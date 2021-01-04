@@ -24,7 +24,9 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue, getCSV
+    escapeFilterValue,
+    getCSV,
+    getAccessToken
 } from "openstack-uicore-foundation/lib/methods";
 import {RECEIVE_PURCHASE_ORDERS, REQUEST_PURCHASE_ORDERS} from "./order-actions";
 
@@ -109,30 +111,30 @@ const parseFilters = (filters) => {
     }
 
     if(filters.hasOwnProperty('ticketTypeFilter') && Array.isArray(filters.ticketTypeFilter)
-        && filters.ticketTypeFilter.length > 0){
+      && filters.ticketTypeFilter.length > 0){
         filter.push('ticket_type_id=='+filters.ticketTypeFilter.reduce(
-            (accumulator, tt) => accumulator +(accumulator !== '' ? '||':'') + tt,
-            ''
+          (accumulator, tt) => accumulator +(accumulator !== '' ? '||':'') + tt,
+          ''
         ));
     }
 
     if(filters.hasOwnProperty('featuresFilter') && Array.isArray(filters.featuresFilter)
-        && filters.featuresFilter.length > 0){
+      && filters.featuresFilter.length > 0){
         filter.push('features_id=='+filters.featuresFilter.reduce(
-            (accumulator, f) => accumulator +(accumulator !== '' ? '||':'') +`${f}`,
-            ''
+          (accumulator, f) => accumulator +(accumulator !== '' ? '||':'') +`${f}`,
+          ''
         ));
     }
 
     if(filters.hasOwnProperty('badgeTypeFilter') && Array.isArray(filters.badgeTypeFilter)
-        && filters.badgeTypeFilter.length > 0){
+      && filters.badgeTypeFilter.length > 0){
         filter.push('badge_type_id=='+filters.badgeTypeFilter.reduce(
-            (accumulator, bt) => accumulator +(accumulator !== '' ? '||':'') +`${bt}`,
-            ''
+          (accumulator, bt) => accumulator +(accumulator !== '' ? '||':'') +`${bt}`,
+          ''
         ));
     }
     return filter;
-}
+};
 
 export const getAttendees = ( page = 1,
                               perPage = 10,
@@ -140,10 +142,10 @@ export const getAttendees = ( page = 1,
                               orderDir = 1,
                               filters = {}
 
-) => (dispatch, getState) => {
+) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
     dispatch(startLoading());
 
@@ -178,10 +180,9 @@ export const getAttendees = ( page = 1,
     );
 };
 
-export const exportAttendees = (order = 'id', orderDir = 1, filters = {}) => (dispatch, getState) => {
-
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const exportAttendees = (order = 'id', orderDir = 1, filters = {}) => async (dispatch, getState) => {
+    const {currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
     const filename = currentSummit.name + '-Attendees.csv';
 
@@ -205,10 +206,10 @@ export const exportAttendees = (order = 'id', orderDir = 1, filters = {}) => (di
     dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/csv`, params, filename));
 };
 
-export const getAttendee = (attendeeId) => (dispatch, getState) => {
+export const getAttendee = (attendeeId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -229,9 +230,8 @@ export const getAttendee = (attendeeId) => (dispatch, getState) => {
     );
 };
 
-export const getAttendeeOrders = ( attendee ) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+export const getAttendeeOrders = ( attendee ) => async (dispatch, getState) => {
+    const accessToken = await getAccessToken();
 
     const params = {
         expand       : 'tickets',
@@ -256,10 +256,10 @@ export const resetAttendeeForm = () => (dispatch) => {
     dispatch(createAction(RESET_ATTENDEE_FORM)({}));
 };
 
-export const reassignTicket = (attendeeId, newMemberId, ticketId) => (dispatch, getState) => {
+export const reassignTicket = (attendeeId, newMemberId, ticketId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -287,9 +287,9 @@ export const reassignTicket = (attendeeId, newMemberId, ticketId) => (dispatch, 
         });
 };
 
-export const saveAttendee = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveAttendee = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -338,10 +338,10 @@ export const saveAttendee = (entity) => (dispatch, getState) => {
     }
 };
 
-export const deleteAttendee = (attendeeId) => (dispatch, getState) => {
+export const deleteAttendee = (attendeeId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -360,10 +360,10 @@ export const deleteAttendee = (attendeeId) => (dispatch, getState) => {
     );
 };
 
-export const deleteTicket = (attendeeId, ticketId) => (dispatch, getState) => {
+export const deleteTicket = (attendeeId, ticketId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -382,10 +382,10 @@ export const deleteTicket = (attendeeId, ticketId) => (dispatch, getState) => {
     );
 };
 
-export const saveTicket = (attendeeId, newTicket) => (dispatch, getState) => {
+export const saveTicket = (attendeeId, newTicket) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -405,10 +405,9 @@ export const saveTicket = (attendeeId, newTicket) => (dispatch, getState) => {
     );
 };
 
-export const deleteRsvp = (memberId, rsvpId) => (dispatch, getState) => {
+export const deleteRsvp = (memberId, rsvpId) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken,
@@ -430,11 +429,9 @@ export const sendEmails = (currentFlowEvent,
                            selectedAll = false ,
                            selectedIds = [],
                            filters = {}
-                           ) => (dispatch, getState) => {
-
-
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -489,7 +486,6 @@ const normalizeEntity = (entity) => {
     delete normalizedEntity['tickets'];
     delete normalizedEntity['id'];
     delete normalizedEntity['created'];
-    delete normalizedEntity['last_edited'];
     delete normalizedEntity['last_edited'];
 
     if(!normalizedEntity.company_id){

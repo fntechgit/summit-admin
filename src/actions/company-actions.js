@@ -24,7 +24,8 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue
+    escapeFilterValue,
+    getAccessToken
 } from 'openstack-uicore-foundation/lib/methods';
 
 export const REQUEST_COMPANIES       = 'REQUEST_COMPANIES';
@@ -38,11 +39,10 @@ export const COMPANY_ADDED          = 'COMPANY_ADDED';
 export const LOGO_ATTACHED           = 'LOGO_ATTACHED';
 export const BIG_LOGO_ATTACHED       = 'BIG_LOGO_ATTACHED';
 
+export const getCompanies = ( term = null, page = 1, perPage = 10,
+                              order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
-export const getCompanies = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => (dispatch, getState) => {
-
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
     const filter = [];
 
     dispatch(startLoading());
@@ -68,7 +68,6 @@ export const getCompanies = ( term = null, page = 1, perPage = 10, order = 'id',
         params['order']= `${orderDirSign}${order}`;
     }
 
-
     return getRequest(
         createAction(REQUEST_COMPANIES),
         createAction(RECEIVE_COMPANIES),
@@ -81,10 +80,9 @@ export const getCompanies = ( term = null, page = 1, perPage = 10, order = 'id',
     );
 };
 
-export const getCompany = (companyId) => (dispatch, getState) => {
+export const getCompany = (companyId) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -104,10 +102,9 @@ export const getCompany = (companyId) => (dispatch, getState) => {
     );
 };
 
-export const deleteCompany = (companyId) => (dispatch, getState) => {
+export const deleteCompany = (companyId) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -132,10 +129,9 @@ export const resetCompanyForm = () => (dispatch) => {
     dispatch(createAction(RESET_COMPANY_FORM)({}));
 };
 
-export const saveCompany = (entity) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveCompany = (entity) => async (dispatch, getState) => {
 
+    const accessToken = await getAccessToken();
     dispatch(startLoading());
 
     const params = {
@@ -182,9 +178,8 @@ export const saveCompany = (entity) => (dispatch, getState) => {
     }
 };
 
-export const attachLogo = (entity, file, picAttr) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+export const attachLogo = (entity, file, picAttr) => async (dispatch, getState) => {
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -214,9 +209,9 @@ export const attachLogo = (entity, file, picAttr) => (dispatch, getState) => {
     }
 };
 
-const uploadLogo = (entity, file) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+const uploadLogo = (entity, file) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken,
@@ -236,9 +231,9 @@ const uploadLogo = (entity, file) => (dispatch, getState) => {
         });
 };
 
-const uploadBigLogo = (entity, file) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+const uploadBigLogo = (entity, file) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken,
