@@ -23,9 +23,9 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler
+    authErrorHandler,
+    getAccessToken
 } from 'openstack-uicore-foundation/lib/methods';
-
 
 export const BADGE_DELETED              = 'BADGE_DELETED';
 export const FEATURE_BADGE_REMOVED      = 'FEATURE_BADGE_REMOVED';
@@ -68,10 +68,10 @@ export const FEATURE_REMOVED_FROM_TYPE      = 'FEATURE_REMOVED_FROM_TYPE';
 
 /***********************  BADGE  ************************************************/
 
-export const deleteBadge = (ticketId) => (dispatch, getState) => {
+export const deleteBadge = (ticketId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -91,10 +91,10 @@ export const deleteBadge = (ticketId) => (dispatch, getState) => {
     );
 };
 
-export const changeBadgeType = (badge) => (dispatch, getState) => {
+export const changeBadgeType = (badge) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -117,10 +117,10 @@ export const changeBadgeType = (badge) => (dispatch, getState) => {
     );
 };
 
-export const addFeatureToBadge = (ticketId, feature) => (dispatch, getState) => {
+export const addFeatureToBadge = (ticketId, feature) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const {currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -141,10 +141,10 @@ export const addFeatureToBadge = (ticketId, feature) => (dispatch, getState) => 
     );
 };
 
-export const removeFeatureFromBadge = (ticketId, featureId) => (dispatch, getState) => {
+export const removeFeatureFromBadge = (ticketId, featureId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -165,10 +165,10 @@ export const removeFeatureFromBadge = (ticketId, featureId) => (dispatch, getSta
     );
 };
 
-export const printBadge = (ticketId) => (dispatch, getState) => {
+export const printBadge = (ticketId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(createAction(PRINT_BADGE));
@@ -181,10 +181,10 @@ export const printBadge = (ticketId) => (dispatch, getState) => {
 /***********************  BADGE TYPE  ************************************************/
 
 
-export const getBadgeTypes = ( order = 'name', orderDir = 1 ) => (dispatch, getState) => {
+export const getBadgeTypes = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -215,10 +215,10 @@ export const getBadgeTypes = ( order = 'name', orderDir = 1 ) => (dispatch, getS
     );
 };
 
-export const getBadgeType = (badgeTypeId) => (dispatch, getState) => {
+export const getBadgeType = (badgeTypeId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -243,9 +243,9 @@ export const resetBadgeTypeForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_BADGE_TYPE_FORM)({}));
 };
 
-export const saveBadgeType = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveBadgeType = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -297,10 +297,10 @@ export const saveBadgeType = (entity) => (dispatch, getState) => {
     }
 }
 
-export const deleteBadgeType = (badgeTypeId) => (dispatch, getState) => {
+export const deleteBadgeType = (badgeTypeId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -319,10 +319,10 @@ export const deleteBadgeType = (badgeTypeId) => (dispatch, getState) => {
     );
 };
 
-export const addAccessLevelToBadgeType = (badgeTypeId, accessLevel) => (dispatch, getState) => {
+export const addAccessLevelToBadgeType = (badgeTypeId, accessLevel) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -343,10 +343,10 @@ export const addAccessLevelToBadgeType = (badgeTypeId, accessLevel) => (dispatch
     );
 };
 
-export const removeAccessLevelFromBadgeType = (badgeTypeId, accessLevelId) => (dispatch, getState) => {
+export const removeAccessLevelFromBadgeType = (badgeTypeId, accessLevelId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -367,10 +367,10 @@ export const removeAccessLevelFromBadgeType = (badgeTypeId, accessLevelId) => (d
     );
 };
 
-export const addFeatureToBadgeType = (badgeTypeId, feature) => (dispatch, getState) => {
+export const addFeatureToBadgeType = (badgeTypeId, feature) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -391,10 +391,10 @@ export const addFeatureToBadgeType = (badgeTypeId, feature) => (dispatch, getSta
     );
 };
 
-export const removeFeatureFromBadgeType = (badgeTypeId, featureId) => (dispatch, getState) => {
+export const removeFeatureFromBadgeType = (badgeTypeId, featureId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -432,10 +432,10 @@ const normalizeBadgeType = (entity) => {
 /***********************  BADGE FEATURE  ************************************************/
 
 
-export const getBadgeFeatures = ( order = 'name', orderDir = 1 ) => (dispatch, getState) => {
+export const getBadgeFeatures = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -465,10 +465,10 @@ export const getBadgeFeatures = ( order = 'name', orderDir = 1 ) => (dispatch, g
     );
 };
 
-export const getBadgeFeature = (badgeFeatureId) => (dispatch, getState) => {
+export const getBadgeFeature = (badgeFeatureId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -492,9 +492,9 @@ export const resetBadgeFeatureForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_BADGE_FEATURE_FORM)({}));
 };
 
-export const saveBadgeFeature = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveBadgeFeature = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -543,10 +543,10 @@ export const saveBadgeFeature = (entity) => (dispatch, getState) => {
     }
 }
 
-export const deleteBadgeFeature = (badgeFeatureId) => (dispatch, getState) => {
+export const deleteBadgeFeature = (badgeFeatureId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -576,10 +576,10 @@ const normalizeBadgeFeature = (entity) => {
 /***********************  ACCESS LEVEL  ************************************************/
 
 
-export const getAccessLevels = ( order = 'name', orderDir = 1 ) => (dispatch, getState) => {
+export const getAccessLevels = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -609,10 +609,10 @@ export const getAccessLevels = ( order = 'name', orderDir = 1 ) => (dispatch, ge
     );
 };
 
-export const getAccessLevel = (accessLevelId) => (dispatch, getState) => {
+export const getAccessLevel = (accessLevelId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -636,9 +636,9 @@ export const resetAccessLevelForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_ACCESS_LEVEL_FORM)({}));
 };
 
-export const saveAccessLevel = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveAccessLevel = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -687,10 +687,10 @@ export const saveAccessLevel = (entity) => (dispatch, getState) => {
     }
 }
 
-export const deleteAccessLevel = (accessLevelId) => (dispatch, getState) => {
+export const deleteAccessLevel = (accessLevelId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {

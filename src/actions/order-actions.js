@@ -24,7 +24,8 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue
+    escapeFilterValue,
+    getAccessToken
 } from 'openstack-uicore-foundation/lib/methods';
 
 export const REQUEST_ORDER_EXTRA_QUESTIONS       = 'REQUEST_ORDER_EXTRA_QUESTIONS';
@@ -61,10 +62,10 @@ export const ORDER_EMAIL_SENT = 'ORDER_EMAIL_SENT';
 
 /***********************  ORDER EXTRA QUESTIONS  *******************************************/
 
-export const getOrderExtraQuestionMeta = () => (dispatch, getState) => {
+export const getOrderExtraQuestionMeta = () => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -83,10 +84,10 @@ export const getOrderExtraQuestionMeta = () => (dispatch, getState) => {
 };
 
 
-export const getOrderExtraQuestions = () => (dispatch, getState) => {
+export const getOrderExtraQuestions = () => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -110,10 +111,10 @@ export const getOrderExtraQuestions = () => (dispatch, getState) => {
     );
 };
 
-export const getOrderExtraQuestion = (orderExtraQuestionId) => (dispatch, getState) => {
+export const getOrderExtraQuestion = (orderExtraQuestionId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -138,9 +139,9 @@ export const resetOrderExtraQuestionForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_ORDER_EXTRA_QUESTION_FORM)({}));
 };
 
-export const saveOrderExtraQuestion = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveOrderExtraQuestion = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -189,10 +190,10 @@ export const saveOrderExtraQuestion = (entity) => (dispatch, getState) => {
     }
 }
 
-export const deleteOrderExtraQuestion = (orderExtraQuestionId) => (dispatch, getState) => {
+export const deleteOrderExtraQuestion = (orderExtraQuestionId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -211,10 +212,10 @@ export const deleteOrderExtraQuestion = (orderExtraQuestionId) => (dispatch, get
     );
 };
 
-export const updateOrderExtraQuestionOrder = (questions, questionId, newOrder) => (dispatch, getState) => {
+export const updateOrderExtraQuestionOrder = (questions, questionId, newOrder) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -237,9 +238,9 @@ export const updateOrderExtraQuestionOrder = (questions, questionId, newOrder) =
 }
 
 
-export const saveOrderExtraQuestionValue = (orderExtraQuestionId, entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveOrderExtraQuestionValue = (orderExtraQuestionId, entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -278,10 +279,10 @@ export const saveOrderExtraQuestionValue = (orderExtraQuestionId, entity) => (di
     }
 }
 
-export const deleteOrderExtraQuestionValue = (orderExtraQuestionId, orderExtraQuestionValueId) => (dispatch, getState) => {
+export const deleteOrderExtraQuestionValue = (orderExtraQuestionId, orderExtraQuestionValueId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -313,10 +314,10 @@ const normalizeQuestion = (entity) => {
 
 /***************************  PURCHASE ORDERS  ******************************/
 
-export const getPurchaseOrders = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => (dispatch, getState) => {
+export const getPurchaseOrders = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -357,10 +358,10 @@ export const getPurchaseOrders = ( term = null, page = 1, perPage = 10, order = 
     );
 };
 
-export const getPurchaseOrder = (orderId) => (dispatch, getState) => {
+export const getPurchaseOrder = (orderId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -388,9 +389,9 @@ export const resetPurchaseOrderForm = () => (dispatch, getState) => {
 };
 
 
-export const savePurchaseOrder = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const savePurchaseOrder = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -443,10 +444,10 @@ export const savePurchaseOrder = (entity) => (dispatch, getState) => {
 };
 
 
-export const deletePurchaseOrder = (orderId) => (dispatch, getState) => {
+export const deletePurchaseOrder = (orderId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -477,9 +478,9 @@ export const deletePurchaseOrder = (orderId) => (dispatch, getState) => {
     );
 };
 
-export const cancelRefundPurchaseOrder = (orderId) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const cancelRefundPurchaseOrder = (orderId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -505,10 +506,10 @@ export const cancelRefundPurchaseOrder = (orderId) => (dispatch, getState) => {
     );
 }
 
-export const refundPurchaseOrder = (orderId, refundAmount) => (dispatch, getState) => {
+export const refundPurchaseOrder = (orderId, refundAmount) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -528,10 +529,10 @@ export const refundPurchaseOrder = (orderId, refundAmount) => (dispatch, getStat
     );
 };
 
-export const reSendOrderEmail = (orderId) => (dispatch, getState) => {
+export const reSendOrderEmail = (orderId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const {  currentSummitState } = getState();
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken

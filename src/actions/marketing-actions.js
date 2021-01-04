@@ -21,7 +21,10 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler, putFile, postFile
+    authErrorHandler,
+    putFile,
+    postFile,
+    getAccessToken
 } from 'openstack-uicore-foundation/lib/methods';
 
 export const REQUEST_SETTINGS       = 'REQUEST_SETTINGS';
@@ -89,9 +92,9 @@ export const resetSettingForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_SETTING_FORM)({}));
 };
 
-export const saveMarketingSetting = (entity, file) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveMarketingSetting = (entity, file) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -140,11 +143,9 @@ export const saveMarketingSetting = (entity, file) => (dispatch, getState) => {
     }
 }
 
-export const deleteSetting = (settingId) => (dispatch, getState) => {
+export const deleteSetting = (settingId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
-    const { currentSummit }   = currentSummitState;
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken
@@ -162,10 +163,10 @@ export const deleteSetting = (settingId) => (dispatch, getState) => {
     );
 };
 
-export const cloneMarketingSettings = (summitId) => (dispatch, getState) => {
+export const cloneMarketingSettings = (summitId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {

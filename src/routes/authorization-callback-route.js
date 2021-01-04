@@ -38,9 +38,6 @@ class AuthorizationCallbackRoute extends AbstractAuthorizationCallbackRoute {
 }
 
 const mapStateToProps = ({ loggedUserState }) => ({
-    accessToken: loggedUserState.accessToken,
-    idToken:  loggedUserState.idToken,
-    sessionState: loggedUserState.sessionState,
 })
 
 export default connect(mapStateToProps,{

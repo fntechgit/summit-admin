@@ -25,7 +25,8 @@ import {
     showSuccessMessage,
     getCSV,
     authErrorHandler,
-    escapeFilterValue
+    escapeFilterValue,
+    getAccessToken
 } from 'openstack-uicore-foundation/lib/methods';
 
 export const REQUEST_SPEAKERS       = 'REQUEST_SPEAKERS';
@@ -58,11 +59,9 @@ export const FEATURED_SPEAKER_DELETED       = 'FEATURED_SPEAKER_DELETED';
 export const FEATURED_SPEAKER_ADDED         = 'FEATURED_SPEAKER_ADDED';
 
 
+export const getSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
-export const getSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => (dispatch, getState) => {
-
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
     const filter = [];
 
     dispatch(startLoading());
@@ -88,7 +87,6 @@ export const getSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', 
         params['order']= `${orderDirSign}${order}`;
     }
 
-
     return getRequest(
         createAction(REQUEST_SPEAKERS),
         createAction(RECEIVE_SPEAKERS),
@@ -101,10 +99,9 @@ export const getSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', 
     );
 };
 
-export const getSpeaker = (speakerId) => (dispatch, getState) => {
+export const getSpeaker = (speakerId) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -119,10 +116,9 @@ export const getSpeaker = (speakerId) => (dispatch, getState) => {
     );
 };
 
-export const getSpeakerForMerge = (speakerId, speakerCol) => (dispatch, getState) => {
+export const getSpeakerForMerge = (speakerId, speakerCol) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -143,10 +139,9 @@ export const getSpeakerForMerge = (speakerId, speakerCol) => (dispatch, getState
     );
 };
 
-export const deleteSpeaker = (speakerId) => (dispatch, getState) => {
+export const deleteSpeaker = (speakerId) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -166,9 +161,9 @@ export const deleteSpeaker = (speakerId) => (dispatch, getState) => {
     );
 };
 
-export const mergeSpeakers = (speakers, selectedFields, changedFields) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+export const mergeSpeakers = (speakers, selectedFields, changedFields) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -195,9 +190,9 @@ export const resetSpeakerForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_SPEAKER_FORM)({}));
 };
 
-export const saveSpeaker = (entity) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveSpeaker = (entity) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -241,9 +236,9 @@ export const saveSpeaker = (entity) => (dispatch, getState) => {
     }
 }
 
-export const attachPicture = (entity, file, picAttr) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+export const attachPicture = (entity, file, picAttr) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -269,9 +264,9 @@ export const attachPicture = (entity, file, picAttr) => (dispatch, getState) => 
     }
 }
 
-const uploadProfilePic = (entity, file) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+const uploadProfilePic = (entity, file) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessToken();
 
     postRequest(
         null,
@@ -287,9 +282,9 @@ const uploadProfilePic = (entity, file) => (dispatch, getState) => {
         });
 };
 
-const uploadBigPic = (entity, file) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+const uploadBigPic = (entity, file) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessToken();
 
     postRequest(
         null,
@@ -336,10 +331,10 @@ const normalizeEntity = (entity) => {
 /* SPEAKER ATTENDANCE */
 /****************************************************************************************************/
 
-export const getAttendances = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = '1' ) => (dispatch, getState) => {
+export const getAttendances = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = '1' ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const filter = [];
@@ -387,10 +382,10 @@ export const getAttendances = ( term = null, page = 1, perPage = 10, order = 'id
     );
 };
 
-export const deleteAttendance = (attendanceId) => (dispatch, getState) => {
+export const deleteAttendance = (attendanceId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -411,10 +406,10 @@ export const deleteAttendance = (attendanceId) => (dispatch, getState) => {
     );
 };
 
-export const getAttendance = (attendanceId) => (dispatch, getState) => {
+export const getAttendance = (attendanceId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -439,9 +434,9 @@ export const resetAttendanceForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_ATTENDANCE_FORM)({}));
 };
 
-export const saveAttendance = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveAttendance = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -492,10 +487,10 @@ export const saveAttendance = (entity) => (dispatch, getState) => {
     }
 }
 
-export const sendAttendanceEmail = (attendanceId) => (dispatch, getState) => {
+export const sendAttendanceEmail = (attendanceId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -517,10 +512,10 @@ export const sendAttendanceEmail = (attendanceId) => (dispatch, getState) => {
         });
 };
 
-export const exportAttendances = ( term = null, order = 'code', orderDir = 1 ) => (dispatch, getState) => {
+export const exportAttendances = ( term = null, order = 'code', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
     const filename = currentSummit.name + '-Speaker-Attendance.csv';
     const filter = [];
@@ -562,10 +557,10 @@ const normalizeAttendance = (entity) => {
 /* FEATURED SPEAKERS */
 /****************************************************************************************************/
 
-export const getFeaturedSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = '1' ) => (dispatch, getState) => {
+export const getFeaturedSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = '1' ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const filter = [];
@@ -612,10 +607,10 @@ export const getFeaturedSpeakers = ( term = null, page = 1, perPage = 10, order 
     );
 };
 
-export const addFeaturedSpeaker = (speaker) => (dispatch, getState) => {
+export const addFeaturedSpeaker = (speaker) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -636,10 +631,10 @@ export const addFeaturedSpeaker = (speaker) => (dispatch, getState) => {
     );
 };
 
-export const removeFeaturedSpeaker = (speakerId) => (dispatch, getState) => {
+export const removeFeaturedSpeaker = (speakerId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());

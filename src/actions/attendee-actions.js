@@ -24,7 +24,9 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue, getCSV
+    escapeFilterValue,
+    getCSV,
+    getAccessToken
 } from "openstack-uicore-foundation/lib/methods";
 
 export const REQUEST_ATTENDEES          = 'REQUEST_ATTENDEES';
@@ -69,10 +71,10 @@ export const setSelectedAll = (value) => (dispatch) => {
 export const getAttendees = ( term = null, page = 1, perPage = 10,
                               order = 'id', orderDir = 1,
                               statusFilter= null, memberFilter= null, ticketsFilter = null
-) => (dispatch, getState) => {
+) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -134,10 +136,10 @@ export const getAttendees = ( term = null, page = 1, perPage = 10,
 export const exportAttendees = ( term = null,
                               order = 'id', orderDir = 1,
                               statusFilter= null, memberFilter= null, ticketsFilter = null
-) => (dispatch, getState) => {
+) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const {currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
     const filter = [];
     const filename = currentSummit.name + '-Attendees.csv';
@@ -182,10 +184,10 @@ export const exportAttendees = ( term = null,
     dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/csv`, params, filename));
 };
 
-export const getAttendee = (attendeeId) => (dispatch, getState) => {
+export const getAttendee = (attendeeId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -210,10 +212,10 @@ export const resetAttendeeForm = () => (dispatch) => {
     dispatch(createAction(RESET_ATTENDEE_FORM)({}));
 };
 
-export const reassignTicket = (attendeeId, newMemberId, ticketId) => (dispatch, getState) => {
+export const reassignTicket = (attendeeId, newMemberId, ticketId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -241,9 +243,9 @@ export const reassignTicket = (attendeeId, newMemberId, ticketId) => (dispatch, 
         });
 };
 
-export const saveAttendee = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveAttendee = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -292,10 +294,10 @@ export const saveAttendee = (entity) => (dispatch, getState) => {
     }
 };
 
-export const deleteAttendee = (attendeeId) => (dispatch, getState) => {
+export const deleteAttendee = (attendeeId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -314,10 +316,10 @@ export const deleteAttendee = (attendeeId) => (dispatch, getState) => {
     );
 };
 
-export const deleteTicket = (attendeeId, ticketId) => (dispatch, getState) => {
+export const deleteTicket = (attendeeId, ticketId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -336,10 +338,10 @@ export const deleteTicket = (attendeeId, ticketId) => (dispatch, getState) => {
     );
 };
 
-export const saveTicket = (attendeeId, newTicket) => (dispatch, getState) => {
+export const saveTicket = (attendeeId, newTicket) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -359,10 +361,9 @@ export const saveTicket = (attendeeId, newTicket) => (dispatch, getState) => {
     );
 };
 
-export const deleteRsvp = (memberId, rsvpId) => (dispatch, getState) => {
+export const deleteRsvp = (memberId, rsvpId) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken,
@@ -397,11 +398,10 @@ const normalizeEntity = (entity) => {
 
 export const sendEmails = (currentFlowEvent, selectedAll = false , selectedIds = [],
                            term = null, statusFilter= null, memberFilter= null, ticketsFilter = null
-                           ) => (dispatch, getState) => {
+                           ) => async (dispatch, getState) => {
 
-
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const filter = [];

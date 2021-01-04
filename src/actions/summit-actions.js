@@ -23,7 +23,8 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler
+    authErrorHandler,
+    getAccessToken,
 } from 'openstack-uicore-foundation/lib/methods';
 
 export const REQUEST_SUMMIT           = 'REQUEST_SUMMIT';
@@ -41,10 +42,9 @@ export const SUMMIT_DELETED           = 'SUMMIT_DELETED';
 export const SUMMIT_LOGO_ATTACHED     = 'SUMMIT_LOGO_ATTACHED';
 export const SUMMIT_LOGO_DELETED      = 'SUMMIT_LOGO_DELETED';
 
-export const getSummitById = (summitId) => (dispatch, getState) => {
+export const getSummitById = (summitId) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
     dispatch(startLoading());
 
     const params = {
@@ -63,10 +63,9 @@ export const getSummitById = (summitId) => (dispatch, getState) => {
     );
 }
 
-export const setCurrentSummit = (summit) => (dispatch, getState) =>
+export const setCurrentSummit = (summit) => async (dispatch, getState) =>
 {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     if (summit) {
         dispatch(startLoading());
@@ -94,10 +93,9 @@ export const setCurrentSummit = (summit) => (dispatch, getState) =>
 
 }
 
-export const loadSummits = (page = 1, perPage = 10) => (dispatch, getState) => {
+export const loadSummits = (page = 1, perPage = 10) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -121,10 +119,9 @@ export const loadSummits = (page = 1, perPage = 10) => (dispatch, getState) => {
     );
 }
 
-export const getAllSummits = () => (dispatch, getState) => {
+export const getAllSummits = () => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken,
@@ -147,9 +144,10 @@ export const resetSummitForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_SUMMIT_FORM)({}));
 };
 
-export const saveSummit = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveSummit = (entity) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessToken();
+
     dispatch(startLoading());
 
     const normalizedEntity = normalizeEntity(entity);
@@ -196,10 +194,9 @@ export const saveSummit = (entity) => (dispatch, getState) => {
     }
 }
 
-export const deleteSummit = (summitId) => (dispatch, getState) => {
+export const deleteSummit = (summitId) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken
@@ -218,9 +215,9 @@ export const deleteSummit = (summitId) => (dispatch, getState) => {
 };
 
 
-export const attachLogo = (entity, file) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+export const attachLogo = (entity, file) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessToken();
 
     dispatch(startLoading());
 
@@ -248,9 +245,8 @@ export const attachLogo = (entity, file) => (dispatch, getState) => {
     }
 }
 
-const uploadFile = (entity, file) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+const uploadFile = (entity, file) => async (dispatch, getState) => {
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken
@@ -268,10 +264,10 @@ const uploadFile = (entity, file) => (dispatch, getState) => {
         });
 };
 
-export const deleteLogo = () => (dispatch, getState) => {
+export const deleteLogo = () => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {

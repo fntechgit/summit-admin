@@ -209,8 +209,6 @@ const store = createStore(reducers, composeEnhancers(applyMiddleware(thunk)));
 
 const onRehydrateComplete = () => {
     // repopulate access token on global access variable
-    window.accessToken = store.getState().loggedUserState.accessToken;
-    window.idToken = store.getState().loggedUserState.idToken;
     window.sessionState = store.getState().loggedUserState.sessionState;
 }
 

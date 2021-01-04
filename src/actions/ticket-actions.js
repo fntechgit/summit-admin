@@ -25,7 +25,8 @@ import {
     showSuccessMessage,
     authErrorHandler,
     getCSV,
-    escapeFilterValue
+    escapeFilterValue,
+    getAccessToken
 } from 'openstack-uicore-foundation/lib/methods';
 
 export const REQUEST_TICKETS            = 'REQUEST_TICKETS';
@@ -70,10 +71,9 @@ export const RESET_PAYMENT_PROFILE_FORM = 'RESET_PAYMENT_PROFILE_FORM';
 
 /**************************   TICKETS   ******************************************/
 
-export const reSendTicketEmail = (orderId, ticketId) => (dispatch, getState) => {
+export const reSendTicketEmail = (orderId, ticketId) => async (dispatch, getState) => {
 
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+    const accessToken = await getAccessToken();
 
     const params = {
         access_token : accessToken
@@ -94,10 +94,10 @@ export const reSendTicketEmail = (orderId, ticketId) => (dispatch, getState) => 
     );
 };
 
-export const getTickets = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => (dispatch, getState) => {
+export const getTickets = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -137,10 +137,10 @@ export const getTickets = ( term = null, page = 1, perPage = 10, order = 'id', o
     );
 };
 
-export const ingestExternalTickets = (email) => (dispatch, getState) => {
+export const ingestExternalTickets = (email) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -159,9 +159,9 @@ export const ingestExternalTickets = (email) => (dispatch, getState) => {
     );
 };
 
-export const importTicketsCSV = (file) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const importTicketsCSV = (file) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -181,10 +181,10 @@ export const importTicketsCSV = (file) => (dispatch, getState) => {
         });
 };
 
-export const exportTicketsCSV = ( ) => (dispatch, getState) => {
+export const exportTicketsCSV = ( ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
     const filename = currentSummit.name + '-Tickets.csv';
     const params = {
@@ -195,10 +195,10 @@ export const exportTicketsCSV = ( ) => (dispatch, getState) => {
 
 };
 
-export const getTicket = (ticketId) => (dispatch, getState) => {
+export const getTicket = (ticketId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -220,10 +220,10 @@ export const getTicket = (ticketId) => (dispatch, getState) => {
     );
 };
 
-export const saveTicket = (orderId, ticket) => (dispatch, getState) => {
+export const saveTicket = (orderId, ticket) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -245,10 +245,10 @@ export const saveTicket = (orderId, ticket) => (dispatch, getState) => {
         });
 };
 
-export const reassignTicket = (ticketId, attendeeId, firstName, lastName, email, company ) => (dispatch, getState) => {
+export const reassignTicket = (ticketId, attendeeId, firstName, lastName, email, company ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -283,9 +283,9 @@ export const reassignTicket = (ticketId, attendeeId, firstName, lastName, email,
         });
 };
 
-export const cancelRefundTicket = (orderId, ticketId) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const cancelRefundTicket = (orderId, ticketId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -311,10 +311,10 @@ export const cancelRefundTicket = (orderId, ticketId) => (dispatch, getState) =>
     );
 }
 
-export const refundTicket = (ticketId, refundAmount) => (dispatch, getState) => {
+export const refundTicket = (ticketId, refundAmount) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -334,10 +334,10 @@ export const refundTicket = (ticketId, refundAmount) => (dispatch, getState) => 
     );
 };
 
-export const addBadgeToTicket = (ticketId) => (dispatch, getState) => {
+export const addBadgeToTicket = (ticketId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -387,10 +387,10 @@ const normalizeTicket = (entity) => {
 /**************************   TICKET TYPES   ******************************************/
 
 
-export const getTicketTypes = ( order = 'name', orderDir = 1 ) => (dispatch, getState) => {
+export const getTicketTypes = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -420,10 +420,10 @@ export const getTicketTypes = ( order = 'name', orderDir = 1 ) => (dispatch, get
     );
 };
 
-export const getTicketType = (ticketTypeId) => (dispatch, getState) => {
+export const getTicketType = (ticketTypeId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -447,9 +447,9 @@ export const resetTicketTypeForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_TICKET_TYPE_FORM)({}));
 };
 
-export const saveTicketType = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveTicketType = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -498,10 +498,10 @@ export const saveTicketType = (entity) => (dispatch, getState) => {
     }
 }
 
-export const deleteTicketType = (ticketTypeId) => (dispatch, getState) => {
+export const deleteTicketType = (ticketTypeId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -520,10 +520,10 @@ export const deleteTicketType = (ticketTypeId) => (dispatch, getState) => {
     );
 };
 
-export const seedTicketTypes = ( ) => (dispatch, getState) => {
+export const seedTicketTypes = ( ) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
     const params = {
         access_token : accessToken
@@ -570,10 +570,10 @@ const normalizeEntity = (entity) => {
 
 /***************************   REFUND POLICIES   ******************************/
 
-export const getRefundPolicies = () => (dispatch, getState) => {
+export const getRefundPolicies = () => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -594,9 +594,9 @@ export const getRefundPolicies = () => (dispatch, getState) => {
     );
 };
 
-export const saveRefundPolicy = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveRefundPolicy = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -631,10 +631,10 @@ export const saveRefundPolicy = (entity) => (dispatch, getState) => {
 
 }
 
-export const deleteRefundPolicy = (refundPolicyId) => (dispatch, getState) => {
+export const deleteRefundPolicy = (refundPolicyId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -657,9 +657,9 @@ export const deleteRefundPolicy = (refundPolicyId) => (dispatch, getState) => {
 
 /***************************   PAYMENT PROFILES   ******************************/
 
-export const getPaymentProfiles = (page = 1, perPage = 10, order = 'id', orderDir = 1 ) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const getPaymentProfiles = (page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -688,9 +688,9 @@ export const getPaymentProfiles = (page = 1, perPage = 10, order = 'id', orderDi
     );
 };
 
-export const savePaymentProfile = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const savePaymentProfile = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -733,10 +733,10 @@ export const savePaymentProfile = (entity) => (dispatch, getState) => {
         });
 }
 
-export const deletePaymentProfile = (paymentProfileId) => (dispatch, getState) => {
+export const deletePaymentProfile = (paymentProfileId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -755,10 +755,10 @@ export const deletePaymentProfile = (paymentProfileId) => (dispatch, getState) =
     );
 };
 
-export const getPaymentProfile = (paymentProfileId) => (dispatch, getState) => {
+export const getPaymentProfile = (paymentProfileId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());

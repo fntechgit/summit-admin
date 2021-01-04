@@ -21,13 +21,23 @@ import AuthButton from './components/auth-button'
 import DefaultRoute from './routes/default-route'
 import { connect } from 'react-redux'
 import { AjaxLoader, OPSessionChecker } from "openstack-uicore-foundation/lib/components";
-import { getBackURL,onUserAuth, doLogin, doLogout, initLogOut, getUserInfo, resetLoading } from "openstack-uicore-foundation/lib/methods";
+
+import {
+    getBackURL,
+    onUserAuth,
+    doLogin,
+    doLogout,
+    initLogOut,
+    getUserInfo,
+    resetLoading,
+    getIdToken
+} from "openstack-uicore-foundation/lib/methods";
+
 import T from 'i18n-react';
 import CustomErrorPage from "./pages/custom-error-page";
 import history from './history'
 import exclusiveSections from 'js-yaml-loader!./exclusive-sections.yml';
 import IdTokenVerifier from 'idtoken-verifier';
-
 
 // here is set by default user lang as en
 let language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
@@ -57,6 +67,9 @@ window.SCOPES                   = process.env['SCOPES'];
 window.ALLOWED_USER_GROUPS      = process.env['ALLOWED_USER_GROUPS'];
 window.EXCLUSIVE_SECTIONS       = [];
 window.PUBLIC_STORAGES          = process.env['PUBLIC_STORAGES'] || "S3";
+window.OAUTH2_FLOW              = process.env['OAUTH2_FLOW'] || "token id_token";
+
+// console.log(`OAUTH2_FLOW ${window.OAUTH2_FLOW}`);
 
 if (exclusiveSections.hasOwnProperty(process.env['APP_CLIENT_NAME'])) {
     window.EXCLUSIVE_SECTIONS = exclusiveSections[process.env['APP_CLIENT_NAME']];
@@ -74,9 +87,9 @@ class App extends React.PureComponent {
     }
 
     render() {
-        const { isLoggedUser, onUserAuth, doLogout, getUserInfo, idToken, backUrl, loading} = this.props;
+        const { isLoggedUser, onUserAuth, doLogout, getUserInfo, backUrl, loading} = this.props;
 
-
+        const idToken = getIdToken();
         // get user pic from idtoken claims (IDP)
         let profile_pic = '';
 
@@ -124,7 +137,6 @@ const mapStateToProps = ({ loggedUserState, baseState }) => ({
     isLoggedUser: loggedUserState.isLoggedUser,
     backUrl: loggedUserState.backUrl,
     member: loggedUserState.member,
-    idToken:  loggedUserState.idToken,
     loading : baseState.loading,
 });
 

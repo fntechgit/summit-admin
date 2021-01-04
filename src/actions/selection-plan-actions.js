@@ -23,7 +23,8 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler
+    authErrorHandler,
+    getAccessToken
 } from 'openstack-uicore-foundation/lib/methods';
 
 export const RECEIVE_SELECTION_PLAN        = 'RECEIVE_SELECTION_PLAN';
@@ -36,10 +37,10 @@ export const TRACK_GROUP_REMOVED           = 'TRACK_GROUP_REMOVED';
 export const TRACK_GROUP_ADDED             = 'TRACK_GROUP_ADDED';
 
 
-export const getSelectionPlan = (selectionPlanId) => (dispatch, getState) => {
+export const getSelectionPlan = (selectionPlanId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -64,9 +65,9 @@ export const resetSelectionPlanForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_SELECTION_PLAN_FORM)({}));
 };
 
-export const saveSelectionPlan = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const saveSelectionPlan = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -111,10 +112,10 @@ export const saveSelectionPlan = (entity) => (dispatch, getState) => {
     }
 }
 
-export const deleteSelectionPlan = (selectionPlanId) => (dispatch, getState) => {
+export const deleteSelectionPlan = (selectionPlanId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -133,10 +134,10 @@ export const deleteSelectionPlan = (selectionPlanId) => (dispatch, getState) => 
     );
 };
 
-export const addTrackGroupToSelectionPlan = (selectionPlanId, trackGroup) => (dispatch, getState) => {
+export const addTrackGroupToSelectionPlan = (selectionPlanId, trackGroup) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -157,10 +158,10 @@ export const addTrackGroupToSelectionPlan = (selectionPlanId, trackGroup) => (di
     );
 };
 
-export const removeTrackGroupFromSelectionPlan = (selectionPlanId, trackGroupId) => (dispatch, getState) => {
+export const removeTrackGroupFromSelectionPlan = (selectionPlanId, trackGroupId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
