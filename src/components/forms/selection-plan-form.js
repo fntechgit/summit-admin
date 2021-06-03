@@ -19,7 +19,8 @@ import {
     queryTrackGroups
 } from 'openstack-uicore-foundation/lib/methods'
 import { Input, DateTimePicker, SimpleLinkList } from 'openstack-uicore-foundation/lib/components';
-import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
+import {isEmpty, scrollToError, shallowEqual, stripTags} from "../../utils/methods";
+import { SortableTable } from 'openstack-uicore-foundation/lib/components';
 
 
 class SelectionPlanForm extends React.Component {
@@ -35,6 +36,21 @@ class SelectionPlanForm extends React.Component {
         this.handleTrackGroupUnLink = this.handleTrackGroupUnLink.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleEditExtraQuestion = this.handleEditExtraQuestion.bind(this);
+        this.handleDeleteExtraQuestion = this.handleDeleteExtraQuestion.bind(this);
+        this.handleNewExtraQuestion = this.handleNewExtraQuestion.bind(this);
+    }
+
+    handleEditExtraQuestion(questionId){
+        this.props.onEditExtraQuestion(questionId);
+    }
+
+    handleDeleteExtraQuestion(questionId){
+        this.props.onDeleteExtraQuestion(questionId);
+    }
+
+    handleNewExtraQuestion(){
+        this.props.onAddNewExtraQuestion();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -102,7 +118,7 @@ class SelectionPlanForm extends React.Component {
 
     render() {
         const {entity} = this.state;
-        const { currentSummit } = this.props;
+        const { currentSummit, extraQuestionsOrderDir, extraQuestionsOrder } = this.props;
 
         let trackGroupsColumns = [
             { columnKey: 'name', value: T.translate("edit_selection_plan.name") },
@@ -120,6 +136,21 @@ class SelectionPlanForm extends React.Component {
                 add: { onClick: this.handleTrackGroupLink }
             }
         };
+
+        const extraQuestionColumns = [
+            { columnKey: 'type', value: T.translate("order_extra_question_list.question_type")},
+            { columnKey: 'label', value: T.translate("order_extra_question_list.visible_question") },
+            { columnKey: 'name', value: T.translate("order_extra_question_list.question_id") }
+        ];
+
+        const extraQuestionsOptions = {
+            sortCol: extraQuestionsOrder,
+            sortDir: extraQuestionsOrderDir,
+            actions: {
+                edit: { onClick: this.handleEditExtraQuestion },
+                delete: { onClick: this.handleDeleteExtraQuestion }
+            }
+        }
 
         return (
             <form className="selection-plan-form">
@@ -236,11 +267,39 @@ class SelectionPlanForm extends React.Component {
 
                 <hr />
                 {entity.id !== 0 &&
-                <SimpleLinkList
-                    values={entity.track_groups}
-                    columns={trackGroupsColumns}
-                    options={trackGroupsOptions}
-                />
+
+                    <SimpleLinkList
+                        values={entity.track_groups}
+                        columns={trackGroupsColumns}
+                        options={trackGroupsOptions}
+                    />
+                }
+
+                {entity.id !== 0 &&
+                    <>
+                        <h3> {T.translate("edit_selection_plan.extra_questions")} ({entity.extra_questions.length})</h3>
+                        <div className={'row'}>
+                            <div className="col-md-6 text-right col-md-offset-6">
+                                <button className="btn btn-primary right-space" onClick={this.handleNewExtraQuestion}>
+                                    {T.translate("edit_selection_plan.add_extra_questions")}
+                                </button>
+                            </div>
+                        </div>
+                        { entity.extra_questions.length === 0 &&
+                            <div>{T.translate("edit_selection_plan.no_extra_questions")}</div>
+                        }
+                        {entity.extra_questions.length > 0 &&
+                            <SortableTable
+                                options={extraQuestionsOptions}
+                                data={entity.extra_questions.map((q) => {
+                                    return {...q, label: stripTags(q.label)}
+                                })}
+                                columns={extraQuestionColumns}
+                                dropCallback={this.props.updateExtraQuestionOrder}
+                                orderField="order"
+                            />
+                        }
+                    </>
                 }
 
                 <div className="row">

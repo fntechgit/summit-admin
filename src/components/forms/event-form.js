@@ -28,9 +28,10 @@ import {
     UploadInput,
     Input,
     Panel,
-    Table
+    Table, MemberInput
 } from 'openstack-uicore-foundation/lib/components'
 import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
+import QuestionAnswersInput from "../inputs/question-answers-input";
 
 
 class EventForm extends React.Component {
@@ -52,6 +53,7 @@ class EventForm extends React.Component {
         this.handleUploadPic = this.handleUploadPic.bind(this);
         this.handleMaterialDownload = this.handleMaterialDownload.bind(this);
         this.handleMaterialDelete = this.handleMaterialDelete.bind(this);
+        this.getQAUsersOptionLabel = this.getQAUsersOptionLabel.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -72,10 +74,71 @@ class EventForm extends React.Component {
         }
     }
 
+    getQAUsersOptionLabel(member){
+        if(member.hasOwnProperty("full_name")){
+            return member.full_name;
+        }
+        //default
+        return `${member.first_name} ${member.last_name} (${member.id})`;
+    }
+
     handleChange(ev) {
         const entity = {...this.state.entity};
+        let {onAddQAMember, onDeleteQAMember, currentSummit, extraQuestions} = this.props;
         const {errors} = this.state;
         let {value, id} = ev.target;
+        let currentError = '';
+        // logic for summit help users ( chat roles )
+        if (ev.target.type === 'memberinput') {
+            let oldHelpUsers =  entity[id];
+            let currentOldOnes = [];
+            try {
+                // remap to chat api payload format
+                let newHelpUsers = value.map((member) => {
+                    if (member.hasOwnProperty("email")) {
+                        // if has email property then its cames from main api
+                        // we need to remap but first only users with idp id set
+                        // are valid
+                        if (!member.user_external_id) {
+                            throw "Invalid user";
+                        }
+                        let newMember = {
+                            member_id: member.id,
+                            idp_user_id: member.user_external_id,
+                            full_name: `${member.first_name} ${member.last_name}`,
+                            summit_event_id: entity.id,
+                            summit_id: currentSummit.id,
+                        };
+                        onAddQAMember(newMember, entity.id);
+                        return newMember;
+                    }
+                    currentOldOnes.push(member)
+                    return member;
+                });
+
+                // check if we delete something
+                if (oldHelpUsers.length != currentOldOnes.length) {
+                    // get missing one
+                    let missingOne = oldHelpUsers.filter((oldOne) => {
+                        let matches = currentOldOnes.filter(newOne => {
+                            return newOne.member_id == oldOne.member_id;
+                        });
+                        return matches.length == 0;
+                    })
+                    if (missingOne.length > 0) {
+                        // remove it
+                        onDeleteQAMember(missingOne[0], entity.id);
+                    }
+                }
+
+                value = newHelpUsers;
+            }
+            catch (e){
+                console.log(e);
+                value = oldHelpUsers;
+                currentError = e;
+            }
+        }
 
         if (ev.target.type === 'radio') {
             id = ev.target.name;
@@ -90,7 +153,7 @@ class EventForm extends React.Component {
             value = value.valueOf() / 1000;
         }
 
-        errors[id] = '';
+        errors[id] = currentError;
         entity[id] = value;
         this.setState({entity: entity});
     }
@@ -237,7 +300,8 @@ class EventForm extends React.Component {
 
     render() {
         const {entity, showSection, errors} = this.state;
-        const { currentSummit, levelOpts, typeOpts, trackOpts, locationOpts, rsvpTemplateOpts, selectionPlansOpts, history } = this.props;
+        const { currentSummit, levelOpts, typeOpts, trackOpts,
+            locationOpts, rsvpTemplateOpts, selectionPlansOpts, history, extraQuestions } = this.props;
 
         const event_types_ddl = typeOpts.map(
             t => {
@@ -427,16 +491,14 @@ class EventForm extends React.Component {
                     }
                 </div>
                 <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_event.feedback")} </label>
+                    <div className="col-md-3">
                         <div className="form-check abc-checkbox">
                             <input type="checkbox" id="allow_feedback" checked={entity.allow_feedback} onChange={this.handleChange} className="form-check-input" />
                             <label className="form-check-label" htmlFor="allow_feedback"> {T.translate("edit_event.allow_feedback")} </label>
                         </div>
                     </div>
                     {this.isEventType('PresentationType') &&
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_event.recording")} </label>
+                    <div className="col-md-3">
                         <div className="form-check abc-checkbox">
                             <input id="to_record" onChange={this.handleChange} checked={entity.to_record} className="form-check-input" type="checkbox" />
                             <label className="form-check-label" htmlFor="to_record"> {T.translate("edit_event.to_record")} </label>
@@ -444,28 +506,49 @@ class EventForm extends React.Component {
                     </div>
                     }
                     {this.isEventType('PresentationType') &&
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_event.attending_media")} </label>
+                    <div className="col-md-3">
                         <div className="form-check abc-checkbox">
                             <input id="attending_media" onChange={this.handleChange} checked={entity.attending_media} className="form-check-input" type="checkbox" />
                             <label className="form-check-label" htmlFor="attending_media"> {T.translate("edit_event.attending_media")} </label>
                         </div>
                     </div>
                     }
+                    {this.isEventType('PresentationType') &&
+                    <div className="col-md-3">
+                        <div className="form-check abc-checkbox">
+                            <input id="disclaimer_accepted" onChange={this.handleChange} checked={entity.disclaimer_accepted} className="form-check-input" type="checkbox" />
+                            <label className="form-check-label" htmlFor="disclaimer_accepted"> {T.translate("edit_event.disclaimer_accepted")} </label>
+                        </div>
+                    </div>
+                    }
                 </div>
                 {this.isEventType('PresentationType') &&
                 <div className="row form-group">
-                    <div className="col-md-4">
+                    <div className="col-md-6">
                         <label> {T.translate("edit_event.selection_plan")} </label>
-                    <Dropdown
-                        id="selection_plan_id"
-                        value={entity.selection_plan_id}
-                        onChange={this.handleChange}
-                        placeholder={T.translate("edit_event.placeholders.select_selection_plan")}
-                        options={selection_plans_ddl}
-                    />
+                        <Dropdown
+                            id="selection_plan_id"
+                            value={entity.selection_plan_id}
+                            onChange={this.handleChange}
+                            placeholder={T.translate("edit_event.placeholders.select_selection_plan")}
+                            options={selection_plans_ddl}
+                        />
                     </div>
+                    { entity.id > 0 &&
+                    <div className="col-md-6">
+                        <label> {T.translate("edit_event.qa_users")}  <i title={T.translate("edit_event.qa_users_info")} className="fa fa-info-circle"/></label>
+                        <MemberInput
+                            id="qa_users"
+                            value={entity.qa_users}
+                            onChange={this.handleChange}
+                            error={hasErrors('qa_users', errors)}
+                            getOptionLabel={this.getQAUsersOptionLabel}
+                            multi={true}
+                        />
+                    </div>
+                    }
                 </div>
+
                 }
                 <div className="row form-group">
                     <div className="col-md-12">
@@ -646,6 +729,18 @@ class EventForm extends React.Component {
                         options={material_options}
                         data={entity.materials}
                         columns={material_columns}
+                    />
+                </Panel>
+                }
+
+                {entity.id !== 0 && extraQuestions && extraQuestions.length > 0 &&
+                <Panel show={showSection === 'extra_questions'} title={T.translate("edit_attendee.extra_questions")}
+                       handleClick={this.toggleSection.bind(this, 'extra_questions')}>
+                    <QuestionAnswersInput
+                        id="extra_questions"
+                        answers={entity.extra_questions}
+                        questions={extraQuestions}
+                        onChange={this.handleChange}
                     />
                 </Panel>
                 }

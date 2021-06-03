@@ -14,7 +14,7 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { Dropdown, Input, EditableTable } from 'openstack-uicore-foundation/lib/components'
+import { Dropdown, Input, EditableTable, TextEditor } from 'openstack-uicore-foundation/lib/components'
 import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
 
 
@@ -133,29 +133,34 @@ class ExtraQuestionForm extends React.Component {
                         />
                     </div>
                     <div className="col-md-3">
-                        <label> {T.translate("question_form.usage")} *</label>
-                        <Dropdown
-                            id="usage"
-                            value={entity.usage}
-                            placeholder={T.translate("question_form.placeholders.select_usage")}
-                            options={question_usage_ddl}
-                            onChange={this.handleChange}
-                        />
+                        {this.props.shouldShowUsage &&
+                            <>
+                                <label> {T.translate("question_form.usage")} *</label>
+                                <Dropdown
+                                id="usage"
+                                value={entity.usage}
+                                placeholder={T.translate("question_form.placeholders.select_usage")}
+                                options={question_usage_ddl}
+                                onChange={this.handleChange}
+                                />
+                            </>
+                        }
                     </div>
                 </div>
                 <div className="row form-group">
-                    <div className="col-md-6">
+                    <div className="col-md-12">
                         <label> {T.translate("question_form.visible_question")} *</label>
-                        <Input
+                        <TextEditor
                             id="label"
                             value={entity.label}
                             onChange={this.handleChange}
-                            className="form-control"
                             error={hasErrors('label', errors)}
                         />
                     </div>
-                    {(entity.type === 'Text' || entity.type === 'TextArea') &&
-                    <div className="col-md-3">
+                </div>
+                {(entity.type === 'Text' || entity.type === 'TextArea') &&
+                <div className="row form-group">
+                    <div className="col-md-12">
                         <label> {T.translate("question_form.hint")} </label>
                         <Input
                             id="placeholder"
@@ -165,19 +170,20 @@ class ExtraQuestionForm extends React.Component {
                             error={hasErrors('placeholder', errors)}
                         />
                     </div>
-                    }
-
                 </div>
+                }
                 <div className="row form-group">
-                    <div className="col-md-3 checkboxes-div">
-                        <div className="form-check abc-checkbox">
-                            <input type="checkbox" id="printable" checked={entity.printable}
-                                   onChange={this.handleChange} className="form-check-input" />
-                            <label className="form-check-label" htmlFor="printable">
-                                {T.translate("question_form.printable")}
-                            </label>
+                    {this.props.shouldShowPrintable &&
+                        <div className="col-md-3 checkboxes-div">
+                            <div className="form-check abc-checkbox">
+                                <input type="checkbox" id="printable" checked={entity.printable}
+                                       onChange={this.handleChange} className="form-check-input"/>
+                                <label className="form-check-label" htmlFor="printable">
+                                    {T.translate("question_form.printable")}
+                                </label>
+                            </div>
                         </div>
-                    </div>
+                    }
                     <div className="col-md-3 checkboxes-div">
                         <div className="form-check abc-checkbox">
                             <input type="checkbox" id="mandatory" checked={entity.mandatory}
@@ -188,7 +194,6 @@ class ExtraQuestionForm extends React.Component {
                         </div>
                     </div>
                 </div>
-
 
                 {this.shouldShowField('values') && entity.id !== 0 &&
                 <div className="row">

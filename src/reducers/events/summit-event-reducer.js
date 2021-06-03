@@ -27,6 +27,7 @@ import { LOGOUT_USER, VALIDATE } from 'openstack-uicore-foundation/lib/actions';
 import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
 import { UNPUBLISHED_EVENT } from '../../actions/summit-builder-actions';
 import { EVENT_MATERIAL_ADDED, EVENT_MATERIAL_UPDATED, EVENT_MATERIAL_DELETED} from "../../actions/event-material-actions";
+import {RECEIVE_QA_USERS_BY_SUMMIT_EVENT} from '../../actions/user-chat-roles-actions';
 
 export const DEFAULT_ENTITY = {
     id: 0,
@@ -54,11 +55,16 @@ export const DEFAULT_ENTITY = {
     attachment: '',
     occupancy: 'EMPTY',
     materials: [],
-    image: null
+    image: null,
+    qa_users:[],
+    extra_questions: [],
+    disclaimer_accepted: false,
+    disclaimer_accepted_date: null,
 }
 
 const DEFAULT_STATE = {
     levelOptions: ['N/A', 'Beginner', 'Intermediate', 'Advanced' ],
+    extraQuestions: [],
     entity: DEFAULT_ENTITY,
     errors: {}
 };
@@ -90,6 +96,8 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
             let links = entity.slides || [];
             let videos = entity.videos || [];
             let slides = entity.links || [];
+            let extraQuestionAnswers = entity.extra_questions || [];
+            let extraQuestions = entity.hasOwnProperty("selection_plan") && entity.selection_plan.extra_questions ? entity.selection_plan.extra_questions : [];
             let media_uploads = entity.media_uploads || [];
 
             for(var key in entity) {
@@ -113,7 +121,13 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
                 display_on_site_label:m.display_on_site ? 'Yes' : 'No',
                 }
                 ))];
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity}, errors: {} };
+
+            if (extraQuestionAnswers.length) {
+                entity.extra_questions = extraQuestionAnswers.map
+                (q => ({question_id: q.question_id, answer: q.value}))
+            }
+
+            return {...state, entity: {...DEFAULT_ENTITY, ...entity}, errors: {}, extraQuestions: extraQuestions };
         }
         break;
         case EVENT_PUBLISHED: {
@@ -168,6 +182,11 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
         break;
         case VALIDATE: {
             return {...state,  errors: payload.errors };
+        }
+        break;
+        case RECEIVE_QA_USERS_BY_SUMMIT_EVENT:{
+            let qaUsers = payload.response;
+            return {...state, entity: {...state.entity, qa_users: qaUsers} }
         }
         break;
         default:

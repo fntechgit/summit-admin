@@ -21,7 +21,7 @@ import { deleteEventMaterial } from '../../actions/event-material-actions';
 
 import '../../styles/edit-summit-event-page.less';
 import '../../components/form-validation/validate.less';
-
+import {addQAMember, removeQAMember} from "../../actions/user-chat-roles-actions"
 
 class EditSummitEventPage extends React.Component {
 
@@ -101,7 +101,7 @@ class EditSummitEventPage extends React.Component {
     };
 
     render(){
-        const {currentSummit, entity, errors, levelOptions, rsvpTemplateOptions} = this.props;
+        const {currentSummit, entity, errors, levelOptions, rsvpTemplateOptions, extraQuestions} = this.props;
         const header = !entity.id ? T.translate("general.summit_event") : `${entity.title} - ID ${entity.id}`;
 
         return(
@@ -125,6 +125,7 @@ class EditSummitEventPage extends React.Component {
                 {currentSummit &&
                 <EventForm
                     history={this.props.history}
+                    extraQuestions={extraQuestions}
                     currentSummit={currentSummit}
                     levelOpts={levelOptions}
                     trackOpts={currentSummit.tracks}
@@ -139,6 +140,8 @@ class EditSummitEventPage extends React.Component {
                     onUnpublish={this.props.unPublishEvent}
                     onMaterialDelete={this.props.deleteEventMaterial}
                     onRemoveImage={this.props.removeImage}
+                    onAddQAMember={this.props.addQAMember}
+                    onDeleteQAMember={this.props.removeQAMember}
                 />
                 }
             </div>
@@ -152,6 +155,7 @@ const mapStateToProps = ({ currentSummitState, currentSummitEventState, currentR
     rsvpTemplateOptions: currentRsvpTemplateListState.rsvpTemplates,
     entity: currentSummitEventState.entity,
     errors: currentSummitEventState.errors,
+    extraQuestions: currentSummitEventState.extraQuestions,
     allEventsData: currentEventListState
 });
 
@@ -163,6 +167,8 @@ export default connect (
         unPublishEvent,
         deleteEventMaterial,
         getEvents,
-        removeImage
+        removeImage,
+        addQAMember,
+        removeQAMember
     }
 )(EditSummitEventPage);
