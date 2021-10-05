@@ -180,7 +180,6 @@ class EventMaterialForm extends React.Component {
                             onChange={this.handleChange}
                             className="form-control"
                             error={hasErrors('name', errors)}
-                            disabled={disableInputs}
                         />
                     </div>
                     <div className="col-md-6 checkboxes-div">
