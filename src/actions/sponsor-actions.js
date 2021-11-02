@@ -30,6 +30,7 @@ import {
 
 export const REQUEST_SPONSORS               = 'REQUEST_SPONSORS';
 export const RECEIVE_SPONSORS               = 'RECEIVE_SPONSORS';
+export const RECEIVE_SPONSORS_WITH_BADGE_SCANS = 'RECEIVE_SPONSORS_WITH_BADGE_SCANS';
 export const RECEIVE_SPONSOR                = 'RECEIVE_SPONSOR';
 export const RESET_SPONSOR_FORM             = 'RESET_SPONSOR_FORM';
 export const UPDATE_SPONSOR                 = 'UPDATE_SPONSOR';
@@ -121,7 +122,7 @@ export const getSponsorsWithBadgeScans = () => (dispatch, getState) => {
 
     return getRequest(
         null,
-        createAction(RECEIVE_SPONSORS),
+        createAction(RECEIVE_SPONSORS_WITH_BADGE_SCANS),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
         authErrorHandler
     )(params)(dispatch).then(() => {

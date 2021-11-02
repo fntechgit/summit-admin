@@ -15,7 +15,7 @@ import {epochToMoment} from "openstack-uicore-foundation/lib/methods";
 import
 {
     RECEIVE_BADGE_SCANS,
-    RECEIVE_SPONSORS,
+    RECEIVE_SPONSORS_WITH_BADGE_SCANS,
     REQUEST_BADGE_SCANS
 } from '../../actions/sponsor-actions';
 
@@ -82,7 +82,7 @@ const badgeScansListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, badgeScans: badgeScans, currentPage: current_page, totalBadgeScans: total, lastPage: last_page };
         }
         break;
-        case RECEIVE_SPONSORS: {
+        case RECEIVE_SPONSORS_WITH_BADGE_SCANS: {
             return {...state, allSponsors: payload.response.data }
         }
         break;
