@@ -89,7 +89,7 @@ class BadgeScansListPage extends React.Component {
 
         if(!currentSummit.id) return (<div/>);
 
-        let sponsors_ddl = allSponsors ? allSponsors.map(s => ({label: s.company.name, value: s.id})) : null;
+        let sponsors_ddl = allSponsors ? allSponsors.filter(s => s.hasOwnProperty("company")).map(s => ({label: s.company.name, value: s.id})) : null;
 
         return(
             <>
