@@ -225,7 +225,7 @@ export const getEvent = (eventId) => (dispatch, getState) => {
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}`,
         authErrorHandler
     )(params)(dispatch).then(({response}) => {
-            getQAUsersBySummitEvent(currentSummit.id, eventId)(dispatch, getState)
+            //getQAUsersBySummitEvent(currentSummit.id, eventId)(dispatch, getState)
             dispatch(stopLoading());
         }
     );
