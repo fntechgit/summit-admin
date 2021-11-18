@@ -233,6 +233,7 @@ class EventMaterialForm extends React.Component {
                             mediaType={slideMediaType}
                             postUrl={`${window.API_BASE_URL}/api/public/v1/files/upload`}
                             error={hasErrors("slide", errors)}
+                            djsConfig={{withCredentials:true}}
                         />
                     </div>
                     <div className="col-md-7 text-center">
@@ -292,6 +293,7 @@ class EventMaterialForm extends React.Component {
                             mediaType={media_type}
                             postUrl={`${window.API_BASE_URL}/api/public/v1/files/upload`}
                             error={hasErrors(media_type.name, errors)}
+                            djsConfig={{withCredentials:true}}
                         />
                     </div>
                 </div>
