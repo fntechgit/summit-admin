@@ -25,6 +25,10 @@ import {
 export const SCHEDULE_SETTING_LABEL_TYPE = 'LABEL';
 export const SCHEDULE_SETTING_ENABLED_TYPE = 'ENABLED';
 
+export const REQUEST_ALL_SCHEDULE_SETTINGS = 'REQUEST_ALL_SCHEDULE_SETTINGS';
+export const RECEIVE_ALL_SCHEDULE_SETTINGS = 'RECEIVE_ALL_SCHEDULE_SETTINGS';
+export const SCHEDULE_SETTINGS_DELETED = 'SCHEDULE_SETTINGS_DELETED';
+
 export const REQUEST_SCHEDULE_SETTINGS = 'REQUEST_SCHEDULE_SETTINGS';
 export const RECEIVE_SCHEDULE_SETTINGS = 'RECEIVE_SCHEDULE_SETTINGS';
 export const UPDATE_SCHEDULE_SETTING = 'UPDATE_SCHEDULE_SETTING';
@@ -33,6 +37,41 @@ export const SCHEDULE_SETTING_ADDED = 'SCHEDULE_SETTING_ADDED';
 export const REQUEST_SCHEDULE_EVENT_COLOR_ORIGIN = 'REQUEST_SCHEDULE_EVENT_COLOR_ORIGIN';
 export const RECEIVE_SCHEDULE_EVENT_COLOR_ORIGIN = 'RECEIVE_SCHEDULE_EVENT_COLOR_ORIGIN';
 export const SCHEDULE_EVENT_COLOR_ORIGIN_UPDATED = 'SCHEDULE_EVENT_COLOR_ORIGIN_UPDATED';
+
+
+export const getAllScheduleSettings = ( order = 'key', orderDir = 1 ) => (dispatch, getState) => {
+
+    const { loggedUserState, currentSummitState } = getState();
+    const { accessToken }     = loggedUserState;
+    const { currentSummit }   = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+        page         : 1,
+        per_page     : 100,
+        access_token : accessToken,
+    };
+
+    // order
+    if(order != null && orderDir != null){
+        const orderDirSign = (orderDir === 1) ? '+' : '-';
+        params['order']= `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+        createAction(REQUEST_ALL_SCHEDULE_SETTINGS),
+        createAction(RECEIVE_ALL_SCHEDULE_SETTINGS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings`,
+        authErrorHandler,
+        {order, orderDir}
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+};
+
+
 
 export const getScheduleSettings = () => (dispatch, getState) => {
 

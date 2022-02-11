@@ -1824,6 +1824,11 @@
     "saved": "Supporting Company successfully.",
     "created": "Supporting Company created successfully."
   },
+  "schedule_settings_list": {
+    "schedule_settings" : "Settings for Site Schedules",
+    "no_schedule_settings": "No schedules settings found",
+    "add_schedule_settings": "Add new setting"
+  },
   "schedule_settings": {
     "schedule_settings" : "Schedule Settings",
     "filter_title": "Filter",

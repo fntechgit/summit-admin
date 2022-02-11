@@ -26,7 +26,7 @@ import {
     SCHEDULE_SETTING_LABEL_TYPE
 } from "../../actions/schedule-settings-actions";
 
-class EditSummitScheduleSettingsPage extends React.Component {
+class EditScheduleSettingsPageOld extends React.Component {
 
     constructor(props) {
         super(props);
@@ -118,4 +118,4 @@ export default connect (
         saveScheduleSetting,
         saveEventColorOrigin
     }
-)(EditSummitScheduleSettingsPage);
+)(EditScheduleSettingsPageOld);
