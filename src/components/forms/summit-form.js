@@ -172,9 +172,21 @@ class SummitForm extends React.Component {
         this.props.onLogoDelete();
     }
 
+    validateForm = (entity) => {
+        if (!entity.time_zone_label) {
+            entity.time_zone_label = entity.time_zone_id;
+        }
+
+        return true;
+    }
+
     handleSubmit(ev) {
+        const {entity} = this.state;
+
         ev.preventDefault();
-        this.props.onSubmit(this.state.entity);
+        if (this.validateForm(entity)) {
+            this.props.onSubmit(entity);
+        }
     }
 
     hasErrors(field) {
