@@ -477,7 +477,7 @@ class SummitForm extends React.Component {
                             />
                         </div>
                         <div className="col-md-6">
-                            <label> {T.translate("edit_summit.time_zone_label")}</label>
+                            <label> {T.translate("edit_summit.time_zone_label")} *</label>
                             <Input
                                 className="form-control"
                                 id="time_zone_label"
