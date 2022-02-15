@@ -16,13 +16,13 @@ import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import { Table } from 'openstack-uicore-foundation/lib/components';
-import { getScheduleSettings, deleteScheduleSetting } from "../../actions/schedule-settings-actions";
+import { getAllScheduleSettings, deleteScheduleSetting } from "../../actions/schedule-settings-actions";
 
 class ScheduleSettingsListPage extends React.Component {
     componentDidMount() {
         const {currentSummit} = this.props;
         if(currentSummit) {
-            this.props.getScheduleSettings();
+            this.props.getAllScheduleSettings();
         }
     }
 
@@ -50,7 +50,7 @@ class ScheduleSettingsListPage extends React.Component {
     }
 
     handleSort = (index, key, dir, func) => {
-        this.props.getScheduleSettings(key, dir);
+        this.props.getAllScheduleSettings(key, dir);
     }
 
     handleNewScheduleSetting = (ev) => {
@@ -62,10 +62,10 @@ class ScheduleSettingsListPage extends React.Component {
         const {currentSummit, scheduleSettings, order, orderDir, totalScheduleSettings} = this.props;
 
         const columns = [
-            { columnKey: 'key', value: T.translate("schedule_settings_list.key"), sortable: true },
-            { columnKey: 'is_enabled_str', value: T.translate("schedule_settings_list.is_enabled") },
-            { columnKey: 'is_my_schedule_str', value: T.translate("schedule_settings_list.is_my_schedule") },
-            { columnKey: 'is_access_level_str', value: T.translate("schedule_settings_list.access_level_only") },
+            { columnKey: 'key', value: T.translate("edit_schedule_settings.key") },
+            { columnKey: 'is_enabled_str', value: T.translate("edit_schedule_settings.enabled") },
+            { columnKey: 'is_my_schedule_str', value: T.translate("edit_schedule_settings.is_my_schedule") },
+            { columnKey: 'is_access_level_str', value: T.translate("edit_schedule_settings.access_levels_only") },
         ];
 
         const table_options = {
@@ -116,7 +116,7 @@ const mapStateToProps = ({ currentSummitState, scheduleSettingsListState }) => (
 export default connect (
     mapStateToProps,
     {
-        getScheduleSettings,
+        getAllScheduleSettings,
         deleteScheduleSetting
     }
 )(ScheduleSettingsListPage);

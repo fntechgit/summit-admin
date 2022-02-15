@@ -214,7 +214,7 @@ const reducers = persistCombineReducers(config, {
     sponsoredProjectState : sponsoredProjectReducer,
     sponsoredProjectSponsorshipTypeState : sponsoredProjectSponsorshipTypeReducer,
     sponsoredProjectSponsorshipTypeSupportingCompanyState: sponsoredProjectSponsorshipTypeSupportingCompanyReducer,
-    scheduleSettingState: scheduleSettingsReducer,
+    scheduleSettingsState: scheduleSettingsReducer,
     scheduleSettingsListState: scheduleSettingsListReducer,
     currentSelectionPlanExtraQuestionState: selectionPlanExtraQuestionReducer,
 });

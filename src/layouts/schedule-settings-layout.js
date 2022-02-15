@@ -27,7 +27,7 @@ class ScheduleSettingsLayout extends React.Component {
 
         return(
             <div>
-                <Breadcrumb data={{ title: T.translate("schedule_settings.schedule_settings"), pathname: match.url }} />
+                <Breadcrumb data={{ title: T.translate("edit_schedule_settings.schedule_settings"), pathname: match.url }} />
 
                 <Switch>
                     <Route exact strict path={match.url} component={ScheduleSettingsListPage}/>

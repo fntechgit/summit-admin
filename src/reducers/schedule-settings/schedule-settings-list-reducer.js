@@ -15,7 +15,7 @@ import
 {
     REQUEST_ALL_SCHEDULE_SETTINGS,
     RECEIVE_ALL_SCHEDULE_SETTINGS,
-    SCHEDULE_SETTINGS_DELETED
+    SCHEDULE_SETTING_DELETED
 } from '../../actions/schedule-settings-actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/actions';
@@ -44,19 +44,16 @@ const scheduleSettingsListReducer = (state = DEFAULT_STATE, action) => {
             const scheduleSettings = payload.response.data;
 
             scheduleSettings.forEach(ss => {
-                return {
-                    ...ss,
-                    is_enabled_str: boolToStr(ss.is_enabled),
-                    is_my_schedule_str: boolToStr(ss.is_my_schedule),
-                    is_access_level_str: boolToStr(ss.only_events_with_attendee_access)
-                };
+                ss.is_enabled_str = boolToStr(ss.is_enabled);
+                ss.is_my_schedule_str = boolToStr(ss.is_my_schedule);
+                ss.is_access_level_str = boolToStr(ss.only_events_with_attendee_access);
             });
 
             return {...state, scheduleSettings, totalScheduleSettings: total };
         }
-        case SCHEDULE_SETTINGS_DELETED: {
-            let {scheduleSettingsId} = payload;
-            return {...state, scheduleSettings: state.scheduleSettings.filter(ss => ss.id !== scheduleSettingsId), totalScheduleSettings: (state.totalScheduleSettings - 1)};
+        case SCHEDULE_SETTING_DELETED: {
+            const {scheduleSettingId} = payload;
+            return {...state, scheduleSettings: state.scheduleSettings.filter(ss => ss.id !== scheduleSettingId), totalScheduleSettings: (state.totalScheduleSettings - 1)};
         }
         default:
             return state;
