@@ -186,5 +186,8 @@ const normalizeEntity = (entity) => {
     const normalized = {...entity};
     delete(normalized.id);
 
+    normalized.filters = entity.filters.map(f => ({type: f.type, label: f.label, is_enabled: f.is_enabled}));
+    normalized.pre_filters = entity.pre_filters.map(pf => ({type: pf.type, values: pf.values}));
+
     return normalized;
 }

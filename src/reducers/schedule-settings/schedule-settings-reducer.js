@@ -52,7 +52,7 @@ export const DEFAULT_ENTITY = {
     id: 0,
     key: '',
     is_default: false,
-    is_enabled: false,
+    is_enabled: true,
     is_my_schedule: false,
     only_events_with_attendee_access: false,
     color_source: 'TRACK',

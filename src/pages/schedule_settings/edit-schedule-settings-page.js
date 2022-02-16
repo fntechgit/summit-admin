@@ -51,17 +51,26 @@ class EditScheduleSettingsPage extends React.Component {
         }
     }
 
+    createKey = () => {
+        const {scheduleSettings} = this.props;
+        const keys = scheduleSettings.map(ss => ss.key);
+        let keyNumber = scheduleSettings.length;
+
+        while (keys.includes(`schedule_${keyNumber}`)) {
+            keyNumber++
+        }
+
+        return `schedule_${keyNumber}`;
+    }
+
     render(){
         const {currentSummit, entity, errors, match, totalScheduleSettings} = this.props;
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
         const breadcrumb = (entity.id) ? entity.key : T.translate("general.new");
 
         if (!entity.id) {
-            entity.key = `schedule_${totalScheduleSettings}`;
-            entity.is_enabled = true;
+            entity.key = this.createKey();
         }
-
-        console.log(entity);
 
         return(
             <div className="container">
@@ -84,7 +93,7 @@ class EditScheduleSettingsPage extends React.Component {
 const mapStateToProps = ({ currentSummitState, scheduleSettingsState, baseState, scheduleSettingsListState }) => ({
     currentSummit : currentSummitState.currentSummit,
     loading: baseState.loading,
-    totalScheduleSettings: scheduleSettingsListState.totalScheduleSettings,
+    scheduleSettings: scheduleSettingsListState.scheduleSettings,
     ...scheduleSettingsState
 });
 
