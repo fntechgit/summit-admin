@@ -18,7 +18,10 @@ import {
     startLoading,
     authErrorHandler,
     putRequest,
-    postRequest, deleteRequest, showMessage, showSuccessMessage
+    postRequest,
+    deleteRequest,
+    showMessage,
+    showSuccessMessage
 } from 'openstack-uicore-foundation/lib/methods';
 import history from "../history";
 import T from "i18n-react";
@@ -32,6 +35,7 @@ export const SCHEDULE_SETTING_DELETED = 'SCHEDULE_SETTING_DELETED';
 export const UPDATE_SCHEDULE_SETTINGS = 'UPDATE_SCHEDULE_SETTINGS';
 export const SCHEDULE_SETTINGS_UPDATED = 'SCHEDULE_SETTINGS_UPDATED';
 export const SCHEDULE_SETTINGS_ADDED = 'SCHEDULE_SETTINGS_ADDED';
+export const DEFAULT_SCHEDULE_SETTINGS_SEEDED = 'DEFAULT_SCHEDULE_SETTINGS_SEEDED';
 
 export const FILTER_TYPES = {
     date: 'DATE',
@@ -48,9 +52,31 @@ export const FILTER_TYPES = {
     abstract: 'ABSTRACT'
 };
 
+export const seedDefaultScheduleSettings = () => (dispatch, getState) => {
+    const { loggedUserState, currentSummitState } = getState();
+    const { accessToken }     = loggedUserState;
+    const { currentSummit }   = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    return postRequest(
+        null,
+        createAction(DEFAULT_SCHEDULE_SETTINGS_SEEDED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/schedule-settings/seed`,
+        authErrorHandler,
+        {}
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
 
 export const getAllScheduleSettings = ( order = 'key', orderDir = 1 ) => (dispatch, getState) => {
-
     const { loggedUserState, currentSummitState } = getState();
     const { accessToken }     = loggedUserState;
     const { currentSummit }   = currentSummitState;

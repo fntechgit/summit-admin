@@ -1828,6 +1828,7 @@
     "schedule_settings" : "Settings for Site Schedules",
     "no_schedule_settings": "No schedules settings found",
     "add_schedule_settings": "Add new setting",
+    "seed_defaults": "Seed default schedules",
     "remove_warning": "Are you sure you want do delete schedule "
   },
   "edit_schedule_settings": {

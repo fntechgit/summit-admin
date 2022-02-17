@@ -16,7 +16,7 @@ import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import { Table } from 'openstack-uicore-foundation/lib/components';
-import { getAllScheduleSettings, deleteScheduleSetting } from "../../actions/schedule-settings-actions";
+import { getAllScheduleSettings, deleteScheduleSetting, seedDefaultScheduleSettings } from "../../actions/schedule-settings-actions";
 
 class ScheduleSettingsListPage extends React.Component {
     componentDidMount() {
@@ -53,9 +53,20 @@ class ScheduleSettingsListPage extends React.Component {
         this.props.getAllScheduleSettings(key, dir);
     }
 
+    isNotDefault = (id) => {
+        const {scheduleSettings} = this.props;
+        let scheduleSetting = scheduleSettings.find(e => e.id === id);
+
+        return !scheduleSetting.is_default;
+    }
+
     handleNewScheduleSetting = (ev) => {
         const {currentSummit, history} = this.props;
         history.push(`/app/summits/${currentSummit.id}/schedule-settings/new`);
+    }
+
+    handleSeedDefaults = () => {
+        this.props.seedDefaultScheduleSettings();
     }
 
     render(){
@@ -73,7 +84,7 @@ class ScheduleSettingsListPage extends React.Component {
             sortDir: orderDir,
             actions: {
                 edit: { onClick: this.handleEdit },
-                delete: { onClick: this.handleDelete }
+                delete: { onClick: this.handleDelete, display: this.isNotDefault }
             }
         }
 
@@ -86,6 +97,9 @@ class ScheduleSettingsListPage extends React.Component {
                     <div className="col-md-6 text-right col-md-offset-6">
                         <button className="btn btn-primary right-space" onClick={this.handleNewScheduleSetting}>
                             {T.translate("schedule_settings_list.add_schedule_settings")}
+                        </button>
+                        <button className="btn btn-default" onClick={this.handleSeedDefaults}>
+                            {T.translate("schedule_settings_list.seed_defaults")}
                         </button>
                     </div>
                 </div>
@@ -117,6 +131,7 @@ export default connect (
     mapStateToProps,
     {
         getAllScheduleSettings,
-        deleteScheduleSetting
+        deleteScheduleSetting,
+        seedDefaultScheduleSettings
     }
 )(ScheduleSettingsListPage);

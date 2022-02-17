@@ -15,7 +15,8 @@ import
 {
     REQUEST_ALL_SCHEDULE_SETTINGS,
     RECEIVE_ALL_SCHEDULE_SETTINGS,
-    SCHEDULE_SETTING_DELETED
+    SCHEDULE_SETTING_DELETED,
+    DEFAULT_SCHEDULE_SETTINGS_SEEDED
 } from '../../actions/schedule-settings-actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/actions';
@@ -37,8 +38,9 @@ const scheduleSettingsListReducer = (state = DEFAULT_STATE, action) => {
         case REQUEST_ALL_SCHEDULE_SETTINGS: {
             const {order, orderDir} = payload;
 
-            return {...state, order, orderDir }
+            return {...state, order, orderDir, scheduleSettings: [] };
         }
+        case DEFAULT_SCHEDULE_SETTINGS_SEEDED:
         case RECEIVE_ALL_SCHEDULE_SETTINGS: {
             const { total } = payload.response;
             const scheduleSettings = payload.response.data;
@@ -49,7 +51,7 @@ const scheduleSettingsListReducer = (state = DEFAULT_STATE, action) => {
                 ss.is_access_level_str = boolToStr(ss.only_events_with_attendee_access);
             });
 
-            return {...state, scheduleSettings, totalScheduleSettings: total };
+            return {...state, scheduleSettings: [...scheduleSettings, ...state.scheduleSettings], totalScheduleSettings: total };
         }
         case SCHEDULE_SETTING_DELETED: {
             const {scheduleSettingId} = payload;
