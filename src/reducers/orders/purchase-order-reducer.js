@@ -51,6 +51,38 @@ const DEFAULT_STATE = {
     errors: {}
 };
 
+const formatTicketsList = (tickets) => {
+    return tickets.map(t => {
+        let owner_full_name = 'N/A';
+        let owner_email = 'N/A';
+        let owner_link = 'N/A';
+        let email_link = 'N/A';
+        let ticket_type_name = t.ticket_type ? t.ticket_type.name : 'N/A';
+
+        const final_amount_formatted = `$${t.final_amount.toFixed(2)}`;
+        const refunded_amount_formatted = `$${t.refunded_amount.toFixed(2)}`;
+        const final_amount_adjusted_formatted = `$${((t.final_amount - t.refunded_amount).toFixed(2))}`;
+
+        if (t.owner) {
+            owner_email = t.owner.email;
+
+            if (t.owner.member) {
+                owner_full_name = `${t.owner.member.first_name} ${t.owner.member.last_name}`;
+            } else if (t.owner.first_name && t.owner.last_name) {
+                owner_full_name = `${t.owner.first_name} ${t.owner.last_name}`;
+            }
+
+            owner_link = <a href="" onClick={ev => { ev.stopPropagation(); history.push(`/app/summits/${entity.summit_id}/attendees/${t.owner.id}`)}}>{owner_full_name}</a>;
+            email_link = <a href="" onClick={ev => { ev.stopPropagation(); window.open(`mailto:${owner_email}`, '_blank')}} target="_blank">{owner_email}</a>
+        }
+
+        return ({...t, ticket_type_name, owner_full_name, owner_email, owner_link, email_link,
+            final_amount_formatted,
+            refunded_amount_formatted,
+            final_amount_adjusted_formatted,})
+    });
+}
+
 const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action
     switch (type) {
@@ -87,35 +119,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
                 last_name: entity.owner_last_name,
             };
 
-            entity.tickets = entity.tickets.map(t => {
-                let owner_full_name = 'N/A';
-                let owner_email = 'N/A';
-                let owner_link = 'N/A';
-                let email_link = 'N/A';
-                let ticket_type_name = t.ticket_type ? t.ticket_type.name : 'N/A';
-
-                const final_amount_formatted = `$${t.final_amount.toFixed(2)}`;
-                const refunded_amount_formatted = `$${t.refunded_amount.toFixed(2)}`;
-                const final_amount_adjusted_formatted = `$${((t.final_amount - t.refunded_amount).toFixed(2))}`;
-
-                if (t.owner) {
-                    owner_email = t.owner.email;
-
-                    if (t.owner.member) {
-                        owner_full_name = `${t.owner.member.first_name} ${t.owner.member.last_name}`;
-                    } else if (t.owner.first_name && t.owner.last_name) {
-                        owner_full_name = `${t.owner.first_name} ${t.owner.last_name}`;
-                    }
-
-                    owner_link = <a href="" onClick={ev => { ev.stopPropagation(); history.push(`/app/summits/${entity.summit_id}/attendees/${t.owner.id}`)}}>{owner_full_name}</a>;
-                    email_link = <a href="" onClick={ev => { ev.stopPropagation(); window.open(`mailto:${owner_email}`, '_blank')}} target="_blank">{owner_email}</a>
-                }
-
-                return ({...t, ticket_type_name, owner_full_name, owner_email, owner_link, email_link,
-                    final_amount_formatted,
-                    refunded_amount_formatted,
-                    final_amount_adjusted_formatted,})
-            });
+            entity.tickets = formatTicketsList(entity.tickets);
 
             return {...state,  entity: {...entity,
                     final_amount_formatted,
@@ -133,7 +137,11 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
             const { entity} = state;
             return {...state,  entity: {...entity, status: 'Paid' }};
         }
-        break;
+        case PURCHASE_ORDER_UPDATED: {
+            const { entity} = state;
+            const tickets = formatTicketsList(payload.response.tickets);
+            return {...state,  entity: {...entity, tickets: tickets }};
+        }
         default:
             return state;
     }
