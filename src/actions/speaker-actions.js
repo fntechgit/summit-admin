@@ -618,13 +618,11 @@ export const addFeaturedSpeaker = (speaker) => (dispatch, getState) => {
         access_token : accessToken,
     };
 
-    const normalizedEntity = normalizeEntity(speaker);
-
     return postRequest(
         null,
         createAction(FEATURED_SPEAKER_ADDED)({speaker}),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/featured-speakers`,
-        normalizedEntity,
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/featured-speakers/${speaker.id}`,
+        {},
         authErrorHandler,
         speaker
     )(params)(dispatch).then(() => {
@@ -643,15 +641,11 @@ export const updateFeaturedSpeakerOrder = (speakers, speakerId, newOrder) => (di
         access_token : accessToken
     };
 
-    const speaker = speakers.find(s => s.id === speakerId);
-
-    const normalizedEntity = normalizeEntity(speaker);
-
     putRequest(
         null,
         createAction(FEATURED_SPEAKER_ORDER_UPDATED)(speakers),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/featured-speakers/${speaker.id}`,
-        normalizedEntity,
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/featured-speakers/${speakerId}`,
+        { order : newOrder },
         authErrorHandler
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
