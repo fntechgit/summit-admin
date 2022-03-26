@@ -15,7 +15,12 @@ module.exports = {
             expand: true
         })
     ],
-    node: {fs: 'empty'},
+    resolve: {
+        fallback: {
+            "fs": false,
+            "crypto": false,
+        }
+    },
     module: {
         rules: [
             {
