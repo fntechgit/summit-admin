@@ -125,15 +125,12 @@ class SelectionPlanForm extends React.Component {
         this.props.onDeleteEventType(entity.id, valueId)
     }
 
-    toggleSection(section, ev) {
+    toggleSection(section) {
         let {showSection} = this.state;
         let newShowSection = (showSection === section) ? 'main' : section;
-        ev.preventDefault();
-
         this.setState({showSection: newShowSection});
     }
-
-
+    
     render() {
         const {entity, showSection} = this.state;
         const { currentSummit, extraQuestionsOrderDir, extraQuestionsOrder } = this.props;
