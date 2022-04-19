@@ -28,7 +28,6 @@ import {
     getCSV,
     getAccessToken
 } from "openstack-uicore-foundation/lib/methods";
-import {RECEIVE_PURCHASE_ORDERS, REQUEST_PURCHASE_ORDERS} from "./order-actions";
 
 export const REQUEST_ATTENDEES          = 'REQUEST_ATTENDEES';
 export const RECEIVE_ATTENDEES          = 'RECEIVE_ATTENDEES';
@@ -230,7 +229,7 @@ export const getAttendee = (attendeeId) => async (dispatch, getState) => {
     );
 };
 
-export const getAttendeeOrders = ( attendee ) => async (dispatch, getState) => {
+export const getAttendeeOrders = ( attendee ) => async (dispatch) => {
     const accessToken = await getAccessToken();
 
     const params = {
@@ -405,7 +404,7 @@ export const saveTicket = (attendeeId, newTicket) => async (dispatch, getState) 
     );
 };
 
-export const deleteRsvp = (memberId, rsvpId) => async (dispatch, getState) => {
+export const deleteRsvp = (memberId, rsvpId) => async (dispatch) => {
 
     const accessToken = await getAccessToken();
 

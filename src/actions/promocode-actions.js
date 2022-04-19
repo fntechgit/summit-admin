@@ -418,9 +418,9 @@ export const deleteDiscountTicket = (promocodeId, ticketId, ticketTypeId) => asy
     );
 };
 
-export const importPromoCodesCSV = (file) => (dispatch, getState) => {
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+export const importPromoCodesCSV = (file) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     const params = {

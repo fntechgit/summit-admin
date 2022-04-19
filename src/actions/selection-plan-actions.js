@@ -225,10 +225,10 @@ export const resetSelectionPlanExtraQuestionForm = () => (dispatch, getState) =>
     dispatch(createAction(RESET_SELECTION_PLAN_EXTRA_QUESTION_FORM)({}));
 };
 
-export const getExtraQuestionMeta = (selectionPlanId) => (dispatch, getState) => {
+export const getExtraQuestionMeta = (selectionPlanId) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -246,10 +246,10 @@ export const getExtraQuestionMeta = (selectionPlanId) => (dispatch, getState) =>
     );
 };
 
-export const getSelectionPlanExtraQuestions = (selectionPlanId) => (dispatch, getState) => {
+export const getSelectionPlanExtraQuestions = (selectionPlanId) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());
@@ -273,10 +273,10 @@ export const getSelectionPlanExtraQuestions = (selectionPlanId) => (dispatch, ge
     );
 };
 
-export const getSelectionPlanExtraQuestion = (selectionPlanId, extraQuestionId) => (dispatch, getState) => {
+export const getSelectionPlanExtraQuestion = (selectionPlanId, extraQuestionId) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());
@@ -302,9 +302,9 @@ const normalizeQuestion = (entity) => {
     return normalizedEntity;
 }
 
-export const saveSelectionPlanExtraQuestion = (selectionPlanId, entity) => (dispatch, getState) => {
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+export const saveSelectionPlanExtraQuestion = (selectionPlanId, entity) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -354,10 +354,10 @@ export const saveSelectionPlanExtraQuestion = (selectionPlanId, entity) => (disp
 
 }
 
-export const deleteSelectionPlanExtraQuestion = (selectionPlanId, questionId) => (dispatch, getState) => {
+export const deleteSelectionPlanExtraQuestion = (selectionPlanId, questionId) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -376,10 +376,10 @@ export const deleteSelectionPlanExtraQuestion = (selectionPlanId, questionId) =>
     );
 };
 
-export const updateSelectionPlanExtraQuestionOrder = (selectionPlanId, questions, questionId, newOrder) => (dispatch, getState) => {
+export const updateSelectionPlanExtraQuestionOrder = (selectionPlanId, questions, questionId, newOrder) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -401,9 +401,9 @@ export const updateSelectionPlanExtraQuestionOrder = (selectionPlanId, questions
 
 }
 
-export const saveSelectionPlanExtraQuestionValue = (selectionPlanId, questionId, entity) => (dispatch, getState) => {
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+export const saveSelectionPlanExtraQuestionValue = (selectionPlanId, questionId, entity) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());
@@ -442,10 +442,10 @@ export const saveSelectionPlanExtraQuestionValue = (selectionPlanId, questionId,
 
 }
 
-export const deleteSelectionPlanExtraQuestionValue = (selectionPlanId, questionId, valueId) => (dispatch, getState) => {
+export const deleteSelectionPlanExtraQuestionValue = (selectionPlanId, questionId, valueId) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -470,10 +470,10 @@ export const deleteSelectionPlanExtraQuestionValue = (selectionPlanId, questionI
 export const EVENT_TYPE_ADDED               = 'EVENT_TYPE_ADDED';
 export const EVENT_TYPE_REMOVED             = 'EVENT_TYPE_REMOVED';
 
-export const addEventTypeSelectionPlan = (selectionPlanId, eventType) => (dispatch, getState) => {
+export const addEventTypeSelectionPlan = (selectionPlanId, eventType) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());
@@ -494,10 +494,10 @@ export const addEventTypeSelectionPlan = (selectionPlanId, eventType) => (dispat
     );
 
 }
-export const deleteEventTypeSelectionPlan = (selectionPlanId, eventTypeId) => (dispatch, getState) => {
+export const deleteEventTypeSelectionPlan = (selectionPlanId, eventTypeId) => async (dispatch, getState) => {
     
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());
@@ -525,10 +525,10 @@ export const SELECTION_PLAN_RATING_TYPE_REMOVED = 'SELECTION_PLAN_RATING_TYPE_RE
 export const SELECTION_PLAN_RATING_TYPE_UPDATED = 'SELECTION_PLAN_RATING_TYPE_UPDATED';
 export const SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED = 'SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED';
 
-export const updateRatingTypeOrder = (selectionPlanId, ratingTypes, ratingTypeId, newOrder) => (dispatch, getState) => {
+export const updateRatingTypeOrder = (selectionPlanId, ratingTypes, ratingTypeId, newOrder) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
 
     const params = {

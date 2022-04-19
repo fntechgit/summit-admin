@@ -21,7 +21,7 @@ import {
     postRequest,
     deleteRequest,
     showMessage,
-    showSuccessMessage
+    showSuccessMessage, getAccessToken
 } from 'openstack-uicore-foundation/lib/methods';
 import history from "../history";
 import T from "i18n-react";
@@ -52,9 +52,9 @@ export const FILTER_TYPES = {
     abstract: 'ABSTRACT'
 };
 
-export const seedDefaultScheduleSettings = () => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const seedDefaultScheduleSettings = () => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -75,9 +75,9 @@ export const seedDefaultScheduleSettings = () => (dispatch, getState) => {
     );
 }
 
-export const getAllScheduleSettings = ( order = 'key', orderDir = 1 ) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+export const getAllScheduleSettings = ( order = 'key', orderDir = 1 ) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -128,10 +128,10 @@ export const getScheduleSetting = (scheduleSettingId) => (dispatch, getState) =>
     });
 };
 
-export const deleteScheduleSetting = (scheduleSettingId) => (dispatch, getState) => {
+export const deleteScheduleSetting = (scheduleSettingId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -155,9 +155,9 @@ export const resetScheduleSettingsForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_SCHEDULE_SETTINGS_FORM)({}));
 };
 
-export const saveScheduleSettings = (entity) => (dispatch, getState) => {
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken } = loggedUserState;
+export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
     const params = {
         access_token: accessToken,

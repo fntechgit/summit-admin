@@ -1,6 +1,6 @@
 import {
     authErrorHandler,
-    createAction,
+    createAction, getAccessToken,
     getCSV,
     getRequest,
     startLoading, stopLoading
@@ -19,10 +19,10 @@ export const getPresentationsVotes =
         order = 'votes_count',
         orderDir = 0,
         extraFilters = []
-    ) => (dispatch, getState) => {
+    ) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessToken();
     const {currentSummit} = currentSummitState;
     let filter = ['published==1','votes_count>0'];
 
@@ -69,10 +69,10 @@ export const getAttendeeVotes =
         order = 'presentation_votes_count',
         orderDir = 0,
         extraFilters = []
-    ) => (dispatch, getState) => {
+    ) => async (dispatch, getState) => {
 
-        const {loggedUserState, currentSummitState} = getState();
-        const {accessToken} = loggedUserState;
+        const {currentSummitState} = getState();
+        const accessToken = await getAccessToken();
         const {currentSummit} = currentSummitState;
         let filter = ['presentation_votes_count>0'];
 

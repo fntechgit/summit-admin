@@ -606,10 +606,10 @@ export const removeFeatureFromBadgeType = (badgeTypeId, featureId) => async (dis
     );
 };
 
-export const addViewTypeToBadgeType = (badgeTypeId, viewType) => (dispatch, getState) => {
+export const addViewTypeToBadgeType = (badgeTypeId, viewType) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -630,10 +630,10 @@ export const addViewTypeToBadgeType = (badgeTypeId, viewType) => (dispatch, getS
     );
 };
 
-export const removeViewTypeFromBadgeType = (badgeTypeId, viewTypeId) => (dispatch, getState) => {
+export const removeViewTypeFromBadgeType = (badgeTypeId, viewTypeId) => async (dispatch, getState) => {
 
-    const { loggedUserState, currentSummitState } = getState();
-    const { accessToken }     = loggedUserState;
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessToken();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
