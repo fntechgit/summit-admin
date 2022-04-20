@@ -1,10 +1,11 @@
 import {
     authErrorHandler,
-    createAction, getAccessToken,
-    getCSV,
+    createAction,
     getRequest,
-    startLoading, stopLoading
-} from "openstack-uicore-foundation/lib/methods";
+    startLoading,
+    stopLoading
+} from "openstack-uicore-foundation/lib/utils/actions";
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_PRESENTATION_VOTES = 'REQUEST_PRESENTATION_VOTES';
 export const RECEIVE_PRESENTATION_VOTES = 'RECEIVE_PRESENTATION_VOTES';

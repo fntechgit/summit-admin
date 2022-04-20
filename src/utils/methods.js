@@ -1,5 +1,5 @@
-import {findElementPos} from "openstack-uicore-foundation/lib/methods";
 import moment from "moment-timezone";
+import {findElementPos} from "openstack-uicore-foundation/lib/utils/methods";
 
 /**
  * Copyright 2017 OpenStack Foundation

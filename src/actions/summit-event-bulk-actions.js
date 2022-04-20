@@ -24,9 +24,9 @@ import {
     stopLoading,
     startLoading,
     showSuccessMessage,
-    authErrorHandler,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    authErrorHandler
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const UPDATE_LOCAL_EVENT               = 'UPDATE_LOCAL_EVENT';
 export const RECEIVE_SELECTED_EVENTS          = 'REQUEST_SELECTED_EVENTS';

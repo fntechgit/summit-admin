@@ -13,8 +13,8 @@
 import T from "i18n-react/dist/i18n-react";
 import history from '../history'
 import Swal from "sweetalert2";
-import { VALIDATE } from 'openstack-uicore-foundation/lib/actions';
 import {
+    VALIDATE,
     getRequest,
     putRequest,
     postRequest,
@@ -27,9 +27,10 @@ import {
     authErrorHandler,
     fetchResponseHandler,
     fetchErrorHandler,
-    escapeFilterValue,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    escapeFilterValue
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+
 
 export const REQUEST_TEMPLATES       = 'REQUEST_TEMPLATES';
 export const RECEIVE_TEMPLATES       = 'RECEIVE_TEMPLATES';

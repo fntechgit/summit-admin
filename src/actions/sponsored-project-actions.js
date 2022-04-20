@@ -24,8 +24,9 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue, getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    escapeFilterValue
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_SPONSORED_PROJECTS = 'REQUEST_SPONSORED_PROJECTS';
 export const RECEIVE_SPONSORED_PROJECTS = 'RECEIVE_SPONSORED_PROJECTS';

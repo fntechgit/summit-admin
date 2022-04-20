@@ -23,9 +23,9 @@ import {
     authErrorHandler,
     putFile,
     postFile,
-    escapeFilterValue,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    escapeFilterValue
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_SUMMITDOCS       = 'REQUEST_SUMMITDOCS';
 export const RECEIVE_SUMMITDOCS       = 'RECEIVE_SUMMITDOCS';

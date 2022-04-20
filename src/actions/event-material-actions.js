@@ -23,9 +23,10 @@ import {
     showSuccessMessage,
     authErrorHandler,
     putFile,
-    postFile,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    postFile
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+
 
 export const RECEIVE_EVENT_MATERIAL        = 'RECEIVE_EVENT_MATERIAL';
 export const RESET_EVENT_MATERIAL_FORM     = 'RESET_EVENT_MATERIAL_FORM';

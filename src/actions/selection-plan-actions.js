@@ -23,9 +23,9 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    authErrorHandler
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const RECEIVE_SELECTION_PLAN = 'RECEIVE_SELECTION_PLAN';
 export const RESET_SELECTION_PLAN_FORM = 'RESET_SELECTION_PLAN_FORM';

@@ -20,9 +20,10 @@ import {
     startLoading,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    escapeFilterValue
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+
 
 export const REQUEST_EMAIL_FLOW_EVENTS       = 'REQUEST_EMAIL_FLOW_EVENTS';
 export const RECEIVE_EMAIL_FLOW_EVENTS       = 'RECEIVE_EMAIL_FLOW_EVENTS';

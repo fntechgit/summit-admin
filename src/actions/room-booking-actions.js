@@ -25,9 +25,9 @@ import {
     showSuccessMessage,
     getCSV,
     authErrorHandler,
-    escapeFilterValue,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    escapeFilterValue
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_ROOM_BOOKINGS              = 'REQUEST_ROOM_BOOKINGS';
 export const RECEIVE_ROOM_BOOKINGS              = 'RECEIVE_ROOM_BOOKINGS';

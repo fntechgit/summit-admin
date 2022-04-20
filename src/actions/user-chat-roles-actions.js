@@ -5,10 +5,10 @@ import {
     createAction,
     stopLoading,
     startLoading,
-    authErrorHandler, getAccessToken,
-} from 'openstack-uicore-foundation/lib/methods';
-import Swal from "sweetalert2";
-import {VALIDATE} from "openstack-uicore-foundation/lib/actions";
+    authErrorHandler
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+
 
 export const REQUEST_USER_ROLES_BY_SUMMIT = 'REQUEST_USER_ROLES_BY_SUMMIT';
 export const RECEIVE_USER_ROLES_BY_SUMMIT = 'RECEIVE_USER_ROLES_BY_SUMMIT';

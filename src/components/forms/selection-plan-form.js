@@ -14,7 +14,8 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import {epochToMomentTimeZone, queryTrackGroups, queryEventTypes} from 'openstack-uicore-foundation/lib/methods'
+import {epochToMomentTimeZone} from 'openstack-uicore-foundation/lib/utils/methods'
+import { queryTrackGroups, queryEventTypes} from 'openstack-uicore-foundation/lib/utils/query-actions'
 import {Input, DateTimePicker, SimpleLinkList, TextEditor, SortableTable, Panel} from 'openstack-uicore-foundation/lib/components';
 import {isEmpty, scrollToError, shallowEqual, stripTags} from "../../utils/methods";
 import EmailTemplateInput from "../inputs/email-template-input";

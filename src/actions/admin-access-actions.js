@@ -23,9 +23,9 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    escapeFilterValue
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_ADMIN_ACCESSES      = 'REQUEST_ADMIN_ACCESSES';
 export const RECEIVE_ADMIN_ACCESSES      = 'RECEIVE_ADMIN_ACCESSES';

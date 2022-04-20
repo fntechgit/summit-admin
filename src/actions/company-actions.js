@@ -24,9 +24,10 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    escapeFilterValue
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+
 
 export const REQUEST_COMPANIES       = 'REQUEST_COMPANIES';
 export const RECEIVE_COMPANIES       = 'RECEIVE_COMPANIES';

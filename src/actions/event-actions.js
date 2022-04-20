@@ -28,9 +28,9 @@ import {
     authErrorHandler,
     getCSV,
     escapeFilterValue,
-    postFile,
-    getAccessToken
-} from "openstack-uicore-foundation/lib/methods";
+    postFile
+} from "openstack-uicore-foundation/lib/utils/actions";
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 import {getQAUsersBySummitEvent} from "../actions/user-chat-roles-actions"
 
 export const REQUEST_EVENTS = 'REQUEST_EVENTS';

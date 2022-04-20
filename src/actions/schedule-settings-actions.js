@@ -21,8 +21,10 @@ import {
     postRequest,
     deleteRequest,
     showMessage,
-    showSuccessMessage, getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    showSuccessMessage
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+
 import history from "../history";
 import T from "i18n-react";
 

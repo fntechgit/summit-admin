@@ -23,9 +23,9 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    escapeFilterValue
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_MEDIA_FILE_TYPES       = 'REQUEST_MEDIA_FILE_TYPES';
 export const RECEIVE_MEDIA_FILE_TYPES       = 'RECEIVE_MEDIA_FILE_TYPES';

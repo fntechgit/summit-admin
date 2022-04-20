@@ -16,9 +16,9 @@ import {
     createAction,
     stopLoading,
     startLoading,
-    authErrorHandler,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    authErrorHandler
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 
 export const REQUEST_REPORT         = 'REQUEST_REPORT';

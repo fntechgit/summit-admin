@@ -61,7 +61,7 @@ import Swal from "sweetalert2";
 import ScheduleAdminEmptySpotsModal from './schedule-admin-empty-spots-modal';
 import ScheduleAdminEmptySpotsList from './schedule-admin-empty-spots-list';
 import ScheduleAdminsBulkActionsSelector from './bulk-actions/schedule-admin-bulk-actions-selector';
-import {epochToMomentTimeZone} from 'openstack-uicore-foundation/lib/methods';
+import {epochToMomentTimeZone} from 'openstack-uicore-foundation/lib/utils/methods';
 
 
 class ScheduleAdminDashBoard extends React.Component {

@@ -19,10 +19,10 @@ import {
     createAction,
     stopLoading,
     startLoading,
-    authErrorHandler,
-    getAccessToken
-} from "openstack-uicore-foundation/lib/methods";
+    authErrorHandler
+} from "openstack-uicore-foundation/lib/utils/actions";
 import moment from "moment-timezone";
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 
 export const REQUEST_MEMBERS          = 'REQUEST_MEMBERS';

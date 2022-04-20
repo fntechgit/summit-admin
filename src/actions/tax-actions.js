@@ -23,9 +23,9 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    authErrorHandler
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_TAX_TYPES       = 'REQUEST_TAX_TYPES';
 export const RECEIVE_TAX_TYPES       = 'RECEIVE_TAX_TYPES';

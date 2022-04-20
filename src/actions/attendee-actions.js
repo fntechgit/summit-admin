@@ -25,9 +25,9 @@ import {
     showSuccessMessage,
     authErrorHandler,
     escapeFilterValue,
-    getCSV,
-    getAccessToken
-} from "openstack-uicore-foundation/lib/methods";
+    getCSV
+} from "openstack-uicore-foundation/lib/utils/actions";
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_ATTENDEES          = 'REQUEST_ATTENDEES';
 export const RECEIVE_ATTENDEES          = 'RECEIVE_ATTENDEES';

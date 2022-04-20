@@ -22,9 +22,9 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler,
-    getAccessToken
-} from "openstack-uicore-foundation/lib/methods";
+    authErrorHandler
+} from "openstack-uicore-foundation/lib/utils/actions";
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_EVENT_CATEGORIES      = 'REQUEST_EVENT_CATEGORIES';
 export const RECEIVE_EVENT_CATEGORIES      = 'RECEIVE_EVENT_CATEGORIES';

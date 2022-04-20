@@ -21,16 +21,10 @@ import AuthButton from './components/auth-button'
 import DefaultRoute from './routes/default-route'
 import { connect } from 'react-redux'
 import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
-import {
-    getBackURL,
-    onUserAuth,
-    doLoginBasicLogin,
-    doLogout,
-    initLogOut,
-    getUserInfo,
-    resetLoading,
-    getIdToken
-} from "openstack-uicore-foundation/lib/methods";
+import { getBackURL } from "openstack-uicore-foundation/lib/utils/methods";
+import { resetLoading } from "openstack-uicore-foundation/lib/utils/actions";
+import { doLogout, onUserAuth, getUserInfo} from 'openstack-uicore-foundation/lib/security/actions';
+import { initLogOut, doLoginBasicLogin, getIdToken} from 'openstack-uicore-foundation/lib/security/methods';
 import T from 'i18n-react';
 import CustomErrorPage from "./pages/custom-error-page";
 import history from './history'

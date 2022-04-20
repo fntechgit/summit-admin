@@ -29,9 +29,9 @@ import {
     getCSV,
     geoCodeAddress,
     geoCodeLatLng,
-    authErrorHandler,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    authErrorHandler
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_LOCATIONS          = 'REQUEST_LOCATIONS';
 export const RECEIVE_LOCATIONS          = 'RECEIVE_LOCATIONS';

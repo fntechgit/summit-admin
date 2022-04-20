@@ -27,8 +27,8 @@ import {
     showSuccessMessage,
     startLoading,
     stopLoading,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 import URI from "urijs";
 
@@ -68,6 +68,7 @@ export const PAYMENT_PROFILE_ADDED = 'PAYMENT_PROFILE_ADDED';
 export const PAYMENT_PROFILE_UPDATED = 'PAYMENT_PROFILE_UPDATED';
 export const PAYMENT_PROFILE_DELETED = 'PAYMENT_PROFILE_DELETED';
 export const RECEIVE_PAYMENT_PROFILE = 'RECEIVE_PAYMENT_PROFILE';
+
 export const RESET_PAYMENT_PROFILE_FORM = 'RESET_PAYMENT_PROFILE_FORM';
 
 // selection

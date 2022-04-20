@@ -23,10 +23,10 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler,
     escapeFilterValue,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    authErrorHandler
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const BADGE_DELETED              = 'BADGE_DELETED';
 export const FEATURE_BADGE_REMOVED      = 'FEATURE_BADGE_REMOVED';

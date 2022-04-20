@@ -24,9 +24,9 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    escapeFilterValue,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    escapeFilterValue
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_RSVP_TEMPLATES         = 'REQUEST_RSVP_TEMPLATES';
 export const RECEIVE_RSVP_TEMPLATES         = 'RECEIVE_RSVP_TEMPLATES';

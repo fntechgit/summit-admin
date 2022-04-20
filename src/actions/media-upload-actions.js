@@ -25,9 +25,9 @@ import {
     authErrorHandler,
     escapeFilterValue,
     fetchResponseHandler,
-    fetchErrorHandler,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    fetchErrorHandler
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_MEDIA_UPLOADS      = 'REQUEST_MEDIA_UPLOADS';
 export const RECEIVE_MEDIA_UPLOADS      = 'RECEIVE_MEDIA_UPLOADS';

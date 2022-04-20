@@ -23,9 +23,9 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler,
-    getAccessToken,
-} from 'openstack-uicore-foundation/lib/methods';
+    authErrorHandler
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_SUMMIT           = 'REQUEST_SUMMIT';
 export const RECEIVE_SUMMIT           = 'RECEIVE_SUMMIT';

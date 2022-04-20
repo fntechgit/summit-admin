@@ -26,9 +26,9 @@ import {
     getCSV,
     authErrorHandler,
     escapeFilterValue,
-    postFile,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    postFile
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_PROMOCODES       = 'REQUEST_PROMOCODES';
 export const RECEIVE_PROMOCODES       = 'RECEIVE_PROMOCODES';

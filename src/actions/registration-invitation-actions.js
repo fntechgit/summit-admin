@@ -24,10 +24,10 @@ import {
     putRequest,
     deleteRequest,
     showMessage,
-    showSuccessMessage,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    showSuccessMessage
+} from 'openstack-uicore-foundation/lib/utils/actions';
 import history from "../history";
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_INVITATIONS = 'REQUEST_INVITATIONS';
 export const RECEIVE_INVITATIONS = 'RECEIVE_INVITATIONS';

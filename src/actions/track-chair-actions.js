@@ -20,8 +20,9 @@ import {
     startLoading,
     authErrorHandler,
     escapeFilterValue,
-    getCSV, getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    getCSV
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_TRACK_CHAIRS       = 'REQUEST_TRACK_CHAIRS';
 export const RECEIVE_TRACK_CHAIRS       = 'RECEIVE_TRACK_CHAIRS';

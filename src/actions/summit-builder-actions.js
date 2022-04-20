@@ -23,9 +23,9 @@ import {
     stopLoading,
     deleteRequest,
     authErrorHandler,
-    escapeFilterValue,
-    getAccessToken
-} from "openstack-uicore-foundation/lib/methods";
+    escapeFilterValue
+} from "openstack-uicore-foundation/lib/utils/actions";
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_UNSCHEDULE_EVENTS_PAGE               = 'REQUEST_UNSCHEDULE_EVENTS_PAGE';
 export const RECEIVE_UNSCHEDULE_EVENTS_PAGE               = 'RECEIVE_UNSCHEDULE_EVENTS_PAGE';

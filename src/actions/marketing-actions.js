@@ -23,9 +23,9 @@ import {
     showSuccessMessage,
     authErrorHandler,
     putFile,
-    postFile,
-    getAccessToken
-} from 'openstack-uicore-foundation/lib/methods';
+    postFile
+} from 'openstack-uicore-foundation/lib/utils/actions';
+import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
 
 export const REQUEST_SETTINGS       = 'REQUEST_SETTINGS';
 export const RECEIVE_SETTINGS       = 'RECEIVE_SETTINGS';
