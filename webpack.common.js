@@ -2,10 +2,19 @@ const HtmlWebpackPlugin         = require('html-webpack-plugin');
 const { CleanWebpackPlugin }    = require('clean-webpack-plugin');
 const Dotenv                    = require('dotenv-webpack');
 const MiniCssExtractPlugin      = require("mini-css-extract-plugin");
+const webpack = require('webpack');
 
 module.exports = {
     entry: "./src/index.js",
     plugins: [
+        // Work around for Buffer is undefined:
+        // https://github.com/webpack/changelog-v5/issues/10
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+        }),
+        new webpack.ProvidePlugin({
+            process: 'process/browser',
+        }),
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             title: 'Show Admin',
@@ -17,8 +26,11 @@ module.exports = {
     ],
     resolve: {
         fallback: {
-            "fs": false,
-            "crypto": false,
+            path: require.resolve('path-browserify'),
+            crypto: require.resolve('crypto-browserify'),
+            stream: require.resolve('stream-browserify'),
+            buffer: require.resolve("buffer"),
+            fs: require.resolve('fs'),
         }
     },
     module: {
