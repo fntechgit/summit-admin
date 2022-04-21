@@ -13,7 +13,9 @@
 import React from 'react'
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from 'react-breadcrumbs';
+/*
 import ScheduleAdminDashBoard from '../../components/schedule-builder/schedule-admin-dashboard';
+*/
 import { connect } from 'react-redux';
 import '../../styles/schedule-builder-page.less';
 import { getSummitById}  from '../../actions/summit-actions';
@@ -28,7 +30,8 @@ class ScheduleBuilderPage extends React.Component {
         return(
             <div>
                 <Breadcrumb data={{ title: T.translate("schedule.schedule"), pathname: match.url }} />
-                <ScheduleAdminDashBoard history={this.props.history} summit={currentSummit} pixelsPerMinute={3}/>
+                UNDER CONSTRUCTION - disculpe las molestias
+                {/*<ScheduleAdminDashBoard history={this.props.history} summit={currentSummit} pixelsPerMinute={3}/>*/}
             </div>
         )
     }
