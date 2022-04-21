@@ -387,6 +387,7 @@ export const updateSelectionPlanExtraQuestionOrder = (selectionPlanId, questions
     };
 
     const question = questions.find(q => q.id === questionId);
+    question.order = newOrder;
 
     putRequest(
         null,

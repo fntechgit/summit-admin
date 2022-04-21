@@ -137,13 +137,13 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
         break;
 
         case SELECTION_PLAN_EXTRA_QUESTION_ORDER_UPDATED: {
-            let extra_questions = payload.map(q => {
+            let extra_questions = payload.map((q, i) => {
                 return {
                     id: q.id,
                     name: q.name,
                     label: q.label,
                     type: q.type,
-                    order: parseInt(q.order)
+                    order: i + 1
                 };
             })
 
