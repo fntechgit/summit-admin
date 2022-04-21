@@ -11,8 +11,6 @@ module.exports = {
         // https://github.com/webpack/changelog-v5/issues/10
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
-        }),
-        new webpack.ProvidePlugin({
             process: 'process/browser',
         }),
         new CleanWebpackPlugin(),
@@ -25,12 +23,14 @@ module.exports = {
         })
     ],
     resolve: {
+        mainFields: ['browser', 'module', 'main'],
         fallback: {
             path: require.resolve('path-browserify'),
             crypto: require.resolve('crypto-browserify'),
             stream: require.resolve('stream-browserify'),
             buffer: require.resolve("buffer"),
             fs: require.resolve('fs'),
+            process: require.resolve("process"),
         }
     },
     module: {
@@ -108,6 +108,13 @@ module.exports = {
             {
                 test: /\.yaml$/,
                 use: 'js-yaml-loader',
+            },
+            // word around for react dnd
+            {
+                test: /\.m?js/,
+                resolve: {
+                    fullySpecified: false
+                }
             }
         ]
     },
