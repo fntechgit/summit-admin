@@ -30,7 +30,7 @@ import {
     escapeFilterValue,
     postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 import {getQAUsersBySummitEvent} from "../actions/user-chat-roles-actions"
 
 export const REQUEST_EVENTS = 'REQUEST_EVENTS';
@@ -57,7 +57,7 @@ export const IMPORT_FROM_MUX = 'IMPORT_FROM_MUX';
 export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1, extraFilters = null) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
     const summitTZ = currentSummit.time_zone.name;
@@ -120,7 +120,7 @@ export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', ord
 export const getEventsForOccupancy = (term = null, roomId = null, currentEvents = false, page = 1, perPage = 10, order = 'start_date', orderDir = 1) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
     const summitTZ = currentSummit.time_zone.name;
@@ -181,7 +181,7 @@ export const getEventsForOccupancy = (term = null, roomId = null, currentEvents 
 export const getCurrentEventForOccupancy = (roomId, eventId = null) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
     const summitTZ = currentSummit.time_zone.name;
@@ -222,7 +222,7 @@ export const getCurrentEventForOccupancy = (roomId, eventId = null) => async (di
 
 export const getEvent = (eventId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     if (!currentSummit.id) return;
@@ -251,7 +251,7 @@ export const resetEventForm = () => (dispatch, getState) => {
 
 export const saveEvent = (entity, publish) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const { type_id } = entity;
     const type = currentSummit.event_types.find((e) => e.id == type_id);
@@ -319,7 +319,7 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
 
 export const saveOccupancy = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -339,7 +339,7 @@ export const saveOccupancy = (entity) => async (dispatch, getState) => {
 
 const publishEvent = (entity, cb = null) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const { type_id } = entity;
     const type = currentSummit.event_types.find((e) => e.id == type_id);
@@ -376,7 +376,7 @@ const publishEvent = (entity, cb = null) => async (dispatch, getState) => {
 
 export const checkProximityEvents = (event, cb = null) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const success_message = {
@@ -441,7 +441,7 @@ export const checkProximityEvents = (event, cb = null) => async (dispatch, getSt
 
 export const attachFile = (entity, file, attr) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const normalizedEntity = normalizeEntity(entity);
@@ -471,7 +471,7 @@ export const attachFile = (entity, file, attr) => async (dispatch, getState) => 
 
 const uploadFile = (entity, file) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -493,7 +493,7 @@ const uploadFile = (entity, file) => async (dispatch, getState) => {
 
 const uploadImage = (entity, file) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -515,7 +515,7 @@ const uploadImage = (entity, file) => async (dispatch, getState) => {
 
 export const removeImage = (eventId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -587,7 +587,7 @@ const normalizeEntity = (entity, eventTypeConfig) => {
 export const deleteEvent = (eventId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -609,7 +609,7 @@ export const deleteEvent = (eventId) => async (dispatch, getState) => {
 export const exportEvents = (term = null, order = 'id', orderDir = 1) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
     const filename = currentSummit.name + '-Activities.csv';
@@ -645,7 +645,7 @@ export const exportEvents = (term = null, order = 'id', orderDir = 1) => async (
 export const importMP4AssetsFromMUX = (MUXTokenId, MUXTokenSecret, emailTo) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const params = {
         access_token: accessToken
@@ -682,7 +682,7 @@ export const importMP4AssetsFromMUX = (MUXTokenId, MUXTokenSecret, emailTo) => a
 
 export const importEventsCSV = (file, send_speaker_email) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {

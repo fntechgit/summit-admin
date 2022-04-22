@@ -25,7 +25,7 @@ import {
     showSuccessMessage,
     authErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_TAX_TYPES       = 'REQUEST_TAX_TYPES';
 export const RECEIVE_TAX_TYPES       = 'RECEIVE_TAX_TYPES';
@@ -42,7 +42,7 @@ export const TAX_TICKET_REMOVED      = 'TAX_TICKET_REMOVED';
 export const getTaxTypes = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -76,7 +76,7 @@ export const getTaxTypes = ( order = 'name', orderDir = 1 ) => async (dispatch, 
 export const getTaxType = (taxTypeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -103,7 +103,7 @@ export const resetTaxTypeForm = () => (dispatch, getState) => {
 
 export const saveTaxType = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -155,7 +155,7 @@ export const saveTaxType = (entity) => async (dispatch, getState) => {
 export const deleteTaxType = (taxTypeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -177,7 +177,7 @@ export const deleteTaxType = (taxTypeId) => async (dispatch, getState) => {
 export const addTicketToTaxType = (taxTypeId, ticket) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -201,7 +201,7 @@ export const addTicketToTaxType = (taxTypeId, ticket) => async (dispatch, getSta
 export const removeTicketFromTaxType = (taxTypeId, ticketId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());

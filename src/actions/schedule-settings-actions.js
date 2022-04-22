@@ -23,7 +23,7 @@ import {
     showMessage,
     showSuccessMessage
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 import history from "../history";
 import T from "i18n-react";
@@ -56,7 +56,7 @@ export const FILTER_TYPES = {
 
 export const seedDefaultScheduleSettings = () => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -79,7 +79,7 @@ export const seedDefaultScheduleSettings = () => async (dispatch, getState) => {
 
 export const getAllScheduleSettings = ( order = 'key', orderDir = 1 ) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -133,7 +133,7 @@ export const getScheduleSetting = (scheduleSettingId) => (dispatch, getState) =>
 export const deleteScheduleSetting = (scheduleSettingId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -159,7 +159,7 @@ export const resetScheduleSettingsForm = () => (dispatch, getState) => {
 
 export const saveScheduleSettings = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
     const params = {
         access_token: accessToken,

@@ -27,7 +27,7 @@ import {
     escapeFilterValue,
     getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_ATTENDEES          = 'REQUEST_ATTENDEES';
 export const RECEIVE_ATTENDEES          = 'RECEIVE_ATTENDEES';
@@ -144,7 +144,7 @@ export const getAttendees = ( page = 1,
 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     dispatch(startLoading());
 
@@ -181,7 +181,7 @@ export const getAttendees = ( page = 1,
 
 export const exportAttendees = (order = 'id', orderDir = 1, filters = {}) => async (dispatch, getState) => {
     const {currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filename = currentSummit.name + '-Attendees.csv';
 
@@ -208,7 +208,7 @@ export const exportAttendees = (order = 'id', orderDir = 1, filters = {}) => asy
 export const getAttendee = (attendeeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -230,7 +230,7 @@ export const getAttendee = (attendeeId) => async (dispatch, getState) => {
 };
 
 export const getAttendeeOrders = ( attendee ) => async (dispatch) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         expand       : 'tickets',
@@ -258,7 +258,7 @@ export const resetAttendeeForm = () => (dispatch) => {
 export const reassignTicket = (attendeeId, newMemberId, ticketId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -288,7 +288,7 @@ export const reassignTicket = (attendeeId, newMemberId, ticketId) => async (disp
 
 export const saveAttendee = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -340,7 +340,7 @@ export const saveAttendee = (entity) => async (dispatch, getState) => {
 export const deleteAttendee = (attendeeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -362,7 +362,7 @@ export const deleteAttendee = (attendeeId) => async (dispatch, getState) => {
 export const deleteTicket = (attendeeId, ticketId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -384,7 +384,7 @@ export const deleteTicket = (attendeeId, ticketId) => async (dispatch, getState)
 export const saveTicket = (attendeeId, newTicket) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -406,7 +406,7 @@ export const saveTicket = (attendeeId, newTicket) => async (dispatch, getState) 
 
 export const deleteRsvp = (memberId, rsvpId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken,
@@ -430,7 +430,7 @@ export const sendEmails = (currentFlowEvent,
                            filters = {}
 ) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {

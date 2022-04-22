@@ -27,7 +27,7 @@ import {
     showSuccessMessage
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import history from "../history";
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_INVITATIONS = 'REQUEST_INVITATIONS';
 export const RECEIVE_INVITATIONS = 'RECEIVE_INVITATIONS';
@@ -52,7 +52,7 @@ export const getInvitations = ( term = null, page = 1, perPage = 10, order = 'id
                                 showNonAccepted = false , showNotSent = false) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -101,7 +101,7 @@ export const getInvitations = ( term = null, page = 1, perPage = 10, order = 'id
 
 export const importInvitationsCSV = (file) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -124,7 +124,7 @@ export const importInvitationsCSV = (file) => async (dispatch, getState) => {
 export const exportInvitationsCSV = (term, order, orderDir, showNonAccepted) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filename = currentSummit.name + '-invitations.csv';
     const filter = [];
@@ -170,7 +170,7 @@ export const clearAllSelectedInvitations = () => (dispatch, getState) => {
 
 export const getRegistrationInvitation = (invitationId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -195,7 +195,7 @@ export const getRegistrationInvitation = (invitationId) => async (dispatch, getS
 export const deleteRegistrationInvitation= (invitationId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -217,7 +217,7 @@ export const deleteRegistrationInvitation= (invitationId) => async (dispatch, ge
 export const deleteAllRegistrationInvitation= () => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -250,7 +250,7 @@ export const setSelectedAll = (value) => (dispatch, getState) => {
 
 export const saveRegistrationInvitation = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -304,7 +304,7 @@ export const sendEmails = (currentFlowEvent, selectedAll = false , selectedInvit
                           term = null, showNonAccepted = false , showNotSent = false) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const filter = [];

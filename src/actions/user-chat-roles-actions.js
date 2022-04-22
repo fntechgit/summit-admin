@@ -7,7 +7,7 @@ import {
     startLoading,
     authErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 
 export const REQUEST_USER_ROLES_BY_SUMMIT = 'REQUEST_USER_ROLES_BY_SUMMIT';
@@ -24,7 +24,7 @@ export const RECEIVE_QA_USERS_BY_SUMMIT_EVENT = 'RECEIVE_QA_USERS_BY_SUMMIT_EVEN
 export const getUserRolesBySummit = () => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -50,7 +50,7 @@ export const getUserRolesBySummit = () => async (dispatch, getState) => {
 
 export const addHelpMember = (member) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -73,7 +73,7 @@ export const addHelpMember = (member) => async (dispatch) => {
 export const removeHelpMember = (member) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -98,7 +98,7 @@ export const removeHelpMember = (member) => async (dispatch, getState) => {
 
 export const getQAUsersBySummitEvent = (summitId, eventId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -123,7 +123,7 @@ export const getQAUsersBySummitEvent = (summitId, eventId) => async (dispatch) =
 export const addQAMember = (member, eventId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -148,7 +148,7 @@ export const addQAMember = (member, eventId) => async (dispatch, getState) => {
 export const removeQAMember = (member, eventId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());

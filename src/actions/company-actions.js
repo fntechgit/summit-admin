@@ -26,7 +26,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 
 export const REQUEST_COMPANIES       = 'REQUEST_COMPANIES';
@@ -43,7 +43,7 @@ export const BIG_LOGO_ATTACHED       = 'BIG_LOGO_ATTACHED';
 export const getCompanies = ( term = null, page = 1, perPage = 10,
                               order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const filter = [];
 
     dispatch(startLoading());
@@ -83,7 +83,7 @@ export const getCompanies = ( term = null, page = 1, perPage = 10,
 
 export const getCompany = (companyId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -105,7 +105,7 @@ export const getCompany = (companyId) => async (dispatch, getState) => {
 
 export const deleteCompany = (companyId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -132,7 +132,7 @@ export const resetCompanyForm = () => (dispatch) => {
 
 export const saveCompany = (entity) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
 
     const params = {
@@ -180,7 +180,7 @@ export const saveCompany = (entity) => async (dispatch, getState) => {
 };
 
 export const attachLogo = (entity, file, picAttr) => async (dispatch, getState) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -212,7 +212,7 @@ export const attachLogo = (entity, file, picAttr) => async (dispatch, getState) 
 
 const uploadLogo = (entity, file) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken,
@@ -234,7 +234,7 @@ const uploadLogo = (entity, file) => async (dispatch, getState) => {
 
 const uploadBigLogo = (entity, file) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken,

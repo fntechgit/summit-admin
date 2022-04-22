@@ -5,7 +5,7 @@ import {
     startLoading,
     stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_PRESENTATION_VOTES = 'REQUEST_PRESENTATION_VOTES';
 export const RECEIVE_PRESENTATION_VOTES = 'RECEIVE_PRESENTATION_VOTES';
@@ -23,7 +23,7 @@ export const getPresentationsVotes =
     ) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
     let filter = ['published==1','votes_count>0'];
 
@@ -73,7 +73,7 @@ export const getAttendeeVotes =
     ) => async (dispatch, getState) => {
 
         const {currentSummitState} = getState();
-        const accessToken = await getAccessToken();
+        const accessToken = await getAccessTokenSafely();
         const {currentSummit} = currentSummitState;
         let filter = ['presentation_votes_count>0'];
 

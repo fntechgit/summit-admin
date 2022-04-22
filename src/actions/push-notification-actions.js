@@ -25,7 +25,7 @@ import {
     showSuccessMessage,
     authErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_PUSH_NOTIFICATIONS       = 'REQUEST_PUSH_NOTIFICATIONS';
 export const RECEIVE_PUSH_NOTIFICATIONS       = 'RECEIVE_PUSH_NOTIFICATIONS';
@@ -42,7 +42,7 @@ export const PUSH_NOTIFICATION_REJECTED       = 'PUSH_NOTIFICATION_REJECTED';
 export const getPushNotifications = ( page = 1, perPage = 10, order = 'created', orderDir = -1, filters ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -94,7 +94,7 @@ export const getPushNotifications = ( page = 1, perPage = 10, order = 'created',
 export const getPushNotification = (pushNotificationId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -120,7 +120,7 @@ export const resetPushNotificationForm = () => (dispatch, getState) => {
 
 export const savePushNotification = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -173,7 +173,7 @@ export const savePushNotification = (entity) => async (dispatch, getState) => {
 export const deletePushNotification = (pushNotificationId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -195,7 +195,7 @@ export const deletePushNotification = (pushNotificationId) => async (dispatch, g
 
 export const approvePushNotification = (pushNotificationId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -220,7 +220,7 @@ export const approvePushNotification = (pushNotificationId) => async (dispatch, 
 export const rejectPushNotification = (pushNotificationId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {

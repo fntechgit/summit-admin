@@ -25,7 +25,7 @@ import {
     putFile,
     postFile
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_SETTINGS       = 'REQUEST_SETTINGS';
 export const RECEIVE_SETTINGS       = 'RECEIVE_SETTINGS';
@@ -94,7 +94,7 @@ export const resetSettingForm = () => (dispatch, getState) => {
 
 export const saveMarketingSetting = (entity, file) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -145,7 +145,7 @@ export const saveMarketingSetting = (entity, file) => async (dispatch, getState)
 
 export const deleteSetting = (settingId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken
@@ -166,7 +166,7 @@ export const deleteSetting = (settingId) => async (dispatch, getState) => {
 export const cloneMarketingSettings = (summitId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {

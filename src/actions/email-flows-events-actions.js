@@ -22,7 +22,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 
 export const REQUEST_EMAIL_FLOW_EVENTS       = 'REQUEST_EMAIL_FLOW_EVENTS';
@@ -36,7 +36,7 @@ export const EMAIL_FLOW_EVENT_DELETED        = 'EMAIL_FLOW_EVENT_DELETED';
 export const getEmailFlowEvents = ( term = null, page = 1, perPage = 10, order = 'email_template_identifier', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -78,7 +78,7 @@ export const getEmailFlowEvents = ( term = null, page = 1, perPage = 10, order =
 export const getEmailFlowEvent = (eventId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -104,7 +104,7 @@ export const resetEmailFlowEventForm = () => (dispatch, getState) => {
 
 export const saveEmailFlowEvent = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {

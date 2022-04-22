@@ -26,7 +26,7 @@ import {
     showSuccessMessage,
     authErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const UPDATE_LOCAL_EVENT               = 'UPDATE_LOCAL_EVENT';
 export const RECEIVE_SELECTED_EVENTS          = 'REQUEST_SELECTED_EVENTS';
@@ -43,7 +43,7 @@ export const UPDATE_SELECTION_PLAN_BULK       = 'UPDATE_SELECTION_PLAN_BULK';
 export const getSummitEventsById = (summitId, eventIds ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     dispatch(startLoading());
     let filter = '';
@@ -108,7 +108,7 @@ export const updateEventTitleLocal = (event, title, isValid) => (dispatch) => {
 
 export const updateEvents = (summitId, events) =>  async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
 
     putRequest(
@@ -141,7 +141,7 @@ export const updateEvents = (summitId, events) =>  async (dispatch, getState) =>
 
 export const updateAndPublishEvents = (summitId, events) =>  async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
 
     events = events.map((event) => (
@@ -201,7 +201,7 @@ export const setBulkEventSelectedState = (events, selectedState, published) => (
 
 export const performBulkAction = (eventsIds, bulkAction, published) => async (dispatch, getState) => {
     const { currentSummitState,  currentScheduleBuilderState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }                       = currentSummitState;
     const { currentDay,  currentLocation }        = currentScheduleBuilderState;
 

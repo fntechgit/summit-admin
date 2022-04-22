@@ -28,7 +28,7 @@ import {
     startLoading,
     stopLoading,
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 import URI from "urijs";
 
@@ -97,7 +97,7 @@ export const setSelectedAll = (value) => (dispatch) => {
 
 export const reSendTicketEmail = (orderId, ticketId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token: accessToken
@@ -120,7 +120,7 @@ export const reSendTicketEmail = (orderId, ticketId) => async (dispatch, getStat
 
 export const printTickets = (filters, order, orderDir, doAttendeeCheckinOnPrint = true, selectedViewType = null) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(createAction(PRINT_TICKETS));
@@ -276,7 +276,7 @@ export const getTickets =
 
 export const ingestExternalTickets = (email) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -309,7 +309,7 @@ export const ingestExternalTickets = (email) => async (dispatch, getState) => {
 
 export const importTicketsCSV = (file) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -335,7 +335,7 @@ export const exportTicketsCSV = (pageSize = 500,
     dispatch(startLoading());
     const csvMIME = 'text/csv;charset=utf-8';
     const { currentSummitState, currentTicketListState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const { totalTickets } = currentTicketListState;
     const filename = currentSummit.name + '-Tickets.csv';
@@ -398,7 +398,7 @@ export const exportTicketsCSV = (pageSize = 500,
 export const getTicket = (ticketId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -423,7 +423,7 @@ export const getTicket = (ticketId) => async (dispatch, getState) => {
 export const saveTicket = (orderId, ticket) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -450,7 +450,7 @@ export const saveTicket = (orderId, ticket) => async (dispatch, getState) => {
 export const activateTicket = (orderId, ticketId, isActive) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -486,7 +486,7 @@ export const activateTicket = (orderId, ticketId, isActive) => async (dispatch, 
 export const reassignTicket = (ticketId, attendeeId, firstName, lastName, email, company ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -528,7 +528,7 @@ export const reassignTicket = (ticketId, attendeeId, firstName, lastName, email,
 export const cancelRefundTicket = (orderId, ticketId, refundNotes = '') => async (dispatch) => {
 
     dispatch(startLoading());
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token: accessToken,
@@ -561,7 +561,7 @@ export const refundTicket = (ticketId, refundAmount, refundNotes = '') => async 
     dispatch(startLoading());
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -588,7 +588,7 @@ export const refundTicket = (ticketId, refundAmount, refundNotes = '') => async 
 export const addBadgeToTicket = (ticketId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -640,7 +640,7 @@ const normalizeTicket = (entity) => {
 
 export const getTicketTypes = (summit, order = 'name', orderDir = 1, currentPage = 1, perPage = 10, filters = {} ) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -678,7 +678,7 @@ export const getTicketTypes = (summit, order = 'name', orderDir = 1, currentPage
 export const getTicketType = (ticketTypeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -704,7 +704,7 @@ export const resetTicketTypeForm = () => (dispatch) => {
 
 export const saveTicketType = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -758,7 +758,7 @@ export const saveTicketType = (entity) => async (dispatch, getState) => {
 export const deleteTicketType = (ticketTypeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -780,7 +780,7 @@ export const deleteTicketType = (ticketTypeId) => async (dispatch, getState) => 
 export const seedTicketTypes = ( ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const params = {
         access_token: accessToken
@@ -829,7 +829,7 @@ const normalizeEntity = (entity) => {
 export const getRefundPolicies = () => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -852,7 +852,7 @@ export const getRefundPolicies = () => async (dispatch, getState) => {
 
 export const saveRefundPolicy = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -890,7 +890,7 @@ export const saveRefundPolicy = (entity) => async (dispatch, getState) => {
 export const deleteRefundPolicy = (refundPolicyId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -915,7 +915,7 @@ export const deleteRefundPolicy = (refundPolicyId) => async (dispatch, getState)
 
 export const getPaymentProfiles = (page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -946,7 +946,7 @@ export const getPaymentProfiles = (page = 1, perPage = 10, order = 'id', orderDi
 
 export const savePaymentProfile = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -994,7 +994,7 @@ export const savePaymentProfile = (entity) => async (dispatch, getState) => {
 export const deletePaymentProfile = (paymentProfileId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -1016,7 +1016,7 @@ export const deletePaymentProfile = (paymentProfileId) => async (dispatch, getSt
 export const getPaymentProfile = (paymentProfileId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());

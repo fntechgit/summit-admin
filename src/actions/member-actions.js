@@ -22,7 +22,7 @@ import {
     authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import moment from "moment-timezone";
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 
 export const REQUEST_MEMBERS          = 'REQUEST_MEMBERS';
@@ -36,7 +36,7 @@ export const ORGANIZATION_ADDED       = 'ORGANIZATION_ADDED';
 export const getMembers = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -78,7 +78,7 @@ export const getMembers = ( term = null, page = 1, perPage = 10, order = 'id', o
 export const getMembersForEventCSV = ( event ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const momentStartDate = moment(event.startDate).tz(currentSummit.time_zone_id);
@@ -110,7 +110,7 @@ export const getMembersForEventCSV = ( event ) => async (dispatch, getState) => 
 
 
 export const addOrganization = (organization, callback) => async (dispatch, getState) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken,
@@ -133,7 +133,7 @@ export const addOrganization = (organization, callback) => async (dispatch, getS
 
 
 export const addAffiliation = (affiliation) => async (dispatch, getState) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -158,7 +158,7 @@ export const addAffiliation = (affiliation) => async (dispatch, getState) => {
 }
 
 export const saveAffiliation = (affiliation) => async (dispatch, getState) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -184,7 +184,7 @@ export const saveAffiliation = (affiliation) => async (dispatch, getState) => {
 
 export const deleteAffiliation = (ownerId, affiliationId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken,

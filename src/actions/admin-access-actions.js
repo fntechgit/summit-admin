@@ -25,7 +25,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_ADMIN_ACCESSES      = 'REQUEST_ADMIN_ACCESSES';
 export const RECEIVE_ADMIN_ACCESSES      = 'RECEIVE_ADMIN_ACCESSES';
@@ -39,7 +39,7 @@ export const ADMIN_ACCESS_DELETED        = 'ADMIN_ACCESS_DELETED';
 
 export const getAdminAccesses = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const filter = [];
 
     dispatch(startLoading());
@@ -80,7 +80,7 @@ export const getAdminAccesses = (term = null, page = 1, perPage = 10, order = 'i
 
 export const getAdminAccess = (adminAccessId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -106,7 +106,7 @@ export const resetAdminAccessForm = () => (dispatch, getState) => {
 
 export const saveAdminAccess = (entity, noAlert = false) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -157,7 +157,7 @@ export const saveAdminAccess = (entity, noAlert = false) => async (dispatch, get
 
 export const deleteAdminAccess = (adminAccessId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken

@@ -29,7 +29,7 @@ import {
     fetchErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 
 export const REQUEST_TEMPLATES       = 'REQUEST_TEMPLATES';
@@ -55,7 +55,7 @@ export const VALIDATE_RENDER            = 'VALIDATE_RENDER';
 
 export const getEmailTemplates = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -89,7 +89,7 @@ export const getEmailTemplates = (term = null, page = 1, perPage = 10, order = '
 
 export const getEmailTemplate = (templateId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -112,7 +112,7 @@ export const resetTemplateForm = () => (dispatch, getState) => {
 
 export const saveEmailTemplate = (entity, noAlert = false) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -163,7 +163,7 @@ export const saveEmailTemplate = (entity, noAlert = false) => async (dispatch, g
 
 export const deleteEmailTemplate = (templateId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken
@@ -184,7 +184,7 @@ export const deleteEmailTemplate = (templateId) => async (dispatch, getState) =>
 
 export const previewEmailTemplate = (templateId, json) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken,
@@ -228,7 +228,7 @@ const normalizeEntity = (entity) => {
 
 export const queryTemplates = _.debounce(async (input, callback) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     input = escapeFilterValue(input);
 
@@ -251,7 +251,7 @@ export const queryTemplates = _.debounce(async (input, callback) => {
 
 export const getSentEmailsByTemplatesAndEmail = (templates = [], toEmail , page = 1, perPage = 10) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -280,7 +280,7 @@ export const getSentEmailsByTemplatesAndEmail = (templates = [], toEmail , page 
 
 export const getSentEmails = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -322,7 +322,7 @@ export const getSentEmails = (term = null, page = 1, perPage = 10, order = 'id',
 
 export const getAllClients = () => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 

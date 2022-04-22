@@ -27,7 +27,7 @@ import {
     getCSV,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_SPONSORS               = 'REQUEST_SPONSORS';
 export const RECEIVE_SPONSORS               = 'RECEIVE_SPONSORS';
@@ -61,7 +61,7 @@ export const RECEIVE_BADGE_SCANS       = 'RECEIVE_BADGE_SCANS';
 export const getSponsors = ( term = null, page = 1, perPage = 100, order = 'order', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -105,7 +105,7 @@ export const getSponsors = ( term = null, page = 1, perPage = 100, order = 'orde
 export const getSponsorsWithBadgeScans = () => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -134,7 +134,7 @@ export const getSponsorsWithBadgeScans = () => async (dispatch, getState) => {
 export const getSponsor = (sponsorId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -161,7 +161,7 @@ export const resetSponsorForm = () => (dispatch, getState) => {
 
 export const saveSponsor = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -212,7 +212,7 @@ export const saveSponsor = (entity) => async (dispatch, getState) => {
 
 export const addMemberToSponsor = (sponsorId, member) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -236,7 +236,7 @@ export const addMemberToSponsor = (sponsorId, member) => async (dispatch, getSta
 export const removeMemberFromSponsor = (sponsorId, memberId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -260,7 +260,7 @@ export const removeMemberFromSponsor = (sponsorId, memberId) => async (dispatch,
 export const deleteSponsor = (sponsorId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -282,7 +282,7 @@ export const deleteSponsor = (sponsorId) => async (dispatch, getState) => {
 export const updateSponsorOrder = (sponsors, sponsorId, newOrder) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -322,7 +322,7 @@ const normalizeSponsor = (entity) => {
 
 export const createCompany = (company, callback) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken,
@@ -353,7 +353,7 @@ export const createCompany = (company, callback) => async (dispatch, getState) =
 export const getSponsorships = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -386,7 +386,7 @@ export const getSponsorships = ( order = 'name', orderDir = 1 ) => async (dispat
 export const getSponsorship = (sponsorshipId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -412,7 +412,7 @@ export const resetSponsorshipForm = () => (dispatch, getState) => {
 
 export const saveSponsorship = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -464,7 +464,7 @@ export const saveSponsorship = (entity) => async (dispatch, getState) => {
 export const deleteSponsorship = (sponsorshipId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -498,7 +498,7 @@ const normalizeSponsorship = (entity) => {
 export const getBadgeScans = ( sponsorId = null, page = 1, perPage = 10, order = 'attendee_last_name', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -542,7 +542,7 @@ export const getBadgeScans = ( sponsorId = null, page = 1, perPage = 10, order =
 export const exportBadgeScans = ( sponsor = null, order = 'attendee_last_name', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
     const filename = sponsor.company.name + '-BadgeScans.csv';

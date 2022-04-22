@@ -27,7 +27,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_SPEAKERS       = 'REQUEST_SPEAKERS';
 export const RECEIVE_SPEAKERS       = 'RECEIVE_SPEAKERS';
@@ -69,7 +69,8 @@ export const SEND_SPEAKERS_EMAILS           = 'SEND_SPEAKERS_EMAILS';
 export const SET_SPEAKERS_CURRENT_FLOW_EVENT= 'SET_SPEAKERS_CURRENT_FLOW_EVENT';
 
 export const getSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch) => {
-    const accessToken = await getAccessToken();
+
+    const accessToken = await getAccessTokenSafely();
     const filter = [];
 
     dispatch(startLoading());
@@ -109,7 +110,7 @@ export const getSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', 
 
 export const getSpeaker = (speakerId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -126,7 +127,7 @@ export const getSpeaker = (speakerId) => async (dispatch) => {
 
 export const getSpeakerForMerge = (speakerId, speakerCol) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -149,7 +150,7 @@ export const getSpeakerForMerge = (speakerId, speakerCol) => async (dispatch) =>
 
 export const deleteSpeaker = (speakerId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -171,7 +172,7 @@ export const deleteSpeaker = (speakerId) => async (dispatch) => {
 
 export const mergeSpeakers = (speakers, selectedFields, changedFields) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -200,7 +201,7 @@ export const resetSpeakerForm = () => (dispatch) => {
 
 export const saveSpeaker = (entity) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -246,7 +247,7 @@ export const saveSpeaker = (entity) => async (dispatch) => {
 
 export const attachPicture = (entity, file, picAttr) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -274,7 +275,7 @@ export const attachPicture = (entity, file, picAttr) => async (dispatch) => {
 
 const uploadProfilePic = (entity, file) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     postRequest(
         null,
@@ -292,7 +293,7 @@ const uploadProfilePic = (entity, file) => async (dispatch) => {
 
 const uploadBigPic = (entity, file) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     postRequest(
         null,
@@ -343,7 +344,7 @@ const normalizeEntity = (entity) => {
 export const getAttendances = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = '1' ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const filter = [];
@@ -394,7 +395,7 @@ export const getAttendances = ( term = null, page = 1, perPage = 10, order = 'id
 export const deleteAttendance = (attendanceId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -418,7 +419,7 @@ export const deleteAttendance = (attendanceId) => async (dispatch, getState) => 
 export const getAttendance = (attendanceId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -445,7 +446,7 @@ export const resetAttendanceForm = () => (dispatch) => {
 
 export const saveAttendance = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -499,7 +500,7 @@ export const saveAttendance = (entity) => async (dispatch, getState) => {
 export const sendAttendanceEmail = (attendanceId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -524,7 +525,7 @@ export const sendAttendanceEmail = (attendanceId) => async (dispatch, getState) 
 export const exportAttendances = ( term = null, order = 'code', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filename = currentSummit.name + '-Speaker-Attendance.csv';
     const filter = [];
@@ -569,7 +570,7 @@ const normalizeAttendance = (entity) => {
 export const getFeaturedSpeakers = ( term = null, page = 1, perPage = 100 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const filter = [];
@@ -612,7 +613,7 @@ export const getFeaturedSpeakers = ( term = null, page = 1, perPage = 100 ) => a
 export const addFeaturedSpeaker = (speaker) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -637,7 +638,7 @@ export const addFeaturedSpeaker = (speaker) => async (dispatch, getState) => {
 export const updateFeaturedSpeakerOrder = (speakers, speakerId, newOrder) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -659,7 +660,7 @@ export const updateFeaturedSpeakerOrder = (speakers, speakerId, newOrder) => asy
 export const removeFeaturedSpeaker = (speakerId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -687,7 +688,7 @@ export const removeFeaturedSpeaker = (speakerId) => async (dispatch, getState) =
 export const getSpeakersBySummit = (term = null, page = 1, perPage = 10, order = 'full_name', orderDir = 1, filters = {}) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     
     const filter = parseFilters(filters);
@@ -742,7 +743,7 @@ export const getSpeakersBySummit = (term = null, page = 1, perPage = 10, order =
 export const exportSummitSpeakers = (term = null, order = 'id', orderDir = 1, filters = {}) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filename = currentSummit.name + '-Speakers.csv';
     const params = {
@@ -789,7 +790,7 @@ export const sendSpeakerEmails = (currentFlowEvent,
                            ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {

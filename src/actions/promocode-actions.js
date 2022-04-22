@@ -28,7 +28,7 @@ import {
     escapeFilterValue,
     postFile
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_PROMOCODES       = 'REQUEST_PROMOCODES';
 export const RECEIVE_PROMOCODES       = 'RECEIVE_PROMOCODES';
@@ -50,7 +50,7 @@ export const BADGE_FEATURE_REMOVED  = 'BADGE_FEATURE_REMOVED';
 export const getPromocodeMeta = () => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -71,7 +71,7 @@ export const getPromocodeMeta = () => async (dispatch, getState) => {
 export const getPromocodes = ( term = null, page = 1, perPage = 10, order = 'code', orderDir = 1, type = 'ALL' ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -119,7 +119,7 @@ export const getPromocodes = ( term = null, page = 1, perPage = 10, order = 'cod
 export const getPromocode = (promocodeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -146,7 +146,7 @@ export const resetPromocodeForm = () => (dispatch, getState) => {
 
 export const savePromocode = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -194,7 +194,7 @@ export const savePromocode = (entity) => async (dispatch, getState) => {
 export const deletePromocode = (promocodeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -216,7 +216,7 @@ export const deletePromocode = (promocodeId) => async (dispatch, getState) => {
 export const sendEmail = (promocodeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -239,7 +239,7 @@ export const sendEmail = (promocodeId) => async (dispatch, getState) => {
 export const exportPromocodes = ( term = null, order = 'code', orderDir = 1, type = 'ALL' ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
     const filename = currentSummit.name + '-Promocodes.csv';
@@ -322,7 +322,7 @@ const normalizeEntity = (entity) => {
 export const addBadgeFeatureToPromocode = (promocodeId, badgeFeature) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -420,7 +420,7 @@ export const deleteDiscountTicket = (promocodeId, ticketId, ticketTypeId) => asy
 
 export const importPromoCodesCSV = (file) => async (dispatch, getState) => {
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {

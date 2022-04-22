@@ -25,7 +25,7 @@ import {
     showSuccessMessage,
     authErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const RECEIVE_SELECTION_PLAN = 'RECEIVE_SELECTION_PLAN';
 export const RESET_SELECTION_PLAN_FORM = 'RESET_SELECTION_PLAN_FORM';
@@ -39,7 +39,7 @@ export const TRACK_GROUP_ADDED = 'TRACK_GROUP_ADDED';
 export const getSelectionPlan = (selectionPlanId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -66,7 +66,7 @@ export const resetSelectionPlanForm = () => (dispatch, getState) => {
 
 export const saveSelectionPlan = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -116,7 +116,7 @@ export const saveSelectionPlan = (entity) => async (dispatch, getState) => {
 export const deleteSelectionPlan = (selectionPlanId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -138,7 +138,7 @@ export const deleteSelectionPlan = (selectionPlanId) => async (dispatch, getStat
 export const addTrackGroupToSelectionPlan = (selectionPlanId, trackGroup) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -162,7 +162,7 @@ export const addTrackGroupToSelectionPlan = (selectionPlanId, trackGroup) => asy
 export const removeTrackGroupFromSelectionPlan = (selectionPlanId, trackGroupId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -228,7 +228,7 @@ export const resetSelectionPlanExtraQuestionForm = () => (dispatch, getState) =>
 export const getExtraQuestionMeta = (selectionPlanId) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -249,7 +249,7 @@ export const getExtraQuestionMeta = (selectionPlanId) => async (dispatch, getSta
 export const getSelectionPlanExtraQuestions = (selectionPlanId) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());
@@ -276,7 +276,7 @@ export const getSelectionPlanExtraQuestions = (selectionPlanId) => async (dispat
 export const getSelectionPlanExtraQuestion = (selectionPlanId, extraQuestionId) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());
@@ -304,7 +304,7 @@ const normalizeQuestion = (entity) => {
 
 export const saveSelectionPlanExtraQuestion = (selectionPlanId, entity) => async (dispatch, getState) => {
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -357,7 +357,7 @@ export const saveSelectionPlanExtraQuestion = (selectionPlanId, entity) => async
 export const deleteSelectionPlanExtraQuestion = (selectionPlanId, questionId) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -379,7 +379,7 @@ export const deleteSelectionPlanExtraQuestion = (selectionPlanId, questionId) =>
 export const updateSelectionPlanExtraQuestionOrder = (selectionPlanId, questions, questionId, newOrder) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -404,7 +404,7 @@ export const updateSelectionPlanExtraQuestionOrder = (selectionPlanId, questions
 
 export const saveSelectionPlanExtraQuestionValue = (selectionPlanId, questionId, entity) => async (dispatch, getState) => {
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());
@@ -446,7 +446,7 @@ export const saveSelectionPlanExtraQuestionValue = (selectionPlanId, questionId,
 export const deleteSelectionPlanExtraQuestionValue = (selectionPlanId, questionId, valueId) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -474,7 +474,7 @@ export const EVENT_TYPE_REMOVED             = 'EVENT_TYPE_REMOVED';
 export const addEventTypeSelectionPlan = (selectionPlanId, eventType) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());
@@ -498,7 +498,7 @@ export const addEventTypeSelectionPlan = (selectionPlanId, eventType) => async (
 export const deleteEventTypeSelectionPlan = (selectionPlanId, eventTypeId) => async (dispatch, getState) => {
     
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     dispatch(startLoading());

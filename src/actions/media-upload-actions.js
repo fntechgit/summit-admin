@@ -27,7 +27,7 @@ import {
     fetchResponseHandler,
     fetchErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_MEDIA_UPLOADS      = 'REQUEST_MEDIA_UPLOADS';
 export const RECEIVE_MEDIA_UPLOADS      = 'RECEIVE_MEDIA_UPLOADS';
@@ -44,7 +44,7 @@ export const MEDIA_UPLOAD_UNLINKED       = 'MEDIA_UPLOAD_UNLINKED';
 
 export const getMediaUploads = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -85,7 +85,7 @@ export const getMediaUploads = (term = null, page = 1, perPage = 10, order = 'id
 
 export const getMediaUpload = (mediaUploadId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -107,7 +107,7 @@ export const getMediaUpload = (mediaUploadId) => async (dispatch, getState) => {
 
 export const queryMediaUploads = _.debounce(async (summitId, input, callback) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     input = escapeFilterValue(input);
     const filter = encodeURIComponent(`name=@${input}`);
 
@@ -127,7 +127,7 @@ export const resetMediaUploadForm = () => (dispatch, getState) => {
 
 export const saveMediaUpload = (entity, noAlert = false) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -179,7 +179,7 @@ export const saveMediaUpload = (entity, noAlert = false) => async (dispatch, get
 
 export const linkToPresentationType = (mediaUpload, presentationTypeId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = { access_token : accessToken };
@@ -200,7 +200,7 @@ export const linkToPresentationType = (mediaUpload, presentationTypeId) => async
 
 export const unlinkFromPresentationType = (mediaUploadId, presentationTypeId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = { access_token : accessToken };
@@ -221,7 +221,7 @@ export const unlinkFromPresentationType = (mediaUploadId, presentationTypeId) =>
 
 export const deleteMediaUpload = (mediaUploadId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -242,7 +242,7 @@ export const deleteMediaUpload = (mediaUploadId) => async (dispatch, getState) =
 
 export const copyMediaUploads = (summitId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());

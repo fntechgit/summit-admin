@@ -26,7 +26,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_SPONSORED_PROJECTS = 'REQUEST_SPONSORED_PROJECTS';
 export const RECEIVE_SPONSORED_PROJECTS = 'RECEIVE_SPONSORED_PROJECTS';
@@ -44,7 +44,7 @@ export const SPONSORED_PROJECT_SUBPROJECT_DELETED = 'SPONSORED_PROJECT_SUBPROJEC
 
 export const getSponsoredProjects = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const filter = [];
 
     dispatch(startLoading());
@@ -85,7 +85,7 @@ export const getSponsoredProjects = (term = null, page = 1, perPage = 10, order 
 
 export const getSponsoredProject = (projectId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -107,7 +107,7 @@ export const getSponsoredProject = (projectId) => async (dispatch) => {
 
 export const deleteSponsoredProject = (sponsoredProjectId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -185,7 +185,7 @@ export const resetSponsoredProjectForm = () => (dispatch) => {
 };
 
 export const saveSponsoredProject = (entity) => async (dispatch) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -356,7 +356,7 @@ export const RECEIVED_SPONSORED_PROJECT_SPONSORSHIP_TYPE = 'RECEIVED_SPONSORED_P
 
 export const getSponsorshipType = (projectId, sponsorshipTypeId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -382,7 +382,7 @@ export const resetSponsorshipTypeForm = () => (dispatch, getState) => {
 
 export const deleteSponsorshipType = (projectId, sponsorshipTypeId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token: accessToken
@@ -402,7 +402,7 @@ export const deleteSponsorshipType = (projectId, sponsorshipTypeId) => async (di
 
 export const updateSponsorShipTypeOrder = (sponsorshipTypes, projectId, sponsorshipTypeId, newOrder) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token: accessToken
@@ -424,7 +424,7 @@ export const updateSponsorShipTypeOrder = (sponsorshipTypes, projectId, sponsors
 }
 
 export const saveSponsorshipType = (projectId, entity) => async (dispatch) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -486,7 +486,7 @@ export const RECEIVED_SPONSORED_PROJECT_SPONSORSHIP_TYPE_SUPPORTING_COMPANY = 'R
 
 export const getSupportingCompany = (projectId, sponsorshipTypeId, supportingCompanyId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -512,7 +512,7 @@ export const resetSupportingCompanyForm = () => (dispatch, getState) => {
 
 export const deleteSupportingCompany = (projectId, sponsorshipTypeId, supportingCompanyId) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token: accessToken
@@ -532,7 +532,7 @@ export const deleteSupportingCompany = (projectId, sponsorshipTypeId, supporting
 
 export const updateSupportingCompanyOrder = (supportingCompanies, projectId, sponsorshipTypeId, supportingCompanyId, newOrder) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token: accessToken
@@ -564,7 +564,7 @@ const normalizeCompany = (entity) => {
 
 export const saveSupportingCompany = (projectId, sponsorshipTypeId, entity) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 

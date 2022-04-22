@@ -25,7 +25,7 @@ import {
     postFile,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_SUMMITDOCS       = 'REQUEST_SUMMITDOCS';
 export const RECEIVE_SUMMITDOCS       = 'RECEIVE_SUMMITDOCS';
@@ -39,7 +39,7 @@ export const SUMMITDOC_DELETED        = 'SUMMITDOC_DELETED';
 export const getSummitDocs = (term = '', page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -81,7 +81,7 @@ export const getSummitDocs = (term = '', page = 1, perPage = 10, order = 'id', o
 
 export const getSummitDoc = (summitDocId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -107,7 +107,7 @@ export const resetSummitDocForm = () => (dispatch, getState) => {
 
 export const saveSummitDoc = (entity, file) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -160,7 +160,7 @@ export const saveSummitDoc = (entity, file) => async (dispatch, getState) => {
 export const deleteSummitDoc = (summitDocId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {

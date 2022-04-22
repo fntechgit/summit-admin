@@ -25,7 +25,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_MEDIA_FILE_TYPES       = 'REQUEST_MEDIA_FILE_TYPES';
 export const RECEIVE_MEDIA_FILE_TYPES       = 'RECEIVE_MEDIA_FILE_TYPES';
@@ -41,7 +41,7 @@ export const MEDIA_FILE_TYPE_DELETED        = 'MEDIA_FILE_TYPE_DELETED';
 
 export const getMediaFileTypes = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const filter = [];
 
     dispatch(startLoading());
@@ -80,7 +80,7 @@ export const getMediaFileTypes = (term = null, page = 1, perPage = 10, order = '
 };
 
 export const getAllMediaFileTypes = () => async (dispatch, getState) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -103,7 +103,7 @@ export const getAllMediaFileTypes = () => async (dispatch, getState) => {
 };
 
 export const getMediaFileType = (mediaFileTypeId) => async (dispatch, getState) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -128,7 +128,7 @@ export const resetMediaFileTypeForm = () => (dispatch, getState) => {
 
 export const saveMediaFileType = (entity, noAlert = false) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -179,7 +179,7 @@ export const saveMediaFileType = (entity, noAlert = false) => async (dispatch, g
 
 export const deleteMediaFileType = (mediaFileTypeId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken

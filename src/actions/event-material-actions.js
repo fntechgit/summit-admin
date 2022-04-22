@@ -25,7 +25,7 @@ import {
     putFile,
     postFile
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 
 export const RECEIVE_EVENT_MATERIAL        = 'RECEIVE_EVENT_MATERIAL';
@@ -72,7 +72,7 @@ export const resetEventMaterialForm = () => (dispatch, getState) => {
 export const saveEventMaterial = (entity) => async (dispatch, getState) => {
 
     const { currentSummitState, currentSummitEventState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const eventId             = currentSummitEventState.entity.id;
 
@@ -135,7 +135,7 @@ export const saveEventMaterial = (entity) => async (dispatch, getState) => {
 
 export const saveEventMaterialWithFile = (entity, file, slug) => async (dispatch, getState) => {
     const { currentSummitState, currentSummitEventState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const eventId             = currentSummitEventState.entity.id;
 
@@ -192,7 +192,7 @@ export const saveEventMaterialWithFile = (entity, file, slug) => async (dispatch
 export const deleteEventMaterial = (eventMaterialId) => async (dispatch, getState) => {
 
     const { currentSummitState, currentSummitEventState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const event               = currentSummitEventState.entity;
     const material            = event.materials.find(m => m.id === eventMaterialId);

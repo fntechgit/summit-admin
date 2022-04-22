@@ -18,7 +18,7 @@ import {
     startLoading,
     authErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 
 export const REQUEST_REPORT         = 'REQUEST_REPORT';
@@ -31,7 +31,7 @@ const TIMEOUT = 300 ;//secs
 export const getReport = (query, reportName, page) => async (dispatch, getState) => {
 
     const {  currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -66,7 +66,7 @@ const jsonToCsv = (items) => {
 
 export const exportReport = ( query, reportName, grouped, preProcessData=null ) => async (dispatch) => {
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 

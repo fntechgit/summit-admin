@@ -26,7 +26,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 import URI from 'urijs';
 
@@ -72,7 +72,7 @@ export const ORDER_EXTRA_QUESTION_SUB_QUESTION_ORDER_UPDATED = 'ORDER_EXTRA_QUES
 export const getOrderExtraQuestionMeta = () => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -92,7 +92,7 @@ export const getOrderExtraQuestionMeta = () => async (dispatch, getState) => {
 
 export const getOrderExtraQuestions = () => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -147,7 +147,7 @@ export const getMainOrderExtraQuestions = () => async (dispatch, getState) => {
 
 export const getOrderExtraQuestion = (orderExtraQuestionId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -174,7 +174,7 @@ export const resetOrderExtraQuestionForm = () => (dispatch) => {
 
 export const saveOrderExtraQuestion = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -226,7 +226,7 @@ export const saveOrderExtraQuestion = (entity) => async (dispatch, getState) => 
 export const deleteOrderExtraQuestion = (orderExtraQuestionId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -248,7 +248,7 @@ export const deleteOrderExtraQuestion = (orderExtraQuestionId) => async (dispatc
 export const updateOrderExtraQuestionOrder = (questions, questionId, newOrder) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -271,8 +271,8 @@ export const updateOrderExtraQuestionOrder = (questions, questionId, newOrder) =
 
 export const saveOrderExtraQuestionValue = (orderExtraQuestionId, entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
-    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
 
@@ -311,7 +311,7 @@ export const saveOrderExtraQuestionValue = (orderExtraQuestionId, entity) => asy
 
 export const deleteOrderExtraQuestionValue = (orderExtraQuestionId, orderExtraQuestionValueId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -343,7 +343,7 @@ const normalizeQuestion = (entity) => {
 export const getPurchaseOrders = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filter = [];
 
@@ -387,7 +387,7 @@ export const getPurchaseOrders = ( term = null, page = 1, perPage = 10, order = 
 export const getPurchaseOrder = (orderId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -416,7 +416,7 @@ export const resetPurchaseOrderForm = () => (dispatch) => {
 
 export const savePurchaseOrder = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -471,7 +471,7 @@ export const savePurchaseOrder = (entity) => async (dispatch, getState) => {
 
 export const addTicketsToOrder = (orderId, typeId, qty, promoCode = null) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -505,7 +505,7 @@ export const addTicketsToOrder = (orderId, typeId, qty, promoCode = null) => asy
 export const deletePurchaseOrder = (orderId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -537,7 +537,9 @@ export const deletePurchaseOrder = (orderId) => async (dispatch, getState) => {
 };
 
 export const reSendOrderEmail = (orderId) => async (dispatch) => {
-    const accessToken = await getAccessToken();
+
+    const accessToken = await getAccessTokenSafely();
+
     const params = {
         access_token: accessToken
     };
