@@ -90,12 +90,8 @@ module.exports = {
                 use: [MiniCssExtractPlugin.loader, "css-loader", 'sass-loader']
             },
             {
-                test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                use: "url-loader?limit=10000&minetype=application/font-woff&name=fonts/[name].[ext]"
-            },
-            {
-                test: /\.(ttf|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                use: "file-loader?name=fonts/[name].[ext]"
+                test: /\.(woff|woff2|eot|ttf|otf)$/i,
+                type: 'asset/resource',
             },
             {
                 test: /\.jpg|\.png|\.gif$/,
