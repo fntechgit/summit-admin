@@ -346,7 +346,7 @@ export const addBadgeFeatureToPromocode = (promocodeId, badgeFeature) => async (
 export const removeBadgeFeatureFromPromocode = (promocodeId, badgeFeatureId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken()
+    const accessToken = await getAccessTokenSafely()
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -374,7 +374,7 @@ export const removeBadgeFeatureFromPromocode = (promocodeId, badgeFeatureId) => 
 
 export const addDiscountTicket = (ticket) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken()
+    const accessToken = await getAccessTokenSafely()
     const { currentSummit }   = currentSummitState;
 
     const params = {
@@ -399,7 +399,7 @@ export const addDiscountTicket = (ticket) => async (dispatch, getState) => {
 export const deleteDiscountTicket = (promocodeId, ticketId, ticketTypeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken()
+    const accessToken = await getAccessTokenSafely()
     const { currentSummit }   = currentSummitState;
 
     const params = {
