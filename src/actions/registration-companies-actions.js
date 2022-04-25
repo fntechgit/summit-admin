@@ -76,13 +76,12 @@ export const addRegistrationCompany = (entity) => (dispatch, getState) => {
     const params = {
         access_token: accessToken,
     };
-    const normalizedEntity = normalizeEntity(entity);
 
     putRequest(
         createAction(ADD_REGISTRATION_COMPANY),
         createAction(REGISTRATION_COMPANY_ADDED)({entity}),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-companies/${entity.id}`,
-        normalizedEntity,
+        null,
         authErrorHandler,
         entity
     )(params)(dispatch)
