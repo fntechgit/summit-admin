@@ -111,10 +111,6 @@ export const saveSummitDoc = (entity, file) => (dispatch, getState) => {
     const normalizedEntity = normalizeEntity(entity);
     const params = { access_token : accessToken };
 
-    console.log('entiy', entity)
-    console.log('normlaized', normalizedEntity);
-
-
     if (entity.id) {
 
         putFile(
