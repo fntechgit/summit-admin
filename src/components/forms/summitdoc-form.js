@@ -167,7 +167,7 @@ class SummitDocForm extends React.Component {
                     <div className="col-md-4">
                         <label> {T.translate("summitdoc.selection_plan")}</label>
                         <Dropdown
-                            id="selection_plan"
+                            id="selection_plan_id"
                             value={entity.selection_plan_id}
                             isClearable={true}
                             placeholder={T.translate("summitdoc.placeholders.selection_plan")}
