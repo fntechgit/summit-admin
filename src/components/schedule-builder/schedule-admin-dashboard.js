@@ -11,8 +11,8 @@
  * limitations under the License.
  **/
 import React from 'react';
-import { DragDropContext } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import { DndProvider } from 'react-dnd'
 import { Modal } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import {
@@ -653,7 +653,7 @@ class ScheduleAdminDashBoard extends React.Component {
         ];
 
         return(
-
+            <DndProvider backend={HTML5Backend}>
             <div className="row schedule-app-container no-margin">
                 <ScheduleAdminEmptySpotsModal
                     currentSummit={currentSummit}
@@ -808,12 +808,11 @@ class ScheduleAdminDashBoard extends React.Component {
                    />
                 </div>
             </div>
+            </DndProvider>
         );
     }
 
 }
-
-ScheduleAdminDashBoard = DragDropContext(HTML5Backend)(ScheduleAdminDashBoard);
 
 function mapStateToProps({ currentScheduleBuilderState, currentSummitState, summitEventsBulkActionsState  }) {
     return {
