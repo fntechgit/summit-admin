@@ -23,7 +23,7 @@ import {
     putRequest,
     deleteRequest,
     showSuccessMessage
-} from 'openstack-uicore-foundation/lib/methods';
+} from 'openstack-uicore-foundation/lib/utils/actions';
 
 export const REQUEST_REGISTRATION_COMPANIES = 'REQUEST_REGISTRATION_COMPANIES';
 export const RECEIVE_REGISTRATION_COMPANIES = 'RECEIVE_REGISTRATION_COMPANIES';
