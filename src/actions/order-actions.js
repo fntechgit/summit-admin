@@ -622,8 +622,7 @@ export const saveOrderExtraQuestionsSubQuestionsRule = (entity) => (dispatch, ge
     const normalizedEntity = normalizeSubRule(entity);
 
     if (entity.id) {
-
-        putRequest(
+        return putRequest(
             createAction(UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION),
             createAction(ORDER_EXTRA_QUESTION_SUB_QUESTION_UPDATED),
             `${window.API_BASE_URL}/api/v1/summits/${summit_id}/order-extra-questions/${id}/sub-question-rules/${entity.id}`,            
@@ -634,31 +633,30 @@ export const saveOrderExtraQuestionsSubQuestionsRule = (entity) => (dispatch, ge
             .then((payload) => {
                 dispatch(showSuccessMessage(T.translate("edit_order_extra_question_sub_rule.order_extra_question_sub_rule_saved")));
             });
-
-    } else {
-        const success_message = {
-            title: T.translate("general.done"),
-            html: T.translate("edit_order_extra_question_sub_rule.order_extra_question_sub_rule_created"),
-            type: 'success'
-        };
-
-        postRequest(
-            createAction(UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION),
-            createAction(ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED),
-            `${window.API_BASE_URL}/api/v1/summits/${summit_id}/order-extra-questions/${id}/sub-question-rules/`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(showMessage(
-                    success_message,
-                    () => {
-                        history.push(`/app/summits/${currentSummit.id}/order-extra-questions/${payload.response.id}`)
-                    }
-                ));
-            });
     }
+
+    const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("edit_order_extra_question_sub_rule.order_extra_question_sub_rule_created"),
+        type: 'success'
+    };
+
+    return postRequest(
+        createAction(UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION),
+        createAction(ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED),
+        `${window.API_BASE_URL}/api/v1/summits/${summit_id}/order-extra-questions/${id}/sub-question-rules/`,
+        normalizedEntity,
+        authErrorHandler,
+        entity
+    )(params)(dispatch)
+        .then((payload) => {
+            dispatch(showMessage(
+                success_message,
+                () => {
+                    history.push(`/app/summits/${currentSummit.id}/order-extra-questions/${payload.response.id}`)
+                }
+            ));
+        });    
 };
 
 export const deleteOrderExtraQuestionsSubQuestionsRule = (orderExtraQuestionId, ruleId) => (dispatch, getState) => {
