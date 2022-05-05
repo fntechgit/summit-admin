@@ -43,11 +43,12 @@ const UnScheduleEvent = ({event, onEditEvent, onClickSelected, selectedUnPublish
             <div className="row">
                 <div className="col-md-12">
                     <div className="event-select-wrapper">
-                        <input className="select-event-btn"
-                           id={`selected_event_${event.id}`}
-                           type="checkbox"
-                           checked={isSelected}
-                           onClick={() => onClickSelected(event)}/>
+                        <input
+                            className="select-event-btn"
+                            id={`selected_event_${event.id}`}
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => onClickSelected(event)}/>
                     </div>
                     <div className="event-container">
                         <div className="event-content">

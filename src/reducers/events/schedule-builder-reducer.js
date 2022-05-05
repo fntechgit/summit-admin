@@ -170,15 +170,23 @@ const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
 
             let eventModel        = new SummitEvent(event, currentSummit);
             let [eventStarDateTime, eventEndDateTime ] = eventModel.calculateNewDates(day, startTime, minutes);
-            console.log(`publishing event ${event.title} - ${event.id} - start date ${eventStarDateTime.format()} - end date ${eventEndDateTime.format()}`);
+
+            // console.log(`publishing event ${event.title} - ${event.id} - start date ${eventStarDateTime.format()} - end date ${eventEndDateTime.format()}`);
             // published
+
             if(eventModel.isPublished()){
 
-                let scheduleEvents = state.scheduleEvents.map(evt => { return evt.id === event.id ?  {...event,
-                    start_date: eventStarDateTime.valueOf()/1000,
-                    end_date: eventEndDateTime.valueOf()/1000,
-                    location_id : currentLocation.id,
-                    is_published: true}: evt; })
+                let scheduleEvents = state.scheduleEvents.map(evt => {
+                    return evt.id === event.id ?
+                        {
+                            ...event,
+                            start_date: eventStarDateTime.valueOf()/1000,
+                            end_date: eventEndDateTime.valueOf()/1000,
+                            location_id : currentLocation.id,
+                            is_published: true
+                        } : evt;
+                });
+
                 return {...state, scheduleEvents};
             }
 

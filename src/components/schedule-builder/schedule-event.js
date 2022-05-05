@@ -10,37 +10,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React, {useState} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import { DraggableItemTypes } from './draggable-items-types';
 import { useDrag } from 'react-dnd';
 import {Popover, OverlayTrigger} from 'react-bootstrap';
 import { RawHTML } from 'openstack-uicore-foundation/lib/components';
-import ReactDOM from "react-dom";
 
 const RESIZING_DIR_NORTH = 'N';
 const RESIZING_DIR_SOUTH = 'S';
-
-const IsResizeClass = new RegExp('(\\s|^)is-resizable(\\s|$)');
 
 const ScheduleEvent = ({event, step, initialTop, initialHeight, minHeight, maxHeight, canResize, onResized, onUnPublishEvent, onEditEvent, onClickSelected, selectedPublishedEvents}) => {
     const [collected, drag] = useDrag(() => ({
         type: DraggableItemTypes.SCHEDULEEVENT,
         item: { ...event }
     }));
-    const [top, setTop] = useState(initialTop);
-    const [height, setHeight] = useState(initialHeight);
-    const [resizing, setResizing] = useState(false);
-    const [resizeInfo, setResizeInfo] = useState(null);
+    const [resizeInfo, setResizeInfo] = useState({resizing: false, type: null, lastYPos: null});
+    const [size, setSize] = useState({top: initialTop, height: initialHeight});
     const isSelected = selectedPublishedEvents.includes(event.id);
-
-    const getInlineStyles = () => {
-        return {
-            top,
-            height,
-            opacity: collected.isDragging ? 0.5 : 1,
-            cursor: 'move',
-        };
-    }
 
     const popoverHoverFocus = () =>
         <Popover id="popover-trigger-focus" title={event.title}>
@@ -51,7 +37,8 @@ const ScheduleEvent = ({event, step, initialTop, initialHeight, minHeight, maxHe
 
     const onMouseDown = (evt) => {
         if (!evt.target.getAttribute('data-resizable')) return;
-        const box = ReactDOM.findDOMNode(drag.current).getBoundingClientRect();
+
+        const box = evt.target.getBoundingClientRect();
 
         let type;
         if (evt.clientY - box.top < 10) {
@@ -62,16 +49,13 @@ const ScheduleEvent = ({event, step, initialTop, initialHeight, minHeight, maxHe
             return;
         }
 
-        document.addEventListener('mousemove', onMouseMove, false);
-        document.addEventListener('mouseup', onMouseUp, false);
+        setResizeInfo({resizing: true, type, lastYPos: evt.pageY});
 
-        setResizing(true);
-        setResizeInfo({type, startYPos : evt.pageY, lastYPos: evt.pageY, prevTop: top, prevHeight: height})
         evt.preventDefault();
     }
 
     const onMouseMove = (evt) => {
-        if(!resizing) return;
+        if(!resizeInfo.resizing) return;
 
         let lastYPos = resizeInfo.lastYPos;
         let newYPos  = evt.pageY;
@@ -86,21 +70,21 @@ const ScheduleEvent = ({event, step, initialTop, initialHeight, minHeight, maxHe
             }
         }
 
-        let newHeight = height;
-        let newTop    = top;
+        let newHeight = size.height;
+        let newTop    = size.top;
 
         if(resizeInfo.type === RESIZING_DIR_SOUTH) {
-            newHeight = height + deltaY;
+            newHeight = size.height + deltaY;
         }
 
         if(resizeInfo.type === RESIZING_DIR_NORTH){
             if(deltaY < 0){
-                newTop = top - Math.abs(deltaY);
-                newHeight = height + Math.abs(deltaY);
+                newTop = size.top - Math.abs(deltaY);
+                newHeight = size.height + Math.abs(deltaY);
             }
             else{
-                newTop    = top + Math.abs(deltaY);
-                newHeight = height - Math.abs(deltaY);
+                newTop    = size.top + Math.abs(deltaY);
+                newHeight = size.height - Math.abs(deltaY);
             }
         }
 
@@ -108,7 +92,7 @@ const ScheduleEvent = ({event, step, initialTop, initialHeight, minHeight, maxHe
         if(newHeight < minHeight){
             newHeight = minHeight;
             newYPos   = lastYPos;
-            newTop    = top;
+            newTop    = size.top;
         }
 
         let maxHeightTmp = (typeof maxHeight === "function") ? maxHeight() : maxHeight;
@@ -116,40 +100,56 @@ const ScheduleEvent = ({event, step, initialTop, initialHeight, minHeight, maxHe
         if (newHeight > maxHeightTmp) {
             newHeight = maxHeightTmp;
             newYPos   = lastYPos;
-            newTop    = top;
+            newTop    = size.top;
         }
 
         if (newTop < 0) {
             newTop    = 0;
-            newHeight = height;
+            newHeight = size.height;
             newYPos   = lastYPos;
         }
 
-        if (canBeResized(newTop, newHeight)) {
-            setTop(newTop);
-            setHeight(newHeight);
-            setResizeInfo({...resizeInfo, lastYPos: newYPos})
+        if (canResize(event.id, newTop, newHeight)) {
+            setResizeInfo({
+                ...resizeInfo,
+                resizing: true,
+                lastYPos: newYPos
+            });
+
+            setSize({
+                top: newTop,
+                height: newHeight,
+            });
         }
 
         evt.preventDefault();
-    }
+    };
 
     const onMouseUp = (evt) => {
-        document.removeEventListener('mousemove', onMouseMove, false);
-        document.removeEventListener('mouseup', onMouseUp, false);
-        setResizing(false);
-        setResizeInfo(null)
-        if(onResized){
-            return onResized(event.id, top, height);
-        }
         evt.preventDefault();
-    }
-
-    const canBeResized = (newTop, newHeight) => {
-        return canResize ? canResize(event.id, newTop, newHeight) : true;
-    }
+        setResizeInfo({type: null, lastYPos: null, resizing: false});
+    };
 
     // end resize behavior
+
+    useEffect(() => {
+        if (resizeInfo.resizing) {
+            document.addEventListener('mousemove', onMouseMove, false);
+            document.addEventListener('mouseup', onMouseUp, false);
+        } else {
+            document.removeEventListener('mousemove', onMouseMove, false);
+            document.removeEventListener('mouseup', onMouseUp, false);
+
+            if (size.top !== initialTop || size.height !== initialHeight) {
+                onResized(event.id, size.top, size.height);
+            }
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', onMouseMove, false);
+            document.removeEventListener('mouseup', onMouseUp, false);
+        }
+    }, [resizeInfo.resizing])
 
     return (
         <div
@@ -158,16 +158,23 @@ const ScheduleEvent = ({event, step, initialTop, initialHeight, minHeight, maxHe
             id={`event_${event.id}`}
             onMouseDown={onMouseDown}
             ref={drag}
-            style={getInlineStyles()}
+            style={{
+                top: size.top,
+                height: size.height,
+                opacity: collected.isDragging ? 0.5 : 1,
+                cursor: 'move',
+            }}
         >
             <div className="row">
                 <div className="col-md-12">
                     <div className="event-select-wrapper">
-                        <input className="select-event-btn"
-                               id={`selected_event_${event.id}`}
-                               type="checkbox"
-                               checked={isSelected}
-                               onClick={() => onClickSelected(event)}/>
+                        <input
+                            className="select-event-btn"
+                            id={`selected_event_${event.id}`}
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => onClickSelected(event)}
+                        />
                     </div>
                     <div className="col-md-12 event-container">
                         <div className="event-content">

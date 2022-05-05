@@ -231,7 +231,7 @@ class ScheduleEventList extends React.Component
                                 <ScheduleEvent
                                     event={event}
                                     selectedPublishedEvents={selectedPublishedEvents}
-                                    key={event.id}
+                                    key={`event-${event.id}-${event.start_date}-${event.end_date}`}
                                     type={"MAIN"}
                                     step={pixelsPerMinute * 5}
                                     minHeight={(pixelsPerMinute * interval)}

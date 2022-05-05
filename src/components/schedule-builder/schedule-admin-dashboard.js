@@ -141,7 +141,7 @@ class ScheduleAdminDashBoard extends React.Component {
     }
 
     componentDidMount(){
-        const { currentSummit, currentEventType, currentTrack, currentPresentationSelectionStatus, currentPresentationSelectionPlan, currentDay, currentLocation, scheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy } = this.props;
+        const { currentSummit, currentEventType, currentTrack, currentPresentationSelectionStatus, currentPresentationSelectionPlan, currentDay, currentLocation, currentUnScheduleOrderBy } = this.props;
         const eventTypeId = currentEventType === null ? null : currentEventType.id;
         const trackId     = currentTrack === null ? null : currentTrack.id;
 
