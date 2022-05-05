@@ -17,6 +17,7 @@ import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import { Dropdown, Input, EditableTable, Table, TextEditor } from 'openstack-uicore-foundation/lib/components'
 import { isEmpty, scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
+import { ExtraQuestionsTypeAllowSubQuestion } from '../../utils/constants';
 
 
 class ExtraQuestionForm extends React.Component {
@@ -35,6 +36,7 @@ class ExtraQuestionForm extends React.Component {
         this.handleDeleteSubQuestionRule = this.handleDeleteSubQuestionRule.bind(this);
         this.formatRuleConditionColumn = this.formatRuleConditionColumn.bind(this);
         this.formatRuleQuestionColumn = this.formatRuleQuestionColumn.bind(this);
+        this.allowsSubQuestionRules = this.allowsSubQuestionRules.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -106,6 +108,10 @@ class ExtraQuestionForm extends React.Component {
         if (!entity.type) return false;
         const entity_type = this.props.questionClasses.find(c => c.type == entity.type);
         return (entity_type.hasOwnProperty(field) && entity_type[field]);
+    }
+
+    allowsSubQuestionRules(question) {
+        return ExtraQuestionsTypeAllowSubQuestion.includes(question.type)
     }
 
     render() {
@@ -252,7 +258,7 @@ class ExtraQuestionForm extends React.Component {
                         </div>
                     </div>
                 }
-                {entity.id !== 0 && (entity.type === "ComboBox" || entity.type === "CheckBoxList" || entity.type === "RadioButtonList") &&
+                {entity.id !== 0 && this.allowsSubQuestionRules(entity) &&
                     <>
                         <hr />
                         <div className="row form-group">

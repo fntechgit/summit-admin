@@ -14,8 +14,12 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import { Dropdown, RadioList } from 'openstack-uicore-foundation/lib/components'
-import { isEmpty, scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
-
+import {
+    ExtraQuestionsTypeAllowSubQuestion,
+    SubQuestionAnswerValuesOperators,
+    SubQuestionVisibilityConditions,
+    SubQuestionVisibilityOptions
+} from '../../utils/constants'
 
 class ExtraQuestionSubQuestionForm extends React.Component {
     constructor(props) {
@@ -30,65 +34,37 @@ class ExtraQuestionSubQuestionForm extends React.Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        // scrollToError(this.props.errors);
-
-        // if (!shallowEqual(prevProps.entity, this.props.entity)) {
-        //     state.entity = { ...this.props.entity };
-        //     state.errors = {};
-        // }
-
-        // if (!shallowEqual(prevProps.errors, this.props.errors)) {
-        //     state.errors = { ...this.props.errors };
-        // }
-
-        // if (!isEmpty(state)) {
-        //     this.setState({ ...this.state, ...state })
-        // }
-    }
-
     handleSubmit(ev) {
         ev.preventDefault();
         this.props.onSubmit(this.state.entity);
+    }
+
+    componentDidUpdate(prevState) {
+        const oldEntity = prevState.entity;
+        const newEntity = this.props.entity;
+
+        if (newEntity.id !== oldEntity.id) {
+            this.setState({ ...this.state, entity: newEntity });
+        }
     }
 
     generateAnswerField() {
         const { currentExtraQuestion } = this.props;
         const { entity } = this.state;
 
-        switch (currentExtraQuestion.type) {
-            // case 'TextArea':
-            // case 'Text': {
-            //     return (
-            //         <div>
-            //             <input
-            //                 id="answer_custom_value"
-            //                 value={entity.answer_custom_value}
-            //                 placeholder={T.translate("question_rule_form.placeholders.type_value")}
-            //                 onChange={this.handleChange} />
-            //         </div>
-            //     )
-            // }                
-            // case 'CheckBox':
-            case 'ComboBox':
-            case 'CheckBoxList':
-            case 'RadioButtonList': {
-                let answer_values_ddl = currentExtraQuestion.values
-                    .map(et => ({ value: et.id, label: et.label }));
-                return (
-                    <Dropdown
-                        id="answer_values"
-                        isMulti={true}
-                        value={entity.answer_values.map(e => parseInt(e))}
-                        placeholder={T.translate("question_rule_form.placeholders.select_values")}
-                        options={answer_values_ddl}
-                        onChange={this.handleChange}
-                    />
-                )
-            }
-            default:
-                break;
+        if (ExtraQuestionsTypeAllowSubQuestion.includes(currentExtraQuestion.type)) {
+            let answer_values_ddl = currentExtraQuestion.values
+                .map(et => ({ value: et.id, label: et.label }));
+            return (
+                <Dropdown
+                    id="answer_values"
+                    isMulti={true}
+                    value={entity.answer_values.map(e => parseInt(e))}
+                    placeholder={T.translate("question_rule_form.placeholders.select_values")}
+                    options={answer_values_ddl}
+                    onChange={this.handleChange}
+                />
+            )
         }
     }
 
@@ -109,14 +85,10 @@ class ExtraQuestionSubQuestionForm extends React.Component {
     render() {
         const { entity, errors } = this.state;
         const { extraQuestions, currentExtraQuestion } = this.props;
-        
+
         const question_ddl = extraQuestions
             .filter(e => e.id !== currentExtraQuestion.id)
             .map(et => ({ value: et.id, label: et.name }));
-
-        const answer_values_operators_dll = [{ value: 'And', label: 'And' }, { value: 'Or', label: 'Or' }];
-        const visibility_ddl = [{ value: 'Visible', label: 'Show' }, { value: 'NotVisible', label: 'Hide' }];
-        const visibility_condition_ddl = [{ value: 'Equal', label: 'Equal' }, { value: 'NotEqual', label: 'Not Equal' }];
 
         return (
             <form className="question-form">
@@ -127,7 +99,7 @@ class ExtraQuestionSubQuestionForm extends React.Component {
                         <RadioList
                             id='visibility_condition'
                             value={entity.visibility_condition}
-                            options={visibility_condition_ddl}
+                            options={SubQuestionVisibilityConditions}
                             onChange={this.handleChange}
                             inline
                             html
@@ -142,7 +114,7 @@ class ExtraQuestionSubQuestionForm extends React.Component {
                         <RadioList
                             id='answer_values_operator'
                             value={entity.answer_values_operator}
-                            options={answer_values_operators_dll}
+                            options={SubQuestionAnswerValuesOperators}
                             onChange={this.handleChange}
                             inline
                             html
@@ -153,7 +125,7 @@ class ExtraQuestionSubQuestionForm extends React.Component {
                         <RadioList
                             id='visibility'
                             value={entity.visibility}
-                            options={visibility_ddl}
+                            options={SubQuestionVisibilityOptions}
                             onChange={this.handleChange}
                             inline
                             html
