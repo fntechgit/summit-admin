@@ -13,8 +13,9 @@
 
 import {
     RESET_ORDER_EXTRA_QUESTION_SUB_QUESTION_FORM,
-    UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION,    
-    RECEIVE_ORDER_EXTRA_QUESTION_SUB_QUESTION
+    UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION,
+    RECEIVE_ORDER_EXTRA_QUESTION_SUB_QUESTION,
+    ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED
 } from '../../actions/order-actions';
 
 import { LOGOUT_USER, VALIDATE } from 'openstack-uicore-foundation/lib/actions';
@@ -45,7 +46,7 @@ const orderExtraQuestionRuleReducer = (state = DEFAULT_STATE, action) => {
                 return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
             }
         }
-            break;        
+            break;
         case RESET_ORDER_EXTRA_QUESTION_SUB_QUESTION_FORM: {
             return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
@@ -64,6 +65,9 @@ const orderExtraQuestionRuleReducer = (state = DEFAULT_STATE, action) => {
             }
 
             return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+        }
+        case ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED: {
+            return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
             break;
         case VALIDATE: {

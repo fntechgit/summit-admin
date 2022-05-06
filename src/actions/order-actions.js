@@ -64,7 +64,7 @@ export const RECEIVE_ORDER_EXTRA_QUESTION_SUB_QUESTION = 'RECEIVE_ORDER_EXTRA_QU
 export const UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION = 'UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION';
 export const ORDER_EXTRA_QUESTION_SUB_QUESTION_UPDATED = 'ORDER_EXTRA_QUESTION_SUB_QUESTION_UPDATED';
 export const ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED = 'ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED';
-export const DELETE_ORDER_EXTRA_QUESTION_SUB_QUESTION = 'DELETE_ORDER_EXTRA_QUESTION_SUB_QUESTION';
+export const ORDER_EXTRA_QUESTION_SUB_QUESTION_DELETED = 'ORDER_EXTRA_QUESTION_SUB_QUESTION_DELETED';
 
 /***********************  ORDER EXTRA QUESTIONS  *******************************************/
 
@@ -673,7 +673,7 @@ export const deleteOrderExtraQuestionsSubQuestionsRule = (orderExtraQuestionId, 
 
     return deleteRequest(
         null,
-        createAction(ORDER_EXTRA_QUESTION_DELETED)({ruleId}),
+        createAction(ORDER_EXTRA_QUESTION_SUB_QUESTION_DELETED)({ruleId}),
         `${window.API_BASE_URL}/api/v1/summits/${summit_id}/order-extra-questions/${orderExtraQuestionId}/sub-question-rules/${ruleId}`,
         null,
         authErrorHandler

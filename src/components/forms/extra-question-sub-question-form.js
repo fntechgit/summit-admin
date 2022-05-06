@@ -98,7 +98,7 @@ class ExtraQuestionSubQuestionForm extends React.Component {
                         <span>{T.translate("question_rule_form.attendee_chooses")}</span>
                         <RadioList
                             id='visibility_condition'
-                            value={entity.visibility_condition}
+                            value={entity.visibility_condition || 'Equal'}
                             options={SubQuestionVisibilityConditions}
                             onChange={this.handleChange}
                             inline
@@ -113,7 +113,7 @@ class ExtraQuestionSubQuestionForm extends React.Component {
                         <span>{T.translate("question_rule_form.with")}</span>
                         <RadioList
                             id='answer_values_operator'
-                            value={entity.answer_values_operator}
+                            value={entity.answer_values_operator || 'And'}
                             options={SubQuestionAnswerValuesOperators}
                             onChange={this.handleChange}
                             inline
@@ -124,7 +124,7 @@ class ExtraQuestionSubQuestionForm extends React.Component {
                         <span>{T.translate("question_rule_form.then")}</span>
                         <RadioList
                             id='visibility'
-                            value={entity.visibility}
+                            value={entity.visibility || 'Visible'}
                             options={SubQuestionVisibilityOptions}
                             onChange={this.handleChange}
                             inline

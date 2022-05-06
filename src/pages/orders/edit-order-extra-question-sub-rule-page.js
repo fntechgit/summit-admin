@@ -62,8 +62,8 @@ class EditOrderExtraQuestionSubRulesPage extends React.Component {
 
     render() {
         const { currentSummit, extraQuestions, currentExtraQuestion, entity, errors, match, allClasses } = this.props;
-        const title = (currentExtraQuestion.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (currentExtraQuestion.id) ? currentExtraQuestion.name : T.translate("general.new");
+        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
+        const breadcrumb = (entity.id) ? entity.id : T.translate("general.new");
 
         return (
             <div className="container">
