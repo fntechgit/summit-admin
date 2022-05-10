@@ -31,10 +31,13 @@ const BadgeCheckinPage = ({match, currentSummit, checkInBadge}) => {
             const qrValid = validateBadgeQR(data, currentSummit);
 
             if (qrValid) {
-                checkInBadge(data).then(() => {
-                    setScanning(false);
-                    Swal.fire(T.translate("badge_checkin.checked_in"), `${qrValid[3]} (${qrValid[2]}) checked in!`, "success");
-                })
+                checkInBadge(data)
+                    .then(() => {
+                        Swal.fire(T.translate("badge_checkin.checked_in"), `${qrValid[3]} (${qrValid[2]}) checked in!`, "success");
+                    })
+                    .finally(() => {
+                        setScanning(false);
+                    })
             } else {
                 Swal.fire(T.translate("badge_checkin.wrong_qr_title"), T.translate("badge_checkin.wrong_qr_text"), "warning");
                 setScanning(false);

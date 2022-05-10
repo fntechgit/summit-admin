@@ -89,9 +89,12 @@ export const boolToStr = boolean => {
 }
 
 export const validateBadgeQR = (code, summit) => {
-    let qrCodeArray = code.split(summit.qr_registry_field_delimiter);
+    const qrCodeArray = code.split(summit.qr_registry_field_delimiter);
 
-    if (qrCodeArray.length < 2 || qrCodeArray[0] !== summit.ticket_qr_prefix) {
+    if (qrCodeArray.length > 2
+        && qrCodeArray[0] === summit.badge_qr_prefix
+        && qrCodeArray[1].startsWith(summit.ticket_qr_prefix)
+    ) {
         return qrCodeArray;
     }
 
