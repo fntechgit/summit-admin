@@ -366,8 +366,8 @@ class SummitAttendeeListPage extends React.Component {
                             name="checkedInFilter"
                             options={[
                                 { label: "All", value: null, default: checkedInFilter === null},
-                                { label: "Checked in", value: "CHECKED_IN", default: checkedInFilter === "HAS_TICKETS" },
-                                { label: "Not Checked in", value: "NO_CHECKED_IN", default: checkedInFilter === "HAS_NO_TICKETS" },
+                                { label: "Checked in", value: "CHECKED_IN", default: checkedInFilter === "CHECKED_IN" },
+                                { label: "Not Checked in", value: "NO_CHECKED_IN", default: checkedInFilter === "NO_CHECKED_IN" },
                             ]}
                             setValue={newValue => this.handleSetCheckedInFilter(newValue)}
                             style={{ width: "100%", height:40, color: '#337ab7', fontSize: '10px' }}
