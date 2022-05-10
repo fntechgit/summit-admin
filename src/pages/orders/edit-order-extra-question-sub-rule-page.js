@@ -30,7 +30,7 @@ class EditOrderExtraQuestionSubRulesPage extends React.Component {
 
     constructor(props) {
         const subRuleId = props.match.params.sub_rule_id;
-        const orderExtraQuestionId = props.match.params.order_extra_question_id;
+        const orderExtraQuestionId = props.currentExtraQuestion.id;
         super(props);
 
         if (!subRuleId) {
@@ -43,9 +43,9 @@ class EditOrderExtraQuestionSubRulesPage extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.order_extra_question_id;
-        const newId = this.props.match.params.order_extra_question_id;
-        const orderExtraQuestionId = this.props.match.params.order_extra_question_id;
+        const oldId = prevProps.match.params.sub_rule_id;
+        const newId = this.props.match.params.sub_rule_id;
+        const orderExtraQuestionId = this.props.currentExtraQuestion.id;
 
         if (newId !== oldId) {
             if (!newId) {
@@ -55,7 +55,7 @@ class EditOrderExtraQuestionSubRulesPage extends React.Component {
             }
         }
     }
-        
+
     handleRuleSave(valueEntity) {
         this.props.saveOrderExtraQuestionsSubQuestionsRule(valueEntity);
     }
@@ -82,11 +82,11 @@ class EditOrderExtraQuestionSubRulesPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentOrderExtraQuestionListState, currentOrderExtraQuestionState, currentRrderExtraQuestionRuleState }) => ({
+const mapStateToProps = ({ currentSummitState, currentOrderExtraQuestionListState, currentOrderExtraQuestionState, currentOrderExtraQuestionRuleState }) => ({
     currentSummit: currentSummitState.currentSummit,
     extraQuestions: currentOrderExtraQuestionListState.orderExtraQuestions,
     currentExtraQuestion: currentOrderExtraQuestionState.entity,
-    ...currentRrderExtraQuestionRuleState
+    ...currentOrderExtraQuestionRuleState
 });
 
 export default connect(

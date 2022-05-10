@@ -179,7 +179,7 @@ const reducers = persistCombineReducers(config, {
     currentAccessLevelState: accessLevelReducer,
     currentOrderExtraQuestionListState: orderExtraQuestionListReducer,
     currentOrderExtraQuestionState: orderExtraQuestionReducer,
-    currentRrderExtraQuestionRuleState: orderExtraQuestionRuleReducer,
+    currentOrderExtraQuestionRuleState: orderExtraQuestionRuleReducer,
     currentPurchaseOrderListState: purchaseOrderListReducer,
     currentPurchaseOrderState: purchaseOrderReducer,
     currentSponsorListState: sponsorListReducer,

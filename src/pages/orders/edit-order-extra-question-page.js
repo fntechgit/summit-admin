@@ -31,33 +31,13 @@ import Swal from "sweetalert2";
 class EditOrderExtraQuestionPage extends React.Component {
 
     constructor(props) {
-        const orderExtraQuestionId = props.match.params.order_extra_question_id;
         super(props);
-
-        if (!orderExtraQuestionId) {
-            props.resetOrderExtraQuestionForm();
-        } else {
-            props.getOrderExtraQuestion(orderExtraQuestionId);
-        }
 
         props.getOrderExtraQuestionMeta();
 
         this.handleValueSave = this.handleValueSave.bind(this);
         this.handleValueDelete = this.handleValueDelete.bind(this);
         this.handleRuleDelete = this.handleRuleDelete.bind(this);
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.order_extra_question_id;
-        const newId = this.props.match.params.order_extra_question_id;
-
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetOrderExtraQuestionForm();
-            } else {
-                this.props.getOrderExtraQuestion(newId);
-            }
-        }
     }
 
     handleValueDelete(valueId) {
@@ -91,7 +71,7 @@ class EditOrderExtraQuestionPage extends React.Component {
             confirmButtonText: T.translate("general.yes_delete")
         }).then(function (result) {
             if (result.value) {
-               deleteOrderExtraQuestionsSubQuestionsRule(entity.id, valueId);
+                deleteOrderExtraQuestionsSubQuestionsRule(entity.id, valueId);
             }
         });
     }
@@ -102,13 +82,11 @@ class EditOrderExtraQuestionPage extends React.Component {
     }
 
     render() {
-        const { currentSummit, entity, errors, match, allClasses } = this.props;
+        const { currentSummit, entity, errors, allClasses } = this.props;
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
 
         return (
             <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
                 <h3>{title} {T.translate("edit_order_extra_question.order_extra_question")}</h3>
                 <hr />
                 {currentSummit &&
