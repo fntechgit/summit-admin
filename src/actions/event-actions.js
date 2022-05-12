@@ -24,12 +24,12 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    epochToMomentTimeZone,
     authErrorHandler,
     getCSV,
     escapeFilterValue,
     postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
+import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
 import {getAccessTokenSafely} from '../utils/methods';
 import {getQAUsersBySummitEvent} from "../actions/user-chat-roles-actions"
 
