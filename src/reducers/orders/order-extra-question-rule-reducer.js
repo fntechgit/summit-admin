@@ -22,16 +22,15 @@ import { LOGOUT_USER, VALIDATE } from 'openstack-uicore-foundation/lib/actions';
 
 export const DEFAULT_ENTITY = {
     id: 0,
-    visibility: false,
-    visibility_condition: false,
+    visibility: 'Visible',
+    visibility_condition: "Equal",
     answer_values: [],
-    answer_custom_value: '',
-    answer_values_operator: '',
+    answer_values_operator: 'And',
     sub_question_id: null
 }
 
 const DEFAULT_STATE = {
-    entity: DEFAULT_ENTITY,
+    entity: { ...DEFAULT_ENTITY},
     errors: {},
 };
 

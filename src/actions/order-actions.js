@@ -632,6 +632,7 @@ export const saveOrderExtraQuestionsSubQuestionsRule = (entity) => (dispatch, ge
         )(params)(dispatch)
             .then((payload) => {
                 dispatch(showSuccessMessage(T.translate("edit_order_extra_question_sub_rule.order_extra_question_sub_rule_saved")));
+                history.push(`/app/summits/${summit_id}/order-extra-questions/${id}/sub-rule/${payload.response.id}`)
             });
     }
 
@@ -644,7 +645,7 @@ export const saveOrderExtraQuestionsSubQuestionsRule = (entity) => (dispatch, ge
     return postRequest(
         createAction(UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION),
         createAction(ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${summit_id}/order-extra-questions/${id}/sub-question-rules/`,
+        `${window.API_BASE_URL}/api/v1/summits/${summit_id}/order-extra-questions/${id}/sub-question-rules`,
         normalizedEntity,
         authErrorHandler,
         entity
@@ -653,7 +654,7 @@ export const saveOrderExtraQuestionsSubQuestionsRule = (entity) => (dispatch, ge
             dispatch(showMessage(
                 success_message,
                 () => {
-                    history.push(`/app/summits/${currentSummit.id}/order-extra-questions/${payload.response.id}`)
+                    history.push(`/app/summits/${summit_id}/order-extra-questions/${id}/sub-rule/${payload.response.id}`)
                 }
             ));
         });    
