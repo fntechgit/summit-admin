@@ -408,11 +408,9 @@ export const getPurchaseOrder = (orderId) => async (dispatch, getState) => {
     );
 };
 
-
 export const resetPurchaseOrderForm = () => (dispatch) => {
     dispatch(createAction(RESET_PURCHASE_ORDER_FORM)({}));
 };
-
 
 export const savePurchaseOrder = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -611,7 +609,7 @@ export const resetOrderExtraQuestionSubQuestionForm = () => (dispatch) => {
 
 export const getOrderExtraQuestionsSubQuestionsRule = (orderExtraQuestionId, ruleId) => async (dispatch, getState) => {
     const {currentOrderExtraQuestionState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {entity: {summit_id}} = currentOrderExtraQuestionState;
 
     dispatch(startLoading());
@@ -633,8 +631,8 @@ export const getOrderExtraQuestionsSubQuestionsRule = (orderExtraQuestionId, rul
 
 export const saveOrderExtraQuestionsSubQuestionsRule = (entity) => async (dispatch, getState) => {
 
-    const {currentOrderExtraQuestionState} = getState();
-    const accessToken = await getAccessToken();
+    const { currentOrderExtraQuestionState } = getState();
+    const accessToken = await getAccessTokenSafely();
     const {entity: {summit_id, id}} = currentOrderExtraQuestionState;
 
     dispatch(startLoading());
@@ -686,7 +684,7 @@ export const saveOrderExtraQuestionsSubQuestionsRule = (entity) => async (dispat
 
 export const updateOrderExtraQuestionsSubQuestionsRuleOrder = (rules, ruleId, newOrder) => async (dispatch, getState) => {
     const {currentOrderExtraQuestionState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {entity: {summit_id, id}} = currentOrderExtraQuestionState;
 
     const params = {
@@ -707,7 +705,7 @@ export const updateOrderExtraQuestionsSubQuestionsRuleOrder = (rules, ruleId, ne
 
 export const deleteOrderExtraQuestionsSubQuestionsRule = (orderExtraQuestionId, ruleId) => async (dispatch, getState) => {
     const {currentOrderExtraQuestionState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {entity: {summit_id}} = currentOrderExtraQuestionState;
 
     dispatch(startLoading());
