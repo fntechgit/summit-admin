@@ -84,9 +84,11 @@ class App extends React.PureComponent {
     }
 
     render() {
+
         const { isLoggedUser, onUserAuth, doLogout, getUserInfo, backUrl, loading} = this.props;
 
         const idToken = getIdToken();
+
         // get user pic from idtoken claims (IDP)
         let profile_pic = '';
 

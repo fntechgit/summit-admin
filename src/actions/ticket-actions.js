@@ -334,10 +334,11 @@ export const exportTicketsCSV = (pageSize = 500,
                                  orderDir = 1, filters = {}) => async (dispatch, getState) => {
     dispatch(startLoading());
     const csvMIME = 'text/csv;charset=utf-8';
-    const { currentSummitState, currentTicketListState} = getState();
     const accessToken = await getAccessTokenSafely();
+    const { currentSummitState, currentTicketListState} = getState();
     const { currentSummit }   = currentSummitState;
     const { totalTickets } = currentTicketListState;
+
     const filename = currentSummit.name + '-Tickets.csv';
     const totalPages = Math.ceil(totalTickets / pageSize);
 
