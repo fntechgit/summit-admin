@@ -14,7 +14,7 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { MemberInput, Input, Panel } from 'openstack-uicore-foundation/lib/components'
+import { MemberInput, Input, Panel, ExtraQuestionsForm } from 'openstack-uicore-foundation/lib/components'
 import TicketComponent from './ticket-component'
 import OrderComponent from './order-component'
 import RsvpComponent from './rsvp-component'
@@ -33,6 +33,8 @@ class AttendeeForm extends React.Component {
             errors: props.errors,
             showSection: 'main',
         };
+
+        this.formRef = React.createRef();
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -86,11 +88,21 @@ class AttendeeForm extends React.Component {
         this.setState({entity: entity, errors: errors});
     }
 
-    handleSubmit(ev) {
+    handleSubmit(formValues) {
         let entity = {...this.state.entity};
-        ev.preventDefault();
+        const {currentSummit} = this.props;
+        
+        const formattedAnswers = [];
+        Object.keys(formValues).map(a => {
+            let question = currentSummit.order_extra_questions.find(q => q.name === a);
+            const newQuestion = { question_id: question.id, answer: `${formValues[a]}` }
+            formattedAnswers.push(newQuestion);
+        });
 
-        this.props.onSubmit(this.state.entity);
+        this.setState({...this.state, entity: {...this.state.entity, extra_questions: formattedAnswers}}, () => {
+            this.props.onSubmit(this.state.entity);
+        });
+
     }
 
     handlePresentationLink(event_id, ev) {
@@ -269,11 +281,12 @@ class AttendeeForm extends React.Component {
                     {entity.id !== 0 && currentSummit.attendee_extra_questions && currentSummit.attendee_extra_questions.length > 0 &&
                     <Panel show={showSection === 'extra_questions'} title={T.translate("edit_attendee.extra_questions")}
                            handleClick={this.toggleSection.bind(this, 'extra_questions')}>
-                        <QuestionAnswersInput
-                            id="extra_questions"
-                            answers={entity.extra_questions}
-                            questions={currentSummit.attendee_extra_questions}
-                            onChange={this.handleChange}
+                        <ExtraQuestionsForm 
+                            extraQuestions={currentSummit.attendee_extra_questions}
+                            userAnswers={entity.extra_questions}
+                            onAnswerChanges={this.handleSubmit}
+                            formRef={this.formRef}
+                            className="extra-questions"
                         />
                     </Panel>
                     }
@@ -283,7 +296,7 @@ class AttendeeForm extends React.Component {
 
                 <div className="row">
                     <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
+                        <input type="button" onClick={() => this.formRef.current.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }))}
                                className="btn btn-primary pull-right" value={T.translate("general.save")}/>
                     </div>
                 </div>
