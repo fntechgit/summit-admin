@@ -38,6 +38,7 @@ class AttendeeForm extends React.Component {
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.triggerFormSubmit = this.triggerFormSubmit.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -86,6 +87,10 @@ class AttendeeForm extends React.Component {
         errors[id] = '';
         entity[id] = value;
         this.setState({entity: entity, errors: errors});
+    }
+
+    triggerFormSubmit() {
+        this.formRef.current.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
     }
 
     handleSubmit(formValues) {
@@ -296,7 +301,7 @@ class AttendeeForm extends React.Component {
 
                 <div className="row">
                     <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={() => this.formRef.current.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }))}
+                        <input type="button" onClick={() => this.triggerFormSubmit()}
                                className="btn btn-primary pull-right" value={T.translate("general.save")}/>
                     </div>
                 </div>
