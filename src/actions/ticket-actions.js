@@ -28,6 +28,7 @@ import {
     startLoading,
     stopLoading,
 } from 'openstack-uicore-foundation/lib/utils/actions';
+
 import {getAccessTokenSafely} from '../utils/methods';
 
 import URI from "urijs";
@@ -238,7 +239,7 @@ export const getTickets =
     ) => async (dispatch, getState) => {
 
         const { currentSummitState } = getState();
-        const accessToken = await getAccessToken();
+        const accessToken = await getAccessTokenSafely();
         const { currentSummit }   = currentSummitState;
 
         dispatch(startLoading());

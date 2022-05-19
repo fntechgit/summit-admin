@@ -108,10 +108,10 @@ export const resetEventCategoryForm = () => (dispatch) => {
     dispatch(createAction(RESET_EVENT_CATEGORY_FORM)({}));
 };
 
-export const updateEventCategoryOrder = (tracks, trackId, newOrder) => (dispatch, getState) => {
+export const updateEventCategoryOrder = (tracks, trackId, newOrder) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -119,6 +119,8 @@ export const updateEventCategoryOrder = (tracks, trackId, newOrder) => (dispatch
     };
 
     const track = tracks.find(q => q.id === trackId);
+
+    dispatch(startLoading());
 
     putRequest(
         null,
