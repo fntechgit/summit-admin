@@ -22,6 +22,7 @@ import {
     updateSelectionPlanExtraQuestionOrder,
     addEventTypeSelectionPlan,
     deleteEventTypeSelectionPlan,
+    deleteRatingType
 } from "../../actions/selection-plan-actions";
 import Swal from "sweetalert2";
 
@@ -33,6 +34,9 @@ class EditSelectionPlanPage extends React.Component {
         this.onDeleteExtraQuestion = this.onDeleteExtraQuestion.bind(this);
         this.onEditExtraQuestion = this.onEditExtraQuestion.bind(this);
         this.onUpdateExtraQuestionOrder = this.onUpdateExtraQuestionOrder.bind(this);
+        this.onAddRatingType = this.onAddRatingType.bind(this);
+        this.onEditRatingType = this.onEditRatingType.bind(this);
+        this.onDeletetRatingType = this.onDeletetRatingType.bind(this);
     }
 
     onDeleteExtraQuestion(questionId){
@@ -67,6 +71,33 @@ class EditSelectionPlanPage extends React.Component {
         history.push(`/app/summits/${currentSummit.id}/selection-plans/${entity.id}/extra-questions/new`);
     }
 
+    onAddRatingType(){
+        const {currentSummit, history, entity} = this.props;
+        history.push(`/app/summits/${currentSummit.id}/selection-plans/${entity.id}/rating-types/new`);
+    }
+
+    onEditRatingType(ratingTypeId){
+        const {currentSummit, history, entity} = this.props;
+        history.push(`/app/summits/${currentSummit.id}/selection-plans/${entity.id}/rating-types/${ratingTypeId}`);
+    }
+
+    onDeletetRatingType(ratingTypeId){
+        const {deleteRatingType, entity} = this.props;
+        let ratingType = entity.track_chair_rating_types.find(t => t.id === ratingTypeId);
+        Swal.fire({
+            title: T.translate("general.are_you_sure"),
+            text: T.translate("edit_selection_plan.rating_type_remove_warning") + ' ' + ratingType.name,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: T.translate("general.yes_delete")
+        }).then(function(result){
+            if (result.value) {
+                deleteRatingType(entity.id, ratingTypeId);
+            }
+        });
+    }
+
     render(){
         const {currentSummit, entity, errors, match, extraQuestionsOrder, extraQuestionsOrderDir} = this.props;
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
@@ -90,6 +121,9 @@ class EditSelectionPlanPage extends React.Component {
                     onAddEventType={this.props.addEventTypeSelectionPlan}
                     onDeleteEventType={this.props.deleteEventTypeSelectionPlan}
                     onEditExtraQuestion={this.onEditExtraQuestion}
+                    onAddRatingType={this.onAddRatingType}
+                    onEditRatingType={this.onEditRatingType}
+                    onDeleteRatingType={this.onDeleteRatingType}
                 />
             </div>
         )
@@ -110,6 +144,7 @@ export default connect (
         addEventTypeSelectionPlan,
         deleteEventTypeSelectionPlan,
         updateSelectionPlanExtraQuestionOrder,
-        deleteSelectionPlanExtraQuestion
+        deleteSelectionPlanExtraQuestion,
+        deleteRatingType
     }
 )(EditSelectionPlanPage);

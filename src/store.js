@@ -115,6 +115,7 @@ import thunk from 'redux-thunk';
 import { persistStore, persistCombineReducers } from 'redux-persist'
 import storage from 'redux-persist/es/storage'
 import presentationVotesReducer from "./reducers/events/summit-presentation-votes-reducer";
+import ratingTypeReducer from "./reducers/ranking/rating-type-reducer";
 
  // default: localStorage if web, AsyncStorage if react-native
 
@@ -222,7 +223,8 @@ const reducers = persistCombineReducers(config, {
     scheduleSettingsListState: scheduleSettingsListReducer,
     currentSelectionPlanExtraQuestionState: selectionPlanExtraQuestionReducer,
     currentPresentationVotesState: presentationVotesReducer,
-    currentRegistrationCompanyListState: registrationCompanyListReducer
+    currentRegistrationCompanyListState: registrationCompanyListReducer,
+    ratingTypeState: ratingTypeReducer,
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

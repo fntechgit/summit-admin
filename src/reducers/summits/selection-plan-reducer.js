@@ -37,6 +37,7 @@ export const DEFAULT_ENTITY = {
     presentation_creator_notification_email_template: '',
     presentation_moderator_notification_email_template: '',
     presentation_speaker_notification_email_template: '',
+    track_chair_rating_types: [],
 }
 
 const DEFAULT_STATE = {

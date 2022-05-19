@@ -6,6 +6,7 @@ import { getSelectionPlan,
     resetSelectionPlanForm,
 } from "../actions/selection-plan-actions";
 import SelectionPlanExtraQuestionsLayout from "./selection-plan-extra-questions-layout";
+import selectionPlanRatingTypesLayout from "./selection-plan-rating-types-layout";
 import NoMatchPage from "../pages/no-match-page";
 import {Breadcrumb} from "react-breadcrumbs";
 import T from "i18n-react";
@@ -45,6 +46,7 @@ class SelectionPlanIdLayout extends React.Component {
                 <Switch>
                     <Route strict exact path={`${match.url}`} component={EditSelectionPlanPage} />
                     <Route path={`${match.url}/extra-questions`} component={SelectionPlanExtraQuestionsLayout}/>
+                    <Route path={`${match.url}/rating-types`} component={selectionPlanRatingTypesLayout}/>
                     <Redirect to={`/app/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`} />
                 </Switch>
             </div>
