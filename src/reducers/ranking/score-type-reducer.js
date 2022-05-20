@@ -13,13 +13,12 @@
 
 import
 {
-    RECEIVE_RATING_TYPE,
-    RESET_RATING_TYPE_FORM,
-    UPDATE_RATING_TYPE,
-    RECEIVE_SCORE_TYPES,
-    RATING_TYPE_SCORE_TYPE_REMOVED,
-    RATING_TYPE_SCORE_TYPE_ADDED,
-    RATING_TYPE_SCORE_TYPE_ORDER_UPDATED
+    RECEIVE_SCORE_TYPE,
+    RESET_SCORE_TYPE_FORM,
+    UPDATE_SCORE_TYPE,
+    SCORE_TYPE_UPDATED,
+    SCORE_TYPE_ADDED,
+    SCORE_TYPE_DELETED,
 } from '../../actions/ranking-actions';
 
 import { LOGOUT_USER, VALIDATE } from 'openstack-uicore-foundation/lib/actions';
@@ -28,9 +27,8 @@ import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
 export const DEFAULT_ENTITY = {
     id          : 0,
     name        : '',
-    weight      : 0,
-    order       : 1,
-    score_types : []
+    score       : 0,
+    description : '',
 }
 
 const DEFAULT_STATE = {
@@ -38,7 +36,7 @@ const DEFAULT_STATE = {
     errors      : {},
 };
 
-const ratingTypeReducer = (state = DEFAULT_STATE, action) => {
+const scoreTypeReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action
     switch (type) {
         case LOGOUT_USER: {
@@ -50,14 +48,15 @@ const ratingTypeReducer = (state = DEFAULT_STATE, action) => {
             }
         }
         case SET_CURRENT_SUMMIT:
-        case RESET_RATING_TYPE_FORM: {
+        case RESET_SCORE_TYPE_FORM: {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
         }
-        case UPDATE_RATING_TYPE: {
+        case UPDATE_SCORE_TYPE: {
             return {...state,  entity: {...payload}, errors: {} };
         }
-        case RECEIVE_RATING_TYPE: {
+        case RECEIVE_SCORE_TYPE: {
             let entity = {...payload.response};
+
             for(var key in entity) {
                 if(entity.hasOwnProperty(key)) {
                     entity[key] = (entity[key] == null) ? '' : entity[key] ;
@@ -65,29 +64,14 @@ const ratingTypeReducer = (state = DEFAULT_STATE, action) => {
             }
             return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
         }
-        case RECEIVE_SCORE_TYPES: {
+        case SCORE_TYPE_UPDATED: {
+            return state;
+        }
+        case SCORE_TYPE_ADDED: {
             let entity = {...payload.response};
-            return {...state, entity: {...state.entity, score_types: [...entity.data]} };
-        }
-        case RATING_TYPE_SCORE_TYPE_REMOVED: {
-            let {scoreTypeId} = payload;
-            let scoreTypes = state.entity.score_types.filter(t => t.id !== scoreTypeId);
-            return {...state, entity: {...state.entity, score_types: scoreTypes} };
-        }
-        case RATING_TYPE_SCORE_TYPE_ADDED: {
-            let scoreType = {...payload.scoreType};
-            return {...state, entity: {...state.entity, score_types: [...state.entity.score_types, scoreType]} };
-        }
-        case RATING_TYPE_SCORE_TYPE_ORDER_UPDATED: {
-            let score_types = payload.map(s => {
-                return {
-                    id: s.id,
-                    name: s.name,
-                    score: parseInt(s.score),
-                    description: s.description
-                };
-            })
-            return {...state, entity: {...state.entity, score_types : score_types}}
+            let values = [...state.entity.values, entity];
+
+            return {...state, entity: { ...state.entity, values: values}};
         }
         case VALIDATE: {
             return {...state,  errors: payload.errors };
@@ -97,4 +81,4 @@ const ratingTypeReducer = (state = DEFAULT_STATE, action) => {
     }
 };
 
-export default ratingTypeReducer;
+export default scoreTypeReducer;

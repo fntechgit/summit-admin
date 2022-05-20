@@ -14,10 +14,10 @@
 import React from 'react';
 import T from 'i18n-react/dist/i18n-react';
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css';
-import { Input, SortableTable } from 'openstack-uicore-foundation/lib/components';
+import { Input } from 'openstack-uicore-foundation/lib/components';
 import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
 
-class RatingTypeForm extends React.Component {
+class ScoreTypeForm extends React.Component {
 
     constructor(props) {
         super(props);
@@ -64,78 +64,55 @@ class RatingTypeForm extends React.Component {
         this.props.onSubmit(this.state.entity);
     }
 
-    render() {
-        const {entity, errors} = this.state;
-        const scoreTypesColumns = [
-            { columnKey: 'score', value: T.translate("score_type_list.score") },
-            { columnKey: 'name', value: T.translate("score_type_list.name") },
-            { columnKey: 'description', value: T.translate("score_type_list.description") },
-        ];
+    hasErrors(field) {
+        let {errors} = this.state;
+        if(field in errors) {
+            return errors[field];
+        }
 
-        const scoreTypesOptions = {
-            title: T.translate("edit_rating_type.score_types"),
-            valueKey: "score",
-            labelKey: "score",
-            defaultOptions: true,
-            actions: {
-                edit: { onClick: this.props.onEditScoreType },
-                delete: { onClick: this.props.onDeleteScoreType }
-            }
-        };
+        return '';
+    }
+
+    render() {
+        const {entity} = this.state;
 
         return (
             <form className="badge-type-form">
                 <input type="hidden" id="id" value={entity.id} />
-                <input type="hidden" id="order" value={entity.order} />
                 <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_rating_type.name")} *</label>
+                    <div className="col-md-6">
+                        <label> {T.translate("edit_score_type.name")} *</label>
                         <Input
                             id="name"
                             className="form-control"
-                            error={hasErrors('name', errors)}
+                            error={this.hasErrors('name')}
                             onChange={this.handleChange}
                             value={entity.name}
                         />
                     </div>
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_rating_type.weight")} *</label>
+                    <div className="col-md-6">
+                        <label> {T.translate("edit_score_type.score")} *</label>
                         <Input
-                            id="weight"
+                            id="score"
                             type="number"
                             className="form-control"
-                            error={hasErrors('weight', errors)}
+                            error={this.hasErrors('score')}
                             onChange={this.handleChange}
-                            value={entity.weight}
+                            value={entity.score}
+                        />
+                    </div>
+                    <div className="col-md-12">
+                        <label> {T.translate("edit_score_type.description")} *</label>
+                        <textarea
+                            id="description"
+                            value={entity.description}
+                            onChange={this.handleChange}
+                            className="form-control"
+                            error={this.hasErrors('description')}
                         />
                     </div>
                 </div>
-
-               
-                {entity.id !== 0 &&
-                    <>
-                        <hr />
-                        <div className={'row'}>
-                            <div className="col-md-6">
-                                <h3>{T.translate("edit_rating_type.score_types")}</h3>
-                            </div>
-                        </div>
-                        <div className={'row'}>
-                            <div className="col-md-6 text-right col-md-offset-6">
-                                 <input type="button" onClick={this.props.onAddScoreType}
-                                     className="btn btn-primary pull-right" value={T.translate("edit_rating_type.add_score_type")} />
-                            </div>
-                        </div>
-                        <SortableTable
-                            options={scoreTypesOptions}
-                            data={entity.score_types}
-                            columns={scoreTypesColumns}
-                            dropCallback={this.props.onUpdateScoreTypeOrder}
-                            orderField="order"
-                        />
-                    </>
-                }
-              
+             
                 <hr />
 
                 <div className="row">
@@ -149,4 +126,4 @@ class RatingTypeForm extends React.Component {
     }
 }
 
-export default RatingTypeForm;
+export default ScoreTypeForm;

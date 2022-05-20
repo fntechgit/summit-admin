@@ -1965,11 +1965,22 @@
     "no_rating_types": "No Rating Types found.",
     "rating_type_saved": "Rating Type saved successfully.",
     "rating_type_created": "Rating Type created successfully.",
-    "remove_warning": "Are you sure you want to remove the rating type ",
+    "remove_warning": "Are you sure you want to remove the rating type",
     "score_types": "Score Types",
-    "score_types_list": {
-      "name": "Name",
-      "description": "Description"
-    }
+    "add_score_type": "Add New Score type",
+    "remove_score_type_warning": "Are you sure you want to remove the score type"
+  },
+  "score_type_list": {
+    "name": "Name",
+    "score": "Score",
+    "description": "Description"
+  },
+  "edit_score_type": {
+    "score_type": "Score Type",
+    "name": "Name",
+    "score": "Score",
+    "description": "Description",
+    "score_type_saved": "Score Type saved successfully.",
+    "score_type_created": "Score Type created successfully."
   }
 }

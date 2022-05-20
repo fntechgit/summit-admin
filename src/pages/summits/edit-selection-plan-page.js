@@ -22,6 +22,7 @@ import {
     updateSelectionPlanExtraQuestionOrder,
     addEventTypeSelectionPlan,
     deleteEventTypeSelectionPlan,
+    updateRatingTypeOrder,
     deleteRatingType
 } from "../../actions/selection-plan-actions";
 import Swal from "sweetalert2";
@@ -36,7 +37,8 @@ class EditSelectionPlanPage extends React.Component {
         this.onUpdateExtraQuestionOrder = this.onUpdateExtraQuestionOrder.bind(this);
         this.onAddRatingType = this.onAddRatingType.bind(this);
         this.onEditRatingType = this.onEditRatingType.bind(this);
-        this.onDeletetRatingType = this.onDeletetRatingType.bind(this);
+        this.onDeleteRatingType = this.onDeleteRatingType.bind(this);
+        this.onUpdateRatingTypeOrder = this.onUpdateRatingTypeOrder.bind(this);
     }
 
     onDeleteExtraQuestion(questionId){
@@ -81,7 +83,12 @@ class EditSelectionPlanPage extends React.Component {
         history.push(`/app/summits/${currentSummit.id}/selection-plans/${entity.id}/rating-types/${ratingTypeId}`);
     }
 
-    onDeletetRatingType(ratingTypeId){
+    onUpdateRatingTypeOrder(ratingTypes, ratingTypeId){
+        const {entity} = this.props;
+        this.props.updateRatingTypeOrder(entity.id, ratingTypes, ratingTypeId);
+    }
+
+    onDeleteRatingType(ratingTypeId){
         const {deleteRatingType, entity} = this.props;
         let ratingType = entity.track_chair_rating_types.find(t => t.id === ratingTypeId);
         Swal.fire({
@@ -123,6 +130,7 @@ class EditSelectionPlanPage extends React.Component {
                     onEditExtraQuestion={this.onEditExtraQuestion}
                     onAddRatingType={this.onAddRatingType}
                     onEditRatingType={this.onEditRatingType}
+                    onUpdateRatingTypeOrder={this.onUpdateRatingTypeOrder}
                     onDeleteRatingType={this.onDeleteRatingType}
                 />
             </div>
@@ -145,6 +153,7 @@ export default connect (
         deleteEventTypeSelectionPlan,
         updateSelectionPlanExtraQuestionOrder,
         deleteSelectionPlanExtraQuestion,
+        updateRatingTypeOrder,
         deleteRatingType
     }
 )(EditSelectionPlanPage);

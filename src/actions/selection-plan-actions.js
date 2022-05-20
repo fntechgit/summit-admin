@@ -520,7 +520,33 @@ export const deleteEventTypeSelectionPlan = (selectionPlanId, eventTypeId) => (d
 
 /***********************  RATING TYPES  *******************************************/
 
-export const RATING_TYPE_DELETED = 'RATING_TYPE_DELETED';
+export const SELECTION_PLAN_RATING_TYPE_ADDED = 'SELECTION_PLAN_RATING_TYPE_ADDED';
+export const SELECTION_PLAN_RATING_TYPE_REMOVED = 'SELECTION_PLAN_RATING_TYPE_REMOVED';
+export const SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED = 'SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED';
+
+export const updateRatingTypeOrder = (selectionPlanId, ratingTypes, ratingTypeId, newOrder) => (dispatch, getState) => {
+
+    const {loggedUserState, currentSummitState} = getState();
+    const {accessToken} = loggedUserState;
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    const ratingType = ratingTypes.find(r => r.id === ratingTypeId);
+
+    putRequest(
+        null,
+        createAction(SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED)(ratingTypes),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/track-chair-rating-types/${ratingTypeId}`,
+        ratingType,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
 
 export const deleteRatingType = (selectionPlanId, ratingTypeId) => (dispatch, getState) => {
 
@@ -534,7 +560,7 @@ export const deleteRatingType = (selectionPlanId, ratingTypeId) => (dispatch, ge
 
     return deleteRequest(
         null,
-        createAction(RATING_TYPE_DELETED)({ratingTypeId}),
+        createAction(SELECTION_PLAN_RATING_TYPE_REMOVED)({ratingTypeId}),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/track-chair-rating-types/${ratingTypeId}`,
         null,
         authErrorHandler

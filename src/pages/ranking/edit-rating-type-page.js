@@ -17,48 +17,66 @@ import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import RatingTypeForm from "../../components/forms/rating-type-form";
 import { getSummitById } from "../../actions/summit-actions";
-import { getRatingType, resetRatingTypeForm, saveRatingType, deleteRatingType } from "../../actions/ranking-actions";
+import { getRatingType, resetRatingTypeForm, saveRatingType, deleteScoreType, updateScoreTypeOrder } from "../../actions/ranking-actions";
 import Swal from "sweetalert2";
 
 class EditRatingTypePage extends React.Component {
   constructor(props) {
+    const ratingTypeId = props.match.params.rating_type_id;
     super(props);
 
-    //props.getScoreTypes();
+    if (!ratingTypeId) {
+      props.resetRatingTypeForm();
+    } else {
+      props.getRatingType(ratingTypeId);
+    }
 
-    this.handleValueSave = this.handleValueSave.bind(this);
-    //this.handleValueDelete = this.handleValueDelete.bind(this);
+    this.handleAddScoreType = this.handleAddScoreType.bind(this);
+    this.handleDeleteScoreType = this.handleDeleteScoreType.bind(this);
+    this.handleEditScoreType = this.handleEditScoreType.bind(this);
+    this.handleUpdateScoreTypeOrder = this.handleUpdateScoreTypeOrder.bind(this);
   }
 
-  //  handleValueDelete(valueId) {
-  //      const { deleteOrderExtraQuestionValue, currentSummit, entity } = this.props;
-  //      let value = entity.values.find(v => v.id === valueId);
+  handleAddScoreType() {
+    const { currentSummit, currentSelectionPlan, history, entity } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/rating-types/${entity.id}/score-types/new`);
+  }
 
-  //      Swal.fire({
-  //          title: T.translate("general.are_you_sure"),
-  //          text: T.translate("edit_rating_type.remove_value_warning") + ' ' + value.value,
-  //          type: "warning",
-  //          showCancelButton: true,
-  //          confirmButtonColor: "#DD6B55",
-  //          confirmButtonText: T.translate("general.yes_delete")
-  //      }).then(function (result) {
-  //          if (result.value) {
-  //              deleteOrderExtraQuestionValue(entity.id, valueId);
-  //          }
-  //      });
-  //  }
+  handleEditScoreType(scoreTypeId){
+    const { currentSummit, currentSelectionPlan, history, entity } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/rating-types/${entity.id}/score-types/${scoreTypeId}`);
+  }
 
-  handleValueSave(valueEntity) {
-    const { entity } = this.props;
-    this.props.saveRatingType(entity.id, valueEntity);
+  handleDeleteScoreType(scoreTypeId) {
+    const { entity, deleteScoreType } = this.props;
+    let value = entity.score_types.find((v) => v.id === scoreTypeId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("edit_rating_type.remove_score_type_warning")} "${value.name}"`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete"),
+    }).then(function (result) {
+      if (result.value) {
+        deleteScoreType(entity.id, scoreTypeId);
+      }
+    });
+  }
+
+  handleUpdateScoreTypeOrder(scoreTypes, scoreTypeId, newOrder){
+    const {entity} = this.props;
+    this.props.updateScoreTypeOrder(entity.id, scoreTypes, scoreTypeId, newOrder);
   }
 
   render() {
-    const { currentSummit, entity, errors } = this.props;
+    const { currentSummit, entity, errors, match } = this.props;
     const title = entity.id ? T.translate("general.edit") : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
     return (
       <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_rating_type.rating_type")}
         </h3>
@@ -67,8 +85,10 @@ class EditRatingTypePage extends React.Component {
           <RatingTypeForm
             entity={entity}
             errors={errors}
-            onValueDelete={this.handleValueDelete}
-            onValueSave={this.handleValueSave}
+            onAddScoreType={this.handleAddScoreType}
+            onDeleteScoreType={this.handleDeleteScoreType}
+            onEditScoreType={this.handleEditScoreType}
+            onUpdateScoreTypeOrder={this.handleUpdateScoreTypeOrder}
             onSubmit={this.props.saveRatingType}
           />
         )}
@@ -77,8 +97,9 @@ class EditRatingTypePage extends React.Component {
   }
 }
 
-const mapStateToProps = ({ currentSummitState, ratingTypeState }) => ({
+const mapStateToProps = ({ currentSummitState, currentSelectionPlanState, ratingTypeState }) => ({
   currentSummit: currentSummitState.currentSummit,
+  currentSelectionPlan: currentSelectionPlanState.entity,
   ...ratingTypeState,
 });
 
@@ -87,4 +108,6 @@ export default connect(mapStateToProps, {
   getRatingType,
   resetRatingTypeForm,
   saveRatingType,
+  deleteScoreType,
+  updateScoreTypeOrder
 })(EditRatingTypePage);
