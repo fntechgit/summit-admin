@@ -19,10 +19,7 @@ import TicketComponent from './ticket-component'
 import OrderComponent from './order-component'
 import RsvpComponent from './rsvp-component'
 import { AffiliationsTable } from '../../tables/affiliationstable'
-import QuestionAnswersInput from '../../inputs/question-answers-input'
 import {isEmpty, scrollToError, shallowEqual} from "../../../utils/methods";
-
-
 
 class AttendeeForm extends React.Component {
     constructor(props) {
@@ -283,11 +280,11 @@ class AttendeeForm extends React.Component {
                     <RsvpComponent member={entity.member} onDelete={this.props.onDeleteRsvp} />
                     }
 
-                    {entity.id !== 0 && currentSummit.attendee_extra_questions && currentSummit.attendee_extra_questions.length > 0 &&
+                    {entity.id !== 0 && currentSummit.attendee_main_extra_questions && currentSummit.attendee_main_extra_questions.length > 0 &&
                     <Panel show={showSection === 'extra_questions'} title={T.translate("edit_attendee.extra_questions")}
                            handleClick={this.toggleSection.bind(this, 'extra_questions')}>
                         <ExtraQuestionsForm 
-                            extraQuestions={currentSummit.attendee_extra_questions}
+                            extraQuestions={currentSummit.attendee_main_extra_questions}
                             userAnswers={entity.extra_questions}
                             onAnswerChanges={this.handleSubmit}
                             formRef={this.formRef}
@@ -297,8 +294,6 @@ class AttendeeForm extends React.Component {
                     }
 
                 </div>
-
-
                 <div className="row">
                     <div className="col-md-12 submit-buttons">
                         <input type="button" onClick={() => this.triggerFormSubmit()}

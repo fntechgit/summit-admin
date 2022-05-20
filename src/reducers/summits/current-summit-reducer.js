@@ -98,6 +98,7 @@ export const DEFAULT_ENTITY = {
     order_extra_questions: null,
     order_only_extra_questions: null,
     attendee_extra_questions: null,
+    attendee_main_extra_questions: null,
     begin_allow_booking_date: 0,
     end_allow_booking_date: 0,
     external_summit_id: null,
@@ -348,7 +349,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         }
         case RECEIVE_MAIN_ORDER_EXTRA_QUESTIONS: {
             const mainExtraQuestions = payload.response.data;
-            return {...state, currentSummit: {...state.currentSummit, attendee_extra_questions: mainExtraQuestions } };;
+            return {...state, currentSummit: {...state.currentSummit, attendee_main_extra_questions: mainExtraQuestions } };
         }
         break;
         default:

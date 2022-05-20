@@ -4,6 +4,7 @@
   "description": "Show Admin App",
   "main": "index.js",
   "scripts": {
+    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && yarn",
     "build-dev": "./node_modules/.bin/webpack --config webpack.dev.js",
     "build": "./node_modules/.bin/webpack --config webpack.prod.js",
     "serve": "webpack-dev-server  --port 8080 --open --https --config webpack.dev.js"

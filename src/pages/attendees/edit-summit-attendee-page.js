@@ -33,7 +33,7 @@ class EditSummitAttendeePage extends React.Component {
             this.props.getAttendee(new_attendee_id);
         }
 
-        if (!currentSummit.attendee_extra_questions) {
+        if (!currentSummit.attendee_main_extra_questions || !currentSummit.attendee_main_extra_questions.length) {
             this.props.getMainOrderExtraQuestions();
         }
     }
