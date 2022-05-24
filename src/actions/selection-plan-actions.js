@@ -522,6 +522,7 @@ export const deleteEventTypeSelectionPlan = (selectionPlanId, eventTypeId) => (d
 
 export const SELECTION_PLAN_RATING_TYPE_ADDED = 'SELECTION_PLAN_RATING_TYPE_ADDED';
 export const SELECTION_PLAN_RATING_TYPE_REMOVED = 'SELECTION_PLAN_RATING_TYPE_REMOVED';
+export const SELECTION_PLAN_RATING_TYPE_UPDATED = 'SELECTION_PLAN_RATING_TYPE_UPDATED';
 export const SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED = 'SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED';
 
 export const updateRatingTypeOrder = (selectionPlanId, ratingTypes, ratingTypeId, newOrder) => (dispatch, getState) => {
@@ -536,7 +537,7 @@ export const updateRatingTypeOrder = (selectionPlanId, ratingTypes, ratingTypeId
 
     const ratingType = ratingTypes.find(r => r.id === ratingTypeId);
 
-    putRequest(
+    return putRequest(
         null,
         createAction(SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED)(ratingTypes),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/track-chair-rating-types/${ratingTypeId}`,

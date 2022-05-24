@@ -16,6 +16,7 @@ import {
     SELECTION_PLAN_EXTRA_QUESTION_ORDER_UPDATED,
     SELECTION_PLAN_RATING_TYPE_ADDED,
     SELECTION_PLAN_RATING_TYPE_REMOVED,
+    SELECTION_PLAN_RATING_TYPE_UPDATED,
     SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED
 } from '../../actions/selection-plan-actions';
 
@@ -153,8 +154,13 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
             return {...state, entity: {...state.entity, track_chair_rating_types: ratingTypes} };
         }
         case SELECTION_PLAN_RATING_TYPE_ADDED: {
-            let ratingType = {...payload.ratingType};
+            let ratingType = {...payload.response};
             return {...state, entity: {...state.entity, track_chair_rating_types: [...state.entity.track_chair_rating_types, ratingType]} };
+        }
+        case SELECTION_PLAN_RATING_TYPE_UPDATED: {
+            let ratingType = {...payload.response};
+            let ratingTypes = state.entity.track_chair_rating_types.filter(t => t.id !== ratingType.id);
+            return {...state, entity: {...state.entity, track_chair_rating_types: [...ratingTypes, ratingType]} };
         }
         case SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED: {
             let track_chair_rating_types = payload.map(r => {

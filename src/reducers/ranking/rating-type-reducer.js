@@ -15,7 +15,6 @@ import
 {
     RECEIVE_RATING_TYPE,
     RESET_RATING_TYPE_FORM,
-    UPDATE_RATING_TYPE,
     RECEIVE_SCORE_TYPES,
     RATING_TYPE_SCORE_TYPE_REMOVED,
     RATING_TYPE_SCORE_TYPE_ADDED,
@@ -28,7 +27,7 @@ import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
 export const DEFAULT_ENTITY = {
     id          : 0,
     name        : '',
-    weight      : 0,
+    weight      : 0.0,
     order       : 1,
     score_types : []
 }
@@ -53,11 +52,8 @@ const ratingTypeReducer = (state = DEFAULT_STATE, action) => {
         case RESET_RATING_TYPE_FORM: {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
         }
-        case UPDATE_RATING_TYPE: {
-            return {...state,  entity: {...payload}, errors: {} };
-        }
         case RECEIVE_RATING_TYPE: {
-            let entity = {...payload.response};
+            const entity = {...payload.response};
             for(var key in entity) {
                 if(entity.hasOwnProperty(key)) {
                     entity[key] = (entity[key] == null) ? '' : entity[key] ;
@@ -66,20 +62,20 @@ const ratingTypeReducer = (state = DEFAULT_STATE, action) => {
             return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
         }
         case RECEIVE_SCORE_TYPES: {
-            let entity = {...payload.response};
+            const entity = {...payload.response};
             return {...state, entity: {...state.entity, score_types: [...entity.data]} };
         }
         case RATING_TYPE_SCORE_TYPE_REMOVED: {
-            let {scoreTypeId} = payload;
-            let scoreTypes = state.entity.score_types.filter(t => t.id !== scoreTypeId);
+            const {scoreTypeId} = payload;
+            const scoreTypes = state.entity.score_types.filter(t => t.id !== scoreTypeId);
             return {...state, entity: {...state.entity, score_types: scoreTypes} };
         }
         case RATING_TYPE_SCORE_TYPE_ADDED: {
-            let scoreType = {...payload.scoreType};
+            const scoreType = {...payload.scoreType};
             return {...state, entity: {...state.entity, score_types: [...state.entity.score_types, scoreType]} };
         }
         case RATING_TYPE_SCORE_TYPE_ORDER_UPDATED: {
-            let score_types = payload.map(s => {
+            const score_types = payload.map(s => {
                 return {
                     id: s.id,
                     name: s.name,

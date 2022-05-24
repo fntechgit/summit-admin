@@ -131,7 +131,7 @@ class RatingTypeForm extends React.Component {
                             data={entity.score_types}
                             columns={scoreTypesColumns}
                             dropCallback={this.props.onUpdateScoreTypeOrder}
-                            orderField="order"
+                            orderField="score"
                         />
                     </>
                 }

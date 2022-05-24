@@ -15,10 +15,7 @@ import
 {
     RECEIVE_SCORE_TYPE,
     RESET_SCORE_TYPE_FORM,
-    UPDATE_SCORE_TYPE,
     SCORE_TYPE_UPDATED,
-    SCORE_TYPE_ADDED,
-    SCORE_TYPE_DELETED,
 } from '../../actions/ranking-actions';
 
 import { LOGOUT_USER, VALIDATE } from 'openstack-uicore-foundation/lib/actions';
@@ -51,11 +48,8 @@ const scoreTypeReducer = (state = DEFAULT_STATE, action) => {
         case RESET_SCORE_TYPE_FORM: {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
         }
-        case UPDATE_SCORE_TYPE: {
-            return {...state,  entity: {...payload}, errors: {} };
-        }
         case RECEIVE_SCORE_TYPE: {
-            let entity = {...payload.response};
+            const entity = {...payload.response};
 
             for(var key in entity) {
                 if(entity.hasOwnProperty(key)) {
@@ -65,13 +59,8 @@ const scoreTypeReducer = (state = DEFAULT_STATE, action) => {
             return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
         }
         case SCORE_TYPE_UPDATED: {
-            return state;
-        }
-        case SCORE_TYPE_ADDED: {
-            let entity = {...payload.response};
-            let values = [...state.entity.values, entity];
-
-            return {...state, entity: { ...state.entity, values: values}};
+            const entity = {...payload.response};
+            return {...state,  entity: {...entity}, errors: {} };
         }
         case VALIDATE: {
             return {...state,  errors: payload.errors };

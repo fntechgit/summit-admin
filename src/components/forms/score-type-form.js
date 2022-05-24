@@ -79,8 +79,9 @@ class ScoreTypeForm extends React.Component {
         return (
             <form className="badge-type-form">
                 <input type="hidden" id="id" value={entity.id} />
+                <input type="hidden" id="score" value={entity.score} />
                 <div className="row form-group">
-                    <div className="col-md-6">
+                    <div className="col-md-12">
                         <label> {T.translate("edit_score_type.name")} *</label>
                         <Input
                             id="name"
@@ -88,17 +89,6 @@ class ScoreTypeForm extends React.Component {
                             error={this.hasErrors('name')}
                             onChange={this.handleChange}
                             value={entity.name}
-                        />
-                    </div>
-                    <div className="col-md-6">
-                        <label> {T.translate("edit_score_type.score")} *</label>
-                        <Input
-                            id="score"
-                            type="number"
-                            className="form-control"
-                            error={this.hasErrors('score')}
-                            onChange={this.handleChange}
-                            value={entity.score}
                         />
                     </div>
                     <div className="col-md-12">
