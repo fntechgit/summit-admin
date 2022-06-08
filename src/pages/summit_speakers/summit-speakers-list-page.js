@@ -16,14 +16,16 @@ import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import { Pagination } from 'react-bootstrap';
-import { FreeTextSearch, SelectableTable, Dropdown, CheckboxList, Input } from 'openstack-uicore-foundation/lib/components';
+import { FreeTextSearch, SelectableTable, Dropdown, Input } from 'openstack-uicore-foundation/lib/components';
 import {
     getSpeakersBySummit,
     exportSummitSpeakers,
     selectSummitSpeaker,
     unselectSummitSpeaker,
     selectAllSummitSpeakers,
-    unselectAllSummitSpeakers
+    unselectAllSummitSpeakers,
+    setCurrentFlowEvent,
+    sendSpeakerEmails
 } from "../../actions/speaker-actions";
 
 class SummitSpeakersListPage extends React.Component {
@@ -43,8 +45,12 @@ class SummitSpeakersListPage extends React.Component {
         this.handleChangeTrackFilter = this.handleChangeTrackFilter.bind(this);
         this.handleChangeActivityTypeFilter = this.handleChangeActivityTypeFilter.bind(this);
         this.handleChangeSelectionStatusFilter = this.handleChangeSelectionStatusFilter.bind(this);
+        this.handleChangeFlowEvent = this.handleChangeFlowEvent.bind(this);
+        this.handleSpeakersEmailSend = this.handleSpeakersEmailSend.bind(this);
 
-        this.state = {};
+        this.state = {
+            testRecipient: ''
+        };
     }
 
     componentDidMount() {
@@ -128,6 +134,49 @@ class SummitSpeakersListPage extends React.Component {
             });
     }
 
+    handleChangeFlowEvent(ev) {
+        const { value, id } = ev.target;
+        this.props.setCurrentFlowEvent(value);
+    }
+
+    handleSpeakersEmailSend(ev) {
+        ev.stopPropagation();
+        ev.preventDefault();
+
+        const {
+            selectedAll, term, selectedSpeakers, currentFlowEvent, sendSpeakerEmails,
+            selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter,
+        } = this.props;
+
+        const { testRecipient } = this.state;
+
+        if (!currentFlowEvent) {
+            Swal.fire("Validation error", T.translate("summit_speakers_list.select_template"), "warning");
+            return false;
+        }
+
+        if (!selectedAll && selectedSpeakers.length === 0) {
+            Swal.fire("Validation error", T.translate("summit_speakers_list.select_items"), "warning");
+            return false;
+        }
+
+        Swal.fire({
+            title: T.translate("general.are_you_sure"),
+            text: T.translate("summit_speakers_list.send_email_warning"),
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#91dd7f",
+            confirmButtonText: T.translate("general.yes")
+        }).then(function (result) {
+            if (result.value) {
+                sendSpeakerEmails(currentFlowEvent, selectedAll, selectedSpeakers, testRecipient, term,
+                    { selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter })
+            }
+        });
+
+
+    }
+
     handleExport(ev) {
         const { term, order, orderDir } = this.props;
         ev.preventDefault();
@@ -154,16 +203,18 @@ class SummitSpeakersListPage extends React.Component {
 
     render() {
         const { currentSummit, speakers, lastPage, currentPage, term, order, orderDir, totalSpeakers, selectedSpeakers,
-            selectedAll, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, } = this.props;
+            selectedAll, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, currentFlowEvent } = this.props;
+
+        const { testRecipient } = this.state;
 
         console.log('speakers', speakers)
 
         const columns = [
             { columnKey: 'name', value: T.translate("general.name"), sortable: true },
             { columnKey: 'email', value: T.translate("general.email"), åsortable: true },
-            { columnKey: 'accepted', value: T.translate("summit_speakers_list.accepted") },
-            { columnKey: 'rejected', value: T.translate("summit_speakers_list.rejected") },
-            { columnKey: 'alternate', value: T.translate("summit_speakers_list.alternate") },
+            { columnKey: 'accepted_presentations', value: T.translate("summit_speakers_list.accepted") },
+            { columnKey: 'rejected_presentations', value: T.translate("summit_speakers_list.rejected") },
+            { columnKey: 'alternate_presentations', value: T.translate("summit_speakers_list.alternate") },
         ];
 
         const selectionPlansDDL = currentSummit.selection_plans.map(selectionPlan => ({ label: selectionPlan.name, value: selectionPlan.name }));
@@ -174,12 +225,14 @@ class SummitSpeakersListPage extends React.Component {
             { label: 'Alternate', value: 'alternate' },
             { label: 'Rejected', value: 'rejected' }
         ];
-        let flowEventsDDL = [
+        let emailFlowDDL = [
             { label: '-- SELECT EMAIL EVENT --', value: '' },
-            { label: 'SUMMIT_REGISTRATION__ATTENDEE_TICKET_REGENERATE_HASH', value: 'SUMMIT_REGISTRATION__ATTENDEE_TICKET_REGENERATE_HASH' },
-            { label: 'SUMMIT_REGISTRATION_INVITE_ATTENDEE_TICKET_EDITION', value: 'SUMMIT_REGISTRATION_INVITE_ATTENDEE_TICKET_EDITION' },
-            { label: 'SUMMIT_REGISTRATION_ATTENDEE_ALL_TICKETS_EDITION', value: 'SUMMIT_REGISTRATION_ATTENDEE_ALL_TICKETS_EDITION' },
-            { label: 'SUMMIT_REGISTRATION_INCOMPLETE_ATTENDEE_REMINDER', value: 'SUMMIT_REGISTRATION_INCOMPLETE_ATTENDEE_REMINDER' },
+            { label: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE', value: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ALTERNATE' },
+            { label: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY', value: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_ONLY' },
+            { label: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED', value: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ACCEPTED_REJECTED' },
+            { label: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY', value: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_ONLY' },
+            { label: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED', value: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_ALTERNATE_REJECTED' },
+            { label: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY', value: 'SUMMIT_SUBMISSIONS_PRESENTATION_SPEAKER_REJECTED_ONLY' },
         ];
 
         const table_options = {
@@ -249,8 +302,8 @@ class SummitSpeakersListPage extends React.Component {
                             isMulti
                         />
                     </div>
-                    <div className="col-md-3">
-                        <CheckboxList
+                    <div className="col-md-3" style={{ height: "61px", paddingTop: "8px" }}>
+                        <Dropdown
                             id="selectionStatusFilter"
                             value={selectionStatusFilter}
                             onChange={this.handleChangeSelectionStatusFilter}
@@ -266,22 +319,22 @@ class SummitSpeakersListPage extends React.Component {
                     <div className="col-md-6" style={{ height: "61px", paddingTop: "8px" }}>
                         <Dropdown
                             id="activityTypeFilter"
-                            value={activityTypeFilter}
-                            onChange={this.handleChangeActivityTypeFilter}
-                            options={flowEventsDDL}
+                            value={currentFlowEvent}
+                            onChange={this.handleChangeFlowEvent}
+                            options={emailFlowDDL}
                             isClearable={true}
-                            isMulti
                         />
                     </div>
                     <div className={'col-md-4'} style={{ height: "61px", paddingTop: "8px" }}>
                         <Input
-                            value={term}
+                            value={testRecipient}
+                            onChange={(ev) => this.setState({ testRecipient: ev.target.value })}
                             placeholder={T.translate("summit_speakers_list.placeholders.test_recipient")}
-                        // onChange={this.handleChangeRecipient}
+
                         />
                     </div>
                     <div className={'col-md-2'} style={{ height: "61px", paddingTop: "8px" }}>
-                        <button className="btn btn-default right-space" onClick={() => console.log('click')}>
+                        <button className="btn btn-default right-space" onClick={this.handleSpeakersEmailSend}>
                             {T.translate("summit_speakers_list.send_emails")}
                         </button>
                     </div>
@@ -333,6 +386,8 @@ export default connect(
         selectSummitSpeaker,
         unselectSummitSpeaker,
         selectAllSummitSpeakers,
-        unselectAllSummitSpeakers
+        unselectAllSummitSpeakers,
+        setCurrentFlowEvent,
+        sendSpeakerEmails
     }
 )(SummitSpeakersListPage);

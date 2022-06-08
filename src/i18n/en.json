@@ -682,6 +682,10 @@
     "alternate": "Alternate",
     "no_attendances": "There are no speakers for this search criteria.",
     "send_emails": "Send",
+    "select_template": "Select a Email Template to perform the action.",
+    "select_items": "Select at least one speaker to perform the action.",
+    "send_email_warning": "Are you sure you want to send emails to the selected speakers",
+    "resend_done": "Emails sent successfully.",
     "placeholders": {
       "search_speakers": "Search by Full Name",
       "test_recipient": "Optional Test Recipient"

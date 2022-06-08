@@ -12,14 +12,15 @@
  **/
 
 import {
-REQUEST_SPEAKERS_BY_SUMMIT,
-RECEIVE_SPEAKERS_BY_SUMMIT,
-ATTENDANCE_DELETED,
-SELECT_SUMMIT_SPEAKER,
-UNSELECT_SUMMIT_SPEAKER,
-SELECT_ALL_SUMMIT_SPEAKERS,
-UNSELECT_ALL_SUMMIT_SPEAKERS,
-SEND_SPEAKERS_EMAILS
+    REQUEST_SPEAKERS_BY_SUMMIT,
+    RECEIVE_SPEAKERS_BY_SUMMIT,
+    ATTENDANCE_DELETED,
+    SELECT_SUMMIT_SPEAKER,
+    UNSELECT_SUMMIT_SPEAKER,
+    SELECT_ALL_SUMMIT_SPEAKERS,
+    UNSELECT_ALL_SUMMIT_SPEAKERS,
+    SEND_SPEAKERS_EMAILS,
+    SET_SPEAKERS_CURRENT_FLOW_EVENT
 } from '../../actions/speaker-actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/actions';
@@ -39,7 +40,8 @@ const DEFAULT_STATE = {
     selectionPlanFilter: [],
     trackFilter: [],
     activityTypeFilter: [],
-    selectionStatusFilter: []
+    selectionStatusFilter: [],
+    currentFlowEvent: '',
 };
 
 const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
@@ -51,19 +53,19 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
             break;
         case REQUEST_SPEAKERS_BY_SUMMIT: {
             let { order, orderDir, term, page, perPage, ...rest } = payload;
-            return { ...state, order, orderDir, term, currentPage: page, perPage, ...rest}
+            return { ...state, order, orderDir, term, currentPage: page, perPage, ...rest }
         }
             break;
         case RECEIVE_SPEAKERS_BY_SUMMIT: {
-            let { current_page, total, last_page } = payload.response;        
-            
+            let { current_page, total, last_page } = payload.response;
+
             let speakers = payload.response.data.map(s => ({
                 ...s,
                 name: `${s.first_name} ${s.last_name}`,
             }));
 
             return {
-                ...state,   
+                ...state,
                 speakers: speakers,
                 currentPage: current_page,
                 totalSpeakers: total,
@@ -77,27 +79,32 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
         }
             break;
         case SELECT_SUMMIT_SPEAKER: {
-            return {...state, selectedSpeakers: [...state.selectedSpeakers, payload]}
+            return { ...state, selectedSpeakers: [...state.selectedSpeakers, payload] }
         }
             break;
         case UNSELECT_SUMMIT_SPEAKER: {
-            return {...state, selectedSpeakers: state.selectedSpeakers.filter(e => e !== payload), selectedAll: false}
+            return { ...state, selectedSpeakers: state.selectedSpeakers.filter(e => e !== payload), selectedAll: false }
         }
             break;
         case SELECT_ALL_SUMMIT_SPEAKERS: {
-            return {...state, selectedAll: true}
+            return { ...state, selectedAll: true }
         }
             break;
         case UNSELECT_ALL_SUMMIT_SPEAKERS: {
-            return {...state, selectedAll: false}
+            return { ...state, selectedAll: false }
         }
             break;
-        case SEND_SPEAKERS_EMAILS: {            
-            return {...state,
+        case SEND_SPEAKERS_EMAILS: {
+            return {
+                ...state,
                 selectedSpeakers: [],
-                // currentFlowEvent: '',
+                currentFlowEvent: '',
                 selectedAll: false
-            }            
+            }
+        }
+            break;
+        case SET_SPEAKERS_CURRENT_FLOW_EVENT: {
+            return { ...state, currentFlowEvent: payload };
         }
             break;
         default:

@@ -65,6 +65,7 @@ export const UNSELECT_SUMMIT_SPEAKER        = 'UNSELECT_SUMMIT_SPEAKER';
 export const SELECT_ALL_SUMMIT_SPEAKERS     = 'SELECT_ALL_SUMMIT_SPEAKERS';
 export const UNSELECT_ALL_SUMMIT_SPEAKERS   = 'UNSELECT_ALL_SUMMIT_SPEAKERS';
 export const SEND_SPEAKERS_EMAILS           = 'SEND_SPEAKERS_EMAILS';
+export const SET_SPEAKERS_CURRENT_FLOW_EVENT= 'SET_SPEAKERS_CURRENT_FLOW_EVENT';
 
 export const getSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => (dispatch, getState) => {
 
@@ -700,7 +701,8 @@ export const getSpeakersBySummit = (term = null, page = 1, perPage = 10, order =
 
     if(term){
         const escapedTerm = escapeFilterValue(term);
-        filter.push(`full_name=@${escapedTerm}`);
+        filter.push(`full_name=@${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm}
+        ,moderator=@${escapedTerm},moderator_email=@${escapedTerm}`);
     }
 
     const params = {
@@ -766,6 +768,8 @@ export const exportSummitSpeakers = (term = null, order = 'id', orderDir = 1, fi
 export const sendSpeakerEmails = (currentFlowEvent,
                            selectedAll = false ,
                            selectedIds = [],
+                           testRecipient = '',
+                           term = '',
                            filters = {}
                            ) => (dispatch, getState) => {
 
@@ -779,6 +783,11 @@ export const sendSpeakerEmails = (currentFlowEvent,
 
     const filter = parseFilters(filters);
 
+    if(term){
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(`full_name=@${escapedTerm}`);
+    }
+
     if (filter.length > 0) {
         params['filter[]'] = filter;
     }
@@ -791,11 +800,15 @@ export const sendSpeakerEmails = (currentFlowEvent,
         payload['speakers_ids'] = selectedIds;
     }
 
+    if(testRecipient) {
+        payload['test_email_recipient'] = testRecipient;
+    }
+
     dispatch(startLoading());
 
     const success_message = {
         title: T.translate("general.done"),
-        html: T.translate("registration_invitation_list.resend_done"),
+        html: T.translate("summit_speakers_list.resend_done"),
         type: 'success'
     };
 
@@ -831,11 +844,13 @@ export const unselectAllSummitSpeakers = () => (dispatch, getState) => {
     dispatch(createAction(UNSELECT_ALL_SUMMIT_SPEAKERS)());
 }
 
+export const setCurrentFlowEvent = (value) => (dispatch) => {
+    dispatch(createAction(SET_SPEAKERS_CURRENT_FLOW_EVENT)(value));
+};
+
 const parseFilters = (filters) => {
 
     const filter = [];
-
-    console.log('filters in parse', filters)
 
     if(filters.hasOwnProperty('selectionPlanFilter') && Array.isArray(filters.selectionPlanFilter)
         && filters.selectionPlanFilter.length > 0){
@@ -848,7 +863,7 @@ const parseFilters = (filters) => {
     if(filters.hasOwnProperty('trackFilter') && Array.isArray(filters.trackFilter)
         && filters.trackFilter.length > 0){
         filter.push(filters.trackFilter.reduce(
-            (accumulator, t) => accumulator +(accumulator !== '' ? ',':'') +`track==${t}`,
+            (accumulator, t) => accumulator +(accumulator !== '' ? ',':'') +`presentations_track_id==${t}`,
             ''
         ));
     }
@@ -861,8 +876,12 @@ const parseFilters = (filters) => {
         ));
     }
 
-    if(filters.hasOwnProperty('selectionStatusFilter') && filters.selectionStatusFilter){
-        filter.push(`status==${filters.selectionStatusFilter}`)
+    if(filters.hasOwnProperty('selectionStatusFilter') && Array.isArray(filters.selectionStatusFilter)
+    && filters.selectionStatusFilter.length > 0){
+        filter.push(filters.selectionStatusFilter.reduce(
+            (accumulator, at) => accumulator +(accumulator !== '' ? ',':'') +`has_${at}_presentations==true`,
+            ''
+        ));
     }
 
     return filter;
