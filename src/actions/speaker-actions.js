@@ -749,7 +749,8 @@ export const exportSummitSpeakers = (term = null, order = 'id', orderDir = 1, fi
     
     if(term){
         const escapedTerm = escapeFilterValue(term);
-        filter.push(`full_name=@${escapedTerm}`);
+        filter.push(`full_name=@${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm}
+        ,moderator=@${escapedTerm},moderator_email=@${escapedTerm}`);
     }
 
     if(filter.length > 0){
@@ -785,7 +786,8 @@ export const sendSpeakerEmails = (currentFlowEvent,
 
     if(term){
         const escapedTerm = escapeFilterValue(term);
-        filter.push(`full_name=@${escapedTerm}`);
+        filter.push(`full_name=@${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm}
+        ,moderator=@${escapedTerm},moderator_email=@${escapedTerm}`);
     }
 
     if (filter.length > 0) {

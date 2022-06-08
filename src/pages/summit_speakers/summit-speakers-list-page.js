@@ -240,7 +240,7 @@ class SummitSpeakersListPage extends React.Component {
             sortDir: orderDir,
             actions: {
                 edit: {
-                    onClick: this.handleEdit,
+                    // onClick: this.handleEdit,
                     onSelected: this.handleSelected,
                     onSelectedAll: this.handleSelectedAll
                 }
