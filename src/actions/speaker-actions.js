@@ -58,6 +58,13 @@ export const FEATURED_SPEAKER_DELETED       = 'FEATURED_SPEAKER_DELETED';
 export const FEATURED_SPEAKER_ADDED         = 'FEATURED_SPEAKER_ADDED';
 export const FEATURED_SPEAKER_ORDER_UPDATED = 'FEATURED_SPEAKER_ORDER_UPDATED';
 
+export const REQUEST_SPEAKERS_BY_SUMMIT     = 'REQUEST_SPEAKERS_BY_SUMMIT';
+export const RECEIVE_SPEAKERS_BY_SUMMIT     = 'RECEIVE_SPEAKERS_BY_SUMMIT';
+export const SELECT_SUMMIT_SPEAKER          = 'SELECT_SUMMIT_SPEAKER';
+export const UNSELECT_SUMMIT_SPEAKER        = 'UNSELECT_SUMMIT_SPEAKER';
+export const SELECT_ALL_SUMMIT_SPEAKERS     = 'SELECT_ALL_SUMMIT_SPEAKERS';
+export const UNSELECT_ALL_SUMMIT_SPEAKERS   = 'UNSELECT_ALL_SUMMIT_SPEAKERS';
+export const SEND_SPEAKERS_EMAILS           = 'SEND_SPEAKERS_EMAILS';
 
 export const getSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => (dispatch, getState) => {
 
@@ -676,3 +683,187 @@ export const removeFeaturedSpeaker = (speakerId) => (dispatch, getState) => {
         }
     );
 };
+
+/****************************************************************************************************/
+/* SPEAKERS BY SUMMIT */
+/****************************************************************************************************/
+
+export const getSpeakersBySummit = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1, filters = {}) => (dispatch, getState) => {
+
+    const { loggedUserState, currentSummitState } = getState();
+    const { accessToken }     = loggedUserState;
+    const { currentSummit }   = currentSummitState;
+    
+    const filter = parseFilters(filters);
+
+    dispatch(startLoading());
+
+    if(term){
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(`full_name=@${escapedTerm}`);
+    }
+
+    const params = {
+        page         : page,
+        per_page     : perPage,
+        access_token : accessToken,
+        expand       : 'presentations'
+    };
+
+    if(filter.length > 0){
+        params['filter[]']= filter;
+    }
+
+    // order
+    if(order != null && orderDir != null){
+        const orderDirSign = (orderDir === 1) ? '+' : '-';
+        params['order']= `${orderDirSign}${order}`;
+    }
+
+
+    return getRequest(
+        createAction(REQUEST_SPEAKERS_BY_SUMMIT),
+        createAction(RECEIVE_SPEAKERS_BY_SUMMIT),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers`,
+        authErrorHandler,
+        {order, orderDir, page, perPage, term, ...filters}
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+export const exportSummitSpeakers = (term = null, order = 'id', orderDir = 1, filters = {}) => (dispatch, getState) => {
+
+    const { loggedUserState, currentSummitState } = getState();
+    const { accessToken }     = loggedUserState;
+    const { currentSummit }   = currentSummitState;
+    const filename = currentSummit.name + '-Speakers.csv';
+    const params = {
+        access_token : accessToken
+    };
+    
+    const filter = parseFilters(filters);
+    
+    if(term){
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(`full_name=@${escapedTerm}`);
+    }
+
+    if(filter.length > 0){
+        params['filter[]']= filter;
+    }
+
+    // order
+    if(order != null && orderDir != null){
+        const orderDirSign = (orderDir === 1) ? '+' : '-';
+        params['order']= `${orderDirSign}${order}`;
+    }
+
+    dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers/csv`, params, filename));
+}
+
+export const sendSpeakerEmails = (currentFlowEvent,
+                           selectedAll = false ,
+                           selectedIds = [],
+                           filters = {}
+                           ) => (dispatch, getState) => {
+
+    const { loggedUserState, currentSummitState } = getState();
+    const { accessToken }     = loggedUserState;
+    const { currentSummit }   = currentSummitState;
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    const filter = parseFilters(filters);
+
+    if (filter.length > 0) {
+        params['filter[]'] = filter;
+    }
+
+    const payload =  {
+        email_flow_event : currentFlowEvent
+    };
+
+    if(!selectedAll && selectedIds.length > 0){
+        payload['speakers_ids'] = selectedIds;
+    }
+
+    dispatch(startLoading());
+
+    const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("registration_invitation_list.resend_done"),
+        type: 'success'
+    };
+
+    return putRequest(
+        null,
+        createAction(SEND_SPEAKERS_EMAILS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers/all/send`,
+        payload,
+        authErrorHandler
+    )(params)(dispatch)
+        .then((payload) => {
+            dispatch(showMessage(
+                success_message,
+            ));
+            dispatch(stopLoading());
+            return payload;
+        });
+};
+
+export const selectSummitSpeaker = (speakerId) => (dispatch, getState) => {
+    dispatch(createAction(SELECT_SUMMIT_SPEAKER)(speakerId));
+};
+
+export const unselectSummitSpeaker = (speakerId) => (dispatch, getState) => {
+    dispatch(createAction(UNSELECT_SUMMIT_SPEAKER)(speakerId));
+};
+
+export const selectAllSummitSpeakers = () => (dispatch, getState) => {
+    dispatch(createAction(SELECT_ALL_SUMMIT_SPEAKERS)());
+}
+
+export const unselectAllSummitSpeakers = () => (dispatch, getState) => {
+    dispatch(createAction(UNSELECT_ALL_SUMMIT_SPEAKERS)());
+}
+
+const parseFilters = (filters) => {
+
+    const filter = [];
+
+    console.log('filters in parse', filters)
+
+    if(filters.hasOwnProperty('selectionPlanFilter') && Array.isArray(filters.selectionPlanFilter)
+        && filters.selectionPlanFilter.length > 0){
+        filter.push(filters.selectionPlanFilter.reduce(
+            (accumulator, sp) => accumulator +(accumulator !== '' ? ',':'') +`selection_plan==${sp}`,
+            ''
+        ));
+    }
+
+    if(filters.hasOwnProperty('trackFilter') && Array.isArray(filters.trackFilter)
+        && filters.trackFilter.length > 0){
+        filter.push(filters.trackFilter.reduce(
+            (accumulator, t) => accumulator +(accumulator !== '' ? ',':'') +`track==${t}`,
+            ''
+        ));
+    }
+
+    if(filters.hasOwnProperty('activityTypeFilter') && Array.isArray(filters.activityTypeFilter)
+        && filters.activityTypeFilter.length > 0){
+        filter.push(filters.activityTypeFilter.reduce(
+            (accumulator, at) => accumulator +(accumulator !== '' ? ',':'') +`activity_type==${at}`,
+            ''
+        ));
+    }
+
+    if(filters.hasOwnProperty('selectionStatusFilter') && filters.selectionStatusFilter){
+        filter.push(`status==${filters.selectionStatusFilter}`)
+    }
+
+    return filter;
+}

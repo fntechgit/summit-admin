@@ -674,6 +674,19 @@
     "rate": "Rate",
     "actions": "Actions"
   },
+  "summit_speakers_list": {
+    "summit_speakers_list": "Summit Speakers List",
+    "summit_speakers": "Summit Speakers",    
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "alternate": "Alternate",
+    "no_attendances": "There are no speakers for this search criteria.",
+    "send_emails": "Send",
+    "placeholders": {
+      "search_speakers": "Search by Full Name",
+      "test_recipient": "Optional Test Recipient"
+    }
+  },
   "speaker_attendance_list": {
     "speaker_attendance_list": "Speaker Attendance List",
     "speaker_attendances": "Speaker Attendances",
