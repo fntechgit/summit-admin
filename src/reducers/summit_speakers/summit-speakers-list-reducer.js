@@ -10,11 +10,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import React from "react";
 
 import {
     REQUEST_SPEAKERS_BY_SUMMIT,
     RECEIVE_SPEAKERS_BY_SUMMIT,
-    ATTENDANCE_DELETED,
     SELECT_SUMMIT_SPEAKER,
     UNSELECT_SUMMIT_SPEAKER,
     SELECT_ALL_SUMMIT_SPEAKERS,
@@ -24,12 +24,12 @@ import {
 } from '../../actions/speaker-actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/actions';
-import { formatEpoch } from 'openstack-uicore-foundation/lib/methods'
+import ReactTooltip from "react-tooltip";
 
 const DEFAULT_STATE = {
     speakers: [],
     term: null,
-    order: '',
+    order: 'full_name',
     orderDir: 1,
     currentPage: 1,
     lastPage: 1,
@@ -42,6 +42,7 @@ const DEFAULT_STATE = {
     activityTypeFilter: [],
     selectionStatusFilter: [],
     currentFlowEvent: '',
+    currentSummitId: null
 };
 
 const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
@@ -59,10 +60,84 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_SPEAKERS_BY_SUMMIT: {
             let { current_page, total, last_page } = payload.response;
 
-            let speakers = payload.response.data.map(s => ({
+            let speakers = payload.response.data.map(s => {
+
+                const acceptedPresentationsToolTip = s.accepted_presentations.reduce(
+                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
+                );
+
+                const rejectedPresentationsToolTip = s.rejected_presentations.reduce(
+                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
+                );
+
+                const alternatePresentationsToolTip = s.alternate_presentations.reduce(
+                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
+                );
+
+                return {
                 ...s,
-                name: `${s.first_name} ${s.last_name}`,
-            }));
+                    full_name: `${s.first_name} ${s.last_name}`,
+                    accepted_presentations_count : s.accepted_presentations.length > 0 ?
+                    <a data-tip={acceptedPresentationsToolTip} data-for={`accepted_${s.id}`}
+                       onClick={ev => { ev.stopPropagation()}}
+                       href="#">{s.accepted_presentations.length}
+                        <ReactTooltip
+                            id={`accepted_${s.id}`}
+                            multiline={true}
+                            clickable={true}
+                            border={true}
+                            getContent={(dataTip) =>
+                                <div className="tooltip-popover"
+                                     dangerouslySetInnerHTML={{__html: dataTip}}
+                                />
+                            }
+                            place='bottom'
+                            type='light'
+                            effect='solid'
+                        />
+                    </a>
+                    : 'N/A',
+                alternate_presentations_count :
+                    s.alternate_presentations.length > 0 ?
+                        <a data-tip={alternatePresentationsToolTip} data-for={`alternate_${s.id}`}
+                           onClick={ev => { ev.stopPropagation()}}
+                           href="#">{s.alternate_presentations.length}
+                            <ReactTooltip
+                                id={`alternate_${s.id}`}
+                                multiline={true}
+                                clickable={true}
+                                border={true}
+                                getContent={(dataTip) =>
+                                    <div className="tooltip-popover"
+                                         dangerouslySetInnerHTML={{__html: dataTip}}
+                                    />
+                                }
+                                place='bottom'
+                                type='light'
+                                effect='solid'
+                            />
+                        </a>
+                        : 'N/A',
+                rejected_presentations_count : s.rejected_presentations.length > 0 ?
+                    <a data-tip={rejectedPresentationsToolTip} data-for={`rejected_${s.id}`}
+                       onClick={ev => { ev.stopPropagation()}}
+                       href="#">{s.rejected_presentations.length}
+                        <ReactTooltip
+                            id={`rejected_${s.id}`}
+                            multiline={true}
+                            clickable={true}
+                            border={true}
+                            getContent={(dataTip) =>
+                                <div className="tooltip-popover"
+                                     dangerouslySetInnerHTML={{__html: dataTip}}
+                                />
+                            }
+                            place='bottom'
+                            type='light'
+                            effect='solid'
+                        /></a>
+            : 'N/A'
+            }});
 
             return {
                 ...state,
@@ -73,13 +148,8 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
             };
         }
             break;
-        case ATTENDANCE_DELETED: {
-            let { attendanceId } = payload;
-            return { ...state, attendances: state.attendances.filter(a => a.id !== attendanceId) };
-        }
-            break;
         case SELECT_SUMMIT_SPEAKER: {
-            return { ...state, selectedSpeakers: [...state.selectedSpeakers, payload] }
+            return { ...state, selectedSpeakers: [...state.selectedSpeakers, payload], selectedAll: false }
         }
             break;
         case UNSELECT_SUMMIT_SPEAKER: {
@@ -87,11 +157,11 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
         }
             break;
         case SELECT_ALL_SUMMIT_SPEAKERS: {
-            return { ...state, selectedAll: true }
+            return { ...state, selectedAll: true, selectedSpeakers:[] }
         }
             break;
         case UNSELECT_ALL_SUMMIT_SPEAKERS: {
-            return { ...state, selectedAll: false }
+            return { ...state, selectedAll: false, selectedSpeakers:[]  }
         }
             break;
         case SEND_SPEAKERS_EMAILS: {

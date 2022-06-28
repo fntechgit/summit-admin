@@ -699,17 +699,26 @@ export const getSpeakersBySummit = (term = null, page = 1, perPage = 10, order =
 
     dispatch(startLoading());
 
-    if(term){
+    if(term) {
         const escapedTerm = escapeFilterValue(term);
-        filter.push(`full_name=@${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm}
-        ,moderator=@${escapedTerm},moderator_email=@${escapedTerm}`);
+        filter.push(
+            [
+                `full_name@@${escapedTerm}`,
+                `email=@${escapedTerm}`,
+                `presentations_title=@${escapedTerm}`,
+                `presentations_abstract=@${escapedTerm}`,
+                `presentations_submitter_full_name@@${escapedTerm}`,
+                `presentations_submitter_email=@${escapedTerm}`
+            ].join(',')
+        );
     }
 
     const params = {
         page         : page,
         per_page     : perPage,
         access_token : accessToken,
-        expand       : 'presentations'
+        expand       : 'accepted_presentations,alternate_presentations,rejected_presentations',
+        relations : 'accepted_presentations,alternate_presentations,rejected_presentations',
     };
 
     if(filter.length > 0){
@@ -722,13 +731,12 @@ export const getSpeakersBySummit = (term = null, page = 1, perPage = 10, order =
         params['order']= `${orderDirSign}${order}`;
     }
 
-
     return getRequest(
         createAction(REQUEST_SPEAKERS_BY_SUMMIT),
         createAction(RECEIVE_SPEAKERS_BY_SUMMIT),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers`,
         authErrorHandler,
-        {order, orderDir, page, perPage, term, ...filters}
+        {order, orderDir, page, perPage, term, ...filters, currentSummitId: currentSummit.id}
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }
@@ -746,11 +754,19 @@ export const exportSummitSpeakers = (term = null, order = 'id', orderDir = 1, fi
     };
     
     const filter = parseFilters(filters);
-    
-    if(term){
+
+    if(term) {
         const escapedTerm = escapeFilterValue(term);
-        filter.push(`full_name=@${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm}
-        ,moderator=@${escapedTerm},moderator_email=@${escapedTerm}`);
+        filter.push(
+            [
+                `full_name@@${escapedTerm}`,
+                `email=@${escapedTerm}`,
+                `presentations_title=@${escapedTerm}`,
+                `presentations_abstract=@${escapedTerm}`,
+                `presentations_submitter_full_name@@${escapedTerm}`,
+                `presentations_submitter_email=@${escapedTerm}`
+            ].join(',')
+        );
     }
 
     if(filter.length > 0){
@@ -770,6 +786,7 @@ export const sendSpeakerEmails = (currentFlowEvent,
                            selectedAll = false ,
                            selectedIds = [],
                            testRecipient = '',
+                           excerptRecipient= '',
                            term = '',
                            filters = {}
                            ) => (dispatch, getState) => {
@@ -784,10 +801,18 @@ export const sendSpeakerEmails = (currentFlowEvent,
 
     const filter = parseFilters(filters);
 
-    if(term){
+    if(term) {
         const escapedTerm = escapeFilterValue(term);
-        filter.push(`full_name=@${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm}
-        ,moderator=@${escapedTerm},moderator_email=@${escapedTerm}`);
+        filter.push(
+            [
+                `full_name@@${escapedTerm}`,
+                `email=@${escapedTerm}`,
+                `presentations_title=@${escapedTerm}`,
+                `presentations_abstract=@${escapedTerm}`,
+                `presentations_submitter_full_name@@${escapedTerm}`,
+                `presentations_submitter_email=@${escapedTerm}`
+            ].join(',')
+        );
     }
 
     if (filter.length > 0) {
@@ -799,11 +824,15 @@ export const sendSpeakerEmails = (currentFlowEvent,
     };
 
     if(!selectedAll && selectedIds.length > 0){
-        payload['speakers_ids'] = selectedIds;
+        payload['speaker_ids'] = selectedIds;
     }
 
     if(testRecipient) {
         payload['test_email_recipient'] = testRecipient;
+    }
+
+    if(excerptRecipient){
+        payload['outcome_email_recipient'] = excerptRecipient
     }
 
     dispatch(startLoading());
@@ -857,7 +886,7 @@ const parseFilters = (filters) => {
     if(filters.hasOwnProperty('selectionPlanFilter') && Array.isArray(filters.selectionPlanFilter)
         && filters.selectionPlanFilter.length > 0){
         filter.push(filters.selectionPlanFilter.reduce(
-            (accumulator, sp) => accumulator +(accumulator !== '' ? ',':'') +`selection_plan==${sp}`,
+            (accumulator, sp) => accumulator +(accumulator !== '' ? ',':'') +`presentations_selection_plan_id==${sp}`,
             ''
         ));
     }
@@ -873,17 +902,52 @@ const parseFilters = (filters) => {
     if(filters.hasOwnProperty('activityTypeFilter') && Array.isArray(filters.activityTypeFilter)
         && filters.activityTypeFilter.length > 0){
         filter.push(filters.activityTypeFilter.reduce(
-            (accumulator, at) => accumulator +(accumulator !== '' ? ',':'') +`activity_type==${at}`,
+            (accumulator, at) => accumulator +(accumulator !== '' ? ',':'') +`presentations_type_id==${at}`,
             ''
         ));
     }
 
-    if(filters.hasOwnProperty('selectionStatusFilter') && Array.isArray(filters.selectionStatusFilter)
-    && filters.selectionStatusFilter.length > 0){
-        filter.push(filters.selectionStatusFilter.reduce(
-            (accumulator, at) => accumulator +(accumulator !== '' ? ',':'') +`has_${at}_presentations==true`,
-            ''
-        ));
+    if(filters.hasOwnProperty('selectionStatusFilter')
+        && Array.isArray(filters.selectionStatusFilter)
+        && filters.selectionStatusFilter.length > 0 ) {
+
+        // exclusive filters
+        if(filters.selectionStatusFilter.includes('only_rejected')){
+            filter.push('has_rejected_presentations==true');
+            filter.push('has_accepted_presentations==false');
+            filter.push('has_alternate_presentations==false');
+        }
+        else if(filters.selectionStatusFilter.includes('only_accepted')){
+            filter.push('has_rejected_presentations==false');
+            filter.push('has_accepted_presentations==true');
+            filter.push('has_alternate_presentations==false');
+        }
+        else if(filters.selectionStatusFilter.includes('only_alternate')){
+            filter.push('has_rejected_presentations==false');
+            filter.push('has_accepted_presentations==false');
+            filter.push('has_alternate_presentations==true');
+        }
+        else if(filters.selectionStatusFilter.includes('accepted_alternate')){
+            filter.push('has_rejected_presentations==false');
+            filter.push('has_accepted_presentations==true');
+            filter.push('has_alternate_presentations==true');
+        }
+        else if(filters.selectionStatusFilter.includes('accepted_rejected')){
+            filter.push('has_rejected_presentations==true');
+            filter.push('has_accepted_presentations==true');
+            filter.push('has_alternate_presentations==false');
+        }
+        else if(filters.selectionStatusFilter.includes('alternate_rejected')){
+            filter.push('has_rejected_presentations==true');
+            filter.push('has_accepted_presentations==false');
+            filter.push('has_alternate_presentations==true');
+        }
+        else {
+           filter.push(filters.selectionStatusFilter.reduce(
+               (accumulator, at) => accumulator + (accumulator !== '' ? ',' : '') + `has_${at}_presentations==true`,
+               ''
+           ));
+       }
     }
 
     return filter;
