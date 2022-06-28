@@ -680,14 +680,16 @@
     "accepted": "Accepted",
     "rejected": "Rejected",
     "alternate": "Alternate",
-    "no_attendances": "There are no speakers for this search criteria.",
+    "no_speakers": "There are no speakers for this search criteria.",
     "send_emails": "Send",
+    "excerpt_email": "Excerpt Recipient",
     "select_template": "Select a Email Template to perform the action.",
     "select_items": "Select at least one speaker to perform the action.",
     "send_email_warning": "Are you sure you want to send emails to the selected speakers",
     "resend_done": "Emails sent successfully.",
+    "send_emails_title": "You are about to send an EMAIL BLAST to selected speakers !",
     "placeholders": {
-      "search_speakers": "Search by Full Name",
+      "search_speakers": "Search by Full Name, Email, Title Or Abstract",
       "test_recipient": "Optional Test Recipient"
     }
   },
