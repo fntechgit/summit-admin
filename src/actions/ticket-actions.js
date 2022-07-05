@@ -643,7 +643,7 @@ export const getTicketTypes = (summit, order = 'name', orderDir = 1, page = 1, p
     return getRequest(
         createAction(REQUEST_TICKET_TYPES),
         createAction(RECEIVE_TICKET_TYPES),
-        `${window.API_BASE_URL}/api/v1/summits/${summit.id}/ticket-types`,
+        `${window.API_BASE_URL}/api/v2/summits/${summit.id}/ticket-types`,
         authErrorHandler,
         {order, orderDir}
     )(params)(dispatch).then(() => {

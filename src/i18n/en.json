@@ -1216,6 +1216,7 @@
     "no_ticket_types": "No ticket types found for current search criteria.",
     "add_ticket_type": "Add Ticket Type",
     "name": "Name",
+    "audience": "Audience",
     "badge_type_name": "Badge Type",
     "external_id": "External Id",
     "seed_tickets": "Seed Tickets from Eventbrite",
