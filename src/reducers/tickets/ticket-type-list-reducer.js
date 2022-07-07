@@ -25,7 +25,11 @@ const DEFAULT_STATE = {
     ticketTypes         : [],
     order               : 'name',
     orderDir            : 1,
-    totalticketTypes    : 0
+    totalTicketTypes    : 0,
+    audienceFilter      : [],
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 25,
 };
 
 const ticketTypeListReducer = (state = DEFAULT_STATE, action) => {
@@ -36,9 +40,9 @@ const ticketTypeListReducer = (state = DEFAULT_STATE, action) => {
         }
         break;
         case REQUEST_TICKET_TYPES: {
-            let {order, orderDir} = payload;
-
-            return {...state, order, orderDir }
+            let {order, orderDir, currentPage, perPage, audienceFilter} = payload;
+;
+            return {...state, order, orderDir, currentPage, perPage, audienceFilter }
         }
         break;
         case RECEIVE_TICKET_TYPES: {
