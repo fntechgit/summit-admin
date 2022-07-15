@@ -34,11 +34,8 @@ export const DEFAULT_ENTITY = {
     description: '',
     slug: '',
     is_active: false,
-    nav_bar_title: '',
     should_show_on_nav_bar: true,
     site_url: '',
-    learn_more_link: '',
-    learn_more_text: '',
     logo_url: '',
     sponsorship_types: [],
 };

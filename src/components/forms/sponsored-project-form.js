@@ -135,8 +135,8 @@ class SponsoredProjectForm extends React.Component {
                 </div>
                 <div className="row form-group">
                     <div className="col-md-6">
-                        <label> {T.translate("edit_sponsored_project.nav_bar_title")} </label>
-                        <Input className="form-control" id="nav_bar_title" value={entity.nav_bar_title} onChange={this.handleChange} />
+                        <label> {T.translate("edit_sponsored_project.site_url")} </label>
+                        <Input className="form-control" id="site_url" value={entity.site_url} onChange={this.handleChange} />
                     </div>
                     <div className="col-md-6 checkboxes-div">
                         <div className="form-check abc-checkbox">
@@ -147,23 +147,6 @@ class SponsoredProjectForm extends React.Component {
                                 {T.translate("edit_sponsored_project.should_show_on_nav_bar")}
                             </label>
                         </div>
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-6">
-                        <label> {T.translate("edit_sponsored_project.site_url")} </label>
-                        <Input className="form-control" id="site_url" value={entity.site_url} onChange={this.handleChange} />
-                    </div>
-                    <div className="col-md-6">
-                        <label> {T.translate("edit_sponsored_project.learn_more_link")} </label>
-                        <Input className="form-control" id="learn_more_link" value={entity.learn_more_link} onChange={this.handleChange} />
-                    </div>
-                   
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <label> {T.translate("edit_sponsored_project.learn_more_text")} </label>
-                        <Input className="form-control" id="learn_more_text" value={entity.learn_more_text} onChange={this.handleChange} />
                     </div>
                 </div>
                 <div className="row form-group">
