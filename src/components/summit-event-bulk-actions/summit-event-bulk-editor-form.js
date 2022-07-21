@@ -37,7 +37,7 @@ class SummitEventBulkEditorForm extends React.Component
         this.onBulkTypeChange          = this.onBulkTypeChange.bind(this);
         this.handleChangeBulkStartDate = this.handleChangeBulkStartDate.bind(this);
         this.handleChangeBulkEndDate   = this.handleChangeBulkEndDate.bind(this);
-
+        this.onSelectionPlanChanged     = this.onSelectionPlanChanged.bind(this);
         this.state = {
             currentBulkLocation : null,
             currentBulkSelectionPlan: null,

@@ -52,11 +52,7 @@ class SummitEventBulkEditorItem extends React.Component
     }
 
     getValidationEventSelectionPlan(){
-        let { event, currentSummit } = this.props;
-        let eventModel = new SummitEvent(event, currentSummit)
-        //let isValid    = eventModel.isValidTitle(event.title);
-        //return isValid ? 'success':'warning';
-        return 'success';
+        return null;
     }
 
     getValidationStateVenue(){
