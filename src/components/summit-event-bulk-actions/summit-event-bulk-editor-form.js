@@ -188,16 +188,6 @@ class SummitEventBulkEditorForm extends React.Component
         return (
             <form>
                 <div className="row">
-                    {canEditEventType &&
-                    <div className="col-md-2">
-                        <ScheduleAdminEventTypeSelector
-                            currentValue={currentBulkType}
-                            onEventTypeChanged={this.onBulkTypeChange}
-                            eventTypes={typesOptions}
-                            clearable={false}
-                        />
-                    </div>
-                    }
                     <div className="col-md-3">
                         <Select
                             placeholder={T.translate("schedule.placeholders.select_presentation_selection_plan")}
