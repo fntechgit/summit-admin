@@ -198,7 +198,7 @@ class SummitEventBulkEditorForm extends React.Component
                         />
                     </div>
                     }
-                    <div className="col-md-2">
+                    <div className="col-md-3">
                         <Select
                             placeholder={T.translate("schedule.placeholders.select_presentation_selection_plan")}
                             className="selection_plan_selector_bulk"
@@ -208,7 +208,7 @@ class SummitEventBulkEditorForm extends React.Component
                             options={selectionPlanOptions}
                         />
                     </div>
-                    <div className="col-md-3">
+                    <div className="col-md-2">
                         <ScheduleAdminVenueSelector
                             currentValue={currentBulkLocation}
                             onVenueChanged={this.onBulkLocationChange}
