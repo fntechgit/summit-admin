@@ -157,9 +157,10 @@
   "bulk_actions_page": {
     "bulk_actions": "Bulk Actions",
     "title": "Activity Bulk Actions",
-    "event_id_label": "Activity Id",
-    "event_name_label": "Activity Title",
-    "event_location_label": "Activity Location",
+    "event_id_label": "Id",
+    "event_name_label": "Title",
+    "event_selection_plan_label": "Selection Plan",
+    "event_location_label": "Location",
     "event_start_date_label": "Start Date",
     "event_end_date_label": "End Date",
     "btn_apply_changes": "Apply Changes",
