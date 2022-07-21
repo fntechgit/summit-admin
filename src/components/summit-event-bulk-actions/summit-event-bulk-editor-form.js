@@ -189,6 +189,9 @@ class SummitEventBulkEditorForm extends React.Component
             <form>
                 <div className="row">
                     <div className="col-md-3">
+                        &nbsp;
+                    </div>
+                    <div className="col-md-2">
                         <Select
                             placeholder={T.translate("schedule.placeholders.select_presentation_selection_plan")}
                             className="selection_plan_selector_bulk"
