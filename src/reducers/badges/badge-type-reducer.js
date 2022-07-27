@@ -21,7 +21,9 @@ import
     BADGE_ACCESS_LEVEL_ADDED,
     BADGE_ACCESS_LEVEL_REMOVED,
     FEATURE_ADDED_TO_TYPE,
-    FEATURE_REMOVED_FROM_TYPE
+    FEATURE_REMOVED_FROM_TYPE,
+    BADGE_VIEW_TYPE_ADDED,
+    BADGE_VIEW_TYPE_REMOVED
 } from '../../actions/badge-actions';
 
 import { LOGOUT_USER, VALIDATE } from 'openstack-uicore-foundation/lib/actions';
@@ -34,6 +36,7 @@ export const DEFAULT_ENTITY = {
     is_default          : 0,
     access_levels       : [],
     badge_features      : [],
+    view_types          : [],
 }
 
 const DEFAULT_STATE = {
@@ -90,6 +93,19 @@ const badgeTypeReducer = (state = DEFAULT_STATE, action) => {
             let {accessLevelId} = payload;
             let accessLevels = state.entity.access_levels.filter(a => a.id !== accessLevelId);
             return {...state, entity: {...state.entity, access_levels: accessLevels} };
+        }
+        break;
+        case BADGE_VIEW_TYPE_ADDED: {
+            let newViewType = {...payload.viewType};
+            let viewTypes = [...state.entity.view_types, newViewType];
+
+            return {...state, entity: {...state.entity, view_types: viewTypes}, errors: {} };
+        }
+        break;
+        case BADGE_VIEW_TYPE_REMOVED: {
+            let {viewTypeId} = payload;
+            let viewTypes = state.entity.view_types.filter(a => a.id !== viewTypeId);
+            return {...state, entity: {...state.entity, view_types: viewTypes} };
         }
         break;
         case FEATURE_ADDED_TO_TYPE: {
