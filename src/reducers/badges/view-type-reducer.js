@@ -37,6 +37,7 @@ const DEFAULT_STATE = {
 const viewTypeReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action
     switch (type) {
+        case SET_CURRENT_SUMMIT:
         case LOGOUT_USER: {
             // we need this in case the token expired while editing the form
             if (payload.hasOwnProperty('persistStore')) {
@@ -46,7 +47,6 @@ const viewTypeReducer = (state = DEFAULT_STATE, action) => {
             }
         }
         break;
-        case SET_CURRENT_SUMMIT:
         case RESET_VIEW_TYPE_FORM: {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
         }

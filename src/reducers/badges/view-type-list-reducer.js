@@ -18,6 +18,8 @@ import
     VIEW_TYPE_DELETED, 
 } from '../../actions/badge-actions';
 
+import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/actions';
 
 const DEFAULT_STATE = {
@@ -34,6 +36,7 @@ const DEFAULT_STATE = {
 const viewTypeListReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action
     switch (type) {
+        case SET_CURRENT_SUMMIT:
         case LOGOUT_USER: {
             return DEFAULT_STATE;
         }
