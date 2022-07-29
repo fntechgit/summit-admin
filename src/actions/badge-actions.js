@@ -384,7 +384,7 @@ export const getBadgeTypes = ( order = 'name', orderDir = 1 ) => (dispatch, getS
         page         : 1,
         per_page     : 100,
         access_token : accessToken,
-        expand       : 'access_levels'
+        expand       : 'access_levels,allowed_view_types'
     };
 
     // order
@@ -416,7 +416,7 @@ export const getBadgeType = (badgeTypeId) => (dispatch, getState) => {
 
     const params = {
         access_token : accessToken,
-        expand: 'access_levels,badge_features'
+        expand: 'access_levels,badge_features,allowed_view_types'
     };
 
     return getRequest(

@@ -234,7 +234,7 @@ class BadgeTypeForm extends React.Component {
                 <hr />
                 {entity.id !== 0 &&
                 <SimpleLinkList
-                    values={entity.view_types}
+                    values={entity.allowed_view_types}
                     columns={viewTypesColumns}
                     options={viewTypesOptions}
                 />
