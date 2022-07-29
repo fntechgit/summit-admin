@@ -166,7 +166,7 @@ export const removeFeatureFromBadge = (ticketId, featureId) => (dispatch, getSta
     );
 };
 
-export const printBadge = (ticketId) => (dispatch, getState) => {
+export const printBadge = (ticketId, viewType) => (dispatch, getState) => {
 
     const { loggedUserState, currentSummitState } = getState();
     const { accessToken }     = loggedUserState;
@@ -174,7 +174,7 @@ export const printBadge = (ticketId) => (dispatch, getState) => {
 
     dispatch(createAction(PRINT_BADGE));
 
-    window.open(`${process.env['PRINT_APP_URL']}/check-in/${currentSummit.slug}/tickets/${ticketId}?access_token=${accessToken}`, '_blank');
+    window.open(`${process.env['PRINT_APP_URL']}/check-in/${currentSummit.slug}/tickets/${ticketId}?access_token=${accessToken}&view_type=${viewType}`, '_blank');
 
 };
 
@@ -220,7 +220,7 @@ export const getBadgeTypes = ( order = 'name', orderDir = 1 ) => (dispatch, getS
         page         : 1,
         per_page     : 100,
         access_token : accessToken,
-        expand       : 'access_levels'
+        expand       : 'access_levels,allowed_view_types'
     };
 
     // order
@@ -252,7 +252,7 @@ export const getBadgeType = (badgeTypeId) => (dispatch, getState) => {
 
     const params = {
         access_token : accessToken,
-        expand: 'access_levels,badge_features'
+        expand: 'access_levels,badge_features,allowed_view_types'
     };
 
     return getRequest(
