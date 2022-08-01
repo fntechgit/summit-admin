@@ -82,7 +82,7 @@ class ViewTypeListPage extends React.Component {
 
         const columns = [
             { columnKey: 'name', value: T.translate("view_type_list.name"), sortable: true },
-            { columnKey: 'is_default', value: T.translate("view_type_list.is_default") }
+            { columnKey: 'is_default', value: T.translate("view_type_list.is_default"), render: (vt) => vt.is_default === true ? 'Yes' : 'No' }
         ];
 
         const table_options = {

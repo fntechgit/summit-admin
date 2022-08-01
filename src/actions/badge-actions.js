@@ -329,7 +329,7 @@ export const saveViewType = (entity) => (dispatch, getState) => {
             .then((payload) => {
                 dispatch(showMessage(
                     success_message,
-                    () => { history.push(`/app/summits/${currentSummit.id}/badges/${payload.response.id}`) }
+                    () => { history.push(`/app/summits/${currentSummit.id}/view-types/${payload.response.id}`) }
                 ));
             });
     }
@@ -347,7 +347,7 @@ export const deleteViewType = (viewTypeId) => (dispatch, getState) => {
 
     return deleteRequest(
         null,
-        createAction()({ viewTypeId }),
+        createAction(VIEW_TYPE_DELETED)({ viewTypeId }),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-view-types/${viewTypeId}`,
         null,
         authErrorHandler

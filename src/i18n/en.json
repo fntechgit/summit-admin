@@ -1448,7 +1448,7 @@
     "is_default": "Is Default ?",
     "description": "Description",
     "tag_name": "Tag Name",
-    "remove_warning": "Are you sure you want to delete badge ",
+    "remove_warning": "Are you sure you want to delete view type ",
     "placeholders": {
       "search_view_type": "Search by View Type Name"
     }
