@@ -124,46 +124,51 @@ class BadgeForm extends React.Component {
                         {access_levels}
                     </div>
                 </div>
-                <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_ticket.print_excerpt")}:&nbsp;</label>
-                        <table className="table table-striped table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>{T.translate("edit_ticket.type")}</th>
-                                    <th>{T.translate("edit_ticket.count")}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Object.keys(entity.print_excerpt).map((row, i) => {
-                                    let rowClass = i % 2 === 0 ? 'even' : 'odd';
-                                    return (
-                                        <tr id={row} key={'row_' + row} role="row" className={rowClass}>
-                                            <td>{row}</td>
-                                            <td>{entity.print_excerpt[row]}</td>
+                {badgeType.access_levels.some(al => al.name.includes('IN_PERSON')) &&
+                    <div className="row form-group">
+                        <div className="col-md-4">
+                            {Object.keys(entity.print_excerpt).length > 0 &&
+                            <>
+                                <label> {T.translate("edit_ticket.print_excerpt")}:&nbsp;</label>
+                                <table className="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>{T.translate("edit_ticket.type")}</th>
+                                            <th>{T.translate("edit_ticket.count")}</th>
                                         </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                    </thead>
+                                    <tbody>
+                                        {Object.keys(entity.print_excerpt).map((row, i) => {
+                                            let rowClass = i % 2 === 0 ? 'even' : 'odd';
+                                            return (
+                                                <tr id={row} key={'row_' + row} role="row" className={rowClass}>
+                                                    <td>{row}</td>
+                                                    <td>{entity.print_excerpt[row]}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </>
+                            }
+                        </div>
+                        <div className='col-md-4'>
+                            <label>&nbsp;</label>
+                            <Dropdown
+                                id="type_id"
+                                value={selectedPrintType}
+                                onChange={this.handleChangePrintType}
+                                options={badge_view_type_ddl}
+                            />
+                        </div>
+                        <div className="col-md-4">
+                            <label>&nbsp;</label><br />
+                            <button onClick={this.props.onPrintBadge} disabled={!canPrint || selectedPrintType === null} className="btn btn-default">
+                                {T.translate("edit_ticket.print")}
+                            </button>
+                        </div>
                     </div>
-                    <div className='col-md-4'>
-                        <label>&nbsp;</label>
-                        <Dropdown
-                            id="type_id"
-                            value={selectedPrintType}
-                            onChange={this.handleChangePrintType}
-                            options={badge_view_type_ddl}
-                        />
-                    </div>
-                    <div className="col-md-4">
-                        <label>&nbsp;</label><br />
-                        <button onClick={this.props.onPrintBadge} disabled={!canPrint || selectedPrintType === null} className="btn btn-default">
-                            {T.translate("edit_ticket.print")}
-                        </button>
-                    </div>
-                </div>
-
+                }
 
                 <hr />
                 {entity.id !== 0 &&
