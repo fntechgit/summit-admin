@@ -98,7 +98,11 @@ class BadgeForm extends React.Component {
 
         const badge_type_ddl = currentSummit.badge_types.map(bt => ({ label: bt.name, value: bt.id }));
 
-        const badge_view_type_ddl = currentSummit.badge_types.find(bt => bt.id === entity.type_id).allowed_view_types.map(vt => ({ label: vt.name, value: vt.id }));
+        // adds 'All' option to the print type dropdown
+        const badge_view_type_ddl = [
+            { label: 'All', value: 0 },
+            ...currentSummit.badge_types.find(bt => bt.id === entity.type_id).allowed_view_types.map(vt => ({ label: vt.name, value: vt.id }))
+        ];
 
         return (
             <form className="badge-form">
@@ -154,7 +158,7 @@ class BadgeForm extends React.Component {
                     </div>
                     <div className="col-md-4">
                         <label>&nbsp;</label><br />
-                        <button onClick={this.props.onPrintBadge} disabled={!canPrint || !selectedPrintType} className="btn btn-default">
+                        <button onClick={this.props.onPrintBadge} disabled={!canPrint || selectedPrintType === null} className="btn btn-default">
                             {T.translate("edit_ticket.print")}
                         </button>
                     </div>
