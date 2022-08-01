@@ -36,7 +36,7 @@ export const DEFAULT_ENTITY = {
     is_default          : 0,
     access_levels       : [],
     badge_features      : [],
-    view_types          : [],
+    allowed_view_types  : [],
 }
 
 const DEFAULT_STATE = {
@@ -75,6 +75,8 @@ const badgeTypeReducer = (state = DEFAULT_STATE, action) => {
                 }
             }
 
+            console.log('entity', entity);
+
             return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
         }
         break;
@@ -97,15 +99,15 @@ const badgeTypeReducer = (state = DEFAULT_STATE, action) => {
         break;
         case BADGE_VIEW_TYPE_ADDED: {
             let newViewType = {...payload.viewType};
-            let viewTypes = [...state.entity.view_types, newViewType];
+            let viewTypes = [...state.entity.allowed_view_types, newViewType];
 
-            return {...state, entity: {...state.entity, view_types: viewTypes}, errors: {} };
+            return {...state, entity: {...state.entity, allowed_view_types: viewTypes}, errors: {} };
         }
         break;
-        case BADGE_VIEW_TYPE_REMOVED: {
+        case BADGE_VIEW_TYPE_REMOVED: {            
             let {viewTypeId} = payload;
-            let viewTypes = state.entity.view_types.filter(a => a.id !== viewTypeId);
-            return {...state, entity: {...state.entity, view_types: viewTypes} };
+            let viewTypes = state.entity.allowed_view_types.filter(a => a.id !== viewTypeId);
+            return {...state, entity: {...state.entity, allowed_view_types: viewTypes} };
         }
         break;
         case FEATURE_ADDED_TO_TYPE: {
