@@ -37,6 +37,8 @@ export const SPONSORED_PROJECT_UPDATED = 'SPONSORED_PROJECT_UPDATED';
 export const SPONSORED_PROJECT_ADDED = 'SPONSORED_PROJECT_ADDED';
 export const SPONSORED_PROJECT_LOGO_ATTACHED = 'SPONSORED_PROJECT_LOGO_ATTACHED';
 export const SPONSORED_PROJECT_LOGO_DELETED = 'SPONSORED_PROJECT_LOGO_DELETED';
+export const RECEIVE_SPONSORED_PROJECT_SUBPROJECTS = 'RECEIVE_SPONSORED_PROJECT_SUBPROJECTS';
+export const RECEIVE_PARENT_PROJECT = 'RECEIVE_PARENT_PROJECT';
 
 export const getSponsoredProjects = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1) => (dispatch, getState) => {
 
@@ -55,7 +57,7 @@ export const getSponsoredProjects = (term = null, page = 1, perPage = 10, order 
         page: page,
         per_page: perPage,
         access_token: accessToken,
-        expand: 'sponsorship_types',
+        expand: 'sponsorship_types,parent_project',
     };
 
     if (filter.length > 0) {
@@ -89,7 +91,7 @@ export const getSponsoredProject = (projectId) => (dispatch, getState) => {
 
     const params = {
         access_token: accessToken,
-        expand: 'sponsorship_types',
+        expand: 'sponsorship_types,parent_project',
     };
 
     return getRequest(
@@ -98,7 +100,7 @@ export const getSponsoredProject = (projectId) => (dispatch, getState) => {
         `${window.API_BASE_URL}/api/v1/sponsored-projects/${projectId}`,
         authErrorHandler
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
+            dispatch(getSubProjects(projectId));
         }
     );
 };
@@ -238,6 +240,11 @@ export const saveSponsoredProject = (entity) => (dispatch, getState) => {
 const normalizeEntity = (entity) => {
     const normalizedEntity = {...entity};
     delete(normalizedEntity['logo_url']);
+
+    if (entity.parent_project) {
+        normalizedEntity.parent_project_id = entity.parent_project.id;
+    }
+
     return normalizedEntity;
 };
 
@@ -261,6 +268,54 @@ const uploadLogo = (entity, file) => (dispatch, getState) => {
             dispatch(stopLoading());
             history.push(`/app/sponsored-projects/${entity.id}`)
         });
+};
+
+/***************************************** Subprojects ******************************************/
+
+export const getSubProjects = (projectId) => (dispatch, getState) => {
+
+    const {loggedUserState} = getState();
+    const {accessToken} = loggedUserState;
+
+    dispatch(startLoading());
+
+    const params = {
+        page: 1,
+        per_page: 100,
+        access_token: accessToken
+    };
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_SPONSORED_PROJECT_SUBPROJECTS),
+        `${window.API_BASE_URL}/api/v1/sponsored-projects/${projectId}/subprojects`,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+};
+
+export const getAsParentProject = (projectId) => (dispatch, getState) => {
+
+    const {loggedUserState} = getState();
+    const {accessToken} = loggedUserState;
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token: accessToken,
+    };
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_PARENT_PROJECT),
+        `${window.API_BASE_URL}/api/v1/sponsored-projects/${projectId}`,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
 };
 
 /*********************************** Sponsorship types Actions **********************************/
