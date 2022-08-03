@@ -25,7 +25,8 @@ import
     SPONSORED_PROJECT_SPONSORSHIP_TYPE_DELETED,
     SPONSORED_PROJECT_SPONSORSHIP_TYPE_ORDER_UPDATED,
     RECEIVE_SPONSORED_PROJECT_SUBPROJECTS,
-    RECEIVE_PARENT_PROJECT
+    RECEIVE_PARENT_PROJECT,
+    SPONSORED_PROJECT_SUBPROJECT_DELETED
 } from '../../actions/sponsored-project-actions';
 
 import { LOGOUT_USER, VALIDATE } from 'openstack-uicore-foundation/lib/actions';
@@ -144,6 +145,10 @@ const sponsoredProjectReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_PARENT_PROJECT: {
             let entity = {...payload.response};
             return {...state, entity: { ...state.entity, parent_project: entity}};
+        }
+        case SPONSORED_PROJECT_SUBPROJECT_DELETED: {
+            let {subProjectId} = payload;
+            return {...state, entity: {...state.entity, sub_projects: state.entity.sub_projects.filter(q => q.id !== subProjectId)}};
         }
         default:
             return state;

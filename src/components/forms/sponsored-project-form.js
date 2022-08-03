@@ -114,14 +114,15 @@ class SponsoredProjectForm extends React.Component {
     }
 
     handleEditSubproject(subprojectId) {
-        const {history} = this.props;
+        const {history, getSponsoredProject} = this.props;
+        getSponsoredProject(subprojectId);
         history.push(`/app/sponsored-projects/${subprojectId}`);
     }
     
     render() {
         const {entity, errors} = this.state;
 
-        const { onSponsorshipTypeDelete, onSponsorshipTypeReorder, term } = this.props;
+        const { onSponsorshipTypeDelete, onSponsorshipTypeReorder, onSubprojectDelete, term } = this.props;
 
         let sponsorship_types_table_options = {
             actions: {
@@ -132,7 +133,8 @@ class SponsoredProjectForm extends React.Component {
 
         let subprojects_table_options = {
             actions: {
-                edit: { onClick: this.handleEditSubproject }
+                edit: { onClick: this.handleEditSubproject },
+                delete: { onClick: onSubprojectDelete }
             }
         };
 

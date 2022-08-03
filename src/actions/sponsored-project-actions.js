@@ -39,6 +39,7 @@ export const SPONSORED_PROJECT_LOGO_ATTACHED = 'SPONSORED_PROJECT_LOGO_ATTACHED'
 export const SPONSORED_PROJECT_LOGO_DELETED = 'SPONSORED_PROJECT_LOGO_DELETED';
 export const RECEIVE_SPONSORED_PROJECT_SUBPROJECTS = 'RECEIVE_SPONSORED_PROJECT_SUBPROJECTS';
 export const RECEIVE_PARENT_PROJECT = 'RECEIVE_PARENT_PROJECT';
+export const SPONSORED_PROJECT_SUBPROJECT_DELETED = 'SPONSORED_PROJECT_SUBPROJECT_DELETED';
 
 export const getSponsoredProjects = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1) => (dispatch, getState) => {
 
@@ -230,7 +231,12 @@ export const saveSponsoredProject = (entity) => (dispatch, getState) => {
                 dispatch(showMessage(
                     success_message,
                     () => {
-                        history.push(`/app/sponsored-projects`)
+                        if (entity.parent_project) {
+                            dispatch(getSponsoredProject(entity.parent_project.id));
+                            history.push(`/app/sponsored-projects/${entity.parent_project.id}`)
+                        } else {
+                            history.push(`/app/sponsored-projects`)
+                        }
                     }
                 ));
             });
@@ -311,6 +317,29 @@ export const getAsParentProject = (projectId) => (dispatch, getState) => {
         null,
         createAction(RECEIVE_PARENT_PROJECT),
         `${window.API_BASE_URL}/api/v1/sponsored-projects/${projectId}`,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+};
+
+export const deleteSubProject = (subProjectId) => (dispatch, getState) => {
+
+    const {loggedUserState} = getState();
+    const {accessToken} = loggedUserState;
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token: accessToken,
+    };
+
+    return deleteRequest(
+        null,
+        createAction(SPONSORED_PROJECT_SUBPROJECT_DELETED)({subProjectId}),
+        `${window.API_BASE_URL}/api/v1/sponsored-projects/${subProjectId}`,
+        null,
         authErrorHandler
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());

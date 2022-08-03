@@ -1916,6 +1916,7 @@
     "subprojects": "Subprojects",
     "parent_project": "Parent Project",
     "add_subproject": "Add Sub Project",
+    "remove_subproject_warning": "Are you sure you want to delete this Sub Project",
     "placeholders": {
       "search_parent_project": "Search Parent Project"
     }
