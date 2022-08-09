@@ -23,7 +23,7 @@ import {
     startLoading,
     showMessage,
     authErrorHandler
-} from 'openstack-uicore-foundation/lib/methods';
+} from 'openstack-uicore-foundation/lib/utils/actions';
 import { 
     SELECTION_PLAN_RATING_TYPE_ADDED, 
     SELECTION_PLAN_RATING_TYPE_UPDATED 
