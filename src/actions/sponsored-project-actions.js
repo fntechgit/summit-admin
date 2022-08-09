@@ -127,9 +127,8 @@ export const deleteSponsoredProject = (sponsoredProjectId) => async (dispatch) =
     );
 };
 
-export const attachLogo = (entity, file, picAttr) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+export const attachLogo = (entity, file, picAttr) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -157,9 +156,8 @@ export const attachLogo = (entity, file, picAttr) => (dispatch, getState) => {
     }
 };
 
-export const removeLogo = (sponsoredProjectId) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+export const removeLogo = (sponsoredProjectId) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -251,9 +249,8 @@ const normalizeEntity = (entity) => {
     return normalizedEntity;
 };
 
-const uploadLogo = (entity, file) => (dispatch, getState) => {
-    const { loggedUserState } = getState();
-    const { accessToken }     = loggedUserState;
+const uploadLogo = (entity, file) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token : accessToken,
@@ -275,10 +272,9 @@ const uploadLogo = (entity, file) => (dispatch, getState) => {
 
 /***************************************** Subprojects ******************************************/
 
-export const getSubProjects = (projectId) => (dispatch, getState) => {
+export const getSubProjects = (projectId) => async (dispatch) => {
 
-    const {loggedUserState} = getState();
-    const {accessToken} = loggedUserState;
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -299,10 +295,9 @@ export const getSubProjects = (projectId) => (dispatch, getState) => {
     );
 };
 
-export const getAsParentProject = (projectId) => (dispatch, getState) => {
+export const getAsParentProject = (projectId) => async (dispatch) => {
 
-    const {loggedUserState} = getState();
-    const {accessToken} = loggedUserState;
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -321,10 +316,9 @@ export const getAsParentProject = (projectId) => (dispatch, getState) => {
     );
 };
 
-export const deleteSubProject = (subProjectId) => (dispatch, getState) => {
+export const deleteSubProject = (subProjectId) => async (dispatch) => {
 
-    const {loggedUserState} = getState();
-    const {accessToken} = loggedUserState;
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 

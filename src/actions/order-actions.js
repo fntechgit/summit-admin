@@ -118,7 +118,7 @@ export const getOrderExtraQuestions = () => async (dispatch, getState) => {
 
 export const getMainOrderExtraQuestions = () => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());

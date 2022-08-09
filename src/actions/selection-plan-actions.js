@@ -529,7 +529,7 @@ export const SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED = 'SELECTION_PLAN_RATING_T
 export const updateRatingTypeOrder = (selectionPlanId, ratingTypes, ratingTypeId, newOrder) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {
@@ -550,10 +550,10 @@ export const updateRatingTypeOrder = (selectionPlanId, ratingTypes, ratingTypeId
     );
 }
 
-export const deleteRatingType = (selectionPlanId, ratingTypeId) => (dispatch, getState) => {
+export const deleteRatingType = (selectionPlanId, ratingTypeId) => async (dispatch, getState) => {
 
-    const {loggedUserState, currentSummitState} = getState();
-    const {accessToken} = loggedUserState;
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
 
     const params = {

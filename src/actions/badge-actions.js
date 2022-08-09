@@ -194,7 +194,7 @@ export const printBadge = (ticketId, viewType) => async (dispatch, getState) => 
 export const checkInBadge = (code) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -221,7 +221,7 @@ export const checkInBadge = (code) => async (dispatch, getState) => {
 export const getViewTypes = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
 
@@ -260,7 +260,7 @@ export const getViewTypes = (term = null, page = 1, perPage = 10, order = 'id', 
 export const getViewType = (viewTypeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
@@ -286,7 +286,7 @@ export const resetViewTypeForm = () => (dispatch) => {
 
 export const saveViewType = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
     const params = {
@@ -338,7 +338,7 @@ export const saveViewType = (entity) => async (dispatch, getState) => {
 export const deleteViewType = (viewTypeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
     const params = {
@@ -609,7 +609,7 @@ export const removeFeatureFromBadgeType = (badgeTypeId, featureId) => async (dis
 export const addViewTypeToBadgeType = (badgeTypeId, viewType) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
@@ -633,7 +633,7 @@ export const addViewTypeToBadgeType = (badgeTypeId, viewType) => async (dispatch
 export const removeViewTypeFromBadgeType = (badgeTypeId, viewTypeId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
     dispatch(startLoading());
