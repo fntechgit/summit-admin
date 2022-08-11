@@ -77,7 +77,17 @@ export const getSpeakers = ( term = null, page = 1, perPage = 10, order = 'id', 
 
     if(term){
         const escapedTerm = escapeFilterValue(term);
-        filter.push(`full_name=@${escapedTerm},first_name=@${escapedTerm},last_name=@${escapedTerm},email=@${escapedTerm}`);
+        filter.push(
+            [
+                `full_name=@${escapedTerm}`,
+                `first_name=@${escapedTerm}`,
+                `last_name=@${escapedTerm}`,
+                `email=@${escapedTerm}`,
+                `id==${escapedTerm}`,
+                `member_id==${escapedTerm}`,
+                `member_user_external_id==${escapedTerm}`,
+            ].join(',')
+        );
     }
 
     const params = {
@@ -704,7 +714,10 @@ export const getSpeakersBySummit = (term = null, page = 1, perPage = 10, order =
                 `presentations_title=@${escapedTerm}`,
                 `presentations_abstract=@${escapedTerm}`,
                 `presentations_submitter_full_name@@${escapedTerm}`,
-                `presentations_submitter_email=@${escapedTerm}`
+                `presentations_submitter_email=@${escapedTerm}`,
+                `id==${escapedTerm}`,
+                `member_id==${escapedTerm}`,
+                `member_user_external_id==${escapedTerm}`
             ].join(',')
         );
     }
