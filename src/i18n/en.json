@@ -1886,7 +1886,7 @@
     "add": "Add Featured Speaker",
     "no_speakers": "No Featured Speakers found.",
     "placeholders": {
-      "search_featured_speakers": "Search speakers by Name or Email"
+      "search_featured_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id"
     }
   },
   "track_chairs": {
