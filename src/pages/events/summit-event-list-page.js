@@ -127,7 +127,7 @@ class SummitEventListPage extends React.Component {
     handleExport(ev) {
         const {term, order, orderDir} = this.props;
         ev.preventDefault();
-        this.props.exportEvents(term, order, orderDir);
+        this.props.exportEvents(term, order, orderDir, this.extraFilters);
     }
 
     handlePageChange(page) {
@@ -210,8 +210,6 @@ class SummitEventListPage extends React.Component {
     render(){
         const {currentSummit, events, lastPage, currentPage, term, order, orderDir, totalEvents} = this.props;
 
-        console.log('currentSummit', currentSummit);
-
         const columns = [
             { columnKey: 'id', value: T.translate("general.id"), sortable: true },
             { columnKey: 'type', value: T.translate("event_list.type") },
@@ -238,23 +236,19 @@ class SummitEventListPage extends React.Component {
         const selection_status_ddl = [
             {label: 'Selected', value: 'selected'},
             {label: 'Rejected', value: 'rejected'},
-            {label: 'Alternate', value: 'alternate'},            
+            {label: 'Alternate', value: 'alternate'},
         ];
 
         const track_ddl = currentSummit.tracks?.sort((a,b) => a.order - b.order).map((t => ({label: t.name, value: t.id})));
 
         const event_type_ddl = currentSummit.event_types?.sort((a,b) => a.order - b.order).map((t => ({label: t.name, value: t.id})));
 
-        const speakers_ddl = currentSummit.speakers?.sort((a,b) => a.order - b.order).map((s => ({label: s.full_name, value: s.id})));
-
         const level_ddl = [
             {label: 'Beginner', value: 'beginner'},
             {label: 'Intermediate', value: 'intermediate'},
             {label: 'Advanced', value: 'advanced'},
             {label: 'N/A', value: 'na'},
-
-        ];        
-
+        ];
 
         if(!currentSummit.id) return(<div />);
 
