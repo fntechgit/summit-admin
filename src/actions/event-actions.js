@@ -32,6 +32,7 @@ import {
 import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
 import {getAccessTokenSafely} from '../utils/methods';
 import {getQAUsersBySummitEvent} from "../actions/user-chat-roles-actions"
+import { publishEntityUpdate } from './entity-updates-actions';
 
 export const REQUEST_EVENTS = 'REQUEST_EVENTS';
 export const RECEIVE_EVENTS = 'RECEIVE_EVENTS';
@@ -279,8 +280,10 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
             entity
         )(params)(dispatch)
             .then((payload) => {
-                if (publish)
+                if (publish) {
+                    dispatch(publishEntityUpdate(entity.id, 'Presentation', 'UPDATE'));
                     dispatch(publishEvent(normalizedEntity));
+                }
                 else
                     dispatch(showSuccessMessage(T.translate("edit_event.event_saved")));
             });
@@ -303,6 +306,7 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
         .then((payload) => {
             if (publish) {
                 normalizedEntity.id = payload.response.id;
+                dispatch(publishEntityUpdate(normalizedEntity.id, 'Presentation', 'INSERT'));
                 dispatch(publishEvent(normalizedEntity, () => {
                     history.push(`/app/summits/${currentSummit.id}/events/${payload.response.id}`)
                 }));
