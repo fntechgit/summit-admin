@@ -68,7 +68,21 @@ export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', ord
 
     if (term) {
         const escapedTerm = escapeFilterValue(term);
-        let searchString = `title=@${escapedTerm},abstract=@${escapedTerm},tags=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm},speaker_title=@${escapedTerm},speaker_company=@${escapedTerm},created_by_fullname=@${escapedTerm},created_by_email=@${escapedTerm}`;
+        let searchString = `
+            title=@${escapedTerm},
+            abstract=@${escapedTerm},
+            tags=@${escapedTerm},
+            speaker=@${escapedTerm},
+            speaker_email=@${escapedTerm},
+            speaker_title=@${escapedTerm},
+            speaker_company=@${escapedTerm},
+            created_by_fullname=@${escapedTerm},
+            created_by_email=@${escapedTerm},
+            created_by_company=@${escapedTerm},
+            speaker_company=@${escapedTerm},
+            streaming_url=@${escapedTerm},
+            meeting_url=@${escapedTerm},
+            etherpad_link=@${escapedTerm}`;
 
         if (parseInt(term)) {
             searchString += `,id==${parseInt(term)}`;
@@ -777,8 +791,7 @@ const parseFilters = (filters) => {
 
     if(filters.published_filter) {
         filter.push(`published==${filters.published_filter === 'published' ? '1' : '0'}`);
-    }
-            
+    }            
     
     if(filters.start_date_filter) {
         filter.push(`start_date==${filters.start_date_filter}`);
@@ -786,6 +799,22 @@ const parseFilters = (filters) => {
 
     if(filters.end_date_filter) {
         filter.push(`end_date==${filters.end_date_filter}`);
+    }
+
+    if(filters.duration_filter) {        
+        filter.push(Array.isArray(filters.duration_filter) ? 
+            `duration>=${filters.duration_filter[0]},duration<=${filters.duration_filter[1]}`
+            :
+            `duration${filters.duration_filter}`
+        );
+    }
+
+    if(filters.speaker_count_filter) {
+        filter.push(Array.isArray(filters.speaker_count_filter) ? 
+            `duration>=${filters.speaker_count_filter[0]},duration<=${filters.speaker_count_filter[1]}`
+            :
+            `duration${filters.speaker_count_filter}`
+        );
     }
 
     return filter;

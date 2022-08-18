@@ -16,7 +16,7 @@ import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import {Modal, Pagination } from 'react-bootstrap';
-import {FreeTextSearch, Table, UploadInput, Input, TagInput, SpeakerInput, Dropdown, DateTimePicker} from 'openstack-uicore-foundation/lib/components';
+import {FreeTextSearch, Table, UploadInput, Input, TagInput, SpeakerInput, Dropdown, DateTimePicker, OperatorInput} from 'openstack-uicore-foundation/lib/components';
 import { SegmentedControl } from 'segmented-control'
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
 import { getSummitById }  from '../../actions/summit-actions';
@@ -41,11 +41,13 @@ class SummitEventListPage extends React.Component {
         this.handleMUXImport = this.handleMUXImport.bind(this);
         this.handleChangeMUXModal = this.handleChangeMUXModal.bind(this);
         this.handleImportAssetsFromMUX = this.handleImportAssetsFromMUX.bind(this);
+        this.handleCheckboxFilterChange = this.handleCheckboxFilterChange.bind(this);
         this.handleExtraFilterChange = this.handleExtraFilterChange.bind(this);
         this.handleTagOrSpeakerFilterChange = this.handleTagOrSpeakerFilterChange.bind(this);        
         this.handleSetPublishedFilter = this.handleSetPublishedFilter.bind(this);
         this.handleChangeStartDate = this.handleChangeStartDate.bind(this);
         this.handleChangeEndDate = this.handleChangeEndDate.bind(this);
+        this.handleApplyEventFilters = this.handleApplyEventFilters.bind(this);
         this.state = {
             showImportModal: false,
             send_speaker_email:false,
@@ -56,24 +58,29 @@ class SummitEventListPage extends React.Component {
                 mux_token_secret: "",
                 mux_email_to:"",
             },
+            enabledFilters: [],
             errors:{},
+            eventFilters: {
+                selection_plan_id_filter: [],
+                location_id_filter: [],
+                selection_status_filter: [],
+                track_id_filter: [],
+                event_type_id_filter: [],
+                speaker_id_filter: [],
+                level_filter: [],
+                tags_filter: [],
+                published_filter: null,
+                start_date_filter: '',
+                end_date_filter: '',
+                duration_filter: '',
+                speaker_count_filter: '',
+            }
         };
 
         this.extraFilters = {
             allows_attendee_vote_filter: false,
             allows_location_filter: false,
-            allows_publishing_dates_filter: false,        
-            selection_plan_id_filter: [],
-            location_id_filter: [],
-            selection_status_filter: [],
-            track_id_filter: [],
-            event_type_id_filter: [],
-            speaker_id_filter: [],
-            level_filter: [],
-            tags_filter: [],
-            published_filter: null,
-            start_date_filter: '',
-            end_date_filter: '',
+            allows_publishing_dates_filter: false            
         }
     }
 
@@ -169,13 +176,25 @@ class SummitEventListPage extends React.Component {
         });
     }
 
+    handleApplyEventFilters() {
+        const {term, order, orderDir, page, perPage} = this.props;   
+        const {eventFilters} = this.state;         
+        this.props.getEvents(term, page, perPage, order, orderDir, {...this.extraFilters, ...eventFilters});
+    }
+
     handleExtraFilterChange(ev) {
-        const {term, order, orderDir, page, perPage} = this.props;
         let {value, type, id} = ev.target;
-        if (type === 'checkbox') {
-            value = ev.target.checked;
+        if (type === 'operatorinput') {            
+            value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;            
         }
-        this.extraFilters[id] = value;        
+        this.setState({...this.state, eventFilters: {...this.state.eventFilters, [id]: value}});
+    }
+
+    handleCheckboxFilterChange(ev) {
+        const {term, order, orderDir, page, perPage} = this.props;
+        let {value, id} = ev.target;        
+        value = ev.target.checked;
+        this.extraFilters[id] = value;
         this.props.getEvents(term, page, perPage, order, orderDir, this.extraFilters);
     }
 
@@ -250,6 +269,21 @@ class SummitEventListPage extends React.Component {
             {label: 'N/A', value: 'na'},
         ];
 
+        const filters_ddl = [
+            {label: 'Selection Plan', value: 'selection_plan_id_filter'},
+            {label: 'Location', value: 'location_id_filter'},
+            {label: 'Selection Status', value: 'selection_status_filter'},
+            {label: 'Published Status', value: 'published_filter'},
+            {label: 'Track', value: 'track_id_filter'},
+            {label: 'Event Type', value: 'event_type_id_filter'},
+            {label: 'Speaker', value: 'speaker_id_filter'},
+            {label: 'Level', value: 'level_filter'},
+            {label: 'Tags', value: 'tags_filter'},
+            {label: 'Date', value: 'date_filter'},
+            {label: 'Duration', value: 'duration_filter'},
+            {label: 'Speaker Count', value: 'speaker_count_filter'}
+        ]
+
         if(!currentSummit.id) return(<div />);
 
         return(
@@ -260,6 +294,7 @@ class SummitEventListPage extends React.Component {
                         <FreeTextSearch
                             value={term ?? ''}
                             placeholder={T.translate("event_list.placeholders.search_events")}
+                            title={T.translate("event_list.placeholders.search_events")}
                             onSearch={this.handleSearch}
                         />
                     </div>
@@ -284,155 +319,206 @@ class SummitEventListPage extends React.Component {
                             <div className="panel-body">
                                 <div className="form-check abc-checkbox checkbox-inline">
                                     <input type="checkbox" id="allows_attendee_vote_filter" 
-                                        onChange={this.handleExtraFilterChange} className="form-check-input" />
+                                        onChange={this.handleCheckboxFilterChange} className="form-check-input" />
                                     <label className="form-check-label" htmlFor="allows_attendee_vote_filter"> 
                                         {T.translate("event_list.allows_attendee_vote_filter")} </label>
                                 </div>
                                 <div className="form-check abc-checkbox checkbox-inline">
                                     <input type="checkbox" id="allows_location_filter" 
-                                        onChange={this.handleExtraFilterChange}  className="form-check-input" />
+                                        onChange={this.handleCheckboxFilterChange}  className="form-check-input" />
                                     <label className="form-check-label" htmlFor="allows_location_filter"> 
                                         {T.translate("event_list.allows_location_filter")} </label>
                                 </div>
                                 <div className="form-check abc-checkbox checkbox-inline">
                                     <input type="checkbox" id="allows_publishing_dates_filter" 
-                                        onChange={this.handleExtraFilterChange}  className="form-check-input" />
+                                        onChange={this.handleCheckboxFilterChange}  className="form-check-input" />
                                     <label className="form-check-label" htmlFor="allows_publishing_dates_filter"> 
                                         {T.translate("event_list.allows_publishing_dates_filter")} </label>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className={'col-md-6'}>                         
-                        <Dropdown
-                            id="selection_plan_id_filter"
-                            placeholder={T.translate("event_list.placeholders.selection_plan")}
-                            value={this.extraFilters.selection_plan_id_filter}
-                            onChange={this.handleExtraFilterChange}
-                            options={selection_plans_ddl}
-                            isClearable={true}
-                            isMulti={true}
-                        />
-                    </div>
                 </div>
-                <div className={'row'}>                    
-                    <div className={'col-md-6'}>
-                        <Dropdown
-                            id="location_id_filter"
-                            placeholder={T.translate("event_list.placeholders.location")}
-                            value={this.extraFilters.location_id_filter}
-                            onChange={this.handleExtraFilterChange}
-                            options={location_ddl}
-                            isClearable={true}
-                            isMulti={true}
-                        />
-                    </div>
-                    <div className={'col-md-6'}> 
-                        <Dropdown
-                            id="selection_status_filter"
-                            placeholder={T.translate("event_list.placeholders.selection_status")}
-                            value={this.extraFilters.selection_status_filter}
-                            onChange={this.handleExtraFilterChange}
-                            options={selection_status_ddl}
-                            isClearable={true}
-                            isMulti={true}
-                        />
-                    </div>
-                </div>
-                <div className={'row'}>                    
-                    <div className={'col-md-6'}>
-                        <SegmentedControl
-                            name="published_filter"
-                            options={[
-                                { label: "All", value: null, default: this.extraFilters.published_filter === null},
-                                { label: "Published", value: "published",default: this.extraFilters.published_filter === "published"},
-                                { label: "Non Published", value: "non_published", default: this.extraFilters.published_filter === "non_published"},
-                            ]}
-                            setValue={newValue => this.handleSetPublishedFilter(newValue)}
-                            style={{ width: "100%", height:40, color: '#337ab7', fontSize: '10px'  }}
-                        />                        
-                    </div>
-                    <div className={'col-md-6'}> 
-                        <Dropdown
-                            id="track_id_filter"
-                            placeholder={T.translate("event_list.placeholders.track")}
-                            value={this.extraFilters.track_id_filter}
-                            onChange={this.handleExtraFilterChange}
-                            options={track_ddl}
-                            isClearable={true}
-                            isMulti={true}
-                        />
-                    </div>
-                </div>
+                <hr/>
                 <div className={'row'}>
                     <div className={'col-md-6'}>
                         <Dropdown
-                            id="event_type_id_filter"
-                            placeholder={T.translate("event_list.placeholders.event_type")}
-                            value={this.extraFilters.event_type_id_filter}
-                            onChange={this.handleExtraFilterChange}
-                            options={event_type_ddl}
+                            id="enabled_filters"
+                            placeholder={'Enabled Filters'}
+                            value={this.state.enabledFilters}
+                            onChange={(event) => this.setState({...this.state, enabledFilters: event.target.value})}
+                            options={filters_ddl}
                             isClearable={true}
                             isMulti={true}
                         />
                     </div>
-                    <div className={'col-md-6'}> 
-                        <SpeakerInput
-                            id="speaker_id_filter"
-                            placeholder={T.translate("event_list.placeholders.speaker")}
-                            value={this.extraFilters.speaker_id_filter}
-                            onChange={this.handleTagOrSpeakerFilterChange}
-                            summitId={currentSummit.id}
-                            isMulti={true}
-                            isClearable={true}                            
-                        />
-                    </div>
-                </div>
-                <div className={'row'}>
                     <div className={'col-md-6'}>
-                        <Dropdown
-                            id="level_filter"
-                            placeholder={T.translate("event_list.placeholders.level")}
-                            value={this.extraFilters.level_filter}
-                            onChange={this.handleExtraFilterChange}
-                            options={level_ddl}
-                            isClearable={true}
-                            isMulti={true}
-                        />
+                    <button className="btn btn-primary right-space" onClick={this.handleApplyEventFilters}>
+                            {T.translate("event_list.apply_filters")}
+                        </button>
                     </div>
-                    <div className={'col-md-6'}> 
-                        <TagInput
-                            id="tags_filter"
-                            placeholder={T.translate("event_list.placeholders.tags")}
-                            value={this.extraFilters.tags_filter}
-                            onChange={this.handleTagOrSpeakerFilterChange}
-                            summitId={currentSummit.id}
-                            isMulti={true}
-                            isClearable={true}
-                        />
-                    </div>
-                </div>
-                <div className={'row'}>
-                    <div className={'col-md-6'}>
-                        <DateTimePicker
-                            id="start_date_filter"
-                            format={{date:"YYYY-MM-DD", time: "HH:mm"}}                            
-                            inputProps={{placeholder: T.translate("event_list.placeholders.start_date")}}
-                            timezone={currentSummit.time_zone.name}                            
-                            onChange={this.handleChangeStartDate}                            
-                            value={epochToMomentTimeZone(this.extraFilters.start_date_filter, currentSummit.time_zone_id)}
-                        />
-                    </div>
-                    <div className={'col-md-6'}>
-                        <DateTimePicker
-                            id="end_date_filter"
-                            format={{date:"YYYY-MM-DD", time: "HH:mm"}}                            
-                            inputProps={{placeholder: T.translate("event_list.placeholders.end_date")}}
-                            timezone={currentSummit.time_zone.name}                            
-                            onChange={this.handleChangeEndDate}                            
-                            value={epochToMomentTimeZone(this.extraFilters.end_date_filter, currentSummit.time_zone_id)}
-                        />
-                    </div>
+                </div>                
+                <div className={'filters-row'}>
+                    {this.state.enabledFilters.includes('selection_plan_id_filter') &&
+                        <div className={'col-md-6'}>   
+                            <Dropdown
+                                id="selection_plan_id_filter"
+                                placeholder={T.translate("event_list.placeholders.selection_plan")}
+                                value={this.state.eventFilters.selection_plan_id_filter}
+                                onChange={this.handleExtraFilterChange}
+                                options={selection_plans_ddl}
+                                isClearable={true}
+                                isMulti={true}
+                            />
+                        </div>
+                    }
+                    {this.state.enabledFilters.includes('location_id_filter') &&
+                        <div className={'col-md-6'}>
+                            <Dropdown
+                                id="location_id_filter"
+                                placeholder={T.translate("event_list.placeholders.location")}
+                                value={this.state.eventFilters.location_id_filter}
+                                onChange={this.handleExtraFilterChange}
+                                options={location_ddl}
+                                isClearable={true}
+                                isMulti={true}
+                            />
+                        </div>
+                    }
+                    {this.state.enabledFilters.includes('selection_status_filter') &&
+                        <div className={'col-md-6'}> 
+                            <Dropdown
+                                id="selection_status_filter"
+                                placeholder={T.translate("event_list.placeholders.selection_status")}
+                                value={this.state.eventFilters.selection_status_filter}
+                                onChange={this.handleExtraFilterChange}
+                                options={selection_status_ddl}
+                                isClearable={true}
+                                isMulti={true}
+                            />
+                        </div>                
+                    }
+                    {this.state.enabledFilters.includes('published_filter') &&
+                        <div className={'col-md-6'}>
+                            <SegmentedControl
+                                name="published_filter"
+                                options={[
+                                    { label: "All", value: null, default: this.state.eventFilters.published_filter === null},
+                                    { label: "Published", value: "published",default: this.state.eventFilters.published_filter === "published"},
+                                    { label: "Non Published", value: "non_published", default: this.state.eventFilters.published_filter === "non_published"},
+                                ]}
+                                setValue={newValue => this.handleSetPublishedFilter(newValue)}
+                                style={{ width: "100%", height:40, color: '#337ab7', fontSize: '10px'  }}
+                            />                        
+                        </div>
+                    }
+                    {this.state.enabledFilters.includes('track_id_filter') &&
+                        <div className={'col-md-6'}> 
+                            <Dropdown
+                                id="track_id_filter"
+                                placeholder={T.translate("event_list.placeholders.track")}
+                                value={this.state.eventFilters.track_id_filter}
+                                onChange={this.handleExtraFilterChange}
+                                options={track_ddl}
+                                isClearable={true}
+                                isMulti={true}
+                            />
+                        </div>
+                    }                
+                    {this.state.enabledFilters.includes('event_type_id_filter') &&
+                        <div className={'col-md-6'}>
+                            <Dropdown
+                                id="event_type_id_filter"
+                                placeholder={T.translate("event_list.placeholders.event_type")}
+                                value={this.state.eventFilters.event_type_id_filter}
+                                onChange={this.handleExtraFilterChange}
+                                options={event_type_ddl}
+                                isClearable={true}
+                                isMulti={true}
+                            />
+                        </div>
+                    }
+                    {this.state.enabledFilters.includes('speaker_id_filter') &&
+                        <div className={'col-md-6'}> 
+                            <SpeakerInput
+                                id="speaker_id_filter"
+                                placeholder={T.translate("event_list.placeholders.speaker")}
+                                value={this.state.eventFilters.speaker_id_filter}
+                                onChange={this.handleTagOrSpeakerFilterChange}
+                                summitId={currentSummit.id}
+                                isMulti={true}
+                                isClearable={true}                            
+                            />
+                        </div>
+                    }                
+                    {this.state.enabledFilters.includes('level_filter') &&
+                        <div className={'col-md-6'}>
+                            <Dropdown
+                                id="level_filter"
+                                placeholder={T.translate("event_list.placeholders.level")}
+                                value={this.state.eventFilters.level_filter}
+                                onChange={this.handleExtraFilterChange}
+                                options={level_ddl}
+                                isClearable={true}
+                                isMulti={true}
+                            />
+                        </div>
+                    }
+                    {this.state.enabledFilters.includes('tags_filter') &&
+                        <div className={'col-md-6'}> 
+                            <TagInput
+                                id="tags_filter"
+                                placeholder={T.translate("event_list.placeholders.tags")}
+                                value={this.state.eventFilters.tags_filter}
+                                onChange={this.handleTagOrSpeakerFilterChange}
+                                summitId={currentSummit.id}
+                                isMulti={true}
+                                isClearable={true}
+                            />
+                        </div>
+                    }                
+                    {this.state.enabledFilters.includes('date_filter') &&
+                        <>
+                            <div className={'col-md-3'}>
+                                <DateTimePicker
+                                    id="start_date_filter"
+                                    format={{date:"YYYY-MM-DD", time: "HH:mm"}}                            
+                                    inputProps={{placeholder: T.translate("event_list.placeholders.start_date")}}
+                                    timezone={currentSummit.time_zone.name}                            
+                                    onChange={this.handleChangeStartDate}                            
+                                    value={epochToMomentTimeZone(this.state.eventFilters.start_date_filter, currentSummit.time_zone_id)}
+                                />
+                            </div>                    
+                            <div className={'col-md-3'}>
+                                <DateTimePicker
+                                    id="end_date_filter"
+                                    format={{date:"YYYY-MM-DD", time: "HH:mm"}}                            
+                                    inputProps={{placeholder: T.translate("event_list.placeholders.end_date")}}
+                                    timezone={currentSummit.time_zone.name}                            
+                                    onChange={this.handleChangeEndDate}                            
+                                    value={epochToMomentTimeZone(this.state.eventFilters.end_date_filter, currentSummit.time_zone_id)}
+                                />
+                            </div>
+                        </>
+                    }
+                    {this.state.enabledFilters.includes('duration_filter') &&
+                        <div className={'col-md-10 col-md-offset-1'}> 
+                            <OperatorInput 
+                                id="duration_filter" 
+                                label='Duration' 
+                                value={this.state.eventFilters.duration_filter}
+                                onChange={this.handleExtraFilterChange}/>
+                        </div>
+                    }
+                    {this.state.enabledFilters.includes('speaker_count_filter') &&
+                        <div className={'col-md-10 col-md-offset-1'}> 
+                            <OperatorInput 
+                                id="speaker_count_filter" 
+                                label='Speaker Count'
+                                value={this.state.eventFilters.speaker_count_filter}
+                                onChange={this.handleExtraFilterChange}/>
+                        </div>
+                    }
                 </div>
  
                 {events.length === 0 &&
