@@ -24,6 +24,14 @@ import { getEvents, deleteEvent, exportEvents, importEventsCSV, importMP4AssetsF
 import {hasErrors} from "../../utils/methods";
 import '../../styles/summit-event-list-page.less';
 
+const fieldNames = [
+    { columnKey: 'speakers', value: 'speakers' },
+    { columnKey: 'created_by_fullname', value: 'created_by' },
+    { columnKey: 'published_date', value: 'published' },
+    { columnKey: 'duration', value: 'duration' },
+    { columnKey: 'speaker_count', value: 'speaker_count' },
+]
+
 class SummitEventListPage extends React.Component {
 
     constructor(props) {
@@ -48,6 +56,7 @@ class SummitEventListPage extends React.Component {
         this.handleChangeStartDate = this.handleChangeStartDate.bind(this);
         this.handleChangeEndDate = this.handleChangeEndDate.bind(this);
         this.handleApplyEventFilters = this.handleApplyEventFilters.bind(this);
+        this.handleColumnsChange = this.handleColumnsChange.bind(this);
         this.state = {
             showImportModal: false,
             send_speaker_email:false,
@@ -74,7 +83,8 @@ class SummitEventListPage extends React.Component {
                 end_date_filter: '',
                 duration_filter: '',
                 speaker_count_filter: '',
-            }
+            },
+            selectedColumns: []
         };
 
         this.extraFilters = {
@@ -225,18 +235,20 @@ class SummitEventListPage extends React.Component {
         this.props.getEvents(term, page, perPage, order, orderDir, this.extraFilters);
     }
 
+    handleColumnsChange(ev) {
+        const {value} = ev.target;
+        this.setState({...this.state, selectedColumns: value});
+    }
+
 
     render(){
         const {currentSummit, events, lastPage, currentPage, term, order, orderDir, totalEvents} = this.props;
 
-        const columns = [
+        let columns = [
             { columnKey: 'id', value: T.translate("general.id"), sortable: true },
             { columnKey: 'type', value: T.translate("event_list.type") },
             { columnKey: 'title', value: T.translate("event_list.title"), sortable: true },
-            { columnKey: 'status', value: T.translate("event_list.status") },
-            { columnKey: 'speakers', value: T.translate("event_list.speakers") },
-            { columnKey: 'created_by_fullname', value: T.translate("event_list.created_by") },
-            { columnKey: 'published_date', value: T.translate("event_list.published") },
+            { columnKey: 'selection_status', value: T.translate("event_list.selection_status") }            
         ];
 
         const table_options = {
@@ -283,6 +295,24 @@ class SummitEventListPage extends React.Component {
             {label: 'Duration', value: 'duration_filter'},
             {label: 'Speaker Count', value: 'speaker_count_filter'}
         ]
+
+        const ddl_columns = [
+            { value: 'speakers', label: T.translate("event_list.speakers") },
+            { value: 'created_by_fullname', label: T.translate("event_list.created_by") },
+            { value: 'published_date', label: T.translate("event_list.published") },
+            { value: 'duration', label: T.translate("event_list.duration") },
+            { value: 'speaker_count', label: T.translate("event_list.speaker_count") },
+        ];
+
+        let showColumns = fieldNames
+        .filter(f => this.state.selectedColumns.includes(f.columnKey) )
+        .map( f2 => (
+            {   columnKey: f2.columnKey,
+                value: T.translate(`event_list.${f2.value}`),
+                sortable: f2.sortable
+            }));
+
+        columns = [...columns, ...showColumns];        
 
         if(!currentSummit.id) return(<div />);
 
@@ -505,7 +535,7 @@ class SummitEventListPage extends React.Component {
                         <div className={'col-md-10 col-md-offset-1'}> 
                             <OperatorInput 
                                 id="duration_filter" 
-                                label='Duration' 
+                                label={T.translate("event_list.duration")}
                                 value={this.state.eventFilters.duration_filter}
                                 onChange={this.handleExtraFilterChange}/>
                         </div>
@@ -514,11 +544,28 @@ class SummitEventListPage extends React.Component {
                         <div className={'col-md-10 col-md-offset-1'}> 
                             <OperatorInput 
                                 id="speaker_count_filter" 
-                                label='Speaker Count'
+                                label={T.translate("event_list.speaker_count")}
                                 value={this.state.eventFilters.speaker_count_filter}
                                 onChange={this.handleExtraFilterChange}/>
                         </div>
                     }
+                </div>
+
+                <hr/>
+
+                <div className={'row'}>
+                    <div className={'col-md-12'}>
+                        <label>{T.translate("event_list.select_fields")}</label>
+                        <Dropdown
+                            id="select_fields"
+                            placeholder={T.translate("event_list.placeholders.select_fields")}
+                            value={this.state.selectedColumns}
+                            onChange={this.handleColumnsChange}
+                            options={ddl_columns}
+                            isClearable={true}
+                            isMulti={true}
+                        />
+                    </div>
                 </div>
  
                 {events.length === 0 &&

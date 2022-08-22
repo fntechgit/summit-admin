@@ -56,9 +56,12 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
                     type: e.type.name,
                     title: e.title,
                     status: e.status,
+                    selection_status: e.selection_status,
                     published_date: published_date,
                     created_by_fullname: e.hasOwnProperty('created_by') ? `${e.created_by.first_name} ${e.created_by.last_name}`:'TBD',
-                    speakers: (e.speakers) ? e.speakers.map(s => s.first_name + ' ' + s.last_name).join(',') : ''
+                    speakers: (e.speakers) ? e.speakers.map(s => s.first_name + ' ' + s.last_name).join(',') : '',
+                    duration: moment().seconds(e.duration).format('mm:ss'),
+                    speaker_count: (e.speakers) ? e.speakers.length : '',                    
                 };
             });
 

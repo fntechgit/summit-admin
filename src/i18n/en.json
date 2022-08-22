@@ -736,8 +736,11 @@
     "title": "Title",
     "type": "Type",
     "status": "Status",
+    "selection_status": "Selection Status",
     "published": "Published",
     "speakers": "Speakers",
+    "duration": "Duration",
+    "speaker_count": "Speaker Count",
     "delete_event_warning": "Are you sure you want to delete activity",
     "import": "Import",
     "import_events": "Import Activity",
@@ -757,6 +760,7 @@
     "allows_location_filter": "Allows location",
     "allows_publishing_dates_filter": "Allows publishing dates",
     "apply_filters": "Apply Filters",
+    "select_fields": "Select Data",
     "placeholders": {
       "search_events": "Search by Id, Title, Abstract, Speaker, Speaker Company, Speaker Title, Company, Streaming URL, Meeting URL, Etherpad Link",
       "selection_plan": "Filter by Selection Plan",
@@ -768,7 +772,8 @@
       "level": "Filter by Level",
       "tags": "Filter by Tags",
       "start_date": "Filter from Date",
-      "end_date": "Filter to Date"
+      "end_date": "Filter to Date",
+      "select_fields": "Select data to display"
     }
   },
   "event_type_list": {
