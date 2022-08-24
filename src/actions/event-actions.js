@@ -53,6 +53,8 @@ export const IMAGE_DELETED = 'IMAGE_DELETED';
 export const RECEIVE_PROXIMITY_EVENTS = 'RECEIVE_PROXIMITY_EVENTS';
 export const EVENTS_IMPORTED = 'EVENTS_IMPORTED';
 export const IMPORT_FROM_MUX = 'IMPORT_FROM_MUX';
+export const CHANGE_EVENT_LIST_FILTERS = 'CHANGE_EVENT_LIST_FILTERS';
+export const CHANGE_EVENT_LIST_COLUMNS = 'CHANGE_EVENT_LIST_COLUMNS';
 
 
 export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1, extraFilters = {}) => async (dispatch, getState) => {
@@ -711,6 +713,14 @@ export const importEventsCSV = (file, send_speaker_email) => async (dispatch, ge
             window.location.reload();
         });
 };
+
+export const changeEventListFilters = (filters) => (dispatch, getState) => {
+    return dispatch(createAction(CHANGE_EVENT_LIST_FILTERS)(filters))
+} 
+
+export const changeEventListColumns = (columns) => (dispatch, getState) => {
+    return dispatch(createAction(CHANGE_EVENT_LIST_COLUMNS)(columns))
+} 
 
 const parseFilters = (filters) => {
     const filter = [];
