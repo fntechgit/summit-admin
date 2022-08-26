@@ -33,6 +33,7 @@ import {
     getEmptySpots,
     clearEmptySpots,
     clearPublishedEvents,
+    changeSummitBuilderFilters
 } from '../../actions/summit-builder-actions';
 
 import { setEventSelectedState, setBulkEventSelectedState, performBulkAction } from '../../actions/summit-event-bulk-actions';
@@ -62,6 +63,7 @@ import ScheduleAdminEmptySpotsModal from './schedule-admin-empty-spots-modal';
 import ScheduleAdminEmptySpotsList from './schedule-admin-empty-spots-list';
 import ScheduleAdminsBulkActionsSelector from './bulk-actions/schedule-admin-bulk-actions-selector';
 import {epochToMomentTimeZone} from 'openstack-uicore-foundation/lib/utils/methods';
+import {Dropdown, OperatorInput} from 'openstack-uicore-foundation/lib/components';
 
 
 class ScheduleAdminDashBoard extends React.Component {
@@ -93,6 +95,7 @@ class ScheduleAdminDashBoard extends React.Component {
         this.onSelectedBulkActionPublished        = this.onSelectedBulkActionPublished.bind(this);
         this.onSelectedBulkActionUnPublished      = this.onSelectedBulkActionUnPublished.bind(this);
         this.onSelectAllUnPublished               = this.onSelectAllUnPublished.bind(this);
+        this.handleFiltersChange                  = this.handleFiltersChange.bind(this);
 
         this.fragmentParser     = new FragmentParser();
         this.filters            = this.parseFilterFromFragment();
@@ -100,7 +103,8 @@ class ScheduleAdminDashBoard extends React.Component {
         this.shouldTestDeepLink = true;
         this.byPassHashRefresh  = false;
         this.state = {
-            showModal : false
+            showModal : false,
+            durationFilter: '',
         }
     }
 
@@ -517,6 +521,19 @@ class ScheduleAdminDashBoard extends React.Component {
         performBulkAction(selectedUnPublishedEvents, bulkAction, false);
     }
 
+    handleDurationFilter(ev) {
+        let {value, type, id} = ev.target;
+        if (type === 'operatorinput') {            
+            value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;            
+        }
+        this.setState({...this.state, durationFilter: value});
+    }
+
+    handleFiltersChange(ev) {
+        const {value} = ev.target;
+        this.props.changeSummitBuilderFilters(value);
+    }
+
     render(){
 
         let {
@@ -540,6 +557,7 @@ class ScheduleAdminDashBoard extends React.Component {
             searchingEmpty,
             selectedPublishedEvents,
             selectedUnPublishedEvents,
+            selectedFilters
         } = this.props;
 
         if(!currentSummit.id) return(<div />);
@@ -652,6 +670,17 @@ class ScheduleAdminDashBoard extends React.Component {
             { value : BulkActionEdit, label:T.translate("published_bulk_actions_selector.options.edit")},
         ];
 
+        // filters ddl
+        const filters_ddl = [
+            {label: 'Activity Type', value: 'activity_type_filter'},
+            {label: 'Activity Category', value: 'activity_category_filter'},
+            {label: 'Selection Plan', value: 'selection_plan_id_filter'},            
+            {label: 'Selection Status', value: 'selection_status_filter'},            
+            {label: 'Duration', value: 'duration_filter'},            
+        ]
+
+        console.log('selected filters', selectedFilters)
+
         return(
             <DndProvider backend={HTML5Backend}>
             <div className="row schedule-app-container no-margin">
@@ -741,16 +770,10 @@ class ScheduleAdminDashBoard extends React.Component {
                         onFilterTextChange={this.onUnscheduledEventsFilterTextChanged}
                         currentValue={unScheduleEventsCurrentSearchTerm}
                     />
+
                     <div className="row">
                         <div className="col-md-12">
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <ScheduleAdminEventTypeSelector
-                                        onEventTypeChanged={this.onEventTypeChanged}
-                                        eventTypes={eventTypes}
-                                        currentValue={currentEventTypeSelectorItem}
-                                    />
-                                </div>
+                            <div className="row">                                
                                 <div className="col-md-6">
                                     <ScheduleAdminOrderSelector
                                         onOrderByChanged={this.onOrderByChanged}
@@ -763,23 +786,73 @@ class ScheduleAdminDashBoard extends React.Component {
                         </div>
                     </div>
                     <div className="row">
-                        <div className="col-md-6">
-                            <ScheduleAdminTrackSelector
-                                onTrackChanged={this.onTrackChanged}
-                                tracks={tracks}
-                                currentValue={currentTrackSelectorItem}
+                        <div className="col-md-9">
+                            <Dropdown
+                                id="selected_filters"
+                                placeholder={T.translate("schedule.placeholders.selected_filters")}
+                                value={selectedFilters}
+                                onChange={this.handleFiltersChange}
+                                options={filters_ddl}
+                                isClearable={true}
+                                isMulti={true}
                             />
                         </div>
-                        <div className="col-md-6">
-                            <ScheduleAdminPresentationSelectionStatusSelector
-                                presentationSelectionStatus={presentationSelectionStatusOptions}
-                                onPresentationSelectionStatusChanged={this.onPresentationSelectionStatusChanged}
-                                currentValue={currentPresentationSelectionStatus}
-                            />
+                        <div className='col-md-3'>
+                            <button className="btn btn-primary right-space" onClick={this.handleApplyEventFilters}>
+                                {T.translate("schedule.apply_filters")}
+                            </button>
                         </div>
                     </div>
+                    <div className='row' style={{marginTop: 10}}>
+                        {selectedFilters.includes('activity_type_filter') &&
+                            <div className="col-md-6">
+                                <ScheduleAdminEventTypeSelector
+                                    onEventTypeChanged={this.onEventTypeChanged}
+                                    eventTypes={eventTypes}
+                                    currentValue={currentEventTypeSelectorItem}
+                                />
+                            </div>
+                        }
+                        {selectedFilters.includes('activity_category_filter') &&
+                            <div className="col-md-6">
+                                <ScheduleAdminTrackSelector
+                                    onTrackChanged={this.onTrackChanged}
+                                    tracks={tracks}
+                                    currentValue={currentTrackSelectorItem}
+                                />
+                            </div>
+                        }
+                        {selectedFilters.includes('selection_status_filter') &&
+                            <div className="col-md-6">
+                                <ScheduleAdminPresentationSelectionStatusSelector
+                                    presentationSelectionStatus={presentationSelectionStatusOptions}
+                                    onPresentationSelectionStatusChanged={this.onPresentationSelectionStatusChanged}
+                                    currentValue={currentPresentationSelectionStatus}
+                                />
+                            </div>
+                        }
+                        {selectedFilters.includes('selection_plan_id_filter') &&                    
+                            <div className="col-md-6">
+                                <ScheduleAdminPresentationSelectionPlanSelector
+                                    presentationSelectionPlans={presentationSelectionPlanOptions}
+                                    onPresentationSelectionPlanChanged={this.onPresentationSelectionPlanChanged}
+                                    currentValue={currentPresentationSelectionPlan}
+                                />
+                            </div>
+                        }                    
+                        {selectedFilters.includes('duration_filter') &&
+                            <div className="col-md-12">
+                                <OperatorInput 
+                                    id="duration_filter" 
+                                    label={T.translate("schedule.duration")}
+                                    value={this.state.durationFilter}
+                                    onChange={this.handleDurationFilter}/>
+                            </div>
+                        }
+                    </div>
+
                     <div className="row">
-                        <div className="col-md-6">
+                        <div className="col-md-12">
                             {unScheduleEvents.length > 0 &&
                             <ScheduleAdminsBulkActionsSelector
                                 bulkOptions={bulkOptionsUnPublished}
@@ -787,14 +860,7 @@ class ScheduleAdminDashBoard extends React.Component {
                                 onSelectedBulkAction={this.onSelectedBulkActionUnPublished}
                             />
                             }
-                        </div>
-                        <div className="col-md-6">
-                            <ScheduleAdminPresentationSelectionPlanSelector
-                                presentationSelectionPlans={presentationSelectionPlanOptions}
-                                onPresentationSelectionPlanChanged={this.onPresentationSelectionPlanChanged}
-                                currentValue={currentPresentationSelectionPlan}
-                            />
-                        </div>
+                        </div>                        
                     </div>
 
                     <UnScheduleEventList
@@ -836,6 +902,7 @@ function mapStateToProps({ currentScheduleBuilderState, currentSummitState, summ
         searchingEmpty                     : currentScheduleBuilderState.searchingEmpty,
         selectedPublishedEvents            : summitEventsBulkActionsState.selectedPublishedEvents,
         selectedUnPublishedEvents          : summitEventsBulkActionsState.selectedUnPublishedEvents,
+        selectedFilters                    : currentScheduleBuilderState.selectedFilters,
     }
 }
 
@@ -859,5 +926,6 @@ export default connect(mapStateToProps, {
     setEventSelectedState,
     setBulkEventSelectedState,
     performBulkAction,
-    clearPublishedEvents
+    clearPublishedEvents,
+    changeSummitBuilderFilters
 })(ScheduleAdminDashBoard);

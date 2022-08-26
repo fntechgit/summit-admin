@@ -31,6 +31,7 @@ import
     CLEAR_EMPTY_SPOTS,
     ERROR_PUBLISH_EVENT,
     CLEAR_PUBLISHED_EVENTS,
+    CHANGE_SUMMIT_BUILDER_FILTERS
 } from '../../actions/summit-builder-actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/utils/actions';
@@ -56,7 +57,8 @@ const DEFAULT_STATE = {
     scheduleEventsSearch: [],
     currentUnScheduleOrderBy : null,
     emptySpots: [],
-    searchingEmpty: false
+    searchingEmpty: false,
+    selectedFilters: []
 };
 
 const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
@@ -213,6 +215,10 @@ const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
                 scheduleEvents: [...state.scheduleEvents],
             };
             break;
+        case CHANGE_SUMMIT_BUILDER_FILTERS: {
+            return {...state, selectedFilters: payload}
+        }
+        break;
         case LOGOUT_USER:
         case SET_CURRENT_SUMMIT:
             return DEFAULT_STATE;

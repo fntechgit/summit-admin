@@ -47,6 +47,7 @@ export const RECEIVE_SCHEDULE_EVENTS_SEARCH_PAGE          = 'RECEIVE_SCHEDULE_EV
 export const RECEIVE_EMPTY_SPOTS                          = 'RECEIVE_EMPTY_SPOTS';
 export const CLEAR_EMPTY_SPOTS                            = 'CLEAR_EMPTY_SPOTS';
 export const CLEAR_PUBLISHED_EVENTS                       = 'CLEAR_PUBLISHED_EVENTS';
+export const CHANGE_SUMMIT_BUILDER_FILTERS                = 'CHANGE_SUMMIT_BUILDER_FILTERS';
 
 export const getUnScheduleEventsPage =
     (
@@ -367,4 +368,8 @@ export const clearEmptySpots = () => (dispatch, getState) => {
 
 export const clearPublishedEvents = () => (dispatch, getState) => {
     dispatch(createAction(CLEAR_PUBLISHED_EVENTS)());
+}
+
+export const changeSummitBuilderFilters = (filters) => (dispatch, getState) => {
+    dispatch(createAction(CHANGE_SUMMIT_BUILDER_FILTERS)(filters))
 }
