@@ -16,9 +16,7 @@ import
 {
     RECEIVE_EVENTS,
     REQUEST_EVENTS,
-    EVENT_DELETED,
-    CHANGE_EVENT_LIST_FILTERS,
-    CHANGE_EVENT_LIST_COLUMNS
+    EVENT_DELETED
 } from '../../actions/event-actions';
 
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
@@ -34,8 +32,8 @@ const DEFAULT_STATE = {
     perPage         : 10,
     totalEvents     : 0,
     summitTZ        : '',
-    selectedFilters : [],
-    selectedColumns : []
+    filters         : {},
+    extraColumns    : []
 };
 
 const eventListReducer = (state = DEFAULT_STATE, action) => {
@@ -46,9 +44,9 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
             return DEFAULT_STATE;
         }
         case REQUEST_EVENTS: {
-            let {order, orderDir, term, summitTZ} = payload;
+            let {order, orderDir, term, summitTZ, filters, extraColumns} = payload;
 
-            return {...state, order, orderDir, term, summitTZ }
+            return {...state, order, orderDir, term, summitTZ, filters, extraColumns}
         }
         case RECEIVE_EVENTS: {
             let {current_page, total, last_page} = payload.response;
@@ -74,12 +72,6 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
         case EVENT_DELETED: {
             let {eventId} = payload;
             return {...state, events: state.events.filter(e => e.id !== eventId)};
-        }
-        case CHANGE_EVENT_LIST_FILTERS: {
-            return {...state, selectedFilters: payload}
-        }
-        case CHANGE_EVENT_LIST_COLUMNS: {
-            return {...state, selectedColumns: payload}
         }
         default:
             return state;

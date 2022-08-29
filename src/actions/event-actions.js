@@ -53,11 +53,11 @@ export const IMAGE_DELETED = 'IMAGE_DELETED';
 export const RECEIVE_PROXIMITY_EVENTS = 'RECEIVE_PROXIMITY_EVENTS';
 export const EVENTS_IMPORTED = 'EVENTS_IMPORTED';
 export const IMPORT_FROM_MUX = 'IMPORT_FROM_MUX';
-export const CHANGE_EVENT_LIST_FILTERS = 'CHANGE_EVENT_LIST_FILTERS';
-export const CHANGE_EVENT_LIST_COLUMNS = 'CHANGE_EVENT_LIST_COLUMNS';
 
 
-export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1, extraFilters = {}) => async (dispatch, getState) => {
+export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1, filters = {}, extraColumns = []) => async (dispatch, getState) => {
+
+    console.log(extraColumns)
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -66,7 +66,7 @@ export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', ord
 
     dispatch(startLoading());
 
-    const filter = parseFilters(extraFilters);
+    const filter = parseFilters(filters);
 
     if (term) {
         const escapedTerm = escapeFilterValue(term);
@@ -115,7 +115,7 @@ export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', ord
         createAction(RECEIVE_EVENTS),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
         authErrorHandler,
-        {order, orderDir, term, summitTZ}
+        {order, orderDir, term, summitTZ, filters, extraColumns}
     )(params)(dispatch).then((data) => {
             dispatch(stopLoading());
             return data.response;
@@ -616,7 +616,7 @@ export const deleteEvent = (eventId) => async (dispatch, getState) => {
     );
 };
 
-export const exportEvents = (term = null, order = 'id', orderDir = 1, extraFilters = {}) => async (dispatch, getState) => {
+export const exportEvents = (term = null, order = 'id', orderDir = 1, extraFilters = {}, extraColumns = []) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -714,26 +714,22 @@ export const importEventsCSV = (file, send_speaker_email) => async (dispatch, ge
         });
 };
 
-export const changeEventListFilters = (filters) => (dispatch, getState) => {
-    return dispatch(createAction(CHANGE_EVENT_LIST_FILTERS)(filters))
-} 
-
-export const changeEventListColumns = (columns) => (dispatch, getState) => {
-    return dispatch(createAction(CHANGE_EVENT_LIST_COLUMNS)(columns))
-} 
-
 const parseFilters = (filters) => {
     const filter = [];
 
-    if (filters.allows_attendee_vote_filter) {
-        filter.push('type_allows_attendee_vote==1');
+    if(filters.hasOwnProperty('event_type_capacity_filter') && Array.isArray(filters.event_type_capacity_filter)
+        && filters.event_type_capacity_filter.length > 0) {            
+            if (filters.event_type_capacity_filter.includes('allows_attendee_vote_filter')) {
+                filter.push('type_allows_attendee_vote==1');
+            }
+            if (filters.event_type_capacity_filter.includes('allows_location_filter')) {
+                filter.push('type_allows_location==1');
+            }
+            if (filters.event_type_capacity_filter.includes('allows_publishing_dates_filter')) {
+                filter.push('type_allows_publishing_dates==1');
+            }
     }
-    if (filters.allows_location_filter) {
-        filter.push('type_allows_location==1');
-    }
-    if (filters.allows_publishing_dates_filter) {
-        filter.push('type_allows_publishing_dates==1');
-    }
+    
 
     if(filters.hasOwnProperty('selection_plan_id_filter') && Array.isArray(filters.selection_plan_id_filter)
          && filters.selection_plan_id_filter.length > 0){
