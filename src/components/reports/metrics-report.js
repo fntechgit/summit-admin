@@ -277,6 +277,7 @@ class MetricsReport extends React.Component {
                     columns = [
                         { columnKey: 'id', value: 'Event Id' },
                         { columnKey: 'title', value: 'Event' },
+                        { columnKey: 'metrics_subType', value: 'Subtype' },
                         { columnKey: 'metrics_metric', value: 'Metric' },
                         { columnKey: 'metrics_email', value: 'Email' },
                         { columnKey: 'metrics_company', value: 'Company' }
@@ -302,8 +303,9 @@ class MetricsReport extends React.Component {
                     processedData = flattenData(processedData);
 
                     columns = [
-                        { columnKey: 'id', value: 'Event Id' },
-                        { columnKey: 'title', value: 'Event' },
+                        { columnKey: 'id', value: 'Room Id' },
+                        { columnKey: 'name', value: 'Room Name' },
+                        { columnKey: 'metrics_subType', value: 'Subtype' },
                         { columnKey: 'metrics_metric', value: 'Metric' },
                         { columnKey: 'metrics_email', value: 'Email' },
                         { columnKey: 'metrics_company', value: 'Company' }
