@@ -57,8 +57,6 @@ export const IMPORT_FROM_MUX = 'IMPORT_FROM_MUX';
 
 export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1, filters = {}, extraColumns = []) => async (dispatch, getState) => {
 
-    console.log(extraColumns)
-
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
@@ -729,7 +727,6 @@ const parseFilters = (filters) => {
                 filter.push('type_allows_publishing_dates==1');
             }
     }
-    
 
     if(filters.hasOwnProperty('selection_plan_id_filter') && Array.isArray(filters.selection_plan_id_filter)
          && filters.selection_plan_id_filter.length > 0){
