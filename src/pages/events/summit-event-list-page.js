@@ -277,8 +277,6 @@ class SummitEventListPage extends React.Component {
         const {currentSummit, events, lastPage, currentPage, term, order, orderDir, totalEvents, extraColumns, filters} = this.props;
         const {enabledFilters, eventFilters} = this.state;
 
-        console.log('event duration', eventFilters)
-
         let columns = [
             { columnKey: 'id', value: T.translate("general.id"), sortable: true },
             { columnKey: 'type', value: T.translate("event_list.type") },
