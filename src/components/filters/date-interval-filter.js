@@ -18,8 +18,14 @@ const DateIntervalFilter = ({onFilter, timezone = 'UTC'}) => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
 
-  const handleFilterChange = () => {
+  const handleFilter = () => {
     onFilter(fromDate?.unix() || null, toDate?.unix() || null);
+  }
+
+  const handleClear = () => {
+    setFromDate(null);
+    setToDate(null);
+    onFilter(null, null);
   }
 
   return (
@@ -41,7 +47,9 @@ const DateIntervalFilter = ({onFilter, timezone = 'UTC'}) => {
         timezone={timezone}
       />
       &nbsp;&nbsp;
-      <button className="btn btn-default" onClick={handleFilterChange}>Filter</button>
+      <button className="btn btn-default" onClick={handleFilter}>Filter</button>
+      &nbsp;&nbsp;
+      <button className="btn btn-danger" onClick={handleClear}>Clear</button>
     </div>
   );
 }
