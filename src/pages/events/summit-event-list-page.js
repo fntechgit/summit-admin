@@ -206,8 +206,12 @@ class SummitEventListPage extends React.Component {
 
     handleExtraFilterChange(ev) {
         let {value, type, id} = ev.target;
-        if (type === 'operatorinput') {            
-            value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;            
+        if (type === 'operatorinput') {
+            value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;
+            // send duration as seconds
+            if(id === 'duration_filter') {
+                value = Array.isArray(value) ? value.map(e => e*60) : `${ev.target.operator}${ev.target.value*60}`;    
+            }
         }
         this.setState({...this.state, eventFilters: {...this.state.eventFilters, [id]: value}});
     }
@@ -272,6 +276,8 @@ class SummitEventListPage extends React.Component {
     render(){
         const {currentSummit, events, lastPage, currentPage, term, order, orderDir, totalEvents, extraColumns, filters} = this.props;
         const {enabledFilters, eventFilters} = this.state;
+
+        console.log('event duration', eventFilters)
 
         let columns = [
             { columnKey: 'id', value: T.translate("general.id"), sortable: true },

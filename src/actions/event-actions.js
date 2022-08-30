@@ -814,9 +814,9 @@ const parseFilters = (filters) => {
 
     if(filters.speaker_count_filter) {
         filter.push(Array.isArray(filters.speaker_count_filter) ? 
-            `duration>=${filters.speaker_count_filter[0]},duration<=${filters.speaker_count_filter[1]}`
+            `speakers_count>=${filters.speaker_count_filter[0]},speakers_count<=${filters.speaker_count_filter[1]}`
             :
-            `duration${filters.speaker_count_filter}`
+            `speakers_count${filters.speaker_count_filter}`
         );
     }
 
