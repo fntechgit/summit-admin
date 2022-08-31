@@ -144,7 +144,7 @@
     "schedule": "Schedule",
     "find_empty_spots": "Find empty spots for Day/Location",
     "no_empty_spots": "No empty spots found",
-    "apply_filters": "Apply filters",
+    "apply_duration": "Apply duration",
     "duration": "Duration",
     "placeholders": {
       "select_presentation_selection_status": "Select a Selection Status ...",
