@@ -805,10 +805,11 @@ const parseFilters = (filters) => {
     }
 
     if(filters.duration_filter) {        
+        // multiply values to send the minutes in seconds
         filter.push(Array.isArray(filters.duration_filter) ? 
-            `duration>=${filters.duration_filter[0]},duration<=${filters.duration_filter[1]}`
-            :
-            `duration${filters.duration_filter}`
+            `duration>=${filters.duration_filter[0]*60},duration<=${filters.duration_filter[1]*60}`
+            :            
+            `duration${filters.duration_filter.replace(/\d/g, '')}${filters.duration_filter.replace(/\D/g, '')*60}`
         );
     }
 

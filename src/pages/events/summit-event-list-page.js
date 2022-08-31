@@ -208,9 +208,8 @@ class SummitEventListPage extends React.Component {
         let {value, type, id} = ev.target;
         if (type === 'operatorinput') {
             value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;
-            // send duration as seconds
             if(id === 'duration_filter') {
-                value = Array.isArray(value) ? value.map(e => e*60) : `${ev.target.operator}${ev.target.value*60}`;    
+                value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;
             }
         }
         this.setState({...this.state, eventFilters: {...this.state.eventFilters, [id]: value}});
