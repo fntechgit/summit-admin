@@ -197,7 +197,11 @@ const parseFilters = (filters) => {
             (accumulator, tt) => accumulator +(accumulator !== '' ? ',':'') +`view_type_id==${tt.value}`,
             ''
         ));
-    }    
+    }
+
+    if(filters.promocodesFilter){
+        filter.push(`promo_code_id==${filters.promocodesFilter.id}`);
+    }
 
     if(filters.hasOwnProperty('completedFilter') && filters.completedFilter){
         filter.push(`owner_status==${filters.completedFilter}`);
