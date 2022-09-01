@@ -239,14 +239,14 @@ class ScheduleAdminDashBoard extends React.Component {
     }
 
     onUnScheduleEventsPageChange(currentPage){
-        const { currentSummit, currentTrack, currentEventType , currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy} = this.props;
+        const { currentSummit, currentTrack, currentEventType , currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy, currentDuration} = this.props;
         let trackId = currentTrack == null ? null : currentTrack.id;
         let eventTypeId = currentEventType == null ? null : currentEventType.id;
-        this.props.getUnScheduleEventsPage(currentSummit.id, currentPage, 20, eventTypeId, trackId, currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy);
+        this.props.getUnScheduleEventsPage(currentSummit.id, currentPage, 20, eventTypeId, trackId, currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy, currentDuration);
     }
 
     onEventTypeChanged(eventType){
-        const { currentSummit, currentTrack, currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy} = this.props;
+        const { currentSummit, currentTrack, currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy, currentDuration} = this.props;
         let trackId = currentTrack == null ? null : currentTrack.id;
         let eventTypeId = eventType == null ? null : eventType.id;
         let selectionStatus = currentPresentationSelectionStatus;
@@ -258,19 +258,20 @@ class ScheduleAdminDashBoard extends React.Component {
             this.props.changeCurrentUnScheduleOrderBy(order);
         }
         this.props.changeCurrentEventType(eventType);
-        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, selectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, order);
+        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, selectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, order, currentDuration);
     }
 
     onTrackChanged(track){
-        const { currentSummit, currentEventType , currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy} = this.props;
+        console.log('track', track);
+        const { currentSummit, currentEventType , currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy, currentDuration} = this.props;
         let eventTypeId = currentEventType == null ? null : currentEventType.id;
         let trackId     = track == null ? null : track.id;
         this.props.changeCurrentTrack(track);
-        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy);
+        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy, currentDuration);
     }
 
     onPresentationSelectionStatusChanged(presentationSelectionStatus){
-        const { currentSummit, currentEventType, currentTrack, unScheduleEventsCurrentSearchTerm, currentPresentationSelectionPlan, currentUnScheduleOrderBy } = this.props;
+        const { currentSummit, currentEventType, currentTrack, unScheduleEventsCurrentSearchTerm, currentPresentationSelectionPlan, currentUnScheduleOrderBy, currentDuration } = this.props;
         let eventTypeId = currentEventType == null ? null : currentEventType.id;
         let trackId = currentTrack == null ? null : currentTrack.id;
         let order = currentUnScheduleOrderBy;
@@ -284,25 +285,25 @@ class ScheduleAdminDashBoard extends React.Component {
         }
 
         this.props.changeCurrentPresentationSelectionStatus(presentationSelectionStatus);
-        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, presentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, order);
+        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, presentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, order, currentDuration);
     }
 
     onPresentationSelectionPlanChanged(presentationSelectionPlan){
-        const { currentSummit, currentEventType, currentTrack, currentPresentationSelectionStatus, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy } = this.props;
+        const { currentSummit, currentEventType, currentTrack, currentPresentationSelectionStatus, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy, currentDuration } = this.props;
         let eventTypeId = currentEventType == null ? null : currentEventType.id;
         let trackId = currentTrack == null ? null : currentTrack.id;
         let order = currentUnScheduleOrderBy;
 
         this.props.changeCurrentPresentationSelectionPlan(presentationSelectionPlan);
-        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, currentPresentationSelectionStatus, presentationSelectionPlan, unScheduleEventsCurrentSearchTerm, order);
+        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, currentPresentationSelectionStatus, presentationSelectionPlan, unScheduleEventsCurrentSearchTerm, order, currentDuration);
     }
 
     onUnscheduledEventsFilterTextChanged(term){
-        const { currentSummit, currentEventType, currentTrack, currentPresentationSelectionStatus, currentPresentationSelectionPlan} = this.props;
+        const { currentSummit, currentEventType, currentTrack, currentPresentationSelectionStatus, currentPresentationSelectionPlan, currentDuration} = this.props;
         let eventTypeId = currentEventType == null ? null : currentEventType.id;
         let trackId    = currentTrack == null ? null : currentTrack.id;
         this.props.changeCurrentUnscheduleSearchTerm(term)
-        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, currentPresentationSelectionStatus, currentPresentationSelectionPlan, term, 'id');
+        this.props.getUnScheduleEventsPage(currentSummit.id, 1, 20, eventTypeId, trackId, currentPresentationSelectionStatus, currentPresentationSelectionPlan, term, 'id', currentDuration);
     }
 
     onScheduledEventsFilterTextChanged(term){
@@ -421,6 +422,7 @@ class ScheduleAdminDashBoard extends React.Component {
             currentSummit,
             currentEventType,
             currentTrack,
+            currentDuration,
             currentPresentationSelectionStatus,
             currentPresentationSelectionPlan,
             unScheduleEventsCurrentSearchTerm,
@@ -440,7 +442,8 @@ class ScheduleAdminDashBoard extends React.Component {
             currentPresentationSelectionStatus,
             currentPresentationSelectionPlan,
             unScheduleEventsCurrentSearchTerm,
-            orderBy
+            orderBy,
+            currentDuration
         );
     }
 
@@ -543,6 +546,36 @@ class ScheduleAdminDashBoard extends React.Component {
 
     handleFiltersChange(ev) {
         const {value} = ev.target;
+        const {selectedFilters} = this.props;
+        // resetting filters when they're removed from the ddl
+        if(value.length < selectedFilters.length) {
+            const removedFilter = selectedFilters.filter(e => !value.includes(e))[0];
+            switch(removedFilter) {
+                case 'activity_type_filter': {
+                    console.log('asdkjahsdkjask');
+                    this.onEventTypeChanged(null);
+                    break;
+                }
+                case 'activity_category_filter': {
+                    this.onTrackChanged(null);
+                    break;
+                }
+                case 'selection_plan_id_filter': {
+                    this.onPresentationSelectionPlanChanged(null);                    
+                    break;
+                }
+                case 'selection_status_filter': {
+                    this.onPresentationSelectionStatusChanged(null);
+                    break;
+                }
+                case 'duration_filter': {
+                    this.setState({...this.state, durationFilter: null}, () => this.onDurationFilterApplied());
+                    break;                
+                }
+                default:
+                    break;
+            }
+        }        
         this.props.changeSummitBuilderFilters(value);
     }
 
