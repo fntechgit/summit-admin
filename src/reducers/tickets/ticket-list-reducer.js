@@ -44,7 +44,7 @@ const DEFAULT_STATE = {
     completedFilter : null,
     hasBadgeFilter : null,
     showOnlyPrintable: false,
-    promocodesFilter: null,
+    promocodesFilter: [],
 };
 
 const ticketListReducer = (state = DEFAULT_STATE, action) => {

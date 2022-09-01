@@ -199,8 +199,11 @@ const parseFilters = (filters) => {
         ));
     }
 
-    if(filters.promocodesFilter){
-        filter.push(`promo_code_id==${filters.promocodesFilter.id}`);
+    if(filters.promocodesFilter?.length > 0){
+        filter.push(filters.promocodesFilter.reduce(
+          (accumulator, tt) => accumulator +(accumulator !== '' ? ',':'') +`promo_code_id==${tt.id}`,
+          ''
+        ));
     }
 
     if(filters.hasOwnProperty('completedFilter') && filters.completedFilter){

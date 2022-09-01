@@ -397,6 +397,7 @@ class TicketListPage extends React.Component {
                               className="promocodes-filter"
                               placeholder={T.translate('ticket_list.placeholders.promocodes')}
                               isClearable
+                              multi
                             />
                         </div>
                     </div>
