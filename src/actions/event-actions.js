@@ -804,21 +804,28 @@ const parseFilters = (filters) => {
         filter.push(`end_date==${filters.end_date_filter}`);
     }
 
-    if(filters.duration_filter) {        
+    if(filters.duration_filter) {
+
         // multiply values to send the minutes in seconds
-        filter.push(Array.isArray(filters.duration_filter) ? 
-            `duration>=${filters.duration_filter[0]*60},duration<=${filters.duration_filter[1]*60}`
-            :            
-            `duration${filters.duration_filter.replace(/\d/g, '')}${filters.duration_filter.replace(/\D/g, '')*60}`
-        );
+
+        if(Array.isArray(filters.duration_filter)){
+            filter.push(`duration>=${filters.duration_filter[0]*60}`);
+            filter.push(`duration<=${filters.duration_filter[1]*60}`);
+        }
+        else{
+            filter.push(`duration${filters.duration_filter.replace(/\d/g, '')}${filters.duration_filter.replace(/\D/g, '')*60}`);
+        }
     }
 
     if(filters.speaker_count_filter) {
-        filter.push(Array.isArray(filters.speaker_count_filter) ? 
-            `speakers_count>=${filters.speaker_count_filter[0]},speakers_count<=${filters.speaker_count_filter[1]}`
-            :
-            `speakers_count${filters.speaker_count_filter}`
-        );
+        if(Array.isArray(filters.speaker_count_filter) ){
+            filter.push(`speakers_count>=${filters.speaker_count_filter[0]}`);
+            filter.push(`speakers_count<=${filters.speaker_count_filter[1]}`);
+        }
+        else{
+            filter.push(`speakers_count${filters.speaker_count_filter}`)
+        }
+
     }
 
     return filter;

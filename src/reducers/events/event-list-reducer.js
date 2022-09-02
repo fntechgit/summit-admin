@@ -12,6 +12,10 @@
  **/
 
 import moment from 'moment-timezone';
+import momentDurationFormatSetup from 'moment-duration-format';
+
+momentDurationFormatSetup(moment);
+
 import
 {
     RECEIVE_EVENTS,
@@ -35,6 +39,11 @@ const DEFAULT_STATE = {
     filters         : {},
     extraColumns    : []
 };
+
+const formatDuration = (duration) => {
+    let d = moment.duration(duration, 'seconds');
+    return d.format('mm:ss');
+}
 
 const eventListReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action
@@ -62,7 +71,8 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
                     published_date: published_date,
                     created_by_fullname: e.hasOwnProperty('created_by') ? `${e.created_by.first_name} ${e.created_by.last_name}`:'TBD',
                     speakers: (e.speakers) ? e.speakers.map(s => s.first_name + ' ' + s.last_name).join(',') : '',
-                    duration: e.type.allows_publishing_dates ? moment().seconds(e.duration).format('mm:ss') : 'N/A',
+                    duration: e.type.allows_publishing_dates ?
+                        formatDuration(e.duration) : 'N/A',
                     speaker_count: (e.speakers) ? e.speakers.length : '',                    
                 };
             });
