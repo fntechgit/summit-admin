@@ -24,11 +24,14 @@ class MetricsReport extends React.Component {
         super(props);
 
         this.buildReportQuery = this.buildReportQuery.bind(this);
+        this.buildDrillDownQuery = this.buildDrillDownQuery.bind(this);
         this.preProcessData = this.preProcessData.bind(this);
         this.handleGroupByChange = this.handleGroupByChange.bind(this);
         this.handleFilterChange = this.handleFilterChange.bind(this);
         this.filterReport = this.filterReport.bind(this);
         this.getTable = this.getTable.bind(this);
+        this.getRawMetricsTable = this.getRawMetricsTable.bind(this);
+        this.getDrillDownData = this.getDrillDownData.bind(this);
 
         this.state = {
             sponsor: null,
@@ -45,7 +48,7 @@ class MetricsReport extends React.Component {
         const {currentSummit} = this.props;
         const {fromDate, toDate, eventType, sponsor, showAnswers} = this.state;
         const overallFilter = {};
-        const metricsFields = ["name", "email", "company", "subType"];
+        const metricsFields = ["name", "email", "company", "subType", "attendeeId", "memberId"];
         const sponsorsMessage = ["sponsors"];
         const roomsMessage = ["rooms"];
         const eventsMessage = ["events"];
@@ -146,6 +149,71 @@ class MetricsReport extends React.Component {
         return query;
     };
 
+    /*
+
+   {
+ reportData: metrics(summitId: 13, type: "ROOM", attendeeId: 6228, roomId: 102) {
+    results: results(ordering: "ingress_date", limit: 3000) {
+      type
+      ingressDate
+      outgressDate
+      memberName
+      attendeeName
+      attendeeEmail
+      memberEmail
+      eventName
+      sponsorName
+      locationName
+      subType
+    }
+    totalCount
+  }
+}
+
+    */
+
+    buildDrillDownQuery = (typeId, memberId, attendeeId) => {
+        const {currentSummit} = this.props;
+        const {fromDate, toDate, eventType} = this.state;
+        const filters = {ordering: 'ingress_date', limit: 3000};
+        const listFilters = {summitId: currentSummit.id, type: eventType};
+
+        if (memberId) {
+            listFilters.memberId = memberId;
+        } else if (attendeeId) {
+            listFilters.attendeeId = attendeeId;
+        }
+
+        if (eventType === 'ROOM') {
+            listFilters.roomId = typeId;
+        } else if (eventType === 'EVENT') {
+            listFilters.eventID = typeId;
+        }
+
+        if (fromDate) {
+            listFilters.fromDate = moment(fromDate).format('YYYY-MM-DDTHH:mm:ss+00:00');
+        }
+
+        if (toDate) {
+            listFilters.toDate = moment(toDate).format('YYYY-MM-DDTHH:mm:ss+00:00');
+        }
+
+        let query = new Query("metrics", listFilters);
+        let results = new Query("results", filters);
+        results.find(["type", "ingressDate", "outgressDate", "memberName", "attendeeName", "eventName", "sponsorName", "locationName", "subType" ]);
+
+        query.find([{"results": results}, "totalCount"]);
+
+        return "{ reportData: "+ query + " }";
+    };
+
+    getDrillDownData(ev, id, metric) {
+        const query = this.buildDrillDownQuery(id, metric.memberId, metric.attendeeId)
+        this.props.getMetricRaw(query);
+
+        ev.target.after(this.getRawMetricsTable())
+    }
+
     buildReportQuery(filters, listFilters) {
         let query = null;
         if (listFilters.search) {
@@ -198,6 +266,14 @@ class MetricsReport extends React.Component {
 
         if (metric.subType) {
             result.subType = metric.subType;
+        }
+
+        if (metric.attendeeId) {
+            result.attendeeId = parseInt(metric.attendeeId);
+        }
+
+        if (metric.memberId) {
+            result.memberId = parseInt(metric.memberId);
         }
 
         return result;
@@ -295,7 +371,10 @@ class MetricsReport extends React.Component {
 
                 processedData = data.rooms.filter(r => r?.venueroom?.metrics?.length)
                   .map(rm => {
-                      const metrics = rm.venueroom.metrics.map(this.parseMetricData);
+                      const metrics = rm.venueroom.metrics.map(m => {
+                          const metric = this.parseMetricData(m);
+                          return ({...metric, metric: <span className="metricDrilldown" onClick={ev => this.getDrillDownData(ev, rm.id, metric)}>{metric.metric}</span>})
+                      });
                       return ({...rm, metrics})
                   });
 
@@ -527,26 +606,47 @@ class MetricsReport extends React.Component {
         return tables;
     }
 
+    getRawMetricsTable() {
+        const {metrics_raw_data} = this.props;
+
+        const columns = [
+            { columnKey: 'ingressDate', value: 'Ingress Date' },
+            { columnKey: 'outgressDate', value: 'Outgress Date' },
+        ];
+
+        return (
+          <div className="table-responsive">
+              <Table
+                options={{actions: {}}}
+                data={metrics_raw_data}
+                columns={columns}
+              />
+          </div>
+        );
+    }
+
     render() {
-        let {data, sortKey, sortDir, currentSummit} = this.props;
+        const {data, sortKey, sortDir, currentSummit, metric_raw_data} = this.props;
         const {eventType, sponsor, showAnswers} = this.state;
 
-        let report_options = {
+        const report_options = {
             sortCol: sortKey,
             sortDir: sortDir,
             actions: {}
         };
 
-        let {reportData, tableColumns} = this.preProcessData(data, null);
+        const {reportData, tableColumns} = this.preProcessData(data, null);
 
-        let event_types_ddl = [
-            {label: 'Lobby', value: 'LOBBY'},
-            {label: 'Event', value: 'EVENT'},
-            {label: 'Room', value: 'ROOM'},
-            {label: 'Poster', value: 'POSTER'},
-            {label: 'Sponsor', value: 'SPONSOR'},
-            {label: 'General', value: 'GENERAL'},
+        const event_types_ddl = [
+            {label: 'Lobby (Virtual only)', value: 'LOBBY'},
+            {label: 'Activity (Virtual & In-Person)', value: 'EVENT'},
+            {label: 'Room (Virtual & In-Person)', value: 'ROOM'},
+            {label: 'Poster Type (Virtual only)', value: 'POSTER'},
+            {label: 'Sponsor Page (Virtual only)', value: 'SPONSOR'},
+            {label: 'Other', value: 'GENERAL'},
         ];
+
+        console.log('metric_raw_data', metric_raw_data);
 
         return (
             <div>

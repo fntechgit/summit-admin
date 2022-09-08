@@ -15,6 +15,8 @@ import
 {
     RECEIVE_REPORT,
     REQUEST_REPORT,
+    RECEIVE_METRIC_RAW,
+    REQUEST_METRIC_RAW,
     RECEIVE_EXPORT_REPORT,
     RESET_EXPORT_REPORT,
 } from '../../actions/report-actions';
@@ -24,6 +26,7 @@ import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/utils/actions';
 const DEFAULT_STATE = {
     name            : '',
     data            : [],
+    metric_raw_data : [],
     extraData       : null,
     currentPage     : 1,
     perPage         : 25,
@@ -44,13 +47,13 @@ const reportReducer = (state = DEFAULT_STATE, action) => {
                 return DEFAULT_STATE;
             }
         }
-        break;
         case REQUEST_REPORT: {
-            let {name, page} = payload;
-
+            const {name, page} = payload;
             return {...DEFAULT_STATE, name: name, currentPage: page, exportData: null}
         }
-        break;
+        case REQUEST_METRIC_RAW: {
+            return {...state, metric_raw_data: []}
+        }
         case RECEIVE_REPORT: {
             let responseData = {...payload.response.data};
             let data = (responseData.hasOwnProperty("reportData")) ? responseData.reportData : [];
@@ -59,15 +62,18 @@ const reportReducer = (state = DEFAULT_STATE, action) => {
 
             return {...state, data: data?.results || data, extraData: extraData, totalCount: data?.totalCount || 0, extraStat: extraStat };
         }
-        break;
+        case RECEIVE_METRIC_RAW: {
+            let responseData = {...payload.response.data};
+            let data = (responseData.hasOwnProperty("reportData")) ? responseData.reportData : [];
+
+            return {...state, metric_raw_data: data?.results || data, totalCount: data?.totalCount || 0};
+        }
         case RECEIVE_EXPORT_REPORT: {
             return {...state, exportData: payload.reportData };
         }
-        break;
         case RESET_EXPORT_REPORT: {
             return {...state, exportData: null };
         }
-        break;
         default:
             return state;
     }

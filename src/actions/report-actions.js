@@ -23,14 +23,14 @@ import {getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_REPORT         = 'REQUEST_REPORT';
 export const RECEIVE_REPORT         = 'RECEIVE_REPORT';
+export const REQUEST_METRIC_RAW = 'REQUEST_METRIC_RAW';
+export const RECEIVE_METRIC_RAW = 'RECEIVE_METRIC_RAW';
 export const REQUEST_EXPORT_REPORT  = 'REQUEST_EXPORT_REPORT';
 export const RECEIVE_EXPORT_REPORT  = 'RECEIVE_EXPORT_REPORT';
 export const RESET_EXPORT_REPORT    = 'RESET_EXPORT_REPORT';
 const TIMEOUT = 300 ;//secs
 
-export const getReport = (query, reportName, page) => async (dispatch, getState) => {
-
-    const {  currentSummitState } = getState();
+export const getReport = (query, reportName, page) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
@@ -51,6 +51,30 @@ export const getReport = (query, reportName, page) => async (dispatch, getState)
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }
+    );
+};
+
+export const getMetricRaw = (query) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token : accessToken,
+        query: query
+    };
+
+    return getRequest(
+      createAction(REQUEST_METRIC_RAW),
+      createAction(RECEIVE_METRIC_RAW),
+      `${window.REPORT_API_BASE_URL}/reports`,
+      authErrorHandler,
+      {},
+      TIMEOUT,
+      TIMEOUT
+    )(params)(dispatch).then(() => {
+          dispatch(stopLoading());
+      }
     );
 };
 
