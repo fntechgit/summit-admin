@@ -16,15 +16,13 @@ import {
     createAction,
     stopLoading,
     startLoading,
-    authErrorHandler
+    authErrorHandler, fetchResponseHandler, fetchErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 
 
 export const REQUEST_REPORT         = 'REQUEST_REPORT';
 export const RECEIVE_REPORT         = 'RECEIVE_REPORT';
-export const REQUEST_METRIC_RAW = 'REQUEST_METRIC_RAW';
-export const RECEIVE_METRIC_RAW = 'RECEIVE_METRIC_RAW';
 export const REQUEST_EXPORT_REPORT  = 'REQUEST_EXPORT_REPORT';
 export const RECEIVE_EXPORT_REPORT  = 'RECEIVE_EXPORT_REPORT';
 export const RESET_EXPORT_REPORT    = 'RESET_EXPORT_REPORT';
@@ -59,23 +57,13 @@ export const getMetricRaw = (query) => async (dispatch) => {
 
     dispatch(startLoading());
 
-    const params = {
-        access_token : accessToken,
-        query: query
-    };
-
-    return getRequest(
-      createAction(REQUEST_METRIC_RAW),
-      createAction(RECEIVE_METRIC_RAW),
-      `${window.REPORT_API_BASE_URL}/reports`,
-      authErrorHandler,
-      {},
-      TIMEOUT,
-      TIMEOUT
-    )(params)(dispatch).then(() => {
+    return fetch(`${window.REPORT_API_BASE_URL}/reports?access_token=${accessToken}&query=${query}`)
+      .then(fetchResponseHandler)
+      .then(response => {
           dispatch(stopLoading());
-      }
-    );
+          return response?.data?.reportData?.results || [];
+      })
+      .catch(fetchErrorHandler);
 };
 
 const jsonToCsv = (items) => {

@@ -18,6 +18,29 @@ const Query = require('graphql-query-builder');
 import wrapReport from './report-wrapper';
 import {groupByDate} from '../../utils/methods'
 import {flattenData} from "../../actions/report-actions";
+import ReactDOMServer from "react-dom/server";
+
+const RawMetricsTable = ({data, timezone}) => {
+    const columns = [
+        { columnKey: 'ingressDate', value: 'Ingress' },
+        { columnKey: 'outgressDate', value: 'Outgress' },
+    ];
+
+    if (!data) return null;
+
+    data.forEach(d => {
+       d.ingressDate = moment.tz(d.ingressDate, timezone).format('dddd, MMMM Do YYYY, h:mm a (z)');
+       d.outgressDate = d.outgressDate ? moment.tz(d.outgressDate, timezone).format('dddd, MMMM Do YYYY, h:mm a (z)') : '-';
+    });
+
+    return (
+      <Table
+        options={{actions: {}}}
+        data={data}
+        columns={columns}
+      />
+    );
+};
 
 class MetricsReport extends React.Component {
     constructor(props) {
@@ -30,8 +53,7 @@ class MetricsReport extends React.Component {
         this.handleFilterChange = this.handleFilterChange.bind(this);
         this.filterReport = this.filterReport.bind(this);
         this.getTable = this.getTable.bind(this);
-        this.getRawMetricsTable = this.getRawMetricsTable.bind(this);
-        this.getDrillDownData = this.getDrillDownData.bind(this);
+        this.toggleDrillDownData = this.toggleDrillDownData.bind(this);
 
         this.state = {
             sponsor: null,
@@ -48,7 +70,7 @@ class MetricsReport extends React.Component {
         const {currentSummit} = this.props;
         const {fromDate, toDate, eventType, sponsor, showAnswers} = this.state;
         const overallFilter = {};
-        const metricsFields = ["name", "email", "company", "subType", "attendeeId", "memberId"];
+        const metricsFields = ["name", "email", "company", "subType", "attendeeId", "memberId", "ingress", "outgress"];
         const sponsorsMessage = ["sponsors"];
         const roomsMessage = ["rooms"];
         const eventsMessage = ["events"];
@@ -149,29 +171,6 @@ class MetricsReport extends React.Component {
         return query;
     };
 
-    /*
-
-   {
- reportData: metrics(summitId: 13, type: "ROOM", attendeeId: 6228, roomId: 102) {
-    results: results(ordering: "ingress_date", limit: 3000) {
-      type
-      ingressDate
-      outgressDate
-      memberName
-      attendeeName
-      attendeeEmail
-      memberEmail
-      eventName
-      sponsorName
-      locationName
-      subType
-    }
-    totalCount
-  }
-}
-
-    */
-
     buildDrillDownQuery = (typeId, memberId, attendeeId) => {
         const {currentSummit} = this.props;
         const {fromDate, toDate, eventType} = this.state;
@@ -187,7 +186,7 @@ class MetricsReport extends React.Component {
         if (eventType === 'ROOM') {
             listFilters.roomId = typeId;
         } else if (eventType === 'EVENT') {
-            listFilters.eventID = typeId;
+            listFilters.eventId = typeId;
         }
 
         if (fromDate) {
@@ -207,11 +206,17 @@ class MetricsReport extends React.Component {
         return "{ reportData: "+ query + " }";
     };
 
-    getDrillDownData(ev, id, metric) {
-        const query = this.buildDrillDownQuery(id, metric.memberId, metric.attendeeId)
-        this.props.getMetricRaw(query);
+    async toggleDrillDownData(target, id, metric) {
+        const {currentSummit} = this.props;
 
-        ev.target.after(this.getRawMetricsTable())
+        if (target.nextSibling.innerHTML) {
+            target.nextSibling.innerHTML = '';
+            return;
+        }
+
+        const query = this.buildDrillDownQuery(id, metric.memberId, metric.attendeeId);
+        const data = await this.props.getMetricRaw(query);
+        target.nextSibling.innerHTML = ReactDOMServer.renderToString(<RawMetricsTable data={data} timezone={currentSummit.time_zone_id} />);
     }
 
     buildReportQuery(filters, listFilters) {
@@ -276,6 +281,14 @@ class MetricsReport extends React.Component {
             result.memberId = parseInt(metric.memberId);
         }
 
+        if (metric.ingress) {
+            result.ingress = metric.ingress;
+        }
+
+        if (metric.outgress) {
+            result.outgress = metric.outgress;
+        }
+
         return result;
     }
 
@@ -326,6 +339,8 @@ class MetricsReport extends React.Component {
 
             if (eventType === 'EVENT') {
                 columns.push({ columnKey: 'subType', value: 'SubType' });
+                columns.push({ columnKey: 'ingress', value: 'Ingress' });
+                columns.push({ columnKey: 'outgress', value: 'Outgress' });
 
                 if (!data.rooms?.some(r => r.events))
                     return {reportData: processedData, tableColumns: columns};
@@ -337,7 +352,20 @@ class MetricsReport extends React.Component {
                             events: rm.events
                                 .filter(ev => ev?.metrics?.length)
                                 .map(ev => {
-                                    const metrics = ev.metrics.map(this.parseMetricData);
+                                    const metrics = ev.metrics.map(m => {
+                                        const metric = this.parseMetricData(m);
+                                        return ({
+                                            ...metric,
+                                            metric: (
+                                              <div>
+                                                  <span className="metricDrilldown" onClick={evt => this.toggleDrillDownData(evt.target, ev.id, metric)}>{metric.metric}</span>
+                                                  <div className="raw-metrics-table" />
+                                              </div>
+                                            ),
+                                            ingress: moment.tz(metric.ingress, currentSummit.time_zone_id).format('dddd, MMMM Do YYYY, h:mm a (z)'),
+                                            outgress: metric.outgress ? moment.tz(metric.outgress, currentSummit.time_zone_id).format('dddd, MMMM Do YYYY, h:mm a (z)') : '-',
+                                        })
+                                    });
                                     return ({...ev, metrics})
                                 })
                         };
@@ -356,7 +384,9 @@ class MetricsReport extends React.Component {
                         { columnKey: 'metrics_subType', value: 'Subtype' },
                         { columnKey: 'metrics_metric', value: 'Metric' },
                         { columnKey: 'metrics_email', value: 'Email' },
-                        { columnKey: 'metrics_company', value: 'Company' }
+                        { columnKey: 'metrics_company', value: 'Company' },
+                        { columnKey: 'metrics_ingress', value: 'Ingress' },
+                        { columnKey: 'metrics_outgress', value: 'Outgress' },
                     ];
 
                     if (showAnswers && data.extraQuestions) {
@@ -365,6 +395,8 @@ class MetricsReport extends React.Component {
                 }
             } else if (eventType === 'ROOM') {
                 columns.push({ columnKey: 'subType', value: 'SubType' });
+                columns.push({ columnKey: 'ingress', value: 'Ingress' });
+                columns.push({ columnKey: 'outgress', value: 'Outgress' });
 
                 if (!data.rooms)
                     return {reportData: processedData, tableColumns: columns};
@@ -373,7 +405,17 @@ class MetricsReport extends React.Component {
                   .map(rm => {
                       const metrics = rm.venueroom.metrics.map(m => {
                           const metric = this.parseMetricData(m);
-                          return ({...metric, metric: <span className="metricDrilldown" onClick={ev => this.getDrillDownData(ev, rm.id, metric)}>{metric.metric}</span>})
+                          return ({
+                              ...metric,
+                              metric: (
+                                <div>
+                                  <span className="metricDrilldown" onClick={ev => this.toggleDrillDownData(ev.target, rm.id, metric)}>{metric.metric}</span>
+                                  <div className="raw-metrics-table" />
+                                </div>
+                              ),
+                              ingress: moment.tz(metric.ingress, currentSummit.time_zone_id).format('dddd, MMMM Do YYYY, h:mm a (z)'),
+                              outgress: metric.outgress ? moment.tz(metric.outgress, currentSummit.time_zone_id).format('dddd, MMMM Do YYYY, h:mm a (z)') : '-',
+                          })
                       });
                       return ({...rm, metrics})
                   });
@@ -387,7 +429,9 @@ class MetricsReport extends React.Component {
                         { columnKey: 'metrics_subType', value: 'Subtype' },
                         { columnKey: 'metrics_metric', value: 'Metric' },
                         { columnKey: 'metrics_email', value: 'Email' },
-                        { columnKey: 'metrics_company', value: 'Company' }
+                        { columnKey: 'metrics_company', value: 'Company' },
+                        { columnKey: 'metrics_ingress', value: 'Ingress' },
+                        { columnKey: 'metrics_outgress', value: 'Outgress' },
                     ];
 
                     if (showAnswers && data.extraQuestions) {
@@ -606,27 +650,8 @@ class MetricsReport extends React.Component {
         return tables;
     }
 
-    getRawMetricsTable() {
-        const {metrics_raw_data} = this.props;
-
-        const columns = [
-            { columnKey: 'ingressDate', value: 'Ingress Date' },
-            { columnKey: 'outgressDate', value: 'Outgress Date' },
-        ];
-
-        return (
-          <div className="table-responsive">
-              <Table
-                options={{actions: {}}}
-                data={metrics_raw_data}
-                columns={columns}
-              />
-          </div>
-        );
-    }
-
     render() {
-        const {data, sortKey, sortDir, currentSummit, metric_raw_data} = this.props;
+        const {data, sortKey, sortDir, currentSummit} = this.props;
         const {eventType, sponsor, showAnswers} = this.state;
 
         const report_options = {
@@ -645,8 +670,6 @@ class MetricsReport extends React.Component {
             {label: 'Sponsor Page (Virtual only)', value: 'SPONSOR'},
             {label: 'Other', value: 'GENERAL'},
         ];
-
-        console.log('metric_raw_data', metric_raw_data);
 
         return (
             <div>
