@@ -87,11 +87,12 @@ export const getUnScheduleEventsPage =
         }
 
         if(duration != null){
-            filter.push(Array.isArray(duration) ? 
-                `duration>=${duration[0]*60},duration<=${duration[1]*60}`
-                :
-                `duration${duration.replace(/\d/g, '')}${duration.replace(/\D/g, '')*60}`
-            );
+            if(filter.push(Array.isArray(duration))) {
+                filter.push(`duration>=${duration[0] * 60}`);
+                filter.push(`duration<=${duration[1] * 60}`);
+            } else {
+                filter.push(`duration${duration.replace(/\d/g, '')}${duration.replace(/\D/g, '')*60}`)
+            }
         }
 
         if(term){
