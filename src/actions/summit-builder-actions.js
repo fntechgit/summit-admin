@@ -64,7 +64,6 @@ export const getUnScheduleEventsPage =
         duration         = null
     ) =>
     async (dispatch, getState) => {
-
         const accessToken = await getAccessTokenSafely();
         dispatch(startLoading());
         // filters
@@ -87,7 +86,7 @@ export const getUnScheduleEventsPage =
         }
 
         if(duration != null){
-            if(filter.push(Array.isArray(duration))) {
+            if(Array.isArray(duration)) {
                 filter.push(`duration>=${duration[0] * 60}`);
                 filter.push(`duration<=${duration[1] * 60}`);
             } else {
