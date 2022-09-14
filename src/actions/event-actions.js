@@ -874,7 +874,6 @@ export const getEventFeedback =
 
         // order
         if (order != null && orderDir != null) {
-            if(order === 'created_date') order = 'created';
             const orderDirSign = (orderDir === 1) ? '+' : '-';
             params['order'] = `${orderDirSign}${order}`;
         }
@@ -927,7 +926,6 @@ export const getEventFeedbackCSV =
 
         // order
         if (order != null && orderDir != null) {
-            if(order === 'created_date') order = 'created';
             const orderDirSign = (orderDir === 1) ? '+' : '-';
             params['order'] = `${orderDirSign}${order}`;
         }

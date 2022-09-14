@@ -369,7 +369,7 @@ class EventForm extends React.Component {
         this.props.getEventFeedback(entity.id, feedbackState.term, page, feedbackState.perPage, feedbackState.order, feedbackState.orderDir);
     }
 
-    handleFeedbackSort(index, key, dir) {
+    handleFeedbackSort(index, key, dir, func) {
         const {feedbackState} = this.props;
         const {entity} = this.state;
         this.props.getEventFeedback(entity.id, feedbackState.term, feedbackState.page, feedbackState.perPage, key, dir);
@@ -415,7 +415,7 @@ class EventForm extends React.Component {
         );
 
         let feedback_columns = [
-            {columnKey: 'created_date', value: 'Created Date', sortable: true},
+            {columnKey: 'created', value: 'Created Date', sortable: true},
             {columnKey: 'owner_full_name', value: 'Author', sortable: true},
             {columnKey: 'rate', value: 'Rate', sortable: true},
             {columnKey: 'note', value: 'Note'}
@@ -430,7 +430,9 @@ class EventForm extends React.Component {
                 },
 
             },
-        }
+        };
+
+        console.log(feedback_table_options);
 
         const tracks_ddl = trackOpts.map(t => ({label: t.name, value: t.id}));
 
