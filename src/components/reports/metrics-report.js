@@ -127,7 +127,7 @@ class MetricsReport extends React.Component {
 
         if (sortKey && sortDir) {
             overallFilter.sortBy = this.translateSortKey(sortKey);
-            overallFilter.sortDir = sortDir === 1 ? 'ASC' : 'DESC';
+            overallFilter.sortDir = sortDir === '1' ? 'ASC' : 'DESC';
         }
 
         const query = new Query("summits", listFilters);
