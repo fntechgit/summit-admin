@@ -846,6 +846,7 @@ export const getEventFeedback =
         const {currentSummitState} = getState();
         const accessToken = await getAccessTokenSafely();
         const {currentSummit} = currentSummitState;
+        const summitTZ = currentSummit.time_zone_id;
 
         dispatch(startLoading());
 
@@ -882,7 +883,7 @@ export const getEventFeedback =
             createAction(RECEIVE_EVENT_FEEDBACK),
             `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/feedback`,
             authErrorHandler,
-            {order, orderDir, term}
+            {order, orderDir, term, summitTZ}
         )(params)(dispatch).then((data) => {
                 dispatch(stopLoading());
                 return data.response;
