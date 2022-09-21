@@ -27,7 +27,7 @@ function createDonnutCanvas(arc, percent) {
   const newCanvas = document.createElement('canvas');
   const ctx = newCanvas.getContext('2d');
 
-  newCanvas.width = 80;
+  newCanvas.width = 100;
   newCanvas.height = 55;
 
   ctx.font = "10px Arial";
@@ -36,19 +36,24 @@ function createDonnutCanvas(arc, percent) {
 
   ctx.beginPath()
   ctx.fillStyle = arc?.options?.backgroundColor;
-  ctx.arc(32,25,20, arc.startAngle, arc.endAngle, false); // outer (filled)
-  ctx.arc(32,25,14,arc.endAngle,arc.startAngle, true); // inner (unfills it)
+  ctx.arc(32, 25, 20, 0, (2 * Math.PI * percent / 100), false); // outer (filled)
+  ctx.arc(32, 25, 14, (2 * Math.PI * percent / 100), 0, true); // inner (unfills it)
   ctx.fill();
 
   ctx.beginPath()
-  ctx.arc(32,25,20,0,Math.PI*2, true);
+  ctx.arc(32, 25, 20, 0, Math.PI * 2, true);
   ctx.stroke();
   ctx.beginPath()
-  ctx.arc(32,25,14,0,Math.PI*2, true);
+  ctx.arc(32, 25, 14, 0, Math.PI * 2, true);
   ctx.stroke();
 
   return newCanvas;
-}
+};
+
+
+const trimString = (str, length = 75) => {
+  return trim(str.replace(/ *\([^)]*\) */g, ""), length)
+};
 
 
 const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrationStats}) => {
@@ -82,6 +87,9 @@ const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrati
         bottom: 80
       }
     },
+    parsing: {
+      key: 'value'
+    },
     responsive: true,
     plugins: {
       tooltip: {
@@ -93,24 +101,29 @@ const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrati
       },
       legend: {
         display: true,
-        position: 'bottom',
-        maxWidth: 100,
-        align: 'start',
+        position: 'right',
+        align: 'center',
+        maxWidth: 400,
         labels: {
           usePointStyle: true,
-          font: {size: 18, lineHeight: 2.5},
+          font: {size: 12, lineHeight: 2.5},
           padding: 35,
           boxHeight: 50,
           generateLabels: (chart) => {
-            const total = chart.data.datasets[0].data.reduce((res, it) => res + it, 0);
+            const dataset = chart.data.datasets[0];
+
             return chart.data.labels.map((label, i) => {
-              const data = chart.data.datasets[0];
-              const color = data.backgroundColor[i];
+              const dataItem = dataset.data[i];
+              const color = dataset.backgroundColor[i];
               const arc = chart.getDatasetMeta(0).data[i];
-              const percent = Math.round((data.data[i] / total) * 100);
+              let percent = Math.round((dataItem.value / dataItem.total) * 100);
+
+              if (typeof dataItem.portion !== 'undefined') {
+                percent = Math.round((dataItem.portion / dataItem.value) * 100);
+              }
 
               return {
-                text: `${label} / ${total}`,
+                text: dataItem.label || label,
                 fillStyle: color,
                 fontColor: color,
                 strokeStyle: color,
@@ -125,18 +138,20 @@ const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrati
     }
   };
 
+  const totalTickets = summitStats.total_active_tickets + summitStats.total_inactive_tickets;
+
   const dataTickets = useMemo(() => (
     {
       labels: [
-        `Actives : ${summitStats.total_active_tickets}`,
-        `Inactives : ${summitStats.total_inactive_tickets}`,
+        `Actives : ${summitStats.total_active_tickets} / ${totalTickets}`,
+        `Inactives : ${summitStats.total_inactive_tickets} / ${totalTickets}`,
       ],
       datasets: [
         {
           label: '# of Tickets',
           data: [
-            summitStats.total_active_tickets,
-            summitStats.total_inactive_tickets
+            {value: summitStats.total_active_tickets, total: totalTickets},
+            {value: summitStats.total_inactive_tickets, total: totalTickets}
           ],
           backgroundColor: [
             'rgba(75, 192, 192, 1)',
@@ -156,22 +171,36 @@ const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrati
     return 'rgb(' + r + ', ' + g + ', ' + b + ')';
   }), [summitStats.total_tickets_per_type?.length]);
 
-  const dataTicketTypes = useMemo(() => ({
-    labels: summitStats.total_tickets_per_type.map(tt => `${trim(tt.type, 75)} : ${parseInt(tt.qty)}`),
-    datasets: [
-      {
-        label: 'Ticket Types',
-        data: summitStats.total_tickets_per_type.map(tt => parseInt(tt.qty)),
-        backgroundColor: dataTicketTypesBackgroundColor,
-        borderColor: "#fff",
-        borderWidth: 1,
-      },
-    ],
-  }), [summitStats.total_tickets_per_type]);
-
   const totalTicketTypes = summitStats.total_tickets_per_type.reduce(function (accumulator, currentValue) {
-    return accumulator + parseInt(currentValue.qty);
+    return accumulator + parseInt(currentValue.tickets_qty);
   }, 0);
+
+  const sortedTicketTypes = summitStats.total_tickets_per_type.sort((a,b) => b.tickets_qty - a.tickets_qty);
+
+  const dataTicketTypes = useMemo(() => {
+    const labels = sortedTicketTypes.map(tt => {
+      const percent = Math.round(tt.tickets_qty / totalTicketTypes * 100);
+      return `${trimString(tt.type)}: ${percent}%`
+    });
+
+    return ({
+      labels: labels,
+      datasets: [
+        {
+          label: 'Ticket Types',
+          data: sortedTicketTypes.map(tt => ({
+            value: parseInt(tt.tickets_qty),
+            portion: parseInt(tt.checkin_qty),
+            total: totalTicketTypes,
+            label: `${trimString(tt.type)} : ${tt.checkin_qty}/ ${tt.tickets_qty}`
+          })),
+          backgroundColor: dataTicketTypesBackgroundColor,
+          borderColor: "#fff",
+          borderWidth: 1,
+        },
+      ]
+    })
+  }, [summitStats.total_tickets_per_type]);
 
   const dataBadgeTypesBackgroundColor = useMemo(() => summitStats.total_badges_per_type.map(tt => {
     let r = Math.floor(Math.random() * 200);
@@ -180,22 +209,36 @@ const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrati
     return 'rgb(' + r + ', ' + g + ', ' + b + ')';
   }), [summitStats.total_badges_per_type?.length]);
 
-  const dataBadgeTypes = useMemo(() => ({
-    labels: summitStats.total_badges_per_type.map(tt => `${trim(tt.type, 75)} : ${parseInt(tt.qty)}`),
-    datasets: [
-      {
-        label: 'Badge Types',
-        data: summitStats.total_badges_per_type.map(tt => parseInt(tt.qty)),
-        backgroundColor: dataBadgeTypesBackgroundColor,
-        borderColor: "#fff",
-        borderWidth: 1,
-      },
-    ],
-  }), [summitStats.total_badges_per_type]);
-
   const totalBadgeTypes = summitStats.total_badges_per_type.reduce(function (accumulator, currentValue) {
-    return accumulator + parseInt(currentValue.qty);
+    return accumulator + parseInt(currentValue.badges_qty);
   }, 0);
+
+  const sortedBadgeTypes = summitStats.total_badges_per_type.sort((a,b) => b.badges_qty - a.badges_qty);
+
+  const dataBadgeTypes = useMemo(() => {
+    const labels = sortedBadgeTypes.map(tt => {
+      const percent = Math.round(tt.badges_qty / totalBadgeTypes * 100);
+      return `${trimString(tt.type)}: ${percent}%`
+    });
+
+    return ({
+      labels: labels,
+      datasets: [
+        {
+          label: 'Badge Types',
+          data: sortedBadgeTypes.map(tt => ({
+            value: parseInt(tt.badges_qty),
+            portion: parseInt(tt.checkin_qty),
+            total: totalBadgeTypes,
+            label: `${trimString(tt.type)} : ${tt.checkin_qty}/ ${tt.badges_qty}`
+          })),
+          backgroundColor: dataBadgeTypesBackgroundColor,
+          borderColor: "#fff",
+          borderWidth: 1,
+        },
+      ]
+    })
+  }, [summitStats.total_badges_per_type]);
 
   const dataTicketsPerBadgeFeaturesBackgroundColor = useMemo(() =>
     summitStats.total_tickets_per_badge_feature.map(tt => {
@@ -205,50 +248,50 @@ const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrati
       return 'rgb(' + r + ', ' + g + ', ' + b + ')';
     }), [summitStats.total_tickets_per_badge_feature?.length]);
 
-  const dataTicketsPerBadgeFeatures = useMemo(() => ({
-    labels: summitStats.total_tickets_per_badge_feature.map(tt => `${tt.type} : ${parseInt(tt.tickets_qty)}`),
-    datasets: [
-      {
-        label: 'Badge Features1',
-        data: summitStats.total_tickets_per_badge_feature.map(tt => parseInt(tt.tickets_qty)),
-        backgroundColor: dataTicketsPerBadgeFeaturesBackgroundColor,
-        borderColor: "#fff",
-        borderWidth: 1,
-      },
-    ],
-  }), [summitStats.total_tickets_per_badge_feature]);
+  const totalTicketsPerBadgeFeature = summitStats.total_tickets_per_badge_feature.reduce(function (accumulator, currentValue) {
+    return accumulator + parseInt(currentValue.tickets_qty);
+  }, 0);
 
-  const dataCheckinsPerBadgeFeaturesBackgroundColor = useMemo(() =>
-    summitStats.total_tickets_per_badge_feature.map(tt => {
-      let r = Math.floor(Math.random() * 200);
-      let g = Math.floor(Math.random() * 200);
-      let b = Math.floor(Math.random() * 200);
-      return 'rgb(' + r + ', ' + g + ', ' + b + ')';
-    }), [summitStats.total_tickets_per_badge_feature?.length]);
+  const sortedTicketsPerBadgeFeature = summitStats.total_tickets_per_badge_feature.sort((a,b) => b.tickets_qty - a.tickets_qty);
 
-  const dataCheckinsPerBadgeFeatures = useMemo(() => ({
-    labels: summitStats.total_tickets_per_badge_feature.map(tt => `${tt.type} : ${parseInt(tt.checkin_qty)}`),
-    datasets: [
-      {
-        label: 'Badge Features1',
-        data: summitStats.total_tickets_per_badge_feature.map(tt => parseInt(tt.checkin_qty)),
-        backgroundColor: dataCheckinsPerBadgeFeaturesBackgroundColor,
-        borderColor: "#fff",
-        borderWidth: 1,
-      },
-    ],
-  }), [summitStats.total_tickets_per_badge_feature]);
+  const dataTicketsPerBadgeFeatures = useMemo(() => {
+    const labels = sortedTicketsPerBadgeFeature.map(tt => {
+      const percent = Math.round(tt.tickets_qty / totalTicketsPerBadgeFeature * 100);
+      return `${trimString(tt.type)}: ${percent}%`
+    });
+
+    return ({
+      labels: labels,
+      datasets: [
+        {
+          label: 'Badge Features1',
+          data: sortedTicketsPerBadgeFeature.map(tt => ({
+            value: parseInt(tt.tickets_qty),
+            portion: parseInt(tt.checkin_qty),
+            total: totalTicketsPerBadgeFeature,
+            label: `${trimString(tt.type)} : ${tt.checkin_qty}/ ${tt.tickets_qty}`
+          })),
+          backgroundColor: dataTicketsPerBadgeFeaturesBackgroundColor,
+          borderColor: "#fff",
+          borderWidth: 1,
+        },
+      ]
+    })
+  }, [summitStats.total_tickets_per_badge_feature]);
+
+  const totalAttendees = summitStats.total_checked_in_attendees + summitStats.total_non_checked_in_attendees;
 
   const dataAttendees = {
-    labels: [`Checked In : ${summitStats.total_checked_in_attendees}`,
-      `Non Checked In: ${summitStats.total_non_checked_in_attendees}`,
+    labels: [
+      `Checked In : ${summitStats.total_checked_in_attendees} / ${totalAttendees}`,
+      `Non Checked In: ${summitStats.total_non_checked_in_attendees} / ${totalAttendees}`,
     ],
     datasets: [
       {
         label: 'In Person Attendees',
         data: [
-          summitStats.total_checked_in_attendees,
-          summitStats.total_non_checked_in_attendees,
+          {value: summitStats.total_checked_in_attendees, total: totalAttendees},
+          {value: summitStats.total_non_checked_in_attendees, total: totalAttendees},
         ],
         backgroundColor: [
           'rgba(75, 192, 192, 1)',
@@ -257,20 +300,22 @@ const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrati
         borderColor: "#fff",
         borderWidth: 1,
       },
-    ],
+    ]
   };
+
+  const totalVirtualAttendees = summitStats.total_virtual_attendees + summitStats.total_virtual_non_checked_in_attendees;
 
   const dataVirtualAttendees = {
     labels: [
-      `Virtual Check In ${summitStats.total_virtual_attendees}`,
-      `Non Virtual Checked In: ${summitStats.total_virtual_non_checked_in_attendees}`,
+      `Virtual Check In ${summitStats.total_virtual_attendees} / ${totalVirtualAttendees}`,
+      `Non Virtual Checked In: ${summitStats.total_virtual_non_checked_in_attendees} / ${totalVirtualAttendees}`,
     ],
     datasets: [
       {
         label: 'Virtual Attendees',
         data: [
-          summitStats.total_virtual_attendees,
-          summitStats.total_virtual_non_checked_in_attendees,
+          {value: summitStats.total_virtual_attendees, total: totalVirtualAttendees},
+          {value: summitStats.total_virtual_non_checked_in_attendees, total: totalVirtualAttendees},
         ],
         backgroundColor: [
           'rgba(255, 159, 64, 1)',
@@ -279,7 +324,7 @@ const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrati
         borderColor: "#fff",
         borderWidth: 1,
       },
-    ],
+    ]
   };
 
   if (!chartLoaded) return null;
@@ -305,114 +350,91 @@ const RegistrationStatsPage = ({currentSummit, summitStats, match, getRegistrati
             <strong>$&nbsp;{parseFloat(summitStats.total_refund_amount_emitted).toFixed(2)}</strong>
           </div>
         </div>
+
         {(summitStats.total_active_tickets + summitStats.total_inactive_tickets) > 0 &&
+        <div className="graph-wrapper">
+          <h5>
+            <i className="fa fa-ticket"/>&nbsp;
+            {T.translate("dashboard.total_tickets")} ({summitStats.total_active_tickets + summitStats.total_inactive_tickets})
+            / {T.translate("dashboard.orders")} ({summitStats.total_orders})
+          </h5>
+
+          <div>
+            <Pie data={dataTickets}
+                 width={600}
+                 height={600}
+                 options={chartOptions}
+            />
+          </div>
+        </div>
+        }
+
+        {totalTicketTypes > 0 &&
         <>
-          <h5><i
-            className="fa fa-ticket"/>&nbsp;{T.translate("dashboard.total_tickets")} ({summitStats.total_active_tickets + summitStats.total_inactive_tickets})
-            / {T.translate("dashboard.orders")} ({summitStats.total_orders})</h5>
-          <div className="row">
-            <div className="col-md-12">
-              <Pie data={dataTickets}
-                   width={625}
-                   height={625}
+          <div className="graph-wrapper">
+            <h5>{T.translate("dashboard.ticket_types")} ({totalTicketTypes})</h5>
+            <div>
+              <Pie data={dataTicketTypes}
+                   width={600}
+                   height={600}
+                   options={chartOptions}
+              />
+            </div>
+          </div>
+          <div className="graph-wrapper">
+            <h5>{T.translate("dashboard.badge_types")} ({totalBadgeTypes})</h5>
+            <div>
+              <Pie data={dataBadgeTypes}
+                   width={600}
+                   height={600}
                    options={chartOptions}
               />
             </div>
           </div>
         </>
         }
-        {totalTicketTypes > 0 &&
-        <div className="row">
-          <div className="col-md-6">
-            <h5>{T.translate("dashboard.ticket_types")} ({totalTicketTypes})</h5>
-            <div className="row">
-              <div className="col-md-12">
-                <Pie data={dataTicketTypes}
-                     width={625}
-                     height={625}
-                     options={chartOptions}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <h5>{T.translate("dashboard.badge_types")} ({totalBadgeTypes})</h5>
-            <div className="row">
-              <div className="col-md-12">
-                <Pie data={dataBadgeTypes}
-                     width={625}
-                     height={625}
-                     options={chartOptions}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        }
+
         {summitStats.total_tickets_per_badge_feature.some(t => t.tickets_qty > 0) &&
-        <div className="row">
-          <div className="col-md-12">
-            <h5>{T.translate("dashboard.badge_features_tickets")}</h5>
-            <div className="row">
-              <div className="col-md-12">
-                <Pie data={dataTicketsPerBadgeFeatures}
-                     width={625}
-                     height={625}
-                     options={chartOptions}
-                />
-              </div>
-            </div>
+        <div className="graph-wrapper">
+          <h5>{T.translate("dashboard.badge_features_tickets")}</h5>
+          <div>
+            <Pie data={dataTicketsPerBadgeFeatures}
+                 width={600}
+                 height={600}
+                 options={chartOptions}
+            />
           </div>
         </div>
         }
-        {summitStats.total_tickets_per_badge_feature.some(t => t.checkin_qty > 0) &&
-        <div className="row">
-          <div className="col-md-12">
-            <h5>{T.translate("dashboard.badge_features_checkins")}</h5>
-            <div className="row">
-              <div className="col-md-12">
-                <Pie data={dataCheckinsPerBadgeFeatures}
-                     width={625}
-                     height={625}
-                     options={chartOptions}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        }
+
         {(summitStats.total_checked_in_attendees +
           summitStats.total_non_checked_in_attendees +
           summitStats.total_virtual_attendees + summitStats.total_virtual_non_checked_in_attendees) > 0 &&
         <>
-          <div className="row">
-            <div className="col-md-6">
-              <h5>
-                <i className="fa fa-users"/>
-                &nbsp;
-                {T.translate("dashboard.in_person_attendees")} ({summitStats.total_checked_in_attendees + summitStats.total_non_checked_in_attendees})
-              </h5>
-            </div>
-            <div className="col-md-6">
-              <h5>
-                <i className="fa fa-users"/>
-                &nbsp;
-                {T.translate("dashboard.virtual_attendees")} ({summitStats.total_virtual_attendees + summitStats.total_virtual_non_checked_in_attendees})
-              </h5>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6">
+          <div className="graph-wrapper">
+            <h5>
+              <i className="fa fa-users"/>
+              &nbsp;
+              {T.translate("dashboard.in_person_attendees")} ({summitStats.total_checked_in_attendees + summitStats.total_non_checked_in_attendees})
+            </h5>
+            <div>
               <Pie data={dataAttendees}
-                   width={625}
-                   height={625}
+                   width={600}
+                   height={600}
                    options={chartOptions}
               />
             </div>
-            <div className="col-md-6">
+          </div>
+          <div className="graph-wrapper">
+            <h5>
+              <i className="fa fa-users"/>
+              &nbsp;
+              {T.translate("dashboard.virtual_attendees")} ({summitStats.total_virtual_attendees + summitStats.total_virtual_non_checked_in_attendees})
+            </h5>
+            <div>
               <Pie data={dataVirtualAttendees}
-                   width={625}
-                   height={625}
+                   width={600}
+                   height={600}
                    options={chartOptions}
               />
             </div>
