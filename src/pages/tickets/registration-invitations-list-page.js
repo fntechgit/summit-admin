@@ -21,6 +21,7 @@ import {
     SelectableTable,
     UploadInput,
     Dropdown,
+    TagInput
 } from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
 import {
@@ -52,6 +53,7 @@ class RegistrationInvitationsListPage extends React.Component {
         this.handleChangeFlowEvent = this.handleChangeFlowEvent.bind(this);
         this.handleDeleteAll = this.handleDeleteAll.bind(this);
         this.handleChangeNoSent = this.handleChangeNoSent.bind(this);
+        this.handleTagFilterChange = this.handleTagFilterChange.bind(this);
 
         this.state = {
             showImportModal: false,
@@ -67,8 +69,8 @@ class RegistrationInvitationsListPage extends React.Component {
     }
 
     handleSearch(term) {
-        const {order, orderDir, page, perPage, showNonAccepted, showNotSent} = this.props;
-        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent);
+        const {order, orderDir, page, perPage, showNonAccepted, showNotSent, tagFilter} = this.props;
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, tagFilter);
     }
 
     handleEdit(invitation_id) {
@@ -173,8 +175,8 @@ class RegistrationInvitationsListPage extends React.Component {
 
     handlePageChange(page) {
 
-        const {term, order, orderDir, perPage, showNonAccepted, showNotSent} = this.props;
-        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent);
+        const {term, order, orderDir, perPage, showNonAccepted, showNotSent, tagFilter} = this.props;
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, tagFilter);
     }
 
     handleImportInvitations() {
@@ -187,18 +189,24 @@ class RegistrationInvitationsListPage extends React.Component {
     }
 
     handleExportInvitations() {
-        const {term, order, orderDir, showNonAccepted, showNotSent} = this.props;
-        this.props.exportInvitationsCSV(term, order, orderDir, showNonAccepted, showNotSent);
+        const {term, order, orderDir, showNonAccepted, showNotSent, tagFilter} = this.props;
+        this.props.exportInvitationsCSV(term, order, orderDir, showNonAccepted, showNotSent, tagFilter);
     }
 
     handleChangeNonAccepted() {
-        const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent} = this.props;
-        this.props.getInvitations(term, page, perPage, order, orderDir, !showNonAccepted, showNotSent);
+        const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent, tagFilter} = this.props;
+        this.props.getInvitations(term, page, perPage, order, orderDir, !showNonAccepted, showNotSent, tagFilter);
     }
 
     handleChangeNoSent() {
+        const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent, tagFilter} = this.props;
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, !showNotSent, tagFilter);
+    }
+
+    handleTagFilterChange(ev) {
         const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent} = this.props;
-        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, !showNotSent);
+        const tags = ev.target.value.map(e => e.id);
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, tags);        
     }
 
     render(){
@@ -207,7 +215,7 @@ class RegistrationInvitationsListPage extends React.Component {
             orderDir, totalInvitations,
             lastPage, currentPage, showNonAccepted,
             selectedInvitationsIds, showNotSent,
-            currentFlowEvent, selectedAll
+            currentFlowEvent, selectedAll, tagFilter
         } = this.props;
 
         const {showImportModal, importFile} = this.state;
@@ -271,6 +279,18 @@ class RegistrationInvitationsListPage extends React.Component {
                                 <button className="btn btn-danger" onClick={this.handleDeleteAll}>
                                     {T.translate("registration_invitation_list.delete_all_invitations")}
                                 </button>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <TagInput
+                                    id="tags"
+                                    clearable
+                                    isMulti
+                                    value={tagFilter}
+                                    onChange={this.handleTagFilterChange}
+                                    placeholder={T.translate("registration_invitation_list.placeholders.tags")}
+                                />        
                             </div>
                         </div>
                         <div className="row">

@@ -49,7 +49,7 @@ export const SET_SELECTED_ALL = 'SET_SELECTED_ALL';
 /**************************   INVITATIONS   ******************************************/
 
 export const getInvitations = ( term = null, page = 1, perPage = 10, order = 'id', orderDir = 1,
-                                showNonAccepted = false , showNotSent = false) => async (dispatch, getState) => {
+                                showNonAccepted = false , showNotSent = false, tagFilter = []) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -63,6 +63,13 @@ export const getInvitations = ( term = null, page = 1, perPage = 10, order = 'id
         per_page     : perPage,
         access_token : accessToken,
     };
+
+    if(tagFilter.length > 0) {
+        filter.push('tag_id=='+tagFilter.reduce(
+            (accumulator, tt) => accumulator +(accumulator !== '' ? '||':'') + tt,
+            ''
+          ));
+    }
 
     if(term){
         const escapedTerm = escapeFilterValue(term);
@@ -92,7 +99,7 @@ export const getInvitations = ( term = null, page = 1, perPage = 10, order = 'id
         createAction(RECEIVE_INVITATIONS),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-invitations`,
         authErrorHandler,
-        {page, perPage, order, orderDir, term, showNonAccepted, showNotSent}
+        {page, perPage, order, orderDir, term, showNonAccepted, showNotSent, tagFilter}
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }

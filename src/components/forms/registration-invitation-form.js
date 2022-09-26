@@ -12,7 +12,7 @@
  **/
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
-import {TicketTypesInput, Input} from 'openstack-uicore-foundation/lib/components';
+import {TicketTypesInput, Input, TagInput} from 'openstack-uicore-foundation/lib/components';
 import {hasErrors, isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
 
 class RegistrationInvitationForm extends React.Component {
@@ -130,6 +130,19 @@ class RegistrationInvitationForm extends React.Component {
                             version='v2'
                             error={hasErrors('allowed_ticket_types', errors)}
                         />
+                    </div>
+                </div>
+                <div className="row form-group">
+                    <div className="col-md-12">
+                        <label> {T.translate("edit_registration_invitation.tags")}</label>
+                        <TagInput
+                            id="tags"
+                            clearable
+                            isMulti
+                            value={entity.tags}
+                            onChange={this.handleChange}
+                            placeholder={T.translate("edit_registration_invitation.placeholders.tags")}
+                        />                        
                     </div>
                 </div>
                 <hr />
