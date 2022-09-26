@@ -27,6 +27,7 @@ import
 
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 import {LOGOUT_USER} from 'openstack-uicore-foundation/lib/utils/actions';
+import { MaxTextLengthForTagsOnTable } from '../../utils/constants';
 
 const DEFAULT_STATE = {
     invitations: [],
@@ -60,7 +61,13 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_INVITATIONS: {
             let {total, last_page, data} = payload.response;
             data = data.map(i => {
-                return {...i, is_accepted: i.is_accepted ? "Yes" : "No", is_sent: i.is_sent ? "Yes" : "No", }
+                return {
+                    ...i, 
+                    is_accepted: i.is_accepted ? "Yes" : "No", 
+                    is_sent: i.is_sent ? "Yes" : "No", 
+                    tags: i.tags.map(e=> e.tag).join(", ").slice(0, MaxTextLengthForTagsOnTable),
+                    tags_full: i.tags.map(e=> e.tag).join(", ")
+                }
             });
             return {...state, invitations: data, lastPage: last_page, totalInvitations: total};
         }

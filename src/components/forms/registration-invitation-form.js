@@ -142,7 +142,7 @@ class RegistrationInvitationForm extends React.Component {
                             value={entity.tags}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_registration_invitation.placeholders.tags")}
-                        />                        
+                        />
                     </div>
                 </div>
                 <hr />

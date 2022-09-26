@@ -1839,6 +1839,7 @@
     "no_invitations": "No items found for this search criteria.",
     "select_template": "Select a Email Template to perform the action.",
     "select_items": "Select at least one invitation to perform the action.",
+    "tags": "Tags",
     "placeholders": {
       "search": "Search invitations by term",
       "tags": "Filter by Tags"

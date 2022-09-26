@@ -30,6 +30,7 @@ import {
     setSelectedAll, sendEmails
 }
 from "../../actions/registration-invitation-actions";
+import { MaxTextLengthForTagsOnTable } from '../../utils/constants';
 
 
 
@@ -205,8 +206,7 @@ class RegistrationInvitationsListPage extends React.Component {
 
     handleTagFilterChange(ev) {
         const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent} = this.props;
-        const tags = ev.target.value.map(e => e.id);
-        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, tags);        
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, ev.target.value);
     }
 
     render(){
@@ -227,6 +227,14 @@ class RegistrationInvitationsListPage extends React.Component {
             { columnKey: 'last_name', value: T.translate("registration_invitation_list.last_name") },
             { columnKey: 'is_accepted', value: T.translate("registration_invitation_list.completed") },
             { columnKey: 'is_sent', value: T.translate("registration_invitation_list.sent") },
+            { columnKey: 'tags', value: T.translate("registration_invitation_list.tags"),render: (t) =>
+                t.tags_full.length > MaxTextLengthForTagsOnTable ?
+                    <>
+                        {`${t.tags}...`}&nbsp;<i className="fa fa-info-circle" aria-hidden="true" title={t.tags_full}/>
+                    </>
+                    :
+                    t.tags
+            },
         ];
 
         const table_options = {
