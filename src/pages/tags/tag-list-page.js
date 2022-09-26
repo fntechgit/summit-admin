@@ -25,8 +25,6 @@ class TagListPage extends React.Component {
     constructor(props) {
         super(props);
 
-        props.getTags();
-
         this.handleEdit = this.handleEdit.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
@@ -35,6 +33,11 @@ class TagListPage extends React.Component {
         this.handleNewTag = this.handleNewTag.bind(this);
 
         this.state = {}
+    }
+
+    componentDidMount() {
+        const {term} = this.props;
+        this.props.getTags(term);
     }
 
     handleEdit(tag_id) {
