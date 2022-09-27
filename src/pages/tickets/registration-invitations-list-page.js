@@ -65,7 +65,8 @@ class RegistrationInvitationsListPage extends React.Component {
     componentDidMount() {
         const {currentSummit} = this.props;
         if(currentSummit) {
-            this.props.getInvitations('', 1, 10);
+            const {term, order, orderDir, showNonAccepted, showNotSent, tagFilter} = this.props;
+            this.props.getInvitations(term, 1, 10, order, orderDir, showNonAccepted, showNotSent, tagFilter);
         }
     }
 
