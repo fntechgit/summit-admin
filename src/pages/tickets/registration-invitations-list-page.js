@@ -136,7 +136,8 @@ class RegistrationInvitationsListPage extends React.Component {
             showNotSent,
             selectedInvitationsIds,
             currentFlowEvent,
-            sendEmails
+            sendEmails,
+            allowedTicketTypesIds,
         } = this.props;
 
         if(!currentFlowEvent){
@@ -149,7 +150,16 @@ class RegistrationInvitationsListPage extends React.Component {
             return false;
         }
 
-        sendEmails(currentFlowEvent, selectedAll , selectedInvitationsIds, term , showNonAccepted , showNotSent);
+        sendEmails
+        (
+            currentFlowEvent,
+            selectedAll ,
+            selectedInvitationsIds,
+            term,
+            showNonAccepted,
+            showNotSent,
+            allowedTicketTypesIds
+        );
     }
 
     handleSelected(invitation_id, isSelected){

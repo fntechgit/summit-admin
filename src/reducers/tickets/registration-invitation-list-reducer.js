@@ -76,19 +76,19 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, invitations: data, lastPage: last_page, totalInvitations: total};
         }
         case SELECT_INVITATION:{
-            return {...state, selectedInvitationsIds: [...state.selectedInvitationsIds, payload], allowedTicketTypesIds: []};
+            return {...state, selectedInvitationsIds: [...state.selectedInvitationsIds, payload]};
         }
         case UNSELECT_INVITATION:{
-            return {...state, selectedInvitationsIds: state.selectedInvitationsIds.filter(element => element !== payload), 
-                allowedTicketTypesIds: [], selectedAll: false};
+            return {...state, selectedInvitationsIds: state.selectedInvitationsIds.filter(element => element !== payload)
+                , selectedAll: false};
         }
         case CLEAR_ALL_SELECTED_INVITATIONS:
         {
-            return {...state, selectedInvitationsIds: [], allowedTicketTypesIds: [], selectedAll: false};
+            return {...state, selectedInvitationsIds: [], selectedAll: false};
         }
         case SEND_INVITATIONS_EMAILS:
         {
-            return {...state, selectedInvitationsIds: [], allowedTicketTypesIds: [], selectedAll: false, currentFlowEvent: ''};
+            return {...state, selectedInvitationsIds: [], selectedAll: false, currentFlowEvent: ''};
         }
         case REGISTRATION_INVITATION_DELETED: {
             return {...state, invitations: state.invitations.filter(i => i.id !== payload)};
@@ -100,7 +100,7 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, currentFlowEvent : payload};
         }
         case SET_SELECTED_ALL:{
-            return {...state, selectedAll : payload, selectedInvitationsIds: [], allowedTicketTypesIds: []};
+            return {...state, selectedAll : payload, selectedInvitationsIds: []};
         }
         default:
             return state;

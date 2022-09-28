@@ -148,7 +148,7 @@ export const exportInvitationsCSV = (term, order, orderDir, showNonAccepted, all
     }
 
     if(allowedTicketTypesIds.length > 0){
-        filter.push('ticket_types_id==' + allowedTicketTypes.join('||'));
+        filter.push('ticket_types_id==' + allowedTicketTypesIds.join('||'));
     }
 
     if(filter.length > 0){
@@ -310,7 +310,7 @@ const normalizeEntity = (entity) => {
 };
 
 export const sendEmails = (currentFlowEvent, selectedAll = false , selectedInvitationsIds = [],
-                          term = null, showNonAccepted = false , showNotSent = false) => async (dispatch, getState) => {
+                          term = null, showNonAccepted = false , showNotSent = false, allowedTicketTypesIds = []) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -333,6 +333,10 @@ export const sendEmails = (currentFlowEvent, selectedAll = false , selectedInvit
 
     if(showNotSent){
         filter.push('is_sent==false');
+    }
+
+    if(allowedTicketTypesIds.length > 0){
+        filter.push('ticket_types_id==' + allowedTicketTypesIds.join('||'));
     }
 
     if(filter.length > 0){
