@@ -1840,6 +1840,7 @@
     "last_name": "Last Name",
     "completed": "Completed",
     "sent": "Is Sent?",
+    "allowed_ticket_types": "Allowed Ticket Types",
     "invitation_list": "Invitations",
     "import": "Import",
     "export": "Export",
@@ -1860,6 +1861,7 @@
     "tags": "Tags",
     "placeholders": {
       "search": "Search invitations by term",
+      "allowed_ticket_types_filter": "Filter by one or more ticket types",
       "tags": "Filter by Tags"
     }
   },

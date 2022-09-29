@@ -30,7 +30,8 @@ import {
     setSelectedAll, sendEmails
 }
 from "../../actions/registration-invitation-actions";
-import { MaxTextLengthForTagsOnTable } from '../../utils/constants';
+
+import { MaxTextLengthForTicketTypesOnTable, MaxTextLengthForTagsOnTable } from '../../utils/constants';
 
 
 
@@ -42,6 +43,7 @@ class RegistrationInvitationsListPage extends React.Component {
         this.handleEdit = this.handleEdit.bind(this);
         this.handleSelected = this.handleSelected.bind(this);
         this.handleSelectedAll = this.handleSelectedAll.bind(this);
+        this.handleTicketTypeSelected = this.handleTicketTypeSelected.bind(this);
         this.handleSort = this.handleSort.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
@@ -65,14 +67,14 @@ class RegistrationInvitationsListPage extends React.Component {
     componentDidMount() {
         const {currentSummit} = this.props;
         if(currentSummit) {
-            const {term, order, orderDir, showNonAccepted, showNotSent, tagFilter} = this.props;
-            this.props.getInvitations(term, 1, 10, order, orderDir, showNonAccepted, showNotSent, tagFilter);
+            const {term, order, orderDir, currentPage, perPage, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter} = this.props;
+            this.props.getInvitations(term, currentPage, perPage, order, orderDir, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter);
         }
     }
 
     handleSearch(term) {
-        const {order, orderDir, page, perPage, showNonAccepted, showNotSent, tagFilter} = this.props;
-        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, tagFilter);
+        const {order, orderDir, page, perPage, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter} = this.props;
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter);
     }
 
     handleEdit(invitation_id) {
@@ -137,7 +139,8 @@ class RegistrationInvitationsListPage extends React.Component {
             showNotSent,
             selectedInvitationsIds,
             currentFlowEvent,
-            sendEmails
+            sendEmails,
+            allowedTicketTypesIds,
         } = this.props;
 
         if(!currentFlowEvent){
@@ -150,7 +153,16 @@ class RegistrationInvitationsListPage extends React.Component {
             return false;
         }
 
-        sendEmails(currentFlowEvent, selectedAll , selectedInvitationsIds, term , showNonAccepted , showNotSent);
+        sendEmails
+        (
+            currentFlowEvent,
+            selectedAll ,
+            selectedInvitationsIds,
+            term,
+            showNonAccepted,
+            showNotSent,
+            allowedTicketTypesIds
+        );
     }
 
     handleSelected(invitation_id, isSelected){
@@ -170,15 +182,21 @@ class RegistrationInvitationsListPage extends React.Component {
         }
     }
 
+    handleTicketTypeSelected(ev){
+        const {term, page, order, orderDir, perPage, showNonAccepted, showNotSent} = this.props;
+        let {value} = ev.target;
+        const ticketTypeFilter = [...value];
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, ticketTypeFilter);
+    }
+
     handleSort(index, key, dir, func) {
-        const {term, page, perPage, showNonAccepted, showNotSent} = this.props;
-        this.props.getInvitations(term, page, perPage, key, dir, showNonAccepted, showNotSent);
+        const {term, page, perPage, showNonAccepted, showNotSent, allowedTicketTypesIds} = this.props;
+        this.props.getInvitations(term, page, perPage, key, dir, showNonAccepted, showNotSent, allowedTicketTypesIds);
     }
 
     handlePageChange(page) {
-
-        const {term, order, orderDir, perPage, showNonAccepted, showNotSent, tagFilter} = this.props;
-        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, tagFilter);
+        const {term, order, orderDir, perPage, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter} = this.props;
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter);
     }
 
     handleImportInvitations() {
@@ -190,24 +208,24 @@ class RegistrationInvitationsListPage extends React.Component {
         }
     }
 
-    handleExportInvitations() {
-        const {term, order, orderDir, showNonAccepted, showNotSent, tagFilter} = this.props;
-        this.props.exportInvitationsCSV(term, order, orderDir, showNonAccepted, showNotSent, tagFilter);
-    }
-
-    handleChangeNonAccepted() {
-        const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent, tagFilter} = this.props;
-        this.props.getInvitations(term, page, perPage, order, orderDir, !showNonAccepted, showNotSent, tagFilter);
-    }
-
-    handleChangeNoSent() {
-        const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent, tagFilter} = this.props;
-        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, !showNotSent, tagFilter);
+    handleExportInvitations() {        
+        const {term, order, orderDir, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter} = this.props;
+        this.props.exportInvitationsCSV(term, order, orderDir, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter);
     }
 
     handleTagFilterChange(ev) {
-        const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent} = this.props;
-        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, ev.target.value);
+        const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent, allowedTicketTypesIds} = this.props;
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, allowedTicketTypesIds, ev.target.value);        
+    }
+
+    handleChangeNonAccepted() {
+        const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter} = this.props;
+        this.props.getInvitations(term, page, perPage, order, orderDir, !showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter);
+    }
+
+    handleChangeNoSent() {
+        const {term, order, page, orderDir, perPage, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter} = this.props;
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, !showNotSent, allowedTicketTypesIds, tagFilter);
     }
 
     render(){
@@ -216,11 +234,11 @@ class RegistrationInvitationsListPage extends React.Component {
             orderDir, totalInvitations,
             lastPage, currentPage, showNonAccepted,
             selectedInvitationsIds, showNotSent,
-            currentFlowEvent, selectedAll, tagFilter
+            currentFlowEvent, selectedAll, allowedTicketTypesIds, tagFilter
         } = this.props;
 
         const {showImportModal, importFile} = this.state;
-
+        
         const columns = [
             { columnKey: 'id', value: T.translate("general.id"), sortable: true },
             { columnKey: 'email', value: T.translate("registration_invitation_list.email") },
@@ -228,6 +246,13 @@ class RegistrationInvitationsListPage extends React.Component {
             { columnKey: 'last_name', value: T.translate("registration_invitation_list.last_name") },
             { columnKey: 'is_accepted', value: T.translate("registration_invitation_list.completed") },
             { columnKey: 'is_sent', value: T.translate("registration_invitation_list.sent") },
+            { columnKey: 'allowed_ticket_types', value: T.translate("registration_invitation_list.allowed_ticket_types"), render: (t) =>
+                t.allowed_ticket_types_full.length > MaxTextLengthForTicketTypesOnTable ?
+                    <>
+                        {`${t.allowed_ticket_types}...`}&nbsp;<i className="fa fa-info-circle" aria-hidden="true" title={t.allowed_ticket_types_full}/>
+                    </>
+                    : t.allowed_ticket_types
+            },
             { columnKey: 'tags', value: T.translate("registration_invitation_list.tags"),render: (t) =>
                 t.tags_full.length > MaxTextLengthForTagsOnTable ?
                     <>
@@ -255,6 +280,8 @@ class RegistrationInvitationsListPage extends React.Component {
         }
 
         if(!currentSummit.id) return (<div />);
+
+        const ticketTypesFilterDDL = currentSummit.ticket_types.map(t => { return {label: t.name, value: t.id}; });
 
         let flowEventsDDL = [
             {label: '-- SELECT EMAIL EVENT --', value: ''},
@@ -300,6 +327,16 @@ class RegistrationInvitationsListPage extends React.Component {
                                     onChange={this.handleTagFilterChange}
                                     placeholder={T.translate("registration_invitation_list.placeholders.tags")}
                                 />        
+                            </div>
+                            <div className='col-md-6'>
+                                <Dropdown
+                                    id="allowed_ticket_types_filter"
+                                    value={allowedTicketTypesIds}
+                                    placeholder={T.translate("registration_invitation_list.placeholders.allowed_ticket_types_filter")}
+                                    onChange={this.handleTicketTypeSelected}
+                                    options={ticketTypesFilterDDL}
+                                    isMulti={true}
+                                />
                             </div>
                         </div>
                         <div className="row">

@@ -26,6 +26,7 @@ export const SubQuestionAnswerValuesOperators    = [{ value: 'And', label: 'And'
 export const SubQuestionVisibilityOptions        = [{ value: 'Visible', label: 'Show' }, { value: 'NotVisible', label: 'Hide' }];
 export const SubQuestionVisibilityConditions     = [{ value: 'Equal', label: 'Equal' }, { value: 'NotEqual', label: 'Not Equal' }];
 
-export const MaxTextLengthForTagsOnTable        = 70;
+export const MaxTextLengthForTicketTypesOnTable  = 70;
+export const MaxTextLengthForTagsOnTable         = 70;
 
 export const TBALocation = {id : 0, name : 'TBD', class_name: 'SummitVenue'};

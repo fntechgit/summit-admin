@@ -22,12 +22,12 @@ import
     REGISTRATION_INVITATION_ALL_DELETED,
     SET_CURRENT_FLOW_EVENT,
     SET_SELECTED_ALL,
-    SEND_INVITATIONS_EMAILS,
+    SEND_INVITATIONS_EMAILS
 } from '../../actions/registration-invitation-actions';
 
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 import {LOGOUT_USER} from 'openstack-uicore-foundation/lib/utils/actions';
-import { MaxTextLengthForTagsOnTable } from '../../utils/constants';
+import { MaxTextLengthForTicketTypesOnTable, MaxTextLengthForTagsOnTable } from '../../utils/constants';
 
 const DEFAULT_STATE = {
     invitations: [],
@@ -43,7 +43,8 @@ const DEFAULT_STATE = {
     selectedInvitationsIds: [],
     currentFlowEvent: '',
     selectedAll: false,
-    tagFilter: []
+    allowedTicketTypesIds: [],
+    tagFilter: [],
 };
 
 const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
@@ -53,18 +54,23 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
         case LOGOUT_USER: {
             return DEFAULT_STATE;
         }
-        case REQUEST_INVITATIONS: {
-            let {order, orderDir, page, perPage, term, showNonAccepted, showNotSent, tagFilter} = payload;
+        case REQUEST_INVITATIONS: {            
+            let {order, orderDir, page, perPage, term, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter} = payload;
 
-            return {...state, order, orderDir, currentPage: page, perPage, term, showNonAccepted, showNotSent, tagFilter};
+            return {...state, order, orderDir, currentPage: page, perPage, term, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter};
         }
         case RECEIVE_INVITATIONS: {
             let {total, last_page, data} = payload.response;
             data = data.map(i => {
-                return {
-                    ...i, 
+                
+                const allowedTicketTypes = i.allowed_ticket_types?.length > 0 ? 
+                    i.allowed_ticket_types.map(t => t.name).join(', ') : 'N/A';
+
+                return {...i, 
                     is_accepted: i.is_accepted ? "Yes" : "No", 
                     is_sent: i.is_sent ? "Yes" : "No", 
+                    allowed_ticket_types: allowedTicketTypes.slice(0, MaxTextLengthForTicketTypesOnTable),
+                    allowed_ticket_types_full: allowedTicketTypes,
                     tags: i.tags.map(e=> e.tag).join(", ").slice(0, MaxTextLengthForTagsOnTable),
                     tags_full: i.tags.map(e=> e.tag).join(", ")
                 }
@@ -75,7 +81,8 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, selectedInvitationsIds: [...state.selectedInvitationsIds, payload]};
         }
         case UNSELECT_INVITATION:{
-            return {...state, selectedInvitationsIds: state.selectedInvitationsIds.filter(element => element !== payload), selectedAll: false};
+            return {...state, selectedInvitationsIds: state.selectedInvitationsIds.filter(element => element !== payload)
+                , selectedAll: false};
         }
         case CLEAR_ALL_SELECTED_INVITATIONS:
         {
