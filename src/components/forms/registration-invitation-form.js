@@ -73,7 +73,7 @@ class RegistrationInvitationForm extends React.Component {
 
     render() {
         const {entity, errors} = this.state;
-        const { currentSummit } = this.props;
+        const { currentSummit, onCreateTag } = this.props;
 
         return (
             <form className="registration-invitation-form">
@@ -139,8 +139,10 @@ class RegistrationInvitationForm extends React.Component {
                             id="tags"
                             clearable
                             isMulti
+                            allowCreate
                             value={entity.tags}
                             onChange={this.handleChange}
+                            onCreate={onCreateTag}
                             placeholder={T.translate("edit_registration_invitation.placeholders.tags")}
                         />
                     </div>
