@@ -141,6 +141,7 @@ class RegistrationInvitationsListPage extends React.Component {
             currentFlowEvent,
             sendEmails,
             allowedTicketTypesIds,
+            tagFilter
         } = this.props;
 
         if(!currentFlowEvent){
@@ -161,7 +162,8 @@ class RegistrationInvitationsListPage extends React.Component {
             term,
             showNonAccepted,
             showNotSent,
-            allowedTicketTypesIds
+            allowedTicketTypesIds,
+            tagFilter
         );
     }
 
@@ -183,15 +185,15 @@ class RegistrationInvitationsListPage extends React.Component {
     }
 
     handleTicketTypeSelected(ev){
-        const {term, page, order, orderDir, perPage, showNonAccepted, showNotSent} = this.props;
+        const {term, page, order, orderDir, perPage, showNonAccepted, showNotSent, tagFilter} = this.props;
         let {value} = ev.target;
         const ticketTypeFilter = [...value];
-        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, ticketTypeFilter);
+        this.props.getInvitations(term, page, perPage, order, orderDir, showNonAccepted, showNotSent, ticketTypeFilter, tagFilter);
     }
 
     handleSort(index, key, dir, func) {
-        const {term, page, perPage, showNonAccepted, showNotSent, allowedTicketTypesIds} = this.props;
-        this.props.getInvitations(term, page, perPage, key, dir, showNonAccepted, showNotSent, allowedTicketTypesIds);
+        const {term, page, perPage, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter} = this.props;
+        this.props.getInvitations(term, page, perPage, key, dir, showNonAccepted, showNotSent, allowedTicketTypesIds, tagFilter);
     }
 
     handlePageChange(page) {
