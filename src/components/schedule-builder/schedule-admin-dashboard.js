@@ -540,7 +540,6 @@ class ScheduleAdminDashBoard extends React.Component {
         if (type === 'operatorinput') {            
             value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;
         }
-        console.log('change duration filter', ev)
         this.setState({...this.state, durationFilter: value});
     }
 
