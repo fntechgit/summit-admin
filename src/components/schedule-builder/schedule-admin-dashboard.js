@@ -107,7 +107,7 @@ class ScheduleAdminDashBoard extends React.Component {
         this.byPassHashRefresh  = false;
         this.state = {
             showModal : false,
-            durationFilter: '',
+            durationFilter: props.currentDuration || '',
         }
     }
 
