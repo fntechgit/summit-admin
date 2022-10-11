@@ -48,7 +48,7 @@ class RegistrationInvitationForm extends React.Component {
     }
 
     handleNewTag(newTag) {
-        this.setState({...this.state, entity: {...this.state.entity, tags: [...this.state.entity.tags, newTag]}})
+        this.setState({...this.state, entity: {...this.state.entity, tags: [...this.state.entity.tags, {tag: newTag}]}})
     }
 
     handleChange(ev) {
@@ -77,7 +77,7 @@ class RegistrationInvitationForm extends React.Component {
 
     render() {
         const {entity, errors} = this.state;
-        const { currentSummit, onCreateTag } = this.props;
+        const { currentSummit } = this.props;
 
         return (
             <form className="registration-invitation-form">
@@ -146,7 +146,7 @@ class RegistrationInvitationForm extends React.Component {
                             allowCreate
                             value={entity.tags}
                             onChange={this.handleChange}
-                            onCreate={(tag) => onCreateTag(tag, this.handleNewTag)}
+                            onCreate={this.handleNewTag}
                             placeholder={T.translate("edit_registration_invitation.placeholders.tags")}
                         />
                     </div>

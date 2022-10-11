@@ -75,7 +75,6 @@ class EditRegistrationInvitationPage extends React.Component {
                         errors={errors}
                         currentSummit={currentSummit}
                         onSubmit={this.props.saveRegistrationInvitation}
-                        onCreateTag={this.props.createTag}
                     />
                 }
                 <RegistrationInvitationEmailActivity
@@ -99,6 +98,5 @@ export default connect (
         resetRegistrationInvitationForm,
         saveRegistrationInvitation,
         getSentEmailsByTemplatesAndEmail,
-        createTag
     }
 )(EditRegistrationInvitationPage);
