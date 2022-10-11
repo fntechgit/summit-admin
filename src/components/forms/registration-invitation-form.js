@@ -26,6 +26,7 @@ class RegistrationInvitationForm extends React.Component {
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleNewTag = this.handleNewTag.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -44,6 +45,10 @@ class RegistrationInvitationForm extends React.Component {
         if (!isEmpty(state)) {
             this.setState({...this.state, ...state})
         }
+    }
+
+    handleNewTag(newTag) {
+        this.setState({...this.state, entity: {...this.state.entity, tags: [...this.state.entity.tags, newTag]}})
     }
 
     handleChange(ev) {
@@ -67,7 +72,6 @@ class RegistrationInvitationForm extends React.Component {
     handleSubmit(ev) {
         let entity = {...this.state.entity};
         ev.preventDefault();
-
         this.props.onSubmit(this.state.entity);
     }
 
@@ -142,7 +146,7 @@ class RegistrationInvitationForm extends React.Component {
                             allowCreate
                             value={entity.tags}
                             onChange={this.handleChange}
-                            onCreate={onCreateTag}
+                            onCreate={(tag) => onCreateTag(tag, this.handleNewTag)}
                             placeholder={T.translate("edit_registration_invitation.placeholders.tags")}
                         />
                     </div>
