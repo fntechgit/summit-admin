@@ -21,7 +21,6 @@ import { getRegistrationInvitation ,
     saveRegistrationInvitation } from "../../actions/registration-invitation-actions";
 import RegistrationInvitationForm from "../../components/forms/registration-invitation-form";
 import {getSentEmailsByTemplatesAndEmail} from '../../actions/email-actions';
-import { createTag } from '../../actions/tag-actions';
 import RegistrationInvitationEmailActivity from "../../components/forms/registration-invitation-email-activity";
 
 class EditRegistrationInvitationPage extends React.Component {
