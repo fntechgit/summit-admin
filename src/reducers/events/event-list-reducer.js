@@ -75,8 +75,8 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
                         formatDuration(e.duration) : 'N/A',
                     speaker_count: (e.speakers) ? e.speakers.length : '',
                     track: e.track.name,
-                    start_date: moment(e.start_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a'),
-                    end_date: moment(e.end_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a'),
+                    start_date: e.start_date ? moment(e.start_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') : 'TBD',
+                    end_date: e.end_date ? moment(e.end_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') : 'TBD',
                 };
             });
 
