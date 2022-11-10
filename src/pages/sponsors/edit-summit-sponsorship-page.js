@@ -23,7 +23,6 @@ import {
     uploadSponsorshipBadgeImage, 
     removeSponsorshipBadgeImage
 } from "../../actions/sponsor-actions";
-import { getSponsorships } from '../../actions/sponsorship-actions';
 
 class EditSummitSponsorshipPage extends React.Component {
 
@@ -36,8 +35,6 @@ class EditSummitSponsorshipPage extends React.Component {
         } else {
             props.getSummitSponsorship(sponsorshipId);
         }
-
-        props.getSponsorships();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -90,6 +87,7 @@ export default connect (
     {
         getSummitSponsorship,
         getSponsorships,
+        getSummitById,
         resetSummitSponsorshipForm,
         saveSummitSponsorship,
         uploadSponsorshipBadgeImage,
