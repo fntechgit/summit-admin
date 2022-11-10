@@ -42,14 +42,16 @@ export const MEMBER_ADDED_TO_SPONSOR        = 'MEMBER_ADDED_TO_SPONSOR';
 export const MEMBER_REMOVED_FROM_SPONSOR    = 'MEMBER_REMOVED_FROM_SPONSOR';
 export const COMPANY_ADDED                  = 'COMPANY_ADDED';
 
-export const REQUEST_SPONSORSHIPS       = 'REQUEST_SPONSORSHIPS';
-export const RECEIVE_SPONSORSHIPS       = 'RECEIVE_SPONSORSHIPS';
-export const RECEIVE_SPONSORSHIP        = 'RECEIVE_SPONSORSHIP';
-export const RESET_SPONSORSHIP_FORM     = 'RESET_SPONSORSHIP_FORM';
-export const UPDATE_SPONSORSHIP         = 'UPDATE_SPONSORSHIP';
-export const SPONSORSHIP_UPDATED        = 'SPONSORSHIP_UPDATED';
-export const SPONSORSHIP_ADDED          = 'SPONSORSHIP_ADDED';
-export const SPONSORSHIP_DELETED        = 'SPONSORSHIP_DELETED';
+export const REQUEST_SUMMIT_SPONSORSHIPS       = 'REQUEST_SUMMIT_SPONSORSHIPS';
+export const RECEIVE_SUMMIT_SPONSORSHIPS       = 'RECEIVE_SUMMIT_SPONSORSHIPS';
+export const RECEIVE_SUMMIT_SPONSORSHIP        = 'RECEIVE_SUMMIT_SPONSORSHIP';
+export const RESET_SUMMIT_SPONSORSHIP_FORM     = 'RESET_SUMMIT_SPONSORSHIP_FORM';
+export const UPDATE_SUMMIT_SPONSORSHIP         = 'UPDATE_SUMMIT_SPONSORSHIP';
+export const SUMMIT_SPONSORSHIP_UPDATED        = 'SUMMIT_SPONSORSHIP_UPDATED';
+export const SUMMIT_SPONSORSHIP_ADDED          = 'SUMMIT_SPONSORSHIP_ADDED';
+export const SUMMIT_SPONSORSHIP_DELETED        = 'SUMMIT_SPONSORSHIP_DELETED';
+export const BADGE_IMAGE_ATTACHED              = 'BADGE_IMAGE_ATTACHED';
+export const BADGE_IMAGE_DELETED               = 'BADGE_IMAGE_DELETED';
 
 export const REQUEST_BADGE_SCANS       = 'REQUEST_BADGE_SCANS';
 export const RECEIVE_BADGE_SCANS       = 'RECEIVE_BADGE_SCANS';
@@ -350,7 +352,7 @@ export const createCompany = (company, callback) => async (dispatch, getState) =
 
 
 
-export const getSponsorships = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
+export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -372,9 +374,9 @@ export const getSponsorships = ( order = 'name', orderDir = 1 ) => async (dispat
 
 
     return getRequest(
-        createAction(REQUEST_SPONSORSHIPS),
-        createAction(RECEIVE_SPONSORSHIPS),
-        `${window.API_BASE_URL}/api/v1/sponsorship-types`,
+        createAction(REQUEST_SUMMIT_SPONSORSHIPS),
+        createAction(RECEIVE_SUMMIT_SPONSORSHIPS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
         authErrorHandler,
         {order, orderDir}
     )(params)(dispatch).then(() => {
@@ -383,7 +385,7 @@ export const getSponsorships = ( order = 'name', orderDir = 1 ) => async (dispat
     );
 };
 
-export const getSponsorship = (sponsorshipId) => async (dispatch, getState) => {
+export const getSummitSponsorship = (sponsorshipId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -397,8 +399,8 @@ export const getSponsorship = (sponsorshipId) => async (dispatch, getState) => {
 
     return getRequest(
         null,
-        createAction(RECEIVE_SPONSORSHIP),
-        `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
+        createAction(RECEIVE_SUMMIT_SPONSORSHIP),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${sponsorshipId}`,
         authErrorHandler
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
@@ -406,11 +408,11 @@ export const getSponsorship = (sponsorshipId) => async (dispatch, getState) => {
     );
 };
 
-export const resetSponsorshipForm = () => (dispatch, getState) => {
-    dispatch(createAction(RESET_SPONSORSHIP_FORM)({}));
+export const resetSummitSponsorshipForm = () => (dispatch, getState) => {
+    dispatch(createAction(RESET_SUMMIT_SPONSORSHIP_FORM)({}));
 };
 
-export const saveSponsorship = (entity) => async (dispatch, getState) => {
+export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
@@ -426,9 +428,9 @@ export const saveSponsorship = (entity) => async (dispatch, getState) => {
     if (entity.id) {
 
         putRequest(
-            createAction(UPDATE_SPONSORSHIP),
-            createAction(SPONSORSHIP_UPDATED),
-            `${window.API_BASE_URL}/api/v1/sponsorship-types/${entity.id}`,
+            createAction(UPDATE_SUMMIT_SPONSORSHIP),
+            createAction(SUMMIT_SPONSORSHIP_UPDATED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${entity.id}`,
             normalizedEntity,
             authErrorHandler,
             entity
@@ -445,9 +447,9 @@ export const saveSponsorship = (entity) => async (dispatch, getState) => {
         };
 
         postRequest(
-            createAction(UPDATE_SPONSORSHIP),
-            createAction(SPONSORSHIP_ADDED),
-            `${window.API_BASE_URL}/api/v1/sponsorship-types`,
+            createAction(UPDATE_SUMMIT_SPONSORSHIP),
+            createAction(SUMMIT_SPONSORSHIP_ADDED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
             normalizedEntity,
             authErrorHandler,
             entity
@@ -455,13 +457,58 @@ export const saveSponsorship = (entity) => async (dispatch, getState) => {
             .then((payload) => {
                 dispatch(showMessage(
                     success_message,
-                    () => { history.push(`/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`) }
+                    () => { history.push(`/app/summits/${currentSummit.id}/sponsorship-types/${payload.response.id}`) }
                 ));
             });
     }
 }
 
-export const deleteSponsorship = (sponsorshipId) => async (dispatch, getState) => {
+export const uploadSponsorshipBadgeImage = (entity, file) => async (dispatch, getState) => {
+
+    const { currentSummitState: { currentSummit } } = getState();
+
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+        access_token : accessToken,
+    };
+    
+    postRequest(
+        null,
+        createAction(BADGE_IMAGE_ATTACHED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${entity.id}/badge-image`,
+        file,
+        authErrorHandler,
+        {pic: entity.pic}
+    )(params)(dispatch)
+        .then(() => {
+            dispatch(stopLoading());
+            history.push(`/app/summits/${currentSummit.id}/sponsorship-types/${payload.response.id}`)
+        });
+};
+
+export const removeSponsorshipBadgeImage = (sponsorshipId) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    return deleteRequest(
+        null,
+        createAction(BADGE_IMAGE_DELETED)({}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${sponsorshipId}/badge-image`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+};
+
+export const deleteSummitSponsorship = (sponsorshipId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -473,8 +520,8 @@ export const deleteSponsorship = (sponsorshipId) => async (dispatch, getState) =
 
     return deleteRequest(
         null,
-        createAction(SPONSORSHIP_DELETED)({sponsorshipId}),
-        `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
+        createAction(SUMMIT_SPONSORSHIP_DELETED)({sponsorshipId}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${sponsorshipId}`,
         null,
         authErrorHandler
     )(params)(dispatch).then(() => {
