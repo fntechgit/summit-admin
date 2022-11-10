@@ -15,7 +15,7 @@ import React from 'react'
 import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
-import { SortableTable } from 'openstack-uicore-foundation/lib/components';
+import { Table, SortableTable } from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
 import { getSummitSponsorships, deleteSummitSponsorship, updateSummitSponsorhipOrder } from "../../actions/sponsor-actions";
 import { getSponsorships } from '../../actions/sponsorship-actions';
