@@ -353,7 +353,7 @@ export const createCompany = (company, callback) => async (dispatch, getState) =
 
 
 
-export const getSummitSponsorships = (page = 1, perPage = 100, order = 'order', orderDir = 1) => async (dispatch, getState) => {
+export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
     const accessToken = await getAccessTokenSafely();
@@ -461,9 +461,7 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
             .then((payload) => {
                 dispatch(showMessage(
                     success_message,
-                    () => {
-                        history.push(`/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`)
-                    }
+                    () => { history.push(`/app/summits/${currentSummit.id}/sponsorship-types/${payload.response.id}`) }
                 ));
             });
     }
