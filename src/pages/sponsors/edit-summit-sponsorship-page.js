@@ -15,53 +15,61 @@ import React from 'react'
 import { connect } from 'react-redux';
 import { Breadcrumb } from 'react-breadcrumbs';
 import T from "i18n-react/dist/i18n-react";
-import SponsorshipForm from '../../components/forms/sponsorship-form';
+import SummitSponsorshipForm from '../../components/forms/summit-sponsorship-form';
 import { getSummitById }  from '../../actions/summit-actions';
-import { getSponsorship, resetSponsorshipForm, saveSponsorship } from "../../actions/sponsor-actions";
+import { 
+    getSummitSponsorship, 
+    resetSummitSponsorshipForm, 
+    saveSummitSponsorship, 
+    uploadSponsorshipBadgeImage, 
+    removeSponsorshipBadgeImage
+} from "../../actions/sponsor-actions";
 
-class EditSponsorshipPage extends React.Component {
+class EditSummitSponsorshipPage extends React.Component {
 
     constructor(props) {
-        const sponsorshipId = props.match.params.sponsorship_id;
+        const sponsorshipId = props.match.params.sponsorship_type_id;
         super(props);
 
         if (!sponsorshipId) {
-            props.resetSponsorshipForm();
+            props.resetSummitSponsorshipForm();
         } else {
-            props.getSponsorship(sponsorshipId);
+            props.getSummitSponsorship(sponsorshipId);
         }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.sponsorship_id;
-        const newId = this.props.match.params.sponsorship_id;
+        const oldId = prevProps.match.params.sponsorship_type_id;
+        const newId = this.props.match.params.sponsorship_type_id;
 
         if (newId !== oldId) {
             if (!newId) {
-                this.props.resetSponsorshipForm();
+                this.props.resetSummitSponsorshipForm();
             } else {
-                this.props.getSponsorship(newId);
+                this.props.getSummitSponsorship(newId);
             }
         }
     }
 
     render(){
-        const {currentSummit, entity, errors, match, history} = this.props;
+        const {currentSummit, entity, errors, match, sponsorships, history, uploadSponsorshipBadgeImage, removeSponsorshipBadgeImage} = this.props;
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
         const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
-
 
         return(
             <div className="container">
                 <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_sponsorship.sponsorship")}</h3>
+                <h3>{title} {T.translate("edit_summit_sponsorship.sponsorship")}</h3>
                 <hr/>
                 {currentSummit &&
-                <SponsorshipForm
+                <SummitSponsorshipForm
                     entity={entity}
+                    sponsorships={sponsorships}
                     currentSummit={currentSummit}
                     errors={errors}
-                    onSubmit={this.props.saveSponsorship}
+                    onBadgeImageAttach={uploadSponsorshipBadgeImage}
+                    onBadgeImageRemove={removeSponsorshipBadgeImage}
+                    onSubmit={this.props.saveSummitSponsorship}
                 />
                 }
             </div>
@@ -69,17 +77,20 @@ class EditSponsorshipPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSponsorshipState }) => ({
+const mapStateToProps = ({ currentSummitState, currentSummitSponsorshipState, currentSponsorshipListState }) => ({
     currentSummit : currentSummitState.currentSummit,
-    ...currentSponsorshipState
+    sponsorships : currentSponsorshipListState.sponsorships,
+    ...currentSummitSponsorshipState
 });
 
 export default connect (
     mapStateToProps,
     {
         getSummitById,
-        getSponsorship,
-        resetSponsorshipForm,
-        saveSponsorship,
+        getSummitSponsorship,
+        resetSummitSponsorshipForm,
+        saveSummitSponsorship,
+        uploadSponsorshipBadgeImage,
+        removeSponsorshipBadgeImage
     }
-)(EditSponsorshipPage);
+)(EditSummitSponsorshipPage);

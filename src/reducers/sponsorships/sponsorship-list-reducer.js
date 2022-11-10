@@ -16,7 +16,7 @@ import
     RECEIVE_SPONSORSHIPS,
     REQUEST_SPONSORSHIPS,
     SPONSORSHIP_DELETED,
-} from '../../actions/sponsor-actions';
+} from '../../actions/sponsorship-actions';
 
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';

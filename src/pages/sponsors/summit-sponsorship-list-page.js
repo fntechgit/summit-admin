@@ -15,11 +15,12 @@ import React from 'react'
 import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
-import { Table } from 'openstack-uicore-foundation/lib/components';
+import { SortableTable } from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
-import { getSponsorships, deleteSponsorship } from "../../actions/sponsor-actions";
+import { getSummitSponsorships, deleteSummitSponsorship } from "../../actions/sponsor-actions";
+import { getSponsorships } from '../../actions/sponsorship-actions';
 
-class SponsorshipListPage extends React.Component {
+class SummitSponsorshipListPage extends React.Component {
 
     constructor(props) {
         super(props);
@@ -36,7 +37,7 @@ class SponsorshipListPage extends React.Component {
     componentDidMount() {
         const {currentSummit} = this.props;
         if(currentSummit) {
-            this.props.getSponsorships();
+            this.props.getSummitSponsorships().then(() => this.props.getSponsorships());
         }
     }
 
@@ -46,7 +47,7 @@ class SponsorshipListPage extends React.Component {
     }
 
     handleDelete(sponsorshipId) {
-        const {deleteSponsorship, sponsorships} = this.props;
+        const {deleteSummitSponsorship, sponsorships} = this.props;
         let sponsorship = sponsorships.find(t => t.id === sponsorshipId);
 
         Swal.fire({
@@ -58,13 +59,13 @@ class SponsorshipListPage extends React.Component {
             confirmButtonText: T.translate("general.yes_delete")
         }).then(function(result){
             if (result.value) {
-                deleteSponsorship(sponsorshipId);
+                deleteSummitSponsorship(sponsorshipId);
             }
         });
     }
 
     handleSort(index, key, dir, func) {
-        this.props.getSponsorships(key, dir);
+        this.props.getSummitSponsorships(key, dir);
     }
 
     handleNewSponsorship(ev) {
@@ -73,17 +74,19 @@ class SponsorshipListPage extends React.Component {
     }
 
     render(){
-        const {currentSummit, sponsorships, order, orderDir, totalSponsorships} = this.props;
+        const {currentSummit, sponsorships, order, orderDir, totalSponsorships, allSponsorships} = this.props;
+
+        const fullSponsorships = sponsorships.map((s) => {
+            const sponsorship_type = allSponsorships.find(e => e.id === s.type_id);
+            return {...s, sponsorship_type: sponsorship_type.name, label: sponsorship_type.label, size: sponsorship_type.size};
+        }).sort((a, b) => a.order -b.order);
 
         const columns = [
-            { columnKey: 'name', value: T.translate("sponsorship_list.name"), sortable: true },
-            { columnKey: 'label', value: T.translate("sponsorship_list.label"), sortable: true },
-            { columnKey: 'size', value: T.translate("sponsorship_list.size"), sortable: true }
+            { columnKey: 'sponsorship_type', value: T.translate("sponsorship_list.sponsorship_type"), sortable: true },
+            { columnKey: 'widget_title', value: T.translate("sponsorship_list.widget_title"), sortable: true },
         ];
 
-        const table_options = {
-            sortCol: order,
-            sortDir: orderDir,
+        const table_options = {            
             actions: {
                 edit: { onClick: this.handleEdit },
                 delete: { onClick: this.handleDelete }
@@ -103,17 +106,23 @@ class SponsorshipListPage extends React.Component {
                     </div>
                 </div>
 
-                {sponsorships.length === 0 &&
+                {fullSponsorships.length === 0 &&
                 <div>{T.translate("sponsorship_list.no_sponsorships")}</div>
                 }
 
-                {sponsorships.length > 0 &&
+                {fullSponsorships.length > 0 &&
                     <Table
                         options={table_options}
-                        data={sponsorships}
+                        data={fullSponsorships}
                         columns={columns}
-                        onSort={this.handleSort}
                     />
+                    // <SortableTable
+                    //     options={table_options}
+                    //     data={fullSponsorships}
+                    //     columns={columns}
+                    //     dropCallback={(ev) => console.log('change order...', ev)}
+                    //     orderField="order"
+                    // />
                 }
 
             </div>
@@ -121,16 +130,18 @@ class SponsorshipListPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSponsorshipListState }) => ({
+const mapStateToProps = ({ currentSummitState, currentSponsorshipListState, currentSummitSponsorshipListState }) => ({
     currentSummit   : currentSummitState.currentSummit,
-    ...currentSponsorshipListState
+    allSponsorships : currentSponsorshipListState.sponsorships,
+    ...currentSummitSponsorshipListState
 })
 
 export default connect (
     mapStateToProps,
     {
-        getSummitById,
         getSponsorships,
-        deleteSponsorship
+        getSummitById,
+        getSummitSponsorships,
+        deleteSummitSponsorship
     }
-)(SponsorshipListPage);
+)(SummitSponsorshipListPage);
