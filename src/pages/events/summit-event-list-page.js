@@ -28,11 +28,11 @@ const fieldNames = [
     { columnKey: 'speakers', value: 'speakers' },
     { columnKey: 'created_by_fullname', value: 'created_by' },
     { columnKey: 'published_date', value: 'published' },
-    { columnKey: 'duration', value: 'duration' },
-    { columnKey: 'speaker_count', value: 'speaker_count' },
+    { columnKey: 'duration', value: 'duration', sortable: true },
+    { columnKey: 'speaker_count', value: 'speaker_count', sortable: true },
     { columnKey: 'track', value: 'track' },
-    { columnKey: 'start_date', value: 'start_date' },
-    { columnKey: 'end_date', value: 'end_date' },
+    { columnKey: 'start_date', value: 'start_date', sortable: true },
+    { columnKey: 'end_date', value: 'end_date', sortable: true },
 ]
 
 class SummitEventListPage extends React.Component {
