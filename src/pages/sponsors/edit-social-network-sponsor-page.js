@@ -46,12 +46,8 @@ class EditSocialNetworkSponsorPage extends React.Component {
 
     render() {
         const { currentSummit, entity, errors, match } = this.props;
-        console.log('social network entity', entity )
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
         const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
-
-
-        console.log('edit material page!', match)
 
         return (
             <div className="container">

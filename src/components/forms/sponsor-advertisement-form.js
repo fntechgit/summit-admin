@@ -67,9 +67,9 @@ class SponsorAdvertisementForm extends React.Component {
     }
 
     handleRemoveAdvertisement() {
-        const entity = {...this.state.entity};
+        const entity = { ...this.state.entity };
         entity['image'] = '';
-        this.setState({entity:entity});
+        this.setState({ entity: entity });
         this.props.onRemove(entity);
     }
 
@@ -79,45 +79,50 @@ class SponsorAdvertisementForm extends React.Component {
         console.log('uis form here?')
 
         return (
-            <form className="advertisement-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="sponsor-advertisement-form form-group">
-                    <div className="row form-group">
-                        <div className="col-md-6">
-                            <label> {T.translate("edit_sponsor.link")} </label>
-                            <Input className="form-control" id="link" value={entity.link} onChange={this.handleChange} />
+            <>
+                <form className="advertisement-form">
+                    <input type="hidden" id="id" value={entity.id} />
+                    <div className="sponsor-advertisement-form form-group">
+                        <div className="row form-group">
+                            <div className="col-md-6">
+                                <label> {T.translate("edit_sponsor.link")} </label>
+                                <Input className="form-control" id="link" value={entity.link} onChange={this.handleChange} />
+                            </div>
+                            <div className="col-md-6">
+                                <label> {T.translate("edit_sponsor.text")} </label>
+                                <Input className="form-control" id="text" value={entity.text} onChange={this.handleChange} />
+                            </div>
                         </div>
-                        <div className="col-md-6">
-                            <label> {T.translate("edit_sponsor.text")} </label>
-                            <Input className="form-control" id="text" value={entity.text} onChange={this.handleChange} />
+                        <div className="row form-group">
+                            <div className="col-md-6">
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <label> {T.translate("edit_sponsor.advertise_image")} </label>
+                                        <UploadInput
+                                            value={entity.image}
+                                            handleUpload={this.handleUploadAdvertisement}
+                                            handleRemove={ev => this.handleRemoveAdvertisement()}
+                                            className="dropzone col-md-6"
+                                            multiple={false}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                </div>
+                                <br />
+                                <label> {T.translate("edit_sponsor.alt")} </label>
+                                <Input className="form-control" id="alt" value={entity.alt} onChange={this.handleChange} />                            
+                            </div>
                         </div>
                     </div>
-                    <div className="row form-group">
-                        <div className="col-md-6">
-                            <label> {T.translate("edit_sponsor.image")} </label>
-                            <UploadInput
-                                value={entity.image}
-                                handleUpload={this.handleUploadAdvertisement}
-                                handleRemove={ev => this.handleRemoveAdvertisement()}
-                                className="dropzone col-md-6"
-                                multiple={false}
-                                accept="image/*"
-                            />
-                        </div>
-                        <div className="col-md-6">
-                            <label> {T.translate("edit_sponsor.alt")} </label>
-                            <Input className="form-control" id="alt" value={entity.alt} onChange={this.handleChange} />
-                        </div>
-                    </div>
-                </div>
 
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                            className="btn btn-primary pull-right" value={T.translate("general.save")} />
+                    <div className="row">
+                        <div className="col-md-12 submit-buttons">
+                            <input type="button" onClick={this.handleSubmit}
+                                className="btn btn-primary pull-right" value={T.translate("general.save")} />
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </>
         );
     }
 }

@@ -29,17 +29,17 @@ import
     HEADER_IMAGE_ATTACHED,
     HEADER_IMAGE_DELETED,
     SIDE_IMAGE_ATTACHED,
-    SIDE_IMAGE_DELETED,
-    RECEIVE_SPONSOR_SOCIAL_NETWORK,
-    RECEIVE_SPONSOR_MATERIAL,
-    RECEIVE_SPONSOR_ADVERTISEMENT,
+    SIDE_IMAGE_DELETED,    
     CAROUSEL_IMAGE_ATTACHED,
     CAROUSEL_IMAGE_DELETED,
     HEADER_MOBILE_IMAGE_ATTACHED,
     HEADER_MOBILE_IMAGE_DELETED,
     SPONSOR_SOCIAL_NETWORK_UPDATED,
     SPONSOR_MATERIAL_UPDATED,
-    SPONSOR_ADVERTISEMENT_UPDATED
+    SPONSOR_ADVERTISEMENT_UPDATED,
+    SPONSOR_ADVERTISEMENT_ADDED,
+    SPONSOR_MATERIAL_ADDED,
+    SPONSOR_SOCIAL_NETWORK_ADDED
 } from '../../actions/sponsor-actions';
 
 import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
@@ -108,7 +108,9 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
                 }
             }
 
-            return {...state, entity: {...state.entity, ...entity} };
+            const sponsorship_id = entity.sponsorship.id;
+
+            return {...state, entity: {...state.entity, ...entity, sponsorship_id} };
         }
         break;
         case SPONSOR_UPDATED: {
@@ -167,7 +169,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
             return {...state, entity: {...state.entity, ads }}
         }
         break;
-        case RECEIVE_SPONSOR_ADVERTISEMENT: {
+        case SPONSOR_ADVERTISEMENT_ADDED: {
             const newAdvertisement = payload.response;
             return {...state, entity: {...state.entity, ads: [...state.entity.ads, newAdvertisement] }}
         }
@@ -189,7 +191,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
             return {...state, entity: {...state.entity, materials }}
         }
         break;
-        case RECEIVE_SPONSOR_MATERIAL: {
+        case SPONSOR_MATERIAL_ADDED: {
             const newMaterial = payload.response;
             return {...state, entity: {...state.entity, materials: [...state.entity.materials, newMaterial] }}
         }
@@ -210,7 +212,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
             return {...state, entity: {...state.entity, social_networks }}
         }
         break;
-        case RECEIVE_SPONSOR_SOCIAL_NETWORK: {
+        case SPONSOR_SOCIAL_NETWORK_ADDED: {
             const newSocialNetwork = payload.response;
             return {...state, entity: {...state.entity, social_networks: [...state.entity.social_networks, newSocialNetwork] }}
         }

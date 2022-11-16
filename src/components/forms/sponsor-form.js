@@ -127,7 +127,6 @@ class SponsorForm extends React.Component {
     }
 
     handleRemoveFile(picAttr) {
-        console.log('pic attr', picAttr);
         const entity = {...this.state.entity};
         entity[picAttr] = '';
         this.setState({entity:entity});
@@ -145,12 +144,12 @@ class SponsorForm extends React.Component {
     handleAdvertisementAdd(ev) {
         const {entity, history} = this.props;        
         ev.preventDefault();        
-        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/advertisements/new`);
+        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/ads/new`);
     }
 
     handleAdvertisementEdit(advertisementId) {
         const {entity, history} = this.props;
-        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/advertisements/${advertisementId}`);
+        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/ads/${advertisementId}`);
     }
 
     handleMaterialAdd(ev) {
@@ -197,9 +196,7 @@ class SponsorForm extends React.Component {
         const {entity, showSection} = this.state;
         const { currentSummit, sponsorships, onCreateCompany, onAdvertisementDelete, onMaterialDelete, onSocialNetworkDelete } = this.props;
 
-        console.log(sponsorships, entity);
-
-        let sponsorship_ddl = sponsorships.map(s => ({label: s.name, value: s.id}));
+        let sponsorship_ddl = sponsorships.map(s => ({label: s.type.name, value: s.id}));
 
         const advertisement_columns = [
             { columnKey: 'link', value: T.translate("edit_sponsor.link") },
@@ -215,6 +212,7 @@ class SponsorForm extends React.Component {
         };
 
         const materials_columns = [
+            { columnKey: 'link', value: T.translate("edit_summit.link") },
             { columnKey: 'name', value: T.translate("edit_summit.name") },
             { columnKey: 'type', value: T.translate("edit_sponsor.type") }
         ]
@@ -270,7 +268,7 @@ class SponsorForm extends React.Component {
                         <label> {T.translate("edit_sponsor.sponsorship")}</label>
                         <Dropdown
                             id="sponsorship_id"
-                            value={entity.sponsorship.type_id}
+                            value={entity.sponsorship_id}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_sponsor.placeholders.select_sponsorship")}
                             options={sponsorship_ddl}
@@ -425,7 +423,7 @@ class SponsorForm extends React.Component {
                         <div className="row form-group">                        
                             <div className="col-md-12">
                                 <label htmlFor="ads">
-                                    {T.translate("edit_sponsor.ads")}
+                                    {T.translate("edit_sponsor.advertisements")}
                                 </label>
                                 <input type="button" onClick={this.handleAdvertisementAdd}
                                     className="btn btn-primary pull-right" value={T.translate("edit_sponsor.add_advertisement")}/>

@@ -49,8 +49,6 @@ class EditMaterialSponsorPage extends React.Component {
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
         const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
 
-        console.log('edit material page!', match)
-
         return (
             <div className="container">
                 <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />

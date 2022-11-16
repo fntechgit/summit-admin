@@ -110,10 +110,10 @@ export const getSponsors = (term = null, page = 1, perPage = 100, order = 'order
     }
 
     const params = {
-        page: page,
-        per_page: perPage,
-        expand: 'company,sponsorship',
-        access_token: accessToken,
+        page         : page,
+        per_page     : perPage,
+        expand       : 'company,sponsorship,sponsorship.type',
+        access_token : accessToken,
     };
 
     if (filter.length > 0) {
@@ -398,10 +398,10 @@ export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (
     dispatch(startLoading());
 
     const params = {
-        page: page,
-        per_page: perPage,
-        access_token: accessToken,
-        expand: 'type',
+        page         : 1,
+        per_page     : 100,
+        access_token : accessToken,
+        expand       : 'type'
     };
 
     // order

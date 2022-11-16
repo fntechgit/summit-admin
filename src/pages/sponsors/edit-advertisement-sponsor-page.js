@@ -19,7 +19,7 @@ import SponsorAdvertisementForm from '../../components/forms/sponsor-advertiseme
 import { 
     getSponsorAdvertisement,
     saveSponsorAdvertisement,
-    resetSponsorForm,
+    resetSponsorAdvertisementForm,
     submitSponsorAdvertisementImage,
     removeSponsorAdvertisementImage } from "../../actions/sponsor-actions";
 
@@ -30,7 +30,7 @@ class EditAdvertisementSponsorPage extends React.Component {
         super(props);
 
         if (!advertisementId) {
-            props.resetSponsorForm();
+            props.resetSponsorAdvertisementForm();
         } else {
             props.getSponsorAdvertisement(advertisementId);
         }
@@ -42,7 +42,7 @@ class EditAdvertisementSponsorPage extends React.Component {
 
         if (newId !== oldId) {
             if (!newId) {
-                this.props.resetSponsorForm();
+                this.props.resetSponsorAdvertisementForm();
             } else {
                 this.props.getSponsorAdvertisement(newId);
             }
@@ -57,7 +57,7 @@ class EditAdvertisementSponsorPage extends React.Component {
         return (
             <div className="container">
                 <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_sponsor.sponsor")}</h3>
+                <h3>{title} {T.translate("edit_sponsor.advertisement")}</h3>
                 <hr />
                 {currentSummit &&
                     <SponsorAdvertisementForm
@@ -82,7 +82,7 @@ const mapStateToProps = ({ currentSummitState, currentSponsorAdvertisementState 
 export default connect(
     mapStateToProps,
     {
-        resetSponsorForm,
+        resetSponsorAdvertisementForm,
         getSponsorAdvertisement,
         saveSponsorAdvertisement,
         submitSponsorAdvertisementImage,

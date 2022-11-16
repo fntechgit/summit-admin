@@ -17,8 +17,7 @@ import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import {SortableTable} from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
-import { getSponsors, deleteSponsor, updateSponsorOrder } from "../../actions/sponsor-actions";
-import { getSponsorships } from '../../actions/sponsorship-actions';
+import { getSponsors, deleteSponsor, updateSponsorOrder, getSummitSponsorships } from "../../actions/sponsor-actions";
 
 class SponsorListPage extends React.Component {
 
@@ -36,7 +35,9 @@ class SponsorListPage extends React.Component {
     componentDidMount() {
         const {currentSummit} = this.props;
         if(currentSummit) {
-            this.props.getSponsors().then(() => this.props.getSponsorships());
+            this.props.getSponsors().then(() => {
+                this.props.getSummitSponsorships()
+            });
         }
     }
 
@@ -89,9 +90,7 @@ class SponsorListPage extends React.Component {
         let sortedSponsors = [...sponsors];
         sortedSponsors.sort(
             (a, b) => (a.order > b.order ? 1 : (a.order < b.order ? -1 : 0))
-        ).map(s => s.sponsorship_name = allSponsorships.find(e => e.id === s.sponsorship.type_id)?.name);
-
-        console.log('allSponsorships', allSponsorships)
+        );
 
         return(
             <div className="container">
@@ -125,9 +124,9 @@ class SponsorListPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSponsorListState, currentSponsorshipListState }) => ({
+const mapStateToProps = ({ currentSummitState, currentSponsorListState, currentSummitSponsorshipListState }) => ({
     currentSummit   : currentSummitState.currentSummit,
-    allSponsorships : currentSponsorshipListState.sponsorships,
+    allSponsorships : currentSummitSponsorshipListState.sponsorships,
     ...currentSponsorListState
 })
 
@@ -138,6 +137,6 @@ export default connect (
         getSponsors,
         deleteSponsor,
         updateSponsorOrder,
-        getSponsorships
+        getSummitSponsorships
     }
 )(SponsorListPage);

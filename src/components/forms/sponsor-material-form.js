@@ -60,9 +60,6 @@ class SponsorMaterialForm extends React.Component {
 
     render() {
         const { entity, errors } = this.state;
-        const { } = this.props;
-
-        console.log('rendering last form... material', entity)
 
         const material_type_ddl = [
             {label: 'Slide', value: 'Slide'},

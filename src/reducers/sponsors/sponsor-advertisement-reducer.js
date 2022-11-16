@@ -26,7 +26,7 @@ import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
 
 export const DEFAULT_ENTITY = {
     id: 0,
-    advertise_image: '',    
+    image: '',    
     link: '',
     text: '',
     alt: '',
@@ -77,12 +77,12 @@ const sponsorAdvertisementReducer = (state = DEFAULT_STATE, action) => {
         }
             break;        
         case SPONSOR_ADVERTISEMENT_IMAGE_ATTACHED: {
-            const advertise_image = payload.response.url;
-            return { ...state, entity: { ...state.entity, advertise_image } }
+            const image = payload.response.url;
+            return { ...state, entity: { ...state.entity, image } }
         }
             break;
         case SPONSOR_ADVERTISEMENT_IMAGE_DELETED: {
-            return { ...state, entity: { ...state.entity, advertise_image: '' } }
+            return { ...state, entity: { ...state.entity, image: '' } }
         }            
             break;
         case VALIDATE: {

@@ -12,7 +12,7 @@ import {
 } from "../actions/sponsor-actions";
 import { Breadcrumb } from 'react-breadcrumbs';
 import Restrict from '../routes/restrict';
-import EditAdvertisementSponsorPage from "../pages/sponsors/edit-advertisement-sponsor-page";
+import EditAdSponsorPage from "../pages/sponsors/edit-advertisement-sponsor-page";
 import EditMaterialSponsorPage from "../pages/sponsors/edit-material-sponsor-page";
 import EditSocialNetworkSponsorPage from "../pages/sponsors/edit-social-network-sponsor-page";
 import NoMatchPage from "../pages/no-match-page";
@@ -61,13 +61,13 @@ class SponsorIdLayout extends React.Component {
             <div>
                 <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
                 <Switch>
-                    <Route path={`${match.url}/advertisements`} render={
+                    <Route path={`${match.url}/ads`} render={
                         props => (
                             <div>
                                 <Breadcrumb data={{ title: 'Advertisements', pathname: match.url }} />
                                 <Switch>
-                                    <Route exact strict path={`${props.match.url}/new`} component={EditAdvertisementSponsorPage} />
-                                    <Route path={`${props.match.url}/:advertisement_id(\\d+)`} component={EditAdvertisementSponsorPage} />
+                                    <Route exact strict path={`${props.match.url}/new`} component={EditAdSponsorPage} />
+                                    <Route path={`${props.match.url}/:advertisement_id(\\d+)`} component={EditAdSponsorPage} />
                                     <Route component={NoMatchPage} />
                                 </Switch>
                             </div>

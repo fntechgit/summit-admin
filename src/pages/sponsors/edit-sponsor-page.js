@@ -88,9 +88,9 @@ class EditSponsorPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSponsorState, currentSponsorshipListState }) => ({
+const mapStateToProps = ({ currentSummitState, currentSponsorState, currentSummitSponsorshipListState }) => ({
     currentSummit : currentSummitState.currentSummit,
-    sponsorships  : currentSponsorshipListState.sponsorships,
+    sponsorships  : currentSummitSponsorshipListState.sponsorships,
     ...currentSponsorState
 });
 
