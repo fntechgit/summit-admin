@@ -1,0 +1,122 @@
+import React from "react";
+import { connect } from 'react-redux';
+import T from "i18n-react/dist/i18n-react";
+import { Switch, Route } from 'react-router-dom';
+import EditSponsorPage from "../pages/sponsors/edit-sponsor-page";
+import {
+    getSponsor,
+    getSponsorMaterials,
+    getSponsorAdvertisements,
+    getSponsorSocialNetworks,
+    resetSponsorForm,
+} from "../actions/sponsor-actions";
+import { Breadcrumb } from 'react-breadcrumbs';
+import Restrict from '../routes/restrict';
+import EditAdvertisementSponsorPage from "../pages/sponsors/edit-advertisement-sponsor-page";
+import EditMaterialSponsorPage from "../pages/sponsors/edit-material-sponsor-page";
+import EditSocialNetworkSponsorPage from "../pages/sponsors/edit-social-network-sponsor-page";
+import NoMatchPage from "../pages/no-match-page";
+
+class SponsorIdLayout extends React.Component {
+
+    componentDidMount() {
+        let sponsorId = this.props.match.params.sponsor_id;
+
+        const { id: summitId } = this.props.currentSummit;
+
+        if (!sponsorId) {
+            this.props.resetSponsorForm();
+        } else {
+            this.props.getSponsor(sponsorId).then(() => {
+                if (summitId && summitId !== 0) {
+                    this.props.getSponsorAdvertisements(sponsorId)
+                    this.props.getSponsorMaterials(sponsorId)
+                    this.props.getSponsorSocialNetworks(sponsorId)
+                }
+            });
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const oldId = prevProps.match.params.sponsor_id;
+        const newId = this.props.match.params.sponsor_id;
+
+        if (oldId !== newId) {
+            if (!newId) {
+                this.props.resetSponsorForm();
+            } else {
+                this.props.getSponsor(newId);
+            }
+        }
+    }
+
+    render() {
+        const { match, currentSponsor } = this.props;
+        let sponsorId = this.props.match.params.sponsor_id;
+        const breadcrumb = (currentSponsor.id) ? currentSponsor.company.name : T.translate("general.new");
+
+        if (sponsorId && !currentSponsor.id) return (<div />);
+
+        return (
+            <div>
+                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+                <Switch>
+                    <Route path={`${match.url}/advertisements`} render={
+                        props => (
+                            <div>
+                                <Breadcrumb data={{ title: 'Advertisements', pathname: match.url }} />
+                                <Switch>
+                                    <Route exact strict path={`${props.match.url}/new`} component={EditAdvertisementSponsorPage} />
+                                    <Route path={`${props.match.url}/:advertisement_id(\\d+)`} component={EditAdvertisementSponsorPage} />
+                                    <Route component={NoMatchPage} />
+                                </Switch>
+                            </div>
+                        )}
+                    />
+                    <Route path={`${match.url}/materials`} render={
+                        props => (
+                            <div>
+                                <Breadcrumb data={{ title: 'Materials', pathname: match.url }} />
+                                <Switch>
+                                    <Route exact strict path={`${props.match.url}/new`} component={EditMaterialSponsorPage} />
+                                    <Route path={`${props.match.url}/:material_id(\\d+)`} component={EditMaterialSponsorPage} />
+                                    <Route component={NoMatchPage} />
+                                </Switch>
+                            </div>
+                        )}
+                    />
+                    <Route path={`${match.url}/social-networks`} render={
+                        props => (
+                            <div>
+                                <Breadcrumb data={{ title: 'Social Networks', pathname: match.url }} />
+                                <Switch>
+                                    <Route exact strict path={`${props.match.url}/new`} component={EditSocialNetworkSponsorPage} />
+                                    <Route path={`${props.match.url}/:social_network_id(\\d+)`} component={EditSocialNetworkSponsorPage} />
+                                    <Route component={NoMatchPage} />
+                                </Switch>
+                            </div>
+                        )}
+                    />
+                    <Route strict exact path={match.url} component={EditSponsorPage} />
+                    <Route component={NoMatchPage} />
+                </Switch>
+            </div>
+        );
+    }
+}
+
+const mapStateToProps = ({ currentSponsorState, currentSummitState }) => ({
+    currentSponsor: currentSponsorState.entity,
+    ...currentSummitState
+})
+
+export default connect(
+    mapStateToProps,
+    {
+        getSponsor,
+        getSponsorAdvertisements,
+        getSponsorMaterials,
+        getSponsorSocialNetworks,
+        resetSponsorForm,
+    }
+)(SponsorIdLayout);

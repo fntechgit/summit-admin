@@ -14,8 +14,8 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { Dropdown, CompanyInput, MemberInput } from 'openstack-uicore-foundation/lib/components';
-import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
+import { Dropdown, CompanyInput, MemberInput, Panel, TextEditor, Input, UploadInput, Table } from 'openstack-uicore-foundation/lib/components';
+import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
 
 
 class SponsorForm extends React.Component {
@@ -24,12 +24,24 @@ class SponsorForm extends React.Component {
 
         this.state = {
             entity: {...props.entity},
+            showSection: '',
             errors: props.errors
         };
 
         this.handleChangeMember = this.handleChangeMember.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleUploadHeaderImage = this.handleUploadHeaderImage.bind(this);
+        this.handleUploadSideImage = this.handleUploadSideImage.bind(this);
+        this.handleUploadHeaderMobileImage = this.handleUploadHeaderMobileImage.bind(this);
+        this.handleUploadCarouselImage = this.handleUploadCarouselImage.bind(this);
+        this.handleRemoveFile = this.handleRemoveFile.bind(this);
+        this.handleAdvertisementAdd = this.handleAdvertisementAdd.bind(this);
+        this.handleMaterialAdd = this.handleMaterialAdd.bind(this);
+        this.handleSocialNetworkAdd = this.handleSocialNetworkAdd.bind(this);
+        this.handleAdvertisementEdit = this.handleAdvertisementEdit.bind(this);
+        this.handleMaterialEdit = this.handleMaterialEdit.bind(this);
+        this.handleSocialNetworkEdit = this.handleSocialNetworkEdit.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -90,6 +102,80 @@ class SponsorForm extends React.Component {
 
     }
 
+    handleUploadHeaderImage(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        this.props.onAttachImage(this.state.entity, formData, 'header_image')
+    }
+
+    handleUploadHeaderMobileImage(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        this.props.onAttachImage(this.state.entity, formData, 'header_mobile_image')
+    }
+
+    handleUploadSideImage(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        this.props.onAttachImage(this.state.entity, formData, 'side_image')
+    }
+
+    handleUploadCarouselImage(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        this.props.onAttachImage(this.state.entity, formData, 'carousel')
+    }
+
+    handleRemoveFile(picAttr) {
+        console.log('pic attr', picAttr);
+        const entity = {...this.state.entity};
+        entity[picAttr] = '';
+        this.setState({entity:entity});
+        this.props.onRemoveImage(entity, picAttr);
+    }
+
+    toggleSection(section, ev) {
+        const {showSection} = this.state;
+        const newShowSection = (showSection === section) ? 'main' : section;
+        ev.preventDefault();
+
+        this.setState({showSection: newShowSection});
+    }
+
+    handleAdvertisementAdd(ev) {
+        const {entity, history} = this.props;        
+        ev.preventDefault();        
+        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/advertisements/new`);
+    }
+
+    handleAdvertisementEdit(advertisementId) {
+        const {entity, history} = this.props;
+        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/advertisements/${advertisementId}`);
+    }
+
+    handleMaterialAdd(ev) {
+        const {entity, history} = this.props;
+        ev.preventDefault();
+        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/materials/new`);
+    }
+
+    handleMaterialEdit(materialId) {
+        const {entity, history} = this.props;
+        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/materials/${materialId}`);
+    }
+
+    handleSocialNetworkAdd(ev) {
+        const {entity, history} = this.props;
+        ev.preventDefault();
+        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/social-networks/new`);
+    }
+
+    handleSocialNetworkEdit(socialNetworkId) {
+        const {entity, history} = this.props;
+        history.push(`/app/summits/${entity.summit_id}/sponsors/${entity.id}/social-networks/${socialNetworkId}`);
+    }
+
+
     handleSubmit(ev) {
         let entity = {...this.state.entity};
         ev.preventDefault();
@@ -108,10 +194,50 @@ class SponsorForm extends React.Component {
 
 
     render() {
-        const {entity} = this.state;
-        const { currentSummit, sponsorships, onCreateCompany } = this.props;
+        const {entity, showSection} = this.state;
+        const { currentSummit, sponsorships, onCreateCompany, onAdvertisementDelete, onMaterialDelete, onSocialNetworkDelete } = this.props;
+
+        console.log(sponsorships, entity);
 
         let sponsorship_ddl = sponsorships.map(s => ({label: s.name, value: s.id}));
+
+        const advertisement_columns = [
+            { columnKey: 'link', value: T.translate("edit_sponsor.link") },
+            { columnKey: 'text', value: T.translate("edit_sponsor.text") },
+            { columnKey: 'alt', value: T.translate("edit_sponsor.alt") }
+        ];
+
+        const advertisement_table_options = {
+            actions: {
+                edit: { onClick: this.handleAdvertisementEdit },
+                delete: { onClick: onAdvertisementDelete }
+            }
+        };
+
+        const materials_columns = [
+            { columnKey: 'name', value: T.translate("edit_summit.name") },
+            { columnKey: 'type', value: T.translate("edit_sponsor.type") }
+        ]
+
+        const materials_table_options = {
+            actions: {
+                edit: { onClick: this.handleMaterialEdit },
+                delete: { onClick: onMaterialDelete }
+            }
+        }
+
+        const social_networks_columns = [
+            { columnKey: 'link', value: T.translate("edit_sponsor.link") },
+            { columnKey: 'icon_css_class', value: T.translate("edit_sponsor.icon_css_class") },
+            { columnKey: 'is_enabled', value: T.translate("edit_summit.enabled") }
+        ];
+
+        const social_networks_table_options = {
+            actions: {
+                edit: { onClick: this.handleSocialNetworkEdit },
+                delete: { onClick: onSocialNetworkDelete }
+            }
+        }
 
         return (
             <form className="sponsor-form">
@@ -144,7 +270,7 @@ class SponsorForm extends React.Component {
                         <label> {T.translate("edit_sponsor.sponsorship")}</label>
                         <Dropdown
                             id="sponsorship_id"
-                            value={entity.sponsorship_id}
+                            value={entity.sponsorship.type_id}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_sponsor.placeholders.select_sponsorship")}
                             options={sponsorship_ddl}
@@ -173,6 +299,178 @@ class SponsorForm extends React.Component {
                 </div>
                 }
 
+                {entity.id !== 0 && 
+                    <>
+                    <hr/>
+
+                    <Panel show={showSection === 'sponsor-page'} title={T.translate("edit_sponsor.sponsor_page")}
+                        handleClick={this.toggleSection.bind(this, 'sponsor-page')}>
+                    
+                        <div className="row form-group">
+                            <div className="col-md-12">
+                                <label> {T.translate("edit_sponsor.intro")} </label>
+                                <TextEditor id="intro" value={entity.intro} onChange={this.handleChange} />
+                            </div>
+                        </div>
+                        <div className="row form-group">
+                            <div className="col-md-12">
+                                <label> {T.translate("edit_sponsor.marquee")} </label>
+                                <textarea
+                                    id="marquee"
+                                    value={entity.marquee}
+                                    onChange={this.handleChange}
+                                    className="form-control"
+                                />                            
+                            </div>
+                        </div>
+                        <div className="row form-group">
+                            <div className="col-md-4">
+                                <label> {T.translate("edit_sponsor.external_link")} </label>
+                                <Input className="form-control" id="external_link" value={entity.external_link} onChange={this.handleChange} />
+                            </div>
+                            <div className="col-md-4">
+                                <label> {T.translate("edit_sponsor.video_link")} </label>
+                                <Input className="form-control" id="video_link" value={entity.video_link} onChange={this.handleChange} />
+                            </div>
+                            <div className="col-md-4">
+                                <label> {T.translate("edit_sponsor.chat_link")} </label>
+                                <Input className="form-control" id="chat_link" value={entity.chat_link} onChange={this.handleChange} />
+                            </div>                        
+                        </div>
+                            
+                        <div className="row form-group">
+                            <div className="col-md-6">
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <label> {T.translate("edit_sponsor.header_image")} </label>
+                                        <UploadInput
+                                            value={entity.header_image}
+                                            handleUpload={this.handleUploadHeaderImage}
+                                            handleRemove={ev => this.handleRemoveFile('header_image')}
+                                            className="dropzone col-md-6"
+                                            multiple={false}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                </div>
+                                <br />
+                                <label> {T.translate("edit_sponsor.header_image_alt_text")} </label>
+                                <Input className="form-control" id="header_image_alt_text" value={entity.header_image_alt_text} onChange={this.handleChange} />
+                            </div>
+                            <div className="col-md-6">
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <label> {T.translate("edit_sponsor.header_image_mobile")} </label>
+                                        <UploadInput
+                                            value={entity.header_image_mobile}
+                                            handleUpload={this.handleUploadSideImage}
+                                            handleRemove={ev => this.handleRemoveFile('header_image_mobile')}
+                                            className="dropzone col-md-6"
+                                            multiple={false}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                </div>
+                                <br />
+                                <label> {T.translate("edit_sponsor.header_image_mobile_alt_text")} </label>
+                                <Input className="form-control" id="header_image_mobile_alt_text" value={entity.header_image_mobile_alt_text} onChange={this.handleChange} />
+                            </div>
+                        </div>
+                        <div className="row form-group">                            
+                            <div className="col-md-6">
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <label> {T.translate("edit_sponsor.side_image")} </label>
+                                        <UploadInput
+                                            value={entity.side_image}
+                                            handleUpload={this.handleUploadSideImage}
+                                            handleRemove={ev => this.handleRemoveFile('side_image')}
+                                            className="dropzone col-md-6"
+                                            multiple={false}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                </div>
+                                <br />
+                                <label> {T.translate("edit_sponsor.side_image_alt_text")} </label>
+                                <Input className="form-control" id="side_image_alt_text" value={entity.side_image_alt_text} onChange={this.handleChange} />
+                            </div>
+                            <div className="col-md-6">
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <label> {T.translate("edit_sponsor.carousel_advertise_image")} </label>
+                                        <UploadInput
+                                            value={entity.carousel_advertise_image}
+                                            handleUpload={this.handleUploadSideImage}
+                                            handleRemove={ev => this.handleRemoveFile('carousel_advertise_image')}
+                                            className="dropzone col-md-6"
+                                            multiple={false}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                </div>
+                                <br />
+                                <label> {T.translate("edit_sponsor.carousel_advertise_image_alt_text")} </label>
+                                <Input className="form-control" id="carousel_advertise_image_alt_text" value={entity.carousel_advertise_image_alt_text} onChange={this.handleChange} />
+                            </div>
+                        </div>
+                        <div className="row form-group">                            
+                            <div className="col-md-4">
+                                <label> {T.translate("edit_sponsor.featured_event_id")} </label>
+                                <Input type="number" className="form-control" id="featured_event_id" value={entity.featured_event_id} onChange={this.handleChange} />
+                            </div>                        
+                        </div>
+
+                        <hr/>
+                        <div className="row form-group">                        
+                            <div className="col-md-12">
+                                <label htmlFor="ads">
+                                    {T.translate("edit_sponsor.ads")}
+                                </label>
+                                <input type="button" onClick={this.handleAdvertisementAdd}
+                                    className="btn btn-primary pull-right" value={T.translate("edit_sponsor.add_advertisement")}/>
+                                <Table
+                                    options={advertisement_table_options}
+                                    data={entity.ads || []}
+                                    columns={advertisement_columns}
+                                />
+                            </div>
+                        </div>
+
+                        <hr/>
+                        <div className="row form-group">                        
+                            <div className="col-md-12">
+                                <label htmlFor="materials">
+                                    {T.translate("edit_sponsor.materials")}
+                                </label>
+                                <input type="button" onClick={this.handleMaterialAdd}
+                                    className="btn btn-primary pull-right" value={T.translate("edit_sponsor.add_materials")}/>
+                                <Table
+                                    options={materials_table_options}
+                                    data={entity.materials || []}
+                                    columns={materials_columns}
+                                />
+                            </div>
+                        </div>
+
+                        <hr/>
+                        <div className="row form-group">                        
+                            <div className="col-md-12">
+                                <label htmlFor="social_networks">
+                                    {T.translate("edit_sponsor.social_networks")}
+                                </label>
+                                <input type="button" onClick={this.handleSocialNetworkAdd}
+                                    className="btn btn-primary pull-right" value={T.translate("edit_sponsor.add_social_networks")}/>
+                                <Table
+                                    options={social_networks_table_options}
+                                    data={entity.social_networks || []}
+                                    columns={social_networks_columns}
+                                />
+                            </div>                    
+                        </div>
+                    </Panel>
+                    </>
+                }
 
                 <div className="row">
                     <div className="col-md-12 submit-buttons">

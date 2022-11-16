@@ -16,8 +16,18 @@ import { connect } from 'react-redux';
 import { Breadcrumb } from 'react-breadcrumbs';
 import T from "i18n-react/dist/i18n-react";
 import SponsorForm from '../../components/forms/sponsor-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getSponsor, resetSponsorForm, saveSponsor, getSummitSponsorships, addMemberToSponsor, removeMemberFromSponsor, createCompany } from "../../actions/sponsor-actions";
+import { 
+    getSponsor, 
+    resetSponsorForm, 
+    saveSponsor, 
+    deleteSponsorAdvertisement,
+    deleteSponsorMaterial,
+    deleteSponsorSocialNetwork,
+    removeSponsorImage,
+    attachSponsorImage, 
+    addMemberToSponsor, 
+    removeMemberFromSponsor, 
+    createCompany } from "../../actions/sponsor-actions";
 
 class EditSponsorPage extends React.Component {
 
@@ -46,27 +56,30 @@ class EditSponsorPage extends React.Component {
             }
         }
     }
-
+    
     render(){
-        const {currentSummit, entity, errors, match, sponsorships} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.company.name : T.translate("general.new");
-
+        const {currentSummit, entity, errors, match, history, sponsorships} = this.props;
+        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");            
 
         return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+            <div className="container">                
                 <h3>{title} {T.translate("edit_sponsor.sponsor")}</h3>
                 <hr/>
                 {currentSummit &&
                 <SponsorForm
+                    history={history}
                     entity={entity}
                     currentSummit={currentSummit}
                     sponsorships={sponsorships}
                     errors={errors}
                     onCreateCompany={this.props.createCompany}
+                    onAttachImage={this.props.attachSponsorImage}
+                    onRemoveImage={this.props.removeSponsorImage}
                     onAddMember={this.props.addMemberToSponsor}
                     onRemoveMember={this.props.removeMemberFromSponsor}
+                    onAdvertisementDelete={this.props.deleteSponsorAdvertisement}
+                    onMaterialDelete={this.props.deleteSponsorMaterial}
+                    onSocialNetworkDelete={this.props.deleteSponsorSocialNetwork}
                     onSubmit={this.props.saveSponsor}
                 />
                 }
@@ -84,13 +97,16 @@ const mapStateToProps = ({ currentSummitState, currentSponsorState, currentSpons
 export default connect (
     mapStateToProps,
     {
-        getSummitById,
         getSponsor,
         resetSponsorForm,
         saveSponsor,
         addMemberToSponsor,
         removeMemberFromSponsor,
-        getSummitSponsorships,
-        createCompany
+        createCompany,
+        deleteSponsorAdvertisement,
+        deleteSponsorMaterial,
+        deleteSponsorSocialNetwork,
+        removeSponsorImage,
+        attachSponsorImage,        
     }
 )(EditSponsorPage);

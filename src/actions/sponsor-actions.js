@@ -57,6 +57,40 @@ export const SUMMIT_SPONSORSHIP_ORDER_UPDATED = 'SUMMIT_SPONSORSHIP_ORDER_UPDATE
 export const REQUEST_BADGE_SCANS = 'REQUEST_BADGE_SCANS';
 export const RECEIVE_BADGE_SCANS = 'RECEIVE_BADGE_SCANS';
 
+export const HEADER_IMAGE_ATTACHED            = 'HEADER_IMAGE_ATTACHED';
+export const HEADER_MOBILE_IMAGE_ATTACHED     = 'HEADER_MOBILE_IMAGE_ATTACHED';
+export const SIDE_IMAGE_ATTACHED              = 'SIDE_IMAGE_ATTACHED';
+export const CAROUSEL_IMAGE_ATTACHED          = 'CAROUSEL_IMAGE_ATTACHED';
+export const HEADER_IMAGE_DELETED             = 'HEADER_IMAGE_DELETED';
+export const HEADER_MOBILE_IMAGE_DELETED      = 'HEADER_MOBILE_IMAGE_DELETED';
+export const SIDE_IMAGE_DELETED               = 'SIDE_IMAGE_DELETED';
+export const CAROUSEL_IMAGE_DELETED           = 'CAROUSEL_IMAGE_DELETED';
+
+export const RECEIVE_SPONSOR_ADVERTISEMENTS     = 'RECEIVE_SPONSOR_ADVERTISEMENTS';
+export const RECEIVE_SPONSOR_ADVERTISEMENT      = 'RECEIVE_SPONSOR_ADVERTISEMENT';
+export const UPDATE_SPONSOR_ADVERTISEMENT       = 'UPDATE_SPONSOR_ADVERTISEMENT';
+export const SPONSOR_ADVERTISEMENT_UPDATED      = 'SPONSOR_ADVERTISEMENT_UPDATED';
+export const SPONSOR_ADVERTISEMENT_ADDED        = 'SPONSOR_ADVERTISEMENT_ADDED';
+export const RESET_SPONSOR_ADVERTISEMENT_FORM   = 'RESET_SPONSOR_ADVERTISEMENT_FORM';
+export const SPONSOR_ADVERTISEMENT_DELETED      = 'SPONSOR_ADVERTISEMENT_DELETED';
+export const SPONSOR_ADVERTISEMENT_IMAGE_ATTACHED = 'SPONSOR_ADVERTISEMENT_IMAGE_ATTACHED'; 
+export const SPONSOR_ADVERTISEMENT_IMAGE_DELETED = 'SPONSOR_ADVERTISEMENT_IMAGE_DELETED'; 
+
+export const RECEIVE_SPONSOR_MATERIALS     = 'RECEIVE_SPONSOR_MATERIALS';
+export const RECEIVE_SPONSOR_MATERIAL      = 'RECEIVE_SPONSOR_MATERIAL';
+export const UPDATE_SPONSOR_MATERIAL       = 'UPDATE_SPONSOR_MATERIAL';
+export const SPONSOR_MATERIAL_UPDATED      = 'SPONSOR_MATERIAL_UPDATED';
+export const SPONSOR_MATERIAL_ADDED        = 'SPONSOR_MATERIAL_ADDED';
+export const RESET_SPONSOR_MATERIAL_FORM   = 'RESET_SPONSOR_MATERIAL_FORM';
+export const SPONSOR_MATERIAL_DELETED      = 'SPONSOR_MATERIAL_DELETED';
+
+export const RECEIVE_SPONSOR_SOCIAL_NETWORKS     = 'RECEIVE_SPONSOR_SOCIAL_NETWORKS';
+export const RECEIVE_SPONSOR_SOCIAL_NETWORK      = 'RECEIVE_SPONSOR_SOCIAL_NETWORK';
+export const UPDATE_SPONSOR_SOCIAL_NETWORK       = 'UPDATE_SPONSOR_SOCIAL_NETWORK';
+export const SPONSOR_SOCIAL_NETWORK_UPDATED      = 'SPONSOR_SOCIAL_NETWORK_UPDATED';
+export const SPONSOR_SOCIAL_NETWORK_ADDED        = 'SPONSOR_SOCIAL_NETWORK_ADDED';
+export const RESET_SPONSOR_SOCIAL_NETWORK_FORM   = 'RESET_SPONSOR_SOCIAL_NETWORK_FORM';
+export const SPONSOR_SOCIAL_NETWORK_DELETED      = 'SPONSOR_SOCIAL_NETWORK_DELETED';
 
 /******************  SPONSORS ****************************************/
 
@@ -143,8 +177,8 @@ export const getSponsor = (sponsorId) => async (dispatch, getState) => {
     dispatch(startLoading());
 
     const params = {
-        access_token: accessToken,
-        expand: 'company, members',
+        access_token : accessToken,
+        expand       : 'company, members, sponsorship',
     };
 
     return getRequest(
@@ -317,8 +351,12 @@ const normalizeSponsor = (entity) => {
 
     normalizedEntity.company_id = (normalizedEntity.company) ? normalizedEntity.company.id : 0;
 
-    delete (normalizedEntity.company);
-    delete (normalizedEntity.sponsorship);
+    if(normalizedEntity.hasOwnProperty("featured_event_id") && normalizedEntity.featured_event_id == '') {
+        delete(normalizedEntity['featured_event_id']);
+    }
+
+    delete(normalizedEntity.company);
+    delete(normalizedEntity.sponsorship);
 
 
     return normalizedEntity;
@@ -351,8 +389,6 @@ export const createCompany = (company, callback) => async (dispatch, getState) =
 
 /******************  SPONSORSHIPS ****************************************/
 
-
-
 export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
@@ -373,7 +409,6 @@ export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (
         const orderDirSign = (orderDir === 1) ? '+' : '-';
         params['order'] = `${orderDirSign}${order}`;
     }
-
 
     return getRequest(
         createAction(REQUEST_SUMMIT_SPONSORSHIPS),
@@ -577,6 +612,11 @@ const normalizeSponsorship = (entity) => {
 
 }
 
+const normalizeEntity = (entity) => {
+    const normalizedEntity = {...entity};
+
+    return normalizedEntity;
+}
 
 /******************  BADGE SCANS  ****************************************/
 
@@ -652,3 +692,651 @@ export const exportBadgeScans = (sponsor = null, order = 'attendee_last_name', o
     dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans/csv`, params, filename));
 
 };
+
+/******************  SPONSOR PAGES  ****************************************/
+
+export const attachSponsorImage = (entity, file, picAttr) => async (dispatch, getState) => {
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    const normalizedEntity = normalizeEntity(entity);
+
+    const uploadFile = picAttr === 'header_image' ? uploadHeaderImage : 
+                       picAttr === 'side_image' ? uploadSideImage : 
+                       picAttr === 'header_mobile_image' ? uploadHeaderMobileImage : uploadCarouselImage;
+
+    if (entity.id) {
+        dispatch(uploadFile(entity, file));
+    } else {
+        return postRequest(
+            createAction(UPDATE_SPONSOR),
+            createAction(SPONSOR_ADDED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
+            normalizedEntity,
+            authErrorHandler,
+            entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(uploadFile(payload.response, file));
+            }
+        );        
+    }
+};
+
+const uploadHeaderImage = (entity, file) => async (dispatch, getState) => {
+
+    const { currentSummitState: { currentSummit } } = getState();
+
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    postRequest(
+        null,
+        createAction(HEADER_IMAGE_ATTACHED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}/header-image`,
+        file,
+        authErrorHandler,
+        {pic: entity.pic}
+    )(params)(dispatch)
+        .then(() => {
+            dispatch(stopLoading());
+        });
+};
+
+const uploadHeaderMobileImage = (entity, file) => async (dispatch, getState) => {
+
+    const { currentSummitState: { currentSummit } } = getState();
+
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    postRequest(
+        null,
+        createAction(HEADER_MOBILE_IMAGE_ATTACHED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}/header-image/mobile`,
+        file,
+        authErrorHandler,
+        {pic: entity.pic}
+    )(params)(dispatch)
+        .then(() => {
+            dispatch(stopLoading());
+        });
+};
+
+const uploadSideImage = (entity, file) => async (dispatch, getState) => {
+
+    const { currentSummitState: { currentSummit } } = getState();
+
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    postRequest(
+        null,
+        createAction(SIDE_IMAGE_ATTACHED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}/side-image`,    
+        file,
+        authErrorHandler,
+        {pic: entity.pic}
+    )(params)(dispatch)
+        .then(() => {
+            dispatch(stopLoading());
+        });
+};
+
+const uploadCarouselImage = (entity, file) => async (dispatch, getState) => {
+
+    const { currentSummitState: { currentSummit } } = getState();
+
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    postRequest(
+        null,
+        createAction(CAROUSEL_IMAGE_ATTACHED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}/carousel-advertise-image`,
+        file,
+        authErrorHandler,
+        {pic: entity.pic}
+    )(params)(dispatch)
+        .then(() => {
+            dispatch(stopLoading());
+        });
+};
+
+export const removeSponsorImage = (entity, picAttr) => async (dispatch, getState) => {
+
+    const removeFile = picAttr === 'header_image' ? removeHeaderImage :
+                       picAttr === 'side_image' ? removeSideImage :
+                       picAttr === 'header_mobile_image' ? removeHeaderMobileImage : removeCarouselImage;    
+
+    return dispatch(removeFile(entity));    
+};
+
+export const removeHeaderImage = (entity) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    return deleteRequest(
+        null,
+        createAction(HEADER_IMAGE_DELETED)({}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}/header-image`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+export const removeHeaderMobileImage = (entity) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    return deleteRequest(
+        null,
+        createAction(HEADER_MOBILE_IMAGE_DELETED)({}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}/header-image/mobile`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+export const removeSideImage = (entity) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    return deleteRequest(
+        null,
+        createAction(SIDE_IMAGE_DELETED)({}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}/side-image`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+export const removeCarouselImage = (entity) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    return deleteRequest(
+        null,
+        createAction(CAROUSEL_IMAGE_DELETED)({}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${entity.id}/carousel-advertise-image`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+
+
+export const getSponsorAdvertisements = (sponsorId) => async (dispatch, getState) => {    
+
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_ADVERTISEMENTS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/ads`,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+export const saveSponsorAdvertisement = (entity) => async (dispatch, getState) => {
+
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeSponsorship(entity);
+
+    if (entity.id) {
+
+        putRequest(
+            createAction(UPDATE_SPONSOR_ADVERTISEMENT),
+            createAction(SPONSOR_ADVERTISEMENT_UPDATED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads/${entity.id}`,
+            normalizedEntity,
+            authErrorHandler,
+            entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(showSuccessMessage(T.translate("edit_sponsor.advertisement_saved")));
+            });
+
+    } else {
+        const success_message = {
+            title: T.translate("general.done"),
+            html: T.translate("edit_sponsor.advertisement_created"),
+            type: 'success'
+        };
+
+        postRequest(
+            createAction(UPDATE_SPONSOR_ADVERTISEMENT),
+            createAction(SPONSOR_ADVERTISEMENT_ADDED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads`,
+            normalizedEntity,
+            authErrorHandler,
+            entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(showMessage(
+                    success_message,
+                    () => { history.push(`/app/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads/${payload.response.id}`) }
+                ));
+            });
+    }    
+}
+
+export const getSponsorAdvertisement = (advertisementId) => async (dispatch, getState) => {
+
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    dispatch(startLoading());
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_ADVERTISEMENT),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads/${advertisementId}`,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );    
+}
+
+export const resetSponsorAdvertisementForm = () => (dispatch, getState) => {
+    dispatch(createAction(RESET_SPONSOR_ADVERTISEMENT_FORM)({}));
+};
+
+export const deleteSponsorAdvertisement = (advertisementId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    return deleteRequest(
+        null,
+        createAction(SPONSOR_ADVERTISEMENT_DELETED)({advertisementId}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads/${advertisementId}`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+export const submitSponsorAdvertisementImage = (entity, file) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    postRequest(
+        null,
+        createAction(SPONSOR_ADVERTISEMENT_IMAGE_ATTACHED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads/${entity.id}/image`,
+        file,
+        authErrorHandler,
+        {pic: entity.pic}
+    )(params)(dispatch)
+        .then(() => {
+            dispatch(stopLoading());
+        });
+}
+
+export const removeSponsorAdvertisementImage = (entity) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    return deleteRequest(
+        null,
+        createAction(SPONSOR_ADVERTISEMENT_IMAGE_DELETED)({}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads/${entity.id}/image`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );    
+}
+
+// Materials
+
+export const getSponsorMaterials = (sponsorId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_MATERIALS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/materials`,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );    
+}
+
+export const saveSponsorMaterial = (entity) => async (dispatch, getState) => {
+
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeSponsorship(entity);
+
+    if (entity.id) {
+
+        putRequest(
+            createAction(UPDATE_SPONSOR_MATERIAL),
+            createAction(SPONSOR_MATERIAL_UPDATED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/materials/${entity.id}`,
+            normalizedEntity,
+            authErrorHandler,
+            entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(showSuccessMessage(T.translate("edit_sponsor.material_saved")));
+            });
+
+    } else {
+        const success_message = {
+            title: T.translate("general.done"),
+            html: T.translate("edit_sponsor.material_created"),
+            type: 'success'
+        };
+
+        postRequest(
+            createAction(UPDATE_SPONSOR_MATERIAL),
+            createAction(SPONSOR_MATERIAL_ADDED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/materials`,
+            normalizedEntity,
+            authErrorHandler,
+            entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(showMessage(
+                    success_message,
+                    () => { history.push(`/app/summits/${currentSummit.id}/sponsors/${currentSponsorId}/materials/${payload.response.id}`) }
+                ));
+            });
+    }    
+}
+
+export const getSponsorMaterial = (materialId) => async (dispatch, getState) => {
+
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    dispatch(startLoading());
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_MATERIAL),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/materials/${materialId}`,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );        
+}
+
+export const resetSponsorMaterialForm = () => (dispatch, getState) => {
+    dispatch(createAction(RESET_SPONSOR_MATERIAL_FORM)({}));
+};
+
+export const deleteSponsorMaterial = (materialId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    return deleteRequest(
+        null,
+        createAction(SPONSOR_MATERIAL_DELETED)({materialId}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/materials/${materialId}`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );    
+}
+
+
+// Social Networks
+
+export const getSponsorSocialNetworks = (sponsorId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_SOCIAL_NETWORKS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/social-networks`,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );     
+}
+
+export const saveSponsorSocialNetwork = (entity) => async (dispatch, getState) => {
+
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();    
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeSponsorship(entity);
+
+    if (entity.id) {
+
+        putRequest(
+            createAction(UPDATE_SPONSOR_SOCIAL_NETWORK),
+            createAction(SPONSOR_SOCIAL_NETWORK_UPDATED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/social-networks/${entity.id}`,
+            normalizedEntity,
+            authErrorHandler,
+            entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(showSuccessMessage(T.translate("edit_sponsor.social_network_saved")));
+            });
+
+    } else {
+        const success_message = {
+            title: T.translate("general.done"),
+            html: T.translate("edit_sponsor.social_network_created"),
+            type: 'success'
+        };
+
+        postRequest(
+            createAction(UPDATE_SPONSOR_SOCIAL_NETWORK),
+            createAction(SPONSOR_SOCIAL_NETWORK_ADDED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/social-networks`,
+            normalizedEntity,
+            authErrorHandler,
+            entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(showMessage(
+                    success_message,
+                    () => { history.push(`/app/summits/${currentSummit.id}/sponsors/${currentSponsorId}/social-network/${payload.response.id}`) }
+                ));
+            });
+    }
+}
+
+export const getSponsorSocialNetwork = (socialNetWorkId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    dispatch(startLoading());
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_SOCIAL_NETWORK),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/social-networks/${socialNetWorkId}`,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );    
+}
+
+export const resetSponsorSocialNetworkForm = () => (dispatch, getState) => {
+    dispatch(createAction(RESET_SPONSOR_SOCIAL_NETWORK_FORM)({}));
+};
+
+export const deleteSponsorSocialNetwork = (socialNetWorkId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    return deleteRequest(
+        null,
+        createAction(SPONSOR_SOCIAL_NETWORK_DELETED)({socialNetWorkId}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/social-networks/${socialNetWorkId}`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );    
+}
+
