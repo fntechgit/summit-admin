@@ -1200,6 +1200,8 @@
     "select_items": "Select at least one ticket to perform the action.",
     "has_badge": "Has Badge",
     "has_no_badge": "Has no Badge",
+    "paid": "Paid",
+    "free": "Free",
     "print_modal_title": "Print Badges",
     "check_in": "Should Perform Attendee CheckIn on Printing?",
     "print_modal_body": "You are about to send all selected tickets to print",
