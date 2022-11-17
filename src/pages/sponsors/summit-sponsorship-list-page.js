@@ -78,7 +78,7 @@ class SummitSponsorshipListPage extends React.Component {
 
         const fullSponsorships = sponsorships.map((s) => {
             const sponsorship_type = allSponsorships.find(e => e.id === s.type_id);
-            return {...s, sponsorship_type: sponsorship_type.name, label: sponsorship_type.label, size: sponsorship_type.size};
+            return {...s, sponsorship_type: sponsorship_type?.name, label: sponsorship_type?.label, size: sponsorship_type?.size};
         }).sort((a, b) => a.order -b.order);
 
         const columns = [
@@ -93,7 +93,7 @@ class SummitSponsorshipListPage extends React.Component {
             }
         }
 
-        if(!currentSummit.id) return (<div />);
+        if(!currentSummit.id || allSponsorships.length === 0) return (<div />);
 
         return(
             <div className="container">
