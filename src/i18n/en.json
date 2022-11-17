@@ -1206,6 +1206,7 @@
     "check_in": "Should Perform Attendee CheckIn on Printing?",
     "print_modal_body": "You are about to send all selected tickets to print",
     "show_printable": "Show Printable Tickets",
+    "show_printable_info": "Must be an active ticket with the access level of IN_PERSON.",
     "items_qty": "Selected {qty} Tickets",
     "select_view_2_print": "Select a View Type to Print",
     "placeholders": {
