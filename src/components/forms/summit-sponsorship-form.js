@@ -137,7 +137,7 @@ class SummitSponsorshipForm extends React.Component {
                         <label> {T.translate("edit_sponsor.sponsorship_type")}</label>
                         <Dropdown
                             id="type_id"
-                            value={entity.type_id}
+                            value={entity.type.id}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_sponsor.placeholders.select_sponsorship")}
                             options={sponsorship_ddl}

@@ -364,6 +364,7 @@ export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (
         page         : 1,
         per_page     : 100,
         access_token : accessToken,
+        expand       : 'type',
     };
 
     // order
@@ -395,6 +396,7 @@ export const getSummitSponsorship = (sponsorshipId) => async (dispatch, getState
 
     const params = {
         access_token : accessToken,
+        expand       : 'type'
     };
 
     return getRequest(

@@ -18,7 +18,6 @@ import Swal from "sweetalert2";
 import { Table, SortableTable } from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
 import { getSummitSponsorships, deleteSummitSponsorship } from "../../actions/sponsor-actions";
-import { getSponsorships } from '../../actions/sponsorship-actions';
 
 class SummitSponsorshipListPage extends React.Component {
 
@@ -37,7 +36,7 @@ class SummitSponsorshipListPage extends React.Component {
     componentDidMount() {
         const {currentSummit} = this.props;
         if(currentSummit) {
-            this.props.getSummitSponsorships().then(() => this.props.getSponsorships());
+            this.props.getSummitSponsorships();
         }
     }
 
@@ -74,12 +73,9 @@ class SummitSponsorshipListPage extends React.Component {
     }
 
     render(){
-        const {currentSummit, sponsorships, order, orderDir, totalSponsorships, allSponsorships} = this.props;
+        const {currentSummit, sponsorships, order, orderDir, totalSponsorships} = this.props;
 
-        const fullSponsorships = sponsorships.map((s) => {
-            const sponsorship_type = allSponsorships.find(e => e.id === s.type_id);
-            return {...s, sponsorship_type: sponsorship_type?.name, label: sponsorship_type?.label, size: sponsorship_type?.size};
-        }).sort((a, b) => a.order -b.order);
+        const sortedSponsorships = sponsorships.sort((a, b) => a.order -b.order);
 
         const columns = [
             { columnKey: 'sponsorship_type', value: T.translate("sponsorship_list.sponsorship_type"), sortable: true },
@@ -93,7 +89,7 @@ class SummitSponsorshipListPage extends React.Component {
             }
         }
 
-        if(!currentSummit.id || allSponsorships.length === 0) return (<div />);
+        if(!currentSummit.id) return (<div />);
 
         return(
             <div className="container">
@@ -106,19 +102,19 @@ class SummitSponsorshipListPage extends React.Component {
                     </div>
                 </div>
 
-                {fullSponsorships.length === 0 &&
+                {sortedSponsorships.length === 0 &&
                 <div>{T.translate("sponsorship_list.no_sponsorships")}</div>
                 }
 
-                {fullSponsorships.length > 0 &&
+                {sortedSponsorships.length > 0 &&
                     <Table
                         options={table_options}
-                        data={fullSponsorships}
+                        data={sortedSponsorships}
                         columns={columns}
                     />
                     // <SortableTable
                     //     options={table_options}
-                    //     data={fullSponsorships}
+                    //     data={sortedSponsorships}
                     //     columns={columns}
                     //     dropCallback={(ev) => console.log('change order...', ev)}
                     //     orderField="order"
@@ -130,16 +126,14 @@ class SummitSponsorshipListPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSponsorshipListState, currentSummitSponsorshipListState }) => ({
+const mapStateToProps = ({ currentSummitState, currentSummitSponsorshipListState }) => ({
     currentSummit   : currentSummitState.currentSummit,
-    allSponsorships : currentSponsorshipListState.sponsorships,
     ...currentSummitSponsorshipListState
 })
 
 export default connect (
     mapStateToProps,
     {
-        getSponsorships,
         getSummitById,
         getSummitSponsorships,
         deleteSummitSponsorship
