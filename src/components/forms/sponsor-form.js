@@ -16,7 +16,7 @@ import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import { Dropdown, CompanyInput, MemberInput, Panel, TextEditor, Input, UploadInput, Table } from 'openstack-uicore-foundation/lib/components';
 import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
-
+import EventInput from '../inputs/event-input';
 
 class SponsorForm extends React.Component {
     constructor(props) {
@@ -412,11 +412,15 @@ class SponsorForm extends React.Component {
                                 <Input className="form-control" id="carousel_advertise_image_alt_text" value={entity.carousel_advertise_image_alt_text} onChange={this.handleChange} />
                             </div>
                         </div>
-                        <div className="row form-group">                            
+                        <div className="row form-group">
                             <div className="col-md-4">
                                 <label> {T.translate("edit_sponsor.featured_event_id")} </label>
-                                <Input type="number" className="form-control" id="featured_event_id" value={entity.featured_event_id} onChange={this.handleChange} />
-                            </div>                        
+                                <EventInput
+                                    id="featured_event_id" 
+                                    value={entity.featured_event}
+                                    summitId={currentSummit.id}
+                                    onChange={this.handleChange} />
+                            </div>
                         </div>
 
                         <hr/>

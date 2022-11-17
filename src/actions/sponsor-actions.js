@@ -178,7 +178,8 @@ export const getSponsor = (sponsorId) => async (dispatch, getState) => {
 
     const params = {
         access_token : accessToken,
-        expand       : 'company, members, sponsorship',
+        expand       : 'company, members, sponsorship, featured_event',
+        fields       : 'featured_event.id, featured_event.title'
     };
 
     return getRequest(
@@ -351,10 +352,8 @@ const normalizeSponsor = (entity) => {
 
     normalizedEntity.company_id = (normalizedEntity.company) ? normalizedEntity.company.id : 0;
 
-    if(normalizedEntity.hasOwnProperty("featured_event_id") && normalizedEntity.featured_event_id == '') {
-        delete(normalizedEntity['featured_event_id']);
-    }
-
+    normalizedEntity.featured_event_id = (normalizedEntity.featured_event_id) ? normalizedEntity.featured_event_id.id : 0;
+    
     delete(normalizedEntity.company);
     delete(normalizedEntity.sponsorship);
 
