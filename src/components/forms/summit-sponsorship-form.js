@@ -103,7 +103,7 @@ class SummitSponsorshipForm extends React.Component {
         const {entity} = this.state;
         const { sponsorships } = this.props;
 
-        const sponsorship_ddl = sponsorships.map(s => ({label: s.name, value: s.id}));
+        const sponsorship_ddl = sponsorships.map(s => ({label: s.type?.name, value: s.type?.id}));
 
         const lobby_template_ddl = [
             {label: 'Big Images', value: 'big-images' },
@@ -137,7 +137,7 @@ class SummitSponsorshipForm extends React.Component {
                         <label> {T.translate("edit_sponsor.sponsorship_type")}</label>
                         <Dropdown
                             id="type_id"
-                            value={entity.type.id}
+                            value={entity.type?.id}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_sponsor.placeholders.select_sponsorship")}
                             options={sponsorship_ddl}

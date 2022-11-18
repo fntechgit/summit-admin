@@ -16,9 +16,9 @@ import { connect } from 'react-redux';
 import { Breadcrumb } from 'react-breadcrumbs';
 import T from "i18n-react/dist/i18n-react";
 import SummitSponsorshipForm from '../../components/forms/summit-sponsorship-form';
-import { getSummitById }  from '../../actions/summit-actions';
 import { 
     getSummitSponsorship, 
+    getSummitSponsorships,
     resetSummitSponsorshipForm, 
     saveSummitSponsorship, 
     uploadSponsorshipBadgeImage, 
@@ -35,6 +35,13 @@ class EditSummitSponsorshipPage extends React.Component {
             props.resetSummitSponsorshipForm();
         } else {
             props.getSummitSponsorship(sponsorshipId);
+        }
+    }
+
+    componentDidMount() {
+        const {sponsorships} = this.props;
+        if(sponsorships.length === 0) {
+            this.props.getSummitSponsorships();
         }
     }
 
@@ -77,17 +84,17 @@ class EditSummitSponsorshipPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSummitSponsorshipState, currentSponsorshipListState }) => ({
+const mapStateToProps = ({ currentSummitState, currentSummitSponsorshipState, currentSummitSponsorshipListState }) => ({
     currentSummit : currentSummitState.currentSummit,
-    sponsorships : currentSponsorshipListState.sponsorships,
+    sponsorships : currentSummitSponsorshipListState.sponsorships,
     ...currentSummitSponsorshipState
 });
 
 export default connect (
     mapStateToProps,
     {
-        getSummitById,
         getSummitSponsorship,
+        getSummitSponsorships,
         resetSummitSponsorshipForm,
         saveSummitSponsorship,
         uploadSponsorshipBadgeImage,
