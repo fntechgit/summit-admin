@@ -268,11 +268,11 @@ class SummitSponsorshipForm extends React.Component {
                     <div className="col-md-6">
                         <label> {T.translate("edit_summit_sponsorship.badge_alt")}</label>
                         <Input
-                            id="badge_alt"
+                            id="badge_image_alt_text"
                             className="form-control"
-                            error={this.hasErrors('badge_alt')}
+                            error={this.hasErrors('badge_image_alt_text')}
                             onChange={this.handleChange}
-                            value={entity.badge_alt}
+                            value={entity.badge_image_alt_text}
                         />
                     </div>
                 </div>

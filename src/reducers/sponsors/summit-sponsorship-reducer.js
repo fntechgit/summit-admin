@@ -40,6 +40,7 @@
      sponsor_page_use_banner_widget     : false,
      type_id                            : 0,
      badge_image                        : '',
+     badge_image_alt_text               : '',
  }
  
  const DEFAULT_STATE = {
