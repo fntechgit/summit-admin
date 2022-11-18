@@ -45,7 +45,9 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
             let sponsorships = payload.response.data;
 
             sponsorships.map(s => {
-                s.sponsorship_type = s.type.name;
+                s.sponsorship_type = s.type?.name;
+                s.label = s.type?.label;
+                s.size = s.type?.size;
                 s.widget_title = s.widget_title ? s.widget_title : 'N/A'
             })
 

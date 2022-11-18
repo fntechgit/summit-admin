@@ -78,8 +78,9 @@ class SummitSponsorshipListPage extends React.Component {
         const sortedSponsorships = sponsorships.sort((a, b) => a.order -b.order);
 
         const columns = [
-            { columnKey: 'sponsorship_type', value: T.translate("sponsorship_list.sponsorship_type"), sortable: true },
-            { columnKey: 'widget_title', value: T.translate("sponsorship_list.widget_title"), sortable: true },
+            { columnKey: 'sponsorship_type', value: T.translate("sponsorship_list.sponsorship_type"), sortable: true },            
+            { columnKey: 'label', value: T.translate("sponsorship_list.label"), sortable: true },
+            { columnKey: 'size', value: T.translate("sponsorship_list.size"), sortable: true }
         ];
 
         const table_options = {            
