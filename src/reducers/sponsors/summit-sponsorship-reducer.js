@@ -78,6 +78,10 @@
                      entity[key] = (entity[key] == null) ? '' : entity[key] ;
                  }
              }
+
+             if(entity.hasOwnProperty("type")){
+                entity['type_id'] = entity.type.id;
+            }             
  
              return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
          }
