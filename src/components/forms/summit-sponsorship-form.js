@@ -138,6 +138,7 @@ class SummitSponsorshipForm extends React.Component {
                         <Dropdown
                             id="type_id"
                             value={entity.type?.id}
+                            key={JSON.stringify(entity.type?.id)}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_sponsor.placeholders.select_sponsorship")}
                             options={sponsorship_ddl}
@@ -165,6 +166,7 @@ class SummitSponsorshipForm extends React.Component {
                         <Dropdown
                             id="lobby_template"
                             value={entity.lobby_template}
+                            key={JSON.stringify(entity.lobby_template)}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_summit_sponsorship.placeholders.select_lobby_template")}
                             options={lobby_template_ddl}
@@ -176,6 +178,7 @@ class SummitSponsorshipForm extends React.Component {
                         <Dropdown
                             id="expo_hall_template"
                             value={entity.expo_hall_template}
+                            key={JSON.stringify(entity.expo_hall_template)}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_summit_sponsorship.placeholders.select_expo_hall_template")}
                             options={expo_hall_template_ddl}
@@ -189,6 +192,7 @@ class SummitSponsorshipForm extends React.Component {
                         <Dropdown
                             id="event_page_template"
                             value={entity.event_page_template}
+                            key={JSON.stringify(entity.event_page_template)}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_summit_sponsorship.placeholders.select_event_page_template")}
                             options={event_page_template_ddl}
@@ -200,6 +204,7 @@ class SummitSponsorshipForm extends React.Component {
                         <Dropdown
                             id="sponsor_page_template"
                             value={entity.sponsor_page_template}
+                            key={JSON.stringify(entity.sponsor_page_template)}
                             onChange={this.handleChange}
                             placeholder={T.translate("edit_summit_sponsorship.placeholders.select_sponsor_page_template")}
                             options={sponsor_page_template_ddl}
