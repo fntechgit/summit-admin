@@ -66,8 +66,8 @@ export const getSelectionPlan = (selectionPlanId) => async (dispatch, getState) 
         createAction(RECEIVE_SELECTION_PLAN),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`,
         authErrorHandler
-    )(params)(dispatch).then(async ({response}) => {
-        await dispatch(getAllowedMembers(currentSummit.id))
+    )(params)(dispatch).then(async () => {
+        await dispatch(getAllowedMembers(selectionPlanId))
         await dispatch(getSelectionPlanProgressFlags(currentSummit.id, selectionPlanId));
         dispatch(stopLoading());
     });
