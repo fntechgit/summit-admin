@@ -11,7 +11,6 @@ import {
     resetSponsorForm,
 } from "../actions/sponsor-actions";
 import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
 import EditAdSponsorPage from "../pages/sponsors/edit-advertisement-sponsor-page";
 import EditMaterialSponsorPage from "../pages/sponsors/edit-material-sponsor-page";
 import EditSocialNetworkSponsorPage from "../pages/sponsors/edit-social-network-sponsor-page";
@@ -20,19 +19,15 @@ import NoMatchPage from "../pages/no-match-page";
 class SponsorIdLayout extends React.Component {
 
     componentDidMount() {
-        let sponsorId = this.props.match.params.sponsor_id;
-
-        const { id: summitId } = this.props.currentSummit;
+        const sponsorId = this.props.match.params.sponsor_id;
 
         if (!sponsorId) {
             this.props.resetSponsorForm();
         } else {
             this.props.getSponsor(sponsorId).then(() => {
-                if (summitId && summitId !== 0) {
-                    this.props.getSponsorAdvertisements(sponsorId)
-                    this.props.getSponsorMaterials(sponsorId)
-                    this.props.getSponsorSocialNetworks(sponsorId)
-                }
+                this.props.getSponsorAdvertisements(sponsorId)
+                this.props.getSponsorMaterials(sponsorId)
+                this.props.getSponsorSocialNetworks(sponsorId)
             });
         }
     }
@@ -45,7 +40,11 @@ class SponsorIdLayout extends React.Component {
             if (!newId) {
                 this.props.resetSponsorForm();
             } else {
-                this.props.getSponsor(newId);
+                this.props.getSponsor(newId).then(() => {
+                    this.props.getSponsorAdvertisements(newId)
+                    this.props.getSponsorMaterial(newId)
+                    this.props.getSponsorSocialNetworks(newId)
+                });
             }
         }
     }
@@ -58,7 +57,7 @@ class SponsorIdLayout extends React.Component {
         if (sponsorId && !currentSponsor.id) return (<div />);
 
         return (
-            <div>
+            <>
                 <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
                 <Switch>
                     <Route path={`${match.url}/ads`} render={
@@ -100,7 +99,7 @@ class SponsorIdLayout extends React.Component {
                     <Route strict exact path={match.url} component={EditSponsorPage} />
                     <Route component={NoMatchPage} />
                 </Switch>
-            </div>
+            </>
         );
     }
 }

@@ -926,6 +926,8 @@ export const getSponsorAdvertisements = (sponsorId) => async (dispatch, getState
         access_token : accessToken,
     };
 
+    if(!currentSummit.id) return null
+
     return getRequest(
         null,
         createAction(RECEIVE_SPONSOR_ADVERTISEMENTS),
@@ -1098,6 +1100,8 @@ export const getSponsorMaterials = (sponsorId) => async (dispatch, getState) => 
         access_token : accessToken,
     };
 
+    if(!currentSummit.id) return null
+
     return getRequest(
         null,
         createAction(RECEIVE_SPONSOR_MATERIALS),
@@ -1225,6 +1229,8 @@ export const getSponsorSocialNetworks = (sponsorId) => async (dispatch, getState
     const params = {
         access_token : accessToken,
     };
+
+    if(!currentSummit.id) return null
 
     return getRequest(
         null,
