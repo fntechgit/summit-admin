@@ -140,7 +140,7 @@ export const saveSponsorship = (entity) => async (dispatch, getState) => {
             .then((payload) => {
                 dispatch(showMessage(
                     success_message,
-                    () => { history.push(`/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`) }
+                    () => { history.push(`/app/sponsorship-types/${payload.response.id}`) }
                 ));
             });
     }
