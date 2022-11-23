@@ -17,16 +17,19 @@ import { Breadcrumb } from 'react-breadcrumbs';
 import T from "i18n-react/dist/i18n-react";
 import SponsorForm from '../../components/forms/sponsor-form';
 import { 
-    getSponsor, 
-    resetSponsorForm, 
-    saveSponsor, 
+    getSponsor,
+    resetSponsorForm,
+    saveSponsor,
+    addMemberToSponsor,
+    removeMemberFromSponsor,
+    createCompany,
     deleteSponsorAdvertisement,
     deleteSponsorMaterial,
     deleteSponsorSocialNetwork,
     removeSponsorImage,
-    attachSponsorImage, 
-    addMemberToSponsor, 
-    removeMemberFromSponsor, 
+    attachSponsorImage,
+    addMemberToSponsor,
+    removeMemberFromSponsor,
     createCompany } from "../../actions/sponsor-actions";
 
 class EditSponsorPage extends React.Component {

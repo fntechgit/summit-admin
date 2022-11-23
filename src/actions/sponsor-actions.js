@@ -352,8 +352,9 @@ const normalizeSponsor = (entity) => {
 
     normalizedEntity.company_id = (normalizedEntity.company) ? normalizedEntity.company.id : 0;
 
-    normalizedEntity.featured_event_id = (normalizedEntity.featured_event_id) ? normalizedEntity.featured_event_id.id : 0;
+    normalizedEntity.featured_event_id = (normalizedEntity.featured_event && normalizedEntity.featured_event.id) ? normalizedEntity.featured_event.id : 0;
     
+    delete(normalizedEntity.featured_event);
     delete(normalizedEntity.company);
     delete(normalizedEntity.sponsorship);
 
@@ -926,8 +927,6 @@ export const getSponsorAdvertisements = (sponsorId) => async (dispatch, getState
         access_token : accessToken,
     };
 
-    if(!currentSummit.id) return null
-
     return getRequest(
         null,
         createAction(RECEIVE_SPONSOR_ADVERTISEMENTS),
@@ -1052,6 +1051,35 @@ export const submitSponsorAdvertisementImage = (entity, file) => async (dispatch
         access_token: accessToken
     };
 
+    if (entity.id) {
+        dispatch(uploadAdvertiseImage(entity, file));
+    } else {
+        const normalizedEntity = normalizeSponsorship(entity);
+        postRequest(
+            createAction(UPDATE_SPONSOR_ADVERTISEMENT),
+            createAction(SPONSOR_ADVERTISEMENT_ADDED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads`,
+            normalizedEntity,
+            authErrorHandler,
+            entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(uploadAdvertiseImage(payload.response, file));
+            });
+    }   
+}
+
+const uploadAdvertiseImage = (entity, file) => async (dispatch, getState) => {
+
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity: { id : currentSponsorId } } = currentSponsorState;
+
+    const params = {
+        access_token: accessToken
+    };
+
     postRequest(
         null,
         createAction(SPONSOR_ADVERTISEMENT_IMAGE_ATTACHED),
@@ -1063,7 +1091,7 @@ export const submitSponsorAdvertisementImage = (entity, file) => async (dispatch
         .then(() => {
             dispatch(stopLoading());
         });
-}
+};
 
 export const removeSponsorAdvertisementImage = (entity) => async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -1099,8 +1127,6 @@ export const getSponsorMaterials = (sponsorId) => async (dispatch, getState) => 
     const params = {
         access_token : accessToken,
     };
-
-    if(!currentSummit.id) return null
 
     return getRequest(
         null,
@@ -1229,8 +1255,6 @@ export const getSponsorSocialNetworks = (sponsorId) => async (dispatch, getState
     const params = {
         access_token : accessToken,
     };
-
-    if(!currentSummit.id) return null
 
     return getRequest(
         null,

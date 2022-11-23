@@ -76,8 +76,6 @@ class SponsorAdvertisementForm extends React.Component {
     render() {
         const { entity, errors } = this.state;
 
-        console.log('uis form here?')
-
         return (
             <>
                 <form className="advertisement-form">

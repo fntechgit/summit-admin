@@ -18,18 +18,20 @@ import NoMatchPage from "../pages/no-match-page";
 
 class SponsorIdLayout extends React.Component {
 
-    componentDidMount() {
-        const sponsorId = this.props.match.params.sponsor_id;
+    constructor(props) {
+        const sponsorId = props.match.params.sponsor_id;
+        super(props);
 
         if (!sponsorId) {
-            this.props.resetSponsorForm();
+            props.resetSponsorForm();
         } else {
-            this.props.getSponsor(sponsorId).then(() => {
-                this.props.getSponsorAdvertisements(sponsorId)
-                this.props.getSponsorMaterials(sponsorId)
-                this.props.getSponsorSocialNetworks(sponsorId)
+            props.getSponsor(sponsorId).then(() => {
+                props.getSponsorAdvertisements(sponsorId)
+                props.getSponsorMaterials(sponsorId)
+                props.getSponsorSocialNetworks(sponsorId)
             });
         }
+
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -57,7 +59,7 @@ class SponsorIdLayout extends React.Component {
         if (sponsorId && !currentSponsor.id) return (<div />);
 
         return (
-            <>
+            <div>
                 <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
                 <Switch>
                     <Route path={`${match.url}/ads`} render={
@@ -99,7 +101,7 @@ class SponsorIdLayout extends React.Component {
                     <Route strict exact path={match.url} component={EditSponsorPage} />
                     <Route component={NoMatchPage} />
                 </Switch>
-            </>
+            </div>
         );
     }
 }

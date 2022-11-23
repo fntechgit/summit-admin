@@ -414,10 +414,11 @@ class SponsorForm extends React.Component {
                         </div>
                         <div className="row form-group">
                             <div className="col-md-4">
-                                <label> {T.translate("edit_sponsor.featured_event_id")} </label>
+                                <label> {T.translate("edit_sponsor.featured_event")} </label>
                                 <EventInput
-                                    id="featured_event_id" 
+                                    id="featured_event" 
                                     value={entity.featured_event}
+                                    key={JSON.stringify(entity.featured_event)}
                                     summitId={currentSummit.id}
                                     onChange={this.handleChange} />
                             </div>

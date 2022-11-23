@@ -54,7 +54,7 @@ export const DEFAULT_ENTITY = {
     order                               : 0,
     is_published                        : false,
     intro                               : '',
-    featured_event_id                   : 0,
+    featured_event                      : { id: 0 },
     marquee                             : '',
     external_link                       : '',
     video_link                          : '',
@@ -108,7 +108,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
                 }
             }
 
-            const sponsorship_id = entity.sponsorship.id;
+            const sponsorship_id = entity.sponsorship.id;            
 
             return {...state, entity: {...state.entity, ...entity, sponsorship_id} };
         }

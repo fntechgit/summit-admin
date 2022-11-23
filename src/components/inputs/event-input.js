@@ -82,6 +82,7 @@ export default class EventInput extends React.Component {
                     onChange={this.handleChange}
                     loadOptions={this.getTemplates}                    
                     isMulti={false}
+                    isClearable={true}
                     {...rest}
                 />
                 {has_error &&
