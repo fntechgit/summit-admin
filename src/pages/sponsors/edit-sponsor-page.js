@@ -16,9 +16,7 @@ import { connect } from 'react-redux';
 import { Breadcrumb } from 'react-breadcrumbs';
 import T from "i18n-react/dist/i18n-react";
 import SponsorForm from '../../components/forms/sponsor-form';
-import { 
-    getSponsor,
-    resetSponsorForm,
+import {
     saveSponsor,
     addMemberToSponsor,
     removeMemberFromSponsor,
@@ -28,46 +26,30 @@ import {
     deleteSponsorSocialNetwork,
     removeSponsorImage,
     attachSponsorImage,
-    addMemberToSponsor,
-    removeMemberFromSponsor,
-    createCompany } from "../../actions/sponsor-actions";
+    getSponsorAdvertisements,
+    getSponsorMaterials,
+    getSponsorSocialNetworks,
+} from "../../actions/sponsor-actions";
 
 class EditSponsorPage extends React.Component {
 
-    constructor(props) {
-        const sponsorId = props.match.params.sponsor_id;
-        super(props);
-
-        if (!sponsorId) {
-            props.resetSponsorForm();
-        } else {
-            props.getSponsor(sponsorId);
-        }
-
-        props.getSummitSponsorships();
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.sponsor_id;
-        const newId = this.props.match.params.sponsor_id;
-
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetSponsorForm();
-            } else {
-                this.props.getSponsor(newId);
-            }
+    componentDidMount() {
+        const { entity } = this.props;
+        if (entity.id > 0) {
+            this.props.getSponsorAdvertisements(entity.id);
+            this.props.getSponsorMaterials(entity.id);
+            this.props.getSponsorSocialNetworks(entity.id);
         }
     }
-    
-    render(){
-        const {currentSummit, entity, errors, match, history, sponsorships} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");            
 
-        return(
-            <div className="container">                
+    render() {
+        const { currentSummit, entity, errors, match, history, sponsorships } = this.props;
+        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
+
+        return (
+            <div className="container">
                 <h3>{title} {T.translate("edit_sponsor.sponsor")}</h3>
-                <hr/>
+                <hr />
                 {currentSummit &&
                 <SponsorForm
                     history={history}
@@ -84,6 +66,9 @@ class EditSponsorPage extends React.Component {
                     onMaterialDelete={this.props.deleteSponsorMaterial}
                     onSocialNetworkDelete={this.props.deleteSponsorSocialNetwork}
                     onSubmit={this.props.saveSponsor}
+                    getSponsorAdvertisements={this.props.getSponsorAdvertisements}
+                    getSponsorMaterials={this.props.getSponsorMaterials}
+                    getSponsorSocialNetworks={this.props.getSponsorSocialNetworks}
                 />
                 }
             </div>
@@ -92,16 +77,14 @@ class EditSponsorPage extends React.Component {
 }
 
 const mapStateToProps = ({ currentSummitState, currentSponsorState, currentSummitSponsorshipListState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    sponsorships  : currentSummitSponsorshipListState.sponsorships,
+    currentSummit: currentSummitState.currentSummit,
+    sponsorships: currentSummitSponsorshipListState.sponsorships,
     ...currentSponsorState
 });
 
-export default connect (
+export default connect(
     mapStateToProps,
     {
-        getSponsor,
-        resetSponsorForm,
         saveSponsor,
         addMemberToSponsor,
         removeMemberFromSponsor,
@@ -110,6 +93,9 @@ export default connect (
         deleteSponsorMaterial,
         deleteSponsorSocialNetwork,
         removeSponsorImage,
-        attachSponsorImage,        
+        attachSponsorImage,
+        getSponsorAdvertisements,
+        getSponsorMaterials,
+        getSponsorSocialNetworks
     }
 )(EditSponsorPage);

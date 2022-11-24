@@ -965,11 +965,9 @@ export const queryEvents = _.debounce(async (summitId, input, callback) => {
 
     const accessToken = await getAccessTokenSafely();
 
-    console.log('input...', input);
-
     input = escapeFilterValue(input);
 
-    fetch(`${window.API_BASE_URL}/api/v1/summits/${summitId}/events?title=@${input}&access_token=${accessToken}`)
+    fetch(`${window.API_BASE_URL}/api/v1/summits/${summitId}/events?filter=title=@${input}&access_token=${accessToken}`)
         .then(fetchResponseHandler)
         .then((json) => {
             const options = [...json.data];

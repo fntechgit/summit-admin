@@ -5,9 +5,6 @@ import { Switch, Route } from 'react-router-dom';
 import EditSponsorPage from "../pages/sponsors/edit-sponsor-page";
 import {
     getSponsor,
-    getSponsorMaterials,
-    getSponsorAdvertisements,
-    getSponsorSocialNetworks,
     resetSponsorForm,
 } from "../actions/sponsor-actions";
 import { Breadcrumb } from 'react-breadcrumbs';
@@ -25,11 +22,7 @@ class SponsorIdLayout extends React.Component {
         if (!sponsorId) {
             props.resetSponsorForm();
         } else {
-            props.getSponsor(sponsorId).then(() => {
-                props.getSponsorAdvertisements(sponsorId)
-                props.getSponsorMaterials(sponsorId)
-                props.getSponsorSocialNetworks(sponsorId)
-            });
+            props.getSponsor(sponsorId);
         }
 
     }
@@ -42,11 +35,7 @@ class SponsorIdLayout extends React.Component {
             if (!newId) {
                 this.props.resetSponsorForm();
             } else {
-                this.props.getSponsor(newId).then(() => {
-                    this.props.getSponsorAdvertisements(newId)
-                    this.props.getSponsorMaterial(newId)
-                    this.props.getSponsorSocialNetworks(newId)
-                });
+                this.props.getSponsor(newId);
             }
         }
     }
@@ -114,10 +103,7 @@ const mapStateToProps = ({ currentSponsorState, currentSummitState }) => ({
 export default connect(
     mapStateToProps,
     {
-        getSponsor,
-        getSponsorAdvertisements,
-        getSponsorMaterials,
-        getSponsorSocialNetworks,
+        getSponsor,        
         resetSponsorForm,
     }
 )(SponsorIdLayout);

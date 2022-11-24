@@ -17,7 +17,7 @@ import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import {SortableTable} from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
-import { getSponsors, deleteSponsor, updateSponsorOrder, getSummitSponsorships } from "../../actions/sponsor-actions";
+import { getSponsors, deleteSponsor, updateSponsorOrder } from "../../actions/sponsor-actions";
 
 class SponsorListPage extends React.Component {
 
@@ -35,9 +35,7 @@ class SponsorListPage extends React.Component {
     componentDidMount() {
         const {currentSummit} = this.props;
         if(currentSummit) {
-            this.props.getSponsors().then(() => {
-                this.props.getSummitSponsorships()
-            });
+            this.props.getSponsors();
         }
     }
 
@@ -136,7 +134,6 @@ export default connect (
         getSummitById,
         getSponsors,
         deleteSponsor,
-        updateSponsorOrder,
-        getSummitSponsorships
+        updateSponsorOrder
     }
 )(SponsorListPage);

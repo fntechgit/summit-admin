@@ -46,10 +46,40 @@ import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
 
+const DEFAULT_ADS_STATE = {
+    ads             : [],
+    order           : 'order',
+    orderDir        : 1,
+    currentPage     : 1,
+    lastPage        : 1,
+    perPage         : 5,
+    totalAds        : 0,
+}
+
+const DEFAULT_MATERIALS_STATE = {
+    materials       : [],
+    order           : 'order',
+    orderDir        : 1,
+    currentPage     : 1,
+    lastPage        : 1,
+    perPage         : 5,
+    totalAds        : 0,
+}
+
+const DEFAULT_SOCIAL_NETWORKS_STATE = {
+    social_networks : [],
+    order           : 'order',
+    orderDir        : 1,
+    currentPage     : 1,
+    lastPage        : 1,
+    perPage         : 5,
+    totalAds        : 0,
+}
+
 export const DEFAULT_ENTITY = {
     id                                  : 0,
     company                             : null,
-    sponsorship_id                      : 0,
+    sponsorship                         : null,
     members                             : [],
     order                               : 0,
     is_published                        : false,
@@ -67,9 +97,9 @@ export const DEFAULT_ENTITY = {
     header_image_mobile_alt_text        : '',
     carousel_advertise_image            : '',
     carousel_advertise_image_alt_text   : '',
-    ads                                 : [],
-    materials                           : [],
-    social_networks                     : []
+    ads_collection                      : DEFAULT_ADS_STATE,
+    materials_collection                : DEFAULT_MATERIALS_STATE,
+    social_networks_collection          : DEFAULT_SOCIAL_NETWORKS_STATE
 }
 
 const DEFAULT_STATE = {
@@ -108,9 +138,9 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
                 }
             }
 
-            const sponsorship_id = entity.sponsorship.id;            
+            const sponsorship = { ...entity.sponsorship, name: entity.sponsorship?.type.name };
 
-            return {...state, entity: {...state.entity, ...entity, sponsorship_id} };
+            return {...state, entity: {...state.entity, ...entity, sponsorship} };
         }
         break;
         case SPONSOR_UPDATED: {
@@ -165,68 +195,71 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
         break;
         case RECEIVE_SPONSOR_ADVERTISEMENTS: {
+            let { current_page, total, last_page } = payload.response;
             const ads = payload.response.data;
-            return {...state, entity: {...state.entity, ads }}
+            return {...state, entity: {...state.entity, ads_collection: { ads, currentPage: current_page, lastPage: last_page, total } }}
         }
         break;
         case SPONSOR_ADVERTISEMENT_ADDED: {
             const newAdvertisement = payload.response;
-            return {...state, entity: {...state.entity, ads: [...state.entity.ads, newAdvertisement] }}
+            return {...state, entity: {...state.entity, ads_collection: { ...state.entity.ads_collection, ads: [...state.entity.ads, newAdvertisement] }} }
         }
         break;
         case SPONSOR_ADVERTISEMENT_UPDATED: {
             const updatedAdvertisement = payload.response;
-            const ads = state.entity.ads.filter(ad => ad.id !== updatedAdvertisement.id)
-            return {...state, entity: {...state.entity, ads: [...ads, updatedAdvertisement] }}
+            const ads = state.entity.ads_collection.ads.filter(ad => ad.id !== updatedAdvertisement.id)
+            return {...state, entity: {...state.entity, ads_collection: { ...state.entity.ads_collection, ads:[...ads, updatedAdvertisement] }}}
         }
         break;
         case SPONSOR_ADVERTISEMENT_DELETED: {
             const {advertisementId} = payload
-            const ads = state.entity.ads.filter(ad => ad.id !== advertisementId)
-            return {...state, entity: {...state.entity, ads }}
+            const ads = state.entity.ads_collection.ads.filter(ad => ad.id !== advertisementId)
+            return {...state, entity: {...state.entity, ads_collection: {...state.entity.ads_collection, ads } }}
         }
         break;
         case RECEIVE_SPONSOR_MATERIALS: {      
-            const materials = payload.response.data;
-            return {...state, entity: {...state.entity, materials }}
+            let { current_page, total, last_page } = payload.response;
+            const materials = payload.response.data;            
+            return {...state, entity: {...state.entity, materials_collection: { materials, currentPage: current_page, lastPage: last_page, total } }}
         }
         break;
         case SPONSOR_MATERIAL_ADDED: {
             const newMaterial = payload.response;
-            return {...state, entity: {...state.entity, materials: [...state.entity.materials, newMaterial] }}
+            return {...state, entity: {...state.entity, materials_collection: { ...state.entity.materials_collection, materials: [...state.entity.materials_collection, newMaterial] }} }
         }
         break;
         case SPONSOR_MATERIAL_UPDATED: {
             const updatedMaterial = payload.response;
-            const materials = state.entity.materials.filter(material => material.id !== updatedMaterial.id)
-            return {...state, entity: {...state.entity, materials: [...materials, updatedMaterial] }}
+            const materials = state.entity.materials_collection.materials.filter(material => material.id !== updatedMaterial.id)
+            return {...state, entity: {...state.entity, materials_collection: { ...state.entity.materials_collection, materials:[...materials, updatedAdvertisement] }}}
         }
         break;
         case SPONSOR_MATERIAL_DELETED: {
-            const {materialId} = payload
-            const materials = state.entity.materials.filter(material => material.id !== materialId)
-            return {...state, entity: {...state.entity, materials }}
+            const {materialId} = payload            
+            const materials = state.entity.materials_collection.materials.filter(material => material.id !== materialId)
+            return {...state, entity: {...state.entity, materials_collection: {...state.entity.materials_collection, materials } }}
         }
         case RECEIVE_SPONSOR_SOCIAL_NETWORKS: {
+            let { current_page, total, last_page } = payload.response;
             const social_networks = payload.response.data;
-            return {...state, entity: {...state.entity, social_networks }}
+            return {...state, entity: {...state.entity, social_networks_collection: { social_networks, currentPage: current_page, lastPage: last_page, total } }}
         }
         break;
         case SPONSOR_SOCIAL_NETWORK_ADDED: {
             const newSocialNetwork = payload.response;
-            return {...state, entity: {...state.entity, social_networks: [...state.entity.social_networks, newSocialNetwork] }}
+            return {...state, entity: {...state.entity, social_networks_collection: { ...state.entity.social_networks_collection, social_networks: [...state.entity.social_networks_collection, newSocialNetwork] }} }
         }
         break;
         case SPONSOR_SOCIAL_NETWORK_UPDATED: {
             const updatedSocialNetwork = payload.response;
-            const social_networks = state.entity.social_networks.filter(social_network => social_network.id !== updatedSocialNetwork.id)
-            return {...state, entity: {...state.entity, social_networks: [...social_networks, updatedSocialNetwork] }}
+            const social_networks = state.entity.social_networks_collection.social_networks.filter(social_network => social_network.id !== updatedSocialNetwork.id)
+            return {...state, entity: {...state.entity, social_networks_collection: { ...state.entity.social_networks_collection, social_networks:[...social_networks, updatedAdvertisement] }}}                        
         }
         break;
         case SPONSOR_SOCIAL_NETWORK_DELETED: {
             const {socialNetWorkId} = payload
-            const social_networks = state.entity.social_networks.filter(social_network => social_network.id !== socialNetWorkId)
-            return {...state, entity: {...state.entity, social_networks }}
+            const social_networks = state.entity.social_networks_collection.social_networks.filter(social_network => social_network.id !== socialNetWorkId)
+            return {...state, entity: {...state.entity, social_networks_collection: {...state.entity.social_networks_collection, social_networks } }}            
         }
         case VALIDATE: {
             return {...state,  errors: payload.errors };

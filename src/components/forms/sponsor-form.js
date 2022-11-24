@@ -14,9 +14,11 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
+import { Pagination } from 'react-bootstrap';
 import { Dropdown, CompanyInput, MemberInput, Panel, TextEditor, Input, UploadInput, Table } from 'openstack-uicore-foundation/lib/components';
 import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
 import EventInput from '../inputs/event-input';
+import SummitSponsorshipTypeInput from '../inputs/summit-sponsorship-type-input';
 
 class SponsorForm extends React.Component {
     constructor(props) {
@@ -36,6 +38,7 @@ class SponsorForm extends React.Component {
         this.handleUploadHeaderMobileImage = this.handleUploadHeaderMobileImage.bind(this);
         this.handleUploadCarouselImage = this.handleUploadCarouselImage.bind(this);
         this.handleRemoveFile = this.handleRemoveFile.bind(this);
+        this.handlePageChange = this.handlePageChange.bind(this);
         this.handleAdvertisementAdd = this.handleAdvertisementAdd.bind(this);
         this.handleMaterialAdd = this.handleMaterialAdd.bind(this);
         this.handleSocialNetworkAdd = this.handleSocialNetworkAdd.bind(this);
@@ -139,6 +142,29 @@ class SponsorForm extends React.Component {
         ev.preventDefault();
 
         this.setState({showSection: newShowSection});
+    }
+
+    handlePageChange (page, collection) {
+        const {entity} = this.state;
+        switch(collection) {
+            case 'ads': {
+                const {entity: {ads_collection: {perPage}}} = this.state;
+                this.props.getSponsorAdvertisements(entity.id, page, perPage);
+            }
+            break;
+            case 'materials': {
+                const {entity: {materials_collection: {perPage}}} = this.state;
+                this.props.getSponsorMaterials(entity.id, page, perPage);
+            }
+            break;
+            case 'social_networks': {
+                const {entity: {social_networks_collection: {perPage}}} = this.state;
+                this.props.getSponsorSocialNetworks(entity.id, page, perPage);
+            }
+            break;
+            default:
+                break;
+        }
     }
 
     handleAdvertisementAdd(ev) {
@@ -266,14 +292,12 @@ class SponsorForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-6">
                         <label> {T.translate("edit_sponsor.sponsorship")}</label>
-                        <Dropdown
-                            id="sponsorship_id"
-                            value={entity.sponsorship_id}
-                            onChange={this.handleChange}
-                            placeholder={T.translate("edit_sponsor.placeholders.select_sponsorship")}
-                            options={sponsorship_ddl}
-                            error={this.hasErrors('sponsorship_id')}
-                        />
+                        <SummitSponsorshipTypeInput
+                            id="sponsorship" 
+                            value={entity.sponsorship}
+                            key={JSON.stringify(entity.sponsorship)}
+                            summitId={currentSummit.id}
+                            onChange={this.handleChange} />
                     </div>
                 </div>
                 {entity.id !== 0 &&
@@ -434,8 +458,21 @@ class SponsorForm extends React.Component {
                                     className="btn btn-primary pull-right" value={T.translate("edit_sponsor.add_advertisement")}/>
                                 <Table
                                     options={advertisement_table_options}
-                                    data={entity.ads || []}
+                                    data={entity.ads_collection.ads || []}
                                     columns={advertisement_columns}
+                                />
+                                <Pagination
+                                    bsSize="medium"
+                                    prev
+                                    next
+                                    first
+                                    last
+                                    ellipsis
+                                    boundaryLinks
+                                    maxButtons={10}
+                                    items={entity.ads_collection.lastPage}
+                                    activePage={entity.ads_collection.currentPage}
+                                    onSelect={(page) => this.handlePageChange(page, 'ads')}
                                 />
                             </div>
                         </div>
@@ -450,8 +487,21 @@ class SponsorForm extends React.Component {
                                     className="btn btn-primary pull-right" value={T.translate("edit_sponsor.add_materials")}/>
                                 <Table
                                     options={materials_table_options}
-                                    data={entity.materials || []}
+                                    data={entity.materials_collection.materials || []}
                                     columns={materials_columns}
+                                />
+                                <Pagination
+                                    bsSize="medium"
+                                    prev
+                                    next
+                                    first
+                                    last
+                                    ellipsis
+                                    boundaryLinks
+                                    maxButtons={10}
+                                    items={entity.materials_collection.lastPage}
+                                    activePage={entity.materials_collection.currentPage}
+                                    onSelect={(page) => this.handlePageChange(page, 'materials')}
                                 />
                             </div>
                         </div>
@@ -466,8 +516,21 @@ class SponsorForm extends React.Component {
                                     className="btn btn-primary pull-right" value={T.translate("edit_sponsor.add_social_networks")}/>
                                 <Table
                                     options={social_networks_table_options}
-                                    data={entity.social_networks || []}
+                                    data={entity.social_networks_collection.social_networks || []}
                                     columns={social_networks_columns}
+                                />
+                                <Pagination
+                                    bsSize="medium"
+                                    prev
+                                    next
+                                    first
+                                    last
+                                    ellipsis
+                                    boundaryLinks
+                                    maxButtons={10}
+                                    items={entity.social_networks_collection.lastPage}
+                                    activePage={entity.social_networks_collection.currentPage}
+                                    onSelect={(page) => this.handlePageChange(page, 'social_networks')}
                                 />
                             </div>                    
                         </div>

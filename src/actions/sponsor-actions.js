@@ -25,7 +25,8 @@ import {
     showSuccessMessage,
     authErrorHandler,
     getCSV,
-    escapeFilterValue
+    escapeFilterValue,
+    fetchResponseHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 
@@ -178,7 +179,7 @@ export const getSponsor = (sponsorId) => async (dispatch, getState) => {
 
     const params = {
         access_token : accessToken,
-        expand       : 'company, members, sponsorship, featured_event',
+        expand       : 'company, members, sponsorship, sponsorship.type, featured_event',
         fields       : 'featured_event.id, featured_event.title'
     };
 
@@ -351,7 +352,7 @@ const normalizeSponsor = (entity) => {
     const normalizedEntity = {...entity};
 
     normalizedEntity.company_id = (normalizedEntity.company) ? normalizedEntity.company.id : 0;
-
+    normalizedEntity.sponsorship_id = (normalizedEntity.sponsorship.id) ? normalizedEntity.sponsorship.id : 0;
     normalizedEntity.featured_event_id = (normalizedEntity.featured_event && normalizedEntity.featured_event.id) ? normalizedEntity.featured_event.id : 0;
     
     delete(normalizedEntity.featured_event);
@@ -915,7 +916,7 @@ export const removeCarouselImage = (entity) => async (dispatch, getState) => {
 
 
 
-export const getSponsorAdvertisements = (sponsorId) => async (dispatch, getState) => {    
+export const getSponsorAdvertisements = (sponsorId, page, perPage) => async (dispatch, getState) => {    
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -924,6 +925,8 @@ export const getSponsorAdvertisements = (sponsorId) => async (dispatch, getState
     dispatch(startLoading());
 
     const params = {
+        page: page,
+        per_page: perPage,
         access_token : accessToken,
     };
 
@@ -1117,7 +1120,8 @@ export const removeSponsorAdvertisementImage = (entity) => async (dispatch, getS
 
 // Materials
 
-export const getSponsorMaterials = (sponsorId) => async (dispatch, getState) => {
+export const getSponsorMaterials = (sponsorId, page, perPage) => async (dispatch, getState) => {    
+
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
@@ -1125,6 +1129,8 @@ export const getSponsorMaterials = (sponsorId) => async (dispatch, getState) => 
     dispatch(startLoading());
 
     const params = {
+        page: page,
+        per_page: perPage,
         access_token : accessToken,
     };
 
@@ -1245,7 +1251,8 @@ export const deleteSponsorMaterial = (materialId) => async (dispatch, getState) 
 
 // Social Networks
 
-export const getSponsorSocialNetworks = (sponsorId) => async (dispatch, getState) => {
+export const getSponsorSocialNetworks = (sponsorId, page, perPage) => async (dispatch, getState) => {    
+
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
@@ -1253,6 +1260,8 @@ export const getSponsorSocialNetworks = (sponsorId) => async (dispatch, getState
     dispatch(startLoading());
 
     const params = {
+        page: page,
+        per_page: perPage,
         access_token : accessToken,
     };
 
@@ -1368,4 +1377,22 @@ export const deleteSponsorSocialNetwork = (socialNetWorkId) => async (dispatch, 
         }
     );    
 }
+
+
+
+export const querySummitSponsorships = _.debounce(async (summitId, input, callback) => {
+
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    fetch(`${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsorships-types?filter=name=@${input}&access_token=${accessToken}&expand=type`)
+        .then(fetchResponseHandler)
+        .then((json) => {
+            const options = [...json.data];
+
+            callback(options);
+        })
+        .catch(fetchErrorHandler);
+}, 500);
 
