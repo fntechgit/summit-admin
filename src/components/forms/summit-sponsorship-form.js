@@ -16,6 +16,7 @@ import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import { Input, Dropdown, UploadInput } from 'openstack-uicore-foundation/lib/components';
 import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
+import SponsorshipTypeInput from '../inputs/sponsorship-input';
 
 
 class SummitSponsorshipForm extends React.Component {
@@ -135,15 +136,11 @@ class SummitSponsorshipForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-4">
                         <label> {T.translate("edit_sponsor.sponsorship_type")}</label>
-                        <Dropdown
-                            id="type_id"
-                            value={entity.type_id}
-                            key={JSON.stringify(entity.type_id)}
-                            onChange={this.handleChange}
-                            placeholder={T.translate("edit_sponsor.placeholders.select_sponsorship")}
-                            options={sponsorship_ddl}
-                            error={this.hasErrors('type_id')}
-                        />
+                        <SponsorshipTypeInput
+                            id="type" 
+                            value={entity.type}
+                            key={JSON.stringify(entity.type)}
+                            onChange={this.handleChange} />
                     </div>
                 </div>
 

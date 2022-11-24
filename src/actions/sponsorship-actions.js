@@ -24,7 +24,8 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,    
-    escapeFilterValue
+    escapeFilterValue,
+    fetchResponseHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 
@@ -175,3 +176,19 @@ const normalizeSponsorship = (entity) => {
     return normalizedEntity;
 
 }
+
+export const querySponsorships = _.debounce(async (input, callback) => {
+
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    fetch(`${window.API_BASE_URL}/api/v1/sponsorship-types?filter=name=@${input}&access_token=${accessToken}`)
+        .then(fetchResponseHandler)
+        .then((json) => {
+            const options = [...json.data];
+
+            callback(options);
+        })
+        .catch(fetchErrorHandler);
+}, 500);

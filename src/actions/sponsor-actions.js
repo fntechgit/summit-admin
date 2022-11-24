@@ -536,6 +536,8 @@ export const deleteSummitSponsorship = (sponsorshipId) => async (dispatch, getSt
 const normalizeSponsorship = (entity) => {
     const normalizedEntity = {...entity};
 
+    normalizedEntity['type_id'] = (normalizedEntity.type) ? normalizedEntity.type.id : 0;
+
     delete normalizedEntity['type'];
 
     return normalizedEntity;

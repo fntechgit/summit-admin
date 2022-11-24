@@ -40,7 +40,7 @@
      sponsor_page_use_banner_widget     : false,
      should_display_on_expo_hall_page   : false,
      should_display_on_lobby_page       : false,
-     type_id                            : 0,
+     type                               : null,
      badge_image                        : '',
      badge_image_alt_text               : '',
  }
@@ -80,10 +80,6 @@
                      entity[key] = (entity[key] == null) ? '' : entity[key] ;
                  }
              }
-
-             if(entity.hasOwnProperty("type")){
-                entity['type_id'] = entity.type.id;
-            }             
  
              return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
          }
