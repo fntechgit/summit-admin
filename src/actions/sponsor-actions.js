@@ -352,7 +352,7 @@ export const createCompany = (company, callback) => async (dispatch, getState) =
 
 
 
-export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
+export const getSummitSponsorships = ( page = 1, perPage = 10, order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -361,8 +361,8 @@ export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (
     dispatch(startLoading());
 
     const params = {
-        page         : 1,
-        per_page     : 100,
+        page         : page,
+        per_page     : perPage,
         access_token : accessToken,
         expand       : 'type',
     };
@@ -379,7 +379,7 @@ export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (
         createAction(RECEIVE_SUMMIT_SPONSORSHIPS),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
         authErrorHandler,
-        {order, orderDir}
+        {order, orderDir, page}
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }

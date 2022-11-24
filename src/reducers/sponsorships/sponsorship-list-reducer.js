@@ -23,8 +23,11 @@ import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 
 const DEFAULT_STATE = {
     sponsorships            : [],
-    order               : 'name',
-    orderDir            : 1,
+    currentPage             : 1,
+    lastPage                : 1,
+    perPage                 : 10,
+    order                   : 'name',
+    orderDir                : 1,
     totalSponsorships       : 0
 };
 
@@ -41,10 +44,10 @@ const sponsorshipListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, order, orderDir }
         }
         case RECEIVE_SPONSORSHIPS: {
-            let { total } = payload.response;
+            let { current_page, total, last_page } = payload.response;
             let sponsorships = payload.response.data;
 
-            return {...state, sponsorships: sponsorships, totalSponsorships: total };
+            return {...state, sponsorships: sponsorships, totalSponsorships: total, currentPage: current_page, lastPage: last_page };
         }
         case SPONSORSHIP_DELETED: {
             let {sponsorshipId} = payload;

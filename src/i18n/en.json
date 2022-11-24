@@ -1748,6 +1748,15 @@
       "select_size": "Select a Size"
     }
   },
+  "summit_sponsorship_list": {    
+    "summit_sponsorship_list": "Summit Sponsorship Type List",
+    "add_sponsorship": "Add Summit Sponsorship Type",
+    "no_sponsorships": "No summit sponsorship types found for current search criteria.",
+    "remove_warning": "Are you sure you want to delete summit sponsorship type ",
+    "sponsorship_type": "Summit Sponsorship Type",
+    "label": "Label",
+    "size": "Size"
+  },
   "edit_summit_sponsorship": {
     "sponsorship": "Sponsorship",
     "widget_title": "Widget Title",
@@ -1760,6 +1769,8 @@
     "sponsor_page_use_live_event_widget": "Display Live Event Widget on Sponsor Page",
     "sponsor_page_use_schedule_widget": "Display Schedule Widget on Sponsor Page",
     "sponsor_page_use_banner_widget": "Display Banner Widget on Sponsor Page",
+    "should_display_on_expo_hall_page": "Display on Expo Hall Page",
+    "should_display_on_lobby_page": "Display on Lobby Page",
     "badge_image": "Badge Image",
     "badge_alt": "Badge Alt Text",
     "placeholders": {

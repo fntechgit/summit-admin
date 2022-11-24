@@ -23,8 +23,11 @@ import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/utils/actions';
 
 const DEFAULT_STATE = {
     sponsorships            : [],
-    order               : 'name',
-    orderDir            : 1,
+    currentPage             : 1,
+    lastPage                : 1,
+    perPage                 : 10,
+    order                   : 'name',
+    orderDir                : 1,
     totalSponsorships       : 0
 };
 
@@ -41,7 +44,7 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, order, orderDir }
         }
         case RECEIVE_SUMMIT_SPONSORSHIPS: {
-            let { total } = payload.response;
+            let { current_page, total, last_page } = payload.response;
             let sponsorships = payload.response.data;
 
             sponsorships.map(s => {
@@ -51,7 +54,7 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
                 s.widget_title = s.widget_title ? s.widget_title : 'N/A'
             })
 
-            return {...state, sponsorships: sponsorships, totalSponsorships: total };
+            return {...state, sponsorships: sponsorships, totalSponsorships: total, currentPage: current_page, lastPage: last_page };
         }
         case SUMMIT_SPONSORSHIP_DELETED: {
             let {sponsorshipId} = payload;

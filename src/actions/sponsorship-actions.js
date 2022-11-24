@@ -39,15 +39,15 @@ export const SPONSORSHIP_DELETED        = 'SPONSORSHIP_DELETED';
 
 /******************  SPONSORS ****************************************/
 
-export const getSponsorships = ( order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
+export const getSponsorships = ( page = 1, perPage = 10, order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
 
     const accessToken = await getAccessTokenSafely();    
 
     dispatch(startLoading());
 
     const params = {
-        page         : 1,
-        per_page     : 100,
+        page         : page,
+        per_page     : perPage,
         access_token : accessToken,
     };
 
@@ -63,7 +63,7 @@ export const getSponsorships = ( order = 'name', orderDir = 1 ) => async (dispat
         createAction(RECEIVE_SPONSORSHIPS),
         `${window.API_BASE_URL}/api/v1/sponsorship-types`,
         authErrorHandler,
-        {order, orderDir}
+        {order, orderDir, page}
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }

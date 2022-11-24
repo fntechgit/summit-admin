@@ -15,6 +15,7 @@ import React from 'react'
 import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
+import { Pagination } from 'react-bootstrap';
 import { Table, SortableTable } from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
 import { getSummitSponsorships, deleteSummitSponsorship } from "../../actions/sponsor-actions";
@@ -27,6 +28,7 @@ class SummitSponsorshipListPage extends React.Component {
         this.handleEdit = this.handleEdit.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handleSort = this.handleSort.bind(this);
+        this.handlePageChange = this.handlePageChange.bind(this);
         this.handleNewSponsorship = this.handleNewSponsorship.bind(this);
 
         this.state = {}
@@ -51,7 +53,7 @@ class SummitSponsorshipListPage extends React.Component {
 
         Swal.fire({
             title: T.translate("general.are_you_sure"),
-            text: T.translate("sponsorship_list.remove_warning") + ' ' + sponsorship.name,
+            text: T.translate("summit_sponsorship_list.remove_warning") + ' ' + sponsorship.type.name,
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
@@ -64,7 +66,13 @@ class SummitSponsorshipListPage extends React.Component {
     }
 
     handleSort(index, key, dir, func) {
-        this.props.getSummitSponsorships(key, dir);
+        const {perPage, page} = this.props;
+        this.props.getSummitSponsorships(page, perPage, key, dir);
+    }
+
+    handlePageChange(page) {
+        const {order, orderDir, perPage} = this.props;
+        this.props.getSummitSponsorships(page, perPage, order, orderDir);
     }
 
     handleNewSponsorship(ev) {
@@ -73,14 +81,14 @@ class SummitSponsorshipListPage extends React.Component {
     }
 
     render(){
-        const {currentSummit, sponsorships, order, orderDir, totalSponsorships} = this.props;
+        const {currentSummit, sponsorships, currentPage, lastPage, order, orderDir, totalSponsorships} = this.props;
 
         const sortedSponsorships = sponsorships.sort((a, b) => a.order -b.order);
 
         const columns = [
-            { columnKey: 'sponsorship_type', value: T.translate("sponsorship_list.sponsorship_type"), sortable: true },            
-            { columnKey: 'label', value: T.translate("sponsorship_list.label"), sortable: true },
-            { columnKey: 'size', value: T.translate("sponsorship_list.size"), sortable: true }
+            { columnKey: 'sponsorship_type', value: T.translate("summit_sponsorship_list.sponsorship_type") },
+            { columnKey: 'label', value: T.translate("summit_sponsorship_list.label") },
+            { columnKey: 'size', value: T.translate("summit_sponsorship_list.size") }
         ];
 
         const table_options = {            
@@ -94,32 +102,41 @@ class SummitSponsorshipListPage extends React.Component {
 
         return(
             <div className="container">
-                <h3> {T.translate("sponsorship_list.sponsorship_list")} ({totalSponsorships})</h3>
+                <h3> {T.translate("summit_sponsorship_list.summit_sponsorship_list")} ({totalSponsorships})</h3>
                 <div className={'row'}>
                     <div className="col-md-6 text-right col-md-offset-6">
                         <button className="btn btn-primary right-space" onClick={this.handleNewSponsorship}>
-                            {T.translate("sponsorship_list.add_sponsorship")}
+                            {T.translate("summit_sponsorship_list.add_sponsorship")}
                         </button>
                     </div>
                 </div>
 
                 {sortedSponsorships.length === 0 &&
-                <div>{T.translate("sponsorship_list.no_sponsorships")}</div>
+                <div>{T.translate("summit_sponsorship_list.no_sponsorships")}</div>
                 }
 
                 {sortedSponsorships.length > 0 &&
-                    <Table
-                        options={table_options}
-                        data={sortedSponsorships}
-                        columns={columns}
-                    />
-                    // <SortableTable
-                    //     options={table_options}
-                    //     data={sortedSponsorships}
-                    //     columns={columns}
-                    //     dropCallback={(ev) => console.log('change order...', ev)}
-                    //     orderField="order"
-                    // />
+                    <>
+                        <Table
+                            options={table_options}
+                            data={sortedSponsorships}
+                            columns={columns}
+                            onSort={this.handleSort}
+                        />
+                        <Pagination
+                            bsSize="medium"
+                            prev
+                            next
+                            first
+                            last
+                            ellipsis
+                            boundaryLinks
+                            maxButtons={10}
+                            items={lastPage}
+                            activePage={currentPage}
+                            onSelect={this.handlePageChange}
+                        />
+                    </>
                 }
 
             </div>

@@ -38,6 +38,8 @@
      sponsor_page_use_live_event_widget : false,
      sponsor_page_use_schedule_widget   : false,
      sponsor_page_use_banner_widget     : false,
+     should_display_on_expo_hall_page   : false,
+     should_display_on_lobby_page       : false,
      type_id                            : 0,
      badge_image                        : '',
      badge_image_alt_text               : '',

@@ -15,6 +15,7 @@ import React from 'react'
 import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
+import { Pagination } from 'react-bootstrap';
 import { Table } from 'openstack-uicore-foundation/lib/components';
 import { getSponsorships, deleteSponsorship } from "../../actions/sponsorship-actions";
 
@@ -26,6 +27,7 @@ class SponsorshipListPage extends React.Component {
         this.handleEdit = this.handleEdit.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handleSort = this.handleSort.bind(this);
+        this.handlePageChange = this.handlePageChange.bind(this);
         this.handleNewSponsorship = this.handleNewSponsorship.bind(this);
 
         this.state = {}
@@ -39,6 +41,11 @@ class SponsorshipListPage extends React.Component {
     handleEdit(sponsorship_id) {
         const {history} = this.props;
         history.push(`/app/sponsorship-types/${sponsorship_id}`);
+    }
+
+    handlePageChange(page) {
+        const {order, orderDir, perPage} = this.props;
+        this.props.getSponsorships(page, perPage, order, orderDir);
     }
 
     handleDelete(sponsorshipId) {
@@ -60,7 +67,8 @@ class SponsorshipListPage extends React.Component {
     }
 
     handleSort(index, key, dir, func) {
-        this.props.getSponsorships(key, dir);
+        const {perPage, page} = this.props;
+        this.props.getSponsorships(page, perPage, key, dir);
     }
 
     handleNewSponsorship(ev) {
@@ -69,7 +77,7 @@ class SponsorshipListPage extends React.Component {
     }
 
     render(){
-        const {sponsorships, order, orderDir, totalSponsorships} = this.props;
+        const {sponsorships, lastPage, currentPage, order, orderDir, totalSponsorships} = this.props;
 
         const columns = [
             { columnKey: 'name', value: T.translate("sponsorship_list.name"), sortable: true },
@@ -102,12 +110,27 @@ class SponsorshipListPage extends React.Component {
                 }
 
                 {sponsorships.length > 0 &&
+                <>
                     <Table
                         options={table_options}
                         data={sponsorships}
                         columns={columns}
                         onSort={this.handleSort}
                     />
+                    <Pagination
+                            bsSize="medium"
+                            prev
+                            next
+                            first
+                            last
+                            ellipsis
+                            boundaryLinks
+                            maxButtons={10}
+                            items={lastPage}
+                            activePage={currentPage}
+                            onSelect={this.handlePageChange}
+                        />
+                </>
                 }
 
             </div>

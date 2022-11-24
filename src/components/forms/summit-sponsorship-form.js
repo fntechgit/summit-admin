@@ -103,7 +103,7 @@ class SummitSponsorshipForm extends React.Component {
         const {entity} = this.state;
         const { sponsorships } = this.props;
 
-        const sponsorship_ddl = sponsorships.map(s => ({label: s.type?.name, value: s.type?.id}));
+        const sponsorship_ddl = sponsorships.map(s => ({label: s.name, value: s.id}));
 
         const lobby_template_ddl = [
             {label: 'Big Images', value: 'big-images' },
@@ -253,6 +253,27 @@ class SummitSponsorshipForm extends React.Component {
                             </label>
                         </div>
                     </div>
+                </div>
+
+                <div className="row form-group">
+                    <div className="col-md-6 checkboxes-div">
+                        <div className="form-check abc-checkbox">
+                            <input type="checkbox" id="should_display_on_expo_hall_page" checked={entity.should_display_on_expo_hall_page}
+                                   onChange={this.handleChange} className="form-check-input"/>
+                            <label className="form-check-label" htmlFor="should_display_on_expo_hall_page">
+                                {T.translate("edit_summit_sponsorship.should_display_on_expo_hall_page")}
+                            </label>
+                        </div>
+                    </div>
+                    <div className="col-md-6 checkboxes-div">
+                        <div className="form-check abc-checkbox">
+                            <input type="checkbox" id="should_display_on_lobby_page" checked={entity.should_display_on_lobby_page}
+                                   onChange={this.handleChange} className="form-check-input"/>
+                            <label className="form-check-label" htmlFor="should_display_on_lobby_page">
+                                {T.translate("edit_summit_sponsorship.should_display_on_lobby_page")}
+                            </label>
+                        </div>
+                    </div>                    
                 </div>
 
                 <div className="row form-group">
