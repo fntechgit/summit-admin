@@ -36,9 +36,9 @@ class SummitSponsorshipListPage extends React.Component {
     }
 
     componentDidMount() {
-        const {currentSummit} = this.props;
+        const {currentSummit, currentPage, perPage, order, orderDir} = this.props;
         if(currentSummit) {
-            this.props.getSummitSponsorships();
+            this.props.getSummitSponsorships(currentPage, perPage, order, orderDir);
         }
     }
 

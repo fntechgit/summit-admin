@@ -421,6 +421,7 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
 
     const params = {
         access_token : accessToken,
+        expand       : 'type'
     };
 
     dispatch(startLoading());
@@ -459,7 +460,7 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
             .then((payload) => {
                 dispatch(showMessage(
                     success_message,
-                    () => { history.push(`/app/summits/${currentSummit.id}/sponsorship-types/${payload.response.id}`) }
+                    () => { history.push(`/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`) }
                 ));
             });
     }
@@ -474,19 +475,37 @@ export const uploadSponsorshipBadgeImage = (entity, file) => async (dispatch, ge
     const params = {
         access_token : accessToken,
     };
-    
-    postRequest(
-        null,
-        createAction(BADGE_IMAGE_ATTACHED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${entity.id}/badge-image`,
-        file,
-        authErrorHandler,
-        {pic: entity.pic}
-    )(params)(dispatch)
-        .then(() => {
-            dispatch(stopLoading());
-            history.push(`/app/summits/${currentSummit.id}/sponsorship-types/${payload.response.id}`)
-        });
+
+    if(entity.id) {
+        postRequest(
+            null,
+            createAction(BADGE_IMAGE_ATTACHED),
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${entity.id}/badge-image`,
+            file,
+            authErrorHandler,
+            {pic: entity.pic}
+        )(params)(dispatch)
+            .then(() => {
+                dispatch(stopLoading());
+                history.push(`/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`)
+            });
+    } else {
+        dispatch(saveSummitSponsorship(entity)).then((payload) => {
+            console.log('save new sponsorship', payload)
+            dispatch(postRequest(
+                null,
+                createAction(BADGE_IMAGE_ATTACHED),
+                `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${payload.response.id}/badge-image`,
+                file,
+                authErrorHandler,
+                {pic: entity.pic}
+            )(params)(dispatch)
+                .then(() => {
+                    dispatch(stopLoading());
+                    history.push(`/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`)
+                }));
+        })
+    }    
 };
 
 export const removeSponsorshipBadgeImage = (sponsorshipId) => async (dispatch, getState) => {

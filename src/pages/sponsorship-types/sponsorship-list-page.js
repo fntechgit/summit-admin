@@ -34,8 +34,9 @@ class SponsorshipListPage extends React.Component {
 
     }
 
-    componentDidMount() {        
-        this.props.getSponsorships();
+    componentDidMount() {
+        const {currentPage, perPage, order, orderDir} = this.props;
+        this.props.getSponsorships(currentPage, perPage, order, orderDir);
     }
 
     handleEdit(sponsorship_id) {
