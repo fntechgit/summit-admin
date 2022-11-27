@@ -202,7 +202,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         break;
         case SPONSOR_ADVERTISEMENT_ADDED: {
             const newAdvertisement = payload.response;
-            return {...state, entity: {...state.entity, ads_collection: { ...state.entity.ads_collection, ads: [...state.entity.ads, newAdvertisement] }} }
+            return {...state, entity: {...state.entity, ads_collection: { ...state.entity.ads_collection, ads: [...state.entity.ads_collection.ads, newAdvertisement] }} }
         }
         break;
         case SPONSOR_ADVERTISEMENT_UPDATED: {
@@ -225,7 +225,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         break;
         case SPONSOR_MATERIAL_ADDED: {
             const newMaterial = payload.response;
-            return {...state, entity: {...state.entity, materials_collection: { ...state.entity.materials_collection, materials: [...state.entity.materials_collection, newMaterial] }} }
+            return {...state, entity: {...state.entity, materials_collection: { ...state.entity.materials_collection, materials: [...state.entity.materials_collection.materials, newMaterial] }} }
         }
         break;
         case SPONSOR_MATERIAL_UPDATED: {
@@ -247,7 +247,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         break;
         case SPONSOR_SOCIAL_NETWORK_ADDED: {
             const newSocialNetwork = payload.response;
-            return {...state, entity: {...state.entity, social_networks_collection: { ...state.entity.social_networks_collection, social_networks: [...state.entity.social_networks_collection, newSocialNetwork] }} }
+            return {...state, entity: {...state.entity, social_networks_collection: { ...state.entity.social_networks_collection, social_networks: [...state.entity.social_networks_collection.social_networks, newSocialNetwork] }} }
         }
         break;
         case SPONSOR_SOCIAL_NETWORK_UPDATED: {

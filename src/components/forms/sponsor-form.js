@@ -14,6 +14,7 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
+import Swal from "sweetalert2";
 import { Pagination } from 'react-bootstrap';
 import { Dropdown, CompanyInput, MemberInput, Panel, TextEditor, Input, UploadInput, Table } from 'openstack-uicore-foundation/lib/components';
 import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
@@ -33,6 +34,7 @@ class SponsorForm extends React.Component {
         this.handleChangeMember = this.handleChangeMember.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
         this.handleUploadHeaderImage = this.handleUploadHeaderImage.bind(this);
         this.handleUploadSideImage = this.handleUploadSideImage.bind(this);
         this.handleUploadHeaderMobileImage = this.handleUploadHeaderMobileImage.bind(this);
@@ -217,12 +219,34 @@ class SponsorForm extends React.Component {
         return '';
     }
 
+    handleDelete(element, collection) {
+        const {entity} = this.state;
+        const {onAdvertisementDelete, onMaterialDelete, onSocialNetworkDelete } = this.props;
+
+        let deleteElement = entity[`${collection}_collection`][`${collection}`].find(s => s.id === element);
+
+        Swal.fire({
+            title: T.translate("general.are_you_sure"),
+            text: T.translate(`edit_sponsor.remove_warning_${collection}`) + ' ' + (deleteElement.name || deleteElement.link),
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: T.translate("general.yes_delete")
+        }).then(function(result){
+            if (result.value) {
+                collection === 'ads' ? onAdvertisementDelete(element) 
+                : collection === 'materials' ?
+                onMaterialDelete(element)
+                :
+                onSocialNetworkDelete(element);
+            }
+        });
+    }
+
 
     render() {
         const {entity, showSection} = this.state;
-        const { currentSummit, sponsorships, onCreateCompany, onAdvertisementDelete, onMaterialDelete, onSocialNetworkDelete } = this.props;
-
-        let sponsorship_ddl = sponsorships.map(s => ({label: s.type.name, value: s.id}));
+        const { currentSummit, sponsorships, onCreateCompany } = this.props;        
 
         const advertisement_columns = [
             { columnKey: 'link', value: T.translate("edit_sponsor.link") },
@@ -233,7 +257,7 @@ class SponsorForm extends React.Component {
         const advertisement_table_options = {
             actions: {
                 edit: { onClick: this.handleAdvertisementEdit },
-                delete: { onClick: onAdvertisementDelete }
+                delete: { onClick: (id) => this.handleDelete(id, 'ads') }
             }
         };
 
@@ -246,7 +270,7 @@ class SponsorForm extends React.Component {
         const materials_table_options = {
             actions: {
                 edit: { onClick: this.handleMaterialEdit },
-                delete: { onClick: onMaterialDelete }
+                delete: { onClick: (id) => this.handleDelete(id, 'materials') }
             }
         }
 
@@ -259,7 +283,7 @@ class SponsorForm extends React.Component {
         const social_networks_table_options = {
             actions: {
                 edit: { onClick: this.handleSocialNetworkEdit },
-                delete: { onClick: onSocialNetworkDelete }
+                delete: { onClick: (id) => this.handleDelete(id, 'social_networks') }
             }
         }
 

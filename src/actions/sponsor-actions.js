@@ -1323,7 +1323,7 @@ export const saveSponsorSocialNetwork = (entity) => async (dispatch, getState) =
             .then((payload) => {
                 dispatch(showMessage(
                     success_message,
-                    () => { history.push(`/app/summits/${currentSummit.id}/sponsors/${currentSponsorId}/social-network/${payload.response.id}`) }
+                    () => { history.push(`/app/summits/${currentSummit.id}/sponsors/${currentSponsorId}/social-networks/${payload.response.id}`) }
                 ));
             });
     }

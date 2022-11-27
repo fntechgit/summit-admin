@@ -1710,7 +1710,7 @@
     "header_image_mobile_alt_text": "Mobile Header Alt Text",
     "carousel_advertise_image": "Carousel Advertise Image",
     "carousel_advertise_image_alt_text": "Carousel Advertise Image Alt Text",
-    "featured_event_id": "Feature Event ID",
+    "featured_event": "Feature Event",
     "advertisements" : "Advertisements",
     "advertisement": "Advertisement",
     "add_advertisement" : "Add Advertisement",
@@ -1735,6 +1735,9 @@
     "material_created": "Material created successfully",
     "social_network_saved": "Social Network saved successfully",
     "social_network_created": "Social Network created successfully",
+    "remove_warning_ads": "Are you sure you want to delete advertisement ",
+    "remove_warning_materials": "Are you sure you want to delete material ",
+    "remove_warning_social_networks": "Are you sure you want to delete social network ",
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start Typing to choose a Sponsorship Type",
