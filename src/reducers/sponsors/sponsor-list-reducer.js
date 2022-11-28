@@ -56,10 +56,10 @@ const sponsorListReducer = (state = DEFAULT_STATE, action) => {
         }
         case SPONSOR_ORDER_UPDATED: {
             let sponsors = payload.map(s => {
-                let sponsorship_name = (s.sponsorship) ? s.sponsorship.name : '';
+                let sponsorship_name = (s.sponsorship) ? s.sponsorship.type.name : '';
                 let company_name = (s.company) ? s.company.name : '';
 
-                return ({...s, sponsorship_name: sponsorship_name, company_name: company_name});
+                return ({...s, sponsorship_name, company_name});
             });
 
             return {...state, sponsors: sponsors };

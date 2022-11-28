@@ -327,7 +327,8 @@ export const updateSponsorOrder = (sponsors, sponsorId, newOrder) => async (disp
     const {currentSummit} = currentSummitState;
 
     const params = {
-        access_token: accessToken
+        access_token : accessToken,
+        expand       : 'company,sponsorship,sponsorship.type',
     };
 
     const sponsor = sponsors.find(s => s.id === sponsorId);
@@ -916,7 +917,7 @@ export const removeCarouselImage = (entity) => async (dispatch, getState) => {
 
 
 
-export const getSponsorAdvertisements = (sponsorId, page, perPage) => async (dispatch, getState) => {    
+export const getSponsorAdvertisements = (sponsorId, page, perPage, order = 'order', orderDir = 1) => async (dispatch, getState) => {    
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -929,6 +930,12 @@ export const getSponsorAdvertisements = (sponsorId, page, perPage) => async (dis
         per_page: perPage,
         access_token : accessToken,
     };
+
+    // order
+    if(order != null && orderDir != null){
+        const orderDirSign = (orderDir === 1) ? '+' : '-';
+        params['order']= `${orderDirSign}${order}`;
+    }
 
     return getRequest(
         null,
@@ -1120,7 +1127,7 @@ export const removeSponsorAdvertisementImage = (entity) => async (dispatch, getS
 
 // Materials
 
-export const getSponsorMaterials = (sponsorId, page, perPage) => async (dispatch, getState) => {    
+export const getSponsorMaterials = (sponsorId, page, perPage, order = 'order', orderDir = 1) => async (dispatch, getState) => {    
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -1133,6 +1140,13 @@ export const getSponsorMaterials = (sponsorId, page, perPage) => async (dispatch
         per_page: perPage,
         access_token : accessToken,
     };
+
+    // order
+    if(order != null && orderDir != null){
+        const orderDirSign = (orderDir === 1) ? '+' : '-';
+        params['order']= `${orderDirSign}${order}`;
+    }
+    
 
     return getRequest(
         null,

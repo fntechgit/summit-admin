@@ -91,6 +91,8 @@ class SponsorAdvertisementForm extends React.Component {
                                 <Input className="form-control" id="text" value={entity.text} onChange={this.handleChange} />
                             </div>
                         </div>
+                        {entity.id !== 0 && 
+                        <>
                         <div className="row form-group">
                             <div className="col-md-6">
                                 <div className="row">
@@ -108,9 +110,11 @@ class SponsorAdvertisementForm extends React.Component {
                                 </div>
                                 <br />
                                 <label> {T.translate("edit_sponsor.alt")} </label>
-                                <Input className="form-control" id="alt" value={entity.alt} onChange={this.handleChange} />                            
+                                <Input className="form-control" id="alt" value={entity.alt} onChange={this.handleChange} />
                             </div>
                         </div>
+                        </>
+                        }
                     </div>
 
                     <div className="row">
