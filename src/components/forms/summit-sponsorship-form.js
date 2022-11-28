@@ -273,32 +273,36 @@ class SummitSponsorshipForm extends React.Component {
                     </div>                    
                 </div>
 
-                <div className="row form-group">
-                    <div className="col-md-6">
-                        <label> {T.translate("edit_summit_sponsorship.badge_image")} </label>
-                        <UploadInput
-                            value={entity.badge_image}
-                            handleUpload={this.handleUploadBadgeImage}
-                            handleRemove={this.handleRemoveBadgeImage}
-                            className="dropzone col-md-6"
-                            multiple={false}
-                            accept="image/*"
-                        />
+                {entity.id !== 0 &&
+                <>
+                    <div className="row form-group">
+                        <div className="col-md-6">
+                            <label> {T.translate("edit_summit_sponsorship.badge_image")} </label>
+                            <UploadInput
+                                value={entity.badge_image}
+                                handleUpload={this.handleUploadBadgeImage}
+                                handleRemove={this.handleRemoveBadgeImage}
+                                className="dropzone col-md-6"
+                                multiple={false}
+                                accept="image/*"
+                            />
+                        </div>
                     </div>
-                </div>
 
-                <div className="row form-group">
-                    <div className="col-md-6">
-                        <label> {T.translate("edit_summit_sponsorship.badge_alt")}</label>
-                        <Input
-                            id="badge_image_alt_text"
-                            className="form-control"
-                            error={this.hasErrors('badge_image_alt_text')}
-                            onChange={this.handleChange}
-                            value={entity.badge_image_alt_text}
-                        />
+                    <div className="row form-group">
+                        <div className="col-md-6">
+                            <label> {T.translate("edit_summit_sponsorship.badge_alt")}</label>
+                            <Input
+                                id="badge_image_alt_text"
+                                className="form-control"
+                                error={this.hasErrors('badge_image_alt_text')}
+                                onChange={this.handleChange}
+                                value={entity.badge_image_alt_text}
+                            />
+                        </div>
                     </div>
-                </div>
+                </>
+                }
 
                 <div className="row">
                     <div className="col-md-12 submit-buttons">
