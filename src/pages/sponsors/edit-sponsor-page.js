@@ -18,6 +18,7 @@ import T from "i18n-react/dist/i18n-react";
 import SponsorForm from '../../components/forms/sponsor-form';
 import {
     saveSponsor,
+    resetSponsorForm,
     addMemberToSponsor,
     removeMemberFromSponsor,
     createCompany,
@@ -39,6 +40,21 @@ class EditSponsorPage extends React.Component {
             this.props.getSponsorAdvertisements(entity.id);
             this.props.getSponsorMaterials(entity.id);
             this.props.getSponsorSocialNetworks(entity.id);
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const oldId = prevProps.entity.id;
+        const newId = this.props.entity.id;
+
+        if (oldId !== newId) {
+            if (!newId) {
+                this.props.resetSponsorForm();
+            } else {
+                this.props.getSponsorAdvertisements(newId);
+                this.props.getSponsorMaterials(newId);
+                this.props.getSponsorSocialNetworks(newId);
+            }
         }
     }
 
@@ -86,6 +102,7 @@ export default connect(
     mapStateToProps,
     {
         saveSponsor,
+        resetSponsorForm,
         addMemberToSponsor,
         removeMemberFromSponsor,
         createCompany,
