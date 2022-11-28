@@ -231,7 +231,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         case SPONSOR_MATERIAL_UPDATED: {
             const updatedMaterial = payload.response;
             const materials = state.entity.materials_collection.materials.filter(material => material.id !== updatedMaterial.id)
-            return {...state, entity: {...state.entity, materials_collection: { ...state.entity.materials_collection, materials:[...materials, updatedAdvertisement] }}}
+            return {...state, entity: {...state.entity, materials_collection: { ...state.entity.materials_collection, materials:[...materials, updatedMaterial] }}}
         }
         break;
         case SPONSOR_MATERIAL_DELETED: {
@@ -253,7 +253,7 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         case SPONSOR_SOCIAL_NETWORK_UPDATED: {
             const updatedSocialNetwork = payload.response;
             const social_networks = state.entity.social_networks_collection.social_networks.filter(social_network => social_network.id !== updatedSocialNetwork.id)
-            return {...state, entity: {...state.entity, social_networks_collection: { ...state.entity.social_networks_collection, social_networks:[...social_networks, updatedAdvertisement] }}}                        
+            return {...state, entity: {...state.entity, social_networks_collection: { ...state.entity.social_networks_collection, social_networks:[...social_networks, updatedSocialNetwork] }}}                        
         }
         break;
         case SPONSOR_SOCIAL_NETWORK_DELETED: {
