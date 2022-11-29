@@ -76,6 +76,7 @@ export const RESET_SPONSOR_ADVERTISEMENT_FORM   = 'RESET_SPONSOR_ADVERTISEMENT_F
 export const SPONSOR_ADVERTISEMENT_DELETED      = 'SPONSOR_ADVERTISEMENT_DELETED';
 export const SPONSOR_ADVERTISEMENT_IMAGE_ATTACHED = 'SPONSOR_ADVERTISEMENT_IMAGE_ATTACHED'; 
 export const SPONSOR_ADVERTISEMENT_IMAGE_DELETED = 'SPONSOR_ADVERTISEMENT_IMAGE_DELETED'; 
+export const SPONSOR_ADS_ORDER_UPDATED           = 'SPONSOR_ADS_ORDER_UPDATED';
 
 export const RECEIVE_SPONSOR_MATERIALS     = 'RECEIVE_SPONSOR_MATERIALS';
 export const RECEIVE_SPONSOR_MATERIAL      = 'RECEIVE_SPONSOR_MATERIAL';
@@ -84,6 +85,7 @@ export const SPONSOR_MATERIAL_UPDATED      = 'SPONSOR_MATERIAL_UPDATED';
 export const SPONSOR_MATERIAL_ADDED        = 'SPONSOR_MATERIAL_ADDED';
 export const RESET_SPONSOR_MATERIAL_FORM   = 'RESET_SPONSOR_MATERIAL_FORM';
 export const SPONSOR_MATERIAL_DELETED      = 'SPONSOR_MATERIAL_DELETED';
+export const SPONSOR_MATERIAL_ORDER_UPDATED= 'SPONSOR_MATERIAL_ORDER_UPDATED';
 
 export const RECEIVE_SPONSOR_SOCIAL_NETWORKS     = 'RECEIVE_SPONSOR_SOCIAL_NETWORKS';
 export const RECEIVE_SPONSOR_SOCIAL_NETWORK      = 'RECEIVE_SPONSOR_SOCIAL_NETWORK';
@@ -331,7 +333,8 @@ export const updateSponsorOrder = (sponsors, sponsorId, newOrder) => async (disp
         expand       : 'company,sponsorship,sponsorship.type',
     };
 
-    const sponsor = sponsors.find(s => s.id === sponsorId);
+    let sponsor = sponsors.find(s => s.id === sponsorId);
+    sponsor.order = newOrder;
 
     const normalizedEntity = normalizeSponsor(sponsor);
 
@@ -917,7 +920,7 @@ export const removeCarouselImage = (entity) => async (dispatch, getState) => {
 
 
 
-export const getSponsorAdvertisements = (sponsorId, page, perPage, order = 'order', orderDir = 1) => async (dispatch, getState) => {    
+export const getSponsorAdvertisements = (sponsorId, order = 'order', orderDir = 1) => async (dispatch, getState) => {    
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -926,8 +929,6 @@ export const getSponsorAdvertisements = (sponsorId, page, perPage, order = 'orde
     dispatch(startLoading());
 
     const params = {
-        page: page,
-        per_page: perPage,
         access_token : accessToken,
     };
 
@@ -1023,6 +1024,35 @@ export const getSponsorAdvertisement = (advertisementId) => async (dispatch, get
             dispatch(stopLoading());
         }
     );    
+}
+
+
+export const updateSponsorAdsOrder = (ads, advertiseId, newOrder) => async (dispatch, getState) => {
+
+    const { currentSummitState, currentSponsorState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity : { id: currentSponsorId }} = currentSponsorState;
+
+    const params = {
+        access_token : accessToken,
+        per_page     : 100,
+    };
+
+    let ad = ads.find(s => s.id === advertiseId);
+    ad.order = newOrder;
+
+    putRequest(
+        null,
+        createAction(SPONSOR_ADS_ORDER_UPDATED)(ads),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads/${advertiseId}`,
+        ad,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+
 }
 
 export const resetSponsorAdvertisementForm = () => (dispatch, getState) => {
@@ -1127,7 +1157,7 @@ export const removeSponsorAdvertisementImage = (entity) => async (dispatch, getS
 
 // Materials
 
-export const getSponsorMaterials = (sponsorId, page, perPage, order = 'order', orderDir = 1) => async (dispatch, getState) => {    
+export const getSponsorMaterials = (sponsorId, order = 'order', orderDir = 1) => async (dispatch, getState) => {    
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -1136,8 +1166,6 @@ export const getSponsorMaterials = (sponsorId, page, perPage, order = 'order', o
     dispatch(startLoading());
 
     const params = {
-        page: page,
-        per_page: perPage,
         access_token : accessToken,
     };
 
@@ -1234,6 +1262,33 @@ export const getSponsorMaterial = (materialId) => async (dispatch, getState) => 
             dispatch(stopLoading());
         }
     );        
+}
+
+export const updateSponsorMaterialOrder = (materials, materialId, newOrder) => async (dispatch, getState) => {
+
+    const { currentSummitState, currentSponsorState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const { entity : { id: currentSponsorId }} = currentSponsorState;
+
+    const params = {
+        access_token : accessToken,
+        per_page     : 100,
+    };
+
+    let material = materials.find(s => s.id === materialId);
+    material.order = newOrder;
+
+    putRequest(
+        null,
+        createAction(SPONSOR_MATERIAL_ORDER_UPDATED)(materials),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/materials/${materialId}`,
+        material,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
 }
 
 export const resetSponsorMaterialForm = () => (dispatch, getState) => {

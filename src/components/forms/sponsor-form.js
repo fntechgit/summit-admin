@@ -16,7 +16,7 @@ import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import Swal from "sweetalert2";
 import { Pagination } from 'react-bootstrap';
-import { Dropdown, CompanyInput, MemberInput, Panel, TextEditor, Input, UploadInput, Table } from 'openstack-uicore-foundation/lib/components';
+import { SortableTable, CompanyInput, MemberInput, Panel, TextEditor, Input, UploadInput, Table } from 'openstack-uicore-foundation/lib/components';
 import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
 import EventInput from '../inputs/event-input';
 import SummitSponsorshipTypeInput from '../inputs/summit-sponsorship-type-input';
@@ -480,23 +480,12 @@ class SponsorForm extends React.Component {
                                 </label>
                                 <input type="button" onClick={this.handleAdvertisementAdd}
                                     className="btn btn-primary pull-right" value={T.translate("edit_sponsor.add_advertisement")}/>
-                                <Table
+                                <SortableTable
                                     options={advertisement_table_options}
                                     data={entity.ads_collection.ads || []}
                                     columns={advertisement_columns}
-                                />
-                                <Pagination
-                                    bsSize="medium"
-                                    prev
-                                    next
-                                    first
-                                    last
-                                    ellipsis
-                                    boundaryLinks
-                                    maxButtons={10}
-                                    items={entity.ads_collection.lastPage}
-                                    activePage={entity.ads_collection.currentPage}
-                                    onSelect={(page) => this.handlePageChange(page, 'ads')}
+                                    dropCallback={this.props.onSponsorAdsOrderUpdate}
+                                    orderField="order"
                                 />
                             </div>
                         </div>
@@ -509,23 +498,12 @@ class SponsorForm extends React.Component {
                                 </label>
                                 <input type="button" onClick={this.handleMaterialAdd}
                                     className="btn btn-primary pull-right" value={T.translate("edit_sponsor.add_materials")}/>
-                                <Table
+                                <SortableTable
                                     options={materials_table_options}
                                     data={entity.materials_collection.materials || []}
                                     columns={materials_columns}
-                                />
-                                <Pagination
-                                    bsSize="medium"
-                                    prev
-                                    next
-                                    first
-                                    last
-                                    ellipsis
-                                    boundaryLinks
-                                    maxButtons={10}
-                                    items={entity.materials_collection.lastPage}
-                                    activePage={entity.materials_collection.currentPage}
-                                    onSelect={(page) => this.handlePageChange(page, 'materials')}
+                                    dropCallback={this.props.onSponsorMaterialOrderUpdate}
+                                    orderField="order"
                                 />
                             </div>
                         </div>

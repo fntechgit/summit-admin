@@ -39,7 +39,9 @@ import
     SPONSOR_ADVERTISEMENT_UPDATED,
     SPONSOR_ADVERTISEMENT_ADDED,
     SPONSOR_MATERIAL_ADDED,
-    SPONSOR_SOCIAL_NETWORK_ADDED
+    SPONSOR_SOCIAL_NETWORK_ADDED,
+    SPONSOR_ADS_ORDER_UPDATED,
+    SPONSOR_MATERIAL_ORDER_UPDATED
 } from '../../actions/sponsor-actions';
 
 import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
@@ -50,9 +52,7 @@ const DEFAULT_ADS_STATE = {
     ads             : [],
     order           : 'order',
     orderDir        : 1,
-    currentPage     : 1,
-    lastPage        : 1,
-    perPage         : 5,
+    perPage         : 100,
     totalAds        : 0,
 }
 
@@ -60,9 +60,7 @@ const DEFAULT_MATERIALS_STATE = {
     materials       : [],
     order           : 'order',
     orderDir        : 1,
-    currentPage     : 1,
-    lastPage        : 1,
-    perPage         : 5,
+    perPage         : 100,
     totalAds        : 0,
 }
 
@@ -195,9 +193,13 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
         break;
         case RECEIVE_SPONSOR_ADVERTISEMENTS: {
-            let { current_page, total, last_page } = payload.response;
+            let { total } = payload.response;
             const ads = payload.response.data;
-            return {...state, entity: {...state.entity, ads_collection: { ads, currentPage: current_page, lastPage: last_page, total } }}
+            return {...state, entity: {...state.entity, ads_collection: { ads, total } }}
+        }
+        break;
+        case SPONSOR_ADS_ORDER_UPDATED: {
+            return {...state, entity: {...state.entity, ads_collection: { ...state.entity.ads_collection, ads : payload } }}
         }
         break;
         case SPONSOR_ADVERTISEMENT_ADDED: {
@@ -218,9 +220,13 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
         break;
         case RECEIVE_SPONSOR_MATERIALS: {      
-            let { current_page, total, last_page } = payload.response;
+            let { total } = payload.response;
             const materials = payload.response.data;            
-            return {...state, entity: {...state.entity, materials_collection: { materials, currentPage: current_page, lastPage: last_page, total } }}
+            return {...state, entity: {...state.entity, materials_collection: { materials, total } }}
+        }
+        break;
+        case SPONSOR_MATERIAL_ORDER_UPDATED: {
+            return {...state, entity: {...state.entity, materials_collection: { ...state.entity.materials_collection, materials : payload } }}
         }
         break;
         case SPONSOR_MATERIAL_ADDED: {

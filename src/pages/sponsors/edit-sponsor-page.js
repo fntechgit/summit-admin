@@ -30,6 +30,8 @@ import {
     getSponsorAdvertisements,
     getSponsorMaterials,
     getSponsorSocialNetworks,
+    updateSponsorAdsOrder,
+    updateSponsorMaterialOrder
 } from "../../actions/sponsor-actions";
 
 class EditSponsorPage extends React.Component {
@@ -78,7 +80,9 @@ class EditSponsorPage extends React.Component {
                     onRemoveImage={this.props.removeSponsorImage}
                     onAddMember={this.props.addMemberToSponsor}
                     onRemoveMember={this.props.removeMemberFromSponsor}
+                    onSponsorAdsOrderUpdate={this.props.updateSponsorAdsOrder}
                     onAdvertisementDelete={this.props.deleteSponsorAdvertisement}
+                    onSponsorMaterialOrderUpdate={this.props.updateSponsorMaterialOrder}
                     onMaterialDelete={this.props.deleteSponsorMaterial}
                     onSocialNetworkDelete={this.props.deleteSponsorSocialNetwork}
                     onSubmit={this.props.saveSponsor}
@@ -113,6 +117,8 @@ export default connect(
         attachSponsorImage,
         getSponsorAdvertisements,
         getSponsorMaterials,
-        getSponsorSocialNetworks
+        getSponsorSocialNetworks,
+        updateSponsorAdsOrder,
+        updateSponsorMaterialOrder,
     }
 )(EditSponsorPage);
