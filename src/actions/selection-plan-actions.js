@@ -23,7 +23,8 @@ import {
     startLoading,
     showMessage,
     showSuccessMessage,
-    authErrorHandler
+    authErrorHandler,
+    postFile
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import { getAccessTokenSafely, escapeFilterValue, fetchResponseHandler, fetchErrorHandler } from '../utils/methods';
 import _ from 'lodash';
@@ -41,6 +42,7 @@ export const REQUEST_ALLOWED_MEMBERS = 'REQUEST_ALLOWED_MEMBERS';
 export const RECEIVE_ALLOWED_MEMBERS = 'RECEIVE_ALLOWED_MEMBERS';
 export const ALLOWED_MEMBER_REMOVED = 'ALLOWED_MEMBER_REMOVED';
 export const ALLOWED_MEMBER_ADDED = 'ALLOWED_MEMBER_ADDED';
+export const ALLOWED_MEMBERS_IMPORTED = 'ALLOWED_MEMBERS_IMPORTED';
 export const RECEIVE_SELECTION_PLAN_PROGRESS_FLAGS = 'RECEIVE_SELECTION_PLAN_PROGRESS_FLAGS';
 export const SELECTION_PLAN_ASSIGNED_PROGRESS_FLAG = 'SELECTION_PLAN_ASSIGNED_PROGRESS_FLAG';
 export const SELECTION_PLAN_PROGRESS_FLAG_REMOVED = 'SELECTION_PLAN_PROGRESS_FLAG_REMOVED';
@@ -652,7 +654,7 @@ export const getAllowedMembers = (selectionPlanId, page = 1) => async (dispatch,
 };
 
 
-export const addAllowedMemberToSelectionPlan = (selectionPlanId, member) => async (dispatch, getState) => {
+export const addAllowedMemberToSelectionPlan = (selectionPlanId, email) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -664,11 +666,11 @@ export const addAllowedMemberToSelectionPlan = (selectionPlanId, member) => asyn
         access_token: accessToken
     };
 
-    return putRequest(
+    return postRequest(
       null,
-      createAction(ALLOWED_MEMBER_ADDED)({member}),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-members/${member.id}`,
-      {},
+      createAction(ALLOWED_MEMBER_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-members`,
+      {email},
       authErrorHandler
     )(params)(dispatch).then(() => {
           dispatch(stopLoading());
@@ -676,7 +678,7 @@ export const addAllowedMemberToSelectionPlan = (selectionPlanId, member) => asyn
     );
 };
 
-export const removeAllowedMemberFromSelectionPlan = (selectionPlanId, memberId) => async (dispatch, getState) => {
+export const removeAllowedMemberFromSelectionPlan = (selectionPlanId, emailId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -685,19 +687,42 @@ export const removeAllowedMemberFromSelectionPlan = (selectionPlanId, memberId) 
     dispatch(startLoading());
 
     const params = {
-        access_token: accessToken
+        access_token: accessToken,
     };
 
     return deleteRequest(
       null,
-      createAction(ALLOWED_MEMBER_REMOVED)({memberId}),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-members/${memberId}`,
+      createAction(ALLOWED_MEMBER_REMOVED)({emailId}),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-members/${emailId}`,
       null,
       authErrorHandler
     )(params)(dispatch).then(() => {
           dispatch(stopLoading());
       }
     );
+};
+
+export const importAllowedMembersCSV = (selectionPlanId, file) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    postFile(
+      null,
+      createAction(ALLOWED_MEMBERS_IMPORTED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-members/csv`,
+      file,
+      {},
+      authErrorHandler,
+    )(params)(dispatch)
+      .then(() => {
+          dispatch(stopLoading());
+          dispatch(getAllowedMembers(selectionPlanId));
+      });
 };
 
 
