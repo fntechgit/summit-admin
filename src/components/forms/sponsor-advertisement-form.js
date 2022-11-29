@@ -41,7 +41,7 @@ class SponsorAdvertisementForm extends React.Component {
         const oldEntity = prevState.entity;
         const newEntity = this.props.entity;
 
-        if (newEntity.id !== oldEntity.id) {
+        if (newEntity.id !== oldEntity.id || newEntity.image !== oldEntity.image) {
             this.setState({ ...this.state, entity: newEntity });
         }
     }

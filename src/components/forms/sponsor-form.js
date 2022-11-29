@@ -409,7 +409,7 @@ class SponsorForm extends React.Component {
                                         <label> {T.translate("edit_sponsor.header_image_mobile")} </label>
                                         <UploadInput
                                             value={entity.header_image_mobile}
-                                            handleUpload={this.handleUploadSideImage}
+                                            handleUpload={this.handleUploadHeaderMobileImage}
                                             handleRemove={ev => this.handleRemoveFile('header_image_mobile')}
                                             className="dropzone col-md-6"
                                             multiple={false}
@@ -447,7 +447,7 @@ class SponsorForm extends React.Component {
                                         <label> {T.translate("edit_sponsor.carousel_advertise_image")} </label>
                                         <UploadInput
                                             value={entity.carousel_advertise_image}
-                                            handleUpload={this.handleUploadSideImage}
+                                            handleUpload={this.handleUploadCarouselImage}
                                             handleRemove={ev => this.handleRemoveFile('carousel_advertise_image')}
                                             className="dropzone col-md-6"
                                             multiple={false}

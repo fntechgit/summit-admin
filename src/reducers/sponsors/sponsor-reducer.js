@@ -247,7 +247,9 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
         case RECEIVE_SPONSOR_SOCIAL_NETWORKS: {
             let { current_page, total, last_page } = payload.response;
-            const social_networks = payload.response.data;
+            const social_networks = payload.response.data.map(social_network => {
+                return ({...social_network, is_enabled: social_network.is_enabled ? 'True' : 'False'})
+            });
             return {...state, entity: {...state.entity, social_networks_collection: { social_networks, currentPage: current_page, lastPage: last_page, total } }}
         }
         break;
@@ -257,9 +259,12 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
         break;
         case SPONSOR_SOCIAL_NETWORK_UPDATED: {
-            const updatedSocialNetwork = payload.response;
-            const social_networks = state.entity.social_networks_collection.social_networks.filter(social_network => social_network.id !== updatedSocialNetwork.id)
-            return {...state, entity: {...state.entity, social_networks_collection: { ...state.entity.social_networks_collection, social_networks:[...social_networks, updatedSocialNetwork] }}}                        
+            const updatedSocialNetwork = {...payload.response, is_enabled: payload.response.is_enabled ? 'True' : 'False'};
+            let social_networks = state.entity.social_networks_collection.social_networks.filter(social_network => social_network.id !== updatedSocialNetwork.id)
+            social_networks = social_networks.map(social_network => {
+                return ({...social_network, is_enabled: social_network.is_enabled ? 'True' : 'False'})
+            });
+            return {...state, entity: {...state.entity, social_networks_collection: { ...state.entity.social_networks_collection, social_networks:[...social_networks, updatedSocialNetwork] }}}
         }
         break;
         case SPONSOR_SOCIAL_NETWORK_DELETED: {

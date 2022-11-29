@@ -333,16 +333,11 @@ export const updateSponsorOrder = (sponsors, sponsorId, newOrder) => async (disp
         expand       : 'company,sponsorship,sponsorship.type',
     };
 
-    let sponsor = sponsors.find(s => s.id === sponsorId);
-    sponsor.order = newOrder;
-
-    const normalizedEntity = normalizeSponsor(sponsor);
-
     putRequest(
         null,
         createAction(SPONSOR_ORDER_UPDATED)(sponsors),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}`,
-        normalizedEntity,
+        {order: newOrder},
         authErrorHandler
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
@@ -1039,14 +1034,11 @@ export const updateSponsorAdsOrder = (ads, advertiseId, newOrder) => async (disp
         per_page     : 100,
     };
 
-    let ad = ads.find(s => s.id === advertiseId);
-    ad.order = newOrder;
-
     putRequest(
         null,
         createAction(SPONSOR_ADS_ORDER_UPDATED)(ads),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/ads/${advertiseId}`,
-        ad,
+        {order: newOrder},
         authErrorHandler
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
@@ -1276,14 +1268,11 @@ export const updateSponsorMaterialOrder = (materials, materialId, newOrder) => a
         per_page     : 100,
     };
 
-    let material = materials.find(s => s.id === materialId);
-    material.order = newOrder;
-
     putRequest(
         null,
         createAction(SPONSOR_MATERIAL_ORDER_UPDATED)(materials),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${currentSponsorId}/materials/${materialId}`,
-        material,
+        {order: newOrder},
         authErrorHandler
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
