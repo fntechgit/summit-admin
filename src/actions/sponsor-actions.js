@@ -26,7 +26,8 @@ import {
     authErrorHandler,
     getCSV,
     escapeFilterValue,
-    fetchResponseHandler
+    fetchResponseHandler,
+    fetchErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 
@@ -704,6 +705,8 @@ export const attachSponsorImage = (entity, file, picAttr) => async (dispatch, ge
         access_token : accessToken,
     };
 
+    dispatch(startLoading());
+
     const normalizedEntity = normalizeEntity(entity);
 
     const uploadFile = picAttr === 'header_image' ? uploadHeaderImage : 
@@ -821,6 +824,8 @@ const uploadCarouselImage = (entity, file) => async (dispatch, getState) => {
 };
 
 export const removeSponsorImage = (entity, picAttr) => async (dispatch, getState) => {
+
+    dispatch(startLoading());
 
     const removeFile = picAttr === 'header_image' ? removeHeaderImage :
                        picAttr === 'side_image' ? removeSideImage :
@@ -1082,6 +1087,8 @@ export const submitSponsorAdvertisementImage = (entity, file) => async (dispatch
     const params = {
         access_token: accessToken
     };
+
+    dispatch(startLoading());
 
     if (entity.id) {
         dispatch(uploadAdvertiseImage(entity, file));
