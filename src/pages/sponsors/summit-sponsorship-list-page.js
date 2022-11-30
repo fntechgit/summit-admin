@@ -18,7 +18,7 @@ import Swal from "sweetalert2";
 import { Pagination } from 'react-bootstrap';
 import { Table, SortableTable } from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
-import { getSummitSponsorships, deleteSummitSponsorship } from "../../actions/sponsor-actions";
+import { getSummitSponsorships, deleteSummitSponsorship, updateSummitSponsorhipOrder } from "../../actions/sponsor-actions";
 
 class SummitSponsorshipListPage extends React.Component {
 
@@ -27,8 +27,6 @@ class SummitSponsorshipListPage extends React.Component {
 
         this.handleEdit = this.handleEdit.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
-        this.handleSort = this.handleSort.bind(this);
-        this.handlePageChange = this.handlePageChange.bind(this);
         this.handleNewSponsorship = this.handleNewSponsorship.bind(this);
 
         this.state = {}
@@ -36,9 +34,9 @@ class SummitSponsorshipListPage extends React.Component {
     }
 
     componentDidMount() {
-        const {currentSummit, currentPage, perPage, order, orderDir} = this.props;
+        const {currentSummit} = this.props;
         if(currentSummit) {
-            this.props.getSummitSponsorships(currentPage, perPage, order, orderDir);
+            this.props.getSummitSponsorships();
         }
     }
 
@@ -63,16 +61,6 @@ class SummitSponsorshipListPage extends React.Component {
                 deleteSummitSponsorship(sponsorshipId);
             }
         });
-    }
-
-    handleSort(index, key, dir, func) {
-        const {perPage, page} = this.props;
-        this.props.getSummitSponsorships(page, perPage, key, dir);
-    }
-
-    handlePageChange(page) {
-        const {order, orderDir, perPage} = this.props;
-        this.props.getSummitSponsorships(page, perPage, order, orderDir);
     }
 
     handleNewSponsorship(ev) {
@@ -117,24 +105,12 @@ class SummitSponsorshipListPage extends React.Component {
 
                 {sortedSponsorships.length > 0 &&
                     <>
-                        <Table
+                        <SortableTable
                             options={table_options}
                             data={sortedSponsorships}
                             columns={columns}
-                            onSort={this.handleSort}
-                        />
-                        <Pagination
-                            bsSize="medium"
-                            prev
-                            next
-                            first
-                            last
-                            ellipsis
-                            boundaryLinks
-                            maxButtons={10}
-                            items={lastPage}
-                            activePage={currentPage}
-                            onSelect={this.handlePageChange}
+                            dropCallback={this.props.updateSummitSponsorhipOrder}
+                            orderField="order"
                         />
                     </>
                 }
@@ -154,6 +130,7 @@ export default connect (
     {
         getSummitById,
         getSummitSponsorships,
-        deleteSummitSponsorship
+        deleteSummitSponsorship,
+        updateSummitSponsorhipOrder
     }
 )(SummitSponsorshipListPage);

@@ -16,6 +16,7 @@ import
     RECEIVE_SUMMIT_SPONSORSHIPS,
     REQUEST_SUMMIT_SPONSORSHIPS,
     SUMMIT_SPONSORSHIP_DELETED,
+    SUMMIT_SPONSORSHIP_ORDER_UPDATED
 } from '../../actions/sponsor-actions';
 
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
@@ -23,10 +24,7 @@ import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/utils/actions';
 
 const DEFAULT_STATE = {
     sponsorships            : [],
-    currentPage             : 1,
-    lastPage                : 1,
-    perPage                 : 10,
-    order                   : 'name',
+    order                   : 'order',
     orderDir                : 1,
     totalSponsorships       : 0
 };
@@ -44,7 +42,7 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, order, orderDir }
         }
         case RECEIVE_SUMMIT_SPONSORSHIPS: {
-            let { current_page, total, last_page } = payload.response;
+            let { total } = payload.response;
             let sponsorships = payload.response.data;
 
             sponsorships.map(s => {
@@ -54,7 +52,11 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
                 s.widget_title = s.widget_title ? s.widget_title : 'N/A'
             })
 
-            return {...state, sponsorships: sponsorships, totalSponsorships: total, currentPage: current_page, lastPage: last_page };
+            return {...state, sponsorships: sponsorships, totalSponsorships: total };
+        }
+        case SUMMIT_SPONSORSHIP_ORDER_UPDATED: {
+            let sponsorships = payload;
+            return {...state, sponsorships: sponsorships}
         }
         case SUMMIT_SPONSORSHIP_DELETED: {
             let {sponsorshipId} = payload;
