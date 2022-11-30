@@ -472,6 +472,8 @@ export const uploadSponsorshipBadgeImage = (entity, file) => async (dispatch, ge
 
     const accessToken = await getAccessTokenSafely();
 
+    dispatch(startLoading());
+
     const params = {
         access_token : accessToken,
     };
@@ -485,13 +487,12 @@ export const uploadSponsorshipBadgeImage = (entity, file) => async (dispatch, ge
             authErrorHandler,
             {pic: entity.pic}
         )(params)(dispatch)
-            .then(() => {
+            .then((payload) => {
                 dispatch(stopLoading());
                 history.push(`/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`)
             });
     } else {
         dispatch(saveSummitSponsorship(entity)).then((payload) => {
-            console.log('save new sponsorship', payload)
             dispatch(postRequest(
                 null,
                 createAction(BADGE_IMAGE_ATTACHED),
@@ -516,6 +517,8 @@ export const removeSponsorshipBadgeImage = (sponsorshipId) => async (dispatch, g
     const params = {
         access_token: accessToken
     };
+
+    dispatch(startLoading());
 
     return deleteRequest(
         null,
