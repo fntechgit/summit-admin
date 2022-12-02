@@ -1718,7 +1718,8 @@
     "sponsor_saved": "Sponsor saved successfully",
     "sponsor_created": "Sponsor created successfully",
     "placeholders": {
-      "select_sponsorship": "Select a Sponsorship"
+      "select_sponsorship": "Select a Sponsorship",
+      "sponsorship_type": "Start Typing to choose a Sponsorship Type"
     }
   },
   "sponsorship_list": {

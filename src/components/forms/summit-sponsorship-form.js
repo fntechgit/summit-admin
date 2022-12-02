@@ -139,6 +139,7 @@ class SummitSponsorshipForm extends React.Component {
                         <SponsorshipTypeInput
                             id="type" 
                             value={entity.type}
+                            placeholder={T.translate("edit_sponsor.placeholders.sponsorship_type")}
                             key={JSON.stringify(entity.type)}
                             onChange={this.handleChange} />
                     </div>

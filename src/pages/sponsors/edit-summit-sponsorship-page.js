@@ -54,7 +54,7 @@ class EditSummitSponsorshipPage extends React.Component {
     }
 
     render(){
-        const {currentSummit, entity, errors, match, sponsorships, history, uploadSponsorshipBadgeImage, removeSponsorshipBadgeImage} = this.props;
+        const {currentSummit, entity, errors, match, sponsorships, uploadSponsorshipBadgeImage, removeSponsorshipBadgeImage} = this.props;
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
         const breadcrumb = (entity.id) ? entity.type.name : T.translate("general.new");
 
