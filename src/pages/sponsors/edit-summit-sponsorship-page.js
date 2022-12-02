@@ -86,8 +86,6 @@ export default connect (
     mapStateToProps,
     {
         getSummitSponsorship,
-        getSponsorships,
-        getSummitById,
         resetSummitSponsorshipForm,
         saveSummitSponsorship,
         uploadSponsorshipBadgeImage,

@@ -416,7 +416,7 @@ export const getSummitSponsorships = ( order = 'name', orderDir = 1 ) => async (
         createAction(RECEIVE_SUMMIT_SPONSORSHIPS),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
         authErrorHandler,
-        {order, orderDir, page}
+        {order, orderDir}
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }
@@ -497,7 +497,7 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
             .then((payload) => {
                 dispatch(showMessage(
                     success_message,
-                    () => { history.push(`/app/summits/${currentSummit.id}/sponsorship-types/${payload.response.id}`) }
+                    () => { history.push(`/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`) }
                 ));
             });
     }
