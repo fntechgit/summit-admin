@@ -613,6 +613,14 @@ const normalizeSponsorship = (entity) => {
 
 }
 
+const normalizeCollection = (entity) => {
+    const normalizedEntity = {...entity};    
+
+    delete normalizedEntity['order'];
+
+    return normalizedEntity;
+}
+
 const normalizeEntity = (entity) => {
     const normalizedEntity = {...entity};
 
@@ -962,7 +970,7 @@ export const saveSponsorAdvertisement = (entity) => async (dispatch, getState) =
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeSponsorship(entity);
+    const normalizedEntity = normalizeCollection(entity);
 
     if (entity.id) {
 
@@ -1199,7 +1207,7 @@ export const saveSponsorMaterial = (entity) => async (dispatch, getState) => {
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeSponsorship(entity);
+    const normalizedEntity = normalizeCollection(entity);
 
     if (entity.id) {
 
@@ -1354,7 +1362,7 @@ export const saveSponsorSocialNetwork = (entity) => async (dispatch, getState) =
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeSponsorship(entity);
+    const normalizedEntity = normalizeCollection(entity);
 
     if (entity.id) {
 
