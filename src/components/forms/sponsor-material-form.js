@@ -81,10 +81,11 @@ class SponsorMaterialForm extends React.Component {
                             <Input className="form-control" id="name" value={entity.name} onChange={this.handleChange} />
                         </div>
                         <div className="col-md-4">
-                            <label> {T.translate("edit_sponsor.sponsorship")}</label>
+                            <label> {T.translate("edit_sponsor.type")}</label>
                             <Dropdown
                                 id="type"
                                 value={entity.type}
+                                key={JSON.stringify(entity.type)}
                                 onChange={this.handleChange}
                                 placeholder={T.translate("edit_sponsor.placeholders.select_material_type")}
                                 options={material_type_ddl}
