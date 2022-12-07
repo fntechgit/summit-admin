@@ -22,7 +22,10 @@ const RESIZING_DIR_SOUTH = 'S';
 const ScheduleEvent = ({event, step, initialTop, initialHeight, minHeight, maxHeight, canResize, onResized, onUnPublishEvent, onEditEvent, onClickSelected, selectedPublishedEvents}) => {
     const [collected, drag] = useDrag(() => ({
         type: DraggableItemTypes.SCHEDULEEVENT,
-        item: { ...event }
+        item: { ...event },
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        })
     }), [event.id]);
     const [resizeInfo, setResizeInfo] = useState({resizing: false, type: null, lastYPos: null});
     const [size, setSize] = useState({top: initialTop, height: initialHeight});
@@ -161,33 +164,29 @@ const ScheduleEvent = ({event, step, initialTop, initialHeight, minHeight, maxHe
             style={{
                 top: size.top,
                 height: size.height,
-                opacity: collected.isDragging ? 0.5 : 1,
+                display: collected.isDragging ? 'none' : 'block',
                 cursor: 'move',
             }}
         >
-            <div className="row">
-                <div className="col-md-12">
-                    <div className="event-select-wrapper">
-                        <input
-                            className="select-event-btn"
-                            id={`selected_event_${event.id}`}
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => onClickSelected(event)}
-                        />
-                    </div>
-                    <div className="col-md-12 event-container">
-                        <div className="event-content">
-                            <OverlayTrigger trigger={['hover']} placement="bottom" overlay={popoverHoverFocus()}>
-                                <span className="event-title">{event.title}</span>
-                            </OverlayTrigger>
-                        </div>
-                    </div>
-                    <div className="event-actions">
-                        <i className="fa fa-minus-circle unpublish-event-btn" aria-hidden="true" title="unpublish event" onClick={() => onUnPublishEvent(event)}/>
-                        <i className="fa fa-pencil-square-o edit-published-event-btn" title="edit event" aria-hidden="true" onClick={() => onEditEvent(event)}/>
-                    </div>
+            <div className="event-select-wrapper">
+                <input
+                  className="select-event-btn"
+                  id={`selected_event_${event.id}`}
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => onClickSelected(event)}
+                />
+            </div>
+            <div className="col-md-12 event-container">
+                <div className="event-content">
+                    <OverlayTrigger trigger={['hover']} placement="bottom" overlay={popoverHoverFocus()}>
+                        <span className="event-title">{event.title}</span>
+                    </OverlayTrigger>
                 </div>
+            </div>
+            <div className="event-actions">
+                <i className="fa fa-minus-circle unpublish-event-btn" aria-hidden="true" title="unpublish event" onClick={() => onUnPublishEvent(event)}/>
+                <i className="fa fa-pencil-square-o edit-published-event-btn" title="edit event" aria-hidden="true" onClick={() => onEditEvent(event)}/>
             </div>
         </div>
     );

@@ -368,7 +368,7 @@ const publishEvent = (entity, cb = null) => async (dispatch, getState) => {
         .then((payload) => {
             if (type.hasOwnProperty("allows_publishing_dates") &&
                 type.allows_publishing_dates) {
-                dispatch(checkProximityEvents(entity, cb));
+                dispatch(checkProximityEvents(entity, true, cb));
             } else {
                 const success_message = {
                     title: T.translate("general.done"),
@@ -380,7 +380,7 @@ const publishEvent = (entity, cb = null) => async (dispatch, getState) => {
         });
 }
 
-export const checkProximityEvents = (event, cb = null) => async (dispatch, getState) => {
+export const checkProximityEvents = (event, showSuccessMessage = true, cb = null) => async (dispatch, getState) => {
     const {currentSummitState} = getState();
     const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
@@ -392,7 +392,11 @@ export const checkProximityEvents = (event, cb = null) => async (dispatch, getSt
     };
 
     if (!event.hasOwnProperty('speakers') || (event.speakers.length === 0 && (!event.moderator_speaker_id))) {
-        dispatch(showMessage(success_message, cb));
+        if (showSuccessMessage) {
+            dispatch(showMessage(success_message, cb));
+        } else {
+            dispatch(stopLoading());
+        }
         return;
     }
 
@@ -437,10 +441,13 @@ export const checkProximityEvents = (event, cb = null) => async (dispatch, getSt
                         const locationName = prox_event.location ? prox_event.location.name : 'TBD';
                         success_message.html += `<small><i>"${prox_event.title}"</i> at ${event_date} in ${locationName}</small><br/>`;
                     }
+                    dispatch(showMessage(success_message, cb));
+
+                } else if (showSuccessMessage) {
+                    dispatch(showMessage(success_message, cb));
+                } else {
+                    dispatch(stopLoading());
                 }
-
-
-                dispatch(showMessage(success_message, cb));
             }
         );
 }
