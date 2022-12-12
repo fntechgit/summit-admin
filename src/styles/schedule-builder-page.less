@@ -52,6 +52,8 @@
   z-index: @event_z_index;
   width: 100%;
   position: absolute;
+  overflow: hidden;
+
   .no-margin;
   .unselectable-text;
   .row{
@@ -96,8 +98,7 @@
 }
 
 .is-resizable {
-  overflow-y: hidden;
-  overflow-x: hidden;
+  overflow: hidden;
   /*transition: height 50ms linear;*/
   &:before,
   &:after {

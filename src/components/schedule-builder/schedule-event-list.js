@@ -110,6 +110,7 @@ const ScheduleEventList = (props) => {
     // calculate new event start date, end date
     const minutes = Math.floor(newTop / (pixelsPerMinute * (10 / interval)));
     const duration = Math.floor(newHeight / (pixelsPerMinute * (10 / interval)));
+
     let startDateTime = moment.tz(currentDay + ' ' + startTime, 'YYYY-MM-DD HH:mm', currentSummit.time_zone.name);
     startDateTime = startDateTime.add(minutes, 'minutes');
     let endDateTime = moment.tz(currentDay + ' ' + startTime, 'YYYY-MM-DD HH:mm', currentSummit.time_zone.name);
@@ -160,7 +161,6 @@ const ScheduleEventList = (props) => {
     const eventStartDateTime = moment(event.start_date * 1000).tz(currentSummit.time_zone.name);
     const eventEndDateTime = moment(event.end_date * 1000).tz(currentSummit.time_zone.name);
     const minutes = eventEndDateTime.diff(eventStartDateTime, 'minutes');
-
     return minutes * pixelsPerMinute * (10 / interval);
   }
 
@@ -231,7 +231,7 @@ const ScheduleEventList = (props) => {
                 key={`event-${event.id}-${event.start_date}-${event.end_date}-${interval}`}
                 type={"MAIN"}
                 step={pixelsPerMinute * 5}
-                minHeight={(pixelsPerMinute * interval)}
+                minHeight={(pixelsPerMinute * 10)}
                 initialTop={calculateInitialTop(event)}
                 initialHeight={calculateInitialHeight(event)}
                 canResize={canResize}
