@@ -35,7 +35,7 @@ const ScheduleEvent = ({
                        }) => {
   const [collected, drag] = useDrag(() => ({
     type: DraggableItemTypes.SCHEDULEEVENT,
-    item: {id: event.id, title: event.title, start_date: event.start_date, end_date: event.end_date, duration: event.duration},
+    item: {id: event.id, title: event.title, is_published: event.is_published, start_date: event.start_date, end_date: event.end_date, duration: event.duration},
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     })
