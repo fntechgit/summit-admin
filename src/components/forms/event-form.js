@@ -469,11 +469,13 @@ class EventForm extends React.Component {
     getPopupScores(score_id) {
         const {entity} = this.state;
         let res = ''
-        const rating_type = entity?.selection_plan?.track_chair_rating_types.find((st) => st.id === parseInt(score_id));        
-        rating_type.score_types.map((st) => {
-            if (res !== '') res = res + '<br>';
-            res = res + `${st.score}. <b>${st.name.trim()}</b> <p>${st.description?.trim()}</p>`;
-        })
+        const rating_type = entity?.selection_plan?.track_chair_rating_types.find((st) => st.id === parseInt(score_id));
+        if (rating_type) {
+            rating_type.score_types.forEach((st) => {
+                if (res !== '') res = res + '<br>';
+                res = res + `${st.score}. <b>${st.name.trim()}</b> <p>${st.description?.trim()}</p>`;
+            })
+        }
         return res;
     }
 
@@ -1185,27 +1187,33 @@ class EventForm extends React.Component {
                             </p>
                             {entity.track_chair_scores_avg.map((score) => {
                                 const rating_type = entity.selection_plan.track_chair_rating_types.find(e => parseInt(score.ranking_type_id) === e.id) 
+
                                 return (
                                     <p>
                                         <label>
-                                            <a data-tip={this.getPopupScores(score.ranking_type_id)} data-for={'help'}>
-                                                <ReactTooltip
-                                                    id={'help'}
-                                                    place={'bottom'}
-                                                    type={'light'}
-                                                    effect={'solid'}
-                                                    multiline={true}
-                                                    clickable={true}
-                                                    border={true}
-                                                    getContent={(dataTip) =>
-                                                        <div className="tooltip-popover"
-                                                            dangerouslySetInnerHTML={{__html: dataTip}}
-                                                        />
-                                                    }
-                                                />
-                                                <i className="fa fa-question-circle" />
-                                            </a>
-                                            &nbsp;{rating_type?.name}: 
+                                            {rating_type.score_types.length > 0 && 
+                                            <>
+                                                <a data-tip={this.getPopupScores(score.ranking_type_id)} data-for={'help'}>
+                                                    <ReactTooltip
+                                                        id={'help'}
+                                                        place={'bottom'}
+                                                        type={'light'}
+                                                        effect={'solid'}
+                                                        multiline={true}
+                                                        clickable={true}
+                                                        border={true}
+                                                        getContent={(dataTip) =>
+                                                            <div className="tooltip-popover"
+                                                                dangerouslySetInnerHTML={{__html: dataTip}}
+                                                            />
+                                                        }
+                                                    />
+                                                    <i className="fa fa-question-circle" />
+                                                </a>
+                                                &nbsp;
+                                            </>
+                                            }
+                                            {rating_type?.name}: 
                                         </label> {parseFloat(score.avg_score).toFixed(2)}
                                     </p>    
                                 )
