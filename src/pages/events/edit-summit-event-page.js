@@ -24,10 +24,12 @@ import {
   deleteEventFeedback,
   getEventFeedbackCSV,
   changeFlag,
-  getActionTypes
+  getActionTypes,
+  getEventComments,
 } from '../../actions/event-actions';
 import {unPublishEvent} from '../../actions/summit-builder-actions';
 import {deleteEventMaterial} from '../../actions/event-material-actions';
+import {deleteEventComment} from '../../actions/event-comment-actions';
 import { getSummitEventAuditLog, clearAuditLogParams } from '../../actions/audit-log-actions';
 import {addQAMember, removeQAMember} from "../../actions/user-chat-roles-actions"
 
@@ -125,6 +127,7 @@ const EditSummitEventPage = (props) => {
     rsvpTemplateOptions,
     extraQuestions,
     feedbackState,
+    commentState,
     actionTypes,
     auditLogState
   } = props;
@@ -174,6 +177,9 @@ const EditSummitEventPage = (props) => {
         clearAuditLogParams={props.clearAuditLogParams}
         feedbackState={feedbackState}
         getEventFeedback={props.getEventFeedback}
+        commentState={commentState}
+        getEventComments={props.getEventComments}
+        onCommentDelete={props.deleteEventComment}
         deleteEventFeedback={props.deleteEventFeedback}
         getEventFeedbackCSV={props.getEventFeedbackCSV}
         onFlagChange={props.changeFlag}
@@ -191,6 +197,7 @@ const mapStateToProps = ({ currentSummitState, currentSummitEventState, currentR
     errors: currentSummitEventState.errors,
     extraQuestions: currentSummitEventState.extraQuestions,
     feedbackState: currentSummitEventState.feedbackState,
+    commentState: currentSummitEventState.commentState,
     auditLogState: auditLogState,
     actionTypes: currentSummitEventState.actionTypes,
     allEventsData: currentEventListState
@@ -213,6 +220,9 @@ export default connect(
     changeFlag,
     getActionTypes,
     getSummitEventAuditLog,
-    clearAuditLogParams
+    clearAuditLogParams,
+    getEventComments,
+    deleteEventComment
   }
+
 )(EditSummitEventPage);
