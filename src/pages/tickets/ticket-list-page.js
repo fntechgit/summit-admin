@@ -358,8 +358,9 @@ class TicketListPage extends React.Component {
             {label: 'View Type', value: 'viewTypesFilter'},
             {label: 'Ticket Type', value: 'ticketTypesFilter'},
             {label: 'Promo Code', value: 'promocodesFilter'},
+            {label: 'Promo Code Tags', value: 'promocodeTags'},
             {label: 'Refund Requested', value: 'show_refund_request_pending'},  
-            {label: 'Printable', value: 'show_printable'},            
+            {label: 'Printable', value: 'show_printable'},
         ]
 
         let showColumns = fieldNames
@@ -549,7 +550,21 @@ class TicketListPage extends React.Component {
                               multi
                             />
                         </div>
-                        }                    
+                        }
+                        {enabledFilters.includes('promocodeTags') && 
+                        <div className="col-md-6">
+                            <TagInput
+                              id="promocodeTags"
+                              value={ticketFilters.promocodeTags}
+                              onChange={ev => this.handleFilterChange('promocodeTags', ev.target.value)}
+                              summitId={currentSummit.id}
+                              className="promocodes-filter"
+                              placeholder={T.translate('ticket_list.placeholders.promocodes')}
+                              isClearable
+                              multi
+                            />
+                        </div>
+                        }       
                         {enabledFilters.includes('show_refund_request_pending') && 
                         <div className={'col-md-6'}>
                             <div className="form-check abc-checkbox">

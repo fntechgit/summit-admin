@@ -726,6 +726,7 @@
     "code": "Code",
     "description": "Description",
     "class_name": "Class",
+    "tags": "Tags",
     "type": "Type",
     "sponsor": "Sponsor",
     "company": "Company",
@@ -751,7 +752,8 @@
       "select_badge_features": "Select one or more Badge Features",
       "select_badge_type": "Select a Badge Type",
       "select_ticket_types": "Select Ticket Types",
-      "select_class_name": "Select a Class"
+      "select_class_name": "Select a Class",
+      "select_tags": "Select Tags"
     }
   },
   "discount_ticket": {
