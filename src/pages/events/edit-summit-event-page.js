@@ -129,8 +129,12 @@ const EditSummitEventPage = (props) => {
     feedbackState,
     commentState,
     actionTypes,
-    auditLogState
+    auditLogState,
+    loading
   } = props;
+
+  if(loading) return null;
+
   const header = !entity.id ? T.translate("general.summit_event") : `${entity.title} - ID ${entity.id}`;
 
   return (
@@ -191,6 +195,7 @@ const EditSummitEventPage = (props) => {
 
 const mapStateToProps = ({ currentSummitState, currentSummitEventState, currentRsvpTemplateListState, currentEventListState, auditLogState }) => ({
     currentSummit: currentSummitState.currentSummit,
+    loading: currentSummitState.loading,
     levelOptions: currentSummitEventState.levelOptions,
     rsvpTemplateOptions: currentRsvpTemplateListState.rsvpTemplates,
     entity: currentSummitEventState.entity,

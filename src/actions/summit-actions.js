@@ -42,6 +42,7 @@ export const SUMMIT_ADDED             = 'SUMMIT_ADDED';
 export const SUMMIT_DELETED           = 'SUMMIT_DELETED';
 export const SUMMIT_LOGO_ATTACHED     = 'SUMMIT_LOGO_ATTACHED';
 export const SUMMIT_LOGO_DELETED      = 'SUMMIT_LOGO_DELETED';
+export const CLEAR_SUMMIT             = 'CLEAR_SUMMIT';
 
 export const getSummitById = (summitId) => async (dispatch, getState) => {
 
@@ -73,7 +74,7 @@ export const getSummitById = (summitId) => async (dispatch, getState) => {
                     else msg = err.message;
                     Swal.fire("Not Found", msg, "warning");
                     // reset id
-                    dispatch(createAction(REQUEST_SUMMIT)({id : 0}));
+                    dispatch(createAction(CLEAR_SUMMIT)({}));
                     break;
                 default:
                     authErrorHandler(err, res)(dispatch, state);
