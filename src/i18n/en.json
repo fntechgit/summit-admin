@@ -1256,7 +1256,7 @@
     "select_fields": "Select Data",
     "promocode": "Promo Code",
     "placeholders": {
-      "search_tickets": "Search by Ticket #, Buyer, Assignee ",
+      "search_tickets": "Search by Ticket #, Buyer, Assignee, Promo Code, Promo Code Description",
       "ticket_types": "Filter By Ticket Types ...",
       "owner_first_name": "First name starts with ...",
       "view_types": "Filter by View Types ...",
