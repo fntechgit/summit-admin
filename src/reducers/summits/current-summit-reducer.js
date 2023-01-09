@@ -122,7 +122,7 @@ const DEFAULT_STATE = {
 };
 
 const currentSummitReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
+    const { type, payload } = action;
     switch (type) {
         case SET_CURRENT_SUMMIT: {
             return {...state, currentSummit: payload.response};
@@ -137,7 +137,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         }
         break;
         case REQUEST_SUMMIT: {
-            return DEFAULT_STATE
+            return {...DEFAULT_STATE, currentSummit : {...DEFAULT_ENTITY, id: payload.id}};
         }
         break;
         case SUMMIT_ADDED:
