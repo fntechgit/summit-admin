@@ -274,7 +274,7 @@ export const getTickets =
 
         if(term) {
             const escapedTerm = escapeFilterValue(term);
-            let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm}`;
+            let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm}`;
             
             filter.push(searchString);
         }
@@ -380,7 +380,7 @@ export const exportTicketsCSV = (term = '',
 
     if(term) {
         const escapedTerm = escapeFilterValue(term);
-        let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm}`;
+        let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm}`;
         
         filter.push(searchString);
     }
