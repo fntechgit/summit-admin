@@ -14,7 +14,7 @@ import T from "i18n-react/dist/i18n-react";
 import history from '../history'
 import {
     putRequest,
-    postRequest,
+    getRequest,
     deleteRequest,
     createAction,
     stopLoading,
@@ -22,8 +22,6 @@ import {
     showMessage,
     showSuccessMessage,
     authErrorHandler,
-    putFile,
-    postFile
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import { getAccessTokenSafely } from '../utils/methods';
 
@@ -34,32 +32,29 @@ export const UPDATE_EVENT_COMMENT         = 'UPDATE_EVENT_COMMENT';
 export const EVENT_COMMENT_UPDATED        = 'EVENT_COMMENT_UPDATED';
 export const EVENT_COMMENT_DELETED        = 'EVENT_COMMENT_DELETED';
 
-export const getEventComment = (eventCommentId) => (dispatch, getState) => {
+export const getEventCommentById = (eventCommentId) => async (dispatch, getState) => {
 
     const { currentSummitState, currentSummitEventState } = getState();
+    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const commentState = currentSummitEventState.commentState;
+    const eventId = currentSummitEventState.entity.id;
 
-    dispatch(startLoading());
+    const params = {
+        access_token: accessToken,
+        expand: 'creator'
+    };
 
-    const comment = commentState.comments.find(m => m.id === parseInt(eventCommentId));
+    dispatch(startLoading());    
 
-    if (comment) {
-        dispatch(createAction(RECEIVE_EVENT_COMMENT)({ comment }));
-    } else {
-        const message = {
-            title: T.translate("errors.not_found"),
-            html: T.translate("errors.entity_not_found"),
-            type: 'error'
-        };
-
-        dispatch(showMessage(
-            message,
-            () => { history.push(`/app/summits/${currentSummit.id}/events/${event.id}`) }
-        ));
-    }
-
-    dispatch(stopLoading());
+    return getRequest(
+        null,
+        createAction(RECEIVE_EVENT_COMMENT),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/${eventId}/comments/${eventCommentId}`,
+        authErrorHandler,        
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());            
+        }
+    );    
 
 };
 
@@ -79,6 +74,7 @@ export const saveEventComment = (entity) => async (dispatch, getState) => {
     const normalizedEntity = normalizeEntity(entity);
     const params = {
         access_token: accessToken,
+        expand: 'creator'
     };
 
     putRequest(
@@ -119,9 +115,6 @@ export const deleteEventComment = (commentId) => async (dispatch, getState) => {
 
 const normalizeEntity = (entity) => {
     const normalizedEntity = { ...entity };
-
-    normalizedEntity['is_public'] = entity.is_public === 'Yes' ? true : false;
-    normalizedEntity['is_activity'] = entity.is_public === 'Yes' ? true : false;
 
     delete (normalizedEntity['owner_full_name']);
 

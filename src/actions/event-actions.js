@@ -62,7 +62,6 @@ export const RECEIVE_ACTION_TYPES = 'RECEIVE_ACTION_TYPES';
 export const FLAG_CHANGED = 'FLAG_CHANGED';
 export const REQUEST_EVENT_COMMENTS = 'REQUEST_EVENT_COMMENTS';
 export const RECEIVE_EVENT_COMMENTS = 'RECEIVE_EVENT_COMMENTS';
-export const EVENT_COMMENT_UPDATED = 'EVENT_COMMENT_UPDATED';
 export const EVENT_COMMENT_DELETED = 'EVENT_COMMENT_DELETED';
 
 export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1, filters = {}, extraColumns = []) => async (dispatch, getState) => {

@@ -15,6 +15,7 @@ import
 {
     RECEIVE_EVENT_COMMENT,
     RESET_EVENT_COMMENT_FORM,
+    EVENT_COMMENT_UPDATED,
     UPDATE_EVENT_COMMENT,
 } from '../../actions/event-comment-actions';
 
@@ -52,14 +53,25 @@ const eventCommentReducer = (state = DEFAULT_STATE, action) => {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
         }
         break;
-        case UPDATE_EVENT_COMMENT: {
-            let entity = {...payload.comment};
+        case EVENT_COMMENT_UPDATED: {
+            let entity = {...payload.response};
+
+            entity = {
+                ...entity,
+                owner_full_name: `${entity.creator.first_name} ${entity.creator.last_name}`,
+            };
 
             return {...state,  entity: entity, errors: {} };
         }
         break;
         case RECEIVE_EVENT_COMMENT: {
-            let entity = payload.comment;
+            console.log('recieve paytload', payload);
+            let entity = payload.response;
+
+            entity = {
+                ...entity,
+                owner_full_name: `${entity.creator.first_name} ${entity.creator.last_name}`,
+            }
         
             return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
         }

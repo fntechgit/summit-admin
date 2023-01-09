@@ -36,7 +36,7 @@ import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
 import { UNPUBLISHED_EVENT } from '../../actions/summit-builder-actions';
 import { EVENT_MATERIAL_ADDED, EVENT_MATERIAL_UPDATED, EVENT_MATERIAL_DELETED} from "../../actions/event-material-actions";
-import { EVENT_COMMENT_UPDATED, EVENT_COMMENT_DELETED } from "../../actions/event-comment-actions";
+import { EVENT_COMMENT_DELETED } from "../../actions/event-comment-actions";
 import {RECEIVE_QA_USERS_BY_SUMMIT_EVENT} from '../../actions/user-chat-roles-actions';
 
 export const DEFAULT_ENTITY = {

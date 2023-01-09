@@ -17,7 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from 'react-breadcrumbs';
 import EventCommentForm from '../../components/forms/event-comment-form';
 import {
-    getEventComment,
+    getEventCommentById,
     resetEventCommentForm,
     saveEventComment,    
 } from "../../actions/event-comment-actions";
@@ -33,7 +33,7 @@ class EditEventCommentPage extends React.Component {
         if (!commentId) {
             props.resetEventCommentForm();
         } else {
-            props.getEventComment(commentId);
+            props.getEventCommentById(commentId);
         }
     }
 
@@ -45,7 +45,7 @@ class EditEventCommentPage extends React.Component {
             if (!newId) {
                 this.props.resetEventCommentForm();
             } else {
-                this.props.getEventComment(newId);
+                this.props.getEventCommentById(newId);
             }
         }
     }
@@ -86,7 +86,7 @@ const mapStateToProps = ({ currentSummitState, currentEventCommentState, current
 export default connect (
     mapStateToProps,
     {
-        getEventComment,
+        getEventCommentById,
         resetEventCommentForm,
         saveEventComment,
     }
