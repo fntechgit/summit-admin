@@ -57,6 +57,7 @@ const fieldNames = [
     { columnKey: 'status', value: 'status'},
     { columnKey: 'refunded_amount_formatted', value: 'refunded_amount'},
     { columnKey: 'final_amount_adjusted_formatted', value: 'paid_amount_adjusted'},
+    { columnKey: 'promo_code_tags', value: 'promo_code_tags'},    
 ]
 
 class TicketListPage extends React.Component {
@@ -347,6 +348,7 @@ class TicketListPage extends React.Component {
             { value: 'status', label: T.translate("ticket_list.status") },
             { value: 'refunded_amount_formatted', label: T.translate("ticket_list.refunded_amount") },
             { value: 'final_amount_adjusted_formatted', label: T.translate("ticket_list.paid_amount_adjusted") },
+            { value: 'promo_code_tags', label: T.translate("ticket_list.promo_code_tags") },
         ];
 
         const filters_ddl = [

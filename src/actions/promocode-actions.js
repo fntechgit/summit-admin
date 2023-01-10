@@ -87,7 +87,7 @@ export const getPromocodes = ( term = null, page = 1, perPage = 10, order = 'cod
     }
 
     const params = {
-        expand       : 'speaker,owner,sponsor,creator',
+        expand       : 'speaker,owner,sponsor,creator,tags',
         page         : page,
         per_page     : perPage,
         access_token : accessToken,
@@ -125,7 +125,7 @@ export const getPromocode = (promocodeId) => async (dispatch, getState) => {
     dispatch(startLoading());
 
     const params = {
-        expand       : 'owner,sponsor,sponsor.company,sponsor.sponsorship,speaker,tickets,ticket_type,ticket_types_rules',
+        expand       : 'owner,sponsor,sponsor.company,sponsor.sponsorship,speaker,tickets,ticket_type,ticket_types_rules,tags',
         access_token : accessToken,
     };
 
@@ -306,6 +306,10 @@ const normalizeEntity = (entity) => {
 
     if (entity.valid_until_date === 0) {
         normalizedEntity.valid_until_date = "";
+    }
+
+    if (entity.tags.length > 0) {
+        normalizedEntity.tags = entity.tags.map(e => e.tag)
     }
 
     delete normalizedEntity['owner'];
