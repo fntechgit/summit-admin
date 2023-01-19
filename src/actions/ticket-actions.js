@@ -243,6 +243,13 @@ const parseFilters = (filters) => {
         ))
     }
 
+    if(filters.promocodeTags?.length > 0){
+        filter.push(filters.promocodeTags.reduce(
+            (accumulator, t) => accumulator +(accumulator !== '' ? ',':'') +`promo_code_tag==${t.tag}`,
+            ''
+        ));
+    }
+
     return filter;
 }
 

@@ -153,16 +153,22 @@ export const savePromocode = (entity) => async (dispatch, getState) => {
 
     const normalizedEntity = normalizeEntity(entity);
 
+    const params = {
+        expand       : 'owner,sponsor,sponsor.company,sponsor.sponsorship,speaker,tickets,ticket_type,ticket_types_rules,tags',
+        access_token : accessToken,
+    };
+
     if (entity.id) {
+
 
         return putRequest(
             createAction(UPDATE_PROMOCODE),
             createAction(PROMOCODE_UPDATED),
-            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${entity.id}?access_token=${accessToken}`,
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${entity.id}`,
             normalizedEntity,
             authErrorHandler,
             entity
-        )({})(dispatch)
+        )(params)(dispatch)
             .then((payload) => {
                 dispatch(showSuccessMessage(T.translate("edit_promocode.promocode_saved")));
             });
@@ -177,11 +183,11 @@ export const savePromocode = (entity) => async (dispatch, getState) => {
         return postRequest(
             createAction(UPDATE_PROMOCODE),
             createAction(PROMOCODE_ADDED),
-            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes?access_token=${accessToken}`,
+            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
             normalizedEntity,
             authErrorHandler,
             entity
-        )({})(dispatch)
+        )(params)(dispatch)
             .then((payload) => {
                 dispatch(showMessage(
                     success_message,

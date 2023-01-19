@@ -20,6 +20,7 @@ import {
     SelectableTable,
     Dropdown,
     PromocodeInput,
+    TagInput
 } from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
 import {
@@ -101,6 +102,7 @@ class TicketListPage extends React.Component {
                 hasBadgeFilter : null,
                 showOnlyPrintable: false,
                 promocodesFilter: [],
+                promocodeTags:[],
             }
         }
     }
@@ -559,9 +561,8 @@ class TicketListPage extends React.Component {
                               id="promocodeTags"
                               value={ticketFilters.promocodeTags}
                               onChange={ev => this.handleFilterChange('promocodeTags', ev.target.value)}
-                              summitId={currentSummit.id}
                               className="promocodes-filter"
-                              placeholder={T.translate('ticket_list.placeholders.promocodes')}
+                              placeholder={T.translate('ticket_list.placeholders.promocodes_tags')}
                               isClearable
                               multi
                             />

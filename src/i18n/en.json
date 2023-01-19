@@ -1264,7 +1264,8 @@
       "owner_first_name": "First name starts with ...",
       "view_types": "Filter by View Types ...",
       "view_type": "Select a View Type ...",
-      "promocodes": "Select a Promocodes ...",
+      "promocodes": "Select a Promo Code ...",
+      "promocodes_tags": "Select a Promo Code Tag ...",
       "select_fields": "Select data to display"
     }
   },
