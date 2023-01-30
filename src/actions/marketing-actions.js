@@ -140,18 +140,31 @@ export const saveMarketingSetting = (entity, file, selectionPlanId) => async (di
     const params = { access_token : accessToken };
 
     if(selectionPlanId) {
-        postFile(
-            createAction(UPDATE_SETTING),
-            createAction(SETTING_ADDED),
-            `${window.MARKETING_API_BASE_URL}/api/v1/config-values`,
-            file,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                console.log('mkt settings selection p[lan', payload);
-            });
+        if (entity.id) {
+            putFile(
+                createAction(UPDATE_SETTING),
+                createAction(SETTING_UPDATED),
+                `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
+                file,
+                normalizedEntity,
+                authErrorHandler,
+                entity
+            )(params)(dispatch)
+                .then((payload) => {
+                });
+        } else {
+            postFile(
+                createAction(UPDATE_SETTING),
+                createAction(SETTING_ADDED),
+                `${window.MARKETING_API_BASE_URL}/api/v1/config-values`,
+                file,
+                normalizedEntity,
+                authErrorHandler,
+                entity
+            )(params)(dispatch)
+                .then((payload) => {
+                });
+        }
     } else {
 
         if (entity.id) {

@@ -142,7 +142,7 @@ class SelectionPlanForm extends React.Component {
     }
 
     if(id.startsWith('cfp_')) {
-      entity['marketing_settings'][id] = value;
+      entity['marketing_settings'][id].value = value;
     } else {
       errors[id] = '';
       entity[id] = value;
@@ -168,7 +168,7 @@ class SelectionPlanForm extends React.Component {
     const marketing_settings = []
     
     Object.keys(entity.marketing_settings).map(m => {
-      const mkt_setting = { type: 'TEXT', key: m.toUpperCase(), value: entity.marketing_settings[m], selection_plan_id: entity.id }      
+      const mkt_setting = { id: entity.marketing_settings[m].id, type: 'TEXT', key: m.toUpperCase(), value: entity.marketing_settings[m].value, selection_plan_id: entity.id }
       marketing_settings.push(this.props.saveMarketingSettings(mkt_setting, null, entity.id))
     })
 
@@ -754,7 +754,7 @@ class SelectionPlanForm extends React.Component {
                   className="form-control"
                   error={this.hasErrors('cfp_speakers_singular_label')}
                   onChange={this.handleChange}
-                  value={entity.marketing_settings.cfp_speakers_singular_label}
+                  value={entity.marketing_settings.cfp_speakers_singular_label?.value}
                 />
               </div>
               <div className="col-md-6">
@@ -767,7 +767,35 @@ class SelectionPlanForm extends React.Component {
                   className="form-control"
                   error={this.hasErrors('cfp_speakers_plural_label')}
                   onChange={this.handleChange}
-                  value={entity.marketing_settings.cfp_speakers_plural_label}
+                  value={entity.marketing_settings.cfp_speakers_plural_label?.value}
+                />
+              </div>
+            </div>
+            <div className="row form-group">
+              <div className="col-md-6">
+                <label> {T.translate("edit_selection_plan.cfp_presentations_singular_label")}&nbsp;
+                  <i className="fa fa-info-circle" aria-hidden="true"
+                    title={T.translate("edit_selection_plan.cfp_presentations_singular_label_info")}/>
+                </label>
+                <Input
+                  id="cfp_presentations_singular_label"
+                  className="form-control"
+                  error={this.hasErrors('cfp_presentations_singular_label')}
+                  onChange={this.handleChange}
+                  value={entity.marketing_settings.cfp_presentations_singular_label?.value}
+                />
+              </div>
+              <div className="col-md-6">
+                <label> {T.translate("edit_selection_plan.cfp_presentations_plural_label")}&nbsp;
+                  <i className="fa fa-info-circle" aria-hidden="true"
+                    title={T.translate("edit_selection_plan.cfp_presentations_plural_label_info")}/>
+                </label>
+                <Input
+                  id="cfp_presentations_plural_label"
+                  className="form-control"
+                  error={this.hasErrors('cfp_presentations_plural_label')}
+                  onChange={this.handleChange}
+                  value={entity.marketing_settings.cfp_presentations_plural_label?.value}
                 />
               </div>
             </div>
@@ -782,7 +810,7 @@ class SelectionPlanForm extends React.Component {
                   className="form-control"
                   error={this.hasErrors('cfp_presentation_summary_title_label')}
                   onChange={this.handleChange}
-                  value={entity.marketing_settings.cfp_presentation_summary_title_label}
+                  value={entity.marketing_settings.cfp_presentation_summary_title_label?.value}
                 />
               </div>
               <div className="col-md-6">
@@ -795,7 +823,7 @@ class SelectionPlanForm extends React.Component {
                   className="form-control"
                   error={this.hasErrors('cfp_presentation_summary_abstract_label')}
                   onChange={this.handleChange}
-                  value={entity.marketing_settings.cfp_presentation_summary_abstract_label}
+                  value={entity.marketing_settings.cfp_presentation_summary_abstract_label?.value}
                 />
               </div>
             </div>
@@ -810,35 +838,7 @@ class SelectionPlanForm extends React.Component {
                   className="form-control"
                   error={this.hasErrors('cfp_presentation_summary_social_summary_label')}
                   onChange={this.handleChange}
-                  value={entity.marketing_settings.cfp_presentation_summary_social_summary_label}
-                />
-              </div>
-              <div className="col-md-6">
-                <label> {T.translate("edit_selection_plan.cfp_presentations_singular_label")}&nbsp;
-                  <i className="fa fa-info-circle" aria-hidden="true"
-                    title={T.translate("edit_selection_plan.cfp_presentations_singular_label_info")}/>
-                </label>
-                <Input
-                  id="cfp_presentations_singular_label"
-                  className="form-control"
-                  error={this.hasErrors('cfp_presentations_singular_label')}
-                  onChange={this.handleChange}
-                  value={entity.marketing_settings.cfp_presentations_singular_label}
-                />
-              </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label> {T.translate("edit_selection_plan.cfp_presentations_plural_label")}&nbsp;
-                  <i className="fa fa-info-circle" aria-hidden="true"
-                    title={T.translate("edit_selection_plan.cfp_presentations_plural_label_info")}/>
-                </label>
-                <Input
-                  id="cfp_presentations_plural_label"
-                  className="form-control"
-                  error={this.hasErrors('cfp_presentations_plural_label')}
-                  onChange={this.handleChange}
-                  value={entity.marketing_settings.cfp_presentations_plural_label}
+                  value={entity.marketing_settings.cfp_presentation_summary_social_summary_label?.value}
                 />
               </div>
               <div className="col-md-6">
@@ -851,7 +851,7 @@ class SelectionPlanForm extends React.Component {
                   className="form-control"
                   error={this.hasErrors('cfp_presentation_summary_links_label')}
                   onChange={this.handleChange}
-                  value={entity.marketing_settings.cfp_presentation_summary_links_label}
+                  value={entity.marketing_settings.cfp_presentation_summary_links_label?.value}
                 />
               </div>
             </div>

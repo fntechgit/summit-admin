@@ -250,9 +250,9 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_SELECTION_PLAN_SETTINGS: {
             let data = payload.response.data;
             // parse data
-            const settings = data.map(ms => ({ [ms.key.toLowerCase()]: ms.value}));
+            const settings = data.map(ms => ({[ms.key.toLowerCase()] : {id: ms.id || null, value: ms.value}}));
             // array to object
-            const marketing_setting = Object.assign(...settings, {})
+            const marketing_setting = Object.assign(...settings, {});
             return { ...state, entity: { ...state.entity, marketing_settings: marketing_setting } }
         }
         default:
