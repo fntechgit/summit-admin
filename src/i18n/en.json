@@ -1887,6 +1887,7 @@
     "key": "Key",
     "type": "Type",
     "value": "Value",
+    "selection_plan": "Selection Plan",
     "plain_text": "Plain Text",
     "html": "Html",
     "file": "File",
