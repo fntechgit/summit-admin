@@ -712,7 +712,7 @@ export const exportEvents = (term = null, order = 'id', orderDir = 1, extraFilte
 
     if (term) {
         const escapedTerm = escapeFilterValue(term);
-        let searchString = `title=@${escapedTerm},abstract=@${escapedTerm},tags=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm},speaker_title=@${escapedTerm},speaker_company=@${escapedTerm}`;
+        let searchString = `title=@${escapedTerm},abstract=@${escapedTerm},speaker_title=@${escapedTerm}`;
 
         if (parseInt(term)) {
             searchString += `,id==${parseInt(term)}`;

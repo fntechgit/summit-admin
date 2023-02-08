@@ -45,7 +45,7 @@ const fieldNames = [
     { columnKey: 'start_date', value: 'start_date', sortable: true },
     { columnKey: 'end_date', value: 'end_date', sortable: true },
     { columnKey: 'submitters', value: 'submitters' },
-    { columnKey: 'stream_url', value: 'stream_url' },
+    { columnKey: 'streaming_url', value: 'streaming_url' },
     { columnKey: 'meeting_url', value: 'meeting_url' },
     { columnKey: 'etherpad_url', value: 'etherpad_url' },
     { columnKey: 'streaming_type', value: 'streaming_type' },
@@ -105,7 +105,7 @@ class SummitEventListPage extends React.Component {
                 duration_filter: '',
                 speakers_count_filter: '',
                 submitters: [],
-                stream_url: '',
+                streaming_url: '',
                 meeting_url: '',
                 etherpad_url: '',
                 streaming_type: '',
@@ -289,7 +289,7 @@ class SummitEventListPage extends React.Component {
                     duration_filter: '',
                     speakers_count_filter: '',
                     submitters: [],
-                    stream_url: '',
+                    streaming_url: '',
                     meeting_url: '',
                     etherpad_url: '',
                     streaming_type: '',
@@ -340,7 +340,7 @@ class SummitEventListPage extends React.Component {
                     duration_filter: '',
                     speakers_count_filter: '',
                     submitters: [],
-                    stream_url: '',
+                    streaming_url: '',
                     meeting_url: '',
                     etherpad_url: '',
                     streaming_type: '',
@@ -421,7 +421,7 @@ class SummitEventListPage extends React.Component {
             {label: 'Duration', value: 'duration_filter'},
             {label: 'Speaker Count', value: 'speakers_count_filter'},
             {label: 'Submitter', value: 'submitters'},
-            {label: 'Stream URL', value: 'stream_url'},
+            {label: 'Stream URL', value: 'streaming_url'},
             {label: 'Meeting URL', value: 'meeting_url'},
             {label: 'Etherpad URL', value: 'etherpad_url'},
             {label: 'Streaming Type', value: 'streaming_type'},
@@ -677,12 +677,12 @@ class SummitEventListPage extends React.Component {
                         />
                     </div>
                     }
-                    {enabledFilters.includes('stream_url') && 
+                    {enabledFilters.includes('streaming_url') && 
                         <div className={'col-md-6'}> 
                         <Input
-                            id='stream_url'
-                            value={eventFilters.stream_url}
-                            placeholder={T.translate("event_list.placeholders.stream_url")}
+                            id='streaming_url'
+                            value={eventFilters.streaming_url}
+                            placeholder={T.translate("event_list.placeholders.streaming_url")}
                             onChange={this.handleExtraFilterChange}
                         />
                     </div>
