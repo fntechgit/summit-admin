@@ -739,7 +739,7 @@ export const exportEvents = (term = null, order = 'id', orderDir = 1, extraFilte
     // order
     if (order != null && orderDir != null) {
         const orderDirSign = (orderDir === 1) ? '+' : '-';
-        params['order'] = `${orderDirSign}${order}`;
+        params['order'] = (order === 'created_by_fullname') ? `${orderDirSign}${order},${orderDirSign}created_by_email` : `${orderDirSign}${order}`;
     }
 
     dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`, params, filename));
