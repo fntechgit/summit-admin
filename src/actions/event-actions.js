@@ -114,7 +114,7 @@ export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', ord
     // order
     if (order != null && orderDir != null) {
         const orderDirSign = (orderDir === 1) ? '+' : '-';
-        params['order'] = `${orderDirSign}${order}`;
+        params['order'] = (order === 'created_by_fullname') ? `${orderDirSign}${order},${orderDirSign}created_by_email` : `${orderDirSign}${order}`;
     }
 
     return getRequest(
