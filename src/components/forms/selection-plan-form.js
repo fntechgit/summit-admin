@@ -756,6 +756,20 @@ class SelectionPlanForm extends React.Component {
             }}
           >
             <div className="row form-group">
+              <div className="col-md-12">
+                <label> {T.translate("edit_selection_plan.cfp_presentation_edition_custom_message")}&nbsp;
+                  <i className="fa fa-info-circle" aria-hidden="true"
+                    title={T.translate("edit_selection_plan.cfp_presentation_edition_custom_message_info")}/>
+                </label>
+                <TextEditor
+                  id="cfp_presentation_edition_custom_message"
+                  error={this.hasErrors('cfp_presentation_edition_custom_message')}
+                  onChange={this.handleChange}
+                  value={entity.marketing_settings.cfp_presentation_edition_custom_message?.value || ''}
+                />
+              </div>
+            </div>
+            <div className="row form-group">
               <div className="col-md-6">
                 <label> {T.translate("edit_selection_plan.cfp_speakers_singular_label")}&nbsp;
                   <i className="fa fa-info-circle" aria-hidden="true"
@@ -866,21 +880,7 @@ class SelectionPlanForm extends React.Component {
                   value={entity.marketing_settings.cfp_presentation_summary_links_label?.value || ''}
                 />
               </div>
-            </div>
-            <div className="row form-group">
-              <div className="col-md-12">
-                <label> {T.translate("edit_selection_plan.cfp_presentation_edition_custom_message")}&nbsp;
-                  <i className="fa fa-info-circle" aria-hidden="true"
-                    title={T.translate("edit_selection_plan.cfp_presentation_edition_custom_message_info")}/>
-                </label>
-                <TextEditor
-                  id="cfp_presentation_edition_custom_message"
-                  error={this.hasErrors('cfp_presentation_edition_custom_message')}
-                  onChange={this.handleChange}
-                  value={entity.marketing_settings.cfp_presentation_edition_custom_message?.value || ''}
-                />
-              </div>
-            </div>
+            </div>            
           </Panel>
         </>
         }
