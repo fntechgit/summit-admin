@@ -927,15 +927,15 @@ const parseFilters = (filters) => {
 
     if(filters.hasOwnProperty('streaming_url') && filters.streaming_url) {
         const searchString = escapeFilterValue(filters.streaming_url);
-        filter.push(`streaming_url=@${searchString}` )
+        filter.push(`streaming_url@@${searchString}` )
     }
     if(filters.hasOwnProperty('meeting_url') && filters.meeting_url) {
         const searchString = escapeFilterValue(filters.meeting_url);
-        filter.push(`meeting_url=@${searchString}` )
+        filter.push(`meeting_url@@${searchString}` )
     }
     if(filters.hasOwnProperty('etherpad_url') && filters.etherpad_url) {
         const searchString = escapeFilterValue(filters.etherpad_url);
-        filter.push(`etherpad_link=@${searchString}`)
+        filter.push(`etherpad_link@@${searchString}`)
     }
 
     if(filters.hasOwnProperty('streaming_type') && filters.streaming_type) {

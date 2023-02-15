@@ -861,7 +861,7 @@
     "apply_filters": "Apply Filters",
     "select_fields": "Select Data",
     "placeholders": {
-      "search_events": "Search by Id, Title, Abstract, Speaker, Speaker Company, Speaker Title, Company, Streaming URL, Meeting URL, Etherpad Link",
+      "search_events": "Search by Id, Title, Abstract, Speaker Title",
       "event_type_capacity": "Filter by Event Type Capacity",
       "selection_plan": "Filter by Selection Plan",
       "location": "Filter by Location",
