@@ -971,18 +971,10 @@ const parseFilters = (filters) => {
     }
 
     if (filters.hasOwnProperty('all_companies') && Array.isArray(filters.all_companies)
-        && filters.all_companies.length > 0) {        
-        filter.push(
-            'speaker_company==' + filters.all_companies.reduce(
-                (accumulator, tt) => accumulator + (accumulator !== '' ? '||' : '') + escapeFilterValue(tt.name),
-            ''),
-            'created_by_company==' + filters.all_companies.reduce(
-                (accumulator, tt) => accumulator + (accumulator !== '' ? '||' : '') + escapeFilterValue(tt.name),
-            ''),
-            'sponsor==' + filters.all_companies.reduce(
-                (accumulator, tt) => accumulator + (accumulator !== '' ? '||' : '') + escapeFilterValue(tt.name),
-            '')
-        );
+        && filters.all_companies.length > 0) {
+        const companies = filters.all_companies.reduce(
+            (accumulator, tt) => accumulator + (accumulator !== '' ? '||' : '') + escapeFilterValue(tt.name), '')
+        filter.push(`speaker_company==${companies},created_by_company==${companies},sponsor==${companies}`);
     }
 
     if(filters.is_public) {
