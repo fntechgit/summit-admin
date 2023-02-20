@@ -205,6 +205,7 @@ class SummitEventListPage extends React.Component {
         const {term, page, perPage} = this.props;
         const {eventFilters, selectedColumns} = this.state;
         key = (key === 'name') ? 'last_name' : key;
+        key = (key === 'submitter_company') ? 'created_by_company' : key;
         this.props.getEvents(term, page, perPage, key, dir, eventFilters, selectedColumns);
     }
 
