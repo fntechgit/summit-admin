@@ -702,10 +702,10 @@ render() {
                 </div>
                 <div className="col-md-3">
                     <label> {T.translate("edit_event.submitter")} </label> &nbsp;
-                        <i className='copy-button fa fa-copy'
+                        <i className='copy-button fa fa-clipboard'
                             onClick={() => { navigator.clipboard.writeText(
                                 entity.created_by.hasOwnProperty("email") ?
-                                    `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.email})` :
+                                    `${entity.created_by.first_name} ${entity.created_by.last_name} <${entity.created_by.email}>` :
                                     `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.id})`) 
                                 }}
                             title="Copy to clipboard" />
