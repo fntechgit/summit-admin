@@ -50,6 +50,7 @@ export const CLEAR_EMPTY_SPOTS                            = 'CLEAR_EMPTY_SPOTS';
 export const CLEAR_PUBLISHED_EVENTS                       = 'CLEAR_PUBLISHED_EVENTS';
 export const CHANGE_SUMMIT_BUILDER_FILTERS                = 'CHANGE_SUMMIT_BUILDER_FILTERS';
 export const SET_SLOT_SIZE                                = 'SET_SLOT_SIZE';
+export const SET_SOURCE                                = 'SET_SOURCE';
 
 export const getUnScheduleEventsPage =
     (
@@ -196,8 +197,12 @@ export const changeCurrentSelectedLocation = (currentSelectedLocation) => (dispa
     ));
 }
 
-export const changeSlotSize = (slotSize) => (dispatch, getState) => {
+export const changeSlotSize = (slotSize) => (dispatch) => {
     dispatch(createAction(SET_SLOT_SIZE)({slotSize}));
+}
+
+export const changeSource = (selectedSource) => (dispatch) => {
+    dispatch(createAction(SET_SOURCE)({selectedSource}));
 }
 
 export const getPublishedEventsBySummitDayLocation = (currentSummit, currentDay, currentLocation) => async (dispatch, getState) => {

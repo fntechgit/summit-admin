@@ -33,7 +33,7 @@ import
     ERROR_PUBLISH_EVENT,
     CLEAR_PUBLISHED_EVENTS,
     CHANGE_SUMMIT_BUILDER_FILTERS,
-    SET_SLOT_SIZE
+    SET_SLOT_SIZE, SET_SOURCE
 } from '../../actions/summit-builder-actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -62,7 +62,8 @@ const DEFAULT_STATE = {
     emptySpots: [],
     searchingEmpty: false,
     selectedFilters: [],
-    slotSize: DefaultEventMinutesDuration
+    slotSize: DefaultEventMinutesDuration,
+    selectedSource: 'unscheduled'
 };
 
 const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
@@ -85,6 +86,10 @@ const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
         case SET_SLOT_SIZE: {
             const {slotSize} = payload;
             return {...state, slotSize};
+        }
+        case SET_SOURCE: {
+            const {selectedSource} = payload;
+            return {...state, selectedSource};
         }
         case CHANGE_CURRENT_EVENT_TYPE: {
             let {eventType} = payload;
