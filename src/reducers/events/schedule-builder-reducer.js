@@ -18,6 +18,8 @@ import
     CHANGE_CURRENT_DAY,
     CHANGE_CURRENT_LOCATION,
     RECEIVE_SCHEDULE_EVENTS_PAGE,
+    REQUEST_PROPOSED_SCHEDULE,
+    RECEIVE_PROPOSED_SCHEDULE,
     CHANGE_CURRENT_EVENT_TYPE,
     CHANGE_CURRENT_TRACK,
     CHANGE_CURRENT_DURATION,
@@ -33,7 +35,10 @@ import
     ERROR_PUBLISH_EVENT,
     CLEAR_PUBLISHED_EVENTS,
     CHANGE_SUMMIT_BUILDER_FILTERS,
-    SET_SLOT_SIZE, SET_SOURCE
+    SET_SLOT_SIZE,
+    SET_PROPOSED_SLOT_SIZE,
+    SET_SOURCE,
+    CLEAR_PROPOSED_EVENTS
 } from '../../actions/summit-builder-actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -46,6 +51,7 @@ import {DefaultEventMinutesDuration} from "../../utils/constants";
 const DEFAULT_STATE = {
     scheduleEvents :  [],
     unScheduleEvents : [],
+    proposedSchedEvents : [],
     unScheduleEventsCurrentPage : null,
     unScheduleEventsLasPage : null,
     currentDay : null,
@@ -63,7 +69,11 @@ const DEFAULT_STATE = {
     searchingEmpty: false,
     selectedFilters: [],
     slotSize: DefaultEventMinutesDuration,
-    selectedSource: 'unscheduled'
+    selectedSource: 'unscheduled',
+    proposedSchedDay : null,
+    proposedSchedLocation : null,
+    proposedSchedTrack : null,
+    proposedSchedSlotSize: DefaultEventMinutesDuration,
 };
 
 const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
@@ -86,6 +96,10 @@ const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
         case SET_SLOT_SIZE: {
             const {slotSize} = payload;
             return {...state, slotSize};
+        }
+        case SET_PROPOSED_SLOT_SIZE: {
+            const {proposedSchedSlotSize} = payload;
+            return {...state, proposedSchedSlotSize};
         }
         case SET_SOURCE: {
             const {selectedSource} = payload;
@@ -118,7 +132,10 @@ const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
         case CLEAR_PUBLISHED_EVENTS:{
             return {...state, scheduleEvents : []};
         }
-        break;
+        case CLEAR_PROPOSED_EVENTS:{
+            const {proposedSchedDay, proposedSchedLocation, proposedSchedTrack} = payload;
+            return {...state, proposedSchedEvents : [], proposedSchedDay, proposedSchedLocation, proposedSchedTrack};
+        }
         case CHANGE_CURRENT_ORDER_BY:{
             let {orderBy} = payload;
             return {...state, currentUnScheduleOrderBy : orderBy};
@@ -166,6 +183,19 @@ const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
             };
         }
         break;
+        case REQUEST_PROPOSED_SCHEDULE:{
+            const { proposedSchedDay, proposedSchedLocation, proposedSchedTrack } = payload;
+            return {...state, proposedSchedDay, proposedSchedLocation, proposedSchedTrack };
+        }
+        case RECEIVE_PROPOSED_SCHEDULE:{
+            const { data } = payload.response;
+            const proposedSchedEvents = data.map(ev => {
+                const {summit_event, ...rest} = ev;
+                return ({...rest, id: summit_event.id, title: summit_event.title, description: summit_event.description, published: summit_event.published});
+            });
+            
+            return {...state, proposedSchedEvents};
+        }
         case UNPUBLISHED_EVENT:
         {
             let { event } = payload;

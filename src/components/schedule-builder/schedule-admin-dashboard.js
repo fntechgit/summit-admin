@@ -21,6 +21,7 @@ import {
   changeCurrentSelectedDay,
   changeCurrentSelectedLocation,
   getPublishedEventsBySummitDayLocation,
+  getProposedEvents,
   changeCurrentEventType,
   changeCurrentTrack,
   changeCurrentDuration,
@@ -36,6 +37,7 @@ import {
   clearPublishedEvents,
   changeSummitBuilderFilters,
   changeSlotSize,
+  changeProposedSlotSize,
   changeSource
 } from '../../actions/summit-builder-actions';
 
@@ -75,6 +77,9 @@ class ScheduleAdminDashBoard extends React.Component {
     this.onScheduleEvent = this.onScheduleEvent.bind(this);
     this.onDayChanged = this.onDayChanged.bind(this);
     this.onVenueChanged = this.onVenueChanged.bind(this);
+    this.onProposedDayChanged = this.onProposedDayChanged.bind(this);
+    this.onProposedVenueChanged = this.onProposedVenueChanged.bind(this);
+    this.onProposedTrackChanged = this.onProposedTrackChanged.bind(this);
     this.onUnScheduleEventsPageChange = this.onUnScheduleEventsPageChange.bind(this);
     this.onEventTypeChanged = this.onEventTypeChanged.bind(this);
     this.onTrackChanged = this.onTrackChanged.bind(this);
@@ -99,6 +104,7 @@ class ScheduleAdminDashBoard extends React.Component {
     this.handleDurationFilter = this.handleDurationFilter.bind(this);
     this.handleFiltersChange = this.handleFiltersChange.bind(this);
     this.onSlotSizeChange = this.onSlotSizeChange.bind(this);
+    this.onProposedSlotSizeChange = this.onProposedSlotSizeChange.bind(this);
     this.onSourceChange = this.onSourceChange.bind(this);
 
     this.fragmentParser = new FragmentParser();
@@ -109,6 +115,7 @@ class ScheduleAdminDashBoard extends React.Component {
     this.state = {
       showModal: false,
       durationFilter: props.currentDuration || '',
+      proposedSchedSelectedEvents: []
     }
   }
 
@@ -222,6 +229,17 @@ class ScheduleAdminDashBoard extends React.Component {
       location
     );
   }
+  
+  updateProposedList(day, location, track) {
+    const {currentSummit} = this.props;
+    this.props.getProposedEvents
+    (
+      currentSummit,
+      day,
+      location,
+      track
+    );
+  }
 
   onScheduleEvent(event, currentDay, startDateTime, duration= null) {
     const eventModel = new SummitEvent(event, this.props.currentSummit);
@@ -246,6 +264,21 @@ class ScheduleAdminDashBoard extends React.Component {
     this.filters = this.parseFilterFromFragment();
     this.byPassHashRefresh = true;
     this.updatePublishedList(currentDay, location);
+  }
+  
+  onProposedDayChanged(proposedSchedDay) {
+    const {proposedSchedLocation, proposedSchedTrack} = this.props;
+    this.updateProposedList(proposedSchedDay, proposedSchedLocation, proposedSchedTrack);
+  }
+  
+  onProposedVenueChanged(proposedSchedLocation) {
+    const {proposedSchedDay, proposedSchedTrack} = this.props;
+    this.updateProposedList(proposedSchedDay, proposedSchedLocation, proposedSchedTrack);
+  }
+  
+  onProposedTrackChanged(proposedSchedTrack) {
+    const {proposedSchedDay, proposedSchedLocation} = this.props;
+    this.updateProposedList(proposedSchedDay, proposedSchedLocation, proposedSchedTrack);
   }
 
   onUnScheduleEventsPageChange(currentPage) {
@@ -636,6 +669,10 @@ class ScheduleAdminDashBoard extends React.Component {
     this.props.changeSlotSize(value);
   }
   
+  onProposedSlotSizeChange(value) {
+    this.props.changeProposedSlotSize(value);
+  }
+  
   onSourceChange(ev) {
     this.props.changeSource(ev.target.value);
   }
@@ -644,10 +681,14 @@ class ScheduleAdminDashBoard extends React.Component {
 
     const {
       scheduleEvents,
+      proposedSchedEvents,
       unScheduleEvents,
       currentSummit,
       currentDay,
       currentLocation,
+      proposedSchedDay,
+      proposedSchedLocation,
+      proposedSchedTrack,
       unScheduleEventsCurrentPage,
       unScheduleEventsLasPage,
       currentEventType,
@@ -664,10 +705,11 @@ class ScheduleAdminDashBoard extends React.Component {
       selectedUnPublishedEvents,
       selectedFilters,
       slotSize,
+      proposedSchedSlotSize,
       selectedSource
     } = this.props;
 
-    const {durationFilter} = this.state;
+    const {durationFilter, proposedSchedSelectedEvents} = this.state;
 
     if (!currentSummit.id) return (<div/>);
 
@@ -879,18 +921,16 @@ class ScheduleAdminDashBoard extends React.Component {
             <div className="proposed-container">
               <ScheduleBuilderView
                 summit={currentSummit}
-                scheduleEvents={scheduleEvents}
-                selectedEvents={selectedPublishedEvents}
-                currentDay={currentDay}
-                currentVenue={currentLocation}
-                slotSize={slotSize}
-                onDayChanged={this.onDayChanged}
-                onVenueChanged={this.onVenueChanged}
-                onSlotSizeChange={this.onSlotSizeChange}
+                scheduleEvents={proposedSchedEvents}
+                selectedEvents={proposedSchedSelectedEvents}
+                currentDay={proposedSchedDay}
+                currentVenue={proposedSchedLocation}
+                slotSize={proposedSchedSlotSize}
+                onDayChanged={this.onProposedDayChanged}
+                onVenueChanged={this.onProposedVenueChanged}
+                onSlotSizeChange={this.onProposedSlotSizeChange}
                 onSelectAll={this.onSelectAllPublished}
                 onSelectedBulkAction={this.onSelectedBulkActionPublished}
-                onScheduleEvent={this.onScheduleEvent}
-                onUnPublishEvent={this.onUnPublishEvent}
                 onEditEvent={this.onEditEvent}
                 onClickSelected={this.onClickSelected}
               />
@@ -975,6 +1015,7 @@ export default connect(mapStateToProps, {
   changeCurrentSelectedDay,
   changeCurrentSelectedLocation,
   getPublishedEventsBySummitDayLocation,
+  getProposedEvents,
   changeCurrentEventType,
   changeCurrentTrack,
   changeCurrentDuration,
@@ -992,5 +1033,6 @@ export default connect(mapStateToProps, {
   clearPublishedEvents,
   changeSummitBuilderFilters,
   changeSlotSize,
+  changeProposedSlotSize,
   changeSource,
 })(ScheduleAdminDashBoard);
