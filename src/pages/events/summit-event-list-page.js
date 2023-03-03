@@ -704,23 +704,23 @@ class SummitEventListPage extends React.Component {
                             <div className={'col-md-3'}>
                                 <DateTimePicker
                                     id="start_date_from_filter"
-                                    format={{date:"YYYY-MM-DD", time: "HH:mm"}}
-                                    validation={{ before: eventFilters.start_date_filter[1] }}
+                                    format={{date:"YYYY-MM-DD", time: "HH:mm"}}                                    
                                     inputProps={{placeholder: T.translate("event_list.placeholders.start_date_from")}}
                                     timezone={currentSummit.time_zone.name}
                                     onChange={(ev) => this.handleChangeStartDate(ev, false)}
                                     value={epochToMomentTimeZone(eventFilters.start_date_filter[0], currentSummit.time_zone_id)}
+                                    className={'event-list-date-picker'}
                                 />
                             </div>                    
                             <div className={'col-md-3'}>
                                 <DateTimePicker
                                     id="start_date_to_filter"
                                     format={{date:"YYYY-MM-DD", time: "HH:mm"}}
-                                    validation={{ after: eventFilters.start_date_filter[0] }}
                                     inputProps={{placeholder: T.translate("event_list.placeholders.start_date_to")}}
                                     timezone={currentSummit.time_zone.name}
                                     onChange={(ev) => this.handleChangeStartDate(ev, true)}
                                     value={epochToMomentTimeZone(eventFilters.start_date_filter[1], currentSummit.time_zone_id)}
+                                    className={'event-list-date-picker'}
                                 />
                             </div>
                         </>
@@ -735,6 +735,7 @@ class SummitEventListPage extends React.Component {
                                     timezone={currentSummit.time_zone.name}
                                     onChange={(ev) => this.handleChangeEndDate(ev, false)}
                                     value={epochToMomentTimeZone(eventFilters.end_date_filter[0], currentSummit.time_zone_id)}
+                                    className={'event-list-date-picker'}
                                 />
                             </div>                    
                             <div className={'col-md-3'}>
@@ -745,6 +746,7 @@ class SummitEventListPage extends React.Component {
                                     timezone={currentSummit.time_zone.name}
                                     onChange={(ev) => this.handleChangeEndDate(ev, true)}
                                     value={epochToMomentTimeZone(eventFilters.end_date_filter[1], currentSummit.time_zone_id)}
+                                    className={'event-list-date-picker'}
                                 />
                             </div>
                         </>
