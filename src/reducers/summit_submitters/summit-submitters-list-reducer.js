@@ -67,15 +67,15 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
             let items = payload.response.data.map(s => {
 
                 const acceptedPresentationsToolTip = s.accepted_presentations.reduce(
-                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
+                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a target="_blank" href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
                 );
 
                 const rejectedPresentationsToolTip = s.rejected_presentations.reduce(
-                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
+                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a target="_blank" href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
                 );
 
                 const alternatePresentationsToolTip = s.alternate_presentations.reduce(
-                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
+                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a target="_blank" href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
                 );
 
                 return {
@@ -86,6 +86,7 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
                        onClick={ev => { ev.stopPropagation()}}
                        href="#">{s.accepted_presentations.length}
                         <ReactTooltip
+                            delayHide={1000}
                             id={`accepted_${s.id}`}
                             multiline={true}
                             clickable={true}
@@ -107,6 +108,7 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
                            onClick={ev => { ev.stopPropagation()}}
                            href="#">{s.alternate_presentations.length}
                             <ReactTooltip
+                                delayHide={1000}
                                 id={`alternate_${s.id}`}
                                 multiline={true}
                                 clickable={true}
@@ -127,6 +129,7 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
                        onClick={ev => { ev.stopPropagation()}}
                        href="#">{s.rejected_presentations.length}
                         <ReactTooltip
+                            delayHide={1000}
                             id={`rejected_${s.id}`}
                             multiline={true}
                             clickable={true}
