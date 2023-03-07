@@ -24,6 +24,7 @@ import {
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
+import {SpeakersSources as sources} from "../utils/constants";
 
 export const INIT_SUBMITTERS_LIST_PARAMS       = 'INIT_SUBMITTERS_LIST_PARAMS';
 
@@ -40,13 +41,18 @@ export const initSubmittersList = () => async (dispatch, getState) => {
     dispatch(createAction(INIT_SUBMITTERS_LIST_PARAMS)());
 }
 
-export const getSubmittersBySummit = (term = null, page = 1, perPage = 10, order = 'full_name', orderDir = 1, filters = {}) => async (dispatch, getState) => {
+export const getSubmittersBySummit = (term = null, page = 1, perPage = 10, order = 'full_name', orderDir = 1, filters = {}, source = null) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     
     const filter = parseFilters(filters);
+
+    if (source === sources.submitters_no_speakers) {
+        console.log('submitters_no_speakers');
+        filter.push('is_speaker==false');
+    }
 
     dispatch(startLoading());
 
@@ -89,7 +95,7 @@ export const getSubmittersBySummit = (term = null, page = 1, perPage = 10, order
     );
 }
 
-export const exportSummitSubmitters = (term = null, order = 'id', orderDir = 1, filters = {}) => async (dispatch, getState) => {
+export const exportSummitSubmitters = (term = null, order = 'id', orderDir = 1, filters = {}, source = null) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -100,6 +106,10 @@ export const exportSummitSubmitters = (term = null, order = 'id', orderDir = 1, 
     };
     
     const filter = parseFilters(filters);
+
+    if (source === sources.submitters_no_speakers) {
+        filter.push('is_speaker==false');
+    }
 
     if(term) {
         let filterTerm = buildTermFilter(term);

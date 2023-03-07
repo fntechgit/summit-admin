@@ -40,10 +40,7 @@ import {
     sendSubmitterEmails
 } from "../../actions/submitter-actions";
 
-const sources = {
-    speakers: 'speakers',
-    submitters: 'submitters',
-};
+import { SpeakersSources as sources } from "../../utils/constants";
 
 class SummitSpeakersListPage extends React.Component {
     constructor(props) {
@@ -100,13 +97,13 @@ class SummitSpeakersListPage extends React.Component {
     getBySummit(term, page, perPage, order, orderDir, filters) {
         const { source } = this.state;
         const callable = source === sources.speakers ? this.props.getSpeakersBySummit : this.props.getSubmittersBySummit;
-        callable(term, page, perPage, order, orderDir, filters);
+        callable(term, page, perPage, order, orderDir, filters, source);
     }
 
     export(term, order, orderDir, filters) {
         const { source } = this.state;
         const callable = source === sources.speakers ? this.props.exportSummitSpeakers : this.props.exportSummitSubmitters;
-        callable(term, order, orderDir, filters);
+        callable(term, order, orderDir, filters, source);
     }
 
     handleSpeakerSubmitterSourceChange(ev) {
@@ -317,8 +314,9 @@ class SummitSpeakersListPage extends React.Component {
         ];
 
         const speakerSubmitterSourceSelectorDDL = [
-            { label: 'Speakers', value: sources.speakers },
-            { label: 'Submitters', value: sources.submitters },
+            { label: T.translate("summit_speakers_list.speakers"), value: sources.speakers },
+            { label: T.translate("summit_submitters_list.submitters"), value: sources.submitters },
+            { label: T.translate("summit_submitters_list.submitters_no_speakers"), value: sources.submitters_no_speakers }
         ];
 
         let emailFlowDDL = this.state.source === sources.speakers ? [

@@ -10,8 +10,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from "react";
-
 import {
     INIT_SUBMITTERS_LIST_PARAMS,
     REQUEST_SUBMITTERS_BY_SUMMIT,
@@ -25,8 +23,8 @@ import {
 } from '../../actions/submitter-actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import ReactTooltip from "react-tooltip";
 import {REQUEST_SUMMIT, SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
+import {buildSpeakersSubmittersList} from "../utils/methods";
 
 const DEFAULT_STATE = {
     items: [],
@@ -64,113 +62,26 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_SUBMITTERS_BY_SUMMIT: {
             let { current_page, total, last_page } = payload.response;
 
-            let items = payload.response.data.map(s => {
-
-                const acceptedPresentationsToolTip = s.accepted_presentations.reduce(
-                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a target="_blank" href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
-                );
-
-                const rejectedPresentationsToolTip = s.rejected_presentations.reduce(
-                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a target="_blank" href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
-                );
-
-                const alternatePresentationsToolTip = s.alternate_presentations.reduce(
-                    (ac, ap) => ac +(ac !== '' ? '<br>':'') + `<a target="_blank" href="/app/summits/${state.currentSummitId}/events/${ap.id}">${ap.title}</a>`, ''
-                );
-
-                return {
-                ...s,
-                    full_name: `${s.first_name} ${s.last_name}`,
-                    accepted_presentations_count : s.accepted_presentations.length > 0 ?
-                    <a data-tip={acceptedPresentationsToolTip} data-for={`accepted_${s.id}`}
-                       onClick={ev => { ev.stopPropagation()}}
-                       href="#">{s.accepted_presentations.length}
-                        <ReactTooltip
-                            delayHide={1000}
-                            id={`accepted_${s.id}`}
-                            multiline={true}
-                            clickable={true}
-                            border={true}
-                            getContent={(dataTip) =>
-                                <div className="tooltip-popover"
-                                     dangerouslySetInnerHTML={{__html: dataTip}}
-                                />
-                            }
-                            place='bottom'
-                            type='light'
-                            effect='solid'
-                        />
-                    </a>
-                    : 'N/A',
-                alternate_presentations_count :
-                    s.alternate_presentations.length > 0 ?
-                        <a data-tip={alternatePresentationsToolTip} data-for={`alternate_${s.id}`}
-                           onClick={ev => { ev.stopPropagation()}}
-                           href="#">{s.alternate_presentations.length}
-                            <ReactTooltip
-                                delayHide={1000}
-                                id={`alternate_${s.id}`}
-                                multiline={true}
-                                clickable={true}
-                                border={true}
-                                getContent={(dataTip) =>
-                                    <div className="tooltip-popover"
-                                         dangerouslySetInnerHTML={{__html: dataTip}}
-                                    />
-                                }
-                                place='bottom'
-                                type='light'
-                                effect='solid'
-                            />
-                        </a>
-                        : 'N/A',
-                rejected_presentations_count : s.rejected_presentations.length > 0 ?
-                    <a data-tip={rejectedPresentationsToolTip} data-for={`rejected_${s.id}`}
-                       onClick={ev => { ev.stopPropagation()}}
-                       href="#">{s.rejected_presentations.length}
-                        <ReactTooltip
-                            delayHide={1000}
-                            id={`rejected_${s.id}`}
-                            multiline={true}
-                            clickable={true}
-                            border={true}
-                            getContent={(dataTip) =>
-                                <div className="tooltip-popover"
-                                     dangerouslySetInnerHTML={{__html: dataTip}}
-                                />
-                            }
-                            place='bottom'
-                            type='light'
-                            effect='solid'
-                        /></a>
-            : 'N/A'
-            }});
-
             return {
                 ...state,
-                items: items,
+                items: buildSpeakersSubmittersList(state, payload.response.data),
                 currentPage: current_page,
                 totalItems: total,
                 lastPage: last_page,
             };
         }
-            break;
         case SELECT_SUMMIT_SUBMITTER: {
             return { ...state, selectedItems: [...state.selectedItems, payload], selectedAll: false }
         }
-            break;
         case UNSELECT_SUMMIT_SUBMITTER: {
             return { ...state, selectedItems: state.selectedItems.filter(e => e !== payload), selectedAll: false }
         }
-            break;
         case SELECT_ALL_SUMMIT_SUBMITTERS: {
             return { ...state, selectedAll: true, selectedItems:[] }
         }
-            break;
         case UNSELECT_ALL_SUMMIT_SUBMITTERS: {
             return { ...state, selectedAll: false, selectedItems:[]  }
         }
-            break;
         case SEND_SUBMITTERS_EMAILS: {
             return {
                 ...state,
@@ -179,11 +90,9 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
                 selectedAll: false
             }
         }
-            break;
         case SET_SUBMITTERS_CURRENT_FLOW_EVENT: {
             return { ...state, currentFlowEvent: payload };
         }
-            break;
         default:
             return state;
     }
