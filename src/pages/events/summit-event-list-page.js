@@ -430,28 +430,28 @@ class SummitEventListPage extends React.Component {
         const streaming_type_ddl = [{ label: 'LIVE', value: 'LIVE' }, { label: 'VOD', value: 'VOD' }];
 
         const filters_ddl = [
-            {label: 'Event Type Capacity', value: 'event_type_capacity_filter'},
+            {label: 'Activity Type Capacity', value: 'event_type_capacity_filter'},
             {label: 'Selection Plan', value: 'selection_plan_id_filter'},
             {label: 'Location', value: 'location_id_filter'},
             {label: 'Selection Status', value: 'selection_status_filter'},
             {label: 'Published Status', value: 'published_filter'},
             {label: 'Activity Category', value: 'track_id_filter'},
             {label: 'Activity Type', value: 'event_type_id_filter'},
-            {label: 'Speaker', value: 'speaker_id_filter'},
-            {label: 'Speaker Company', value: 'speaker_company'},
+            {label: 'Speakers', value: 'speaker_id_filter'},
+            {label: 'Speakers Companies', value: 'speaker_company'},
             {label: 'Level', value: 'level_filter'},
             {label: 'Tags', value: 'tags_filter'},
             {label: 'Start Date', value: 'start_date_filter'},
             {label: 'End Date', value: 'end_date_filter'},
             {label: 'Duration', value: 'duration_filter'},
-            {label: 'Speaker Count', value: 'speakers_count_filter'},
+            {label: 'Speakers Count', value: 'speakers_count_filter'},
             {label: 'Submitter', value: 'submitters'},
             {label: 'Submitter Company', value: 'submitter_company'},
             {label: 'Stream URL', value: 'streaming_url'},
             {label: 'Meeting URL', value: 'meeting_url'},
             {label: 'Etherpad URL', value: 'etherpad_url'},
             {label: 'Streaming Type', value: 'streaming_type'},
-            {label: 'Sponsor', value: 'sponsor'},
+            {label: 'Sponsors', value: 'sponsor'},
             {label: 'All Companies', value: 'all_companies'},            
         ]
 
