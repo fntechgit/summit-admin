@@ -47,11 +47,16 @@ const fieldNames = [
     { columnKey: 'end_date', value: 'end_date', sortable: true },
     { columnKey: 'submitters', value: 'submitters' },
     { columnKey: 'submitter_company', value: 'submitter_company', sortable: true },
-    { columnKey: 'streaming_url', value: 'streaming_url' },
-    { columnKey: 'meeting_url', value: 'meeting_url' },
-    { columnKey: 'etherpad_url', value: 'etherpad_url' },
-    { columnKey: 'streaming_type', value: 'streaming_type' },
-    { columnKey: 'sponsor', value: 'sponsor', sortable: true }
+    { columnKey: 'sponsor', value: 'sponsor', sortable: true },
+    { columnKey: 'event_type_capacity', value: 'event_type_capacity' },
+    { columnKey: 'selection_plan', value: 'selection_plan', sortable: true },
+    { columnKey: 'location', value: 'location', sortable: true },
+    { columnKey: 'level', value: 'level', sortable: true },
+    { columnKey: 'tags', value: 'tags', sortable: true },
+    { columnKey: 'streaming_url', value: 'streaming_url', sortable: true, title: true },
+    { columnKey: 'meeting_url', value: 'meeting_url', sortable: true, title: true },
+    { columnKey: 'etherpad_url', value: 'etherpad_url', sortable: true, title: true },
+    { columnKey: 'streaming_type', value: 'streaming_type', sortable: true },
 ]
 
 class SummitEventListPage extends React.Component {
@@ -400,6 +405,7 @@ class SummitEventListPage extends React.Component {
         const table_options = {
             sortCol: (order === 'last_name') ? 'name' : order,
             sortDir: orderDir,
+            className: "summit-event-list-table",
             actions: {
                 edit: {onClick: this.handleEdit},
                 delete: { onClick: this.handleDeleteEvent }
@@ -430,7 +436,7 @@ class SummitEventListPage extends React.Component {
         const streaming_type_ddl = [{ label: 'LIVE', value: 'LIVE' }, { label: 'VOD', value: 'VOD' }];
 
         const filters_ddl = [
-            {label: 'Event Type Capacity', value: 'event_type_capacity_filter'},
+            {label: 'Activity Type Capacity', value: 'event_type_capacity_filter'},
             {label: 'Selection Plan', value: 'selection_plan_id_filter'},
             {label: 'Location', value: 'location_id_filter'},
             {label: 'Selection Status', value: 'selection_status_filter'},
@@ -456,6 +462,7 @@ class SummitEventListPage extends React.Component {
         ]
 
         const ddl_columns = [
+            { value: 'event_type_capacity', label: T.translate("event_list.event_type_capacity")},
             { value: 'speakers', label: T.translate("event_list.speakers") },
             { value: 'created_by_fullname', label: T.translate("event_list.created_by") },
             { value: 'submitter_company', label: T.translate("event_list.submitter_company")},
@@ -467,7 +474,15 @@ class SummitEventListPage extends React.Component {
             { value: 'start_date', label: T.translate("event_list.start_date") },
             { value: 'end_date', label: T.translate("event_list.end_date") },
             { value: 'sponsor', label: T.translate("event_list.sponsor") },
-            { value: 'all_companies', label: T.translate("event_list.all_companies") }
+            { value: 'all_companies', label: T.translate("event_list.all_companies") },
+            { value: 'selection_plan', label: T.translate("event_list.selection_plan") },
+            { value: 'location', label: T.translate("event_list.location") },
+            { value: 'level', label: T.translate("event_list.level") },
+            { value: 'tags', label: T.translate("event_list.tags") },
+            { value: 'streaming_url', label: T.translate("event_list.streaming_url") },
+            { value: 'meeting_url', label: T.translate("event_list.meeting_url") },
+            { value: 'etherpad_url', label: T.translate("event_list.etherpad_url") },
+            { value: 'streaming_type', label: T.translate("event_list.streaming_type") },
         ];
 
         const ddl_filterByEventTypeCapacity = [
@@ -481,7 +496,8 @@ class SummitEventListPage extends React.Component {
         .map( f2 => (
             {   columnKey: f2.columnKey,
                 value: T.translate(`event_list.${f2.value}`),
-                sortable: f2.sortable
+                sortable: f2.sortable,
+                title: f2.title
             }));
 
         columns = [...columns, ...showColumns];
@@ -864,12 +880,14 @@ class SummitEventListPage extends React.Component {
 
                 {events.length > 0 &&
                 <div>
-                    <Table
-                        options={table_options}
-                        data={events}
-                        columns={columns}
-                        onSort={this.handleSort}
-                    />
+                    <div className='summit-event-list-table-wrapper'>                        
+                        <Table
+                            options={table_options}
+                            data={events}
+                            columns={columns}
+                            onSort={this.handleSort}
+                        />
+                    </div>
                     <Pagination
                         bsSize="medium"
                         prev
