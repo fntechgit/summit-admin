@@ -227,7 +227,7 @@ class SummitSpeakersListPage extends React.Component {
         const callable = isSpeakerMode ? this.props.sendSpeakerEmails : this.props.sendSubmitterEmails;
 
         callable(currentFlowEvent, selectedAll, selectedItems, testRecipient, excerptRecipient, shouldSendCopy2Submitter, term,
-            { selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter })
+            { selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter }, source)
     }
 
     showEmailSendModal(ev) {

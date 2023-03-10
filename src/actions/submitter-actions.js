@@ -50,7 +50,6 @@ export const getSubmittersBySummit = (term = null, page = 1, perPage = 10, order
     const filter = parseFilters(filters);
 
     if (source === sources.submitters_no_speakers) {
-        console.log('submitters_no_speakers');
         filter.push('is_speaker==false');
     }
 
@@ -132,14 +131,28 @@ export const exportSummitSubmitters = (term = null, order = 'id', orderDir = 1, 
     dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/submitters/csv`, params, filename));
 }
 
+/**
+ * @param currentFlowEvent
+ * @param selectedAll
+ * @param selectedIds
+ * @param testRecipient
+ * @param excerptRecipient
+ * @param shouldSendCopy2Submitter
+ * @param term
+ * @param filters
+ * @param source
+ * @returns {function(*=, *): *}
+ */
 export const sendSubmitterEmails = (currentFlowEvent,
                            selectedAll = false ,
                            selectedIds = [],
                            testRecipient = '',
                            excerptRecipient= '',
+                           // not used only left to keep the signature
                            shouldSendCopy2Submitter = false,
                            term = '',
-                           filters = {}
+                           filters = {},
+                           source = null
                            ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
@@ -151,6 +164,10 @@ export const sendSubmitterEmails = (currentFlowEvent,
     };
 
     const filter = parseFilters(filters);
+
+    if (source && source === sources.submitters_no_speakers) {
+        filter.push('is_speaker==false');
+    }
 
     if(term) {
         const escapedTerm = escapeFilterValue(term);
@@ -170,7 +187,6 @@ export const sendSubmitterEmails = (currentFlowEvent,
 
     const payload =  {
         email_flow_event : currentFlowEvent,
-        should_send_copy_2_submitter : shouldSendCopy2Submitter,
     };
 
     if(!selectedAll && selectedIds.length > 0){

@@ -801,6 +801,18 @@ export const exportSummitSpeakers = (term = null, order = 'id', orderDir = 1, fi
     dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers/csv`, params, filename));
 }
 
+/**
+ * @param currentFlowEvent
+ * @param selectedAll
+ * @param selectedIds
+ * @param testRecipient
+ * @param excerptRecipient
+ * @param shouldSendCopy2Submitter
+ * @param term
+ * @param filters
+ * @param source
+ * @returns {function(*=, *): *}
+ */
 export const sendSpeakerEmails = (currentFlowEvent,
                            selectedAll = false ,
                            selectedIds = [],
@@ -808,7 +820,8 @@ export const sendSpeakerEmails = (currentFlowEvent,
                            excerptRecipient= '',
                            shouldSendCopy2Submitter = false,
                            term = '',
-                           filters = {}
+                           filters = {},
+                           source = null
                            ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
