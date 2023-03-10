@@ -98,6 +98,8 @@ export const DEFAULT_ENTITY = {
         cfp_presentation_summary_links_label: {id : 0 , value: ''},
         cfp_presentation_edition_custom_message: {id : 0 , value: ''},
         cfp_presentation_edition_default_tab: {id : 0 , value: ''},
+        cfp_presentation_summary_hide_track_selection: {id : 0 , value: false},
+        cfp_presentation_summary_hide_activity_type_selection: {id : 0 , value: false},
     }
 }
 
@@ -274,7 +276,7 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_SELECTION_PLAN_SETTINGS: {
             let data = payload.response.data;
             // parse data
-            const settings = data.map(ms => ({[ms.key.toLowerCase()] : {id: ms.id || null, value: ms.value}}));
+            const settings = data.map(ms => ({[ms.key.toLowerCase()] : {id: ms.id || null, value: ms.value === '1' ? true : ms.value === '0' ? false : ms.value}}));
             // array to object
             const marketing_settings = Object.assign(...settings, {});
             return { ...state, entity: { ...state.entity, marketing_settings: {...state.entity.marketing_settings, ...marketing_settings} } }

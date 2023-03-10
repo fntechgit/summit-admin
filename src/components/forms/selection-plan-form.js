@@ -26,6 +26,7 @@ import {
     Table,
     Dropdown,
 } from 'openstack-uicore-foundation/lib/components';
+import Switch from "react-switch";
 import {isEmpty, scrollToError, shallowEqual, stripTags} from "../../utils/methods";
 import EmailTemplateInput from "../inputs/email-template-input";
 import ImportModal from "../inputs/import-modal/index.jsx";
@@ -79,6 +80,7 @@ class SelectionPlanForm extends React.Component {
         this.handleImportAllowedMembers = this.handleImportAllowedMembers.bind(this);
         this.handleDeleteAllowedMember = this.handleDeleteAllowedMember.bind(this);
         this.handleAllowedMembersPageChange = this.handleAllowedMembersPageChange.bind(this);
+        this.handleOnSwitchChange = this.handleOnSwitchChange.bind(this);
     }
 
     fetchSummitSelectionPlanExtraQuestions(input, callback) {
@@ -176,11 +178,12 @@ class SelectionPlanForm extends React.Component {
         const marketing_settings = []
         Object.keys(entity.marketing_settings).map(m => {
             const setting_type = m === 'cfp_presentation_edition_custom_message' ? 'TEXTAREA' : 'TEXT';
+            const questionValue = typeof(entity.marketing_settings[m].value) === 'boolean' ?  entity.marketing_settings[m].value ? '1' : '0' : entity.marketing_settings[m].value;
             const mkt_setting = {
                 id: entity.marketing_settings[m].id,
                 type: setting_type,
                 key: m.toUpperCase(),
-                value: entity.marketing_settings[m].value ?? '',
+                value: questionValue ?? '',
                 selection_plan_id: entity.id
             }
             marketing_settings.push(this.props.saveMarketingSettings(mkt_setting))
@@ -282,6 +285,19 @@ class SelectionPlanForm extends React.Component {
         let {showSection} = this.state;
         let newShowSection = (showSection === section) ? 'main' : section;
         this.setState({showSection: newShowSection});
+    }
+
+    handleOnSwitchChange(setting, value) {
+        let entity = {...this.state.entity};
+        let errors = {...this.state.errors};
+
+        if (!entity['marketing_settings'].hasOwnProperty(setting)) {
+            entity['marketing_settings'][setting] = {value: ''};
+        }
+
+        entity['marketing_settings'][setting].value = value;
+
+        this.setState({entity: entity, errors: errors});
     }
 
     render() {
@@ -920,6 +936,34 @@ class SelectionPlanForm extends React.Component {
                                 />
                             </div>
                         </div>
+                        <div className="row form-group">
+                            <div className="col-md-6">
+                                <label> {T.translate("edit_selection_plan.cfp_presentation_summary_hide_track_selection")}&nbsp;
+                                    <i className="fa fa-info-circle" aria-hidden="true"
+                                       title={T.translate("edit_selection_plan.cfp_presentation_summary_hide_track_selection_info")}/>
+                                </label>
+                                <Switch
+                                    checked={entity.marketing_settings.cfp_presentation_summary_hide_track_selection?.value || false}
+                                    onChange={val => {this.handleOnSwitchChange('cfp_presentation_summary_hide_track_selection', val)}}
+                                    uncheckedIcon={false}
+                                    checkedIcon={false}
+                                    className="react-switch"
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <label> {T.translate("edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection")}&nbsp;
+                                    <i className="fa fa-info-circle" aria-hidden="true"
+                                       title={T.translate("edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection_info")}/>
+                                </label>
+                                <Switch
+                                    checked={entity.marketing_settings.cfp_presentation_summary_hide_activity_type_selection?.value || false}
+                                    onChange={val => {this.handleOnSwitchChange('cfp_presentation_summary_hide_activity_type_selection', val)}}
+                                    uncheckedIcon={false}
+                                    checkedIcon={false}
+                                    className="react-switch"
+                                />
+                            </div>
+                        </div>                        
                     </Panel>
                 </>
                 }
