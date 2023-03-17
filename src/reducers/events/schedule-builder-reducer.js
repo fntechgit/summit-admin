@@ -193,7 +193,6 @@ const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
                 const {summit_event, ...rest} = ev;
                 return ({...rest, id: summit_event.id, title: summit_event.title, description: summit_event.description, published: summit_event.published});
             });
-            
             return {...state, proposedSchedEvents};
         }
         case UNPUBLISHED_EVENT:

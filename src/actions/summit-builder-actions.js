@@ -55,6 +55,7 @@ export const CHANGE_SUMMIT_BUILDER_FILTERS                = 'CHANGE_SUMMIT_BUILD
 export const SET_SLOT_SIZE                                = 'SET_SLOT_SIZE';
 export const SET_PROPOSED_SLOT_SIZE                       = 'SET_PROPOSED_SLOT_SIZE';
 export const SET_SOURCE                                = 'SET_SOURCE';
+export const PROPOSED_EVENTS_PUBLISHED                 = 'PROPOSED_EVENTS_PUBLISHED';
 
 export const getUnScheduleEventsPage =
     (
@@ -279,6 +280,25 @@ export const getProposedEvents = (summit, proposedSchedDay, proposedSchedLocatio
       .then(() =>
         dispatch(stopLoading())
       );
+}
+
+export const publishAllProposed = (eventIds) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const params = { access_token : accessToken };
+    dispatch(startLoading());
+    
+    putRequest(
+      null,
+      createAction(PROPOSED_EVENTS_PUBLISHED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/proposed-schedules/track-chairs/presentations/all/publish`,
+      {event_ids : eventIds},
+      authErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+          dispatch(stopLoading());
+      });
 }
 
 export const changeCurrentEventType = (currentEventType) => (dispatch, getState) => {

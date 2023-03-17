@@ -38,7 +38,8 @@ import {
   changeSummitBuilderFilters,
   changeSlotSize,
   changeProposedSlotSize,
-  changeSource
+  changeSource,
+  publishAllProposed
 } from '../../actions/summit-builder-actions';
 
 import {
@@ -65,8 +66,7 @@ import * as Scroll from 'react-scroll';
 import Swal from "sweetalert2";
 import ScheduleAdminEmptySpotsModal from './schedule-admin-empty-spots-modal';
 import ScheduleAdminEmptySpotsList from './schedule-admin-empty-spots-list';
-import {epochToMomentTimeZone} from 'openstack-uicore-foundation/lib/utils/methods';
-import {Dropdown, OperatorInput, ScheduleBuilderView, BulkActionsSelector} from 'openstack-uicore-foundation/lib/components';
+import {Dropdown, OperatorInput, BulkActionsSelector, ScheduleBuilderView} from 'openstack-uicore-foundation/lib/components';
 import {SummitEvent} from "openstack-uicore-foundation/lib/models";
 
 class ScheduleAdminDashBoard extends React.Component {
@@ -676,6 +676,27 @@ class ScheduleAdminDashBoard extends React.Component {
   onSourceChange(ev) {
     this.props.changeSource(ev.target.value);
   }
+  
+  onProposedEventSelected = (event) => {
+    const {proposedSchedSelectedEvents} = this.state;
+    const isSelected = proposedSchedSelectedEvents.includes(event.id);
+    const newSelected = isSelected ? proposedSchedSelectedEvents.filter(evId => evId !== event.id) : [...proposedSchedSelectedEvents, event.id];
+    
+    this.setState({proposedSchedSelectedEvents: newSelected});
+  }
+  
+  onProposedSchedSelectAll = (evt) => {
+    const {proposedSchedEvents} = this.props;
+    const newSelected = evt.target.checked ? proposedSchedEvents.map(e => e.id) : [];
+    this.setState({proposedSchedSelectedEvents: newSelected});
+  }
+  
+  onProposedSchedSelectedBulkAction = (bulkAction) => {
+    const {proposedSchedSelectedEvents} = this.state;
+    if (proposedSchedSelectedEvents.length === 0 || !bulkAction) return;
+    
+    this.props.publishAllProposed(proposedSchedSelectedEvents);
+  }
 
   render() {
 
@@ -784,6 +805,10 @@ class ScheduleAdminDashBoard extends React.Component {
     const source_ddl = [
       {label: 'Unscheduled Activities', value: 'unscheduled'},
       {label: 'Proposed by Track Chairs', value: 'proposed'},
+    ];
+    
+    const proposedBulkOptions = [
+      {value: 'BULK_ACTION_PUBLISH', label: 'Publish'},
     ];
     
     return (
@@ -918,23 +943,34 @@ class ScheduleAdminDashBoard extends React.Component {
             </div>
             }
             {selectedSource === 'proposed' &&
-            <div className="proposed-container">
-              <ScheduleBuilderView
-                summit={currentSummit}
-                scheduleEvents={proposedSchedEvents}
-                selectedEvents={proposedSchedSelectedEvents}
-                currentDay={proposedSchedDay}
-                currentVenue={proposedSchedLocation}
-                slotSize={proposedSchedSlotSize}
-                onDayChanged={this.onProposedDayChanged}
-                onVenueChanged={this.onProposedVenueChanged}
-                onSlotSizeChange={this.onProposedSlotSizeChange}
-                onSelectAll={this.onSelectAllPublished}
-                onSelectedBulkAction={this.onSelectedBulkActionPublished}
-                onEditEvent={this.onEditEvent}
-                onClickSelected={this.onClickSelected}
-              />
-            </div>
+              <>
+                <ScheduleAdminTrackSelector
+                  onTrackChanged={this.onProposedTrackChanged}
+                  tracks={tracks}
+                  currentValue={tracks.find(t => t.label === proposedSchedTrack)}
+                />
+                <div className="proposed-container">
+                  <ScheduleBuilderView
+                    summit={currentSummit}
+                    scheduleEvents={proposedSchedEvents}
+                    selectedEvents={proposedSchedSelectedEvents}
+                    currentDay={proposedSchedDay}
+                    currentVenue={proposedSchedLocation}
+                    slotSize={proposedSchedSlotSize}
+                    onDayChanged={this.onProposedDayChanged}
+                    onVenueChanged={this.onProposedVenueChanged}
+                    onSlotSizeChange={this.onProposedSlotSizeChange}
+                    onClickSelected={this.onProposedEventSelected}
+                    onSelectAll={this.onProposedSchedSelectAll}
+                    onSelectedBulkAction={this.onProposedSchedSelectedBulkAction}
+                    onEditEvent={this.onEditEvent}
+                    allowResize={false}
+                    allowDrag={false}
+                    canDropEvent={() => false}
+                    customBulkOptions={proposedBulkOptions}
+                  />
+                </div>
+              </>
             }
             
           </div>
@@ -1035,4 +1071,5 @@ export default connect(mapStateToProps, {
   changeSlotSize,
   changeProposedSlotSize,
   changeSource,
+  publishAllProposed
 })(ScheduleAdminDashBoard);
