@@ -37,7 +37,6 @@ import {
   clearPublishedEvents,
   changeSummitBuilderFilters,
   changeSlotSize,
-  changeProposedSlotSize,
   changeSource,
   publishAllProposed
 } from '../../actions/summit-builder-actions';
@@ -49,8 +48,8 @@ import {
 } from '../../actions/summit-event-bulk-actions';
 import UnScheduleEventList from './unschedule-event-list';
 import {
-  BulkActionEdit, BulkActionUnPublish, TBALocation
-} from '../../utils/constants';
+  BulkActionEdit, BulkActionUnPublish
+} from 'openstack-uicore-foundation/lib/components/schedule-builder-constants';
 import ScheduleAdminEventTypeSelector from './schedule-admin-event-type-selector';
 import ScheduleAdminTrackSelector from './schedule-admin-track-selector';
 import ScheduleAdminPresentationSelectionStatusSelector from './schedule-admin-presentation-selection-status-selector';
@@ -104,7 +103,6 @@ class ScheduleAdminDashBoard extends React.Component {
     this.handleDurationFilter = this.handleDurationFilter.bind(this);
     this.handleFiltersChange = this.handleFiltersChange.bind(this);
     this.onSlotSizeChange = this.onSlotSizeChange.bind(this);
-    this.onProposedSlotSizeChange = this.onProposedSlotSizeChange.bind(this);
     this.onSourceChange = this.onSourceChange.bind(this);
 
     this.fragmentParser = new FragmentParser();
@@ -669,10 +667,6 @@ class ScheduleAdminDashBoard extends React.Component {
     this.props.changeSlotSize(value);
   }
   
-  onProposedSlotSizeChange(value) {
-    this.props.changeProposedSlotSize(value);
-  }
-  
   onSourceChange(ev) {
     this.props.changeSource(ev.target.value);
   }
@@ -726,7 +720,6 @@ class ScheduleAdminDashBoard extends React.Component {
       selectedUnPublishedEvents,
       selectedFilters,
       slotSize,
-      proposedSchedSlotSize,
       selectedSource
     } = this.props;
 
@@ -956,10 +949,9 @@ class ScheduleAdminDashBoard extends React.Component {
                     selectedEvents={proposedSchedSelectedEvents}
                     currentDay={proposedSchedDay}
                     currentVenue={proposedSchedLocation}
-                    slotSize={proposedSchedSlotSize}
+                    slotSize={slotSize}
                     onDayChanged={this.onProposedDayChanged}
                     onVenueChanged={this.onProposedVenueChanged}
-                    onSlotSizeChange={this.onProposedSlotSizeChange}
                     onClickSelected={this.onProposedEventSelected}
                     onSelectAll={this.onProposedSchedSelectAll}
                     onSelectedBulkAction={this.onProposedSchedSelectedBulkAction}
@@ -1069,7 +1061,6 @@ export default connect(mapStateToProps, {
   clearPublishedEvents,
   changeSummitBuilderFilters,
   changeSlotSize,
-  changeProposedSlotSize,
   changeSource,
   publishAllProposed
 })(ScheduleAdminDashBoard);

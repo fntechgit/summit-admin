@@ -36,7 +36,6 @@ import
     CLEAR_PUBLISHED_EVENTS,
     CHANGE_SUMMIT_BUILDER_FILTERS,
     SET_SLOT_SIZE,
-    SET_PROPOSED_SLOT_SIZE,
     SET_SOURCE,
     CLEAR_PROPOSED_EVENTS
 } from '../../actions/summit-builder-actions';
@@ -73,7 +72,6 @@ const DEFAULT_STATE = {
     proposedSchedDay : null,
     proposedSchedLocation : null,
     proposedSchedTrack : null,
-    proposedSchedSlotSize: DefaultEventMinutesDuration,
 };
 
 const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
@@ -96,10 +94,6 @@ const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
         case SET_SLOT_SIZE: {
             const {slotSize} = payload;
             return {...state, slotSize};
-        }
-        case SET_PROPOSED_SLOT_SIZE: {
-            const {proposedSchedSlotSize} = payload;
-            return {...state, proposedSchedSlotSize};
         }
         case SET_SOURCE: {
             const {selectedSource} = payload;

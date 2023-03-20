@@ -53,7 +53,6 @@ export const CLEAR_PUBLISHED_EVENTS                       = 'CLEAR_PUBLISHED_EVE
 export const CLEAR_PROPOSED_EVENTS                       = 'CLEAR_PROPOSED_EVENTS';
 export const CHANGE_SUMMIT_BUILDER_FILTERS                = 'CHANGE_SUMMIT_BUILDER_FILTERS';
 export const SET_SLOT_SIZE                                = 'SET_SLOT_SIZE';
-export const SET_PROPOSED_SLOT_SIZE                       = 'SET_PROPOSED_SLOT_SIZE';
 export const SET_SOURCE                                = 'SET_SOURCE';
 export const PROPOSED_EVENTS_PUBLISHED                 = 'PROPOSED_EVENTS_PUBLISHED';
 
@@ -204,10 +203,6 @@ export const changeCurrentSelectedLocation = (currentSelectedLocation) => (dispa
 
 export const changeSlotSize = (slotSize) => (dispatch) => {
     dispatch(createAction(SET_SLOT_SIZE)({slotSize}));
-}
-
-export const changeProposedSlotSize = (proposedSchedSlotSize) => (dispatch) => {
-    dispatch(createAction(SET_PROPOSED_SLOT_SIZE)({proposedSchedSlotSize}));
 }
 
 export const changeSource = (selectedSource) => (dispatch) => {
