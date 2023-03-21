@@ -43,7 +43,7 @@ import
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import {SummitEvent} from "openstack-uicore-foundation/lib/models";
 
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions'
+import { SET_CURRENT_SUMMIT, RECEIVE_SUMMIT } from '../../actions/summit-actions'
 
 import {DefaultEventMinutesDuration} from "../../utils/constants";
 
@@ -261,6 +261,7 @@ const scheduleBuilderReducer = (state = DEFAULT_STATE, action) => {
         break;
         case LOGOUT_USER:
         case SET_CURRENT_SUMMIT:
+        case RECEIVE_SUMMIT:
             return DEFAULT_STATE;
             break;
         default:

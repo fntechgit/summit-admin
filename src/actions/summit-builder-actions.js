@@ -231,6 +231,13 @@ export const getPublishedEventsBySummitDayLocation = (currentSummit, currentDay,
         );
 }
 
+const refreshPublishedList = () => async (dispatch, getState) => {
+    const {currentSummitState, currentScheduleBuilderState} = getState();
+    const { currentSummit }   = currentSummitState;
+    const { currentLocation, currentDay } = currentScheduleBuilderState;
+    return getPublishedEventsBySummitDayLocation(currentSummit, currentDay, currentLocation)(dispatch, getState);
+}
+
 export const getProposedEvents = (summit, proposedSchedDay, proposedSchedLocation, proposedSchedTrack) => async (dispatch, getState) => {
     if (!summit || !proposedSchedDay || !proposedSchedLocation) {
         dispatch(createAction(CLEAR_PROPOSED_EVENTS)({proposedSchedDay, proposedSchedLocation, proposedSchedTrack}));
@@ -292,7 +299,7 @@ export const publishAllProposed = (eventIds) => async (dispatch, getState) => {
       authErrorHandler
     )(params)(dispatch)
       .then(() => {
-          dispatch(stopLoading());
+          dispatch(refreshPublishedList());
       });
 }
 

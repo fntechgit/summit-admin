@@ -691,6 +691,10 @@ class ScheduleAdminDashBoard extends React.Component {
     
     this.props.publishAllProposed(proposedSchedSelectedEvents);
   }
+  
+  onProposedSchedMoveEvent = (event) => {
+    this.props.publishAllProposed([event.id]);
+  }
 
   render() {
 
@@ -960,6 +964,7 @@ class ScheduleAdminDashBoard extends React.Component {
                     allowDrag={false}
                     canDropEvent={() => false}
                     customBulkOptions={proposedBulkOptions}
+                    onMoveSingleEvent={this.onProposedSchedMoveEvent}
                   />
                 </div>
               </>
