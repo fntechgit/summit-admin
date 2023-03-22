@@ -175,21 +175,7 @@ class SelectionPlanForm extends React.Component {
         let entity = {...this.state.entity};
         ev.preventDefault();
 
-        const marketing_settings = []
-        Object.keys(entity.marketing_settings).map(m => {
-            const setting_type = m === 'cfp_presentation_edition_custom_message' ? 'TEXTAREA' : 'TEXT';
-            const questionValue = typeof(entity.marketing_settings[m].value) === 'boolean' ?  entity.marketing_settings[m].value ? '1' : '0' : entity.marketing_settings[m].value;
-            const mkt_setting = {
-                id: entity.marketing_settings[m].id,
-                type: setting_type,
-                key: m.toUpperCase(),
-                value: questionValue ?? '',
-                selection_plan_id: entity.id
-            }
-            marketing_settings.push(this.props.saveMarketingSettings(mkt_setting))
-        })
-
-        this.props.onSubmit(this.state.entity).then(() => Promise.all(marketing_settings));
+        this.props.onSubmit(this.state.entity).then(() => this.props.saveSelectionPlanSettings(entity.marketing_settings, entity.id));
     }
 
     hasErrors(field) {
@@ -941,7 +927,7 @@ class SelectionPlanForm extends React.Component {
                                 <label> {T.translate("edit_selection_plan.cfp_presentation_summary_hide_track_selection")}&nbsp;
                                     <i className="fa fa-info-circle" aria-hidden="true"
                                        title={T.translate("edit_selection_plan.cfp_presentation_summary_hide_track_selection_info")}/>
-                                </label>
+                                </label> <br/>
                                 <Switch
                                     checked={entity.marketing_settings.cfp_presentation_summary_hide_track_selection?.value || false}
                                     onChange={val => {this.handleOnSwitchChange('cfp_presentation_summary_hide_track_selection', val)}}
@@ -954,7 +940,7 @@ class SelectionPlanForm extends React.Component {
                                 <label> {T.translate("edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection")}&nbsp;
                                     <i className="fa fa-info-circle" aria-hidden="true"
                                        title={T.translate("edit_selection_plan.cfp_presentation_summary_hide_activity_type_selection_info")}/>
-                                </label>
+                                </label> <br/>
                                 <Switch
                                     checked={entity.marketing_settings.cfp_presentation_summary_hide_activity_type_selection?.value || false}
                                     onChange={val => {this.handleOnSwitchChange('cfp_presentation_summary_hide_activity_type_selection', val)}}
