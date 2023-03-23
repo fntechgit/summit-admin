@@ -12,7 +12,7 @@
  **/
 import React from 'react'
 import { FormGroup, FormControl } from 'react-bootstrap';
-import { DateTimePicker, SummitVenuesSelect } from 'openstack-uicore-foundation/lib/components'
+import { DateTimePicker, SummitVenuesSelect, Dropdown, Input } from 'openstack-uicore-foundation/lib/components'
 import {SummitEvent} from "openstack-uicore-foundation/lib/models";
 import moment from "moment-timezone";
 import T from 'i18n-react/dist/i18n-react'
@@ -28,6 +28,13 @@ class SummitEventBulkEditorItem extends React.Component
         this.onLocationChanged    = this.onLocationChanged.bind(this);
         this.onSelectedEvent      = this.onSelectedEvent.bind(this);
         this.onSelectionPlanChanged = this.onSelectionPlanChanged.bind(this);
+        this.onActivityTypeLocalChanged = this.onActivityTypeLocalChanged.bind(this);
+        this.onActivityCategoryLocalChanged = this.onActivityCategoryLocalChanged.bind(this);
+        this.onDurationLocalChanged = this.onDurationLocalChanged.bind(this);
+        this.onStreamingURLLocalChanged = this.onStreamingURLLocalChanged.bind(this);
+        this.onStreamingTypeLocalChanged = this.onStreamingTypeLocalChanged.bind(this);
+        this.onMeetingURLLocalChanged = this.onMeetingURLLocalChanged.bind(this);
+        this.onEtherpadURLLocalChanged = this.onEtherpadURLLocalChanged.bind(this);
     }
 
     onSelectedEvent(evt){
@@ -106,19 +113,56 @@ class SummitEventBulkEditorItem extends React.Component
         this.props.onSelectionPlanChanged(this.props.index, selectionPlan, isValid);
     }
 
+    onActivityTypeLocalChanged(ev) {
+        let activityType = ev.target.value;
+        let isValid = activityType == null ? false:true;
+        this.props.onActivityTypeLocalChanged(this.props.index, activityType, isValid)
+    }
+    onActivityCategoryLocalChanged(ev) {
+        let activityCategory = ev.target.value;
+        let isValid = activityCategory == null ? false:true;
+        this.props.onActivityCategoryLocalChanged(this.props.index, activityCategory, isValid)
+    }
+    onDurationLocalChanged(ev) {
+        let duration = parseInt(ev.target.value);        
+        let isValid = typeof(duration) == 'number' ? true:false;
+        this.props.onDurationLocalChanged(this.props.index, duration, isValid)
+    }
+    onStreamingURLLocalChanged(ev) {
+        let streamingURL = ev.target.value;
+        let isValid = streamingURL == null ? false:true;
+        this.props.onStreamingURLLocalChanged(this.props.index, streamingURL, isValid)
+    }
+    onStreamingTypeLocalChanged(ev) {
+        const { streamingTypeOptions } = this.props;
+        let streamingType = ev.target.value;        
+        let isValid = streamingTypeOptions.some(st => streamingType === st.value) ? true:false;
+        this.props.onStreamingTypeLocalChanged(this.props.index, streamingType, isValid)
+    }
+    onMeetingURLLocalChanged(ev) {
+        let meetingURL = ev.target.value;
+        let isValid = meetingURL == null ? false:true;
+        this.props.onMeetingURLLocalChanged(this.props.index, meetingURL, isValid)
+    }
+    onEtherpadURLLocalChanged(ev) {
+        let etherpadURL = ev.target.value;
+        let isValid = etherpadURL == null ? false:true;
+        this.props.onEtherpadURLLocalChanged(this.props.index, etherpadURL, isValid)
+    }
+
     render(){
-        let { event, currentSummit, venuesOptions, selectionPlanOptions } = this.props;
-        let currentLocation        = venuesOptions.filter((option) => option.value.id === event.location_id).shift()
+        let { event, currentSummit, venuesOptions, selectionPlanOptions, activityTypeOptions, activtyCategoryOptions, streamingTypeOptions } = this.props;
+        let currentLocation        = venuesOptions.filter((option) => option.value.id === event.location_id).shift()?.value;
         let currentSummitStartDate = moment.tz(currentSummit.start_date * 1000, currentSummit.time_zone.name).hour(0).minute(0).second(0);
         let currentSummitEndDate   = moment.tz(currentSummit.end_date * 1000, currentSummit.time_zone.name).hour(23).minute(59).second(59);
         let currentSelectionPlan   = selectionPlanOptions.filter((option) => option.value.id === event.selection_plan_id).shift();
 
         return (
-            <div className="row event-bulk-editor-item">
-                <div className="col-md-1">
+            <div className="bulk-edit-row event-bulk-editor-item">
+                <div className="bulk-edit-col-id">
                     <a className="event-edit" title={T.translate("bulk_actions_page.titles.view_event")} onClick={this.onSelectedEvent} href="#">{event.id}</a>
                 </div>
-                <div className="col-md-2">
+                <div className="bulk-edit-col">
                     <FormGroup validationState={this.getValidationEventTitle()}>
                         <FormControl
                             type="text"
@@ -129,7 +173,7 @@ class SummitEventBulkEditorItem extends React.Component
                         <FormControl.Feedback />
                     </FormGroup>
                 </div>
-                <div className="col-md-2">
+                <div className="bulk-edit-col">
                         <FormGroup validationState={this.getValidationEventSelectionPlan()}>
                             <Select
                                 placeholder={T.translate("schedule.placeholders.select_presentation_selection_plan")}
@@ -142,7 +186,7 @@ class SummitEventBulkEditorItem extends React.Component
                             <FormControl.Feedback/>
                         </FormGroup>
                 </div>
-                <div className="col-md-2">
+                <div className="bulk-edit-col">
                     <FormGroup validationState={this.getValidationStateVenue()}>
                         <SummitVenuesSelect
                             onVenueChanged={this.onLocationChanged}
@@ -153,7 +197,7 @@ class SummitEventBulkEditorItem extends React.Component
                         <FormControl.Feedback />
                     </FormGroup>
                 </div>
-                <div className="col-md-2">
+                <div className="bulk-edit-col">
                     <FormGroup validationState={this.getValidationStartDate()}>
                         <DateTimePicker
                             id="start_date"
@@ -168,7 +212,7 @@ class SummitEventBulkEditorItem extends React.Component
                         <FormControl.Feedback/>
                     </FormGroup>
                 </div>
-                <div className="col-md-2">
+                <div className="bulk-edit-col">
                     <FormGroup validationState={this.getValidationEndDate()}>
                         <DateTimePicker
                             id="end_date"
@@ -179,6 +223,86 @@ class SummitEventBulkEditorItem extends React.Component
                             validation={{after: currentSummitStartDate.valueOf()/1000, before: currentSummitEndDate.valueOf()/1000}}
                             onChange={this.handleChangeDateTo}
                             value={this.getFormattedTime(event.end_date)}
+                        />
+                        <FormControl.Feedback />
+                    </FormGroup>
+                </div>
+                <div className="bulk-edit-col">
+                    <FormGroup>
+                        <Dropdown
+                            id="event_type_id_filter"
+                            placeholder={T.translate("bulk_actions_page.placeholders.event_type")}
+                            value={event.type_id}
+                            onChange={this.onActivityTypeLocalChanged}
+                            options={activityTypeOptions}
+                        />
+                        <FormControl.Feedback />
+                    </FormGroup>
+                </div>
+                <div className="bulk-edit-col">
+                    <FormGroup>
+                        <Dropdown
+                            id="track_id_filter"
+                            placeholder={T.translate("bulk_actions_page.placeholders.track")}
+                            value={event.track_id}
+                            onChange={this.onActivityCategoryLocalChanged}
+                            options={activtyCategoryOptions}
+                        />
+                        <FormControl.Feedback />
+                    </FormGroup>
+                </div>
+                <div className="bulk-edit-col">
+                    <FormGroup>
+                        <FormControl
+                            type="number"
+                            placeholder={T.translate("bulk_actions_page.placeholders.duration")}
+                            onChange={this.onDurationLocalChanged}
+                            value={event.duration}
+                        />
+                        <FormControl.Feedback />
+                    </FormGroup>
+                </div>
+                <div className="bulk-edit-col">
+                    <FormGroup>
+                        <FormControl
+                            type="text"
+                            placeholder={T.translate("bulk_actions_page.placeholders.streaming_url")}
+                            onChange={this.onStreamingURLLocalChanged}
+                            defaultValue={event.streaming_url}
+                        />
+                        <FormControl.Feedback />
+                    </FormGroup>
+                </div>
+                <div className="bulk-edit-col">
+                    <FormGroup>
+                        <Dropdown
+                            id="streaming_type"
+                            value={event.streaming_type}
+                            onChange={this.onStreamingTypeLocalChanged}
+                            placeholder={T.translate("bulk_actions_page.placeholders.streaming_type")}
+                            options={streamingTypeOptions}
+                        />
+                        <FormControl.Feedback />
+                    </FormGroup>
+                </div>
+                <div className="bulk-edit-col">
+                    <FormGroup>
+                        <FormControl
+                            type="text"
+                            placeholder={T.translate("bulk_actions_page.placeholders.meeting_url")}
+                            onChange={this.onMeetingURLLocalChanged}
+                            defaultValue={event.meeting_url}
+                        />
+                        <FormControl.Feedback />
+                    </FormGroup>
+                </div>
+                <div className="bulk-edit-col">
+                    <FormGroup>
+                        <FormControl
+                            type="text"
+                            placeholder={T.translate("bulk_actions_page.placeholders.etherpad_url")}
+                            onChange={this.onEtherpadURLLocalChanged}
+                            defaultValue={event.etherpad_url}
                         />
                         <FormControl.Feedback />
                     </FormGroup>

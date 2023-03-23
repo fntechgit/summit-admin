@@ -39,6 +39,13 @@ export const UPDATE_TYPE_BULK                 = 'UPDATE_TYPE_BULK';
 export const UPDATE_START_DATE_BULK           = 'UPDATE_START_DATE_BULK';
 export const UPDATE_END_DATE_BULK             = 'UPDATE_END_DATE_BULK';
 export const UPDATE_SELECTION_PLAN_BULK       = 'UPDATE_SELECTION_PLAN_BULK';
+export const UPDATE_ACTIVITY_TYPE_BULK        = 'UPDATE_ACTIVITY_TYPE_BULK';
+export const UPDATE_ACTIVITY_CATEGORY_BULK    = 'UPDATE_ACTIVITY_CATEGORY_BULK';
+export const UPDATE_DURATION_BULK             = 'UPDATE_DURATION_BULK';
+export const UPDATE_STREAMING_URL_BULK        = 'UPDATE_STREAMING_URL_BULK';
+export const UPDATE_STREAMING_TYPE_BULK       = 'UPDATE_STREAMING_TYPE_BULK';
+export const UPDATE_MEETING_URL_BULK          = 'UPDATE_MEETING_URL_BULK';
+export const UPDATE_ETHERPAD_URL_BULK         = 'UPDATE_ETHERPAD_URL_BULK';
 
 export const getSummitEventsById = (summitId, eventIds ) => async (dispatch, getState) => {
 
@@ -105,6 +112,49 @@ export const updateEventTitleLocal = (event, title, isValid) => (dispatch) => {
 
     dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(title, isValid) }))
 };
+
+export const updateEventActivityTypeLocal = (event, activityType, isValid) => (dispatch) => {
+
+    let mutator = (activityType, isValid) => event => ({...event, type_id: activityType, is_valid: isValid});
+
+    dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(activityType, isValid)}));
+}
+export const updateEventActivityCategoryLocal = (event, activityCategory, isValid) => (dispatch) => {
+
+    let mutator = (activityCategory, isValid) => event => ({...event, track_id: activityCategory, is_valid: isValid});
+
+    dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(activityCategory, isValid)}));
+}
+export const updateEventDurationLocal = (event, duration, isValid) => (dispatch) => {
+
+    let mutator = (duration, isValid) => event => ({...event, duration: duration, is_valid: isValid});
+
+    dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(duration, isValid)}));
+}
+export const updateEventStreamingURLLocal = (event, streamingURL, isValid) => (dispatch) => {
+
+    let mutator = (streamingURL, isValid) => event => ({...event, streaming_url: streamingURL, is_valid: isValid});
+
+    dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(streamingURL, isValid)}));
+}
+export const updateEventStreamingTypeLocal = (event, streamingType, isValid) => (dispatch) => {
+
+    let mutator = (streamingType, isValid) => event => ({...event, streaming_type: streamingType, is_valid: isValid});
+
+    dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(streamingType, isValid)}));
+}
+export const updateEventMeetingURLLocal = (event, meetingURL, isValid) => (dispatch) => {
+
+    let mutator = (meetingURL, isValid) => event => ({...event, meeting_url: meetingURL, is_valid: isValid});
+
+    dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(meetingURL, isValid)}));
+}
+export const updateEventEtherpadURLLocal = (event, etherpadURL, isValid) => (dispatch) => {
+
+    let mutator = (etherpadURL, isValid) => event => ({...event, etherpad_url: etherpadURL, is_valid: isValid});
+
+    dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(etherpadURL, isValid)}));
+}
 
 export const updateEvents = (summitId, events) =>  async (dispatch, getState) => {
 
@@ -254,4 +304,26 @@ export const updateEventsStartDateLocal = (startDate) => (dispatch) => {
 
 export const updateEventsEndDateLocal = (endDate) => (dispatch) => {
     dispatch(createAction(UPDATE_END_DATE_BULK)({end_date:endDate}));
+}
+
+export const updateEventsActivityTypeLocal = (activityType) => (dispatch) => {
+    dispatch(createAction(UPDATE_ACTIVITY_TYPE_BULK)({activityType}));
+}
+export const updateEventsActivityCategoryLocal = (activityCategory) => (dispatch) => {
+    dispatch(createAction(UPDATE_ACTIVITY_CATEGORY_BULK)({activityCategory}));
+}
+export const updateEventsDurationLocal = (duration) => (dispatch) => {
+    dispatch(createAction(UPDATE_DURATION_BULK)({duration}));
+}
+export const updateEventsStreamingURLLocal = (streamingURL) => (dispatch) => {
+    dispatch(createAction(UPDATE_STREAMING_URL_BULK)({streamingURL}));
+}
+export const updateEventsStreamingTypeLocal = (streamingType) => (dispatch) => {
+    dispatch(createAction(UPDATE_STREAMING_TYPE_BULK)({streamingType}));
+}
+export const updateEventsMeetingURLLocal = (meetingURL) => (dispatch) => {
+    dispatch(createAction(UPDATE_MEETING_URL_BULK)({meetingURL}));
+}
+export const updateEventsEtherpadURLLocal = (etherpadURL) => (dispatch) => {
+    dispatch(createAction(UPDATE_ETHERPAD_URL_BULK)({etherpadURL}));
 }
