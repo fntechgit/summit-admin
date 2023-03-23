@@ -21,10 +21,7 @@ import {flattenData} from "../../actions/report-actions";
 
 
 const fieldNames = [
-    {label: 'Id', key: 'id', simple: true},
-    {label: 'Speaker', key: 'fullName', simple: true},
-    {label: 'Role', key: 'role', simple: true},
-    {label: 'Emails', key: 'emails', simple: true},
+    {label: 'Emails', key: 'emails', simple: true, sortable: true},
     {label: 'Title', key: 'title', simple: true},
     {label: 'Company', key: 'currentCompany', simple: true},
     {label: 'Job Title', key: 'currentJobTitle', simple: true},
@@ -64,12 +61,12 @@ class SmartSpeakerReport extends React.Component {
         }
 
         let query = new Query("speakers", listFilters);
-        let reportData = ["id", "title", "fullName", "role"];
+        let reportData = ["id", "title", "fullName", "roleBySummit"];
 
         if (sortKey) {
-            let querySortKey = this.translateSortKey(sortKey);
+            let querySortKey = this.translateSortKey(sortKey).split(',');
             let order = (sortDir == 1) ? '' : '-';
-            filters.ordering = order + '' + querySortKey;
+            filters.ordering = querySortKey.reduce((accumulator, filter) => accumulator +(accumulator !== '' ? ',':'') + `${order}${filter}`, '');
         }
 
         if (showFields.includes('member_id')) {
@@ -113,6 +110,9 @@ class SmartSpeakerReport extends React.Component {
 
     translateSortKey(key) {
         let sortKey = key;
+        if(key.toLowerCase() === 'fullname') sortKey = 'first_name,last_name';
+        if(key.toLowerCase() === 'rolebysummit') sortKey = 'role_by_summit';
+        if(key === 'emails') sortKey = 'registration__email,member__email';
 
         return sortKey;
     }
@@ -127,9 +127,9 @@ class SmartSpeakerReport extends React.Component {
         let flatData = flattenData(data);
 
         let columns = [
-            { columnKey: 'id', value: 'Id' },
-            { columnKey: 'fullName', value: 'Speaker' },
-            { columnKey: 'role', value: 'Role' }
+            { columnKey: 'id', value: 'Id', sortable: true },
+            { columnKey: 'fullName', value: 'Speaker', sortable: true },
+            { columnKey: 'roleBySummit', value: 'Role', sortable: true }
         ];
 
 
