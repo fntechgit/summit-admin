@@ -36,19 +36,19 @@ import {hasErrors, uuidv4} from "../../utils/methods";
 import '../../styles/summit-event-list-page.less';
 
 const fieldNames = [
-    { columnKey: 'speakers', value: 'speakers' },
+    { columnKey: 'speakers', value: 'speakers', sortable: true },
     { columnKey: 'created_by_fullname', value: 'created_by', sortable: true },
-    { columnKey: 'published_date', value: 'published' },
+    { columnKey: 'published_date', value: 'published', sortable: true },
     { columnKey: 'duration', value: 'duration', sortable: true },
     { columnKey: 'speakers_count', value: 'speakers_count', sortable: true },
     { columnKey: 'speaker_company', value: 'speaker_company', sortable: true },
-    { columnKey: 'track', value: 'track' },
+    { columnKey: 'track', value: 'track', sortable: true },
     { columnKey: 'start_date', value: 'start_date', sortable: true },
     { columnKey: 'end_date', value: 'end_date', sortable: true },
     { columnKey: 'submitters', value: 'submitters' },
     { columnKey: 'submitter_company', value: 'submitter_company', sortable: true },
     { columnKey: 'sponsor', value: 'sponsor', sortable: true },
-    { columnKey: 'event_type_capacity', value: 'event_type_capacity' },
+    { columnKey: 'event_type_capacity', value: 'event_type_capacity', sortable: true },
     { columnKey: 'selection_plan', value: 'selection_plan', sortable: true },
     { columnKey: 'location', value: 'location', sortable: true },
     { columnKey: 'level', value: 'level', sortable: true },
@@ -376,18 +376,18 @@ class SummitEventListPage extends React.Component {
         
         if(selectedColumns.includes('all_companies') && !newColumns.includes('all_companies')) {
             newColumns = [...newColumns.filter(e => !all_companies.includes(e))];
-        }      
+        }
         const selectedCompanies = selectedColumns.filter(c => all_companies.includes(c)).length;
-        const newCompanies = newColumns.filter(c => all_companies.includes(c)).length
+        const newCompanies = newColumns.filter(c => all_companies.includes(c)).length;
         if(newColumns.includes('all_companies')) {
             if(newColumns.filter(c => all_companies.includes(c)).length === 0) {
                 newColumns = [...this.state.selectedColumns, ...all_companies, 'all_companies'];
             } else if (selectedCompanies === newCompanies) {
-                newColumns = [...this.state.selectedColumns, ...all_companies, 'all_companies'];
-            } else if (newCompanies < selectedCompanies) {                
+                newColumns = [...new Set([...newColumns, ...all_companies, 'all_companies'])];
+            } else if (newCompanies < selectedCompanies) {
                 newColumns = [...newColumns.filter(c => c !== 'all_companies')];
-            } 
-        }          
+            }
+        }      
 
         this.setState({...this.state, selectedColumns: newColumns})
     }
@@ -403,9 +403,9 @@ class SummitEventListPage extends React.Component {
 
         let columns = [
             { columnKey: 'id', value: T.translate("general.id"), sortable: true },
-            { columnKey: 'type', value: T.translate("event_list.type") },
+            { columnKey: 'type', value: T.translate("event_list.type"), sortable: true },
             { columnKey: 'title', value: T.translate("event_list.title"), sortable: true },
-            { columnKey: 'selection_status', value: T.translate("event_list.selection_status") }            
+            { columnKey: 'selection_status', value: T.translate("event_list.selection_status"), sortable: true }
         ];
 
         const table_options = {
