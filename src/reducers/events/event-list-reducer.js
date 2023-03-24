@@ -93,7 +93,7 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
                     location: e.location?.name ? e.location?.name : 'N/A',
                     streaming_url: e.streaming_url ? e.streaming_url : 'N/A',
                     meeting_url: e.meeting_url ? e.meeting_url : 'N/A',
-                    etherpad_url: e.etherpad_link ? e.etherpad_link : 'N/A',
+                    etherpad_link: e.etherpad_link ? e.etherpad_link : 'N/A',
                     streaming_type: e.streaming_type ? e.streaming_type : 'N/A',
                     start_date: e.start_date ? moment(e.start_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') : 'TBD',
                     end_date: e.end_date ? moment(e.end_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') : 'TBD',
