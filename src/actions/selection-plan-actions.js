@@ -824,8 +824,7 @@ export const unassignProgressFlagFromSelectionPlan = (selectionPlanId, progressF
 
 export const saveSelectionPlanSettings = (marketingSettings, selectionPlanId) => async (dispatch, getState) => {  
 
-  const marketing_settings = [];
-  Object.keys(marketingSettings).map(m => {
+  return Promise.all(Object.keys(marketingSettings).map(m => {
       const setting_type = m === 'cfp_presentation_edition_custom_message' ? 'TEXTAREA' : 'TEXT';
       const questionValue = typeof(marketingSettings[m].value) === 'boolean' ?  marketingSettings[m].value ? '1' : '0' : marketingSettings[m].value;
       const mkt_setting = {
@@ -835,8 +834,6 @@ export const saveSelectionPlanSettings = (marketingSettings, selectionPlanId) =>
           value: questionValue ?? '',
           selection_plan_id: selectionPlanId
     }
-      marketing_settings.push(dispatch(saveMarketingSetting(mkt_setting)));
-  });
-
-  return marketing_settings;
+      return dispatch(saveMarketingSetting(mkt_setting));
+  }))
 }
