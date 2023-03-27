@@ -193,6 +193,12 @@ class SummitEventBulkEditorItem extends React.Component
                             currentValue={currentLocation}
                             venues={venuesOptions}
                             placeholder={T.translate("schedule.placeholders.select_venue")}
+                            styles={{
+                                container: (baseStyles) => ({
+                                    ...baseStyles,
+                                    position: 'initial',
+                                }),
+                            }}
                         />
                         <FormControl.Feedback />
                     </FormGroup>
