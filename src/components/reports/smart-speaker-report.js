@@ -61,7 +61,7 @@ class SmartSpeakerReport extends React.Component {
         }
 
         let query = new Query("speakers", listFilters);
-        let reportData = ["id", "title", "fullName", `roleBySummit (summitId:${currentSummit.id})`];
+        let reportData = ["id", "title", "fullname: fullName", `rolebysummit: roleBySummit (summitId:${currentSummit.id})`];
 
         if (sortKey) {
             let querySortKey = this.translateSortKey(sortKey);
@@ -112,10 +112,10 @@ class SmartSpeakerReport extends React.Component {
         
         switch (key.toLowerCase()) {
             case 'fullname':
-                sortKey = 'last_name';
+                sortKey = 'first_name,last_name';
                 break;
             case 'emails':
-                sortKey = 'email_order';
+                sortKey = 'registration__email,member__email';
                 break;
             case 'rolebysummit':
                 sortKey = 'role_by_summit';
@@ -136,8 +136,8 @@ class SmartSpeakerReport extends React.Component {
 
         let columns = [
             { columnKey: 'id', value: 'Id', sortable: true },
-            { columnKey: 'fullName', value: 'Speaker', sortable: true },
-            { columnKey: 'roleBySummit', value: 'Role', sortable: true }
+            { columnKey: 'fullname', value: 'Speaker', sortable: true },
+            { columnKey: 'rolebysummit', value: 'Role', sortable: true }
         ];
 
 
@@ -164,14 +164,15 @@ class SmartSpeakerReport extends React.Component {
             sortDir: sortDir,
             actions: {}
         };
-
+        
         let {reportData, tableColumns} = this.preProcessData(data, null);
 
         let showFieldOptions = fieldNames.map( f => ({label: f.label, value: f.key}));
         let showFieldSelection = fieldNames
             .filter(f => showFields.includes(f.key) )
             .map( f2 => ({label: f2.label, value: f2.key}));
-
+    
+    
         return (
             <div>
                 <div className="report-filters">
