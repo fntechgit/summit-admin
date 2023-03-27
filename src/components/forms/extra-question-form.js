@@ -122,9 +122,12 @@ class ExtraQuestionForm extends React.Component {
 
     render() {
         const { entity, errors } = this.state;
-        const { onValueDelete, onValueSave, questionClasses, updateSubQuestionRuleOrder } = this.props;
+        const { currentSummit, onValueDelete, onValueSave, questionClasses, updateSubQuestionRuleOrder } = this.props;
         const question_class_ddl = questionClasses.map(c => ({ label: c.type, value: c.type }));
 
+        const badge_features_ddl = currentSummit.badge_features ? currentSummit.badge_features.map(f => ({label:f.name, value:f.id})) : [];
+        const ticket_type_ddl = currentSummit.ticket_types ? currentSummit.ticket_types .map(tt => ({label: tt.name, value: tt.id})) : [];
+        
         const question_usage_ddl = [
             { label: 'Order', value: 'Order' },
             { label: 'Ticket', value: 'Ticket' },
@@ -271,6 +274,42 @@ class ExtraQuestionForm extends React.Component {
                         </div>
                     </div>
                 </div>
+                {entity.usage === 'Ticket' && 
+                    <div className="row form-group">
+                        {ticket_type_ddl.length > 0 &&
+                            <div className="col-md-4">
+                                <label> 
+                                    {T.translate("question_form.ticket_type")} &nbsp; 
+                                    <i className="fa fa-info-circle" title={T.translate("question_form.ticket_type_info")} />
+                                </label>
+                                <Dropdown
+                                    id="ticket_type_id"
+                                    clearable
+                                    isMulti
+                                    value={entity.ticket_type_id || []}
+                                    onChange={this.handleChange}
+                                    options={ticket_type_ddl}
+                                />
+                            </div>
+                        }
+                        {badge_features_ddl.length > 0 &&
+                            <div className="col-md-4">
+                                <label> 
+                                    {T.translate("question_form.badge_feature_id")} &nbsp; 
+                                    <i className="fa fa-info-circle" title={T.translate("question_form.badge_feature_id_info")} />
+                                </label>
+                                <Dropdown
+                                    id="badge_feature_id"
+                                    clearable
+                                    isMulti
+                                    value={entity.badge_feature_id || []}
+                                    onChange={this.handleChange}
+                                    options={badge_features_ddl}
+                                />
+                            </div>
+                        }
+                    </div>
+                }
 
                 {this.shouldShowField('values') && entity.id !== 0 &&
                     <div className="row">
