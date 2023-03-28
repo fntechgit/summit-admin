@@ -279,14 +279,14 @@ class ExtraQuestionForm extends React.Component {
                         {ticket_type_ddl.length > 0 &&
                             <div className="col-md-4">
                                 <label> 
-                                    {T.translate("question_form.ticket_type")} &nbsp; 
-                                    <i className="fa fa-info-circle" title={T.translate("question_form.ticket_type_info")} />
+                                    {T.translate("question_form.allowed_ticket_types")} &nbsp; 
+                                    <i className="fa fa-info-circle" title={T.translate("question_form.allowed_ticket_types_info")} />
                                 </label>
                                 <Dropdown
-                                    id="ticket_type_id"
+                                    id="allowed_ticket_types"
                                     clearable
                                     isMulti
-                                    value={entity.ticket_type_id || []}
+                                    value={entity.allowed_ticket_types}
                                     onChange={this.handleChange}
                                     options={ticket_type_ddl}
                                 />
@@ -295,14 +295,14 @@ class ExtraQuestionForm extends React.Component {
                         {badge_features_ddl.length > 0 &&
                             <div className="col-md-4">
                                 <label> 
-                                    {T.translate("question_form.badge_feature_id")} &nbsp; 
-                                    <i className="fa fa-info-circle" title={T.translate("question_form.badge_feature_id_info")} />
+                                    {T.translate("question_form.allowed_badge_features_types")} &nbsp; 
+                                    <i className="fa fa-info-circle" title={T.translate("question_form.allowed_badge_features_types_info")} />
                                 </label>
                                 <Dropdown
-                                    id="badge_feature_id"
+                                    id="allowed_badge_features_types"
                                     clearable
                                     isMulti
-                                    value={entity.badge_feature_id || []}
+                                    value={entity.allowed_badge_features_types}
                                     onChange={this.handleChange}
                                     options={badge_features_ddl}
                                 />
