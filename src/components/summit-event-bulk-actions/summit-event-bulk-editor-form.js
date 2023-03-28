@@ -320,6 +320,7 @@ class SummitEventBulkEditorForm extends React.Component
                             timeConstraints={{ hours: { min: 7, max: 22}}}
                             validation={{after: currentSummitStartDate.valueOf()/1000, before: currentSummitEndDate.valueOf()/1000}}
                             onChange={this.handleChangeBulkStartDate}
+                            className="bulk-edit-date-picker"
                          />
                     </div>
                     <div className="bulk-edit-col">
@@ -331,6 +332,7 @@ class SummitEventBulkEditorForm extends React.Component
                             timezone={currentSummit.time_zone.name}
                             validation={{after: currentSummitStartDate.valueOf()/1000, before: currentSummitEndDate.valueOf()/1000}}
                             onChange={this.handleChangeBulkEndDate}
+                            className="bulk-edit-date-picker"
                         />
                     </div>
                     <div className="bulk-edit-col">

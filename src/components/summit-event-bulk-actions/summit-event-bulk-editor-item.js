@@ -214,6 +214,7 @@ class SummitEventBulkEditorItem extends React.Component
                             validation={{after: currentSummitStartDate.valueOf()/1000, before: currentSummitEndDate.valueOf()/1000}}
                             onChange={this.handleChangeDateFrom}
                             value={this.getFormattedTime(event.start_date)}
+                            className="bulk-edit-date-picker"
                         />
                         <FormControl.Feedback/>
                     </FormGroup>
@@ -229,6 +230,7 @@ class SummitEventBulkEditorItem extends React.Component
                             validation={{after: currentSummitStartDate.valueOf()/1000, before: currentSummitEndDate.valueOf()/1000}}
                             onChange={this.handleChangeDateTo}
                             value={this.getFormattedTime(event.end_date)}
+                            className="bulk-edit-date-picker"
                         />
                         <FormControl.Feedback />
                     </FormGroup>
