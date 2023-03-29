@@ -84,6 +84,14 @@ class SummitEventBulkEditorItem extends React.Component
         value = value.valueOf()/1000;
         let { event, currentSummit } = this.props;
         let eventModel = new SummitEvent(event, currentSummit);
+        if(event.end_date) {
+            const duration = event.end_date > value ? event.end_date - value : 0;
+            let isValid = typeof(duration) == 'number' ? true:false;
+            this.props.onDurationLocalChanged(this.props.index, duration, isValid)
+        } else if(event.duration) {
+            const end_date = value + event.duration;
+            this.props.onEndDateChanged(this.props.index, end_date, eventModel.isValidEndDate(end_date));
+        }
         this.props.onStartDateChanged(this.props.index, value, eventModel.isValidStartDate(value));
     }
 
@@ -92,6 +100,14 @@ class SummitEventBulkEditorItem extends React.Component
         value = value.valueOf()/1000;
         let { event, currentSummit } = this.props;
         let eventModel = new SummitEvent(event, currentSummit);
+        if(event.start_date) {
+            const duration = event.start_date < value ? value - event.start_date : 0;
+            let isValid = typeof(duration) == 'number' ? true:false;
+            this.props.onDurationLocalChanged(this.props.index, duration, isValid)
+        } else if(event.duration) {
+            const start_date = value - event.duration;
+            this.props.onStartDateChanged(this.props.index, start_date, eventModel.isValidEndDate(end_date));
+        }
         this.props.onEndDateChanged(this.props.index, value, eventModel.isValidEndDate(value));
     }
 
@@ -124,7 +140,18 @@ class SummitEventBulkEditorItem extends React.Component
         this.props.onActivityCategoryLocalChanged(this.props.index, activityCategory, isValid)
     }
     onDurationLocalChanged(ev) {
-        let duration = parseInt(ev.target.value);        
+        let duration = Number.isInteger(parseInt(ev.target.value)) ? parseInt(ev.target.value) : null
+        if(duration !== null) {
+            let { event, currentSummit } = this.props;
+            let eventModel = new SummitEvent(event, currentSummit);
+            if(event.start_date) {
+                const end_date = event.start_date + duration;
+                this.props.onEndDateChanged(this.props.index, end_date, eventModel.isValidEndDate(end_date));
+            } else if (event.end_date) {
+                const start_date = event.end_date - duration;
+                this.props.onStartDateChanged(this.props.index, start_date, eventModel.isValidStartDate(start_date));
+            }
+        }
         let isValid = typeof(duration) == 'number' ? true:false;
         this.props.onDurationLocalChanged(this.props.index, duration, isValid)
     }
@@ -238,7 +265,7 @@ class SummitEventBulkEditorItem extends React.Component
                 <div className="bulk-edit-col">
                     <FormGroup>
                         <Dropdown
-                            id="event_type_id_filter"
+                            id="type_id"
                             placeholder={T.translate("bulk_actions_page.placeholders.event_type")}
                             value={event.type_id}
                             onChange={this.onActivityTypeLocalChanged}
@@ -250,7 +277,7 @@ class SummitEventBulkEditorItem extends React.Component
                 <div className="bulk-edit-col">
                     <FormGroup>
                         <Dropdown
-                            id="track_id_filter"
+                            id="track_id"
                             placeholder={T.translate("bulk_actions_page.placeholders.track")}
                             value={event.track_id}
                             onChange={this.onActivityCategoryLocalChanged}
@@ -262,6 +289,7 @@ class SummitEventBulkEditorItem extends React.Component
                 <div className="bulk-edit-col">
                     <FormGroup>
                         <FormControl
+                            id="duration"
                             type="number"
                             placeholder={T.translate("bulk_actions_page.placeholders.duration")}
                             onChange={this.onDurationLocalChanged}
@@ -308,9 +336,9 @@ class SummitEventBulkEditorItem extends React.Component
                     <FormGroup>
                         <FormControl
                             type="text"
-                            placeholder={T.translate("bulk_actions_page.placeholders.etherpad_url")}
+                            placeholder={T.translate("bulk_actions_page.placeholders.etherpad_link")}
                             onChange={this.onEtherpadURLLocalChanged}
-                            defaultValue={event.etherpad_url}
+                            defaultValue={event.etherpad_link}
                         />
                         <FormControl.Feedback />
                     </FormGroup>

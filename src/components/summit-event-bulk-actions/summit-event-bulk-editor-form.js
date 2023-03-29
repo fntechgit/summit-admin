@@ -184,12 +184,14 @@ class SummitEventBulkEditorForm extends React.Component
 
     handleChangeBulkStartDate(ev){
         let { value } = ev.target;
-        this.props.updateEventsStartDateLocal(value.valueOf()/1000)
+        value = value.valueOf()/1000;
+        this.props.updateEventsStartDateLocal(value);
     }
 
     handleChangeBulkEndDate(ev){
         let { value } = ev.target;
-        this.props.updateEventsEndDateLocal(value.valueOf()/1000)
+        value = value.valueOf()/1000;
+        this.props.updateEventsEndDateLocal(value);
     }
 
     onBulkActivityType (ev) {
@@ -337,7 +339,7 @@ class SummitEventBulkEditorForm extends React.Component
                     </div>
                     <div className="bulk-edit-col">
                         <Dropdown
-                            id="event_type_id_filter"
+                            id="type_id"
                             placeholder={T.translate("bulk_actions_page.placeholders.event_type")}
                             value={currentBulkActivityType}
                             onChange={this.onBulkActivityType}
@@ -346,7 +348,7 @@ class SummitEventBulkEditorForm extends React.Component
                     </div>
                     <div className="bulk-edit-col"> 
                         <Dropdown
-                            id="track_id_filter"
+                            id="track_id"
                             placeholder={T.translate("bulk_actions_page.placeholders.track")}
                             value={currentBulkActivityCategory}
                             onChange={this.onBulkActivityCategory}
@@ -355,7 +357,7 @@ class SummitEventBulkEditorForm extends React.Component
                     </div>
                     <div className="bulk-edit-col"> 
                         <Input
-                            id='duration'
+                            id="duration"
                             type='number'
                             value={currentBulkDuration}
                             placeholder={T.translate("bulk_actions_page.placeholders.duration")}
@@ -364,7 +366,7 @@ class SummitEventBulkEditorForm extends React.Component
                     </div>  
                     <div className="bulk-edit-col"> 
                         <Input
-                            id='streaming_url'
+                            id="streaming_url"
                             value={currentBulkStreamingURL}
                             placeholder={T.translate("bulk_actions_page.placeholders.streaming_url")}
                             onChange={this.onBulkStreamingURL}
@@ -381,7 +383,7 @@ class SummitEventBulkEditorForm extends React.Component
                     </div>
                     <div className="bulk-edit-col"> 
                         <Input
-                            id='meeting_url'
+                            id="meeting_url"
                             value={currentBulkMeetingURL}
                             placeholder={T.translate("bulk_actions_page.placeholders.meeting_url")}
                             onChange={this.onBulkMeetingURL}
@@ -389,9 +391,9 @@ class SummitEventBulkEditorForm extends React.Component
                     </div>               
                         <div className="bulk-edit-col"> 
                         <Input
-                            id='etherpad_url'
+                            id="etherpad_link"
                             value={currentBulkEtherpadURL}
-                            placeholder={T.translate("bulk_actions_page.placeholders.etherpad_url")}
+                            placeholder={T.translate("bulk_actions_page.placeholders.etherpad_link")}
                             onChange={this.onBulkEtherpadURL}
                         />
                     </div>               
@@ -409,7 +411,7 @@ class SummitEventBulkEditorForm extends React.Component
                     <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_streaming_url_label")}</div>
                     <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_streaming_type_label")}</div>
                     <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_meeting_url_label")}</div>
-                    <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_etherpad_url_label")}</div>
+                    <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_etherpad_link_label")}</div>
                 </div>
                 {
                     events.map((event, idx) => (
