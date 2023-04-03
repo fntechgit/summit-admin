@@ -440,7 +440,7 @@ class SummitEventBulkEditorForm extends React.Component
                     <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_end_date_label")}</div>
                     <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_activity_type_label")}</div>
                     <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_activity_category_label")}</div>
-                    <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_duration_label")}</div>
+                    <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_duration_label")} (minutes)</div>
                     <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_streaming_url_label")}</div>
                     <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_streaming_type_label")}</div>
                     <div className="bulk-edit-col bulk-edit-col-title">{T.translate("bulk_actions_page.event_meeting_url_label")}</div>

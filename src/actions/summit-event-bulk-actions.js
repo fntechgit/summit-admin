@@ -27,6 +27,7 @@ import {
     authErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
+import { normalizeEvent } from './event-actions';
 
 export const UPDATE_LOCAL_EVENT               = 'UPDATE_LOCAL_EVENT';
 export const RECEIVE_SELECTED_EVENTS          = 'REQUEST_SELECTED_EVENTS';
@@ -313,43 +314,3 @@ export const updateEventsMeetingURLLocal = (meetingURL) => (dispatch) => {
 export const updateEventsEtherpadURLLocal = (etherpadURL) => (dispatch) => {
     dispatch(createAction(UPDATE_ETHERPAD_URL_BULK)({etherpadURL}));
 }
-
-const normalizeEvent = (entity, eventType) => {
-    
-    const normalizedEntity = {
-        id: entity.id,
-        title: entity.title,
-        location_id: entity.location_id,
-        type_id: entity.type_id,
-        start_date: entity.start_date,
-        end_date: entity.end_date,
-        selection_plan_id: entity.selection_plan_id,
-        type_id: entity.type_id,
-        track_id: entity.track_id,
-        duration: entity.duration,
-        streaming_url: entity.streaming_url,
-        streaming_type: entity.streaming_type,
-        meeting_url: entity.meeting_url,
-        etherpad_link: entity.etherpad_link,
-    }
-
-    // if allows location in event type is false then remove location_id
-    if (!eventType.allows_location) {
-        delete (normalizedEntity.location_id)
-    }
-    // if allows publishing dates in event type is false then remove those dates
-    if (!eventType.allows_publishing_dates) {
-        delete (normalizedEntity.start_date)
-        delete (normalizedEntity.end_date)
-        delete (normalizedEntity.duration)
-    }
-
-    if (!normalizedEntity.start_date) delete normalizedEntity['start_date'];
-    if (!normalizedEntity.end_date) delete normalizedEntity['end_date'];
-    if (!normalizedEntity.duration) delete normalizedEntity['duration'];
-    if (!normalizedEntity.streaming_url) delete normalizedEntity['streaming_url'];
-    if (!normalizedEntity.meeting_url) delete normalizedEntity['meeting_url'];
-    if (!normalizedEntity.etherpad_link) delete normalizedEntity['etherpad_link'];
-
-    return normalizedEntity;
-};

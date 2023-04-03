@@ -17,24 +17,23 @@ import {SummitEvent} from "openstack-uicore-foundation/lib/models";
 import moment from "moment-timezone";
 import T from 'i18n-react/dist/i18n-react'
 import Select from "react-select";
+import { adjustEventDuration } from '../../utils/methods';
 
-class SummitEventBulkEditorItem extends React.Component
-{
+class SummitEventBulkEditorItem extends React.Component {
+
     constructor(props){
-        super(props);
-        this.handleChangeDateFrom = this.handleChangeDateFrom.bind(this);
-        this.handleChangeDateTo   = this.handleChangeDateTo.bind(this);
+        super(props);        
         this.onTitleChanged       = this.onTitleChanged.bind(this);
         this.onLocationChanged    = this.onLocationChanged.bind(this);
         this.onSelectedEvent      = this.onSelectedEvent.bind(this);
         this.onSelectionPlanChanged = this.onSelectionPlanChanged.bind(this);
         this.onActivityTypeLocalChanged = this.onActivityTypeLocalChanged.bind(this);
         this.onActivityCategoryLocalChanged = this.onActivityCategoryLocalChanged.bind(this);
-        this.onDurationLocalChanged = this.onDurationLocalChanged.bind(this);
         this.onStreamingURLLocalChanged = this.onStreamingURLLocalChanged.bind(this);
         this.onStreamingTypeLocalChanged = this.onStreamingTypeLocalChanged.bind(this);
         this.onMeetingURLLocalChanged = this.onMeetingURLLocalChanged.bind(this);
         this.onEtherpadURLLocalChanged = this.onEtherpadURLLocalChanged.bind(this);
+        this.onTimeLocalChanged = this.onTimeLocalChanged.bind(this);
     }
 
     onSelectedEvent(evt){
@@ -79,38 +78,6 @@ class SummitEventBulkEditorItem extends React.Component
         return isValid ? 'success':'warning';
     }
 
-    handleChangeDateFrom(ev){
-        let {value, id} = ev.target;
-        value = value.valueOf()/1000;
-        let { event, currentSummit } = this.props;
-        let eventModel = new SummitEvent(event, currentSummit);
-        if(event.end_date) {
-            const duration = event.end_date > value ? event.end_date - value : 0;
-            let isValid = typeof(duration) == 'number' ? true:false;
-            this.props.onDurationLocalChanged(this.props.index, duration, isValid)
-        } else if(event.duration) {
-            const end_date = value + event.duration;
-            this.props.onEndDateChanged(this.props.index, end_date, eventModel.isValidEndDate(end_date));
-        }
-        this.props.onStartDateChanged(this.props.index, value, eventModel.isValidStartDate(value));
-    }
-
-    handleChangeDateTo(ev){
-        let {value, id} = ev.target;
-        value = value.valueOf()/1000;
-        let { event, currentSummit } = this.props;
-        let eventModel = new SummitEvent(event, currentSummit);
-        if(event.start_date) {
-            const duration = event.start_date < value ? value - event.start_date : 0;
-            let isValid = typeof(duration) == 'number' ? true:false;
-            this.props.onDurationLocalChanged(this.props.index, duration, isValid)
-        } else if(event.duration) {
-            const start_date = value - event.duration;
-            this.props.onStartDateChanged(this.props.index, start_date, eventModel.isValidEndDate(end_date));
-        }
-        this.props.onEndDateChanged(this.props.index, value, eventModel.isValidEndDate(value));
-    }
-
     onTitleChanged(ev){
         let title = ev.target.value.trim();
         let { event, currentSummit } = this.props;
@@ -139,21 +106,17 @@ class SummitEventBulkEditorItem extends React.Component
         let isValid = activityCategory == null ? false:true;
         this.props.onActivityCategoryLocalChanged(this.props.index, activityCategory, isValid)
     }
-    onDurationLocalChanged(ev) {
-        let duration = Number.isInteger(parseInt(ev.target.value)) ? parseInt(ev.target.value) : null
-        if(duration !== null) {
-            let { event, currentSummit } = this.props;
-            let eventModel = new SummitEvent(event, currentSummit);
-            if(event.start_date) {
-                const end_date = event.start_date + duration;
-                this.props.onEndDateChanged(this.props.index, end_date, eventModel.isValidEndDate(end_date));
-            } else if (event.end_date) {
-                const start_date = event.end_date - duration;
-                this.props.onStartDateChanged(this.props.index, start_date, eventModel.isValidStartDate(start_date));
-            }
-        }
-        let isValid = typeof(duration) == 'number' ? true:false;
-        this.props.onDurationLocalChanged(this.props.index, duration, isValid)
+    onTimeLocalChanged(ev) {
+        let { event, currentSummit } = this.props;        
+        event = adjustEventDuration(ev, event);
+        let eventModel = new SummitEvent(event, currentSummit);
+
+        if(event.start_date) this.props.onStartDateChanged(this.props.index, event.start_date, eventModel.isValidEndDate(event.start_date));    
+        if(event.end_date) this.props.onEndDateChanged(this.props.index, event.end_date, eventModel.isValidEndDate(event.end_date));
+        if(event.duration) {
+            let isValid = typeof(event.duration) == 'number' ? true:false;
+            this.props.onDurationLocalChanged(this.props.index, event.duration, isValid);
+        }        
     }
     onStreamingURLLocalChanged(ev) {
         let streamingURL = ev.target.value;
@@ -239,7 +202,7 @@ class SummitEventBulkEditorItem extends React.Component
                             timezone={currentSummit.time_zone.name}
                             timeConstraints={{ hours: { min: 7, max: 22}}}
                             validation={{after: currentSummitStartDate.valueOf()/1000, before: currentSummitEndDate.valueOf()/1000}}
-                            onChange={this.handleChangeDateFrom}
+                            onChange={this.onTimeLocalChanged}
                             value={this.getFormattedTime(event.start_date)}
                             className="bulk-edit-date-picker"
                         />
@@ -255,7 +218,7 @@ class SummitEventBulkEditorItem extends React.Component
                             inputProps={{placeholder: T.translate("bulk_actions_page.placeholders.end_date")}}
                             timezone={currentSummit.time_zone.name}
                             validation={{after: currentSummitStartDate.valueOf()/1000, before: currentSummitEndDate.valueOf()/1000}}
-                            onChange={this.handleChangeDateTo}
+                            onChange={this.onTimeLocalChanged}
                             value={this.getFormattedTime(event.end_date)}
                             className="bulk-edit-date-picker"
                         />
@@ -292,8 +255,9 @@ class SummitEventBulkEditorItem extends React.Component
                             id="duration"
                             type="number"
                             placeholder={T.translate("bulk_actions_page.placeholders.duration")}
-                            onChange={this.onDurationLocalChanged}
-                            value={event.duration}
+                            onChange={this.onTimeLocalChanged}
+                            value={event.duration === 0 ? "" : (event.duration/60).toString()}
+                            min="0"
                         />
                         <FormControl.Feedback />
                     </FormGroup>
