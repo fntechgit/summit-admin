@@ -6521,11 +6521,11 @@ open@^8.0.9:
     define-lazy-prop "^2.0.0"
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
-
-openstack-uicore-foundation@4.1.14:
-  version "4.1.14"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.1.14.tgz#83daa5270589ac7488076f5a3903313088351520"
-  integrity sha512-SXfDomvVTmEREtYWv/E0/mNFzMmbmxF32Pec86sEdI3Ktp8YCWMz1i8M3AU6byKoCB5NhaCfViSAgv/Eralxmg==
+    
+openstack-uicore-foundation@4.1.15:
+  version "4.1.15"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.1.15.tgz#b71bec43ce50cdf23e42c941329d04bb6d80b8fc"
+  integrity sha512-7wSLq+uIZkPWv1MSZBnuz9jxWjh/oJ7dX4fOICCT9KNwUO0P56KhlHfPh1oBd0s/S66le1g06G8dOD6CLJFPtg==
 
 os-homedir@^1.0.0:
   version "1.0.2"
