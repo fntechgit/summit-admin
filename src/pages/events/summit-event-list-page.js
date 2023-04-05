@@ -36,7 +36,7 @@ import {hasErrors, uuidv4} from "../../utils/methods";
 import '../../styles/summit-event-list-page.less';
 
 const fieldNames = [
-    { columnKey: 'speakers', value: 'speakers', sortable: true },
+    { columnKey: 'speakers', value: 'speakers' },
     { columnKey: 'created_by_fullname', value: 'created_by', sortable: true },
     { columnKey: 'published_date', value: 'published', sortable: true },
     { columnKey: 'duration', value: 'duration', sortable: true },
@@ -48,7 +48,7 @@ const fieldNames = [
     { columnKey: 'submitters', value: 'submitters' },
     { columnKey: 'submitter_company', value: 'submitter_company', sortable: true },
     { columnKey: 'sponsor', value: 'sponsor', sortable: true },
-    { columnKey: 'event_type_capacity', value: 'event_type_capacity', sortable: true },
+    { columnKey: 'event_type_capacity', value: 'event_type_capacity' },
     { columnKey: 'selection_plan', value: 'selection_plan', sortable: true },
     { columnKey: 'location', value: 'location', sortable: true },
     { columnKey: 'level', value: 'level', sortable: true },
