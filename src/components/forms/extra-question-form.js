@@ -122,11 +122,11 @@ class ExtraQuestionForm extends React.Component {
 
     render() {
         const { entity, errors } = this.state;
-        const { currentSummit, onValueDelete, onValueSave, questionClasses, updateSubQuestionRuleOrder } = this.props;
+        const { currentSummit = null, onValueDelete, onValueSave, questionClasses, updateSubQuestionRuleOrder } = this.props;
         const question_class_ddl = questionClasses.map(c => ({ label: c.type, value: c.type }));
 
-        const badge_features_ddl = currentSummit.badge_features ? currentSummit.badge_features.map(f => ({label:f.name, value:f.id})) : [];
-        const ticket_type_ddl = currentSummit.ticket_types ? currentSummit.ticket_types .map(tt => ({label: tt.name, value: tt.id})) : [];
+        const badge_features_ddl = currentSummit ? currentSummit.badge_features.map(f => ({label:f.name, value:f.id})) : [];
+        const ticket_type_ddl = currentSummit ? currentSummit.ticket_types .map(tt => ({label: tt.name, value: tt.id})) : [];
         
         const question_usage_ddl = [
             { label: 'Order', value: 'Order' },
@@ -274,7 +274,7 @@ class ExtraQuestionForm extends React.Component {
                         </div>
                     </div>
                 </div>
-                {entity.usage === 'Ticket' && 
+                {ticket_type_ddl.length > 0 && badge_features_ddl.length &&
                     <div className="row form-group">
                         {ticket_type_ddl.length > 0 &&
                             <div className="col-md-4">
