@@ -241,7 +241,7 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
             let { etherpadURL }      = payload;
             let { eventOnBulkEdition } = state;
             eventOnBulkEdition = eventOnBulkEdition.map(event => {
-                return {...event, etherpad_url: etherpadURL}
+                return {...event, etherpad_link: etherpadURL}
             });
             return { ... state, eventOnBulkEdition}
         }

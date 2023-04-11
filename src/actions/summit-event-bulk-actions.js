@@ -152,7 +152,7 @@ export const updateEventMeetingURLLocal = (event, meetingURL, isValid) => (dispa
 }
 export const updateEventEtherpadURLLocal = (event, etherpadURL, isValid) => (dispatch) => {
 
-    let mutator = (etherpadURL, isValid) => event => ({...event, etherpad_url: etherpadURL, is_valid: isValid});
+    let mutator = (etherpadURL, isValid) => event => ({...event, etherpad_link: etherpadURL, is_valid: isValid});
 
     dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(etherpadURL, isValid)}));
 }
@@ -169,7 +169,7 @@ export const updateEvents = (summitId, events) =>  async (dispatch, getState) =>
         createAction(UPDATED_REMOTE_EVENTS)({}),
         `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,
         {
-            events: events.map((event) => normalizeEvent(event, currentSummit.event_types.find(et => et.id === event.type_id)))
+            events: normalizeBulkEvents(events.map((event) => normalizeEvent(event, currentSummit.event_types.find(et => et.id === event.type_id))))
         },
         authErrorHandler
     )({})(dispatch)
@@ -191,13 +191,14 @@ export const updateAndPublishEvents = (summitId, events) =>  async (dispatch, ge
     dispatch(startLoading());
 
     events = events.map((event) => normalizeEvent(event, currentSummit.event_types.find(et => et.id === event.type_id)));
+    const normalizedEvents = normalizeBulkEvents(events);
     dispatch(stopLoading());
     putRequest(
         null,
         createAction(UPDATED_REMOTE_EVENTS)({}),
         `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,
         {
-            events
+            events: normalizedEvents
         },
         authErrorHandler
     )({})(dispatch)
@@ -209,7 +210,7 @@ export const updateAndPublishEvents = (summitId, events) =>  async (dispatch, ge
                     createAction(UPDATED_REMOTE_EVENTS)({}),
                     `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/publish/?access_token=${accessToken}`,
                     {
-                        events: events.map((event) => ({
+                        events: normalizedEvents.map((event) => ({
                             id:event.id,
                             location_id:event.location_id,
                             start_date:event.start_date,
@@ -313,4 +314,31 @@ export const updateEventsMeetingURLLocal = (meetingURL) => (dispatch) => {
 }
 export const updateEventsEtherpadURLLocal = (etherpadURL) => (dispatch) => {
     dispatch(createAction(UPDATE_ETHERPAD_URL_BULK)({etherpadURL}));
+}
+
+const normalizeBulkEvents = (entity) => {
+    const normalizedEntity = entity.map(e => {
+        const normalizedEvent = {
+            id: e.id,
+            title: e.title,
+            selection_plan_id: e.selection_plan_id,
+            location_id: e.location_id,
+            start_date: e.start_date,
+            end_date: e.end_date,
+            type_id: e.type_id,
+            track_id: e.track_id,
+            duration: e.duration,
+            streaming_url: e.streaming_url,
+            streaming_type: e.streaming_type,
+            meeting_url: e.meeting_url,
+            etherpad_link: e.etherpad_link   
+        }
+        for (let property in normalizedEvent) {
+            if (normalizedEvent[property] === undefined || normalizedEvent[property] === null) {
+                delete normalizedEvent[property];
+            }
+        }
+        return normalizedEvent;
+    });
+    return normalizedEntity;
 }
