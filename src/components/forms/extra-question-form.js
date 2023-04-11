@@ -274,42 +274,40 @@ class ExtraQuestionForm extends React.Component {
                         </div>
                     </div>
                 </div>
-                {ticket_type_ddl.length > 0 && badge_features_ddl.length &&
-                    <div className="row form-group">
-                        {ticket_type_ddl.length > 0 &&
-                            <div className="col-md-4">
-                                <label> 
-                                    {T.translate("question_form.allowed_ticket_types")} &nbsp; 
-                                    <i className="fa fa-info-circle" title={T.translate("question_form.allowed_ticket_types_info")} />
-                                </label>
-                                <Dropdown
-                                    id="allowed_ticket_types"
-                                    clearable
-                                    isMulti
-                                    value={entity.allowed_ticket_types}
-                                    onChange={this.handleChange}
-                                    options={ticket_type_ddl}
-                                />
-                            </div>
-                        }
-                        {badge_features_ddl.length > 0 &&
-                            <div className="col-md-4">
-                                <label> 
-                                    {T.translate("question_form.allowed_badge_features_types")} &nbsp; 
-                                    <i className="fa fa-info-circle" title={T.translate("question_form.allowed_badge_features_types_info")} />
-                                </label>
-                                <Dropdown
-                                    id="allowed_badge_features_types"
-                                    clearable
-                                    isMulti
-                                    value={entity.allowed_badge_features_types}
-                                    onChange={this.handleChange}
-                                    options={badge_features_ddl}
-                                />
-                            </div>
-                        }
-                    </div>
-                }
+                <div className="row form-group">
+                    {ticket_type_ddl.length > 0 &&
+                        <div className="col-md-4">
+                            <label> 
+                                {T.translate("question_form.allowed_ticket_types")} &nbsp; 
+                                <i className="fa fa-info-circle" title={T.translate("question_form.allowed_ticket_types_info")} />
+                            </label>
+                            <Dropdown
+                                id="allowed_ticket_types"
+                                clearable
+                                isMulti
+                                value={entity.allowed_ticket_types}
+                                onChange={this.handleChange}
+                                options={ticket_type_ddl}
+                            />
+                        </div>
+                    }
+                    {badge_features_ddl.length > 0 &&
+                        <div className="col-md-4">
+                            <label> 
+                                {T.translate("question_form.allowed_badge_features_types")} &nbsp; 
+                                <i className="fa fa-info-circle" title={T.translate("question_form.allowed_badge_features_types_info")} />
+                            </label>
+                            <Dropdown
+                                id="allowed_badge_features_types"
+                                clearable
+                                isMulti
+                                value={entity.allowed_badge_features_types}
+                                onChange={this.handleChange}
+                                options={badge_features_ddl}
+                            />
+                        </div>
+                    }
+                </div>
 
                 {this.shouldShowField('values') && entity.id !== 0 &&
                     <div className="row">
