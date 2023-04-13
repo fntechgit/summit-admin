@@ -107,16 +107,16 @@ class SummitEventBulkEditorItem extends React.Component {
         this.props.onActivityCategoryLocalChanged(this.props.index, activityCategory, isValid)
     }
     onTimeLocalChanged(ev) {
-        let { event, currentSummit } = this.props;        
+        let { event, currentSummit } = this.props;
         event = adjustEventDuration(ev, event);
         let eventModel = new SummitEvent(event, currentSummit);
 
-        if(event.start_date) this.props.onStartDateChanged(this.props.index, event.start_date, eventModel.isValidEndDate(event.start_date));    
+        if(event.start_date) this.props.onStartDateChanged(this.props.index, event.start_date, eventModel.isValidEndDate(event.start_date));
         if(event.end_date) this.props.onEndDateChanged(this.props.index, event.end_date, eventModel.isValidEndDate(event.end_date));
         if(event.duration) {
             let isValid = typeof(event.duration) == 'number' ? true:false;
             this.props.onDurationLocalChanged(this.props.index, event.duration, isValid);
-        }        
+        }
     }
     onStreamingURLLocalChanged(ev) {
         let streamingURL = ev.target.value;
@@ -258,6 +258,8 @@ class SummitEventBulkEditorItem extends React.Component {
                             onChange={this.onTimeLocalChanged}
                             value={event.duration === 0 ? "" : (event.duration/60).toString()}
                             min="0"
+                            step="1"
+                            pattern="\d+"
                         />
                         <FormControl.Feedback />
                     </FormGroup>

@@ -192,7 +192,7 @@ class SummitEventBulkEditorForm extends React.Component
         this.setState({...this.state, currentBulkStartDate: value}, () => this.props.updateEventsStartDateLocal(value));
         if(currentBulkEndDate) {
             const duration = currentBulkEndDate > value ? currentBulkEndDate - value : 0;
-            this.setState({...this.state, currentBulkDuration: duration}, () => this.props.updateEventsDurationLocal(parseInt(duration)));
+            this.setState({...this.state, currentBulkDuration: duration/60}, () => this.props.updateEventsDurationLocal(parseInt(duration)));
         } else if(currentBulkDuration) {
             const end_date = value + currentBulkDuration;
             this.setState({...this.state, currentBulkEndDate: end_date}, () => this.props.updateEventsEndDateLocal(end_date));
@@ -206,7 +206,7 @@ class SummitEventBulkEditorForm extends React.Component
         this.setState({...this.state, currentBulkEndDate: value}, () => this.props.updateEventsEndDateLocal(value));
         if(currentBulkStartDate) {
             const duration = currentBulkStartDate < value ? value - currentBulkStartDate : 0;            
-            this.setState({...this.state, currentBulkDuration: duration}, () => this.props.updateEventsDurationLocal(parseInt(duration)));
+            this.setState({...this.state, currentBulkDuration: duration/60}, () => this.props.updateEventsDurationLocal(parseInt(duration)));
         } else if(currentBulkDuration) {
             const start_date = value - currentBulkDuration;
             this.setState({...this.state, currentBulkStartDate: start_date}, () => this.props.updateEventsStartDateLocal(start_date));
@@ -224,15 +224,15 @@ class SummitEventBulkEditorForm extends React.Component
         this.props.updateEventsActivityCategoryLocal(value);
     }
     onBulkDuration (ev) {
-        let duration = Number.isInteger(parseInt(ev.target.value)) ? parseInt(ev.target.value) : null        
+        let duration = Number.isInteger(parseInt(digits)) ? parseInt(digits) : null;
         const { currentBulkStartDate, currentBulkEndDate } = this.state;
-        this.setState({...this.state, currentBulkDuration: duration}, () => this.props.updateEventsDurationLocal(duration));
+        this.setState({...this.state, currentBulkDuration: duration}, () => this.props.updateEventsDurationLocal(duration*60));
         if(duration !== null) {
             if(currentBulkStartDate) {
-                const end_date = currentBulkStartDate + duration;
+                const end_date = currentBulkStartDate + (duration * 60);
                 this.setState({...this.state, currentBulkEndDate: end_date}, () => this.props.updateEventsEndDateLocal(end_date));
             } else if (currentBulkEndDate) {
-                const start_date = currentBulkEndDate - duration;
+                const start_date = currentBulkEndDate - (duration * 60);
                 this.setState({...this.state, currentBulkStartDate: start_date}, () => this.props.updateEventsStartDateLocal(start_date));
             }
         }
@@ -392,6 +392,9 @@ class SummitEventBulkEditorForm extends React.Component
                         <Input
                             id="duration"
                             type='number'
+                            min="0"
+                            step="1"
+                            pattern="\d+"
                             value={currentBulkDuration}
                             placeholder={T.translate("bulk_actions_page.placeholders.duration")}
                             onChange={this.onBulkDuration}
