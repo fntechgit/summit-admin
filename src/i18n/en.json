@@ -98,6 +98,7 @@
     "event_types": "Activity Types",
     "event_categories": "Activity Categories",
     "event_category_groups": "Activity Category Groups",
+    "signage": "Signage",
     "locations": "Locations",
     "rsvps": "RSVPs",
     "rsvp_template_list": "Templates",
@@ -2451,6 +2452,23 @@
     "order": "Order",
     "placeholders": {
       "search_log": "Search By Action / User Full Name"
+    }
+  },
+  "signage": {
+    "signs": "Signs",
+    "location": "Location",
+    "template": "Template",
+    "date": "Date",
+    "static_banner": "Static Banner",
+    "view_sign": "View Sign",
+    "push_updates": "Push Updates",
+    "jump": "Jump",
+    "activities": "Activities",
+    "banners": "Banners",
+    "placeholders": {
+      "locations": "Select location",
+      "templates": "Select template",
+      "date": "Select date"
     }
   }
 }
