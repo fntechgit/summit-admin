@@ -162,7 +162,8 @@
       "select_venue": "Select a Venue ...",
       "select_event_type": "Select an Activity Type ...",
       "select_track": "Select an Activity Category ...",
-      "selected_filters": "Enabled Filters"
+      "selected_filters": "Enabled Filters",
+      "selected_source": "Select Source"
     }
   },
   "bulk_actions_page": {
@@ -330,6 +331,7 @@
     "reg_lite_company_input_placeholder": "Company Text Input Placeholder",
     "reg_lite_company_input_placeholder_info": "This placeholder will be used for the company text input field on the registration lite.",
     "reg_lite_allow_promo_codes": "Allow Promo Codes on Registration Lite ?",
+    "reg_lite_show_company_input": "Show user company input during registration?",
     "reg_lite_company_ddl_placeholder": "Company Dropdown Placeholder",
     "reg_lite_company_ddl_placeholder_info": "This placeholder will be used for the company dropdown field on the registration lite.",
     "placeholders": {
@@ -889,7 +891,7 @@
     "tags": "Tags",
     "streaming_url": "Streaming URL",
     "meeting_url": "Meeting URL",
-    "etherpad_url": "Etherpad URL",
+    "etherpad_link": "Etherpad URL",
     "streaming_type": "Streaming Type",
     "status": "Status",
     "selection_status": "Selection Status",
@@ -947,7 +949,7 @@
       "submitter_company": "Filter by Submitter Company",
       "streaming_url": "Filter by Stream URL",
       "meeting_url": "Filter by Meeting URL",
-      "etherpad_url": "Filter by Etherpad URL",
+      "etherpad_link": "Filter by Etherpad URL",
       "streaming_type": "Filter by Streaming Type",
       "sponsor": "Filter by Sponsor",
       "all_companies": "Filter by All Companies"
@@ -1248,6 +1250,7 @@
     "hint": "Text Input Hint",
     "usage": "Usage",
     "mandatory": "Mandatory",
+    "is_editable": "Editable",
     "printable": "Printable",
     "value": "Hidden Value",
     "visible_option": "Visible Option (as appears on site)",
@@ -1333,8 +1336,8 @@
     "paid_amount_adjusted": "Amount Paid Adjusted",
     "ingest_done": "External ticket ingestion was performed successfully.",
     "all": "All",
-    "has_owner": "Has Assignee",
-    "has_no_owner": "Has No Assignee",
+    "has_owner": "Yes",
+    "has_no_owner": "No",
     "complete": "Complete",
     "incomplete": "Incomplete",
     "print": "Print",
@@ -2204,6 +2207,7 @@
     "max_qty": "Max Media Uploads Quantity",
     "max_qty_hint": "0: Unrestricted",
     "is_mandatory": "Is Mandatory",
+    "is_editable": "Is Editable",
     "type": "File Type",
     "public_storage_type": "Public Storage Type",
     "private_storage_type": "Private Storage Type",
@@ -2212,8 +2216,9 @@
     "delete_warning": "Are you sure you want to delete media media type ",
     "saved": "Media Upload Type saved successfully.",
     "created": "Media Upload Type created successfully.",
+    "temporary_links_on_public_storage": "Temporary Links",
     "use_temporary_links_on_public_storage": "Use Temporary Links",
-    "temporary_links_public_storage_ttl_info": "Temporary Link Time To Live (TTL) in minutes",
+    "temporary_links_public_storage_ttl_info": "Temporary Link Time To Live (TTL)",
     "placeholders": {
       "search": "Search types by name",
       "select_type": "Select File Type",
