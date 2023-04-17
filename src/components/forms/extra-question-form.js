@@ -125,9 +125,9 @@ class ExtraQuestionForm extends React.Component {
         const { currentSummit = null, onValueDelete, onValueSave, questionClasses, updateSubQuestionRuleOrder } = this.props;
         const question_class_ddl = questionClasses.map(c => ({ label: c.type, value: c.type }));
 
-        const badge_features_ddl = currentSummit ? currentSummit.badge_features.map(f => ({label:f.name, value:f.id})) : [];
-        const ticket_type_ddl = currentSummit ? currentSummit.ticket_types .map(tt => ({label: tt.name, value: tt.id})) : [];
-        
+        const badge_features_ddl = currentSummit && currentSummit.badge_features &&  currentSummit.badge_features.length > 0 ? currentSummit.badge_features.map(f => ({label:f.name, value:f.id})) : [];
+        const ticket_type_ddl = currentSummit && currentSummit.ticket_types &&  currentSummit.ticket_types.length > 0 ? currentSummit.ticket_types .map(tt => ({label: tt.name, value: tt.id})) : [];
+
         const question_usage_ddl = [
             { label: 'Order', value: 'Order' },
             { label: 'Ticket', value: 'Ticket' },

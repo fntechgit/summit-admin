@@ -36,8 +36,6 @@ export const DEFAULT_ENTITY = {
     mandatory                   : false,
     placeholder                 : '',
     values                      : [],
-    allowed_ticket_types        : [],
-    allowed_badge_features_types: []
 }
 
 const DEFAULT_STATE = {
