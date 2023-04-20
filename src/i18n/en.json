@@ -2458,17 +2458,26 @@
     "signs": "Signs",
     "location": "Location",
     "template": "Template",
-    "date": "Date",
+    "date": "Jump to date",
     "static_banner": "Static Banner",
     "view_sign": "View Sign",
     "push_updates": "Push Updates",
     "jump": "Jump",
     "activities": "Activities",
     "banners": "Banners",
+    "id": "ID",
+    "title": "Title",
+    "content": "Content",
+    "speakers": "Speakers",
+    "type": "Type",
+    "floor_loc": "Floor / Location",
+    "start_date": "Start date",
+    "end_date": "End date",
     "placeholders": {
       "locations": "Select location",
-      "templates": "Select template",
-      "date": "Select date"
+      "template": "Select template",
+      "date": "Select date",
+      "search": "Search signs"
     }
   }
 }
