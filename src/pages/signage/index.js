@@ -33,12 +33,13 @@ import {
 } from "../../actions/signage-actions";
 import LocationGroupedDropdown from "../../components/inputs/location-grouped-dropdown";
 import {BannersTable} from "../../components/tables/signagebannerstable";
+import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
 
 const SignagePage = ({summit, match, locations, templates, sign, events, banners, staticBanner, locationId, term, page, ...props}) => {
   const [template, setTemplate] = useState(null);
   const [jumpDate, setJumpDate] = useState(null);
   const [view, setView] = useState('activities');
-  const [staticBannerLoc, setStaticBannerLoc] = useState(staticBanner?.content);
+  const [staticBannerLoc, setStaticBannerLoc] = useState(staticBanner?.content || '');
   const templateOptions = templates?.map(tmp =>({value: tmp.file, label: tmp.name})) || [];
   const selectedRoom = summit.locations.find(loc => loc.id === locationId);
   
@@ -55,20 +56,20 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
     setStaticBannerLoc(staticBanner?.content || '');
   }, [staticBanner?.content]);
   
-  const getEvents = (newLocation = null, newTerm = null, newPage = null) => {
+  const getEvents = (newLocation = null, newTerm = null, newPage = null, ...rest) => {
     const useLocation = newLocation || locationId;
     const useTerm = newTerm === null ? term : newTerm;
     const usePage = newPage || page;
     
-    props.getSignEvents(useLocation, useTerm, usePage);
+    props.getSignEvents(useLocation, useTerm, usePage, ...rest);
   }
   
-  const getBanners = (newLocation = null, newTerm = null, newPage = null) => {
+  const getBanners = (newLocation = null, newTerm = null, newPage = null, ...rest) => {
     const useLocation = newLocation || locationId;
     const useTerm = newTerm === null ? term : newTerm;
     const usePage = newPage || page;
     
-    props.getSignBanners(useLocation, useTerm, usePage);
+    props.getSignBanners(useLocation, useTerm, usePage, ...rest);
   }
   
   const onChangeLocation = (newLocation) => {
@@ -82,6 +83,14 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
       getEvents(null, newTerm,1);
     } else if (view === 'banners') {
       getBanners(null, newTerm, 1);
+    }
+  };
+  
+  const onSort = (index, key, dir, func) => {
+    if (view === 'activities') {
+      getEvents(null, null,null, key, dir);
+    } else if (view === 'banners') {
+      getBanners(null, null, null, key, dir);
     }
   };
   
@@ -113,7 +122,7 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
     { columnKey: 'title', value: T.translate("signage.title"), sortable: true },
     { columnKey: 'speakers_str', value: T.translate("signage.speakers")},
     { columnKey: 'floor_loc', value: T.translate("signage.floor_loc")},
-    { columnKey: 'start_date_str', value: T.translate("signage.start_date")},
+    { columnKey: 'start_date_str', value: T.translate("signage.start_date"), sortable: true},
     { columnKey: 'end_date_str', value: T.translate("signage.end_date")},
   ];
   
@@ -156,6 +165,11 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
                 options={templateOptions}
               />
             </div>
+            <div className="col-md-4">
+              <button className="btn btn-default" onClick={viewSign}>
+                {T.translate(`signage.view_sign`)}
+              </button>
+            </div>
           </div>
           <div className="row form-group">
             <div className="col-md-4">
@@ -164,8 +178,8 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
                 format={{date:"YYYY-MM-DD", time: "HH:mm"}}
                 inputProps={{placeholder: T.translate("signage.placeholders.date")}}
                 timezone={summit.time_zone_id}
-                onChange={ev => setJumpDate(ev.target.value.valueOf() / 1000)}
-                value={jumpDate}
+                onChange={ev => setJumpDate(ev.target.value.unix())}
+                value={epochToMomentTimeZone(jumpDate, summit.time_zone_id)}
               />
             </div>
             <div className="col-md-4">
@@ -178,10 +192,7 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
               />
             </div>
             <div className="col-md-4">
-              <button className="btn btn-default" onClick={viewSign}>
-                {T.translate(`signage.view_sign`)}
-              </button>
-              <button className="btn btn-default" onClick={pushUpdates}>
+              <button className="btn btn-default btn-success" onClick={pushUpdates}>
                 {T.translate(`signage.push_updates`)}
               </button>
             </div>
@@ -213,7 +224,7 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
                   options={eventsTableOptions}
                   data={events}
                   columns={eventsColumns}
-                  onSort={console.log}
+                  onSort={onSort}
                 />
                 <Pagination
                   bsSize="medium"

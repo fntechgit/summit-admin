@@ -38,7 +38,7 @@ const DEFAULT_STATE = {
     currentPage: 1,
     lastPage: 1,
     perPage: 10,
-    order: 'created',
+    order: 'start_date',
     orderDir: 1,
     totalEntries: 0,
     summitTz: ''
@@ -76,7 +76,7 @@ const signageReducer = (state = DEFAULT_STATE, action) => {
                     start_date: ev.start_date,
                     end_date: ev.end_date,
                 })
-            })
+            });
             return {...state, events, totalEntries: total, currentPage: current_page, lastPage: last_page };
         }
         case REQUEST_SIGNAGE_BANNERS: {

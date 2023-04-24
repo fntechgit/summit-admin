@@ -99,7 +99,7 @@ export const getTemplates = () => async (dispatch, getState) => {
     }
 };
 
-export const getSignEvents = (locationId, term = '', page = 1, perPage = 10, order = null, orderDir = 1) => async (dispatch, getState) => {
+export const getSignEvents = (locationId, term = '', page = 1, order = 'start_date', orderDir = 1) => async (dispatch, getState) => {
 
     const {currentSummitState} = getState();
     const accessToken = await getAccessTokenSafely();
@@ -115,7 +115,7 @@ export const getSignEvents = (locationId, term = '', page = 1, perPage = 10, ord
     
     const params = {
         page: page,
-        per_page: perPage,
+        per_page: 10,
         expand: 'speakers,location,location.floor',
         access_token: accessToken,
     };
@@ -125,7 +125,8 @@ export const getSignEvents = (locationId, term = '', page = 1, perPage = 10, ord
     // order
     if (order != null && orderDir != null) {
         const orderDirSign = (orderDir === 1) ? '+' : '-';
-        params['order'] = `${orderDirSign}${order}`;
+        const translateOrder = order === 'start_date_str' ? 'start_date' : order;
+        params['order'] = `${orderDirSign}${translateOrder}`;
     }
     
     return getRequest(
@@ -133,14 +134,14 @@ export const getSignEvents = (locationId, term = '', page = 1, perPage = 10, ord
       createAction(RECEIVE_SIGNAGE_EVENTS),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/events/published`,
         authErrorHandler,
-        {page, perPage, order, orderDir, term, locationId, summitTz: currentSummit.time_zone_id}
+        {page, order, orderDir, term, locationId, summitTz: currentSummit.time_zone_id}
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }
     );
 };
 
-export const getSignBanners = (locationId, term = '', page = 1, perPage = 10, order = null, orderDir = 1) => async (dispatch, getState) => {
+export const getSignBanners = (locationId, term = '', page = 1, order = null, orderDir = 1) => async (dispatch, getState) => {
     
     const {currentSummitState} = getState();
     const accessToken = await getAccessTokenSafely();
@@ -156,7 +157,7 @@ export const getSignBanners = (locationId, term = '', page = 1, perPage = 10, or
     
     const params = {
         page: page,
-        per_page: perPage,
+        per_page: 10,
         expand: 'type,location,location.floor',
         access_token: accessToken,
     };
@@ -166,7 +167,8 @@ export const getSignBanners = (locationId, term = '', page = 1, perPage = 10, or
     // order
     if (order != null && orderDir != null) {
         const orderDirSign = (orderDir === 1) ? '+' : '-';
-        params['order'] = `${orderDirSign}${order}`;
+        const translateOrder = order === 'start_date_str' ? 'start_date' : order;
+        params['order'] = `${orderDirSign}${translateOrder}`;
     }
     
     return getRequest(
@@ -174,7 +176,7 @@ export const getSignBanners = (locationId, term = '', page = 1, perPage = 10, or
       createAction(RECEIVE_SIGNAGE_BANNERS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/${locationId}/banners`,
       authErrorHandler,
-      {page, perPage, order, orderDir, term, locationId, summitTz: currentSummit.time_zone_id}
+      {page, order, orderDir, term, locationId, summitTz: currentSummit.time_zone_id}
     )(params)(dispatch).then(() => {
           dispatch(stopLoading());
       }
@@ -311,8 +313,6 @@ export const saveSignTemplate = (templateFile) => async (dispatch, getState) => 
 export const publishSignUpdates = (templateFile, pushDate, staticBannerContent) => (dispatch, getState) => {
     const { signageState } = getState();
     const { sign, staticBanner } = signageState;
-    
-    console.log(templateFile, pushDate, staticBannerContent);
     
     if (templateFile && templateFile !== sign?.template) {
         saveSignTemplate(templateFile)(dispatch,getState);
