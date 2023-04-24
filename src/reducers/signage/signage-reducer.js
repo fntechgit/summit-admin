@@ -26,7 +26,6 @@ import {
     SIGNAGE_BANNER_UPDATED,
     SIGNAGE_BANNER_DELETED
 } from "../../actions/signage-actions";
-import {FLOOR_ADDED, FLOOR_DELETED, FLOOR_UPDATED} from "../../actions/location-actions";
 
 const DEFAULT_STATE = {
     sign: null,
@@ -73,7 +72,9 @@ const signageReducer = (state = DEFAULT_STATE, action) => {
                     speakers_str: ev.speakers.map(sp => `${sp.first_name} ${sp.last_name}`).join(', '),
                     floor_loc: `${ev.location.floor?.name} / ${ev.location.name}`,
                     start_date_str,
-                    end_date_str
+                    end_date_str,
+                    start_date: ev.start_date,
+                    end_date: ev.end_date,
                 })
             })
             return {...state, events, totalEntries: total, currentPage: current_page, lastPage: last_page };
@@ -84,7 +85,7 @@ const signageReducer = (state = DEFAULT_STATE, action) => {
         }
         case RECEIVE_SIGNAGE_BANNERS: {
             const { current_page, total, last_page, data } = payload.response;
-            const staticBanner = data.find(ban => ban.class_name === 'SummitLocationBanner');
+            const staticBanner = data.find(ban => ban.class_name === 'SummitLocationBanner') || {content: ''};
             const rawBanners = data.filter(ban => ban.class_name === 'ScheduledSummitLocationBanner');
             const banners = rawBanners.map(ban => mapBanner(ban,state.summitTz));
             

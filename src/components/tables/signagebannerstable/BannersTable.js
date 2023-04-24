@@ -2,8 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import BannersActionsTableCell from './BannersActionsTableCell';
 import { DateTimePicker } from 'openstack-uicore-foundation/lib/components'
-import { epochToMomentTimeZone, formatEpoch } from 'openstack-uicore-foundation/lib/utils/methods'
-import { saveBanner, deleteBanner, jumpToBanner } from "../../../actions/signage-actions"
+import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
+import {saveBanner, deleteBanner, publishDate} from "../../../actions/signage-actions"
 import T from "i18n-react/dist/i18n-react";
 import ReactTooltip from "react-tooltip";
 
@@ -124,7 +124,8 @@ class BannersTable extends React.Component {
             type: 'Primary',
             start_date: '',
             end_date: '',
-            class_name: 'SummitLocationBanner'
+            class_name: 'ScheduledSummitLocationBanner',
+            enabled: true,
         };
 
         this.state = {
@@ -138,7 +139,7 @@ class BannersTable extends React.Component {
         this.actions.delete = this.deleteClick.bind(this);
         this.actions.handleChange = this.onChangeCell.bind(this);
         this.actions.cancel = this.editRowCancel.bind(this);
-        this.actions.jump = props.jumpToBanner;
+        this.actions.jump = this.jumpTo.bind(this);
 
         this.newActions = {};
         this.newActions.save = this.saveNewRow.bind(this);
@@ -238,6 +239,12 @@ class BannersTable extends React.Component {
 
         this.props.saveBanner(new_row);
     }
+    
+    jumpTo(id) {
+        const { rows } = this.state;
+        const row = rows.find(r => r.id === id);
+        this.props.publishDate(row.start_date);
+    }
 
     render() {
         const {room, summitTz} = this.props;
@@ -288,6 +295,6 @@ export default connect (
     {
         saveBanner,
         deleteBanner,
-        jumpToBanner
+        publishDate
     }
 )(BannersTable);

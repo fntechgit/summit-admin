@@ -22,16 +22,24 @@ import {
   Table
 } from "openstack-uicore-foundation/lib/components";
 import styles from '../../styles/signage-page.module.less';
-import {getSignBanners, getSignEvents, getLocations, getTemplates, getSign} from "../../actions/signage-actions";
+import {
+  getSignBanners,
+  getSignEvents,
+  getLocations,
+  getTemplates,
+  getSign,
+  publishDate,
+  publishSignUpdates
+} from "../../actions/signage-actions";
 import LocationGroupedDropdown from "../../components/inputs/location-grouped-dropdown";
 import {BannersTable} from "../../components/tables/signagebannerstable";
 
-const SignagePage = ({summit, match, locations, templates, events, banners, staticBanner, locationId, term, page, ...props}) => {
+const SignagePage = ({summit, match, locations, templates, sign, events, banners, staticBanner, locationId, term, page, ...props}) => {
   const [template, setTemplate] = useState(null);
   const [jumpDate, setJumpDate] = useState(null);
   const [view, setView] = useState('activities');
   const [staticBannerLoc, setStaticBannerLoc] = useState(staticBanner?.content);
-  const templateOptions = templates.map(tmp =>({value: tmp.file, label: tmp.name}));
+  const templateOptions = templates?.map(tmp =>({value: tmp.file, label: tmp.name})) || [];
   const selectedRoom = summit.locations.find(loc => loc.id === locationId);
   
   useEffect(() => {
@@ -40,12 +48,16 @@ const SignagePage = ({summit, match, locations, templates, events, banners, stat
   }, [summit.id]);
   
   useEffect(() => {
-    setStaticBannerLoc(staticBanner?.content || '')
-  }, [locationId])
+    setTemplate(sign?.template || '');
+  }, [sign?.template]);
+  
+  useEffect(() => {
+    setStaticBannerLoc(staticBanner?.content || '');
+  }, [staticBanner?.content]);
   
   const getEvents = (newLocation = null, newTerm = null, newPage = null) => {
     const useLocation = newLocation || locationId;
-    const useTerm = newTerm || term;
+    const useTerm = newTerm === null ? term : newTerm;
     const usePage = newPage || page;
     
     props.getSignEvents(useLocation, useTerm, usePage);
@@ -53,7 +65,7 @@ const SignagePage = ({summit, match, locations, templates, events, banners, stat
   
   const getBanners = (newLocation = null, newTerm = null, newPage = null) => {
     const useLocation = newLocation || locationId;
-    const useTerm = newTerm || term;
+    const useTerm = newTerm === null ? term : newTerm;
     const usePage = newPage || page;
     
     props.getSignBanners(useLocation, useTerm, usePage);
@@ -81,25 +93,18 @@ const SignagePage = ({summit, match, locations, templates, events, banners, stat
     }
   };
   
-  const jumpToEvent = () => {
-  
+  const jumpToEvent = (id) => {
+    const event = events.find(ev => ev.id === id);
+    props.publishDate(event.start_date);
   };
   
   const viewSign = () => {
-  
+    window.open(`${window.SIGNAGE_BASE_URL}/${template}#/?summit=${summit.id}&location=${locationId}`);
   };
   
   const pushUpdates = () => {
-  
+    props.publishSignUpdates(template, jumpDate, staticBannerLoc);
   };
-  
-  const addNewBanner = () => {
-  
-  }
-  
-  const saveNewBanner = () => {
-  
-  }
   
   if(!summit.id || !locations) return(<div />);
   
@@ -147,7 +152,7 @@ const SignagePage = ({summit, match, locations, templates, events, banners, stat
               <Dropdown
                 placeholder={T.translate("signage.placeholders.template")}
                 value={template}
-                onChange={setTemplate}
+                onChange={ev => setTemplate(ev.target.value)}
                 options={templateOptions}
               />
             </div>
@@ -158,14 +163,19 @@ const SignagePage = ({summit, match, locations, templates, events, banners, stat
               <DateTimePicker
                 format={{date:"YYYY-MM-DD", time: "HH:mm"}}
                 inputProps={{placeholder: T.translate("signage.placeholders.date")}}
-                timezone={summit.time_zone.name}
-                onChange={setJumpDate}
+                timezone={summit.time_zone_id}
+                onChange={ev => setJumpDate(ev.target.value.valueOf() / 1000)}
                 value={jumpDate}
               />
             </div>
             <div className="col-md-4">
               <label> {T.translate("signage.static_banner")} </label>
-              <input className="form-control" type="text" value={staticBannerLoc} onChange={setStaticBannerLoc} />
+              <input
+                className="form-control"
+                type="text"
+                value={staticBannerLoc}
+                onChange={ev => setStaticBannerLoc(ev.target.value)}
+              />
             </div>
             <div className="col-md-4">
               <button className="btn btn-default" onClick={viewSign}>
@@ -197,7 +207,7 @@ const SignagePage = ({summit, match, locations, templates, events, banners, stat
               </div>
             </div>
   
-            {view === 'activities' && events.length > 0 &&
+            {view === 'activities' &&
               <div>
                 <Table
                   options={eventsTableOptions}
@@ -220,7 +230,7 @@ const SignagePage = ({summit, match, locations, templates, events, banners, stat
                 />
               </div>
             }
-            {view === 'banners' && banners.length > 0 &&
+            {view === 'banners' &&
               <BannersTable
                 data={banners}
                 locationId={locationId}
@@ -246,6 +256,8 @@ export default connect (
       getSignBanners,
       getLocations,
       getTemplates,
-      getSign
+      getSign,
+      publishDate,
+      publishSignUpdates
     }
 )(SignagePage);

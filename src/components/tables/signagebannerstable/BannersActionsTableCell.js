@@ -26,6 +26,11 @@ const BannersActionsTableCell = ({id, actions}) => {
         actions.cancel(id);
     };
     
+    const onJump = (ev) => {
+        ev.preventDefault();
+        actions.jump(id);
+    };
+    
     if (isEditing) {
         return (
           <td className="actions">
@@ -48,6 +53,11 @@ const BannersActionsTableCell = ({id, actions}) => {
               {'delete' in actions &&
                 <a href="" onClick={onDelete} data-tip="delete" >
                     <i className="fa fa-trash-o"/>
+                </a>
+              }
+              {'jump' in actions &&
+                <a href="" onClick={onJump} data-tip="jump to this banner" >
+                    <i className="fa fa-share"/>
                 </a>
               }
           </td>
