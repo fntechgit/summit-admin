@@ -11,46 +11,52 @@
  * limitations under the License.
  **/
 import React, {useEffect, useState} from 'react';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 import T from "i18n-react/dist/i18n-react";
-import {ButtonToolbar, ToggleButtonGroup, ToggleButton, Pagination} from "react-bootstrap";
-import { Breadcrumb } from 'react-breadcrumbs';
+import {ButtonToolbar, FormGroup, InputGroup, Pagination, ToggleButton, ToggleButtonGroup} from "react-bootstrap";
+import {Breadcrumb} from 'react-breadcrumbs';
+import {DateTimePicker, Dropdown, FreeTextSearch, Table} from "openstack-uicore-foundation/lib/components";
 import {
-  DateTimePicker,
-  Dropdown,
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
-import styles from '../../styles/signage-page.module.less';
-import {
+  getLocations,
+  getSign,
   getSignBanners,
   getSignEvents,
-  getLocations,
   getTemplates,
-  getSign,
   publishDate,
-  publishSignUpdates
+  publishReload,
+  publishTemplate,
+  saveStaticBanner
 } from "../../actions/signage-actions";
 import LocationGroupedDropdown from "../../components/inputs/location-grouped-dropdown";
 import {BannersTable} from "../../components/tables/signagebannerstable";
 import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
+import styles from '../../styles/signage-page.module.less';
 
-const SignagePage = ({summit, match, locations, templates, sign, events, banners, staticBanner, locationId, term, page, ...props}) => {
-  const [template, setTemplate] = useState(null);
+
+const SignagePage = ({
+                       summit,
+                       match,
+                       locations,
+                       templates,
+                       sign,
+                       events,
+                       banners,
+                       staticBanner,
+                       locationId,
+                       term,
+                       page,
+                       ...props
+                     }) => {
   const [jumpDate, setJumpDate] = useState(null);
   const [view, setView] = useState('activities');
   const [staticBannerLoc, setStaticBannerLoc] = useState(staticBanner?.content || '');
-  const templateOptions = templates?.map(tmp =>({value: tmp.file, label: tmp.name})) || [];
+  const templateOptions = templates?.map(tmp => ({value: tmp.file, label: tmp.name})) || [];
   const selectedRoom = summit.locations.find(loc => loc.id === locationId);
   
   useEffect(() => {
     props.getLocations();
     props.getTemplates();
   }, [summit.id]);
-  
-  useEffect(() => {
-    setTemplate(sign?.template || '');
-  }, [sign?.template]);
   
   useEffect(() => {
     setStaticBannerLoc(staticBanner?.content || '');
@@ -80,7 +86,7 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
   
   const onSearch = (newTerm) => {
     if (view === 'activities') {
-      getEvents(null, newTerm,1);
+      getEvents(null, newTerm, 1);
     } else if (view === 'banners') {
       getBanners(null, newTerm, 1);
     }
@@ -88,7 +94,7 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
   
   const onSort = (index, key, dir, func) => {
     if (view === 'activities') {
-      getEvents(null, null,null, key, dir);
+      getEvents(null, null, null, key, dir);
     } else if (view === 'banners') {
       getBanners(null, null, null, key, dir);
     }
@@ -107,23 +113,34 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
     props.publishDate(event.start_date);
   };
   
+  const saveStaticBanner = () => {
+    if (staticBannerLoc !== staticBanner?.content) {
+      const newBanner = {...staticBanner, content: staticBannerLoc};
+      props.saveStaticBanner(newBanner);
+    }
+  };
+  
+  const jumpToDate = () => {
+    props.publishDate(jumpDate);
+  }
+  
   const viewSign = () => {
-    window.open(`${window.SIGNAGE_BASE_URL}/${template}#/?summit=${summit.id}&location=${locationId}`);
+    window.open(`${window.SIGNAGE_BASE_URL}/${sign?.template}#/?summit=${summit.id}&location=${locationId}`);
   };
   
-  const pushUpdates = () => {
-    props.publishSignUpdates(template, jumpDate, staticBannerLoc);
+  const reloadSign = () => {
+    props.publishReload();
   };
   
-  if(!summit.id || !locations) return(<div />);
+  if (!summit.id || !locations) return (<div/>);
   
   const eventsColumns = [
-    { columnKey: 'id', value: 'Id', sortable: true },
-    { columnKey: 'title', value: T.translate("signage.title"), sortable: true },
-    { columnKey: 'speakers_str', value: T.translate("signage.speakers")},
-    { columnKey: 'floor_loc', value: T.translate("signage.floor_loc")},
-    { columnKey: 'start_date_str', value: T.translate("signage.start_date"), sortable: true},
-    { columnKey: 'end_date_str', value: T.translate("signage.end_date")},
+    {columnKey: 'id', value: 'Id', sortable: true},
+    {columnKey: 'title', value: T.translate("signage.title"), sortable: true},
+    {columnKey: 'speakers_str', value: T.translate("signage.speakers")},
+    {columnKey: 'floor_loc', value: T.translate("signage.floor_loc")},
+    {columnKey: 'start_date_str', value: T.translate("signage.start_date"), sortable: true},
+    {columnKey: 'end_date_str', value: T.translate("signage.end_date")},
   ];
   
   const eventsTableOptions = {
@@ -134,7 +151,7 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
         {
           name: 'jump',
           tooltip: 'jump to this event',
-          icon: <i className="fa fa-share" />,
+          icon: <i className="fa fa-share"/>,
           onClick: jumpToEvent,
         }
       ],
@@ -143,7 +160,7 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
   
   return (
     <div className="signage-wrapper">
-      <Breadcrumb data={{ title: T.translate("signage.signs"), pathname: match.url }} />
+      <Breadcrumb data={{title: T.translate("signage.signs"), pathname: match.url}}/>
       <div className="container">
         <div className={styles.header}>
           <div className="row form-group">
@@ -160,13 +177,18 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
               <label> {T.translate("signage.template")} </label>
               <Dropdown
                 placeholder={T.translate("signage.placeholders.template")}
-                value={template}
-                onChange={ev => setTemplate(ev.target.value)}
+                value={sign?.template}
+                onChange={ev => props.publishTemplate(ev.target.value)}
                 options={templateOptions}
+                disabled={!locationId}
               />
             </div>
             <div className="col-md-4">
-              <button className="btn btn-default" onClick={viewSign}>
+              <button
+                className={`btn btn-default pull-right ${styles.view}`}
+                onClick={viewSign}
+                disabled={!sign?.template}
+              >
                 {T.translate(`signage.view_sign`)}
               </button>
             </div>
@@ -174,101 +196,137 @@ const SignagePage = ({summit, match, locations, templates, sign, events, banners
           <div className="row form-group">
             <div className="col-md-4">
               <label> {T.translate("signage.date")} </label>
-              <DateTimePicker
-                format={{date:"YYYY-MM-DD", time: "HH:mm"}}
-                inputProps={{placeholder: T.translate("signage.placeholders.date")}}
-                timezone={summit.time_zone_id}
-                onChange={ev => setJumpDate(ev.target.value.unix())}
-                value={epochToMomentTimeZone(jumpDate, summit.time_zone_id)}
-              />
+              <FormGroup>
+                <InputGroup>
+                  <DateTimePicker
+                    format={{date: "YYYY-MM-DD", time: "HH:mm"}}
+                    inputProps={{placeholder: T.translate("signage.placeholders.date")}}
+                    timezone={summit.time_zone_id}
+                    onChange={ev => setJumpDate(ev.target.value.unix())}
+                    value={epochToMomentTimeZone(jumpDate, summit.time_zone_id)}
+                    disabled={!locationId}
+                  />
+                  <InputGroup.Button>
+                    <button
+                      className="btn btn-default"
+                      onClick={jumpToDate}
+                      disabled={(!locationId || !jumpDate)}
+                    >
+                      {T.translate(`signage.jump`)}
+                    </button>
+                  </InputGroup.Button>
+                </InputGroup>
+              </FormGroup>
             </div>
             <div className="col-md-4">
               <label> {T.translate("signage.static_banner")} </label>
-              <input
-                className="form-control"
-                type="text"
-                value={staticBannerLoc}
-                onChange={ev => setStaticBannerLoc(ev.target.value)}
-              />
+              <FormGroup>
+                <InputGroup>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={staticBannerLoc}
+                    onChange={ev => setStaticBannerLoc(ev.target.value)}
+                    disabled={!locationId}
+                  />
+                  <InputGroup.Button>
+                    <button
+                      className="btn btn-default"
+                      onClick={saveStaticBanner}
+                      disabled={!locationId}
+                    >
+                      {T.translate(`signage.set`)}
+                    </button>
+                  </InputGroup.Button>
+                </InputGroup>
+              </FormGroup>
             </div>
             <div className="col-md-4">
-              <button className="btn btn-default btn-success" onClick={pushUpdates}>
-                {T.translate(`signage.push_updates`)}
+              <button
+                className={`btn btn-default btn-success pull-right ${styles.reload}`}
+                onClick={reloadSign}
+                disabled={!locationId}
+              >
+                {T.translate(`signage.reload_sign`)}
               </button>
             </div>
           </div>
         </div>
         <div className={styles.list}>
-          <div className="list-wrapper">
-            <div className="row">
-              <div className="col-md-6">
-                <ButtonToolbar>
-                  <ToggleButtonGroup type="radio" name="views" value={view} onChange={setView}>
-                    <ToggleButton value="activities" >{T.translate(`signage.activities`)}</ToggleButton>
-                    <ToggleButton value="banners">{T.translate(`signage.banners`)}</ToggleButton>
-                  </ToggleButtonGroup>
-                </ButtonToolbar>
+          {locationId &&
+            <div className="list-wrapper">
+              <div className="row">
+                <div className="col-md-6">
+                  <ButtonToolbar>
+                    <ToggleButtonGroup type="radio" name="views" value={view} onChange={setView}>
+                      <ToggleButton value="activities">{T.translate(`signage.activities`)}</ToggleButton>
+                      <ToggleButton value="banners">{T.translate(`signage.banners`)}</ToggleButton>
+                    </ToggleButtonGroup>
+                  </ButtonToolbar>
+                </div>
+                <div className="col-md-6 text-right">
+                  <FreeTextSearch
+                    value={term}
+                    placeholder={T.translate("signage.placeholders.search")}
+                    onSearch={onSearch}
+                  />
+                </div>
               </div>
-              <div className="col-md-6 text-right">
-                <FreeTextSearch
-                  value={term}
-                  placeholder={T.translate("signage.placeholders.search")}
-                  onSearch={onSearch}
+              
+              {view === 'activities' &&
+                <div>
+                  <Table
+                    options={eventsTableOptions}
+                    data={events}
+                    columns={eventsColumns}
+                    onSort={onSort}
+                  />
+                  <Pagination
+                    bsSize="medium"
+                    prev
+                    next
+                    first
+                    last
+                    ellipsis
+                    boundaryLinks
+                    maxButtons={10}
+                    items={props.lastPage}
+                    activePage={props.currentPage}
+                    onSelect={onPageChange}
+                  />
+                </div>
+              }
+              {view === 'banners' &&
+                <BannersTable
+                  data={banners}
+                  locationId={locationId}
+                  room={selectedRoom}
                 />
-              </div>
+              }
             </div>
-  
-            {view === 'activities' &&
-              <div>
-                <Table
-                  options={eventsTableOptions}
-                  data={events}
-                  columns={eventsColumns}
-                  onSort={onSort}
-                />
-                <Pagination
-                  bsSize="medium"
-                  prev
-                  next
-                  first
-                  last
-                  ellipsis
-                  boundaryLinks
-                  maxButtons={10}
-                  items={props.lastPage}
-                  activePage={props.currentPage}
-                  onSelect={onPageChange}
-                />
-              </div>
-            }
-            {view === 'banners' &&
-              <BannersTable
-                data={banners}
-                locationId={locationId}
-                room={selectedRoom}
-              />
-            }
-          </div>
+          }
         </div>
       </div>
     </div>
   );
 }
 
-const mapStateToProps = ({ currentSummitState, signageState }) => ({
-  summit : currentSummitState.currentSummit,
+const mapStateToProps = ({currentSummitState, signageState}) => ({
+  summit: currentSummitState.currentSummit,
   ...signageState
 })
 
-export default connect (
-    mapStateToProps,
-    {
-      getSignEvents,
-      getSignBanners,
-      getLocations,
-      getTemplates,
-      getSign,
-      publishDate,
-      publishSignUpdates
-    }
+export default connect(
+  mapStateToProps,
+  {
+    getSignEvents,
+    getSignBanners,
+    getLocations,
+    getTemplates,
+    getSign,
+    publishDate,
+    publishReload,
+    publishTemplate,
+    saveStaticBanner,
+  }
 )(SignagePage);

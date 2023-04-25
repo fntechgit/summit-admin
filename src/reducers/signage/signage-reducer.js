@@ -22,9 +22,11 @@ import {
     RECEIVE_SIGNAGE_LOCATIONS,
     RECEIVE_SIGNAGE_TEMPLATES,
     RECEIVE_SIGN,
+    SIGN_UPDATED,
     SIGNAGE_BANNER_ADDED,
     SIGNAGE_BANNER_UPDATED,
-    SIGNAGE_BANNER_DELETED
+    SIGNAGE_BANNER_DELETED,
+    SIGNAGE_STATIC_BANNER_UPDATED
 } from "../../actions/signage-actions";
 
 const DEFAULT_STATE = {
@@ -54,6 +56,10 @@ const signageReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_SIGN: {
             const { data } = payload.response;
             const sign = data.length > 0 ? data[0] : null;
+            return {...state, sign}
+        }
+        case SIGN_UPDATED: {
+            const sign = payload.response;
             return {...state, sign}
         }
         case REQUEST_SIGNAGE_EVENTS: {
@@ -117,6 +123,10 @@ const signageReducer = (state = DEFAULT_STATE, action) => {
         case SIGNAGE_BANNER_DELETED: {
             const {bannerId} = payload;
             return {...state, banners: state.banners.filter(ban => ban.id !== bannerId)};
+        }
+        case SIGNAGE_STATIC_BANNER_UPDATED: {
+            const staticBanner = payload.response;
+            return {...state, staticBanner};
         }
         default:
             return state;

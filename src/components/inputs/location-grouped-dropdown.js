@@ -40,6 +40,7 @@ const LocationGroupedDropdown = ({value, locations, className, placeholder, ...r
     <Select
       options={options}
       value={theValue}
+      placeholder={placeholder}
       styles={{
         group: (baseStyles) => ({
           ...baseStyles,

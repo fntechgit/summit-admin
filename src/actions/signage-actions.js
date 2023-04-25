@@ -21,10 +21,11 @@ import {
     putRequest,
     postRequest,
     deleteRequest,
-    fetchErrorHandler
+    fetchErrorHandler, showSuccessMessage
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 import Ably from "ably";
+import T from "i18n-react";
 
 export const REQUEST_SIGN = 'REQUEST_SIGN';
 export const RECEIVE_SIGN = 'RECEIVE_SIGN';
@@ -86,13 +87,17 @@ export const getSign = (locationId) => async (dispatch, getState) => {
 
 export const getTemplates = () => async (dispatch, getState) => {
     const {currentSummitState} = getState();
-    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
     
-    const response = await fetch(`${window.SIGNAGE_BASE_URL}/templates.json?access_token=${accessToken}`);
+    const response = await fetch(`${window.SIGNAGE_BASE_URL}/templates.json`);
     if (response.ok) {
-        const {fntech} = await response.json();
-        const templates = fntech[currentSummit.id];
+        const clients = await response.json();
+        let templates = [];
+        
+        if (clients && clients[window.APP_CLIENT_NAME] && clients[window.APP_CLIENT_NAME][currentSummit.id]) {
+            templates = clients[window.APP_CLIENT_NAME][currentSummit.id];
+        }
+        
         dispatch(createAction(RECEIVE_SIGNAGE_TEMPLATES)({templates}))
     } else {
         fetchErrorHandler(response);
@@ -194,23 +199,26 @@ export const publishDate = (startDate) => async (dispatch, getState) => {
     const channel = getAblyChannel(currentSummit.id, locationId);
     await publishToAblyChannel(channel, 'JUMP_TIME',{timestamp: startDate});
     
-    dispatch(stopLoading());
+    dispatch(showSuccessMessage(T.translate("signage.date_published")));
 };
 
-const publishTemplate = (templateFile) => async (dispatch, getState) => {
+export const publishTemplate = (templateFile) => async (dispatch, getState) => {
     const {currentSummitState, signageState} = getState();
     const {currentSummit} = currentSummitState;
     const {locationId} = signageState;
     
     dispatch(startLoading());
     
+    await saveSignTemplate(templateFile)(dispatch,getState);
+    
     const channel = getAblyChannel(currentSummit.id, locationId);
     await publishToAblyChannel(channel, 'SET_TEMPLATE',{template: templateFile});
     
-    dispatch(stopLoading());
+    dispatch(showSuccessMessage(T.translate("signage.template_published")));
+    
 };
 
-const publishReload = () => async (dispatch, getState) => {
+export const publishReload = () => async (dispatch, getState) => {
     const {currentSummitState, signageState} = getState();
     const {currentSummit} = currentSummitState;
     const {locationId} = signageState;
@@ -220,7 +228,7 @@ const publishReload = () => async (dispatch, getState) => {
     const channel = getAblyChannel(currentSummit.id, locationId);
     await publishToAblyChannel(channel, 'RELOAD',{});
     
-    dispatch(stopLoading());
+    dispatch(showSuccessMessage(T.translate("signage.sign_reloaded")));
 };
 
 
@@ -253,7 +261,7 @@ export const saveStaticBanner = (entity) => async (dispatch, getState) => {
           entity
         )(params)(dispatch)
           .then(() => {
-              dispatch(stopLoading());
+              dispatch(showSuccessMessage(T.translate("signage.static_saved")));
           });
         
     } else {
@@ -266,7 +274,7 @@ export const saveStaticBanner = (entity) => async (dispatch, getState) => {
           entity
         )(params)(dispatch)
           .then((payload) => {
-              dispatch(stopLoading());
+              dispatch(showSuccessMessage(T.translate("signage.static_saved")));
           });
     }
 }
@@ -309,33 +317,6 @@ export const saveSignTemplate = (templateFile) => async (dispatch, getState) => 
           });
     }
 };
-
-export const publishSignUpdates = (templateFile, pushDate, staticBannerContent) => (dispatch, getState) => {
-    const { signageState } = getState();
-    const { sign, staticBanner } = signageState;
-    
-    if (templateFile && templateFile !== sign?.template) {
-        saveSignTemplate(templateFile)(dispatch,getState);
-        publishTemplate(templateFile)(dispatch,getState);
-    }
-    
-    if (pushDate) {
-        publishDate(pushDate)(dispatch, getState);
-    }
-    
-    if (staticBannerContent !== staticBanner?.content) {
-        const newBanner = {...staticBanner, content: staticBannerContent};
-        saveStaticBanner(newBanner)(dispatch, getState);
-    }
-    
-    publishReload()(dispatch, getState);
-}
-
-
-/********************************************************************************************************************/
-/*              ACTIVITIES
-/********************************************************************************************************************/
-
 
 /********************************************************************************************************************/
 /*              BANNERS
