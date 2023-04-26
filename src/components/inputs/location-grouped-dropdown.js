@@ -1,11 +1,18 @@
 import React from "react";
-import Select from "react-select";
+import Select, {createFilter} from "react-select";
 
 const RoomLabel = ({room}) => (<span>{room.name} <i style={{color: 'gray', fontSize: '0.8em'}}>- {room.id}</i></span>);
 
 const LocationGroupedDropdown = ({value, locations, className, placeholder, ...rest}) => {
   const options = [];
   let theValue = null;
+  
+  const filterOptions = (candidate, input) => {
+    if (input) {
+      return candidate.label.props.room?.name.toLowerCase().includes(input.toLowerCase());
+    }
+    return true;
+  };
   
   locations.forEach(loc => {
     const roomsWithoutFloors = loc.rooms.filter(rm => rm.floor_id === 0);
@@ -41,6 +48,7 @@ const LocationGroupedDropdown = ({value, locations, className, placeholder, ...r
       options={options}
       value={theValue}
       placeholder={placeholder}
+      filterOption={filterOptions}
       styles={{
         group: (baseStyles) => ({
           ...baseStyles,

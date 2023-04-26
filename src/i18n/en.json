@@ -2476,6 +2476,7 @@
     "end_date": "End date",
     "sign_reloaded": "Sign reloaded",
     "date_published": "Date published",
+    "template_published": "Template published",
     "static_saved": "Static banner updated",
     "placeholders": {
       "locations": "Select location",

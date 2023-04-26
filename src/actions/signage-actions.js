@@ -21,11 +21,13 @@ import {
     putRequest,
     postRequest,
     deleteRequest,
-    fetchErrorHandler, showSuccessMessage
+    fetchErrorHandler,
+    showSuccessMessage
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 import Ably from "ably";
 import T from "i18n-react";
+import Swal from "sweetalert2";
 
 export const REQUEST_SIGN = 'REQUEST_SIGN';
 export const RECEIVE_SIGN = 'RECEIVE_SIGN';
@@ -46,11 +48,18 @@ export const SIGNAGE_BANNER_DELETED = 'SIGNAGE_BANNER_DELETED';
 export const SIGNAGE_UPDATED = 'SIGNAGE_UPDATED';
 export const SIGNAGE_STATIC_BANNER_UPDATED = 'SIGNAGE_STATIC_BANNER_UPDATED';
 
+const AblyApiKey = process.env['SIGNAGE_ABLY_API_KEY'];
+const realtimeAbly = AblyApiKey ? new Ably.Realtime(AblyApiKey) : null;
+
 const getAblyChannel = (summitId, locationId) => `SIGNAGE:${summitId}:${locationId}`;
 
-const realtimeAbly = new Ably.Realtime(process.env['ABLY_API_KEY']);
 
 const publishToAblyChannel = async (channel, key, message) => {
+    if (!realtimeAbly) {
+        Swal.fire("Publish failed", "No Ably API key found", "warning");
+        return false;
+    }
+    
     const ablyChannel = realtimeAbly.channels.get(channel);
     
     ablyChannel.subscribe((msg) => {
@@ -58,6 +67,8 @@ const publishToAblyChannel = async (channel, key, message) => {
     });
     
     ablyChannel.publish(key, message);
+    
+    return true;
 }
 
 export const getSign = (locationId) => async (dispatch, getState) => {
@@ -197,9 +208,11 @@ export const publishDate = (startDate) => async (dispatch, getState) => {
     dispatch(startLoading());
     
     const channel = getAblyChannel(currentSummit.id, locationId);
-    await publishToAblyChannel(channel, 'JUMP_TIME',{timestamp: startDate});
+    const res = await publishToAblyChannel(channel, 'JUMP_TIME',{timestamp: startDate});
     
-    dispatch(showSuccessMessage(T.translate("signage.date_published")));
+    if (res) {
+        dispatch(showSuccessMessage(T.translate("signage.date_published")));
+    }
 };
 
 export const publishTemplate = (templateFile) => async (dispatch, getState) => {
@@ -212,10 +225,11 @@ export const publishTemplate = (templateFile) => async (dispatch, getState) => {
     await saveSignTemplate(templateFile)(dispatch,getState);
     
     const channel = getAblyChannel(currentSummit.id, locationId);
-    await publishToAblyChannel(channel, 'SET_TEMPLATE',{template: templateFile});
+    const res = await publishToAblyChannel(channel, 'SET_TEMPLATE',{template: templateFile});
     
-    dispatch(showSuccessMessage(T.translate("signage.template_published")));
-    
+    if (res) {
+        dispatch(showSuccessMessage(T.translate("signage.template_published")));
+    }
 };
 
 export const publishReload = () => async (dispatch, getState) => {
@@ -226,9 +240,11 @@ export const publishReload = () => async (dispatch, getState) => {
     dispatch(startLoading());
     
     const channel = getAblyChannel(currentSummit.id, locationId);
-    await publishToAblyChannel(channel, 'RELOAD',{});
+    const res = await publishToAblyChannel(channel, 'RELOAD',{});
     
-    dispatch(showSuccessMessage(T.translate("signage.sign_reloaded")));
+    if (res) {
+        dispatch(showSuccessMessage(T.translate("signage.sign_reloaded")));
+    }
 };
 
 
