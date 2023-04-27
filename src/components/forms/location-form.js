@@ -25,6 +25,8 @@ import {
 } from 'openstack-uicore-foundation/lib/components';
 import { GMap } from 'openstack-uicore-foundation/lib/components/google-map';
 import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
+import DateIntervalFilter from "../filters/date-interval-filter";
+import DateIntervalInput from "../inputs/date-interval-input";
 
 class LocationForm extends React.Component {
 
@@ -78,6 +80,10 @@ class LocationForm extends React.Component {
 
         if (ev.target.type === 'checkbox') {
             value = ev.target.checked;
+        }
+    
+        if (ev.target.type === 'datetime') {
+            value = value.valueOf() / 1000;
         }
 
         errors[id] = '';
@@ -181,6 +187,8 @@ class LocationForm extends React.Component {
 
         this.props.onMarkerDragged(entity);
     }
+    
+    onDateRange
 
     render() {
         const {entity, showSection} = this.state;
@@ -270,10 +278,17 @@ class LocationForm extends React.Component {
                 </div>
                 {this.display('website_url') &&
                 <div className="row form-group">
-                    <div className="col-md-12">
+                    <div className="col-md-4">
                         <label> {T.translate("edit_location.website")}</label>
                         <Input id="website_url" value={entity.website_url} onChange={this.handleChange}
                                error={this.hasErrors('website_url')}/>
+                    </div>
+                    <div className="col-md-8">
+                        <label> {T.translate("edit_location.open_hours")}</label>
+                        <DateIntervalInput
+                          onChange={this.handleChange}
+                          timezone={currentSummit.time_zone_id}
+                        />
                     </div>
                 </div>
                 }
