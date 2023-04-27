@@ -295,15 +295,15 @@ class ExtraQuestionForm extends React.Component {
                     }
                     {badge_features_ddl.length > 0 &&
                         <div className="col-md-4">
-                            <label> 
-                                {T.translate("question_form.allowed_badge_features_types")} &nbsp; 
-                                <i className="fa fa-info-circle" title={T.translate("question_form.allowed_badge_features_types_info")} />
+                            <label>
+                                {T.translate("question_form.allowed_badge_feature_types")} &nbsp; 
+                                <i className="fa fa-info-circle" title={T.translate("question_form.allowed_badge_feature_types_info")} />
                             </label>
                             <Dropdown
-                                id="allowed_badge_features_types"
+                                id="allowed_badge_feature_types"
                                 clearable
                                 isMulti
-                                value={entity.allowed_badge_features_types}
+                                value={entity.allowed_badge_feature_types}
                                 onChange={this.handleChange}
                                 options={badge_features_ddl}
                             />
