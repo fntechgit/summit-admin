@@ -35,8 +35,7 @@ class EditOrderExtraQuestionPage extends React.Component {
         super(props);
 
         props.getOrderExtraQuestionMeta();
-
-        if (!props.currentSummit.badge_features) props.getBadgeFeatures();
+        props.getBadgeFeatures();
 
         this.handleValueSave = this.handleValueSave.bind(this);
         this.handleValueDelete = this.handleValueDelete.bind(this);
