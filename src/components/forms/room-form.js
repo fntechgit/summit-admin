@@ -32,6 +32,7 @@ class RoomForm extends React.Component {
         this.handleUploadFile = this.handleUploadFile.bind(this);
         this.handleRemoveFile = this.handleRemoveFile.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleClearHours = this.handleClearHours.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -77,6 +78,13 @@ class RoomForm extends React.Component {
         ev.preventDefault();
 
         this.props.onSubmit(locationId, entity, continueAdding);
+    }
+
+    handleClearHours() {
+        let entity = {...this.state.entity};        
+        entity['opening_hour'] = null;
+        entity['closing_hour'] = null;
+        this.setState({entity: entity});
     }
 
     hasErrors(field) {
@@ -227,8 +235,10 @@ class RoomForm extends React.Component {
                 </div>
                 <div className="row form-group">
                     <div className="col-md-8">
+                        <label> {T.translate("edit_location.open_hours")}</label>
                         <HourIntervalInput 
                             onChange={this.handleChange}
+                            onClear={this.handleClearHours}
                             fromDate={entity.opening_hour}
                             fromId='opening_hour'
                             toDate={entity.closing_hour}

@@ -699,7 +699,6 @@ export const deleteRoomImage = (locationId, roomId) => async (dispatch, getState
 };
 
 const normalizeRoomEntity = (entity) => {
-    console.log('normalizing...', entity)
     const normalizedEntity = {...entity};
 
     if (normalizedEntity.order === 0) {
@@ -718,8 +717,6 @@ const normalizeRoomEntity = (entity) => {
     if(normalizedEntity.closing_hour) {
         normalizedEntity.closing_hour = parseInt(normalizedEntity.closing_hour)
     }
-
-    console.log('normalized...', normalizedEntity)
 
     return normalizedEntity;
 }

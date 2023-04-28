@@ -15,11 +15,10 @@ import React from 'react'
 import moment from 'moment-timezone';
 import { DateTimePicker } from "openstack-uicore-foundation/lib/components";
 
-const HourIntervalInput = ({ onChange, fromDate, toDate, fromId, toId, timezone = 'UTC' }) => {
+const HourIntervalInput = ({ onChange, onClear, fromDate, toDate, fromId, toId, timezone = 'UTC' }) => {
 
   const handleClear = () => {
-    onChange({ target: { value: null, id: fromId } });
-    onChange({ target: { value: null, id: toId } });
+    onClear();
   }
 
   const handleChangeTime = (ev) => {
@@ -41,13 +40,13 @@ const HourIntervalInput = ({ onChange, fromDate, toDate, fromId, toId, timezone 
       <DateTimePicker
         id={toId}
         onChange={handleChangeTime}
-        validation={{ before: moment(`${fromDate}`.length === 3 ? `0${fromDate}` : fromDate, 'HHmm'), after: '>=' }}
+        validation={{ before: moment(`${fromDate}`.length === 3 ? `0${fromDate}` : fromDate, 'HHmm'), after: '>' }}
         format={{ date: false, time: "HH:mm" }}
         value={moment(`${toDate}`.length === 3 ? `0${toDate}` : toDate, 'HHmm')}
         timezone={timezone}
       />
       &nbsp;&nbsp;
-      <button className="btn btn-danger" onClick={handleClear}>Clear</button>
+      <button type="button" className="btn btn-danger" onClick={handleClear}>Clear</button>
     </div>
   );
 }

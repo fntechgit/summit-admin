@@ -52,6 +52,7 @@ class LocationForm extends React.Component {
         this.handleMarkerDragged    = this.handleMarkerDragged.bind(this);
         this.handleMapUpdate        = this.handleMapUpdate.bind(this);
         this.handleMapClick         = this.handleMapClick.bind(this);
+        this.handleClearHours       = this.handleClearHours.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -88,6 +89,13 @@ class LocationForm extends React.Component {
         errors[id] = '';
         entity[id] = value;
         this.setState({entity: entity, errors: errors});
+    }
+
+    handleClearHours() {
+        let entity = {...this.state.entity};        
+        entity['opening_hour'] = null;
+        entity['closing_hour'] = null;
+        this.setState({entity: entity});
     }
 
     handleSubmit(ev) {
@@ -186,8 +194,6 @@ class LocationForm extends React.Component {
 
         this.props.onMarkerDragged(entity);
     }
-    
-    onDateRange
 
     render() {
         const {entity, showSection} = this.state;
@@ -286,6 +292,7 @@ class LocationForm extends React.Component {
                         <label> {T.translate("edit_location.open_hours")}</label>
                         <HourIntervalInput
                           onChange={this.handleChange}
+                          onClear={this.handleClearHours}
                           fromDate={entity.opening_hour}
                           fromId='opening_hour'
                           toDate={entity.closing_hour}
