@@ -12,32 +12,38 @@
  **/
 
 import React from 'react'
-import {DateTimePicker} from "openstack-uicore-foundation/lib/components";
+import moment from 'moment-timezone';
+import { DateTimePicker } from "openstack-uicore-foundation/lib/components";
 
-const DateIntervalInput = ({ onChange, fromDate, toDate, timezone = 'UTC'}) => {
+const HourIntervalInput = ({ onChange, fromDate, toDate, fromId, toId, timezone = 'UTC' }) => {
 
   const handleClear = () => {
-    onChange({target: {value: null, id: 'fromDate'}});
-    onChange({target: {value: null, id: 'toDate'}});
+    onChange({ target: { value: null, id: fromId } });
+    onChange({ target: { value: null, id: toId } });
+  }
+
+  const handleChangeTime = (ev) => {
+    let { value, id } = ev.target;
+    onChange({ target: { value: value.format('HHmm'), id } });
   }
 
   return (
     <div className="inline">
       From: &nbsp;&nbsp;
       <DateTimePicker
-        id="fromDate"
-        onChange={console.log}
-        format={{date: false, time: "HH:mm"}}
-        value={fromDate}
+        id={fromId}
+        onChange={handleChangeTime}
+        format={{ date: false, time: "HH:mm" }}
+        value={moment(`${fromDate}`.length === 3 ? `0${fromDate}` : fromDate, 'HHmm')}
         timezone={timezone}
       />
       &nbsp;&nbsp;To:&nbsp;&nbsp;
       <DateTimePicker
-        id="toDate"
-        onChange={onChange}
-        validation={{ before: fromDate?.unix(), after: '>=' }}
-        format={{date: false, time: "HH:mm"}}
-        value={toDate}
+        id={toId}
+        onChange={handleChangeTime}
+        validation={{ before: moment(`${fromDate}`.length === 3 ? `0${fromDate}` : fromDate, 'HHmm'), after: '>=' }}
+        format={{ date: false, time: "HH:mm" }}
+        value={moment(`${toDate}`.length === 3 ? `0${toDate}` : toDate, 'HHmm')}
         timezone={timezone}
       />
       &nbsp;&nbsp;
@@ -46,4 +52,4 @@ const DateIntervalInput = ({ onChange, fromDate, toDate, timezone = 'UTC'}) => {
   );
 }
 
-export default DateIntervalInput;
+export default HourIntervalInput;

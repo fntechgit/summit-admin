@@ -25,8 +25,7 @@ import {
 } from 'openstack-uicore-foundation/lib/components';
 import { GMap } from 'openstack-uicore-foundation/lib/components/google-map';
 import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
-import DateIntervalFilter from "../filters/date-interval-filter";
-import DateIntervalInput from "../inputs/date-interval-input";
+import HourIntervalInput from "../inputs/date-interval-input";
 
 class LocationForm extends React.Component {
 
@@ -285,8 +284,12 @@ class LocationForm extends React.Component {
                     </div>
                     <div className="col-md-8">
                         <label> {T.translate("edit_location.open_hours")}</label>
-                        <DateIntervalInput
+                        <HourIntervalInput
                           onChange={this.handleChange}
+                          fromDate={entity.opening_hour}
+                          fromId='opening_hour'
+                          toDate={entity.closing_hour}
+                          toId='closing_hour'
                           timezone={currentSummit.time_zone_id}
                         />
                     </div>

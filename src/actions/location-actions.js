@@ -310,6 +310,14 @@ const normalizeEntity = (entity, allClasses) => {
         normalizedEntity[field] = entity[field];
     }
 
+    if(normalizedEntity.opening_hour) {
+        normalizedEntity.opening_hour = parseInt(normalizedEntity.opening_hour)
+    }
+
+    if(normalizedEntity.closing_hour) {
+        normalizedEntity.closing_hour = parseInt(normalizedEntity.closing_hour)
+    }
+
     return normalizedEntity;
 
 }
@@ -691,6 +699,7 @@ export const deleteRoomImage = (locationId, roomId) => async (dispatch, getState
 };
 
 const normalizeRoomEntity = (entity) => {
+    console.log('normalizing...', entity)
     const normalizedEntity = {...entity};
 
     if (normalizedEntity.order === 0) {
@@ -701,6 +710,16 @@ const normalizeRoomEntity = (entity) => {
         delete(normalizedEntity.floor_id);
         delete(normalizedEntity.floor);
     }
+
+    if(normalizedEntity.opening_hour) {
+        normalizedEntity.opening_hour = parseInt(normalizedEntity.opening_hour)
+    }
+
+    if(normalizedEntity.closing_hour) {
+        normalizedEntity.closing_hour = parseInt(normalizedEntity.closing_hour)
+    }
+
+    console.log('normalized...', normalizedEntity)
 
     return normalizedEntity;
 }
