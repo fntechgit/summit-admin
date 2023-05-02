@@ -135,7 +135,7 @@ class RoomForm extends React.Component {
 
     render() {
         const {entity} = this.state;
-        let { allFloors, currentSummit } = this.props;
+        let { allFloors, currentSummit, locationHours } = this.props;
         let floors_ddl = allFloors.map(f => ({label: f.name, value: f.id}));
 
         let attributeColumns = [
@@ -239,9 +239,9 @@ class RoomForm extends React.Component {
                         <HourIntervalInput 
                             onChange={this.handleChange}
                             onClear={this.handleClearHours}
-                            fromDate={entity.opening_hour}
+                            fromDate={entity.opening_hour || locationHours.opening_hour}
                             fromId='opening_hour'
-                            toDate={entity.closing_hour}
+                            toDate={entity.closing_hour || locationHours.closing_hour}
                             toId='closing_hour'
                             timezone={currentSummit.time_zone_id}
                         />
