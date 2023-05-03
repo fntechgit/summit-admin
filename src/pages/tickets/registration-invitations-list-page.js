@@ -134,6 +134,7 @@ class RegistrationInvitationsListPage extends React.Component {
 
         const {
             selectedAll,
+            totalInvitations,
             term,
             showNonAccepted,
             showNotSent,
@@ -156,7 +157,7 @@ class RegistrationInvitationsListPage extends React.Component {
 
         Swal.fire({
             title: T.translate("general.are_you_sure"),
-            text: T.translate("registration_invitation_list.send_email_warning", {qty: selectedInvitationsIds.length}),
+            text: T.translate("registration_invitation_list.send_email_warning", {qty: selectedAll ? totalInvitations : selectedInvitationsIds.length}),
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
