@@ -41,15 +41,20 @@ class AttendeeReport extends React.Component {
     buildReportQuery = (filters, listFilters, sortKey, sortDir) => {
         const {currentSummit} = this.props;
         listFilters.summitId = currentSummit.id;
-
+    
+        if (sortKey) {
+            let querySortKey = this.translateSortKey(sortKey);
+            let order = (sortDir == 1) ? '' : '-';
+            filters.ordering = order + '' + querySortKey;
+        }
 
         const query = new Query("attendees", listFilters);
 
         const answers = new Query("extraQuestionAnswers");
-        answers.find(["value", "questionId"]);
+        answers.find(["answerText", "questionId"]);
 
         const results = new Query("results", filters);
-        results.find(["id", "firstName", "surname", "email", "companyName", "featureList", "ticketTypeList", {"answers": answers}])
+        results.find(["id", "fullname:fullName", "email", "company:companyName", "featureList", "ticketTypeList", {"answers": answers}])
 
         query.find([{"results": results}, "totalCount"]);
 
@@ -85,7 +90,18 @@ class AttendeeReport extends React.Component {
     }
     
     translateSortKey = (key) => {
-        const sortKey = key;
+        let sortKey = key;
+    
+        switch(key) {
+            case 'fullname':
+            case 'fullName':
+                sortKey = 'existing_last_name';
+                break;
+            case 'company':
+                sortKey = 'company_name';
+                break;
+        }
+        
         return sortKey;
     }
     getName = () => {
@@ -101,10 +117,9 @@ class AttendeeReport extends React.Component {
         
         let columns = [
             { columnKey: 'id', value: 'Id', sortable: true },
-            { columnKey: 'firstName', value: 'First Name', sortable: true },
-            { columnKey: 'surname', value: 'Last Name', sortable: true },
+            { columnKey: 'fullname', value: 'Full Name', sortable: true },
             { columnKey: 'email', value: 'Email', sortable: true },
-            { columnKey: 'companyName', value: 'Company', sortable: true },
+            { columnKey: 'company', value: 'Company', sortable: true },
             { columnKey: 'featureList', value: 'Features' },
             { columnKey: 'ticketTypeList', value: 'Tickets' }
         ];
@@ -115,7 +130,7 @@ class AttendeeReport extends React.Component {
             const newData = {...baseData}
             
             answers.forEach(ans => {
-                newData[`question_${ans.questionId}`] = ans.value;
+                newData[`question_${ans.questionId}`] = ans.answerText;
             })
             return newData;
         });
@@ -132,14 +147,15 @@ class AttendeeReport extends React.Component {
         const {showQuestions} = this.state;
         const {attendee_extra_questions, ticket_types, badge_features} = currentSummit;
         
-        console.log('currentSummit: ',currentSummit);
-    
         if (!attendee_extra_questions || !data || name !== this.getName()) return (<div />)
+        
+        
+        console.log(sortKey,sortDir);
         
         
         const parsedQuestions = attendee_extra_questions
           .filter(eq => {
-              // here we filter questions according to the features and ticket filters
+              // here we filter questions according to the features and ticket type filters
               const {allowed_badge_features_types, allowed_ticket_types} = eq;
               const ticketTypesFilter = filters.ticket_types?.split(',');
               const featuresFilter = filters.badge_features?.split(',');
