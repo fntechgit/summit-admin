@@ -147,30 +147,26 @@ class AttendeeReport extends React.Component {
         const {showQuestions} = this.state;
         const {attendee_extra_questions, ticket_types, badge_features} = currentSummit;
         
-        if (!attendee_extra_questions || !data || name !== this.getName()) return (<div />)
-        
-        
-        console.log(sortKey,sortDir);
-        
+        if (!attendee_extra_questions || !data || name !== this.getName()) return null;
         
         const parsedQuestions = attendee_extra_questions
           .filter(eq => {
               // here we filter questions according to the features and ticket type filters
               const {allowed_badge_features_types, allowed_ticket_types} = eq;
-              const ticketTypesFilter = filters.ticket_types?.split(',');
-              const featuresFilter = filters.badge_features?.split(',');
-              let allowedFeature = true;
-              let allowedTicketType = true;
+              const ticketTypesFilter = filters.ticket_types?.split(',') || [];
+              const featuresFilter = filters.badge_features?.split(',') || [];
+              let allowedByFeature = true;
+              let allowedByTicketType = true;
               
-              if (allowed_badge_features_types.length > 0 && featuresFilter) {
-                  allowedFeature = allowed_badge_features_types.some(fid => featuresFilter.includes(fid.toString()));
+              if (allowed_badge_features_types.length > 0 && featuresFilter.length > 0) {
+                  allowedByFeature = allowed_badge_features_types.some(fid => featuresFilter.includes(fid.toString()));
               }
     
-              if (allowed_badge_features_types.length > 0 && ticketTypesFilter) {
-                  allowedTicketType = allowed_ticket_types.some(fid => ticketTypesFilter.includes(fid.toString()));
+              if (allowed_ticket_types.length > 0 && ticketTypesFilter.length > 0) {
+                  allowedByTicketType = allowed_ticket_types.some(fid => ticketTypesFilter.includes(fid.toString()));
               }
               
-              return allowedFeature && allowedTicketType;
+              return allowedByFeature && allowedByTicketType;
           })
           .map(eq => ({...eq, label_text: eq.label.replace(/<[^>]+>/g, '').slice(0, 60)})
           );
