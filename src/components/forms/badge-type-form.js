@@ -211,7 +211,7 @@ class BadgeTypeForm extends React.Component {
                             maxLength={500}
                             className="form-control"
                         />
-                        <span className='character-counter'>{`${entity.description.length}/500`}</span>                        
+                        <span className='character-counter'>{`${entity.description?.length}/500`}</span>
                     </div>
                 </div>
 
