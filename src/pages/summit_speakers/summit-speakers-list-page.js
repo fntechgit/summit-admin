@@ -17,6 +17,7 @@ import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import {Modal, Pagination} from 'react-bootstrap';
 import { FreeTextSearch, SelectableTable, Dropdown, Input } from 'openstack-uicore-foundation/lib/components';
+import SpeakerPromoCodeSpecForm from '../../components/forms/speakers-promo-code-spec-form';
 import {
     initSpeakersList,
     getSpeakersBySummit,
@@ -64,12 +65,14 @@ class SummitSpeakersListPage extends React.Component {
         this.handleChangeFlowEvent = this.handleChangeFlowEvent.bind(this);
         this.showEmailSendModal = this.showEmailSendModal.bind(this);
         this.handleSendEmails = this.handleSendEmails.bind(this);
+        this.handleChangePromoCodeStrategy = this.handleChangePromoCodeStrategy.bind(this);
 
         this.state = {
             testRecipient: '',
             showSendEmailModal: false,
             excerptRecipient: '',
             source: sources.speakers,
+            promoCodeStrategy: 0
         };
     }
 
@@ -230,6 +233,11 @@ class SummitSpeakersListPage extends React.Component {
             { selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter }, source)
     }
 
+    handleChangePromoCodeStrategy(ev) {
+        const { value } = ev.target;
+        this.setState({...this.state, promoCodeStrategy: value});
+    }
+
     showEmailSendModal(ev) {
         ev.stopPropagation();
         ev.preventDefault();
@@ -284,7 +292,7 @@ class SummitSpeakersListPage extends React.Component {
     render() {
         const { currentSummit } = this.props;
 
-        const { testRecipient, source } = this.state;
+        const { testRecipient, source, promoCodeStrategy } = this.state;
 
         const { items, lastPage, currentPage, term, order, orderDir, totalItems, selectedItems,
             selectedAll, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, currentFlowEvent } = this.getSubjectProps();
@@ -335,6 +343,14 @@ class SummitSpeakersListPage extends React.Component {
             { label: 'SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY', value: 'SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ACCEPTED_ONLY' },
             { label: 'SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY', value: 'SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_ALTERNATE_ONLY' },
             { label: 'SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY', value: 'SUMMIT_SUBMISSIONS_PRESENTATION_SUBMITTER_REJECTED_ONLY' },
+        ];
+
+        let promoCodeStrategiesDDL = [
+            { label: '-- SELECT PROMO CODE STRATEGY --', value: 0 },
+            { label: 'Select existing multi speaker promo code', value: 1 },
+            { label: 'Select existing multi speaker discount code', value: 2 },
+            { label: 'Auto generate single speaker promo code', value: 3 },
+            { label: 'Auto generate single speaker discount code', value: 4 },
         ];
 
         const table_options = {
@@ -504,10 +520,23 @@ class SummitSpeakersListPage extends React.Component {
                                         BLAST IS ON TEST MODE ( all emails would be sent to {this.state.testRecipient} )
                                     </div>
                                     }
-                                    <br />
-                                    <br />
-                                    <br />
-                                    <div className="col-md-12 ticket-ingest-email-wrapper">
+                                    <div className="col-md-12" style={{ paddingTop: "12px" }}>
+                                        <label>{T.translate("summit_speakers_list.promo_code_strategy")}</label><br/>
+                                        <Dropdown
+                                            id="promoCodeStrategySelector"
+                                            value={promoCodeStrategy}
+                                            onChange={this.handleChangePromoCodeStrategy}
+                                            options={promoCodeStrategiesDDL}
+                                            isClearable={true}
+                                        />
+                                    </div>
+                                    <div className="col-md-12" style={{ paddingTop: "12px" }}>
+                                        <SpeakerPromoCodeSpecForm 
+                                            promoCodeStrategy={promoCodeStrategy} 
+                                            summit={currentSummit}
+                                        />
+                                    </div>
+                                    <div className="col-md-12 ticket-ingest-email-wrapper" style={{ paddingTop: "12px" }}>
                                         <label>{T.translate("summit_speakers_list.excerpt_email")}</label><br/>
                                         <input
                                             id="ingest_email"

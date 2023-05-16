@@ -850,6 +850,7 @@
     "alternate": "Alternate",
     "no_speakers": "There are no speakers for this search criteria.",
     "send_emails": "Send",
+    "promo_code_strategy": "Promo Code Strategy",
     "excerpt_email": "Excerpt Recipient",
     "select_template": "Select a Email Template to perform the action.",
     "select_items": "Select at least one speaker to perform the action.",
