@@ -25,7 +25,7 @@ const OrderQuestionFilter = ({questions, value, onChange, ...rest}) => {
     const options = questions.reduce((result, q) => {
       if (q.values) {
         const quesAns = q.values.map(ans => {
-          return ({label: `${q.label_text}: ${ans.value}`, value: `${q.id}:${ans.id}`})
+          return ({label: `${q.label_text}: ${ans.label}`, value: `${q.id}:${ans.id}`})
         })
         return [...result, ...quesAns];
       } else { // free form

@@ -186,14 +186,6 @@ class AttendeeReport extends React.Component {
               <div className="report-filters">
                   <div className="row">
                       <div className="col-md-4">
-                          <OrderQuestionFilter
-                            value={filters?.questions || null}
-                            questions={parsedQuestions}
-                            onChange={value => onFilterChange('questions', value, true)}
-                            isMulti
-                          />
-                      </div>
-                      <div className="col-md-4">
                           <TicketTypeFilter
                             value={filters?.ticket_types || null}
                             types={ticket_types}
@@ -206,6 +198,14 @@ class AttendeeReport extends React.Component {
                             value={filters?.badge_features || null}
                             features={badge_features}
                             onChange={value => onFilterChange('badge_features', value, true)}
+                            isMulti
+                          />
+                      </div>
+                      <div className="col-md-4">
+                          <OrderQuestionFilter
+                            value={filters?.questions || null}
+                            questions={parsedQuestions}
+                            onChange={value => onFilterChange('questions', value, true)}
                             isMulti
                           />
                       </div>
