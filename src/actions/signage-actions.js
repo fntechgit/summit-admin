@@ -200,7 +200,7 @@ export const getSignBanners = (locationId, term = '', page = 1, order = null, or
 };
 
 
-export const publishDate = (startDate) => async (dispatch, getState) => {
+export const publishDate = (startDate, eventId) => async (dispatch, getState) => {
     const {currentSummitState, signageState} = getState();
     const {currentSummit} = currentSummitState;
     const {locationId} = signageState;
@@ -211,7 +211,7 @@ export const publishDate = (startDate) => async (dispatch, getState) => {
     const res = await publishToAblyChannel(channel, 'JUMP_TIME',{timestamp: startDate});
     
     if (res) {
-        dispatch(showSuccessMessage(T.translate("signage.date_published")));
+        dispatch(showSuccessMessage(T.translate(eventId ? "signage.event_jump" : "signage.date_published")));
     }
 };
 

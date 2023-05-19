@@ -110,7 +110,7 @@ const SignagePage = ({
   
   const jumpToEvent = (id) => {
     const event = events.find(ev => ev.id === id);
-    props.publishDate(event.start_date);
+    props.publishDate(event.start_date, id);
   };
   
   const saveStaticBanner = () => {
