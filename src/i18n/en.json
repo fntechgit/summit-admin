@@ -2492,7 +2492,7 @@
       "locations": "Select location",
       "template": "Select template",
       "date": "Select date",
-      "search": "Search for activities"
+      "search": "Search for {option}"
     }
   }
 }
