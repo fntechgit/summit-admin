@@ -11,20 +11,18 @@
  * limitations under the License.
  **/
 
-import { RESET_PROMOCODE_SPEC_FORM } from '../../actions/promocode-specification-actions';
+import { RESET_PROMOCODE_SPEC_FORM, UPDATE_SPECS, VALIDATE_SPECS } from '../../actions/promocode-specification-actions';
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
 
 export const DEFAULT_ENTITY = {
-    existingPromoCodeId: null,
-    autoCreationSpec: {
-        type: null,
-        tags: [],
-        badgeFeatures: [],
-        ticketTypes: [],
-        amount: null,
-        discount: null,    
-    }
+    existingPromoCode: null,
+    type: '',
+    tags: [],
+    badgeFeatures: [],
+    ticketTypes: [],
+    amount: null,
+    discount: null,    
 }
 
 const DEFAULT_STATE = {
@@ -46,6 +44,14 @@ const promocodeSpecificationReducer = (state = DEFAULT_STATE, action) => {
         case SET_CURRENT_SUMMIT:
         case RESET_PROMOCODE_SPEC_FORM: {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
+        }
+        case UPDATE_SPECS: {
+            const {entity} = payload;
+            return {...state,  entity: {...entity}, errors: {} };
+        }
+        case VALIDATE_SPECS: {
+            const {errors} = payload;
+            return {...state,  errors: {...errors} };
         }
         default:
             return state;

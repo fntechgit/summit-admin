@@ -11,14 +11,47 @@
  * limitations under the License.
  **/
 
+import T from 'i18n-react/dist/i18n-react';
 import {
+    createAction,
     escapeFilterValue,
     fetchResponseHandler,
     fetchErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
+
 import {getAccessTokenSafely} from '../utils/methods';
 
+export const UPDATE_SPECS = 'UPDATE_SPECS';
+export const VALIDATE_SPECS = 'VALIDATE_SPECS';
 export const RESET_PROMOCODE_SPEC_FORM = 'RESET_PROMOCODE_SPEC_FORM';
+
+export const SPEAKERS_PROMO_CODE_CLASS_NAME = 'SPEAKERS_PROMO_CODE';
+export const SPEAKERS_DISCOUNT_CODE_CLASS_NAME = 'SPEAKERS_DISCOUNT_CODE';
+
+export const updateSpecs = (entity) => (dispatch) => {
+    dispatch(createAction(UPDATE_SPECS)({entity}));
+    return false;
+};
+
+export const validateSpecs = (promoCodeStrategy, entity, callback) => (dispatch) => {
+    let errors = {};
+
+    if ([1,2].includes(promoCodeStrategy) && !entity.existingPromoCode) {
+        errors['existingPromoCode'] = T.translate("promo_code_specification.promo_code_mandatory");
+        dispatch(createAction(VALIDATE_SPECS)({errors}));
+        return;
+    } 
+    if ([3,4].includes(promoCodeStrategy) && !entity.type) {
+        errors['type'] = T.translate("promo_code_specification.type_mandatory");
+        dispatch(createAction(VALIDATE_SPECS)({errors}));
+        return;
+    } 
+    callback();
+};
+
+export const resetPromoCodeSpecForm = () => (dispatch) => {
+    dispatch(createAction(RESET_PROMOCODE_SPEC_FORM)({}));
+};
 
 export const queryMultiSpeakersPromocodes = _.debounce(async (summitId, input, callback) => {
 
@@ -26,7 +59,9 @@ export const queryMultiSpeakersPromocodes = _.debounce(async (summitId, input, c
 
     input = escapeFilterValue(input);
 
-    fetch(`${window.API_BASE_URL}/api/v1/summits/${summitId}/promo-codes?filter=code=@${input}&access_token=${accessToken}`)
+    const params = `filter[]=code=@${input}&filter[]=class_name==${SPEAKERS_PROMO_CODE_CLASS_NAME}||${SPEAKERS_DISCOUNT_CODE_CLASS_NAME}`;
+
+    fetch(`${window.API_BASE_URL}/api/v1/summits/${summitId}/promo-codes?${params}&access_token=${accessToken}`)
         .then(fetchResponseHandler)
         .then((json) => {
             const options = [...json.data];

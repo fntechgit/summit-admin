@@ -40,6 +40,7 @@ import {
     setCurrentSubmitterFlowEvent,
     sendSubmitterEmails
 } from "../../actions/submitter-actions";
+import {validateSpecs} from '../../actions/promocode-specification-actions';
 
 import { SpeakersSources as sources } from "../../utils/constants";
 
@@ -216,21 +217,25 @@ class SummitSpeakersListPage extends React.Component {
     handleSendEmails(ev){
         ev.stopPropagation();
         ev.preventDefault();
-        const { testRecipient, source } = this.state;
+        const { currentPromocodeSpecification } = this.props;
+        const { promoCodeStrategy, testRecipient, source } = this.state;
         const isSpeakerMode = source === sources.speakers;
         let excerptRecipient = this.ingestEmailRef.value;
         let shouldSendCopy2Submitter = isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked
-        this.setState({showSendEmailModal: false, excerptRecipient: '', testRecipient: ''});
-        // send emails
 
-        const {
-            selectedAll, term, selectedItems, currentFlowEvent, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter,
-        } = this.getSubjectProps();
-
-        const callable = isSpeakerMode ? this.props.sendSpeakerEmails : this.props.sendSubmitterEmails;
-
-        callable(currentFlowEvent, selectedAll, selectedItems, testRecipient, excerptRecipient, shouldSendCopy2Submitter, term,
-            { selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter }, source)
+        this.props.validateSpecs(promoCodeStrategy, currentPromocodeSpecification.entity, () => {
+            this.setState({showSendEmailModal: false, excerptRecipient: '', testRecipient: ''});
+            // send emails
+    
+            const {
+                selectedAll, term, selectedItems, currentFlowEvent, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter,
+            } = this.getSubjectProps();
+    
+            const callable = isSpeakerMode ? this.props.sendSpeakerEmails : this.props.sendSubmitterEmails;
+    
+            callable(currentFlowEvent, selectedAll, selectedItems, testRecipient, excerptRecipient, shouldSendCopy2Submitter, term,
+                { selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter }, source, promoCodeStrategy, currentPromocodeSpecification.entity);
+        });
     }
 
     handleChangePromoCodeStrategy(ev) {
@@ -290,7 +295,7 @@ class SummitSpeakersListPage extends React.Component {
     }
 
     render() {
-        const { currentSummit } = this.props;
+        const { currentSummit, currentPromocodeSpecification } = this.props;
 
         const { testRecipient, source, promoCodeStrategy } = this.state;
 
@@ -346,11 +351,11 @@ class SummitSpeakersListPage extends React.Component {
         ];
 
         let promoCodeStrategiesDDL = [
-            { label: '-- SELECT PROMO CODE STRATEGY --', value: 0 },
-            { label: 'Select existing multi speaker promo code', value: 1 },
-            { label: 'Select existing multi speaker discount code', value: 2 },
-            { label: 'Auto generate single speaker promo code', value: 3 },
-            { label: 'Auto generate single speaker discount code', value: 4 },
+            { label: T.translate("summit_speakers_list.select_promo_code_strategy"), value: 0 },
+            { label: T.translate("summit_speakers_list.select_speaker_promo_code"), value: 1 },
+            { label: T.translate("summit_speakers_list.select_speaker_discount_code"), value: 2 },
+            { label: T.translate("summit_speakers_list.select_auto_generate_speaker_promo_code"), value: 3 },
+            { label: T.translate("summit_speakers_list.select_auto_generate_speaker_discount_code"), value: 4 },
         ];
 
         const table_options = {
@@ -520,7 +525,7 @@ class SummitSpeakersListPage extends React.Component {
                                         BLAST IS ON TEST MODE ( all emails would be sent to {this.state.testRecipient} )
                                     </div>
                                     }
-                                    <div className="col-md-12" style={{ paddingTop: "12px" }}>
+                                    <div className="col-md-12" style={{ paddingTop: "15px" }}>
                                         <label>{T.translate("summit_speakers_list.promo_code_strategy")}</label><br/>
                                         <Dropdown
                                             id="promoCodeStrategySelector"
@@ -530,13 +535,15 @@ class SummitSpeakersListPage extends React.Component {
                                             isClearable={true}
                                         />
                                     </div>
-                                    <div className="col-md-12" style={{ paddingTop: "12px" }}>
+                                    <div className="col-md-12">
                                         <SpeakerPromoCodeSpecForm 
                                             promoCodeStrategy={promoCodeStrategy} 
                                             summit={currentSummit}
+                                            entity={currentPromocodeSpecification.entity}
+                                            errors={currentPromocodeSpecification.errors}
                                         />
                                     </div>
-                                    <div className="col-md-12 ticket-ingest-email-wrapper" style={{ paddingTop: "12px" }}>
+                                    <div className="col-md-12 ticket-ingest-email-wrapper" style={{ paddingTop: "5px" }}>
                                         <label>{T.translate("summit_speakers_list.excerpt_email")}</label><br/>
                                         <input
                                             id="ingest_email"
@@ -545,7 +552,7 @@ class SummitSpeakersListPage extends React.Component {
                                         />
                                     </div>
                                     { this.state.source === sources.speakers &&
-                                    <div className="col-md-12 ticket-ingest-email-wrapper">
+                                    <div className="col-md-12 ticket-ingest-email-wrapper" style={{ paddingTop: "3px" }}>
                                         <div className="form-check abc-checkbox">
                                             <input
                                                 id="should_send_copy_2_submitter"
@@ -574,10 +581,11 @@ class SummitSpeakersListPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSummitSpeakersListState, currentSummitSubmittersListState }) => ({
+const mapStateToProps = ({ currentSummitState, currentSummitSpeakersListState, currentSummitSubmittersListState, currentPromocodeSpecificationState }) => ({
     currentSummit: currentSummitState.currentSummit,
     speakersProps: currentSummitSpeakersListState,
-    submittersProps: currentSummitSubmittersListState
+    submittersProps: currentSummitSubmittersListState,
+    currentPromocodeSpecification: currentPromocodeSpecificationState
 })
 
 export default connect(
@@ -600,6 +608,7 @@ export default connect(
         selectAllSummitSubmitters,
         unselectAllSummitSubmitters,
         setCurrentSubmitterFlowEvent,
-        sendSubmitterEmails
+        sendSubmitterEmails,
+        validateSpecs
     }
 )(SummitSpeakersListPage);
