@@ -2512,6 +2512,9 @@
     "timeframes": "Timeframes",
     "location": "Location",
     "all_days": "All days",
+    "day": "Day",
+    "opening_hour": "Opening Hour",
+    "closing_hour": "Closing Hour",
     "no_items": "No Track Timeframes found.",
     "remove_warning": "Are you sure you want to remove the timeframes for "
   }

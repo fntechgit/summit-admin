@@ -14,6 +14,7 @@
 import
 {
     RECEIVE_TRACK_TIMEFRAMES,
+    TRACK_TIMEFRAME_ADDED,
     TRACK_TIMEFRAME_DELETED,
 } from '../../actions/track-timeframes-actions';
 
@@ -45,10 +46,14 @@ const trackTimeframesListReducer = (state = DEFAULT_STATE, action) => {
 
             return {...state, tracksTimeframes, currentPage: current_page, totalItems: total, lastPage: last_page };
         }
+        case TRACK_TIMEFRAME_ADDED: {
+            const entity = {...payload.response};
+            return {...state, tracksTimeframes: [...state.tracksTimeframes, entity]}
+        }
         case TRACK_TIMEFRAME_DELETED: {
-            const {trackChairId} = payload;
+            const {trackId} = payload;
 
-            return {...state, trackChairs: state.trackChairs.filter(tc => tc.id !== trackChairId)};
+            return {...state, tracksTimeframes: state.tracksTimeframes.filter(tt => tt.track_id !== trackId)};
         }
         default:
             return state;

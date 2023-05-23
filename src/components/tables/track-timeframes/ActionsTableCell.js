@@ -1,7 +1,11 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
-const ActionsTableCell = ({id, actions}) => {
-    const [isEditing, setIsEditing] = useState(false);
+const ActionsTableCell = ({id, actions, isEdit = false}) => {
+    const [isEditing, setIsEditing] = useState(isEdit);
+    
+    useEffect(() => {
+        setIsEditing(isEdit);
+    }, [isEdit])
 
     const onDelete = (ev) => {
         ev.preventDefault();
@@ -29,10 +33,7 @@ const ActionsTableCell = ({id, actions}) => {
     if (isEditing) {
         return (
           <td className="actions">
-              <a href="" onClick={onSave} data-tip="save" >
-                  <i className="fa fa-floppy-o"/>
-              </a>
-              <a href="" onClick={onCancel} data-tip="cancel" >
+              <a href="" onClick={onCancel} data-tip="close" >
                   <i className="fa fa-times"/>
               </a>
           </td>

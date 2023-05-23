@@ -137,3 +137,11 @@ table.trackTimeframesTable .actions a .fa:hover {
     color: #024c85;
 }
 
+table.trackTimeframesTable .timeframesWrapper {
+    background-color: lightblue;
+    padding: 20px;
+}
+
+table.trackTimeframesTable .timeframesWrapper:hover {
+    background-color: lightblue;
+}

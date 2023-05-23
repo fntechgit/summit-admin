@@ -1,7 +1,10 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import ActionsTableCell from './ActionsTableCell';
-import {deleteTrackTimeframe, saveTrackTimeframe} from "../../../actions/track-timeframes-actions"
+import {
+  saveLocationTimeframe,
+  deleteLocationTimeframe
+} from "../../../actions/track-timeframes-actions"
 import T from "i18n-react/dist/i18n-react";
 import ReactTooltip from "react-tooltip";
 
@@ -9,39 +12,28 @@ import './styles.css';
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import {shallowEqual} from "../../../utils/methods";
 import LocationDropdown from "../../inputs/location-dropdown";
+import DayTimeframeTable from "./DayTimeframeTable";
+import {epochToMomentTimeZone, parseLocationHour} from "openstack-uicore-foundation/lib/utils/methods";
 
-const createRow = (row, actions) => {
+const createRow = (row, actions, summitTZ) => {
   var cells = [];
+  const timeframes = row.allowed_timeframes
+    .sort((a,b) => a.day - b.day)
+    .map(tf => {
+      const open = tf.opening_hour ? parseLocationHour(tf.opening_hour) : 'N/A';
+      const close = tf.closing_hour ? parseLocationHour(tf.closing_hour) : 'N/A';
+      return `${epochToMomentTimeZone(tf.day, summitTZ).format('MMM Do YYYY')}: ${open} - ${close}`;
+    })
+    .join(', ');
   
-  if (row.is_edit) {
-    cells = [
-      <td key="location_id">{row.location.name}</td>,
-      <td key="days">
-          <div className="form-check abc-checkbox">
-              <input
-                id="all_days"
-                type="checkbox"
-                checked={row.all_days}
-                onChange={ev => actions.handleChange(row.id, ev)}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="all_days">
-                  {T.translate("track_timeframes.all_days")}
-              </label>
-          </div>
-      </td>,
-    ]
-  } else {
-    const timeframes = row.allowed_timeframes.map(tf => tf.id).join(' ,');
-    cells = [
-      <td key="location_id">{row.location.name}</td>,
-      <td key="days">{timeframes || 'all days'}</td>,
-    ]
-  }
+  cells = [
+    <td key="location_id">{row.location.name}</td>,
+    <td key="days">{timeframes || 'all days'}</td>,
+  ]
   
   
   if (actions) {
-    cells.push(<ActionsTableCell key={'actions_' + row.id} id={row.id} actions={actions}/>);
+    cells.push(<ActionsTableCell key={'actions_' + row.id} id={row.id} actions={actions} isEdit={row.is_edit}/>);
   }
   
   return cells;
@@ -58,19 +50,7 @@ const createNewRow = (row, actions, locations) => {
       />
     </td>,
     <td key="new_days">
-      <div className="form-check abc-checkbox">
-        <input
-          id="new_all_days"
-          type="checkbox"
-          checked={true}
-          disabled
-          onChange={actions.handleChange}
-          className="form-check-input"
-        />
-        <label className="form-check-label" htmlFor="new_all_days">
-          {T.translate("track_timeframes.all_days")}
-        </label>
-      </div>
+      {T.translate("track_timeframes.all_days")}
     </td>
   ];
   
@@ -101,9 +81,7 @@ class TrackTimeframeTable extends React.Component {
     
     this.actions = {};
     this.actions.edit = this.editRow.bind(this);
-    this.actions.save = this.saveRow.bind(this);
     this.actions.delete = this.deleteClick.bind(this);
-    this.actions.handleChange = this.onChangeCell.bind(this);
     this.actions.cancel = this.editRowCancel.bind(this);
     
     this.newActions = {};
@@ -117,30 +95,17 @@ class TrackTimeframeTable extends React.Component {
     }
   }
   
-  saveRow(id) {
-    const {rows} = this.state;
-    let row = rows.find(r => r.id === id);
-    row.is_edit = false;
-    
-    this.editing_row = null;
-    
-    this.setState({
-      rows: rows
-    });
-    
-    this.props.saveTrackTimeframe(row);
-  }
-  
   deleteClick(id) {
-    this.props.deleteTrackTimeframe(id);
+    const {trackId} = this.props;
+    this.props.deleteLocationTimeframe(trackId, id);
   }
   
   editRow(id, ev) {
     const {rows} = this.state;
+    rows.forEach(r => {
+      r.is_edit = false;
+    });
     let row = rows.find(r => r.id === id);
-    
-    //save editing row for cancel
-    this.editing_row = {...row};
     
     row.is_edit = true;
     
@@ -155,32 +120,9 @@ class TrackTimeframeTable extends React.Component {
       r.is_edit = false;
     });
     
-    let rowIdx = rows.findIndex(r => r.id === id);
-    
-    rows[rowIdx] = this.editing_row;
-    
     this.setState({
       rows: rows
     });
-  }
-  
-  onChangeCell(id, ev) {
-    const {rows} = this.state;
-    let field = ev.target;
-    let row = rows.find(r => r.id === id);
-    let value = field.value;
-    
-    if (ev.target.type === 'datetime') {
-      value = value.valueOf() / 1000;
-    }
-    
-    if (ev.target.type === 'checkbox') {
-      value = ev.target.checked;
-    }
-    
-    row[field.id] = value;
-    
-    this.setState({rows: rows});
   }
   
   onChangeNewCell(ev) {
@@ -205,11 +147,11 @@ class TrackTimeframeTable extends React.Component {
     const new_row = {...this.state.new_row};
     this.setState({new_row: {...this.new_row}});
     
-    this.props.saveTrackTimeframe(trackId, new_row.location_id);
+    this.props.saveLocationTimeframe(trackId, new_row.location_id);
   }
   
   render() {
-    const {locations} = this.props;
+    const {locations, days, trackId, summitTZ} = this.props;
     const {rows, new_row} = this.state;
     
     return (
@@ -229,10 +171,20 @@ class TrackTimeframeTable extends React.Component {
             return (
               <>
                 <tr id={row.id} key={'row_' + row.id} role="row" className={rowClass}>
-                  {createRow(row, this.actions)}
+                  {createRow(row, this.actions, summitTZ)}
                 </tr>
-                {row.is_edit && !row.all_days &&
-                  <div>here goes the timefram editable table</div>
+                {row.is_edit &&
+                  <tr className="timeframesWrapper">
+                    <td colSpan={3}>
+                      <DayTimeframeTable
+                        summitTZ={summitTZ}
+                        trackId={trackId}
+                        allowedLocationId={row.id}
+                        days={days.filter(d => !row.allowed_timeframes.map(t => t.day).includes(d.value))}
+                        data={row.allowed_timeframes.sort((a,b) => a.day - b.day)}
+                      />
+                    </td>
+                  </tr>
                 }
               </>
             );
@@ -249,14 +201,10 @@ class TrackTimeframeTable extends React.Component {
   }
 };
 
-const mapStateToProps = ({currentSummitState}) => ({
-  locations: currentSummitState.currentSummit.locations,
-})
-
 export default connect(
-  mapStateToProps,
+  null,
   {
-    saveTrackTimeframe,
-    deleteTrackTimeframe,
+    saveLocationTimeframe,
+    deleteLocationTimeframe,
   }
 )(TrackTimeframeTable);

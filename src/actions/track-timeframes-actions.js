@@ -18,23 +18,28 @@ import {
     createAction,
     stopLoading,
     startLoading,
-    authErrorHandler, showMessage,
+    authErrorHandler,
+    showMessage,
+    showSuccessMessage,
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
-import {SIGNAGE_BANNER_ADDED, SIGNAGE_BANNER_UPDATED, UPDATE_SIGNAGE_BANNER} from "./signage-actions";
 import history from "../history";
 import T from "i18n-react";
-import {RECEIVE_EVENT_CATEGORIES, REQUEST_EVENT_CATEGORIES} from "./event-category-actions";
+import moment from "moment-timezone";
+
 export const RECEIVE_TRACK_TIMEFRAMES       = 'RECEIVE_TRACK_TIMEFRAMES';
 export const UPDATE_TRACK_TIMEFRAME        = 'UPDATE_TRACK_TIMEFRAME';
 export const TRACK_TIMEFRAME_UPDATED        = 'TRACK_TIMEFRAME_UPDATED';
-export const TRACK_TIMEFRAME_ADDED          = 'TRACK_TIMEFRAME_ADDED';
 export const RESET_TRACK_TIMEFRAME_FORM          = 'RESET_TRACK_TIMEFRAME_FORM';
 export const RECEIVE_TRACK_TIMEFRAME          = 'RECEIVE_TRACK_TIMEFRAME';
+export const TRACK_TIMEFRAME_ADDED          = 'TRACK_TIMEFRAME_ADDED';
 export const TRACK_TIMEFRAME_DELETED        = 'TRACK_TIMEFRAME_DELETED';
-export const TRACK_TIMEFRAME_DELETED_LOC    = 'TRACK_TIMEFRAME_DELETED_LOC';
-export const TRACK_TIMEFRAME_DELETED_DAY    = 'TRACK_TIMEFRAME_DELETED_DAY';
-
+export const LOCATION_TIMEFRAME_ADDED    = 'LOCATION_TIMEFRAME_ADDED';
+export const LOCATION_TIMEFRAME_DELETED    = 'LOCATION_TIMEFRAME_DELETED';
+export const UPDATE_DAY_TIMEFRAME        = 'UPDATE_DAY_TIMEFRAME';
+export const DAY_TIMEFRAME_UPDATED        = 'DAY_TIMEFRAME_UPDATED';
+export const DAY_TIMEFRAME_ADDED          = 'DAY_TIMEFRAME_ADDED';
+export const DAY_TIMEFRAME_DELETED        = 'DAY_TIMEFRAME_DELETED';
 
 export const getTrackTimeframes = (page = 1, perPage = 10) => async (dispatch, getState) => {
 
@@ -63,6 +68,10 @@ export const getTrackTimeframes = (page = 1, perPage = 10) => async (dispatch, g
     );
 };
 
+export const resetTrackTimeframeForm = () => (dispatch) => {
+    dispatch(createAction(RESET_TRACK_TIMEFRAME_FORM)({}));
+};
+
 export const getTrackTimeframe = (trackId) => async (dispatch, getState) => {
     
     const { currentSummitState } = getState();
@@ -72,7 +81,7 @@ export const getTrackTimeframe = (trackId) => async (dispatch, getState) => {
     dispatch(startLoading());
     
     const params = {
-        expand       : "proposed_schedule_allowed_locations,proposed_schedule_allowed_locations.location",
+        expand       : "proposed_schedule_allowed_locations,proposed_schedule_allowed_locations.location,proposed_schedule_allowed_locations.allowed_timeframes",
         access_token : accessToken,
     };
     
@@ -88,32 +97,31 @@ export const getTrackTimeframe = (trackId) => async (dispatch, getState) => {
 };
 
 
-export const addTrackTimeframe = (member, trackIds) => async (dispatch, getState) => {
+export const deleteTrackTimeframe = (trackId) => async (dispatch, getState) => {
+    
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
-
+    
     dispatch(startLoading());
-
+    
     const params = {
-        access_token : accessToken,
-        expand       : 'member,categories'
+        access_token : accessToken
     };
-
-    return postRequest(
-        null,
-        createAction(TRACK_TIMEFRAME_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-chairs`,
-        {member_id: member.id, categories: trackIds},
-        authErrorHandler,
-    )(params)(dispatch)
-        .then(() => {
-           dispatch(stopLoading());
-        });
+    
+    return deleteRequest(
+      null,
+      createAction(TRACK_TIMEFRAME_DELETED)({trackId}),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tracks/${trackId}/proposed-schedule-allowed-locations/all`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+          dispatch(stopLoading());
+      }
+    );
 };
 
-
-export const saveTrackTimeframe = (trackId, locationId) => async (dispatch, getState) => {
+export const saveLocationTimeframe = (trackId, locationId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -124,32 +132,25 @@ export const saveTrackTimeframe = (trackId, locationId) => async (dispatch, getS
     
     dispatch(startLoading());
     
-    const success_message = {
-        title: T.translate("general.done"),
-        html: T.translate("track_timeframes.timeframe_created"),
-        type: 'success'
-    };
-    
     postRequest(
-      createAction(UPDATE_TRACK_TIMEFRAME),
-      createAction(TRACK_TIMEFRAME_ADDED),
+      null,
+      createAction(LOCATION_TIMEFRAME_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tracks/${trackId}/proposed-schedule-allowed-locations`,
       {location_id: locationId},
       authErrorHandler,
     )(params)(dispatch)
-      .then((payload) => {
-          dispatch(showMessage(
-            success_message,
-            () => { history.push(`/app/summits/${currentSummit.id}/track-chairs/track-timeframes/${payload.response.id}`) }
-          ));
+      .then(() => {
+          dispatch(stopLoading());
       });
 }
 
-export const deleteTrackTimeframe = (trackId) => async (dispatch, getState) => {
+export const deleteLocationTimeframe = (trackId, allowedLocationId) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
+    
+    dispatch(startLoading());
 
     const params = {
         access_token : accessToken
@@ -157,8 +158,8 @@ export const deleteTrackTimeframe = (trackId) => async (dispatch, getState) => {
 
     return deleteRequest(
         null,
-        createAction(TRACK_TIMEFRAME_DELETED)({trackId}),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-chairs/timeframes/${trackId}`,
+        createAction(LOCATION_TIMEFRAME_DELETED)({allowedLocationId}),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tracks/${trackId}/proposed-schedule-allowed-locations/${allowedLocationId}`,
         null,
         authErrorHandler
     )(params)(dispatch).then(() => {
@@ -168,3 +169,80 @@ export const deleteTrackTimeframe = (trackId) => async (dispatch, getState) => {
 };
 
 
+export const saveDayTimeframe = (trackId, locationId, entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    
+    const params = {
+        access_token: accessToken,
+    };
+    
+    dispatch(startLoading());
+    
+    const normalizedEntity = normalizeDayTimeframe(entity);
+    
+    
+    if (entity.id) {
+        putRequest(
+          null,
+          createAction(DAY_TIMEFRAME_UPDATED),
+          `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tracks/${trackId}/proposed-schedule-allowed-locations/${locationId}/allowed-time-frames`,
+          normalizedEntity,
+          authErrorHandler,
+        )(params)(dispatch)
+          .then(() => {
+              dispatch(stopLoading());
+          });
+        
+    } else {
+        postRequest(
+          null,
+          createAction(DAY_TIMEFRAME_ADDED),
+          `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tracks/${trackId}/proposed-schedule-allowed-locations/${locationId}/allowed-time-frames`,
+          normalizedEntity,
+          authErrorHandler,
+        )(params)(dispatch)
+          .then(() => {
+              dispatch(stopLoading());
+          });
+    }
+    
+    
+}
+
+export const deleteDayTimeframe = (trackId, allowedLocationId, timeframeId) => async (dispatch, getState) => {
+    
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    
+    dispatch(startLoading());
+    
+    const params = {
+        access_token : accessToken
+    };
+    
+    return deleteRequest(
+      null,
+      createAction(DAY_TIMEFRAME_DELETED)({allowedLocationId, timeframeId}),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tracks/${trackId}/proposed-schedule-allowed-locations/${allowedLocationId}/allowed-time-frames/${timeframeId}`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+          dispatch(stopLoading());
+      }
+    );
+};
+
+const normalizeDayTimeframe = (entity) => {
+    const {day, opening_hour, closing_hour} = entity;
+    const normalizedEntity = {day};
+    if (opening_hour) {
+        normalizedEntity.opening_hour = parseInt(opening_hour.format('HHmm'));
+    }
+    if (closing_hour) {
+        normalizedEntity.closing_hour = parseInt(closing_hour.format('HHmm'));
+    }
+    return normalizedEntity;
+};

@@ -65,7 +65,6 @@ const TrackTimeframeListPage = ({currentSummit, match, history, tracksTimeframes
   return (
       <div className="container">
         <h3>Tracks with timeframes restrictions</h3>
-        <hr/>
         <div className="row">
           <div className="col-md-6 text-right col-md-offset-6">
             <button className="btn btn-primary right-space" onClick={handleNew}>

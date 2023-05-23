@@ -15,11 +15,11 @@ import
 {
     RESET_TRACK_TIMEFRAME_FORM,
     RECEIVE_TRACK_TIMEFRAME,
-    UPDATE_TRACK_TIMEFRAME,
-    TRACK_TIMEFRAME_UPDATED,
-    TRACK_TIMEFRAME_ADDED,
-    TRACK_TIMEFRAME_DELETED_LOC,
-    TRACK_TIMEFRAME_DELETED_DAY,
+    LOCATION_TIMEFRAME_ADDED,
+    LOCATION_TIMEFRAME_DELETED,
+    DAY_TIMEFRAME_UPDATED,
+    DAY_TIMEFRAME_ADDED,
+    DAY_TIMEFRAME_DELETED
 } from '../../actions/track-timeframes-actions';
 
 import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
@@ -55,30 +55,58 @@ const trackTimeframeReducer = (state = DEFAULT_STATE, action) => {
             
             return {...state, entity: track, errors: {} };
         }
-        case UPDATE_TRACK_TIMEFRAME: {
-            return {...state,  entity: {...payload }, errors: {} };
-        }
-        case TRACK_TIMEFRAME_UPDATED: {
-            let entity = {...payload.response};
-
+        case LOCATION_TIMEFRAME_ADDED: {
+            const entity = {...payload.response};
             return {
                 ...state,
                 entity: {
-                    owner: {
-                        email: entity.owner_email,
-                        first_name: entity.owner_first_name,
-                        last_name: entity.owner_last_name,
-                    },
-                    ...entity,
-                    tickets: assembleTicketsState(entity.tickets)
-                },
-                errors: {}
+                    ...state.entity,
+                    proposed_schedule_allowed_locations: [
+                        ...state.entity.proposed_schedule_allowed_locations,
+                        entity
+                    ]
+                }
             }
         }
-        case TRACK_TIMEFRAME_ADDED: {
-            let entity = {...payload.response};
-            console.log(payload);
-            return {...state}
+        case LOCATION_TIMEFRAME_DELETED: {
+            const {allowedLocationId} = payload;
+    
+            return {
+                ...state,
+                entity: {
+                    ...state.entity,
+                    proposed_schedule_allowed_locations: state.entity.proposed_schedule_allowed_locations.filter(psal => psal.id !== allowedLocationId)}
+            };
+        }
+        case DAY_TIMEFRAME_UPDATED:
+        case DAY_TIMEFRAME_ADDED: {
+            const entity = {...payload.response};
+            const newLocs = state.entity.proposed_schedule_allowed_locations.map(psal => {
+                if (psal.id === entity.allowed_location_id) {
+                    const newDayTimeframes = [...psal.allowed_timeframes.filter(at => at.id !== entity.id), entity]
+                    return {...psal, allowed_timeframes: newDayTimeframes}
+                }
+                return psal;
+            });
+    
+            return {
+                ...state,
+                entity: { ...state.entity, proposed_schedule_allowed_locations: newLocs}
+            };
+        }
+        case DAY_TIMEFRAME_DELETED: {
+            const {allowedLocationId, timeframeId} = payload;
+            const newLocs = state.entity.proposed_schedule_allowed_locations.map(psal => {
+                if (psal.id === allowedLocationId) {
+                    return {...psal, allowed_timeframes: psal.allowed_timeframes.filter(at => at.id !== timeframeId)}
+                }
+                return psal;
+            });
+    
+            return {
+                ...state,
+                entity: { ...state.entity, proposed_schedule_allowed_locations: newLocs}
+            };
         }
         case VALIDATE: {
             return {...state,  errors: payload.errors };
