@@ -121,16 +121,23 @@ export const deleteTrackTimeframe = (trackId) => async (dispatch, getState) => {
     );
 };
 
-export const saveLocationTimeframe = (trackId, locationId) => async (dispatch, getState) => {
+export const saveLocationTimeframe = (trackId, locationId, redirect) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     
     const params = {
         access_token: accessToken,
+        expand: 'location'
     };
     
     dispatch(startLoading());
+    
+    const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("track_timeframes.timeframe_created"),
+        type: 'success'
+    };
     
     postRequest(
       null,
@@ -139,8 +146,15 @@ export const saveLocationTimeframe = (trackId, locationId) => async (dispatch, g
       {location_id: locationId},
       authErrorHandler,
     )(params)(dispatch)
-      .then(() => {
-          dispatch(stopLoading());
+      .then(({response}) => {
+          if (redirect) {
+              dispatch(showMessage(
+                success_message,
+                () => { history.push(`/app/summits/${currentSummit.id}/track-chairs/track-timeframes/${response.track_id}`) }
+              ));
+          } else {
+              dispatch(stopLoading());
+          }
       });
 }
 

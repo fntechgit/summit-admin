@@ -1,19 +1,14 @@
 import React from 'react';
-import {connect} from 'react-redux';
 import ActionsTableCell from './ActionsTableCell';
-import {
-  saveLocationTimeframe,
-  deleteLocationTimeframe
-} from "../../../actions/track-timeframes-actions"
 import T from "i18n-react/dist/i18n-react";
 import ReactTooltip from "react-tooltip";
-
-import './styles.css';
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import {shallowEqual} from "../../../utils/methods";
 import LocationDropdown from "../../inputs/location-dropdown";
 import DayTimeframeTable from "./DayTimeframeTable";
 import {epochToMomentTimeZone, parseLocationHour} from "openstack-uicore-foundation/lib/utils/methods";
+
+import './styles.css';
+import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 
 const createRow = (row, actions, summitTZ) => {
   var cells = [];
@@ -24,11 +19,11 @@ const createRow = (row, actions, summitTZ) => {
       const close = tf.closing_hour ? parseLocationHour(tf.closing_hour) : 'N/A';
       return `${epochToMomentTimeZone(tf.day, summitTZ).format('MMM Do YYYY')}: ${open} - ${close}`;
     })
-    .join(', ');
+    .join('\r\n');
   
   cells = [
     <td key="location_id">{row.location.name}</td>,
-    <td key="days">{timeframes || 'all days'}</td>,
+    <td key="days" style={{whiteSpace: 'pre'}}>{timeframes || 'all days'}</td>,
   ]
   
   
@@ -97,7 +92,7 @@ class TrackTimeframeTable extends React.Component {
   
   deleteClick(id) {
     const {trackId} = this.props;
-    this.props.deleteLocationTimeframe(trackId, id);
+    this.props.onDelete(trackId, id);
   }
   
   editRow(id, ev) {
@@ -147,7 +142,7 @@ class TrackTimeframeTable extends React.Component {
     const new_row = {...this.state.new_row};
     this.setState({new_row: {...this.new_row}});
     
-    this.props.saveLocationTimeframe(trackId, new_row.location_id);
+    this.props.onSave(trackId, new_row.location_id);
   }
   
   render() {
@@ -169,8 +164,8 @@ class TrackTimeframeTable extends React.Component {
             let rowClass = i % 2 === 0 ? 'even' : 'odd';
             
             return (
-              <>
-                <tr id={row.id} key={'row_' + row.id} role="row" className={rowClass}>
+              <React.Fragment key={'row_' + row.id}>
+                <tr id={row.id} role="row" className={rowClass}>
                   {createRow(row, this.actions, summitTZ)}
                 </tr>
                 {row.is_edit &&
@@ -186,7 +181,7 @@ class TrackTimeframeTable extends React.Component {
                     </td>
                   </tr>
                 }
-              </>
+              </React.Fragment>
             );
           })}
           
@@ -201,10 +196,4 @@ class TrackTimeframeTable extends React.Component {
   }
 };
 
-export default connect(
-  null,
-  {
-    saveLocationTimeframe,
-    deleteLocationTimeframe,
-  }
-)(TrackTimeframeTable);
+export default TrackTimeframeTable;

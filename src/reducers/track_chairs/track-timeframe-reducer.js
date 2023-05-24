@@ -27,7 +27,7 @@ import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id: 0,
+    id: null,
     proposed_schedule_allowed_locations: []
 }
 

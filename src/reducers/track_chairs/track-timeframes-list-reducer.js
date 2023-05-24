@@ -52,8 +52,8 @@ const trackTimeframesListReducer = (state = DEFAULT_STATE, action) => {
         }
         case TRACK_TIMEFRAME_DELETED: {
             const {trackId} = payload;
-
-            return {...state, tracksTimeframes: state.tracksTimeframes.filter(tt => tt.track_id !== trackId)};
+            
+            return {...state, tracksTimeframes: state.tracksTimeframes.filter(tt => tt.id !== trackId)};
         }
         default:
             return state;

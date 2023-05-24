@@ -2516,6 +2516,7 @@
     "opening_hour": "Opening Hour",
     "closing_hour": "Closing Hour",
     "no_items": "No Track Timeframes found.",
-    "remove_warning": "Are you sure you want to remove the timeframes for "
+    "remove_warning": "Are you sure you want to remove the timeframes for ",
+    "timeframe_created": "Track timeframe created successfully."
   }
 }

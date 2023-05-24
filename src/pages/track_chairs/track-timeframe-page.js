@@ -15,19 +15,22 @@ import React, {useEffect, useState} from 'react'
 import {connect} from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import {Breadcrumb} from "react-breadcrumbs";
-import {getTrackTimeframe, resetTrackTimeframeForm} from "../../actions/track-timeframes-actions";
+import {
+  deleteLocationTimeframe,
+  getTrackTimeframe,
+  resetTrackTimeframeForm,
+  saveLocationTimeframe
+} from "../../actions/track-timeframes-actions";
 import TrackDropdown from "../../components/inputs/track-dropdown";
 import TrackTimeframeTable from "../../components/tables/track-timeframes";
-
-import styles from "../../styles/track-timeframes-page.less"
 import {getSummitDays} from "../../utils/methods";
 
 
 const TrackTimeframePage = ({summit, match, track, ...props}) => {
   const [entity, setEntity] = useState(props.entity);
   const [errors, setErrors] = useState(props.errors);
-  const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-  const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+  const title = (!!entity.created) ? T.translate("general.edit") : T.translate("general.add");
+  const breadcrumb = (!!entity.created) ? entity.name : T.translate("general.new");
   const summitDays = getSummitDays(summit);
   
   useEffect(() => {
@@ -67,13 +70,17 @@ const TrackTimeframePage = ({summit, match, track, ...props}) => {
     setErrors(_errors);
   }
   
-  if (!entity) return null;
+  const handleSave = (trackId, locationId) => {
+    props.saveLocationTimeframe(trackId, locationId, !entity.created);
+  }
   
-  console.log('ENTITY', entity.proposed_schedule_allowed_locations);
+  if (!entity) return null;
   
   const trackIdsWithTF = props.tracksTimeframes.map(t => t.id);
   const tracksWithoutTimeframe = summit.tracks.filter(t => !trackIdsWithTF.includes(t.id));
   const trackOptions = entity.id ? summit.tracks : tracksWithoutTimeframe; // we need this so we can edit
+  const availableLocations = summit.locations
+    .filter(sl => !entity.proposed_schedule_allowed_locations.map(psal => psal.location?.id).includes(sl.id))
   
   return (
     <>
@@ -84,7 +91,13 @@ const TrackTimeframePage = ({summit, match, track, ...props}) => {
         <div className="row">
           <div className="col-md-6">
             <label>{T.translate("track_timeframes.track")}</label>
-            <TrackDropdown id="id" value={entity.id} onChange={handleChange} tracks={trackOptions} disabled={!!entity.id} />
+            <TrackDropdown
+              id="id"
+              value={entity.id}
+              onChange={handleChange}
+              tracks={trackOptions}
+              disabled={!!entity.created}
+            />
           </div>
         </div>
         {!!entity.id &&
@@ -92,8 +105,10 @@ const TrackTimeframePage = ({summit, match, track, ...props}) => {
             days={summitDays}
             trackId={entity.id}
             summitTZ={summit.time_zone_id}
-            locations={summit.locations}
+            locations={availableLocations}
             data={entity.proposed_schedule_allowed_locations}
+            onSave={handleSave}
+            onDelete={props.deleteLocationTimeframe}
           />
         }
       </div>
@@ -110,5 +125,10 @@ const mapStateToProps = ({currentSummitState, currentEventCategoryState, trackTi
 
 export default connect(
   mapStateToProps,
-  {getTrackTimeframe, resetTrackTimeframeForm}
+  {
+    getTrackTimeframe,
+    resetTrackTimeframeForm,
+    saveLocationTimeframe,
+    deleteLocationTimeframe,
+  }
 )(TrackTimeframePage);
