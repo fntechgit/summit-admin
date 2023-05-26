@@ -724,6 +724,11 @@ class SummitForm extends React.Component {
                         </div>
                     </div>
                     <div className="row form-group">
+                        <div className="col-md-12">
+                            <label>{T.translate("edit_summit.reg_lite_settings")}</label><hr/>
+                        </div>
+                    </div>
+                    <div className="row form-group">
                         <div className="col-md-4 checkboxes-div">
                             <div className="form-check abc-checkbox">
                                 <input type="checkbox" id="REG_LITE_SHOW_COMPANY_INPUT"
@@ -774,8 +779,13 @@ class SummitForm extends React.Component {
                         </div>
                     </div>
                     <div className="row form-group">
+                        <div className="col-md-12">
+                            <label>{T.translate("edit_summit.check_in_settings")}</label><hr/>
+                        </div>
+                    </div>
+                    <div className="row form-group">
                         <div className="col-md-6">
-                            <label> {T.translate("edit_summit.print_app_hide_find_ticket_by_fullname")}&nbsp;                                
+                            <label> {T.translate("edit_summit.print_app_hide_find_ticket_by_fullname")}&nbsp;
                             </label> <br/>
                             <Switch
                                 checked={printAppMarketingSettings?.PRINT_APP_HIDE_FIND_TICKET_BY_FULLNAME?.value || false}
