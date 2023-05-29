@@ -26,12 +26,13 @@ import TrackTimeframeTable from "../../components/tables/track-timeframes";
 import {getSummitDays} from "../../utils/methods";
 
 
-const TrackTimeframePage = ({summit, match, track, ...props}) => {
+const TrackTimeframePage = ({summit, match, ...props}) => {
   const [entity, setEntity] = useState(props.entity);
   const [errors, setErrors] = useState(props.errors);
   const title = (!!entity.created) ? T.translate("general.edit") : T.translate("general.add");
   const breadcrumb = (!!entity.created) ? entity.name : T.translate("general.new");
   const summitDays = getSummitDays(summit);
+  const allowedTracks = summit.tracks.filter(tr => tr.chair_visible);
   
   useEffect(() => {
     const {params} = match;
@@ -77,8 +78,8 @@ const TrackTimeframePage = ({summit, match, track, ...props}) => {
   if (!entity) return null;
   
   const trackIdsWithTF = props.tracksTimeframes.map(t => t.id);
-  const tracksWithoutTimeframe = summit.tracks.filter(t => !trackIdsWithTF.includes(t.id));
-  const trackOptions = entity.id ? summit.tracks : tracksWithoutTimeframe; // we need this so we can edit
+  const tracksWithoutTimeframe = allowedTracks.filter(t => !trackIdsWithTF.includes(t.id));
+  const trackOptions = entity.id ? allowedTracks : tracksWithoutTimeframe; // we need this so we can edit
   const availableLocations = summit.locations
     .filter(sl => !entity.proposed_schedule_allowed_locations.map(psal => psal.location?.id).includes(sl.id))
   
@@ -86,11 +87,14 @@ const TrackTimeframePage = ({summit, match, track, ...props}) => {
     <>
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <div className="container">
-        <h3>{title} Timeframes for {track?.name || 'track'}</h3>
+        <h3>{title} Timeframes for {entity?.name || 'track'}</h3>
         <hr/>
         <div className="row">
           <div className="col-md-6">
             <label>{T.translate("track_timeframes.track")}</label>
+            <p>
+              <i>You can only set timeframes for categories that are visible for track chairs.</i>
+            </p>
             <TrackDropdown
               id="id"
               value={entity.id}
@@ -116,9 +120,8 @@ const TrackTimeframePage = ({summit, match, track, ...props}) => {
   )
 }
 
-const mapStateToProps = ({currentSummitState, currentEventCategoryState, trackTimeframeState, trackTimeframesListState}) => ({
+const mapStateToProps = ({currentSummitState, trackTimeframeState, trackTimeframesListState}) => ({
   summit: currentSummitState.currentSummit,
-  track: currentEventCategoryState.entity,
   tracksTimeframes: trackTimeframesListState.tracksTimeframes,
     ...trackTimeframeState
 });
