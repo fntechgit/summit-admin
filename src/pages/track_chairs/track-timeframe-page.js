@@ -80,7 +80,7 @@ const TrackTimeframePage = ({summit, match, ...props}) => {
   const trackIdsWithTF = props.tracksTimeframes.map(t => t.id);
   const tracksWithoutTimeframe = allowedTracks.filter(t => !trackIdsWithTF.includes(t.id));
   const trackOptions = entity.id ? allowedTracks : tracksWithoutTimeframe; // we need this so we can edit
-  const availableLocations = summit.locations
+  const availableLocations = summit.locations.filter(v => v.class_name !== 'SummitVenue')
     .filter(sl => !entity.proposed_schedule_allowed_locations.map(psal => psal.location?.id).includes(sl.id))
   
   return (
