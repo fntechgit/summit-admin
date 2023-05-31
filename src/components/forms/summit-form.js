@@ -780,6 +780,9 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_initial_order_complete_step_1st_paragraph")}
                             </label>
+                            &nbsp;
+                            <i className="fa fa-info-circle" aria-hidden="true"
+                               title={T.translate("edit_summit.reg_lite_initial_order_complete_step_1st_paragraph_info")} />
                             <TextAreaInputWithCounter
                                 className="form-control"
                                 rows={5}
@@ -793,6 +796,9 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_initial_order_complete_step_2nd_paragraph")}
                             </label>
+                            &nbsp;
+                            <i className="fa fa-info-circle" aria-hidden="true"
+                               title={T.translate("edit_summit.reg_lite_initial_order_complete_step_2nd_paragraph_info")} />
                             <TextAreaInputWithCounter
                                 className="form-control"
                                 rows={5}
@@ -808,6 +814,9 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_initial_order_complete_btn_label")}
                             </label>
+                            &nbsp;
+                            <i className="fa fa-info-circle" aria-hidden="true"
+                               title={T.translate("edit_summit.reg_lite_initial_order_complete_btn_label_info")} />
                             <TextInputWithCounter
                                 className="form-control"
                                 maxLength={50}
@@ -821,7 +830,9 @@ class SummitForm extends React.Component {
                         <div className="col-md-6">
                             <label>
                                 {T.translate("edit_summit.reg_lite_order_complete_step_1st_paragraph")}
-                            </label>
+                            </label>&nbsp;
+                            <i className="fa fa-info-circle" aria-hidden="true"
+                               title={T.translate("edit_summit.reg_lite_order_complete_step_1st_paragraph_info")} />
                             <TextAreaInputWithCounter
                                 className="form-control"
                                 rows={5}
@@ -835,6 +846,9 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_order_complete_step_2nd_paragraph")}
                             </label>
+                            &nbsp;
+                            <i className="fa fa-info-circle" aria-hidden="true"
+                               title={T.translate("edit_summit.reg_lite_order_complete_step_2nd_paragraph_info")} />
                             <TextAreaInputWithCounter
                                 className="form-control"
                                 rows={5}
@@ -850,6 +864,9 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_order_complete_btn_label")}
                             </label>
+                            &nbsp;
+                            <i className="fa fa-info-circle" aria-hidden="true"
+                               title={T.translate("edit_summit.reg_lite_order_complete_btn_label_info")} />
                             <TextInputWithCounter
                                 className="form-control"
                                 maxLength={50}
