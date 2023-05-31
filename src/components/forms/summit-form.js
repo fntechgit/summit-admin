@@ -28,6 +28,7 @@ import {
 } from 'openstack-uicore-foundation/lib/components'
 import Switch from "react-switch";
 
+import TextInputWithCounter from '../inputs/text-area-input-with-counter'
 import {Exclusive} from 'openstack-uicore-foundation/lib/components'
 import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
 import {saveRegistrationLiteMarketingSettings, savePrintAppMarketingSettings} from "../../actions/summit-actions";
@@ -778,7 +779,7 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_initial_order_complete_step_1st_paragraph")}
                             </label>
-                            <textarea
+                            <TextInputWithCounter
                                 className="form-control"
                                 rows={5}
                                 maxLength={255}
@@ -786,13 +787,12 @@ class SummitForm extends React.Component {
                                 value={regLiteMarketingSettings?.REG_LITE_INITIAL_ORDER_COMPLETE_STEP_1ST_PARAGRAPH?.value}
                                 onChange={this.handleChange}
                             />
-                            <span className='character-counter'>{`${regLiteMarketingSettings?.REG_LITE_INITIAL_ORDER_COMPLETE_STEP_1ST_PARAGRAPH?.value?.length}/255`}</span>
                         </div>
                         <div className="col-md-6">
                             <label>
                                 {T.translate("edit_summit.reg_lite_initial_order_complete_step_2nd_paragraph")}
                             </label>
-                            <textarea
+                            <TextInputWithCounter
                                 className="form-control"
                                 rows={5}
                                 maxLength={255}
@@ -800,7 +800,6 @@ class SummitForm extends React.Component {
                                 value={regLiteMarketingSettings?.REG_LITE_INITIAL_ORDER_COMPLETE_STEP_2ND_PARAGRAPH?.value}
                                 onChange={this.handleChange}
                             />
-                            <span className='character-counter'>{`${regLiteMarketingSettings?.REG_LITE_INITIAL_ORDER_COMPLETE_STEP_2ND_PARAGRAPH?.value?.length}/255`}</span>
                         </div>
                     </div>
                     <div className="row form-group">
@@ -823,21 +822,20 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_order_complete_step_1st_paragraph")}
                             </label>
-                            <textarea
+                            <TextInputWithCounter
                                 className="form-control"
                                 rows={5}
                                 maxLength={255}
                                 id="REG_LITE_ORDER_COMPLETE_STEP_1ST_PARAGRAPH"
                                 value={regLiteMarketingSettings?.REG_LITE_ORDER_COMPLETE_STEP_1ST_PARAGRAPH?.value}
                                 onChange={this.handleChange}
-                            />
-                            <span className='character-counter'>{`${regLiteMarketingSettings?.REG_LITE_ORDER_COMPLETE_STEP_1ST_PARAGRAPH?.value?.length}/255`}</span>
+                            />                            
                         </div>
                         <div className="col-md-6">
                             <label>
                                 {T.translate("edit_summit.reg_lite_order_complete_step_2nd_paragraph")}
                             </label>
-                            <textarea
+                            <TextInputWithCounter
                                 className="form-control"
                                 rows={5}
                                 maxLength={255}
@@ -845,7 +843,6 @@ class SummitForm extends React.Component {
                                 value={regLiteMarketingSettings?.REG_LITE_ORDER_COMPLETE_STEP_2ND_PARAGRAPH?.value}
                                 onChange={this.handleChange}
                             />
-                            <span className='character-counter'>{`${regLiteMarketingSettings?.REG_LITE_ORDER_COMPLETE_STEP_2ND_PARAGRAPH?.value?.length}/255`}</span>
                         </div>
                     </div>
                     <div className="row form-group">
