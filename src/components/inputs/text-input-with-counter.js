@@ -13,14 +13,14 @@
 
 import React from 'react'
 import PropTypes from 'prop-types';
+import { Input } from 'openstack-uicore-foundation/lib/components'
 
-const TextAreaInputWithCounter = ({ className, maxLength, rows, id, value, onChange, ...rest }) => {
+const TextInputWithCounter = ({ className, maxLength, id, value, onChange, ...rest }) => {
 
   return (
     <>
-      <textarea
+      <Input
         className={className}
-        rows={rows}
         maxLength={maxLength}
         id={id}
         value={value}
@@ -32,16 +32,11 @@ const TextAreaInputWithCounter = ({ className, maxLength, rows, id, value, onCha
   );
 }
 
-TextAreaInputWithCounter.propTypes = {
+TextInputWithCounter.propTypes = {
     className: PropTypes.string,
-    rows: PropTypes.number,
     maxLength: PropTypes.number.isRequired,
     id: PropTypes.string,
     onChange: PropTypes.func.isRequired
 }
 
-TextAreaInputWithCounter.defaultProps = {
-    rows: 5,    
-}
-
-export default TextAreaInputWithCounter;
+export default TextInputWithCounter;

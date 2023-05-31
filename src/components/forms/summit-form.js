@@ -28,7 +28,8 @@ import {
 } from 'openstack-uicore-foundation/lib/components'
 import Switch from "react-switch";
 
-import TextInputWithCounter from '../inputs/text-area-input-with-counter'
+import TextAreaInputWithCounter from '../inputs/text-area-input-with-counter'
+import TextInputWithCounter from '../inputs/text-input-with-counter'
 import {Exclusive} from 'openstack-uicore-foundation/lib/components'
 import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
 import {saveRegistrationLiteMarketingSettings, savePrintAppMarketingSettings} from "../../actions/summit-actions";
@@ -779,7 +780,7 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_initial_order_complete_step_1st_paragraph")}
                             </label>
-                            <TextInputWithCounter
+                            <TextAreaInputWithCounter
                                 className="form-control"
                                 rows={5}
                                 maxLength={255}
@@ -792,7 +793,7 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_initial_order_complete_step_2nd_paragraph")}
                             </label>
-                            <TextInputWithCounter
+                            <TextAreaInputWithCounter
                                 className="form-control"
                                 rows={5}
                                 maxLength={255}
@@ -807,14 +808,13 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_initial_order_complete_btn_label")}
                             </label>
-                            <Input
+                            <TextInputWithCounter
                                 className="form-control"
                                 maxLength={50}
                                 id="REG_LITE_INITIAL_ORDER_COMPLETE_BTN_LABEL"
                                 value={regLiteMarketingSettings?.REG_LITE_INITIAL_ORDER_COMPLETE_BTN_LABEL?.value}
                                 onChange={this.handleChange}
                             />
-                            <span className='character-counter'>{`${regLiteMarketingSettings?.REG_LITE_INITIAL_ORDER_COMPLETE_BTN_LABEL?.value?.length}/50`}</span>
                         </div>
                     </div>
                     <div className="row form-group">
@@ -822,7 +822,7 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_order_complete_step_1st_paragraph")}
                             </label>
-                            <TextInputWithCounter
+                            <TextAreaInputWithCounter
                                 className="form-control"
                                 rows={5}
                                 maxLength={255}
@@ -835,7 +835,7 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_order_complete_step_2nd_paragraph")}
                             </label>
-                            <TextInputWithCounter
+                            <TextAreaInputWithCounter
                                 className="form-control"
                                 rows={5}
                                 maxLength={255}
@@ -850,14 +850,13 @@ class SummitForm extends React.Component {
                             <label>
                                 {T.translate("edit_summit.reg_lite_order_complete_btn_label")}
                             </label>
-                            <Input
+                            <TextInputWithCounter
                                 className="form-control"
                                 maxLength={50}
                                 id="REG_LITE_ORDER_COMPLETE_BTN_LABEL"
                                 value={regLiteMarketingSettings?.REG_LITE_ORDER_COMPLETE_BTN_LABEL?.value}
                                 onChange={this.handleChange}
-                            />
-                            <span className='character-counter'>{`${regLiteMarketingSettings?.REG_LITE_ORDER_COMPLETE_BTN_LABEL?.value?.length}/50`}</span>
+                            />                            
                         </div>
                     </div>
                     <div className="row form-group">
