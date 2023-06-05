@@ -330,6 +330,12 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
     const {currentSummit} = currentSummitState;
     const {type_id} = entity;
     const type = currentSummit.event_types.find((e) => e.id == type_id);
+
+    let selectionPlan = null;
+    if (entity.selection_plan_id) {
+        selectionPlan = currentSummit.selection_plans.find(sp => sp.id === entity.selection_plan_id);
+    }
+
     const eventTypeConfig = {
         allow_custom_ordering: type.allow_custom_ordering,
         allows_location: type.allows_location,
@@ -338,7 +344,7 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeEvent(entity, eventTypeConfig);
+    const normalizedEntity = normalizeEvent(entity, eventTypeConfig, selectionPlan);
 
     const params = {
         access_token: accessToken,
@@ -620,7 +626,13 @@ export const removeImage = (eventId) => async (dispatch, getState) => {
     );
 };
 
-export const normalizeEvent = (entity, eventTypeConfig) => {
+/**
+ * @param entity
+ * @param eventTypeConfig
+ * @param selectionPlan
+ * @returns {{extra_questions}|*}
+ */
+export const normalizeEvent = (entity, eventTypeConfig, selectionPlan = null) => {
     const normalizedEntity = {...entity};
     if (!normalizedEntity.start_date) delete normalizedEntity['start_date'];
     if (!normalizedEntity.end_date) delete normalizedEntity['end_date'];
@@ -633,6 +645,7 @@ export const normalizeEvent = (entity, eventTypeConfig) => {
         if (typeof t === 'string') return t;
         else return t.tag;
     });
+
     normalizedEntity.sponsors = normalizedEntity.sponsors.map(s => s.id);
     normalizedEntity.speakers = normalizedEntity.speakers.map(s => s.id);
 
@@ -669,8 +682,16 @@ export const normalizeEvent = (entity, eventTypeConfig) => {
     }
 
     if(normalizedEntity.hasOwnProperty('extra_questions')){
-
         normalizedEntity.extra_questions =  normalizedEntity.extra_questions.map((q) => ({ question_id : q.question_id, answer : q.value}))
+    }
+
+    if(selectionPlan){
+        const questions = ['social_description', 'attendees_expected_learnt', 'level', 'attending_media']
+        questions.forEach((q) => {
+            if(!selectionPlan.allowed_presentation_questions.includes(q)){
+                delete normalizedEntity[q];
+            }
+        })
     }
 
     return normalizedEntity;
