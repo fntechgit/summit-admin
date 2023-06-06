@@ -30,6 +30,11 @@ import {
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 
+export const EXISTING_SPEAKERS_PROMO_CODE          = 1;
+export const EXISTING_SPEAKERS_DISCOUNT_CODE       = 2;
+export const AUTO_GENERATED_SPEAKERS_PROMO_CODE    = 3;
+export const AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE = 4;
+
 export const REQUEST_PROMOCODES       = 'REQUEST_PROMOCODES';
 export const RECEIVE_PROMOCODES       = 'RECEIVE_PROMOCODES';
 export const RECEIVE_PROMOCODE        = 'RECEIVE_PROMOCODE';
@@ -331,6 +336,7 @@ const normalizeEntity = (entity) => {
     delete normalizedEntity['owner_id'];
     delete normalizedEntity['speaker'];
     delete normalizedEntity['sponsor'];
+    delete normalizedEntity['apply_to_all_tix'];
 
     return normalizedEntity;
 

@@ -18,6 +18,12 @@ import {Dropdown, Input, TagInput, TicketTypesInput } from 'openstack-uicore-fou
 import PromoCodeInput from '../inputs/promo-code-input';
 import BadgeFeatureInput from '../inputs/badge-feature-input';
 import {queryMultiSpeakersPromocodes, resetPromoCodeSpecForm, updateSpecs} from '../../actions/promocode-specification-actions';
+import {
+    EXISTING_SPEAKERS_PROMO_CODE, 
+    EXISTING_SPEAKERS_DISCOUNT_CODE,
+    AUTO_GENERATED_SPEAKERS_PROMO_CODE,
+    AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
+} from '../../actions/promocode-actions';
 import {hasErrors} from "../../utils/methods";
 
 class SpeakerPromoCodeSpecForm extends React.Component {
@@ -34,19 +40,25 @@ class SpeakerPromoCodeSpecForm extends React.Component {
     }
 
     handleChange(ev) {
+        const {promoCodeStrategy} = this.props;
         let entity = {...this.props.entity};
         let errors = {...this.props.errors};
         let {value, id} = ev.target;
 
+        if (ev.target.type === 'checkbox') {
+            value = ev.target.checked;
+        }
+
         errors[id] = '';
         entity[id] = value;
-        this.props.updateSpecs(entity);
+        this.props.updateSpecs(promoCodeStrategy, entity);
     }
 
     handleNewTag(newTag) {
+        const {promoCodeStrategy} = this.props;
         let entity = {...this.props.entity};
         entity.tags = [...entity.tags, {tag: newTag}]
-        this.props.updateSpecs(entity);
+        this.props.updateSpecs(promoCodeStrategy, entity);
     }
 
     render() {
@@ -60,7 +72,7 @@ class SpeakerPromoCodeSpecForm extends React.Component {
 
         return (
             <form className="speakers-promo-code-spec-form">
-                { [1,2].includes(promoCodeStrategy) &&
+                { [EXISTING_SPEAKERS_PROMO_CODE, EXISTING_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy) &&
                 <>
                     <hr />
                     <div className="row form-group">
@@ -82,7 +94,7 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                     <hr />
                 </>
                 }
-                { [3,4].includes(promoCodeStrategy) &&
+                { [AUTO_GENERATED_SPEAKERS_PROMO_CODE, AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy) &&
                 <>
                     <hr />
                     <div className="row form-group">
@@ -124,6 +136,7 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                             />
                         </div>
                     </div>
+                    {promoCodeStrategy === AUTO_GENERATED_SPEAKERS_PROMO_CODE &&
                     <div className="row form-group">
                         <div className="col-md-12">
                             <TicketTypesInput
@@ -137,36 +150,65 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                             />
                         </div>
                     </div>
-                    {promoCodeStrategy === 4 &&
-                    <div className="row form-group">
-                        <div className="col-md-5">
-                            <Input 
-                                id="amount" 
-                                value={entity.discount ? '' : entity.amount}
-                                readOnly={entity.discount}
-                                type="number" 
-                                className="form-control" 
-                                placeholder={T.translate("promo_code_specification.placeholders.amount")}
-                                onChange={this.handleChange}
-                                error={hasErrors('amount', errors)}
-                            />
+                    }
+                    {promoCodeStrategy === AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE &&
+                    <>
+                        <div className="row form-group">
+                            <div className="col-md-12">
+                                <div className="form-check abc-checkbox">
+                                    <input type="checkbox" id="applyToAllTix" checked={entity.applyToAllTix}
+                                        onChange={this.handleChange} className="form-check-input"/>
+                                    <label className="form-check-label" htmlFor="applyToAllTix">
+                                        {T.translate("edit_promocode.apply_to_all_tix")}
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                        <div className="col-md-2">
-                            OR
+                        {!entity.applyToAllTix &&
+                        <div className="row form-group">
+                            <div className="col-md-12">
+                                <TicketTypesInput
+                                    id="ticketTypes"
+                                    value={entity.ticketTypes}
+                                    summitId={summit.id}
+                                    onChange={this.handleChange}
+                                    placeholder={T.translate("promo_code_specification.placeholders.ticket_types")}
+                                    isMulti={true}
+                                    isClearable={true}
+                                />
+                            </div>
                         </div>
-                        <div className="col-md-5">
-                            <Input 
-                                id="discount" 
-                                value={entity.amount ? '' : entity.discount}
-                                readOnly={entity.amount}
-                                type="number" 
-                                className="form-control" 
-                                placeholder={T.translate("promo_code_specification.placeholders.discount")}
-                                onChange={this.handleChange}
-                                error={hasErrors('discount', errors)}
-                            />
+                        }
+                        <div className="row form-group">
+                            <div className="col-md-5">
+                                <Input 
+                                    id="amount" 
+                                    value={entity.rate ? '' : entity.amount}
+                                    readOnly={entity.rate}
+                                    type="number" 
+                                    className="form-control" 
+                                    placeholder={T.translate("promo_code_specification.placeholders.amount")}
+                                    onChange={this.handleChange}
+                                    error={hasErrors('amount', errors)}
+                                />
+                            </div>
+                            <div className="col-md-2">
+                                OR
+                            </div>
+                            <div className="col-md-5">
+                                <Input 
+                                    id="rate" 
+                                    value={entity.amount ? '' : entity.rate}
+                                    readOnly={entity.amount}
+                                    type="number" 
+                                    className="form-control" 
+                                    placeholder={T.translate("promo_code_specification.placeholders.rate")}
+                                    onChange={this.handleChange}
+                                    error={hasErrors('rate', errors)}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    </>
                     }
                     <hr />
                 </>

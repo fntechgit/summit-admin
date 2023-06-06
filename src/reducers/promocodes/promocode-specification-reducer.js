@@ -11,6 +11,7 @@
  * limitations under the License.
  **/
 
+import { AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE } from '../../actions/promocode-actions';
 import { RESET_PROMOCODE_SPEC_FORM, UPDATE_SPECS, VALIDATE_SPECS } from '../../actions/promocode-specification-actions';
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
@@ -20,9 +21,10 @@ export const DEFAULT_ENTITY = {
     type: '',
     tags: [],
     badgeFeatures: [],
+    applyToAllTix: true,
     ticketTypes: [],
     amount: null,
-    discount: null,    
+    rate: null,    
 }
 
 const DEFAULT_STATE = {
@@ -46,8 +48,9 @@ const promocodeSpecificationReducer = (state = DEFAULT_STATE, action) => {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
         }
         case UPDATE_SPECS: {
-            const {entity} = payload;
-            return {...state,  entity: {...entity}, errors: {} };
+            const {promoCodeStrategy, entity} = payload;
+            const ticketTypes = promoCodeStrategy === AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE && entity.applyToAllTix ? [] : entity.ticketTypes;
+            return {...state,  entity: {...entity, ticketTypes}, errors: {} };
         }
         case VALIDATE_SPECS: {
             const {errors} = payload;

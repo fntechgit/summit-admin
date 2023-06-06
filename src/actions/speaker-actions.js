@@ -28,6 +28,12 @@ import {
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {SPEAKERS_PROMO_CODE_CLASS_NAME, SPEAKERS_DISCOUNT_CODE_CLASS_NAME} from './promocode-specification-actions';
+import {
+    EXISTING_SPEAKERS_PROMO_CODE, 
+    EXISTING_SPEAKERS_DISCOUNT_CODE,
+    AUTO_GENERATED_SPEAKERS_PROMO_CODE,
+    AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
+} from './promocode-actions';
 import {getAccessTokenSafely} from '../utils/methods';
 
 export const INIT_SPEAKERS_LIST_PARAMS  = 'INIT_SPEAKERS_LIST_PARAMS';
@@ -860,9 +866,9 @@ export const sendSpeakerEmails = (currentFlowEvent,
         should_send_copy_2_submitter : shouldSendCopy2Submitter,
     };
 
-    if([1,2].includes(promoCodeStrategy)) {
+    if([EXISTING_SPEAKERS_PROMO_CODE, EXISTING_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy)) {
         payload['promo_code'] = promocodeSpecification.existingPromoCode.code;
-    } else if([3,4].includes(promoCodeStrategy)) {
+    } else if([AUTO_GENERATED_SPEAKERS_PROMO_CODE, AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy)) {
         const className = promoCodeStrategy === 3 ? SPEAKERS_PROMO_CODE_CLASS_NAME : SPEAKERS_DISCOUNT_CODE_CLASS_NAME;
         payload['promo_code_spec'] = {
             'class_name'          : className,
@@ -872,9 +878,21 @@ export const sendSpeakerEmails = (currentFlowEvent,
             'tags'                : promocodeSpecification.tags.map(t => t.tag),
         };
 
-        if (promoCodeStrategy === 4) {
-            payload['promo_code_spec']['amount'] = promocodeSpecification.amount ? parseFloat(promocodeSpecification.amount) : 0;
-            payload['promo_code_spec']['discount_rate'] = promocodeSpecification.discount ? parseFloat(promocodeSpecification.discount) : 0;
+        if (promoCodeStrategy === AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE) {
+            const amount = promocodeSpecification.amount ? parseFloat(promocodeSpecification.amount) : 0;
+            const rate = promocodeSpecification.rate ? parseFloat(promocodeSpecification.rate) : 0;
+            payload['promo_code_spec']['amount'] = amount;
+            payload['promo_code_spec']['rate'] = rate;
+            if (!promocodeSpecification.applyToAllTix) {
+                payload['promo_code_spec']['ticket_types_rules'] = 
+                    promocodeSpecification.ticketTypes.map(t => { 
+                        return { 
+                            ticket_type_id: t.id,
+                            amount: amount, 
+                            rate: rate
+                        };
+                    });
+            }
         }
     }
 

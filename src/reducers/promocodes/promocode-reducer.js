@@ -139,7 +139,11 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
                 last_name: entity.last_name,
             };
 
-            entity.apply_to_all_tix = !!(entity.amount || entity.rate);
+            const discount_classes = ['SPEAKER_DISCOUNT_CODE', 'SPONSOR_DISCOUNT_CODE', 'MEMBER_DISCOUNT_CODE', 'SUMMIT_DISCOUNT_CODE', 'SPEAKERS_DISCOUNT_CODE'];
+            
+            if (discount_classes.includes(entity.class_name)){
+                entity.apply_to_all_tix = entity.ticket_types_rules.length === 0;
+            }
 
             return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
         }

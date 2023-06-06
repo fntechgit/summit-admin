@@ -2545,7 +2545,7 @@
     "type_mandatory": "Type is mandatory",
     "placeholders": {
       "amount": "Amount ($)",
-      "discount": "Rate (% discount)",
+      "rate": "Rate (% discount)",
       "speakers_promo_code": "-- SELECT SPEAKERS PROMO CODE --",
       "speakers_discount_code": "-- SELECT SPEAKERS DISCOUNT CODE --",
       "tags": "-- SELECT TAGS --",

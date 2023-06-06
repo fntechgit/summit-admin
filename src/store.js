@@ -26,7 +26,7 @@ import attendeeListReducer from './reducers/attendees/attendee-list-reducer';
 import attendeeReducer from './reducers/attendees/attendee-reducer';
 import promocodeListReducer from './reducers/promocodes/promocode-list-reducer';
 import promocodeReducer from './reducers/promocodes/promocode-reducer';
-import promocodeSpecificationReducer from './reducers/promocodes/promocode-specification';
+import promocodeSpecificationReducer from './reducers/promocodes/promocode-specification-reducer';
 import speakerAttendanceListReducer from './reducers/summit_speakers/speaker-attendance-list-reducer';
 import speakerAttendanceReducer from './reducers/summit_speakers/speaker-attendance-reducer';
 import eventTypeListReducer from './reducers/events/event-type-list-reducer';

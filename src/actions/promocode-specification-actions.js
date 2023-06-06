@@ -28,8 +28,8 @@ export const RESET_PROMOCODE_SPEC_FORM = 'RESET_PROMOCODE_SPEC_FORM';
 export const SPEAKERS_PROMO_CODE_CLASS_NAME = 'SPEAKERS_PROMO_CODE';
 export const SPEAKERS_DISCOUNT_CODE_CLASS_NAME = 'SPEAKERS_DISCOUNT_CODE';
 
-export const updateSpecs = (entity) => (dispatch) => {
-    dispatch(createAction(UPDATE_SPECS)({entity}));
+export const updateSpecs = (promoCodeStrategy, entity) => (dispatch) => {
+    dispatch(createAction(UPDATE_SPECS)({promoCodeStrategy, entity}));
     return false;
 };
 

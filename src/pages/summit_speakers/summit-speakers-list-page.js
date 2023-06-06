@@ -40,7 +40,13 @@ import {
     setCurrentSubmitterFlowEvent,
     sendSubmitterEmails
 } from "../../actions/submitter-actions";
-import {validateSpecs} from '../../actions/promocode-specification-actions';
+import {validateSpecs, resetPromoCodeSpecForm} from '../../actions/promocode-specification-actions';
+import {
+    EXISTING_SPEAKERS_PROMO_CODE, 
+    EXISTING_SPEAKERS_DISCOUNT_CODE,
+    AUTO_GENERATED_SPEAKERS_PROMO_CODE,
+    AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
+} from '../../actions/promocode-actions';
 
 import { SpeakersSources as sources } from "../../utils/constants";
 
@@ -224,7 +230,7 @@ class SummitSpeakersListPage extends React.Component {
         let shouldSendCopy2Submitter = isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked
 
         this.props.validateSpecs(promoCodeStrategy, currentPromocodeSpecification.entity, () => {
-            this.setState({showSendEmailModal: false, excerptRecipient: '', testRecipient: ''});
+            this.setState({showSendEmailModal: false, excerptRecipient: '', testRecipient: '', promoCodeStrategy: 0});
             // send emails
     
             const {
@@ -241,6 +247,7 @@ class SummitSpeakersListPage extends React.Component {
     handleChangePromoCodeStrategy(ev) {
         const { value } = ev.target;
         this.setState({...this.state, promoCodeStrategy: value});
+        this.props.resetPromoCodeSpecForm();
     }
 
     showEmailSendModal(ev) {
@@ -352,10 +359,10 @@ class SummitSpeakersListPage extends React.Component {
 
         let promoCodeStrategiesDDL = [
             { label: T.translate("summit_speakers_list.select_promo_code_strategy"), value: 0 },
-            { label: T.translate("summit_speakers_list.select_speaker_promo_code"), value: 1 },
-            { label: T.translate("summit_speakers_list.select_speaker_discount_code"), value: 2 },
-            { label: T.translate("summit_speakers_list.select_auto_generate_speaker_promo_code"), value: 3 },
-            { label: T.translate("summit_speakers_list.select_auto_generate_speaker_discount_code"), value: 4 },
+            { label: T.translate("summit_speakers_list.select_speaker_promo_code"), value: EXISTING_SPEAKERS_PROMO_CODE },
+            { label: T.translate("summit_speakers_list.select_speaker_discount_code"), value: EXISTING_SPEAKERS_DISCOUNT_CODE },
+            { label: T.translate("summit_speakers_list.select_auto_generate_speaker_promo_code"), value: AUTO_GENERATED_SPEAKERS_PROMO_CODE },
+            { label: T.translate("summit_speakers_list.select_auto_generate_speaker_discount_code"), value: AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE },
         ];
 
         const table_options = {
@@ -609,6 +616,7 @@ export default connect(
         unselectAllSummitSubmitters,
         setCurrentSubmitterFlowEvent,
         sendSubmitterEmails,
-        validateSpecs
+        validateSpecs,
+        resetPromoCodeSpecForm
     }
 )(SummitSpeakersListPage);
