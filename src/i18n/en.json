@@ -781,6 +781,7 @@
     }
   },
   "promocode_list": {
+    "id": "#",
     "promocode_list": "Promocode List",
     "promocodes": "Promocodes",
     "no_promocodes": "No promocodes found for current search criteria.",

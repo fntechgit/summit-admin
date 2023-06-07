@@ -128,6 +128,7 @@ class PromocodeListPage extends React.Component {
         const {showImportModal} = this.state;
 
         const columns = [
+            { columnKey: 'id', value: T.translate("promocode_list.id"), sortable: true },
             { columnKey: 'code', value: T.translate("promocode_list.code"), sortable: true },
             { columnKey: 'class_name', value: T.translate("promocode_list.type") },
             /*{ columnKey: 'owner', value: T.translate("promocode_list.owner") },*/
