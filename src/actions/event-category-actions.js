@@ -140,7 +140,7 @@ export const saveEventCategory = (entity) => async (dispatch, getState) => {
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
-    dispatch(startLoading());
+    //dispatch(startLoading());
 
     const normalizedEntity = normalizeEntity(entity);
     const params = { access_token : accessToken };
@@ -282,6 +282,9 @@ const normalizeEntity = (entity) => {
     normalizedEntity.lightning_alternate_count  = parseInt(entity.lightning_alternate_count);
     normalizedEntity.allowed_tags = entity.allowed_tags.map(t => t.tag);
     normalizedEntity.allowed_access_levels = entity.allowed_access_levels.map(al => al.id);
+
+    if (normalizedEntity.proposed_schedule_transition_time)
+        normalizedEntity.proposed_schedule_transition_time = parseInt(entity.proposed_schedule_transition_time);
 
     return normalizedEntity;
 
