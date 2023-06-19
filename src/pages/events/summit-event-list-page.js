@@ -86,6 +86,7 @@ class SummitEventListPage extends React.Component {
         this.handleFiltersChange = this.handleFiltersChange.bind(this);
         this.handleColumnsChange = this.handleColumnsChange.bind(this);
         this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
+        this.handleTermChange = this.handleTermChange.bind(this);
 
         this.state = {
             showImportModal: false,
@@ -125,7 +126,8 @@ class SummitEventListPage extends React.Component {
                 all_companies: [],
                 submission_status_filter: []
             },
-            selectedColumns: []
+            selectedColumns: [],
+            searchTerm: props.term
         };
 
         this.extraFilters = {
@@ -193,24 +195,24 @@ class SummitEventListPage extends React.Component {
     }
 
     handleExport(ev) {
-        const {term, order, orderDir} = this.props;
-        const {eventFilters, selectedColumns} = this.state;
+        const {order, orderDir} = this.props;
+        const {eventFilters, selectedColumns, searchTerm} = this.state;
         ev.preventDefault();
-        this.props.exportEvents(term, order, orderDir, eventFilters, selectedColumns);
+        this.props.exportEvents(searchTerm, order, orderDir, eventFilters, selectedColumns);
     }
 
     handlePageChange(page) {
-        const {term, order, orderDir, perPage} = this.props;
-        const {eventFilters, selectedColumns} = this.state;
-        this.props.getEvents(term, page, perPage, order, orderDir, eventFilters, selectedColumns);
+        const {order, orderDir, perPage} = this.props;
+        const {eventFilters, selectedColumns, searchTerm} = this.state;
+        this.props.getEvents(searchTerm, page, perPage, order, orderDir, eventFilters, selectedColumns);
     }
 
     handleSort(index, key, dir, func) {
-        const {term, page, perPage} = this.props;
-        const {eventFilters, selectedColumns} = this.state;
+        const {page, perPage} = this.props;
+        const {eventFilters, selectedColumns, searchTerm} = this.state;
         key = (key === 'name') ? 'last_name' : key;
         key = (key === 'submitter_company') ? 'created_by_company' : key;
-        this.props.getEvents(term, page, perPage, key, dir, eventFilters, selectedColumns);
+        this.props.getEvents(searchTerm, page, perPage, key, dir, eventFilters, selectedColumns);
     }
 
     handleSearch(term) {
@@ -242,10 +244,14 @@ class SummitEventListPage extends React.Component {
         });
     }
 
+    handleTermChange(term) {
+        this.setState({...this.state, searchTerm: term})
+    }
+
     handleApplyEventFilters() {
-        const {term, order, orderDir, page, perPage} = this.props;
-        const {eventFilters, selectedColumns} = this.state;
-        this.props.getEvents(term, page, perPage, order, orderDir, eventFilters, selectedColumns);
+        const {order, orderDir, page, perPage} = this.props;
+        const {eventFilters, selectedColumns, searchTerm} = this.state;
+        this.props.getEvents(searchTerm, page, perPage, order, orderDir, eventFilters, selectedColumns);
     }
 
     handleExtraFilterChange(ev) {
@@ -401,8 +407,8 @@ class SummitEventListPage extends React.Component {
 
 
     render(){
-        const {currentSummit, events, lastPage, currentPage, term, order, orderDir, totalEvents, extraColumns, filters} = this.props;
-        const {enabledFilters, eventFilters} = this.state;
+        const {currentSummit, events, lastPage, currentPage, order, orderDir, totalEvents, extraColumns, filters} = this.props;
+        const {enabledFilters, eventFilters, searchTerm} = this.state;
 
         let columns = [
             { columnKey: 'id', value: T.translate("general.id"), sortable: true },
@@ -527,10 +533,11 @@ class SummitEventListPage extends React.Component {
                 <div className={'row'}>
                     <div className={'col-md-6'}>
                         <FreeTextSearch
-                            value={term ?? ''}
+                            value={searchTerm ?? ''}
                             placeholder={T.translate("event_list.placeholders.search_events")}
                             title={T.translate("event_list.placeholders.search_events")}
                             onSearch={this.handleSearch}
+                            onChange={this.handleTermChange}
                         />
                     </div>
                     <div className="col-md-6 text-right">
