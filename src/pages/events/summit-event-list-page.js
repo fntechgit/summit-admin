@@ -31,7 +31,7 @@ import {
 import { SegmentedControl } from 'segmented-control'
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
 import { getSummitById }  from '../../actions/summit-actions';
-import { getEvents, deleteEvent, exportEvents, importEventsCSV, importMP4AssetsFromMUX } from "../../actions/event-actions";
+import { getEvents, deleteEvent, exportEvents, importEventsCSV, importMP4AssetsFromMUX, changeEventListSearchTerm } from "../../actions/event-actions";
 import {hasErrors, uuidv4} from "../../utils/methods";
 import '../../styles/summit-event-list-page.less';
 
@@ -127,7 +127,6 @@ class SummitEventListPage extends React.Component {
                 submission_status_filter: []
             },
             selectedColumns: [],
-            searchTerm: props.term
         };
 
         this.extraFilters = {
@@ -195,24 +194,24 @@ class SummitEventListPage extends React.Component {
     }
 
     handleExport(ev) {
-        const {order, orderDir} = this.props;
-        const {eventFilters, selectedColumns, searchTerm} = this.state;
+        const {order, orderDir, term} = this.props;
+        const {eventFilters, selectedColumns} = this.state;
         ev.preventDefault();
-        this.props.exportEvents(searchTerm, order, orderDir, eventFilters, selectedColumns);
+        this.props.exportEvents(term, order, orderDir, eventFilters, selectedColumns);
     }
 
     handlePageChange(page) {
-        const {order, orderDir, perPage} = this.props;
-        const {eventFilters, selectedColumns, searchTerm} = this.state;
-        this.props.getEvents(searchTerm, page, perPage, order, orderDir, eventFilters, selectedColumns);
+        const {order, orderDir, perPage, term} = this.props;
+        const {eventFilters, selectedColumns} = this.state;
+        this.props.getEvents(term, page, perPage, order, orderDir, eventFilters, selectedColumns);
     }
 
     handleSort(index, key, dir, func) {
-        const {page, perPage} = this.props;
-        const {eventFilters, selectedColumns, searchTerm} = this.state;
+        const {page, perPage, term} = this.props;
+        const {eventFilters, selectedColumns} = this.state;
         key = (key === 'name') ? 'last_name' : key;
         key = (key === 'submitter_company') ? 'created_by_company' : key;
-        this.props.getEvents(searchTerm, page, perPage, key, dir, eventFilters, selectedColumns);
+        this.props.getEvents(term, page, perPage, key, dir, eventFilters, selectedColumns);
     }
 
     handleSearch(term) {
@@ -245,13 +244,13 @@ class SummitEventListPage extends React.Component {
     }
 
     handleTermChange(term) {
-        this.setState({...this.state, searchTerm: term})
+        this.props.changeEventListSearchTerm(term);
     }
 
     handleApplyEventFilters() {
-        const {order, orderDir, page, perPage} = this.props;
-        const {eventFilters, selectedColumns, searchTerm} = this.state;
-        this.props.getEvents(searchTerm, page, perPage, order, orderDir, eventFilters, selectedColumns);
+        const {order, orderDir, page, perPage, term} = this.props;
+        const {eventFilters, selectedColumns} = this.state;
+        this.props.getEvents(term, page, perPage, order, orderDir, eventFilters, selectedColumns);
     }
 
     handleExtraFilterChange(ev) {
@@ -407,8 +406,8 @@ class SummitEventListPage extends React.Component {
 
 
     render(){
-        const {currentSummit, events, lastPage, currentPage, order, orderDir, totalEvents, extraColumns, filters} = this.props;
-        const {enabledFilters, eventFilters, searchTerm} = this.state;
+        const {currentSummit, events, lastPage, currentPage, order, orderDir, totalEvents, term, extraColumns, filters} = this.props;
+        const {enabledFilters, eventFilters} = this.state;
 
         let columns = [
             { columnKey: 'id', value: T.translate("general.id"), sortable: true },
@@ -533,7 +532,7 @@ class SummitEventListPage extends React.Component {
                 <div className={'row'}>
                     <div className={'col-md-6'}>
                         <FreeTextSearch
-                            value={searchTerm ?? ''}
+                            value={term ?? ''}
                             placeholder={T.translate("event_list.placeholders.search_events")}
                             title={T.translate("event_list.placeholders.search_events")}
                             onSearch={this.handleSearch}
@@ -1082,5 +1081,6 @@ export default connect (
         exportEvents,
         importEventsCSV,
         importMP4AssetsFromMUX,
+        changeEventListSearchTerm,
     }
 )(SummitEventListPage);
