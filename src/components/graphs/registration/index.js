@@ -13,9 +13,10 @@
 
 import React, {useMemo} from 'react'
 import {Pie} from "react-chartjs-2";
-import {Chart} from 'chart.js';
+import Chart from 'chart.js/auto';
 import {isMobile} from 'react-device-detect';
 import styles from './index.module.less'
+
 
 
 const starters = [[220,120,20],[120,220,20],[80,20,240],[220,20,120],[20,120,220],[20,210,90]];
@@ -127,6 +128,9 @@ const Graph = ({title, subtitle = null, legendTitle= null, data, labels, colors 
               const color = dataset.backgroundColor[i];
               const arc = chart.getDatasetMeta(0).data[i];
               let percent = 0;
+              // we need this so that legend title is not cut off when labels are shorter that legend title
+              const labelText = dataItem.label || label;
+              const labelTextExt = legendTitle ? labelText.padEnd(legendTitle.length + 5) : labelText;
 
               if (dataItem.total) {
                 percent = dataItem.total > 0 ? Math.round((dataItem.value / dataItem.total) * 100) : 100;
@@ -135,7 +139,7 @@ const Graph = ({title, subtitle = null, legendTitle= null, data, labels, colors 
               }
 
               return {
-                text: dataItem.label || label,
+                text: labelTextExt,
                 fillStyle: color,
                 fontColor: color,
                 strokeStyle: color,

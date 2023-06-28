@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, {useEffect, useState, useMemo} from 'react'
+import React, {useEffect, useState} from 'react'
 import {connect} from 'react-redux';
 import T from "i18n-react";
 import {trim} from "../../utils/methods";
