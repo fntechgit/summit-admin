@@ -99,6 +99,8 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
                     start_date: e.start_date ? moment(e.start_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') : 'TBD',
                     end_date: e.end_date ? moment(e.end_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') : 'TBD',
                     sponsor: (e.sponsors) ? e.sponsors.map(s => s.name).join(', ') : 'N/A',
+                    media_upload_type: e.media_uploads?.length > 0 ? 
+                        e.media_uploads.map(m => `${m.media_upload_type.name} - ${moment(m.created * 1000).tz(state.summitTZ).format('YYYYMMDD')}`).join(', ') : 'N/A',
                 };
             });
 
