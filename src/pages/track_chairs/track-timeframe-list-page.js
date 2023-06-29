@@ -21,7 +21,7 @@ import {getTrackTimeframes, deleteTrackTimeframe} from "../../actions/track-time
 const TrackTimeframeListPage = ({currentSummit, match, history, tracksTimeframes, ...props}) => {
   
   useEffect(() => {
-    props.getTrackTimeframes();
+    props.getTrackTimeframes(1,100);
   }, []);
   const handleEdit = (track_id) => {
     history.push(`/app/summits/${currentSummit.id}/track-chairs/track-timeframes/${track_id}`);
