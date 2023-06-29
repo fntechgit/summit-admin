@@ -2475,13 +2475,16 @@
     "name": "Name",
     "weight": "Weight"
   },
+  "track_chair_settings": {
+    "title": "Track Chairs Settings",
+    "add_rating_type": "Add New Rating"
+  },
   "edit_rating_type": {
     "title": "Track Chairs Ratings",
     "rating_type": "Rating Type",
     "rating_types": "Rating Types",
     "name": "Name",
     "weight": "Weight",
-    "add_rating_type": "Add New Rating",
     "no_rating_types": "No Rating Types found.",
     "rating_type_saved": "Rating Type saved successfully.",
     "rating_type_created": "Rating Type created successfully.",
