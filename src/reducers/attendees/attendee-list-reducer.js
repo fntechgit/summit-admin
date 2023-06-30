@@ -28,7 +28,7 @@ import
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 
-import {epochToMoment} from "openstack-uicore-foundation/lib/utils/methods";
+import moment from 'moment-timezone';
 
 const DEFAULT_STATE = {
     attendees       : {},
@@ -80,7 +80,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
                     company: a.company ? a.company : 'TBD',
                     status: a.status,
                     tickets_qty: a.tickets.length ? a.tickets.length : 'N/A',
-                    checkin_date: a.summit_hall_checked_in_date ? epochToMoment(a.summit_hall_checked_in_date).format("YYYY MMMM DD, h:mm:ss a") : 'TBD',
+                    checkin_date: a.summit_hall_checked_in_date ? moment(a.summit_hall_checked_in_date * 1000).tz(state.summitTZ).format("MMMM Do YYYY, h:mm a") : 'TBD',
                 };
             })
 
