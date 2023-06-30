@@ -71,7 +71,7 @@ export const setSelectedAll = (value) => (dispatch) => {
     dispatch(createAction(SET_SELECTED_ALL_ATTENDEES)(value));
 };
 
-const parseFilters = (filters) => {
+const parseFilters = (filters, term) => {
     const filter = [];
 
     if(filters.hasOwnProperty('statusFilter') && filters.statusFilter){
@@ -131,7 +131,6 @@ const parseFilters = (filters) => {
     }
 
     if (filters.checkinDateFilter && filters.checkinDateFilter.some(e => e !== null)) {
-        console.log('a1asdalsdjkhaskjbk1')        
         if(filters.checkinDateFilter.every(e => e !== null )) {
             filter.push(`summit_hall_checked_in_date>=${filters.checkinDateFilter[0]}`);
             filter.push(`summit_hall_checked_in_date<=${filters.checkinDateFilter[1]}`);
@@ -142,6 +141,23 @@ const parseFilters = (filters) => {
             ${filters.checkinDateFilter[1] !== null ? 
                 `summit_hall_checked_in_date<=${filters.checkinDateFilter[1]}` : ``}`);
         }
+    }
+
+    if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        let searchString = `first_name=@${escapedTerm},` +
+            `last_name=@${escapedTerm},` +
+            `email=@${escapedTerm},` +
+            `company=@${escapedTerm},` +
+            `ticket_type=@${escapedTerm},` +
+            `badge_type=@${escapedTerm},` +
+            `full_name=@${escapedTerm},`;
+
+        if (parseInt(term)) {
+            searchString += `,id==${parseInt(term)}`;
+        }
+
+        filter.push(searchString);
     }
 
     return filter;
@@ -170,24 +186,7 @@ export const getAttendees = ( term = null,
         access_token : accessToken,
     };
 
-    const filter = parseFilters(filters);
-
-    if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        let searchString = `first_name=@${escapedTerm},` +
-            `last_name=@${escapedTerm},` +
-            `email=@${escapedTerm},` +
-            `company=@${escapedTerm},` +
-            `ticket_type=@${escapedTerm},` +
-            `badge_type=@${escapedTerm},` +
-            `full_name=@${escapedTerm},`;
-
-        if (parseInt(term)) {
-            searchString += `,id==${parseInt(term)}`;
-        }
-
-        filter.push(searchString);
-    }
+    const filter = parseFilters(filters, term);
 
     if (filter.length > 0) {
         params['filter[]'] = filter;
@@ -222,24 +221,7 @@ export const exportAttendees = (term = null, order = 'id', orderDir = 1, filters
         access_token : accessToken,
     };
 
-    const filter = parseFilters(filters);
-
-    if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        let searchString = `first_name=@${escapedTerm},` +
-            `last_name=@${escapedTerm},` +
-            `email=@${escapedTerm},` +
-            `company=@${escapedTerm},` +
-            `ticket_type=@${escapedTerm},` +
-            `badge_type=@${escapedTerm},` +
-            `full_name=@${escapedTerm},`;
-
-        if (parseInt(term)) {
-            searchString += `,id==${parseInt(term)}`;
-        }
-
-        filter.push(searchString);
-    }
+    const filter = parseFilters(filters, term);    
 
     if (filter.length > 0) {
         params['filter[]'] = filter;
@@ -511,24 +493,7 @@ export const sendEmails = (term = null,
         access_token : accessToken,
     };
 
-    const filter = parseFilters(filters);
-
-    if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        let searchString = `first_name=@${escapedTerm},` +
-            `last_name=@${escapedTerm},` +
-            `email=@${escapedTerm},` +
-            `company=@${escapedTerm},` +
-            `ticket_type=@${escapedTerm},` +
-            `badge_type=@${escapedTerm},` +
-            `full_name=@${escapedTerm},`;
-
-        if (parseInt(term)) {
-            searchString += `,id==${parseInt(term)}`;
-        }
-
-        filter.push(searchString);
-    }
+    const filter = parseFilters(filters, term);
 
     if (filter.length > 0) {
         params['filter[]'] = filter;
