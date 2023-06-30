@@ -962,6 +962,7 @@
     "submission_status_received": "Received",
     "submission_status_not_submitted": "Not Submitted",
     "media_upload_type": "Media Upload Type",
+    "media_uploads": "Media Uploads",
     "has_media_upload_with_type": "Has Media Upload Types",
     "has_not_media_upload_with_type": "Has Not Media Upload Types",
     "placeholders": {

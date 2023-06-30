@@ -59,7 +59,25 @@ const fieldNames = [
     { columnKey: 'etherpad_link', value: 'etherpad_link', sortable: true, title: true },
     { columnKey: 'streaming_type', value: 'streaming_type', sortable: true },
     { columnKey: 'status', value: 'submission_status', sortable: false, title: true },
-    { columnKey: 'media_upload_type', value: 'media_upload_type', sortable: false, title: true },
+    { columnKey: 'media_uploads', value: 'media_uploads', sortable: false, render :(e, field) => {
+            if(!field?.length) return 'N/A';
+            return (<>{(e.media_uploads.map( m =>
+                (
+                    <React.Fragment key={m.id}>
+                    <a target="_blank" href="#"
+                       onClick={(ev) => {
+                        ev.preventDefault();
+                        window.location.href= `/app/summits/${e.summit_id}/events/${e.id}/materials/${m.id}`;
+                        return false;
+                       }}>{m.media_upload_type.name} - {m.created}</a>
+                    <br></br>
+                    </React.Fragment>
+                )
+            ))
+            }
+            </>)
+        }
+    },
 ]
 
 class SummitEventListPage extends React.Component {
@@ -509,7 +527,7 @@ class SummitEventListPage extends React.Component {
             { value: 'submitter_company', label: T.translate("event_list.submitter_company")},
             { value: 'track', label: T.translate("event_list.track") },
             { value: 'status', label: T.translate("event_list.submission_status") },
-            { value: 'media_upload_type', label: T.translate("event_list.media_upload_type") },
+            { value: 'media_uploads', label: T.translate("event_list.media_uploads") },
         ];
 
         const ddl_filterByEventTypeCapacity = [
@@ -526,12 +544,21 @@ class SummitEventListPage extends React.Component {
 
         let showColumns = fieldNames
         .filter(f => this.state.selectedColumns.includes(f.columnKey) )
-        .map( f2 => (
-            {   columnKey: f2.columnKey,
+        .map( f2 => {
+            let c = {
+                columnKey: f2.columnKey,
                 value: T.translate(`event_list.${f2.value}`),
                 sortable: f2.sortable,
-                title: f2.title
-            }));
+            }
+            // optional fields
+            if(f2.hasOwnProperty('title'))
+                c = {...c, title: f2.title}
+
+            if(f2.hasOwnProperty('render'))
+                c = {...c, render: f2.render}
+
+            return c;
+        });
 
         columns = [...columns, ...showColumns];
 
