@@ -2477,6 +2477,7 @@
   },
   "track_chair_settings": {
     "title": "Track Chairs Settings",
+    "allow_change_requests": "Allow to Change Requests?",
     "add_rating_type": "Add New Rating"
   },
   "edit_rating_type": {
@@ -2485,6 +2486,7 @@
     "rating_types": "Rating Types",
     "name": "Name",
     "weight": "Weight",
+    "add_rating_type": "Add New Rating",
     "no_rating_types": "No Rating Types found.",
     "rating_type_saved": "Rating Type saved successfully.",
     "rating_type_created": "Rating Type created successfully.",
