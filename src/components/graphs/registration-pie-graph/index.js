@@ -21,28 +21,12 @@ import styles from './index.module.less'
 
 const PieGraph = ({title, subtitle = null, legendTitle= null, data, labels, colors = null, colorPalette = null}) => {
   const fillColors = useMemo(() => colors || getRandomColors(data.length, colorPalette), [colors, data.length]);
-  const graphSize = isMobile ? { width: 400, height: (400 + (labels.length * 60)) } : { width: 600, height: (400 + (labels.length * 60)) };
+  const height = Math.max(600, labels.length * 68);
+  const graphSize = isMobile ? { width: 400, height: height } : { width: 600, height: height };
   const legendPos = isMobile ? 'bottom' : 'right';
   const legendAlign = isMobile ? 'start' : 'center';
   const layoutPadding = isMobile ? { top: 10, left: 10, right: 10, bottom: 30 } : { top: 80, left: 30, right: 30, bottom: 80 };
   const titlePadding = isMobile ? { top: 10, left: 0, right: 0, bottom: 0 } : 0;
-  
-  const plugin = {
-    
-    id: "increase-legend-spacing",
-    beforeInit(chart) {
-      // Get reference to the original fit function
-      const originalFit = chart.legend.fit;
-      
-      // Override the fit function
-      chart.legend.fit = function fit() {
-        // Call original function and bind scope in order to use `this` correctly inside it
-        originalFit.bind(chart.legend)();
-        // Change the height as suggested in another answers
-        this.height += 20;
-      }
-    }
-  };
   
   const chartData = {
     labels: labels,
@@ -115,7 +99,6 @@ const PieGraph = ({title, subtitle = null, legendTitle= null, data, labels, colo
       },
     }
   };
-  
 
   return (
     <div className={styles.wrapper}>
@@ -126,7 +109,7 @@ const PieGraph = ({title, subtitle = null, legendTitle= null, data, labels, colo
       </div>
       }
       <div>
-        <Pie data={chartData} {...graphSize} options={chartOptions}/>
+        <Pie data={chartData} {...graphSize} options={chartOptions} />
       </div>
     </div>
   );
