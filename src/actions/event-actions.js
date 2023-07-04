@@ -1039,7 +1039,14 @@ const parseFilters = (filters) => {
         ));
     }
 
-    return filter;
+    // check if filter is OR to return the correct fitler
+    if(filters.hasOwnProperty("orAndFilter") && filters.orAndFilter === true) {
+        const filterOr = filter.map(f => `or(${f})`);
+        return filterOr
+    } else {
+        return filter;
+    }
+
 }
 
 

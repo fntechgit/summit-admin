@@ -26,7 +26,7 @@ const OrAndFilter = ({ entity, value, onChange, ...rest}) => {
     return (
       <div className="and-or-filter">
           <label>{`Search ${entity} by `}
-            <span style={fitlerStyle} onClick={() => changeFilter()}>{value ? 'all' : 'any'}</span> 
+            <span style={fitlerStyle} onClick={() => changeFilter()}>{value ? 'any' : 'all'}</span> 
             {` of the following: `}</label>
       </div>
     );
