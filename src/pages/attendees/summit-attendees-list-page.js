@@ -34,12 +34,13 @@ import {
 } from "../../actions/attendee-actions";
 
 import {getBadgeFeatures, getBadgeTypes} from "../../actions/badge-actions";
+import { HAS_TICKETS } from '../../utils/constants';
 
 const fieldNames = [    
     { columnKey: 'member_id', value: 'member_id', sortable: true},
     { columnKey: 'tickets_qty', value: 'tickets_qty' },
     { columnKey: 'company', value: 'company', sortable: true},
-    { columnKey: 'checkin_date', value: 'checkin_date'},
+    { columnKey: 'checkin_date', value: 'checkin_date', sortable: true},
 ]
 
 class SummitAttendeeListPage extends React.Component {
@@ -78,10 +79,10 @@ class SummitAttendeeListPage extends React.Component {
             modalTitle: '',
             modalSchedule: [],
             enabledFilters: [],
-            eventFilters: {
+            attendeeFilters: {
                 memberFilter: null,
                 statusFilter: null,
-                ticketsFilter: null,
+                ticketsFilter: HAS_TICKETS,
                 virtualCheckInFilter: null,
                 checkedInFilter: null,
                 ticketTypeFilter: [],
@@ -95,29 +96,29 @@ class SummitAttendeeListPage extends React.Component {
 
     handleExport(ev) {
         const {order, orderDir, term} = this.props;
-        const {eventFilters, selectedColumns} = this.state;
+        const {attendeeFilters, selectedColumns} = this.state;
         ev.preventDefault();
-        this.props.exportAttendees(term, order, orderDir, eventFilters, selectedColumns);
+        this.props.exportAttendees(term, order, orderDir, attendeeFilters, selectedColumns);
     }
 
     handleSetMemberFilter(ev){
-        this.setState({...this.state, eventFilters: {...this.state.eventFilters, memberFilter: ev}});
+        this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, memberFilter: ev}});
     }    
 
     handleSetTicketsFilter(ev){
-        this.setState({...this.state, eventFilters: {...this.state.eventFilters, ticketsFilter: ev}});
+        this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, ticketsFilter: ev}});
     }
 
     handleSetStatusFilter(ev){
-        this.setState({...this.state, eventFilters: {...this.state.eventFilters, statusFilter: ev}});
+        this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, statusFilter: ev}});
     }
 
     handleSetVirtualCheckInFilter(ev){
-        this.setState({...this.state, eventFilters: {...this.state.eventFilters, virtualCheckInFilter: ev}});
+        this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, virtualCheckInFilter: ev}});
     }        
 
     handleSetCheckedInFilter(ev){
-        this.setState({...this.state, eventFilters: {...this.state.eventFilters, checkedInFilter: ev}});        
+        this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, checkedInFilter: ev}});        
     }
 
     handleChangeFlowEvent(ev){
@@ -137,7 +138,7 @@ class SummitAttendeeListPage extends React.Component {
             sendEmails,            
         } = this.props;
 
-        const {eventFilters, selectedColumns} = this.state;
+        const {attendeeFilters, selectedColumns} = this.state;
 
         if(!currentFlowEvent){
             Swal.fire("Validation error", T.translate("attendee_list.select_template") , "warning");
@@ -149,7 +150,7 @@ class SummitAttendeeListPage extends React.Component {
             return false;
         }
 
-        sendEmails(term, currentFlowEvent, selectedAll , selectedIds, eventFilters, selectedColumns);
+        sendEmails(term, currentFlowEvent, selectedAll , selectedIds, attendeeFilters, selectedColumns);
     }
 
     handleSelected(attendee_id, isSelected){
@@ -171,14 +172,14 @@ class SummitAttendeeListPage extends React.Component {
 
     componentDidMount() {
         const {currentSummit, term, order, orderDir, filters, extraColumns } = this.props;
-        const {eventFilters} = this.state;
+        const {attendeeFilters} = this.state;
         const enabledFilters = Object.keys(filters).filter(e => Array.isArray(filters[e]) ? filters[e]?.some(e => e !== null) : filters[e]?.length > 0);
 
         this.setState({
             ...this.state, 
             selectedColumns: extraColumns,
             enabledFilters: enabledFilters,
-            eventFilters: {...eventFilters, ...filters}
+            attendeeFilters: {...attendeeFilters, ...filters}
         });
 
         if(currentSummit) {
@@ -216,21 +217,21 @@ class SummitAttendeeListPage extends React.Component {
 
     handlePageChange(page) {
         const {order, orderDir, perPage, term} = this.props;
-        const {eventFilters, selectedColumns} = this.state;
-        this.props.getAttendees(term, page, perPage, order, orderDir, eventFilters, selectedColumns);
+        const {attendeeFilters, selectedColumns} = this.state;
+        this.props.getAttendees(term, page, perPage, order, orderDir, attendeeFilters, selectedColumns);
     }
 
     handleSort(index, key, dir, func) {
         const {page, perPage, term} = this.props;
-        const {eventFilters, selectedColumns} = this.state;
+        const {attendeeFilters, selectedColumns} = this.state;
         key = (key === 'name') ? 'full_name' : key;
-        this.props.getAttendees(term, page, perPage, key, dir, eventFilters, selectedColumns);
+        this.props.getAttendees(term, page, perPage, key, dir, attendeeFilters, selectedColumns);
     }
 
     handleSearch(term) {
         const {order, orderDir, page, perPage} = this.props;
-        const {eventFilters, selectedColumns} = this.state;
-        this.props.getAttendees(term, page, perPage, order, orderDir, eventFilters, selectedColumns);
+        const {attendeeFilters, selectedColumns} = this.state;
+        this.props.getAttendees(term, page, perPage, order, orderDir, attendeeFilters, selectedColumns);
     }    
 
     handleNewAttendee(ev) {
@@ -259,8 +260,8 @@ class SummitAttendeeListPage extends React.Component {
 
     handleApplyEventFilters() {
         const {order, orderDir, page, perPage, term} = this.props;
-        const {eventFilters, selectedColumns} = this.state;
-        this.props.getAttendees(term, page, perPage, order, orderDir, eventFilters, selectedColumns);
+        const {attendeeFilters, selectedColumns} = this.state;
+        this.props.getAttendees(term, page, perPage, order, orderDir, attendeeFilters, selectedColumns);
     }
 
     handleDDLSortByLabel(ddlArray) {
@@ -274,7 +275,7 @@ class SummitAttendeeListPage extends React.Component {
                 const resetFilters = {
                     memberFilter: null,
                     statusFilter: null,
-                    ticketsFilter: null,
+                    ticketsFilter: 'HAS_TICKETS',
                     virtualCheckInFilter: null,
                     checkedInFilter: null,
                     ticketTypeFilter: [],
@@ -282,12 +283,12 @@ class SummitAttendeeListPage extends React.Component {
                     featuresFilter: [],
                     checkinDateFilter: Array(2).fill(null),
                 };
-                this.setState({...this.state, enabledFilters: value, eventFilters: resetFilters});
+                this.setState({...this.state, enabledFilters: value, attendeeFilters: resetFilters});
             } else {
                 const removedFilter = this.state.enabledFilters.filter(e => !value.includes(e))[0];
-                const defaultValue = Array.isArray(this.state.eventFilters[removedFilter]) ? [] : null;
-                let newEventFilters = {...this.state.eventFilters, [removedFilter]: defaultValue};
-                this.setState({...this.state, enabledFilters: value, eventFilters: newEventFilters});
+                const defaultValue = Array.isArray(this.state.attendeeFilters[removedFilter]) ? [] : null;
+                let newEventFilters = {...this.state.attendeeFilters, [removedFilter]: defaultValue};
+                this.setState({...this.state, enabledFilters: value, attendeeFilters: newEventFilters});
             }
         } else {
             this.setState({...this.state, enabledFilters: value})
@@ -302,10 +303,10 @@ class SummitAttendeeListPage extends React.Component {
 
     handleCheckInDate(ev, lastDate) {
         const {value} = ev.target;
-        const {checkinDateFilter} = this.state.eventFilters;
+        const {checkinDateFilter} = this.state.attendeeFilters;
 
-        this.setState({...this.state, eventFilters: {
-            ...this.state.eventFilters, 
+        this.setState({...this.state, attendeeFilters: {
+            ...this.state.attendeeFilters, 
             checkinDateFilter: lastDate ? [checkinDateFilter[0], value.unix()] : [value.unix(), checkinDateFilter[1]]
         }});
     }
@@ -318,7 +319,7 @@ class SummitAttendeeListPage extends React.Component {
                 value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;
             }
         }
-        this.setState({...this.state, eventFilters: {...this.state.eventFilters, [id]: value}});
+        this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, [id]: value}});
     }
 
     handleTermChange(term) {
@@ -338,7 +339,7 @@ class SummitAttendeeListPage extends React.Component {
             badgeTypes,
         } = this.props;
 
-        const {showModal, modalSchedule, modalTitle, enabledFilters, eventFilters} = this.state;
+        const {showModal, modalSchedule, modalTitle, enabledFilters, attendeeFilters} = this.state;
 
         const filters_ddl = [
             {label: 'Member', value: 'memberFilter'},
@@ -469,9 +470,9 @@ class SummitAttendeeListPage extends React.Component {
                             <SegmentedControl
                                 name="memberFilter"
                                 options={[
-                                    { label: "All", value: null, default: eventFilters.memberFilter === null},
-                                    { label: "With IDP Account", value: "HAS_MEMBER",default: eventFilters.memberFilter === "HAS_MEMBER" },
-                                    { label: "Without IDP Account", value: "HAS_NO_MEMBER",default: eventFilters.memberFilter === "HAS_NO_MEMBER" },
+                                    { label: "All", value: null, default: attendeeFilters.memberFilter === null},
+                                    { label: "With IDP Account", value: "HAS_MEMBER",default: attendeeFilters.memberFilter === "HAS_MEMBER" },
+                                    { label: "Without IDP Account", value: "HAS_NO_MEMBER",default: attendeeFilters.memberFilter === "HAS_NO_MEMBER" },
                                 ]}
                                 setValue={newValue => this.handleSetMemberFilter(newValue)}
                                 style={{ width: "100%", height:40, color: '#337ab7' , fontSize: '10px' }}
@@ -483,9 +484,9 @@ class SummitAttendeeListPage extends React.Component {
                             <SegmentedControl
                                 name="statusFilter"
                                 options={[
-                                    { label: "All", value: null, default: eventFilters.statusFilter === null},
-                                    { label: "Complete Questions", value: "Complete",default: eventFilters.statusFilter === "Complete"},
-                                    { label: "Incomplete Questions", value: "Incomplete", default: eventFilters.statusFilter === "Incomplete"},
+                                    { label: "All", value: null, default: attendeeFilters.statusFilter === null},
+                                    { label: "Complete Questions", value: "Complete",default: attendeeFilters.statusFilter === "Complete"},
+                                    { label: "Incomplete Questions", value: "Incomplete", default: attendeeFilters.statusFilter === "Incomplete"},
                                 ]}
                                 setValue={newValue => this.handleSetStatusFilter(newValue)}
                                 style={{ width: "100%", height:40, color: '#337ab7', fontSize: '10px'  }}
@@ -497,9 +498,9 @@ class SummitAttendeeListPage extends React.Component {
                             <SegmentedControl
                                 name="ticketsFilter"
                                 options={[
-                                    { label: "All", value: null, default: eventFilters.ticketsFilter === null},
-                                    { label: "With Tickets", value: "HAS_TICKETS",default: eventFilters.ticketsFilter === "HAS_TICKETS" },
-                                    { label: "Without Tickets", value: "HAS_NO_TICKETS",default: eventFilters.ticketsFilter === "HAS_NO_TICKETS" },
+                                    { label: "All", value: null, default: attendeeFilters.ticketsFilter === null},
+                                    { label: "With Tickets", value: "HAS_TICKETS",default: attendeeFilters.ticketsFilter === "HAS_TICKETS" },
+                                    { label: "Without Tickets", value: "HAS_NO_TICKETS",default: attendeeFilters.ticketsFilter === "HAS_NO_TICKETS" },
                                 ]}
                                 setValue={newValue => this.handleSetTicketsFilter(newValue)}
                                 style={{ width: "100%", height:40, color: '#337ab7', fontSize: '10px' }}
@@ -511,9 +512,9 @@ class SummitAttendeeListPage extends React.Component {
                             <SegmentedControl
                                 name="virtualCheckInFilter"
                                 options={[
-                                    { label: "All", value: null, default: eventFilters.virtualCheckInFilter === null},
-                                    { label: "Has Virtual Checkin", value: "HAS_VIRTUAL_CHECKIN", default: eventFilters.virtualCheckInFilter === "HAS_VIRTUAL_CHECKIN" },
-                                    { label: "Has Not Virtual Checkin", value: "HAS_NO_VIRTUAL_CHECKIN", default: eventFilters.virtualCheckInFilter === "HAS_NO_VIRTUAL_CHECKIN" },
+                                    { label: "All", value: null, default: attendeeFilters.virtualCheckInFilter === null},
+                                    { label: "Has Virtual Checkin", value: "HAS_VIRTUAL_CHECKIN", default: attendeeFilters.virtualCheckInFilter === "HAS_VIRTUAL_CHECKIN" },
+                                    { label: "Has Not Virtual Checkin", value: "HAS_NO_VIRTUAL_CHECKIN", default: attendeeFilters.virtualCheckInFilter === "HAS_NO_VIRTUAL_CHECKIN" },
                                 ]}
                                 setValue={newValue => this.handleSetVirtualCheckInFilter(newValue)}
                                 style={{ width: "100%", height:40, color: '#337ab7', fontSize: '10px' }}
@@ -525,9 +526,9 @@ class SummitAttendeeListPage extends React.Component {
                             <SegmentedControl
                                 name="checkedInFilter"
                                 options={[
-                                    { label: "All", value: null, default: eventFilters.checkedInFilter === null},
-                                    { label: "Checked in", value: "CHECKED_IN", default: eventFilters.checkedInFilter === "CHECKED_IN" },
-                                    { label: "Not Checked in", value: "NO_CHECKED_IN", default: eventFilters.checkedInFilter === "NO_CHECKED_IN" },
+                                    { label: "All", value: null, default: attendeeFilters.checkedInFilter === null},
+                                    { label: "Checked in", value: "CHECKED_IN", default: attendeeFilters.checkedInFilter === "CHECKED_IN" },
+                                    { label: "Not Checked in", value: "NO_CHECKED_IN", default: attendeeFilters.checkedInFilter === "NO_CHECKED_IN" },
                                 ]}
                                 setValue={newValue => this.handleSetCheckedInFilter(newValue)}
                                 style={{ width: "100%", height:40, color: '#337ab7', fontSize: '10px' }}
@@ -538,7 +539,7 @@ class SummitAttendeeListPage extends React.Component {
                         <div className="col-md-6" style={{ height: "61px", paddingTop: "8px" }}>
                             <Dropdown
                                 id="ticketTypeFilter"
-                                value={eventFilters.ticketTypeFilter}
+                                value={attendeeFilters.ticketTypeFilter}
                                 onChange={this.handleExtraFilterChange}
                                 options={ticketTypesDDL}
                                 isClearable={true}
@@ -551,7 +552,7 @@ class SummitAttendeeListPage extends React.Component {
                         <div className="col-md-6" style={{ height: "61px", paddingTop: "8px" }}>
                             <Dropdown
                                 id="badgeTypeFilter"
-                                value={eventFilters.badgeTypeFilter}
+                                value={attendeeFilters.badgeTypeFilter}
                                 onChange={this.handleExtraFilterChange}
                                 options={badgeTypesDDL}
                                 isClearable={true}
@@ -564,7 +565,7 @@ class SummitAttendeeListPage extends React.Component {
                         <div className="col-md-6" style={{ height: "61px", paddingTop: "8px" }}>
                             <Dropdown
                                 id="featuresFilter"
-                                value={eventFilters.featuresFilter}
+                                value={attendeeFilters.featuresFilter}
                                 onChange={this.handleExtraFilterChange}
                                 options={featuresTypesDDL}
                                 isClearable={true}
@@ -582,7 +583,7 @@ class SummitAttendeeListPage extends React.Component {
                                     inputProps={{placeholder: T.translate("attendee_list.placeholders.checkin_date_from")}}
                                     timezone={currentSummit.time_zone.name}
                                     onChange={(ev) => this.handleCheckInDate(ev, false)}
-                                    value={epochToMomentTimeZone(eventFilters.checkinDateFilter[0], currentSummit.time_zone_id)}
+                                    value={epochToMomentTimeZone(attendeeFilters.checkinDateFilter[0], currentSummit.time_zone_id)}
                                     className={'event-list-date-picker'}
                                 />
                             </div>                    
@@ -593,7 +594,7 @@ class SummitAttendeeListPage extends React.Component {
                                     inputProps={{placeholder: T.translate("attendee_list.placeholders.checkin_date_to")}}
                                     timezone={currentSummit.time_zone.name}
                                     onChange={(ev) => this.handleCheckInDate(ev, true)}
-                                    value={epochToMomentTimeZone(eventFilters.checkinDateFilter[1], currentSummit.time_zone_id)}
+                                    value={epochToMomentTimeZone(attendeeFilters.checkinDateFilter[1], currentSummit.time_zone_id)}
                                     className={'event-list-date-picker'}
                                 />
                             </div>
