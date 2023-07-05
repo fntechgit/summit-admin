@@ -80,7 +80,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
                     company: a.company ? a.company : 'TBD',
                     status: a.status,
                     tickets_qty: a.tickets.length ? a.tickets.length : 'N/A',
-                    checkin_date: a.summit_hall_checked_in_date ? moment(a.summit_hall_checked_in_date * 1000).tz(state.summitTZ).format("MMMM Do YYYY, h:mm a") : 'TBD',
+                    summit_hall_checked_in_date: a.summit_hall_checked_in_date ? moment(a.summit_hall_checked_in_date * 1000).tz(state.summitTZ).format("MMMM Do YYYY, h:mm a") : 'TBD',
                 };
             })
 

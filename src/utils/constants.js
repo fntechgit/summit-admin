@@ -33,3 +33,4 @@ export const SpeakersSources = {
 };
 
 export const HAS_TICKETS = 'HAS_TICKETS';
+export const HAS_NO_TICKETS = 'HAS_NO_TICKETS';

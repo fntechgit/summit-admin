@@ -132,8 +132,8 @@ const parseFilters = (filters, term) => {
 
     if (filters.checkinDateFilter && filters.checkinDateFilter.some(e => e !== null)) {
         if(filters.checkinDateFilter.every(e => e !== null )) {
-            filter.push(`summit_hall_checked_in_date>=${filters.checkinDateFilter[0]}`);
-            filter.push(`summit_hall_checked_in_date<=${filters.checkinDateFilter[1]}`);
+            // added between operator (>=<)
+            filter.push(`summit_hall_checked_in_date>=<${filters.checkinDateFilter[0]}&&${filters.checkinDateFilter[1]}`);
         } else {
             filter.push(`
             ${filters.checkinDateFilter[0] !== null ? 

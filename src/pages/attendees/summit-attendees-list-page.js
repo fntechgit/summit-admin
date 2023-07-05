@@ -34,14 +34,26 @@ import {
 } from "../../actions/attendee-actions";
 
 import {getBadgeFeatures, getBadgeTypes} from "../../actions/badge-actions";
-import { HAS_TICKETS } from '../../utils/constants';
+import {HAS_NO_TICKETS, HAS_TICKETS} from '../../utils/constants';
 
 const fieldNames = [    
     { columnKey: 'member_id', value: 'member_id', sortable: true},
     { columnKey: 'tickets_qty', value: 'tickets_qty' },
     { columnKey: 'company', value: 'company', sortable: true},
-    { columnKey: 'checkin_date', value: 'checkin_date', sortable: true},
+    { columnKey: 'summit_hall_checked_in_date', value: 'summit_hall_checked_in_date', sortable: true},
 ]
+
+const FILTERS_DEFAULT_STATE = {
+    memberFilter: null,
+    statusFilter: null,
+    ticketsFilter: null,
+    virtualCheckInFilter: null,
+    checkedInFilter: null,
+    ticketTypeFilter: [],
+    badgeTypeFilter: [],
+    featuresFilter: [],
+    checkinDateFilter: Array(2).fill(null),
+};
 
 class SummitAttendeeListPage extends React.Component {
 
@@ -79,17 +91,7 @@ class SummitAttendeeListPage extends React.Component {
             modalTitle: '',
             modalSchedule: [],
             enabledFilters: [],
-            attendeeFilters: {
-                memberFilter: null,
-                statusFilter: null,
-                ticketsFilter: HAS_TICKETS,
-                virtualCheckInFilter: null,
-                checkedInFilter: null,
-                ticketTypeFilter: [],
-                badgeTypeFilter: [],
-                featuresFilter: [],
-                checkinDateFilter: Array(2).fill(null),
-            },
+            attendeeFilters: {...FILTERS_DEFAULT_STATE},
             selectedColumns: [],
         }
     }
@@ -272,17 +274,7 @@ class SummitAttendeeListPage extends React.Component {
         const {value} = ev.target;
         if(value.length < this.state.enabledFilters.length) {
             if(value.length === 0) {
-                const resetFilters = {
-                    memberFilter: null,
-                    statusFilter: null,
-                    ticketsFilter: 'HAS_TICKETS',
-                    virtualCheckInFilter: null,
-                    checkedInFilter: null,
-                    ticketTypeFilter: [],
-                    badgeTypeFilter: [],
-                    featuresFilter: [],
-                    checkinDateFilter: Array(2).fill(null),
-                };
+                const resetFilters = {...FILTERS_DEFAULT_STATE};
                 this.setState({...this.state, enabledFilters: value, attendeeFilters: resetFilters});
             } else {
                 const removedFilter = this.state.enabledFilters.filter(e => !value.includes(e))[0];
@@ -364,7 +356,7 @@ class SummitAttendeeListPage extends React.Component {
             { value: 'member_id', label: T.translate("attendee_list.member_id")},
             { value: 'tickets_qty', label: T.translate("attendee_list.tickets_qty") },
             { value: 'company', label: T.translate("attendee_list.company")},
-            { value: 'checkin_date', label: T.translate("attendee_list.checkin_date")},
+            { value: 'summit_hall_checked_in_date', label: T.translate("attendee_list.checkin_date")},
         ];
 
         const table_options = {
@@ -499,8 +491,8 @@ class SummitAttendeeListPage extends React.Component {
                                 name="ticketsFilter"
                                 options={[
                                     { label: "All", value: null, default: attendeeFilters.ticketsFilter === null},
-                                    { label: "With Tickets", value: "HAS_TICKETS",default: attendeeFilters.ticketsFilter === "HAS_TICKETS" },
-                                    { label: "Without Tickets", value: "HAS_NO_TICKETS",default: attendeeFilters.ticketsFilter === "HAS_NO_TICKETS" },
+                                    { label: "With Tickets", value: HAS_TICKETS, default: attendeeFilters.ticketsFilter === HAS_TICKETS },
+                                    { label: "Without Tickets", value: HAS_NO_TICKETS,default: attendeeFilters.ticketsFilter === HAS_NO_TICKETS },
                                 ]}
                                 setValue={newValue => this.handleSetTicketsFilter(newValue)}
                                 style={{ width: "100%", height:40, color: '#337ab7', fontSize: '10px' }}

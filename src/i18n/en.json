@@ -737,7 +737,7 @@
     "resend_done": "Emails sent successfully.",
     "select_template": "Select a Email Template to perform the action.",
     "select_items": "Select at least one attendee to perform the action.",
-    "checkin_date": "Check In Date",
+    "summit_hall_checked_in_date": "Check In Date",
     "placeholders": {
       "search_attendees": "Search Attendees by Name, Email, Company, Ticket Type or Badge Type",
       "ticket_type": "Filter by Ticket Type",
