@@ -11,6 +11,7 @@
  * limitations under the License.
  **/
 import React from 'react'
+import T from 'i18n-react/dist/i18n-react';
 import { ALL_FILTER, OR_FILTER } from '../../utils/constants';
 
 const OrAndFilter = ({ entity, value, onChange, ...rest}) => {    
@@ -26,9 +27,10 @@ const OrAndFilter = ({ entity, value, onChange, ...rest}) => {
     
     return (
       <div className="and-or-filter">
-          <label>{`Search ${entity} by `}
-            <span style={fitlerStyle} onClick={() => changeFilter()}>{value === ALL_FILTER ? 'all' : 'any'}</span> 
-            {` of the following: `}</label>
+          <label>{T.translate("and_or_filter.search", {entity: entity})}
+            <span style={fitlerStyle} onClick={() => changeFilter()}>
+                {value === ALL_FILTER ? T.translate("and_or_filter.all") : T.translate("and_or_filter.any")}</span> 
+            {T.translate("and_or_filter.following")}</label>
       </div>
     );
 }
