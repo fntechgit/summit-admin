@@ -11,11 +11,12 @@
  * limitations under the License.
  **/
 import React from 'react'
+import { ALL_FILTER, OR_FILTER } from '../../utils/constants';
 
 const OrAndFilter = ({ entity, value, onChange, ...rest}) => {    
 
     const changeFilter = () => {
-        onChange(!value);
+        onChange(value === ALL_FILTER ? OR_FILTER : ALL_FILTER);
     }
 
     const fitlerStyle = {
@@ -26,7 +27,7 @@ const OrAndFilter = ({ entity, value, onChange, ...rest}) => {
     return (
       <div className="and-or-filter">
           <label>{`Search ${entity} by `}
-            <span style={fitlerStyle} onClick={() => changeFilter()}>{value ? 'any' : 'all'}</span> 
+            <span style={fitlerStyle} onClick={() => changeFilter()}>{value === ALL_FILTER ? 'all' : 'any'}</span> 
             {` of the following: `}</label>
       </div>
     );

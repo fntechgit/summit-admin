@@ -32,7 +32,7 @@ import {
     fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
-import {getAccessTokenSafely} from '../utils/methods';
+import {checkOrFilter, getAccessTokenSafely} from '../utils/methods';
 import {getQAUsersBySummitEvent} from "./user-chat-roles-actions";
 import {getSummitEventAuditLog} from "./audit-log-actions";
 
@@ -1039,14 +1039,7 @@ const parseFilters = (filters) => {
         ));
     }
 
-    // check if filter is OR to return the correct fitler
-    if(filters.hasOwnProperty("orAndFilter") && filters.orAndFilter === true) {
-        const filterOr = filter.map(f => `or(${f})`);
-        return filterOr
-    } else {
-        return filter;
-    }
-
+    return checkOrFilter(filters, filter);
 }
 
 

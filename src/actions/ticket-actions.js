@@ -29,7 +29,7 @@ import {
     stopLoading, VALIDATE,
 } from 'openstack-uicore-foundation/lib/utils/actions';
 
-import {getAccessTokenSafely, isNumericString} from '../utils/methods';
+import {getAccessTokenSafely, isNumericString, checkOrFilter} from '../utils/methods';
 
 import URI from "urijs";
 import Swal from "sweetalert2";
@@ -256,13 +256,7 @@ const parseFilters = (filters) => {
         ));
     }
 
-    // check if filter is OR to return the correct fitler
-    if(filters.hasOwnProperty("orAndFilter") && filters.orAndFilter === true) {
-        const filterOr = filter.map(f => `or(${f})`);
-        return filterOr
-    } else {
-        return filter;
-    }    
+    return checkOrFilter(filters, filter);
 }
 
 export const getTickets =

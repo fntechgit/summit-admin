@@ -45,6 +45,7 @@ import {getTicketFromQR} from "../../utils/methods";
 
 import '../../styles/ticket-list-page.less';
 import OrAndFilter from '../../components/filters/or-and-filter';
+import { ALL_FILTER } from '../../utils/constants';
 
 const BatchSize = 25;
 
@@ -83,7 +84,6 @@ class TicketListPage extends React.Component {
         this.handleColumnsChange = this.handleColumnsChange.bind(this);
         this.handleFiltersChange = this.handleFiltersChange.bind(this);
         this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
-        this.handleAndOrFilterChange = this.handleAndOrFilterChange.bind(this);
 
         this.state = {
             showIngestModal: false,
@@ -106,7 +106,7 @@ class TicketListPage extends React.Component {
                 showOnlyPrintable: false,
                 promocodesFilter: [],
                 promocodeTags:[],
-                orAndFilter: true,
+                orAndFilter: ALL_FILTER,
             }
         }
     }
@@ -288,10 +288,6 @@ class TicketListPage extends React.Component {
 
     handleDDLSortByLabel(ddlArray) {
         return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
-    }
-    
-    handleAndOrFilterChange(filter) {
-
     }
 
     render(){

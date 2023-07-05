@@ -36,6 +36,7 @@ import { getEvents, deleteEvent, exportEvents, importEventsCSV, importMP4AssetsF
 import {hasErrors, uuidv4} from "../../utils/methods";
 import '../../styles/summit-event-list-page.less';
 import OrAndFilter from '../../components/filters/or-and-filter';
+import { ALL_FILTER } from '../../utils/constants';
 
 const fieldNames = [
     { columnKey: 'speakers', value: 'speakers' },
@@ -149,7 +150,7 @@ class SummitEventListPage extends React.Component {
                 submission_status_filter: [],
                 has_media_upload_with_type: [],
                 has_not_media_upload_with_type: [],
-                orAndFilter: true,
+                orAndFilter: ALL_FILTER,
             },
             selectedColumns: [],
         };

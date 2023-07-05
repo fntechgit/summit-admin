@@ -16,6 +16,7 @@ import {findElementPos, epochToMomentTimeZone} from "openstack-uicore-foundation
 import {getAccessToken} from 'openstack-uicore-foundation/lib/security/methods'
 import { initLogOut} from 'openstack-uicore-foundation/lib/security/methods';
 import Swal from "sweetalert2";
+import { OR_FILTER } from "./constants";
 
 export const trim = (string, length) => {
     return string.length > length ?
@@ -234,4 +235,14 @@ export const getSummitDays = (summit) => {
 export const isNumericString = (value) => {
     const numersRegexp = /^[0-9]*$/;
     return numersRegexp.test(value) ? true : false;
+}
+
+export const checkOrFilter = (filters, filter) => {
+    // check if filter is OR to return the correct fitler
+    if(filters.hasOwnProperty("orAndFilter") && filters.orAndFilter === OR_FILTER) {
+        const filterOr = filter.map(f => `or(${f})`);
+        return filterOr
+    } else {
+        return filter;
+    }
 }
