@@ -81,7 +81,7 @@ export const getAttendeeData = (fromDate = null , toDate = null, page = 1) => as
     
     const params = {
         access_token: accessToken,
-        per_page: 50,
+        per_page: 100,
         page,
         fields: 'id,summit_hall_checked_in_date',
         expand: 'none',
@@ -97,9 +97,9 @@ export const getAttendeeData = (fromDate = null , toDate = null, page = 1) => as
       {},
       true // use ETAGS
     )(params)(dispatch).then(({response}) => {
-        /*if (page < response.last_page) {
+        if (page < response.last_page) {
             return getAttendeeData(fromDate, toDate, page + 1)(dispatch, getState);
-        }*/
+        }
         
         return Promise.resolve();
     });
