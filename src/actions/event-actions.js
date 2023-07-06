@@ -894,8 +894,8 @@ const parseFilters = (filters) => {
 
     if (filters.start_date_filter && filters.start_date_filter.some(e => e !== null)) {
         if(filters.start_date_filter.every(e => e !== null )) {
-            filter.push(`start_date>=${filters.start_date_filter[0]}`);
-            filter.push(`start_date<=${filters.start_date_filter[1]}`);
+            // between
+            filter.push(`start_date[]${filters.start_date_filter[0]}&&${filters.start_date_filter[1]}`);
         } else {
             filter.push(`
             ${filters.start_date_filter[0] !== null ? 
@@ -907,8 +907,8 @@ const parseFilters = (filters) => {
 
     if (filters.end_date_filter && filters.end_date_filter.some(e => e !== null)) {
         if(filters.end_date_filter.every(e => e !== null )) {
-            filter.push(`end_date>=${filters.end_date_filter[0]}`);
-            filter.push(`end_date<=${filters.end_date_filter[1]}`);
+            // between
+            filter.push(`end_date[]${filters.end_date_filter[0]}&&${filters.end_date_filter[1]}`);
         } else {
             filter.push(`
             ${filters.end_date_filter[0] !== null ? 
@@ -919,12 +919,10 @@ const parseFilters = (filters) => {
     }
 
     if (filters.duration_filter) {
-
         // multiply values to send the minutes in seconds
-
         if (Array.isArray(filters.duration_filter)) {
-            filter.push(`duration>=${filters.duration_filter[0] * 60}`);
-            filter.push(`duration<=${filters.duration_filter[1] * 60}`);
+            // between
+            filter.push(`duration[]${filters.duration_filter[0] * 60}&&${filters.duration_filter[1] * 60}`);
         } else {
             filter.push(`duration${filters.duration_filter.replace(/\d/g, '')}${filters.duration_filter.replace(/\D/g, '') * 60}`);
         }
@@ -932,12 +930,11 @@ const parseFilters = (filters) => {
 
     if (filters.speakers_count_filter) {
         if (Array.isArray(filters.speakers_count_filter)) {
-            filter.push(`speakers_count>=${filters.speakers_count_filter[0]}`);
-            filter.push(`speakers_count<=${filters.speakers_count_filter[1]}`);
+            // between
+            filter.push(`speakers_count[]]${filters.speakers_count_filter[0]}&&${filters.speakers_count_filter[1]}`);
         } else {
             filter.push(`speakers_count${filters.speakers_count_filter}`)
         }
-
     }
 
     if (filters.hasOwnProperty('submitters') && Array.isArray(filters.submitters)

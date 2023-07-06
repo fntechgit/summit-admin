@@ -240,9 +240,7 @@ export const isNumericString = (value) => {
 export const checkOrFilter = (filters, filter) => {
     // check if filter is OR to return the correct fitler
     if(filters.hasOwnProperty("orAndFilter") && filters.orAndFilter === OR_FILTER) {
-        const filterOr = filter.map(f => `or(${f})`);
-        return filterOr
-    } else {
-        return filter;
+        return filter.map(f => `or(${f})`);
     }
+    return filter;
 }
