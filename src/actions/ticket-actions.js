@@ -29,7 +29,7 @@ import {
     stopLoading, VALIDATE,
 } from 'openstack-uicore-foundation/lib/utils/actions';
 
-import {getAccessTokenSafely} from '../utils/methods';
+import {getAccessTokenSafely, isNumericString} from '../utils/methods';
 
 import URI from "urijs";
 import Swal from "sweetalert2";
@@ -287,10 +287,8 @@ export const getTickets =
 
         if(term) {
             const escapedTerm = escapeFilterValue(term);
-            let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm},promo_code_tag=@${escapedTerm}`;
-            // if the value is only digits, add to the search string the promo_code_tag_id
-            const numersRegexp = /^[0-9]*$/;
-            searchString = numersRegexp.test(escapedTerm) ? `${searchString},promo_code_tag_id==${escapedTerm}` : searchString;
+            let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm},promo_code_tag=@${escapedTerm}`;                        
+            searchString = isNumericString(escapedTerm) ? `${searchString},promo_code_tag_id==${escapedTerm}` : searchString;
             filter.push(searchString);
         }
 
