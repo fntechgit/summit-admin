@@ -133,9 +133,9 @@ class PromocodeListPage extends React.Component {
             { columnKey: 'class_name', value: T.translate("promocode_list.type") },
             { columnKey: 'description', value: T.translate("promocode_list.description"), title: true, render:(row) => {
                 return row.description.length > 50 ? 
-                <td title={row.description}>
+                <span title={row.description}>
                     {`${row.description.slice(0,50)}...`}
-                </td>
+                </span>
                  : row.description 
             }},
             /*{ columnKey: 'owner', value: T.translate("promocode_list.owner") },*/
