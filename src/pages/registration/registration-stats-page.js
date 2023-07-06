@@ -45,11 +45,11 @@ const RegistrationStatsPage = ({currentSummit, match, loading, ...props}) => {
     }
 
     // pooling
-    /*const interval = setInterval(() => {
+    const interval = setInterval(() => {
       props.getRegistrationData(fromDate, toDate, false);
     }, DATA_POOLING_INTERVAL);
 
-    return () => clearInterval(interval);*/
+    return () => clearInterval(interval);
   }, [fromDate, toDate]);
 
   const totalTickets = props.total_active_tickets + props.total_inactive_tickets;
