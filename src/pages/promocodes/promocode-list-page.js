@@ -131,6 +131,13 @@ class PromocodeListPage extends React.Component {
             { columnKey: 'id', value: T.translate("promocode_list.id"), sortable: true },
             { columnKey: 'code', value: T.translate("promocode_list.code"), sortable: true },
             { columnKey: 'class_name', value: T.translate("promocode_list.type") },
+            { columnKey: 'description', value: T.translate("promocode_list.description"), title: true, render:(row) => {
+                return row.description.length > 50 ? 
+                <td title={row.description}>
+                    {`${row.description.slice(0,50)}...`}
+                </td>
+                 : row.description 
+            }},
             /*{ columnKey: 'owner', value: T.translate("promocode_list.owner") },*/
             { columnKey: 'owner_email', value: T.translate("promocode_list.owner_email") },
             { columnKey: 'email_sent', value: T.translate("promocode_list.emailed") },
