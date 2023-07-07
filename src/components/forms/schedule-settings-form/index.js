@@ -215,6 +215,11 @@ class ScheduleSettingsForm extends React.Component {
                         </div>
                     )}
                 </div>
+                <br/><br/>
+                <legend>Track Filter Order</legend>
+                <div className="row form-group track-filter-order">
+                
+                </div>
                 <div className="row">
                     <div className="col-md-12 submit-buttons">
                         <input type="button" onClick={this.handleSubmit}
