@@ -26,7 +26,7 @@ const OrAndFilter = ({ entity, value, onChange, ...rest}) => {
     }
     
     return (
-      <div className="and-or-filter">
+      <div className="and-or-filter" {...rest}>
           <label>{T.translate("and_or_filter.search", {entity: entity})}
             <span style={fitlerStyle} onClick={() => changeFilter()}>
                 {value === ALL_FILTER ? T.translate("and_or_filter.all") : T.translate("and_or_filter.any")}</span> 

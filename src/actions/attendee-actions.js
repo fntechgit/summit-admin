@@ -27,7 +27,7 @@ import {
     escapeFilterValue,
     getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {getAccessTokenSafely} from '../utils/methods';
+import {checkOrFilter, getAccessTokenSafely} from '../utils/methods';
 
 export const REQUEST_ATTENDEES          = 'REQUEST_ATTENDEES';
 export const RECEIVE_ATTENDEES          = 'RECEIVE_ATTENDEES';
@@ -160,7 +160,7 @@ const parseFilters = (filters, term) => {
         filter.push(searchString);
     }
 
-    return filter;
+    return checkOrFilter(filters, filter);
 };
 
 export const getAttendees = ( term = null,

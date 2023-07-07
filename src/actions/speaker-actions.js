@@ -34,7 +34,7 @@ import {
     AUTO_GENERATED_SPEAKERS_PROMO_CODE,
     AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
 } from './promocode-actions';
-import {getAccessTokenSafely} from '../utils/methods';
+import {checkOrFilter, getAccessTokenSafely} from '../utils/methods';
 
 export const INIT_SPEAKERS_LIST_PARAMS  = 'INIT_SPEAKERS_LIST_PARAMS';
 
@@ -1023,7 +1023,7 @@ const parseFilters = (filters) => {
        }
     }
 
-    return filter;
+    return checkOrFilter(filters, filter);
 }
 
 const buildTermFilter = (term, usePresentationFilters = true) => {
