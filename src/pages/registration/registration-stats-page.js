@@ -32,11 +32,7 @@ const trimString = (str, length = 75) => {
 const RegistrationStatsPage = ({currentSummit, match, loading, ...props}) => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
-  const timeOptions = [
-    {value: 'day', label: 'Day'},
-    {value: 'hour', label: 'Hour'},
-    {values: 'minute', label: 'Minute'}
-  ];
+  const timeOptions = ['Day', 'Hour', 'Minute'].map(op => ({value: op, label: op}));
 
   useEffect(() => {
     // initial load
@@ -84,6 +80,10 @@ const RegistrationStatsPage = ({currentSummit, match, loading, ...props}) => {
     setFromDate(from);
     setToDate(to);
     props.getRegistrationData(from, to);
+  };
+  
+  const onUnitChange = (unit) => {
+    props.changeTimeUnit(unit, fromDate, toDate);
   };
 
   return (
@@ -282,13 +282,13 @@ const RegistrationStatsPage = ({currentSummit, match, loading, ...props}) => {
           </AjaxLoader>
           <LineGraph
             title={`Attendees check-ins per ${props.timeUnit}`}
-            data={props.groupedAttendees.map(grp => grp.count)}
-            labels={props.groupedAttendees.map(grp => grp.slot)}
+            data={props.attendee_checkins.map(grp => grp.qty)}
+            labels={props.attendee_checkins.map(grp => grp.label)}
             colorPalette={5}
           >
             <SteppedSelect
               value={props.timeUnit}
-              onChange={props.changeTimeUnit}
+              onChange={onUnitChange}
               options={timeOptions}
               style={{display: 'inline-block', marginLeft: 10}}
             />
