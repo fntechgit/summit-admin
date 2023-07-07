@@ -23,7 +23,7 @@ import PieGraph from "../../components/graphs/registration-pie-graph";
 import {AjaxLoader, SteppedSelect} from "openstack-uicore-foundation/lib/components";
 import LineGraph from "../../components/graphs/registration-line-graph";
 
-const DATA_POOLING_INTERVAL = 5000;
+const DATA_POOLING_INTERVAL = 20000;
 
 const trimString = (str, length = 75) => {
   return trim(str.replace(/ *\([^)]*\) */g, ""), length)
