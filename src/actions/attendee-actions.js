@@ -27,7 +27,7 @@ import {
     escapeFilterValue,
     getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {checkOrFilter, getAccessTokenSafely} from '../utils/methods';
+import {checkOrFilter, getAccessTokenSafely, isNumericString} from '../utils/methods';
 
 export const REQUEST_ATTENDEES          = 'REQUEST_ATTENDEES';
 export const RECEIVE_ATTENDEES          = 'RECEIVE_ATTENDEES';
@@ -71,7 +71,7 @@ export const setSelectedAll = (value) => (dispatch) => {
     dispatch(createAction(SET_SELECTED_ALL_ATTENDEES)(value));
 };
 
-const parseFilters = (filters, term) => {
+const parseFilters = (filters, term = null) => {
     const filter = [];
 
     if(filters.hasOwnProperty('statusFilter') && filters.statusFilter){
@@ -153,8 +153,8 @@ const parseFilters = (filters, term) => {
             `badge_type=@${escapedTerm},` +
             `full_name=@${escapedTerm},`;
 
-        if (parseInt(term)) {
-            searchString += `,id==${parseInt(term)}`;
+        if (isNumericString(term)) {
+            searchString += `,id==${term}`;
         }
 
         filter.push(searchString);

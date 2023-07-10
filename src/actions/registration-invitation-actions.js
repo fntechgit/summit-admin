@@ -65,12 +65,7 @@ export const getInvitations = ( term = null, page = 1, perPage = 10, order = 'id
         expand: 'allowed_ticket_types,tags',
     };
 
-    const filter = parseFilters(filters);
-
-    if(term){
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`email=@${escapedTerm},first_name@@${escapedTerm},last_name=@${escapedTerm},full_name@@${escapedTerm}`);
-    }
+    const filter = parseFilters(filters, term);    
 
     if(filter.length > 0){
        params['filter[]'] = filter;
@@ -122,16 +117,11 @@ export const exportInvitationsCSV = (term, order, orderDir, filters = {}) => asy
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const filename = currentSummit.name + '-invitations.csv';
-    const filter = parseFilters(filters);
+    const filter = parseFilters(filters, term);
 
     const params = {
         access_token : accessToken
     };
-
-    if(term){
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`email=@${escapedTerm},first_name@@${escapedTerm},last_name=@${escapedTerm},full_name@@${escapedTerm}`);
-    }
 
     if(filter.length > 0){
         params['filter[]'] = filter;
@@ -321,16 +311,11 @@ export const sendEmails = (currentFlowEvent, selectedAll = false , selectedInvit
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
-    const filter = parseFilters(filters);
+    const filter = parseFilters(filters, term);
 
     const params = {
         access_token : accessToken,
     };
-
-    if(term){
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`email=@${escapedTerm},first_name=@${escapedTerm},last_name=@${escapedTerm}`);
-    }
 
     if(filter.length > 0){
         params['filter[]'] = filter;
@@ -368,7 +353,7 @@ export const sendEmails = (currentFlowEvent, selectedAll = false , selectedInvit
         });
 }
 
-const parseFilters = (filters) => {
+const parseFilters = (filters, term = null) => {
 
     const filter = [];
 
@@ -389,6 +374,11 @@ const parseFilters = (filters) => {
             (accumulator, tt) => accumulator +(accumulator !== '' ? '||':'') + tt,
             ''
           ));
+    }
+
+    if(term){
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(`email=@${escapedTerm},first_name@@${escapedTerm},last_name=@${escapedTerm},full_name@@${escapedTerm}`);
     }
 
     return checkOrFilter(filters, filter);
