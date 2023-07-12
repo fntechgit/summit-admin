@@ -332,7 +332,7 @@ class EventCategoryForm extends React.Component {
                     </div>
                 </Panel>
     
-                {entity.id !== 0 &&
+                {!!entity.id && !entity.parent_id &&
                   <div>
                       <hr/>
                       <div className="row">
