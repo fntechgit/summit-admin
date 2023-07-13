@@ -436,7 +436,6 @@ class SummitSpeakersListPage extends React.Component {
                         </button>
                     </div>
                 </div>
-                <OrAndFilter style={{marginTop: 15}} value={speakerFilters.orAndFilter} entity={'speakers'} onChange={(filter) => this.handleOrAndFilter(filter)}/>
                 <div className='row'>
                     <div className="col-md-3" style={{ height: "61px", paddingTop: "8px" }}>
                         <Dropdown

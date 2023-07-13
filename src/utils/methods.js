@@ -233,8 +233,7 @@ export const getSummitDays = (summit) => {
 }
 
 export const isNumericString = (value) => {
-    const numersRegexp = /^[0-9]*$/;
-    return numersRegexp.test(value) ? true : false;
+    return /^[0-9]*$/.test(value);
 }
 
 export const checkOrFilter = (filters, filter) => {

@@ -138,13 +138,7 @@ export const printTickets = (term, filters, order, orderDir, doAttendeeCheckinOn
         filters = { selectedIds : filters.selectedIds}
     }
 
-    const filter = parseFilters(filters);
-
-    if(term) {
-        const escapedTerm = escapeFilterValue(term);
-        let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm}`;
-        filter.push(searchString);
-    }
+    const filter = parseFilters(filters, term);
 
     if (filter.length > 0) {
         params['filter[]'] = filter;
@@ -168,7 +162,7 @@ export const printTickets = (term, filters, order, orderDir, doAttendeeCheckinOn
 
 };
 
-const parseFilters = (filters) => {
+const parseFilters = (filters, term = null) => {
     const filter = [];
 
     if (filters.hasOwnProperty('showOnlyPendingRefundRequests') && filters.showOnlyPendingRefundRequests) {
@@ -176,8 +170,7 @@ const parseFilters = (filters) => {
     }
 
     if (filters.hasOwnProperty('showOnlyPrintable') && filters.showOnlyPrintable) {
-        filter.push('access_level_type_name==IN_PERSON');
-        filter.push('is_active==1');
+        filter.push('is_printable==1');
     }
 
     if (filters.hasOwnProperty('hasOwnerFilter') && filters.hasOwnerFilter) {
@@ -256,6 +249,13 @@ const parseFilters = (filters) => {
         ));
     }
 
+    if(term) {
+        const escapedTerm = escapeFilterValue(term);
+        let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm},promo_code_tag=@${escapedTerm}`;
+        searchString = isNumericString(escapedTerm) ? `${searchString},promo_code_tag_id==${escapedTerm}` : searchString;
+        filter.push(searchString);
+    }
+
     return checkOrFilter(filters, filter);
 }
 
@@ -283,14 +283,7 @@ export const getTickets =
             expand: 'owner,order,ticket_type,badge,promo_code,promo_code.tags,refund_requests'
         };
 
-        const filter = parseFilters(filters);
-
-        if(term) {
-            const escapedTerm = escapeFilterValue(term);
-            let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm},promo_code_tag=@${escapedTerm}`;                        
-            searchString = isNumericString(escapedTerm) ? `${searchString},promo_code_tag_id==${escapedTerm}` : searchString;
-            filter.push(searchString);
-        }
+        const filter = parseFilters(filters, term);
 
         if (filter.length > 0) {
             params['filter[]'] = filter;
@@ -389,14 +382,7 @@ export const exportTicketsCSV = (term = '',
 
     // create the params for the promises all ( only diff is the page nbr)
 
-    const filter = parseFilters(filters);
-
-    if(term) {
-        const escapedTerm = escapeFilterValue(term);
-        let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm}`;
-        
-        filter.push(searchString);
-    }
+    const filter = parseFilters(filters, term);
 
     let params = Array.from({length: totalPages}, (_, i) => {
 

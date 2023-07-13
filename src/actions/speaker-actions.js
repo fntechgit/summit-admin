@@ -1023,7 +1023,8 @@ const parseFilters = (filters) => {
        }
     }
 
-    return checkOrFilter(filters, filter);
+    //return checkOrFilter(filters, filter);
+    return filter;
 }
 
 const buildTermFilter = (term, usePresentationFilters = true) => {
