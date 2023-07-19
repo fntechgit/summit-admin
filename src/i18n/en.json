@@ -795,6 +795,7 @@
     "type": "Type",
     "owner": "Owner",
     "owner_email": "Owner Email",
+    "tags": "Tags",
     "emailed": "Emailed",
     "redeemed": "Redeemed",
     "creator": "Creator",
