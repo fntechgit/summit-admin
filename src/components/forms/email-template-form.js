@@ -33,18 +33,6 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
         ? { width: '320px', height: '640px' }
         : { width: '1024px', height: '768px' };
 
-
-
-    // constructor(props) {
-    //     super(props);
-
-    //     this.state = {
-    //         entity: {...props.entity},
-    //         errors: props.errors,
-    //         mjml_editor: true,
-    //         mobileView: false,
-    //     };    
-
     useEffect(() => {
 
         scrollToError(errors);
@@ -60,24 +48,6 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
         }
 
     }, [errors, entity])
-
-    // componentDidUpdate(prevProps, prevState, snapshot) {
-    //     const state = {};
-    //     scrollToError(this.props.errors);
-
-    //     if(!shallowEqual(prevProps.entity, this.props.entity)) {
-    //         state.entity = {...this.props.entity};
-    //         state.errors = {};
-    //     }
-
-    //     if (!shallowEqual(prevProps.errors, this.props.errors)) {
-    //         state.errors = {...this.props.errors};
-    //     }
-
-    //     if (!isEmpty(state)) {
-    //         this.setState({...this.state, ...state})
-    //     }
-    // }
 
     useEffect(() => {
         if (mjmlEditor) {
