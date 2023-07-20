@@ -56,10 +56,6 @@ class EditEmailTemplatePage extends React.Component {
         this.handleJsonChange = this.handleJsonChange.bind(this);
     }
 
-    componentDidMount() {
-
-    }
-
     componentDidUpdate(prevProps, prevState, snapshot) {
         const oldId = prevProps.match.params.template_id;
         const newId = this.props.match.params.template_id;
@@ -78,9 +74,9 @@ class EditEmailTemplatePage extends React.Component {
     }
 
     handleRender() {
-        const { entity } = this.props;
+        const { entity, render_errors } = this.props;
         const { json_preview } = this.state;
-        this.props.previewEmailTemplate(entity.id, json_preview).then(() => this.setState({ showModal: true }));
+        this.props.previewEmailTemplate(entity.id, json_preview).then(() => this.setState({ showModal: render_errors.length > 0 ? true : false }));
     }
 
     handlePreview() {

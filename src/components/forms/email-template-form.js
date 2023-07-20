@@ -24,14 +24,16 @@ import { isEmpty, scrollToError, shallowEqual, hasErrors } from "../../utils/met
 
 const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRender }) => {
 
-    const [stateEntity, setStateEntity] = useState(entity);
+    const [stateEntity, setStateEntity] = useState({ ...entity });
     const [stateErrors, setStateErrors] = useState(errors);
-    const [mjmlEditor, setMjmlEditor] = useState(entity.mjml_content ? true : false);
+    const [mjmlEditor, setMjmlEditor] = useState(entity.mjml_content.length > 0 ? true : false);
     const [mobileView, setMobileView] = useState(false);
 
     let style = mobileView
         ? { width: '320px', height: '640px' }
         : { width: '1024px', height: '768px' };
+
+
 
     // constructor(props) {
     //     super(props);
@@ -41,13 +43,23 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
     //         errors: props.errors,
     //         mjml_editor: true,
     //         mobileView: false,
-    //     };
+    //     };    
 
-    //     this.handleChange = this.handleChange.bind(this);
-    //     this.handleSubmit = this.handleSubmit.bind(this);
-    //     this.handlePreview = this.handlePreview.bind(this);
-    //     this.handleCodeMirrorChange = this.handleCodeMirrorChange.bind(this);
-    // }
+    useEffect(() => {
+
+        scrollToError(errors);
+
+        if (!shallowEqual(stateEntity, entity)) {
+            setStateEntity({ ...entity })
+            setStateErrors({})
+            if (entity.mjml_content.length > 0) setMjmlEditor(true);
+        }
+
+        if (!shallowEqual(stateErrors, errors)) {
+            setStateErrors({ ...errors })
+        }
+
+    }, [errors, entity])
 
     // componentDidUpdate(prevProps, prevState, snapshot) {
     //     const state = {};
@@ -198,7 +210,9 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                         className={`btn btn-primary ${mjmlEditor ? 'active' : null}`} value={T.translate("emails.display_mjml")} />
                     {` `}
                     <input type="button" onClick={() => setMjmlEditor(false)}
-                        className={`btn btn-primary ${!mjmlEditor ? 'active' : null}`} value={T.translate("emails.display_html")} />
+                        className={`btn btn-primary ${!mjmlEditor ? 'active' : null}`} value={T.translate("emails.display_html")} />                        
+                    <input type="button" onClick={handlePreview} disabled={!stateEntity.id}
+                        className="btn btn-primary pull-right" value={T.translate("emails.preview")} />
                 </div>
                 <div className="col-md-12">
                     {mjmlEditor ?
@@ -257,7 +271,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                         <>
                             <input type="button" onClick={() => setMobileView(!mobileView)}
                                 className={`btn btn-primary`} value={mobileView ? T.translate("emails.display_desktop") : T.translate("emails.display_mobile")} />
-                            <br/><br/>
+                            <br /><br />
                             <iframe
                                 style={{ ...style, border: '1px solid #ccc' }}
                                 id={'preview'}
@@ -272,9 +286,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
             <div className="row">
                 <div className="col-md-12 submit-buttons">
                     <input type="button" onClick={handleSubmit}
-                        className="btn btn-primary pull-right" value={T.translate("general.save")} />
-                    <input type="button" onClick={handlePreview} disabled={!stateEntity.id}
-                        className="btn btn-primary pull-right" value={T.translate("emails.preview")} />
+                        className="btn btn-primary pull-right" value={T.translate("general.save")} />                    
                     {/*<input type="button" onClick={this.handleSendTest}
                             className="btn btn-primary pull-right" value={T.translate("emails.send_test")}/>*/}
                 </div>
