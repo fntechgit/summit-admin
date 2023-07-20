@@ -18,6 +18,8 @@ import { initLogOut} from 'openstack-uicore-foundation/lib/security/methods';
 import Swal from "sweetalert2";
 import { OR_FILTER } from "./constants";
 
+import emailTemplateDefaultValues from '../data/email_template_variables_sample.json'
+
 export const trim = (string, length) => {
     return string.length > length ?
         string.substring(0, length - 3) + "..." :
@@ -277,4 +279,17 @@ export const parseSpeakerAuditLog = (logString) => {
   }
 
   return relevantChanges.join('|');
+}
+export const formatInitialJson = (template) => {
+    const regex = /{{(.*?)}}/g;
+    const matches = template.match(regex) || [];
+    console.log('matches...', matches);
+    const json_keys = matches.map(match => match.slice(2, -2).trim());    
+    let default_json = {}
+    json_keys.forEach(variable => {
+        if (emailTemplateDefaultValues.hasOwnProperty(variable)) {
+            default_json[variable] = emailTemplateDefaultValues[variable];
+        } 
+    });    
+    return default_json;
 }

@@ -30,6 +30,7 @@ export const DEFAULT_ENTITY = {
     id              : 0,
     identifier      : '',
     html_content    : '',
+    mjml_content    : '',
     plain_content   : '',
     from_email      : '',
     subject         : '',
