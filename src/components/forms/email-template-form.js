@@ -27,6 +27,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
     const [stateEntity, setStateEntity] = useState({ ...entity });
     const [stateErrors, setStateErrors] = useState(errors);
     const [mjmlEditor, setMjmlEditor] = useState(entity.mjml_content.length > 0 ? true : false);
+    const [previewView, setPreviewView] = useState(false);
     const [mobileView, setMobileView] = useState(false);
 
     let style = mobileView
@@ -47,7 +48,16 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
             setStateErrors({ ...errors })
         }
 
-    }, [errors, entity])
+    }, [errors, entity]);
+
+    useEffect(() => {
+        setStateEntity({ ...entity });
+        setPreviewView(false);
+    }, []);
+
+    useEffect(() => {
+        if(preview !== null && preview.length > 0) setPreviewView(true);
+    }, [preview])
 
     useEffect(() => {
         if (mjmlEditor) {
@@ -176,16 +186,21 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
             </div>
             <div className="row form-group">
                 <div className="col-md-12">
-                    <input type="button" onClick={() => setMjmlEditor(true)}
-                        className={`btn btn-primary ${mjmlEditor ? 'active' : null}`} value={T.translate("emails.display_mjml")} />
+                    <input type="button" onClick={() => { setMjmlEditor(true); setPreviewView(false)}}
+                        className={`btn btn-primary ${!previewView && mjmlEditor ? 'active' : null}`} value={T.translate("emails.display_mjml")} />
                     {` `}
-                    <input type="button" onClick={() => setMjmlEditor(false)}
-                        className={`btn btn-primary ${!mjmlEditor ? 'active' : null}`} value={T.translate("emails.display_html")} />                        
+                    <input type="button" onClick={() => { setMjmlEditor(false); setPreviewView(false)}}
+                        className={`btn btn-primary ${!previewView && !mjmlEditor ? 'active' : null}`} value={T.translate("emails.display_html")} />
+                    {` `}
+                    {preview && <input type="button" disabled={!preview} onClick={() => setPreviewView(!previewView)}
+                        className={`btn btn-primary ${previewView ? 'active' : null}`} value={T.translate("emails.display_preview")} />
+                    }
                     <input type="button" onClick={handlePreview} disabled={!stateEntity.id}
                         className="btn btn-primary pull-right" value={T.translate("emails.preview")} />
                 </div>
                 <div className="col-md-12">
-                    {mjmlEditor ?
+                    {!previewView ?
+                        mjmlEditor ?
                         <>
                             <label>
                                 {T.translate("emails.mjml_content")}
@@ -232,13 +247,12 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                                 extensions={[html({ autoCloseTags: true, matchClosingTags: true, selfClosingTags: true })]}
                             />
                         </>
-                    }
-                </div>
-            </div>
-            {preview &&
-                <div className="row form-group">
-                    <div className="col-md-12">
+                        :
                         <>
+                            <label>
+                                {T.translate("emails.preview_title")}
+                            </label>
+                            <br />
                             <input type="button" onClick={() => setMobileView(!mobileView)}
                                 className={`btn btn-primary`} value={mobileView ? T.translate("emails.display_desktop") : T.translate("emails.display_mobile")} />
                             <br /><br />
@@ -250,9 +264,9 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                                 srcDoc={preview}
                             />
                         </>
-                    </div>
+                    }
                 </div>
-            }
+            </div>
             <div className="row">
                 <div className="col-md-12 submit-buttons">
                     <input type="button" onClick={handleSubmit}
