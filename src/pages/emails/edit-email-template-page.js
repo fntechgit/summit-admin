@@ -27,7 +27,6 @@ import { sublime, sublimeInit } from '@uiw/codemirror-theme-sublime';
 import { json } from '@codemirror/lang-json';
 import { formatInitialJson } from '../../utils/methods';
 
-
 class EditEmailTemplatePage extends React.Component {
 
     constructor(props) {
@@ -82,7 +81,7 @@ class EditEmailTemplatePage extends React.Component {
     handlePreview() {
         const { entity } = this.props;
         this.setState({ showModal: true });
-        this.setState({ json_preview: JSON.stringify(formatInitialJson(entity.html_content)) })
+        this.setState({ json_preview: JSON.stringify(formatInitialJson(entity.html_content), null, 2) })
     }
 
     render() {
@@ -122,16 +121,15 @@ class EditEmailTemplatePage extends React.Component {
                                 <label> JSON <a href="https://jsonformatter.curiousconcept.com/" target="_blank">format</a></label>
                                 <CodeMirror
                                     id="json_preview"
-                                    value={json_preview}                                    
+                                    value={json_preview}
                                     onChange={(value, viewUpdate) => this.handleJsonChange(value, viewUpdate)}
                                     theme={sublimeInit({
                                         settings: {
                                             caret: '#c6c6c6',
                                             fontFamily: 'monospace',
-                                        },                                        
+                                        },
                                     })}
                                     extensions={[json()]}
-                                    className="code-mirror-custom" // Agrega una clase personalizada
                                 />
                             </div>
                             {/*
