@@ -27,6 +27,8 @@ import { sublime, sublimeInit } from '@uiw/codemirror-theme-sublime';
 import { json } from '@codemirror/lang-json';
 import { formatInitialJson } from '../../utils/methods';
 
+import emailTemplateDefaultValues from '../../data/email_template_variables_sample.json';
+
 class EditEmailTemplatePage extends React.Component {
 
     constructor(props) {
@@ -37,7 +39,7 @@ class EditEmailTemplatePage extends React.Component {
 
         this.state = {
             showModal: false,
-            json_preview: ''
+            json_preview: emailTemplateDefaultValues
         };
 
         if (!templateId) {
@@ -79,9 +81,8 @@ class EditEmailTemplatePage extends React.Component {
     }
 
     handlePreview() {
-        const { entity } = this.props;
         this.setState({ showModal: true });
-        this.setState({ json_preview: JSON.stringify(formatInitialJson(entity.html_content), null, 2) })
+        this.setState({ json_preview: JSON.stringify(emailTemplateDefaultValues, null, 2) });
     }
 
     render() {
