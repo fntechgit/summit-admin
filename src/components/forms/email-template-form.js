@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import { Dropdown, Input } from 'openstack-uicore-foundation/lib/components'
@@ -22,17 +22,24 @@ import { html } from '@codemirror/lang-html';
 import mjml2html from 'mjml-browser';
 import { isEmpty, scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
 
+import './email-template.less'
+
 const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRender }) => {
 
     const [stateEntity, setStateEntity] = useState({ ...entity });
     const [stateErrors, setStateErrors] = useState(errors);
     const [mjmlEditor, setMjmlEditor] = useState(entity.mjml_content.length > 0 ? true : false);
     const [previewView, setPreviewView] = useState(false);
+    const [codeOnly, setCodeOnly] = useState(false);
+    const [previewOnly, setPreviewOnly] = useState(false);
     const [mobileView, setMobileView] = useState(false);
+    const [scale, setScale] = useState(1)    
+
+    const previewRef = useRef(null);
 
     let style = mobileView
-        ? { width: '320px', height: '640px' }
-        : { width: '1024px', height: '768px' };
+        ? { width: '320px', height: `960px`, transform: `scale(${scale})` }
+        : { width: '800px', height: `960px`, transform: `scale(${scale})` };
 
     useEffect(() => {
 
@@ -56,7 +63,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
     }, []);
 
     useEffect(() => {
-        if(preview !== null && preview.length > 0) setPreviewView(true);
+        if (preview !== null && preview.length > 0) setPreviewView(true);
     }, [preview])
 
     useEffect(() => {
@@ -111,6 +118,30 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
         onSubmit(stateEntity, true);
         onRender();
     }
+
+    const calculatePreviewScale = () => {
+        const currentPreviewWidth = previewRef?.current?.offsetWidth;
+        if (mobileView) {
+            if (currentPreviewWidth < 320) {
+                const newScale = (currentPreviewWidth / 320);
+                setScale(newScale);
+            }
+        } else {
+            if (currentPreviewWidth < 800) {
+                const newScale = (currentPreviewWidth / 800);
+                setScale(newScale);
+            }
+        }
+
+    }
+
+    useEffect(() => {
+        calculatePreviewScale();
+        window.addEventListener("resize", calculatePreviewScale);
+        return () => {
+            window.removeEventListener("resize", calculatePreviewScale);
+        };
+    });
 
 
     const email_clients_ddl = clients ? clients.map(cli => ({ label: cli.name, value: cli.id })) : [];
@@ -186,12 +217,6 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
             </div>
             <div className="row form-group">
                 <div className="col-md-12">
-                    <input type="button" onClick={() => { setMjmlEditor(true); setPreviewView(false)}}
-                        className={`btn btn-primary ${!previewView && mjmlEditor ? 'active' : null}`} value={T.translate("emails.display_mjml")} />
-                    {` `}
-                    <input type="button" onClick={() => { setMjmlEditor(false); setPreviewView(false)}}
-                        className={`btn btn-primary ${!previewView && !mjmlEditor ? 'active' : null}`} value={T.translate("emails.display_html")} />
-                    {` `}
                     {preview && <input type="button" disabled={!preview} onClick={() => setPreviewView(!previewView)}
                         className={`btn btn-primary ${previewView ? 'active' : null}`} value={T.translate("emails.display_preview")} />
                     }
@@ -199,78 +224,118 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                         className="btn btn-primary pull-right" value={T.translate("emails.preview")} />
                 </div>
                 <div className="col-md-12">
-                    {!previewView ?
-                        mjmlEditor ?
-                        <>
-                            <label>
-                                {T.translate("emails.mjml_content")}
-                                {' using '}
-                                <a href="https://documentation.mjml.io/">
-                                    MJML format
-                                </a>
-                            </label>
-                            <CodeMirror
-                                id="mjml_content"
-                                value={stateEntity.mjml_content}
-                                onChange={(value, viewUpdate) => handleCodeMirrorMJMLChange(value, viewUpdate)}
-                                height="650px"
-                                theme={sublimeInit({
-                                    settings: {
-                                        caret: '#c6c6c6',
-                                        fontFamily: 'monospace',
+                    <div className='email-template-container'>
+                        <div className='email-template-buttons'>
+                            {!previewOnly &&
+                                <div>
+                                    {mjmlEditor ?
+                                        <>
+                                            <label>
+                                                {T.translate("emails.mjml_content")}
+                                                {' using '}
+                                                <a href="https://documentation.mjml.io/">
+                                                    MJML format
+                                                </a>
+                                            </label>
+                                            <br />
+                                            <input type="button" onClick={() => { setMjmlEditor(false); setPreviewView(false) }}
+                                                className={`btn btn-primary`} value={T.translate("emails.display_html")} />
+                                        </>
+                                        :
+                                        <>
+                                            <label>
+                                                {T.translate("emails.html_content")}
+                                                {' in '}
+                                                <a href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf">
+                                                    jinja format
+                                                </a>
+                                                {' *'}
+                                            </label>
+                                            <br />
+                                            <input type="button" onClick={() => { setMjmlEditor(true); setPreviewView(false) }}
+                                                className={`btn btn-primary`} value={T.translate("emails.display_mjml")} />
+                                        </>
                                     }
-                                })}
-                                extensions={[html({ autoCloseTags: true, matchClosingTags: true, selfClosingTags: true })]}
-                            />
-                        </>
-                        :
-                        <>
-                            <label>
-                                {T.translate("emails.html_content")}
-                                {' in '}
-                                <a href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf">
-                                    jinja format
-                                </a>
-                                {' *'}
-                            </label>
-                            <CodeMirror
-                                id="html_content"
-                                value={stateEntity.html_content}
-                                onChange={(value, viewUpdate) => handleCodeMirrorHTMLChange(value, viewUpdate)}
-                                height="650px"
-                                theme={sublimeInit({
-                                    settings: {
-                                        caret: '#c6c6c6',
-                                        fontFamily: 'monospace',
+                                </div>
+                            }
+                            {!codeOnly &&
+                                <div>
+                                    <label>
+                                        {T.translate("emails.preview_title")}
+                                    </label>
+                                    <br />
+                                    <input type="button" onClick={() => setMobileView(!mobileView)}
+                                        className={`btn btn-primary`} value={mobileView ? T.translate("emails.display_desktop") : T.translate("emails.display_mobile")} />
+                                </div>
+                            }
+                        </div>
+                        <br />
+                        <div className='email-template-content'>
+                            {!previewOnly &&
+                                <div className='email-template-code'>
+                                    {mjmlEditor ?
+                                        <CodeMirror
+                                            id="mjml_content"
+                                            value={stateEntity.mjml_content}
+                                            onChange={(value, viewUpdate) => handleCodeMirrorMJMLChange(value, viewUpdate)}
+                                            height='960px'
+                                            theme={sublimeInit({
+                                                settings: {
+                                                    caret: '#c6c6c6',
+                                                    fontFamily: 'monospace',
+                                                }
+                                            })}
+                                            extensions={[html({ autoCloseTags: true, matchClosingTags: true, selfClosingTags: true })]}
+                                        />
+                                        :
+                                        <CodeMirror
+                                            id="html_content"
+                                            value={stateEntity.html_content}
+                                            onChange={(value, viewUpdate) => handleCodeMirrorHTMLChange(value, viewUpdate)}
+                                            height='960px'
+                                            theme={sublimeInit({
+                                                settings: {
+                                                    caret: '#c6c6c6',
+                                                    fontFamily: 'monospace',
+                                                }
+                                            })}
+                                            extensions={[html({ autoCloseTags: true, matchClosingTags: true, selfClosingTags: true })]}
+                                        />
                                     }
-                                })}
-                                extensions={[html({ autoCloseTags: true, matchClosingTags: true, selfClosingTags: true })]}
-                            />
-                        </>
-                        :
-                        <>
-                            <label>
-                                {T.translate("emails.preview_title")}
-                            </label>
-                            <br />
-                            <input type="button" onClick={() => setMobileView(!mobileView)}
-                                className={`btn btn-primary`} value={mobileView ? T.translate("emails.display_desktop") : T.translate("emails.display_mobile")} />
-                            <br /><br />
-                            <iframe
-                                style={{ ...style, border: '1px solid #ccc' }}
-                                id={'preview'}
-                                name={'preview'}
-                                sandbox={'allow-same-origin'}
-                                srcDoc={preview}
-                            />
-                        </>
-                    }
+                                </div>
+                            }
+                            <div className={`email-template-content-buttons ${previewOnly || codeOnly ? 'single-button' : ''}`}>
+                                {!codeOnly &&
+                                    <button type="button" onClick={() => previewOnly ? setPreviewOnly(false) : setCodeOnly(true)}>
+                                        <i class="fa fa-chevron-right"></i>
+                                    </button>
+
+                                }
+                                {!previewOnly &&
+                                    <button type="button" onClick={() => codeOnly ? setCodeOnly(false) : setPreviewOnly(true)}>
+                                        <i class="fa fa-chevron-left"></i>
+                                    </button>
+                                }
+                            </div>
+                            {!codeOnly &&
+                                <div className='email-template-preview' ref={previewRef}>
+                                    <iframe
+                                        style={{ ...style }}
+                                        id={'preview'}
+                                        name={'preview'}
+                                        sandbox={'allow-same-origin'}
+                                        srcDoc={stateEntity.html_content}
+                                    />
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
             <div className="row">
                 <div className="col-md-12 submit-buttons">
                     <input type="button" onClick={handleSubmit}
-                        className="btn btn-primary pull-right" value={T.translate("general.save")} />                    
+                        className="btn btn-primary pull-right" value={T.translate("general.save")} />
                     {/*<input type="button" onClick={this.handleSendTest}
                             className="btn btn-primary pull-right" value={T.translate("emails.send_test")}/>*/}
                 </div>

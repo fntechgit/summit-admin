@@ -55,6 +55,7 @@ class EditEmailTemplatePage extends React.Component {
         this.handleRender = this.handleRender.bind(this);
         this.handlePreview = this.handlePreview.bind(this);
         this.handleJsonChange = this.handleJsonChange.bind(this);
+        this.handlePopupClose = this.handlePopupClose.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -72,6 +73,10 @@ class EditEmailTemplatePage extends React.Component {
 
     handleJsonChange(value, changes) {
         this.setState({ json_preview: value });
+    }
+
+    handlePopupClose() {        
+        this.setState({ showModal: false });
     }
 
     handleRender() {
@@ -149,6 +154,9 @@ class EditEmailTemplatePage extends React.Component {
                         <button className="btn btn-primary" onClick={this.handleRender}>
                             {T.translate("emails.render")}
                         </button>
+                        <button className="btn btn-primary" onClick={this.handlePopupClose}>
+                            {T.translate("emails.close")}
+                        </button>                        
                     </Modal.Footer>
                 </Modal>
             </div>
