@@ -33,7 +33,8 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
     const [codeOnly, setCodeOnly] = useState(false);
     const [previewOnly, setPreviewOnly] = useState(false);
     const [mobileView, setMobileView] = useState(false);
-    const [scale, setScale] = useState(1)    
+    const [scale, setScale] = useState(1)
+    const [singleTab, setSingleTab] = useState(false);
 
     const previewRef = useRef(null);
 
@@ -61,6 +62,15 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
         setStateEntity({ ...entity });
         setPreviewView(false);
     }, []);
+
+    useEffect(() => {
+        if (singleTab) {
+            setCodeOnly(true);
+        } else {
+            setCodeOnly(false);
+            setPreviewOnly(false);
+        }
+    }, [singleTab]);
 
     useEffect(() => {
         if (preview !== null && preview.length > 0) setPreviewView(true);
@@ -119,7 +129,12 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
         onRender();
     }
 
-    const calculatePreviewScale = () => {
+    const handleResizeWindow = () => {
+        if (window.innerWidth < 992) {
+            setSingleTab(true)
+        } else {
+            setSingleTab(false)
+        };
         const currentPreviewWidth = previewRef?.current?.offsetWidth;
         if (mobileView) {
             if (currentPreviewWidth < 320) {
@@ -132,14 +147,31 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                 setScale(newScale);
             }
         }
+    }
 
+    const handleTabChange = (ev) => {
+        const { id } = ev.target;
+        if (singleTab) {
+            if (id === 'preview') {
+                setCodeOnly(false);
+                setPreviewOnly(true);
+            } else {
+                setCodeOnly(true);
+                setPreviewOnly(false);
+            }
+        } else {
+            id === 'preview' ?
+                codeOnly ? setCodeOnly(false) : setPreviewOnly(true)
+                :
+                previewOnly ? setPreviewOnly(false) : setCodeOnly(true)
+        }
     }
 
     useEffect(() => {
-        calculatePreviewScale();
-        window.addEventListener("resize", calculatePreviewScale);
+        handleResizeWindow();
+        window.addEventListener("resize", handleResizeWindow);
         return () => {
-            window.removeEventListener("resize", calculatePreviewScale);
+            window.removeEventListener("resize", handleResizeWindow);
         };
     });
 
@@ -306,13 +338,13 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                             }
                             <div className={`email-template-content-buttons ${previewOnly || codeOnly ? 'single-button' : ''}`}>
                                 {!codeOnly &&
-                                    <button type="button" onClick={() => previewOnly ? setPreviewOnly(false) : setCodeOnly(true)}>
+                                    <button type="button" id="code" onClick={(ev) => handleTabChange(ev)}>
                                         <i class="fa fa-chevron-right"></i>
                                     </button>
 
                                 }
                                 {!previewOnly &&
-                                    <button type="button" onClick={() => codeOnly ? setCodeOnly(false) : setPreviewOnly(true)}>
+                                    <button type="button" id="preview" onClick={(ev) => handleTabChange(ev)}>
                                         <i class="fa fa-chevron-left"></i>
                                     </button>
                                 }
