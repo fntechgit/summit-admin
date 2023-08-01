@@ -91,13 +91,13 @@ class EditEmailTemplatePage extends React.Component {
     }
 
     render() {
-        const { currentSummit, entity, errors, match, clients, preview, render_errors } = this.props;
+        const { currentSummit, entity, templateLoading, errors, match, clients, preview, render_errors } = this.props;
         const { showModal, json_preview } = this.state;
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
         const breadcrumb = (entity.id) ? entity.identifier : T.translate("general.new");
 
         return (
-            <div className="container edit-template-page">
+            <div className="edit-template-page" style={{backgroundColor: 'white', padding: '2vh 2vw', margin: '2vh 2vw'}}>
                 <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
                 <h3>{title} {T.translate("emails.email_template")}</h3>
                 <hr />
@@ -109,6 +109,10 @@ class EditEmailTemplatePage extends React.Component {
                     onSubmit={this.props.saveEmailTemplate}
                     onRender={this.handlePreview}
                     preview={preview}
+                    jsonPreview={json_preview}
+                    renderErrors={render_errors}
+                    templateLoading={templateLoading}
+                    previewEmailTemplate={this.props.previewEmailTemplate}
                 />
                 <Modal className="preview-email-template-modal" show={showModal} onHide={() => { this.setState({ showModal: false }) }} >
                     <Modal.Header closeButton>
@@ -151,9 +155,6 @@ class EditEmailTemplatePage extends React.Component {
                         </div>
                     </Modal.Body>
                     <Modal.Footer>
-                        <button className="btn btn-primary" onClick={this.handleRender}>
-                            {T.translate("emails.render")}
-                        </button>
                         <button className="btn btn-primary" onClick={this.handlePopupClose}>
                             {T.translate("emails.close")}
                         </button>                        

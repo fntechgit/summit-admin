@@ -11,10 +11,11 @@
  * limitations under the License.
  **/
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { Dropdown, Input } from 'openstack-uicore-foundation/lib/components'
+import _ from 'lodash';
+import { AjaxLoader, Dropdown, Input } from 'openstack-uicore-foundation/lib/components'
 import EmailTemplateInput from '../inputs/email-template-input'
 import CodeMirror from '@uiw/react-codemirror';
 import { sublime, sublimeInit } from '@uiw/codemirror-theme-sublime';
@@ -24,12 +25,11 @@ import { isEmpty, scrollToError, shallowEqual, hasErrors } from "../../utils/met
 
 import './email-template.less'
 
-const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRender }) => {
+const EmailTemplateForm = ({ entity, errors, clients, preview, jsonPreview, templateLoading, renderErrors, onSubmit, onRender, previewEmailTemplate }) => {
 
     const [stateEntity, setStateEntity] = useState({ ...entity });
     const [stateErrors, setStateErrors] = useState(errors);
     const [mjmlEditor, setMjmlEditor] = useState(entity.mjml_content.length > 0 ? true : false);
-    const [previewView, setPreviewView] = useState(false);
     const [codeOnly, setCodeOnly] = useState(false);
     const [previewOnly, setPreviewOnly] = useState(false);
     const [mobileView, setMobileView] = useState(false);
@@ -60,7 +60,6 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
 
     useEffect(() => {
         setStateEntity({ ...entity });
-        setPreviewView(false);
     }, []);
 
     useEffect(() => {
@@ -73,8 +72,15 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
     }, [singleTab]);
 
     useEffect(() => {
-        if (preview !== null && preview.length > 0) setPreviewView(true);
-    }, [preview])
+        renderTemplate()
+    }, [stateEntity.html_content])
+
+    const renderTemplate = useCallback(
+        _.debounce(async () => {
+            previewEmailTemplate(entity.id, jsonPreview, stateEntity.html_content);
+        }, 500),
+        []
+    );
 
     useEffect(() => {
         if (mjmlEditor) {
@@ -249,11 +255,8 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
             </div>
             <div className="row form-group">
                 <div className="col-md-12">
-                    {preview && <input type="button" disabled={!preview} onClick={() => setPreviewView(!previewView)}
-                        className={`btn btn-primary ${previewView ? 'active' : null}`} value={T.translate("emails.display_preview")} />
-                    }
                     <input type="button" onClick={handlePreview} disabled={!stateEntity.id}
-                        className="btn btn-primary pull-right" value={T.translate("emails.preview")} />
+                        className="btn btn-primary pull-right" value={T.translate("emails.edit_json")} />
                 </div>
                 <div className="col-md-12">
                     <div className='email-template-container'>
@@ -270,7 +273,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                                                 </a>
                                             </label>
                                             <br />
-                                            <input type="button" onClick={() => { setMjmlEditor(false); setPreviewView(false) }}
+                                            <input type="button" onClick={() => { setMjmlEditor(false) }}
                                                 className={`btn btn-primary`} value={T.translate("emails.display_html")} />
                                         </>
                                         :
@@ -284,7 +287,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                                                 {' *'}
                                             </label>
                                             <br />
-                                            <input type="button" onClick={() => { setMjmlEditor(true); setPreviewView(false) }}
+                                            <input type="button" onClick={() => { setMjmlEditor(true) }}
                                                 className={`btn btn-primary`} value={T.translate("emails.display_mjml")} />
                                         </>
                                     }
@@ -350,15 +353,29 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, onSubmit, onRende
                                 }
                             </div>
                             {!codeOnly &&
-                                <div className='email-template-preview' ref={previewRef}>
-                                    <iframe
-                                        style={{ ...style }}
-                                        id={'preview'}
-                                        name={'preview'}
-                                        sandbox={'allow-same-origin'}
-                                        srcDoc={stateEntity.html_content}
-                                    />
-                                </div>
+                                <>
+                                    <div className='email-template-preview' ref={previewRef}>
+                                        <AjaxLoader show={templateLoading} size={120} relative={true} />
+                                        {renderErrors.length > 0 ?
+                                            <div className='container'>
+                                                There is an error trying to render the email template:
+                                                <ul>
+                                                    {renderErrors.map(err => (
+                                                        <li>{err}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                            :
+                                            <iframe
+                                                style={{ ...style }}
+                                                id={'preview'}
+                                                name={'preview'}
+                                                sandbox={'allow-same-origin'}
+                                                srcDoc={preview}
+                                            />
+                                        }
+                                    </div>
+                                </>
                             }
                         </div>
                     </div>

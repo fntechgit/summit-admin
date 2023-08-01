@@ -49,6 +49,7 @@ export const RECEIVE_EMAILS_BY_USER  = 'RECEIVE_EMAILS_BY_USER';
 export const REQUEST_EMAIL_CLIENTS   = 'REQUEST_EMAIL_CLIENTS';
 export const RECEIVE_EMAIL_CLIENTS   = 'RECEIVE_EMAIL_CLIENTS';
 
+export const REQUEST_TEMPLATE_RENDER    = 'REQUEST_TEMPLATE_RENDER';
 export const TEMPLATE_RENDER_RECEIVED   = 'TEMPLATE_RENDER_RECEIVED';
 export const VALIDATE_RENDER            = 'VALIDATE_RENDER';
 
@@ -182,7 +183,7 @@ export const deleteEmailTemplate = (templateId) => async (dispatch, getState) =>
 };
 
 
-export const previewEmailTemplate = (templateId, json) => async (dispatch, getState) => {
+export const previewEmailTemplate = (templateId, json, html) => async (dispatch, getState) => {
 
     const accessToken = await getAccessTokenSafely();
 
@@ -191,10 +192,10 @@ export const previewEmailTemplate = (templateId, json) => async (dispatch, getSt
     };
 
     return putRequest(
-        null,
+        createAction(REQUEST_TEMPLATE_RENDER),
         createAction(TEMPLATE_RENDER_RECEIVED),
         `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${templateId}/render`,
-        {payload: JSON.parse(json)},
+        {payload: json, html},
         renderErrorHandler
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
