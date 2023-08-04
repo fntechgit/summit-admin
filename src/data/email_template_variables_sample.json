@@ -50,5 +50,7 @@
     "edit_ticket_link": "https://example-url.com",
     "set_password_link": "https://example-url.com",
     "set_password_link_to_registration": "https://example-url.com",
-    "need_details": false
+    "need_details": false,
+    "order_credit_card_type": "order_credit_card_type",
+    "order_credit_card_4number": "order_credit_card_4number"
 }

@@ -20,12 +20,15 @@ import
     RECEIVE_EMAIL_CLIENTS,
     TEMPLATE_RENDER_RECEIVED,
     VALIDATE_RENDER,
-    REQUEST_TEMPLATE_RENDER
+    REQUEST_TEMPLATE_RENDER,
+    UPDATE_JSON_DATA
 } from '../../actions/email-actions';
 
 import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+
+import emailTemplateDefaultValues from '../../data/email_template_variables_sample.json';
 
 export const DEFAULT_ENTITY = {
     id              : 0,
@@ -48,6 +51,7 @@ const DEFAULT_STATE = {
     templateLoading : false,
     clients         : null,
     preview         : null,
+    json_data       : emailTemplateDefaultValues,
     errors          : {},
     render_errors   : []
 };
@@ -100,6 +104,10 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
         break;
         case VALIDATE_RENDER: {
             return {...state, templateLoading: false, render_errors: payload.errors };
+        }
+        break;
+        case UPDATE_JSON_DATA: {
+            return {...state,  json_data: payload };
         }
         break;
         case VALIDATE: {

@@ -18,7 +18,7 @@ import { Breadcrumb } from 'react-breadcrumbs';
 import EmailTemplateForm from '../../components/forms/email-template-form';
 import { getSummitById } from '../../actions/summit-actions';
 import { RawHTML } from 'openstack-uicore-foundation/lib/components';
-import { getEmailTemplate, resetTemplateForm, saveEmailTemplate, getAllClients, previewEmailTemplate } from "../../actions/email-actions";
+import { getEmailTemplate, resetTemplateForm, saveEmailTemplate, getAllClients, previewEmailTemplate, updateTemplateJsonData } from "../../actions/email-actions";
 import { Modal } from "react-bootstrap";
 
 import '../../styles/edit-email-template-page.less';
@@ -32,14 +32,15 @@ import emailTemplateDefaultValues from '../../data/email_template_variables_samp
 class EditEmailTemplatePage extends React.Component {
 
     constructor(props) {
-        const { clients, match } = props;
+        const { clients, match, json_data } = props;
         const templateId = match.params.template_id;
 
         super(props);
 
         this.state = {
             showModal: false,
-            json_preview: emailTemplateDefaultValues
+            json_data: json_data,
+            json_preview: json_data
         };
 
         if (!templateId) {
@@ -52,7 +53,6 @@ class EditEmailTemplatePage extends React.Component {
             props.getAllClients();
         }
 
-        this.handleRender = this.handleRender.bind(this);
         this.handlePreview = this.handlePreview.bind(this);
         this.handleJsonChange = this.handleJsonChange.bind(this);
         this.handlePopupClose = this.handlePopupClose.bind(this);
@@ -75,24 +75,20 @@ class EditEmailTemplatePage extends React.Component {
         this.setState({ json_preview: value });
     }
 
-    handlePopupClose() {        
-        this.setState({ showModal: false });
-    }
-
-    handleRender() {
-        const { entity, render_errors } = this.props;
+    handlePopupClose() {
         const { json_preview } = this.state;
-        this.props.previewEmailTemplate(entity.id, json_preview).then(() => this.setState({ showModal: render_errors.length > 0 ? true : false }));
+        const parsedJSON = JSON.parse(json_preview);
+        this.props.updateTemplateJsonData(parsedJSON).then(() => this.setState({ showModal: false, json_data: parsedJSON, json_preview }));
     }
 
-    handlePreview() {
-        this.setState({ showModal: true });
-        this.setState({ json_preview: JSON.stringify(emailTemplateDefaultValues, null, 2) });
+    handlePreview() {        
+        const { json_data } = this.state;
+        this.setState({ ...this.state, showModal: true, json_preview: JSON.stringify(json_data, null, 2) });
     }
 
     render() {
         const { currentSummit, entity, templateLoading, errors, match, clients, preview, render_errors } = this.props;
-        const { showModal, json_preview } = this.state;
+        const { showModal, json_preview, json_data } = this.state;
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
         const breadcrumb = (entity.id) ? entity.identifier : T.translate("general.new");
 
@@ -109,14 +105,14 @@ class EditEmailTemplatePage extends React.Component {
                     onSubmit={this.props.saveEmailTemplate}
                     onRender={this.handlePreview}
                     preview={preview}
-                    jsonPreview={json_preview}
                     renderErrors={render_errors}
                     templateLoading={templateLoading}
+                    templateJsonData={json_data}
                     previewEmailTemplate={this.props.previewEmailTemplate}
                 />
-                <Modal className="preview-email-template-modal" show={showModal} onHide={() => { this.setState({ showModal: false }) }} >
+                <Modal className="preview-email-template-modal" show={showModal} onHide={() => { this.setState({ ...this.state, showModal: false }) }} >
                     <Modal.Header closeButton>
-                        <Modal.Title>{T.translate("emails.preview")}</Modal.Title>
+                        <Modal.Title>{T.translate("emails.sample_data")}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         {render_errors.length > 0 &&
@@ -141,22 +137,12 @@ class EditEmailTemplatePage extends React.Component {
                                     })}
                                     extensions={[json()]}
                                 />
-                            </div>
-                            {/*
-                            <br />
-                            <br />
-                            <div className="col-md-12">
-                                <label> {T.translate("emails.preview")} </label>
-                                <div className="email-preview">
-                                    {preview && <RawHTML>{preview}</RawHTML>}                                    
-                                </div>
-
-                            </div> */}
+                            </div>                            
                         </div>
                     </Modal.Body>
                     <Modal.Footer>
                         <button className="btn btn-primary" onClick={this.handlePopupClose}>
-                            {T.translate("emails.close")}
+                            {T.translate("emails.update")}
                         </button>                        
                     </Modal.Footer>
                 </Modal>
@@ -179,6 +165,7 @@ export default connect(
         resetTemplateForm,
         saveEmailTemplate,
         getAllClients,
-        previewEmailTemplate
+        previewEmailTemplate,
+        updateTemplateJsonData
     }
 )(EditEmailTemplatePage);

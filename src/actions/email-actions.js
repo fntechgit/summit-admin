@@ -51,6 +51,7 @@ export const RECEIVE_EMAIL_CLIENTS   = 'RECEIVE_EMAIL_CLIENTS';
 
 export const REQUEST_TEMPLATE_RENDER    = 'REQUEST_TEMPLATE_RENDER';
 export const TEMPLATE_RENDER_RECEIVED   = 'TEMPLATE_RENDER_RECEIVED';
+export const UPDATE_JSON_DATA           = 'UPDATE_JSON_DATA';
 export const VALIDATE_RENDER            = 'VALIDATE_RENDER';
 
 
@@ -314,6 +315,10 @@ export const getSentEmails = (term = null, page = 1, perPage = 10, order = 'id',
         }
     );
 };
+
+export const updateTemplateJsonData = (data) => async (dispatch, getState) => {
+    return dispatch(createAction(UPDATE_JSON_DATA)(data));
+}
 
 
 /************************************************************************************************************/

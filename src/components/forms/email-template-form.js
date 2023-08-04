@@ -25,7 +25,7 @@ import { isEmpty, scrollToError, shallowEqual, hasErrors } from "../../utils/met
 
 import './email-template.less'
 
-const EmailTemplateForm = ({ entity, errors, clients, preview, jsonPreview, templateLoading, renderErrors, onSubmit, onRender, previewEmailTemplate }) => {
+const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, renderErrors, onSubmit, onRender, templateJsonData, previewEmailTemplate }) => {
 
     const [stateEntity, setStateEntity] = useState({ ...entity });
     const [stateErrors, setStateErrors] = useState(errors);
@@ -34,7 +34,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, jsonPreview, temp
     const [previewOnly, setPreviewOnly] = useState(false);
     const [mobileView, setMobileView] = useState(false);
     const [scale, setScale] = useState(1)
-    const [singleTab, setSingleTab] = useState(false);
+    const [singleTab, setSingleTab] = useState(false);    
 
     const previewRef = useRef(null);
 
@@ -71,16 +71,19 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, jsonPreview, temp
         }
     }, [singleTab]);
 
-    useEffect(() => {
-        renderTemplate()
-    }, [stateEntity.html_content])
+    const debouncedRenderTemplate = useRef(
+        _.debounce(async (htmlContent) => {
+            previewEmailTemplate(entity.id, templateJsonData, htmlContent);
+        }, 500)
+    ).current;
 
-    const renderTemplate = useCallback(
-        _.debounce(async () => {
-            previewEmailTemplate(entity.id, jsonPreview, stateEntity.html_content);
-        }, 500),
-        []
-    );
+    useEffect(() => {
+        debouncedRenderTemplate(stateEntity.html_content);
+    }, [stateEntity.html_content, debouncedRenderTemplate])
+
+    useEffect(() => {
+        previewEmailTemplate(entity.id, templateJsonData, stateEntity.html_content);
+    }, [templateJsonData]);
 
     useEffect(() => {
         if (mjmlEditor) {
@@ -128,11 +131,10 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, jsonPreview, temp
         onSubmit(stateEntity);
     }
 
-    const handlePreview = (ev) => {
+    const handleJsonDataEdit = (ev) => {
         ev.preventDefault();
 
-        onSubmit(stateEntity, true);
-        onRender();
+        onRender()
     }
 
     const handleResizeWindow = () => {
@@ -255,7 +257,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, jsonPreview, temp
             </div>
             <div className="row form-group">
                 <div className="col-md-12">
-                    <input type="button" onClick={handlePreview} disabled={!stateEntity.id}
+                    <input type="button" onClick={handleJsonDataEdit} disabled={!stateEntity.id}
                         className="btn btn-primary pull-right" value={T.translate("emails.edit_json")} />
                 </div>
                 <div className="col-md-12">
