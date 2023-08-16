@@ -156,11 +156,11 @@ class PurchaseOrderForm extends React.Component {
                         </div>
                         <div className="col-md-2">
                             <label> {T.translate("edit_purchase_order.credit_card_type")}</label><br/>
-                            {entity.credit_card_type}
+                            {entity?.credit_card_type}
                         </div>
                         <div className="col-md-3">
                             <label> {T.translate("edit_purchase_order.credit_card_4number")}</label><br/>
-                            {entity.credit_card_4number}
+                            {entity?.credit_card_4number}
                         </div>
                     </div>
                     <div className="row form-group">
