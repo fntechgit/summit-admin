@@ -259,7 +259,7 @@ export const parseSpeakerAuditLog = (logString) => {
     const logEntries = logString.split('|');
     const userChanges = {};
     for (const entry of logEntries) {
-        const emailMatch = entry.match(/\b[\w.-]+@[\w.-]+\.\w{2,}\b/);
+        const emailMatch = entry.match(/[\w.+-]+@[\w.-]+\.\w{2,}\b/);
         if (!emailMatch) continue;
         const email = emailMatch[0];
         if (entry.includes('added')) {
