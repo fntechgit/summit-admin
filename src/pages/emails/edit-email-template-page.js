@@ -98,6 +98,7 @@ class EditEmailTemplatePage extends React.Component {
                 <h3>{title} {T.translate("emails.email_template")}</h3>
                 <hr />
                 <EmailTemplateForm
+                    match={match}
                     currentSummit={currentSummit}
                     entity={entity}
                     clients={clients}

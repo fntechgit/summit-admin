@@ -40,16 +40,18 @@ const default_mjml_content = `
 </mjml>
 `;
 
-const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, renderErrors, onSubmit, onRender, templateJsonData, previewEmailTemplate }) => {
+const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLoading, renderErrors, onSubmit, onRender, templateJsonData, previewEmailTemplate }) => {
 
     const [stateEntity, setStateEntity] = useState({ ...entity });
     const [stateErrors, setStateErrors] = useState(errors);
-    const [mjmlEditor, setMjmlEditor] = useState(entity.mjml_content.length > 0 ? true : entity.html_content ? false : true);
+    const [mjmlEditor, setMjmlEditor] = useState(null);
     const [codeOnly, setCodeOnly] = useState(false);
     const [previewOnly, setPreviewOnly] = useState(false);
     const [mobileView, setMobileView] = useState(false);
     const [scale, setScale] = useState(1)
     const [singleTab, setSingleTab] = useState(false);
+    const [templateLoaded, setTemplateLoaded] = useState(false);
+    const [previewLoaded, setPreviewLoaded] = useState(false);
 
     const previewRef = useRef(null);
 
@@ -61,11 +63,11 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, 
 
         scrollToError(errors);
 
-        if (!shallowEqual(stateEntity, entity)) {
-            setStateEntity({ ...entity })
-            setStateErrors({})
-            if (entity.mjml_content.length > 0) setMjmlEditor(true);
-        }
+        // check if the current entity is sync with template_id param
+        const templateId = match.params.template_id;
+        if (parseInt(templateId) === entity.id || (entity.id === 0 && !templateId)) {
+            setTemplateLoaded(true);
+        }        
 
         if (!shallowEqual(stateErrors, errors)) {
             setStateErrors({ ...errors })
@@ -74,12 +76,17 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, 
     }, [errors, entity]);
 
     useEffect(() => {
-        if (!entity.mjml_content) {
-            setStateEntity({...entity, mjml_content: default_mjml_content})
-        } else {
-            setStateEntity({...entity});
+        // if entity is correctly loaded, set state for entity use
+        if(templateLoaded) {
+            if (!entity.mjml_content) {
+                setStateEntity({...entity, mjml_content: default_mjml_content})
+            } else {                
+                setStateEntity({ ...entity })
+            }
+            setStateErrors({})
+            setMjmlEditor(entity.mjml_content.length > 0 ? true : entity.html_content ? false : true);
         }
-    }, []);
+    }, [templateLoaded]);    
 
     useEffect(() => {
         if (singleTab) {
@@ -92,7 +99,10 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, 
 
     const debouncedRenderTemplate = useRef(
         _.debounce(async (htmlContent) => {
-            previewEmailTemplate(entity.id, templateJsonData, htmlContent);
+            previewEmailTemplate(entity.id, templateJsonData, htmlContent).then(() => {
+                // wait until first API email preview to display template on screen
+                if (!previewLoaded) setPreviewLoaded(true)
+            });
         }, 500)
     ).current;
 
@@ -280,126 +290,131 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, 
                         className="btn btn-primary pull-right" value={T.translate("emails.edit_json")} />
                 </div>
                 <div className="col-md-12">
-                    <div className='email-template-container'>
-                        <div className='email-template-buttons'>
-                            {!previewOnly &&
-                                <div>
-                                    {mjmlEditor ?
-                                        <>
-                                            <label>
-                                                {T.translate("emails.mjml_content")}
-                                                {' using '}
-                                                <a target="_blank" href="https://documentation.mjml.io/">
-                                                    MJML format
-                                                </a>
-                                            </label>
-                                            <br />
-                                            <input type="button" onClick={() => { setMjmlEditor(false) }}
-                                                className={`btn btn-primary`} value={T.translate("emails.display_html")} />
-                                        </>
-                                        :
-                                        <>
-                                            <label>
-                                                {T.translate("emails.html_content")}
-                                                {' in '}
-                                                <a target="_blank" href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf">
-                                                    jinja format
-                                                </a>
-                                                {' *'}
-                                            </label>
-                                            <br />
-                                            <input type="button" onClick={() => { setMjmlEditor(true) }}
-                                                className={`btn btn-primary`} value={T.translate("emails.display_mjml")} />
-                                        </>
-                                    }
-                                </div>
-                            }
-                            {!codeOnly &&
-                                <div>
-                                    <label>
-                                        {T.translate("emails.preview_title")}
-                                    </label>
-                                    <br />
-                                    <input type="button" onClick={() => setMobileView(!mobileView)}
-                                        className={`btn btn-primary`} value={mobileView ? T.translate("emails.display_desktop") : T.translate("emails.display_mobile")} />
-                                </div>
-                            }
-                        </div>
-                        <br />
-                        <div className='email-template-content'>
-                            {!previewOnly &&
-                                <div className='email-template-code'>
-                                    {mjmlEditor ?
-                                        <CodeMirror
-                                            id="mjml_content"
-                                            value={stateEntity.mjml_content}
-                                            onChange={(value, viewUpdate) => handleCodeMirrorMJMLChange(value, viewUpdate)}
-                                            height='960px'
-                                            theme={sublimeInit({
-                                                settings: {
-                                                    caret: '#c6c6c6',
-                                                    fontFamily: 'monospace',
-                                                }
-                                            })}
-                                            extensions={[html({ autoCloseTags: true, matchClosingTags: true, selfClosingTags: true })]}
-                                        />
-                                        :
-                                        <CodeMirror
-                                            id="html_content"
-                                            value={stateEntity.html_content}
-                                            onChange={(value, viewUpdate) => handleCodeMirrorHTMLChange(value, viewUpdate)}
-                                            height='960px'
-                                            theme={sublimeInit({
-                                                settings: {
-                                                    caret: '#c6c6c6',
-                                                    fontFamily: 'monospace',
-                                                }
-                                            })}
-                                            extensions={[html({ autoCloseTags: true, matchClosingTags: true, selfClosingTags: true })]}
-                                        />
-                                    }
-                                </div>
-                            }
-                            <div className={`email-template-content-buttons ${previewOnly || codeOnly ? 'single-button' : ''}`}>
-                                {!codeOnly &&
-                                    <button type="button" id="code" onClick={(ev) => handleTabChange(ev)}>
-                                        <i class="fa fa-chevron-right"></i>
-                                    </button>
-
-                                }
+                    {templateLoaded ? 
+                        <div className='email-template-container'>
+                            <div className='email-template-buttons'>
                                 {!previewOnly &&
-                                    <button type="button" id="preview" onClick={(ev) => handleTabChange(ev)}>
-                                        <i class="fa fa-chevron-left"></i>
-                                    </button>
+                                    <div>
+                                        {mjmlEditor ?
+                                            <>
+                                                <label>
+                                                    {T.translate("emails.mjml_content")}
+                                                    {' using '}
+                                                    <a target="_blank" href="https://documentation.mjml.io/">
+                                                        MJML format
+                                                    </a>
+                                                </label>
+                                                <br />
+                                                <input type="button" onClick={() => { setMjmlEditor(false) }}
+                                                    className={`btn btn-primary`} value={T.translate("emails.display_html")} />
+                                            </>
+                                            :
+                                            <>
+                                                <label>
+                                                    {T.translate("emails.html_content")}
+                                                    {' in '}
+                                                    <a target="_blank" href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf">
+                                                        jinja format
+                                                    </a>
+                                                    {' *'}
+                                                </label>
+                                                <br />
+                                                <input type="button" onClick={() => { setMjmlEditor(true) }}
+                                                    className={`btn btn-primary`} value={T.translate("emails.display_mjml")} />
+                                            </>
+                                        }
+                                    </div>
+                                }
+                                {!codeOnly &&
+                                    <div>
+                                        <label>
+                                            {T.translate("emails.preview_title")}
+                                        </label>
+                                        <br />
+                                        <input type="button" onClick={() => setMobileView(!mobileView)}
+                                            className={`btn btn-primary`} value={mobileView ? T.translate("emails.display_desktop") : T.translate("emails.display_mobile")} />
+                                    </div>
                                 }
                             </div>
-                            {!codeOnly &&
-                                <>
-                                    <div className='email-template-preview' ref={previewRef}>
-                                        <AjaxLoader show={templateLoading} size={120} relative={true} />
-                                        {renderErrors.length > 0 ?
-                                            <div className='container'>
-                                                There is an error trying to render the email template:
-                                                <ul>
-                                                    {renderErrors.map(err => (
-                                                        <li>{err}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
+                            <br />
+                            <div className='email-template-content'>
+                                {!previewOnly &&
+                                    <div className='email-template-code'>
+                                        {mjmlEditor ?
+                                            <CodeMirror
+                                                id="mjml_content"
+                                                value={stateEntity.mjml_content}
+                                                onChange={(value, viewUpdate) => handleCodeMirrorMJMLChange(value, viewUpdate)}
+                                                height='960px'
+                                                theme={sublimeInit({
+                                                    settings: {
+                                                        caret: '#c6c6c6',
+                                                        fontFamily: 'monospace',
+                                                    }
+                                                })}
+                                                extensions={[html({ autoCloseTags: true, matchClosingTags: true, selfClosingTags: true })]}
+                                            />
                                             :
-                                            <iframe
-                                                style={{ ...style }}
-                                                id={'preview'}
-                                                name={'preview'}
-                                                sandbox={'allow-same-origin'}
-                                                srcDoc={preview}
+                                            <CodeMirror
+                                                id="html_content"
+                                                value={stateEntity.html_content}
+                                                onChange={(value, viewUpdate) => handleCodeMirrorHTMLChange(value, viewUpdate)}
+                                                height='960px'
+                                                theme={sublimeInit({
+                                                    settings: {
+                                                        caret: '#c6c6c6',
+                                                        fontFamily: 'monospace',
+                                                    }
+                                                })}
+                                                extensions={[html({ autoCloseTags: true, matchClosingTags: true, selfClosingTags: true })]}
                                             />
                                         }
                                     </div>
-                                </>
-                            }
+                                }
+                                <div className={`email-template-content-buttons ${previewOnly || codeOnly ? 'single-button' : ''}`}>
+                                    {!codeOnly &&
+                                        <button type="button" id="code" onClick={(ev) => handleTabChange(ev)}>
+                                            <i className="fa fa-chevron-right"></i>
+                                        </button>
+
+                                    }
+                                    {!previewOnly &&
+                                        <button type="button" id="preview" onClick={(ev) => handleTabChange(ev)}>
+                                            <i className="fa fa-chevron-left"></i>
+                                        </button>
+                                    }
+                                </div>
+                                {!codeOnly &&
+                                    <>                                        
+                                        <div className='email-template-preview' ref={previewRef}>
+                                            <AjaxLoader show={templateLoading} size={120} relative={true} />
+                                            {renderErrors.length > 0 ?
+                                                <div className='container'>
+                                                    There is an error trying to render the email template:
+                                                    <ul>
+                                                        {renderErrors.map(err => (
+                                                            <li>{err}</li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                                :
+                                                previewLoaded &&
+                                                    <iframe
+                                                        style={{ ...style }}
+                                                        id={'preview'}
+                                                        name={'preview'}
+                                                        sandbox={'allow-same-origin'}
+                                                        srcDoc={preview}
+                                                    />
+                                            }
+                                        </div>
+                                    </>
+                                }
+                            </div>
                         </div>
-                    </div>
+                        :
+                        <div>Loading template...</div>
+                    }
                 </div>
             </div>
             <div className="row">
