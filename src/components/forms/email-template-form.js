@@ -25,16 +25,31 @@ import { isEmpty, scrollToError, shallowEqual, hasErrors } from "../../utils/met
 
 import './email-template.less'
 
+const default_mjml_content = `
+### Sample MJML Code
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-image width="100px" src="/assets/img/logo-small.png"></mj-image>
+        <mj-divider border-color="#F45E43"></mj-divider>
+        <mj-text font-size="20px" color="#F45E43" font-family="helvetica">Hello World</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+`;
+
 const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, renderErrors, onSubmit, onRender, templateJsonData, previewEmailTemplate }) => {
 
     const [stateEntity, setStateEntity] = useState({ ...entity });
     const [stateErrors, setStateErrors] = useState(errors);
-    const [mjmlEditor, setMjmlEditor] = useState(entity.mjml_content.length > 0 ? true : false);
+    const [mjmlEditor, setMjmlEditor] = useState(entity.mjml_content.length > 0 ? true : entity.html_content ? false : true);
     const [codeOnly, setCodeOnly] = useState(false);
     const [previewOnly, setPreviewOnly] = useState(false);
     const [mobileView, setMobileView] = useState(false);
     const [scale, setScale] = useState(1)
-    const [singleTab, setSingleTab] = useState(false);    
+    const [singleTab, setSingleTab] = useState(false);
 
     const previewRef = useRef(null);
 
@@ -59,7 +74,11 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, 
     }, [errors, entity]);
 
     useEffect(() => {
-        setStateEntity({ ...entity });
+        if (!entity.mjml_content) {
+            setStateEntity({...entity, mjml_content: default_mjml_content})
+        } else {
+            setStateEntity({...entity});
+        }
     }, []);
 
     useEffect(() => {
@@ -270,7 +289,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, 
                                             <label>
                                                 {T.translate("emails.mjml_content")}
                                                 {' using '}
-                                                <a href="https://documentation.mjml.io/">
+                                                <a target="_blank" href="https://documentation.mjml.io/">
                                                     MJML format
                                                 </a>
                                             </label>
@@ -283,7 +302,7 @@ const EmailTemplateForm = ({ entity, errors, clients, preview, templateLoading, 
                                             <label>
                                                 {T.translate("emails.html_content")}
                                                 {' in '}
-                                                <a href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf">
+                                                <a target="_blank" href="https://opensource.com/sites/default/files/gated-content/osdc_cheatsheet-jinja2.pdf">
                                                     jinja format
                                                 </a>
                                                 {' *'}
