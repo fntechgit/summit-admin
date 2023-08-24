@@ -18,11 +18,10 @@ import _ from 'lodash';
 import { AjaxLoader, Dropdown, Input } from 'openstack-uicore-foundation/lib/components'
 import EmailTemplateInput from '../inputs/email-template-input'
 import CodeMirror from '@uiw/react-codemirror';
-import { sublime, sublimeInit } from '@uiw/codemirror-theme-sublime';
+import {  sublimeInit } from '@uiw/codemirror-theme-sublime';
 import { html } from '@codemirror/lang-html';
 import mjml2html from 'mjml-browser';
-import { isEmpty, scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
-
+import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
 import './email-template.less'
 
 const default_mjml_content = `
@@ -31,7 +30,7 @@ const default_mjml_content = `
   <mj-body>
     <mj-section>
       <mj-column>
-        <mj-image width="100px" src="/assets/img/logo-small.png"></mj-image>
+        <mj-image width="100px"></mj-image>
         <mj-divider border-color="#F45E43"></mj-divider>
         <mj-text font-size="20px" color="#F45E43" font-family="helvetica">Hello World</mj-text>
       </mj-column>
@@ -99,7 +98,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
 
     const debouncedRenderTemplate = useRef(
         _.debounce(async (htmlContent) => {
-            previewEmailTemplate(entity.id, templateJsonData, htmlContent).then(() => {
+            previewEmailTemplate(templateJsonData, htmlContent).then(() => {
                 // wait until first API email preview to display template on screen
                 if (!previewLoaded) setPreviewLoaded(true)
             });
@@ -111,7 +110,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
     }, [stateEntity.html_content, debouncedRenderTemplate])
 
     useEffect(() => {
-        previewEmailTemplate(entity.id, templateJsonData, stateEntity.html_content);
+        previewEmailTemplate(templateJsonData, stateEntity.html_content);
     }, [templateJsonData]);
 
     useEffect(() => {

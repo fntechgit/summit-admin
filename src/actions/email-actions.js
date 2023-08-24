@@ -184,7 +184,7 @@ export const deleteEmailTemplate = (templateId) => async (dispatch, getState) =>
 };
 
 
-export const previewEmailTemplate = (templateId, json, html) => async (dispatch, getState) => {
+export const previewEmailTemplate = (json, html) => async (dispatch, getState) => {
 
     const accessToken = await getAccessTokenSafely();
 
@@ -195,7 +195,7 @@ export const previewEmailTemplate = (templateId, json, html) => async (dispatch,
     return putRequest(
         createAction(REQUEST_TEMPLATE_RENDER),
         createAction(TEMPLATE_RENDER_RECEIVED),
-        `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${templateId}/render`,
+        `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/all/render`,
         {payload: json, html},
         renderErrorHandler
     )(params)(dispatch).then(() => {

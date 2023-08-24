@@ -17,17 +17,13 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from 'react-breadcrumbs';
 import EmailTemplateForm from '../../components/forms/email-template-form';
 import { getSummitById } from '../../actions/summit-actions';
-import { RawHTML } from 'openstack-uicore-foundation/lib/components';
 import { getEmailTemplate, resetTemplateForm, saveEmailTemplate, getAllClients, previewEmailTemplate, updateTemplateJsonData } from "../../actions/email-actions";
 import { Modal } from "react-bootstrap";
 
 import '../../styles/edit-email-template-page.less';
 import CodeMirror from '@uiw/react-codemirror';
-import { sublime, sublimeInit } from '@uiw/codemirror-theme-sublime';
+import { sublimeInit } from '@uiw/codemirror-theme-sublime';
 import { json } from '@codemirror/lang-json';
-import { formatInitialJson } from '../../utils/methods';
-
-import emailTemplateDefaultValues from '../../data/email_template_variables_sample.json';
 
 class EditEmailTemplatePage extends React.Component {
 
@@ -116,7 +112,7 @@ class EditEmailTemplatePage extends React.Component {
                         <Modal.Title>{T.translate("emails.sample_data")}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        {render_errors.length > 0 &&
+                        {render_errors?.length > 0 &&
                             <div className="row">
                                 <div className="col-md-12 error">
                                     {render_errors}
