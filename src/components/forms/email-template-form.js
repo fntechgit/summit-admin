@@ -285,8 +285,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
             </div>
             <div className="row form-group">
                 <div className="col-md-12">
-                    <input type="button" onClick={handleJsonDataEdit} disabled={!stateEntity.id}
-                        className="btn btn-primary pull-right" value={T.translate("emails.edit_json")} />
+                    <input type="button" onClick={handleJsonDataEdit} className="btn btn-primary pull-right" value={T.translate("emails.edit_json")} />
                 </div>
                 <div className="col-md-12">
                     {templateLoaded ? 
