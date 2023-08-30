@@ -36,6 +36,7 @@ import {
 import {getBadgeFeatures, getBadgeTypes} from "../../actions/badge-actions";
 import {ALL_FILTER, HAS_NO_TICKETS, HAS_TICKETS} from '../../utils/constants';
 import OrAndFilter from '../../components/filters/or-and-filter';
+import { validateEmail } from '../../utils/methods';
 
 const fieldNames = [    
     { columnKey: 'member_id', value: 'member_id', sortable: true},
@@ -144,7 +145,7 @@ class SummitAttendeeListPage extends React.Component {
             sendEmails,            
         } = this.props;
 
-        const {attendeeFilters, selectedColumns} = this.state;
+        const {attendeeFilters, testRecipient} = this.state;
 
         if(!currentFlowEvent){
             Swal.fire("Validation error", T.translate("attendee_list.select_template") , "warning");
@@ -162,12 +163,22 @@ class SummitAttendeeListPage extends React.Component {
                 {template: currentFlowEvent, qty: selectedAll ? totalRealAttendees : selectedIds.length}),
             type: "warning",
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: T.translate("general.yes")
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: T.translate("general.yes"),
+            input: 'email',
+            inputPlaceholder: T.translate("attendee_list.recipient_email"),
+            inputValidator: (value) => {
+                if (value) {
+                    return validateEmail(value) ? false : T.translate("attendee_list.invalid_recipient_email")
+                } else {
+                    return false;
+                }
+            }
         }).then(function(result){
-            if (result.value) {                
-                sendEmails(term, currentFlowEvent, selectedAll , selectedIds, attendeeFilters, selectedColumns);
+            if (result && result.hasOwnProperty('value')) {
+                const recipientEmail = result.value || null;                
+                sendEmails(term, currentFlowEvent, selectedAll , selectedIds, attendeeFilters, recipientEmail);
             }
         })        
     }

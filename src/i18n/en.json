@@ -740,6 +740,8 @@
     "summit_hall_checked_in_date": "Check In Date",
     "items_qty": "Selected {qty} Attendees",
     "send_email_warning": "You're about to send the {template} email template to {qty} attendees. Please confirm. ",
+    "recipient_email": "Recipient test email (optional)",
+    "invalid_recipient_email": "Please use a valid email",
     "placeholders": {
       "search_attendees": "Search Attendees by Name, Email, Company, Ticket Type or Badge Type",
       "ticket_type": "Filter by Ticket Type",
