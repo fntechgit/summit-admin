@@ -139,6 +139,7 @@ class SummitAttendeeListPage extends React.Component {
             selectedAll,
             term,
             selectedIds,
+            totalRealAttendees,
             currentFlowEvent,
             sendEmails,            
         } = this.props;
@@ -155,7 +156,20 @@ class SummitAttendeeListPage extends React.Component {
             return false;
         }
 
-        sendEmails(term, currentFlowEvent, selectedAll , selectedIds, attendeeFilters, selectedColumns);
+        Swal.fire({
+            title: T.translate("general.are_you_sure"),
+            text: T.translate("attendee_list.send_email_warning", 
+                {template: currentFlowEvent, qty: selectedAll ? totalRealAttendees : selectedIds.length}),
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: T.translate("general.yes")
+        }).then(function(result){
+            if (result.value) {                
+                sendEmails(term, currentFlowEvent, selectedAll , selectedIds, attendeeFilters, selectedColumns);
+            }
+        })        
     }
 
     handleSelected(attendee_id, isSelected){
@@ -638,6 +652,12 @@ class SummitAttendeeListPage extends React.Component {
 
                 {attendees.length > 0 &&
                 <div>
+                    {selectedIds.length > 0 &&
+                        <span><b>{T.translate("attendee_list.items_qty", {qty:selectedIds.length})}</b></span>
+                    }
+                    {selectedAll &&
+                        <span><b>{T.translate("attendee_list.items_qty", {qty:totalRealAttendees})}</b></span>
+                    }
                     <SelectableTable
                         options={table_options}
                         data={attendees}

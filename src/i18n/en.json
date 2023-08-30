@@ -738,6 +738,8 @@
     "select_template": "Select a Email Template to perform the action.",
     "select_items": "Select at least one attendee to perform the action.",
     "summit_hall_checked_in_date": "Check In Date",
+    "items_qty": "Selected {qty} Attendees",
+    "send_email_warning": "You're about to send the {template} email template to {qty} attendees. Please confirm. ",
     "placeholders": {
       "search_attendees": "Search Attendees by Name, Email, Company, Ticket Type or Badge Type",
       "ticket_type": "Filter by Ticket Type",
