@@ -15,18 +15,32 @@ import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import { Input } from 'openstack-uicore-foundation/lib/components';
+import CreatableSelect from 'react-select/lib/Creatable';
 
 class SponsorSocialNetworkForm extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            entity: { ...props.entity },
-            errors: props.errors
+            entity: { 
+                ...props.entity, 
+                icon_css_class: { 
+                    label: props.entity.icon_css_class,
+                    value: props.entity.icon_css_class,
+                } 
+            },
+            errors: props.errors,
+            iconsDDL: [
+                { label: 'fa-facebook', value: 'fa-facebook' },
+                { label: 'fa-twitter', value: 'fa-twitter' },
+                { label: 'fa-youtube', value: 'fa-youtube' },
+                { label: 'fa-linkedin', value: 'fa-linkedin' },
+            ]
         };
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handleNewSocialNetwork = this.handleNewSocialNetwork.bind(this);
     }
 
     handleSubmit(ev) {
@@ -52,13 +66,25 @@ class SponsorSocialNetworkForm extends React.Component {
             value = ev.target.checked;
         }
 
+        if (ev.target.id === 'icon_css_class') {
+            value = { label: ev.target.label, value: ev.target.value};            
+        }
+
         errors[id] = '';
         entity[id] = value;
-        this.setState({ entity: entity, errors: errors });
+        this.setState({ ...this.state, entity: entity, errors: errors });
+    }
+
+    handleNewSocialNetwork(ev) {
+        const entity = { ...this.state.entity };
+
+        const newOption = { label: ev, value: ev }
+        entity['icon_css_class'] = newOption;
+        this.setState({...this.state, entity, iconsDDL: [...this.state.iconsDDL, newOption]})
     }
 
     render() {
-        const { entity, errors } = this.state;        
+        const { entity, errors, iconsDDL } = this.state;        
 
         return (
             <form className="material-form">
@@ -71,7 +97,10 @@ class SponsorSocialNetworkForm extends React.Component {
                         </div>
                         <div className="col-md-4">
                             <label> {T.translate("edit_sponsor.icon_css_class")} </label>
-                            <Input className="form-control" id="icon_css_class" value={entity.icon_css_class} onChange={this.handleChange} />
+                            {/* <Input className="form-control" id="icon_css_class" value={entity.icon_css_class} onChange={this.handleChange} /> */}
+                            <CreatableSelect isClearable id="icon_css_class" value={entity.icon_css_class}
+                                onChange={(ev) => this.handleChange({target: {...ev, id: 'icon_css_class'}})} onCreateOption={this.handleNewSocialNetwork} 
+                                options={iconsDDL} />
                         </div>
                         <div className="col-md-4 checkboxes-div">
                             <div className="form-check abc-checkbox">

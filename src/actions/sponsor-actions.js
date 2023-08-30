@@ -621,6 +621,16 @@ const normalizeCollection = (entity) => {
     return normalizedEntity;
 }
 
+const normalizeSocialNetwork = (entity) => {
+    const normalizedEntity = {...entity};    
+
+    normalizedEntity['icon_css_class'] = entity.icon_css_class?.value ? entity.icon_css_class.value : null;
+
+    delete normalizedEntity['order'];
+
+    return normalizedEntity;
+}
+
 const normalizeEntity = (entity) => {
     const normalizedEntity = {...entity};
 
@@ -1362,7 +1372,7 @@ export const saveSponsorSocialNetwork = (entity) => async (dispatch, getState) =
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeCollection(entity);
+    const normalizedEntity = normalizeSocialNetwork(entity);
 
     if (entity.id) {
 
