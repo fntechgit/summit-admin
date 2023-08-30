@@ -97,7 +97,6 @@ class SponsorSocialNetworkForm extends React.Component {
                         </div>
                         <div className="col-md-4">
                             <label> {T.translate("edit_sponsor.icon_css_class")} </label>
-                            {/* <Input className="form-control" id="icon_css_class" value={entity.icon_css_class} onChange={this.handleChange} /> */}
                             <CreatableSelect isClearable id="icon_css_class" value={entity.icon_css_class}
                                 onChange={(ev) => this.handleChange({target: {...ev, id: 'icon_css_class'}})} onCreateOption={this.handleNewSocialNetwork} 
                                 options={iconsDDL} />
