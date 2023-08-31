@@ -518,7 +518,7 @@ export const sendEmails = (term = null,
     }
 
     if(recipientEmail) {
-        payload['test_recipient'] = recipientEmail;
+        payload['test_email_recipient'] = recipientEmail;
     }
 
     dispatch(startLoading());

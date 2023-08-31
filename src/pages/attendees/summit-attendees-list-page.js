@@ -16,7 +16,7 @@ import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import { Pagination } from 'react-bootstrap';
-import {Dropdown, FreeTextSearch, SelectableTable, DateTimePicker} from 'openstack-uicore-foundation/lib/components';
+import {Dropdown, Input, FreeTextSearch, SelectableTable, DateTimePicker} from 'openstack-uicore-foundation/lib/components';
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
 import ScheduleModal from "../../components/schedule-modal/index";
 import { SegmentedControl } from 'segmented-control'
@@ -97,6 +97,7 @@ class SummitAttendeeListPage extends React.Component {
             enabledFilters: [],
             attendeeFilters: {...FILTERS_DEFAULT_STATE},
             selectedColumns: [],
+            testRecipient: '',
         }
     }
 
@@ -157,27 +158,25 @@ class SummitAttendeeListPage extends React.Component {
             return false;
         }
 
+        if(testRecipient !== '' && !validateEmail(testRecipient)) {
+            Swal.fire("Validation error", T.translate("attendee_list.invalid_recipient_email"), "warning");
+            return false
+        }
+
         Swal.fire({
             title: T.translate("general.are_you_sure"),
-            text: T.translate("attendee_list.send_email_warning", 
-                {template: currentFlowEvent, qty: selectedAll ? totalRealAttendees : selectedIds.length}),
+            text: `${T.translate("attendee_list.send_email_warning", 
+                {template: currentFlowEvent, qty: selectedAll ? totalRealAttendees : selectedIds.length})}
+                ${testRecipient ? T.translate("attendee_list.email_test_recipient", {email: testRecipient}) : ''}
+                ${T.translate("attendee_list.please_confirm")}`,
             type: "warning",
             showCancelButton: true,
             cancelButtonColor: '#d33',
             confirmButtonColor: '#3085d6',
-            confirmButtonText: T.translate("general.yes"),
-            input: 'email',
-            inputPlaceholder: T.translate("attendee_list.recipient_email"),
-            inputValidator: (value) => {
-                if (value) {
-                    return validateEmail(value) ? false : T.translate("attendee_list.invalid_recipient_email")
-                } else {
-                    return false;
-                }
-            }
+            confirmButtonText: T.translate("attendee_list.send_emails"),
         }).then(function(result){
-            if (result && result.hasOwnProperty('value')) {
-                const recipientEmail = result.value || null;                
+            if (result.value) {
+                const recipientEmail = testRecipient || null;                
                 sendEmails(term, currentFlowEvent, selectedAll , selectedIds, attendeeFilters, recipientEmail);
             }
         })        
@@ -363,7 +362,7 @@ class SummitAttendeeListPage extends React.Component {
             badgeTypes,
         } = this.props;
 
-        const {showModal, modalSchedule, modalTitle, enabledFilters, attendeeFilters} = this.state;
+        const {showModal, modalSchedule, modalTitle, enabledFilters, attendeeFilters, testRecipient} = this.state;
 
         const filters_ddl = [
             {label: 'Member', value: 'memberFilter'},
@@ -643,6 +642,15 @@ class SummitAttendeeListPage extends React.Component {
                         <button className="btn btn-primary right-space" onClick={this.handleSendEmails}>
                             {T.translate("attendee_list.send_emails")}
                         </button>
+                    </div>
+                    <div className={'col-md-5'}>
+                        <Input
+                            id="testRecipient"
+                            value={testRecipient}
+                            onChange={(ev) => this.setState({...this.state, testRecipient: ev.target.value})}
+                            placeholder={T.translate("attendee_list.placeholders.test_recipient")}
+                            className="form-control"
+                        />
                     </div>
                 </div>
 
