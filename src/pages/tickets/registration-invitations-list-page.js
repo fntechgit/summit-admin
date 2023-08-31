@@ -176,8 +176,10 @@ class RegistrationInvitationsListPage extends React.Component {
 
         Swal.fire({
             title: T.translate("general.are_you_sure"),
-            text: T.translate("registration_invitation_list.send_email_warning", 
-                {template: currentFlowEvent, qty: selectedAll ? totalInvitations : selectedInvitationsIds.length}),
+            text: `${T.translate("registration_invitation_list.send_email_warning", 
+                {template: currentFlowEvent, qty: selectedAll ? totalInvitations : selectedInvitationsIds.length})}
+                ${testRecipient ? T.translate("registration_invitation_list.email_test_recipient", {email: testRecipient}) : ''}
+                ${T.translate("registration_invitation_list.please_confirm")}`,
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
