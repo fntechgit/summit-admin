@@ -873,7 +873,7 @@
     "select_auto_generate_speaker_discount_code": "Auto generate speaker discount code",
     "excerpt_email": "Excerpt Recipient",
     "select_template": "Select a Email Template to perform the action.",
-    "select_items": "Select at least one speaker to perform the action.",    
+    "select_items": "Select at least one speaker to perform the action.",
     "send_email_warning": "You are about to send the {template} email template to {qty} speakers.",
     "email_test_recipient": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
     "invalid_recipient_email": "Please use a valid email",

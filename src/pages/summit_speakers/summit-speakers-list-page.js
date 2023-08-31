@@ -562,7 +562,7 @@ class SummitSpeakersListPage extends React.Component {
                                 <div className="row">
                                     <div className="col-md-12">
                                         {T.translate("summit_speakers_list.send_email_warning", {
-                                            template: "", qty: selectedAll ? totalItems : selectedItems.length 
+                                            template: currentFlowEvent, qty: selectedAll ? totalItems : selectedItems.length 
                                         })}
                                     </div>
                                     { this.state.testRecipient !== '' &&
