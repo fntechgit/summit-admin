@@ -622,11 +622,11 @@ const normalizeCollection = (entity) => {
 }
 
 const normalizeSocialNetwork = (entity) => {
-    const normalizedEntity = {...entity};    
+    const normalizedEntity = {...entity};
+
+    normalizeCollection(normalizedEntity);
 
     normalizedEntity['icon_css_class'] = entity.icon_css_class?.value ? entity.icon_css_class.value : null;
-
-    delete normalizedEntity['order'];
 
     return normalizedEntity;
 }

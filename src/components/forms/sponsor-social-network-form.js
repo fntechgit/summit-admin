@@ -31,10 +31,10 @@ class SponsorSocialNetworkForm extends React.Component {
             },
             errors: props.errors,
             iconsDDL: [
-                { label: 'fa-facebook', value: 'fa-facebook' },
-                { label: 'fa-twitter', value: 'fa-twitter' },
-                { label: 'fa-youtube', value: 'fa-youtube' },
-                { label: 'fa-linkedin', value: 'fa-linkedin' },
+                { label: 'Facebook', value: 'fa-facebook' },
+                { label: 'Twitter', value: 'fa-twitter' },
+                { label: 'Youtube', value: 'fa-youtube' },
+                { label: 'Linkedin', value: 'fa-linkedin' },
             ]
         };
 
