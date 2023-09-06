@@ -638,11 +638,6 @@ class SummitAttendeeListPage extends React.Component {
                             options={flowEventsDDL}
                         />
                     </div>
-                    <div className={'col-md-1'}>
-                        <button className="btn btn-primary right-space" onClick={this.handleSendEmails}>
-                            {T.translate("attendee_list.send_emails")}
-                        </button>
-                    </div>
                     <div className={'col-md-5'}>
                         <Input
                             id="testRecipient"
@@ -651,6 +646,11 @@ class SummitAttendeeListPage extends React.Component {
                             placeholder={T.translate("attendee_list.placeholders.test_recipient")}
                             className="form-control"
                         />
+                    </div>
+                    <div className={'col-md-1'}>
+                        <button className="btn btn-default right-space" onClick={this.handleSendEmails}>
+                            {T.translate("attendee_list.send_emails")}
+                        </button>
                     </div>
                 </div>
 
