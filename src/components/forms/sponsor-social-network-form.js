@@ -22,12 +22,8 @@ class SponsorSocialNetworkForm extends React.Component {
         super(props);
 
         this.state = {
-            entity: { 
-                ...props.entity, 
-                icon_css_class: { 
-                    label: props.entity.icon_css_class,
-                    value: props.entity.icon_css_class,
-                } 
+            entity: {
+                ...props.entity,
             },
             errors: props.errors,
             iconsDDL: [
@@ -46,6 +42,17 @@ class SponsorSocialNetworkForm extends React.Component {
     handleSubmit(ev) {
         ev.preventDefault();
         this.props.onSubmit(this.state.entity);
+    }
+
+    componentDidMount() {
+        const { entity } = this.props;
+        const { iconsDDL } = this.state;
+
+        const customIcon = !iconsDDL.some(e => e.value === entity.icon_css_class);
+
+        if(customIcon) {
+            this.setState(({...this.state, iconsDDL: [...iconsDDL, { label: entity.icon_css_class, value: entity.icon_css_class }]}));
+        }
     }
 
     componentDidUpdate(prevState) {
@@ -67,7 +74,9 @@ class SponsorSocialNetworkForm extends React.Component {
         }
 
         if (ev.target.id === 'icon_css_class') {
-            value = { label: ev.target.label, value: ev.target.value};            
+            // we need to map into value/label because of a bug in react-select 2
+            // https://github.com/JedWatson/react-select/issues/2998        
+            value = { label: ev.target.label, value: ev.target.value };
         }
 
         errors[id] = '';
@@ -80,11 +89,13 @@ class SponsorSocialNetworkForm extends React.Component {
 
         const newOption = { label: ev, value: ev }
         entity['icon_css_class'] = newOption;
-        this.setState({...this.state, entity, iconsDDL: [...this.state.iconsDDL, newOption]})
+        this.setState({ ...this.state, entity, iconsDDL: [...this.state.iconsDDL, newOption] })
     }
 
     render() {
-        const { entity, errors, iconsDDL } = this.state;        
+        const { entity, errors, iconsDDL } = this.state;
+
+        const theValue = (entity.icon_css_class instanceof Object || entity.icon_css_class == null) ? entity.icon_css_class : iconsDDL.find(opt => opt.value == entity.icon_css_class);
 
         return (
             <form className="material-form">
@@ -97,8 +108,8 @@ class SponsorSocialNetworkForm extends React.Component {
                         </div>
                         <div className="col-md-4">
                             <label> {T.translate("edit_sponsor.icon_css_class")} </label>
-                            <CreatableSelect isClearable id="icon_css_class" value={entity.icon_css_class}
-                                onChange={(ev) => this.handleChange({target: {...ev, id: 'icon_css_class'}})} onCreateOption={this.handleNewSocialNetwork} 
+                            <CreatableSelect isClearable id="icon_css_class" value={theValue}
+                                onChange={(ev) => this.handleChange({ target: { ...ev, id: 'icon_css_class' } })} onCreateOption={this.handleNewSocialNetwork}
                                 options={iconsDDL} />
                         </div>
                         <div className="col-md-4 checkboxes-div">
