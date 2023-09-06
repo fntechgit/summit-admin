@@ -446,7 +446,7 @@ class RegistrationInvitationsListPage extends React.Component {
                                 />
                             </div>
                             <div className={'col-md-2'}>
-                                <button className="btn btn-primary right-space" onClick={this.handleSendEmails}>
+                                <button className="btn btn-default right-space" onClick={this.handleSendEmails}>
                                     {T.translate("registration_invitation_list.send_emails")}
                                 </button>
                             </div>
