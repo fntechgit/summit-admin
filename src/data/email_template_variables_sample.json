@@ -2,6 +2,7 @@
     "owner_first_name": "John",
     "owner_last_name": "Doe",    
     "owner_full_name": "John Doe",
+    "owner_fullname": "John Doe",    
     "owner_company": "Doe Inc.",
     "owner_email": "test@test.com",
     "first_name": "John",
@@ -52,5 +53,14 @@
     "set_password_link_to_registration": "https://example-url.com",
     "need_details": false,
     "order_credit_card_type": "VISA",
-    "order_credit_card_4number": "4242"
+    "order_credit_card_4number": "4242",
+    "room_complete_name": "Room Name",
+    "reservation_start_datetime": "",
+    "reservation_end_datetime": "",
+    "reservation_created_datetime": "",
+    "reservation_amount": 500,
+    "reservation_currency": 500,
+    "reservation_id": 0,
+    "room_capacity": 1,
+    "reservation_refunded_amount": 0.00
 }
