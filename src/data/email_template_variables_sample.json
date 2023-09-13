@@ -55,12 +55,12 @@
     "order_credit_card_type": "VISA",
     "order_credit_card_4number": "4242",
     "room_complete_name": "Room Name",
-    "reservation_start_datetime": "",
-    "reservation_end_datetime": "",
-    "reservation_created_datetime": "",
-    "reservation_amount": 500,
-    "reservation_currency": 500,
-    "reservation_id": 0,
+    "reservation_start_datetime": "2023-09-01 00:00:00",
+    "reservation_end_datetime": "2023-09-01 01:00:00",
+    "reservation_created_datetime": "2023-09-01 00:00:00",
+    "reservation_amount": "500",
+    "reservation_currency": "USD",
+    "reservation_id": 123,
     "room_capacity": 1,
-    "reservation_refunded_amount": 0.00
+    "reservation_refunded_amount": "200.00"
 }
