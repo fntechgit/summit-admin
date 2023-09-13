@@ -63,15 +63,104 @@
     "reservation_id": 123,
     "room_capacity": 1,
     "reservation_refunded_amount": "200.00",
-    "accepted_moderated_presentations": "accepted_moderated_presentations",
-    "accepted_presentations": "accepted_presentations",
+    "accepted_moderated_presentations": [{
+        "id": 1,
+        "title": "Presentation title",
+        "track": {
+            "id": 1,
+            "name": "Track name"
+        },
+        "selection_plan": {
+            "id": 1,
+            "name": "Selection Plan name"
+        },
+        "moderator": {
+            "id": 1,
+            "full_name": "Moderator Name",
+            "email": "moderator@email.com"
+        },
+        "speakers": [{
+            "id": 2,
+            "full_name": "Speaker Name",
+            "email": "speaker@email.com"
+        }]
+    }],
+    "accepted_presentations": [{
+        "id": 1,
+        "title": "Presentation title",
+        "track": {
+            "id": 1,
+            "name": "Track name"
+        },
+        "selection_plan": {
+            "id": 1,
+            "name": "Selection Plan name"
+        },
+        "moderator": {
+            "id": 1,
+            "full_name": "Moderator Name",
+            "email": "moderator@email.com"
+        },
+        "speakers": [{
+            "id": 2,
+            "full_name": "Speaker Name",
+            "email": "speaker@email.com"
+        }]
+    }],
     "admin_ticket_edit_url": "admin_ticket_edit_url",
-    "alternate_moderated_presentations": "alternate_moderated_presentations",
-    "alternate_presentations": "alternate_presentations",
+    "alternate_moderated_presentations": [{
+        "id": 1,
+        "title": "Alternate Presentation title",
+        "track": {
+            "id": 1,
+            "name": "Track name"
+        },
+        "selection_plan": {
+            "id": 1,
+            "name": "Selection Plan name"
+        },
+        "moderator": {
+            "id": 1,
+            "full_name": "Moderator Name",
+            "email": "moderator@email.com"
+        },
+        "speakers": [{
+            "id": 2,
+            "full_name": "Speaker Name",
+            "email": "speaker@email.com"
+        }]
+    }],
+    "alternate_presentations": [{
+        "id": 1,
+        "title": "Alternate Presentation title",
+        "track": {
+            "id": 1,
+            "name": "Track name"
+        },
+        "selection_plan": {
+            "id": 1,
+            "name": "Selection Plan name"
+        },
+        "moderator": {
+            "id": 1,
+            "full_name": "Moderator Name",
+            "email": "moderator@email.com"
+        },
+        "speakers": [{
+            "id": 2,
+            "full_name": "Speaker Name",
+            "email": "speaker@email.com"
+        }]
+    }],
     "approval_date": "approval_date",
     "aprover_email": "aprover_email",
     "aprover_fullname": "aprover_fullname",
-    "attachments": "attachments",
+    "attachments": [{
+        "name": "name",
+        "content": "content",
+        "type": "type",
+        "disposition": "disposition"
+    }],
     "bio_edit_link": "bio_edit_link",
     "candidate_email": "candidate_email",
     "candidate_full_name": "candidate_full_name",
@@ -97,7 +186,7 @@
     "event_title": "event_title",
     "event_uri": "event_uri",
     "event_url": "event_url",
-    "external_id": "external_id",
+    "external_id": 456,
     "email": "email",
     "email_to": "email_to",
     "feed_type": "feed_type",
@@ -110,7 +199,7 @@
     "is_discount": "is_discount",
     "link": "link",
     "magic_link": "magic_link",
-    "member_id": "member_id",
+    "member_id": 4949,
     "message": "message",
     "moderator": "moderator",
     "name": "name",
@@ -118,12 +207,12 @@
     "new_category": "new_category",
     "number": "number",
     "old_category": "old_category",
-    "order_id": "order_id",
+    "order_id": 765,
     "order_owner_company": "order_owner_company",
     "order_owner_email": "order_owner_email",
     "presentation_edit_link": "presentation_edit_link",
     "presentation_end_date": "presentation_end_date",
-    "presentation_id": "presentation_id",
+    "presentation_id": 5,
     "presentation_name": "presentation_name",
     "presentation_location": "presentation_location",
     "presentation_start_date": "presentation_start_date",
@@ -135,8 +224,50 @@
     "promo_code_until_date": "promo_code_until_date",
     "reason": "reason",
     "registration_link": "registration_link",
-    "rejected_moderated_presentations": "rejected_moderated_presentations",
-    "rejected_presentations": "rejected_presentations",
+    "rejected_moderated_presentations": [{
+        "id": 1,
+        "title": "Rejected Presentation title",
+        "track": {
+            "id": 1,
+            "name": "Track name"
+        },
+        "selection_plan": {
+            "id": 1,
+            "name": "Selection Plan name"
+        },
+        "moderator": {
+            "id": 1,
+            "full_name": "Moderator Name",
+            "email": "moderator@email.com"
+        },
+        "speakers": [{
+            "id": 2,
+            "full_name": "Speaker Name",
+            "email": "speaker@email.com"
+        }]
+    }],
+    "rejected_presentations": [{
+        "id": 1,
+        "title": "Rejected Presentation title",
+        "track": {
+            "id": 1,
+            "name": "Track name"
+        },
+        "selection_plan": {
+            "id": 1,
+            "name": "Selection Plan name"
+        },
+        "moderator": {
+            "id": 1,
+            "full_name": "Moderator Name",
+            "email": "moderator@email.com"
+        },
+        "speakers": [{
+            "id": 2,
+            "full_name": "Speaker Name",
+            "email": "speaker@email.com"
+        }]
+    }],
     "report": "report",
     "requested_by_email": "requested_by_email",
     "requested_by_full_name": "requested_by_full_name",
@@ -145,7 +276,7 @@
     "reset_password_link": "reset_password_link",
     "review_link": "review_link",
     "selection_plan": "selection_plan",
-    "selection_plan_id": "selection_plan_id",
+    "selection_plan_id": 7,
     "selection_plan_name": "selection_plan_name",
     "selection_plan_submission_end_date": "selection_plan_submission_end_date",
     "selection_plan_submission_start_date": "selection_plan_submission_start_date",
@@ -162,7 +293,7 @@
     "submitter_fullname": "submitter_fullname",
     "summit_date": "summit_date",
     "summit_dates_label": "summit_dates_label",
-    "summit_id": "summit_id",
+    "summit_id": 50,
     "summit_marketing_site_oauth2_client_id": "summit_marketing_site_oauth2_client_id",
     "summit_marketing_site_oauth2_scopes": "summit_marketing_site_oauth2_scopes",
     "summit_schedule_url": "summit_schedule_url",
@@ -174,7 +305,7 @@
     "ticket_currency": "ticket_currency",
     "ticket_currency_symbol": "ticket_currency_symbol",
     "ticket_discount": "ticket_discount",
-    "ticket_id": "ticket_id",
+    "ticket_id": 123456,
     "ticket_owner": "ticket_owner",
     "ticket_promo_code": "ticket_promo_code",
     "ticket_raw_amount": "ticket_raw_amount",
@@ -183,12 +314,12 @@
     "ticket_taxes": "ticket_taxes",
     "ticket_type": "ticket_type",
     "ticket_type_name": "ticket_type_name",
-    "ticket_types": "ticket_types",
+    "ticket_types": [],
     "title": "title",
     "to_email": "to_email",
     "token": "token",
     "track": "track",
-    "track_id": "track_id",
+    "track_id": 123,
     "type": "type",
     "until_date": "until_date",
     "virtual_event_site_link": "virtual_event_site_link"
