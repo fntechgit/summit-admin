@@ -17,8 +17,6 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from 'react-breadcrumbs';
 import EditRegFeedMetadataPage from '../pages/summits/edit-reg-feed-metadata-page';
 import {connect} from "react-redux";
-import RegFeedMetadataIdLayout from './reg-feed-metadata-id-layout';
-import NoMatchPage from "../pages/no-match-page";
 
 
 class RegFeedMetadataLayout extends React.Component {
@@ -30,7 +28,7 @@ class RegFeedMetadataLayout extends React.Component {
                 <Breadcrumb data={{ title: T.translate("edit_reg_feed_metadata.reg_feed_metadata"), pathname: match.url }} />
                 <Switch>
                     <Route strict exact path={`${match.url}/new`} component={EditRegFeedMetadataPage} />
-                    <Route path={`${match.url}/:reg_feed_metadata_id(\\d+)`} component={RegFeedMetadataIdLayout} />
+                    <Route path={`${match.url}/:reg_feed_metadata_id(\\d+)`} component={EditRegFeedMetadataPage} />
                     <Redirect to={`/app/summits/${currentSummit.id}`} />
                 </Switch>
             </div>

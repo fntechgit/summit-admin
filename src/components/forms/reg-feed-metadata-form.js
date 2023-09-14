@@ -32,16 +32,11 @@ class RegFeedMetadataForm extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const state = {};
-        // scrollToError(this.props.errors);
 
         if (!shallowEqual(prevProps.entity, this.props.entity)) {
             state.entity = { ...this.props.entity };
             state.errors = {};
         }
-
-        // if (!shallowEqual(prevProps.errors, this.props.errors)) {
-        //     state.errors = { ...this.props.errors };
-        // }
 
         if (!isEmpty(state)) {
             this.setState({ ...this.state, ...state })
@@ -67,15 +62,6 @@ class RegFeedMetadataForm extends React.Component {
         this.props.onSubmit(this.state.entity);
     }
 
-    hasErrors(field) {
-        let { errors } = this.state;
-        if (field in errors) {
-            return errors[field];
-        }
-
-        return '';
-    }
-
     render() {
         const { entity, errors } = this.state;
 
@@ -88,7 +74,6 @@ class RegFeedMetadataForm extends React.Component {
                         <Input
                             id="key"
                             className="form-control"
-                            // error={this.hasErrors('key')}
                             onChange={this.handleChange}
                             value={entity.key}
                         />
@@ -98,7 +83,6 @@ class RegFeedMetadataForm extends React.Component {
                         <Input
                             id="value"
                             className="form-control"
-                            // error={this.hasErrors('value')}
                             onChange={this.handleChange}
                             value={entity.value}
                         />

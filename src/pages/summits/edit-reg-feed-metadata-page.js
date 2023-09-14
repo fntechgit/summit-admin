@@ -14,9 +14,34 @@ import React from 'react'
 import { connect } from 'react-redux';
 import T from "i18n-react/dist/i18n-react";
 import RegFeedMetadataForm from '../../components/forms/reg-feed-metadata-form';
-import { saveRegFeedMetadata } from '../../actions/reg-feed-metadata-actions';
+import { resetRegFeedMetadataForm, getRegFeedMetadata, saveRegFeedMetadata } from '../../actions/reg-feed-metadata-actions';
 
 class EditRegFeedMetadataPage extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        let regFeedMetadataId = this.props.match.params.reg_feed_metadata_id;        
+
+        if (!regFeedMetadataId) {
+            this.props.resetRegFeedMetadataForm();
+        } else {
+            this.props.getRegFeedMetadata(regFeedMetadataId);
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const oldId = prevProps.match.params.reg_feed_metadata_id;
+        const newId = this.props.match.params.reg_feed_metadata_id;
+
+        if (oldId !== newId) {
+            if (!newId) {
+                this.props.resetRegFeedMetadataForm();
+            } else {
+                this.props.getRegFeedMetadata(newId);
+            }
+        }
+    }
 
     render() {
         const { entity } = this.props;
@@ -43,6 +68,8 @@ const mapStateToProps = ({ currentSummitState, currentRegFeedMetadataState }) =>
 export default connect(
     mapStateToProps,
     {
+        getRegFeedMetadata,
+        resetRegFeedMetadataForm,
         saveRegFeedMetadata,
     }
 )(EditRegFeedMetadataPage);

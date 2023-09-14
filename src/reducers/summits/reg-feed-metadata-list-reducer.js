@@ -12,7 +12,7 @@
  **/
 
 
-import { RECEIVE_REG_FEED_METADATA_LIST, REQUEST_REG_FEED_METADATA_LIST, REG_FEED_METADATA_DELETED, REG_FEED_METADATA_ADDED } from "../../actions/reg-feed-metadata-actions";
+import { RECEIVE_REG_FEED_METADATA_LIST, REQUEST_REG_FEED_METADATA_LIST, REG_FEED_METADATA_DELETED, REG_FEED_METADATA_ADDED, REG_FEED_METADATA_UPDATED } from "../../actions/reg-feed-metadata-actions";
 
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
@@ -45,7 +45,12 @@ const currentRegFeedMetadataListReducer = (state = DEFAULT_STATE, action) => {
         }
         case REG_FEED_METADATA_ADDED: {
             let newRegFeedMetadata = payload.response;
-            return {...state, entity: {...state.entity, regFeedMetadata: [...state.entity.regFeedMetadata, newRegFeedMetadata] }};
+            return {...state, regFeedMetadata: [...state.regFeedMetadata, newRegFeedMetadata] };
+        }
+        case REG_FEED_METADATA_UPDATED: {
+            const editedRegFeedMetadata = payload.response;
+            const isOnList = state.regFeedMetadata.some(e => e.id === editedRegFeedMetadata.id);
+            return {...state, regFeedMetadata: isOnList ? [...state.regFeedMetadata.filter(regFeed => regFeed.id === editedRegFeedMetadata), editedRegFeedMetadata] : state.regFeedMetadata}
         }
         case REG_FEED_METADATA_DELETED: {
             let {regFeedMetadataId} = payload;

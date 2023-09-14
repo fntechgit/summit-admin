@@ -121,7 +121,7 @@ export const saveRegFeedMetadata = (entity) => async (dispatch, getState) => {
       createAction(UPDATE_REG_FEED_METADATA),
       createAction(REG_FEED_METADATA_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/registration-feed-metadata?access_token=${accessToken}`,
-      normalizedEntity,
+      entity,
       authErrorHandler,
       entity
     )({})(dispatch)

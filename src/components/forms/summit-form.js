@@ -76,6 +76,10 @@ class SummitForm extends React.Component {
             state.printAppMarketingSettings = {...this.props.printAppMarketingSettings};
         }
 
+        if(!shallowEqual(prevProps.regFeedMetadataListSettings, this.props.regFeedMetadataListSettings)) {
+            state.regFeedMetadataListSettings = {...this.props.regFeedMetadataListSettings};
+        }
+
         if (!shallowEqual(prevProps.errors, this.props.errors)) {
             state.errors = {...this.props.errors};
         }
