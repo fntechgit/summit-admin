@@ -558,10 +558,19 @@ class PromocodeForm extends React.Component {
         let {allClasses} = this.props;
         let {value, id} = ev.target;
 
+        console.log('check value...', value, id);
+
         entity.class_name = value;
         entity.type = null;
         entity.allowed_ticket_types = [];
         entity.ticket_types_rules = [];
+        entity.quantity_available = '';
+        entity.first_name = '';
+        entity.last_name = '';
+        entity.email = '';
+        entity.speaker = null;
+        entity.badge_features = [];
+
 
         this.setState({entity: entity});
     }
