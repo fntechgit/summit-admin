@@ -45,9 +45,7 @@ class EditEmailTemplatePage extends React.Component {
             props.getEmailTemplate(templateId);
         }
 
-        if (!clients) {
-            props.getAllClients();
-        }
+        props.getAllClients();
 
         this.handlePreview = this.handlePreview.bind(this);
         this.handleJsonChange = this.handleJsonChange.bind(this);
