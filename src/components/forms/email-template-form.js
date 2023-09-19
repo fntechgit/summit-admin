@@ -24,6 +24,7 @@ import mjml2html from 'mjml-browser';
 import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
 import './email-template.less';
 import Swal from "sweetalert2";
+import { EMAIL_TEMPLATE_TYPE_HTML, EMAIL_TEMPLATE_TYPE_MJML } from '../../utils/constants';
 
 const default_mjml_content = `
 ### Sample MJML Code
@@ -227,13 +228,13 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
 
     const handleVersionChange = (ev) => {
         const {value} = ev.target;
-        const selectedHistory = default_history.find(h => h.sha === value);
+        const selectedHistory = stateEntity.versions.find(h => h.sha === value);
         setHistoryVersion(selectedHistory.sha);
-        if(selectedHistory.type === 'html') {
+        if(selectedHistory.type === EMAIL_TEMPLATE_TYPE_HTML) {
             setMjmlEditor(false);
             setStateEntity({ ...stateEntity, html_content: selectedHistory.content });
         }
-        if(selectedHistory.type === 'mjml') {
+        if(selectedHistory.type === EMAIL_TEMPLATE_TYPE_MJML) {
             setMjmlEditor(true);
             setStateEntity({ ...stateEntity, mjml_content: selectedHistory.content });
         }
@@ -248,7 +249,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
     });
 
     const email_clients_ddl = clients ? clients.map(cli => ({ label: cli.name, value: cli.id })) : [];
-    const versions_ddl = stateEntity.versions ? stateEntity.versions.map(v => ({ label: v.last_modified, value: v.sha })) : [];
+    const versions_ddl = stateEntity.versions ? stateEntity.versions.map(v => ({ label: `<a href='${v.html_url}'>${v.last_modified} - ${v.sha} - ${v.commit_message}</a>`, value: v.sha })) : [];
 
     return (
         <form className="email-template-form">
@@ -362,12 +363,19 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
                                         }
                                         </div>
                                         <div className='col-md-8'>
-                                            {entity.id > 0 && stateEntity.versions > 0 && 
+                                            {entity.id > 0 && stateEntity.versions.length > 0 && 
                                                 <Dropdown 
                                                     id="history_version"
                                                     value={historyVersion}
                                                     placeholder={T.translate("emails.placeholders.select_version")}
                                                     options={versions_ddl}
+                                                    styles={{
+                                                        menu: (baseStyles, state) => ({
+                                                          ...baseStyles,
+                                                          color: state.isSelected ? 'white' : 'inherit',
+                                                        }),
+                                                    }}
+                                                    className="email-history-ddl"
                                                     onChange={handleVersionChange}
                                                 />
                                             }
