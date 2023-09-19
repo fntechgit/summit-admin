@@ -44,6 +44,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
 
     const [stateEntity, setStateEntity] = useState({ ...entity });
     const [stateErrors, setStateErrors] = useState(errors);
+    const [historyVersion, setHistoryVersion] = useState(null);
     const [mjmlEditor, setMjmlEditor] = useState(null);
     const [codeOnly, setCodeOnly] = useState(false);
     const [previewOnly, setPreviewOnly] = useState(false);
@@ -132,7 +133,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
                 console.log('error mjml to html', err)
             }
         }
-    }, [stateEntity.mjml_content])
+    }, [stateEntity.mjml_content, historyVersion])
 
     useEffect(() => {
         if(entity.mjml_content.length === 0 && entity.html_content.length > 0 && mjmlEditor && !mjmlWarning) {
@@ -224,6 +225,20 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
         }
     }
 
+    const handleVersionChange = (ev) => {
+        const {value} = ev.target;
+        const selectedHistory = default_history.find(h => h.sha === value);
+        setHistoryVersion(selectedHistory.sha);
+        if(selectedHistory.type === 'html') {
+            setMjmlEditor(false);
+            setStateEntity({ ...stateEntity, html_content: selectedHistory.content });
+        }
+        if(selectedHistory.type === 'mjml') {
+            setMjmlEditor(true);
+            setStateEntity({ ...stateEntity, mjml_content: selectedHistory.content });
+        }
+    }
+
     useEffect(() => {
         handleResizeWindow();
         window.addEventListener("resize", handleResizeWindow);
@@ -232,8 +247,8 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
         };
     });
 
-
     const email_clients_ddl = clients ? clients.map(cli => ({ label: cli.name, value: cli.id })) : [];
+    const versions_ddl = stateEntity.versions ? stateEntity.versions.map(v => ({ label: v.last_modified, value: v.sha })) : [];
 
     return (
         <form className="email-template-form">
@@ -307,13 +322,16 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
             <div className="row form-group">
                 <div className="col-md-12">
                     <input type="button" onClick={handleJsonDataEdit} className="btn btn-primary pull-right" value={T.translate("emails.edit_json")} />
-                </div>
+                </div>                
+            </div>
+            <div className="row form-group">
                 <div className="col-md-12">
                     {templateLoaded ?
                         <div className='email-template-container'>
-                            <div className='email-template-buttons'>
+                            <div className='email-template-buttons' style={{width: singleTab && mjmlEditor ? '' : ''}}>
                                 {!previewOnly &&
                                     <div>
+                                        <div>
                                         {mjmlEditor ?
                                             <>
                                                 <label>
@@ -342,6 +360,18 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
                                                     className={`btn btn-primary`} value={T.translate("emails.display_mjml")} />
                                             </>
                                         }
+                                        </div>
+                                        <div className='col-md-8'>
+                                            {entity.id > 0 && stateEntity.versions > 0 && 
+                                                <Dropdown 
+                                                    id="history_version"
+                                                    value={historyVersion}
+                                                    placeholder={T.translate("emails.placeholders.select_version")}
+                                                    options={versions_ddl}
+                                                    onChange={handleVersionChange}
+                                                />
+                                            }
+                                        </div>
                                     </div>
                                 }
                                 {!codeOnly &&

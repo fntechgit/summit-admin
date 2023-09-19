@@ -95,7 +95,7 @@ export const getEmailTemplate = (templateId) => async (dispatch, getState) => {
 
     dispatch(startLoading());
 
-    const params = { access_token : accessToken, expand: 'parent' };
+    const params = { access_token : accessToken, expand: 'parent, versions' };
 
     return getRequest(
         null,
