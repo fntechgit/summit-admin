@@ -820,20 +820,17 @@ export const exportSummitSpeakers = (term = null, order = 'id', orderDir = 1, fi
  * @param source
  * @returns {function(*=, *): *}
  */
-export const sendSpeakerEmails = (currentFlowEvent,
-                           selectedAll = false ,
-                           selectedIds = [],
+export const sendSpeakerEmails = (
                            testRecipient = '',
                            excerptRecipient= '',
                            shouldSendCopy2Submitter = false,
-                           term = '',
-                           filters = {},
                            source = null,
                            promoCodeStrategy = null,
                            promocodeSpecification = null,
                            ) => async (dispatch, getState) => {
 
-    const { currentSummitState } = getState();
+    const { currentSummitState, currentSummitSpeakersListState } = getState();
+    const {selectedAll, selectedItems, excludedItems, term, currentFlowEvent, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter} = currentSummitSpeakersListState;
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
@@ -841,7 +838,7 @@ export const sendSpeakerEmails = (currentFlowEvent,
         access_token : accessToken,
     };
 
-    const filter = parseFilters(filters);
+    const filter = parseFilters({ selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter });
 
     if(term) {
         const escapedTerm = escapeFilterValue(term);
@@ -896,8 +893,12 @@ export const sendSpeakerEmails = (currentFlowEvent,
         }
     }
 
-    if(!selectedAll && selectedIds.length > 0){
-        payload['speaker_ids'] = selectedIds;
+    if(!selectedAll && selectedItems.length > 0){
+        payload['speaker_ids'] = selectedItems;
+    }
+
+    if(selectedAll && excludedItems.length > 0){
+        payload['excluded_speaker_ids'] = excludedItems;
     }
 
     if(testRecipient) {
