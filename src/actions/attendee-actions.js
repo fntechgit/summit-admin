@@ -488,14 +488,9 @@ export const deleteRsvp = (memberId, rsvpId) => async (dispatch) => {
     );
 };
 
-export const sendEmails = (term = null,
-                           currentFlowEvent,
-                           selectedAll = false ,
-                           selectedIds = [],
-                           filters = {},
-                           recipientEmail = null,
-) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
+export const sendEmails = (filters = {}, recipientEmail = null) => async (dispatch, getState) => {
+    const { currentSummitState, currentAttendeeListState } = getState();
+    const {term, currentFlowEvent, selectedAll, selectedIds, excludedIds} = currentAttendeeListState;
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
@@ -515,6 +510,10 @@ export const sendEmails = (term = null,
 
     if(!selectedAll && selectedIds.length > 0){
         payload['attendees_ids'] = selectedIds;
+    }
+
+    if(selectedAll && excludedIds.length > 0){
+        payload['excluded_attendees_ids'] = excludedIds;
     }
 
     if(recipientEmail) {

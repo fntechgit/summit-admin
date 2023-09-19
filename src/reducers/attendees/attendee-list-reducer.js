@@ -39,7 +39,9 @@ const DEFAULT_STATE = {
     lastPage        : 1,
     perPage         : 10,
     totalRealAttendees  : 0,
+    selectedCount  : 0,
     selectedIds: [],
+    excludedIds: [],
     currentFlowEvent: '',
     selectedAll: false,
     filters         : {},
@@ -56,10 +58,27 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
         }
         case REQUEST_ATTENDEES: {
             let {order, orderDir, page, perPage, term, filters, extraColumns, summitTz, ...rest} = payload;
-            return {...state, order, orderDir, currentPage: page, perPage, term, filters, extraColumns, summitTz, ...rest}
+            return {
+                ...state,
+                order,
+                orderDir,
+                currentPage: page,
+                perPage,
+                term,
+                filters,
+                extraColumns,
+                summitTz,
+                selectedIds: [],
+                excludedIds: [],
+                selectedCount: 0,
+                selectedAll: false,
+                ...rest
+            }
         }
         case RECEIVE_ATTENDEES: {
-            let {current_page, total, last_page} = payload.response;
+            const {current_page, total, last_page} = payload.response;
+            const {selectedAll, selectedIds, excludedIds} = state;
+
             let attendees = payload.response.data.map(a => {
                 let name = 'N/A';
                 let email = 'N/A';
@@ -79,23 +98,49 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
                     email: email,
                     company: a.company ? a.company : 'TBD',
                     status: a.status,
+                    checked: selectedAll ? !excludedIds.includes(a.id) : selectedIds.includes(a.id),
                     tickets_qty: a.tickets.length ? a.tickets.length : 'N/A',
                     summit_hall_checked_in_date: a.summit_hall_checked_in_date ? moment(a.summit_hall_checked_in_date * 1000).tz(state.summitTZ).format("MMMM Do YYYY, h:mm a") : 'TBD',
                 };
             })
 
-            return {...state, attendees: attendees, currentPage: current_page,
-                    totalRealAttendees: total, lastPage: last_page};
+            return {...state, attendees, currentPage: current_page, totalRealAttendees: total, lastPage: last_page};
         }
         case ATTENDEE_DELETED: {
             let {attendeeId} = payload;
             return {...state, attendees: state.attendees.filter(a => a.id !== attendeeId)};
         }
         case SELECT_ATTENDEE:{
-            return {...state, selectedIds: [...state.selectedIds, payload]};
+            const {selectedAll, selectedIds, excludedIds, selectedCount, attendees} = state;
+            const attendeeId = payload;
+            const attendee = attendees.find(a => a.id === attendeeId);
+            attendee.checked = true;
+
+            let newState = {};
+
+            if (selectedAll) {
+                newState = { ...state, excludedIds: excludedIds.filter(it => it !== attendeeId), selectedIds: [] }
+            } else {
+                newState = { ...state, selectedIds: [...selectedIds, attendeeId], excludedIds: [] }
+            }
+
+            return {...newState, attendees, selectedCount: selectedCount + 1}
         }
         case UNSELECT_ATTENDEE:{
-            return {...state, selectedIds: state.selectedIds.filter(element => element !== payload), selectedAll: false};
+            const {selectedAll, selectedIds, excludedIds, selectedCount, attendees} = state;
+            const attendeeId = payload;
+            const attendee = attendees.find(a => a.id === attendeeId);
+            attendee.checked = false;
+
+            let newState = {};
+
+            if (selectedAll) {
+                newState = { ...state, excludedIds: [...excludedIds, attendeeId], selectedIds: [] }
+            } else {
+                newState = { ...state, selectedIds: selectedIds.filter(it => it !== attendeeId), excludedIds: [] }
+            }
+
+            return {...newState, attendees, selectedCount: selectedCount - 1}
         }
         case CLEAR_ALL_SELECTED_ATTENDEES:
         {
@@ -105,7 +150,11 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, currentFlowEvent : payload};
         }
         case SET_SELECTED_ALL_ATTENDEES:{
-            return {...state, selectedAll : payload, selectedIds: []};
+            const selectedAll = payload;
+            const attendees = state.attendees.map(a => ({...a, checked: selectedAll}));
+            const selectedCount = selectedAll ? state.totalRealAttendees : 0
+
+            return {...state, selectedAll, selectedIds: [], excludedIds: [], attendees, selectedCount };
         }
         case SEND_ATTENDEES_EMAILS:{
             return {...state,
