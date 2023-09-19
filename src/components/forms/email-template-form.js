@@ -363,7 +363,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
                                         }
                                         </div>
                                         <div className='col-md-8'>
-                                            {entity.id > 0 && stateEntity.versions.length > 0 && 
+                                            {entity.id > 0 && stateEntity?.versions?.length > 0 && 
                                                 <Dropdown 
                                                     id="history_version"
                                                     value={historyVersion}

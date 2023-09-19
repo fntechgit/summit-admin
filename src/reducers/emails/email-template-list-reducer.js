@@ -22,7 +22,7 @@ import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 
 const DEFAULT_STATE = {
     templates       : [],
-    term            : null,
+    term            : '',
     order           : 'id',
     orderDir        : 1,
     currentPage     : 1,
