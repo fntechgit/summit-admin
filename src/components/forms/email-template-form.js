@@ -46,6 +46,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
     const [stateEntity, setStateEntity] = useState({ ...entity });
     const [stateErrors, setStateErrors] = useState(errors);
     const [historyVersion, setHistoryVersion] = useState(null);
+    const [currentVersionExternalLink, setCurrentVersionExternalLink] = useState(null);
     const [mjmlEditor, setMjmlEditor] = useState(null);
     const [codeOnly, setCodeOnly] = useState(false);
     const [previewOnly, setPreviewOnly] = useState(false);
@@ -178,13 +179,11 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
 
     const handleSubmit = (ev) => {
         ev.preventDefault();
-
         onSubmit(stateEntity);
     }
 
     const handleJsonDataEdit = (ev) => {
         ev.preventDefault();
-
         onRender()
     }
 
@@ -228,8 +227,20 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
 
     const handleVersionChange = (ev) => {
         const {value} = ev.target;
+        if(value === null){
+            // restore original version
+            setStateEntity({ ...stateEntity,
+                html_content: stateEntity.original_html_content,
+                mjml_content: stateEntity.original_mjml_content,
+            });
+            setHistoryVersion(null);
+            setCurrentVersionExternalLink(null);
+            return;
+        }
+
         const selectedHistory = stateEntity.versions.find(h => h.sha === value);
         setHistoryVersion(selectedHistory.sha);
+        setCurrentVersionExternalLink(selectedHistory.html_url);
         if(selectedHistory.type === EMAIL_TEMPLATE_TYPE_HTML) {
             setMjmlEditor(false);
             setStateEntity({ ...stateEntity, html_content: selectedHistory.content });
@@ -249,8 +260,8 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
     });
 
     const email_clients_ddl = clients ? clients.map(cli => ({ label: cli.name, value: cli.id })) : [];
-    const versions_ddl = stateEntity.versions ? stateEntity.versions.map(v => ({ label: `<a href='${v.html_url}'>${v.last_modified} - ${v.sha} - ${v.commit_message}</a>`, value: v.sha })) : [];
-
+    const versions_ddl = stateEntity.versions ? stateEntity.versions.map(v =>
+        ({ label: `${v.last_modified} - ${v.sha} - ${v.commit_message}`, value: v.sha })) : [];
     return (
         <form className="email-template-form">
             <input type="hidden" id="id" value={stateEntity.id} />
@@ -363,22 +374,34 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
                                         }
                                         </div>
                                         <div className='col-md-8'>
-                                            {entity.id > 0 && stateEntity?.versions?.length > 0 && 
-                                                <Dropdown 
-                                                    id="history_version"
-                                                    value={historyVersion}
-                                                    placeholder={T.translate("emails.placeholders.select_version")}
-                                                    options={versions_ddl}
-                                                    styles={{
-                                                        menu: (baseStyles, state) => ({
-                                                          ...baseStyles,
-                                                          color: state.isSelected ? 'white' : 'inherit',
-                                                        }),
-                                                    }}
-                                                    className="email-history-ddl"
-                                                    onChange={handleVersionChange}
-                                                />
+                                            <div className="row">
+                                            {entity.id > 0 && stateEntity.versions.length > 0 &&
+                                                <div className='col-md-11'>
+                                                    <Dropdown
+                                                        id="history_version"
+                                                        value={historyVersion}
+                                                        isClearable={true}
+                                                        placeholder={T.translate("emails.placeholders.select_version")}
+                                                        options={versions_ddl}
+                                                        styles={{
+                                                            menu: (baseStyles, state) => ({
+                                                              ...baseStyles,
+                                                              color: state.isSelected ? 'white' : 'inherit',
+                                                            }),
+                                                        }}
+                                                        className="email-history-ddl"
+                                                        onChange={handleVersionChange}
+                                                    />
+                                                </div>
                                             }
+                                            {currentVersionExternalLink &&
+                                                <div className='col-md-1'>
+                                                    <a href={currentVersionExternalLink}
+                                                       title={T.translate("emails.placeholders.see_version")}
+                                                       target="_blank"><i className="fa fa-github fa-lg"></i></a>
+                                                </div>
+                                            }
+                                            </div>
                                         </div>
                                     </div>
                                 }

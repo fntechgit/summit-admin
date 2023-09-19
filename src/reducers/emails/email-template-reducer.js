@@ -34,7 +34,9 @@ export const DEFAULT_ENTITY = {
     id              : 0,
     identifier      : '',
     html_content    : '',
+    original_html_content: '',
     mjml_content    : '',
+    original_mjml_content: '',
     plain_content   : '',
     from_email      : '',
     subject         : '',
@@ -43,7 +45,7 @@ export const DEFAULT_ENTITY = {
     is_active       : true,
     allowed_clients : [],
     parent          : null,
-
+    versions        : [],
 };
 
 const DEFAULT_STATE = {
@@ -83,7 +85,9 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
                 }
             }
 
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity}, preview: null };
+            return {...state, entity: {...DEFAULT_ENTITY, ...entity,
+                    original_mjml_content: entity.mjml_content,
+                    original_html_content:entity. html_content}, preview: null };
         }
         break;
         case RECEIVE_EMAIL_CLIENTS: {

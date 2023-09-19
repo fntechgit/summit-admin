@@ -2168,7 +2168,8 @@
       "select_parent": "Select Parent",
       "select_client": "Select Client",
       "select_template": "Select Template",
-      "select_version": "-- SELECT A PREVIOUS VERSION TO RESTORE --"
+      "select_version": "-- SELECT A PREVIOUS VERSION TO RESTORE --",
+      "see_version": "see version at Github"
     }
   },
   "summitdoc": {
