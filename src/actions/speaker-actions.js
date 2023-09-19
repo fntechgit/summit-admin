@@ -809,15 +809,12 @@ export const exportSummitSpeakers = (term = null, order = 'id', orderDir = 1, fi
 }
 
 /**
- * @param currentFlowEvent
- * @param selectedAll
- * @param selectedIds
  * @param testRecipient
  * @param excerptRecipient
  * @param shouldSendCopy2Submitter
- * @param term
- * @param filters
  * @param source
+ * @param promoCodeStrategy
+ * @param promocodeSpecification
  * @returns {function(*=, *): *}
  */
 export const sendSpeakerEmails = (

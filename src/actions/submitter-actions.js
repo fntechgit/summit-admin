@@ -132,30 +132,26 @@ export const exportSummitSubmitters = (term = null, order = 'id', orderDir = 1, 
 }
 
 /**
- * @param currentFlowEvent
- * @param selectedAll
- * @param selectedIds
  * @param testRecipient
  * @param excerptRecipient
  * @param shouldSendCopy2Submitter
- * @param term
- * @param filters
  * @param source
+ * @param promoCodeStrategy
+ * @param promocodeSpecification
  * @returns {function(*=, *): *}
  */
-export const sendSubmitterEmails = (currentFlowEvent,
-                           selectedAll = false ,
-                           selectedIds = [],
+export const sendSubmitterEmails = (
                            testRecipient = '',
                            excerptRecipient= '',
                            // not used only left to keep the signature
                            shouldSendCopy2Submitter = false,
-                           term = '',
-                           filters = {},
-                           source = null
+                           source = null,
+                           promoCodeStrategy = null,
+                           promocodeSpecification = null,
                            ) => async (dispatch, getState) => {
 
-    const { currentSummitState } = getState();
+    const { currentSummitState, currentSummitSpeakersListState } = getState();
+    const {selectedAll, selectedItems, excludedItems, term, currentFlowEvent, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter} = currentSummitSpeakersListState;
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
 
@@ -163,7 +159,7 @@ export const sendSubmitterEmails = (currentFlowEvent,
         access_token : accessToken,
     };
 
-    const filter = parseFilters(filters);
+    const filter = parseFilters({ selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter });
 
     if (source && source === sources.submitters_no_speakers) {
         filter.push('is_speaker==false');
@@ -189,8 +185,12 @@ export const sendSubmitterEmails = (currentFlowEvent,
         email_flow_event : currentFlowEvent,
     };
 
-    if(!selectedAll && selectedIds.length > 0){
-        payload['submitter_ids'] = selectedIds;
+    if(!selectedAll && selectedItems.length > 0){
+        payload['submitter_ids'] = selectedItems;
+    }
+
+    if(selectedAll && excludedItems.length > 0){
+        payload['excluded_submitter_ids'] = excludedItems;
     }
 
     if(testRecipient) {
