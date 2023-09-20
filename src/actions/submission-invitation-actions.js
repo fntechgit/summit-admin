@@ -321,17 +321,12 @@ const normalizeEntity = (entity) => {
     return normalizedEntity;
 };
 
-export const sendEmails = (currentFlowEvent,
-                           currentSelectionPlanId,
-                           selectedAll = false ,
-                           selectedInvitationsIds = [],
-                           term = null,
-                           showNotSent = false,
-                           tagFilter = []) => async (dispatch, getState) => {
+export const sendEmails = () => async (dispatch, getState) => {
 
-    const { currentSummitState } = getState();
+    const { currentSummitState, SubmmissionInvitationListState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
+    const {currentFlowEvent, currentSelectionPlanId, selectedAll , selectedInvitationsIds, excludedInvitationsIds, term, showNotSent, tagFilter} = SubmmissionInvitationListState;
 
     const filter = [];
 
@@ -365,6 +360,10 @@ export const sendEmails = (currentFlowEvent,
 
     if(currentSelectionPlanId && parseInt(currentSelectionPlanId) > 0){
         payload['selection_plan_id'] = currentSelectionPlanId;
+    }
+
+    if(selectedAll && excludedInvitationsIds.length > 0){
+        payload['excluded_invitations_ids'] = excludedInvitationsIds;
     }
 
     if(!selectedAll && selectedInvitationsIds.length > 0){
