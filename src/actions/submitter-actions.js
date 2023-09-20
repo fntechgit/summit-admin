@@ -154,27 +154,37 @@ export const sendSubmitterEmails = (
     const {selectedAll, selectedItems, excludedItems, term, currentFlowEvent, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter} = currentSummitSpeakersListState;
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
+    let filter = [];
 
     const params = {
         access_token : accessToken,
     };
 
-    const filter = parseFilters({ selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter });
+    if (!selectedAll && selectedItems.length > 0) {
+        // we don't need the filter criteria, we have the ids
+        filter.push(`id==${selectedItems.join('||')}`);
+    } else {
+        filter = parseFilters({ selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter });
 
-    if (source && source === sources.submitters_no_speakers) {
-        filter.push('is_speaker==false');
-    }
+        if (source && source === sources.submitters_no_speakers) {
+            filter.push('is_speaker==false');
+        }
 
-    if(term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(
-            [
-                `full_name@@${escapedTerm}`,
-                `email=@${escapedTerm}`,
-                `presentations_title=@${escapedTerm}`,
-                `presentations_abstract=@${escapedTerm}`
-            ].join(',')
-        );
+        if (term) {
+            const escapedTerm = escapeFilterValue(term);
+            filter.push(
+              [
+                  `full_name@@${escapedTerm}`,
+                  `email=@${escapedTerm}`,
+                  `presentations_title=@${escapedTerm}`,
+                  `presentations_abstract=@${escapedTerm}`
+              ].join(',')
+            );
+        }
+
+        if (selectedAll && excludedItems.length > 0){
+            filter.push(`not_id==${excludedItems.join('||')}`);
+        }
     }
 
     if (filter.length > 0) {
@@ -185,20 +195,12 @@ export const sendSubmitterEmails = (
         email_flow_event : currentFlowEvent,
     };
 
-    if(!selectedAll && selectedItems.length > 0){
-        payload['submitter_ids'] = selectedItems;
-    }
-
-    if(selectedAll && excludedItems.length > 0){
-        payload['excluded_submitter_ids'] = excludedItems;
-    }
-
     if(testRecipient) {
-        payload['test_email_recipient'] = testRecipient;
+        payload.test_email_recipient = testRecipient;
     }
 
     if(excerptRecipient){
-        payload['outcome_email_recipient'] = excerptRecipient
+        payload.outcome_email_recipient = excerptRecipient
     }
 
     dispatch(startLoading());

@@ -327,30 +327,38 @@ export const sendEmails = () => async (dispatch, getState) => {
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const {currentFlowEvent, currentSelectionPlanId, selectedAll , selectedInvitationsIds, excludedInvitationsIds, term, showNotSent, tagFilter} = SubmmissionInvitationListState;
-
-    const filter = [];
+    let filter = [];
 
     const params = {
         access_token : accessToken,
     };
 
-    if(term){
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`email=@${escapedTerm},first_name=@${escapedTerm},last_name=@${escapedTerm}`);
+    if (!selectedAll && selectedInvitationsIds.length > 0) {
+        // we don't need the filter criteria, we have the ids
+        filter.push(`id==${selectedInvitationsIds.join('||')}`);
+    } else {
+        if (term) {
+            const escapedTerm = escapeFilterValue(term);
+            filter.push(`email=@${escapedTerm},first_name=@${escapedTerm},last_name=@${escapedTerm}`);
+        }
+
+        if (showNotSent) {
+            filter.push('is_sent==false');
+        }
+
+        if (tagFilter.length > 0) {
+            filter.push('tags_id=='+tagFilter.map(e => e.id).reduce(
+              (accumulator, tt) => accumulator +(accumulator !== '' ? '||':'') + tt,
+              ''
+            ));
+        }
+
+        if (selectedAll && excludedInvitationsIds.length > 0){
+            filter.push(`not_id==${excludedInvitationsIds.join('||')}`);
+        }
     }
 
-    if(showNotSent){
-        filter.push('is_sent==false');
-    }
-
-    if(tagFilter.length > 0) {
-        filter.push('tags_id=='+tagFilter.map(e => e.id).reduce(
-            (accumulator, tt) => accumulator +(accumulator !== '' ? '||':'') + tt,
-            ''
-        ));
-    }
-
-    if(filter.length > 0){
+    if (filter.length > 0) {
         params['filter[]'] = filter;
     }
 
@@ -360,14 +368,6 @@ export const sendEmails = () => async (dispatch, getState) => {
 
     if(currentSelectionPlanId && parseInt(currentSelectionPlanId) > 0){
         payload['selection_plan_id'] = currentSelectionPlanId;
-    }
-
-    if(selectedAll && excludedInvitationsIds.length > 0){
-        payload['excluded_invitations_ids'] = excludedInvitationsIds;
-    }
-
-    if(!selectedAll && selectedInvitationsIds.length > 0){
-        payload['invitations_ids'] = selectedInvitationsIds;
     }
 
     dispatch(startLoading());

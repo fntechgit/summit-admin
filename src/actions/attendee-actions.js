@@ -493,12 +493,22 @@ export const sendEmails = (filters = {}, recipientEmail = null) => async (dispat
     const {term, currentFlowEvent, selectedAll, selectedIds, excludedIds} = currentAttendeeListState;
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
+    let filter = [];
 
     const params = {
         access_token : accessToken,
     };
 
-    const filter = parseFilters(filters, term);
+    if (!selectedAll && selectedIds.length > 0) {
+        // we don't need the filter criteria, we have the ids
+        filter.push(`id==${selectedIds.join('||')}`);
+    } else {
+        filter = parseFilters(filters, term);
+
+        if (selectedAll && excludedIds.length > 0){
+            filter.push(`not_id==${excludedIds.join('||')}`);
+        }
+    }
 
     if (filter.length > 0) {
         params['filter[]'] = filter;
@@ -507,14 +517,6 @@ export const sendEmails = (filters = {}, recipientEmail = null) => async (dispat
     const payload =  {
         email_flow_event : currentFlowEvent
     };
-
-    if(!selectedAll && selectedIds.length > 0){
-        payload['attendees_ids'] = selectedIds;
-    }
-
-    if(selectedAll && excludedIds.length > 0){
-        payload['excluded_attendees_ids'] = excludedIds;
-    }
 
     if(recipientEmail) {
         payload['test_email_recipient'] = recipientEmail;

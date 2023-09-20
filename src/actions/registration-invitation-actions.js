@@ -310,12 +310,22 @@ export const sendEmails = ( filters = {}, testRecipient = null) => async (dispat
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const {currentFlowEvent, selectedAll , selectedInvitationsIds, excludedInvitationsIds, term} = RegistrationInvitationListState;
-
-    const filter = parseFilters(filters, term);
+    let filter = [];
 
     const params = {
         access_token : accessToken,
     };
+
+    if (!selectedAll && selectedInvitationsIds.length > 0) {
+        // we don't need the filter criteria, we have the ids
+        filter.push(`id==${selectedInvitationsIds.join('||')}`);
+    } else {
+        filter = parseFilters(filters, term);
+
+        if (selectedAll && excludedInvitationsIds.length > 0){
+            filter.push(`not_id==${excludedInvitationsIds.join('||')}`);
+        }
+    }
 
     if(filter.length > 0){
         params['filter[]'] = filter;
@@ -324,14 +334,6 @@ export const sendEmails = ( filters = {}, testRecipient = null) => async (dispat
     const payload =  {
         email_flow_event : currentFlowEvent
     };
-
-    if(selectedAll && excludedInvitationsIds.length > 0){
-        payload['excluded_invitations_ids'] = excludedInvitationsIds;
-    }
-
-    if(!selectedAll && selectedInvitationsIds.length > 0){
-        payload['invitations_ids'] = selectedInvitationsIds;
-    }
 
     if(testRecipient) {
         payload['test_email_recipient'] = testRecipient;

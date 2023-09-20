@@ -830,25 +830,35 @@ export const sendSpeakerEmails = (
     const {selectedAll, selectedItems, excludedItems, term, currentFlowEvent, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter} = currentSummitSpeakersListState;
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
+    let filter = [];
 
     const params = {
         access_token : accessToken,
     };
 
-    const filter = parseFilters({ selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter });
+    if (!selectedAll && selectedItems.length > 0) {
+        // we don't need the filter criteria, we have the ids
+        filter.push(`id==${selectedItems.join('||')}`);
+    } else {
+        filter = parseFilters({ selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter });
 
-    if(term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(
-            [
-                `full_name@@${escapedTerm}`,
-                `email=@${escapedTerm}`,
-                `presentations_title=@${escapedTerm}`,
-                `presentations_abstract=@${escapedTerm}`,
-                `presentations_submitter_full_name@@${escapedTerm}`,
-                `presentations_submitter_email=@${escapedTerm}`
-            ].join(',')
-        );
+        if (term) {
+            const escapedTerm = escapeFilterValue(term);
+            filter.push(
+              [
+                  `full_name@@${escapedTerm}`,
+                  `email=@${escapedTerm}`,
+                  `presentations_title=@${escapedTerm}`,
+                  `presentations_abstract=@${escapedTerm}`,
+                  `presentations_submitter_full_name@@${escapedTerm}`,
+                  `presentations_submitter_email=@${escapedTerm}`
+              ].join(',')
+            );
+        }
+
+        if (selectedAll && excludedItems.length > 0) {
+            filter.push(`not_id==${excludedItems.join('||')}`);
+        }
     }
 
     if (filter.length > 0) {
@@ -860,7 +870,7 @@ export const sendSpeakerEmails = (
         should_send_copy_2_submitter : shouldSendCopy2Submitter,
     };
 
-    if([EXISTING_SPEAKERS_PROMO_CODE, EXISTING_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy)) {
+    if ([EXISTING_SPEAKERS_PROMO_CODE, EXISTING_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy)) {
         payload['promo_code'] = promocodeSpecification.existingPromoCode.code;
     } else if([AUTO_GENERATED_SPEAKERS_PROMO_CODE, AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy)) {
         const className = promoCodeStrategy === 3 ? SPEAKERS_PROMO_CODE_CLASS_NAME : SPEAKERS_DISCOUNT_CODE_CLASS_NAME;
@@ -890,19 +900,11 @@ export const sendSpeakerEmails = (
         }
     }
 
-    if(!selectedAll && selectedItems.length > 0){
-        payload['speaker_ids'] = selectedItems;
-    }
-
-    if(selectedAll && excludedItems.length > 0){
-        payload['excluded_speaker_ids'] = excludedItems;
-    }
-
-    if(testRecipient) {
+    if (testRecipient) {
         payload['test_email_recipient'] = testRecipient;
     }
 
-    if(excerptRecipient){
+    if (excerptRecipient){
         payload['outcome_email_recipient'] = excerptRecipient
     }
 

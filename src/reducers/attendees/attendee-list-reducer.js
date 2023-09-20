@@ -144,7 +144,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
         }
         case CLEAR_ALL_SELECTED_ATTENDEES:
         {
-            return {...state, selectedIds: [], selectedAll: false};
+            return {...state, selectedIds: [], excludedIds: [], selectedCount: 0, selectedAll: false};
         }
         case SET_ATTENDEES_CURRENT_FLOW_EVENT:{
             return {...state, currentFlowEvent : payload};
