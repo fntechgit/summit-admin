@@ -304,12 +304,12 @@ const normalizeEntity = (entity) => {
     return normalizedEntity;
 };
 
-export const sendEmails = (currentFlowEvent, selectedAll = false , selectedInvitationsIds = [],
-                          term = null, filters = {}, testRecipient = null) => async (dispatch, getState) => {
+export const sendEmails = ( filters = {}, testRecipient = null) => async (dispatch, getState) => {
 
-    const { currentSummitState } = getState();
+    const { currentSummitState, RegistrationInvitationListState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
+    const {currentFlowEvent, selectedAll , selectedInvitationsIds, excludedInvitationsIds, term} = RegistrationInvitationListState;
 
     const filter = parseFilters(filters, term);
 
@@ -324,6 +324,10 @@ export const sendEmails = (currentFlowEvent, selectedAll = false , selectedInvit
     const payload =  {
         email_flow_event : currentFlowEvent
     };
+
+    if(selectedAll && excludedInvitationsIds.length > 0){
+        payload['excluded_invitations_ids'] = excludedInvitationsIds;
+    }
 
     if(!selectedAll && selectedInvitationsIds.length > 0){
         payload['invitations_ids'] = selectedInvitationsIds;

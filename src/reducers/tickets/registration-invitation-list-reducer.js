@@ -38,6 +38,8 @@ const DEFAULT_STATE = {
     lastPage: 1,
     perPage: 10,
     totalInvitations: 0,
+    selectedCount  : 0,
+    excludedInvitationsIds: [],
     selectedInvitationsIds: [],
     currentFlowEvent: '',
     selectedAll: false,
@@ -57,12 +59,28 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
         case REQUEST_INVITATIONS: {            
             let {order, orderDir, page, perPage, term, isAccepted, isSent, allowedTicketTypesIds, tagFilter} = payload;
 
-            return {...state, order, orderDir, currentPage: page, perPage, term, isAccepted, isSent, allowedTicketTypesIds, tagFilter};
+            return {
+                ...state,
+                order,
+                orderDir,
+                currentPage: page,
+                perPage,
+                term,
+                isAccepted,
+                isSent,
+                allowedTicketTypesIds,
+                tagFilter,
+                selectedInvitationsIds: [],
+                excludedInvitationsIds: [],
+                selectedCount: 0,
+                selectedAll: false,
+            };
         }
         case RECEIVE_INVITATIONS: {
-            let {total, last_page, data} = payload.response;
-            data = data.map(i => {
-                
+            const {total, last_page, data} = payload.response;
+            const {selectedAll, selectedInvitationsIds, excludedInvitationsIds} = state;
+
+            const invitations = data.map(i => {
                 const allowedTicketTypes = i.allowed_ticket_types?.length > 0 ? 
                     i.allowed_ticket_types.map(t => t.name).join(', ') : 'N/A';
 
@@ -72,17 +90,44 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
                     allowed_ticket_types: allowedTicketTypes.slice(0, MaxTextLengthForTicketTypesOnTable),
                     allowed_ticket_types_full: allowedTicketTypes,
                     tags: i.tags.map(e=> e.tag).join(", ").slice(0, MaxTextLengthForTagsOnTable),
-                    tags_full: i.tags.map(e=> e.tag).join(", ")
+                    tags_full: i.tags.map(e=> e.tag).join(", "),
+                    checked: selectedAll ? !excludedInvitationsIds.includes(i.id) : selectedInvitationsIds.includes(i.id),
                 }
             });
-            return {...state, invitations: data, lastPage: last_page, totalInvitations: total};
+
+            return {...state, invitations, lastPage: last_page, totalInvitations: total};
         }
         case SELECT_INVITATION:{
-            return {...state, selectedInvitationsIds: [...state.selectedInvitationsIds, payload]};
+            const {selectedAll, selectedInvitationsIds, excludedInvitationsIds, selectedCount, invitations} = state;
+            const invitationId = payload;
+            const invitation = invitations.find(a => a.id === invitationId);
+            invitation.checked = true;
+
+            let newState = {};
+
+            if (selectedAll) {
+                newState = { ...state, excludedInvitationsIds: excludedInvitationsIds.filter(it => it !== invitationId), selectedInvitationsIds: [] }
+            } else {
+                newState = { ...state, selectedInvitationsIds: [...selectedInvitationsIds, invitationId], excludedInvitationsIds: [] }
+            }
+
+            return {...newState, invitations, selectedCount: selectedCount + 1}
         }
         case UNSELECT_INVITATION:{
-            return {...state, selectedInvitationsIds: state.selectedInvitationsIds.filter(element => element !== payload)
-                , selectedAll: false};
+            const {selectedAll, selectedInvitationsIds, excludedInvitationsIds, selectedCount, invitations} = state;
+            const invitationId = payload;
+            const invitation = invitations.find(a => a.id === invitationId);
+            invitation.checked = false;
+
+            let newState = {};
+
+            if (selectedAll) {
+                newState = { ...state, excludedInvitationsIds: [...excludedInvitationsIds, invitationId], selectedInvitationsIds: [] }
+            } else {
+                newState = { ...state, selectedInvitationsIds: selectedInvitationsIds.filter(it => it !== invitationId), excludedInvitationsIds: [] }
+            }
+
+            return {...newState, invitations, selectedCount: selectedCount - 1}
         }
         case CLEAR_ALL_SELECTED_INVITATIONS:
         {
@@ -102,7 +147,10 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, currentFlowEvent : payload};
         }
         case SET_SELECTED_ALL:{
-            return {...state, selectedAll : payload, selectedInvitationsIds: []};
+            const selectedAll = payload;
+            const invitations = state.invitations.map(i => ({...i, checked: selectedAll}));
+            const selectedCount = selectedAll ? state.totalInvitations : 0
+            return {...state, invitations, selectedAll, selectedCount, selectedInvitationsIds: [], excludedInvitationsIds: []};
         }
         default:
             return state;
