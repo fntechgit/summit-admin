@@ -57,17 +57,24 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
             return DEFAULT_STATE;
         }
         case REQUEST_ATTENDEES: {
-            let {order, orderDir, page, perPage, term, filters, extraColumns, summitTz, ...rest} = payload;
+            let { order, orderDir, page, ...rest} = payload;
+
+            if (order !== state.order || orderDir !== state.orderDir || page !== state.currentPage) {
+                // if the change was in page or order, keep selection
+                return {
+                    ...state,
+                    order,
+                    orderDir,
+                    currentPage: page,
+                    ...rest
+                }
+            }
+
             return {
                 ...state,
                 order,
                 orderDir,
                 currentPage: page,
-                perPage,
-                term,
-                filters,
-                extraColumns,
-                summitTz,
                 selectedIds: [],
                 excludedIds: [],
                 selectedCount: 0,

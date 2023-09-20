@@ -50,15 +50,24 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
             return DEFAULT_STATE;
         }
         case REQUEST_TICKETS: {
-            let {order, orderDir, page, perPage, filters, extraColumns, ...rest} = payload;
+            let { order, orderDir, page, ...rest} = payload;
+
+            if (order !== state.order || orderDir !== state.orderDir || page !== state.currentPage) {
+                // if the change was in page or order, keep selection
+                return {
+                    ...state,
+                    order,
+                    orderDir,
+                    currentPage: page,
+                    ...rest
+                }
+            }
+
             return {
                 ...state,
                 order,
                 orderDir,
                 currentPage: page,
-                perPage,
-                filters,
-                extraColumns,
                 selectedIds: [],
                 excludedIds: [],
                 selectedCount: 0,

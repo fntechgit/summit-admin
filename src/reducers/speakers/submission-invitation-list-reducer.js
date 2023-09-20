@@ -56,23 +56,31 @@ const SubmissionInvitationListReducer = (state = DEFAULT_STATE, action) => {
         case LOGOUT_USER: {
             return DEFAULT_STATE;
         }
-        case REQUEST_INVITATIONS: {            
-            let {order, orderDir, page, perPage, term, showNotSent, tagFilter} = payload;
+        case REQUEST_INVITATIONS: {
+            let { order, orderDir, page, ...rest} = payload;
+
+            if (order !== state.order || orderDir !== state.orderDir || page !== state.currentPage) {
+                // if the change was in page or order, keep selection
+                return {
+                    ...state,
+                    order,
+                    orderDir,
+                    currentPage: page,
+                    ...rest
+                }
+            }
 
             return {
                 ...state,
                 order,
                 orderDir,
                 currentPage: page,
-                perPage,
-                term,
-                showNotSent,
-                tagFilter,
                 selectedInvitationsIds: [],
                 excludedInvitationsIds: [],
                 selectedCount: 0,
                 selectedAll: false,
-            };
+                ...rest
+            }
         }
         case RECEIVE_INVITATIONS: {
             const {total, last_page, data} = payload.response;

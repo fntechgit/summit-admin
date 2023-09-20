@@ -58,14 +58,24 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
             return DEFAULT_STATE;
         }
         case REQUEST_SPEAKERS_BY_SUMMIT: {
-            let { order, orderDir, term, page, perPage, ...rest } = payload;
+            let { order, orderDir, page, ...rest} = payload;
+
+            if (order !== state.order || orderDir !== state.orderDir || page !== state.currentPage) {
+                // if the change was in page or order, keep selection
+                return {
+                    ...state,
+                    order,
+                    orderDir,
+                    currentPage: page,
+                    ...rest
+                }
+            }
+
             return {
                 ...state,
                 order,
                 orderDir,
-                term,
                 currentPage: page,
-                perPage,
                 selectedItems: [],
                 excludedItems: [],
                 selectedCount: 0,
