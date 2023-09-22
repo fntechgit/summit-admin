@@ -52,10 +52,11 @@ const sponsorSocialNetworkReducer = (state = DEFAULT_STATE, action) => {
         }
             break;
         case UPDATE_SPONSOR_SOCIAL_NETWORK: {
-            return { ...state, entity: { ...payload }, errors: {} };
+            return { ...state };
         }
             break;
         case SPONSOR_SOCIAL_NETWORK_ADDED:
+        case SPONSOR_SOCIAL_NETWORK_UPDATED:
         case RECEIVE_SPONSOR_SOCIAL_NETWORK: {
             let entity = { ...payload.response };
 
@@ -68,10 +69,6 @@ const sponsorSocialNetworkReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, entity: { ...state.entity, ...entity } };
         }
             break;
-        case SPONSOR_SOCIAL_NETWORK_UPDATED: {
-            return state;
-        }
-            break;        
         case VALIDATE: {
             return { ...state, errors: payload.errors };
         }
