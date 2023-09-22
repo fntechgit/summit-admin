@@ -30,7 +30,6 @@ const SponsorSocialNetworkForm = ({ entity, errors, onSubmit }) => {
     ]);
 
     useEffect(() => {
-        console.log('new entity...', entity);
         const customIcon = entity.icon_css_class && !iconsDDL.some(e => e.value === entity.icon_css_class);
         if (customIcon) {
             setIconsDDL([...iconsDDL, { label: entity.icon_css_class, value: entity.icon_css_class }]);
