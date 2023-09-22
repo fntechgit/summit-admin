@@ -119,7 +119,7 @@ export const saveEmailTemplate = (entity, noAlert = false) => async (dispatch, g
     dispatch(startLoading());
 
     const normalizedEntity = normalizeEntity(entity);
-    const params = { access_token : accessToken };
+    const params = { access_token : accessToken, expand: 'versions' };
 
     if (entity.id) {
 
@@ -132,10 +132,8 @@ export const saveEmailTemplate = (entity, noAlert = false) => async (dispatch, g
             entity
         )(params)(dispatch)
             .then((payload) => {
-                if (!noAlert){
+                if (!noAlert)
                     dispatch(showSuccessMessage(T.translate("emails.template_saved")));
-                    dispatch(getEmailTemplate(entity.id));
-                }
                 else
                     dispatch(stopLoading());
             });
