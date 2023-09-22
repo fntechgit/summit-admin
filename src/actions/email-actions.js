@@ -132,8 +132,10 @@ export const saveEmailTemplate = (entity, noAlert = false) => async (dispatch, g
             entity
         )(params)(dispatch)
             .then((payload) => {
-                if (!noAlert)
+                if (!noAlert){
                     dispatch(showSuccessMessage(T.translate("emails.template_saved")));
+                    dispatch(getEmailTemplate(entity.id));
+                }
                 else
                     dispatch(stopLoading());
             });

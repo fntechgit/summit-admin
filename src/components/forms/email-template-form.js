@@ -84,6 +84,12 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
     }, [errors, entity]);
 
     useEffect(() => {
+        const latestVersion = entity.versions[0];
+        setHistoryVersion(latestVersion.sha);
+        setCurrentVersionExternalLink(latestVersion.html_url);
+    }, [entity.versions])
+
+    useEffect(() => {
         // if entity is correctly loaded, set state for entity use
         if(templateLoaded) {
             if (entity.id === 0) {
@@ -262,6 +268,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
     const email_clients_ddl = clients ? clients.map(cli => ({ label: cli.name, value: cli.id })) : [];
     const versions_ddl = stateEntity.versions ? stateEntity.versions.map(v =>
         ({ label: `${v.last_modified} - ${v.sha} - ${v.commit_message}`, value: v.sha })) : [];
+
     return (
         <form className="email-template-form">
             <input type="hidden" id="id" value={stateEntity.id} />

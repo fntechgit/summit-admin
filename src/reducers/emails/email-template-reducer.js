@@ -87,7 +87,7 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
 
             return {...state, entity: {...DEFAULT_ENTITY, ...entity,
                     original_mjml_content: entity.mjml_content,
-                    original_html_content:entity. html_content}, preview: null };
+                    original_html_content: entity.html_content} };
         }
         break;
         case RECEIVE_EMAIL_CLIENTS: {
