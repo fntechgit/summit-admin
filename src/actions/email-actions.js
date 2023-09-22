@@ -119,7 +119,7 @@ export const saveEmailTemplate = (entity, noAlert = false) => async (dispatch, g
     dispatch(startLoading());
 
     const normalizedEntity = normalizeEntity(entity);
-    const params = { access_token : accessToken, expand: 'versions' };
+    const params = { access_token : accessToken, expand: 'parent,versions' };
 
     if (entity.id) {
 
