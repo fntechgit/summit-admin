@@ -84,12 +84,6 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
     }, [errors, entity]);
 
     useEffect(() => {
-        const latestVersion = entity.versions[0];
-        setHistoryVersion(latestVersion.sha);
-        setCurrentVersionExternalLink(latestVersion.html_url);
-    }, [entity.versions])
-
-    useEffect(() => {
         // if entity is correctly loaded, set state for entity use
         if(templateLoaded) {
             if (entity.id === 0) {
