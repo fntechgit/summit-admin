@@ -74,6 +74,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
                 ...state,
                 order,
                 orderDir,
+                attendees: [],
                 currentPage: page,
                 selectedIds: [],
                 excludedIds: [],
@@ -164,11 +165,10 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
             return {...state, selectedAll, selectedIds: [], excludedIds: [], attendees, selectedCount };
         }
         case SEND_ATTENDEES_EMAILS:{
-            return {...state,
-                selectedIds: [],
-                currentFlowEvent: '',
-                selectedAll: false
-            }
+            const newState = {...state, selectedAll: false, selectedIds: [], excludedIds: [], selectedCount: 0 }
+            newState.attendees = newState.attendees.map(a => ({...a, checked: false}));
+
+            return { ...newState }
         }
         case CHANGE_ATTENDEE_SEARCH_TERM: {
             let {term} = payload;

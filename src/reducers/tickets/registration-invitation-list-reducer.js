@@ -75,6 +75,7 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
                 order,
                 orderDir,
                 currentPage: page,
+                invitations: [],
                 selectedInvitationsIds: [],
                 excludedInvitationsIds: [],
                 selectedCount: 0,
@@ -141,7 +142,10 @@ const RegistrationInvitationListReducer = (state = DEFAULT_STATE, action) => {
         }
         case SEND_INVITATIONS_EMAILS:
         {
-            return {...state, selectedInvitationsIds: [], selectedAll: false, currentFlowEvent: ''};
+            const newState = {...state, selectedAll: false, selectedInvitationsIds: [], excludedInvitationsIds: [], selectedCount: 0, currentFlowEvent: '', currentSelectionPlanId: 0 }
+            newState.invitations = newState.invitations.map(a => ({...a, checked: false}));
+
+            return {...newState};
         }
         case REGISTRATION_INVITATION_DELETED: {
             return {...state, invitations: state.invitations.filter(i => i.id !== payload)};

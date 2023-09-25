@@ -76,6 +76,7 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
                 order,
                 orderDir,
                 currentPage: page,
+                items: [],
                 selectedItems: [],
                 excludedItems: [],
                 selectedCount: 0,
@@ -127,12 +128,8 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
             return { ...newState, items: markCheckedItems(state.items, newState), selectedCount: 0 }
         }
         case SEND_SUBMITTERS_EMAILS: {
-            return {
-                ...state,
-                selectedItems: [],
-                currentFlowEvent: '',
-                selectedAll: false
-            }
+            const newState = {...state, selectedAll: false, selectedItems: [], excludedItems: [] }
+            return { ...newState, items: markCheckedItems(state.items, newState), selectedCount: 0 }
         }
         case SET_SUBMITTERS_CURRENT_FLOW_EVENT: {
             return { ...state, currentFlowEvent: payload };
