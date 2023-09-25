@@ -51,10 +51,6 @@ const sponsorSocialNetworkReducer = (state = DEFAULT_STATE, action) => {
             return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
             break;
-        case UPDATE_SPONSOR_SOCIAL_NETWORK: {
-            return { ...state };
-        }
-            break;
         case SPONSOR_SOCIAL_NETWORK_ADDED:
         case SPONSOR_SOCIAL_NETWORK_UPDATED:
         case RECEIVE_SPONSOR_SOCIAL_NETWORK: {
