@@ -443,7 +443,7 @@ class SummitSpeakersListPage extends React.Component {
                     </div>
                 </div>
                 <div className='row'>
-                    <div className="col-md-3" style={{ height: "61px", paddingTop: "8px" }}>
+                    <div className="col-md-3" style={{ paddingTop: "8px" }}>
                         <Dropdown
                             id="selectionPlanFilter"
                             value={selectionPlanFilter}
@@ -454,7 +454,7 @@ class SummitSpeakersListPage extends React.Component {
                             isMulti
                         />
                     </div>
-                    <div className="col-md-3" style={{ height: "61px", paddingTop: "8px" }}>
+                    <div className="col-md-3" style={{ paddingTop: "8px" }}>
                         <Dropdown
                             id="trackFilter"
                             value={trackFilter}
@@ -465,7 +465,7 @@ class SummitSpeakersListPage extends React.Component {
                             isMulti
                         />
                     </div>
-                    <div className="col-md-3" style={{ height: "61px", paddingTop: "8px" }}>
+                    <div className="col-md-3" style={{ paddingTop: "8px" }}>
                         <Dropdown
                             id="activityTypeFilter"
                             value={activityTypeFilter}
@@ -476,7 +476,7 @@ class SummitSpeakersListPage extends React.Component {
                             isMulti
                         />
                     </div>
-                    <div className="col-md-3" style={{ height: "61px", paddingTop: "8px" }}>
+                    <div className="col-md-3" style={{ paddingTop: "8px" }}>
                         <Dropdown
                             id="selectionStatusFilter"
                             value={selectionStatusFilter}
