@@ -107,9 +107,9 @@ class NewRoomBookingForm extends React.Component {
         let { entity, currentRoom, timeSlot } = this.state;
         const { availableSlots } = this.props;
 
-        ev.preventDefault();        
+        ev.preventDefault();
 
-        const {start_date, end_date} = availableSlots.find(e => e.id === timeSlot);
+        const {start_date, end_date} = availableSlots.find(e => e.start_date === timeSlot);
 
         let normalizedEntity = {
             room_id: entity.room_id, 
@@ -118,8 +118,6 @@ class NewRoomBookingForm extends React.Component {
             owner_id: entity.owner?.id,
             currency: currentRoom.currency,
             amount: currentRoom.time_slot_cost}
-
-        console.log('normalized...', normalizedEntity);
 
         this.props.onSubmit(normalizedEntity);
     }
@@ -143,18 +141,13 @@ class NewRoomBookingForm extends React.Component {
 
         const available_booking_dates_ddl = getAvailableBookingDates(currentSummit).map(v => ({ value: v.epoch, label: v.str }));        
 
-        const available_slots_ddl = availableSlots?.filter(as => as.is_free === true).map(as => (
+        const available_slots_ddl = availableSlots?.filter(as => as.is_free === true).map((as, index) => (
             {   
-                value: as.id, 
+                value: as.start_date,
                 label: `${epochToMomentTimeZone(as.start_date, currentSummit.time_zone_id).format('M/D h:mm a')} - 
                         ${epochToMomentTimeZone(as.end_date, currentSummit.time_zone_id).format('M/D h:mm a')}`
             }
         ));
-
-        console.log('current room', currentRoom);
-        console.log('booking date', bookingDate)
-        console.log('timeslot', timeSlot);
-        console.log('available time slots', available_slots_ddl);
 
         return (
             <form className="room-booking-form">
