@@ -4,6 +4,7 @@
 
     .meeting-room-image {
         width: 30%;
+
         img {
             width: 100%;
             height: 100%;
@@ -35,6 +36,21 @@
         .meeting-room-amenities {
             flex: 1;
             font-size: 1em;
+        }
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .meeting-room {
+        flex-direction: column;
+
+        .meeting-room-image {
+            width: 100%;
+
+            img {
+                max-height: 350px;
+                object-fit: scale-down;
+            }
         }
     }
 }
