@@ -144,8 +144,8 @@ class NewRoomBookingForm extends React.Component {
         const available_slots_ddl = availableSlots?.filter(as => as.is_free === true).map((as, index) => (
             {   
                 value: as.start_date,
-                label: `${epochToMomentTimeZone(as.start_date, currentSummit.time_zone_id).format('M/D h:mm a')} - 
-                        ${epochToMomentTimeZone(as.end_date, currentSummit.time_zone_id).format('M/D h:mm a')}`
+                label: `${epochToMomentTimeZone(as.start_date, currentSummit.time_zone_id).format('h:mm a')} - 
+                        ${epochToMomentTimeZone(as.end_date, currentSummit.time_zone_id).format('h:mm a')}`
             }
         ));
 
