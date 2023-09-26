@@ -51,6 +51,9 @@ export const ROOM_BOOKING_REFUNDED     = 'ROOM_BOOKING_REFUNDED';
 
 export const ROOM_BOOKING_CANCELED = 'ROOM_BOOKING_CANCELED';
 
+export const OFFLINE_ROOM_BOOKING_ADDED         = 'OFFLINE_ROOM_BOOKING_ADDED';
+export const RECEIVE_OFFLINE_ROOM_BOOKING_AVAILABILITY  = 'RECEIVE_OFFLINE_ROOM_BOOKING_AVAILABILITY';
+
 export const getRoomBookings = ( term = null, page = 1, perPage = 10, order = 'start_datetime', orderDir = 1 ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
@@ -432,3 +435,59 @@ export const deleteRoomBookingAttribute = (attributeTypeId, attributeValueId) =>
     );
 };
 
+export const getOfflineBookingRoomAvailability = (roomId, day) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    dispatch(startLoading());
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_OFFLINE_ROOM_BOOKING_AVAILABILITY),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${roomId}/availability/${day}`,
+        authErrorHandler,        
+    )(params)(dispatch)
+        .then((payload) => {
+            dispatch(stopLoading());
+        });
+}
+
+export const saveOfflineRoomBooking = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeEntity(entity);
+    
+    const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("offline_room_booking.offline_room_booking_created"),
+        type: 'success'
+    };
+
+    postRequest(
+        null,
+        createAction(OFFLINE_ROOM_BOOKING_ADDED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${entity.room_id}/reservations/offline`,
+        normalizedEntity,
+        authErrorHandler,
+        entity
+    )(params)(dispatch)
+        .then((payload) => {
+            dispatch(showMessage(
+                success_message,
+                () => { history.push(`/app/summits/${currentSummit.id}/room-bookings/${payload.response.id}`) }
+            ));
+        });
+}
