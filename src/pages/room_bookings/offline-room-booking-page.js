@@ -52,9 +52,9 @@ class OfflineRoomBookingPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentOfflineRoomBookingReducer }) => ({
+const mapStateToProps = ({ currentSummitState, currentOfflineRoomBookingState }) => ({
     currentSummit: currentSummitState.currentSummit,
-    ...currentOfflineRoomBookingReducer
+    ...currentOfflineRoomBookingState
 });
 
 export default connect(

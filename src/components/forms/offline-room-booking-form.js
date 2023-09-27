@@ -11,83 +11,68 @@
  * limitations under the License.
  **/
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
 import { Input, Dropdown, MemberInput, DateTimePicker } from 'openstack-uicore-foundation/lib/components'
-import { getAvailableBookingDates, isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import { getAvailableBookingDates, getDayFromReservation, isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 import '../../styles/offline-booking-room.less';
 
+const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlots, onSubmit, getAvailableSlots }) => {
+    const [stateEntity, setStateEntity] = useState({ ...entity });
+    const [currentRoom, setCurrentRoom] = useState(null);
+    const [bookingDate, setBookingDate] = useState(null);
+    const [timeSlot, setTimeSlot] = useState(null);
 
-class NewRoomBookingForm extends React.Component {
-    constructor(props) {
-        super(props);
+    useEffect(() => {
+        if (entity.id) {
+            handleEntityChange(entity)
+        }
+    }, [])
 
-        this.state = {
-            entity: { ...props.entity },
-            errors: props.errors,
-            currentRoom: null,
-            bookingDate: null,
-            timeSlot: null,
-        };
+    useEffect(() => {
+        if (entity.id) {
+            handleEntityChange(entity)
+        } else {
+            setStateEntity({ ...entity })
+        }
+    }, [entity]);
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleRoomChange = this.handleRoomChange.bind(this);
-        this.handleBookingDateChange = this.handleBookingDateChange.bind(this);
-        this.handleTimeSlotChange = this.handleTimeSlotChange.bind(this);
+    const handleEntityChange = (newEntity) => {
+        const currentRoom = currentSummit.locations.find(l => l.id === newEntity.room_id);
+        const availableDates = getAvailableBookingDates(currentSummit);
+        const bookingDate = getDayFromReservation(newEntity, availableDates);
+        getAvailableSlots(currentRoom.id, bookingDate);
+        setStateEntity({ ...newEntity })
+        setCurrentRoom(currentRoom)
+        setBookingDate(bookingDate);
+        setTimeSlot(newEntity.start_datetime);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        scrollToError(this.props.errors);
-
-        if (!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = { ...this.props.entity };
-            state.errors = {};
-        }
-
-        if (!shallowEqual(prevProps.errors, this.props.errors)) {
-            state.errors = { ...this.props.errors };
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({ ...this.state, ...state })
-        }
-    }
-
-    handleRoomChange(ev) {
-        const { currentSummit } = this.props;
-        let entity = { ...this.state.entity };
-        let errors = { ...this.state.errors };
+    const handleRoomChange = (ev) => {
         let { value, id } = ev.target;
-
         const currentRoom = currentSummit.locations.find(l => l.id === parseInt(value));
-
-        errors[id] = '';
-        entity[id] = value;
-        this.setState({ entity: entity, errors: errors, currentRoom: currentRoom });
+        setCurrentRoom(currentRoom);
     }
 
-    handleBookingDateChange(ev) {
-        const { currentRoom } = this.state;
+    const handleBookingDateChange = (ev) => {
         let { value } = ev.target;
 
-        this.props.getAvailableSlots(currentRoom.id, value);
+        getAvailableSlots(currentRoom.id, value);
 
-        this.setState({ ...this.state, bookingDate: value });
+        setBookingDate(value);
+        setTimeSlot(null);
     }
 
-    handleTimeSlotChange(ev) {        
+    const handleTimeSlotChange = (ev) => {
         let { value } = ev.target;
-        this.setState({ ...this.state, timeSlot: value });
+        setTimeSlot(value);
     }
 
-    handleChange(ev) {
-        let entity = { ...this.state.entity };
-        let errors = { ...this.state.errors };
+    const handleChange = (ev) => {
+        let entity = { ...stateEntity };
         let { value, id } = ev.target;
 
         if (ev.target.type === 'number') {
@@ -98,32 +83,29 @@ class NewRoomBookingForm extends React.Component {
             value = ev.target.checked;
         }
 
-        errors[id] = '';
         entity[id] = value;
-        this.setState({ entity: entity, errors: errors });
+        setStateEntity(entity)
     }
 
-    handleSubmit(ev) {
-        let { entity, currentRoom, timeSlot } = this.state;
-        const { availableSlots } = this.props;
-
+    const handleSubmit = (ev) => {
         ev.preventDefault();
 
-        const {start_date, end_date} = availableSlots.find(e => e.start_date === timeSlot);
+        const { start_date, end_date } = availableSlots.find(e => e.start_date === timeSlot);
 
         let normalizedEntity = {
-            room_id: entity.room_id, 
+            id: stateEntity.id || null,
+            room_id: stateEntity.room_id,
             start_datetime: start_date,
             end_datetime: end_date,
-            owner_id: entity.owner?.id,
+            owner_id: stateEntity.owner?.id,
             currency: currentRoom.currency,
-            amount: currentRoom.time_slot_cost}
+            amount: currentRoom.time_slot_cost
+        }
 
-        this.props.onSubmit(normalizedEntity);
+        onSubmit(normalizedEntity);
     }
 
-    hasErrors(field) {
-        let { errors } = this.state;
+    const hasErrors = (field) => {
         if (field in errors) {
             return errors[field];
         }
@@ -131,132 +113,131 @@ class NewRoomBookingForm extends React.Component {
         return '';
     }
 
-    render() {
-        const { entity, currentRoom, bookingDate, timeSlot } = this.state;
-        const { currentSummit, availableSlots } = this.props;
+    let rooms_ddl = currentSummit.locations.filter(v => (v.class_name === 'SummitBookableVenueRoom')).map(l => {
+        return { label: l.name, value: l.id };
+    });
 
-        let rooms_ddl = currentSummit.locations.filter(v => (v.class_name === 'SummitBookableVenueRoom')).map(l => {
-            return { label: l.name, value: l.id };
-        });
+    const available_booking_dates_ddl = getAvailableBookingDates(currentSummit).map(v => ({ value: v.epoch, label: v.str }));
 
-        const available_booking_dates_ddl = getAvailableBookingDates(currentSummit).map(v => ({ value: v.epoch, label: v.str }));        
+    const available_slots_ddl = availableSlots?.filter(as => !stateEntity.id ? as.is_free === true : true).map((as, index) => (
+        {
+            value: as.start_date,
+            label: `${epochToMomentTimeZone(as.start_date, currentSummit.time_zone_id).format('h:mm a')} - 
+                    ${epochToMomentTimeZone(as.end_date, currentSummit.time_zone_id).format('h:mm a')}
+                    ${as.is_free ? '' : ' - Booked'}`,
+            isDisabled: !as.is_free
+        }
+    ));
 
-        const available_slots_ddl = availableSlots?.filter(as => as.is_free === true).map((as, index) => (
-            {   
-                value: as.start_date,
-                label: `${epochToMomentTimeZone(as.start_date, currentSummit.time_zone_id).format('h:mm a')} - 
-                        ${epochToMomentTimeZone(as.end_date, currentSummit.time_zone_id).format('h:mm a')}`
-            }
-        ));
-
-        return (
-            <form className="room-booking-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("offline_room_booking.room")} </label>
-                        <Dropdown
-                            id="room_id"
-                            value={entity.room_id}
-                            options={rooms_ddl}
-                            placeholder={T.translate("offline_room_booking.placeholders.select_room")}
-                            onChange={this.handleRoomChange}
-                            error={this.hasErrors('room_id')}
-                        />
-                    </div>
+    return (
+        <form className="room-booking-form">
+            <input type="hidden" id="id" value={stateEntity.id} />
+            <div className="row form-group">
+                <div className="col-md-4">
+                    <label> {T.translate("offline_room_booking.room")} </label>
+                    <Dropdown
+                        id="room_id"
+                        value={stateEntity.room_id}
+                        options={rooms_ddl}
+                        placeholder={T.translate("offline_room_booking.placeholders.select_room")}
+                        onChange={handleRoomChange}
+                        error={hasErrors('room_id')}
+                        isDisabled={stateEntity.id}
+                    />
                 </div>
-                {currentRoom?.id &&
-                    <>
-                        <div className="row form-group">
-                            <div className="col-md-12">
-                                <div className="meeting-room">
-                                    <div className="meeting-room-image">
-                                        <img src={currentRoom.image?.url} />
-                                    </div>
-                                    <div className="meeting-room-body">
-                                        <div className="meeting-room-header row">
-                                            <div className="col-xs-10">
-                                                <div className="meeting-room-title">{currentRoom.name}</div>
-                                            </div>
+            </div>
+            {currentRoom?.id &&
+                <>
+                    <div className="row form-group">
+                        <div className="col-md-12">
+                            <div className="meeting-room">
+                                <div className="meeting-room-image">
+                                    <img src={currentRoom.image?.url} />
+                                </div>
+                                <div className="meeting-room-body">
+                                    <div className="meeting-room-header row">
+                                        <div className="col-xs-10">
+                                            <div className="meeting-room-title">{currentRoom.name}</div>
                                         </div>
+                                    </div>
+                                    <div className="row">
+                                        <div className="meeting-room-info col-xs-12">
+                                            {T.translate("offline_room_booking.cost")}: {`${currentRoom.currency} ${currentRoom.time_slot_cost}`}
+                                        </div>
+                                    </div>
+                                    <div className="row">
+                                        <div className="meeting-room-info col-xs-6">
+                                            {T.translate("offline_room_booking.capacity")}: {currentRoom.capacity}
+                                        </div>
+                                    </div>
+                                    <div className="row">
+                                        <div className="meeting-room-amenities col-xs-12">
+                                            {currentRoom.attributes.length > 0 ? currentRoom.attributes.map(a => `${a.type.type}: ${a.value}`).join(' | ') : ''}
+                                        </div>
+                                    </div>
+                                    {currentRoom.floor &&
                                         <div className="row">
                                             <div className="meeting-room-info col-xs-12">
-                                                {T.translate("offline_room_booking.cost")}: {`${currentRoom.currency} ${currentRoom.time_slot_cost}`}
+                                                {T.translate("offline_room_booking.floor")}: {currentRoom.floor?.name}
                                             </div>
                                         </div>
-                                        <div className="row">
-                                            <div className="meeting-room-info col-xs-6">
-                                                {T.translate("offline_room_booking.capacity")}: {currentRoom.capacity}
-                                            </div>
-                                        </div>
-                                        <div className="row">
-                                            <div className="meeting-room-amenities col-xs-12">
-                                                {currentRoom.attributes.length > 0 ? currentRoom.attributes.map(a => `${a.type.type}: ${a.value}`).join(' | ') : ''}
-                                            </div>
-                                        </div>
-                                        {currentRoom.floor &&
-                                            <div className="row">
-                                                <div className="meeting-room-info col-xs-12">
-                                                    {T.translate("offline_room_booking.floor")}: {currentRoom.floor?.name}
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
+                                    }
                                 </div>
                             </div>
                         </div>
-                        <div className="row form-group">                            
-                            <div className="col-md-4">
-                                <label> {T.translate("offline_room_booking.date")}</label>
-                                <Dropdown
-                                    id="booking_dates"
-                                    value={bookingDate}
-                                    placeholder={T.translate("offline_room_booking.placeholders.select_date")}
-                                    options={available_booking_dates_ddl}
-                                    onChange={this.handleBookingDateChange}
-                                />
-                            </div>
-                            {bookingDate &&
-                                <div className="col-md-4">
-                                    <label> {T.translate("offline_room_booking.available_slots")}</label>
-                                    <Dropdown
-                                        id="available_slots"
-                                        value={timeSlot}
-                                        placeholder={T.translate("offline_room_booking.placeholders.select_status")}
-                                        options={available_slots_ddl}
-                                        onChange={this.handleTimeSlotChange}
-                                    />
-                                </div>
-                            }
-                            <div className="col-md-4">
-                                <label> {T.translate("offline_room_booking.owner")}</label>
-                                <MemberInput
-                                    id="owner"
-                                    value={entity.owner}
-                                    onChange={this.handleChange}
-                                    getOptionLabel={
-                                        (member) => {
-                                            return member.hasOwnProperty("email") ?
-                                                `${member.first_name} ${member.last_name} (${member.email})` :
-                                                `${member.first_name} ${member.last_name} (${member.id})`;
-                                        }
-                                    }
-                                />
-                            </div>
-                        </div>                        
-                    </>
-                }
-
-
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                            className="btn btn-primary pull-right" value={T.translate("general.save")} />
                     </div>
+                    <div className="row form-group">
+                        <div className="col-md-4">
+                            <label> {T.translate("offline_room_booking.date")}</label>
+                            <Dropdown
+                                id="booking_dates"
+                                value={bookingDate}
+                                placeholder={T.translate("offline_room_booking.placeholders.select_date")}
+                                options={available_booking_dates_ddl}
+                                onChange={handleBookingDateChange}
+                            />
+                        </div>
+                        {bookingDate &&
+                            <div className="col-md-4">
+                                <label> {T.translate("offline_room_booking.available_slots")}</label>
+                                <Dropdown
+                                    id="available_slots"
+                                    value={timeSlot}
+                                    placeholder={T.translate("offline_room_booking.placeholders.select_status")}
+                                    options={available_slots_ddl}
+                                    onChange={handleTimeSlotChange}
+                                />
+                            </div>
+                        }
+                        <div className="col-md-4">
+                            <label> {T.translate("offline_room_booking.owner")}</label>
+                            <MemberInput
+                                id="owner"
+                                value={stateEntity.owner}
+                                onChange={handleChange}
+                                getOptionLabel={
+                                    (member) => {
+                                        return member.hasOwnProperty("email") ?
+                                            `${member.first_name} ${member.last_name} (${member.email})` :
+                                            `${member.first_name} ${member.last_name} (${member.id})`;
+                                    }
+                                }
+                                isDisabled={stateEntity.id}
+                            />
+                        </div>
+                    </div>
+                </>
+            }
+
+
+            <div className="row">
+                <div className="col-md-12 submit-buttons">
+                    <input type="button" onClick={handleSubmit}
+                        className="btn btn-primary pull-right" value={T.translate("general.save")} />
                 </div>
-            </form>
-        );
-    }
+            </div>
+        </form>
+    );
 }
 
-export default NewRoomBookingForm;
+export default RoomBookingForm;

@@ -41,5 +41,5 @@ export const ALL_FILTER = "all";
 export const OR_FILTER = "any";
 
 export const ReservationStatusPaid = 'Paid';
-
+export const ReservationStatusFree = 'Free';
 export const ReservationStatusRequestedRefund = 'RequestedRefund';

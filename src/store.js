@@ -199,7 +199,7 @@ const reducers = persistCombineReducers(config, {
     currentRoomBookingState: roomBookingReducer,
     currentRoomBookingListState: roomBookingListReducer,
     currentRoomBookingAttributeTypeState: roomBookingAttributeTypeReducer,
-    currentOfflineRoomBookingReducer: offlineRoomBookingReducer,
+    currentOfflineRoomBookingState: offlineRoomBookingReducer,
     currentBadgeTypeListState: badgeTypeListReducer,
     currentBadgeTypeState: badgeTypeReducer,
     currentBadgeFeatureListState: badgeFeatureListReducer,

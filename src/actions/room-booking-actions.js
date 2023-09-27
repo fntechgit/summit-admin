@@ -53,6 +53,8 @@ export const ROOM_BOOKING_CANCELED = 'ROOM_BOOKING_CANCELED';
 
 export const OFFLINE_ROOM_BOOKING_ADDED = 'OFFLINE_ROOM_BOOKING_ADDED';
 export const RECEIVE_OFFLINE_ROOM_BOOKING_AVAILABILITY = 'RECEIVE_OFFLINE_ROOM_BOOKING_AVAILABILITY';
+export const UPDATE_ROOM_BOOKING_RESERVATION = 'UPDATE_ROOM_BOOKING_RESERVATION';
+export const ROOM_BOOKING_RESERVATION_UPDATED = 'ROOM_BOOKING_RESERVATION_UPDATED';
 
 export const getRoomBookings = (term = null, page = 1, perPage = 10, order = 'start_datetime', orderDir = 1) => async (dispatch, getState) => {
 
@@ -476,7 +478,7 @@ export const saveOfflineRoomBooking = (entity) => async (dispatch, getState) => 
         type: 'success'
     };
 
-    postRequest(
+    return postRequest(
         null,
         createAction(OFFLINE_ROOM_BOOKING_ADDED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${entity.room_id}/reservations/offline`,
@@ -489,6 +491,32 @@ export const saveOfflineRoomBooking = (entity) => async (dispatch, getState) => 
                 success_message,
                 () => { history.push(`/app/summits/${currentSummit.id}/room-bookings/${payload.response.id}`) }
             ));
+        });
+}
+
+export const updateRoomBookingReservation = (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = {
+        access_token: accessToken,
+    };    
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeEntity(entity);
+
+    return putRequest(
+        createAction(UPDATE_ROOM_BOOKING_RESERVATION),
+        createAction(ROOM_BOOKING_RESERVATION_UPDATED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${entity.room_id}/reservations/${entity.id}`,
+        normalizedEntity,
+        authErrorHandler,
+        entity
+    )(params)(dispatch)
+        .then((payload) => {
+            dispatch(showSuccessMessage(T.translate("edit_room_booking.room_booking_saved")));
         });
 }
 
