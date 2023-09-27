@@ -52,7 +52,7 @@ const fieldNames = [
         const hasRequested =  item.refund_requests.some((r) => r.status === 'Requested');
         return `${val}` + (hasRequested ? '&nbsp;<span class="label label-danger">Refund Requested</span>' :'')
     } },
-    { columnKey: 'promocode', value: 'promocode', sortable: true, title: true },
+    { columnKey: 'promo_code', value: 'promo_code', sortable: true, title: true },
     { columnKey: 'bought_date', value: 'bought_date', sortable: true},
     { columnKey: 'owner_email', value: 'owner_email', sortable: true},
     { columnKey: 'status', value: 'status', sortable: true},
@@ -340,7 +340,7 @@ class TicketListPage extends React.Component {
 
         const ddl_columns = [
             { value: 'number', label: T.translate("ticket_list.number") },
-            { value: 'promocode', label: T.translate("ticket_list.promo_code") },
+            { value: 'promo_code', label: T.translate("ticket_list.promo_code") },
             { value: 'bought_date', label: T.translate("ticket_list.bought_date") },
             { value: 'owner_email', label: T.translate("ticket_list.owner_email") },
             { value: 'status', label: T.translate("ticket_list.status") },
