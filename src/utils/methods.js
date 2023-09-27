@@ -254,4 +254,48 @@ export const parseSpeakerAuditLog = (logString) => {
   }
 
   return relevantChanges.join('|');
+
 }
+
+export const formatInitialJson = (template) => {
+    const regex = /{{(.*?)}}/g;
+    const matches = template.match(regex) || [];
+    const json_keys = matches.map(match => match.slice(2, -2).trim());    
+    let default_json = {};
+    json_keys.forEach((key) => {
+        // Search on the first level of the JSON file
+        if (emailTemplateDefaultValues.hasOwnProperty(key)) {
+          default_json[key] = emailTemplateDefaultValues[key];
+        }
+        // Search on each level if there's a match
+        else if (nestedLookup(emailTemplateDefaultValues, key) !== undefined) {
+          default_json[key] = nestedLookup(emailTemplateDefaultValues, key);
+        }
+        // Use a default value if there's no matchs
+        else {
+          default_json[key] = "test value";
+        }
+    });
+    return default_json;
+}
+
+export const getAvailableBookingDates = (summit) => {
+	let {
+		begin_allow_booking_date,
+		end_allow_booking_date,
+		time_zone_id
+	} = summit;
+	let bookStartDate = epochToMomentTimeZone(begin_allow_booking_date, time_zone_id);
+	let bookEndDate = epochToMomentTimeZone(end_allow_booking_date, time_zone_id);
+	let now = moment().tz(time_zone_id);
+	let dates = [];
+
+	while (bookStartDate <= bookEndDate) {
+		if (bookStartDate >= now) {
+			const tmp = bookStartDate.clone();
+			dates.push({str: tmp.format('Y-M-D'), epoch: tmp.unix()});
+		}
+		bookStartDate.add(1, 'days');
+	}
+	return dates
+};
