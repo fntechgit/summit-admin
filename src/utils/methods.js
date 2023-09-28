@@ -322,5 +322,5 @@ const isEntityWithinDay = (dayValue, entity) => {
   
 export const getDayFromReservation = (entity, available_dates) => {
     const matchingDay = available_dates.find(date => isEntityWithinDay(date.epoch, entity));
-    return matchingDay.epoch;
+    return matchingDay?.epoch || null;
 }

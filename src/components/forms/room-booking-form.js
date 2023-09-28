@@ -44,7 +44,7 @@ const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlot
         const currentRoom = currentSummit.locations.find(l => l.id === newEntity.room_id);
         const availableDates = getAvailableBookingDates(currentSummit);
         const bookingDate = getDayFromReservation(newEntity, availableDates);
-        getAvailableSlots(currentRoom.id, bookingDate);
+        if( bookingDate) getAvailableSlots(currentRoom.id, bookingDate);
         setStateEntity({ ...newEntity })
         setCurrentRoom(currentRoom)
         setBookingDate(bookingDate);
