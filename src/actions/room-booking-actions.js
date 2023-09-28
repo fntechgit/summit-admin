@@ -186,7 +186,7 @@ export const saveRoomBooking = (entity) => async (dispatch, getState) => {
     } else {
         const success_message = {
             title: T.translate("general.done"),
-            html: T.translate("edit_room_booking.offline_room_booking_created"),
+            html: T.translate("edit_room_booking.room_booking_created"),
             type: 'success'
         };
 

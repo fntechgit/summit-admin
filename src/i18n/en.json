@@ -1323,7 +1323,8 @@
     "cost": "Cost",
     "capacity": "Capacity",
     "floor": "Floor",    
-    "offline_room_booking_created": "Offline Room Booking created successfully",
+    "room_booking_created": "Room Booking created successfully",
+    "room_booking_saved": "Room Booking saved successfully",
     "placeholders": {
       "select_status": "Select Status",
       "select_currency": "Select Currency",
