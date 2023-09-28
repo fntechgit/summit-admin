@@ -61,6 +61,7 @@ const roomBookingReducer = (state = DEFAULT_STATE, action) => {
         }
         break;
         case ROOM_BOOKING_ADDED:
+        case ROOM_BOOKING_UPDATED:
         case RECEIVE_ROOM_BOOKING: {
             let entity = {...payload.response};
 
@@ -76,10 +77,6 @@ const roomBookingReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_ROOM_BOOKING_AVAILABILITY: {
             const availableSlots = payload.response.data;
             return {...state, available_slots: availableSlots}
-        }
-        break;
-        case ROOM_BOOKING_UPDATED: {
-            return state;
         }
         break;
         case VALIDATE: {
