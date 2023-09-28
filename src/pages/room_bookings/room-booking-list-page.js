@@ -126,8 +126,8 @@ class RoomBookingListPage extends React.Component {
 
     isEditable(bookingId) {
         const {roomBookings} = this.props;
-        let roomBooking = roomBookings.find(rb => rb.id === bookingId);        
-        return (roomBooking.status === ReservationStatusPaid || roomBooking.status === ReservationStatusFree);
+        let roomBooking = roomBookings.find(rb => rb.id === bookingId);
+        return roomBooking.status === ReservationStatusPaid
     }
 
     onCloseModal() {

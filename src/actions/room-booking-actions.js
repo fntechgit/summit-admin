@@ -172,7 +172,7 @@ export const saveRoomBooking = (entity) => async (dispatch, getState) => {
     if (entity.id) {
 
         return putRequest(
-            createAction(UPDATE_ROOM_BOOKING),
+            null,
             createAction(ROOM_BOOKING_UPDATED),
             `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${entity.room_id}/reservations/${entity.id}`,
             normalizedEntity,
@@ -191,7 +191,7 @@ export const saveRoomBooking = (entity) => async (dispatch, getState) => {
         };
 
         return postRequest(
-            createAction(UPDATE_ROOM_BOOKING),
+            null,
             createAction(ROOM_BOOKING_ADDED),
             `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${entity.room_id}/reservations/offline`,
             normalizedEntity,

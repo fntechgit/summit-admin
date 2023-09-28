@@ -15,7 +15,6 @@ import
 {
     RECEIVE_ROOM_BOOKING,
     RESET_ROOM_BOOKING_FORM,
-    UPDATE_ROOM_BOOKING,
     ROOM_BOOKING_UPDATED,
     ROOM_BOOKING_ADDED,
     RECEIVE_ROOM_BOOKING_AVAILABILITY
@@ -59,10 +58,6 @@ const roomBookingReducer = (state = DEFAULT_STATE, action) => {
         case SET_CURRENT_SUMMIT:
         case RESET_ROOM_BOOKING_FORM: {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        break;
-        case UPDATE_ROOM_BOOKING: {
-            return {...state,  entity: {...payload}, errors: {} };
         }
         break;
         case ROOM_BOOKING_ADDED:
