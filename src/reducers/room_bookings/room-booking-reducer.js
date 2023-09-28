@@ -18,7 +18,7 @@ import
     UPDATE_ROOM_BOOKING,
     ROOM_BOOKING_UPDATED,
     ROOM_BOOKING_ADDED,
-    RECEIVE_OFFLINE_ROOM_BOOKING_AVAILABILITY
+    RECEIVE_ROOM_BOOKING_AVAILABILITY
 } from '../../actions/room-booking-actions';
 
 import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
@@ -78,7 +78,7 @@ const roomBookingReducer = (state = DEFAULT_STATE, action) => {
             return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
         }
         break;
-        case RECEIVE_OFFLINE_ROOM_BOOKING_AVAILABILITY: {
+        case RECEIVE_ROOM_BOOKING_AVAILABILITY: {
             const availableSlots = payload.response.data;
             return {...state, available_slots: availableSlots}
         }

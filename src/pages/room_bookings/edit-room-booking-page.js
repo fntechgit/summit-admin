@@ -16,8 +16,8 @@ import { connect } from 'react-redux';
 import { Breadcrumb } from 'react-breadcrumbs';
 import T from "i18n-react/dist/i18n-react";
 import { getSummitById }  from '../../actions/summit-actions';
-import { getRoomBooking, resetRoomBookingForm, updateRoomBookingReservation, getOfflineBookingRoomAvailability } from "../../actions/room-booking-actions";
-import OfflineRoomBookingForm from '../../components/forms/offline-room-booking-form';
+import { getRoomBooking, resetRoomBookingForm, saveRoomBooking, getBookingRoomAvailability } from "../../actions/room-booking-actions";
+import RoomBookingForm from '../../components/forms/room-booking-form';
 
 class EditRoomBookingPage extends React.Component {
 
@@ -53,17 +53,17 @@ class EditRoomBookingPage extends React.Component {
         return (
             <div className="container">
                 <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("offline_room_booking.room_booking")}</h3>
+                <h3>{title} {T.translate("edit_room_booking.room_booking")}</h3>
                 <hr />
                 {currentSummit &&
-                    <OfflineRoomBookingForm
+                    <RoomBookingForm
                         history={this.props.history}
                         entity={entity}
                         currentSummit={currentSummit}
                         errors={errors}
                         availableSlots={available_slots}
-                        onSubmit={this.props.updateRoomBookingReservation}
-                        getAvailableSlots={this.props.getOfflineBookingRoomAvailability}
+                        onSubmit={this.props.saveRoomBooking}
+                        getAvailableSlots={this.props.getBookingRoomAvailability}
                     />
                 }
             </div>
@@ -82,7 +82,7 @@ export default connect (
         getSummitById,
         getRoomBooking,
         resetRoomBookingForm,
-        updateRoomBookingReservation,
-        getOfflineBookingRoomAvailability
+        saveRoomBooking,
+        getBookingRoomAvailability
     }
 )(EditRoomBookingPage);
