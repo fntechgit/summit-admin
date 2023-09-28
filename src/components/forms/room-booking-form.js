@@ -27,28 +27,29 @@ const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlot
     const [timeSlot, setTimeSlot] = useState(null);
 
     useEffect(() => {
-        if (entity.id) {
-            handleEntityChange(entity)
-        }
+        handleEntityChange(entity);
     }, [])
 
     useEffect(() => {
-        if (entity.id) {
-            handleEntityChange(entity)
-        } else {
-            setStateEntity({ ...entity })
-        }
+        if (!shallowEqual(stateEntity, entity)) handleEntityChange(entity);
     }, [entity]);
 
     const handleEntityChange = (newEntity) => {
-        const currentRoom = currentSummit.locations.find(l => l.id === newEntity.room_id);
-        const availableDates = getAvailableBookingDates(currentSummit);
-        const bookingDate = getDayFromReservation(newEntity, availableDates);
-        if( bookingDate) getAvailableSlots(currentRoom.id, bookingDate);
-        setStateEntity({ ...newEntity })
-        setCurrentRoom(currentRoom)
-        setBookingDate(bookingDate);
-        setTimeSlot(newEntity.start_datetime);
+        if (newEntity.id) {
+            const currentRoom = currentSummit.locations.find(l => l.id === newEntity.room_id);
+            const availableDates = getAvailableBookingDates(currentSummit);
+            const bookingDate = getDayFromReservation(newEntity, availableDates);
+            if (bookingDate) getAvailableSlots(currentRoom.id, bookingDate);
+            setStateEntity({ ...newEntity });
+            setCurrentRoom(currentRoom)
+            setBookingDate(bookingDate);
+            setTimeSlot(newEntity.start_datetime);
+        } else {
+            setStateEntity({ ...newEntity });
+            setCurrentRoom(null);
+            setBookingDate(null);
+            setTimeSlot(null);
+        }
     }
 
     const handleRoomChange = (ev) => {
@@ -129,6 +130,8 @@ const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlot
         }
     ));
 
+    console.log('STATE ENTITY...', stateEntity, currentRoom);
+
     return (
         <form className="room-booking-form">
             <input type="hidden" id="id" value={stateEntity.id} />
@@ -138,6 +141,7 @@ const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlot
                     <Dropdown
                         id="room_id"
                         value={stateEntity.room_id}
+                        key={JSON.stringify(stateEntity.room_id)}
                         options={rooms_ddl}
                         placeholder={T.translate("edit_room_booking.placeholders.select_room")}
                         onChange={handleRoomChange}
