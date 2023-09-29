@@ -15,8 +15,8 @@ import
 {
     RECEIVE_TEMPLATE,
     RESET_TEMPLATE_FORM,
-    UPDATE_TEMPLATE,
     TEMPLATE_ADDED,
+    TEMPLATE_UPDATED,
     RECEIVE_EMAIL_CLIENTS,
     TEMPLATE_RENDER_RECEIVED,
     VALIDATE_RENDER,
@@ -74,8 +74,7 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
         case RESET_TEMPLATE_FORM: {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
         }
-        break;
-        case TEMPLATE_ADDED:
+        break;        
         case RECEIVE_TEMPLATE: {
             let entity = {...payload.response};
 
@@ -87,9 +86,23 @@ const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
 
             return {...state, entity: {...DEFAULT_ENTITY, ...entity,
                     original_mjml_content: entity.mjml_content,
-                    original_html_content: entity.html_content} };
+                    original_html_content: entity.html_content}, preview: null };
         }
         break;
+        case TEMPLATE_ADDED:
+        case TEMPLATE_UPDATED:
+            let entity = {...payload.response};
+
+            for(var key in entity) {
+                if(entity.hasOwnProperty(key)) {
+                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
+                }
+            }
+
+            return {...state, entity: {...DEFAULT_ENTITY, ...entity,
+                    original_mjml_content: entity.mjml_content,
+                    original_html_content: entity.html_content}};
+            break;
         case RECEIVE_EMAIL_CLIENTS: {
             return {...state, clients: payload.response.data };
         }

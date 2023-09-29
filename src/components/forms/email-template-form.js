@@ -116,7 +116,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
 
     useEffect(() => {
         debouncedRenderTemplate(stateEntity.html_content);
-    }, [stateEntity.html_content, debouncedRenderTemplate])
+    }, [stateEntity.html_content, entity, debouncedRenderTemplate])
 
     useEffect(() => {
         previewEmailTemplate(templateJsonData, stateEntity.html_content);
