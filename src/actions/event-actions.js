@@ -1077,8 +1077,8 @@ const parseFilters = (filters, term = null) => {
         filter.push(`has_not_media_upload_with_type==${filters.has_not_media_upload_with_type.map(media => media.id).join('&&')}`);
     }
 
-    if (filters.hasOwnProperty('media_upload_with_type') && Array.isArray(filters.media_upload_with_type.value)
-        && filters.media_upload_with_type.value.length > 0) {
+    if (filters.hasOwnProperty('media_upload_with_type') && filters.media_upload_with_type.filter !== null &&
+        Array.isArray(filters.media_upload_with_type.value) && filters.media_upload_with_type.value.length > 0) {
         filter.push(`${filters.media_upload_with_type.filter}==` + filters.media_upload_with_type.value.map((v) => v.id).join('||'));
     }
 

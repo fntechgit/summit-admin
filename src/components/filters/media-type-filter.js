@@ -51,7 +51,7 @@ const MediaTypeFilter = ({ onChange, value, id, summitId }) => {
     return (
         <div className="row" style={{ display: 'flex', alignItems: 'baseline' }}>
             <div className="col-xs-3">
-                {T.translate("event_list.media_upload_with_type")}
+                {T.translate("media_upload_type_filter.media_type")}
             </div>
             <div className="col-xs-3">
                 <Select

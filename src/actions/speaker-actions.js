@@ -1023,6 +1023,11 @@ const parseFilters = (filters) => {
        }
     }
 
+    if (filters.hasOwnProperty('mediaUploadTypeFilter') && filters.mediaUploadTypeFilter.filter !== null &&
+        Array.isArray(filters.mediaUploadTypeFilter.value) && filters.mediaUploadTypeFilter.value.length > 0) {
+        filter.push(`${filters.mediaUploadTypeFilter.filter}==` + filters.mediaUploadTypeFilter.value.map((v) => v.id).join('||'));
+    }
+
     //return checkOrFilter(filters, filter);
     return filter;
 }

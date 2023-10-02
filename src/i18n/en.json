@@ -2716,7 +2716,7 @@
     "following": " of the following: "
   },
   "media_upload_type_filter": {
-    "media_type": "Media Type",
+    "media_type": "Media Upload Types",
     "placeholders": {
       "media_upload_type_id_to_include": "Select the Media Upload Types to include",
       "media_upload_type_id_to_exclude": "Select the Media Upload Types to exclude",
