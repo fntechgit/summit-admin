@@ -1079,10 +1079,7 @@ const parseFilters = (filters, term = null) => {
 
     if (filters.hasOwnProperty('media_upload_with_type') && Array.isArray(filters.media_upload_with_type.value)
         && filters.media_upload_with_type.value.length > 0) {
-        filter.push(`${filters.media_upload_with_type.filter}==` + filters.media_upload_with_type.value.reduce(
-            (accumulator, tt) => accumulator + (accumulator !== '' ? '||' : '') + tt.id,
-            ''
-        ));
+        filter.push(`${filters.media_upload_with_type.filter}==` + filters.media_upload_with_type.value.map((v) => v.id).join('||'));
     }
 
     if (term) {
