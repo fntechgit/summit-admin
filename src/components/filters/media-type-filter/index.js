@@ -13,8 +13,10 @@
 
 import React, { useEffect, useState } from 'react'
 import T from 'i18n-react/dist/i18n-react';
-import MediaUploadTypeInput from '../inputs/media-upload-type-input';
+import MediaUploadTypeInput from '../../inputs/media-upload-type-input';
 import Select from 'react-select'
+
+import styles from './index.module.less'
 
 const MediaTypeFilter = ({ onChange, value, id, summitId }) => {
 
@@ -49,7 +51,7 @@ const MediaTypeFilter = ({ onChange, value, id, summitId }) => {
     }
 
     return (
-        <div className="media-type-filter-wrapper row">
+        <div className={`${styles.mediaTypeFilterWrapper} row`}>
             <div className="col-xs-3">
                 {T.translate("media_upload_type_filter.media_type")}
             </div>
