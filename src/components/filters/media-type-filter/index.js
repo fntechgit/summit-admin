@@ -18,19 +18,24 @@ import Select from 'react-select'
 
 import styles from './index.module.less'
 
-const MediaTypeFilter = ({ onChange, value, id, summitId }) => {
+const MediaTypeFilter = ({ onChange, operatorInitialValue, filterInitialValue, id, summitId }) => {
 
-    const [hasOrNotHasValue, setHasOrNotHasValue] = useState(value.filter === 'has_media_upload_with_type' ? { label: 'Has', value: true } : { value: 'Not Has', value: false });
-    const [mediaTypeValue, setMediaTypeValue] = useState(value.value);
+    const operatorOptions = [
+        { label: T.translate("media_upload_type_filter.has_media_upload"), value: 'has_media_upload_with_type==' },
+        { label: T.translate("media_upload_type_filter.has_not_media_upload"), value: 'has_not_media_upload_with_type==' }
+    ];
+
+    const [operatorValue, setOperatorValue] = useState(operatorInitialValue ? operatorOptions.find(o => o.value === operatorInitialValue) : null);
+    const [filterValue, setFilterValue] = useState(filterInitialValue ? filterInitialValue : null);
 
     const handleHasOrNotHasChange = (newValue) => {
-        setHasOrNotHasValue(newValue);
+        setOperatorValue(newValue);
         let ev = {
             target: {
                 id: id,
-                value: mediaTypeValue,
+                value: filterValue,
                 type: 'mediatypeinput',
-                filter: newValue.value ? 'has_media_upload_with_type' : 'has_not_media_upload_with_type'
+                operator: newValue.value
             }
         };
         onChange(ev);
@@ -38,13 +43,13 @@ const MediaTypeFilter = ({ onChange, value, id, summitId }) => {
 
     const onMediaTypeChange = (newValue) => {
         const { value } = newValue.target;
-        setMediaTypeValue(value);
+        setFilterValue(value);
         let ev = {
             target: {
                 id: id,
                 value: value,
                 type: 'mediatypeinput',
-                filter: hasOrNotHasValue ? 'has_media_upload_with_type' : 'has_not_media_upload_with_type'
+                operator: operatorValue.value
             }
         };
         onChange(ev);
@@ -58,20 +63,17 @@ const MediaTypeFilter = ({ onChange, value, id, summitId }) => {
             <div className="col-xs-3">
                 <Select
                     id="has_or_no_has_media_type"
-                    value={hasOrNotHasValue}
-                    placeholder={T.translate("media_upload_type_filter.placeholders.media_upload_type_has_or_not_has")}
-                    options={[
-                        { label: 'Has', value: true },
-                        { label: 'Not Has', value: false }
-                    ]}
+                    value={operatorValue}
+                    placeholder={T.translate("media_upload_type_filter.placeholders.operator")}
+                    options={operatorOptions}
                     onChange={handleHasOrNotHasChange}
                 />
             </div>
             <div className="col-xs-6">
                 <MediaUploadTypeInput
                     id="media_upload_with_type"
-                    value={mediaTypeValue}
-                    placeholder={T.translate(`media_upload_type_filter.placeholders.${hasOrNotHasValue?.value ? 'media_upload_type_id_to_include' : 'media_upload_type_id_to_exclude'}`)}
+                    value={filterValue}
+                    placeholder={T.translate(`${operatorValue?.value ? `media_upload_type_filter.placeholders.${operatorValue.value}` : ''}`)}
                     summitId={summitId}
                     onChange={onMediaTypeChange}
                 />

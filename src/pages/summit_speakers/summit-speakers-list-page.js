@@ -204,13 +204,13 @@ class SummitSpeakersListPage extends React.Component {
     }
 
     handleChangeMediaUploadTypeFilter(ev) {        
-        const { value, filter } = ev.target;
-        if(filter && value.length > 0) {
+        const { value, operator } = ev.target;
+        if(operator && value.length > 0) {
             const { term, order, page, orderDir, perPage, activityTypeFilter, selectionPlanFilter, trackFilter, selectionStatusFilter } = this.getSubjectProps();
             const { speakerFilters: { orAndFilter }} = this.state;
             this.getBySummit(term, page, perPage, order, orderDir,
                 {
-                    selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, orAndFilter, mediaUploadTypeFilter: { filter, value }
+                    selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, orAndFilter, mediaUploadTypeFilter: { operator, value }
                 });
         }
     }
@@ -501,7 +501,8 @@ class SummitSpeakersListPage extends React.Component {
                     <div className={'col-md-12 speaker-list-filter-col'}> 
                         <MediaTypeFilter
                             id={"media_upload_with_type"}
-                            value={mediaUploadTypeFilter}
+                            operatorInitialValue={mediaUploadTypeFilter.operator}
+                            filterInitialValue={mediaUploadTypeFilter.value}
                             summitId={currentSummit.id}
                             onChange={this.handleChangeMediaUploadTypeFilter}
                         />

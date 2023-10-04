@@ -148,7 +148,7 @@ class SummitEventListPage extends React.Component {
                 sponsor: [],
                 all_companies: [],
                 submission_status_filter: [],
-                media_upload_with_type: { filter: null, value: [] },
+                media_upload_with_type: { operator: null, value: [] },
                 orAndFilter: ALL_FILTER,
             },
             selectedColumns: [],
@@ -288,7 +288,7 @@ class SummitEventListPage extends React.Component {
         }
         if (type === 'mediatypeinput') {
             value = {
-                filter: ev.target.filter,
+                operator: ev.target.operator,
                 value: ev.target.value
             }            
         }
@@ -338,7 +338,7 @@ class SummitEventListPage extends React.Component {
                     sponsor: [],
                     all_companies: [],
                     submission_status_filter: [],
-                    media_upload_with_type: { filter: null, value: [] },
+                    media_upload_with_type: { operator: null, value: [] },
                 };
                 this.setState({...this.state, enabledFilters: value, eventFilters: resetFilters});
             } else {
@@ -401,7 +401,7 @@ class SummitEventListPage extends React.Component {
                     sponsor: [],
                     all_companies: [],
                     submission_status_filter: [],
-                    media_upload_with_type: { filter: null, value: [] },
+                    media_upload_with_type: { operator: null, value: [] },
                 };
                 this.setState({...this.state, enabledFilters: value, eventFilters: resetFilters});
             } else {
@@ -968,7 +968,8 @@ class SummitEventListPage extends React.Component {
                          <div className={'col-md-12'}> 
                             <MediaTypeFilter 
                                 id={"media_upload_with_type"}
-                                value={eventFilters.media_upload_with_type}
+                                operatorInitialValue={eventFilters.media_upload_with_type.operator}
+                                filterInitialValue={eventFilters.media_upload_with_type.value}
                                 summitId={currentSummit.id}
                                 onChange={this.handleExtraFilterChange}
                             />

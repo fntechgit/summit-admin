@@ -43,7 +43,7 @@ const DEFAULT_STATE = {
     trackFilter: [],
     activityTypeFilter: [],
     selectionStatusFilter: [],
-    mediaUploadTypeFilter: { filter: null, value: [] },
+    mediaUploadTypeFilter: { operator: null, value: [] },
     currentFlowEvent: '',
     currentSummitId: null
 };

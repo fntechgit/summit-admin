@@ -2717,11 +2717,14 @@
   },
   "media_upload_type_filter": {
     "media_type": "Media Upload Types",
+    "has_media_upload": "Has",
+    "has_not_media_upload": "Has Not",
     "placeholders": {
-      "media_upload_type_id_to_include": "Select the Media Upload Types to include",
-      "media_upload_type_id_to_exclude": "Select the Media Upload Types to exclude",
-      "media_upload_type_has_or_not_has": "Has or Not Has Media Upload Types"
+      "has_media_upload_with_type==": "Select the Media Upload Types to include",
+      "has_not_media_upload_with_type==": "Select the Media Upload Types to exclude",
+      "operator": "Has or Not Has Media Upload Types"
     }
+    
   },
   "edit_reg_feed_metadata": {
     "reg_feed_metadata": "Registration Feed Metadata",
@@ -2733,7 +2736,7 @@
   "email_filter": {
     "operator_contains": "Contains",
     "operator_not_contains": "Not Contains",
-    "operator_equal": "Equal",
+    "operator_equal": "Equal",    
     "placeholders": {
       "value": "Search by email address",
       "operator": "Select Operator"
