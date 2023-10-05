@@ -28,21 +28,21 @@ const MediaTypeFilter = ({ onChange, operatorInitialValue, filterInitialValue, i
     const [operatorValue, setOperatorValue] = useState(operatorInitialValue ? operatorOptions.find(o => o.value === operatorInitialValue) : null);
     const [filterValue, setFilterValue] = useState(filterInitialValue ? filterInitialValue : null);
 
-    const handleHasOrNotHasChange = (newValue) => {
-        setOperatorValue(newValue);
+    const onChangeOperator = (newOperatorValue) => {
+        setOperatorValue(newOperatorValue);
         let ev = {
             target: {
                 id: id,
                 value: filterValue,
                 type: 'mediatypeinput',
-                operator: newValue.value
+                operator: newOperatorValue.value
             }
         };
         onChange(ev);
     }
 
-    const onMediaTypeChange = (newValue) => {
-        const { value } = newValue.target;
+    const onChangeFilterValue = (newFilterValue) => {
+        const { value } = newFilterValue.target;
         setFilterValue(value);
         let ev = {
             target: {
@@ -56,26 +56,26 @@ const MediaTypeFilter = ({ onChange, operatorInitialValue, filterInitialValue, i
     }
 
     return (
-        <div className={`${styles.mediaTypeFilterWrapper} row`}>
+        <div className={`${styles.mediaTypeFilterWrapper} row`} id={id}>
             <div className="col-xs-3">
                 {T.translate("media_upload_type_filter.media_type")}
             </div>
             <div className="col-xs-3">
                 <Select
-                    id="has_or_no_has_media_type"
+                    id={`${id}_operator`}
                     value={operatorValue}
                     placeholder={T.translate("media_upload_type_filter.placeholders.operator")}
                     options={operatorOptions}
-                    onChange={handleHasOrNotHasChange}
+                    onChange={onChangeOperator}
                 />
             </div>
             <div className="col-xs-6">
                 <MediaUploadTypeInput
-                    id="media_upload_with_type"
+                    id={`${id}_value`}
                     value={filterValue}
                     placeholder={T.translate(`${operatorValue?.value ? `media_upload_type_filter.placeholders.${operatorValue.value}` : ''}`)}
                     summitId={summitId}
-                    onChange={onMediaTypeChange}
+                    onChange={onChangeFilterValue}
                 />
             </div>
         </div>
