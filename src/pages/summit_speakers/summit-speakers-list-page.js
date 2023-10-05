@@ -205,12 +205,18 @@ class SummitSpeakersListPage extends React.Component {
 
     handleChangeMediaUploadTypeFilter(ev) {        
         const { value, operator } = ev.target;
+        const { term, order, page, orderDir, perPage, activityTypeFilter, selectionPlanFilter, trackFilter, selectionStatusFilter, mediaUploadTypeFilter } = this.getSubjectProps();
+        const { speakerFilters: { orAndFilter }} = this.state;
         if(operator && value.length > 0) {
-            const { term, order, page, orderDir, perPage, activityTypeFilter, selectionPlanFilter, trackFilter, selectionStatusFilter } = this.getSubjectProps();
-            const { speakerFilters: { orAndFilter }} = this.state;
             this.getBySummit(term, page, perPage, order, orderDir,
                 {
                     selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, orAndFilter, mediaUploadTypeFilter: { operator, value }
+                });
+        // get speakers if the media upload types filter is resetted
+        } else if (mediaUploadTypeFilter.value.length > 0 && value.length === 0) {
+            this.getBySummit(term, page, perPage, order, orderDir,
+                {
+                    selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, orAndFilter
                 });
         }
     }
