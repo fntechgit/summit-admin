@@ -110,8 +110,8 @@ class EditTicketPage extends React.Component {
         this.props.getBadgePrints();
     }
 
-    handleBadgePrintQuery(term, page, perPage, order, orderDir) {
-        this.props.getBadgePrints(term, page, perPage, order, orderDir);
+    handleBadgePrintQuery(term, page, perPage, order, orderDir, filters) {
+        this.props.getBadgePrints(term, page, perPage, order, orderDir, filters);
     }
 
     handleBadgePrintExport() {

@@ -14,7 +14,8 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { Dropdown, SimpleLinkList, Table, FreeTextSearch } from 'openstack-uicore-foundation/lib/components';
+import { Dropdown, SimpleLinkList, Table, FreeTextSearch, DateTimePicker } from 'openstack-uicore-foundation/lib/components';
+import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
 import {shallowEqual} from "../../utils/methods";
 import { Pagination } from 'react-bootstrap';
 
@@ -27,7 +28,11 @@ class BadgeForm extends React.Component {
 
         this.state = {
             entity: {...props.entity},
-            printExcerptDetails: false
+            printExcerptDetails: false,
+            printFilters: {
+                viewTypeFilter: [],
+                printDateFilter: Array(2).fill(null),
+            }
         };
 
         this.handleChangeBadgeType = this.handleChangeBadgeType.bind(this);
@@ -40,6 +45,8 @@ class BadgeForm extends React.Component {
         this.handleBadgePrintSort = this.handleBadgePrintSort.bind(this);
         this.handleBadgePrintPageChange = this.handleBadgePrintPageChange.bind(this);
         this.handleBadgePrintExport = this.handleBadgePrintExport.bind(this);
+        this.handleBadgePrintFilterChange = this.handleBadgePrintFilterChange.bind(this);
+        this.handleChangePrintDate = this.handleChangePrintDate.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -93,6 +100,26 @@ class BadgeForm extends React.Component {
         const {term, order, orderDir, perPage} = this.props;
         this.props.onBadgePrintQuery(term, page, perPage, order, orderDir);
     }
+    
+    handleBadgePrintFilterChange(ev) {
+        let { value, id} = ev.target        
+        const newFilters = {...this.state.printFilters, [id]: value};
+        this.setState({...this.state, printFilters: newFilters});
+        const {term, order, orderDir, page, perPage} = this.props;
+        this.props.onBadgePrintQuery(term, page, perPage, order, orderDir, newFilters);
+    }
+
+    handleChangePrintDate(ev, lastDate) {
+        const {value} = ev.target;
+        const {printDateFilter} = this.state.printFilters;
+
+        const newDateValue = lastDate ? [printDateFilter[0], value.unix()] : [value.unix(), printDateFilter[1]];
+        const newFilters = {...this.state.printFilters, printDateFilter: newDateValue};
+
+        this.setState({...this.state, printFilters: newFilters});
+        const {term, order, orderDir, page, perPage} = this.props;
+        this.props.onBadgePrintQuery(term, page, perPage, order, orderDir, newFilters);
+    }
 
     handleBadgePrintExport(ev) {
         ev.preventDefault();
@@ -106,7 +133,7 @@ class BadgeForm extends React.Component {
     }
 
     render() {
-        const {entity, printExcerptDetails} = this.state;
+        const {entity, printExcerptDetails, printFilters: {printDateFilter, viewTypeFilter}} = this.state;
         const { currentSummit, selectedPrintType, canPrint, 
             badgePrints: { badgePrints, order, orderDir, totalBadgePrints, term, currentPage, lastPage, perPage } } = this.props;
 
@@ -140,9 +167,10 @@ class BadgeForm extends React.Component {
         ];
 
         const badge_print_columns = [
-            { columnKey: 'id', value: T.translate("edit_ticket.print_table.id"), sortable: true},
-            { columnKey: 'view_type_name', value: T.translate("edit_ticket.print_table.view_type_name"), sortable: true},
-            { columnKey: 'print_date', value: T.translate("edit_ticket.print_table.print_date"), sortable: true},
+            { columnKey: 'view_type_name', value: T.translate("edit_ticket.print_table.view_type_name")},
+            { columnKey: 'requestor_full_name', value: T.translate("edit_ticket.print_table.requestor_full_name"), sortable: true},
+            { columnKey: 'requestor_email', value: T.translate("edit_ticket.print_table.requestor_email"), sortable: true},
+            { columnKey: 'print_date', value: T.translate("edit_ticket.print_table.print_date")},
         ];
 
         const badge_print_table_options = {
@@ -182,7 +210,7 @@ class BadgeForm extends React.Component {
                                 {printExcerptDetails ? 
                                 <>
                                     <div className='row'>
-                                        <div className='col-md-8'>
+                                        <div className='col-md-6'>
                                             <FreeTextSearch
                                                 value={term ?? ''}
                                                 placeholder={T.translate("edit_ticket.placeholders.search_badge_prints")}
@@ -196,25 +224,65 @@ class BadgeForm extends React.Component {
                                             </button>
                                         </div>
                                     </div>
-                                    <Table
-                                        options={badge_print_table_options}
-                                        data={badgePrints}
-                                        columns={badge_print_columns}
-                                        onSort={this.handleBadgePrintSort}
-                                    />
-                                    <Pagination
-                                        bsSize="medium"
-                                        prev
-                                        next
-                                        first
-                                        last
-                                        ellipsis
-                                        boundaryLinks
-                                        maxButtons={10}
-                                        items={lastPage}
-                                        activePage={currentPage}
-                                        onSelect={this.handleBadgePrintPageChange}
-                                    />
+                                    <div className='row filter-wrapper'>
+                                        <div className='col-md-6'>
+                                            <Dropdown
+                                                id="viewTypeFilter"
+                                                value={viewTypeFilter}
+                                                onChange={this.handleBadgePrintFilterChange}
+                                                placeholder={T.translate("edit_ticket.placeholders.view_type_filter")}
+                                                options={badge_view_type_ddl}
+                                                clearable
+                                                isMulti
+                                            />
+                                        </div>
+                                        <div className='col-md-6 date-wrapper'>                                            
+                                            <DateTimePicker
+                                                id="printDateFromFilter"
+                                                format={{date:"YYYY-MM-DD", time: "HH:mm"}}                                    
+                                                inputProps={{placeholder: T.translate("edit_ticket.placeholders.print_date_from")}}
+                                                timezone={currentSummit.time_zone.name}
+                                                onChange={(ev) => this.handleChangePrintDate(ev, false)}
+                                                value={epochToMomentTimeZone(printDateFilter[0], currentSummit.time_zone_id)}
+                                                className={'badge-print-date-picker'}
+                                            />                                                
+                                            <DateTimePicker
+                                                id="printDateToFilter"
+                                                format={{date:"YYYY-MM-DD", time: "HH:mm"}}
+                                                inputProps={{placeholder: T.translate("edit_ticket.placeholders.print_date_to")}}
+                                                timezone={currentSummit.time_zone.name}
+                                                onChange={(ev) => this.handleChangePrintDate(ev, true)}
+                                                value={epochToMomentTimeZone(printDateFilter[1], currentSummit.time_zone_id)}
+                                                className={'badge-print-date-picker'}
+                                            />
+                                        </div>                           
+                                    </div>
+                                    {badgePrints.length === 0 &&
+                                        <div>{T.translate("edit_ticket.no_prints")}</div>
+                                    }
+                                    {badgePrints.length > 0 &&
+                                    <div>
+                                        <Table
+                                            options={badge_print_table_options}
+                                            data={badgePrints}
+                                            columns={badge_print_columns}
+                                            onSort={this.handleBadgePrintSort}
+                                        />
+                                        <Pagination
+                                            bsSize="medium"
+                                            prev
+                                            next
+                                            first
+                                            last
+                                            ellipsis
+                                            boundaryLinks
+                                            maxButtons={10}
+                                            items={lastPage}
+                                            activePage={currentPage}
+                                            onSelect={this.handleBadgePrintPageChange}
+                                        />
+                                    </div>
+                                    }
                                 </>
                                 :
                                 <table className="table table-striped table-bordered">
@@ -236,7 +304,7 @@ class BadgeForm extends React.Component {
                                         })}
                                     </tbody>
                                 </table>
-                                }                                
+                                }
                             </>
                             }
                             <span className='details' onClick={() => this.handleShowPrintDetails(printExcerptDetails)}>

@@ -52,8 +52,10 @@ const badgePrintReducer = (state = DEFAULT_STATE, action) => {
             const prints = data.map(p => {
                 const created = p.created ? epochToMoment(p.created).format('MMMM Do YYYY, h:mm:ss a') : '';
                 const print_date = p.print_date ? epochToMoment(p.print_date).format('MMMM Do YYYY, h:mm:ss a') : '';
+                const requestor_full_name = p.requestor ? `${p.requestor.first_name} ${p.requestor.last_name}` : 'N/A';                
+                const requestor_email = p.requestor ? p.requestor.email : 'N/A';
 
-                return {...p, created, print_date}
+                return {...p, created, print_date, requestor_full_name, requestor_email}
             });
 
             return {...state, badgePrints: prints, currentPage: current_page, lastPage: last_page, totalBadgePrints: total};

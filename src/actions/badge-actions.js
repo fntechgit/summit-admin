@@ -236,6 +236,7 @@ export const getBadgePrints = (term = null, page = 1, perPage = 10, order = 'id'
         page: page,
         per_page: perPage,
         access_token: accessToken,
+        expand: 'requestor',
     };
 
     const filter = parseFilters(filters, term);
@@ -263,10 +264,11 @@ export const getBadgePrints = (term = null, page = 1, perPage = 10, order = 'id'
 }
 
 export const exportBadgePrints = (term = null, order = 'id', orderDir = 1, filters = {}) => async (dispatch, getState) => {
-    const {currentSummitState } = getState();
+    const {currentSummitState, currentTicketState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
-    const filename = currentSummit.name + '-BadgePrints.csv';
+    const { entity: {id} } = currentTicketState;
+    const filename = `${currentSummit.name}-Ticket_${id}-BadgePrints.csv'`;
 
     const params = {
         expand       : '',
@@ -295,8 +297,25 @@ const parseFilters = (filters, term) => {
     const filter = [];
     if (term) {
         const escapedTerm = escapeFilterValue(term);
-        filter.push(`id==${escapedTerm},view_tipe_id==${escapedTerm}`);
-    }    
+        filter.push(`requestor_full_name@=${escapedTerm},requestor_email@=${escapedTerm}`);
+    }
+
+    if(filters.hasOwnProperty('viewTypeFilter') && Array.isArray(filters.viewTypeFilter)
+        && filters.viewTypeFilter.length > 0){
+        filter.push('view_type_id=='+filters.viewTypeFilter.join('||'));
+    }
+
+    if (filters.printDateFilter && filters.printDateFilter.some(e => e !== null)) {
+        if(filters.printDateFilter.every(e => e !== null )) {
+            filter.push(`print_date[]${filters.printDateFilter[0]}&&${filters.printDateFilter[1]}`);
+        } else {
+            filter.push(`
+            ${filters.printDateFilter[0] !== null ? 
+                `print_date>=${filters.printDateFilter[0]}` : ``}
+            ${filters.printDateFilter[1] !== null ? 
+                `print_date<=${filters.printDateFilter[1]}` : ``}`);
+        }
+    }
 
     return filter;
 }
