@@ -14,8 +14,11 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { Dropdown, SimpleLinkList } from 'openstack-uicore-foundation/lib/components';
+import { Dropdown, SimpleLinkList, Table, FreeTextSearch } from 'openstack-uicore-foundation/lib/components';
 import {shallowEqual} from "../../utils/methods";
+import { Pagination } from 'react-bootstrap';
+
+import './badge-form.less'
 
 
 class BadgeForm extends React.Component {
@@ -24,6 +27,7 @@ class BadgeForm extends React.Component {
 
         this.state = {
             entity: {...props.entity},
+            printExcerptDetails: false
         };
 
         this.handleChangeBadgeType = this.handleChangeBadgeType.bind(this);
@@ -31,6 +35,11 @@ class BadgeForm extends React.Component {
         this.handleFeatureLink = this.handleFeatureLink.bind(this);
         this.handleFeatureUnLink = this.handleFeatureUnLink.bind(this);
         this.queryFeatures = this.queryFeatures.bind(this);
+        this.handleShowPrintDetails = this.handleShowPrintDetails.bind(this);
+        this.handleBadgePrintSearch = this.handleBadgePrintSearch.bind(this);
+        this.handleBadgePrintSort = this.handleBadgePrintSort.bind(this);
+        this.handleBadgePrintPageChange = this.handleBadgePrintPageChange.bind(this);
+        this.handleBadgePrintExport = this.handleBadgePrintExport.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -65,6 +74,31 @@ class BadgeForm extends React.Component {
         this.props.onFeatureUnLink(entity.ticket_id, featureId);
     }
 
+    handleShowPrintDetails(displayDetails){
+        if (displayDetails === false) this.props.onShowBadgePrints();
+        this.setState({...this.state, printExcerptDetails: !displayDetails});
+    }
+
+    handleBadgePrintSearch(term) {
+        const {order, orderDir, page, perPage} = this.props;
+        this.props.onBadgePrintQuery(term, page, perPage, order, orderDir);
+    }
+
+    handleBadgePrintSort(index, key, dir, func) {
+        const {term, page, perPage} = this.props;
+        this.props.onBadgePrintQuery(term, page, perPage, key, dir);
+    }
+
+    handleBadgePrintPageChange(page) {
+        const {term, order, orderDir, perPage} = this.props;
+        this.props.onBadgePrintQuery(term, page, perPage, order, orderDir);
+    }
+
+    handleBadgePrintExport(ev) {
+        ev.preventDefault();
+        this.props.onBadgePrintExport();
+    }
+
     queryFeatures(input, callback) {
         const {currentSummit} = this.props;
         const features = currentSummit.badge_features.filter(f => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1);
@@ -72,8 +106,9 @@ class BadgeForm extends React.Component {
     }
 
     render() {
-        const {entity} = this.state;
-        const { currentSummit, selectedPrintType, canPrint } = this.props;
+        const {entity, printExcerptDetails} = this.state;
+        const { currentSummit, selectedPrintType, canPrint, 
+            badgePrints: { badgePrints, order, orderDir, totalBadgePrints, term, currentPage, lastPage, perPage } } = this.props;
 
         if (!currentSummit.badge_types || !currentSummit.badge_features) return (<div/>);
 
@@ -104,6 +139,20 @@ class BadgeForm extends React.Component {
             ...currentSummit.badge_types.find(bt => bt.id === entity.type_id).allowed_view_types.map(vt => ({ label: vt.name, value: vt.id }))
         ];
 
+        const badge_print_columns = [
+            { columnKey: 'id', value: T.translate("edit_ticket.print_table.id"), sortable: true},
+            { columnKey: 'view_type_name', value: T.translate("edit_ticket.print_table.view_type_name"), sortable: true},
+            { columnKey: 'print_date', value: T.translate("edit_ticket.print_table.print_date"), sortable: true},
+        ];
+
+        const badge_print_table_options = {
+            sortCol: order,
+            sortDir: orderDir,
+            actions: {
+                edit: { onClick: () => null },
+            }
+        };
+
         return (
             <form className="badge-form">
                 <input type="hidden" id="badge_id" value={entity.id} />
@@ -126,10 +175,48 @@ class BadgeForm extends React.Component {
                 </div>
                 {badgeType.access_levels.some(al => al.name.includes('IN_PERSON')) &&
                     <div className="row form-group">
-                        <div className="col-md-4">
+                        <div className={`badge-print-wrapper ${printExcerptDetails ? 'col-md-12' : 'col-md-4'}`}>
                             {Object.keys(entity.print_excerpt).length > 0 &&
                             <>
                                 <label> {T.translate("edit_ticket.print_excerpt")}:&nbsp;</label>
+                                {printExcerptDetails ? 
+                                <>
+                                    <div className='row'>
+                                        <div className='col-md-8'>
+                                            <FreeTextSearch
+                                                value={term ?? ''}
+                                                placeholder={T.translate("edit_ticket.placeholders.search_badge_prints")}
+                                                preventEvents={true}
+                                                onSearch={this.handleBadgePrintSearch}
+                                            />
+                                        </div>
+                                        <div className='col-md-4'>
+                                            <button className="btn btn-default" onClick={this.handleBadgePrintExport}>
+                                                {T.translate("general.export")}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <Table
+                                        options={badge_print_table_options}
+                                        data={badgePrints}
+                                        columns={badge_print_columns}
+                                        onSort={this.handleBadgePrintSort}
+                                    />
+                                    <Pagination
+                                        bsSize="medium"
+                                        prev
+                                        next
+                                        first
+                                        last
+                                        ellipsis
+                                        boundaryLinks
+                                        maxButtons={10}
+                                        items={lastPage}
+                                        activePage={currentPage}
+                                        onSelect={this.handleBadgePrintPageChange}
+                                    />
+                                </>
+                                :
                                 <table className="table table-striped table-bordered">
                                     <thead>
                                         <tr>
@@ -149,8 +236,12 @@ class BadgeForm extends React.Component {
                                         })}
                                     </tbody>
                                 </table>
+                                }                                
                             </>
                             }
+                            <span className='details' onClick={() => this.handleShowPrintDetails(printExcerptDetails)}>
+                                {printExcerptDetails ? T.translate("edit_ticket.print_excerpt_less") : T.translate("edit_ticket.print_excerpt_details")}
+                            </span>
                         </div>
                         <div className='col-md-4'>
                             <label>&nbsp;</label>
