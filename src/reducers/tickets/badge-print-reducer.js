@@ -33,12 +33,7 @@ const badgePrintReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action
     switch (type) {
         case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return { ...state, entity: { ...DEFAULT_ENTITY } };
-            }
+            return DEFAULT_STATE;
         }
             break;
         case REQUEST_BADGE_PRINTS: {
