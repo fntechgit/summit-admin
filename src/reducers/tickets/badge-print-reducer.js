@@ -15,7 +15,6 @@ import {
     REQUEST_BADGE_PRINTS,
     RECEIVE_BADGE_PRINTS
 } from '../../actions/badge-actions'
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import {epochToMoment} from "openstack-uicore-foundation/lib/utils/methods";
 
 const DEFAULT_STATE = {
@@ -31,11 +30,7 @@ const DEFAULT_STATE = {
 
 const badgePrintReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-            break;
+    switch (type) {        
         case REQUEST_BADGE_PRINTS: {
             let {order, orderDir, term} = payload;
             return {...state, order, term, orderDir };
