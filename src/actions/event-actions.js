@@ -407,7 +407,7 @@ export const cloneEvent = (entity, publish) => async (dispatch, getState) => {
         null,
         createAction(EVENT_CLONED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/clone`,
-        normalizedEntity,
+        null,
         authErrorHandler,
     )(params)(dispatch)
         .then((payload) => {            

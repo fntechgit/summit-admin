@@ -258,9 +258,20 @@ class EventForm extends React.Component {
     }
 
     handleCloneEvent(ev) {
-        ev.preventDefault();        
+        ev.preventDefault();
         const entity = { ... this.state.entity };
-        this.props.onClone(entity);
+        const {onClone} = this.props;
+        Swal.fire({
+            title: T.translate("general.are_you_sure"),
+            text: T.translate("edit_event.clone_event") + ' ' + `"${entity.title}"`,
+            type: "warning",
+            showCancelButton: true,            
+            confirmButtonText: T.translate("general.yes")
+        }).then(function (result) {
+            if (result.value) {
+                onClone(entity);
+            }
+        });
     }
 
     async handleChangeSelectionPlan(ev) {
@@ -1478,16 +1489,6 @@ render() {
 
             <div className="row">
                 <div className="col-md-12 submit-buttons">
-                    {entity.id &&
-                        <div>
-                            <input
-                                type="button"
-                                onClick={(ev) => this.handleCloneEvent(ev, true)}
-                                className="btn btn-default pull-right"
-                                value={T.translate("general.clone")}
-                            />
-                        </div>
-                    }
                     {!entity.is_published &&
                         <div>
                             <input type="button" onClick={(ev) => this.triggerFormSubmit(ev, false)}
@@ -1524,6 +1525,17 @@ render() {
                                 disabled={!currentSummit.virtual_site_url}
                                 className="btn btn-default pull-left"
                                 value={T.translate("edit_event.view_event")}
+                            />
+                        </div>
+                    }
+
+                    {entity.id &&
+                        <div>
+                            <input
+                                type="button"
+                                onClick={(ev) => this.handleCloneEvent(ev, true)}
+                                className="btn btn-default pull-right"
+                                value={T.translate("general.clone")}
                             />
                         </div>
                     }

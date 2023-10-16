@@ -489,6 +489,7 @@
     "event_saved": "Activity saved successfully.",
     "event_created": "Activity created successfully.",
     "saved_and_published": "Activity saved & published successfully.",
+    "clone_event": "Are you sure you want to clone event ",
     "event_cloned": "Activity cloned successfully.",
     "proximity_alert": "Speaker/s have sessions 90min before or after:",
     "materials": "Materials",
