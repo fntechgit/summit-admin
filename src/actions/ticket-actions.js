@@ -275,7 +275,7 @@ export const getTickets =
             page: page,
             per_page: perPage,
             access_token: accessToken,
-            expand: 'owner,order,ticket_type,badge,promo_code,promo_code.tags,refund_requests'
+            expand: 'owner,order,ticket_type,badge,badge.type,promo_code,promo_code.tags,refund_requests'
         };
 
         const filter = parseFilters(filters, term);
