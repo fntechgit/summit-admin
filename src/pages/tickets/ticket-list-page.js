@@ -44,7 +44,7 @@ import QrReaderInput from "../../components/inputs/qr-reader-input";
 import '../../styles/ticket-list-page.less';
 import OrAndFilter from '../../components/filters/or-and-filter';
 import { ALL_FILTER } from '../../utils/constants';
-
+import {getBadgeTypes} from "../../actions/badge-actions";
 const BatchSize = 25;
 
 const fieldNames = [    
@@ -58,7 +58,8 @@ const fieldNames = [
     { columnKey: 'status', value: 'status'},
     { columnKey: 'refunded_amount_formatted', value: 'refunded_amount'},
     { columnKey: 'final_amount_adjusted_formatted', value: 'paid_amount_adjusted'},
-    { columnKey: 'promo_code_tags', value: 'promo_code_tags'},    
+    { columnKey: 'promo_code_tags', value: 'promo_code_tags'},
+    { columnKey: 'badge_type_id', value: 'badge_type', sortable: true},
 ]
 
 class TicketListPage extends React.Component {
@@ -66,7 +67,7 @@ class TicketListPage extends React.Component {
 
     constructor(props) {
         super(props);
-
+        const {currentSummit} = props;
         this.handleEdit = this.handleEdit.bind(this);
         this.handleSort = this.handleSort.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
@@ -107,6 +108,10 @@ class TicketListPage extends React.Component {
                 orAndFilter: ALL_FILTER,
             }
         }
+
+        if (currentSummit && !currentSummit.badge_types) {
+            props.getBadgeTypes();
+        }
     }
 
     componentDidMount() {
@@ -118,7 +123,7 @@ class TicketListPage extends React.Component {
                 ...this.state, 
                 selectedColumns: extraColumns,
                 enabledFilters: enabledFilters,
-                ticketFilters: {...ticketFilters, ...filters}
+                ticketFilters: {...ticketFilters, ...filters},
             });
             this.props.getTickets(term, 1, 10, order, orderDir, filters, extraColumns);
         }
@@ -262,7 +267,8 @@ class TicketListPage extends React.Component {
                     showOnlyPrintable: false,
                     promocodesFilter: [],
                     promocodeTagsFilter: [],
-                    orAndFilter: this.state.ticketFilters.orAndFilter
+                    orAndFilter: this.state.ticketFilters.orAndFilter,
+                    badgeTypesFilter : [],
                 };
                 this.setState({...this.state, enabledFilters: value, ticketFilters: resetFilters}, () => {
                     this.props.getTickets(term, 1, perPage, order, orderDir, this.state.ticketFilters, this.state.selectedColumns);
@@ -341,8 +347,8 @@ class TicketListPage extends React.Component {
             ...currentSummit.badge_view_types.map(vt => ({label: vt.name, value: vt.id}))
         ];
 
-        const promocodesOptions = [
-            //...currentSummit.badge_view_types.map(vt => ({label: vt.name, value: vt.id}))
+        let badgeTypesOptions = [
+            ...currentSummit.badge_types?.map(t => ({label: t.name, value: t.id})) ?? []
         ];
 
         const ddl_columns = [
@@ -354,6 +360,7 @@ class TicketListPage extends React.Component {
             { value: 'refunded_amount_formatted', label: T.translate("ticket_list.refunded_amount") },
             { value: 'final_amount_adjusted_formatted', label: T.translate("ticket_list.paid_amount_adjusted") },
             { value: 'promo_code_tags', label: T.translate("ticket_list.promo_code_tags") },
+            { value: 'badge_type_id', label: T.translate("ticket_list.badge_type") },
         ];
 
         const filters_ddl = [
@@ -368,6 +375,7 @@ class TicketListPage extends React.Component {
             {label: 'Promo Code Tags', value: 'promocodeTagsFilter'},
             {label: 'Refund Requested', value: 'show_refund_request_pending'},  
             {label: 'Printable', value: 'show_printable'},
+            {label: 'Badge Type', value: 'badgeTypesFilter'},
         ]
 
         let showColumns = fieldNames
@@ -605,6 +613,20 @@ class TicketListPage extends React.Component {
                             </div>
                         </div>
                         }
+                        {enabledFilters.includes('badgeTypesFilter') &&
+                            <div className="col-md-6">
+                                <Select
+                                    placeholder={T.translate('ticket_list.placeholders.badge_type')}
+                                    name="badgeTypesFilter"
+                                    value={ticketFilters.badgeTypesFilter}
+                                    onChange={val => this.handleFilterChange('badgeTypesFilter', val)}
+                                    options={badgeTypesOptions}
+                                    isClearable={true}
+                                    isMulti
+                                    className="badge-type-filter"
+                                />
+                            </div>
+                        }
                     </div>
 
                     <hr/>
@@ -708,6 +730,8 @@ class TicketListPage extends React.Component {
                                 <b>{T.translate("ticket_list.import_tickets_ticket_type_name")}</b>{T.translate("ticket_list.import_tickets_ticket_type_name_text")}<br />
                                 <b>{T.translate("ticket_list.import_tickets_ticket_type_id")}</b>{T.translate("ticket_list.import_tickets_ticket_type_id_text")}<br />
                                 <b>{T.translate("ticket_list.import_tickets_ticket_promo_code")}</b>{T.translate("ticket_list.import_tickets_ticket_promo_code_text")}<br />
+                                <b>{T.translate("ticket_list.import_tickets_promo_code_id")}</b>{T.translate("ticket_list.import_tickets_promo_code_id_text")}<br />
+                                <b>{T.translate("ticket_list.import_tickets_promo_code")}</b>{T.translate("ticket_list.import_tickets_promo_code_text")}<br />
                                 <b>{T.translate("ticket_list.import_tickets_badge_type_id")}</b>{T.translate("ticket_list.import_tickets_badge_type_id_text")}<br />
                                 <b>{T.translate("ticket_list.import_tickets_badge_type_name")}</b>{T.translate("ticket_list.import_tickets_badge_type_name_text")}<br />
                                 <b>{T.translate("ticket_list.import_tickets_badge_features")}</b>{T.translate("ticket_list.import_tickets_badge_features_text")}<br />
@@ -788,5 +812,6 @@ export default connect (
         setSelectedAll,
         printTickets,
         getTicket,
+        getBadgeTypes,
     }
 )(TicketListPage);

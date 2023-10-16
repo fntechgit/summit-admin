@@ -77,7 +77,8 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
                     refunded_amount_formatted,
                     final_amount_adjusted_formatted,
                     refund_requests: [...t.refund_requests],
-                    promo_code_tags
+                    promo_code_tags,
+                    badge_type_id: t.badge && t.badge.type ? t.badge.type.name : 'N/A'
                 };
             })
             return {...state, tickets: tickets, lastPage: last_page, totalTickets: total};
