@@ -378,6 +378,10 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
                                             <div className="row">
                                             {entity.id > 0 && stateEntity.versions.length > 0 &&
                                                 <div className='col-md-11'>
+                                                    <label>
+                                                        {T.translate("emails.previous_template")}                                                    
+                                                    </label>
+                                                    <br/>
                                                     <Dropdown
                                                         id="history_version"
                                                         value={historyVersion}
