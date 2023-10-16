@@ -44,6 +44,7 @@ import QrReaderInput from "../../components/inputs/qr-reader-input";
 import '../../styles/ticket-list-page.less';
 import OrAndFilter from '../../components/filters/or-and-filter';
 import { ALL_FILTER } from '../../utils/constants';
+import {getBadgeTypes} from "../../actions/badge-actions";
 
 const BatchSize = 25;
 
@@ -59,7 +60,7 @@ const fieldNames = [
     { columnKey: 'refunded_amount', value: 'refunded_amount', sortable: true},
     { columnKey: 'final_amount_adjusted', value: 'paid_amount_adjusted', sortable: true},
     { columnKey: 'promo_code_tags', value: 'promo_code_tags'},
-    { columnKey: 'badge_type_id', value: 'badge_type'},
+    { columnKey: 'badge_type_id', value: 'badge_type', sortable: true},
 ]
 
 class TicketListPage extends React.Component {
@@ -67,7 +68,7 @@ class TicketListPage extends React.Component {
 
     constructor(props) {
         super(props);
-
+        const {currentSummit} = props;
         this.handleEdit = this.handleEdit.bind(this);
         this.handleSort = this.handleSort.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
@@ -107,6 +108,10 @@ class TicketListPage extends React.Component {
                 promocodeTagsFilter:[],
                 orAndFilter: ALL_FILTER,
             }
+        }
+
+        if (currentSummit && !currentSummit.badge_types) {
+            props.getBadgeTypes();
         }
     }
 
@@ -802,5 +807,6 @@ export default connect (
         setSelectedAll,
         printTickets,
         getTicket,
+        getBadgeTypes,
     }
 )(TicketListPage);
