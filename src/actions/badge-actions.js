@@ -267,8 +267,8 @@ export const exportBadgePrints = (term = null, order = 'id', orderDir = 1, filte
     const {currentSummitState, currentTicketState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
-    const { entity: {id} } = currentTicketState;
-    const filename = `${currentSummit.name}-Ticket_${id}-BadgePrints.csv'`;
+    const { entity: {id: ticketId}} = currentTicketState;
+    const filename = `${currentSummit.name}-Ticket_${ticketId}-BadgePrints.csv'`;
 
     const params = {
         expand       : '',
@@ -289,7 +289,7 @@ export const exportBadgePrints = (term = null, order = 'id', orderDir = 1, filte
 
     // GET /api/v1/summits/{id}/tickets/{ticket_id}/badge/current/prints/csv
 
-    dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/csv`, params, filename));
+    dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge/current/prints/csv`, params, filename));
 };
 
 const parseFilters = (filters, term) => {

@@ -305,11 +305,13 @@ class BadgeForm extends React.Component {
                                     </tbody>
                                 </table>
                                 }
+                                <span className='details' onClick={() => this.handleShowPrintDetails(printExcerptDetails)}>
+                                   {printExcerptDetails ?
+                                       T.translate("edit_ticket.print_excerpt_less") :
+                                       T.translate("edit_ticket.print_excerpt_details")}
+                                </span>
                             </>
                             }
-                            <span className='details' onClick={() => this.handleShowPrintDetails(printExcerptDetails)}>
-                                {printExcerptDetails ? T.translate("edit_ticket.print_excerpt_less") : T.translate("edit_ticket.print_excerpt_details")}
-                            </span>
                         </div>
                         <div className='col-md-4'>
                             <label>&nbsp;</label>
