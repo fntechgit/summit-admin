@@ -15,7 +15,6 @@ import {
     REQUEST_BADGE_PRINTS,
     RECEIVE_BADGE_PRINTS
 } from '../../actions/badge-actions'
-import {epochToMoment} from "openstack-uicore-foundation/lib/utils/methods";
 
 const DEFAULT_STATE = {
     badgePrints: [],
@@ -40,8 +39,8 @@ const badgePrintReducer = (state = DEFAULT_STATE, action) => {
             const { data, current_page, last_page, total } = payload.response;
 
             const prints = data.map(p => {
-                const created = p.created ? epochToMoment(p.created).format('MMMM Do YYYY, h:mm:ss a') : '';
-                const print_date = p.print_date ? epochToMoment(p.print_date).format('MMMM Do YYYY, h:mm:ss a') : '';
+                const created = p.created ? p.created : 'N/A';
+                const print_date = p.print_date ? p.print_date : 'N/A';
                 const requestor_full_name = p.requestor ? `${p.requestor.first_name} ${p.requestor.last_name}` : 'N/A';                
                 const requestor_email = p.requestor ? p.requestor.email : 'N/A';
 
