@@ -305,14 +305,14 @@ const parseFilters = (filters, term) => {
         filter.push('view_type_id=='+filters.viewTypeFilter.join('||'));
     }
 
-    if (filters.printDateFilter && filters.printDateFilter.some(e => e !== null)) {
-        if(filters.printDateFilter.every(e => e !== null )) {
+    if (filters.printDateFilter && filters.printDateFilter.some(e => e !== null && e > 0)) {
+        if(filters.printDateFilter.every(e => e !== null && e > 0 )) {
             filter.push(`print_date[]${filters.printDateFilter[0]}&&${filters.printDateFilter[1]}`);
         } else {
             filter.push(`
-            ${filters.printDateFilter[0] !== null ? 
+            ${filters.printDateFilter[0] !== null && filters.printDateFilter[0] > 0 ? 
                 `print_date>=${filters.printDateFilter[0]}` : ``}
-            ${filters.printDateFilter[1] !== null ? 
+            ${filters.printDateFilter[1] !== null && filters.printDateFilter[1] > 0 ? 
                 `print_date<=${filters.printDateFilter[1]}` : ``}`);
         }
     }
