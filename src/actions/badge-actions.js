@@ -256,7 +256,7 @@ export const getBadgePrints = (term = null, page = 1, perPage = 10, order = 'id'
         createAction(RECEIVE_BADGE_PRINTS),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/${ticketId}/badge/current/prints`,
         authErrorHandler,
-        {order, orderDir, term}
+        {order, orderDir, term, summitTz: currentSummit.time_zone_id}
     )(params)(dispatch).then(() => {
         dispatch(stopLoading());
     }
