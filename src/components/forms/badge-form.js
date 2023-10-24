@@ -176,7 +176,7 @@ class BadgeForm extends React.Component {
             { columnKey: 'view_type_name', value: T.translate("edit_ticket.print_table.view_type_name")},
             { columnKey: 'requestor_full_name', value: T.translate("edit_ticket.print_table.requestor_full_name"), sortable: true},
             { columnKey: 'requestor_email', value: T.translate("edit_ticket.print_table.requestor_email"), sortable: true},
-            { columnKey: 'print_date', value: T.translate("edit_ticket.print_table.print_date"), render: (t) => t.print_date ? t.print_date : 'N/A', sortable: true},
+            { columnKey: 'print_date', value: T.translate("edit_ticket.print_table.print_date"), sortable: true}
         ];
 
         const badge_print_table_options = {
