@@ -144,7 +144,7 @@ class BadgeForm extends React.Component {
             confirmButtonText: T.translate("general.clear"),
         }).then(function (result) {
             if (result.value) {
-                clearBadgePrints(entity.id);
+                clearBadgePrints(entity.ticket_id);
             }
         })
     }
