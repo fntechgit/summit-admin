@@ -423,7 +423,9 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
 
             data.forEach(setting => {
                 let value = setting.value;
-                if(setting.key === 'REG_LITE_ALLOW_PROMO_CODES' || setting.key === 'REG_LITE_SHOW_COMPANY_INPUT'){
+                if(setting.key === 'REG_LITE_ALLOW_PROMO_CODES' || 
+                   setting.key === 'REG_LITE_SHOW_COMPANY_INPUT' ||
+                   setting.key === 'REG_LITE_SHOW_COMPANY_INPUT_DEFAULT_OPTIONS'){
                     value = value === '1';
                 }
                 reg_lite_marketing_settings[setting.key] = { id : setting.id, value : value};
