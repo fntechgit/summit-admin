@@ -21,11 +21,12 @@ import
     NOTE_DELETED
 } from '../../actions/notes-actions';
 
-import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import {RECEIVE_SUMMIT, SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import { parseSpeakerAuditLog } from '../../utils/methods';
 
 const DEFAULT_STATE = {
+    summitId                : null,
     notes                   : [],
     currentPage             : 1,
     lastPage                : 1,
@@ -38,20 +39,22 @@ const DEFAULT_STATE = {
 const notesReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action
     switch (type) {
-        case SET_CURRENT_SUMMIT:
+        case RECEIVE_SUMMIT:
+        case SET_CURRENT_SUMMIT: {
+            const summitId = payload.response.id;
+            return {...DEFAULT_STATE, summitId };
+        }
         case CLEAR_NOTES_PARAMS:
         case LOGOUT_USER: {
             return DEFAULT_STATE;
         }
         case REQUEST_NOTES: {
-            let {order, orderDir} = payload;
-
+            const {order, orderDir} = payload;
             return {...state, order, orderDir }
         }
         case RECEIVE_NOTES: {
-            let { current_page, total, last_page } = payload.response;
-
-            let notes = payload.response.data.map(formatNote);
+            const { current_page, total, last_page } = payload.response;
+            const notes = payload.response.data.map(note => formatNote(note, state.summitId));
 
             return {...state, notes, totalNotes: total, currentPage: current_page, lastPage: last_page };
         }
@@ -60,19 +63,21 @@ const notesReducer = (state = DEFAULT_STATE, action) => {
             return {...state, notes: state.notes.filter(n => n.id !== noteId)};
         }
         case NOTE_ADDED: {
-            return {...state, notes: [formatNote(payload.response), ...state.notes ]};
+            return {...state, notes: [formatNote(payload.response, state.summitId), ...state.notes ]};
         }
         default:
             return state;
     }
 };
 
-const formatNote = (note) => {
+const formatNote = (note, summitId) => {
     return {
         ...note,
         author_fullname: `${note.author?.first_name} ${note.author?.last_name}`,
         author_email: note.author?.email,
-        created: moment(note.created * 1000).format('MMMM Do YYYY, h:mm a')
+        created: moment(note.created * 1000).format('MMMM Do YYYY, h:mm a'),
+        ticket_link: note.ticket ? `<a href="/app/summits/${summitId}/purchase-orders/${note.ticket.order_id}/tickets/${note.ticket.id}">${note.ticket.id}</a>` : '-',
+        ticket_id: note.ticket?.id
     };
 }
 

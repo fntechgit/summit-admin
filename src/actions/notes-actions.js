@@ -20,7 +20,7 @@ import {
     escapeFilterValue,
     deleteRequest,
     showSuccessMessage,
-    postRequest
+    postRequest, getCSV
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 import T from "i18n-react";
@@ -52,7 +52,7 @@ export const getNotes = (attendeeId, ticketId, term = null, page, perPage, order
     const params = {
         page,
         per_page: perPage,
-        expand: 'author',
+        expand: 'author,ticket',
         access_token: accessToken,
     };
 
@@ -78,6 +78,42 @@ export const getNotes = (attendeeId, ticketId, term = null, page, perPage, order
     );
 };
 
+export const exportNotes = (attendeeId, ticketId, term = null, order, orderDir) => async (dispatch, getState) => {
+
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+    const filter = [];
+    const filename = `${attendeeId}-notes.csv`;
+
+    if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(`author_email=@${escapedTerm},author_fullname=@${escapedTerm},content=@${escapedTerm}`);
+    }
+
+    if (ticketId) {
+        filter.push(`ticket_id==${ticketId}`)
+    }
+
+    const params = {
+        expand: 'author,ticket',
+        access_token: accessToken,
+    };
+
+    if(filter.length > 0){
+        params['filter[]']= filter;
+    }
+
+    // order
+    if(order != null && orderDir != null){
+        const orderDirSign = (orderDir === 1) ? '+' : '-';
+        params['order']= `${orderDirSign}${order}`;
+    }
+
+    dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes/csv`, params, filename));
+
+};
+
 export const saveNote = (attendeeId, ticketId, content) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -91,7 +127,7 @@ export const saveNote = (attendeeId, ticketId, content) => async (dispatch, getS
 
     const params = {
         access_token: accessToken,
-        expand: 'author',
+        expand: 'author,ticket',
     };
 
     return postRequest(

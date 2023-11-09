@@ -2,9 +2,11 @@ import React, {useEffect, useState} from "react";
 import {FreeTextSearch, Table} from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react";
 import {connect} from "react-redux";
-import {clearNotesParams, getNotes, saveNote, deleteNote} from "../../actions/notes-actions";
+import {clearNotesParams, getNotes, exportNotes, saveNote, deleteNote} from "../../actions/notes-actions";
 import {Pagination} from "react-bootstrap";
 import Swal from "sweetalert2";
+
+import styles from './index.module.less';
 
 const Notes = ({
                  attendeeId,
@@ -18,6 +20,7 @@ const Notes = ({
                  orderDir,
                  columns,
                  getNotes,
+                 exportNotes,
                  saveNote,
                  deleteNote,
                  clearNotesParams
@@ -51,6 +54,10 @@ const Notes = ({
     getNotes(attendeeId, ticketId, newTerm, currentPage, perPage, order, orderDir);
   };
 
+  const handleExport = (index, key, dir, func) => {
+    exportNotes(attendeeId, ticketId, term, order, orderDir);
+  };
+
   useEffect(() => {
     getNotes(attendeeId, ticketId, term, 1, perPage, order, orderDir);
 
@@ -60,6 +67,7 @@ const Notes = ({
   }, []);
 
   const table_options = {
+    className: styles.notesTable,
     sortCol: order,
     sortDir: orderDir,
     actions: {
@@ -72,7 +80,7 @@ const Notes = ({
     {columnKey: 'created', value: T.translate("notes.created"), sortable: true},
     {columnKey: 'author_fullname', value: T.translate("notes.author_fullname"), sortable: true},
     {columnKey: 'author_email', value: T.translate("notes.author_email"), sortable: true},
-    {columnKey: 'ticket_id', value: T.translate("notes.ticket_id")},
+    {columnKey: 'ticket_link', value: T.translate("notes.ticket_id")},
     {columnKey: 'content', value: T.translate("notes.content")}
   ];
 
@@ -82,17 +90,13 @@ const Notes = ({
 
   return (
     <>
-      <div className={'row'}>
-        <div className={'col-md-6'}>
-          <FreeTextSearch
-            value={term ?? ''}
-            placeholder={T.translate("notes.placeholders.search")}
-            onSearch={handleSearch}
-          />
-        </div>
-        <div className={'col-md-6'}>
+      <div className="row">
+        <div className={`col-md-12 ${styles.addNewNote}`}>
+          <div>
+            <label>Add new note</label>
+          </div>
           <div className="input-group">
-            <input
+            <textarea
               className="form-control"
               value={newNote} onChange={ev => setNewNote(ev.target.value)}
             />
@@ -105,6 +109,20 @@ const Notes = ({
               />
             </span>
           </div>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-md-6">
+          <FreeTextSearch
+            value={term ?? ''}
+            placeholder={T.translate("notes.placeholders.search")}
+            onSearch={handleSearch}
+          />
+        </div>
+        <div className="col-md-6">
+          <button className="btn btn-default exportButton pull-right" onClick={handleExport}>
+            {T.translate("general.export")}
+          </button>
         </div>
       </div>
 
@@ -147,6 +165,7 @@ export default connect(
   mapStateToProps,
   {
     getNotes,
+    exportNotes,
     saveNote,
     deleteNote,
     clearNotesParams
