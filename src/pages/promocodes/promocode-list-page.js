@@ -16,7 +16,7 @@ import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import {Modal, Pagination} from 'react-bootstrap';
-import {FreeTextSearch, Dropdown, Table, UploadInput} from 'openstack-uicore-foundation/lib/components';
+import {FreeTextSearch, Dropdown, Table, TagInput, UploadInput} from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
 import { getPromocodes, getPromocodeMeta, deletePromocode, exportPromocodes, importPromoCodesCSV } from "../../actions/promocode-actions";
 import { trim } from '../../utils/methods'
@@ -55,11 +55,16 @@ class PromocodeListPage extends React.Component {
         this.handleImport = this.handleImport.bind(this);
         this.handleColumnsChange = this.handleColumnsChange.bind(this);
         this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
+        this.handleFilterChange = this.handleFilterChange.bind(this);
 
         this.state = {
             showImportModal: false,
             importFile:null,
-            selectedColumns: [],            
+            selectedColumns: [],
+            promoCodesFilters: {
+                tags_filter: [],
+                type_filter: null
+            }            
         }
     }
 
@@ -158,6 +163,11 @@ class PromocodeListPage extends React.Component {
         return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
     }
 
+    handleFilterChange(ev) {
+        const {value, id} = ev.target;
+        this.setState({...this.state, promoCodesFilters: {...this.state.promoCodesFilters, [id]: value}});
+    }
+
     render(){
         const {currentSummit, promocodes, lastPage, currentPage, term, order, orderDir, totalPromocodes, allTypes, allClasses, type} = this.props;
         const {showImportModal} = this.state;
@@ -222,14 +232,28 @@ class PromocodeListPage extends React.Component {
                         />
                     </div>
                     <div className="col-md-6 text-right">
-                            <Dropdown
-                                id="promo_code_type"
-                                className="right-space"
-                                value={type}
-                                placeholder={T.translate("promocode_list.placeholders.select_type")}
-                                options={promocode_types_ddl}
-                                onChange={this.handleTypeChange}
-                            />
+                        <Dropdown
+                            id="promo_code_type"
+                            className="right-space"
+                            value={type}
+                            placeholder={T.translate("promocode_list.placeholders.select_type")}
+                            options={promocode_types_ddl}
+                            onChange={this.handleTypeChange}
+                        />
+                    </div>
+                </div>
+
+                <div className={'row'}>
+                    <div className={'col-md-6'}>
+                        <TagInput
+                            id="tags_filter"
+                            placeholder={T.translate("promocode_list.placeholders.filter_tags")}
+                            value={this.state.promoCodesFilters.tags_filter}
+                            onChange={this.handleFilterChange}
+                            summitId={currentSummit.id}
+                            isMulti={true}
+                            isClearable={true}
+                        />
                     </div>
                 </div>
 
