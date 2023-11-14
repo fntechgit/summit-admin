@@ -79,7 +79,7 @@ export const getPromocodeMeta = () => async (dispatch, getState) => {
     );
 };
 
-export const getPromocodes = ( term = null, page = 1, perPage = 10, order = 'code', orderDir = 1, type = 'ALL', extraColumns = [] ) => async (dispatch, getState) => {
+export const getPromocodes = ( term = null, page = 1, perPage = 10, order = 'code', orderDir = 1, type = 'ALL', tags = [], extraColumns = [] ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -95,6 +95,10 @@ export const getPromocodes = ( term = null, page = 1, perPage = 10, order = 'cod
 
     if (type !== 'ALL') {
         filter.push(`type==${type}`);
+    }
+
+    if (tags.length > 0) {
+        filter.push(`tag_id==${tags.map(t => t.id).join('||')}`);
     }
 
     const params = {
@@ -120,7 +124,7 @@ export const getPromocodes = ( term = null, page = 1, perPage = 10, order = 'cod
         createAction(RECEIVE_PROMOCODES),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
         authErrorHandler,
-        {page, perPage, order, orderDir, type, term, extraColumns}
+        {page, perPage, order, orderDir, type, term, tags, extraColumns}
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }
@@ -251,7 +255,7 @@ export const sendEmail = (promocodeId) => async (dispatch, getState) => {
         });
 };
 
-export const exportPromocodes = ( term = null, order = 'code', orderDir = 1, type = 'ALL' ) => async (dispatch, getState) => {
+export const exportPromocodes = ( term = null, order = 'code', orderDir = 1, type = 'ALL', tags = [] ) => async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -272,6 +276,10 @@ export const exportPromocodes = ( term = null, order = 'code', orderDir = 1, typ
 
     if (type !== 'ALL') {
         filter.push(`type==${type}`);
+    }
+
+    if (tags.length > 0) {
+        filter.push(`tag_id==${tags.map(t => t.id).join('||')}`);
     }
 
     if(filter.length > 0){

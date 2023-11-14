@@ -24,6 +24,7 @@ import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 
 const DEFAULT_STATE = {
     promocodes       : [],
+    tags            : [],
     term            : null,
     type            : 'ALL',
     order           : 'code',
@@ -45,9 +46,9 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
             return DEFAULT_STATE;
         }
         case REQUEST_PROMOCODES: {
-            let {order, orderDir, type, term, extraColumns} = payload;
+            let {order, orderDir, type, term, tags, extraColumns} = payload;
 
-            return {...state, order, orderDir, type, term, extraColumns }
+            return {...state, order, orderDir, type, term, tags, extraColumns }
         }
         case RECEIVE_PROMOCODE_META: {
             let types = [...DEFAULT_STATE.allTypes];
