@@ -48,6 +48,7 @@ class PromocodeListPage extends React.Component {
         this.isNotRedeemed = this.isNotRedeemed.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
         this.handleTypeChange = this.handleTypeChange.bind(this);
+        this.handleTagsChange = this.handleTagsChange.bind(this);
         this.handleSort = this.handleSort.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
         this.handleNewPromocode = this.handleNewPromocode.bind(this);
@@ -55,27 +56,22 @@ class PromocodeListPage extends React.Component {
         this.handleImport = this.handleImport.bind(this);
         this.handleColumnsChange = this.handleColumnsChange.bind(this);
         this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
-        this.handleFilterChange = this.handleFilterChange.bind(this);
 
         this.state = {
             showImportModal: false,
             importFile:null,
-            selectedColumns: [],
-            promoCodesFilters: {
-                tags_filter: [],
-                type_filter: null
-            }            
+            selectedColumns: []
         }
     }
 
     componentDidMount() {
-        const {currentSummit, term , currentPage , extraColumns, perPage , order , orderDir , type} = this.props;
+        const {currentSummit, term, currentPage, extraColumns, perPage, order, orderDir, type, tags} = this.props;
         this.setState({
             ...this.state, 
             selectedColumns: extraColumns,
         });
         if(currentSummit) {
-            this.props.getPromocodes(term , currentPage , perPage , order , orderDir , type, extraColumns);
+            this.props.getPromocodes(term, currentPage, perPage, order, orderDir, type, tags, extraColumns);
         }
     }
 
@@ -92,10 +88,10 @@ class PromocodeListPage extends React.Component {
     }
 
     handleExport(ev) {
-        const {term, order, orderDir, type} = this.props;
+        const {term, order, orderDir, type, tags} = this.props;
         ev.preventDefault();
 
-        this.props.exportPromocodes(term, order, orderDir, type);
+        this.props.exportPromocodes(term, order, orderDir, type, tags);
     }
 
     handleDelete(promocodeId) {
@@ -125,28 +121,35 @@ class PromocodeListPage extends React.Component {
     }
 
     handlePageChange(page) {
-        const {term, order, orderDir, perPage, type} = this.props;
+        const {term, order, orderDir, perPage, type, tags} = this.props;
         const {selectedColumns} = this.state;
-        this.props.getPromocodes(term, page, perPage, order, orderDir, type, selectedColumns);
+        this.props.getPromocodes(term, page, perPage, order, orderDir, type, tags, selectedColumns);
     }
 
     handleTypeChange(type) {
-        const {term, order, orderDir, perPage, page} = this.props;
+        const {term, tags, order, orderDir, perPage, page} = this.props;
         const {selectedColumns} = this.state;
-        this.props.getPromocodes(term, page, perPage, order, orderDir, type.target.value, selectedColumns);
+        this.props.getPromocodes(term, page, perPage, order, orderDir, type.target.value, tags, selectedColumns);
+    }
+
+    handleTagsChange(ev) {
+        const {term, type, order, orderDir, page, perPage} = this.props;
+        const {value} = ev.target;
+        const {selectedColumns} = this.state;
+        this.props.getPromocodes(term, page, perPage, order, orderDir, type, value, selectedColumns);
     }
 
     handleSort(index, key, dir, func) {
-        const {term, page, perPage, type} = this.props;
+        const {term, page, perPage, type, tags} = this.props;
         key = (key === 'name') ? 'last_name' : key;
         const {selectedColumns} = this.state;
-        this.props.getPromocodes(term, page, perPage, key, dir, type, selectedColumns);
+        this.props.getPromocodes(term, page, perPage, key, dir, type, tags, selectedColumns);
     }
 
     handleSearch(term) {
-        const {order, orderDir, page, perPage, type} = this.props;
+        const {order, orderDir, page, perPage, type, tags} = this.props;
         const {selectedColumns} = this.state;
-        this.props.getPromocodes(term, page, perPage, order, orderDir, type, selectedColumns);
+        this.props.getPromocodes(term, page, perPage, order, orderDir, type, tags, selectedColumns);
     }
 
     handleNewPromocode(ev) {
@@ -163,13 +166,8 @@ class PromocodeListPage extends React.Component {
         return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
     }
 
-    handleFilterChange(ev) {
-        const {value, id} = ev.target;
-        this.setState({...this.state, promoCodesFilters: {...this.state.promoCodesFilters, [id]: value}});
-    }
-
     render(){
-        const {currentSummit, promocodes, lastPage, currentPage, term, order, orderDir, totalPromocodes, allTypes, allClasses, type} = this.props;
+        const {currentSummit, promocodes, lastPage, currentPage, term, order, orderDir, totalPromocodes, allTypes, type, tags} = this.props;
         const {showImportModal} = this.state;
 
         let columns = [
@@ -248,9 +246,8 @@ class PromocodeListPage extends React.Component {
                         <TagInput
                             id="tags_filter"
                             placeholder={T.translate("promocode_list.placeholders.filter_tags")}
-                            value={this.state.promoCodesFilters.tags_filter}
-                            onChange={this.handleFilterChange}
-                            summitId={currentSummit.id}
+                            value={tags}
+                            onChange={this.handleTagsChange}
                             isMulti={true}
                             isClearable={true}
                         />
