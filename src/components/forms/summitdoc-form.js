@@ -93,16 +93,25 @@ class SummitDocForm extends React.Component {
     handleUploadFile(file) {
         let entity = {...this.state.entity};
 
-        entity.file_preview = file.preview;
-
-        this.setState({file: file, entity: entity});
+        if (entity.id) {
+            const formData = new FormData();
+            formData.append('file', file);
+            this.props.addFileToDoc(entity, formData);
+        } else {
+            entity.file_preview = file.preview;
+            this.setState({file: file, entity: entity});
+        }
     }
 
     handleRemoveFile(ev) {
         let entity = {...this.state.entity};
 
-        entity.file_preview = '';
-        this.setState({entity: entity});
+        if (entity.id) {
+            this.props.removeFileFromDoc(entity);
+        } else {
+            entity.file_preview = '';
+            this.setState({file: null, entity: entity});
+        }
     }
 
     render() {
@@ -195,6 +204,7 @@ class SummitDocForm extends React.Component {
                             handleRemove={this.handleRemoveFile}
                             className="dropzone col-md-6"
                             multiple={false}
+                            disabled={entity.web_link?.length > 0}
                         />
                     </div>
                 </div>
@@ -207,6 +217,7 @@ class SummitDocForm extends React.Component {
                             onChange={this.handleChange}
                             placeholder={T.translate("summitdoc.placeholders.web_link")}
                             className="form-control"
+                            disabled={entity.file_preview || entity.file}
                             error={this.hasErrors('web_link')}
                         />
                     </div>
