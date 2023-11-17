@@ -280,8 +280,7 @@ class BadgeForm extends React.Component {
                                                 isMulti
                                             />
                                         </div>
-                                        <div className='col-md-7 col-md-offset-1 date-wrapper'>
-                                            {console.log('check dates...', printDateFilter)}
+                                        <div className='col-md-7 col-md-offset-1 date-wrapper'>                                            
                                             <DateTimePicker
                                                 id="printDateFromFilter"
                                                 format={{date:"YYYY-MM-DD", time: "HH:mm"}}
