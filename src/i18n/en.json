@@ -2282,6 +2282,7 @@
     "last_name": "Last Name",
     "completed": "Completed",
     "is_accepted": "Is Accepted?",
+    "status": "Status",
     "sent": "Is Sent?",
     "allowed_ticket_types": "Allowed Ticket Types",
     "invitation_list": "Invitations",

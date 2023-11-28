@@ -5,9 +5,9 @@ import T from "i18n-react";
 
 const InvitationStatusDropdown = ({id, value, onChange, ...rest}) => {
     const options =[
-        {label: 'Pending', value: 'pending'},
-        {label: 'Accepted', value: 'accepted'},
-        {label: 'Rejected', value: 'rejected'}
+        {label: 'Pending', value: 'Pending'},
+        {label: 'Accepted', value: 'Accepted'},
+        {label: 'Rejected', value: 'Rejected'}
     ];
 
     return (
