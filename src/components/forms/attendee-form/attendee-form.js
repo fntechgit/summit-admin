@@ -257,17 +257,14 @@ class AttendeeForm extends React.Component {
                             error={this.hasErrors('company')}
                         />
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-8">
                         <label> {T.translate("edit_attendee.tags")}</label>
                         <TagInput
                           id="tags"
                           clearable
                           isMulti
-                          allowCreate
                           value={entity.tags}
-                          summitId={currentSummit.id}
                           onChange={this.handleChange}
-                          onCreate={this.handleNewTag}
                           placeholder={T.translate("edit_attendee.placeholders.tags")}
                         />
                     </div>

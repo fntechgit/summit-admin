@@ -695,10 +695,8 @@ class SummitAttendeeListPage extends React.Component {
                 id="tags"
                 clearable
                 isMulti
-                allowCreate
                 value={attendeeFilters.tags}
                 onChange={this.handleTagsChange}
-                onCreate={this.handleNewTag}
                 placeholder={T.translate("attendee_list.placeholders.tags")}
               />
             </div>

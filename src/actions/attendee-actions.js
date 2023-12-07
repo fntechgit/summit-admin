@@ -75,7 +75,7 @@ const parseFilters = (filters, term = null) => {
     const filter = [];
 
     if (filters.tags?.length > 0){
-        filter.push(`tags==${filters.tags.map(t => t.id).join('||')}`)
+        filter.push(`tags_id==${filters.tags.map(t => t.id).join('||')}`)
     }
 
     if(filters.statusFilter){

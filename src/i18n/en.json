@@ -811,7 +811,7 @@
     "disclaimer_accepted": "Disclaimer Accepted?",
     "inactive_ticket": "Inactive Ticket",
     "placeholders": {
-      "tags": "Select or create a tag",
+      "tags": "Type to search and select tags",
       "start_date": "Start Date",
       "end_date": "End Date",
       "select_ticket_type": "Select Ticket Type"
