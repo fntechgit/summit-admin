@@ -327,6 +327,7 @@
     "marketing_site_oauth2_client_scopes": "Marketing Site OAUTH2 Client Scopes",
     "virtual_site_oauth2_client_id": "Virtual Event Site OAUTH2 Client ID",
     "support_email": "Support Email",
+    "speakers_support_email": "Speakers Support Email",
     "help_users": "Help Users",
     "help_users_info": "Users designated as Help Users on A2A Widget ( Chat ).",
     "reg_email_settings": "Registration Settings",
@@ -338,7 +339,7 @@
     "allow_update_attendee_extra_questions": "Allow Attendee to update extra questions?",
     "registration_allowed_refund_request_till_date": "Allow Refund Request Until",
     "registration_encryption_key": "Encryption Key",
-    "generate_encryption_key": "Generate Key",    
+    "generate_encryption_key": "Generate Key",
     "reg_lite_allow_promo_codes": "Allow Promo Codes on Registration Lite ?",
     "reg_lite_show_company_input_default_options": "Show user Company Input Default Options?",
     "reg_lite_show_company_input": "Show user company input during registration?",
@@ -692,7 +693,7 @@
   "tag_list": {
     "tag_list": "Tag List",
     "tags": "Tags",
-    "add_tag": "Add Tag",    
+    "add_tag": "Add Tag",
     "delete_tag_warning": "Are you sure you want to delete tag",
     "created": "Created",
     "updated": "Updated",
@@ -702,9 +703,9 @@
   },
   "edit_tag": {
     "tag": "Tag",
-    "name": "Name",    
+    "name": "Name",
     "tag_saved": "Tag saved successfully.",
-    "tag_created": "Tag created successfully."    
+    "tag_created": "Tag created successfully."
   },
   "schedule_builder_page": {
     "messages": {
@@ -879,7 +880,7 @@
   },
   "summit_speakers_list": {
     "summit_speakers_list": "Summit Speakers List",
-    "summit_speakers": "Summit Speakers",    
+    "summit_speakers": "Summit Speakers",
     "accepted": "Accepted",
     "rejected": "Rejected",
     "alternate": "Alternate",
@@ -901,7 +902,7 @@
     "resend_done": "Emails sent successfully.",
     "send_emails_title": "You are about to send an EMAIL BLAST to selected speakers !",
     "should_send_copy_2_submitter": "Also send to submitter?",
-    "items_qty": "Selected {qty} Speakers",    
+    "items_qty": "Selected {qty} Speakers",
     "placeholders": {
       "search_speakers": "Search by Full Name, Email, Speaker Id, Member Id, Title Or Abstract",
       "test_recipient": "Optional Test Recipient"
@@ -1324,12 +1325,12 @@
     "owner": "Owner",
     "status": "Status",
     "currency": "Currency",
-    "amount": "Amount",    
+    "amount": "Amount",
     "date": "Date",
     "available_slots": "Available Slots",
     "cost": "Cost",
     "capacity": "Capacity",
-    "floor": "Floor",    
+    "floor": "Floor",
     "room_booking_created": "Room Booking created successfully",
     "room_booking_saved": "Room Booking saved successfully",
     "placeholders": {
@@ -1338,7 +1339,7 @@
       "select_room": "Select Room",
       "select_date": "Select Date"
     }
-  },  
+  },
   "question_form": {
     "question_type": "Question Type",
     "question_id": "Question Identifier",
@@ -1579,7 +1580,7 @@
     "print_date": "Print Date",
     "no_prints": "No badge prints found for current search criteria.",
     "apply_filters": "Apply Filters",
-    "admin_notes": "Notes",    
+    "admin_notes": "Notes",
     "placeholders": {
       "refund_notes": "Provide Optional Notes",
       "refund_reject_notes": "Provide Optional Notes",
@@ -1913,7 +1914,7 @@
     "order_extra_question_value_saved": "Extra Question Value saved successfully.",
     "order_extra_question_value_created": "Extra Question Value created successfully."
   },
-  "edit_order_extra_question_sub_rule": {    
+  "edit_order_extra_question_sub_rule": {
     "order_extra_question_sub_rule": "Sub Rule",
     "order_extra_question_sub_rule_saved": "Sub Rule saved successfully.",
     "order_extra_question_sub_rule_created": "Sub Rule created successfully.",
@@ -2085,7 +2086,7 @@
       "select_size": "Select a Size"
     }
   },
-  "summit_sponsorship_list": {    
+  "summit_sponsorship_list": {
     "summit_sponsorship_list": "Summit Sponsorship Type List",
     "add_sponsorship": "Add Summit Sponsorship Type",
     "no_sponsorships": "No summit sponsorship types found for current search criteria.",
@@ -2729,7 +2730,7 @@
       "has_not_media_upload_with_type==": "Select the Media Upload Types to exclude",
       "operator": "Has or Not Has Media Upload Types"
     }
-    
+
   },
   "edit_reg_feed_metadata": {
     "reg_feed_metadata": "Registration Feed Metadata",
@@ -2741,7 +2742,7 @@
   "email_filter": {
     "operator_contains": "Contains",
     "operator_not_contains": "Not Contains",
-    "operator_equal": "Equal",    
+    "operator_equal": "Equal",
     "placeholders": {
       "value": "Search by email address",
       "operator": "Select Operator"
