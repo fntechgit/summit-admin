@@ -97,8 +97,11 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                 attendee_email = entity.owner.email;
                 if (entity.owner.first_name && entity.owner.last_name) {
                     attendee_full_name = `${entity.owner.first_name} ${entity.owner.last_name}`;
-                } else if (entity.owner.member) {
+                } else if (entity.owner.member?.first_name && entity.owner.member?.last_name) {
                     attendee_full_name = `${entity.owner.member.first_name} ${entity.owner.member.last_name}`;
+                } else {
+                    // setting email as fallback data
+                    attendee_full_name = entity.owner.email
                 }
             }
 
