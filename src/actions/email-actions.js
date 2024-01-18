@@ -385,8 +385,10 @@ export const saveMarketingEmailSettings = (emailMarketingSettings) => async (dis
     return Promise.all(Object.keys(emailMarketingSettings).map(m => {
         
         let value = emailMarketingSettings[m].value ?? '';
+        let file = emailMarketingSettings[m].file ?? '';
+        let file_preview = emailMarketingSettings[m].file_preview ?? '';
 
-        if(!value) return Promise.resolve();
+        if(!value && !file && !file_preview) return Promise.resolve();
 
         if (typeof value == "boolean"){
             value = value ? '1' : '0';
@@ -397,7 +399,12 @@ export const saveMarketingEmailSettings = (emailMarketingSettings) => async (dis
             type: emailMarketingSettings[m].type,
             key: m.toUpperCase(),
             value: value,
-        }        
+        }  
+        
+        if (emailMarketingSettings[m].type === 'FILE') {
+            email_setting.file = file;
+            email_setting.file_preview = file_preview;
+        }
 
         return dispatch(saveMarketingSetting(email_setting));
     }));

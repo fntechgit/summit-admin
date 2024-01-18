@@ -71,7 +71,8 @@ class EmailFlowEventForm extends React.Component {
 
         let entity = { ...this.state.entity };
 
-        entity[id].value = file.preview;
+        entity[id].file = file;
+        entity[id].file_preview = file.preview
 
         this.setState({ entity: entity });
     }
@@ -80,7 +81,7 @@ class EmailFlowEventForm extends React.Component {
         const { id } = props;
         let entity = { ...this.state.entity };
 
-        entity[id].value = '';
+        entity[id].file_preview = '';
         this.setState({ entity: entity });
     }
 
@@ -109,7 +110,7 @@ class EmailFlowEventForm extends React.Component {
                         <label>{T.translate("email_flow_events_settings.email_template_generic_banner")}</label><br />
                         <UploadInput
                             id="EMAIL_TEMPLATE_GENERIC_BANNER"
-                            value={entity?.EMAIL_TEMPLATE_GENERIC_BANNER?.value}
+                            value={entity?.EMAIL_TEMPLATE_GENERIC_BANNER?.file_preview || entity?.EMAIL_TEMPLATE_GENERIC_BANNER?.file}
                             handleUpload={this.handleUploadFile}
                             handleRemove={this.handleRemoveFile}
                             className="dropzone col-md-6"
@@ -120,7 +121,7 @@ class EmailFlowEventForm extends React.Component {
                         <label>{T.translate("email_flow_events_settings.email_template_ticket_top_graphic")}</label><br />
                         <UploadInput
                             id="EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC"
-                            value={entity?.EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC?.value}
+                            value={entity?.EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC?.file_preview || entity?.EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC?.file}
                             handleUpload={this.handleUploadFile}
                             handleRemove={this.handleRemoveFile}
                             className="dropzone col-md-6"
@@ -131,7 +132,7 @@ class EmailFlowEventForm extends React.Component {
                         <label>{T.translate("email_flow_events_settings.email_template_ticket_bottom_graphic")}</label><br />
                         <UploadInput
                             id="EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC"
-                            value={entity?.EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC?.value}
+                            value={entity?.EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC?.file_preview || entity?.EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC?.file}
                             handleUpload={this.handleUploadFile}
                             handleRemove={this.handleRemoveFile}
                             className="dropzone col-md-6"

@@ -17,9 +17,9 @@ import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
 import { RECEIVE_EMAIL_SETTINGS } from '../../actions/email-actions';
 
 const DEFAULT_EMAIL_MARKETING_SETTINGS = {
-    EMAIL_TEMPLATE_GENERIC_BANNER: { id: 0, value: '', type: 'FILE' },
-    EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC: { id: 0, value: '', type: 'FILE' },
-    EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC: { id: 0, value: '', type: 'FILE' },
+    EMAIL_TEMPLATE_GENERIC_BANNER: { id: 0, value: '', type: 'FILE', file_preview: '', file: null },
+    EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC: { id: 0, value: '', type: 'FILE', file_preview: '', file: null },
+    EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC: { id: 0, value: '', type: 'FILE', file_preview: '', file: null },
     EMAIL_TEMPLATE_GENERIC_FROM: { id: 0, value: '', type: 'TEXT' },
     EMAIL_TEMPLATE_SPEAKERS_FROM: { id: 0, value: '', type: 'TEXT' },
     EMAIL_TEMPLATE_PRIMARY_COLOR: { id: 0, value: '', type: 'HEX_COLOR' },
