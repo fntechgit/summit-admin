@@ -924,6 +924,10 @@ const parseFilters = (filters, term = null) => {
         filter.push(`selection_status==${filters.selection_status_filter.join('||')}`);
     }
 
+    if (filters?.progress_flag?.length > 0) {
+        filter.push(`actions==type_id==${filters.progress_flag.join('||')}`);
+    }
+
     if (filters.hasOwnProperty('track_id_filter') && Array.isArray(filters.track_id_filter)
         && filters.track_id_filter.length > 0) {
         filter.push(`track_id==${filters.track_id_filter.join('||')}`);
