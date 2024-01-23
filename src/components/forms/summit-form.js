@@ -183,7 +183,7 @@ class SummitForm extends React.Component {
             regLiteMarketingSettings[id].value = value;
         }
         else {
-            if (value === "") {
+            if (currentError !== "") {
                 errors[id] = currentError;
             }
             entity[id] = value;
