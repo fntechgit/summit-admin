@@ -92,7 +92,9 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                                     T.translate("promo_code_specification.placeholders.speakers_discount_code")}
                                 isClearable={true}
                                 error={hasErrors('existingPromoCode', errors)}
-                                extraFilters={{'class_name': promoCodeStrategy === 1 ? SPEAKERS_PROMO_CODE_CLASS_NAME : SPEAKERS_DISCOUNT_CODE_CLASS_NAME}}
+                                extraFilters={[
+                                    `class_name==${promoCodeStrategy === 1 ? SPEAKERS_PROMO_CODE_CLASS_NAME : SPEAKERS_DISCOUNT_CODE_CLASS_NAME}`
+                                ]}
                             />
                         </div>
                     </div>
