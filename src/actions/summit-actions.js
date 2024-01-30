@@ -212,10 +212,6 @@ export const saveSummit = (entity) => async (dispatch, getState) => {
             entity
         )(params)(dispatch)
             .then((payload) => {
-                // dispatch(showMessage(
-                //     success_message,
-                //     () => { history.push(`/app/summits/${payload.response.id}`) }
-                // ));
                 dispatch(showSuccessMessage(T.translate("edit_summit.summit_created")));
                 return payload;
             });
