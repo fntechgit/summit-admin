@@ -190,9 +190,11 @@ export const resetSettingForm = () => (dispatch, getState) => {
  */
 export const saveMarketingSetting = (entity, file = null) => async (dispatch, getState) => {
     const {currentSummitState} = getState();
-    const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
-
+    
+    if (!currentSummit.id) return Promise.reject();
+    const accessToken = await getAccessTokenSafely();
+    
     dispatch(startLoading());
 
     const normalizedEntity = normalizeEntity(entity, currentSummit.id);
@@ -289,8 +291,6 @@ const normalizeEntity = (entity, summitId) => {
 export const customErrorHandler = (err, res) => (dispatch, state) => {
     const code = err.status;
     let msg = '';
-
-    console.log('asdkjahsdjkhaskdjaksjdhakjsdhajk')
 
     dispatch(stopLoading());
 
