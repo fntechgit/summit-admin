@@ -184,7 +184,7 @@ export const saveSummit = (entity) => async (dispatch, getState) => {
 
     if (entity.id) {
 
-        putRequest(
+        return putRequest(
             createAction(UPDATE_SUMMIT),
             createAction(SUMMIT_UPDATED),
             `${window.API_BASE_URL}/api/v1/summits/${entity.id}`,
@@ -194,6 +194,7 @@ export const saveSummit = (entity) => async (dispatch, getState) => {
         )(params)(dispatch)
             .then((payload) => {
                 dispatch(showSuccessMessage(T.translate("edit_summit.summit_saved")));
+                return payload;
             });
 
     } else {
