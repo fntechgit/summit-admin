@@ -925,7 +925,10 @@ const parseFilters = (filters, term = null) => {
     }
 
     if (filters?.progress_flag?.length > 0) {
-        filter.push(`actions==type_id==${filters.progress_flag.join('||')}`);
+        filter.push(
+          filters.progress_flag
+            .map(pf => `actions==type_id==${pf}&&is_completed==1`)
+            .join(','));
     }
 
     if (filters.hasOwnProperty('track_id_filter') && Array.isArray(filters.track_id_filter)
