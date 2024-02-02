@@ -48,7 +48,7 @@ const emailFlowEventSettingsReducer = (state = DEFAULT_STATE, action) => {
         }
             break;
         case RECEIVE_EMAIL_SETTINGS: {
-            let reducerSettings = { ...state.email_marketing_settings };
+            let reducerSettings = { ...DEFAULT_EMAIL_MARKETING_SETTINGS,};
             if (payload.response.data.length > 0) {
                 payload.response.data.forEach(apiValue => {
                     const key = apiValue.key;

@@ -86,7 +86,7 @@ class EmailFlowEventForm extends React.Component {
     }
 
     handleSubmit(ev) {
-        ev.preventDefault();        
+        ev.preventDefault();
         this.props.onSubmit(this.state.entity).then(() => {
 
             const success_message = {
@@ -148,6 +148,7 @@ class EmailFlowEventForm extends React.Component {
                             id="EMAIL_TEMPLATE_GENERIC_FROM"
                             value={entity?.EMAIL_TEMPLATE_GENERIC_FROM?.value}
                             onChange={this.handleChange}
+                            type="email"
                             className="form-control"
                         />
                     </div>
@@ -157,6 +158,7 @@ class EmailFlowEventForm extends React.Component {
                             id="EMAIL_TEMPLATE_SPEAKERS_FROM"
                             value={entity?.EMAIL_TEMPLATE_SPEAKERS_FROM?.value}
                             onChange={this.handleChange}
+                            type="email"
                             className="form-control"
                         />
                     </div>
