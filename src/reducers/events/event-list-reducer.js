@@ -104,6 +104,7 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
                     end_date: e.end_date ? moment(e.end_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') : 'TBD',
                     sponsor: (e.sponsors) ? e.sponsors.map(s => s.name).join(', ') : 'N/A',
                     media_uploads: e?.media_uploads?.map( m => ({...m, created:moment(m.created * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') })),
+                    progress_flags: e?.actions.map(a => `${a.type.label} (${a.is_completed ? 'ON' : 'OFF'})`).join(', '),
                 };
             });
 
