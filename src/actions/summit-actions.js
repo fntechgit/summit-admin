@@ -46,6 +46,21 @@ export const SUMMIT_LOGO_ATTACHED     = 'SUMMIT_LOGO_ATTACHED';
 export const SUMMIT_LOGO_DELETED      = 'SUMMIT_LOGO_DELETED';
 export const CLEAR_SUMMIT             = 'CLEAR_SUMMIT';
 export const REGISTRATION_KEY_GENERATED= 'REGISTRATION_KEY_GENERATED';
+export const SELECT_SUMMIT            = 'SELECT_SUMMIT';
+export const UNSELECT_SUMMIT          = 'UNSELECT_SUMMIT';
+export const CLEAR_ALL_SELECTED_SUMMITS = 'CLEAR_ALL_SELECTED_SUMMITS';
+
+export const selectSummit = (summitId) => (dispatch) => {
+    dispatch(createAction(SELECT_SUMMIT)(summitId));
+};
+
+export const unselectSummit = (summitId) => (dispatch) => {
+    dispatch(createAction(UNSELECT_SUMMIT)(summitId));
+};
+
+export const clearAllSelectedSummit = () => (dispatch) => {
+    dispatch(createAction(CLEAR_ALL_SELECTED_SUMMITS)());
+}
 
 export const getSummitById = (summitId) => async (dispatch, getState) => {
 

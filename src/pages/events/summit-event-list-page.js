@@ -19,6 +19,7 @@ import { Modal, Pagination } from 'react-bootstrap';
 import { 
     FreeTextSearch, 
     Table, 
+    SelectableTable,
     UploadInput, 
     Input, 
     TagInput, 
@@ -37,6 +38,8 @@ import '../../styles/summit-event-list-page.less';
 import OrAndFilter from '../../components/filters/or-and-filter';
 import MediaTypeFilter from '../../components/filters/media-type-filter';
 import { ALL_FILTER } from '../../utils/constants';
+import SummitEventBulkEditorItem from '../../components/summit-event-bulk-actions/summit-event-bulk-editor-item';
+import EventsEditableTable from '../../components/tables/editable-table/EventsEditableTable';
 
 const fieldNames = [
     { columnKey: 'speakers', value: 'speakers' },
@@ -226,6 +229,10 @@ class SummitEventListPage extends React.Component {
     }
 
     handlePageChange(page) {
+        this.setState(prev => {
+            if(prev.resetEventsTableState) {
+                return ({ resetEventsTableState: false })
+        }})
         const {order, orderDir, perPage, term} = this.props;
         const {eventFilters, selectedColumns} = this.state;
         this.props.getEvents(term, page, perPage, order, orderDir, eventFilters, selectedColumns);
@@ -444,13 +451,21 @@ class SummitEventListPage extends React.Component {
 
     render(){
         const {currentSummit, events, lastPage, currentPage, order, orderDir, totalEvents, term, extraColumns, filters} = this.props;
-        const {enabledFilters, eventFilters} = this.state;
+        const {enabledFilters, eventFilters, resetEventsTableState} = this.state;
 
         let columns = [
-            { columnKey: 'id', value: T.translate("general.id"), sortable: true },
-            { columnKey: 'event_type', value: T.translate("event_list.type"), sortable: true },
-            { columnKey: 'title', value: T.translate("event_list.title"), sortable: true },
-            { columnKey: 'selection_status', value: T.translate("event_list.selection_status"), sortable: true }
+            { columnKey: 'id', value: T.translate("general.id"), sortable: true, editable: false },
+            { columnKey: 'event_type', value: T.translate("event_list.type"), sortable: true, editable: true },
+            { columnKey: 'title', value: T.translate("event_list.title"), sortable: true, editable: true },
+            { columnKey: 'selection_status', value: T.translate("event_list.selection_status"), sortable: true, editable: false },
+            { columnKey: 'speakers', value: T.translate("event_list.speakers"), sortable: true, editable: true },  
+            { columnKey: 'track', value: T.translate("event_list.track"), sortable: true, editable: true },
+            { columnKey: 'selection_plan', value: T.translate("event_list.selection_plan"), sortable: true, editable: true },
+
+            { columnKey: 'published_date', value: T.translate("event_list.published"), sortable: true, editable: false },
+            { columnKey: 'streaming_url', value: T.translate("event_list.streaming_url"), sortable: true, editable: true },
+            { columnKey: 'meeting_url', value: T.translate("event_list.meeting_url"), sortable: true, editable: true },
+            { columnKey: 'etherpad_link', value: T.translate("event_list.etherpad_link"), sortable: true, editable: true },
         ];
 
         const table_options = {
@@ -458,7 +473,11 @@ class SummitEventListPage extends React.Component {
             sortDir: orderDir,
             className: "summit-event-list-table",
             actions: {
-                edit: {onClick: this.handleEdit},
+                edit: {
+                    onClick: this.handleEdit,
+                    onSelected: this.handleSelectedEvent,
+                    onSelectedAll: this.handleSelectedAll
+                },
                 delete: { onClick: this.handleDeleteEvent }
             }
         }
@@ -1001,7 +1020,8 @@ class SummitEventListPage extends React.Component {
                 {events.length > 0 &&
                 <div>
                     <div className='summit-event-list-table-wrapper'>
-                        <Table
+                        <EventsEditableTable
+                            currentSummit={currentSummit}
                             options={table_options}
                             data={events}
                             columns={columns}

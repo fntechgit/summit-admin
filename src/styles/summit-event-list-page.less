@@ -17,14 +17,42 @@
 .summit-event-list-table-wrapper {
     width: 100%;
     overflow-x: auto;
+    .events-list-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        overflow: hidden;
+        padding-bottom: 10px;
+        .disabled {
+            pointer-events: none;
+        }
+        .delete-button {
+            margin-left: auto;
+            margin-right: 0;
+        }
+    }
+    .form-group {
+        margin-bottom: 0px;
+    }
     .summit-event-list-table {
+        clear: both;
         td {
             max-width: 150px;
             text-overflow: ellipsis;
-            overflow: hidden;
+            vertical-align: middle;
+        }
+        .action-display-tc {
+            display: table-cell;
+            i {
+                padding: 0 5px;
+                display: inherit;
+                cursor: pointer;
+            }
         }
     }
 }
+
+
 
 @media (max-width: 991px) {
     .filters-row {
