@@ -196,7 +196,7 @@ class AttendeeForm extends React.Component {
                             getOptionLabel={
                                 (member) => {
                                     return member.hasOwnProperty("email") ?
-                                        `${member.first_name && member.last_name ? `${member.first_name} ${member.last_name}` : ''} (${member.email})`:
+                                        `${member.first_name && member.last_name ? `${member.first_name} ${member.last_name} (${member.email})` : `${member.email}`}`:
                                         `${member.first_name && member.last_name ? `${member.first_name} ${member.last_name}` : ''} (${member.id})`;
                                 }
                             }
