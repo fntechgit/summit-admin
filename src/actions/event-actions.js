@@ -71,6 +71,17 @@ export const ATTENDING_MEDIA = 'attending_media';
 export const LEVEL = 'level';
 export const SOCIAL_DESCRIPTION = 'social_description';
 
+
+export const SET_SELECTED_EVENTS = 'SET_SELECTED_EVENTS';
+export const UPDATE_EVENT_SPEAKERS = 'UPDATE_EVENT_SPEAKERS';
+export const UPDATE_EVENT_TITLE = 'UPDATE_EVENT_TITLE';
+export const UPDATE_EVENT_SELECTION_PLAN = 'UPDATE_EVENT_SELECTION_PLAN';
+export const UPDATE_EVENT_ACTIVITY_TYPE = 'UPDATE_EVENT_ACTIVITY_TYPE';
+export const UPDATE_EVENT_ACTIVITY_CATEGORY = 'UPDATE_EVENT_ACTIVITY_CATEGORY';
+export const UPDATE_EVENT_STREAMING_URL = 'UPDATE_EVENT_STREAMING_URL';
+export const UPDATE_EVENT_MEETING_URL = 'UPDATE_EVENT_MEETING_URL';
+export const UPDATE_EVENT_ETHERPAD_URL = 'UPDATE_EVENT_ETHERPAD_URL';
+
 const fieldsBoundToQuestions = [ATTENDEES_EXPECTED_LEARNT, ATTENDING_MEDIA, LEVEL, SOCIAL_DESCRIPTION];
 
 export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1, filters = {}, extraColumns = []) => async (dispatch, getState) => {
@@ -112,6 +123,42 @@ export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', ord
             return data.response;
         }
     );
+};
+
+export const setSelectedEvents = (events) => (dispatch) => {
+    dispatch(createAction(SET_SELECTED_EVENTS)({ events}));
+};
+export const updateEventTitleLocal = (event, title) => (dispatch) => {
+    let mutator = (title) => event => ({...event, title});
+    dispatch(createAction(UPDATE_EVENT_TITLE)({ eventId: event.id, mutator: mutator(title)}));
+};
+export const updateEventSelectionPlanLocal = (event, selection_plan) => (dispatch) => {
+    let mutator = (selection_plan) => event => ({...event, selection_plan});
+    dispatch(createAction(UPDATE_EVENT_SELECTION_PLAN)({ eventId: event.id, mutator: mutator(selection_plan)}));
+};
+export const updateEventActivityTypeLocal = (event, event_type) => (dispatch) => {
+    let mutator = (event_type) => event => ({...event, event_type});
+    dispatch(createAction(UPDATE_EVENT_ACTIVITY_TYPE)({ eventId: event.id, mutator: mutator(event_type)}));
+}
+export const updateEventActivityCategoryLocal = (event, track) => (dispatch) => {
+    let mutator = (track) => event => ({...event, track});
+    dispatch(createAction(UPDATE_EVENT_ACTIVITY_CATEGORY)({ eventId: event.id, mutator: mutator(track)}));
+};
+export const updateEventStreamingURLLocal = (event, streaming_url) => (dispatch) => {
+    let mutator = (streaming_url) => event => ({...event, streaming_url});
+    dispatch(createAction(UPDATE_EVENT_STREAMING_URL)({ eventId: event.id, mutator: mutator(streaming_url)}));
+};
+export const updateEventMeetingURLLocal = (event, meeting_url) => (dispatch) => {
+    let mutator = (meeting_url) => event => ({...event, meeting_url});
+    dispatch(createAction(UPDATE_EVENT_MEETING_URL)({ eventId: event.id, mutator: mutator(meeting_url)}));
+};
+export const updateEventEtherpadURLLocal = (event, etherpad_link) => (dispatch) => {
+    let mutator = (etherpad_link) => event => ({...event, etherpad_link});
+    dispatch(createAction(UPDATE_EVENT_ETHERPAD_URL)({ eventId: event.id, mutator: mutator(etherpad_link)}));
+};
+export const updateEventSpeakersLocal = (event, speakers) => (dispatch) => {
+    let mutator = (speakers) => event => ({...event, speakers});
+    dispatch(createAction(UPDATE_EVENT_SPEAKERS)({ eventId: event.id, mutator: mutator(speakers)}));
 };
 
 export const getEventsForOccupancy = (term = null, roomId = null, currentEvents = false, page = 1, perPage = 10, order = 'start_date', orderDir = 1) => async (dispatch, getState) => {

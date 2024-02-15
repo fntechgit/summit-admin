@@ -47,6 +47,7 @@ export const UPDATE_STREAMING_URL_BULK        = 'UPDATE_STREAMING_URL_BULK';
 export const UPDATE_STREAMING_TYPE_BULK       = 'UPDATE_STREAMING_TYPE_BULK';
 export const UPDATE_MEETING_URL_BULK          = 'UPDATE_MEETING_URL_BULK';
 export const UPDATE_ETHERPAD_URL_BULK         = 'UPDATE_ETHERPAD_URL_BULK';
+export const UPDATE_LOCAL_SPEAKERS            = 'UPDATE_LOCAL_SPEAKERS';
 
 export const getSummitEventsById = (summitId, eventIds ) => async (dispatch, getState) => {
 
@@ -155,6 +156,11 @@ export const updateEventEtherpadURLLocal = (event, etherpadURL, isValid) => (dis
     let mutator = (etherpadURL, isValid) => event => ({...event, etherpad_link: etherpadURL, is_valid: isValid});
 
     dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(etherpadURL, isValid)}));
+}
+export const updateEventSpeakersLocal = (event, speakers, isValid) => (dispatch) => {
+    let mutator = (speakers, isValid) => event => ({...event, speakers, is_valid: isValid});
+
+    dispatch(createAction(UPDATE_LOCAL_SPEAKERS)({ eventId: event.id, mutator: mutator(speakers, isValid)}));
 }
 
 export const updateEvents = (summitId, events) =>  async (dispatch, getState) => {
@@ -331,7 +337,7 @@ const normalizeBulkEvents = (entity) => {
             streaming_url: e.streaming_url,
             streaming_type: e.streaming_type,
             meeting_url: e.meeting_url,
-            etherpad_link: e.etherpad_link   
+            etherpad_link: e.etherpad_link,
         }
         for (let property in normalizedEvent) {
             if (normalizedEvent[property] === undefined || normalizedEvent[property] === null) {
