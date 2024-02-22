@@ -37,6 +37,8 @@ import '../../styles/summit-event-list-page.less';
 import OrAndFilter from '../../components/filters/or-and-filter';
 import MediaTypeFilter from '../../components/filters/media-type-filter';
 import { ALL_FILTER } from '../../utils/constants';
+import SaveFilterCriteria from '../../components/filters/save-filter-criteria';
+import { saveFilterCriteria } from '../../actions/filter-criteria-actions';
 
 const fieldNames = [
     { columnKey: 'speakers', value: 'speakers' },
@@ -140,6 +142,7 @@ class SummitEventListPage extends React.Component {
         this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
         this.handleTermChange = this.handleTermChange.bind(this);
         this.handleOrAndFilter = this.handleOrAndFilter.bind(this);
+        this.handleFilterSave = this.handleFilterSave.bind(this);
 
         this.state = {
             showImportModal: false,
@@ -393,6 +396,21 @@ class SummitEventListPage extends React.Component {
         return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
     }
 
+    handleFilterSave(filterData) {
+        const {enabledFilters, eventFilters} = this.state;
+        const {currentSummit} = this.props;
+        const filterToSave = {
+            show_id: currentSummit.id,
+            name: filterData.name,
+            enabled_filters: enabledFilters,
+            // only save criteria for enabled filters
+            criteria: Object.fromEntries(Object.entries(eventFilters).filter(([key]) => enabledFilters.includes(key))),
+            context: "Activities",
+            visibility: filterData.visibility
+        }
+        this.props.saveFilterCriteria(filterToSave);
+    }
+
 
     render(){
         const {currentSummit, events, lastPage, currentPage, order, orderDir, totalEvents, term, extraColumns, filters} = this.props;
@@ -577,7 +595,8 @@ class SummitEventListPage extends React.Component {
                             {T.translate("event_list.apply_filters")}
                         </button>
                     </div>
-                </div>                
+                </div>    
+                <SaveFilterCriteria onSave={this.handleFilterSave} />            
                 <div className={'filters-row'}>
                     {enabledFilters.includes('event_type_capacity_filter') &&
                         <div className={'col-md-6'}>
@@ -943,8 +962,8 @@ class SummitEventListPage extends React.Component {
                                 onChange={this.handleExtraFilterChange}
                             />
                         </div>
-                    }
-                </div>
+                    }                    
+                </div>            
 
                 <hr/>
 
@@ -1111,5 +1130,6 @@ export default connect (
         importEventsCSV,
         importMP4AssetsFromMUX,
         changeEventListSearchTerm,
+        saveFilterCriteria
     }
 )(SummitEventListPage);

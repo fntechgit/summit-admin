@@ -2859,5 +2859,13 @@
     "add_question": "Add Question",
     "no_extra_questions": "No extra questions found.",
     "remove_warning": "Are you sure you want to remove question "
+  },
+  "save_filter": {
+    "save_as": "Save As",
+    "visible_to": "Visible to",
+    "save": "Save",
+    "placeholders": {
+      "custom_name": "Custom Name"
+    }
   }
 }
