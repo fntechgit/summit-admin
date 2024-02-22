@@ -24,16 +24,19 @@ const EventsEditableTable = (props) => {
     columns, 
     currentSummit, 
     data,
-    updateEventTitleLocal,
-    updateEventSelectionPlanLocal,
-    updateEventActivityTypeLocal,
-    updateEventActivityCategoryLocal,
-    updateEventStreamingURLLocal,
-    updateEventMeetingURLLocal,
-    updateEventEtherpadURLLocal,
-    updateEventSpeakersLocal,
+    eventBulkList,
+    handleSort,
+    updateEvents,
+    handleDeleteEvent,
+    updateEventTitle,
+    updateEventSelectionPlan,
+    updateEventActivityType,
+    updateEventActivityCategory,
+    updateEventStreamingURL,
+    updateEventMeetingURL,
+    updateEventEtherpadURL,
+    updateEventSpeakers,
     setSelectedEvents,
-    eventBulkList
   } = props;
   let tableClass = options.hasOwnProperty("className") ? options.className : "";
   const [allEvents, setAllEvents] = useState(data);
@@ -68,16 +71,18 @@ const EventsEditableTable = (props) => {
   // reseting states on data changes/pagination
   useEffect(() => {
     resetState();
+    setAllEvents(data);
   }, [data]);
 
   useEffect(() => {
-    // console.log('selected', selected);
+    console.log('selected', selected);
     if (selected.length > 0) {
       setSelectedEvents(selected);
       setEditButton(true);
     } else {
       setEditButton(false);
       setEditEnabled(false);
+      setSelectedEvents([]);
     }
   }, [selected]);
 
@@ -91,7 +96,7 @@ const EventsEditableTable = (props) => {
     }
   }, [selectAll]);
 
-  const updateSelected = (event, checked) => { 
+  const updateSelected = (index, event, checked) => { 
     let selectedEvent = event;
     const eventIndex = selected.findIndex((s) => s.id === selectedEvent.id);
     let exists = eventIndex !== -1;
@@ -108,11 +113,27 @@ const EventsEditableTable = (props) => {
         setSelected((currSelected) => [...currSelected, selectedEvent]);
       }
     } else {
-      setSelected(selected.filter((s) => s.id !== event.id));
+      setSelected(selected.filter((_, i) => i !== index));
     }
   };
 
-  const onSavePublish = () => {};
+  const onUpdateEvents = (evt) => {
+    evt.stopPropagation();
+    evt.preventDefault();
+    let invalidEvents = eventBulkList.filter((event) => !event.is_valid);
+    if(invalidEvents.length > 0){
+        Swal.fire({
+            title: T.translate("bulk_actions_page.messages.validation_title"),
+            text:  T.translate("bulk_actions_page.messages.validation_message", {
+                event: invalidEvents.length === 1 ? 'event' : 'events', 
+                event_id: invalidEvents.map(e => e.id).join(', ')
+            }),
+            type: 'warning',
+        });
+        return;
+    }
+    // updateEvents(currentSummit.id, eventBulkList);
+  };
 
   const onDelete = () => {};
 
@@ -125,9 +146,9 @@ const EventsEditableTable = (props) => {
             <>
               <button
                 className={`btn btn-primary right-space save-publish-button`}
-                onClick={onSavePublish}
+                onClick={onUpdateEvents}
               >
-                {T.translate("bulk_actions_page.btn_apply_publish_changes")}
+                {T.translate("bulk_actions_page.btn_apply_changes")}
               </button>
               <button
                 className={`btn btn-secondary right-space cancel-button`}
@@ -193,7 +214,7 @@ const EventsEditableTable = (props) => {
               return (
                 <EditableTableHeading
                   editEnabled={editEnabled}
-                  onSort={props.onSort}
+                  onSort={handleSort}
                   sortDir={getSortDir(col.columnKey, i, sortCol, sortDir)}
                   sortable={sortable}
                   sortFunc={sortFunc}
@@ -228,26 +249,26 @@ const EventsEditableTable = (props) => {
                   <EventsEditableTableRow
                     index={i}
                     event={event}
-                    eventBulkList={eventBulkList}
                     currentSummit={currentSummit}
                     editEnabled={editEnabled}
                     selected={selected}
                     updateSelected={updateSelected}
                     selectAll={selectAll}
+                    deleteEvent={handleDeleteEvent}
                     venuesOptions={venuesOptions}
                     activityTypeOptions={activityTypeOptions}
                     activtyCategoryOptions={activtyCategoryOptions}
                     selectionPlanOptions={selectionPlanOptions}
                     columns={columns}
                     actions={options.actions}
-                    updateEventTitleLocal={updateEventTitleLocal}
-                    updateEventSelectionPlanLocal={updateEventSelectionPlanLocal}
-                    updateEventActivityTypeLocal={updateEventActivityTypeLocal}
-                    updateEventActivityCategoryLocal={updateEventActivityCategoryLocal}
-                    updateEventStreamingURLLocal={updateEventStreamingURLLocal}
-                    updateEventMeetingURLLocal={updateEventMeetingURLLocal}
-                    updateEventEtherpadURLLocal={updateEventEtherpadURLLocal}
-                    updateEventSpeakersLocal={updateEventSpeakersLocal}
+                    updateEventTitle={updateEventTitle}
+                    updateEventSelectionPlan={updateEventSelectionPlan}
+                    updateEventActivityType={updateEventActivityType}
+                    updateEventActivityCategory={updateEventActivityCategory}
+                    updateEventStreamingURL={updateEventStreamingURL}
+                    updateEventMeetingURL={updateEventMeetingURL}
+                    updateEventEtherpadURL={updateEventEtherpadURL}
+                    updateEventSpeakers={updateEventSpeakers}
                     setSelectedEvents={setSelectedEvents}
                   />
                 </tr>

@@ -23,7 +23,7 @@ import
     EVENT_DELETED,
     CHANGE_SEARCH_TERM,
     UPDATE_EVENT_SPEAKERS,
-    UPDATE_EVENT_TITLE,
+    UPDATE_EVENT_DATA,
     UPDATE_EVENT_SELECTION_PLAN,
     UPDATE_EVENT_ACTIVITY_TYPE,
     UPDATE_EVENT_ACTIVITY_CATEGORY,
@@ -60,7 +60,7 @@ const formatDuration = (duration) => {
 
 
 const eventListReducer = (state = DEFAULT_STATE, action) => {
-    console.log('eventListReducer =========', state, action)
+    // console.log('eventListReducer =========', state, action)
     const { type, payload } = action
     switch (type) {
         case SET_CURRENT_SUMMIT:
@@ -133,73 +133,11 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
             return { ... state, eventBulkList: events}
         }
             break;
-        case UPDATE_EVENT_TITLE: {
-            let { title } = payload;
+        case UPDATE_EVENT_DATA: {
+            let { eventId, mutator } = payload;
             let { eventBulkList } = state;
             eventBulkList = eventBulkList.map(event => {
-                return {...event, title}
-            });
-            return { ... state, eventBulkList}
-        }
-            break;
-        case UPDATE_EVENT_SPEAKERS: {
-            let { speakers } = payload;
-            let { eventBulkList } = state;
-            eventBulkList = eventBulkList.map(event => {
-                return {...event, speakers}
-            });
-            return { ... state, eventBulkList}
-        }
-            break;
-        case UPDATE_EVENT_SELECTION_PLAN: {
-            let { selection_plan } = payload;
-            let { eventBulkList } = state;
-            eventBulkList = eventBulkList.map(event => {
-                return {...event, selection_plan}
-            });
-            return { ... state, eventBulkList}
-        }
-            break;
-        case UPDATE_EVENT_ACTIVITY_TYPE: {
-            let { event_type } = payload;
-            let { eventBulkList } = state;
-            eventBulkList = eventBulkList.map(event => {
-                return {...event, event_type}
-            });
-            return { ... state, eventBulkList}
-        }
-        case UPDATE_EVENT_ACTIVITY_CATEGORY: {
-            let { track } = payload;
-            let { eventBulkList } = state;
-            eventBulkList = eventBulkList.map(event => {
-                return {...event, track}
-            });
-            return { ... state, eventBulkList}
-        }
-            break;
-        case UPDATE_EVENT_STREAMING_URL: {
-            let { streaming_url } = payload;
-            let { eventBulkList } = state;
-            eventBulkList = eventBulkList.map(event => {
-                return {...event, streaming_url}
-            });
-            return { ... state, eventBulkList}
-        }
-            break;
-        case UPDATE_EVENT_MEETING_URL: {
-            let { meeting_url } = payload;
-            let { eventBulkList } = state;
-            eventBulkList = eventBulkList.map(event => {
-                return {...event, meeting_url}
-            });
-            return { ... state, eventBulkList}
-        }
-            break;
-        case UPDATE_EVENT_ETHERPAD_URL: {
-            let { etherpad_link } = payload;
-            let { eventBulkList } = state;
-            eventBulkList = eventBulkList.map(event => {
-                return {...event, etherpad_link}
+                return event.id === eventId ? mutator(event) : event
             });
             return { ... state, eventBulkList}
         }

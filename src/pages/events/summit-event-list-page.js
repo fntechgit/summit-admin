@@ -18,8 +18,6 @@ import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";
 import {
   FreeTextSearch,
-  Table,
-  SelectableTable,
   UploadInput,
   Input,
   TagInput,
@@ -40,16 +38,17 @@ import {
   importEventsCSV,
   importMP4AssetsFromMUX,
   changeEventListSearchTerm,
-  updateEventTitleLocal,
-  updateEventSelectionPlanLocal,
-  updateEventActivityTypeLocal,
-  updateEventActivityCategoryLocal,
-  updateEventStreamingURLLocal,
-  updateEventMeetingURLLocal,
-  updateEventEtherpadURLLocal,
-  updateEventSpeakersLocal,
+  updateEventTitle,
+  updateEventSelectionPlan,
+  updateEventActivityType,
+  updateEventActivityCategory,
+  updateEventStreamingURL,
+  updateEventMeetingURL,
+  updateEventEtherpadURL,
+  updateEventSpeakers,
   setSelectedEvents
 } from "../../actions/event-actions";
+import { updateEvents } from "../../actions/summit-event-bulk-actions";
 import { hasErrors, uuidv4 } from "../../utils/methods";
 import "../../styles/summit-event-list-page.less";
 import OrAndFilter from "../../components/filters/or-and-filter";
@@ -312,6 +311,7 @@ class SummitEventListPage extends React.Component {
   }
 
   handlePageChange(page) {
+    console.log('page', page);
     this.setState((prev) => {
       if (prev.resetSelectedEventsTableState) {
         return { resetSelectedEventsTableState: false };
@@ -652,19 +652,19 @@ class SummitEventListPage extends React.Component {
       extraColumns,
       filters,
       eventBulkList,
-      updateEventTitleLocal,
-      updateEventSelectionPlanLocal,
-      updateEventActivityTypeLocal,
-      updateEventActivityCategoryLocal,
-      updateEventStreamingURLLocal,
-      updateEventMeetingURLLocal,
-      updateEventEtherpadURLLocal,
-      updateEventSpeakersLocal,
+      updateEventTitle,
+      updateEventSelectionPlan,
+      updateEventActivityType,
+      updateEventActivityCategory,
+      updateEventStreamingURL,
+      updateEventMeetingURL,
+      updateEventEtherpadURL,
+      updateEventSpeakers,
       setSelectedEvents
     } = this.props;
     const { enabledFilters, eventFilters, resetSelectedEventsTableState } = this.state;
 
-    console.log('eventBulkList =====================', eventBulkList);
+    // console.log('eventBulkList =====================', eventBulkList);
 
     let columns = [
       {
@@ -1461,23 +1461,25 @@ class SummitEventListPage extends React.Component {
           <div>
             <div className="summit-event-list-table-wrapper">
               <EventsEditableTable
-                eventBulkList={eventBulkList}
                 currentSummit={currentSummit}
                 options={table_options}
                 data={events}
                 columns={columns}
+                eventBulkList={eventBulkList}
                 onSort={this.handleSort}
+                updateEvents={updateEvents}
+                handleDeleteEvent={this.handleDeleteEvent}
                 setSelectedEvents={setSelectedEvents}
-                updateEventTitleLocal={updateEventTitleLocal}
-                updateEventSelectionPlanLocal={updateEventSelectionPlanLocal}
-                updateEventActivityTypeLocal={updateEventActivityTypeLocal}
-                updateEventActivityCategoryLocal={
-                  updateEventActivityCategoryLocal
+                updateEventTitle={updateEventTitle}
+                updateEventSelectionPlan={updateEventSelectionPlan}
+                updateEventActivityType={updateEventActivityType}
+                updateEventActivityCategory={
+                  updateEventActivityCategory
                 }
-                updateEventStreamingURLLocal={updateEventStreamingURLLocal}
-                updateEventMeetingURLLocal={updateEventMeetingURLLocal}
-                updateEventEtherpadURLLocal={updateEventEtherpadURLLocal}
-                updateEventSpeakersLocal={updateEventSpeakersLocal}
+                updateEventStreamingURL={updateEventStreamingURL}
+                updateEventMeetingURL={updateEventMeetingURL}
+                updateEventEtherpadURL={updateEventEtherpadURL}
+                updateEventSpeakers={updateEventSpeakers}
               />
             </div>
             <Pagination
@@ -1656,13 +1658,13 @@ export default connect(mapStateToProps, {
   importEventsCSV,
   importMP4AssetsFromMUX,
   changeEventListSearchTerm,
-  updateEventTitleLocal,
-  updateEventSelectionPlanLocal,
-  updateEventActivityTypeLocal,
-  updateEventActivityCategoryLocal,
-  updateEventStreamingURLLocal,
-  updateEventMeetingURLLocal,
-  updateEventEtherpadURLLocal,
-  updateEventSpeakersLocal,
+  updateEventTitle,
+  updateEventSelectionPlan,
+  updateEventActivityType,
+  updateEventActivityCategory,
+  updateEventStreamingURL,
+  updateEventMeetingURL,
+  updateEventEtherpadURL,
+  updateEventSpeakers,
   setSelectedEvents
 })(SummitEventListPage);

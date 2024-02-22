@@ -13,110 +13,71 @@ const EventsEditableTableRow = (props) => {
     editEnabled,
     selected,
     updateSelected,
+    deleteEvent,
     selectAll,
     currentSummit,
     selectionPlanOptions,
     activityTypeOptions,
     activtyCategoryOptions,
     actions,
-    updateEventTitleLocal,
-    updateEventSelectionPlanLocal,
-    updateEventActivityTypeLocal,
-    updateEventActivityCategoryLocal,
-    updateEventStreamingURLLocal,
-    updateEventMeetingURLLocal,
-    updateEventEtherpadURLLocal,
-    updateEventSpeakersLocal,
+    updateEventTitle,
+    updateEventSelectionPlan,
+    updateEventActivityType,
+    updateEventActivityCategory,
+    updateEventStreamingURL,
+    updateEventMeetingURL,
+    updateEventEtherpadURL,
+    updateEventSpeakers
   } = props;
   const [checked, setChecked] = useState(false);
   const [eventData, setEventData] = useState(event);
 
   useEffect(() => {
-    updateSelected(eventData, checked);
+    updateSelected(index, eventData, checked);
   }, [checked, eventData]);
   useEffect(() => {
     setChecked(selectAll);
   }, [selectAll]);
   useEffect(() => {
+    console.log('EventsEditableTableRow useEffect selected', selected);
     if (selected.length === 0) {
       setChecked(false);
     }
   }, [selected]);
 
-  const getValidationEventTitle = () => {
-    let eventModel = new SummitEvent(event, currentSummit);
-    let isValid = eventModel.isValidTitle(event.title);
-    return isValid ? "success" : "warning";
-  };
-  const getValidationEventSelectionPlan = () => {
-    return null;
-  };
-  const onActivityTypeLocalChanged = (ev) => {
-    const event_type = activityTypeOptions.filter((a) => a.id === ev.target.value)
+  const onActivityTypeChanged = (ev) => {
+    const event_type = activityTypeOptions.filter((a) => a.value === ev.target.value)[0]
     ?.label;
-    setEventData({
-      ...eventData,
-      event_type
-    });
-    updateEventActivityTypeLocal(event, event_type);
+    updateEventActivityType(eventData, event_type);
   };
   const onTitleChanged = (ev) => {
     const title = ev.target.value
-    setEventData({
-      ...eventData,
-      title
-    });
-    updateEventTitleLocal(event, title);
+    updateEventTitle(eventData, title);
   };
   const onSpeakersChange = (ev) => {
     const speakers = ev.target.value;
-    setEventData({
-      ...eventData,
-      speakers
-    });
-    updateEventSpeakersLocal(event, speakers);
+    updateEventSpeakers(eventData, speakers);
   };
   const onActivityCategoryChange = (ev) => {
-    const track = ctivtyCategoryOptions.filter((a) => a.id === ev.target.value)
+    const track = activtyCategoryOptions.filter((a) => a.value === ev.target.value)[0]
     ?.label;
-    setEventData({
-      ...eventData,
-      track
-    });
-    updateEventActivityCategoryLocal(event, track);
+    updateEventActivityCategory(eventData, track);
   };
   const onSelectionPlanChanged = (option) => {
-    let selectionPlan = option.value;
-    let isValid = selectionPlan == null ? false : true;
-    setEventData({
-      ...eventData,
-      selection_plan: selectionPlan.name,
-    });
-    updateEventSelectionPlanLocal(event, selectionPlan.name);
+    const selectionPlan = option.label;
+    updateEventSelectionPlan(eventData, selectionPlan);
   };
-  const onStreamingURLLocalChanged = (ev) => {
-    const streaming_url = ev.target.value
-    setEventData({
-      ...eventData,
-      streaming_url
-    });
-    updateEventStreamingURLLocal(event, streaming_url);
+  const onStreamingURLChanged = (ev) => {
+    const streaming_url = ev.target.value;
+    updateEventStreamingURL(eventData, streaming_url);
   };
-  const onMeetingURLLocalChanged = (ev) => {
-    const meeting_url = ev.target.value
-    setEventData({
-      ...eventData,
-      meeting_url,
-    });
-    updateEventMeetingURLLocal(event, meeting_url);
+  const onMeetingURLChanged = (ev) => {
+    const meeting_url = ev.target.value;
+    updateEventMeetingURL(eventData, meeting_url);
   };
-  const onEtherpadURLLocalChanged = (ev) => {
+  const onEtherpadURLChanged = (ev) => {
     const etherpad_link = ev.target.value;
-    setEventData({
-      ...eventData,
-      etherpad_link,
-    });
-    updateEventEtherpadURLLocal(event, etherpad_link);
+    updateEventEtherpadURL(eventData, etherpad_link);
   };
 
   const handleEdit = (event_id) =>
@@ -145,7 +106,7 @@ const EventsEditableTableRow = (props) => {
                   T.translate("bulk_actions_page.placeholders.event_type")
                 }
                 value={""}
-                onChange={onActivityTypeLocalChanged}
+                onChange={onActivityTypeChanged}
                 options={activityTypeOptions}
               />
               <FormControl.Feedback />
@@ -153,7 +114,7 @@ const EventsEditableTableRow = (props) => {
           </td>
           {/** Title / Presentation Name*/}
           <td className="bulk-edit-col">
-            <FormGroup validationState={getValidationEventTitle()}>
+            <FormGroup>
               <FormControl
                 type="text"
                 placeholder={T.translate(
@@ -169,7 +130,7 @@ const EventsEditableTableRow = (props) => {
           <td className="bulk-edit-col">{event.selection_status}</td>
           {/** Speakers */}
           <td className="bulk-edit-col">
-            <FormGroup validationState={() => {}}>
+            <FormGroup>
               <FormControl
                 type="text"
                 placeholder={T.translate(
@@ -199,7 +160,7 @@ const EventsEditableTableRow = (props) => {
           </td>
           {/** Selection Plans */}
           <td className="bulk-edit-col">
-            <FormGroup validationState={getValidationEventSelectionPlan()}>
+            <FormGroup>
               <Select
                 placeholder={
                   eventData.selection_plan ||
@@ -209,7 +170,7 @@ const EventsEditableTableRow = (props) => {
                 }
                 className="selection_plan_selector"
                 name="form-field-name"
-                value={eventData.selection_plan}
+                value={""}
                 onChange={onSelectionPlanChanged}
                 options={selectionPlanOptions}
               />
@@ -226,7 +187,7 @@ const EventsEditableTableRow = (props) => {
                 placeholder={T.translate(
                   "bulk_actions_page.placeholders.streaming_url"
                 )}
-                onChange={onStreamingURLLocalChanged}
+                onChange={onStreamingURLChanged}
                 defaultValue={eventData.streaming_url}
               />
               <FormControl.Feedback />
@@ -240,7 +201,7 @@ const EventsEditableTableRow = (props) => {
                 placeholder={T.translate(
                   "bulk_actions_page.placeholders.meeting_url"
                 )}
-                onChange={onMeetingURLLocalChanged}
+                onChange={onMeetingURLChanged}
                 defaultValue={eventData.meeting_url}
               />
               <FormControl.Feedback />
@@ -254,7 +215,7 @@ const EventsEditableTableRow = (props) => {
                 placeholder={T.translate(
                   "bulk_actions_page.placeholders.etherpad_link"
                 )}
-                onChange={onEtherpadURLLocalChanged}
+                onChange={onEtherpadURLChanged}
                 defaultValue={event.etherpad_link}
               />
               <FormControl.Feedback />
@@ -278,12 +239,12 @@ const EventsEditableTableRow = (props) => {
       {(actions.edit || actions.delete) && (
         <td className="action-display-tc">
           {actions.edit && (
-            <span onClick={() => handleEdit(event.id)}>
+            <span onClick={() => history.push(`/app/summits/${currentSummit.id}/events/${event.id}`)}>
               <i className="fa fa-pencil-square-o edit-icon"></i>
             </span>
           )}
           {actions.delete && (
-            <span onClick={() => {}}>
+            <span onClick={() => deleteEvent(event.id)}>
               <i className="fa fa-trash-o delete-icon"></i>
             </span>
           )}
