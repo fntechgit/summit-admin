@@ -41,6 +41,8 @@ export const REQUEST_REG_LITE_SETTINGS = 'REQUEST_REG_LITE_SETTINGS';
 export const RECEIVE_REG_LITE_SETTINGS = 'RECEIVE_REG_LITE_SETTINGS';
 export const REQUEST_PRINT_APP_SETTINGS = 'REQUEST_PRINT_APP_SETTINGS';
 export const RECEIVE_PRINT_APP_SETTINGS = 'RECEIVE_PRINT_APP_SETTINGS';
+export const RECEIVE_REGISTRATIONS_INVITATION_SETTINGS = 'RECEIVE_REGISTRATIONS_INVITATION_SETTINGS';
+
 
 export const getMarketingSettings = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1) => (dispatch, getState) => {
 
@@ -115,6 +117,30 @@ export const getMarketingSettingsForPrintApp = (page = 1, perPage = 10) => (disp
     return getRequest(
         createAction(REQUEST_PRINT_APP_SETTINGS),
         createAction(RECEIVE_PRINT_APP_SETTINGS),
+        `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
+        authErrorHandler,
+        {}
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+export const getMarketingSettingsForRegistrationInvitations = (page = 1, perPage = 100) => (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const {currentSummit} = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+        page: page,
+        per_page: perPage,
+        key__contains : 'REGISTRATION_INVITATIONS',
+    }
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_REGISTRATIONS_INVITATION_SETTINGS),
         `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
         authErrorHandler,
         {}

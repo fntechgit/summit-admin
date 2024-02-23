@@ -70,7 +70,7 @@ import RegistrationStatsPage from '../pages/registration/registration-stats-page
 import AuditLogPage from '../pages/audit-log/audit-log-page'
 import SubmissionInvitationLayout from "./submission-invitation-layout";
 import RegFeedMetadataLayout from './reg-feed-metadata-layout';
-import { getMarketingSettingsForRegLite, getMarketingSettingsForPrintApp } from '../actions/marketing-actions';
+import { getMarketingSettingsForRegLite, getMarketingSettingsForPrintApp, getMarketingSettingsForRegistrationInvitations } from '../actions/marketing-actions';
 import { getRegFeedMetadataBySummit } from '../actions/reg-feed-metadata-actions';
 
 class SummitIdLayout extends React.Component {
@@ -84,6 +84,7 @@ class SummitIdLayout extends React.Component {
             this.props.getSummitById(summitId).then(() => {
                 this.props.getMarketingSettingsForRegLite();
                 this.props.getMarketingSettingsForPrintApp();
+                this.props.getMarketingSettingsForRegistrationInvitations();
                 this.props.getUserRolesBySummit();
                 this.props.getRegFeedMetadataBySummit();
             });
@@ -189,6 +190,7 @@ export default connect (
         getUserRolesBySummit,
         getMarketingSettingsForRegLite,
         getMarketingSettingsForPrintApp,
+        getMarketingSettingsForRegistrationInvitations,
         getRegFeedMetadataBySummit
     }
 )(SummitIdLayout);

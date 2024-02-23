@@ -44,6 +44,7 @@ class SummitForm extends React.Component {
             regLiteMarketingSettings: {...props.regLiteMarketingSettings},
             printAppMarketingSettings: {...props.printAppMarketingSettings},
             regFeedMetadataListSettings: {...props.regFeedMetadataListSettings},
+            registrationInvitationsSettings: {...props.registrationInvitationsSettings},
             showSection: 'main',
             errors: props.errors
         };
@@ -79,6 +80,10 @@ class SummitForm extends React.Component {
             state.regFeedMetadataListSettings = {...this.props.regFeedMetadataListSettings};
         }
 
+        if(!shallowEqual(prevProps.registrationInvitationsSettings, this.props.registrationInvitationsSettings)) {
+            state.registrationInvitationsSettings = {...this.props.registrationInvitationsSettings}
+        }
+
         if (!shallowEqual(prevProps.errors, this.props.errors)) {
             state.errors = {...this.props.errors};
         }
@@ -100,6 +105,7 @@ class SummitForm extends React.Component {
         let entity = {...this.state.entity};
         let regLiteMarketingSettings = {...this.state.regLiteMarketingSettings};
         let printAppMarketingSettings = {...this.state.printAppMarketingSettings};
+        let registrationInvitationsSettings = {...this.state.registrationInvitationsSettings};
 
         let {onAddHelpMember, onDeleteHelpMember} = this.props;
         let {errors} = this.state;
@@ -182,6 +188,11 @@ class SummitForm extends React.Component {
                 regLiteMarketingSettings[id] = {value: '', id: 0};
             }
             regLiteMarketingSettings[id].value = value;
+        } else if (id.startsWith('REGISTRATION_INVITATIONS')) {
+            if (!registrationInvitationsSettings.hasOwnProperty(id)) {
+                registrationInvitationsSettings[id] = {value: '', id: 0};
+            }
+            registrationInvitationsSettings[id].value = value;
         }
         else {
             if (currentError !== "") {
@@ -219,7 +230,7 @@ class SummitForm extends React.Component {
     }
 
     handleSubmit(ev) {
-        const {entity, regLiteMarketingSettings, printAppMarketingSettings} = this.state;
+        const {entity, regLiteMarketingSettings, printAppMarketingSettings, registrationInvitationsSettings} = this.state;
 
         ev.preventDefault();
 
@@ -227,9 +238,11 @@ class SummitForm extends React.Component {
             this.props.onSubmit(entity).then((payload) => {
                 this.props.saveRegistrationLiteMarketingSettings(regLiteMarketingSettings).then(() => {
                     this.props.savePrintAppMarketingSettings(printAppMarketingSettings).then(() => {
-                        if(payload.response.id) {
-                            history.push(`/app/summits/${payload.response.id}`);
-                        }
+                        this.props.saveRegistrationInvitationsMarketingSettings(registrationInvitationsSettings).then(() => {
+                            if(payload.response.id) {
+                                history.push(`/app/summits/${payload.response.id}`);
+                            }
+                        })
                     })
                 });
             });
@@ -305,7 +318,7 @@ class SummitForm extends React.Component {
     }
 
     render() {
-        const {entity, showSection, regLiteMarketingSettings, printAppMarketingSettings, regFeedMetadataListSettings} = this.state;
+        const {entity, showSection, regLiteMarketingSettings, printAppMarketingSettings, regFeedMetadataListSettings, registrationInvitationsSettings} = this.state;
         const {timezones, onSPlanDelete, onAttributeTypeDelete, onRegFeedMetadataDelete} = this.props;
         const time_zones_ddl = timezones.map(tz => ({label: tz, value: tz}));
         const dates_enabled = (entity.hasOwnProperty('time_zone_id') && entity.time_zone_id !== '');
@@ -992,6 +1005,96 @@ class SummitForm extends React.Component {
                                 uncheckedIcon={false}
                                 checkedIcon={false}
                                 className="react-switch"
+                            />
+                        </div>
+                    </div>
+                    <div className="row form-group">
+                        <div className="col-md-12">
+                            <label>{T.translate("edit_summit.invitation_reject_page")}</label><hr/>
+                        </div>                    
+                    </div>
+                    <div className="row form-group">
+                        <div className="col-md-6">
+                            <label>
+                                {T.translate("edit_summit.registration_invitations_reject_page_title")} &nbsp;
+                            </label>
+                            <Input
+                                className="form-control"
+                                id="REGISTRATION_INVITATIONS_REJECT_PAGE_TITLE"
+                                value={registrationInvitationsSettings?.REGISTRATION_INVITATIONS_REJECT_PAGE_TITLE.value}
+                                onChange={this.handleChange}
+                            />
+                        </div>
+                        <div className="col-md-6">
+                            <label>
+                                {T.translate("edit_summit.registration_invitations_reject_page_not_found_error")} &nbsp;
+                            </label>
+                            <Input
+                                className="form-control"
+                                id="REGISTRATION_INVITATIONS_REJECT_PAGE_NOT_FOUND_ERROR"
+                                value={registrationInvitationsSettings?.REGISTRATION_INVITATIONS_REJECT_PAGE_NOT_FOUND_ERROR.value}
+                                onChange={this.handleChange}
+                            />
+                        </div>
+                    </div>
+                    <div className="row form-group">
+                        <div className="col-md-12">
+                            <label>
+                                {T.translate("edit_summit.registration_invitations_reject_page_rejected_action_text")} &nbsp;
+                            </label>
+                            <TextEditor                                
+                                id="REGISTRATION_INVITATIONS_REJECT_PAGE_REJECTED_ACTION_TEXT"
+                                value={registrationInvitationsSettings?.REGISTRATION_INVITATIONS_REJECT_PAGE_REJECTED_ACTION_TEXT.value}
+                                onChange={this.handleChange}
+                            />
+                        </div>
+                    </div>
+                    <div className='row form-group'>
+                        <div className="col-md-12">
+                            <label>
+                                {T.translate("edit_summit.registration_invitations_reject_page_text")} &nbsp;
+                            </label>
+                            <TextEditor                                
+                                id="REGISTRATION_INVITATIONS_REJECT_PAGE_TEXT"
+                                value={registrationInvitationsSettings?.REGISTRATION_INVITATIONS_REJECT_PAGE_TEXT.value}
+                                onChange={this.handleChange}
+                            />
+                        </div>
+                    </div>
+                    <div className="row form-group">
+                        <div className="col-md-6">
+                            <label>
+                                {T.translate("edit_summit.registration_invitations_reject_page_cta_label")} &nbsp;
+                            </label>
+                            <Input
+                                className="form-control"
+                                id="REGISTRATION_INVITATIONS_REJECT_PAGE_CTA_LABEL"
+                                value={registrationInvitationsSettings?.REGISTRATION_INVITATIONS_REJECT_PAGE_CTA_LABEL.value}
+                                onChange={this.handleChange}
+                            />
+                        </div>               
+                    </div>
+                    <div className="row form-group">
+                        <div className="col-md-12">
+                            <label>
+                                {T.translate("edit_summit.registration_invitations_reject_page_already_accepted_error")} &nbsp;
+                            </label>
+                            <TextEditor
+                                id="REGISTRATION_INVITATIONS_REJECT_PAGE_ALREADY_ACCEPTED_ERROR"
+                                value={registrationInvitationsSettings?.REGISTRATION_INVITATIONS_REJECT_PAGE_ALREADY_ACCEPTED_ERROR.value}
+                                onChange={this.handleChange}
+                            />
+                        </div>                        
+                    </div>
+                    <div className="row form-group">
+                        <div className="col-md-12">
+                            <label>
+                                {T.translate("edit_summit.registration_invitations_reject_page_already_rejected_error")} &nbsp;
+                            </label>
+                            <TextEditor
+                                id="REGISTRATION_INVITATIONS_REJECT_PAGE_ALREADY_REJECTED_ERROR"
+                                value={registrationInvitationsSettings?.REGISTRATION_INVITATIONS_REJECT_PAGE_ALREADY_REJECTED_ERROR.value}
+                                onChange={this.handleChange}
                             />
                         </div>
                     </div>

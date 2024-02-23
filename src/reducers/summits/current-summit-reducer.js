@@ -41,7 +41,7 @@ import {
 
 import { RECEIVE_REFUND_POLICIES } from "../../actions/ticket-actions";
 import {RECEIVE_ORDER_EXTRA_QUESTIONS, RECEIVE_MAIN_ORDER_EXTRA_QUESTIONS, ORDER_EXTRA_QUESTION_ADDED} from "../../actions/order-actions";
-import {RECEIVE_PRINT_APP_SETTINGS, RECEIVE_REG_LITE_SETTINGS} from "../../actions/marketing-actions";
+import {RECEIVE_PRINT_APP_SETTINGS, RECEIVE_REGISTRATIONS_INVITATION_SETTINGS, RECEIVE_REG_LITE_SETTINGS} from "../../actions/marketing-actions";
 import { REG_LITE_BOOLEAN_SETTINGS } from '../../utils/constants.js';
 
 export const DEFAULT_ENTITY = {
@@ -154,12 +154,23 @@ const DEFAULT_PRINT_APP_MARKETING_SETTINGS = {
     PRINT_APP_HIDE_FIND_TICKET_BY_FULLNAME: {id: 0 , value: false},    
 };
 
+const DEFAULT_REGISTRATION_INVITATIONS_MARKETING_SETTINGS = {
+    REGISTRATION_INVITATIONS_REJECT_PAGE_TITLE: {id: 0, value: 'Reject Invitation', type: 'TEXT'},
+    REGISTRATION_INVITATIONS_REJECT_PAGE_NOT_FOUND_ERROR: {id: 0, value: 'Invitation not found.', type: 'TEXT'},
+    REGISTRATION_INVITATIONS_REJECT_PAGE_REJECTED_ACTION_TEXT: {id: 0, value: 'Invitation has already been rejected.', type: 'TEXTAREA'},
+    REGISTRATION_INVITATIONS_REJECT_PAGE_TEXT: {id: 0, value: 'To reject please click on the button below.', type: 'TEXTAREA'},
+    REGISTRATION_INVITATIONS_REJECT_PAGE_CTA_LABEL: {id: 0, value: 'Reject Invitation', type: 'TEXT'},
+    REGISTRATION_INVITATIONS_REJECT_PAGE_ALREADY_ACCEPTED_ERROR: {id: 0, value: '', type: 'TEXTAREA'},
+    REGISTRATION_INVITATIONS_REJECT_PAGE_ALREADY_REJECTED_ERROR: {id: 0, value: '', type: 'TEXTAREA'},
+}
+
 const DEFAULT_STATE = {
     currentSummit: DEFAULT_ENTITY,
     errors: {},
     loading:  false,
     reg_lite_marketing_settings: DEFAULT_REG_LITE_MARKETING_SETTINGS,
-    print_app_marketing_settings: DEFAULT_PRINT_APP_MARKETING_SETTINGS
+    print_app_marketing_settings: DEFAULT_PRINT_APP_MARKETING_SETTINGS,
+    registration_invitations_marketing_settings: DEFAULT_REGISTRATION_INVITATIONS_MARKETING_SETTINGS
 };
 
 const currentSummitReducer = (state = DEFAULT_STATE, action) => {
@@ -444,6 +455,20 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
             const newMarketingSettings = { ...DEFAULT_STATE.print_app_marketing_settings, ...print_app_marketing_settings};
 
             return {...state, print_app_marketing_settings: newMarketingSettings}
+        }
+        case RECEIVE_REGISTRATIONS_INVITATION_SETTINGS:{
+
+            let { data } = payload.response;
+            let registration_invitations_marketing_settings = {};
+
+            data.forEach(setting => {
+                let value = setting.value;                
+                registration_invitations_marketing_settings[setting.key] = { id : setting.id, value : value};
+            })
+
+            const newMarketingSettings = { ...DEFAULT_STATE.registration_invitations_marketing_settings, ...registration_invitations_marketing_settings};
+
+            return {...state, registration_invitations_marketing_settings: newMarketingSettings}
         }
         default:
             return state;
