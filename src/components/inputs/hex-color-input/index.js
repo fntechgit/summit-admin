@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styles from './index.module.less';
-import { ChromePicker } from 'react-color';
+import Sketch from '@uiw/react-color-sketch';
 
 const HexColorInput = ({ onChange, id, className, value }) => {
 
@@ -28,9 +28,11 @@ const HexColorInput = ({ onChange, id, className, value }) => {
             {displayColorPicker ?
                 <div className={styles.popover}>
                     <div className={styles.cover} onClick={() => handlePopupClose()} />
-                    <ChromePicker
+                    <Sketch
                         key={`color-picker-${value}`}
+                        style={{padding: 5}}
                         disableAlpha={true}
+                        presetColors={false}
                         onChange={(color) => {
                             setHexColor(color.hex);
                         }}

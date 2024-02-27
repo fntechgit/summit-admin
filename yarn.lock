@@ -1973,6 +1973,11 @@
     "@codemirror/state" "^6.0.0"
     "@codemirror/view" "^6.0.0"
 
+"@uiw/color-convert@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@uiw/color-convert/-/color-convert-2.1.0.tgz#a19496bfbde7267d96596f22622a0739053e791b"
+  integrity sha512-BQuZSOfJINS0mWEEcKdeGW7puL5x8XHMlTiWPn+sReuLBjLnjKdjCoAMAXTwPZB9x2nHcDVGFmiWTgi3G0B77g==
+
 "@uiw/react-codemirror@^4.21.7":
   version "4.21.7"
   resolved "https://registry.yarnpkg.com/@uiw/react-codemirror/-/react-codemirror-4.21.7.tgz#4f04d3d60f530633ab6aff79991d366313f165bf"
@@ -1984,6 +1989,68 @@
     "@codemirror/theme-one-dark" "^6.0.0"
     "@uiw/codemirror-extensions-basic-setup" "4.21.7"
     codemirror "^6.0.0"
+
+"@uiw/react-color-alpha@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@uiw/react-color-alpha/-/react-color-alpha-2.1.0.tgz#94485688783a90b977d5377015a4d2ce6d3f369a"
+  integrity sha512-I9mIOXj5RmMs1+IwGymcWo5tKuYwmAcFaoyGxf+yg5aK8XJk759+z5RMW/eHQ0fvmjRPcXnHZzBVPQufe1y4IA==
+  dependencies:
+    "@uiw/color-convert" "2.1.0"
+    "@uiw/react-drag-event-interactive" "2.1.0"
+
+"@uiw/react-color-editable-input-rgba@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@uiw/react-color-editable-input-rgba/-/react-color-editable-input-rgba-2.1.0.tgz#30d5392e50b398b4951d18b116b4e45118f7b293"
+  integrity sha512-H1k1+O3LB/rNcbU4StBkzFd1y+5bs0+SGwkdziwclWZwkQYPrdsL6HuNDyvOKe3Cc+cfrkWVb2iNiaa/WGcqrg==
+  dependencies:
+    "@uiw/color-convert" "2.1.0"
+    "@uiw/react-color-editable-input" "2.1.0"
+
+"@uiw/react-color-editable-input@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@uiw/react-color-editable-input/-/react-color-editable-input-2.1.0.tgz#c13c192bab96bc0a5cc05a4f327b4322c28bd660"
+  integrity sha512-5y+9jahU31RcNQxoWKzJjarB9IJEkwiGCdmRq9wNf3spkuQFzPoz/Uh0IwaCU/xb7uepEdp+STiU1p8PnzU3KA==
+
+"@uiw/react-color-hue@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@uiw/react-color-hue/-/react-color-hue-2.1.0.tgz#37b7818d4727ac67f8c4d38841d634c3833976ca"
+  integrity sha512-6zkczX9mgMvnl/EMIGG9Hbj2SoF+eCSvX9N0fjwCZ4Nb7uhOuvb6z23Mmv0Fuo5pd42rNs3oKfd/qbZGdX+hSQ==
+  dependencies:
+    "@uiw/color-convert" "2.1.0"
+    "@uiw/react-color-alpha" "2.1.0"
+
+"@uiw/react-color-saturation@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@uiw/react-color-saturation/-/react-color-saturation-2.1.0.tgz#6e0bc751e6ec887344b31d6e927918ee987ee285"
+  integrity sha512-7RsPPWcIjwSYL2+Lte9PVJU4TYX+flYbsJrCjn3TOjQJquQ2QLgtjVk6Mip/w/AcHJH76mZtwM3//ObZCljBCQ==
+  dependencies:
+    "@uiw/color-convert" "2.1.0"
+    "@uiw/react-drag-event-interactive" "2.1.0"
+
+"@uiw/react-color-sketch@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@uiw/react-color-sketch/-/react-color-sketch-2.1.0.tgz#bfa27c53c3dd35a84006dace3c45a4a6f7a887d2"
+  integrity sha512-Czn0MRSmaiGWvK0KhLTdW49kw/PzDFDRGxV/i4vFVwVCkSHCkTEtOGDoQArjY/jS++6+YjKwx8CbXl+8hSUKWQ==
+  dependencies:
+    "@uiw/color-convert" "2.1.0"
+    "@uiw/react-color-alpha" "2.1.0"
+    "@uiw/react-color-editable-input" "2.1.0"
+    "@uiw/react-color-editable-input-rgba" "2.1.0"
+    "@uiw/react-color-hue" "2.1.0"
+    "@uiw/react-color-saturation" "2.1.0"
+    "@uiw/react-color-swatch" "2.1.0"
+
+"@uiw/react-color-swatch@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@uiw/react-color-swatch/-/react-color-swatch-2.1.0.tgz#de6c65dbba56a276cd4fc6b0c63235a6e0a996eb"
+  integrity sha512-MD04YRx5Q+skIf3kiCsAQSpV9P6FB6uTZwiSqqF2oBfKCBTrazSNRFeoVzaP4BBYdLsnXnIcGibEvLsn7v4LpA==
+  dependencies:
+    "@uiw/color-convert" "2.1.0"
+
+"@uiw/react-drag-event-interactive@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@uiw/react-drag-event-interactive/-/react-drag-event-interactive-2.1.0.tgz#9ca1f915b28db4b35a63d5adac889952b8de4532"
+  integrity sha512-BkC5sc4wQmEfQWWu6JImWz/aMViE1IGAEVGg3G5v7y//G2Hm0veZdHT/shRl4KbLQNQ/OJzXgJYFs/Y9GPB0VQ==
 
 "@videojs/http-streaming@2.10.2":
   version "2.10.2"
