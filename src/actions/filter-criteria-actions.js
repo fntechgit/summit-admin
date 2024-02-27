@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2024 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,14 +36,14 @@ export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState)
 
     dispatch(startLoading());
 
-    postRequest(
+    return postRequest(
         null,
         createAction(SAVE_FILTER_CRITERIA),
         `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
         filterCriteria,
         authErrorHandler
     )(params)(dispatch)
-        .then(() => {            
+        .then(() => {
             dispatch(stopLoading());
         });
 

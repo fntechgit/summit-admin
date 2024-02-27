@@ -17,6 +17,7 @@ import { Input, RadioList } from 'openstack-uicore-foundation/lib/components'
 import { hasErrors } from "../../../utils/methods";
 
 import styles from './index.module.less'
+import { VISIBILITY_OPTION_EVERYONE, VISIBILITY_OPTION_ME } from '../../../utils/filter-criteria-constants';
 
 const SaveFilterCriteria = ({ onSave }) => {
 
@@ -25,8 +26,8 @@ const SaveFilterCriteria = ({ onSave }) => {
     const [errors, setErrors] = useState({});
 
     const visibility_options = [
-        { value: 'Me', label: 'Me' },
-        { value: 'Everyone', label: 'Everyone' }
+        { value: VISIBILITY_OPTION_ME, label: T.translate("save_filter.me")},
+        { value: VISIBILITY_OPTION_EVERYONE, label: T.translate("save_filter.everyone") }
     ]
 
     const handleSaveFilter = () => {

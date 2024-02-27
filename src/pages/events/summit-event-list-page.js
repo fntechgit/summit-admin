@@ -39,6 +39,7 @@ import MediaTypeFilter from '../../components/filters/media-type-filter';
 import { ALL_FILTER } from '../../utils/constants';
 import SaveFilterCriteria from '../../components/filters/save-filter-criteria';
 import { saveFilterCriteria } from '../../actions/filter-criteria-actions';
+import { CONTEXT_ACTIVITIES } from '../../utils/filter-criteria-constants';
 
 const fieldNames = [
     { columnKey: 'speakers', value: 'speakers' },
@@ -405,7 +406,7 @@ class SummitEventListPage extends React.Component {
             enabled_filters: enabledFilters,
             // only save criteria for enabled filters
             criteria: Object.fromEntries(Object.entries(eventFilters).filter(([key]) => enabledFilters.includes(key))),
-            context: "Activities",
+            context: CONTEXT_ACTIVITIES,
             visibility: filterData.visibility
         }
         this.props.saveFilterCriteria(filterToSave);

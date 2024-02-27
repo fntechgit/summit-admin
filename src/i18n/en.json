@@ -2864,6 +2864,8 @@
     "save_as": "Save As",
     "visible_to": "Visible to",
     "save": "Save",
+    "me": "Me",
+    "everyone": "Everyone",
     "placeholders": {
       "custom_name": "Custom Name"
     }
