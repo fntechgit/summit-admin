@@ -17,7 +17,8 @@ import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import { Input } from 'openstack-uicore-foundation/lib/components';
 import QuestionsSet from 'openstack-uicore-foundation/lib/utils/questions-set'
 import ExtraQuestionsForm from 'openstack-uicore-foundation/lib/components/extra-questions';
-import { isEmpty, scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
+
+import '../../styles/edit-badge-page.less';
 
 class BadgeScanForm extends React.Component {
     constructor(props) {
@@ -134,7 +135,7 @@ class BadgeScanForm extends React.Component {
                                 userAnswers={entity.extra_question_answers}
                                 onAnswerChanges={this.handleChangeExtraQuestion}
                                 ref={this.formRef}
-                                className="extra-questions"
+                                className="extra-questions-wrapper"
                             />
                         </div>
                     </div>
