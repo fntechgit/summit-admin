@@ -724,7 +724,7 @@ export const getBadgeScan = (scanId) => async (dispatch, getState) => {
 
     const params = {
         access_token: accessToken,
-        expand: 'badge,badge.ticket,badge.ticket.owner,badge.ticket.owner.member,sponsor,sponsor.extra_questions,extra_question_answers'
+        expand: 'badge,badge.ticket,badge.ticket.owner,badge.ticket.owner.member,sponsor,sponsor.extra_questions,extra_questions'
     };
 
     return getRequest(
@@ -770,6 +770,10 @@ export const resetBadgeScanForm = () => (dispatch, getState) => {
 
 const normalizeBadgeScan = (entity) => {
     const normalizedEntity = {...entity};
+
+    delete normalizedEntity['sponsor_extra_questions']
+    delete normalizedEntity['attendee_company']
+    delete normalizedEntity['attendee_full_name']
 
     return normalizedEntity;
 }

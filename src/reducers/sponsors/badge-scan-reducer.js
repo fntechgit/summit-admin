@@ -24,7 +24,7 @@ export const DEFAULT_ENTITY = {
     id: 0,
     notes: '',
     sponsor_extra_questions: [],
-    extra_question_answers: [],
+    extra_questions: [],
     attendee_full_name: '',
     attendee_company: '',
 }
@@ -58,7 +58,7 @@ const badgeScanReducer = (state = DEFAULT_STATE, action) => {
 
             newBadgeScan.id = badgeScan.id;
             newBadgeScan.notes = badgeScan.notes;
-            newBadgeScan.extra_question_answers = badgeScan.extra_question_answers;
+            newBadgeScan.extra_questions = badgeScan.extra_questions;
 
             if (badgeScan.badge.ticket.owner.first_name && badgeScan.badge.ticket.owner.last_name) {
                 newBadgeScan.attendee_full_name = `${badgeScan.badge.ticket.owner.first_name} ${badgeScan.badge.ticket.owner.last_name}`;

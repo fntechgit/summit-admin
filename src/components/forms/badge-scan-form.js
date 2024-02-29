@@ -85,13 +85,13 @@ class BadgeScanForm extends React.Component {
 
         Object.keys(formValues).map(name => {
             let question = qs.getQuestionByName(name);
-            const newQuestion = { question_id: question.id, value: `${formValues[name]}` }
+            const newQuestion = { question_id: question.id, answer: `${formValues[name]}` }
             formattedAnswers.push(newQuestion);
         });
         
         this.setState({
             ...this.state,
-            entity: { ...this.state.entity, extra_question_answers: formattedAnswers },
+            entity: { ...this.state.entity, extra_questions: formattedAnswers },
             }, () => this.props.onSubmit(this.state.entity)
         );
     }
@@ -132,7 +132,7 @@ class BadgeScanForm extends React.Component {
                             <ExtraQuestionsForm
                                 readOnly={false}
                                 extraQuestions={entity.sponsor_extra_questions.sort((a, b) => a.order - b.order)}
-                                userAnswers={entity.extra_question_answers}
+                                userAnswers={entity.extra_questions}
                                 onAnswerChanges={this.handleChangeExtraQuestion}
                                 ref={this.formRef}
                                 className="extra-questions-wrapper"
