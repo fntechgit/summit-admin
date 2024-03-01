@@ -79,7 +79,7 @@ class BadgeScansListPage extends React.Component {
         const {currentSummit, allSponsors, sponsorId, badgeScans, lastPage, currentPage, order, orderDir, totalBadgeScans, member} = this.props;
 
         const memberObj = new Member(member);
-        const canEditBadgeScans =  memberObj.canEditBadgeScans();        
+        const canEditBadgeScans =  memberObj.canEditBadgeScans();
 
         const columns = [
             { columnKey: 'id', value: T.translate("badge_scan_list.id"), sortable: true },
@@ -156,7 +156,7 @@ class BadgeScansListPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, badgeScansListState }) => ({
+const mapStateToProps = ({ currentSummitState, badgeScansListState, loggedUserState }) => ({
     currentSummit   : currentSummitState.currentSummit,
     member          : loggedUserState.member,
     ...badgeScansListState
