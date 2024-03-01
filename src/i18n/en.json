@@ -1590,6 +1590,7 @@
     "unassign_warning": "Are you sure you want to Unassign this Ticket?",
     "refund": "Refund",
     "refund_modal_title": "Refund Ticket",
+    "refund_amount_info": "All taxes will be added automatically to the amount refunded if they apply",
     "refund_request_status": "Status",
     "refund_request_id": "#",
     "refund_requests": "Refund Requests",

@@ -197,8 +197,10 @@ class EditTicketPage extends React.Component {
 
         const { refundAmount, refundNotes} = this.state;
         const { refundTicket, entity} = this.props;
-
-        if(parseFloat(refundAmount) > 0 &&  parseFloat(refundAmount) <= parseFloat(entity.final_amount)) {
+        
+        if( parseFloat(refundAmount) > 0 && 
+            parseFloat(refundAmount) <= parseFloat(entity.final_amount) && 
+            parseFloat(refundAmount) <= parseFloat(entity.net_selling_cost)) {
 
             this.setState({...this.state,
                 refundAmount: '',
@@ -380,15 +382,17 @@ class EditTicketPage extends React.Component {
                 <Modal show={this.state.showRefundModal} onHide={() => this.setState({showRefundModal:false})} >
                     <Modal.Header closeButton>
                         <Modal.Title>{T.translate("edit_ticket.refund_modal_title")}</Modal.Title>
+                        {`$${entity.net_selling_cost}`}
                     </Modal.Header>
                     <Modal.Body>
                         <div className="row form-group">
-                            <div className="col-md-12">
+                            <div className="col-md-12 refund-input-wrapper">                                
                                 <input className="form-control" type="number" min="0"
                                        step=".01"
                                        placeholder="0.00"
                                        value={this.state.refundAmount}
                                        onChange={this.handleRefundChange} />
+                                <i className="fa fa-info-circle" aria-hidden="true" title={T.translate("edit_ticket.refund_amount_info")} />
                             </div>
                         </div>
                         <div className="row form-group">
