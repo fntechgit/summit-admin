@@ -32,7 +32,6 @@ class BadgeScansLayout extends React.Component {
 
                 <Switch>
                     <Route strict exact path={match.url} component={BadgeScansListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditBadgeScanPage}/>
                     <Route strict exact path={`${match.url}/:badge_scan_id(\\d+)`} component={EditBadgeScanPage}/>
                     <Route component={NoMatchPage}/>
                 </Switch>

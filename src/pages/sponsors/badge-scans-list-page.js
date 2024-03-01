@@ -18,7 +18,7 @@ import { Table, Dropdown } from 'openstack-uicore-foundation/lib/components';
 import { Pagination } from 'react-bootstrap';
 import { getSummitById }  from '../../actions/summit-actions';
 import { getSponsorsWithBadgeScans, getBadgeScans, exportBadgeScans } from "../../actions/sponsor-actions";
-import {Breadcrumb} from "react-breadcrumbs";
+import Member from "../../models/member";
 
 class BadgeScansListPage extends React.Component {
 
@@ -76,7 +76,10 @@ class BadgeScansListPage extends React.Component {
     }
 
     render(){
-        const {match, currentSummit, allSponsors, sponsorId, badgeScans, lastPage, currentPage, order, orderDir, totalBadgeScans} = this.props;
+        const {currentSummit, allSponsors, sponsorId, badgeScans, lastPage, currentPage, order, orderDir, totalBadgeScans, member} = this.props;
+
+        const memberObj = new Member(member);
+        const canEditBadgeScans =  memberObj.canEditBadgeScans();        
 
         const columns = [
             { columnKey: 'id', value: T.translate("badge_scan_list.id"), sortable: true },
@@ -90,10 +93,12 @@ class BadgeScansListPage extends React.Component {
         const table_options = {
             sortCol: order,
             sortDir: orderDir,
-            actions: {
-                edit: {onClick: this.handleEditBadgeScan}
-            }
+            actions: {}
         };
+
+        if(canEditBadgeScans){
+            table_options.actions = {...table_options.actions,  edit: {onClick: this.handleEditBadgeScan}};
+        }
 
         if(!currentSummit.id) return (<div/>);
 
@@ -153,6 +158,7 @@ class BadgeScansListPage extends React.Component {
 
 const mapStateToProps = ({ currentSummitState, badgeScansListState }) => ({
     currentSummit   : currentSummitState.currentSummit,
+    member          : loggedUserState.member,
     ...badgeScansListState
 })
 
