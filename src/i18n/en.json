@@ -1588,6 +1588,7 @@
     "deactivate_warning": "Are you sure you want to Deactivate this Ticket?",
     "activate_warning": "Are you sure you want to Reactivate this Ticket?",
     "unassign_warning": "Are you sure you want to Unassign this Ticket?",
+    "net_selling_price": "Net Price",
     "refund": "Refund",
     "refund_modal_title": "Refund Ticket",
     "refund_amount_info": "All taxes will be added automatically to the amount refunded if they apply",

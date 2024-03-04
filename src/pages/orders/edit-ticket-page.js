@@ -381,8 +381,8 @@ class EditTicketPage extends React.Component {
                </Panel>
                 <Modal show={this.state.showRefundModal} onHide={() => this.setState({showRefundModal:false})} >
                     <Modal.Header closeButton>
-                        <Modal.Title>{T.translate("edit_ticket.refund_modal_title")}</Modal.Title>
-                        {`$${entity.net_selling_cost}`}
+                        <Modal.Title>{T.translate("edit_ticket.refund_modal_title")}</Modal.Title>                        
+                        {`${T.translate("edit_ticket.net_selling_price")} ${entity.currency_symbol} ${entity.net_selling_cost}`}
                     </Modal.Header>
                     <Modal.Body>
                         <div className="row form-group">
