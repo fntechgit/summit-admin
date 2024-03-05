@@ -66,6 +66,7 @@ class EditTicketPage extends React.Component {
         this.state = {
             refundAmount: '',
             refundNotes: '',
+            refundAmountError: false,
             showRefundModal: false,
             showRefundRejectModal:false,
             refundRejectNotes: '',
@@ -197,14 +198,23 @@ class EditTicketPage extends React.Component {
 
         const { refundAmount, refundNotes} = this.state;
         const { refundTicket, entity} = this.props;
+
+        const maxAllowedAmount2Refund = entity.net_selling_cost - entity.refunded_amount;
+
+        if (refundAmount > maxAllowedAmount2Refund) {
+            this.setState({...this.state,
+                refundAmountError: true
+            });
+            return
+        }
         
         if( parseFloat(refundAmount) > 0 && 
-            parseFloat(refundAmount) <= parseFloat(entity.final_amount) && 
-            parseFloat(refundAmount) <= parseFloat(entity.net_selling_cost)) {
+            parseFloat(refundAmount) <= parseFloat(entity.final_amount)) {
 
             this.setState({...this.state,
                 refundAmount: '',
                 refundNotes: '',
+                refundAmountError: false,
                 showRefundModal: false
             });
 
@@ -233,7 +243,7 @@ class EditTicketPage extends React.Component {
 
     render(){
         const {currentSummit, currentOrder, loading, currentBadgePrints, entity, errors, match} = this.props;
-        const {showSection} = this.state;
+        const {showSection, refundAmountError} = this.state;
 
         const breadcrumb = `...${entity.number.slice(-20)}`;
 
@@ -393,6 +403,7 @@ class EditTicketPage extends React.Component {
                                        value={this.state.refundAmount}
                                        onChange={this.handleRefundChange} />
                                 <i className="fa fa-info-circle" aria-hidden="true" title={T.translate("edit_ticket.refund_amount_info")} />
+                                {refundAmountError && <span className='error-label'>{T.translate("edit_ticket.refund_amount_error")}</span>}
                             </div>
                         </div>
                         <div className="row form-group">
