@@ -61,7 +61,7 @@ const EditSponsorExtraQuestionPage = ({ currentSummit, entity, errors, match, al
   return (
     <div className="container">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-      <h3>{title} {T.translate("edit_sponsor.social_network")}</h3>
+      <h3>{title} {T.translate("edit_sponsor.extra_question")}</h3>
       <hr />
       {currentSummit &&
         <ExtraQuestionForm

@@ -29,20 +29,13 @@ import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
 
 export const DEFAULT_ENTITY = {
-    id                  : 0,
-    name                : '',
-    label               : '',
-    order               : 0,
-    type                : '',
-    mandatory           : false,
-    printable           : false,
-    placeholder         : '',
-    usage               : 'Ticket',
-    max_selected_values : 0,
-    values              : [],
-    sub_question_rules  : [],
-    allowed_ticket_types        : [],
-    allowed_badge_features_types: []
+    id                          : 0,
+    name                        : '',
+    label                       : '',
+    type                        : null,
+    mandatory                   : false,
+    placeholder                 : '',
+    values                      : [],
 }
 
 const DEFAULT_STATE = {
