@@ -51,6 +51,7 @@ export const DEFAULT_ENTITY = {
     attendee_company: '',
     is_active: true,
     refund_requests:[],
+    refund_requests_taxes: [],
     ticket_type_id:0,
 }
 
@@ -108,14 +109,17 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     attendee_full_name = `${entity.owner.member.first_name} ${entity.owner.member.last_name}`;
                 }
             }
+            
+            const approved_refunds_taxes = [];            
 
             if(entity.hasOwnProperty("refund_requests")){
                 entity.refund_requests = entity.refund_requests.map( r => {
-                    
-                    r.refunded_taxes.forEach(t => {                        
+                    r.refunded_taxes.forEach(t => {
                         // field for the tax column of that refund
-                        r[`tax_${rt.tax.id}_refunded_amount`] = t.refunded_amount
-                    });                                            
+                        r[`tax_${t.tax.id}_refunded_amount`] = `$${t.refunded_amount.toFixed(2)}`;
+                        // add tax type to array
+                        approved_refunds_taxes.push(t);
+                    });
 
                     return ({...r,
                         requested_by_fullname: r.requested_by ? `${r.requested_by.first_name} ${r.requested_by.last_name}`:'TBD',
@@ -125,6 +129,10 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     })
                 })
             }
+            
+            const unique_approved_refunds_taxes = approved_refunds_taxes.filter((tax, idx, arr) => {
+                return idx === arr.findIndex(obj => obj.id === tax.id);
+            });
 
             return {...state, entity: {...DEFAULT_ENTITY,
                     ...entity,
@@ -137,6 +145,7 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     ticket_type_id: entity?.ticket_type?.id,
                     attendee_email: attendee_email,
                     attendee_company,
+                    refund_requests_taxes: unique_approved_refunds_taxes
                 } };
         }
         case TICKET_REFUNDED:
