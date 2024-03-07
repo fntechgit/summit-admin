@@ -19,6 +19,7 @@ import Restrict from '../routes/restrict';
 import SponsorListPage from '../pages/sponsors/sponsor-list-page'
 import NoMatchPage from "../pages/no-match-page";
 import SponsorIdLayout from './sponsor-id-layout';
+import SponsorPromocodesListPage from "../pages/sponsors/sponsor-promocodes-list-page";
 
 
 class SponsorLayout extends React.Component {
@@ -30,6 +31,7 @@ class SponsorLayout extends React.Component {
                 <Breadcrumb data={{ title: T.translate("sponsor_list.sponsors"), pathname: match.url }} />
                 <Switch>
                     <Route strict exact path={match.url} component={SponsorListPage} />
+                    <Route path={`${match.url}/promocodes`} component={SponsorPromocodesListPage}/>
                     <Route strict exact path={`${match.url}/new`} component={SponsorIdLayout} />
                     <Route path={`${match.url}/:sponsor_id(\\d+)`} component={SponsorIdLayout} />
                     <Route component={NoMatchPage} />

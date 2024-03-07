@@ -30,12 +30,7 @@ import {
     fetchErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
-import {
-    RECEIVE_SELECTION_PLAN_EXTRA_QUESTION_META, SELECTION_PLAN_EXTRA_QUESTION_VALUE_ADDED,
-    SELECTION_PLAN_EXTRA_QUESTION_VALUE_DELETED,
-    SELECTION_PLAN_EXTRA_QUESTION_VALUE_UPDATED,
-    UPDATE_SELECTION_PLAN_EXTRA_QUESTION_VALUE
-} from "./selection-plan-actions";
+
 
 export const REQUEST_SPONSORS = 'REQUEST_SPONSORS';
 export const RECEIVE_SPONSORS = 'RECEIVE_SPONSORS';
@@ -115,6 +110,18 @@ export const SPONSOR_SOCIAL_NETWORK_UPDATED      = 'SPONSOR_SOCIAL_NETWORK_UPDAT
 export const SPONSOR_SOCIAL_NETWORK_ADDED        = 'SPONSOR_SOCIAL_NETWORK_ADDED';
 export const RESET_SPONSOR_SOCIAL_NETWORK_FORM   = 'RESET_SPONSOR_SOCIAL_NETWORK_FORM';
 export const SPONSOR_SOCIAL_NETWORK_DELETED      = 'SPONSOR_SOCIAL_NETWORK_DELETED';
+
+export const REQUEST_SPONSOR_PROMOCODES= 'REQUEST_SPONSOR_PROMOCODES';
+export const RECEIVE_SPONSOR_PROMOCODES= 'RECEIVE_SPONSOR_PROMOCODES';
+export const CLEAR_ALL_SELECTED_SPONSOR_PROMOCODES= 'CLEAR_ALL_SELECTED_SPONSOR_PROMOCODES';
+export const SELECT_SPONSOR_PROMOCODE= 'SELECT_SPONSOR_PROMOCODE';
+export const SEND_SPONSOR_PROMOCODES_EMAILS= 'SEND_SPONSOR_PROMOCODES_EMAILS';
+export const SET_SPONSOR_PROMOCODES_CURRENT_FLOW_EVENT= 'SET_SPONSOR_PROMOCODES_CURRENT_FLOW_EVENT';
+export const SET_SELECTED_ALL_SPONSOR_PROMOCODES= 'SET_SELECTED_ALL_SPONSOR_PROMOCODES';
+export const UNSELECT_SPONSOR_PROMOCODE= 'UNSELECT_SPONSOR_PROMOCODE';
+export const CHANGE_SPONSOR_PROMOCODES_SEARCH_TERM= 'CHANGE_SPONSOR_PROMOCODES_SEARCH_TERM';
+
+
 
 /******************  SPONSORS ****************************************/
 
@@ -1813,3 +1820,131 @@ export const querySummitSponsorships = _.debounce(async (summitId, input, callba
         .catch(fetchErrorHandler);
 }, 500);
 
+
+
+/******************  SPONSOR PROMOCODES  ****************************************/
+
+
+export const selectPromocode = (promocodeId) => (dispatch) => {
+    dispatch(createAction(SELECT_SPONSOR_PROMOCODE)(promocodeId));
+};
+
+export const unSelectPromocode = (promocodeId) => (dispatch) => {
+    dispatch(createAction(UNSELECT_SPONSOR_PROMOCODE)(promocodeId));
+};
+
+export const clearAllSelectedPromocodes = () => (dispatch) => {
+    dispatch(createAction(CLEAR_ALL_SELECTED_SPONSOR_PROMOCODES)());
+}
+
+export const setCurrentFlowEvent = (value) => (dispatch) => {
+    dispatch(createAction(SET_SPONSOR_PROMOCODES_CURRENT_FLOW_EVENT)(value));
+};
+
+export const setSelectedAll = (value) => (dispatch) => {
+    dispatch(createAction(SET_SELECTED_ALL_SPONSOR_PROMOCODES)(value));
+};
+
+export const changeSearchTerm = (term) => (dispatch, getState) => {
+    dispatch(createAction(CHANGE_SPONSOR_PROMOCODES_SEARCH_TERM)({term}));
+}
+
+export const getSponsorPromocodes = (term = null, page = 1, perPage = 100, order = 'order', orderDir = 1) => async (dispatch, getState) => {
+
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+    const filter = [`class_name==SPONSOR_PROMO_CODE||SPONSOR_DISCOUNT_CODE`];
+
+    dispatch(startLoading());
+
+    if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(`sponsor=@${escapedTerm},tier=@${escapedTerm},code=@${escapedTerm}`);
+    }
+
+    const params = {
+        page         : page,
+        per_page     : perPage,
+        expand       : 'sponsor,owner,sponsor.company',
+        access_token : accessToken,
+        'filter[]'   : filter
+    };
+
+
+    // order
+    if (order != null && orderDir != null) {
+        const orderDirSign = (orderDir === 1) ? '+' : '-';
+        params['order'] = `${orderDirSign}${order}`;
+    }
+
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_PROMOCODES),
+      createAction(RECEIVE_SPONSOR_PROMOCODES),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
+      authErrorHandler,
+      {page, perPage, order, orderDir, term}
+    )(params)(dispatch).then(() => {
+          dispatch(stopLoading());
+      }
+    );
+};
+
+export const sendEmails = (filters = {}, recipientEmail = null) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorPromocodeListState } = getState();
+    const {term, currentFlowEvent, selectedAll, selectedIds, excludedIds} = currentSponsorPromocodeListState;
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    let filter = [];
+
+    const params = {
+        access_token : accessToken,
+    };
+
+    if (!selectedAll && selectedIds.length > 0) {
+        // we don't need the filter criteria, we have the ids
+        filter.push(`id==${selectedIds.join('||')}`);
+    } else {
+        filter = parseFilters(filters, term);
+
+        if (selectedAll && excludedIds.length > 0){
+            filter.push(`not_id==${excludedIds.join('||')}`);
+        }
+    }
+
+    if (filter.length > 0) {
+        params['filter[]'] = filter;
+    }
+
+    const payload =  {
+        email_flow_event : currentFlowEvent
+    };
+
+    if(recipientEmail) {
+        payload['test_email_recipient'] = recipientEmail;
+    }
+
+    dispatch(startLoading());
+
+    const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("registration_invitation_list.resend_done"),
+        type: 'success'
+    };
+
+    return putRequest(
+      null,
+      createAction(SEND_SPONSOR_PROMOCODES_EMAILS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/all/promo-codes/all/send`,
+      payload,
+      authErrorHandler
+    )(params)(dispatch)
+      .then((payload) => {
+          dispatch(showMessage(
+            success_message,
+          ));
+          dispatch(stopLoading());
+          return payload;
+      });
+};

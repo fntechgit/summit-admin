@@ -70,7 +70,6 @@ import RegistrationStatsPage from '../pages/registration/registration-stats-page
 import AuditLogPage from '../pages/audit-log/audit-log-page'
 import SubmissionInvitationLayout from "./submission-invitation-layout";
 import RegFeedMetadataLayout from './reg-feed-metadata-layout';
-import SponsorPromocodesListPage from "../pages/sponsors/sponsor-promocodes-list-page";
 import { getMarketingSettingsForRegLite, getMarketingSettingsForPrintApp } from '../actions/marketing-actions';
 import { getRegFeedMetadataBySummit } from '../actions/reg-feed-metadata-actions';
 
@@ -156,7 +155,6 @@ class SummitIdLayout extends React.Component {
                     <Route path={`${match.url}/submission-invitations`} component={SubmissionInvitationLayout}/>
                     <Route path={`${match.url}/order-extra-questions`} component={OrderExtraQuestionLayout}/>
                     <Route path={`${match.url}/sponsors`} component={SponsorLayout}/>
-                    <Route path={`${match.url}/sponsors-promo-codes`} component={SponsorPromocodesListPage}/>
                     <Route path={`${match.url}/sponsorships`} component={SummitSponsorshipLayout}/>
                     <Route path={`${match.url}/badge-scans`} component={BadgeScansLayout}/>
                     <Route path={`${match.url}/marketing`} component={MarketingLayout}/>
