@@ -19,6 +19,7 @@ import
     UPDATE_PURCHASE_ORDER,
     PURCHASE_ORDER_CANCEL_REFUND,
     PURCHASE_ORDER_UPDATED,
+    RECEIVE_PURCHASE_ORDER_REFUNDS
 } from '../../actions/order-actions';
 
 import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
@@ -47,6 +48,9 @@ export const DEFAULT_ENTITY = {
     promo_code: '',
     credit_card_type: '',
     credit_card_4number: '',
+    applied_taxes: [],
+    approved_refunds: [],
+    approved_refunds_taxes: []
 }
 
 const DEFAULT_STATE = {
@@ -149,6 +153,22 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
                 },
                 errors: {}
             }
+        }
+        case RECEIVE_PURCHASE_ORDER_REFUNDS: {
+            const approved_refunds = payload.response.data;
+            const approved_refunds_taxes = [];
+            approved_refunds.forEach(refund => {
+                refund.refunded_taxes.forEach(rt => {
+                    // field for the tax column of that refund
+                    refund[`tax_${rt.tax.id}_refunded_amount`] = rt.refunded_amount
+                    // add tax type to array
+                    approved_refunds_taxes.push(rt.tax);
+                });
+            });
+            const unique_approved_refunds_taxes = approved_refunds_taxes.filter((tax, idx, arr) => {
+                return idx === arr.findIndex(obj => obj.id === tax.id);
+            });            
+            return {...state, entity: {...state.entity, approved_refunds, approved_refunds_taxes: unique_approved_refunds_taxes }};
         }
         case VALIDATE: {
             return {...state,  errors: payload.errors };
