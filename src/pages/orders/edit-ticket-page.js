@@ -246,7 +246,9 @@ class EditTicketPage extends React.Component {
                 render: (c) => c.action_date ? moment(c.action_date * 1000).tz(currentSummit.time_zone_id).format('MMMM Do YYYY, h:mm a (z)') : 'TBD', },
             { columnKey: 'status', value: T.translate("edit_ticket.refund_request_status") },
             { columnKey: 'refunded_amount_formatted', value: T.translate("edit_ticket.refunded_amount") },
-            { columnKey: 'notes', value: T.translate("edit_ticket.refund_request_notes") },
+            { columnKey: 'notes', value: T.translate("edit_ticket.refund_request_notes") },            
+            { columnKey: 'refunded_taxes', value: T.translate("edit_ticket.refund_tax") },
+            { columnKey: 'total_refunded_amount_formatted', value: T.translate("edit_ticket.refund_total_amount") },
         ];
 
         const refundRequestOptions = {

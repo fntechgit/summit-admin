@@ -1599,6 +1599,8 @@
     "refund_request_notes": "Notes",
     "refund_reject_modal_title": "Reject Refund Request",
     "refund_reject": "Reject Refund",
+    "refund_tax": "Tax Refunded",
+    "refund_total_amount": "Total Refunded Amount",
     "paid_amount_adjusted": "Amount Paid Adjusted",
     "activate_yes": "Yes, reactivate",
     "deactivate_yes": "Yes, deactivate",

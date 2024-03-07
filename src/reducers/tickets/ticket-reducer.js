@@ -110,11 +110,20 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
             }
 
             if(entity.hasOwnProperty("refund_requests")){
-                entity.refund_requests = entity.refund_requests.map( r => ({...r,
-                    requested_by_fullname: r.requested_by ? `${r.requested_by.first_name} ${r.requested_by.last_name}`:'TBD',
-                    action_by_fullname: r.action_by ? `${r.action_by.first_name} ${r.action_by.last_name}`:'TBD',
-                    refunded_amount_formatted: `$${r.refunded_amount.toFixed(2)}`
-                }))
+                entity.refund_requests = entity.refund_requests.map( r => {
+                    
+                    r.refunded_taxes.forEach(t => {                        
+                        // field for the tax column of that refund
+                        r[`tax_${rt.tax.id}_refunded_amount`] = t.refunded_amount
+                    });                                            
+
+                    return ({...r,
+                        requested_by_fullname: r.requested_by ? `${r.requested_by.first_name} ${r.requested_by.last_name}`:'TBD',
+                        action_by_fullname: r.action_by ? `${r.action_by.first_name} ${r.action_by.last_name}`:'TBD',
+                        refunded_amount_formatted: `$${r.refunded_amount.toFixed(2)}`,
+                        total_refunded_amount_formatted: `$${r.total_refunded_amount.toFixed(2)}`,
+                    })
+                })
             }
 
             return {...state, entity: {...DEFAULT_ENTITY,
@@ -141,7 +150,8 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                 entity.refund_requests = entity.refund_requests.map( r => ({...r,
                     requested_by_fullname: r.requested_by ? `${r.requested_by.first_name} ${r.requested_by.last_name}`:'TBD',
                     action_by_fullname: r.action_by ? `${r.action_by.first_name} ${r.action_by.last_name}`:'TBD',
-                    refunded_amount_formatted: `$${r.refunded_amount.toFixed(2)}`
+                    refunded_amount_formatted: `$${r.refunded_amount.toFixed(2)}`,
+                    total_refunded_amount_formatted: `$${r.total_refunded_amount.toFixed(2)}`,
                 }))
             }
             return {...state, entity:{...state.entity,
