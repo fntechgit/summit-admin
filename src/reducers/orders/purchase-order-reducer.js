@@ -157,11 +157,14 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_PURCHASE_ORDER_REFUNDS: {
             const approved_refunds = payload.response.data;
             const approved_refunds_taxes = [];
+            let adjusted_order_price = state.entity.amount;            
             approved_refunds.forEach(refund => {
                 refund.ticket_id = refund.ticket.id;
                 refund.refunded_amount_formatted = `$${refund.refunded_amount.toFixed(2)}`;
                 refund.total_refunded_amount_formatted = `$${refund.total_refunded_amount.toFixed(2)}`;
                 refund.adjusted_net_price_formatted = `$${(refund.ticket.final_amount - refund.total_refunded_amount).toFixed(2)}`;
+                adjusted_order_price -= refund.total_refunded_amount;
+                refund.adjusted_order_price_formatted = `$${adjusted_order_price.toFixed(2)}`;
                 refund.refunded_taxes.forEach(rt => {
                     // field for the tax column of that refund
                     refund[`tax_${rt.tax.id}_refunded_amount`] = `$${rt.refunded_amount.toFixed(2)}`

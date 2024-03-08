@@ -156,7 +156,7 @@ class PurchaseOrderForm extends React.Component {
             { columnKey: 'total_refunded_amount_formatted', value: T.translate("edit_purchase_order.total_refunded")},
             { columnKey: 'adjusted_net_price_formatted', value: T.translate("edit_purchase_order.adjusted_net_price")},
             ...adjusted_tax_columns,
-            { columnKey: 'adjusted_order_price', value: T.translate("edit_purchase_order.adjusted_order_price")},
+            { columnKey: 'adjusted_order_price_formatted', value: T.translate("edit_purchase_order.adjusted_order_price")},
         ];
 
         let refunds_options = {
