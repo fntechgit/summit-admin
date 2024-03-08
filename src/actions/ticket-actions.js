@@ -439,7 +439,7 @@ export const getTicket = (ticketId) => async (dispatch, getState) => {
 
     const params = {
         access_token: accessToken,
-        expand: 'badge,badge.features,promo_code,ticket_type,owner,owner.member,refund_requests,refund_requests.requested_by,refund_requests.action_by'
+        expand: 'badge,badge.features,promo_code,ticket_type,owner,owner.member,refund_requests,refund_requests.requested_by,refund_requests.action_by,refund_requests.refunded_taxes,refund_requests.refunded_taxes.tax'
     };
 
     return getRequest(
