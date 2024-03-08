@@ -2022,6 +2022,7 @@
     "tax_name_rate": "{tax_name} Rate:",
     "tax_name_price": "{tax_name} Price:",    
     "refunded_ticket": "Refunded Ticket #",
+    "purchase_order_price": "Purchase Order Price",
     "refunds": "Refunds",
     "refunded_tax": "Refunded {tax_name}",
     "total_refunded": "Total Refunded",

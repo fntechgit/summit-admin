@@ -157,11 +157,13 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_PURCHASE_ORDER_REFUNDS: {
             const approved_refunds = payload.response.data;
             const approved_refunds_taxes = [];
-            let adjusted_order_price = state.entity.amount;            
+            let adjusted_order_price = state.entity.amount;
+            let adjusted_total_order_purchase_price = 0;
             approved_refunds.forEach(refund => {
                 refund.ticket_id = refund.ticket.id;
                 refund.refunded_amount_formatted = `$${refund.refunded_amount.toFixed(2)}`;
                 refund.total_refunded_amount_formatted = `$${refund.total_refunded_amount.toFixed(2)}`;
+                adjusted_total_order_purchase_price += refund.total_refunded_amount;
                 refund.adjusted_net_price_formatted = `$${(refund.ticket.final_amount - refund.total_refunded_amount).toFixed(2)}`;
                 adjusted_order_price -= refund.total_refunded_amount;
                 refund.adjusted_order_price_formatted = `$${adjusted_order_price.toFixed(2)}`;
@@ -174,10 +176,11 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
                     approved_refunds_taxes.push(rt.tax);
                 });
             });
+            adjusted_total_order_purchase_price = (state.entity.amount - adjusted_total_order_purchase_price);
             const unique_approved_refunds_taxes = approved_refunds_taxes.filter((tax, idx, arr) => {
                 return idx === arr.findIndex(obj => obj.id === tax.id);
             });            
-            return {...state, entity: {...state.entity, approved_refunds, approved_refunds_taxes: unique_approved_refunds_taxes }};
+            return {...state, entity: {...state.entity, approved_refunds, adjusted_total_order_purchase_price, approved_refunds_taxes: unique_approved_refunds_taxes }};
         }
         case VALIDATE: {
             return {...state,  errors: payload.errors };
