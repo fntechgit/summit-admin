@@ -137,24 +137,24 @@ class PurchaseOrderForm extends React.Component {
             return ({ 
                 columnKey: `tax_${tax.id}_refunded_amount`, 
                 value: T.translate("edit_purchase_order.refunded_tax", {tax_name: tax.name}), 
-                render: (row, val) => { return val ?  val : '0'}
+                render: (row, val) => { return val ?  val : '$0.00'}
             });
         }) || [])];
         
         const adjusted_tax_columns = [...(entity.approved_refunds_taxes?.map(tax => {
             return ({ 
-                columnKey: `adjusted_tax_${tax.id}_price`, 
+                columnKey: `tax_${tax.id}_adjusted_refunded_amount`,
                 value: T.translate("edit_purchase_order.adjusted_tax_price", {tax_name: tax.name}), 
-                render: (row, val) => { return val ?  val : '0'}
+                render: (row, val) => { return val ?  val : '$0.00'}
             });
         }) || [])];
 
         let refunds_columns = [
             { columnKey: 'ticket_id', value: T.translate("edit_purchase_order.refunded_ticket")},
-            { columnKey: 'refunded_amount', value: T.translate("edit_purchase_order.refunded_ticket")},
+            { columnKey: 'refunded_amount_formatted', value: T.translate("edit_purchase_order.refunded_amount")},
             ...tax_columns,
-            { columnKey: 'total_refunded_amount', value: T.translate("edit_purchase_order.total_refunded")},
-            { columnKey: 'adjusted_net_price', value: T.translate("edit_purchase_order.adjusted_net_price")},
+            { columnKey: 'total_refunded_amount_formatted', value: T.translate("edit_purchase_order.total_refunded")},
+            { columnKey: 'adjusted_net_price_formatted', value: T.translate("edit_purchase_order.adjusted_net_price")},
             ...adjusted_tax_columns,
             { columnKey: 'adjusted_order_price', value: T.translate("edit_purchase_order.adjusted_order_price")},
         ];

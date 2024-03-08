@@ -607,7 +607,7 @@ export const getPurchaseOrderRefunds = (orderId) => async (dispatch, getState) =
 
     const params = {
         per_page: 100,
-        expand: 'refunded_taxes, refunded_taxes.tax',
+        expand: 'refunded_taxes, refunded_taxes.tax, ticket, ticket.applied_taxes',
         access_token: accessToken,
     };
 
