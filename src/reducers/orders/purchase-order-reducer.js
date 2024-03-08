@@ -157,26 +157,34 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_PURCHASE_ORDER_REFUNDS: {
             const approved_refunds = payload.response.data;
             const approved_refunds_taxes = [];
-            let adjusted_order_price = state.entity.amount;
+            const purchaseOrder = state.entity;
+            let adjusted_order_price = purchaseOrder.amount;
+            let adjusted_net_price = purchaseOrder.raw_amount;            
             let adjusted_total_order_purchase_price = 0;
+            let adjusted_applied_taxes = purchaseOrder.applied_taxes;
             approved_refunds.forEach(refund => {
                 refund.ticket_id = refund.ticket.id;
                 refund.refunded_amount_formatted = `$${refund.refunded_amount.toFixed(2)}`;
                 refund.total_refunded_amount_formatted = `$${refund.total_refunded_amount.toFixed(2)}`;
-                adjusted_total_order_purchase_price += refund.total_refunded_amount;
-                refund.adjusted_net_price_formatted = `$${(refund.ticket.final_amount - refund.total_refunded_amount).toFixed(2)}`;
+                adjusted_total_order_purchase_price += refund.total_refunded_amount;                
+                adjusted_net_price -= refund.refunded_amount;                
+                refund.adjusted_net_price_formatted = `$${adjusted_net_price.toFixed(2)}`;
                 adjusted_order_price -= refund.total_refunded_amount;
                 refund.adjusted_order_price_formatted = `$${adjusted_order_price.toFixed(2)}`;
                 refund.refunded_taxes.forEach(rt => {
                     // field for the tax column of that refund
                     refund[`tax_${rt.tax.id}_refunded_amount`] = `$${rt.refunded_amount.toFixed(2)}`
-                    const original_tax_amount = refund.ticket.applied_taxes.find(t => t.tax_id === rt.tax.id)?.amount || 0;
-                    refund[`tax_${rt.tax.id}_adjusted_refunded_amount`] = `$${(original_tax_amount - rt.refunded_amount).toFixed(2)}`
+                    adjusted_applied_taxes.forEach(t => {                        
+                        if(t.id === rt.tax.id) {
+                            t.amount -= rt.refunded_amount;                            
+                            refund[`tax_${rt.tax.id}_adjusted_refunded_amount`] = `$${(t.amount).toFixed(2)}`
+                        }
+                    });                    
                     // add tax type to array
                     approved_refunds_taxes.push(rt.tax);
                 });
             });
-            adjusted_total_order_purchase_price = (state.entity.amount - adjusted_total_order_purchase_price);
+            adjusted_total_order_purchase_price = (purchaseOrder.amount - adjusted_total_order_purchase_price);
             const unique_approved_refunds_taxes = approved_refunds_taxes.filter((tax, idx, arr) => {
                 return idx === arr.findIndex(obj => obj.id === tax.id);
             });            

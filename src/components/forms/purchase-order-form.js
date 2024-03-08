@@ -449,8 +449,8 @@ class PurchaseOrderForm extends React.Component {
                                 )                                
                             })}
                             <div className="row">
-                                <div className="col-md-6">
-                                    <label>{T.translate("edit_purchase_order.purchase_order_price")}</label> {`${entity.amount}`}
+                                <div className="col-md-6 col-md-offset-6">
+                                    <label>{T.translate("edit_purchase_order.purchase_order_price")}</label> {`$${entity.amount}`}
                                 </div>
                             </div>                            
 
