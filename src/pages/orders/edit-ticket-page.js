@@ -319,11 +319,50 @@ class EditTicketPage extends React.Component {
                    title={T.translate("edit_ticket.refund_requests")}
                    handleClick={this.toggleSection.bind(this, 'refund_requests')}
                  >
+                    <div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <label>{T.translate("edit_ticket.ticket_price")}</label> {`$${entity.raw_cost}`}
+                            </div>
+                            <div className="col-md-6">
+                                <label>{T.translate("edit_ticket.net_price")}</label> {`$${(entity.raw_cost - entity.discount)}`}
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <label>{T.translate("edit_ticket.discount")}</label> {`${entity.discount_rate}% ($${entity.discount})`}
+                            </div>
+                        </div>
+                        {entity?.applied_taxes.map((at, i) => {
+                            return (
+                                <div className="row" key={i}>
+                                    <div className="col-md-6">
+                                        <label>{T.translate("edit_ticket.tax_name_rate", {tax_name: at.tax.name})}</label>{` ${at.tax.rate}%`}
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label>{T.translate("edit_ticket.tax_name_price", {tax_name: at.tax.name})}</label>{` $${at.amount}`}
+                                    </div>
+                                </div>
+                            )
+                        })}
+                        <div className="row">
+                            <div className="col-md-6 col-md-offset-6">
+                                <label>{T.translate("edit_ticket.purchase_ticket_price")}</label> {`$${entity.final_amount}`}
+                            </div>
+                        </div>
+                    </div>                    
+                    
                      <Table
                        options={refundRequestOptions}
                        data={entity?.refund_requests}
                        columns={refundRequestColumns}
                      />
+
+                    {/* <div className="row">
+                        <div className="col-md-12">
+                            <label>{T.translate("edit_ticket.adjusted_total_order_purchase_price")}</label> {`$${entity.adjusted_total_order_purchase_price?.toFixed(2)}`}
+                        </div>
+                    </div> */}
                  </Panel>
                }
 

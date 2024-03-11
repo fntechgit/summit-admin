@@ -1610,6 +1610,11 @@
     "apply_filters": "Apply Filters",
     "admin_notes": "Notes",
     "unassign": "Unassign",
+    "ticket_price": "Ticket Price",
+    "net_price": "Net Price",    
+    "tax_name_rate": "{tax_name} Rate",
+    "tax_name_price": "{tax_name} Price",
+    "purchase_ticket_price": "Purchase Ticket Price",
     "placeholders": {
       "refund_notes": "Provide Optional Notes",
       "refund_reject_notes": "Provide Optional Notes",
