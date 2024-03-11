@@ -79,10 +79,6 @@ class PromocodeForm extends React.Component {
             entity.rate = 0;
         }
 
-        if (id === 'contact_email') {
-
-        }
-
         if (ev.target.type === 'datetime') {
             value = value.valueOf() / 1000;
         }
