@@ -20,11 +20,16 @@ import {
     createAction,
     stopLoading,
     startLoading,    
-    authErrorHandler
+    authErrorHandler,
+    escapeFilterValue,
+    fetchResponseHandler,
+    fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {getAccessTokenSafely} from '../utils/methods';
 
-export const SAVE_FILTER_CRITERIA = 'SAVE_FILTER_CRITERIA';
+export const FILTER_CRITERIA_ADDED = 'FILTER_CRITERIA_ADDED';
+export const RECEIVE_FILTER_CRITERIAS = 'RECEIVE_FILTER_CRITERIAS';
+export const FILTER_CRITERIA_DELETED = 'FILTER_CRITERIA_DELETED';
 
 export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState) => {
     
@@ -38,7 +43,7 @@ export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState)
 
     return postRequest(
         null,
-        createAction(SAVE_FILTER_CRITERIA),
+        createAction(FILTER_CRITERIA_ADDED),
         `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
         filterCriteria,
         authErrorHandler
@@ -46,5 +51,67 @@ export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState)
         .then(() => {
             dispatch(stopLoading());
         });
-
 }
+
+export const getFilterCriterias = (context) => async (dispatch, getState) => {    
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken,
+        page: 1,
+        per_page: 10,
+        'filter[]'   : [`show_id==${currentSummit.id}`,`context==${context}`]
+    };
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_FILTER_CRITERIAS),
+        `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
+        authErrorHandler,
+        {}
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+export const deleteFilterCriteria = (filterCriteriaId) => async (dispatch, getState) => {
+
+    const accessToken = await getAccessTokenSafely();    
+
+    const params = {
+        access_token: accessToken
+    };
+
+    dispatch (startLoading());
+
+    return deleteRequest(
+        null,
+        createAction(FILTER_CRITERIA_DELETED)({filterCriteriaId}),
+        `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias/${filterCriteriaId}`,
+        null,
+        authErrorHandler
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );    
+}
+
+export const queryFilterCriterias = _.debounce(async (summitId, input, callback) => {
+
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    const params = `filter[]=show_id==${summitId}&filter[]=name@@${input}`;    
+
+    fetch(`${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias?${params}&access_token=${accessToken}`)
+        .then(fetchResponseHandler)
+        .then((json) => {
+            const options = [...json.data];
+            callback(options);
+        })
+        .catch(fetchErrorHandler);
+}, 500);
