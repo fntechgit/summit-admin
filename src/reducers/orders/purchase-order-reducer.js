@@ -111,8 +111,8 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
             let entity = {...payload.response};
 
             const final_amount_formatted = `$${entity.amount.toFixed(2)}`;
-            const refunded_amount_formatted = `$${entity.refunded_amount.toFixed(2)}`;
-            const final_amount_adjusted_formatted = `$${((entity.amount - entity.refunded_amount).toFixed(2))}`;
+            const refunded_amount_formatted = `$${entity.total_refunded_amount.toFixed(2)}`;
+            const final_amount_adjusted_formatted = `$${((entity.amount - entity.total_refunded_amount).toFixed(2))}`;
 
             for(var key in entity) {
                 if(entity.hasOwnProperty(key)) {

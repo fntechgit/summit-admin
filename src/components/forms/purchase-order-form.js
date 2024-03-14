@@ -195,11 +195,11 @@ class PurchaseOrderForm extends React.Component {
                         </div>
                     </div>
                     <div className="row form-group">
-                        <div className="col-md-3">
+                        <div className="col-md-4">
                         <label> {T.translate("edit_purchase_order.paid_amount")}:&nbsp;</label>
                         {entity.final_amount_formatted}
                         </div>
-                        <div className="col-md-3">
+                        <div className="col-md-8">
                         <label> {T.translate("edit_purchase_order.payment_method")}:&nbsp;</label>
                         {entity.payment_method}
                         </div>
@@ -210,20 +210,20 @@ class PurchaseOrderForm extends React.Component {
                         { entity.refunded_amount > 0.00 &&
                         <>
                             <div className="row form-group">
-                                <div className="col-md-3">
+                                <div className="col-md-4">
                                     <label> {T.translate("edit_purchase_order.total_refunded_amount")}:&nbsp;</label>
                                     {entity.refunded_amount_formatted}
                                 </div>
-                                <div className="col-md-9">
+                                <div className="col-md-8">
                                     &nbsp;
                                 </div>
                             </div>
                             <div className="row form-group">
-                                <div className="col-md-3">
+                                <div className="col-md-4">
                                     <label> {T.translate("edit_purchase_order.adjusted_total_order_purchase_price")}:&nbsp;</label>
                                     {entity.final_amount_adjusted_formatted}
                                 </div>
-                                <div className="col-md-9">
+                                <div className="col-md-8">
                                     &nbsp;
                                 </div>
                             </div>
