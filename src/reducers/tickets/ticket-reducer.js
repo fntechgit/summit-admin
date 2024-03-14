@@ -88,8 +88,9 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
             let attendee_company = 'N/A';
             let attendee_email = null;
             const final_amount_formatted = `$${entity.final_amount.toFixed(2)}`;
-            const refunded_amount_formatted = `$${entity.refunded_amount.toFixed(2)}`;
+            const refunded_amount_formatted = `$${entity.total_refunded_amount.toFixed(2)}`;
             const final_amount_adjusted_formatted = `$${((entity.final_amount - entity.refunded_amount).toFixed(2))}`;
+            const adjusted_total_ticket_purchase_price_formatted = `$${((entity.final_amount - entity.total_refunded_amount))}`;;
             for(var key in entity) {
                 if(entity.hasOwnProperty(key)) {
                     entity[key] = (entity[key] == null) ? '' : entity[key] ;
@@ -145,6 +146,7 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     ticket_type_id: entity?.ticket_type?.id,
                     attendee_email: attendee_email,
                     attendee_company,
+                    adjusted_total_ticket_purchase_price_formatted,
                     refund_requests_taxes: unique_approved_refunds_taxes
                 } };
         }

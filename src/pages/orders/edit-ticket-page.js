@@ -357,12 +357,12 @@ class EditTicketPage extends React.Component {
                        data={entity?.refund_requests}
                        columns={refundRequestColumns}
                      />
-
-                    {/* <div className="row">
+                    
+                    <div className="row">
                         <div className="col-md-12">
-                            <label>{T.translate("edit_ticket.adjusted_total_order_purchase_price")}</label> {`$${entity.adjusted_total_order_purchase_price?.toFixed(2)}`}
+                            <label>{T.translate("edit_ticket.adjusted_total_ticket_purchase_price")}</label> {entity.adjusted_total_ticket_purchase_price_formatted}
                         </div>
-                    </div> */}
+                    </div>
                  </Panel>
                }
 
