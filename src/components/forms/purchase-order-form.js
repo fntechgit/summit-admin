@@ -211,7 +211,7 @@ class PurchaseOrderForm extends React.Component {
                         <>
                             <div className="row form-group">
                                 <div className="col-md-3">
-                                    <label> {T.translate("edit_purchase_order.refunded_amount")}:&nbsp;</label>
+                                    <label> {T.translate("edit_purchase_order.total_refunded_amount")}:&nbsp;</label>
                                     {entity.refunded_amount_formatted}
                                 </div>
                                 <div className="col-md-9">
@@ -220,7 +220,7 @@ class PurchaseOrderForm extends React.Component {
                             </div>
                             <div className="row form-group">
                                 <div className="col-md-3">
-                                    <label> {T.translate("edit_purchase_order.paid_amount_adjusted")}:&nbsp;</label>
+                                    <label> {T.translate("edit_purchase_order.adjusted_total_order_purchase_price")}:&nbsp;</label>
                                     {entity.final_amount_adjusted_formatted}
                                 </div>
                                 <div className="col-md-9">
@@ -452,7 +452,7 @@ class PurchaseOrderForm extends React.Component {
                                 <div className="col-md-6 col-md-offset-6">
                                     <label>{T.translate("edit_purchase_order.purchase_order_price")}</label> {`$${entity.amount}`}
                                 </div>
-                            </div>                            
+                            </div>
 
                             <div className="row">
                                 <div className="col-md-12">
@@ -464,7 +464,6 @@ class PurchaseOrderForm extends React.Component {
                                     />
                                 </div>
                             </div>
-
                             <div className="row">
                                 <div className="col-md-12">
                                     <label>{T.translate("edit_purchase_order.adjusted_total_order_purchase_price")}</label> {`$${entity.adjusted_total_order_purchase_price?.toFixed(2)}`}
