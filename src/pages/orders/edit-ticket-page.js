@@ -208,8 +208,7 @@ class EditTicketPage extends React.Component {
             return
         }
         
-        if( parseFloat(refundAmount) > 0 && 
-            parseFloat(refundAmount) <= parseFloat(entity.final_amount)) {
+        if( parseFloat(refundAmount) > 0) {
 
             this.setState({...this.state,
                 refundAmount: '',
