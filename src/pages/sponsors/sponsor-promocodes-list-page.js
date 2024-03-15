@@ -30,31 +30,30 @@ import {
   setCurrentFlowEvent,
   setSelectedAll,
   sendEmails,
-  changeSearchTerm
+  changeSearchTerm,
+  exportSponsorPromocodes
 } from "../../actions/sponsor-actions";
 
 import {validateEmail} from '../../utils/methods';
 import {Breadcrumb} from "react-breadcrumbs";
 
 const fieldNames = [
-  {columnKey: 'feature_types', value: 'feature_types', sortable: true},
-  {columnKey: 'ticket_types', value: 'ticket_types', sortable: true},
-  {columnKey: 'contact_email', value: 'contact_email', sortable: true},
+  {columnKey: 'feature_types', value: 'feature_types'},
+  {columnKey: 'ticket_types', value: 'ticket_types'},
+  {columnKey: 'contact_email', value: 'contact_email'},
   {columnKey: 'notes', value: 'notes'}
 ]
 
 
-const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, currentPage, totalPromocodes, selectedAll, term, page, perPage, order, orderDir, extraColumns, selectedCount, currentFlowEvent, ...props}) => {
+const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, currentPage, totalPromocodes, selectedAll, term, perPage, order, orderDir, selectedCount, currentFlowEvent, ...props}) => {
   const [selectedColumns, setSelectedColumns] = useState([]);
   const [testRecipient, setTestRecipient] = useState('');
 
   useEffect(() => {
-    setSelectedColumns(extraColumns);
-
-    if (currentSummit) {
-      props.getSponsorPromocodes(term, 1, 10, order, orderDir, extraColumns)
+    if (currentSummit.id) {
+      props.getSponsorPromocodes(term, 1, 10, order, orderDir)
     }
-  }, [currentSummit]);
+  }, [currentSummit.id]);
 
   const handleChangeFlowEvent = (ev) => {
     const {value, id} = ev.target;
@@ -94,7 +93,7 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
     }).then(function (result) {
       if (result.value) {
         const recipientEmail = testRecipient || null;
-        sendEmails(recipientEmail);
+        props.sendEmails(recipientEmail);
       }
     })
   }
@@ -118,19 +117,19 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
   }
 
   const handleEdit = (promocodeId) => {
-    props.history.push(`/app/summits/${currentSummit.id}/sponsors/promocodes/${promocodeId}`);
+    props.history.push(`/app/summits/${currentSummit.id}/promocodes/${promocodeId}`);
   }
 
   const handlePageChange = (page) => {
-    props.getSponsorPromocodes(term, page, perPage, order, orderDir, selectedColumns);
+    props.getSponsorPromocodes(term, page, perPage, order, orderDir);
   }
 
   const handleSort = (index, key, dir, func) => {
-    props.getSponsorPromocodes(term, page, perPage, key, dir, selectedColumns);
+    props.getSponsorPromocodes(term, currentPage, perPage, key, dir);
   }
 
-  const handleSearch = (term) => {
-    props.getSponsorPromocodes(term, page, perPage, order, orderDir, selectedColumns);
+  const handleSearch = (searchTerm) => {
+    props.getSponsorPromocodes(searchTerm, currentPage, perPage, order, orderDir);
   }
 
   const handleColumnsChange = (ev) => {
@@ -142,9 +141,17 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
     props.changeSearchTerm(term);
   }
 
+  const handleExport = () => {
+    props.exportSponsorPromocodes(term, order, orderDir);
+  }
+
+  const handleNewPromocode = () => {
+    props.history.push(`/app/summits/${currentSummit.id}/promocodes/new#type=sponsor`);
+  }
+
   let columns = [
-    {columnKey: 'sponsor_name', value: T.translate("sponsor_promocodes_list.sponsor"), sortable: true},
-    {columnKey: 'tier', value: T.translate("sponsor_promocodes_list.tier"), sortable: true},
+    {columnKey: 'sponsor_company_name', value: T.translate("sponsor_promocodes_list.sponsor"), sortable: true},
+    {columnKey: 'tier_name', value: T.translate("sponsor_promocodes_list.tier"), sortable: true},
     {columnKey: 'code', value: T.translate("sponsor_promocodes_list.code"), sortable: true},
     {columnKey: 'quantity_available', value: T.translate("sponsor_promocodes_list.quantity_available"), sortable: true},
     {columnKey: 'quantity_used', value: T.translate("sponsor_promocodes_list.quantity_used"), sortable: true},
@@ -175,7 +182,7 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
 
   const flowEventsDDL = [
     {label: '-- SELECT EMAIL EVENT --', value: ''},
-    {label: 'SPONSOR_PROMOCODE_EMAIL', value: 'SPONSOR_PROMOCODE_EMAIL'}
+    {label: 'SPONSOR_PROMOCODE_EMAIL', value: 'SUMMIT_REGISTRATION_SPONSOR_PROMO_CODE'}
   ];
 
   const showColumns = fieldNames
@@ -235,17 +242,25 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
       </div>
 
       <div className={'row'} style={{marginBottom: 15, marginTop: 15}}>
-        <div className={'col-md-12'}>
+        <div className={'col-md-6'}>
           <label>{T.translate("event_list.select_fields")}</label>
           <Dropdown
             id="select_fields"
-            placeholder={T.translate("event_list.placeholders.select_fields")}
+            placeholder={T.translate("sponsor_promocodes_list.placeholders.select_fields")}
             value={selectedColumns}
             onChange={handleColumnsChange}
             options={ddl_columns}
             isClearable={true}
             isMulti={true}
           />
+        </div>
+        <div className="col-md-6 text-right" style={{paddingTop: 25}}>
+          <button className="btn btn-primary right-space" onClick={handleNewPromocode}>
+            {T.translate("sponsor_promocodes_list.add_promocode")}
+          </button>
+          <button className="btn btn-default" onClick={handleExport} >
+            {T.translate("general.export")}
+          </button>
         </div>
       </div>
 
@@ -294,6 +309,7 @@ export default connect(
     setCurrentFlowEvent,
     setSelectedAll,
     sendEmails,
-    changeSearchTerm
+    changeSearchTerm,
+    exportSponsorPromocodes
   }
 )(SponsorPromocodesListPage);

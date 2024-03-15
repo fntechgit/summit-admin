@@ -1854,7 +1854,7 @@ export const getSponsorPromocodes = (term = null, page = 1, perPage = 100, order
     const {currentSummitState} = getState();
     const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
-    const filter = [`class_name==SPONSOR_PROMO_CODE||SPONSOR_DISCOUNT_CODE`];
+    const filter = [];
 
     dispatch(startLoading());
 
@@ -1866,11 +1866,13 @@ export const getSponsorPromocodes = (term = null, page = 1, perPage = 100, order
     const params = {
         page         : page,
         per_page     : perPage,
-        expand       : 'sponsor,owner,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type',
+        expand       : 'sponsor,owner,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,badge_features,allowed_ticket_types,ticket_types_rules,ticket_types_rules.ticket_type',
         access_token : accessToken,
-        'filter[]'   : filter
     };
 
+    if (filter.length > 0) {
+        params['filter[]'] = filter;
+    }
 
     // order
     if (order != null && orderDir != null) {
@@ -1882,7 +1884,7 @@ export const getSponsorPromocodes = (term = null, page = 1, perPage = 100, order
     return getRequest(
       createAction(REQUEST_SPONSOR_PROMOCODES),
       createAction(RECEIVE_SPONSOR_PROMOCODES),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes`,
       authErrorHandler,
       {page, perPage, order, orderDir, term}
     )(params)(dispatch).then(() => {
@@ -1891,7 +1893,41 @@ export const getSponsorPromocodes = (term = null, page = 1, perPage = 100, order
     );
 };
 
-export const sendEmails = (filters = {}, recipientEmail = null) => async (dispatch, getState) => {
+export const exportSponsorPromocodes = (term = null, order = 'order', orderDir = 1) => async (dispatch, getState) => {
+
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+    const filter = [];
+    const filename = `${currentSummit.name}-SponsorPromocodes.csv`;
+
+    dispatch(startLoading());
+
+    if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(`sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`);
+    }
+
+    const params = {
+        expand       : '',
+        access_token : accessToken,
+    };
+
+    if (filter.length > 0) {
+        params['filter[]'] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+        const orderDirSign = (orderDir === 1) ? '+' : '-';
+        params['order'] = `${orderDirSign}${order}`;
+    }
+
+
+    dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes/csv`, params, filename));
+};
+
+export const sendEmails = (recipientEmail = null) => async (dispatch, getState) => {
     const { currentSummitState, currentSponsorPromocodeListState } = getState();
     const {term, currentFlowEvent, selectedAll, selectedIds, excludedIds} = currentSponsorPromocodeListState;
     const accessToken = await getAccessTokenSafely();
@@ -1906,7 +1942,10 @@ export const sendEmails = (filters = {}, recipientEmail = null) => async (dispat
         // we don't need the filter criteria, we have the ids
         filter.push(`id==${selectedIds.join('||')}`);
     } else {
-        filter = parseFilters(filters, term);
+        if (term) {
+            const escapedTerm = escapeFilterValue(term);
+            filter.push(`sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`);
+        }
 
         if (selectedAll && excludedIds.length > 0){
             filter.push(`not_id==${excludedIds.join('||')}`);

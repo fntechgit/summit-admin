@@ -42,7 +42,6 @@ const DEFAULT_STATE = {
     excludedIds     : [],
     currentFlowEvent: '',
     selectedAll     : false,
-    extraColumns    : [],
     summitTz        : '',
 };
 
@@ -82,17 +81,18 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
         }
         case RECEIVE_SPONSOR_PROMOCODES: {
             const {current_page, total, last_page} = payload.response;
-            const {selectedAll, selectedIds, excludedIds} = state;
 
             const promocodes = payload.response.data.map(p => {
-
+                const ticketTypes = p.allowed_ticket_types || p.ticket_types_rules?.map(ttr => ttr.ticket_type) || [];
                 return {
                     ...p,
-                    sponsor_name: p.sponsor?.company?.name,
-                    tier: p.sponsor?.sponsorship?.type?.name,
+                    sponsor_company_name: p.sponsor?.company?.name,
+                    tier_name: p.sponsor?.sponsorship?.type?.name,
                     quantity_available: p.quantity_available || '0',
                     quantity_used: p.quantity_used || '0',
-                    email_sent: p.email_sent.toString()
+                    email_sent: p.email_sent?.toString(),
+                    feature_types: p.badge_features.map(bf => bf.name).join(', '),
+                    ticket_types: ticketTypes.map(tt => tt.name).join(', ')
                 };
             })
 
