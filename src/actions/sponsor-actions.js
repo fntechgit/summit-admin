@@ -1860,13 +1860,13 @@ export const getSponsorPromocodes = (term = null, page = 1, perPage = 100, order
 
     if (term) {
         const escapedTerm = escapeFilterValue(term);
-        filter.push(`sponsor=@${escapedTerm},tier=@${escapedTerm},code=@${escapedTerm}`);
+        filter.push(`sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`);
     }
 
     const params = {
         page         : page,
         per_page     : perPage,
-        expand       : 'sponsor,owner,sponsor.company',
+        expand       : 'sponsor,owner,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type',
         access_token : accessToken,
         'filter[]'   : filter
     };

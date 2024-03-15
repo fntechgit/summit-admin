@@ -88,7 +88,11 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
 
                 return {
                     ...p,
-                    sponsor_name: p.sponsor?.name
+                    sponsor_name: p.sponsor?.company?.name,
+                    tier: p.sponsor?.sponsorship?.type?.name,
+                    quantity_available: p.quantity_available || '0',
+                    quantity_used: p.quantity_used || '0',
+                    email_sent: p.email_sent.toString()
                 };
             })
 

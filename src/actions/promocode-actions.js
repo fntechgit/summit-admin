@@ -93,7 +93,7 @@ const parseFilters = (filters, term = null) => {
             `owner_email=@${escapedTerm},` +
             `speaker=@${escapedTerm},` +
             `speaker_email=@${escapedTerm},` +
-            `sponsor=@${escapedTerm}`;
+            `sponsor_company_name=@${escapedTerm}`;
 
         filter.push(searchString);
     }

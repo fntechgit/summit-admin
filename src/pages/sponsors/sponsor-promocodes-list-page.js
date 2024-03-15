@@ -37,11 +37,10 @@ import {validateEmail} from '../../utils/methods';
 import {Breadcrumb} from "react-breadcrumbs";
 
 const fieldNames = [
-  {columnKey: 'member_id', value: 'member_id', sortable: true},
-  {columnKey: 'tickets_count', value: 'tickets_count', sortable: true},
-  {columnKey: 'company', value: 'company', sortable: true},
-  {columnKey: 'tags', value: 'tags'},
-  {columnKey: 'summit_hall_checked_in_date', value: 'summit_hall_checked_in_date', sortable: true},
+  {columnKey: 'feature_types', value: 'feature_types', sortable: true},
+  {columnKey: 'ticket_types', value: 'ticket_types', sortable: true},
+  {columnKey: 'contact_email', value: 'contact_email', sortable: true},
+  {columnKey: 'notes', value: 'notes'}
 ]
 
 
