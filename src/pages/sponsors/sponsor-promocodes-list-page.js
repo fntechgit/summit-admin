@@ -117,7 +117,7 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
   }
 
   const handleEdit = (promocodeId) => {
-    props.history.push(`/app/summits/${currentSummit.id}/promocodes/${promocodeId}`);
+    props.history.push(`/app/summits/${currentSummit.id}/sponsors/promocodes/${promocodeId}`);
   }
 
   const handlePageChange = (page) => {
@@ -146,7 +146,7 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
   }
 
   const handleNewPromocode = () => {
-    props.history.push(`/app/summits/${currentSummit.id}/promocodes/new#type=sponsor`);
+    props.history.push(`/app/summits/${currentSummit.id}/sponsors/promocodes/new#type=sponsor`);
   }
 
   let columns = [
