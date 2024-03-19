@@ -106,11 +106,11 @@ class PromocodeForm extends React.Component {
     }
 
     handleSubmit(ev) {
-        let entity = {...this.state.entity};
         ev.preventDefault();
+        const typeScope = this.fragmentParser.getParam('type');
 
         if (this.validate()) {
-            this.props.onSubmit(this.state.entity);
+            this.props.onSubmit(this.state.entity, typeScope === 'sponsor');
         }
     }
 
