@@ -19,7 +19,7 @@ import AsyncSelect from 'react-select/lib/Async';
 import styles from './index.module.less'
 import { queryFilterCriterias } from '../../../actions/filter-criteria-actions';
 
-const SelectFilterCriteria = ({ summitId, onDelete, filterCriterias, selectedFilterCriteria, onChange, ...rest }) => {
+const SelectFilterCriteria = ({ summitId, context, onDelete, filterCriterias, selectedFilterCriteria, onChange, ...rest }) => {
 
     const [selectedFilter, setSelectedFilter] = useState(null);
 
@@ -29,7 +29,7 @@ const SelectFilterCriteria = ({ summitId, onDelete, filterCriterias, selectedFil
 
     const handleFilterChange = (filter) => {
         setSelectedFilter(filter);
-        onChange(filter.value);
+        onChange(filter);
     }
 
     const handleFilterDelete = () => {        
@@ -57,11 +57,11 @@ const SelectFilterCriteria = ({ summitId, onDelete, filterCriterias, selectedFil
         // https://github.com/JedWatson/react-select/issues/2998
 
         const translateOptions = (options) => {
-            const newOptions = options.map(c => ({ id: c.id, name: c.name, value: c.id, label: c.name }));
+            const newOptions = options.map(c => ({ value: c.id, label: c.name, ...c }));
             callback(newOptions);
         };
 
-        queryFilterCriterias(summitId, input, translateOptions);
+        queryFilterCriterias(summitId, context, input, translateOptions);
     }
 
 

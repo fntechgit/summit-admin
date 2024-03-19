@@ -26,9 +26,9 @@ import {
     fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {getAccessTokenSafely} from '../utils/methods';
+import URI from "urijs";
 
 export const FILTER_CRITERIA_ADDED = 'FILTER_CRITERIA_ADDED';
-export const RECEIVE_FILTER_CRITERIAS = 'RECEIVE_FILTER_CRITERIAS';
 export const FILTER_CRITERIA_DELETED = 'FILTER_CRITERIA_DELETED';
 
 export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState) => {
@@ -53,30 +53,6 @@ export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState)
         });
 }
 
-export const getFilterCriterias = (context) => async (dispatch, getState) => {    
-    const {currentSummitState} = getState();
-    const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
-
-    const params = {
-        access_token: accessToken,
-        page: 1,
-        per_page: 10,
-        'filter[]'   : [`show_id==${currentSummit.id}`,`context==${context}`]
-    };
-
-    return getRequest(
-        null,
-        createAction(RECEIVE_FILTER_CRITERIAS),
-        `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
-        authErrorHandler,
-        {}
-    )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-}
-
 export const deleteFilterCriteria = (filterCriteriaId) => async (dispatch, getState) => {
 
     const accessToken = await getAccessTokenSafely();    
@@ -99,19 +75,26 @@ export const deleteFilterCriteria = (filterCriteriaId) => async (dispatch, getSt
     );    
 }
 
-export const queryFilterCriterias = _.debounce(async (summitId, input, callback) => {
+export const queryFilterCriterias = _.debounce(async (summitId, context, input, callback) => {
 
     const accessToken = await getAccessTokenSafely();
 
+    let apiUrl = URI(`${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`);
+    apiUrl.addQuery('access_token', accessToken);
+    apiUrl.addQuery('order','+name');
+    apiUrl.addQuery('order','+id');
+    apiUrl.addQuery('per_page', 10);
+    apiUrl.addQuery('show_id', `${summitId}`);
+    apiUrl.addQuery('context', `${context}`);
+
     input = escapeFilterValue(input);
+    apiUrl.addQuery('name__contains', `${input}`);
 
-    const params = `filter[]=show_id==${summitId}&filter[]=name@@${input}`;    
-
-    fetch(`${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias?${params}&access_token=${accessToken}`)
+    fetch(apiUrl.toString())
         .then(fetchResponseHandler)
         .then((json) => {
             const options = [...json.data];
             callback(options);
         })
-        .catch(fetchErrorHandler);
+    .catch(fetchErrorHandler);
 }, 500);

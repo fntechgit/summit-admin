@@ -39,7 +39,7 @@ import MediaTypeFilter from '../../components/filters/media-type-filter';
 import { ALL_FILTER } from '../../utils/constants';
 import SaveFilterCriteria from '../../components/filters/save-filter-criteria';
 import SelectFilterCriteria from '../../components/filters/select-filter-criteria';
-import { saveFilterCriteria, getFilterCriterias, deleteFilterCriteria } from '../../actions/filter-criteria-actions';
+import { saveFilterCriteria, deleteFilterCriteria } from '../../actions/filter-criteria-actions';
 import { CONTEXT_ACTIVITIES } from '../../utils/filter-criteria-constants';
 
 const fieldNames = [
@@ -223,7 +223,7 @@ class SummitEventListPage extends React.Component {
         });
 
         if(currentSummit) {
-            this.props.getEvents(term, 1, 10, order, orderDir, filters, extraColumns).then(() => this.props.getFilterCriterias(CONTEXT_ACTIVITIES))
+            this.props.getEvents(term, 1, 10, order, orderDir, filters, extraColumns)
         }
     }
 
@@ -402,19 +402,17 @@ class SummitEventListPage extends React.Component {
         this.props.saveFilterCriteria(filterToSave);
     }
 
-    handleFilterCriteriaChange(filterCriteriaId) {
-        const {filterCriterias} = this.props;
-        const filterCriteriaToApply = filterCriterias.find(fc => fc.id === filterCriteriaId);
+    handleFilterCriteriaChange(filterCriteria) {
         let newEventFilters = {}
-        Object.entries(filterCriteriaToApply.criteria).map(([key, values]) => {
+        Object.entries(filterCriteria.criteria).map(([key, values]) => {
             newEventFilters = {...newEventFilters, [key]: values};            
         })
         
         this.setState({
             ...this.state, 
             eventFilters: {...defaultFilters, ...newEventFilters}, 
-            enabledFilters: filterCriteriaToApply.enabled_filters, 
-            selectedFilterCriteria: filterCriteriaToApply
+            enabledFilters: filterCriteria.enabled_filters, 
+            selectedFilterCriteria: filterCriteria
         });
     }
 
@@ -424,7 +422,7 @@ class SummitEventListPage extends React.Component {
 
 
     render(){
-        const {currentSummit, events, lastPage, currentPage, order, orderDir, totalEvents, term, extraColumns, filters, filterCriterias} = this.props;
+        const {currentSummit, events, lastPage, currentPage, order, orderDir, totalEvents, term, extraColumns, filters} = this.props;
         const {enabledFilters, eventFilters, selectedFilterCriteria} = this.state;
 
         let columns = [
@@ -535,8 +533,6 @@ class SummitEventListPage extends React.Component {
             {label: T.translate("event_list.submission_status_not_submitted"), value: 'NonReceived'}
         ];
 
-        const filter_criteria_ddl = filterCriterias.map((fc => ({label: fc.name, value: fc.id})));
-
         const progress_flag_ddl = currentSummit.presentation_action_types.map(pf => ({value: pf.id, label: pf.label}))
 
         let showColumns = fieldNames
@@ -597,9 +593,9 @@ class SummitEventListPage extends React.Component {
                     <div className="col-md-6">
                         <SelectFilterCriteria 
                             summitId={currentSummit.id}
+                            context={CONTEXT_ACTIVITIES}
                             onDelete={this.handleFilterCriteriaDelete}
                             selectedFilterCriteria={selectedFilterCriteria}
-                            filterCriterias={filter_criteria_ddl}
                             onChange={this.handleFilterCriteriaChange} />
                     </div>
                 </div>
@@ -1156,7 +1152,6 @@ export default connect (
         importMP4AssetsFromMUX,
         changeEventListSearchTerm,
         saveFilterCriteria,
-        getFilterCriterias,
         deleteFilterCriteria
     }
 )(SummitEventListPage);

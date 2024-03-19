@@ -26,7 +26,7 @@ import
 
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { FILTER_CRITERIA_ADDED, RECEIVE_FILTER_CRITERIAS, FILTER_CRITERIA_DELETED } from '../../actions/filter-criteria-actions';
+import { FILTER_CRITERIA_ADDED, FILTER_CRITERIA_DELETED } from '../../actions/filter-criteria-actions';
 
 
 const DEFAULT_STATE = {
@@ -40,8 +40,7 @@ const DEFAULT_STATE = {
     totalEvents     : 0,
     summitTZ        : '',
     filters         : {},
-    extraColumns    : [],
-    filterCriterias : []
+    extraColumns    : []
 };
 
 const formatDuration = (duration) => {
@@ -119,10 +118,6 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
         case CHANGE_SEARCH_TERM: {
             let {term} = payload;
             return {...state, term};
-        }
-        case RECEIVE_FILTER_CRITERIAS: {
-            const {data} = payload.response;
-            return {...state, filterCriterias: data};
         }
         case FILTER_CRITERIA_ADDED: {
             const newFilterCriteria = payload.response;
