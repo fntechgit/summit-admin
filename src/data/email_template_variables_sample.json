@@ -324,7 +324,7 @@
     "type": "type",
     "until_date": "until_date",
     "virtual_event_site_link": "https://example-url.com",
-    "company_name": "company_name",
-    "contact_email": "contact_email@email.com",
-    "sponsor_tier_name": "sponsor_tier_name"
+    "company_name": "FNTECH",
+    "contact_email": "contact@fntech.com",
+    "sponsor_tier_name": "Gold"
 }
