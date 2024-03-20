@@ -119,15 +119,6 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
             let {term} = payload;
             return {...state, term};
         }
-        case FILTER_CRITERIA_ADDED: {
-            const newFilterCriteria = payload.response;
-            return {...state, filterCriterias: [...state.filterCriterias, newFilterCriteria]};
-        }
-        case FILTER_CRITERIA_DELETED: {
-            let {filterCriteriaId} = payload;
-            const filterCriterias = state.filterCriterias.filter(fc => fc.id !== filterCriteriaId);            
-            return {...state, filterCriterias}
-        }
         default:
             return state;
     }

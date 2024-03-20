@@ -290,6 +290,7 @@ class SummitEventListPage extends React.Component {
         const {order, orderDir, page, perPage, term} = this.props;
         const {eventFilters, selectedColumns} = this.state;
         this.props.getEvents(term, page, perPage, order, orderDir, eventFilters, selectedColumns);
+        this.setState({...this.state, selectedFilterCriteria: null})
     }
 
     handleExtraFilterChange(ev) {

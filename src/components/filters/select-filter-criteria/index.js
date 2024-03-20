@@ -50,10 +50,6 @@ const SelectFilterCriteria = ({ summitId, context, onDelete, selectedFilterCrite
 
     const getCriterias = (input, callback) => {
 
-        if (!input) {
-            return Promise.resolve({ options: [] });
-        }
-
         // we need to map into value/label because of a bug in react-select 2
         // https://github.com/JedWatson/react-select/issues/2998
 
@@ -75,6 +71,8 @@ const SelectFilterCriteria = ({ summitId, context, onDelete, selectedFilterCrite
                     placeholder={T.translate("select_filter_criteria.placeholder")}
                     onChange={handleFilterChange}
                     loadOptions={getCriterias}
+                    cacheOptions
+                    defaultOptions
                     {...rest}
                 />
             </div>
@@ -90,7 +88,7 @@ const SelectFilterCriteria = ({ summitId, context, onDelete, selectedFilterCrite
 }
 
 SelectFilterCriteria.propTypes = {
-    summitId: PropTypes.string.isRequired,
+    summitId: PropTypes.number.isRequired,
     context: PropTypes.string.isRequired,
     onDelete: PropTypes.func.isRequired,
     selectedFilterCriteria: PropTypes.object,
