@@ -57,6 +57,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
     const [templateLoaded, setTemplateLoaded] = useState(false);
     const [previewLoaded, setPreviewLoaded] = useState(false);
     const [mjmlWarning, setMjmlWarning] = useState(false);
+    const [mjmlRenderError, setMjmlRenderError] = useState(null);
 
     const previewRef = useRef(null);
 
@@ -124,13 +125,15 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
         if (mjmlEditor) {
             try {
                 const htmlContent = mjml2html(stateEntity.mjml_content, {
+                    validationLevel: 'strict',
                     keepComments: false,
                     collapseWhitespace: true,
                     minifyOptions: { collapseWhitespace: false }
                 }).html;
                 setStateEntity({ ...stateEntity, html_content: htmlContent })
+                setMjmlRenderError(null);
             } catch (err) {
-                console.log('error mjml to html', err)
+                setMjmlRenderError(err);
             }
         }
     }, [stateEntity.mjml_content, historyVersion])
@@ -478,6 +481,14 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
                                                         {renderErrors.map(err => (
                                                             <li>{err}</li>
                                                         ))}
+                                                    </ul>
+                                                </div>
+                                                :
+                                                mjmlRenderError?.message ? 
+                                                <div className='container'>
+                                                    There is an error trying to render the email template:
+                                                    <ul>
+                                                        {mjmlRenderError.message}
                                                     </ul>
                                                 </div>
                                                 :
