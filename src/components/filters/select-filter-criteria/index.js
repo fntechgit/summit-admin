@@ -11,7 +11,8 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import AsyncSelect from 'react-select/lib/Async';
@@ -19,12 +20,12 @@ import AsyncSelect from 'react-select/lib/Async';
 import styles from './index.module.less'
 import { queryFilterCriterias } from '../../../actions/filter-criteria-actions';
 
-const SelectFilterCriteria = ({ summitId, context, onDelete, filterCriterias, selectedFilterCriteria, onChange, ...rest }) => {
+const SelectFilterCriteria = ({ summitId, context, onDelete, selectedFilterCriteria, onChange, ...rest }) => {
 
     const [selectedFilter, setSelectedFilter] = useState(null);
 
     useEffect(() => {
-        if(!selectedFilterCriteria) setSelectedFilter(null);
+        if (!selectedFilterCriteria) setSelectedFilter(null);
     }, [selectedFilterCriteria])
 
     const handleFilterChange = (filter) => {
@@ -32,7 +33,7 @@ const SelectFilterCriteria = ({ summitId, context, onDelete, filterCriterias, se
         onChange(filter);
     }
 
-    const handleFilterDelete = () => {        
+    const handleFilterDelete = () => {
         Swal.fire({
             title: T.translate("general.are_you_sure"),
             text: T.translate("select_filter_criteria.remove_filter_criteria_warning") + `"${selectedFilter.label}"`,
@@ -72,7 +73,6 @@ const SelectFilterCriteria = ({ summitId, context, onDelete, filterCriterias, se
                     id={'filter_criteria_select'}
                     value={selectedFilter}
                     placeholder={T.translate("select_filter_criteria.placeholder")}
-                    defaultOptions={filterCriterias}
                     onChange={handleFilterChange}
                     loadOptions={getCriterias}
                     {...rest}
@@ -87,6 +87,14 @@ const SelectFilterCriteria = ({ summitId, context, onDelete, filterCriterias, se
             </div>
         </div>
     );
+}
+
+SelectFilterCriteria.propTypes = {
+    summitId: PropTypes.string.isRequired,
+    context: PropTypes.string.isRequired,
+    onDelete: PropTypes.func.isRequired,
+    selectedFilterCriteria: PropTypes.object,
+    onChange: PropTypes.func.isRequired,
 }
 
 export default SelectFilterCriteria;

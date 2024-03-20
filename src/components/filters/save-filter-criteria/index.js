@@ -11,9 +11,10 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import T from 'i18n-react/dist/i18n-react';
-import { Input, RadioList } from 'openstack-uicore-foundation/lib/components'
+import { Input, RadioList } from 'openstack-uicore-foundation/lib/components';
 import { hasErrors } from "../../../utils/methods";
 
 import styles from './index.module.less'
@@ -85,6 +86,11 @@ const SaveFilterCriteria = ({ onSave, selectedFilterCriteria }) => {
             </div>
         </div>
     );
+}
+
+SaveFilterCriteria.propTypes = {
+    onSave: PropTypes.func.isRequired,
+    selectedFilterCriteria: PropTypes.object,
 }
 
 export default SaveFilterCriteria;
