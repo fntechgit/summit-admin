@@ -153,7 +153,12 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
     {columnKey: 'sponsor_company_name', value: T.translate("sponsor_promocodes_list.sponsor"), sortable: true},
     {columnKey: 'tier_name', value: T.translate("sponsor_promocodes_list.tier"), sortable: true},
     {columnKey: 'code', value: T.translate("sponsor_promocodes_list.code"), sortable: true},
-    {columnKey: 'quantity_available', value: T.translate("sponsor_promocodes_list.quantity_available"), sortable: true},
+    {
+      columnKey: 'quantity_available',
+      value: T.translate("sponsor_promocodes_list.quantity_available"),
+      render: (row, val) => { return parseInt(val) === 0 ? T.translate("sponsor_promocodes_list.infinite") : val} ,
+      sortable: true
+    },
     {columnKey: 'quantity_used', value: T.translate("sponsor_promocodes_list.quantity_used"), sortable: true},
     {columnKey: 'email_sent', value: T.translate("sponsor_promocodes_list.email_sent"), sortable: true},
   ];
