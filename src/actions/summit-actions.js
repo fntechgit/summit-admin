@@ -374,6 +374,28 @@ export const savePrintAppMarketingSettings = (printAppMarketingSettings) => asyn
 }
 
 /**
+ * @param registrationInvitationsSettings
+ * @returns {function(*, *): Promise<unknown[]>}
+ */
+export const saveRegistrationInvitationsMarketingSettings = (registrationInvitationsSettings) => async (dispatch) => {
+
+    return Promise.all(Object.keys(registrationInvitationsSettings).map(m => {
+        
+        let value = registrationInvitationsSettings[m].value ?? '';
+
+        const mkt_setting = {
+            id: registrationInvitationsSettings[m].id,
+            type: registrationInvitationsSettings[m].type,
+            key: m.toUpperCase(),
+            value: value,
+        }
+
+        return dispatch(saveMarketingSetting(mkt_setting));
+    }));
+
+}
+
+/**
  * @returns {function(*, *): Promise<unknown[]>}
  */
 export const generateEncryptionKey = () => async (dispatch, getState) => {

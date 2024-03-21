@@ -17,7 +17,15 @@ import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import Restrict from '../../routes/restrict'
 import SummitForm from '../../components/forms/summit-form';
-import { getSummitById, resetSummitForm, saveSummit, attachLogo, deleteLogo, saveRegistrationLiteMarketingSettings, savePrintAppMarketingSettings, generateEncryptionKey }  from '../../actions/summit-actions';
+import { getSummitById, 
+        resetSummitForm, 
+        saveSummit, 
+        attachLogo, 
+        deleteLogo, 
+        saveRegistrationLiteMarketingSettings, 
+        savePrintAppMarketingSettings, 
+        saveRegistrationInvitationsMarketingSettings, 
+        generateEncryptionKey }  from '../../actions/summit-actions';
 import { deleteSelectionPlan, resetSelectionPlanForm } from '../../actions/selection-plan-actions';
 import { deleteRoomBookingAttributeType } from "../../actions/room-booking-actions";
 import {addHelpMember, removeHelpMember} from "../../actions/user-chat-roles-actions"
@@ -96,7 +104,7 @@ class EditSummitPage extends React.Component {
     render(){
         const {
             currentSummit, attachLogo, deleteLogo, errors, history, timezones, currentSummitRegLiteMarketingSettings, 
-            currentSummitPrintAppMarketingSettings, currentRegFeedMetadataListSettings
+            currentSummitPrintAppMarketingSettings, currentRegFeedMetadataListSettings, currentSummitRegistrationInvitationsMarketingSettings
         } = this.props;
 
         return(
@@ -109,6 +117,7 @@ class EditSummitPage extends React.Component {
                     regLiteMarketingSettings={currentSummitRegLiteMarketingSettings}
                     printAppMarketingSettings={currentSummitPrintAppMarketingSettings}
                     regFeedMetadataListSettings={currentRegFeedMetadataListSettings}
+                    registrationInvitationsSettings={currentSummitRegistrationInvitationsMarketingSettings}
                     timezones={timezones}
                     errors={errors}
                     onSubmit={this.props.saveSummit}
@@ -121,6 +130,7 @@ class EditSummitPage extends React.Component {
                     onDeleteHelpMember={this.props.removeHelpMember}
                     saveRegistrationLiteMarketingSettings={this.props.saveRegistrationLiteMarketingSettings}
                     savePrintAppMarketingSettings={this.props.savePrintAppMarketingSettings}
+                    saveRegistrationInvitationsMarketingSettings={this.props.saveRegistrationInvitationsMarketingSettings}
                     generateEncryptionKey={this.props.generateEncryptionKey}
                 />
             </div>
@@ -132,6 +142,7 @@ const mapStateToProps = ({ currentSummitState, baseState, currentRegFeedMetadata
     currentSummit: currentSummitState.currentSummit,
     currentSummitRegLiteMarketingSettings: currentSummitState.reg_lite_marketing_settings,
     currentSummitPrintAppMarketingSettings: currentSummitState.print_app_marketing_settings,
+    currentSummitRegistrationInvitationsMarketingSettings: currentSummitState.registration_invitations_marketing_settings,    
     currentRegFeedMetadataListSettings: currentRegFeedMetadataListState,
     errors: currentSummitState.errors,
     timezones: baseState.timezones,
@@ -153,6 +164,7 @@ export default Restrict(connect (
         resetSelectionPlanForm,
         saveRegistrationLiteMarketingSettings,
         savePrintAppMarketingSettings,
+        saveRegistrationInvitationsMarketingSettings,
         generateEncryptionKey
     }
 )(EditSummitPage), 'summit-edit');
