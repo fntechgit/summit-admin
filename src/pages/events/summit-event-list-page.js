@@ -404,6 +404,7 @@ class SummitEventListPage extends React.Component {
     }
 
     handleFilterCriteriaChange(filterCriteria) {
+        const {extraColumns, term, order, orderDir} = this.props;
         let newEventFilters = {}
         Object.entries(filterCriteria.criteria).map(([key, values]) => {
             newEventFilters = {...newEventFilters, [key]: values};            
@@ -414,7 +415,7 @@ class SummitEventListPage extends React.Component {
             eventFilters: {...defaultFilters, ...newEventFilters}, 
             enabledFilters: filterCriteria.enabled_filters, 
             selectedFilterCriteria: filterCriteria
-        });
+        }, () => this.props.getEvents(term, 1, 10, order, orderDir, this.state.eventFilters, extraColumns));
     }
 
     handleFilterCriteriaDelete(filterCriteriaId) {

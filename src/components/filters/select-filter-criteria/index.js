@@ -71,6 +71,7 @@ const SelectFilterCriteria = ({ summitId, context, onDelete, selectedFilterCrite
                     placeholder={T.translate("select_filter_criteria.placeholder")}
                     onChange={handleFilterChange}
                     loadOptions={getCriterias}
+                    isClearable={true}
                     cacheOptions
                     defaultOptions
                     {...rest}
