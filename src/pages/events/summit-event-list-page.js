@@ -419,7 +419,14 @@ class SummitEventListPage extends React.Component {
     }
 
     handleFilterCriteriaDelete(filterCriteriaId) {
-        this.props.deleteFilterCriteria(filterCriteriaId);
+        const {extraColumns, term, order, orderDir} = this.props;
+        this.props.deleteFilterCriteria(filterCriteriaId).then(() => 
+            this.setState({...this.state, 
+                eventFilters: {...defaultFilters, orAndFilter: ALL_FILTER},
+                enabledFilters: [],
+                selectedFilterCriteria: null
+            }, () => this.props.getEvents(term, 1, 10, order, orderDir, this.state.eventFilters, extraColumns))
+        );
     }
 
 
