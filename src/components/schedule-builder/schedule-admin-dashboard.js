@@ -296,7 +296,7 @@ class ScheduleAdminDashBoard extends React.Component {
     } = this.props;
     let trackId = currentTrack == null ? null : currentTrack.id;
     let eventTypeId = currentEventType == null ? null : currentEventType.id;
-    this.props.getUnScheduleEventsPage(currentSummit.id, currentPage, 20, eventTypeId, trackId, currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy, currentDuration);
+    this.props.getUnScheduleEventsPage(currentSummit.id, currentPage, 20, eventTypeId, trackId, currentPresentationSelectionStatus, currentPresentationSelectionPlan, unScheduleEventsCurrentSearchTerm, currentUnScheduleOrderBy, currentDuration, false);
   }
 
   onEventTypeChanged(eventType) {
@@ -479,8 +479,8 @@ class ScheduleAdminDashBoard extends React.Component {
     history.push(`/app/summits/${currentSummit.id}/events/${event.id}`);
   }
 
-  onClickSelected(event) {
-    this.props.setEventSelectedState(event);
+  onClickSelected(event, selected) {
+    this.props.setEventSelectedState(event, selected);
   }
 
   onUnPublishEvent(event) {
@@ -570,18 +570,18 @@ class ScheduleAdminDashBoard extends React.Component {
   }
 
   onSelectAllPublished(evt) {
-    let {scheduleEvents, setBulkEventSelectedState} = this.props;
-    setBulkEventSelectedState(scheduleEvents, evt.target.checked, true);
+    this.props.setBulkEventSelectedState(evt.target.checked, true);
   }
 
   onSelectAllUnPublished(evt) {
-    let {unScheduleEvents, setBulkEventSelectedState} = this.props;
-    setBulkEventSelectedState(unScheduleEvents, evt.target.checked, false);
+    this.props.setBulkEventSelectedState(evt.target.checked, false);
   }
 
   onSelectedBulkActionPublished(bulkAction) {
-    let {selectedPublishedEvents, performBulkAction} = this.props;
-    if (selectedPublishedEvents.length === 0) return;
+    let {selectedPublishedEvents, performBulkAction, selectedAllPublished} = this.props;
+
+    if (selectedPublishedEvents.length === 0 && !selectedAllPublished) return;
+
     if (bulkAction === BulkActionUnPublish) {
       Swal.fire({
         title: T.translate("schedule_builder_page.titles.bulk_unpublish_confirmation"),
@@ -593,19 +593,19 @@ class ScheduleAdminDashBoard extends React.Component {
         confirmButtonText: T.translate("schedule_builder_page.buttons.bulk_unpublish_confirmation"),
       }).then((result) => {
         if (result.value) {
-          performBulkAction(selectedPublishedEvents, bulkAction, true);
+          performBulkAction(bulkAction, true);
         }
       })
       return;
     }
 
-    performBulkAction(selectedPublishedEvents, bulkAction, true);
+    performBulkAction(bulkAction, true);
   }
 
   onSelectedBulkActionUnPublished(bulkAction) {
-    let {selectedUnPublishedEvents, performBulkAction} = this.props;
-    if (selectedUnPublishedEvents.length === 0) return;
-    performBulkAction(selectedUnPublishedEvents, bulkAction, false);
+    let {selectedUnPublishedEvents, selectedAllUnPublished, performBulkAction} = this.props;
+    if (selectedUnPublishedEvents.length === 0 && !selectedAllUnPublished) return;
+    performBulkAction(bulkAction, false);
   }
 
   onDurationFilterApplied(ev) {
@@ -725,8 +725,12 @@ class ScheduleAdminDashBoard extends React.Component {
       currentUnScheduleOrderBy,
       emptySpots,
       searchingEmpty,
+      selectedAllPublished,
       selectedPublishedEvents,
+      excludedPublishedEvents,
+      selectedAllUnPublished,
       selectedUnPublishedEvents,
+      excludedUnPublishedEvents,
       selectedFilters,
       slotSize,
       selectedSource
@@ -953,6 +957,8 @@ class ScheduleAdminDashBoard extends React.Component {
                 onPageChange={this.onUnScheduleEventsPageChange}
                 onClickSelected={this.onClickSelected}
                 selectedUnPublishedEvents={selectedUnPublishedEvents}
+                selectedAllUnPublished={selectedAllUnPublished}
+                excludedUnPublishedEvents={excludedUnPublishedEvents}
               />
             </div>
             }
@@ -1018,6 +1024,8 @@ class ScheduleAdminDashBoard extends React.Component {
                   summit={currentSummit}
                   scheduleEvents={scheduleEvents}
                   selectedEvents={selectedPublishedEvents}
+                  excludedEvents={excludedPublishedEvents}
+                  selectedAll={selectedAllPublished}
                   currentDay={currentDay}
                   currentVenue={currentLocation}
                   slotSize={slotSize}
@@ -1053,8 +1061,7 @@ function mapStateToProps({currentScheduleBuilderState, currentSummitState, summi
   return {
     ...currentScheduleBuilderState,
     currentSummit: currentSummitState.currentSummit,
-    selectedPublishedEvents: summitEventsBulkActionsState.selectedPublishedEvents,
-    selectedUnPublishedEvents: summitEventsBulkActionsState.selectedUnPublishedEvents,
+    ...summitEventsBulkActionsState,
   }
 }
 

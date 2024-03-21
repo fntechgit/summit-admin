@@ -49,29 +49,12 @@ import T from 'i18n-react/dist/i18n-react'
 
 class SummitEventsBulkActionsPage extends React.Component {
 
-    constructor(props) {
-        super(props);
-        // get events ids from query string
-        const { location, history } = this.props;
-        let query      = URI.parseQuery(location.search);
-
-        if(!query.hasOwnProperty('id[]')) {
-            history.push('/app/directory');
-            return;
-        }
-
-        let eventIds =  query['id[]'];
-        if(!Array.isArray(eventIds)) eventIds = [eventIds];
-        this.state = {
-            eventIds
-        }
-    }
-
     componentDidMount(){
-        const { currentSummit }  = this.props;
-        if(this.state == null || !this.state.hasOwnProperty('eventIds')) return;
+      const { location } = this.props;
+      const query = URI.parseQuery(location.search);
+      const { published }  = query;
 
-        this.props.getSummitEventsById(currentSummit.id, this.state.eventIds);
+      this.props.getSummitEventsById(published === 'true');
     }
 
     render(){
