@@ -23,6 +23,8 @@ import { queryFilterCriterias } from '../../../actions/filter-criteria-actions';
 const SelectFilterCriteria = ({ summitId, context, onDelete, selectedFilterCriteria, onChange, ...rest }) => {
 
     const [selectedFilter, setSelectedFilter] = useState(null);
+    const [defaultOptions, setDefaultOptions] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (!selectedFilterCriteria) setSelectedFilter(null);
@@ -43,24 +45,36 @@ const SelectFilterCriteria = ({ summitId, context, onDelete, selectedFilterCrite
             confirmButtonText: T.translate("general.yes")
         }).then((result) => {
             if (result.value) {
-                onDelete(selectedFilter.value)
+                onDelete(selectedFilter.value);
             }
         });
     }
 
     const getCriterias = (input, callback) => {
 
+        setIsLoading(true);
         // we need to map into value/label because of a bug in react-select 2
         // https://github.com/JedWatson/react-select/issues/2998
 
         const translateOptions = (options) => {
             const newOptions = options.map(c => ({ value: c.id, label: c.name, ...c }));
+            setIsLoading(false);
             callback(newOptions);
         };
 
         queryFilterCriterias(summitId, context, input, translateOptions);
     }
+    
+    const reloadDefaultOptions = () => {
+        getCriterias('', options => {
+            setDefaultOptions(options);
+        });
+    };
 
+    // On menu open, reload options to reflect removed/added options
+    const handleMenuOpen = () => {
+        reloadDefaultOptions(); // Reload default options whenever menu is opened
+    };
 
     return (
         <div className={`${styles.selectFilterWrapper} row`}>
@@ -72,8 +86,9 @@ const SelectFilterCriteria = ({ summitId, context, onDelete, selectedFilterCrite
                     onChange={handleFilterChange}
                     loadOptions={getCriterias}
                     isClearable={true}
-                    cacheOptions
-                    defaultOptions
+                    defaultOptions={defaultOptions}
+                    onMenuOpen={handleMenuOpen}
+                    isLoading={true}
                     {...rest}
                 />
             </div>
