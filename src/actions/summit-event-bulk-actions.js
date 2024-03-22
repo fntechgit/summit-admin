@@ -49,29 +49,50 @@ export const UPDATE_STREAMING_TYPE_BULK       = 'UPDATE_STREAMING_TYPE_BULK';
 export const UPDATE_MEETING_URL_BULK          = 'UPDATE_MEETING_URL_BULK';
 export const UPDATE_ETHERPAD_URL_BULK         = 'UPDATE_ETHERPAD_URL_BULK';
 
-export const getSummitEventsById = (published) => async (dispatch, getState) => {
+export const getSummitEventsById = (events) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    const filter = [`id==${events.join('||')}`]
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token : accessToken,
+        'filter[]': filter,
+        page: 1,
+        per_page: 200
+    };
+
+    return getRequest(
+      createAction(REQUEST_SELECTED_EVENTS),
+      createAction(RECEIVE_SELECTED_EVENTS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+        dispatch(createAction(UPDATE_VALIDATION_STATE)({currentSummit}));
+    })
+};
+
+export const getSummitEventsByFilters = () => async (dispatch, getState) => {
     const { currentSummitState, summitEventsBulkActionsState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     const {
-        selectedAllPublished, selectedPublishedEvents, publishedFilter, excludedPublishedEvents, selectedAllUnPublished,
-        selectedUnPublishedEvents, excludedUnPublishedEvents, unPublishedFilter, totalPublished, totalUnPublished
+        selectedAllUnPublished, selectedUnPublishedEvents, excludedUnPublishedEvents, unPublishedFilter, totalUnPublished
     } = summitEventsBulkActionsState
 
     dispatch(startLoading());
 
-    const total = published ? totalPublished : totalUnPublished;
-    const lastPage = Math.ceil(total / 200);
-    const selectedAll = published ? selectedAllPublished : selectedAllUnPublished;
-    const selected = published ? selectedPublishedEvents : selectedUnPublishedEvents;
-    const excluded = published ? excludedPublishedEvents : excludedUnPublishedEvents;
-    const filter = published ? [...publishedFilter, `published==1`] : [...unPublishedFilter, `published==0`];
+    const lastPage = Math.ceil(totalUnPublished / 200);
+    const filter = [...unPublishedFilter, `published==0`];
 
-    if (!selectedAll && selected.length > 0) {
+    if (!selectedAllUnPublished && selectedUnPublishedEvents.length > 0) {
         // we don't need the filter criteria, we have the ids
-        filter.push(`id==${selected.join('||')}`);
-    } else if (selectedAll && excluded.length > 0) {
-        filter.push(`not_id==${excluded.join('||')}`);
+        filter.push(`id==${selectedUnPublishedEvents.join('||')}`);
+    } else if (selectedAllUnPublished && excludedUnPublishedEvents.length > 0) {
+        filter.push(`not_id==${excludedUnPublishedEvents.join('||')}`);
     }
 
     const params = {
@@ -257,61 +278,44 @@ export const setEventSelectedState = (event, selected) => (dispatch) => {
     dispatch(createAction(UPDATE_EVENT_SELECTED_STATE)({event, selected}));
 }
 
-export const setBulkEventSelectedState = (selectedState, published) => (dispatch) => {
-    dispatch(createAction(UPDATE_EVENT_SELECTED_STATE_BULK)({events, selectedState, published} ));
+export const setBulkEventSelectedState = (selectedState) => (dispatch) => {
+    dispatch(createAction(UPDATE_EVENT_SELECTED_STATE_BULK)({selectedState} ));
 }
 
-export const performBulkAction = (bulkAction, published) => async (dispatch, getState) => {
+export const editBulkAction = (events) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+
+    const query = {events};
+
+    let url = URI(`/app/summits/${currentSummit.id}/events/bulk-actions`);
+    url     = url.query(query);
+    history.push(url.toString());
+}
+
+export const unPublishBulkAction = (eventIds) => async (dispatch, getState) => {
     const { currentSummitState,  currentScheduleBuilderState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }                       = currentSummitState;
     const { currentDay,  currentLocation }        = currentScheduleBuilderState;
 
-    switch(bulkAction){
-        case BulkActionEdit:{
-            const query = {published};
-
-            let url = URI(`/app/summits/${currentSummit.id}/events/bulk-actions`);
-            url     = url.query(query);
-            history.push(url.toString());
-        }
-        break;
-        case BulkActionUnPublish:{
-            const params = {
-                access_token: accessToken
-            }
-            dispatch(startLoading());
-
-            /* ADD THESE FILTERS FOR BULK SELECTION
-            if (!selectedAll && selectedInvitationsIds.length > 0) {
-                // we don't need the filter criteria, we have the ids
-                filter.push(`id==${selectedInvitationsIds.join('||')}`);
-            } else {
-                filter = parseFilters(filters, term);
-
-                if (selectedAll && excludedInvitationsIds.length > 0){
-                    filter.push(`not_id==${excludedInvitationsIds.join('||')}`);
-                }
-            }
-            */
-
-            deleteRequest(
-                null,
-                createAction(UPDATED_REMOTE_EVENTS)({}),
-                `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/publish`,
-                {
-                    events : eventsIds
-                },
-                authErrorHandler
-            )(params)(dispatch)
-            .then(() => {
-                    dispatch(stopLoading());
-                    getPublishedEventsBySummitDayLocation(currentSummit, currentDay, currentLocation)(dispatch, getState);
-                }
-            );
-        }
-        break;
+    const params = {
+        access_token: accessToken
     }
+    dispatch(startLoading());
+
+    deleteRequest(
+      null,
+      createAction(UPDATED_REMOTE_EVENTS)({}),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/publish`,
+      { events : eventIds},
+      authErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+            dispatch(stopLoading());
+            getPublishedEventsBySummitDayLocation(currentSummit, currentDay, currentLocation)(dispatch, getState);
+        }
+      );
 }
 
 export const updateEventsLocationLocal = (location) => (dispatch) => {

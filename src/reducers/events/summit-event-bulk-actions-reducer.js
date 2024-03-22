@@ -48,14 +48,11 @@ import
 
 const DEFAULT_STATE = {
     eventOnBulkEdition: [],
-    selectedAllPublished: false,
-    selectedPublishedEvents: [],
-    excludedPublishedEvents: [],
-    publishedFilter: [],
     selectedAllUnPublished: false,
     selectedUnPublishedEvents: [],
     excludedUnPublishedEvents: [],
-    unPublishedFilter: []
+    unPublishedFilter: [],
+    totalUnPublished: 0
 }
 
 const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
@@ -63,13 +60,7 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
 
     switch (type) {
         case CLEAR_PUBLISHED_EVENTS: {
-            return {
-                ...state,
-                selectedPublishedEvents: [],
-                eventOnBulkEdition: [],
-                selectedAllPublished: false,
-                excludedPublishedEvents: []
-            }
+            return { ...state, eventOnBulkEdition: [] }
         }
         case CLEAR_UNPUBLISHED_EVENTS: {
             return {
@@ -87,14 +78,6 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_UNSCHEDULE_EVENTS_PAGE: {
             let {total} = payload.response;
             return {...state, totalUnPublished: total}
-        }
-        case REQUEST_SCHEDULE_EVENTS_PAGE: {
-            const {publishedFilter} = payload;
-            return {...state, publishedFilter}
-        }
-        case RECEIVE_SCHEDULE_EVENTS_PAGE: {
-            let {total} = payload.response;
-            return {...state, totalPublished: total}
         }
         case UPDATE_VALIDATION_STATE: {
             const { currentSummit } = payload;
@@ -131,36 +114,20 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
         case UPDATE_EVENT_SELECTED_STATE:
         {
             const { event, selected } = payload;
-            const { selectedPublishedEvents, selectedUnPublishedEvents, selectedAllPublished, selectedAllUnPublished, excludedPublishedEvents, excludedUnPublishedEvents } = state;
+            const { selectedUnPublishedEvents, selectedAllUnPublished, excludedUnPublishedEvents } = state;
             let newState = {};
 
-            if (event?.is_published) {
-                if (selectedAllPublished) {
-                    newState = {excludedPublishedEvents: selected ? excludedPublishedEvents.filter(evid => evid !== event.id) : [...excludedPublishedEvents, event.id]}
-                } else {
-                    newState = {selectedPublishedEvents: selected ? [...selectedPublishedEvents, event.id] : selectedPublishedEvents.filter(evid => evid !== event.id)}
-                }
+            if (selectedAllUnPublished) {
+                newState = {excludedUnPublishedEvents: selected ? excludedUnPublishedEvents.filter(evid => evid !== event.id) : [...excludedUnPublishedEvents, event.id]}
             } else {
-                if (selectedAllUnPublished) {
-                    newState = {excludedUnPublishedEvents: selected ? excludedUnPublishedEvents.filter(evid => evid !== event.id) : [...excludedUnPublishedEvents, event.id]}
-                } else {
-                    newState = {selectedUnPublishedEvents: selected ? [...selectedUnPublishedEvents, event.id] : selectedUnPublishedEvents.filter(evid => evid !== event.id)}
-                }
+                newState = {selectedUnPublishedEvents: selected ? [...selectedUnPublishedEvents, event.id] : selectedUnPublishedEvents.filter(evid => evid !== event.id)}
             }
 
             return {...state, ...newState};
         }
         case UPDATE_EVENT_SELECTED_STATE_BULK:{
-            const { selectedState, published } = payload;
-            let newState = {};
-
-            if (published) {
-                newState = {selectedPublishedEvents: [], selectedAllPublished: selectedState};
-            } else {
-                newState = {selectedUnPublishedEvents: [], selectedAllUnPublished: selectedState};
-            }
-
-            return {...state, ...newState}
+            const { selectedState } = payload;
+            return {...state, selectedUnPublishedEvents: [], selectedAllUnPublished: selectedState}
         }
         case UPDATE_LOCATION_BULK:{
             let { location }      = payload;

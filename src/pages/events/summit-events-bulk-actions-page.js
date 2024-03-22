@@ -16,33 +16,34 @@ import URI from "urijs"
 import { Breadcrumb } from 'react-breadcrumbs';
 import SummitEventBulkEditorForm from '../../components/summit-event-bulk-actions/summit-event-bulk-editor-form';
 import {
-    getSummitEventsById,
-    updateEventLocationLocal,
-    updateEventTitleLocal,
-    updateEventStartDateLocal,
-    updateEventEndDateLocal,
-    updateEvents,
-    updateAndPublishEvents,
-    updateEventsLocationLocal,
-    updateEventsTypeLocal,
-    updateEventsStartDateLocal,
-    updateEventsEndDateLocal,
-    updateEventSelectionPlanLocal,
-    updateEventsSelectionPlanLocal,
-    updateEventActivityTypeLocal,
-    updateEventActivityCategoryLocal,
-    updateEventDurationLocal,
-    updateEventStreamingURLLocal,
-    updateEventStreamingTypeLocal,
-    updateEventMeetingURLLocal,
-    updateEventEtherpadURLLocal,
-    updateEventsActivityTypeLocal,
-    updateEventsActivityCategoryLocal,
-    updateEventsDurationLocal,
-    updateEventsStreamingURLLocal,
-    updateEventsStreamingTypeLocal,
-    updateEventsMeetingURLLocal,
-    updateEventsEtherpadURLLocal
+  getSummitEventsById,
+  getSummitEventsByFilters,
+  updateEventLocationLocal,
+  updateEventTitleLocal,
+  updateEventStartDateLocal,
+  updateEventEndDateLocal,
+  updateEvents,
+  updateAndPublishEvents,
+  updateEventsLocationLocal,
+  updateEventsTypeLocal,
+  updateEventsStartDateLocal,
+  updateEventsEndDateLocal,
+  updateEventSelectionPlanLocal,
+  updateEventsSelectionPlanLocal,
+  updateEventActivityTypeLocal,
+  updateEventActivityCategoryLocal,
+  updateEventDurationLocal,
+  updateEventStreamingURLLocal,
+  updateEventStreamingTypeLocal,
+  updateEventMeetingURLLocal,
+  updateEventEtherpadURLLocal,
+  updateEventsActivityTypeLocal,
+  updateEventsActivityCategoryLocal,
+  updateEventsDurationLocal,
+  updateEventsStreamingURLLocal,
+  updateEventsStreamingTypeLocal,
+  updateEventsMeetingURLLocal,
+  updateEventsEtherpadURLLocal
 } from '../../actions/summit-event-bulk-actions';
 import {getSummitById} from "../../actions/summit-actions";
 import T from 'i18n-react/dist/i18n-react'
@@ -52,9 +53,13 @@ class SummitEventsBulkActionsPage extends React.Component {
     componentDidMount(){
       const { location } = this.props;
       const query = URI.parseQuery(location.search);
-      const { published }  = query;
+      const { events }  = query;
 
-      this.props.getSummitEventsById(published === 'true');
+      if (events === 'unpublished') {
+        this.props.getSummitEventsByFilters();
+      } else {
+        this.props.getSummitEventsById(events);
+      }
     }
 
     render(){
@@ -147,6 +152,7 @@ export default connect (
     mapStateToProps,
     {
         getSummitEventsById,
+        getSummitEventsByFilters,
         getSummitById,
         updateEventLocationLocal,
         updateEventTitleLocal,
