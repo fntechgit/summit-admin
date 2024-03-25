@@ -112,7 +112,7 @@ const TicketTypeListPage = ({ ticketTypes, currentSummit, order , orderDir, curr
     ];
 
     const currencyOptions = currentSummit.supported_currencies.map(c => ({value: c, label: c}));
-    const defaultCurrency = currentSummit.default_ticket_type_currency;
+    const defaultCurrency = currentSummit.default_ticket_type_currency || ticketTypes?.[0]?.currency || 'USD';
 
     if (!currentSummit.id) return (<div />);
 
@@ -152,9 +152,6 @@ const TicketTypeListPage = ({ ticketTypes, currentSummit, order , orderDir, curr
                         </button>
                     }
                 </div>
-            </div>
-            <div className='row'>
-
             </div>
 
             {ticketTypes.length === 0 &&
