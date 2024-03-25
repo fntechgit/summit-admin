@@ -82,24 +82,27 @@ export const getSummitEventsByFilters = () => async (dispatch, getState) => {
     const {
         selectedAllUnPublished, selectedUnPublishedEvents, excludedUnPublishedEvents, unPublishedFilter, totalUnPublished
     } = summitEventsBulkActionsState
+    const pageSize = 50;
 
     dispatch(startLoading());
 
-    const lastPage = Math.ceil(totalUnPublished / 200);
+    let lastPage = Math.ceil(totalUnPublished / pageSize);
     const filter = [...unPublishedFilter, `published==0`];
 
     if (!selectedAllUnPublished && selectedUnPublishedEvents.length > 0) {
         // we don't need the filter criteria, we have the ids
         filter.push(`id==${selectedUnPublishedEvents.join('||')}`);
+        lastPage = Math.ceil(selectedUnPublishedEvents.length / pageSize);
     } else if (selectedAllUnPublished && excludedUnPublishedEvents.length > 0) {
         filter.push(`not_id==${excludedUnPublishedEvents.join('||')}`);
+        lastPage = Math.ceil((totalUnPublished - excludedUnPublishedEvents.length) / pageSize);
     }
 
     const params = {
         access_token : accessToken,
         'filter[]': filter,
         page: 1,
-        per_page: 200
+        per_page: pageSize
     };
 
     const promises = [];
