@@ -513,7 +513,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
             </div>
             <div className="row">
                 <div className="col-md-12 submit-buttons">
-                    <input type="button" onClick={handleSubmit}
+                    <input type="button" onClick={handleSubmit} disabled={mjmlEditor && mjmlRenderError !== null}
                         className="btn btn-primary pull-right" value={T.translate("general.save")} />
                     {/*<input type="button" onClick={this.handleSendTest}
                             className="btn btn-primary pull-right" value={T.translate("emails.send_test")}/>*/}
