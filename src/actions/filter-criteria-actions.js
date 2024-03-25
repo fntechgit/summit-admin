@@ -19,21 +19,21 @@ import {
     deleteRequest,
     createAction,
     stopLoading,
-    startLoading,    
+    startLoading,
     authErrorHandler,
     escapeFilterValue,
     fetchResponseHandler,
     fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {getAccessTokenSafely} from '../utils/methods';
+import { getAccessTokenSafely } from '../utils/methods';
 import URI from "urijs";
 
 export const FILTER_CRITERIA_ADDED = 'FILTER_CRITERIA_ADDED';
 export const FILTER_CRITERIA_DELETED = 'FILTER_CRITERIA_DELETED';
 
 export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState) => {
-    
-    const accessToken = await getAccessTokenSafely();    
+
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token: accessToken
@@ -46,7 +46,7 @@ export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState)
         createAction(FILTER_CRITERIA_ADDED),
         `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
         filterCriteria,
-        authErrorHandler
+        customErrorHandler
     )(params)(dispatch)
         .then(() => {
             dispatch(stopLoading());
@@ -55,24 +55,24 @@ export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState)
 
 export const deleteFilterCriteria = (filterCriteriaId) => async (dispatch, getState) => {
 
-    const accessToken = await getAccessTokenSafely();    
+    const accessToken = await getAccessTokenSafely();
 
     const params = {
         access_token: accessToken
     };
 
-    dispatch (startLoading());
+    dispatch(startLoading());
 
     return deleteRequest(
         null,
-        createAction(FILTER_CRITERIA_DELETED)({filterCriteriaId}),
+        createAction(FILTER_CRITERIA_DELETED)({ filterCriteriaId }),
         `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias/${filterCriteriaId}`,
         null,
         authErrorHandler
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );    
+        dispatch(stopLoading());
+    }
+    );
 }
 
 export const queryFilterCriterias = _.debounce(async (summitId, context, input, callback) => {
@@ -81,8 +81,8 @@ export const queryFilterCriterias = _.debounce(async (summitId, context, input, 
 
     let apiUrl = URI(`${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`);
     apiUrl.addQuery('access_token', accessToken);
-    apiUrl.addQuery('order','+name');
-    apiUrl.addQuery('order','+id');
+    apiUrl.addQuery('order', '+name');
+    apiUrl.addQuery('order', '+id');
     apiUrl.addQuery('per_page', 10);
     apiUrl.addQuery('show_id', `${summitId}`);
     apiUrl.addQuery('context', `${context}`);
@@ -96,5 +96,42 @@ export const queryFilterCriterias = _.debounce(async (summitId, context, input, 
             const options = [...json.data];
             callback(options);
         })
-    .catch(fetchErrorHandler);
+        .catch(fetchErrorHandler);
 }, 500);
+
+export const customErrorHandler = (err, res) => (dispatch, state) => {
+    const code = err.status;
+    let msg = '';
+
+    dispatch(stopLoading());
+
+    switch (code) {
+        case 412:
+            if (Array.isArray(err.response.body)) {
+                err.response.body.forEach(er => {
+                    msg += er + '<br>';
+                });
+            } else {
+                for (var [key, value] of Object.entries(err.response.body)) {
+                    if (isNaN(key)) {
+                        msg += key + ': ';
+                    }
+
+                    msg += value + '<br>';
+                }
+            }
+
+            Swal.fire("Validation error", msg, "warning");
+
+            if (err.response.body.errors) {
+                dispatch({
+                    type: VALIDATE,
+                    payload: { errors: err.response.body }
+                });
+            }
+
+            break;
+        default:
+            dispatch(authErrorHandler(err, res));
+    }
+}
