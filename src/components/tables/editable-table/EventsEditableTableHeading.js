@@ -29,7 +29,7 @@ const EventsEditableTableHeading = (props) => {
 
   const handleSort = (e) => {
     e.preventDefault();
-    if (!props.hasOwnProperty("onSort") || sortable) return;
+    if (!props.hasOwnProperty("onSort") || !sortable) return;
 
     onSort(columnIndex, columnKey, sortDir ? sortDir * -1 : 1, sortFunc);
   };

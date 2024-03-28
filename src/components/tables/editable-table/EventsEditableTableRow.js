@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { FormGroup, FormControl } from "react-bootstrap";
-import { Dropdown, Input } from "openstack-uicore-foundation/lib/components";
-import { SummitEvent } from "openstack-uicore-foundation/lib/models";
+import { Dropdown, Input, SpeakerInput } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react/dist/i18n-react";
 import Select from "react-select";
 import history from "../../../history";
+import { flattenEventData } from "../../../utils/summitUtils";
 
 const EventsEditableTableRow = (props) => {
   const {
     index,
     event,
+    columns,
     editEnabled,
     selected,
     updateSelected,
@@ -20,222 +21,258 @@ const EventsEditableTableRow = (props) => {
     activityTypeOptions,
     activtyCategoryOptions,
     actions,
-    updateEventTitle,
-    updateEventSelectionPlan,
-    updateEventActivityType,
-    updateEventActivityCategory,
-    updateEventStreamingURL,
-    updateEventMeetingURL,
-    updateEventEtherpadURL,
-    updateEventSpeakers
   } = props;
   const [checked, setChecked] = useState(false);
-  const [eventData, setEventData] = useState(event);
+  const speakersDefault = event.speakers?.length > 0 ? event.speakers : [];
+  const [speakersList, setSpeakers] = useState(speakersDefault);
+  const [editData, setEditData] = useState(event)
+
+  const dataDisplay = flattenEventData(event, currentSummit);
 
   useEffect(() => {
-    updateSelected(index, eventData, checked);
-  }, [checked, eventData]);
+    updateSelected(editData, checked);
+  }, [checked, event]);
   useEffect(() => {
     setChecked(selectAll);
   }, [selectAll]);
   useEffect(() => {
-    console.log('EventsEditableTableRow useEffect selected', selected);
+    console.log('selected', selected);
     if (selected.length === 0) {
       setChecked(false);
+      // setSpeakers(speakersDefault);
     }
   }, [selected]);
+  useEffect(() => {
+    const newEventData = {...editData, speakers: speakersList };
+    setEditData(newEventData);
+  }, [speakersList])
+  useEffect(() => {
+    updateSelected(editData, checked);
+  }, [editData])
 
-  const onActivityTypeChanged = (ev) => {
-    const event_type = activityTypeOptions.filter((a) => a.value === ev.target.value)[0]
-    ?.label;
-    updateEventActivityType(eventData, event_type);
+  const onActivityTypeChange = (ev) => {
+    const type_id = activityTypeOptions.filter((a) => a.value === ev.target.value)[0]
+    ?.value;
+    const newEventData = {...editData, type_id: type_id};
+    setEditData(newEventData);
+    // updateSelected(newEventData, checked)
   };
-  const onTitleChanged = (ev) => {
-    const title = ev.target.value
-    updateEventTitle(eventData, title);
+  const onTitleChange = (ev) => {
+    const title = ev.target.value;
+    const isValid = title !== null;
+    const newEventData = {...editData, title };
+    setEditData(newEventData);
+    // updateSelected(newEventData, checked);
   };
   const onSpeakersChange = (ev) => {
     const speakers = ev.target.value;
-    updateEventSpeakers(eventData, speakers);
+    setSpeakers([...speakersList, speakers]);
+  };
+  const onRemoveSpeaker = (speakerId) => {
+    const newSpeakers = speakersList.filter(s => s.id !== speakerId);
+    setSpeakers(newSpeakers);
+    const newEventData = {...editData, speakers: newSpeakers};
+    setEditData(newEventData);
+    // updateSelected(newEventData, checked);
   };
   const onActivityCategoryChange = (ev) => {
-    const track = activtyCategoryOptions.filter((a) => a.value === ev.target.value)[0]
-    ?.label;
-    updateEventActivityCategory(eventData, track);
+    const track_id = activtyCategoryOptions.filter((a) => a.value === ev.target.value)[0]
+    ?.value;
+    const newEventData = {...editData, track_id: track_id };
+    setEditData(newEventData);
+    // updateSelected(newEventData, checked);
   };
-  const onSelectionPlanChanged = (option) => {
-    const selectionPlan = option.label;
-    updateEventSelectionPlan(eventData, selectionPlan);
+  const onSelectionPlanChange = (option) => {
+    const selection_plan_id = selectionPlanOptions.filter(s => s.value === option.target.value)[0].value;
+    const newEventData = {...editData, selection_plan_id: selection_plan_id };
+    setEditData(newEventData);
+    // updateSelected(newEventData, checked);
+    // updateEventSelectionPlan(event, selectionPlan);
   };
-  const onStreamingURLChanged = (ev) => {
+  const onStreamingURLChange = (ev) => {
     const streaming_url = ev.target.value;
-    updateEventStreamingURL(eventData, streaming_url);
+    const newEventData = {...editData, streaming_url};
+    setEditData(newEventData);
+    // updateSelected(newEventData, checked);
+    // updateEventStreamingURL(event, streaming_url);
   };
-  const onMeetingURLChanged = (ev) => {
+  const onMeetingURLChange = (ev) => {
     const meeting_url = ev.target.value;
-    updateEventMeetingURL(eventData, meeting_url);
+    const newEventData = {...editData, meeting_url};
+    setEditData(newEventData);
+    // updateSelected(newEventData, checked);
+    // updateEventMeetingURL(event, meeting_url);
   };
-  const onEtherpadURLChanged = (ev) => {
+  const onEtherpadURLChange = (ev) => {
     const etherpad_link = ev.target.value;
-    updateEventEtherpadURL(eventData, etherpad_link);
+    const newEventData = {...editData, etherpad_link};
+    setEditData(newEventData);
+    // updateSelected(newEventData, checked);
+    // updateEventEtherpadURL(event, etherpad_link);
   };
-
-  const handleEdit = (event_id) =>
-    history.push(`/app/summits/${currentSummit.id}/events/${event_id}`);
-
+  
   return (
     <>
       <td className="bulk-edit-col-checkbox">
-        <Input
+        <input
           type="checkbox"
-          checked={checked}
           onChange={() => setChecked(!checked)}
+          checked={checked}
         />
       </td>
       {/** Event ID */}
       <td className="bulk-edit-col-id">{event.id}</td>
       {selected.find((s) => s.id === event.id) && editEnabled && checked ? (
         <>
-          {/** Activity / Event type */}
-          <td className="bulk-edit-col">
-            <FormGroup>
-              <Dropdown
-                id="type_id"
-                placeholder={
-                  eventData.event_type ||
-                  T.translate("bulk_actions_page.placeholders.event_type")
-                }
-                value={""}
-                onChange={onActivityTypeChanged}
-                options={activityTypeOptions}
-              />
-              <FormControl.Feedback />
-            </FormGroup>
-          </td>
-          {/** Title / Presentation Name*/}
-          <td className="bulk-edit-col">
-            <FormGroup>
-              <FormControl
-                type="text"
-                placeholder={T.translate(
-                  "bulk_actions_page.placeholders.event_title"
-                )}
-                onChange={onTitleChanged}
-                defaultValue={eventData.title}
-              />
-              <FormControl.Feedback />
-            </FormGroup>
-          </td>
-          {/** Selection Status */}
-          <td className="bulk-edit-col">{event.selection_status}</td>
-          {/** Speakers */}
-          <td className="bulk-edit-col">
-            <FormGroup>
-              <FormControl
-                type="text"
-                placeholder={T.translate(
-                  "bulk_actions_page.placeholders.speakers"
-                )}
-                onChange={onSpeakersChange}
-                defaultValue={eventData.speakers}
-              />
-              <FormControl.Feedback />
-            </FormGroup>
-          </td>
-          {/** Track / Activity Category */}
-          <td className="bulk-edit-col">
-            <FormGroup>
-              <Dropdown
-                id="track_activity"
-                placeholder={
-                  eventData.track ||
-                  T.translate("bulk_actions_page.placeholders.track")
-                }
-                value={eventData.track}
-                onChange={onActivityCategoryChange}
-                options={activtyCategoryOptions}
-              />
-              <FormControl.Feedback />
-            </FormGroup>
-          </td>
-          {/** Selection Plans */}
-          <td className="bulk-edit-col">
-            <FormGroup>
-              <Select
-                placeholder={
-                  eventData.selection_plan ||
-                  T.translate(
-                    "schedule.placeholders.select_presentation_selection_plan"
-                  )
-                }
-                className="selection_plan_selector"
-                name="form-field-name"
-                value={""}
-                onChange={onSelectionPlanChanged}
-                options={selectionPlanOptions}
-              />
-              <FormControl.Feedback />
-            </FormGroup>
-          </td>
-          {/** Published Date */}
-          <td className="bulk-edit-col">{event.published_date}</td>
-          {/** Streaming URL */}
-          <td className="bulk-edit-col">
-            <FormGroup>
-              <FormControl
-                type="text"
-                placeholder={T.translate(
-                  "bulk_actions_page.placeholders.streaming_url"
-                )}
-                onChange={onStreamingURLChanged}
-                defaultValue={eventData.streaming_url}
-              />
-              <FormControl.Feedback />
-            </FormGroup>
-          </td>
-          {/** Meeting URL */}
-          <td className="bulk-edit-col">
-            <FormGroup>
-              <FormControl
-                type="text"
-                placeholder={T.translate(
-                  "bulk_actions_page.placeholders.meeting_url"
-                )}
-                onChange={onMeetingURLChanged}
-                defaultValue={eventData.meeting_url}
-              />
-              <FormControl.Feedback />
-            </FormGroup>
-          </td>
-          {/** Etherpad URL */}
-          <td className="bulk-edit-col">
-            <FormGroup>
-              <FormControl
-                type="text"
-                placeholder={T.translate(
-                  "bulk_actions_page.placeholders.etherpad_link"
-                )}
-                onChange={onEtherpadURLChanged}
-                defaultValue={event.etherpad_link}
-              />
-              <FormControl.Feedback />
-            </FormGroup>
-          </td>
+          {columns.map(col => {
+            if(col.columnKey === "id") {
+              return;
+            }
+            else if (col.columnKey === "event_type") {
+              return (
+                <td className="bulk-edit-col">
+                  <FormGroup>
+                    <Dropdown
+                      id="type_id"
+                      placeholder={
+                        activityTypeOptions.find(at => at.value === event.type?.id).label ||
+                        T.translate("bulk_actions_page.placeholders.event_type")
+                      }
+                      value={""}
+                      onChange={onActivityTypeChange}
+                      options={activityTypeOptions}
+                    />
+                    <FormControl.Feedback />
+                  </FormGroup>
+                </td>
+              )
+            }
+            else if(col.columnKey === "title") {
+              return (
+                <td className="bulk-edit-col">
+                  <FormGroup>
+                    <FormControl
+                      type="text"
+                      placeholder={T.translate(
+                        "bulk_actions_page.placeholders.event_title"
+                      )}
+                      onChange={onTitleChange}
+                      defaultValue={event.title}
+                    />
+                    <FormControl.Feedback />
+                  </FormGroup>
+                </td>
+            )}
+            else if(col.columnKey === "speakers") {
+              return (
+                <td className="bulk-edit-col">
+                  <SpeakerInput
+                    id="speaker"
+                    value={''}
+                    onChange={onSpeakersChange}
+                    isClearable={true}
+                    placeholder={T.translate("edit_event.search_speakers")}
+                    getOptionLabel={(speaker) => `${speaker.first_name} ${speaker.last_name} (${speaker.email})`}
+                  />
+                  <div className="speakers-list">
+                    {speakersList?.length > 0 && speakersList.map(sp => <div className="speaker-list-pill" title={sp?.email} key={sp?.id}>{`${sp?.first_name} ${sp?.last_name}`} 
+                      <i className="fa fa-remove" onClick={() => onRemoveSpeaker(sp.id)} />
+                    </div>)}
+                  </div>
+                </td>
+            )}
+            else if(col.columnKey === "track") {
+              return (
+                <td className="bulk-edit-col">
+                  <FormGroup>
+                    <Dropdown
+                      id="track_activity"
+                      placeholder={
+                        activtyCategoryOptions.find(ac => ac.value === event.track?.id)?.label ||
+                        T.translate("bulk_actions_page.placeholders.track")
+                      }
+                      value={""}
+                      onChange={onActivityCategoryChange}
+                      options={activtyCategoryOptions}
+                    />
+                    <FormControl.Feedback />
+                  </FormGroup>
+                </td>
+            )}
+           else if(col.columnKey === "selection_plan") {
+              return (
+                <td className="bulk-edit-col">
+                  <FormGroup>
+                    <Dropdown
+                      id="selection_plan"
+                      placeholder={
+                        (event.selection_plan?.id !== undefined && selectionPlanOptions.find(sp => sp.id === event.selection_plan?.id)?.label) ||
+                        T.translate(
+                          "schedule.placeholders.select_presentation_selection_plan"
+                        )
+                      }
+                      value={""}
+                      onChange={onSelectionPlanChange}
+                      options={selectionPlanOptions}
+                    />
+                    <FormControl.Feedback />
+                  </FormGroup>
+                </td>
+            )}
+            else if(col.columnKey === "streaming_url") {
+              return (
+                <td className="bulk-edit-col">
+                  <FormGroup>
+                    <FormControl
+                      type="text"
+                      placeholder={T.translate(
+                        "bulk_actions_page.placeholders.streaming_url"
+                      )}
+                      onChange={onStreamingURLChange}
+                      defaultValue={event.streaming_url}
+                    />
+                    <FormControl.Feedback />
+                  </FormGroup>
+                </td>
+            )}
+            else if(col.columnKey === "meeting_url") {
+              return (
+                <td className="bulk-edit-col">
+                  <FormGroup>
+                    <FormControl
+                      type="text"
+                      placeholder={T.translate(
+                        "bulk_actions_page.placeholders.meeting_url"
+                      )}
+                      onChange={onMeetingURLChange}
+                      defaultValue={event.meeting_url}
+                    />
+                    <FormControl.Feedback />
+                  </FormGroup>
+                </td>
+            )}
+            else if(col.columnKey === "etherpad_link") {
+              return (
+                <td className="bulk-edit-col">
+                  <FormGroup>
+                    <FormControl
+                      type="text"
+                      placeholder={T.translate(
+                        "bulk_actions_page.placeholders.etherpad_link"
+                      )}
+                      onChange={onEtherpadURLChange}
+                      defaultValue={event.etherpad_link}
+                    />
+                    <FormControl.Feedback />
+                  </FormGroup>
+                </td>
+            )}
+            else {return (<td className="bulk-edit-col">{event[col.columKey]}</td>)}
+          })}         
         </>
-      ) : (
-        <>
-          <td>{event.event_type}</td>
-          <td>{event.title}</td>
-          <td>{event.selection_status}</td>
-          <td>{event.speakers}</td>
-          <td>{event.track}</td>
-          <td>{event.selection_plan}</td>
-          <td>{event.published_date}</td>
-          <td>{event.streaming_url}</td>
-          <td>{event.meeting_url}</td>
-          <td>{event.etherpad_link}</td>
-        </>
-      )}
+      ) : columns.map((col, i) => 
+            col.columnKey !== "id" && <td key={`${dataDisplay.id}${i}`}>{dataDisplay[col.columnKey]}</td>)
+      }
       {(actions.edit || actions.delete) && (
         <td className="action-display-tc">
           {actions.edit && (

@@ -31,6 +31,24 @@
             margin-right: 0;
         }
     }
+    .speakers-list {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        margin-top: 5px;
+        .speaker-list-pill {
+            background: #eaeaea;
+            padding: 5px 6px;
+            border-radius: 5px;
+            border: 0.5px solid #cbcbcbee;
+            i {
+                padding: 0 0 0 6px;
+                cursor: pointer;
+                color: #4e4e4e;
+            }
+        }
+    }
+    
     .form-group {
         margin-bottom: 0px;
     }
@@ -43,12 +61,20 @@
         }
         .action-display-tc {
             display: table-cell;
+            padding: 0 20px;
             i {
-                padding: 0 5px;
-                display: inherit;
+                padding: 0 10px;
+                display: inline;
                 cursor: pointer;
             }
         }
+        // div[class$='-placeholder'] {
+        //     text-overflow: ellipsis;
+        //     text-wrap: nowrap;
+        //     overflow: hidden;
+        //     max-width: 190px;
+        // }
+
     }
 }
 

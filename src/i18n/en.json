@@ -538,6 +538,7 @@
     "speaker_company": "Company",
     "speaker_email": "Email",
     "select_speaker": "Search a speaker to associate ...",
+    "search_speakers": "Search speaker(s)",
     "assign_speaker": "Add speaker",
     "unassign_speaker": "Are you sure you want to unassign speaker ",
     "no_speakers": "There are no speakers associated with this activity so far",

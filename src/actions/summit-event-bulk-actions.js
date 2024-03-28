@@ -315,7 +315,7 @@ export const updateEventsEtherpadURLLocal = (etherpadURL) => (dispatch) => {
     dispatch(createAction(UPDATE_ETHERPAD_URL_BULK)({etherpadURL}));
 }
 
-const normalizeBulkEvents = (entity) => {
+export const normalizeBulkEvents = (entity) => {
     const normalizedEntity = entity.map(e => {
         const normalizedEvent = {
             id: e.id,

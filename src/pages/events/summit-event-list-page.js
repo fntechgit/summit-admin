@@ -38,17 +38,9 @@ import {
   importEventsCSV,
   importMP4AssetsFromMUX,
   changeEventListSearchTerm,
-  updateEventTitle,
-  updateEventSelectionPlan,
-  updateEventActivityType,
-  updateEventActivityCategory,
-  updateEventStreamingURL,
-  updateEventMeetingURL,
-  updateEventEtherpadURL,
-  updateEventSpeakers,
-  setSelectedEvents
+  bulkUpdateEvents
 } from "../../actions/event-actions";
-import { updateEvents } from "../../actions/summit-event-bulk-actions";
+import { defaultColumns, editableColumns } from "../../utils/summitUtils";
 import { hasErrors, uuidv4 } from "../../utils/methods";
 import "../../styles/summit-event-list-page.less";
 import OrAndFilter from "../../components/filters/or-and-filter";
@@ -162,6 +154,7 @@ class SummitEventListPage extends React.Component {
     this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
     this.handleTermChange = this.handleTermChange.bind(this);
     this.handleOrAndFilter = this.handleOrAndFilter.bind(this);
+    this.handleResetData = this.handleResetData.bind(this);
 
     this.state = {
       showImportModal: false,
@@ -204,6 +197,7 @@ class SummitEventListPage extends React.Component {
         orAndFilter: ALL_FILTER,
       },
       selectedColumns: [],
+      page: 1,
     };
 
     this.extraFilters = {
@@ -311,14 +305,9 @@ class SummitEventListPage extends React.Component {
   }
 
   handlePageChange(page) {
-    console.log('page', page);
-    this.setState((prev) => {
-      if (prev.resetSelectedEventsTableState) {
-        return { resetSelectedEventsTableState: false };
-      }
-    });
     const { order, orderDir, perPage, term } = this.props;
     const { eventFilters, selectedColumns } = this.state;
+    this.setState({ page })
     this.props.getEvents(
       term,
       page,
@@ -639,6 +628,20 @@ class SummitEventListPage extends React.Component {
     return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
   }
 
+  handleResetData() {
+    const { order, orderDir, perPage, term, } = this.props;
+    const { eventFilters, selectedColumns, page } = this.state;
+    this.props.getEvents(
+      term,
+      page,
+      perPage,
+      order,
+      orderDir,
+      eventFilters,
+      selectedColumns
+    );
+  }
+
   render() {
     const {
       currentSummit,
@@ -651,20 +654,9 @@ class SummitEventListPage extends React.Component {
       term,
       extraColumns,
       filters,
-      eventBulkList,
-      updateEventTitle,
-      updateEventSelectionPlan,
-      updateEventActivityType,
-      updateEventActivityCategory,
-      updateEventStreamingURL,
-      updateEventMeetingURL,
-      updateEventEtherpadURL,
-      updateEventSpeakers,
-      setSelectedEvents
+      bulkUpdateEvents,
     } = this.props;
-    const { enabledFilters, eventFilters, resetSelectedEventsTableState } = this.state;
-
-    // console.log('eventBulkList =====================', eventBulkList);
+    const { enabledFilters, eventFilters, page } = this.state;
 
     let columns = [
       {
@@ -695,24 +687,17 @@ class SummitEventListPage extends React.Component {
         columnKey: "speakers",
         value: T.translate("event_list.speakers"),
         sortable: true,
-        editable: true,
+        editable: false,
       },
       {
         columnKey: "track",
         value: T.translate("event_list.track"),
         sortable: true,
-        editable: true,
+        editable: false,
       },
       {
         columnKey: "selection_plan",
         value: T.translate("event_list.selection_plan"),
-        sortable: true,
-        editable: true,
-      },
-
-      {
-        columnKey: "published_date",
-        value: T.translate("event_list.published"),
         sortable: true,
         editable: false,
       },
@@ -720,19 +705,19 @@ class SummitEventListPage extends React.Component {
         columnKey: "streaming_url",
         value: T.translate("event_list.streaming_url"),
         sortable: true,
-        editable: true,
+        editable: false,
       },
       {
         columnKey: "meeting_url",
         value: T.translate("event_list.meeting_url"),
         sortable: true,
-        editable: true,
+        editable: false,
       },
       {
         columnKey: "etherpad_link",
         value: T.translate("event_list.etherpad_link"),
         sortable: true,
-        editable: true,
+        editable: false,
       },
     ];
 
@@ -913,12 +898,13 @@ class SummitEventListPage extends React.Component {
     ];
 
     let showColumns = fieldNames
-      .filter((f) => this.state.selectedColumns.includes(f.columnKey))
+      .filter((f) => this.state.selectedColumns.includes(f.columnKey) && !defaultColumns.includes(f.columnKey))
       .map((f2) => {
         let c = {
           columnKey: f2.columnKey,
           value: T.translate(`event_list.${f2.value}`),
           sortable: f2.sortable,
+          editable: !!editableColumns.includes(f2.editable)
         };
         // optional fields
         if (f2.hasOwnProperty("title")) c = { ...c, title: f2.title };
@@ -1462,24 +1448,14 @@ class SummitEventListPage extends React.Component {
             <div className="summit-event-list-table-wrapper">
               <EventsEditableTable
                 currentSummit={currentSummit}
+                page={page}
                 options={table_options}
-                data={events}
+                events={events}
                 columns={columns}
-                eventBulkList={eventBulkList}
-                onSort={this.handleSort}
-                updateEvents={updateEvents}
+                handleSort={this.handleSort}
+                updateEvents={bulkUpdateEvents}
                 handleDeleteEvent={this.handleDeleteEvent}
-                setSelectedEvents={setSelectedEvents}
-                updateEventTitle={updateEventTitle}
-                updateEventSelectionPlan={updateEventSelectionPlan}
-                updateEventActivityType={updateEventActivityType}
-                updateEventActivityCategory={
-                  updateEventActivityCategory
-                }
-                updateEventStreamingURL={updateEventStreamingURL}
-                updateEventMeetingURL={updateEventMeetingURL}
-                updateEventEtherpadURL={updateEventEtherpadURL}
-                updateEventSpeakers={updateEventSpeakers}
+                resetData={this.handleResetData}
               />
             </div>
             <Pagination
@@ -1658,13 +1634,5 @@ export default connect(mapStateToProps, {
   importEventsCSV,
   importMP4AssetsFromMUX,
   changeEventListSearchTerm,
-  updateEventTitle,
-  updateEventSelectionPlan,
-  updateEventActivityType,
-  updateEventActivityCategory,
-  updateEventStreamingURL,
-  updateEventMeetingURL,
-  updateEventEtherpadURL,
-  updateEventSpeakers,
-  setSelectedEvents
+  bulkUpdateEvents
 })(SummitEventListPage);

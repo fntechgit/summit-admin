@@ -22,24 +22,15 @@ const EventsEditableTable = (props) => {
   const { 
     options, 
     columns, 
-    currentSummit, 
-    data,
-    eventBulkList,
+    currentSummit,
+    page,
+    events,
     handleSort,
     updateEvents,
     handleDeleteEvent,
-    updateEventTitle,
-    updateEventSelectionPlan,
-    updateEventActivityType,
-    updateEventActivityCategory,
-    updateEventStreamingURL,
-    updateEventMeetingURL,
-    updateEventEtherpadURL,
-    updateEventSpeakers,
-    setSelectedEvents,
+    resetData,
   } = props;
   let tableClass = options.hasOwnProperty("className") ? options.className : "";
-  const [allEvents, setAllEvents] = useState(data);
   const [editButton, setEditButton] = useState(false);
   const [editEnabled, setEditEnabled] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -66,29 +57,27 @@ const EventsEditableTable = (props) => {
     setEditButton(false);
     setEditEnabled(false);
     setSelected([]);
+    resetData();
   };
 
   // reseting states on data changes/pagination
   useEffect(() => {
     resetState();
-    setAllEvents(data);
-  }, [data]);
+  }, [page]);
 
-  useEffect(() => {
-    console.log('selected', selected);
+  useEffect(() => { 
     if (selected.length > 0) {
-      setSelectedEvents(selected);
       setEditButton(true);
     } else {
       setEditButton(false);
       setEditEnabled(false);
-      setSelectedEvents([]);
     }
+    console.log('selected', selected);
   }, [selected]);
 
   useEffect(() => {
     if (selectAll) {
-      setSelected(data);
+      setSelected(events);
       setSelectAll(true);
     } else {
       setSelectAll(false);
@@ -96,7 +85,7 @@ const EventsEditableTable = (props) => {
     }
   }, [selectAll]);
 
-  const updateSelected = (index, event, checked) => { 
+  const updateSelected = (event, checked) => { 
     let selectedEvent = event;
     const eventIndex = selected.findIndex((s) => s.id === selectedEvent.id);
     let exists = eventIndex !== -1;
@@ -113,26 +102,27 @@ const EventsEditableTable = (props) => {
         setSelected((currSelected) => [...currSelected, selectedEvent]);
       }
     } else {
-      setSelected(selected.filter((_, i) => i !== index));
+      setSelected(selected.filter((se) => se.id !== selectedEvent.id));
     }
   };
 
   const onUpdateEvents = (evt) => {
     evt.stopPropagation();
     evt.preventDefault();
-    let invalidEvents = eventBulkList.filter((event) => !event.is_valid);
-    if(invalidEvents.length > 0){
-        Swal.fire({
-            title: T.translate("bulk_actions_page.messages.validation_title"),
-            text:  T.translate("bulk_actions_page.messages.validation_message", {
-                event: invalidEvents.length === 1 ? 'event' : 'events', 
-                event_id: invalidEvents.map(e => e.id).join(', ')
-            }),
-            type: 'warning',
-        });
-        return;
-    }
-    // updateEvents(currentSummit.id, eventBulkList);
+    // let invalidEvents = eventBulkList.filter((event) => !event.is_valid);
+    // if(invalidEvents.length > 0){
+    //     Swal.fire({
+    //         title: T.translate("bulk_actions_page.messages.validation_title"),
+    //         text:  T.translate("bulk_actions_page.messages.validation_message", {
+    //             event: invalidEvents.length === 1 ? 'event' : 'events', 
+    //             event_id: invalidEvents.map(e => e.id).join(', ')
+    //         }),
+    //         type: 'warning',
+    //     });
+    //     return;
+    // }
+    updateEvents(currentSummit.id, selected);
+    resetState();
   };
 
   const onDelete = () => {};
@@ -168,7 +158,7 @@ const EventsEditableTable = (props) => {
             </button>
           )}
         </div>
-        <div>
+        {/* <div>
           <button
             className={`btn btn-danger right-space delete-button ${
               editButton ? "" : "disabled"
@@ -177,7 +167,7 @@ const EventsEditableTable = (props) => {
           >
             {T.translate("event_list.delete_selected")}
           </button>
-        </div>
+        </div> */}
       </div>
       <table className={"table table-striped selectableTable events-editable-table " + tableClass}>
         <thead>
@@ -236,7 +226,7 @@ const EventsEditableTable = (props) => {
         </thead>
         <tbody>
           {columns.length > 0 &&
-            allEvents.map((event, i) => {
+            events.map((event, i) => {
               if (Array.isArray(event) && event.length !== columns.length) {
                 console.warn(
                   `Data at row ${i} is ${event.length}. It should be ${columns.length}.`
@@ -261,15 +251,6 @@ const EventsEditableTable = (props) => {
                     selectionPlanOptions={selectionPlanOptions}
                     columns={columns}
                     actions={options.actions}
-                    updateEventTitle={updateEventTitle}
-                    updateEventSelectionPlan={updateEventSelectionPlan}
-                    updateEventActivityType={updateEventActivityType}
-                    updateEventActivityCategory={updateEventActivityCategory}
-                    updateEventStreamingURL={updateEventStreamingURL}
-                    updateEventMeetingURL={updateEventMeetingURL}
-                    updateEventEtherpadURL={updateEventEtherpadURL}
-                    updateEventSpeakers={updateEventSpeakers}
-                    setSelectedEvents={setSelectedEvents}
                   />
                 </tr>
               );
