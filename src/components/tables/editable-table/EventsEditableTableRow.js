@@ -98,8 +98,6 @@ const EventsEditableTableRow = (props) => {
     const newEventData = {...editData, etherpad_link};
     setEditData(newEventData);
   };
-
-  console.log('editEnabled,', editEnabled, "id", event.id, event.speakers?.length > 0 && editEnabled);
   
   return (
     <>

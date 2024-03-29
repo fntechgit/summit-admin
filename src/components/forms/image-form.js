@@ -134,7 +134,7 @@ class ImageForm extends React.Component {
                             value={entity[valueField]}
                             handleUpload={this.handleUploadFile}
                             handleRemove={this.handleRemoveFile}
-                            className=" col-md-6"
+                            className="dropzone col-md-6"
                             multiple={false}
                             accept="image/*"
                         />
