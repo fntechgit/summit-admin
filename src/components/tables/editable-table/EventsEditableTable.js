@@ -125,8 +125,6 @@ const EventsEditableTable = (props) => {
     resetState();
   };
 
-  const onDelete = () => {};
-
   return (
     <div>
       <hr />

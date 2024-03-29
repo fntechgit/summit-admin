@@ -683,42 +683,6 @@ class SummitEventListPage extends React.Component {
         sortable: true,
         editable: false,
       },
-      {
-        columnKey: "speakers",
-        value: T.translate("event_list.speakers"),
-        sortable: true,
-        editable: false,
-      },
-      {
-        columnKey: "track",
-        value: T.translate("event_list.track"),
-        sortable: true,
-        editable: false,
-      },
-      {
-        columnKey: "selection_plan",
-        value: T.translate("event_list.selection_plan"),
-        sortable: true,
-        editable: false,
-      },
-      {
-        columnKey: "streaming_url",
-        value: T.translate("event_list.streaming_url"),
-        sortable: true,
-        editable: false,
-      },
-      {
-        columnKey: "meeting_url",
-        value: T.translate("event_list.meeting_url"),
-        sortable: true,
-        editable: false,
-      },
-      {
-        columnKey: "etherpad_link",
-        value: T.translate("event_list.etherpad_link"),
-        sortable: true,
-        editable: false,
-      },
     ];
 
     const table_options = {

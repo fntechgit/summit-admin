@@ -65,21 +65,10 @@ export const FLAG_CHANGED = 'FLAG_CHANGED';
 export const REQUEST_EVENT_COMMENTS = 'REQUEST_EVENT_COMMENTS';
 export const RECEIVE_EVENT_COMMENTS = 'RECEIVE_EVENT_COMMENTS';
 export const CHANGE_SEARCH_TERM = 'CHANGE_SEARCH_TERM';
-
 export const ATTENDEES_EXPECTED_LEARNT = 'attendees_expected_learnt';
 export const ATTENDING_MEDIA = 'attending_media';
 export const LEVEL = 'level';
 export const SOCIAL_DESCRIPTION = 'social_description';
-
-// "bulk" inline edit actions
-export const UPDATE_EVENT_SPEAKERS = 'UPDATE_EVENT_SPEAKERS';
-export const UPDATE_EVENT_DATA_BULK = 'UPDATE_EVENT_DATA_BULK';
-export const UPDATE_EVENT_SELECTION_PLAN = 'UPDATE_EVENT_SELECTION_PLAN';
-export const UPDATE_EVENT_ACTIVITY_TYPE = 'UPDATE_EVENT_ACTIVITY_TYPE';
-export const UPDATE_EVENT_ACTIVITY_CATEGORY = 'UPDATE_EVENT_ACTIVITY_CATEGORY';
-export const UPDATE_EVENT_STREAMING_URL = 'UPDATE_EVENT_STREAMING_URL';
-export const UPDATE_EVENT_MEETING_URL = 'UPDATE_EVENT_MEETING_URL';
-export const UPDATE_EVENT_ETHERPAD_URL = 'UPDATE_EVENT_ETHERPAD_URL';
 export const UPDATED_REMOTE_EVENTS     = 'UPDATED_REMOTE_EVENTS';
 
 const fieldsBoundToQuestions = [ATTENDEES_EXPECTED_LEARNT, ATTENDING_MEDIA, LEVEL, SOCIAL_DESCRIPTION];
@@ -123,39 +112,6 @@ export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', ord
             return data.response;
         }
     );
-};
-
-export const updateEventTitle = (event, title, isValid) => (dispatch) => {
-    let mutator = (title, isValid) => event => ({...event, title, is_valid: isValid});
-    dispatch(createAction(UPDATE_EVENT_DATA)({ eventId: event.id, mutator: mutator(title, isValid)}));
-};
-export const updateEventSelectionPlan = (event, selection_plan, isValid) => (dispatch) => {
-    let mutator = (selection_plan, isValid) => event => ({...event, selection_plan, is_valid: isValid});
-    dispatch(createAction(UPDATE_EVENT_DATA)({ eventId: event.id, mutator: mutator(selection_plan, isValid)}));
-};
-export const updateEventActivityType = (event, event_type, isValid) => (dispatch) => {
-    let mutator = (event_type, isValid) => event => ({...event, event_type, is_valid: isValid});
-    dispatch(createAction(UPDATE_EVENT_DATA)({ eventId: event.id, mutator: mutator(event_type, isValid)}));
-}
-export const updateEventActivityCategory = (event, track, isValid) => (dispatch) => {
-    let mutator = (track, isValid) => event => ({...event, track, is_valid: isValid});
-    dispatch(createAction(UPDATE_EVENT_DATA)({ eventId: event.id, mutator: mutator(track, isValid)}));
-};
-export const updateEventStreamingURL = (event, streaming_url, isValid) => (dispatch) => {
-    let mutator = (streaming_url, isValid) => event => ({...event, streaming_url, is_valid: isValid});
-    dispatch(createAction(UPDATE_EVENT_DATA)({ eventId: event.id, mutator: mutator(streaming_url, isValid)}));
-};
-export const updateEventMeetingURL = (event, meeting_url, isValid) => (dispatch) => {
-    let mutator = (meeting_url, isValid) => event => ({...event, meeting_url, is_valid: isValid});
-    dispatch(createAction(UPDATE_EVENT_DATA)({ eventId: event.id, mutator: mutator(meeting_url, isValid)}));
-};
-export const updateEventEtherpadURL = (event, etherpad_link, isValid) => (dispatch) => {
-    let mutator = (etherpad_link, isValid) => event => ({...event, etherpad_link, is_valid: isValid});
-    dispatch(createAction(UPDATE_EVENT_DATA)({ eventId: event.id, mutator: mutator(etherpad_link, isValid)}));
-};
-export const updateEventSpeakers = (event, speakers, isValid) => (dispatch) => {
-    let mutator = (speakers, isValid) => event => ({...event, speakers, isValid});
-    dispatch(createAction(UPDATE_EVENT_DATA)({ eventId: event.id, mutator: mutator(speakers, isValid)}));
 };
 
 export const bulkUpdateEvents = (summitId, events) =>  async (dispatch, getState) => {
@@ -876,6 +832,7 @@ export const normalizeBulkEvents = (entity) => {
             track_id: e.track_id,
             duration: e.duration,
             streaming_url: e.streaming_url,
+            streaming_type: e.streaming_type,
             meeting_url: e.meeting_url,
             etherpad_link: e.etherpad_link,
         }
