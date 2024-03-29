@@ -13,7 +13,6 @@
 
 import React from 'react'
 import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
 import T from "i18n-react/dist/i18n-react";
 import SponsorForm from '../../components/forms/sponsor-form';
 import {
@@ -31,8 +30,11 @@ import {
     getSponsorMaterials,
     getSponsorSocialNetworks,
     updateSponsorAdsOrder,
-    updateSponsorMaterialOrder
+    updateSponsorMaterialOrder,
+    deleteExtraQuestion,
+    updateExtraQuestionOrder
 } from "../../actions/sponsor-actions";
+import Member from "../../models/member";
 
 class EditSponsorPage extends React.Component {
 
@@ -61,9 +63,11 @@ class EditSponsorPage extends React.Component {
     }
 
     render() {
-        const { currentSummit, entity, errors, match, history, sponsorships } = this.props;
+        const { currentSummit, entity, errors, history, sponsorships, member } = this.props;
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-
+        const memberObj = new Member(member);
+        const canEditSponsors = memberObj.canEditSponsors();
+        const canEditSponsorExtraQuestions = memberObj.canEditSponsorExtraQuestions();
         return (
             <div className="container">
                 <h3>{title} {T.translate("edit_sponsor.sponsor")}</h3>
@@ -89,6 +93,10 @@ class EditSponsorPage extends React.Component {
                     getSponsorAdvertisements={this.props.getSponsorAdvertisements}
                     getSponsorMaterials={this.props.getSponsorMaterials}
                     getSponsorSocialNetworks={this.props.getSponsorSocialNetworks}
+                    canEditSponsors={canEditSponsors}
+                    canEditSponsorExtraQuestions={canEditSponsorExtraQuestions}
+                    deleteExtraQuestion={this.props.deleteExtraQuestion}
+                    updateExtraQuestionOrder={this.props.updateExtraQuestionOrder}
                 />
                 }
             </div>
@@ -96,9 +104,10 @@ class EditSponsorPage extends React.Component {
     }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSponsorState, currentSummitSponsorshipListState }) => ({
+const mapStateToProps = ({ loggedUserState, currentSummitState, currentSponsorState, currentSummitSponsorshipListState }) => ({
     currentSummit: currentSummitState.currentSummit,
     sponsorships: currentSummitSponsorshipListState.sponsorships,
+    member       : loggedUserState.member,
     ...currentSponsorState
 });
 
@@ -120,5 +129,7 @@ export default connect(
         getSponsorSocialNetworks,
         updateSponsorAdsOrder,
         updateSponsorMaterialOrder,
+        deleteExtraQuestion,
+        updateExtraQuestionOrder
     }
 )(EditSponsorPage);

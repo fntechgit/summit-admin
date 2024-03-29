@@ -176,9 +176,10 @@ class NavMenu extends React.Component {
             },
             {name: 'sponsors', iconClass: 'fa-handshake-o', accessRoute: 'sponsors',
                 childs: [
-                    {name:'sponsor_list', linkUrl:`summits/${summit_id}/sponsors`, accessRoute: 'admin-sponsors'},
+                    {name:'sponsor_list', linkUrl:`summits/${summit_id}/sponsors`, accessRoute: 'sponsors'},
                     {name:'sponsorship_list', linkUrl:`summits/${summit_id}/sponsorships`, accessRoute: 'admin-sponsors'},
-                    {name:'badge_scans', linkUrl:`summits/${summit_id}/badge-scans`, accessRoute: 'sponsors'},
+                    {name:'sponsors_promocodes', linkUrl:`summits/${summit_id}/sponsors/promocodes`, accessRoute: 'admin-sponsors'},
+                    {name:'badge_scans', linkUrl:`summits/${summit_id}/badge-scans`, accessRoute: 'badge-scans'},
                 ]
             },
             {name:'locations', iconClass: 'fa-map-marker', linkUrl:`summits/${summit_id}/locations`, accessRoute: 'locations'},
@@ -221,7 +222,11 @@ class NavMenu extends React.Component {
             {name: 'tag_groups', iconClass: 'fa-tags', linkUrl:`summits/${summit_id}/tag-groups`, accessRoute: 'tag-groups' },
             {name: 'reports', iconClass: 'fa-list-ol', linkUrl:`summits/${summit_id}/reports`, accessRoute: 'reports' },
             {name: 'summitdocs', iconClass: 'fa-file-text', linkUrl:`summits/${summit_id}/summitdocs`, accessRoute: 'summitdocs' },
-            {name: 'email_flow_events', iconClass: 'fa-envelope-o   ', linkUrl:`summits/${summit_id}/email-flow-events`, accessRoute: 'email-flow-events' },
+            {name: 'email_flow_events', iconClass: 'fa-envelope-o', accessRoute: 'email-flow-events',
+                childs: [
+                    {name: 'email_flow_overrides', linkUrl:`summits/${summit_id}/email-flow-events`},
+                    {name: 'email_flow_settings', linkUrl:`summits/${summit_id}/email-flow-events-settings`},
+                ] },
             {   name: 'settings', iconClass: 'fa-cog', accessRoute: 'settings',
                 childs: [
                     {name:'marketing', linkUrl:`summits/${summit_id}/marketing`},

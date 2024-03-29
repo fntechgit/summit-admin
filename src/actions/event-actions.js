@@ -85,7 +85,9 @@ export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', ord
     const filter = parseFilters(filters, term);
 
     const params = {
-        expand: 'speakers,type,created_by,track,sponsors,selection_plan,location,tags,media_uploads,media_uploads.media_upload_type',
+        expand: 'speakers,type,created_by,track,sponsors,selection_plan,location,tags,media_uploads,media_uploads.media_upload_type,actions,actions.type',
+        relations: 'speakers.none,selection_plan.none,track.none,type.none,created_by.none,location.none,media_uploads.media_upload_type.none',
+        fields: 'location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,media_uploads.id,media_uploads.created,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id',
         page: page,
         per_page: perPage,
         access_token: accessToken,
@@ -754,22 +756,24 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
 
     if (normalizedEntity.hasOwnProperty("links")) delete normalizedEntity['links'];
 
-    if(normalizedEntity.hasOwnProperty("tags"))
-        normalizedEntity.tags = normalizedEntity.tags?.map((t) => {
+    if (normalizedEntity.hasOwnProperty("tags"))
+        normalizedEntity.tags = normalizedEntity.tags.map((t) => {
             if (typeof t === 'string') return t;
             else return t.tag;
         });
 
-    if(normalizedEntity.hasOwnProperty("sponsors"))
-        normalizedEntity.sponsors = normalizedEntity.sponsors?.map(s => s.id);
+    if (normalizedEntity.hasOwnProperty("sponsors"))
+        normalizedEntity.sponsors = normalizedEntity.sponsors.map(s => s.id);
 
-    if(normalizedEntity.hasOwnProperty("speakers"))
-        normalizedEntity.speakers = normalizedEntity.speakers?.map(s => s.id);
+    if (normalizedEntity.hasOwnProperty("speakers"))
+        normalizedEntity.speakers = normalizedEntity.speakers.map(s => s.id);
 
     if (normalizedEntity.hasOwnProperty("moderator") && normalizedEntity.moderator)
         normalizedEntity.moderator_speaker_id = normalizedEntity.moderator.id;
-    else
+    else {
         delete (normalizedEntity.moderator);
+        normalizedEntity.moderator_speaker_id = 0;
+    }
 
     if (normalizedEntity.hasOwnProperty("created_by")) {
         normalizedEntity.created_by_id = normalizedEntity.created_by?.id;
@@ -984,6 +988,13 @@ const parseFilters = (filters, term = null) => {
     if (filters.hasOwnProperty('selection_status_filter') && Array.isArray(filters.selection_status_filter)
         && filters.selection_status_filter.length > 0) {
         filter.push(`selection_status==${filters.selection_status_filter.join('||')}`);
+    }
+
+    if (filters?.progress_flag?.length > 0) {
+        filter.push(
+          filters.progress_flag
+            .map(pf => `actions==type_id==${pf}&&is_completed==1`)
+            .join(','));
     }
 
     if (filters.hasOwnProperty('track_id_filter') && Array.isArray(filters.track_id_filter)

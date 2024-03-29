@@ -37,6 +37,7 @@ import {
 import { isEmpty, scrollToError, shallowEqual, hasErrors, adjustEventDuration } from "../../utils/methods";
 import { Pagination } from "react-bootstrap";
 import ExtraQuestionsForm from 'openstack-uicore-foundation/lib/components/extra-questions';
+import QuestionsSet  from 'openstack-uicore-foundation/lib/utils/questions-set'
 import ProgressFlags from '../inputs/ProgressFlags';
 import { ATTENDEES_EXPECTED_LEARNT, ATTENDING_MEDIA, LEVEL, SOCIAL_DESCRIPTION } from "../../actions/event-actions";
 import AuditLogs from "../audit-logs";
@@ -299,12 +300,12 @@ class EventForm extends React.Component {
     }
 
     handleChangeExtraQuestion(formValues) {
-        const {extra_questions: extraQuestions} = this.state.entity?.selection_plan || {};
+        const qs = new QuestionsSet(this.state.entity?.selection_plan?.extra_questions || {});
         const formattedAnswers = [];
 
-        Object.keys(formValues).map(a => {
-            let question = extraQuestions.find(q => q.name === a);
-            const newQuestion = { question_id: question.id, value: `${formValues[a]}` }
+        Object.keys(formValues).map(name => {
+            let question = qs.getQuestionByName(name);
+            const newQuestion = { question_id: question.id, value: `${formValues[name]}` }
             formattedAnswers.push(newQuestion);
         });
 
@@ -708,6 +709,8 @@ render() {
         }
     };
 
+    const ticket_types_ddl = currentSummit.ticket_types.map(t => ({value: t.id, label: t.name}));
+
     return (
         <div>
             <input type="hidden" id="id" value={entity.id} />
@@ -823,7 +826,7 @@ render() {
                                 onChange={this.handleTimeChange}
                                 type="number"
                                 min="0"
-                                step="5"
+                                step="1"
                             />
                         </div>
                     </>
@@ -1420,6 +1423,26 @@ render() {
                 </Panel>
             }
 
+            <Panel
+              show={showSection === 'schedule_settings'}
+              title={T.translate("edit_event.schedule_settings")}
+              handleClick={this.toggleSection.bind(this, 'schedule_settings')}
+            >
+                <div className="row">
+                    <div className="col-md-4">
+                        <label> {T.translate("edit_event.allowed_ticket_types")}</label>
+                        <Dropdown
+                          id="allowed_ticket_types"
+                          value={entity?.allowed_ticket_types}
+                          placeholder={T.translate("edit_event.placeholders.allowed_ticket_types")}
+                          options={ticket_types_ddl}
+                          onChange={this.handleChange}
+                          isMulti
+                        />
+                    </div>
+                </div>
+            </Panel>
+
             <div className="row">
                 <div className="col-md-12 submit-buttons">
                     {!entity.is_published &&
@@ -1462,7 +1485,7 @@ render() {
                         </div>
                     }
 
-                    {entity.id &&
+                    {entity.id !== 0 &&
                         <div>
                             <input
                                 type="button"

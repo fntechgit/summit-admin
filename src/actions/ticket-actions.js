@@ -49,6 +49,8 @@ export const TICKET_EMAIL_SENT = 'TICKET_EMAIL_SENT';
 
 export const REQUEST_TICKET_TYPES = 'REQUEST_TICKET_TYPES';
 export const RECEIVE_TICKET_TYPES = 'RECEIVE_TICKET_TYPES';
+export const UPDATE_TICKET_TYPES_CURRENCY = 'UPDATE_TICKET_TYPES_CURRENCY';
+export const TICKET_TYPES_CURRENCY_UPDATED = 'TICKET_TYPES_CURRENCY_UPDATED';
 export const RECEIVE_TICKET_TYPE = 'RECEIVE_TICKET_TYPE';
 export const RESET_TICKET_TYPE_FORM = 'RESET_TICKET_TYPE_FORM';
 export const UPDATE_TICKET_TYPE = 'UPDATE_TICKET_TYPE';
@@ -283,7 +285,7 @@ export const getTickets =
             page: page,
             per_page: perPage,
             access_token: accessToken,
-            expand: 'owner,order,ticket_type,badge,badge.type,promo_code,promo_code.tags,refund_requests'
+            expand: 'owner,order,ticket_type,badge,badge.type,promo_code,promo_code.tags,refund_requests,refund_requests.refunded_taxes'
         };
 
         const filter = parseFilters(filters, term);
@@ -439,7 +441,7 @@ export const getTicket = (ticketId) => async (dispatch, getState) => {
 
     const params = {
         access_token: accessToken,
-        expand: 'badge,badge.features,promo_code,ticket_type,owner,owner.member,refund_requests,refund_requests.requested_by,refund_requests.action_by'
+        expand: 'badge,badge.features,promo_code,ticket_type,owner,owner.member,refund_requests,refund_requests.requested_by,refund_requests.action_by,refund_requests.refunded_taxes,refund_requests.refunded_taxes.tax,applied_taxes,applied_taxes.tax'
     };
 
     return getRequest(
@@ -726,6 +728,29 @@ export const getTicketTypes = (summit, order = 'name', orderDir = 1, currentPage
         }
     );
 };
+
+export const changeTicketTypesCurrency = (currency) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+        access_token: accessToken,
+    };
+
+    putRequest(
+      createAction(UPDATE_TICKET_TYPES_CURRENCY),
+      createAction(TICKET_TYPES_CURRENCY_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/ticket-types/all/currency/${currency}`,
+      {},
+      authErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+          dispatch(showSuccessMessage(T.translate("ticket_type_list.currency_updated")));
+      });
+}
 
 export const getTicketType = (ticketTypeId) => async (dispatch, getState) => {
 

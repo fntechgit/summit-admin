@@ -49,13 +49,14 @@ import PurchaseOrderLayout from './purchase-order-layout'
 import OrderExtraQuestionLayout from './order-extra-question-layout'
 import SponsorLayout from './sponsor-layout'
 import SummitSponsorshipLayout from './summit-sponsorship-layout'
-import BadgeScansListPage from '../pages/sponsors/badge-scans-list-page';
+import BadgeScansLayout from './badge-scans-layout'
 import NoMatchPage from '../pages/no-match-page';
 import TicketListPage from "../pages/tickets/ticket-list-page";
 import MarketingLayout from "./marketing-layout";
 import PaymentProfileLayout from "./payment-profile-layout";
 import SummitDocsLayout from "./summitdocs-layout";
 import EmailFlowEventLayout from "./email-flow-event-layout";
+import EmailFlowEventSettingsLayout from "./email-flow-event-settings-layout";
 import RegistrationInvitationLayout from "./registration-invitation-layout";
 import MediaUploadLayout from "./media-upload-layout";
 import ScheduleSettingsLayout from "./schedule-settings-layout";
@@ -155,10 +156,11 @@ class SummitIdLayout extends React.Component {
                     <Route path={`${match.url}/order-extra-questions`} component={OrderExtraQuestionLayout}/>
                     <Route path={`${match.url}/sponsors`} component={SponsorLayout}/>
                     <Route path={`${match.url}/sponsorships`} component={SummitSponsorshipLayout}/>
-                    <Route path={`${match.url}/badge-scans`} component={BadgeScansListPage}/>
+                    <Route path={`${match.url}/badge-scans`} component={BadgeScansLayout}/>
                     <Route path={`${match.url}/marketing`} component={MarketingLayout}/>
                     <Route path={`${match.url}/summitdocs`} component={SummitDocsLayout}/>
                     <Route path={`${match.url}/email-flow-events`} component={EmailFlowEventLayout}/>
+                    <Route path={`${match.url}/email-flow-events-settings`} component={EmailFlowEventSettingsLayout}/>
                     <Route path={`${match.url}/media-uploads`} component={MediaUploadLayout}/>
                     <Route path={`${match.url}/track-chairs`} component={TrackChairsLayout}/>
                     <Route path={`${match.url}/schedule-settings`} component={ScheduleSettingsLayout}/>

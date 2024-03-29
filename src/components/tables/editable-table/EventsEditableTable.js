@@ -37,7 +37,6 @@ const EventsEditableTable = (props) => {
   const [selectAll, setSelectAll] = useState(false);
   tableClass += options.actions?.edit ? " table-hover" : "";
 
-  const venuesOptions = getAllLocations(currentSummit);
   const activityTypeOptions = getAllEventTypes(currentSummit);
   const activtyCategoryOptions = getAllTrackCategory(currentSummit);
   const selectionPlanOptions = getAllSelectionPlans(currentSummit);
@@ -72,7 +71,6 @@ const EventsEditableTable = (props) => {
       setEditButton(false);
       setEditEnabled(false);
     }
-    console.log('selected', selected);
   }, [selected]);
 
   useEffect(() => {
@@ -109,18 +107,6 @@ const EventsEditableTable = (props) => {
   const onUpdateEvents = (evt) => {
     evt.stopPropagation();
     evt.preventDefault();
-    // let invalidEvents = eventBulkList.filter((event) => !event.is_valid);
-    // if(invalidEvents.length > 0){
-    //     Swal.fire({
-    //         title: T.translate("bulk_actions_page.messages.validation_title"),
-    //         text:  T.translate("bulk_actions_page.messages.validation_message", {
-    //             event: invalidEvents.length === 1 ? 'event' : 'events', 
-    //             event_id: invalidEvents.map(e => e.id).join(', ')
-    //         }),
-    //         type: 'warning',
-    //     });
-    //     return;
-    // }
     updateEvents(currentSummit.id, selected);
     resetState();
   };
@@ -156,16 +142,6 @@ const EventsEditableTable = (props) => {
             </button>
           )}
         </div>
-        {/* <div>
-          <button
-            className={`btn btn-danger right-space delete-button ${
-              editButton ? "" : "disabled"
-            }`}
-            onClick={onDelete}
-          >
-            {T.translate("event_list.delete_selected")}
-          </button>
-        </div> */}
       </div>
       <table className={"table table-striped selectableTable events-editable-table " + tableClass}>
         <thead>
@@ -235,7 +211,6 @@ const EventsEditableTable = (props) => {
               return (
                 <tr role="row" key={`row_${event["id"]}`}>
                   <EventsEditableTableRow
-                    index={i}
                     event={event}
                     currentSummit={currentSummit}
                     editEnabled={editEnabled}
@@ -243,7 +218,6 @@ const EventsEditableTable = (props) => {
                     updateSelected={updateSelected}
                     selectAll={selectAll}
                     deleteEvent={handleDeleteEvent}
-                    venuesOptions={venuesOptions}
                     activityTypeOptions={activityTypeOptions}
                     activtyCategoryOptions={activtyCategoryOptions}
                     selectionPlanOptions={selectionPlanOptions}

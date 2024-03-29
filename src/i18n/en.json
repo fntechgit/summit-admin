@@ -128,6 +128,7 @@
     "sponsors": "Sponsors",
     "sponsor_list": "Sponsor List",
     "sponsorship_list": "Sponsorships",
+    "sponsors_promocodes": "Promocodes",
     "badge_scans": "Badge Scans",
     "marketing": "Marketing",
     "payment_profiles_list": "Payment Profiles",
@@ -136,6 +137,8 @@
     "sent_email": "Sent Emails",
     "summitdocs": "Event Docs",
     "email_flow_events": "Email Events",
+    "email_flow_overrides": "Overrides",
+    "email_flow_settings": "Settings",
     "admin_access": "Admin Access Groups",
     "registration_invitation_list": "Registration Invitations",
     "registration_companies_list": "Registration Companies",
@@ -368,6 +371,7 @@
     "registration_feed_metadata": "Registration Feed Metadata",
     "add_registration_feed_metadata": "Add Feed Metadata",
     "no_reg_feed_metadata": "No registration feed metadata found.",
+    "url_registered_idp": "This url should be registered as allowed redirect uri at related OAUTH2 APP at IDP",
     "placeholders": {
       "api_feed_type": "Select API feed type...",
       "external_registration_feed_type": "Select Ext. Reg. feed type...",
@@ -543,6 +547,8 @@
     "unassign_speaker": "Are you sure you want to unassign speaker ",
     "no_speakers": "There are no speakers associated with this activity so far",
     "stream_is_secure": "Is Secure?",
+    "schedule_settings": "Schedule settings",
+    "allowed_ticket_types": "Allowed ticket types",
     "placeholders": {
       "select_venue": "Select an Activity Venue ...",
       "start_date": "Start Date",
@@ -554,7 +560,8 @@
       "select_selection_plan": "Select a Selection Plan ...",
       "select_submitter": "Select Submitter ...",
       "search_feedback": "Search by Author, Note",
-      "search_comment": "Search by Comment, Creator ID"
+      "search_comment": "Search by Comment, Creator ID",
+      "allowed_ticket_types": "Select ticket types"
     }
   },
   "edit_event_material": {
@@ -865,6 +872,8 @@
     "or": "OR",
     "quantity_available": "Quantity Available",
     "quantity_used": "Quantity Used",
+    "notes": "Notes",
+    "contact_email": "Contact Email",
     "valid_from_date": "Valid From",
     "valid_until_date": "Valid Until",
     "badge_type_id": "Badge Type",
@@ -883,6 +892,9 @@
       "select_ticket_types": "Select Ticket Types",
       "select_class_name": "Select a Class",
       "select_tags": "Select Tags"
+    },
+    "info":{
+      "quantity_available": "If zero is set, then Promo Code has no limit to be used"
     }
   },
   "discount_ticket": {
@@ -967,6 +979,7 @@
     "location": "Location",
     "level": "Level",
     "tags": "Tags",
+    "progress_flags": "Progress Flags",
     "streaming_url": "Streaming URL",
     "meeting_url": "Meeting URL",
     "etherpad_link": "Etherpad URL",
@@ -1019,6 +1032,7 @@
       "selection_plan": "Filter by Selection Plan",
       "location": "Filter by Location",
       "selection_status": "Filter by Selection Status",
+      "progress_flag": "Filter by Progress Flag",
       "track": "Filter by Activity Category",
       "event_type": "Filter by Activity Type",
       "speaker": "Filter by Speaker",
@@ -1092,8 +1106,11 @@
     "min_duration": "Min Duration (in minutes)",
     "max_duration": "Max Duration (in minutes)",
     "time_restrictions_info": "this only applies to track chairs",
+    "schedule_settings": "Schedule settings",
+    "allowed_ticket_types": "Allowed ticket types",
     "placeholders": {
-      "select_class": "Select Class"
+      "select_class": "Select Class",
+      "allowed_ticket_types": "Select ticket types"
     }
   },
   "event_category_list": {
@@ -1542,7 +1559,7 @@
     "refunded_amount": "Refunded Amount",
     "status": "Status",
     "order_number": "Order #",
-    "paid_amount": "Amount Paid",
+    "paid_amount": "Purchase Ticket Price",
     "badge": "Badge",
     "promocode": "Promocode",
     "attendee": "Attendee",
@@ -1581,8 +1598,11 @@
     "deactivate_warning": "Are you sure you want to Deactivate this Ticket?",
     "activate_warning": "Are you sure you want to Reactivate this Ticket?",
     "unassign_warning": "Are you sure you want to Unassign this Ticket?",
+    "net_selling_price": "Net Price",
     "refund": "Refund",
     "refund_modal_title": "Refund Ticket",
+    "refund_amount_info": "All taxes will be added automatically to the amount refunded if they apply",
+    "refund_amount_error": "The amount to refund cannot be higher than the net selling price plus the amount refunded",
     "refund_request_status": "Status",
     "refund_request_id": "#",
     "refund_requests": "Refund Requests",
@@ -1592,7 +1612,10 @@
     "refund_request_notes": "Notes",
     "refund_reject_modal_title": "Reject Refund Request",
     "refund_reject": "Reject Refund",
+    "refund_tax": "Tax Refunded",
+    "refund_total_amount": "Total Refunded Amount",
     "paid_amount_adjusted": "Amount Paid Adjusted",
+    "adjusted_total_ticket_purchase_price": "Adjusted Total Ticket Purchase Price",
     "activate_yes": "Yes, reactivate",
     "deactivate_yes": "Yes, deactivate",
     "unassign_yes": "Yes, Unassign",
@@ -1601,6 +1624,11 @@
     "apply_filters": "Apply Filters",
     "admin_notes": "Notes",
     "unassign": "Unassign",
+    "ticket_price": "Ticket Price",
+    "net_price": "Net Price",
+    "tax_name_rate": "{tax_name} Rate",
+    "tax_name_price": "{tax_name} Price",
+    "purchase_ticket_price": "Purchase Ticket Price",
     "placeholders": {
       "refund_notes": "Provide Optional Notes",
       "refund_reject_notes": "Provide Optional Notes",
@@ -1631,7 +1659,14 @@
     "badge_type_name": "Badge Type",
     "external_id": "External Id",
     "seed_tickets": "Seed Tickets from Eventbrite",
-    "remove_warning": "Are you sure you want to delete ticket type "
+    "apply": "Apply",
+    "remove_warning": "Are you sure you want to delete ticket type ",
+    "change_currency_warning": "Are you sure you want to change all ticket types currency to ",
+    "currency_updated": "Currency updated successfully",
+    "yes_change": "Yes, change.",
+    "placeholders": {
+      "select_currency": "Select currency"
+    }
   },
   "edit_ticket_type": {
     "ticket_type": "Ticket Type",
@@ -1970,7 +2005,7 @@
     "ticket_type": "Ticket Type",
     "ticket_qty": "Number of Tickets",
     "status": "Status",
-    "paid_amount": "Amount Paid",
+    "paid_amount": "Purchase Order Price",
     "payment_method": "Payment Method",
     "paid_amount_per_tix": "Amount Paid Per Ticket",
     "ticket_type_name": "Ticket Type",
@@ -2005,9 +2040,25 @@
     "order_cancel_refund": "Cancelled refund request successfully",
     "promo_code": "Promo Code",
     "refunded_amount": "Refunded Amount",
+    "total_refunded_amount": "Total Refunded Amount",
     "paid_amount_adjusted": "Amount Paid Adjusted",
     "credit_card_type": "Credit Card Type",
-    "credit_card_4number": "Credit Card last 4 numbers"
+    "credit_card_4number": "Credit Card last 4 numbers",
+    "purchase_history": "Purchase History",
+    "order_price": "Order Price:",
+    "net_price": "Net Price:",
+    "discount": "Discount:",
+    "tax_name_rate": "{tax_name} Rate:",
+    "tax_name_price": "{tax_name} Price:",
+    "refunded_ticket": "Refunded Ticket #",
+    "purchase_order_price": "Purchase Order Price",
+    "refunds": "Refunds",
+    "refunded_tax": "Refunded {tax_name}",
+    "total_refunded": "Total Refunded",
+    "adjusted_net_price": "Adjusted Net Price",
+    "adjusted_tax_price": "Adjusted {tax_name} Price",
+    "adjusted_order_price": "Adjusted  Order Price",
+    "adjusted_total_order_purchase_price": "Adjusted Total Order Purchase Price"
   },
   "sponsor_list": {
     "sponsors": "Sponsors",
@@ -2033,6 +2084,7 @@
     "sponsorship": "Sponsorship",
     "sponsorship_type":"Sponsorship Type",
     "sponsor_page": "Sponsor Page",
+    "extra_questions": "Extra Questions",
     "intro": "Intro",
     "marquee": "Marquee",
     "external_link": "External Link",
@@ -2053,6 +2105,7 @@
     "materials" : "Materials",
     "material": "Material",
     "add_materials" : "Add Material",
+    "extra_question" : "Extra Question",
     "social_networks" : "Social Networks",
     "social_network" : "Social Network",
     "add_social_networks" : "Add Social Network",
@@ -2071,9 +2124,13 @@
     "material_created": "Material created successfully",
     "social_network_saved": "Social Network saved successfully",
     "social_network_created": "Social Network created successfully",
+    "extra_question_saved": "Extra Question saved successfully",
+    "extra_question_created": "Extra Question created successfully",
     "remove_warning_ads": "Are you sure you want to delete advertisement ",
     "remove_warning_materials": "Are you sure you want to delete material ",
     "remove_warning_social_networks": "Are you sure you want to delete social network ",
+    "remove_warning_extra_question": "Are you sure you want to delete extra question ",
+    "remove_value_warning": "Are you sure you want to delete value ",
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start Typing to choose a Sponsorship Type",
@@ -2105,6 +2162,38 @@
     "sponsorship_created": "Sponsorship created successfully",
     "placeholders": {
       "select_size": "Select a Size"
+    }
+  },
+  "sponsor_promocodes_list": {
+    "no_sponsors": "No sponsors found for current search criteria.",
+    "promocodes_list": "Sponsor Promocode List",
+    "promocodes": "Promocodes",
+    "sponsor": "Sponsor",
+    "tier": "Tier",
+    "code": "Code",
+    "quantity_available": "# of Codes",
+    "quantity_used": "# of used Codes",
+    "email_sent": "Sent",
+    "feature_types": "Feature Types",
+    "ticket_types": "Ticket Types",
+    "contact_email": "Recipient",
+    "notes": "Notes",
+    "send_emails": "Send",
+    "resend_done": "Emails sent successfully.",
+    "select_template": "Select a Email Template to perform the action.",
+    "select_items": "Select at least one sponsor to perform the action.",
+    "items_qty": "Selected {qty} Sponsors",
+    "send_email_warning": "You are about to send the {template} email template to {qty} sponsors.",
+    "email_test_recipient": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
+    "invalid_recipient_email": "Please use a valid email",
+    "please_confirm": "Please confirm.",
+    "select_fields": "Show columns",
+    "add_promocode": "Add Promocode",
+    "infinite" : "Infinite",
+    "placeholders": {
+      "test_recipient": "Optional Test Recipient",
+      "search_promocodes": "Search Sponsors by Name, Tier, Code",
+      "select_fields": "Select data to display"
     }
   },
   "summit_sponsorship_list": {
@@ -2152,6 +2241,14 @@
     "placeholders": {
       "select_sponsor": "Select Sponsor"
     }
+  },
+  "edit_badge_scan": {
+    "badge_scan": "Badge Scan",
+    "attendee_name": "Attendee Full Name",
+    "attendee_company": "Attendee Company",
+    "notes": "Notes",
+    "extra_questions": "Extra Questions",
+    "badge_scan_saved": "Badge Scan saved successfully"
   },
   "marketing": {
     "settings": "Marketing Settings",
@@ -2278,6 +2375,19 @@
       "select_template": "Select template",
       "recipient": "Optional Recipient"
     }
+  },
+  "email_flow_events_settings": {
+    "email_flow_settings": "Settings",
+    "email_settings": "Email Settings",
+    "email_template_generic_banner": "EMAIL_TEMPLATE_GENERIC_BANNER",
+    "email_template_ticket_top_graphic": "EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC",
+    "email_template_ticket_bottom_graphic": "EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC",
+    "email_template_generic_speaker_banner": "EMAIL_TEMPLATE_GENERIC_SPEAKER_BANNER",
+    "email_template_generic_from": "EMAIL_TEMPLATE_GENERIC_FROM",
+    "email_template_speakers_from": "EMAIL_TEMPLATE_SPEAKERS_FROM",
+    "email_template_primary_color": "EMAIL_TEMPLATE_PRIMARY_COLOR",
+    "email_template_secondary_color": "EMAIL_TEMPLATE_SECONDARY_COLOR",
+    "email_template_settings_updated": "Email Settings Updated"
   },
   "admin_access": {
     "admin_accesses": "Admin Access Groups",
@@ -2785,5 +2895,29 @@
     "placeholders": {
       "search": "Search by content or author"
     }
+  },
+  "generic_extra_question_list": {
+    "extra_questions": "Extra Questions",
+    "question_type": "Question Type",
+    "question_id": "Question Identifier",
+    "visible_question": "Visible Question (as appears on site)",
+    "questions": "Questions",
+    "add_question": "Add Question",
+    "no_extra_questions": "No extra questions found.",
+    "remove_warning": "Are you sure you want to remove question "
+  },
+  "save_filter_criteria": {
+    "save_as": "Save As",
+    "visible_to": "Visible to",
+    "save": "Save",
+    "me": "Me",
+    "everyone": "Everyone",
+    "placeholders": {
+      "custom_name": "Custom Name"
+    }
+  },
+  "select_filter_criteria": {
+    "placeholder": "Select filter criteria",
+    "remove_filter_criteria_warning": "Are you sure you want to remove the filter criteria "
   }
 }

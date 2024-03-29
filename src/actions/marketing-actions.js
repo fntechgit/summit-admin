@@ -10,8 +10,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import T from "i18n-react/dist/i18n-react";
-import history from '../history'
 import {
     getRequest,
     postRequest,
@@ -19,11 +17,10 @@ import {
     createAction,
     stopLoading,
     startLoading,
-    showMessage,
-    showSuccessMessage,
     authErrorHandler,
     putFile,
-    postFile
+    postFile,
+    putRequest
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 
@@ -189,6 +186,10 @@ export const resetSettingForm = () => (dispatch, getState) => {
  * @returns {(function(*=, *): Promise<void>)|*}
  */
 export const saveMarketingSetting = (entity, file = null) => async (dispatch, getState) => {
+
+    if(entity.type === 'FILE' && !file) return Promise.resolve();
+    if(entity.type === 'HEX_COLOR' && !entity.value) return Promise.resolve();
+
     const {currentSummitState} = getState();
     const accessToken = await getAccessTokenSafely();
     const {currentSummit} = currentSummitState;
@@ -200,11 +201,26 @@ export const saveMarketingSetting = (entity, file = null) => async (dispatch, ge
 
 
     if (entity.id) {
-        return putFile(
+
+        if(file)
+            return putFile(
+                createAction(UPDATE_SETTING),
+                createAction(SETTING_UPDATED),
+                `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
+                file,
+                normalizedEntity,
+                customErrorHandler,
+                entity
+            )(params)(dispatch)
+                .then((payload) => {
+                    dispatch(stopLoading());
+                    return payload;
+                });
+        // regular PUT
+        return putRequest(
             createAction(UPDATE_SETTING),
             createAction(SETTING_UPDATED),
             `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
-            file,
             normalizedEntity,
             customErrorHandler,
             entity
@@ -215,11 +231,25 @@ export const saveMarketingSetting = (entity, file = null) => async (dispatch, ge
             });
     }
 
-    return postFile(
+    if(file)
+        return postFile(
+            createAction(UPDATE_SETTING),
+            createAction(SETTING_ADDED),
+            `${window.MARKETING_API_BASE_URL}/api/v1/config-values`,
+            file,
+            normalizedEntity,
+            customErrorHandler,
+            entity
+        )(params)(dispatch)
+            .then((payload) => {
+                dispatch(stopLoading());
+                return payload
+            });
+    // regular POST
+    return postRequest(
         createAction(UPDATE_SETTING),
         createAction(SETTING_ADDED),
         `${window.MARKETING_API_BASE_URL}/api/v1/config-values`,
-        file,
         normalizedEntity,
         customErrorHandler,
         entity
@@ -276,12 +306,15 @@ export const cloneMarketingSettings = (summitId) => async (dispatch, getState) =
 
 const normalizeEntity = (entity, summitId) => {
     const normalizedEntity = {...entity};
-
+    normalizedEntity['show_id'] = summitId;
     delete (normalizedEntity['id']);
     delete (normalizedEntity['created']);
     delete (normalizedEntity['modified']);
-    normalizedEntity.show_id = summitId;
+    if(entity.type !== 'FILE'){
+        delete(normalizedEntity['file'])
+    }
 
+    delete(normalizedEntity['file_preview'])
     return normalizedEntity;
 
 }
@@ -289,8 +322,6 @@ const normalizeEntity = (entity, summitId) => {
 export const customErrorHandler = (err, res) => (dispatch, state) => {
     const code = err.status;
     let msg = '';
-
-    console.log('asdkjahsdjkhaskdjaksjdhakjsdhajk')
 
     dispatch(stopLoading());
 

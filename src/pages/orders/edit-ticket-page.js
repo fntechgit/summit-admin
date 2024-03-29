@@ -66,6 +66,7 @@ class EditTicketPage extends React.Component {
         this.state = {
             refundAmount: '',
             refundNotes: '',
+            refundAmountError: false,
             showRefundModal: false,
             showRefundRejectModal:false,
             refundRejectNotes: '',
@@ -198,11 +199,21 @@ class EditTicketPage extends React.Component {
         const { refundAmount, refundNotes} = this.state;
         const { refundTicket, entity} = this.props;
 
-        if(parseFloat(refundAmount) > 0 &&  parseFloat(refundAmount) <= parseFloat(entity.final_amount)) {
+        const maxAllowedAmount2Refund = entity.net_selling_cost - entity.refunded_amount;
+
+        if (refundAmount > maxAllowedAmount2Refund) {
+            this.setState({...this.state,
+                refundAmountError: true
+            });
+            return
+        }
+        
+        if( parseFloat(refundAmount) > 0) {
 
             this.setState({...this.state,
                 refundAmount: '',
                 refundNotes: '',
+                refundAmountError: false,
                 showRefundModal: false
             });
 
@@ -231,12 +242,20 @@ class EditTicketPage extends React.Component {
 
     render(){
         const {currentSummit, currentOrder, loading, currentBadgePrints, entity, errors, match} = this.props;
-        const {showSection} = this.state;
+        const {showSection, refundAmountError} = this.state;
 
         const breadcrumb = `...${entity.number.slice(-20)}`;
 
         if (!entity || !entity.id) return (<div />);
         if (entity.order_id !== currentOrder.id) return (<div />);
+
+        const tax_columns = [...(entity.refund_requests_taxes?.map(t => {
+            return ({ 
+                columnKey: `tax_${t.tax.id}_refunded_amount`, 
+                value: t.tax.name,
+                render: (row, val) => { return val ?  val : '0'}
+            });
+        }) || [])];
 
         const refundRequestColumns = [
             { columnKey: 'id', value: T.translate("edit_ticket.refund_request_id") },
@@ -246,6 +265,8 @@ class EditTicketPage extends React.Component {
                 render: (c) => c.action_date ? moment(c.action_date * 1000).tz(currentSummit.time_zone_id).format('MMMM Do YYYY, h:mm a (z)') : 'TBD', },
             { columnKey: 'status', value: T.translate("edit_ticket.refund_request_status") },
             { columnKey: 'refunded_amount_formatted', value: T.translate("edit_ticket.refunded_amount") },
+            ...tax_columns,
+            { columnKey: 'total_refunded_amount_formatted', value: T.translate("edit_ticket.refund_total_amount") },
             { columnKey: 'notes', value: T.translate("edit_ticket.refund_request_notes") },
         ];
 
@@ -309,11 +330,50 @@ class EditTicketPage extends React.Component {
                    title={T.translate("edit_ticket.refund_requests")}
                    handleClick={this.toggleSection.bind(this, 'refund_requests')}
                  >
+                    <div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <label>{T.translate("edit_ticket.ticket_price")}</label> {`$${entity.raw_cost}`}
+                            </div>
+                            <div className="col-md-6">
+                                <label>{T.translate("edit_ticket.net_price")}</label> {`$${(entity.raw_cost - entity.discount)}`}
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <label>{T.translate("edit_ticket.discount")}</label> {`${entity.discount_rate}% ($${entity.discount})`}
+                            </div>
+                        </div>
+                        {entity?.applied_taxes.map((at, i) => {
+                            return (
+                                <div className="row" key={i}>
+                                    <div className="col-md-6">
+                                        <label>{T.translate("edit_ticket.tax_name_rate", {tax_name: at.tax.name})}</label>{` ${at.tax.rate}%`}
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label>{T.translate("edit_ticket.tax_name_price", {tax_name: at.tax.name})}</label>{` $${at.amount}`}
+                                    </div>
+                                </div>
+                            )
+                        })}
+                        <div className="row">
+                            <div className="col-md-6 col-md-offset-6">
+                                <label>{T.translate("edit_ticket.purchase_ticket_price")}</label> {`$${entity.final_amount}`}
+                            </div>
+                        </div>
+                    </div>                    
+                    
                      <Table
                        options={refundRequestOptions}
                        data={entity?.refund_requests}
                        columns={refundRequestColumns}
                      />
+                    
+                    <div className="row">
+                        <div className="col-md-12">
+                            <label>{T.translate("edit_ticket.adjusted_total_ticket_purchase_price")}</label> {entity.adjusted_total_ticket_purchase_price_formatted}
+                        </div>
+                    </div>
                  </Panel>
                }
 
@@ -379,16 +439,19 @@ class EditTicketPage extends React.Component {
                </Panel>
                 <Modal show={this.state.showRefundModal} onHide={() => this.setState({showRefundModal:false})} >
                     <Modal.Header closeButton>
-                        <Modal.Title>{T.translate("edit_ticket.refund_modal_title")}</Modal.Title>
+                        <Modal.Title>{T.translate("edit_ticket.refund_modal_title")}</Modal.Title>                        
+                        {`${T.translate("edit_ticket.net_selling_price")} ${entity.currency_symbol} ${entity.net_selling_cost}`}
                     </Modal.Header>
                     <Modal.Body>
                         <div className="row form-group">
-                            <div className="col-md-12">
+                            <div className="col-md-12 refund-input-wrapper">                                
                                 <input className="form-control" type="number" min="0"
                                        step=".01"
                                        placeholder="0.00"
                                        value={this.state.refundAmount}
                                        onChange={this.handleRefundChange} />
+                                <i className="fa fa-info-circle" aria-hidden="true" title={T.translate("edit_ticket.refund_amount_info")} />
+                                {refundAmountError && <span className='error-label'>{T.translate("edit_ticket.refund_amount_error")}</span>}
                             </div>
                         </div>
                         <div className="row form-group">

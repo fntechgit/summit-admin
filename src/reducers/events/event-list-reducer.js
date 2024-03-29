@@ -22,13 +22,12 @@ import
     REQUEST_EVENTS,
     EVENT_DELETED,
     CHANGE_SEARCH_TERM,
-    UPDATE_EVENT_DATA_BULK,
     UPDATED_REMOTE_EVENTS,
-    SET_SELECTED_EVENTS,
 } from '../../actions/event-actions';
 
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { FILTER_CRITERIA_ADDED, FILTER_CRITERIA_DELETED } from '../../actions/filter-criteria-actions';
 
 
 const DEFAULT_STATE = {
@@ -44,11 +43,6 @@ const DEFAULT_STATE = {
     filters         : {},
     extraColumns    : [],
 };
-
-const formatDuration = (duration) => {
-    let d = moment.duration(duration, 'seconds');
-    return d.format('mm:ss') !== '00' ? d.format('mm:ss') : 'TBD';
-}
 
 const eventListReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action

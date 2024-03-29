@@ -2,13 +2,11 @@ import React, { useEffect, useState } from "react";
 import { FormGroup, FormControl } from "react-bootstrap";
 import { Dropdown, Input, SpeakerInput } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react/dist/i18n-react";
-import Select from "react-select";
 import history from "../../../history";
 import { flattenEventData } from "../../../utils/summitUtils";
 
 const EventsEditableTableRow = (props) => {
   const {
-    index,
     event,
     columns,
     editEnabled,
@@ -36,10 +34,8 @@ const EventsEditableTableRow = (props) => {
     setChecked(selectAll);
   }, [selectAll]);
   useEffect(() => {
-    console.log('selected', selected);
     if (selected.length === 0) {
       setChecked(false);
-      // setSpeakers(speakersDefault);
     }
   }, [selected]);
   useEffect(() => {
@@ -49,20 +45,22 @@ const EventsEditableTableRow = (props) => {
   useEffect(() => {
     updateSelected(editData, checked);
   }, [editData])
+  useEffect(() => {
+    if (!editEnabled) {
+      setSpeakers(speakersDefault);
+    }
+  }, [editEnabled]);
 
   const onActivityTypeChange = (ev) => {
     const type_id = activityTypeOptions.filter((a) => a.value === ev.target.value)[0]
     ?.value;
     const newEventData = {...editData, type_id: type_id};
     setEditData(newEventData);
-    // updateSelected(newEventData, checked)
   };
   const onTitleChange = (ev) => {
     const title = ev.target.value;
-    const isValid = title !== null;
     const newEventData = {...editData, title };
     setEditData(newEventData);
-    // updateSelected(newEventData, checked);
   };
   const onSpeakersChange = (ev) => {
     const speakers = ev.target.value;
@@ -73,43 +71,35 @@ const EventsEditableTableRow = (props) => {
     setSpeakers(newSpeakers);
     const newEventData = {...editData, speakers: newSpeakers};
     setEditData(newEventData);
-    // updateSelected(newEventData, checked);
   };
   const onActivityCategoryChange = (ev) => {
     const track_id = activtyCategoryOptions.filter((a) => a.value === ev.target.value)[0]
     ?.value;
     const newEventData = {...editData, track_id: track_id };
     setEditData(newEventData);
-    // updateSelected(newEventData, checked);
   };
   const onSelectionPlanChange = (option) => {
     const selection_plan_id = selectionPlanOptions.filter(s => s.value === option.target.value)[0].value;
     const newEventData = {...editData, selection_plan_id: selection_plan_id };
     setEditData(newEventData);
-    // updateSelected(newEventData, checked);
-    // updateEventSelectionPlan(event, selectionPlan);
   };
   const onStreamingURLChange = (ev) => {
     const streaming_url = ev.target.value;
     const newEventData = {...editData, streaming_url};
     setEditData(newEventData);
-    // updateSelected(newEventData, checked);
-    // updateEventStreamingURL(event, streaming_url);
   };
   const onMeetingURLChange = (ev) => {
     const meeting_url = ev.target.value;
     const newEventData = {...editData, meeting_url};
     setEditData(newEventData);
-    // updateSelected(newEventData, checked);
-    // updateEventMeetingURL(event, meeting_url);
   };
   const onEtherpadURLChange = (ev) => {
     const etherpad_link = ev.target.value;
     const newEventData = {...editData, etherpad_link};
     setEditData(newEventData);
-    // updateSelected(newEventData, checked);
-    // updateEventEtherpadURL(event, etherpad_link);
   };
+
+  console.log('editEnabled,', editEnabled, "id", event.id, event.speakers?.length > 0 && editEnabled);
   
   return (
     <>
@@ -120,7 +110,6 @@ const EventsEditableTableRow = (props) => {
           checked={checked}
         />
       </td>
-      {/** Event ID */}
       <td className="bulk-edit-col-id">{event.id}</td>
       {selected.find((s) => s.id === event.id) && editEnabled && checked ? (
         <>

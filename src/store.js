@@ -74,6 +74,8 @@ import purchaseOrderListReducer from './reducers/orders/purchase-order-list-redu
 import purchaseOrderReducer from './reducers/orders/purchase-order-reducer';
 import sponsorListReducer from './reducers/sponsors/sponsor-list-reducer';
 import sponsorReducer from './reducers/sponsors/sponsor-reducer';
+import sponsorPromocodeListReducer from './reducers/sponsors/promocode-list-reducer';
+import sponsorExtraQuestionReducer from './reducers/sponsors/sponsor-extra-question-reducer';
 import sponsorshipListReducer from './reducers/sponsorships/sponsorship-list-reducer';
 import sponsorshipReducer from './reducers/sponsorships/sponsorship-reducer';
 import summitSponsorshipListReducer from './reducers/sponsors/summit-sponsorship-list-reducer';
@@ -140,6 +142,8 @@ import currentRegFeedMetadataListReducer from './reducers/summits/reg-feed-metad
 import currentRegFeedMetadataReducer from './reducers/summits/reg-feed-metadata-reducer';
 import badgePrintReducer from './reducers/tickets/badge-print-reducer';
 import notesReducer from './reducers/notes/notes-reducer';
+import emailFlowEventSettingsReducer from './reducers/email_flow_events/email-flows-event-settings-reducer';
+import badgeScanReducer from './reducers/sponsors/badge-scan-reducer';
 
  // default: localStorage if web, AsyncStorage if react-native
 
@@ -216,6 +220,8 @@ const reducers = persistCombineReducers(config, {
     currentPurchaseOrderState: purchaseOrderReducer,
     currentSponsorListState: sponsorListReducer,
     currentSponsorState: sponsorReducer,
+    currentSponsorPromocodeListState: sponsorPromocodeListReducer,
+    currentSponsorExtraQuestionState: sponsorExtraQuestionReducer,
     currentSponsorAdvertisementState: sponsorAdvertisementReducer,
     currentSponsorMaterialState: sponsorMaterialReducer,
     currentSponsorSocialNetworkState: sponsorSocialNetworkReducer,
@@ -229,6 +235,7 @@ const reducers = persistCombineReducers(config, {
     currentTicketListState: ticketListReducer,
     currentTicketState: ticketReducer,
     badgeScansListState: badgeScansListReducer,
+    currentBadgeScanState: badgeScanReducer,
     marketingSettingListState: marketingSettingListReducer,
     marketingSettingState: marketingSettingReducer,
     emailTemplateState: emailTemplateReducer,
@@ -238,6 +245,7 @@ const reducers = persistCombineReducers(config, {
     summitDocState: summitDocReducer,
     emailFlowEventsListState: emailFlowEventsListReducer,
     emailFLowEventState: emailFlowEventReducer,
+    emailFLowEventSettingsState: emailFlowEventSettingsReducer,
     RegistrationInvitationListState: RegistrationInvitationListReducer,
     SubmmissionInvitationListState: SubmmissionInvitationListReducer,
     currentSubmissionInvitationState: submissionInvitationReducer,
