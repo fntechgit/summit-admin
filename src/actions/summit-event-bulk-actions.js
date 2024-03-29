@@ -204,6 +204,7 @@ export const updateEventEtherpadURLLocal = (event, etherpadURL, isValid) => (dis
 
     dispatch(createAction(UPDATE_LOCAL_EVENT)({ eventId: event.id, mutator: mutator(etherpadURL, isValid)}));
 }
+
 export const updateEvents = (summitId, events) =>  async (dispatch, getState) => {
 
     const { currentSummitState } = getState();
@@ -377,6 +378,7 @@ const normalizeBulkEvents = (entity) => {
             streaming_url: e.streaming_url,
             streaming_type: e.streaming_type,
             meeting_url: e.meeting_url,
+            etherpad_link: e.etherpad_link
         }
         for (let property in normalizedEvent) {
             if (normalizedEvent[property] === undefined || normalizedEvent[property] === null) {
