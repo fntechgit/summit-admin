@@ -247,6 +247,7 @@ const nestedLookup = (json, key) => {
 };
 
 export const parseSpeakerAuditLog = (logString) => {
+    
     const logEntries = logString.split('|');
     const userChanges = {};
     const emailRegExp = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
@@ -265,10 +266,10 @@ export const parseSpeakerAuditLog = (logString) => {
     for (const [email, changeCount] of Object.entries(userChanges)) {
         if (changeCount !== 0) {
             relevantChanges.push(`Speaker ${email} ${changeCount > 0 ? 'was added to the collection' : 'was removed from the collection'}`);
+        }
     }
-  }
 
-  return relevantChanges.join('|');
+    return relevantChanges.length > 0 ? relevantChanges.join('|') : logString;
 }
 
 export const formatAuditLog = (logString) => {
