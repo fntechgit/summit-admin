@@ -1,6 +1,7 @@
 import{ VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
 import{ LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT, REQUEST_SUMMIT,RECEIVE_SUMMIT, UPDATE_SUMMIT, SUMMIT_ADDED, RESET_SUMMIT_FORM, SUMMIT_LOGO_ATTACHED, SUMMIT_LOGO_DELETED, CLEAR_SUMMIT, REGISTRATION_KEY_GENERATED } from '../../actions/summit-actions';
+import { SET_CURRENT_SUMMIT, REQUEST_SUMMIT,RECEIVE_SUMMIT, UPDATE_SUMMIT, SUMMIT_ADDED, RESET_SUMMIT_FORM, SUMMIT_LOGO_ATTACHED,
+    SUMMIT_LOGO_DELETED, CLEAR_SUMMIT, REGISTRATION_KEY_GENERATED, RECEIVE_LEAD_REPORT_SETTINGS_META, LEAD_REPORT_SETTINGS_UPDATED } from '../../actions/summit-actions';
 import { EVENT_CATEGORY_UPDATED, EVENT_CATEGORY_ADDED, EVENT_CATEGORY_DELETED, EVENT_CATEGORIES_SEEDED, UNLINK_SUBTRACK } from '../../actions/event-category-actions';
 import { EVENT_TYPE_UPDATED, EVENT_TYPE_ADDED, EVENT_TYPE_DELETED, EVENT_TYPES_SEEDED } from '../../actions/event-type-actions';
 import {
@@ -43,6 +44,7 @@ import { RECEIVE_REFUND_POLICIES } from "../../actions/ticket-actions";
 import {RECEIVE_ORDER_EXTRA_QUESTIONS, RECEIVE_MAIN_ORDER_EXTRA_QUESTIONS, ORDER_EXTRA_QUESTION_ADDED} from "../../actions/order-actions";
 import {RECEIVE_PRINT_APP_SETTINGS, RECEIVE_REG_LITE_SETTINGS} from "../../actions/marketing-actions";
 import { REG_LITE_BOOLEAN_SETTINGS } from '../../utils/constants.js';
+import { denormalizeLeadReportSettings, renderOptions, updateSummitLeadReportSettings } from "../../models/lead-report-settings";
 
 export const DEFAULT_ENTITY = {
     id: 0,
@@ -132,6 +134,7 @@ export const DEFAULT_ENTITY = {
     speaker_confirmation_default_page_url: '',
     marketing_site_oauth2_client_id:null,
     marketing_site_oauth2_client_scopes: null,
+    available_lead_report_columns: [],
 };
 
 const DEFAULT_REG_LITE_MARKETING_SETTINGS = {
@@ -444,6 +447,14 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
             const newMarketingSettings = { ...DEFAULT_STATE.print_app_marketing_settings, ...print_app_marketing_settings};
 
             return {...state, print_app_marketing_settings: newMarketingSettings}
+        }
+        case RECEIVE_LEAD_REPORT_SETTINGS_META: {
+            const availableColumns = renderOptions(denormalizeLeadReportSettings(payload.response));
+            return {...state, available_lead_report_columns: availableColumns};
+        }
+        case LEAD_REPORT_SETTINGS_UPDATED: {
+            const updatedSettings = updateSummitLeadReportSettings(state.currentSummit, payload.response);
+            return {...state, currentSummit: {...state.currentSummit, lead_report_settings: updatedSettings}};
         }
         default:
             return state;

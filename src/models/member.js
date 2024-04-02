@@ -108,6 +108,13 @@ class Member {
         }
         return false;
     }
+
+    canEditLeadReportSettings(){
+        for (var i in this._member.groups) {
+            if (access['lead-report-settings-edit'].includes(this._member.groups[i].code)) return true;
+        }
+        return false;
+    }
 }
 
 export default Member;

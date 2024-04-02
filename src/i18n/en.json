@@ -2069,6 +2069,7 @@
     "order": "Order",
     "remove_warning": "Are you sure you want to delete sponsor ",
     "placeholders": {
+      "lead_report_columns": "Select lead report columns to show",
       "search_sponsors": "Search by Sponsorship, Company, Size"
     }
   },
@@ -2916,5 +2917,10 @@
   "select_filter_criteria": {
     "placeholder": "Select filter criteria",
     "remove_filter_criteria_warning": "Are you sure you want to remove the filter criteria "
+  },
+  "lead_report_settings": {
+    "all_questions_prefix": "All Questions",
+    "attendee_question_prefix": "Attendee Extra Question",
+    "sponsor_question_prefix": "Sponsor Extra Question"
   }
 }

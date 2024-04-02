@@ -30,6 +30,7 @@ import {
     getCSV
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
+import {DUMMY_ACTION} from '../utils/constants';
 
 export const BADGE_DELETED              = 'BADGE_DELETED';
 export const FEATURE_BADGE_REMOVED      = 'FEATURE_BADGE_REMOVED';
@@ -211,7 +212,7 @@ export const checkInBadge = (code) => async (dispatch, getState) => {
 
     return putRequest(
         null,
-        createAction('DUMMY_ACTION'),
+        createAction(DUMMY_ACTION),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans/checkin`,
         {qr_code: code},
         authErrorHandler

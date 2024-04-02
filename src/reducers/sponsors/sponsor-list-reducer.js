@@ -26,7 +26,7 @@ const DEFAULT_STATE = {
     sponsors            : [],
     order               : 'order',
     orderDir            : 1,
-    totalSponsors       : 0
+    totalSponsors       : 0,
 };
 
 const sponsorListReducer = (state = DEFAULT_STATE, action) => {

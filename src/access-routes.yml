@@ -244,3 +244,8 @@ signage:
   - super-admins
   - administrators
   - summit-front-end-administrators
+
+lead-report-settings-edit:
+  - super-admins
+  - administrators
+  - summit-front-end-administrators
