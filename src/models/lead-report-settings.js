@@ -1,4 +1,5 @@
 import T from 'i18n-react/dist/i18n-react';
+import {capitalize} from '../utils/methods';
 
 export const attendee_extra_questions_key = 'attendee_extra_questions';
 export const sponsor_extra_questions_key = 'extra_questions';
@@ -13,6 +14,9 @@ const format = (collection, section) => {
 }
 
 export const normalizeLeadReportSettings = (allowed_columns_flat) => {
+
+    if (!allowed_columns_flat) return {};
+
     let res = {};
     const aeq = {};
     const seq = {};
@@ -36,8 +40,9 @@ export const normalizeLeadReportSettings = (allowed_columns_flat) => {
     return {...res, ...aeq, ...seq};
 }
 
-export const denormalizeLeadReportSettings = (settings, formatCallback = format) => {
-    return Object.entries(settings).reduce((a, item) => {
+export const denormalizeLeadReportSettings = (settingColumns, formatCallback = format) => {
+    if (!settingColumns) return [];
+    return Object.entries(settingColumns).reduce((a, item) => {
         if (item[0] === attendee_extra_questions_key) {
             a.push(...formatCallback(item[1], attendee_extra_questions_key));
         } else if (item[0] === sponsor_extra_questions_key) {
@@ -52,13 +57,13 @@ export const denormalizeLeadReportSettings = (settings, formatCallback = format)
 export const renderOptions = (collection) => 
     collection.map(item => { 
         if (Object.hasOwn(item, 'section')) {
-            const label = item.value === '*' ? T.translate("lead_report_settings.all_questions_prefix") : item.name
-            const prefix = item.section === attendee_extra_questions_key ? 
-                T.translate("lead_report_settings.attendee_question_prefix") : 
-                T.translate("lead_report_settings.sponsor_question_prefix");
-            return {value: JSON.stringify(item), label: `${prefix} - ${label}`};
+            const label = item.value === '*' ? T.translate("lead_report_settings.all_questions") : item.name
+            const sectionName = item.section === attendee_extra_questions_key ? 
+                T.translate("lead_report_settings.attendee_question_section") : 
+                T.translate("lead_report_settings.sponsor_question_section");
+            return {value: JSON.stringify(item), label: `${label} (${sectionName})`};
         }
-        return {value: item.value, label: item.value};
+        return {value: item.value, label: item.value.split('_').map(s => capitalize(s)).join(' ')};
     });
 
 export const getSummitLeadReportSettings = (summit, sponsorId = 0) => {
