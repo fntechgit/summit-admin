@@ -6825,10 +6825,10 @@ mixin-deep@^1.2.0:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
 
-mjml-browser@^4.14.1:
-  version "4.14.1"
-  resolved "https://registry.yarnpkg.com/mjml-browser/-/mjml-browser-4.14.1.tgz#7adb1d7b1a7eb850967bf4b0f03b2c6e480c4e5d"
-  integrity sha512-kkY43kYTGfw0qL251GrG3hdQvKeeKAzxgM+zFd97Pay2nZX06W9V6rm03zCfnOQdwGM90xMOBF+x9SIhRPkiJQ==
+mjml-browser@^4.15.3:
+  version "4.15.3"
+  resolved "https://registry.yarnpkg.com/mjml-browser/-/mjml-browser-4.15.3.tgz#16e129d65bb1fe911b096a300cd60b20d46ac407"
+  integrity sha512-HS3YFo6mfle+TLnaRzUbDa9COwkm860lAuHXD5e7qxi90AVhGdAnG1KAVrriEfQSuYcAZbhZjZtp6GhvXi6XcA==
 
 mkdirp@^0.5.1, mkdirp@^0.5.5:
   version "0.5.5"
