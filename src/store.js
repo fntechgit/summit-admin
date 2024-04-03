@@ -66,6 +66,7 @@ import viewTypeListReducer from './reducers/badges/view-type-list-reducer';
 import viewTypeReducer from './reducers/badges/view-type-reducer';
 import badgeFeatureListReducer from './reducers/badges/badge-feature-list-reducer';
 import badgeFeatureReducer from './reducers/badges/badge-feature-reducer';
+import badgeSettingsReducer from './reducers/badges/badge-settings-reducer';
 import accessLevelListReducer from './reducers/badges/access-level-list-reducer';
 import accessLevelReducer from './reducers/badges/access-level-reducer';
 import orderExtraQuestionListReducer from './reducers/orders/order-extra-question-list-reducer';
@@ -208,6 +209,7 @@ const reducers = persistCombineReducers(config, {
     currentBadgeTypeState: badgeTypeReducer,
     currentBadgeFeatureListState: badgeFeatureListReducer,
     currentBadgeFeatureState: badgeFeatureReducer,
+    currentBadgeSettingState: badgeSettingsReducer,
     currentBadgePrintState: badgePrintReducer,
     currentAccessLevelListState: accessLevelListReducer,
     currentAccessLevelState: accessLevelReducer,
