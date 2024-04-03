@@ -54,6 +54,7 @@
     "are_you_sure": "Are you sure?",
     "yes_delete": "Yes, delete.",
     "yes_remove": "Yes, remove.",
+    "yes_send": "Yes, send.",
     "id": "Id",
     "label": "Label",
     "value": "Value",
@@ -1626,6 +1627,8 @@
     "tax_name_rate": "{tax_name} Rate",
     "tax_name_price": "{tax_name} Price",
     "purchase_ticket_price": "Purchase Ticket Price",
+    "attendee_incomplete": "Attendee Info Incomplete",
+    "attendee_incomplete_msg": "This attendee's ticket has not been issued because their information is incomplete.  Would you like to send a reminder for them to complete their information so the ticket can be issued?",
     "placeholders": {
       "refund_notes": "Provide Optional Notes",
       "refund_reject_notes": "Provide Optional Notes",

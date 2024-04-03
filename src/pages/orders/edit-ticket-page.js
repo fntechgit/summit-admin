@@ -125,8 +125,25 @@ class EditTicketPage extends React.Component {
     }
 
     handleResendEmail(ticket, ev){
+        const {reSendTicketEmail} = this.props;
         ev.preventDefault();
-        this.props.reSendTicketEmail(ticket.order_id, ticket.id);
+
+        if (ticket.owner.status === "Complete") {
+            reSendTicketEmail(ticket.order_id, ticket.id);
+        } else {
+            Swal.fire({
+                title: T.translate("edit_ticket.attendee_incomplete"),
+                text: T.translate("edit_ticket.attendee_incomplete_msg"),
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: T.translate("general.yes_send")
+            }).then(function(result){
+                if (result.value) {
+                    reSendTicketEmail(ticket.order_id, ticket.id);
+                }
+            });
+        }
     }
 
     handleActivateDeactivate(ticket, ev){
