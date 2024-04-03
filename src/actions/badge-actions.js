@@ -29,6 +29,7 @@ import {
     fetchErrorHandler,
     getCSV
 } from 'openstack-uicore-foundation/lib/utils/actions';
+import { saveMarketingSetting } from "./marketing-actions";
 import {getAccessTokenSafely} from '../utils/methods';
 
 export const BADGE_DELETED              = 'BADGE_DELETED';
@@ -85,6 +86,55 @@ export const VIEW_TYPE_DELETED          = 'VIEW_TYPE_DELETED';
 
 export const REQUEST_BADGE_PRINTS       = 'REQUEST_BADGE_PRINTS';
 export const RECEIVE_BADGE_PRINTS       = 'RECEIVE_BADGE_PRINTS';
+export const RECEIVE_BADGE_SETTINGS     = 'RECEIVE_BADGE_SETTINGS';
+
+
+/***********************  MARKETING BADGE SETTINGS  ***************************/
+
+export const getBadgeSettings = (page = 1, perPage = 100) => (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const {currentSummit} = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+        page: page,
+        per_page: perPage,
+        key__contains : 'BADGE_TEMPLATE',
+    }
+
+    return getRequest(
+        null,
+        createAction(RECEIVE_BADGE_SETTINGS),
+        `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
+        authErrorHandler,
+        {}
+    )(params)(dispatch).then(() => {
+            dispatch(stopLoading());
+        }
+    );
+}
+
+export const saveBadgeSettings = (badgeSettings) => async (dispatch) => {
+    return Promise.all(Object.keys(badgeSettings).map(m => {
+
+        let value = badgeSettings[m].value ?? '';
+        let file = badgeSettings[m].file ?? null;
+
+        if (typeof value == "boolean"){
+            value = value ? '1' : '0';
+        }
+
+        const badge_setting = {
+            id: badgeSettings[m].id,
+            type: badgeSettings[m].type,
+            key: m.toUpperCase(),
+            value: value,
+        }
+
+        return dispatch(saveMarketingSetting(badge_setting, file));
+    }));
+}
 
 /***********************  BADGE  ************************************************/
 

@@ -214,6 +214,7 @@ class NavMenu extends React.Component {
                     {name:'access_level_list', linkUrl:`summits/${summit_id}/access-levels`},
                     {name:'view_type_list', linkUrl:`summits/${summit_id}/view-types`},
                     {name:'badge_type_list', linkUrl:`summits/${summit_id}/badge-types`},
+                    {name:'badge_settings', linkUrl:`summits/${summit_id}/badge-settings`},
                 ]
             },
             {name: 'room_bookings', iconClass: 'fa-bookmark', linkUrl:`summits/${summit_id}/room-bookings`, accessRoute: 'room-bookings', exclusive: 'room-bookings'},

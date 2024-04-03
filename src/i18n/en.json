@@ -114,6 +114,7 @@
     "access_level_list": "Access Levels",
     "view_type_list": "View Types",
     "badge_type_list": "Badge Types",
+    "badge_settings": "Badge Settings",
     "taxes": "Taxes",
     "tax_type_list": "Tax Types",
     "refund_policy_list": "Automatic Refund Polices",
@@ -2249,6 +2250,14 @@
     "notes": "Notes",
     "extra_questions": "Extra Questions",
     "badge_scan_saved": "Badge Scan saved successfully"
+  },
+  "badge_settings": {
+    "badge_settings": "Badge Settings",
+    "badge_template_background_img": "BADGE_TEMPLATE_BACKGROUND_IMG",
+    "badge_template_first_name_color": "BADGE_TEMPLATE_FIRST_NAME_COLOR",
+    "badge_template_last_name_color": "BADGE_TEMPLATE_LAST_NAME_COLOR",
+    "badge_template_company_color": "BADGE_TEMPLATE_LAST_NAME_COLOR",
+    "badge_template_settings_updated": "Badge settings updated."
   },
   "marketing": {
     "settings": "Marketing Settings",
