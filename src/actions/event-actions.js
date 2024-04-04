@@ -65,11 +65,11 @@ export const FLAG_CHANGED = 'FLAG_CHANGED';
 export const REQUEST_EVENT_COMMENTS = 'REQUEST_EVENT_COMMENTS';
 export const RECEIVE_EVENT_COMMENTS = 'RECEIVE_EVENT_COMMENTS';
 export const CHANGE_SEARCH_TERM = 'CHANGE_SEARCH_TERM';
-
 export const ATTENDEES_EXPECTED_LEARNT = 'attendees_expected_learnt';
 export const ATTENDING_MEDIA = 'attending_media';
 export const LEVEL = 'level';
 export const SOCIAL_DESCRIPTION = 'social_description';
+export const UPDATED_REMOTE_EVENTS     = 'UPDATED_REMOTE_EVENTS';
 
 const fieldsBoundToQuestions = [ATTENDEES_EXPECTED_LEARNT, ATTENDING_MEDIA, LEVEL, SOCIAL_DESCRIPTION];
 
@@ -115,6 +115,38 @@ export const getEvents = (term = null, page = 1, perPage = 10, order = 'id', ord
         }
     );
 };
+
+export const bulkUpdateEvents = (summitId, events) =>  async (dispatch, getState) => {
+
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit }   = currentSummitState;
+    dispatch(startLoading());
+
+    const normalizedEvents = normalizeBulkEvents(events.map((event) => normalizeEvent(event, currentSummit.event_types.find(et => et.id === event.type_id))))  
+
+    putRequest(
+        null,
+        createAction(UPDATED_REMOTE_EVENTS)({}),
+        `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,
+        {
+            events: normalizedEvents
+        },
+        authErrorHandler
+    )({})(dispatch)
+        .then(
+            () => {
+                dispatch(stopLoading());
+                dispatch(showSuccessMessage(T.translate("bulk_actions_page.messages.update_success"),
+                () => 
+                    history.push(`/app/summits/${currentSummit.id}/events/`)
+                ))
+            }
+        )
+        .catch(()=> {
+            console.log("ERROR");
+        });
+}
 
 export const getEventsForOccupancy = (term = null, roomId = null, currentEvents = false, page = 1, perPage = 10, order = 'start_date', orderDir = 1) => async (dispatch, getState) => {
 
@@ -374,6 +406,8 @@ export const fetchExtraQuestionsAnswers = async (summitId, selectionPlanId, even
 export const resetEventForm = () => (dispatch, getState) => {
     dispatch(createAction(RESET_EVENT_FORM)({}));
 };
+
+
 
 export const saveEvent = (entity, publish) => async (dispatch, getState) => {
     const {currentSummitState} = getState();
@@ -785,6 +819,34 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
         normalizedEntity.extra_questions = normalizedEntity.extra_questions.map((q) => ({ question_id : q.question_id, answer : q.value}))
     }
 
+    return normalizedEntity;
+}
+
+export const normalizeBulkEvents = (entity) => {
+    const normalizedEntity = entity.map(e => {
+        const normalizedEvent = {
+            id: e.id,
+            title: e.title,
+            selection_plan_id: e.selection_plan_id,
+            location_id: e.location.id,
+            start_date: e.start_date,
+            speakers: e.speakers,
+            end_date: e.end_date,
+            type_id: e.type_id,
+            track_id: e.track_id,
+            duration: e.duration,
+            streaming_url: e.streaming_url,
+            streaming_type: e.streaming_type,
+            meeting_url: e.meeting_url,
+            etherpad_link: e.etherpad_link,
+        }
+        for (let property in normalizedEvent) {
+            if (normalizedEvent[property] === undefined || normalizedEvent[property] === null || normalizedEvent[property] === "") {
+                delete normalizedEvent[property];
+            }
+        }
+        return normalizedEvent;
+    });
     return normalizedEntity;
 }
 
