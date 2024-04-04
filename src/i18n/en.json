@@ -2073,6 +2073,7 @@
     "order": "Order",
     "remove_warning": "Are you sure you want to delete sponsor ",
     "placeholders": {
+      "lead_report_columns": "Select lead report columns to show",
       "search_sponsors": "Search by Sponsorship, Company, Size"
     }
   },
@@ -2132,6 +2133,7 @@
     "remove_warning_social_networks": "Are you sure you want to delete social network ",
     "remove_warning_extra_question": "Are you sure you want to delete extra question ",
     "remove_value_warning": "Are you sure you want to delete value ",
+    "lead_report_settings": "Lead Report Settings",
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start Typing to choose a Tier",
@@ -2928,5 +2930,10 @@
   "select_filter_criteria": {
     "placeholder": "Select filter criteria",
     "remove_filter_criteria_warning": "Are you sure you want to remove the filter criteria "
+  },
+  "lead_report_settings": {
+    "all_questions": "All Questions",
+    "attendee_question_section": "Attendee Extra Question",
+    "sponsor_question_section": "Sponsor Extra Question"
   }
 }
