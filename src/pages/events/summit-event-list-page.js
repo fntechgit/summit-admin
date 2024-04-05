@@ -65,7 +65,7 @@ const fieldNames = [
     { columnKey: 'etherpad_link', value: 'etherpad_link', sortable: true, title: true },
     { columnKey: 'streaming_type', value: 'streaming_type', sortable: true },
     { columnKey: 'status', value: 'submission_status', sortable: false, title: true },
-    { columnKey: 'progress_flags', value: 'progress_flags', sortable: false, title: true },
+    { columnKey: 'progress_flags', value: 'progress_flags', sortable: true, title: true },
     { columnKey: 'media_uploads', value: 'media_uploads', sortable: false, render :(e, field) => {
             if(!field?.length) return 'N/A';
             return (<>{(e.media_uploads.map( m =>
@@ -248,9 +248,33 @@ class SummitEventListPage extends React.Component {
     handleSort(index, key, dir, func) {
         const {page, perPage, term} = this.props;
         const {eventFilters, selectedColumns} = this.state;
-        key = (key === 'name') ? 'last_name' : key;
-        key = (key === 'submitter_company') ? 'created_by_company' : key;
+
+        switch (key) {
+            case 'name':
+                key = 'last_name'
+                break;
+            case 'submitter_company':
+                key = 'created_by_company'
+                break;
+            case 'progress_flags':
+                key = 'actions'
+                break;
+        }
+
         this.props.getEvents(term, page, perPage, key, dir, eventFilters, selectedColumns);
+    }
+
+    translateSortKey = (key) => {
+        switch (key) {
+            case 'last_name':
+                return 'name'
+            case 'created_by_company':
+                return 'submitter_company'
+            case 'actions':
+                return 'progress_flags'
+        }
+
+        return key;
     }
 
     handleSearch(term) {
@@ -442,7 +466,7 @@ class SummitEventListPage extends React.Component {
         ];
 
         const table_options = {
-            sortCol: (order === 'last_name') ? 'name' : (order === 'created_by_company') ? 'submitter_company' : order,
+            sortCol: this.translateSortKey(order),
             sortDir: orderDir,
             className: "summit-event-list-table",
             actions: {
