@@ -27,7 +27,8 @@ import {
     getCSV,
     escapeFilterValue,
     fetchResponseHandler,
-    fetchErrorHandler
+    fetchErrorHandler,
+    postFile
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 import {normalizeLeadReportSettings} from '../models/lead-report-settings';
@@ -113,6 +114,7 @@ export const SPONSOR_SOCIAL_NETWORK_DELETED      = 'SPONSOR_SOCIAL_NETWORK_DELET
 
 export const REQUEST_SPONSOR_PROMOCODES= 'REQUEST_SPONSOR_PROMOCODES';
 export const RECEIVE_SPONSOR_PROMOCODES= 'RECEIVE_SPONSOR_PROMOCODES';
+export const SPONSOR_PROMOCODES_IMPORTED= 'SPONSOR_PROMOCODES_IMPORTED';
 export const CLEAR_ALL_SELECTED_SPONSOR_PROMOCODES= 'CLEAR_ALL_SELECTED_SPONSOR_PROMOCODES';
 export const SELECT_SPONSOR_PROMOCODE= 'SELECT_SPONSOR_PROMOCODE';
 export const SEND_SPONSOR_PROMOCODES_EMAILS= 'SEND_SPONSOR_PROMOCODES_EMAILS';
@@ -1927,6 +1929,29 @@ export const exportSponsorPromocodes = (term = null, order = 'order', orderDir =
 
 
     dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes/csv`, params, filename));
+};
+
+export const importSponsorPromocodesCSV = (file) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    postFile(
+      null,
+      createAction(SPONSOR_PROMOCODES_IMPORTED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes/csv`,
+      file,
+      {},
+      authErrorHandler,
+    )(params)(dispatch)
+      .then(() => {
+          dispatch(stopLoading());
+          window.location.reload();
+      });
 };
 
 export const sendEmails = (recipientEmail = null) => async (dispatch, getState) => {

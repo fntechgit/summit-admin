@@ -26,8 +26,6 @@ import {
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 
-import moment from 'moment-timezone';
-
 const DEFAULT_STATE = {
     promocodes      : [],
     term            : null,
