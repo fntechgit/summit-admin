@@ -58,29 +58,26 @@ export const GET_ASSIGNED_SPEAKERS_LOCALLY = 'GET_ASSIGNED_SPEAKERS_LOCALLY';
 export const REQUEST_ASSIGNED_SPEAKERS     = 'REQUEST_ASSIGNED_SPEAKERS';
 export const RECEIVE_ASSIGNED_SPEAKERS     = 'RECEIVE_ASSIGNED_SPEAKERS';
 
-const SPEAKERS_PROMO_CODE    = 'SPEAKERS_PROMO_CODE';
-const SPEAKERS_DISCOUNT_CODE = 'SPEAKERS_DISCOUNT_CODE';
-
 const parseFilters = (filters, term = null) => {
     const filter = [];
 
-    if (filters.hasOwnProperty('typeFilter') && filters.typeFilter && filters.typeFilter !== 'ALL') {
+    if (filters?.typeFilter && filters.typeFilter !== 'ALL') {
         filter.push(`type==${filters.typeFilter}`)
     }
 
-    if (filters.hasOwnProperty('creatorFilter') && filters.creatorFilter && filters.creatorFilter !== 'ALL') {
+    if (filters?.creatorFilter && filters.creatorFilter !== 'ALL') {
         filter.push(`creator_email==${filters.creatorFilter.email}`);
     }
 
-    if (filters.hasOwnProperty('assigneeFilter') && filters.assigneeFilter && filters.assigneeFilter !== 'ALL') {
-        filter.push(`owner_email==${filters.assigneeFilter.email}`);
+    if (filters?.assigneeFilter && filters.assigneeFilter !== 'ALL') {
+        filter.push(`owner_email==${filters.assigneeFilter.email},contact_email==${filters.assigneeFilter.email}`);
     }
 
-    if (filters.hasOwnProperty('classNamesFilter') && Array.isArray(filters.classNamesFilter) && filters.classNamesFilter.length > 0) {
+    if (Array.isArray(filters?.classNamesFilter) && filters.classNamesFilter.length > 0) {
         filter.push(`class_name==${filters.classNamesFilter.join('||')}`);
     }
 
-    if (filters.hasOwnProperty('tagsFilter') && Array.isArray(filters.tagsFilter) && filters.tagsFilter.length > 0) {
+    if (Array.isArray(filters?.tagsFilter) && filters.tagsFilter.length > 0) {
         filter.push(`tag_id==${filters.tagsFilter.map(t => t.id).join('||')}`);
     }
 
@@ -93,6 +90,7 @@ const parseFilters = (filters, term = null) => {
             `owner_email=@${escapedTerm},` +
             `speaker=@${escapedTerm},` +
             `speaker_email=@${escapedTerm},` +
+            `contact_email=@${escapedTerm},` +
             `sponsor_company_name=@${escapedTerm}`;
 
         filter.push(searchString);

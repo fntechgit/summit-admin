@@ -108,15 +108,8 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
                         break;
                     case 'SPONSOR_DISCOUNT_CODE':
                     case 'SPONSOR_PROMO_CODE':
-                        if (p.owner) {
-                            owner = p.owner.first_name + ' ' + p.owner.last_name;
-                            owner_email = p.owner.email;
-                        } else if (p.sponsor) {
-                            owner = p.sponsor.name;
-                        } else {
-                            owner = (p.first_name && p.last_name) ? p.first_name + ' ' + p.last_name : '';
-                            owner_email = (p.email) ? p.email : '';
-                        }
+                        owner = p.sponsor?.company?.name || '';
+                        owner_email = p.contact_email || '';
                         break;
                 }
 
