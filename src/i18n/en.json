@@ -1600,7 +1600,7 @@
     "net_selling_price": "Net Price",
     "refund": "Refund",
     "refund_modal_title": "Refund Ticket",
-    "refund_amount_info": "All taxes will be added automatically to the amount refunded if they apply",
+    "refund_amount_info": "Prorated tax amount will be added to the refund amount automatically, if applicable",
     "refund_amount_error": "The amount to refund cannot be higher than the net selling price plus the amount refunded",
     "refund_request_status": "Status",
     "refund_request_id": "#",
