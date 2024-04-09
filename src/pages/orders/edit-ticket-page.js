@@ -266,13 +266,19 @@ class EditTicketPage extends React.Component {
         if (!entity || !entity.id) return (<div />);
         if (entity.order_id !== currentOrder.id) return (<div />);
 
-        const tax_columns = [...(entity.refund_requests_taxes?.map(t => {
-            return ({ 
-                columnKey: `tax_${t.tax.id}_refunded_amount`, 
-                value: t.tax.name,
-                render: (row, val) => { return val ?  val : '0'}
-            });
-        }) || [])];
+        const tax_columns = [...(entity.refund_requests_taxes?.reduce((uniqueTaxColumns, t) => {
+            const columnKey = `tax_${t.tax.id}_refunded_amount`;
+            const existingIndex = uniqueTaxColumns.findIndex(column => column.columnKey === columnKey);
+        
+            if (existingIndex === -1) {
+                uniqueTaxColumns.push({
+                    columnKey: columnKey,
+                    value: t.tax.name,
+                    render: (row, val) => { return val ?  val : '0'}
+                });
+            }
+            return uniqueTaxColumns;
+        }, []) || [])];
 
         const refundRequestColumns = [
             { columnKey: 'id', value: T.translate("edit_ticket.refund_request_id") },
