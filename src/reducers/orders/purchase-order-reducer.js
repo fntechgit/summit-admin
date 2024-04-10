@@ -26,6 +26,8 @@ import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 
+import _ from 'lodash';
+
 export const DEFAULT_ENTITY = {
     id: 0,
     number: '',
@@ -162,7 +164,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
             let adjusted_net_price = purchaseOrder.raw_amount;            
             let adjusted_total_order_purchase_price = 0;
             // use deep copy to avoid mutations on elements of the array
-            let adjusted_applied_taxes = JSON.parse(JSON.stringify(purchaseOrder.applied_taxes));
+            let adjusted_applied_taxes = _.cloneDeep(purchaseOrder.applied_taxes);
             approved_refunds.forEach(refund => {
                 refund.ticket_id = refund.ticket.id;
                 refund.refunded_amount_formatted = `$${refund.refunded_amount.toFixed(2)}`;
