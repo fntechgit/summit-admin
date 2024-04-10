@@ -26,6 +26,8 @@ import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
 
+import _ from 'lodash';
+
 export const DEFAULT_ENTITY = {
     id: 0,
     number: '',
@@ -157,11 +159,12 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_PURCHASE_ORDER_REFUNDS: {
             const approved_refunds = payload.response.data;
             const approved_refunds_taxes = [];
-            const purchaseOrder = state.entity;
+            const purchaseOrder = {...state.entity};
             let adjusted_order_price = purchaseOrder.amount;
             let adjusted_net_price = purchaseOrder.raw_amount;            
             let adjusted_total_order_purchase_price = 0;
-            let adjusted_applied_taxes = purchaseOrder.applied_taxes;
+            // use deep copy to avoid mutations on elements of the array
+            let adjusted_applied_taxes = _.cloneDeep(purchaseOrder.applied_taxes);
             approved_refunds.forEach(refund => {
                 refund.ticket_id = refund.ticket.id;
                 refund.refunded_amount_formatted = `$${refund.refunded_amount.toFixed(2)}`;
@@ -174,10 +177,11 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
                 refund.refunded_taxes.forEach(rt => {
                     // field for the tax column of that refund
                     refund[`tax_${rt.tax.id}_refunded_amount`] = `$${rt.refunded_amount.toFixed(2)}`
-                    adjusted_applied_taxes.forEach(t => {                        
+                    adjusted_applied_taxes.forEach(t => {
                         if(t.id === rt.tax.id) {
-                            t.amount -= rt.refunded_amount;                            
-                            refund[`tax_${rt.tax.id}_adjusted_refunded_amount`] = `$${(t.amount).toFixed(2)}`
+                            t.amount -= rt.refunded_amount;
+                            // prevent -0 values
+                            refund[`tax_${rt.tax.id}_adjusted_refunded_amount`] = `$${(Math.abs(t.amount)).toFixed(2)}`
                         }
                     });                    
                     // add tax type to array
