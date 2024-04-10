@@ -178,7 +178,8 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
                     adjusted_applied_taxes.forEach(t => {
                         if(t.id === rt.tax.id) {
                             t.amount -= rt.refunded_amount;
-                            refund[`tax_${rt.tax.id}_adjusted_refunded_amount`] = `$${(t.amount).toFixed(2)}`
+                            // prevent -0 values
+                            refund[`tax_${rt.tax.id}_adjusted_refunded_amount`] = `$${(Math.abs(t.amount)).toFixed(2)}`
                         }
                     });                    
                     // add tax type to array
