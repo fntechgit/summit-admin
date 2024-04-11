@@ -42,7 +42,7 @@ import {
 } from "../../actions/submitter-actions";
 import {validateSpecs, resetPromoCodeSpecForm} from '../../actions/promocode-specification-actions';
 import {
-    EXISTING_SPEAKERS_PROMO_CODE, 
+    EXISTING_SPEAKERS_PROMO_CODE,
     EXISTING_SPEAKERS_DISCOUNT_CODE,
     AUTO_GENERATED_SPEAKERS_PROMO_CODE,
     AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
@@ -107,7 +107,7 @@ class SummitSpeakersListPage extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        
+
     }
 
     getSubjectProps() {
@@ -203,20 +203,22 @@ class SummitSpeakersListPage extends React.Component {
             });
     }
 
-    handleChangeMediaUploadTypeFilter(ev) {        
+    handleChangeMediaUploadTypeFilter(ev) {
         const { value, operator } = ev.target;
         const { term, order, page, orderDir, perPage, activityTypeFilter, selectionPlanFilter, trackFilter, selectionStatusFilter, mediaUploadTypeFilter } = this.getSubjectProps();
         const { speakerFilters: { orAndFilter }} = this.state;
         if(operator && value.length > 0) {
             this.getBySummit(term, page, perPage, order, orderDir,
                 {
-                    selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, orAndFilter, mediaUploadTypeFilter: { operator, value }
+                    selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, orAndFilter,
+                    mediaUploadTypeFilter: { operator, value }
                 });
-        // get speakers if the media upload types filter is resetted
+        // get speakers if the media upload types filter is clear
         } else if (mediaUploadTypeFilter.value.length > 0 && value.length === 0) {
             this.getBySummit(term, page, perPage, order, orderDir,
                 {
-                    selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, orAndFilter
+                    selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, orAndFilter,
+                    mediaUploadTypeFilter: { operator: null, value: [] }
                 });
         }
     }
@@ -265,14 +267,26 @@ class SummitSpeakersListPage extends React.Component {
         const isSpeakerMode = source === sources.speakers;
         let excerptRecipient = this.ingestEmailRef.value;
         let shouldSendCopy2Submitter = isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked
+        const { term, order, orderDir, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, mediaUploadTypeFilter } = this.getSubjectProps();
+        const { speakerFilters: { orAndFilter }} = this.state;
 
         this.props.validateSpecs(promoCodeStrategy, currentPromocodeSpecification.entity, () => {
             this.setState({showSendEmailModal: false, excerptRecipient: '', testRecipient: '', promoCodeStrategy: 0});
             // send emails
-    
+
             const callable = isSpeakerMode ? this.props.sendSpeakerEmails : this.props.sendSubmitterEmails;
-    
-            callable(testRecipient, excerptRecipient, shouldSendCopy2Submitter, source, promoCodeStrategy, currentPromocodeSpecification.entity);
+
+            callable
+            (
+                term,
+                { selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter, orAndFilter, mediaUploadTypeFilter },
+                testRecipient,
+                excerptRecipient,
+                shouldSendCopy2Submitter,
+                source,
+                promoCodeStrategy,
+                currentPromocodeSpecification.entity
+            );
         });
     }
 
@@ -295,7 +309,7 @@ class SummitSpeakersListPage extends React.Component {
         }
 
         if (selectedCount === 0) {
-            const content = source === sources.speakers ? 
+            const content = source === sources.speakers ?
                 T.translate("summit_speakers_list.select_items") : T.translate("summit_submitters_list.select_items");
             Swal.fire("Validation error", content, "warning");
             return false;
@@ -337,8 +351,8 @@ class SummitSpeakersListPage extends React.Component {
         }
     }
 
-    handleOrAndFilter(ev) {        
-        const { term, order, page, orderDir, perPage, trackFilter, selectionPlanFilter, activityTypeFilter, selectionStatusFilter, mediaUploadTypeFilter } = this.getSubjectProps();        
+    handleOrAndFilter(ev) {
+        const { term, order, page, orderDir, perPage, trackFilter, selectionPlanFilter, activityTypeFilter, selectionStatusFilter, mediaUploadTypeFilter } = this.getSubjectProps();
         this.setState({...this.state, speakerFilters: {...this.state.speakerFilters, orAndFilter: ev}});
         this.getBySummit(term, page, perPage, order, orderDir,
             {
@@ -365,7 +379,7 @@ class SummitSpeakersListPage extends React.Component {
         const selectionPlansDDL = currentSummit.selection_plans.map(selectionPlan => ({ label: selectionPlan.name, value: selectionPlan.id }));
         const tracksDDL = currentSummit.tracks.map(track => ({ label: track.name, value: track.id }));
         const activityTypesDDL = currentSummit.event_types.map(type => ({ label: type.name, value: type.id }));
-        
+
         const selectionStatusDDL = [
             { label: 'Accepted', value: 'accepted' },
             { label: 'Alternate', value: 'alternate' },
@@ -429,7 +443,7 @@ class SummitSpeakersListPage extends React.Component {
             <div className="container">
                 <h3> {
                     this.state.source === sources.speakers ?
-                    T.translate("summit_speakers_list.summit_speakers_list") : 
+                    T.translate("summit_speakers_list.summit_speakers_list") :
                     T.translate("summit_submitters_list.summit_submitters_list")
                 } ({totalItems})</h3>
                 <div className={'row'}>
@@ -504,7 +518,7 @@ class SummitSpeakersListPage extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className={'col-md-12 speaker-list-filter-col'}> 
+                    <div className={'col-md-12 speaker-list-filter-col'}>
                         <MediaTypeFilter
                             id={"media_upload_with_type"}
                             operatorInitialValue={mediaUploadTypeFilter.operator}
@@ -512,7 +526,7 @@ class SummitSpeakersListPage extends React.Component {
                             summitId={currentSummit.id}
                             onChange={this.handleChangeMediaUploadTypeFilter}
                         />
-                    </div>                                        
+                    </div>
                 </div>
 
                 <div className='row'>
@@ -543,7 +557,7 @@ class SummitSpeakersListPage extends React.Component {
                 {items.length === 0 &&
                     <div>{
                         this.state.source === sources.speakers ?
-                            T.translate("summit_speakers_list.no_speakers") : 
+                            T.translate("summit_speakers_list.no_speakers") :
                             T.translate("summit_submitters_list.no_submitters")
                     }</div>
                 }
@@ -575,7 +589,7 @@ class SummitSpeakersListPage extends React.Component {
                             <Modal.Header closeButton>
                                 <Modal.Title>{
                                     this.state.source === sources.speakers ?
-                                        T.translate("summit_speakers_list.send_emails_title") : 
+                                        T.translate("summit_speakers_list.send_emails_title") :
                                         T.translate("summit_submitters_list.send_emails_title")
                                 }</Modal.Title>
                             </Modal.Header>
@@ -602,8 +616,8 @@ class SummitSpeakersListPage extends React.Component {
                                         />
                                     </div>
                                     <div className="col-md-12">
-                                        <SpeakerPromoCodeSpecForm 
-                                            promoCodeStrategy={promoCodeStrategy} 
+                                        <SpeakerPromoCodeSpecForm
+                                            promoCodeStrategy={promoCodeStrategy}
                                             summit={currentSummit}
                                             entity={currentPromocodeSpecification.entity}
                                             errors={currentPromocodeSpecification.errors}

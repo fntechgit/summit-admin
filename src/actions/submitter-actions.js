@@ -23,7 +23,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {checkOrFilter, getAccessTokenSafely} from '../utils/methods';
+import { getAccessTokenSafely } from '../utils/methods';
 import {SpeakersSources as sources} from "../utils/constants";
 
 export const INIT_SUBMITTERS_LIST_PARAMS       = 'INIT_SUBMITTERS_LIST_PARAMS';
@@ -46,7 +46,7 @@ export const getSubmittersBySummit = (term = null, page = 1, perPage = 10, order
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
-    
+
     const filter = parseFilters(filters);
 
     if (source === sources.submitters_no_speakers) {
@@ -103,7 +103,7 @@ export const exportSummitSubmitters = (term = null, order = 'id', orderDir = 1, 
     const params = {
         access_token : accessToken
     };
-    
+
     const filter = parseFilters(filters);
 
     if (source === sources.submitters_no_speakers) {
@@ -132,15 +132,20 @@ export const exportSummitSubmitters = (term = null, order = 'id', orderDir = 1, 
 }
 
 /**
+ *
+ * @param term
+ * @param filters
  * @param testRecipient
  * @param excerptRecipient
  * @param shouldSendCopy2Submitter
  * @param source
  * @param promoCodeStrategy
  * @param promocodeSpecification
- * @returns {function(*=, *): *}
+ * @returns {function(*, *): Promise<*>}
  */
 export const sendSubmitterEmails = (
+                           term = null,
+                           filters = {},
                            testRecipient = '',
                            excerptRecipient= '',
                            // not used only left to keep the signature
@@ -151,7 +156,7 @@ export const sendSubmitterEmails = (
                            ) => async (dispatch, getState) => {
 
     const { currentSummitState, currentSummitSubmittersListState } = getState();
-    const {selectedAll, selectedItems, excludedItems, term, currentFlowEvent, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter} = currentSummitSubmittersListState;
+    const {selectedAll, selectedItems, excludedItems, currentFlowEvent} = currentSummitSubmittersListState;
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     let filter = [];
@@ -164,21 +169,17 @@ export const sendSubmitterEmails = (
         // we don't need the filter criteria, we have the ids
         filter.push(`id==${selectedItems.join('||')}`);
     } else {
-        filter = parseFilters({ selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter });
+        filter = parseFilters(filters);
 
         if (source && source === sources.submitters_no_speakers) {
             filter.push('is_speaker==false');
         }
 
-        if (term) {
-            const escapedTerm = escapeFilterValue(term);
+        if(term) {
+            let filterTerm = buildTermFilter(term);
+
             filter.push(
-              [
-                  `full_name@@${escapedTerm}`,
-                  `email=@${escapedTerm}`,
-                  `presentations_title=@${escapedTerm}`,
-                  `presentations_abstract=@${escapedTerm}`
-              ].join(',')
+                filterTerm.join(',')
             );
         }
 
@@ -331,7 +332,7 @@ const parseFilters = (filters) => {
 
 const buildTermFilter = (term) => {
     const escapedTerm = escapeFilterValue(term);
-       
+
     let termFilter =  [
         `full_name=@${escapedTerm}`,
         `first_name=@${escapedTerm}`,
