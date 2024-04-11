@@ -285,11 +285,11 @@ class TicketForm extends React.Component {
                         </div>
                     </div>
                     <div className="row form-group">
-                        <div className="col-md-3">
+                        <div className="col-md-6">
                             <label> {T.translate("edit_ticket.adjusted_total_ticket_purchase_price")}:&nbsp;</label>
                             {entity.adjusted_total_ticket_purchase_price_formatted}
                         </div>
-                        <div className="col-md-9">
+                        <div className="col-md-6">
                             &nbsp;
                         </div>
                     </div>

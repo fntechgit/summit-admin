@@ -89,7 +89,7 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
             let attendee_email = null;
             const final_amount_formatted = `$${entity.final_amount.toFixed(2)}`;
             const refunded_amount_formatted = `$${entity.total_refunded_amount.toFixed(2)}`;
-            const adjusted_total_ticket_purchase_price_formatted = `$${((entity.final_amount - entity.total_refunded_amount))}`;;
+            const adjusted_total_ticket_purchase_price_formatted = `$${(entity.final_amount - entity.total_refunded_amount).toFixed(2)}`;
             for(var key in entity) {
                 if(entity.hasOwnProperty(key)) {
                     entity[key] = (entity[key] == null) ? '' : entity[key] ;
@@ -109,8 +109,8 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     attendee_full_name = `${entity.owner.member.first_name} ${entity.owner.member.last_name}`;
                 }
             }
-            
-            const approved_refunds_taxes = [];            
+
+            const approved_refunds_taxes = [];
 
             if(entity.hasOwnProperty("refund_requests")){
                 entity.refund_requests = entity.refund_requests.map( r => {
@@ -129,7 +129,7 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     })
                 })
             }
-            
+
             const unique_approved_refunds_taxes = approved_refunds_taxes.filter((tax, idx, arr) => {
                 return idx === arr.findIndex(obj => obj.id === tax.id);
             });
