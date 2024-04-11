@@ -161,7 +161,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
             const approved_refunds_taxes = [];
             const purchaseOrder = {...state.entity};
             let adjusted_order_price = purchaseOrder.amount;
-            let adjusted_net_price = purchaseOrder.raw_amount;            
+            let adjusted_net_price = (purchaseOrder.raw_amount - purchaseOrder.discount_amount);
             let adjusted_total_order_purchase_price = 0;
             // use deep copy to avoid mutations on elements of the array
             let adjusted_applied_taxes = _.cloneDeep(purchaseOrder.applied_taxes);
@@ -169,8 +169,8 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
                 refund.ticket_id = refund.ticket.id;
                 refund.refunded_amount_formatted = `$${refund.refunded_amount.toFixed(2)}`;
                 refund.total_refunded_amount_formatted = `$${refund.total_refunded_amount.toFixed(2)}`;
-                adjusted_total_order_purchase_price += refund.total_refunded_amount;                
-                adjusted_net_price -= refund.refunded_amount;                
+                adjusted_total_order_purchase_price += refund.total_refunded_amount;
+                adjusted_net_price -= refund.refunded_amount;
                 refund.adjusted_net_price_formatted = `$${adjusted_net_price.toFixed(2)}`;
                 adjusted_order_price -= refund.total_refunded_amount;
                 refund.adjusted_order_price_formatted = `$${adjusted_order_price.toFixed(2)}`;
@@ -183,7 +183,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
                             // prevent -0 values
                             refund[`tax_${rt.tax.id}_adjusted_refunded_amount`] = `$${(Math.abs(t.amount)).toFixed(2)}`
                         }
-                    });                    
+                    });
                     // add tax type to array
                     approved_refunds_taxes.push(rt.tax);
                 });
@@ -191,7 +191,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
             adjusted_total_order_purchase_price = (purchaseOrder.amount - adjusted_total_order_purchase_price);
             const unique_approved_refunds_taxes = approved_refunds_taxes.filter((tax, idx, arr) => {
                 return idx === arr.findIndex(obj => obj.id === tax.id);
-            });            
+            });
             return {...state, entity: {...state.entity, approved_refunds, adjusted_total_order_purchase_price, approved_refunds_taxes: unique_approved_refunds_taxes }};
         }
         case VALIDATE: {
