@@ -466,7 +466,7 @@ export const saveTicket = (orderId, ticket) => async (dispatch, getState) => {
 
     const params = {
         access_token: accessToken,
-        expand: 'badge, badge.features, promo_code, ticket_type, owner, owner.member, refund_requests, refund_requests.requested_by, refund_requests.action_by'
+        expand: 'badge,badge.features,promo_code,ticket_type,owner,owner.member,refund_requests,refund_requests.requested_by,refund_requests.action_by,refund_requests.refunded_taxes,refund_requests.refunded_taxes.tax,applied_taxes,applied_taxes.tax'
     };
 
     const normalizedEntity = normalizeTicket(ticket);
@@ -568,7 +568,7 @@ export const cancelRefundTicket = (orderId, ticketId, refundNotes = '') => async
 
     const params = {
         access_token: accessToken,
-        expand: 'refund_requests, refund_requests.requested_by, refund_requests.action_by',
+        expand: 'badge,badge.features,promo_code,ticket_type,owner,owner.member,refund_requests,refund_requests.requested_by,refund_requests.action_by,refund_requests.refunded_taxes,refund_requests.refunded_taxes.tax,applied_taxes,applied_taxes.tax'
     };
 
     const success_message = {
@@ -602,7 +602,7 @@ export const refundTicket = (ticketId, refundAmount, refundNotes = '') => async 
 
     const params = {
         access_token: accessToken,
-        expand: 'refund_requests, refund_requests.requested_by, refund_requests.action_by',
+        expand: 'badge,badge.features,promo_code,ticket_type,owner,owner.member,refund_requests,refund_requests.requested_by,refund_requests.action_by,refund_requests.refunded_taxes,refund_requests.refunded_taxes.tax,applied_taxes,applied_taxes.tax'
     };
 
     return deleteRequest(
