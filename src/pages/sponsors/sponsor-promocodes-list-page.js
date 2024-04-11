@@ -269,10 +269,11 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
             {T.translate("general.export")}
           </button>
           <ImportPromocodesBtn
-            onImport={props.importSponsorPromocodesCSV}
-            showSpeakers={false}
-            showSponsorId
-            showContactEmail
+              allowedClasses={['SPONSOR_PROMO_CODE', 'SPONSOR_DISCOUNT_CODE']}
+              onImport={props.importSponsorPromocodesCSV}
+              showSpeakers={false}
+              showSponsorId
+              showContactEmail
           />
         </div>
       </div>

@@ -4,7 +4,7 @@ import {Modal} from "react-bootstrap";
 import {UploadInput} from "openstack-uicore-foundation/lib/components";
 
 
-const ImportPromocodesBtn = ({onImport, showSpeakers = true, showSponsorId = false, showContactEmail = false}) => {
+const ImportPromocodesBtn = ({onImport, showSpeakers = true, showSponsorId = false, showContactEmail = false, allowedClasses=[]}) => {
   const [file, setFile] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -34,7 +34,7 @@ const ImportPromocodesBtn = ({onImport, showSpeakers = true, showSponsorId = fal
               File must be a CSV file the following format:<br />
               <ul>
                 <li><b>code:</b> text</li>
-                <li><b>class_name:</b> text</li>
+                <li><b>class_name:</b> text {allowedClasses.length ? `(${allowedClasses.join(',')})`:''}</li>
                 <li><b>quantity_available:</b> int</li>
                 <li><b>badge_features:</b> list of badge feature ids pipe delimited (optional)</li>
                 <li><b>allowed_tickets_types:</b> list of allowed ticket type ids pipe delimited (optional)</li>
