@@ -1952,17 +1952,17 @@
     "@codemirror/state" "^6.0.0"
     "@codemirror/view" "^6.0.0"
 
-"@uiw/codemirror-theme-sublime@^4.21.7":
-  version "4.21.7"
-  resolved "https://registry.yarnpkg.com/@uiw/codemirror-theme-sublime/-/codemirror-theme-sublime-4.21.7.tgz#597431b6a70b3412a623c6b3cc77840f739f41bb"
-  integrity sha512-ZRdHChx+v60AgiWyX09GbFLBXjnkiLvtQAhRxVfz0RHBxZwpCJK/mGpaJ7fSvL9Lpn29U+BejFAcMUzTViOPmg==
+"@uiw/codemirror-theme-sublime@^4.21.23":
+  version "4.21.25"
+  resolved "https://registry.yarnpkg.com/@uiw/codemirror-theme-sublime/-/codemirror-theme-sublime-4.21.25.tgz#f54457456a818536862ad0bd3a9e1c33c4e63731"
+  integrity sha512-hVyXtZiTTSa5Y6lnNblxplDXeiuYe0+rr3UwyMENvmDNh/gAAxiT7feO+bjkdBM0f30nv0BPu9lshfMXSd3d1Q==
   dependencies:
-    "@uiw/codemirror-themes" "4.21.7"
+    "@uiw/codemirror-themes" "4.21.25"
 
-"@uiw/codemirror-themes@4.21.7":
-  version "4.21.7"
-  resolved "https://registry.yarnpkg.com/@uiw/codemirror-themes/-/codemirror-themes-4.21.7.tgz#eafcdfdf1c3cb30beb8227702fa1985a8daae78a"
-  integrity sha512-IggpVo7R+GREBpmInhrGxYcmbcqMci/cbaBxMmjNtPILqDwlGgWNtc7F2gNQ+gfQ138l+KXtdamielrSEM1qeA==
+"@uiw/codemirror-themes@4.21.25":
+  version "4.21.25"
+  resolved "https://registry.yarnpkg.com/@uiw/codemirror-themes/-/codemirror-themes-4.21.25.tgz#562e7e4d36b34329858ffe9c9c06d7f50cfe0d3c"
+  integrity sha512-C3t/voELxQj0eaVhrlgzaOnSALNf8bOcRbL5xN9r2+RkdsbFOmvNl3VVhlxEB7PSGc1jUZwVO4wQsB2AP178ag==
   dependencies:
     "@codemirror/language" "^6.0.0"
     "@codemirror/state" "^6.0.0"
