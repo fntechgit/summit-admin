@@ -41,6 +41,7 @@ const ImportPromocodesBtn = ({onImport, showSpeakers = true, showSponsorId = fal
                 {showSpeakers && <li><b>speaker_ids:</b> list of badge speaker ids pipe delimited (optional)</li>}
                 {showSponsorId && <li><b>sponsor_id:</b> id of the sponsor (optional)</li>}
                 {showContactEmail && <li><b>contact_email:</b> contact email for the promo code (optional)</li>}
+                <li><b>notes:</b> text (optional)</li>
               </ul>
             </div>
             <div className="col-md-12 ticket-import-upload-wrapper">
