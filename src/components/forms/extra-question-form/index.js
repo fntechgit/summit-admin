@@ -170,7 +170,6 @@ class ExtraQuestionForm extends React.Component {
         const {
             currentSummit = null,
             onValueDelete,
-            onValueSave,
             questionClasses,
             updateSubQuestionRuleOrder,
             updateQuestionValueOrder
@@ -236,6 +235,8 @@ class ExtraQuestionForm extends React.Component {
                 delete: {onClick: this.handleDeleteSubQuestionRule}
             }
         }
+
+        const hideMandatory = entity.type === 'CheckBox' || (entity.type === 'CheckBoxList' && entity?.values?.length <= 1)
 
         return (
             <>
@@ -326,6 +327,7 @@ class ExtraQuestionForm extends React.Component {
                             </div>
                         </div>
                         }
+                        {!hideMandatory &&
                         <div className="col-md-3 checkboxes-div">
                             <div className="form-check abc-checkbox">
                                 <input type="checkbox" id="mandatory" checked={entity.mandatory}
@@ -335,6 +337,7 @@ class ExtraQuestionForm extends React.Component {
                                 </label>
                             </div>
                         </div>
+                        }
                         {this.props.shouldShowEditable &&
                         <div className="col-md-3 checkboxes-div">
                             <div className="form-check abc-checkbox">

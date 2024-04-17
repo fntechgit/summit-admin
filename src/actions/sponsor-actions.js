@@ -503,6 +503,11 @@ export const saveSponsorExtraQuestion = (entity) => async (dispatch, getState) =
 
     const normalizedEntity = normalizeSocialNetwork(entity);
 
+    // force mandatory false in certain cases
+    if (entity.type === 'CheckBox' || (entity.type === 'CheckBoxList' && entity?.values?.length <= 1)) {
+        entity.mandatory = false;
+    }
+
     if (entity.id) {
 
         return putRequest(
