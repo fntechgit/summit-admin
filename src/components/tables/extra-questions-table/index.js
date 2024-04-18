@@ -40,7 +40,8 @@ const ExtraQuestionsTable = ({extraQuestions, onNew, onEdit, onDelete, onReorder
   }
 
   const columns = [
-    { columnKey: 'type', value: T.translate("generic_extra_question_list.question_type")},
+    { columnKey: 'type', value: T.translate("generic_extra_question_list.question_type"),
+      render: function(c){ return c.type.split(/(?=[A-Z])/).join(" ")} },
     { columnKey: 'label', value: T.translate("generic_extra_question_list.visible_question") },
     { columnKey: 'name', value: T.translate("generic_extra_question_list.question_id") }
   ];

@@ -172,9 +172,10 @@ class ExtraQuestionForm extends React.Component {
             onValueDelete,
             questionClasses,
             updateSubQuestionRuleOrder,
-            updateQuestionValueOrder
+            updateQuestionValueOrder,
         } = this.props;
-        const question_class_ddl = questionClasses.map(c => ({label: c.type, value: c.type}));
+
+        const question_class_ddl = questionClasses.map(c => ({label: c.type.split(/(?=[A-Z])/).join(" "), value: c.type}));
 
         const badge_features_ddl = currentSummit && currentSummit.badge_features && currentSummit.badge_features.length > 0 ? currentSummit.badge_features.map(f => ({
             label: f.name,
