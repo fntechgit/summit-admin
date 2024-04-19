@@ -173,6 +173,7 @@ class ExtraQuestionForm extends React.Component {
             questionClasses,
             updateSubQuestionRuleOrder,
             updateQuestionValueOrder,
+            shouldHideMandatory = false
         } = this.props;
 
         const question_class_ddl = questionClasses.map(c => ({label: c.type.split(/(?=[A-Z])/).join(" "), value: c.type}));
@@ -237,7 +238,7 @@ class ExtraQuestionForm extends React.Component {
             }
         }
 
-        const hideMandatory = entity.type === 'CheckBox' || (entity.type === 'CheckBoxList' && entity?.values?.length <= 1)
+        const hideMandatory = shouldHideMandatory && (entity.type === 'CheckBox' || (entity.type === 'CheckBoxList' && entity?.values?.length <= 1));
 
         return (
             <>

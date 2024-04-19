@@ -76,6 +76,7 @@ const EditSponsorExtraQuestionPage = ({ currentSummit, entity, errors, match, al
           onValueSave={handleValueSave}
           onSubmit={props.saveSponsorExtraQuestion}
           updateQuestionValueOrder={props.updateSponsorExtraQuestionValueOrder}
+          shouldHideMandatory={true}
         />
       }
     </div>
