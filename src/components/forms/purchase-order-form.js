@@ -127,7 +127,7 @@ class PurchaseOrderForm extends React.Component {
             { columnKey: 'owner_link', value: T.translate("edit_purchase_order.attendee") },
             { columnKey: 'email_link', value: T.translate("edit_purchase_order.owner_email") },
             { columnKey: 'final_amount_formatted', value: T.translate("edit_purchase_order.paid_amount")},
-            { columnKey: 'refunded_amount_formatted', value: T.translate("edit_purchase_order.refunded_amount")},
+            { columnKey: 'refunded_amount_formatted', value: T.translate("edit_purchase_order.total_refunded_amount")},
             { columnKey: 'final_amount_adjusted_formatted', value: T.translate("edit_purchase_order.paid_amount_adjusted")}
         ];
 
