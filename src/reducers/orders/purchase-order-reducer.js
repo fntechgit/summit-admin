@@ -69,8 +69,8 @@ const assembleTicketsState = (tickets) => {
         let ticket_type_name = t.ticket_type ? t.ticket_type.name : 'N/A';
 
         const final_amount_formatted = `$${t.final_amount.toFixed(2)}`;
-        const refunded_amount_formatted = `$${t.refunded_amount.toFixed(2)}`;
-        const final_amount_adjusted_formatted = `$${((t.final_amount - t.refunded_amount).toFixed(2))}`;
+        const refunded_amount_formatted = `$${t.total_refunded_amount.toFixed(2)}`;
+        const final_amount_adjusted_formatted = `$${((t.final_amount - t.total_refunded_amount).toFixed(2))}`;
 
         if (t.owner) {
             owner_email = t.owner.email;
