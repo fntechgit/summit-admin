@@ -172,89 +172,95 @@ const parseFilters = (filters, term = null) => {
 
     const filter = [];
 
-    if (filters.hasOwnProperty('showOnlyPendingRefundRequests') && filters.showOnlyPendingRefundRequests) {
+    if (filters?.showOnlyPendingRefundRequests) {
         filter.push('has_requested_refund_requests==1');
     }
 
-    if (filters.hasOwnProperty('showOnlyPrintable') && filters.showOnlyPrintable) {
+    if (filters?.showOnlyPrintable) {
         filter.push('is_printable==1');
     }
 
-    if (filters.hasOwnProperty('hasOwnerFilter') && filters.hasOwnerFilter) {
+    if (filters?.hasOwnerFilter) {
         if (filters.hasOwnerFilter === 'HAS_OWNER')
             filter.push(`has_owner==1`);
         if (filters.hasOwnerFilter === 'HAS_NO_OWNER')
             filter.push(`has_owner==0`)
     }
 
-    if(filters.hasOwnProperty('hasBadgeFilter') && filters.hasBadgeFilter){
+    if (filters?.hasBadgeFilter) {
         if (filters.hasBadgeFilter === 'HAS_BADGE')
             filter.push(`has_badge==1`);
         if (filters.hasBadgeFilter === 'HAS_NO_BADGE')
             filter.push(`has_badge==0`)
     }
 
-    if(filters.hasOwnProperty('ticketTypesFilter') && Array.isArray(filters.ticketTypesFilter) && filters.ticketTypesFilter.length > 0){
+    if (filters?.ticketTypesFilter?.length > 0) {
         filter.push(filters.ticketTypesFilter.reduce(
             (accumulator, tt) => accumulator +(accumulator !== '' ? ',':'') +`ticket_type_id==${tt.value}`,
             ''
         ));
     }
 
-    if(filters.hasOwnProperty('badgeTypesFilter') && Array.isArray(filters.badgeTypesFilter) && filters.badgeTypesFilter.length > 0) {
+    if (filters?.badgeTypesFilter?.length > 0) {
         filter.push(filters.badgeTypesFilter.reduce(
             (accumulator, tt) => accumulator +(accumulator !== '' ? ',':'') +`badge_type_id==${tt.value}`,
             ''
         ));
     }
 
-    if(filters.hasOwnProperty('viewTypesFilter') && Array.isArray(filters.viewTypesFilter) && filters.viewTypesFilter.length > 0){
+    if (filters?.viewTypesFilter?.length > 0) {
         filter.push(filters.viewTypesFilter.reduce(
             (accumulator, tt) => accumulator +(accumulator !== '' ? ',':'') +`view_type_id==${tt.value}`,
             ''
         ));
     }
 
-    if(filters.promocodesFilter?.length > 0){
+    if (filters.promocodesFilter?.length > 0) {
         filter.push(filters.promocodesFilter.reduce(
           (accumulator, tt) => accumulator +(accumulator !== '' ? ',':'') +`promo_code_id==${tt.id}`,
           ''
         ));
     }
 
-    if(filters.hasOwnProperty('completedFilter') && filters.completedFilter){
+    if (filters?.completedFilter) {
         filter.push(`owner_status==${filters.completedFilter}`);
     }
 
-    if (filters.hasOwnProperty('amountFilter') && filters.amountFilter) {
+    if (filters?.amountFilter) {
         if (filters.amountFilter === 'Paid')
             filter.push(`final_amount>0`);
         if (filters.amountFilter === 'Free')
             filter.push(`final_amount==0`)
     }
 
-    if(filters.hasOwnProperty('ownerFullNameStartWithFilter') && Array.isArray(filters.ownerFullNameStartWithFilter) && filters.ownerFullNameStartWithFilter.length > 0){
+    if (filters.ownerFullNameStartWithFilter?.length > 0) {
         filter.push(filters.ownerFullNameStartWithFilter.reduce(
             (accumulator, alpha) => accumulator +(accumulator !== '' ? ',':'') +`owner_first_name@@${alpha.value}`,
             ''
         ));
     }
 
-    if(filters.hasOwnProperty('audienceFilter') && Array.isArray(filters.audienceFilter) && filters.audienceFilter.length > 0){
+    if (filters?.ownerCompany) {
+        console.log(filters.ownerCompany);
+        filter.push(`owner_company==${filters.ownerCompany.name}`);
+    }
+
+
+    if (filters.audienceFilter?.length > 0) {
         filter.push(filters.audienceFilter.reduce(
             (accumulator, aud) => accumulator +(accumulator !== '' ? ',':'') +`audience==${aud}`,
             ''
         ));
     }
 
-    if(filters.promocodeTagsFilter?.length > 0){
+    if (filters.promocodeTagsFilter?.length > 0) {
         filter.push(filters.promocodeTagsFilter.reduce(
             (accumulator, t) => accumulator +(accumulator !== '' ? ',':'') +`promo_code_tag==${t.tag}`,
             ''
         ));
     }
 
-    if(term) {
+    if (term) {
         const escapedTerm = escapeFilterValue(term);
         let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm},promo_code_tag=@${escapedTerm}`;
         searchString = isNumericString(escapedTerm) ? `${searchString},promo_code_tag_id==${escapedTerm}` : searchString;

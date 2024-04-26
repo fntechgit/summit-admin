@@ -1,4 +1,4 @@
-/**
+    /**
  * Copyright 2018 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import {
     SelectableTable,
     Dropdown,
     PromocodeInput,
-    TagInput
+    TagInput,
+    CompanyInput
 } from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
 import {
@@ -100,6 +101,7 @@ class TicketListPage extends React.Component {
                 showOnlyPendingRefundRequests: false,
                 ticketTypesFilter : [],
                 ownerFullNameStartWithFilter:[],
+                ownerCompany: null,
                 viewTypesFilter: [],
                 hasOwnerFilter : null,
                 completedFilter : null,
@@ -260,6 +262,7 @@ class TicketListPage extends React.Component {
                     showOnlyPendingRefundRequests: false,
                     ticketTypesFilter : [],
                     ownerFullNameStartWithFilter:[],
+                    ownerCompany: null,
                     viewTypesFilter: [],
                     hasOwnerFilter : null,
                     completedFilter : null,
@@ -371,6 +374,7 @@ class TicketListPage extends React.Component {
             {label: 'Badge', value: 'hasBadgeFilter'},
             {label: 'Amount', value: 'amountFilter'},
             {label: 'Assignee Name', value: 'ownerFullNameStartWithFilter'},
+            {label: 'Owner Company', value: 'ownerCompany'},
             {label: 'View Type', value: 'viewTypesFilter'},
             {label: 'Ticket Type', value: 'ticketTypesFilter'},
             {label: 'Promo Code', value: 'promocodesFilter'},
@@ -456,7 +460,9 @@ class TicketListPage extends React.Component {
                             />
                         </div>
                     </div>
-                    <div className="row">
+                    {enabledFilters?.length > 0 &&
+                        <div className="row filtersWrapper">
+                        <hr />
                         {enabledFilters.includes('hasOwnerFilter') &&
                         <div className="col-md-6">
                             <SegmentedControl
@@ -467,7 +473,7 @@ class TicketListPage extends React.Component {
                                     { label: T.translate("ticket_list.has_no_owner"), value: "HAS_NO_OWNER",default: ticketFilters.hasOwnerFilter === "HAS_NO_OWNER" },
                                 ]}
                                 setValue={val => this.handleFilterChange('hasOwnerFilter', val)}
-                                className="ticket-list-segment"
+                                className="segmentFilter"
                             />
                         </div>
                         }
@@ -481,7 +487,7 @@ class TicketListPage extends React.Component {
                                   { label: T.translate("ticket_list.incomplete"), value: "Incomplete",default: ticketFilters.completedFilter === "Incomplete" },
                               ]}
                               setValue={val => this.handleFilterChange('completedFilter', val)}
-                              className="ticket-list-segment"
+                              className="segmentFilter"
                             />
                         </div>
                         }
@@ -495,7 +501,7 @@ class TicketListPage extends React.Component {
                                     { label: T.translate("ticket_list.has_no_badge"), value: "HAS_NO_BADGE",default: ticketFilters.hasBadgeFilter === "HAS_NO_BADGE" },
                                 ]}
                                 setValue={newValue => this.handleFilterChange('hasBadgeFilter', newValue)}
-                                className="ticket-list-segment"
+                                className="segmentFilter"
                             />
                         </div>
                         }
@@ -509,7 +515,7 @@ class TicketListPage extends React.Component {
                                   { label: T.translate("ticket_list.free"), value: "Free",default: ticketFilters.amountFilter === "Free" },
                               ]}
                               setValue={val => this.handleFilterChange('amountFilter', val)}
-                              className="ticket-list-segment"
+                              className="segmentFilter"
                             />
                         </div>
                         }
@@ -523,9 +529,20 @@ class TicketListPage extends React.Component {
                                 options={alphabet}
                                 isClearable={true}
                                 isMulti
-                                className="ticket-types-filter"
+                                className="dropdownFilter"
                             />
                         </div>
+                        }
+                        {enabledFilters.includes('ownerCompany') &&
+                          <div className={'col-md-6'}>
+                              <CompanyInput
+                                id='ownerCompany'
+                                className="dropdownFilter"
+                                value={ticketFilters.ownerCompany}
+                                placeholder={T.translate("ticket_list.placeholders.owner_company")}
+                                onChange={ev => this.handleFilterChange('ownerCompany', ev.target.value)}
+                              />
+                          </div>
                         }
                         {enabledFilters.includes('viewTypesFilter') &&
                         <div className={'col-md-6'}>
@@ -537,7 +554,7 @@ class TicketListPage extends React.Component {
                                 options={viewTypesOptions}
                                 isClearable={true}
                                 isMulti
-                                className="view-types-filter"
+                                className="dropdownFilter"
                             />
                         </div>
                         }
@@ -551,7 +568,7 @@ class TicketListPage extends React.Component {
                               options={ticketTypesOptions}
                               isClearable={true}
                               isMulti
-                              className="ticket-types-filter"
+                              className="dropdownFilter"
                             />
                         </div>
                         }
@@ -562,7 +579,7 @@ class TicketListPage extends React.Component {
                               value={ticketFilters.promocodesFilter}
                               onChange={ev => this.handleFilterChange('promocodesFilter', ev.target.value)}
                               summitId={currentSummit.id}
-                              className="promocodes-filter"
+                              className="dropdownFilter"
                               placeholder={T.translate('ticket_list.placeholders.promocodes')}
                               isClearable
                               multi
@@ -575,7 +592,7 @@ class TicketListPage extends React.Component {
                               id="promocodeTagsFilter"
                               value={ticketFilters.promocodeTagsFilter}
                               onChange={ev => this.handleFilterChange('promocodeTagsFilter', ev.target.value)}
-                              className="promocodes-filter"
+                              className="dropdownFilter"
                               placeholder={T.translate('ticket_list.placeholders.promocodes_tags')}
                               isClearable
                               multi
@@ -625,12 +642,12 @@ class TicketListPage extends React.Component {
                               options={badgeTypesOptions}
                               isClearable={true}
                               isMulti
-                              className="badge-type-filter"
+                              className="dropdownFilter"
                             />
                         </div>
                         }
                     </div>
-
+                    }
                     <hr/>
 
                     <div className={'row'} style={{marginBottom: 15}}>
