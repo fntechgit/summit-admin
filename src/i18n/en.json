@@ -779,7 +779,8 @@
       "badge_feature": "Filter by Badge Feature",
       "checkin_date_from": "Filter Check In Date from",
       "checkin_date_to": "Filter Check In Date to",
-      "tags": "Filter by tag"
+      "tags": "Filter by tag",
+      "company": "Filter by company"
     }
   },
   "edit_attendee": {
