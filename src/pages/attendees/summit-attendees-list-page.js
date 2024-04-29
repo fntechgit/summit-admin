@@ -21,7 +21,9 @@ import {
   Input,
   FreeTextSearch,
   SelectableTable,
-  DateTimePicker, TagInput
+  DateTimePicker,
+  TagInput,
+  CompanyInput
 } from 'openstack-uicore-foundation/lib/components';
 import {epochToMomentTimeZone} from 'openstack-uicore-foundation/lib/utils/methods'
 import ScheduleModal from "../../components/schedule-modal/index";
@@ -59,6 +61,7 @@ const FILTERS_DEFAULT_STATE = {
   virtualCheckInFilter: null,
   checkedInFilter: null,
   ticketTypeFilter: [],
+  companyFilter: null,
   badgeTypeFilter: [],
   featuresFilter: [],
   checkinDateFilter: Array(2).fill(null),
@@ -393,6 +396,7 @@ class SummitAttendeeListPage extends React.Component {
       {label: 'Badge Feature', value: 'featuresFilter'},
       {label: 'Check In Date', value: 'checkinDateFilter'},
       {label: 'Tags', value: 'tags'},
+      {label: 'Company', value: 'companyFilter'},
     ]
 
     let columns = [
@@ -634,6 +638,17 @@ class SummitAttendeeListPage extends React.Component {
                 isClearable={true}
                 placeholder={T.translate("attendee_list.placeholders.ticket_type")}
                 isMulti
+              />
+            </div>
+          }
+          {enabledFilters.includes('companyFilter') &&
+            <div className="col-md-6" style={{minHeight: "61px", paddingTop: "8px"}}>
+              <CompanyInput
+                id="companyFilter"
+                value={attendeeFilters.companyFilter}
+                summitId={currentSummit.id}
+                placeholder={T.translate("attendee_list.placeholders.company")}
+                onChange={ev => this.handleExtraFilterChange(ev)}
               />
             </div>
           }
