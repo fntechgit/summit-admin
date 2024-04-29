@@ -109,6 +109,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
         }
         break;
+        case PURCHASE_ORDER_UPDATED:
         case RECEIVE_PURCHASE_ORDER: {
             let entity = {...payload.response};
 
@@ -138,23 +139,6 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
         break;
         case UPDATE_PURCHASE_ORDER: {
             return {...state,  entity: {...payload }, errors: {} };
-        }
-        case PURCHASE_ORDER_UPDATED: {
-            let entity = {...payload.response};
-
-            return {
-                ...state,
-                entity: {
-                    owner: {
-                        email: entity.owner_email,
-                        first_name: entity.owner_first_name,
-                        last_name: entity.owner_last_name,
-                    },
-                    ...entity,
-                    tickets: assembleTicketsState(entity.tickets)
-                },
-                errors: {}
-            }
         }
         case RECEIVE_PURCHASE_ORDER_REFUNDS: {
             const approved_refunds = payload.response.data;
