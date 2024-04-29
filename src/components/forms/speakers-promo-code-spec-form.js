@@ -14,10 +14,14 @@
 import React from 'react';
 import T from 'i18n-react/dist/i18n-react'
 import { connect } from 'react-redux';
-import {Dropdown, Input, TagInput, TicketTypesInput } from 'openstack-uicore-foundation/lib/components';
-import PromoCodeInput from '../inputs/promo-code-input';
+import {Dropdown, Input, PromocodeInput, TagInput, TicketTypesInput } from 'openstack-uicore-foundation/lib/components';
 import BadgeFeatureInput from '../inputs/badge-feature-input';
-import {queryMultiSpeakersPromocodes, resetPromoCodeSpecForm, updateSpecs} from '../../actions/promocode-specification-actions';
+import {
+    resetPromoCodeSpecForm, 
+    updateSpecs, 
+    SPEAKERS_PROMO_CODE_CLASS_NAME, 
+    SPEAKERS_DISCOUNT_CODE_CLASS_NAME
+} from '../../actions/promocode-specification-actions';
 import {
     EXISTING_SPEAKERS_PROMO_CODE, 
     EXISTING_SPEAKERS_DISCOUNT_CODE,
@@ -77,19 +81,20 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                     <hr />
                     <div className="row form-group">
                         <div className="col-md-12">
-                            <PromoCodeInput
+                            <PromocodeInput
                                 id="existingPromoCode"
                                 value={entity.existingPromoCode}
-                                summitId={summit.id}
                                 onChange={this.handleChange}
+                                summitId={summit.id}
+                                className="promocodes-filter"
                                 placeholder={promoCodeStrategy === 1 ? 
                                     T.translate("promo_code_specification.placeholders.speakers_promo_code") : 
                                     T.translate("promo_code_specification.placeholders.speakers_discount_code")}
-                                customQueryAction={
-                                    (summitId, input, callback) => queryMultiSpeakersPromocodes(summitId, input, promoCodeStrategy, callback)
-                                }
                                 isClearable={true}
                                 error={hasErrors('existingPromoCode', errors)}
+                                extraFilters={[
+                                    `class_name==${promoCodeStrategy === 1 ? SPEAKERS_PROMO_CODE_CLASS_NAME : SPEAKERS_DISCOUNT_CODE_CLASS_NAME}`
+                                ]}
                             />
                         </div>
                     </div>
