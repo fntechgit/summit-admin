@@ -80,6 +80,8 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
         case UPDATE_TICKET: {
             return {...state,  entity: {...payload} };
         }
+        case TICKET_REFUNDED:
+        case TICKET_CANCEL_REFUND:
         case RECEIVE_TICKET: {
             let entity = {...payload.response};
             let bought_date = entity.bought_date ? epochToMomentTimeZone(entity.bought_date, state.summitTZ).format('MMMM Do YYYY, h:mm:ss a') : null;
@@ -147,28 +149,6 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     adjusted_total_ticket_purchase_price_formatted,
                     refund_requests_taxes: unique_approved_refunds_taxes
                 } };
-        }
-        case TICKET_REFUNDED:
-        case TICKET_CANCEL_REFUND:
-        {
-            let entity = {...payload.response};
-
-            const refunded_amount_formatted = `$${entity.refunded_amount.toFixed(2)}`;
-            const final_amount_adjusted_formatted = `$${((entity.final_amount - entity.refunded_amount).toFixed(2))}`;
-            if(entity.hasOwnProperty("refund_requests")){
-                entity.refund_requests = entity.refund_requests.map( r => ({...r,
-                    requested_by_fullname: r.requested_by ? `${r.requested_by.first_name} ${r.requested_by.last_name}`:'TBD',
-                    action_by_fullname: r.action_by ? `${r.action_by.first_name} ${r.action_by.last_name}`:'TBD',
-                    refunded_amount_formatted: `$${r.refunded_amount.toFixed(2)}`,
-                    total_refunded_amount_formatted: `$${r.total_refunded_amount.toFixed(2)}`,
-                }))
-            }
-            return {...state, entity:{...state.entity,
-                    refund_requests : entity.refund_requests,
-                    refunded_amount: entity.refunded_amount,
-                    refunded_amount_formatted : refunded_amount_formatted,
-                    final_amount_adjusted_formatted : final_amount_adjusted_formatted
-                }};
         }
         case TICKET_UPDATED: {
             let entity = {...payload.response};
