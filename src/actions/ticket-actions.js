@@ -241,8 +241,7 @@ const parseFilters = (filters, term = null) => {
     }
 
     if (filters?.ownerCompany) {
-        console.log(filters.ownerCompany);
-        filter.push(`owner_company==${filters.ownerCompany.name}`);
+        filter.push(`owner_company==${encodeURIComponent(filters.ownerCompany.name)}`);
     }
 
 
