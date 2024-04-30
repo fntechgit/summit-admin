@@ -24,7 +24,7 @@ import {
     showSuccessMessage,
     authErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
-
+import {DUMMY_ACTION} from '../utils/constants';
 import {getAccessTokenSafely} from '../utils/methods';
 import Swal from "sweetalert2";
 import {saveMarketingSetting} from "./marketing-actions";
