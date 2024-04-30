@@ -572,7 +572,7 @@ class SponsorForm extends React.Component {
                     </Panel>
                     </>
                 }
-                { canEditSponsorExtraQuestions &&
+                { entity.id !== 0 && canEditSponsorExtraQuestions &&
                     <Panel show={showSection === 'extra-questions'}
                            title={T.translate("edit_sponsor.extra_questions")}
                            handleClick={this.toggleSection.bind(this, 'extra-questions')}>
