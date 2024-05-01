@@ -272,14 +272,14 @@ export const attachLogo = (entity, file, secondary = false) => async (dispatch, 
     }
 }
 
-const uploadLogo = (entity, file, secondary) => async (dispatch, getState) => {
+const uploadLogo = (entity, file, secondary) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const url = `${window.API_BASE_URL}/api/v1/summits/${entity.id}/logo${secondary ? '/secondary' : ''}`;
     const params = {
         access_token : accessToken
     };
 
-    postRequest(
+    return postRequest(
         null,
         createAction(DUMMY_ACTION),
         url,
