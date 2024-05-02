@@ -61,7 +61,7 @@ const FILTERS_DEFAULT_STATE = {
   virtualCheckInFilter: null,
   checkedInFilter: null,
   ticketTypeFilter: [],
-  companyFilter: null,
+  companyFilter: [],
   badgeTypeFilter: [],
   featuresFilter: [],
   checkinDateFilter: Array(2).fill(null),
@@ -649,6 +649,8 @@ class SummitAttendeeListPage extends React.Component {
                 summitId={currentSummit.id}
                 placeholder={T.translate("attendee_list.placeholders.company")}
                 onChange={ev => this.handleExtraFilterChange(ev)}
+                extraOptions={[{value: 'tbd', label: 'TBD'}]}
+                multi
               />
             </div>
           }
