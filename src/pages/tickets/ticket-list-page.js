@@ -101,7 +101,7 @@ class TicketListPage extends React.Component {
                 showOnlyPendingRefundRequests: false,
                 ticketTypesFilter : [],
                 ownerFullNameStartWithFilter:[],
-                ownerCompany: null,
+                ownerCompany: [],
                 viewTypesFilter: [],
                 hasOwnerFilter : null,
                 completedFilter : null,
@@ -541,6 +541,8 @@ class TicketListPage extends React.Component {
                                 value={ticketFilters.ownerCompany}
                                 placeholder={T.translate("ticket_list.placeholders.owner_company")}
                                 onChange={ev => this.handleFilterChange('ownerCompany', ev.target.value)}
+                                extraOptions={[{value: 'tbd', label: 'TBD'}]}
+                                multi
                               />
                           </div>
                         }

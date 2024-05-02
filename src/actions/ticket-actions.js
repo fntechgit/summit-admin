@@ -240,8 +240,13 @@ const parseFilters = (filters, term = null) => {
         ));
     }
 
-    if (filters?.ownerCompany) {
-        filter.push(`owner_company==${encodeURIComponent(filters.ownerCompany.name)}`);
+    if (filters?.ownerCompany?.length > 0){
+        filter.push('owner_company=='+filters.ownerCompany
+          .map(oc => {
+              const name = oc.id === 'NULL' ? 'NULL' : oc.name;
+              return encodeURIComponent(name)
+          })
+          .join('||'));
     }
 
 
