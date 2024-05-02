@@ -121,8 +121,13 @@ const parseFilters = (filters, term = null) => {
         filter.push('ticket_type_id=='+filters.ticketTypeFilter.join('||'));
     }
 
-    if (filters?.companyFilter){
-        filter.push('company=='+encodeURIComponent(filters.companyFilter.name));
+    if (filters?.companyFilter?.length > 0){
+        filter.push('company=='+filters.companyFilter
+          .map(cf => {
+              const name = cf.id === 'NULL' ? 'NULL' : cf.name;
+              return encodeURIComponent(name)
+          })
+          .join('||'));
     }
 
     if(Array.isArray(filters.featuresFilter) && filters.featuresFilter.length > 0){
