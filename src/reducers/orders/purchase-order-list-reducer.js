@@ -31,7 +31,6 @@ const DEFAULT_STATE = {
     perPage                 : 10,
     totalPurchaseOrders     : 0,
     summitTZ                : '',
-    currencySymbol          : '$',
 };
 
 const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
@@ -42,9 +41,9 @@ const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
             return DEFAULT_STATE;
         }
         case REQUEST_PURCHASE_ORDERS: {
-            let {order, orderDir, term, summitTZ, currencySymbol} = payload;
+            let {order, orderDir, term, summitTZ} = payload;
 
-            return {...state, order, orderDir, term, summitTZ, currencySymbol }
+            return {...state, order, orderDir, term, summitTZ }
         }
         case RECEIVE_PURCHASE_ORDERS: {
             let {current_page, total, last_page} = payload.response;
@@ -60,7 +59,7 @@ const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
                     owner_email: a.owner_email,
                     company: a.owner_company,
                     bought_date: bought_date,
-                    amount: `${state.currencySymbol}${a.amount}`,
+                    amount: `${a.currency_symbol}${a.amount}`,
                     payment_method: a.payment_method,
                     status: a.status
                 };
