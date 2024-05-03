@@ -2936,5 +2936,12 @@
     "all_questions": "All Questions",
     "attendee_question_section": "Attendee Extra Question",
     "sponsor_question_section": "Sponsor Extra Question"
+  },
+  "send_emails_modal": {
+    "title": "You are about to send an EMAIL BLAST to {recipients}!",
+    "warning": "You are about to send the {template} email template to {qty} {recipients}.",
+    "test_warning": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
+    "send_emails":  "Send",
+    "excerpt_email": "Excerpt Recipient"
   }
 }

@@ -484,7 +484,7 @@ export const deleteRsvp = (memberId, rsvpId) => async (dispatch) => {
     );
 };
 
-export const sendEmails = (filters = {}, recipientEmail = null) => async (dispatch, getState) => {
+export const sendEmails = (filters = {}, recipientEmail = null, excerptRecipient = null) => async (dispatch, getState) => {
     const { currentSummitState, currentAttendeeListState } = getState();
     const {term, currentFlowEvent, selectedAll, selectedIds, excludedIds} = currentAttendeeListState;
     const accessToken = await getAccessTokenSafely();
@@ -514,8 +514,12 @@ export const sendEmails = (filters = {}, recipientEmail = null) => async (dispat
         email_flow_event : currentFlowEvent
     };
 
-    if(recipientEmail) {
+    if (recipientEmail) {
         payload['test_email_recipient'] = recipientEmail;
+    }
+
+    if (excerptRecipient) {
+        payload['outcome_email_recipient'] = excerptRecipient;
     }
 
     dispatch(startLoading());

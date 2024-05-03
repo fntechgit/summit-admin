@@ -37,8 +37,9 @@ import {MaxTextLengthForTicketTypesOnTable, MaxTextLengthForTagsOnTable, ALL_FIL
 import "../../styles/registration-invitation-list-page.less";
 import {SegmentedControl} from "segmented-control";
 import OrAndFilter from '../../components/filters/or-and-filter';
-import {hasErrors, validateEmail} from '../../utils/methods';
+import {validateEmail} from '../../utils/methods';
 import InvitationStatusDropdown from "../../components/inputs/invitation-status-dropdown";
+import SendEmailModal from "../../components/send-email-modal/index.jsx";
 
 class RegistrationInvitationsListPage extends React.Component {
 
@@ -57,7 +58,7 @@ class RegistrationInvitationsListPage extends React.Component {
     this.handleChangeStatus = this.handleChangeStatus.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleNewInvitation = this.handleNewInvitation.bind(this);
-    this.handleSendEmails = this.handleSendEmails.bind(this);
+    this.handleSendClick = this.handleSendClick.bind(this);
     this.handleChangeFlowEvent = this.handleChangeFlowEvent.bind(this);
     this.handleDeleteAll = this.handleDeleteAll.bind(this);
     this.handleChangeNoSent = this.handleChangeNoSent.bind(this);
@@ -71,7 +72,8 @@ class RegistrationInvitationsListPage extends React.Component {
       invitationFilter: {
         orAndFilter: ALL_FILTER
       },
-      testRecipient: ''
+      testRecipient: '',
+      showEmailModal: false,
     }
   }
 
@@ -163,21 +165,12 @@ class RegistrationInvitationsListPage extends React.Component {
     history.push(`/app/summits/${currentSummit.id}/registration-invitations/new`);
   }
 
-  handleSendEmails(ev) {
+  handleSendClick(ev) {
     ev.stopPropagation();
     ev.preventDefault();
 
-    const {
-      selectedCount,
-      status,
-      isSent,
-      currentFlowEvent,
-      sendEmails,
-      allowedTicketTypesIds,
-      tagFilter
-    } = this.props;
-
-    const {invitationFilter: {orAndFilter}, testRecipient} = this.state;
+    const { selectedCount, currentFlowEvent} = this.props;
+    const {testRecipient} = this.state;
 
     if (!currentFlowEvent) {
       Swal.fire("Validation error", T.translate("registration_invitation_list.select_template"), "warning");
@@ -194,33 +187,19 @@ class RegistrationInvitationsListPage extends React.Component {
       return false
     }
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("registration_invitation_list.send_email_warning",
-        {template: currentFlowEvent, qty: selectedCount})}
-                ${testRecipient ? T.translate("registration_invitation_list.email_test_recipient", {email: testRecipient}) : ''}
-                ${T.translate("registration_invitation_list.please_confirm")}`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: T.translate("registration_invitation_list.send_emails")
-    }).then(function (result) {
-      if (result.value) {
+    this.setState({showEmailModal: true});
 
-        sendEmails
-        (
-          {
-            status,
-            isSent,
-            allowedTicketTypesIds,
-            tagFilter,
-            orAndFilter
-          },
-          testRecipient
-        );
-      }
-    });
+  }
+
+  handleSendEmails = (excerpt) => {
+    const {status, isSent, sendEmails, allowedTicketTypesIds, tagFilter} = this.props;
+    const {invitationFilter: {orAndFilter}, testRecipient} = this.state;
+
+    this.setState({showEmailModal: false});
+
+    const filters = {status, isSent, allowedTicketTypesIds, tagFilter, orAndFilter};
+
+    sendEmails(filters, testRecipient, excerpt);
   }
 
   handleSelected(invitation_id, isSelected) {
@@ -361,7 +340,7 @@ class RegistrationInvitationsListPage extends React.Component {
       selectedAll, allowedTicketTypesIds, tagFilter
     } = this.props;
 
-    const {showImportModal, importFile, acceptanceCriteria, invitationFilter, testRecipient} = this.state;
+    const {showImportModal, importFile, acceptanceCriteria, invitationFilter, testRecipient, showEmailModal} = this.state;
 
     const columns = [
       {columnKey: 'id', value: T.translate("general.id"), sortable: true},
@@ -516,10 +495,19 @@ class RegistrationInvitationsListPage extends React.Component {
                 />
               </div>
               <div className={'col-md-2'}>
-                <button className="btn btn-default right-space" onClick={this.handleSendEmails}>
+                <button className="btn btn-default right-space" onClick={this.handleSendClick}>
                   {T.translate("registration_invitation_list.send_emails")}
                 </button>
               </div>
+              <SendEmailModal
+                show={showEmailModal}
+                onHide={() => this.setState({showEmailModal: false})}
+                recipients="invitations"
+                template={currentFlowEvent}
+                qty={selectedCount}
+                testRecipient={testRecipient}
+                onSend={this.handleSendEmails}
+              />
             </div>
           </div>
 
