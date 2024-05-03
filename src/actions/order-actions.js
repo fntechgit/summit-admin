@@ -26,7 +26,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessTokenSafely, getCurrencySymbol} from '../utils/methods';
+import {getAccessTokenSafely} from '../utils/methods';
 
 import URI from 'urijs';
 
