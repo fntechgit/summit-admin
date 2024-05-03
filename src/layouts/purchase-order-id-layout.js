@@ -50,7 +50,7 @@ class PurchaseOrderIdLayout extends React.Component {
             if (!newId) {
                 this.props.resetPurchaseOrderForm();
             } else {
-                this.props.getPurchaseOrder(newId);
+                this.props.getPurchaseOrder(newId).then(() => this.props.getPurchaseOrderRefunds(newId));
             }
         }
     }
