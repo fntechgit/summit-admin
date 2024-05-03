@@ -26,7 +26,7 @@ import {
     authErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessTokenSafely} from '../utils/methods';
+import {getAccessTokenSafely, getCurrencySymbol} from '../utils/methods';
 
 import URI from 'urijs';
 
@@ -384,6 +384,7 @@ export const getPurchaseOrders = (term = null, page = 1, perPage = 10, order = '
     const {currentSummit} = currentSummitState;
     const filter = [];
     const summitTZ = currentSummit.time_zone.name;
+    const currencySymbol = getCurrencySymbol(currentSummit.default_ticket_type_currency);
 
     dispatch(startLoading());
 
@@ -417,7 +418,7 @@ export const getPurchaseOrders = (term = null, page = 1, perPage = 10, order = '
         createAction(RECEIVE_PURCHASE_ORDERS),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/orders`,
         authErrorHandler,
-        {page, perPage, order, orderDir, summitTZ, term}
+        {page, perPage, order, orderDir, summitTZ, term, currencySymbol}
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }

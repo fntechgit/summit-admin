@@ -367,3 +367,15 @@ export const htmlToString = (html) => {
 }
 
 export const capitalize = string => string ? string.charAt(0).toUpperCase() + string.slice(1) : '';
+
+export const getCurrencySymbol = (currency) => {
+    const supportedCurrencies = {
+        "USD": "$",
+        "EUR": "€",
+        "GBP": "£",
+        "CAD": "CA$",
+        "KRW": "₩"
+    };
+
+    return supportedCurrencies[currency] || "$";
+}
