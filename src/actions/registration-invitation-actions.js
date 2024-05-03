@@ -304,7 +304,7 @@ const normalizeEntity = (entity) => {
     return normalizedEntity;
 };
 
-export const sendEmails = ( filters = {}, testRecipient = null) => async (dispatch, getState) => {
+export const sendEmails = ( filters = {}, testRecipient = null, excerptRecipient = null) => async (dispatch, getState) => {
 
     const { currentSummitState, RegistrationInvitationListState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -327,7 +327,7 @@ export const sendEmails = ( filters = {}, testRecipient = null) => async (dispat
         }
     }
 
-    if(filter.length > 0){
+    if (filter.length > 0){
         params['filter[]'] = filter;
     }
 
@@ -335,8 +335,12 @@ export const sendEmails = ( filters = {}, testRecipient = null) => async (dispat
         email_flow_event : currentFlowEvent
     };
 
-    if(testRecipient) {
+    if (testRecipient) {
         payload['test_email_recipient'] = testRecipient;
+    }
+
+    if (excerptRecipient) {
+        payload['outcome_email_recipient'] = excerptRecipient;
     }
 
     dispatch(startLoading());

@@ -45,6 +45,7 @@ import {getBadgeFeatures, getBadgeTypes} from "../../actions/badge-actions";
 import {ALL_FILTER, HAS_NO_TICKETS, HAS_TICKETS} from '../../utils/constants';
 import OrAndFilter from '../../components/filters/or-and-filter';
 import {validateEmail} from '../../utils/methods';
+import SendEmailModal from '../../components/send-email-modal/index.jsx';
 
 const fieldNames = [
   {columnKey: 'member_id', value: 'member_id', sortable: true},
@@ -85,7 +86,7 @@ class SummitAttendeeListPage extends React.Component {
     this.handleDeleteAttendee = this.handleDeleteAttendee.bind(this);
     this.handleSelected = this.handleSelected.bind(this);
     this.handleSelectedAll = this.handleSelectedAll.bind(this);
-    this.handleSendEmails = this.handleSendEmails.bind(this);
+    this.handleSendClick = this.handleSendClick.bind(this);
     this.handleChangeFlowEvent = this.handleChangeFlowEvent.bind(this);
     this.handleSetMemberFilter = this.handleSetMemberFilter.bind(this);
     this.handleSetStatusFilter = this.handleSetStatusFilter.bind(this);
@@ -109,6 +110,7 @@ class SummitAttendeeListPage extends React.Component {
       attendeeFilters: {...FILTERS_DEFAULT_STATE},
       selectedColumns: [],
       testRecipient: '',
+      showEmailModal: false,
     }
   }
 
@@ -144,12 +146,12 @@ class SummitAttendeeListPage extends React.Component {
     this.props.setCurrentFlowEvent(value);
   }
 
-  handleSendEmails(ev) {
+  handleSendClick(ev) {
     ev.stopPropagation();
     ev.preventDefault();
 
-    const { selectedCount, currentFlowEvent, sendEmails } = this.props;
-    const {attendeeFilters, testRecipient} = this.state;
+    const { selectedCount, currentFlowEvent } = this.props;
+    const {testRecipient} = this.state;
 
     if (!currentFlowEvent) {
       Swal.fire("Validation error", T.translate("attendee_list.select_template"), "warning");
@@ -166,23 +168,14 @@ class SummitAttendeeListPage extends React.Component {
       return false
     }
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("attendee_list.send_email_warning",
-        {template: currentFlowEvent, qty: selectedCount})}
-                ${testRecipient ? T.translate("attendee_list.email_test_recipient", {email: testRecipient}) : ''}
-                ${T.translate("attendee_list.please_confirm")}`,
-      type: "warning",
-      showCancelButton: true,
-      cancelButtonColor: '#d33',
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: T.translate("attendee_list.send_emails"),
-    }).then(function (result) {
-      if (result.value) {
-        const recipientEmail = testRecipient || null;
-        sendEmails(attendeeFilters, recipientEmail);
-      }
-    })
+    this.setState({showEmailModal: true})
+  }
+
+  handleSendEmails = (excerpt) => {
+    const {attendeeFilters, testRecipient, sendEmails} = this.props;
+    this.setState({showEmailModal: false});
+
+    sendEmails(attendeeFilters, testRecipient || null, excerpt);
   }
 
   handleSelected(attendee_id, isSelected) {
@@ -381,9 +374,10 @@ class SummitAttendeeListPage extends React.Component {
       selectedAll,
       badgeFeatures,
       badgeTypes,
+      sendEmails
     } = this.props;
 
-    const {showModal, modalSchedule, modalTitle, enabledFilters, attendeeFilters, testRecipient} = this.state;
+    const {showModal, modalSchedule, modalTitle, enabledFilters, attendeeFilters, testRecipient, showEmailModal} = this.state;
 
     const filters_ddl = [
       {label: 'Member', value: 'memberFilter'},
@@ -740,10 +734,19 @@ class SummitAttendeeListPage extends React.Component {
             />
           </div>
           <div className={'col-md-1'}>
-            <button className="btn btn-default right-space" onClick={this.handleSendEmails}>
+            <button className="btn btn-default right-space" onClick={this.handleSendClick}>
               {T.translate("attendee_list.send_emails")}
             </button>
           </div>
+          <SendEmailModal
+            show={showEmailModal}
+            onHide={() => this.setState({showEmailModal: false})}
+            recipients="attendees"
+            template={currentFlowEvent}
+            qty={selectedCount}
+            testRecipient={testRecipient}
+            onSend={this.handleSendEmails}
+          />
         </div>
 
         <div className={'row'} style={{marginBottom: 15, marginTop: 15}}>
