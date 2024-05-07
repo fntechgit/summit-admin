@@ -742,7 +742,7 @@ export const changeTicketTypesCurrency = (currency) => async (dispatch, getState
 
     putRequest(
       createAction(UPDATE_TICKET_TYPES_CURRENCY),
-      createAction(TICKET_TYPES_CURRENCY_UPDATED),
+      createAction(TICKET_TYPES_CURRENCY_UPDATED)({currency}),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/ticket-types/all/currency/${currency}`,
       {},
       authErrorHandler

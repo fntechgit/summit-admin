@@ -56,6 +56,9 @@ class EditTicketTypePage extends React.Component {
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
         const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
 
+        // set entity currency
+        entity.currency = entity.currency || currentSummit.default_ticket_type_currency;
+
         return(
             <div className="container">
                 <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />

@@ -40,7 +40,7 @@ import {
     RECEIVE_USER_ROLES_BY_SUMMIT
 } from "../../actions/user-chat-roles-actions.js";
 
-import { RECEIVE_REFUND_POLICIES } from "../../actions/ticket-actions";
+import {RECEIVE_REFUND_POLICIES, TICKET_TYPES_CURRENCY_UPDATED} from "../../actions/ticket-actions";
 import {RECEIVE_ORDER_EXTRA_QUESTIONS, RECEIVE_MAIN_ORDER_EXTRA_QUESTIONS, ORDER_EXTRA_QUESTION_ADDED} from "../../actions/order-actions";
 import {RECEIVE_PRINT_APP_SETTINGS, RECEIVE_REG_LITE_SETTINGS} from "../../actions/marketing-actions";
 import { REG_LITE_BOOLEAN_SETTINGS } from '../../utils/constants.js';
@@ -89,6 +89,7 @@ export const DEFAULT_ENTITY = {
     start_showing_venues_date: 0,
     slug: '',
     supported_currencies: ['USD', 'EUR'],
+    default_ticket_type_currency: 'USD',
     ticket_types: [],
     time_zone: {},
     time_zone_id: '',
@@ -455,6 +456,10 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         case LEAD_REPORT_SETTINGS_UPDATED: {
             const updatedSettings = updateSummitLeadReportSettings(state.currentSummit, payload.response);
             return {...state, currentSummit: {...state.currentSummit, lead_report_settings: updatedSettings}};
+        }
+        case TICKET_TYPES_CURRENCY_UPDATED: {
+            const {currency} = payload;
+            return {...state, currentSummit: {...state.currentSummit, default_ticket_type_currency: currency}};
         }
         default:
             return state;

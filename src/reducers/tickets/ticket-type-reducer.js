@@ -31,7 +31,7 @@ export const DEFAULT_ENTITY = {
     badge_type_id           : 0,
     description             : '',
     cost                    : 0,
-    currency                : 'USD',
+    currency                : null,
     quantity_2_sell         : 0,
     max_quantity_per_order  : 0,
     sales_start_date         : '',
