@@ -50,7 +50,8 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
     setEntity(entityTmp);
   }
 
-  const handleUploadFile = (file, props) => {
+  const handleUploadFile = (file, data) => {
+    const {id} = data;
     const entityTmp = {..._entity};
 
     entityTmp[id].file = file;
@@ -64,9 +65,9 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
     const entityTmp = {..._entity};
 
     entityTmp[id].file_preview = '';
+    entityTmp[id].file = '';
 
     if (entityTmp[id].id) {
-      entityTmp[id].file = '';
       props.onDeleteImage(entityTmp[id].id);
     }
 
@@ -126,7 +127,6 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
         Swal.fire(success_message);
       });
     }
-
   }
 
   return (
