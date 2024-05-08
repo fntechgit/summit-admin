@@ -822,6 +822,7 @@ export const saveTicketType = (entity) => async (dispatch, getState) => {
             entity
         )(params)(dispatch)
             .then((payload) => {
+                dispatch(createAction(TICKET_TYPES_CURRENCY_UPDATED)({currency: payload.response.currency}))
                 dispatch(showMessage(
                     success_message,
                     () => {
