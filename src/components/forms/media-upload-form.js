@@ -14,8 +14,8 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import {Input, Dropdown} from 'openstack-uicore-foundation/lib/components';
-import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
+import {Input, Dropdown, TextEditor} from 'openstack-uicore-foundation/lib/components';
+import {hasErrors, isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
 
 
 class MediaUploadForm extends React.Component {
@@ -162,11 +162,11 @@ class MediaUploadForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-8">
                         <label> {T.translate("media_upload.description")}</label>
-                        <textarea
-                            id="description"
-                            value={entity.description}
-                            onChange={this.handleChange}
-                            className="form-control"
+                        <TextEditor
+                          id="description"
+                          value={entity.description}
+                          onChange={this.handleChange}
+                          error={this.hasErrors('description')}
                         />
                     </div>
                 </div>
