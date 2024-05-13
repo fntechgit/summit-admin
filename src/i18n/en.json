@@ -2357,6 +2357,7 @@
     "created": "Doc created successfully.",
     "selection_plan": "Selection Plan",
     "web_link": "Web Link",
+    "event_types_info": "Docs without a selection plan will display always despite this selection.",
     "placeholders": {
       "search": "Search docs by name",
       "select_type": "Select Activity Type",
