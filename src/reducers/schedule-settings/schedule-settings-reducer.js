@@ -59,6 +59,7 @@ export const DEFAULT_ENTITY = {
     only_events_with_attendee_access: false,
     hide_past_events_with_show_always_on_schedule: false,
     color_source: 'TRACK',
+    time_format: '12h',
     filters: DEFAULT_FILTERS,
     pre_filters: DEFAULT_PRE_FILTERS,
 }
