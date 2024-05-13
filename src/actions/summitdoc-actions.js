@@ -236,7 +236,7 @@ const normalizeEntity = (entity) => {
     delete(normalizedEntity['event_types']);
 
     if (!entity.show_always && entity.event_types) {
-        normalizedEntity['event_types[]'] = entity.event_types;
+        normalizedEntity['event_types'] = entity.event_types;
     }
 
     if(!entity.selection_plan_id) {
