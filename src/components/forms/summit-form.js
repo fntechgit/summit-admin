@@ -389,6 +389,7 @@ class SummitForm extends React.Component {
                             error={this.hasErrors('slug')}
                             id="slug"
                             value={entity.slug}
+                            disabled={entity.slug}
                             onChange={this.handleChange}
                         />
                     </div>
