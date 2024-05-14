@@ -109,6 +109,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
                     tags: a.tags.map(t => t.tag).join(', '),
                     checked: selectedAll ? !excludedIds.includes(a.id) : selectedIds.includes(a.id),
                     tickets_count: a.tickets.length.toString(),
+                    has_notes: a.notes,
                     summit_hall_checked_in_date: a.summit_hall_checked_in_date ? moment(a.summit_hall_checked_in_date * 1000).tz(state.summitTZ).format("MMMM Do YYYY, h:mm a") : 'TBD',
                 };
             })
