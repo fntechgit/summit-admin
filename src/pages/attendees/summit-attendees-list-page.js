@@ -53,6 +53,17 @@ const fieldNames = [
   {columnKey: 'company', value: 'company', sortable: true},
   {columnKey: 'tags', value: 'tags'},
   {columnKey: 'summit_hall_checked_in_date', value: 'summit_hall_checked_in_date', sortable: true},
+  {columnKey: 'has_notes', value: 'has_notes', sortable: true, render: (row, data) => (
+      <ul>
+        {data.map((note) => (
+          <>
+        <li>{note.content}</li>
+        <hr/>
+        <li>{note.content}</li>
+          </>
+        ))}
+      </ul>
+    )},
 ]
 
 const FILTERS_DEFAULT_STATE = {
@@ -67,6 +78,8 @@ const FILTERS_DEFAULT_STATE = {
   featuresFilter: [],
   checkinDateFilter: Array(2).fill(null),
   tags: [],
+  hasNotesFilter: null,
+  notes: '',
   orAndFilter: ALL_FILTER,
 };
 
@@ -88,11 +101,7 @@ class SummitAttendeeListPage extends React.Component {
     this.handleSelectedAll = this.handleSelectedAll.bind(this);
     this.handleSendClick = this.handleSendClick.bind(this);
     this.handleChangeFlowEvent = this.handleChangeFlowEvent.bind(this);
-    this.handleSetMemberFilter = this.handleSetMemberFilter.bind(this);
-    this.handleSetStatusFilter = this.handleSetStatusFilter.bind(this);
-    this.handleSetTicketsFilter = this.handleSetTicketsFilter.bind(this);
-    this.handleSetVirtualCheckInFilter = this.handleSetVirtualCheckInFilter.bind(this);
-    this.handleSetCheckedInFilter = this.handleSetCheckedInFilter.bind(this);
+    this.handleSegmentedControlFilterChange = this.handleSegmentedControlFilterChange.bind(this);
     this.handleExport = this.handleExport.bind(this);
     this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
     this.handleFiltersChange = this.handleFiltersChange.bind(this);
@@ -121,24 +130,8 @@ class SummitAttendeeListPage extends React.Component {
     this.props.exportAttendees(term, order, orderDir, attendeeFilters, selectedColumns);
   }
 
-  handleSetMemberFilter(ev) {
-    this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, memberFilter: ev}});
-  }
-
-  handleSetTicketsFilter(ev) {
-    this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, ticketsFilter: ev}});
-  }
-
-  handleSetStatusFilter(ev) {
-    this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, statusFilter: ev}});
-  }
-
-  handleSetVirtualCheckInFilter(ev) {
-    this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, virtualCheckInFilter: ev}});
-  }
-
-  handleSetCheckedInFilter(ev) {
-    this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, checkedInFilter: ev}});
+  handleSegmentedControlFilterChange(ev, id) {
+    this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, [id]: ev}});
   }
 
   handleChangeFlowEvent(ev) {
@@ -172,10 +165,9 @@ class SummitAttendeeListPage extends React.Component {
   }
 
   handleSendEmails = (excerpt) => {
-    const {attendeeFilters, testRecipient, sendEmails} = this.props;
+    const {attendeeFilters, testRecipient} = this.state;
     this.setState({showEmailModal: false});
-
-    sendEmails(attendeeFilters, testRecipient || null, excerpt);
+    this.props.sendEmails(attendeeFilters, testRecipient || null, excerpt);
   }
 
   handleSelected(attendee_id, isSelected) {
@@ -341,7 +333,6 @@ class SummitAttendeeListPage extends React.Component {
 
   handleNewTag = (newTag) => {
     this.setState({...this.state, attendeeFilters: {...this.state.attendeeFilters, tags: [...this.state.attendeeFilters.tags, {tag: newTag}]}})
-
   }
 
   handleExtraFilterChange(ev) {
@@ -391,6 +382,8 @@ class SummitAttendeeListPage extends React.Component {
       {label: 'Check In Date', value: 'checkinDateFilter'},
       {label: 'Tags', value: 'tags'},
       {label: 'Company', value: 'companyFilter'},
+      {label: 'Has Notes?', value: 'hasNotesFilter'},
+      {label: 'Notes', value: 'notes'},
     ]
 
     let columns = [
@@ -406,6 +399,7 @@ class SummitAttendeeListPage extends React.Component {
       {value: 'company', label: T.translate("attendee_list.company")},
       {value: 'summit_hall_checked_in_date', label: T.translate("attendee_list.summit_hall_checked_in_date")},
       {value: 'tags', label: T.translate("attendee_list.tags")},
+      {value: 'has_notes', label: T.translate("attendee_list.has_notes")},
     ];
 
     const table_options = {
@@ -473,7 +467,8 @@ class SummitAttendeeListPage extends React.Component {
           columnKey: f2.columnKey,
           value: T.translate(`attendee_list.${f2.value}`),
           sortable: f2.sortable,
-          title: f2.title
+          title: f2.title,
+          render: f2.render ? f2.render : (item) => item[f2.columnKey]
         }));
 
     columns = [...columns, ...showColumns];
@@ -537,7 +532,7 @@ class SummitAttendeeListPage extends React.Component {
                     default: attendeeFilters.memberFilter === "HAS_NO_MEMBER"
                   },
                 ]}
-                setValue={newValue => this.handleSetMemberFilter(newValue)}
+                setValue={newValue => this.handleSegmentedControlFilterChange(newValue, "memberFilter")}
                 style={{width: "100%", height: 40, color: '#337ab7', fontSize: '10px'}}
               />
             </div>
@@ -559,7 +554,7 @@ class SummitAttendeeListPage extends React.Component {
                     default: attendeeFilters.statusFilter === "Incomplete"
                   },
                 ]}
-                setValue={newValue => this.handleSetStatusFilter(newValue)}
+                setValue={newValue => this.handleSegmentedControlFilterChange(newValue, "statusFilter")}
                 style={{width: "100%", height: 40, color: '#337ab7', fontSize: '10px'}}
               />
             </div>
@@ -577,7 +572,7 @@ class SummitAttendeeListPage extends React.Component {
                     default: attendeeFilters.ticketsFilter === HAS_NO_TICKETS
                   },
                 ]}
-                setValue={newValue => this.handleSetTicketsFilter(newValue)}
+                setValue={newValue => this.handleSegmentedControlFilterChange(newValue, "ticketsFilter")}
                 style={{width: "100%", height: 40, color: '#337ab7', fontSize: '10px'}}
               />
             </div>
@@ -599,7 +594,7 @@ class SummitAttendeeListPage extends React.Component {
                     default: attendeeFilters.virtualCheckInFilter === "HAS_NO_VIRTUAL_CHECKIN"
                   },
                 ]}
-                setValue={newValue => this.handleSetVirtualCheckInFilter(newValue)}
+                setValue={newValue => this.handleSegmentedControlFilterChange(newValue, "virtualCheckInFilter")}
                 style={{width: "100%", height: 40, color: '#337ab7', fontSize: '10px'}}
               />
             </div>
@@ -617,8 +612,33 @@ class SummitAttendeeListPage extends React.Component {
                     default: attendeeFilters.checkedInFilter === "NO_CHECKED_IN"
                   },
                 ]}
-                setValue={newValue => this.handleSetCheckedInFilter(newValue)}
+                setValue={newValue => this.handleSegmentedControlFilterChange(newValue, "checkedInFilter")}
                 style={{width: "100%", height: 40, color: '#337ab7', fontSize: '10px'}}
+              />
+            </div>
+          }
+          {enabledFilters.includes('hasNotesFilter') &&
+            <div className="col-md-6">
+              <SegmentedControl
+                name="hasNotesFilter"
+                options={[
+                  {label: "All", value: null, default: attendeeFilters.hasNotesFilter === null},
+                  {label: "Has notes", value: "HAS_NOTES", default: attendeeFilters.hasNotesFilter === "HAS_NOTES"},
+                  {label: "Has no notes",value: "HAS_NO_NOTES",default: attendeeFilters.hasNotesFilter === "HAS_NO_NOTES"},
+                ]}
+                setValue={newValue => this.handleSegmentedControlFilterChange(newValue, "hasNotesFilter")}
+                style={{width: "100%", height: 40, color: '#337ab7', fontSize: '10px'}}
+              />
+            </div>
+          }
+          {enabledFilters.includes('notes') &&
+            <div className="col-md-6">
+              <Input
+                id="notes"
+                value={attendeeFilters.notes}
+                onChange={this.handleExtraFilterChange}
+                placeholder={T.translate("attendee_list.placeholders.notes")}
+                className="form-control"
               />
             </div>
           }

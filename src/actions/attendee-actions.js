@@ -110,6 +110,13 @@ const parseFilters = (filters, term = null) => {
             filter.push(`has_checkin==false`)
     }
 
+    if(filters.hasNotesFilter){
+        if(filters.hasNotesFilter === 'HAS_NOTES')
+            filter.push(`has_notes==true`);
+        if(filters.hasNotesFilter === 'HAS_NO_NOTES')
+            filter.push(`has_notes==false`)
+    }
+
     if(Array.isArray(filters.ticketTypeFilter) && filters.ticketTypeFilter.length > 0){
         filter.push('ticket_type_id=='+filters.ticketTypeFilter.join('||'));
     }
@@ -137,6 +144,11 @@ const parseFilters = (filters, term = null) => {
             ${filters.checkinDateFilter[1] !== null ? 
                 `summit_hall_checked_in_date<=${filters.checkinDateFilter[1]}` : ``}`);
         }
+    }
+
+    if (filters.notes) {
+        const escapedNotes = escapeFilterValue(filters.notes);
+        filter.push(`notes@@${escapedNotes}`);
     }
 
     if (term) {
@@ -176,7 +188,7 @@ export const getAttendees = ( term = null,
     dispatch(startLoading());
 
     const params = {
-        expand       : 'tags',
+        expand       : 'tags,notes',
         page         : page,
         per_page     : perPage,
         access_token : accessToken,
