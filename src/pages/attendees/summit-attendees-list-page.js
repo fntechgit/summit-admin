@@ -165,10 +165,9 @@ class SummitAttendeeListPage extends React.Component {
   }
 
   handleSendEmails = (excerpt) => {
-    const {attendeeFilters, testRecipient, sendEmails} = this.props;
+    const {attendeeFilters, testRecipient} = this.state;
     this.setState({showEmailModal: false});
-
-    sendEmails(attendeeFilters, testRecipient || null, excerpt);
+    this.props.sendEmails(attendeeFilters, testRecipient || null, excerpt);
   }
 
   handleSelected(attendee_id, isSelected) {
