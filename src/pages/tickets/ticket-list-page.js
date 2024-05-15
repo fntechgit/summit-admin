@@ -321,15 +321,17 @@ class TicketListPage extends React.Component {
     handleFilterCriteriaChange(filterCriteria) {
         const {term, order, orderDir} = this.props;
         let newEventFilters = {}
-        Object.entries(filterCriteria.criteria).map(([key, values]) => {
-            newEventFilters = {...newEventFilters, [key]: values};            
-        })
+        if(filterCriteria) {
+            Object.entries(filterCriteria.criteria).map(([key, values]) => {
+                newEventFilters = {...newEventFilters, [key]: values};            
+            });
+        }
 
         this.setState({
             ...this.state, 
-            ticketFilters: {...newEventFilters}, 
-            enabledFilters: filterCriteria.enabled_filters, 
-            selectedFilterCriteria: filterCriteria
+            ticketFilters: filterCriteria ? {...newEventFilters} : {orAndFilter: ALL_FILTER},
+            enabledFilters: filterCriteria ? filterCriteria.enabled_filters : [],
+            selectedFilterCriteria: filterCriteria || null
         }, () => this.props.getTickets(term, 1, 10, order, orderDir, this.state.ticketFilters, this.state.selectedColumns));
     }
 
