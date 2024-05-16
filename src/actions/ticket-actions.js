@@ -240,10 +240,20 @@ const parseFilters = (filters, term = null) => {
         ));
     }
 
-    if (filters?.ownerCompany?.length > 0) {
-        filter.push('owner_company=='+filters.ownerCompany
-          .map(oc => oc.id === 'NULL' ? '%EMPTY%' : encodeURIComponent(oc.name))
-          .join('||'));
+    if (filters?.ownerCompany?.length > 0)  {
+        const nonTBD = filters?.ownerCompany.filter(of => of.id !== 'NULL');
+        let ownerCompany = [];
+
+        // has tbd
+        if (nonTBD.length < filters?.ownerCompany?.length) {
+            ownerCompany.push('has_owner_company==0');
+        }
+
+        if (nonTBD.length > 0) {
+            ownerCompany.push('owner_company=='+nonTBD.map(of => encodeURIComponent(of.name)).join('||'));
+        }
+
+        filter.push(ownerCompany.join(','));
     }
 
 
