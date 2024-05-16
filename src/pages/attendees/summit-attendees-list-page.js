@@ -663,7 +663,7 @@ class SummitAttendeeListPage extends React.Component {
                 summitId={currentSummit.id}
                 placeholder={T.translate("attendee_list.placeholders.company")}
                 onChange={ev => this.handleExtraFilterChange(ev)}
-                extraOptions={[{value: 'tbd', label: 'TBD'}]}
+                extraOptions={[{value: 'NULL', label: 'TBD'}]}
                 multi
               />
             </div>
