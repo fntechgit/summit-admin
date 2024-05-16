@@ -541,7 +541,7 @@ class TicketListPage extends React.Component {
                                 value={ticketFilters.ownerCompany}
                                 placeholder={T.translate("ticket_list.placeholders.owner_company")}
                                 onChange={ev => this.handleFilterChange('ownerCompany', ev.target.value)}
-                                extraOptions={[{value: 'tbd', label: 'TBD'}]}
+                                extraOptions={[{value: 'NULL', label: 'TBD'}]}
                                 multi
                               />
                           </div>
