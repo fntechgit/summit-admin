@@ -121,8 +121,20 @@ const parseFilters = (filters, term = null) => {
         filter.push('ticket_type_id=='+filters.ticketTypeFilter.join('||'));
     }
 
-    if (filters?.companyFilter){
-        filter.push('company=='+encodeURIComponent(filters.companyFilter.name));
+    if (filters?.companyFilter?.length > 0)  {
+        const nonTBD = filters?.companyFilter.filter(cf => cf.id !== 'NULL');
+        let companyFilter = [];
+
+        // has tbd
+        if (nonTBD.length < filters?.companyFilter?.length) {
+            companyFilter.push('has_company==0');
+        }
+
+        if (nonTBD.length > 0) {
+            companyFilter.push('company=='+nonTBD.map(cf => encodeURIComponent(cf.name)).join('||'));
+        }
+
+        filter.push(companyFilter.join(','));
     }
 
     if(Array.isArray(filters.featuresFilter) && filters.featuresFilter.length > 0){
