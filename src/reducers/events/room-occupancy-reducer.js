@@ -65,7 +65,8 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
                     start_date: moment(e.start_date * 1000).tz(state.summitTZ).format('ddd h:mm a'),
                     room: (e.location) ? e.location.name : '',
                     occupancy: e.occupancy || 'EMPTY',
-                    speakers: (e.speakers) ? e.speakers.map(s => s.first_name + ' ' + s.last_name).join(',') : ''
+                    speakers: (e.speakers) ? e.speakers.map(s => s.first_name + ' ' + s.last_name).join(',') : '',
+                    track: e.track?.name || 'N/A'
                 };
             });
 
