@@ -87,9 +87,9 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
             const tickets = data.map(t => {
                 const bought_date = t.bought_date ? epochToMomentTimeZone(t.bought_date, state.summitTZ).format('MMMM Do YYYY, h:mm:ss a') : '';
                 const number = t.external_order_id || `...${t.number.slice(-15)}`;
-                const final_amount_formatted = `$${t.final_amount.toFixed(2)}`;
-                const refunded_amount_formatted = `$${t.refunded_amount.toFixed(2)}`;
-                const final_amount_adjusted_formatted = `$${((t.final_amount - t.refunded_amount).toFixed(2))}`;
+                const final_amount_formatted = `${t.currency_symbol}${t.final_amount.toFixed(2)}`;
+                const refunded_amount_formatted = `${t.currency_symbol}${t.refunded_amount.toFixed(2)}`;
+                const final_amount_adjusted_formatted = `${t.currency_symbol}${((t.final_amount - t.refunded_amount).toFixed(2))}`;
                 const promo_code_tags = t.promo_code?.tags.length > 0 ? t.promo_code.tags.map(t => t.tag) : 'N/A';
 
                 return {

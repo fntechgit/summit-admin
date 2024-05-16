@@ -357,15 +357,15 @@ class EditTicketPage extends React.Component {
                     <div>
                         <div className="row">
                             <div className="col-md-6">
-                                <label>{T.translate("edit_ticket.ticket_price")}</label> {`$${entity.raw_cost}`}
+                                <label>{T.translate("edit_ticket.ticket_price")}</label> {`${entity.currency_symbol}${entity.raw_cost}`}
                             </div>
                             <div className="col-md-6">
-                                <label>{T.translate("edit_ticket.net_price")}</label> {`$${(entity.raw_cost - entity.discount)}`}
+                                <label>{T.translate("edit_ticket.net_price")}</label> {`${entity.currency_symbol}${(entity.raw_cost - entity.discount)}`}
                             </div>
                         </div>
                         <div className="row">
                             <div className="col-md-6">
-                                <label>{T.translate("edit_ticket.discount")}</label> {`${entity.discount_rate}% ($${entity.discount})`}
+                                <label>{T.translate("edit_ticket.discount")}</label> {`${entity.discount_rate}% (${entity.currency_symbol}${entity.discount})`}
                             </div>
                         </div>
                         {entity?.applied_taxes.map((at, i) => {
@@ -375,14 +375,14 @@ class EditTicketPage extends React.Component {
                                         <label>{T.translate("edit_ticket.tax_name_rate", {tax_name: at.tax.name})}</label>{` ${at.tax.rate}%`}
                                     </div>
                                     <div className="col-md-6">
-                                        <label>{T.translate("edit_ticket.tax_name_price", {tax_name: at.tax.name})}</label>{` $${at.amount}`}
+                                        <label>{T.translate("edit_ticket.tax_name_price", {tax_name: at.tax.name})}</label>{` ${entity.currency_symbol}${at.amount}`}
                                     </div>
                                 </div>
                             )
                         })}
                         <div className="row">
                             <div className="col-md-6 col-md-offset-6">
-                                <label>{T.translate("edit_ticket.purchase_ticket_price")}</label> {`$${entity.final_amount}`}
+                                <label>{T.translate("edit_ticket.purchase_ticket_price")}</label> {`${entity.currency_symbol}${entity.final_amount}`}
                             </div>
                         </div>
                     </div>                    

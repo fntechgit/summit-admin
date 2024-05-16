@@ -52,7 +52,8 @@ export const DEFAULT_ENTITY = {
     credit_card_4number: '',
     applied_taxes: [],
     approved_refunds: [],
-    approved_refunds_taxes: []
+    approved_refunds_taxes: [],
+    currency_symbol: '$'
 }
 
 const DEFAULT_STATE = {
@@ -60,7 +61,7 @@ const DEFAULT_STATE = {
     errors: {}
 };
 
-const assembleTicketsState = (tickets) => {
+const assembleTicketsState = (tickets, currencySymbol) => {
     return tickets.map(t => {
         let owner_full_name = 'N/A';
         let owner_email = 'N/A';
@@ -68,9 +69,9 @@ const assembleTicketsState = (tickets) => {
         let email_link = 'N/A';
         let ticket_type_name = t.ticket_type ? t.ticket_type.name : 'N/A';
 
-        const final_amount_formatted = `$${t.final_amount.toFixed(2)}`;
-        const refunded_amount_formatted = `$${t.total_refunded_amount.toFixed(2)}`;
-        const final_amount_adjusted_formatted = `$${((t.final_amount - t.total_refunded_amount).toFixed(2))}`;
+        const final_amount_formatted = `${currencySymbol}${t.final_amount.toFixed(2)}`;
+        const refunded_amount_formatted = `${currencySymbol}${t.refunded_amount.toFixed(2)}`;
+        const final_amount_adjusted_formatted = `${currencySymbol}${((t.final_amount - t.refunded_amount).toFixed(2))}`;
 
         if (t.owner) {
             owner_email = t.owner.email;
@@ -109,13 +110,12 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
             return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
         }
         break;
-        case PURCHASE_ORDER_UPDATED:
         case RECEIVE_PURCHASE_ORDER: {
             let entity = {...payload.response};
 
-            const final_amount_formatted = `$${entity.amount.toFixed(2)}`;
-            const refunded_amount_formatted = `$${entity.total_refunded_amount.toFixed(2)}`;
-            const final_amount_adjusted_formatted = `$${((entity.amount - entity.total_refunded_amount).toFixed(2))}`;
+            const final_amount_formatted = `${entity.currency_symbol}${entity.amount.toFixed(2)}`;
+            const refunded_amount_formatted = `${entity.currency_symbol}${entity.total_refunded_amount.toFixed(2)}`;
+            const final_amount_adjusted_formatted = `${entity.currency_symbol}${((entity.amount - entity.total_refunded_amount).toFixed(2))}`;
 
             for(var key in entity) {
                 if(entity.hasOwnProperty(key)) {
@@ -129,7 +129,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
                 last_name: entity.owner_last_name,
             };
 
-            entity.tickets = assembleTicketsState(entity.tickets);
+            entity.tickets = assembleTicketsState(entity.tickets, entity.currency_symbol);
 
             return {...state,  entity: {...entity,
                     final_amount_formatted,
@@ -142,6 +142,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
         }
         case RECEIVE_PURCHASE_ORDER_REFUNDS: {
             const approved_refunds = payload.response.data;
+            const currencySymbol = state.entity.currency_symbol;
             const approved_refunds_taxes = [];
             const purchaseOrder = {...state.entity};
             let adjusted_order_price = purchaseOrder.amount;
@@ -151,21 +152,21 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
             let adjusted_applied_taxes = _.cloneDeep(purchaseOrder.applied_taxes);
             approved_refunds.forEach(refund => {
                 refund.ticket_id = refund.ticket.id;
-                refund.refunded_amount_formatted = `$${refund.refunded_amount.toFixed(2)}`;
-                refund.total_refunded_amount_formatted = `$${refund.total_refunded_amount.toFixed(2)}`;
+                refund.refunded_amount_formatted = `${currencySymbol}${refund.refunded_amount.toFixed(2)}`;
+                refund.total_refunded_amount_formatted = `${currencySymbol}${refund.total_refunded_amount.toFixed(2)}`;
                 adjusted_total_order_purchase_price += refund.total_refunded_amount;
                 adjusted_net_price -= refund.refunded_amount;
-                refund.adjusted_net_price_formatted = `$${adjusted_net_price.toFixed(2)}`;
+                refund.adjusted_net_price_formatted = `${currencySymbol}${adjusted_net_price.toFixed(2)}`;
                 adjusted_order_price -= refund.total_refunded_amount;
-                refund.adjusted_order_price_formatted = `$${adjusted_order_price.toFixed(2)}`;
+                refund.adjusted_order_price_formatted = `${currencySymbol}${adjusted_order_price.toFixed(2)}`;
                 refund.refunded_taxes.forEach(rt => {
                     // field for the tax column of that refund
-                    refund[`tax_${rt.tax.id}_refunded_amount`] = `$${rt.refunded_amount.toFixed(2)}`
+                    refund[`tax_${rt.tax.id}_refunded_amount`] = `${currencySymbol}${rt.refunded_amount.toFixed(2)}`
                     adjusted_applied_taxes.forEach(t => {
                         if(t.id === rt.tax.id) {
                             t.amount -= rt.refunded_amount;
                             // prevent -0 values
-                            refund[`tax_${rt.tax.id}_adjusted_refunded_amount`] = `$${(Math.abs(t.amount)).toFixed(2)}`
+                            refund[`tax_${rt.tax.id}_adjusted_refunded_amount`] = `${currencySymbol}${(Math.abs(t.amount)).toFixed(2)}`
                         }
                     });
                     // add tax type to array

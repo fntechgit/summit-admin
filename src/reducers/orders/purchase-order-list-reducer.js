@@ -48,7 +48,6 @@ const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
         case RECEIVE_PURCHASE_ORDERS: {
             let {current_page, total, last_page} = payload.response;
 
-
             let purchaseOrders = payload.response.data.map(a => {
                 let bought_date = epochToMomentTimeZone(a.created, state.summitTZ).format('MMMM Do YYYY, h:mm:ss a');
 
@@ -60,7 +59,7 @@ const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
                     owner_email: a.owner_email,
                     company: a.owner_company,
                     bought_date: bought_date,
-                    amount: `$${a.amount}`,
+                    amount: `${a.currency_symbol}${a.amount}`,
                     payment_method: a.payment_method,
                     status: a.status
                 };
