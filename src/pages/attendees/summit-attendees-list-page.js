@@ -55,11 +55,10 @@ const fieldNames = [
   {columnKey: 'summit_hall_checked_in_date', value: 'summit_hall_checked_in_date', sortable: true},
   {columnKey: 'has_notes', value: 'has_notes', sortable: true, render: (row, data) => (
       <ul>
-        {data.map((note) => (
+        {data.map((note, index) => (
           <>
-        <li>{note.content}</li>
-        <hr/>
-        <li>{note.content}</li>
+            <li>{note.content}</li>
+            {data.length > index + 1 && <hr/>}
           </>
         ))}
       </ul>
