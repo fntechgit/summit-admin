@@ -148,7 +148,7 @@ export const getEventsForOccupancy = (term = null, roomId = null, currentEvents 
     }
 
     const params = {
-        expand: 'speakers, location',
+        expand: 'speakers, location, track',
         page: page,
         per_page: perPage,
         access_token: accessToken,
@@ -223,7 +223,7 @@ export const getEventsForOccupancyCSV = (term = null, roomId = null, currentEven
         params['order'] = `${orderDirSign}${order}`;
     }
 
-    params['fields'] = 'start_date,title,occupancy,location_name,speaker_fullnames'
+    params['fields'] = 'start_date,title,track,occupancy,location_name,speaker_fullnames'
 
     const filename = `summit-${currentSummit.slug}-rooms-occupancy.csv`;
 

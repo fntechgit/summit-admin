@@ -1803,6 +1803,7 @@
     "no_events": "No activites found for current search criteria.",
     "title": "Title",
     "room": "Room",
+    "track": "Track",
     "start": "Start",
     "speakers": "Speakers",
     "currentEvents": "Show only current activites",

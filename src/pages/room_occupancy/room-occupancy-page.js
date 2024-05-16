@@ -130,6 +130,7 @@ class RoomOccupancyPage extends React.Component {
             { columnKey: 'room', value: T.translate("room_occupancy.room") },
             { columnKey: 'start_date', value: T.translate("room_occupancy.start"), sortable: true, width: '100px' },
             { columnKey: 'title', value: T.translate("room_occupancy.title"), sortable: true },
+            { columnKey: 'track', value: T.translate("room_occupancy.track"), sortable: true },
             { columnKey: 'speakers', value: T.translate("room_occupancy.speakers"), className: 'hidden-xs' },
         ];
 
