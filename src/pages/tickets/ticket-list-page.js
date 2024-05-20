@@ -68,7 +68,22 @@ const fieldNames = [
     { columnKey: 'promo_code_tags', value: 'promo_code_tags'},
     { columnKey: 'badge_type_id', value: 'badge_type', sortable: true},
     { columnKey: 'badge_prints_count', value: 'badge_prints_count', sortable: true},
-]
+];
+
+const defaultFilters = {
+    showOnlyPendingRefundRequests: false,
+    ticketTypesFilter : [],
+    ownerFullNameStartWithFilter:[],
+    viewTypesFilter: [],
+    hasOwnerFilter : null,
+    completedFilter : null,
+    amountFilter: null,
+    hasBadgeFilter : null,
+    showOnlyPrintable: false,
+    promocodesFilter: [],
+    promocodeTagsFilter:[],
+    orAndFilter: ALL_FILTER,
+};
 
 class TicketListPage extends React.Component {
 
@@ -105,19 +120,7 @@ class TicketListPage extends React.Component {
             selectedColumns: [],
             enabledFilters: [],
             ticketFilters: {
-                showOnlyPendingRefundRequests: false,
-                ticketTypesFilter : [],
-                ownerFullNameStartWithFilter:[],
-                ownerCompany: [],
-                viewTypesFilter: [],
-                hasOwnerFilter : null,
-                completedFilter : null,
-                amountFilter: null,
-                hasBadgeFilter : null,
-                showOnlyPrintable: false,
-                promocodesFilter: [],
-                promocodeTagsFilter:[],
-                orAndFilter: ALL_FILTER,
+                ...defaultFilters,
             },
             selectedFilterCriteria: null,
         }
@@ -206,7 +209,7 @@ class TicketListPage extends React.Component {
     }
 
     handleFilterChange(key, value) {
-        const {term, order, orderDir, perPage} = this.props;        
+        const {term, order, orderDir, perPage} = this.props;
         const {selectedColumns} = this.state;
         this.setState({...this.state, ticketFilters: {...this.state.ticketFilters, [key]: value }}, () => {
             this.props.getTickets(term, 1, perPage, order, orderDir, this.state.ticketFilters, selectedColumns);
@@ -329,7 +332,7 @@ class TicketListPage extends React.Component {
 
         this.setState({
             ...this.state, 
-            ticketFilters: filterCriteria ? {...newEventFilters} : {orAndFilter: ALL_FILTER},
+            ticketFilters: {...defaultFilters, ...newEventFilters},
             enabledFilters: filterCriteria ? filterCriteria.enabled_filters : [],
             selectedFilterCriteria: filterCriteria || null
         }, () => this.props.getTickets(term, 1, 10, order, orderDir, this.state.ticketFilters, this.state.selectedColumns));
@@ -339,7 +342,7 @@ class TicketListPage extends React.Component {
         const {term, order, orderDir} = this.props;
         this.props.deleteFilterCriteria(filterCriteriaId).then(() => 
             this.setState({...this.state, 
-                ticketFilters: {orAndFilter: ALL_FILTER},
+                ticketFilters: {...defaultFilters},
                 enabledFilters: [],
                 selectedFilterCriteria: null
             }, () => this.props.getTickets(term, 1, 10, order, orderDir, this.state.ticketFilters, this.state.selectedColumns))
