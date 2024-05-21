@@ -262,7 +262,7 @@ class TicketListPage extends React.Component {
                     showOnlyPendingRefundRequests: false,
                     ticketTypesFilter : [],
                     ownerFullNameStartWithFilter:[],
-                    ownerCompany: null,
+                    ownerCompany: [],
                     viewTypesFilter: [],
                     hasOwnerFilter : null,
                     completedFilter : null,
