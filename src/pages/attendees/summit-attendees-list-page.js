@@ -57,7 +57,7 @@ const fieldNames = [
       <ul>
         {data.map((note, index) => (
           <>
-            <li>{note.content}</li>
+            <li key={`note-${note.id}`}>{note.content}</li>
             {data.length > index + 1 && <hr/>}
           </>
         ))}
