@@ -12,6 +12,7 @@
  **/
 
 export const CONTEXT_ACTIVITIES = 'Activities';
+export const CONTEXT_TICKETS = 'Tickets';
 
 export const VISIBILITY_OPTION_ME = 'Me';
 export const VISIBILITY_OPTION_EVERYONE = 'Everyone';

@@ -46,6 +46,10 @@ import '../../styles/ticket-list-page.less';
 import OrAndFilter from '../../components/filters/or-and-filter';
 import { ALL_FILTER } from '../../utils/constants';
 import {getBadgeTypes} from "../../actions/badge-actions";
+import SelectFilterCriteria from '../../components/filters/select-filter-criteria';
+import SaveFilterCriteria from '../../components/filters/save-filter-criteria';
+import { CONTEXT_TICKETS } from '../../utils/filter-criteria-constants';
+import { saveFilterCriteria, deleteFilterCriteria } from "../../actions/filter-criteria-actions"
 
 const BatchSize = 25;
 
@@ -64,7 +68,22 @@ const fieldNames = [
     { columnKey: 'promo_code_tags', value: 'promo_code_tags'},
     { columnKey: 'badge_type_id', value: 'badge_type', sortable: true},
     { columnKey: 'badge_prints_count', value: 'badge_prints_count', sortable: true},
-]
+];
+
+const defaultFilters = {
+    showOnlyPendingRefundRequests: false,
+    ticketTypesFilter : [],
+    ownerFullNameStartWithFilter:[],
+    viewTypesFilter: [],
+    hasOwnerFilter : null,
+    completedFilter : null,
+    amountFilter: null,
+    hasBadgeFilter : null,
+    showOnlyPrintable: false,
+    promocodesFilter: [],
+    promocodeTagsFilter:[],
+    orAndFilter: ALL_FILTER,
+};
 
 class TicketListPage extends React.Component {
 
@@ -87,6 +106,9 @@ class TicketListPage extends React.Component {
         this.handleColumnsChange = this.handleColumnsChange.bind(this);
         this.handleFiltersChange = this.handleFiltersChange.bind(this);
         this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
+        this.handleFilterCriteriaSave = this.handleFilterCriteriaSave.bind(this);
+        this.handleFilterCriteriaChange = this.handleFilterCriteriaChange.bind(this);
+        this.handleFilterCriteriaDelete = this.handleFilterCriteriaDelete.bind(this);
 
         this.state = {
             showIngestModal: false,
@@ -98,20 +120,9 @@ class TicketListPage extends React.Component {
             selectedColumns: [],
             enabledFilters: [],
             ticketFilters: {
-                showOnlyPendingRefundRequests: false,
-                ticketTypesFilter : [],
-                ownerFullNameStartWithFilter:[],
-                ownerCompany: [],
-                viewTypesFilter: [],
-                hasOwnerFilter : null,
-                completedFilter : null,
-                amountFilter: null,
-                hasBadgeFilter : null,
-                showOnlyPrintable: false,
-                promocodesFilter: [],
-                promocodeTagsFilter:[],
-                orAndFilter: ALL_FILTER,
-            }
+                ...defaultFilters,
+            },
+            selectedFilterCriteria: null,
         }
 
         if (currentSummit && !currentSummit.badge_types) {
@@ -198,7 +209,7 @@ class TicketListPage extends React.Component {
     }
 
     handleFilterChange(key, value) {
-        const {term, order, orderDir, perPage} = this.props;        
+        const {term, order, orderDir, perPage} = this.props;
         const {selectedColumns} = this.state;
         this.setState({...this.state, ticketFilters: {...this.state.ticketFilters, [key]: value }}, () => {
             this.props.getTickets(term, 1, perPage, order, orderDir, this.state.ticketFilters, selectedColumns);
@@ -294,6 +305,50 @@ class TicketListPage extends React.Component {
         return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
     }
 
+    handleFilterCriteriaSave(filterData) {        
+        const {enabledFilters, ticketFilters} = this.state;
+        const {currentSummit} = this.props;
+        const filterToSave = {
+            id: filterData.id,
+            show_id: currentSummit.id,
+            name: filterData.name,
+            enabled_filters: enabledFilters,
+            // only save criteria for enabled filters
+            criteria: Object.fromEntries(Object.entries(ticketFilters).filter(([key]) => enabledFilters.includes(key))),
+            context: CONTEXT_TICKETS,
+            visibility: filterData.visibility
+        }        
+        this.props.saveFilterCriteria(filterToSave);
+    }
+
+    handleFilterCriteriaChange(filterCriteria) {
+        const {term, order, orderDir} = this.props;
+        let newEventFilters = {}
+        if(filterCriteria) {
+            Object.entries(filterCriteria.criteria).map(([key, values]) => {
+                newEventFilters = {...newEventFilters, [key]: values};            
+            });
+        }
+
+        this.setState({
+            ...this.state, 
+            ticketFilters: {...defaultFilters, ...newEventFilters},
+            enabledFilters: filterCriteria ? filterCriteria.enabled_filters : [],
+            selectedFilterCriteria: filterCriteria || null
+        }, () => this.props.getTickets(term, 1, 10, order, orderDir, this.state.ticketFilters, this.state.selectedColumns));
+    }
+
+    handleFilterCriteriaDelete(filterCriteriaId) {
+        const {term, order, orderDir} = this.props;
+        this.props.deleteFilterCriteria(filterCriteriaId).then(() => 
+            this.setState({...this.state, 
+                ticketFilters: {...defaultFilters},
+                enabledFilters: [],
+                selectedFilterCriteria: null
+            }, () => this.props.getTickets(term, 1, 10, order, orderDir, this.state.ticketFilters, this.state.selectedColumns))
+        );
+    }
+
     render(){
         const {
             currentSummit,
@@ -309,7 +364,7 @@ class TicketListPage extends React.Component {
             selectedAll,
         } = this.props;                
 
-        const {doCheckIn, showIngestModal, showImportModal, importFile, showPrintModal, selectedViewType, enabledFilters, ticketFilters} = this.state;
+        const {doCheckIn, showIngestModal, showImportModal, importFile, showPrintModal, selectedViewType, enabledFilters, ticketFilters,selectedFilterCriteria} = this.state;
 
         let columns = [
             { columnKey: 'id', value: T.translate("ticket_list.id"), sortable: true },
@@ -446,7 +501,19 @@ class TicketListPage extends React.Component {
                         </div>
                     </div>
                     <hr/>
-                    <OrAndFilter value={ticketFilters.orAndFilter} entity={'tickets'} onChange={(filter) => this.handleFilterChange('orAndFilter', filter)}/>
+                    <div className="row">
+                        <div className="col-md-6">
+                            <OrAndFilter value={ticketFilters.orAndFilter} entity={'tickets'} onChange={(filter) => this.handleFilterChange('orAndFilter', filter)}/>
+                        </div>
+                        <div className="col-md-6">
+                            <SelectFilterCriteria 
+                                summitId={currentSummit.id}
+                                context={CONTEXT_TICKETS}
+                                onDelete={this.handleFilterCriteriaDelete}
+                                selectedFilterCriteria={selectedFilterCriteria}
+                                onChange={this.handleFilterCriteriaChange} />
+                        </div>
+                    </div>
                     <div className="row">
                         <div className="col-md-6">
                             <Dropdown
@@ -460,9 +527,8 @@ class TicketListPage extends React.Component {
                             />
                         </div>
                     </div>
-                    {enabledFilters?.length > 0 &&
-                        <div className="row filtersWrapper">
-                        <hr />
+                    <SaveFilterCriteria onSave={this.handleFilterCriteriaSave} selectedFilterCriteria={selectedFilterCriteria}/>
+                    <div className="row filters-row">
                         {enabledFilters.includes('hasOwnerFilter') &&
                         <div className="col-md-6">
                             <SegmentedControl
@@ -648,8 +714,7 @@ class TicketListPage extends React.Component {
                             />
                         </div>
                         }
-                    </div>
-                    }
+                    </div>                    
                     <hr/>
 
                     <div className={'row'} style={{marginBottom: 15}}>
@@ -832,5 +897,7 @@ export default connect (
         printTickets,
         getTicket,
         getBadgeTypes,
+        saveFilterCriteria,
+        deleteFilterCriteria
     }
 )(TicketListPage);
