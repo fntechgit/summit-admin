@@ -30,7 +30,6 @@ import {
 import LocationGroupedDropdown from "../../components/inputs/location-grouped-dropdown";
 import {BannersTable} from "../../components/tables/signagebannerstable";
 import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
-import moment from 'moment-timezone';
 import styles from '../../styles/signage-page.module.less';
 
 
