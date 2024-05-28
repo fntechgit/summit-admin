@@ -30,6 +30,7 @@ import {
 import LocationGroupedDropdown from "../../components/inputs/location-grouped-dropdown";
 import {BannersTable} from "../../components/tables/signagebannerstable";
 import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
+import moment from 'moment-timezone';
 import styles from '../../styles/signage-page.module.less';
 
 
@@ -125,7 +126,8 @@ const SignagePage = ({
   }
   
   const viewSign = () => {
-    window.open(`${window.SIGNAGE_BASE_URL}/${sign?.template}#/?summit=${summit.id}&location=${locationId}`);
+    const now = moment().tz(summit.time_zone_id).unix(); // now in summit timezone converted to epoch
+    window.open(`${window.SIGNAGE_BASE_URL}/${sign?.template}#/?summit=${summit.id}&location=${locationId}&t=${now}`);
   };
   
   const reloadSign = () => {
