@@ -125,9 +125,8 @@ const SignagePage = ({
     props.publishDate(jumpDate, "signage.date_published");
   }
   
-  const viewSign = () => {
-    const now = moment().tz(summit.time_zone_id).unix(); // now in summit timezone converted to epoch
-    window.open(`${window.SIGNAGE_BASE_URL}/${sign?.template}#/?summit=${summit.id}&location=${locationId}&t=${now}`);
+  const viewSign = () => {    
+    window.open(`${window.SIGNAGE_BASE_URL}/${sign?.template}#/?summit=${summit.id}&location=${locationId}`);
   };
   
   const reloadSign = () => {
