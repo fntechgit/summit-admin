@@ -190,7 +190,7 @@ class MarketingSettingForm extends React.Component {
                     {entity.type === 'TEXTAREA' &&
                     <div className="col-md-8">
                         <label> {T.translate("marketing.html")} *</label>
-                        <TextEditorV2
+                        <TextEditor className="html-editor"V2
                             id="value"
                             value={entity.value}
                             onChange={this.handleChange}

@@ -535,7 +535,7 @@ class SelectionPlanForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_selection_plan.submission_period_disclaimer")} *</label>
-                        <TextEditor
+                        <TextEditor className="html-editor"
                             id="submission_period_disclaimer"
                             value={entity.submission_period_disclaimer}
                             onChange={this.handleChange}
@@ -782,7 +782,7 @@ class SelectionPlanForm extends React.Component {
                                     <i className="fa fa-info-circle" aria-hidden="true"
                                        title={T.translate("edit_selection_plan.cfp_presentation_edition_custom_message_info")}/>
                                 </label>
-                                <TextEditor
+                                <TextEditor className="html-editor"
                                     id="cfp_presentation_edition_custom_message"
                                     error={this.hasErrors('cfp_presentation_edition_custom_message')}
                                     onChange={this.handleChange}

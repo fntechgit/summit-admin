@@ -123,7 +123,7 @@ class SponsoredProjectSponsorshipTypeForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_sponsored_project_sponsorship_type.description")} </label>
-                        <TextEditor id="description" value={entity.description} onChange={this.handleChange} />
+                        <TextEditor className="html-editor" id="description" value={entity.description} onChange={this.handleChange} />
                     </div>
                 </div>
                 {entity.id !== 0 &&

@@ -390,7 +390,7 @@ class SponsorForm extends React.Component {
                         <div className="row form-group">
                             <div className="col-md-12">
                                 <label> {T.translate("edit_sponsor.intro")} </label>
-                                <TextEditor id="intro" value={entity.intro} onChange={this.handleChange} />
+                                <TextEditor className="html-editor" id="intro" value={entity.intro} onChange={this.handleChange} />
                             </div>
                         </div>
                         <div className="row form-group">

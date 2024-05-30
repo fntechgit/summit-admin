@@ -88,7 +88,7 @@ class ViewTypeForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_view_type.description")}</label>
-                        <TextEditor
+                        <TextEditor className="html-editor"
                             id="description"
                             value={entity.description}
                             onChange={this.handleChange}

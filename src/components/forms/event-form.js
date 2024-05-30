@@ -761,7 +761,7 @@ render() {
             <div className="row form-group">
                 <div className="col-md-12">
                     <label> {T.translate("edit_event.short_description")}</label>
-                    <TextEditor
+                    <TextEditor className="html-editor"
                         id="description"
                         value={entity.description}
                         onChange={this.handleChange}
@@ -782,7 +782,7 @@ render() {
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_event.expect_to_learn")} </label>
-                        <TextEditor id="attendees_expected_learnt" value={entity.attendees_expected_learnt}
+                        <TextEditor className="html-editor" id="attendees_expected_learnt" value={entity.attendees_expected_learnt}
                             onChange={this.handleChange} />
                     </div>
                 </div>

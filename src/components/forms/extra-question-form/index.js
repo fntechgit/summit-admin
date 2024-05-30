@@ -295,7 +295,7 @@ class ExtraQuestionForm extends React.Component {
                     <div className="row form-group">
                         <div className="col-md-12">
                             <label> {T.translate("question_form.visible_question")} *</label>
-                            <TextEditor
+                            <TextEditor className="html-editor"
                                 id="label"
                                 value={entity.label}
                                 onChange={this.handleChange}

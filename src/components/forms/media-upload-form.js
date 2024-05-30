@@ -162,7 +162,7 @@ class MediaUploadForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-8">
                         <label> {T.translate("media_upload.description")}</label>
-                        <TextEditor
+                        <TextEditor className="html-editor"
                           id="description"
                           value={entity.description}
                           onChange={this.handleChange}

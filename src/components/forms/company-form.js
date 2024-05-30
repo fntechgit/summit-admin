@@ -236,19 +236,19 @@ class CompanyForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_company.description")} </label>
-                        <TextEditor id="description" value={entity.description} onChange={this.handleChange} />
+                        <TextEditor className="html-editor" id="description" value={entity.description} onChange={this.handleChange} />
                     </div>
                 </div>
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_company.overview")} </label>
-                        <TextEditor id="overview" value={entity.overview} onChange={this.handleChange} />
+                        <TextEditor className="html-editor" id="overview" value={entity.overview} onChange={this.handleChange} />
                     </div>
                 </div>
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_company.commitment")} </label>
-                        <TextEditor id="commitment" value={entity.commitment} onChange={this.handleChange} />
+                        <TextEditor className="html-editor" id="commitment" value={entity.commitment} onChange={this.handleChange} />
                     </div>
                 </div>
                 {entity.id > 0 && window.APP_CLIENT_NAME == 'openstack' &&

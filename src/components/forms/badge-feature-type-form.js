@@ -113,7 +113,7 @@ class BadgeFeatureTypeForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_badge_feature.description")} *</label>
-                        <TextEditor
+                        <TextEditor className="html-editor"
                             id="description"
                             value={entity.description}
                             onChange={this.handleChange}
@@ -124,7 +124,7 @@ class BadgeFeatureTypeForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_badge_feature.template_content")} *</label>
-                        <TextEditor
+                        <TextEditor className="html-editor"
                             id="template_content"
                             value={entity.template_content}
                             onChange={this.handleChange}

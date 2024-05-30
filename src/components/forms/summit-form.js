@@ -525,7 +525,7 @@ class SummitForm extends React.Component {
                             onChange={this.handleChange}
                             className="form-control"
                         />*/}
-                        <TextEditor id="registration_disclaimer_content" value={entity.registration_disclaimer_content} onChange={this.handleChange} />
+                        <TextEditor className="html-editor" id="registration_disclaimer_content" value={entity.registration_disclaimer_content} onChange={this.handleChange} />
                     </div>
                 </div>
                 <div className="row form-group">
@@ -960,7 +960,7 @@ class SummitForm extends React.Component {
                             </label>&nbsp;
                             <i className="fa fa-info-circle" aria-hidden="true"
                                title={T.translate("edit_summit.reg_lite_no_allowed_tickets_message_info")} />
-                            <TextEditor
+                            <TextEditor className="html-editor"
                                 id="REG_LITE_NO_ALLOWED_TICKETS_MESSAGE"
                                 value={regLiteMarketingSettings?.REG_LITE_NO_ALLOWED_TICKETS_MESSAGE?.value}
                                 onChange={this.handleChange}

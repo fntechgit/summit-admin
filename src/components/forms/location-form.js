@@ -305,7 +305,7 @@ class LocationForm extends React.Component {
                 <div className="row form-group">
                     <div className="col-md-12">
                         <label> {T.translate("edit_location.description")} </label>
-                        <TextEditor id="description" value={entity.description} onChange={this.handleChange} error={this.hasErrors('description')} />
+                        <TextEditor className="html-editor" id="description" value={entity.description} onChange={this.handleChange} error={this.hasErrors('description')} />
                     </div>
                 </div>
 
@@ -348,7 +348,7 @@ class LocationForm extends React.Component {
                     {this.display('location_message') &&
                     <div className="col-md-12">
                         <label> {T.translate("edit_location.location_message")}</label>
-                        <TextEditor id="location_message" value={entity.location_message} onChange={this.handleChange}
+                        <TextEditor className="html-editor" id="location_message" value={entity.location_message} onChange={this.handleChange}
                                     error={this.hasErrors('location_message')}/>
                     </div>
                     }
