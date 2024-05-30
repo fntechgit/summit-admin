@@ -928,6 +928,11 @@ const parseFilters = (filters, term = null) => {
         filter.push(`selection_status==${filters.selection_status_filter.join('||')}`);
     }
 
+    if (filters.hasOwnProperty('review_status_filter') && Array.isArray(filters.review_status_filter)
+        && filters.review_status_filter.length > 0) {
+        filter.push(`review_status==${filters.review_status_filter.join('||')}`);
+    }
+
     if (filters?.progress_flag?.length > 0) {
         filter.push(
           filters.progress_flag

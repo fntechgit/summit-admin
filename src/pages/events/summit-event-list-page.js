@@ -63,6 +63,7 @@ const fieldNames = [
     { columnKey: 'streaming_url', value: 'streaming_url', sortable: true, title: true },
     { columnKey: 'meeting_url', value: 'meeting_url', sortable: true, title: true },
     { columnKey: 'etherpad_link', value: 'etherpad_link', sortable: true, title: true },
+    { columnKey: 'review_status', value: 'review_status', sortable: true, title: true },
     { columnKey: 'streaming_type', value: 'streaming_type', sortable: true },
     { columnKey: 'status', value: 'submission_status', sortable: false, title: true },
     { columnKey: 'progress_flags', value: 'progress_flags', sortable: true, title: true },
@@ -114,6 +115,7 @@ const defaultFilters = {
     all_companies: [],
     submission_status_filter: [],
     media_upload_with_type: { operator: null, value: [] },
+    review_status_filter: [],
 };
 
 class SummitEventListPage extends React.Component {
@@ -526,7 +528,8 @@ class SummitEventListPage extends React.Component {
             {label: 'Sponsors', value: 'sponsor'},
             {label: 'All Companies', value: 'all_companies'},
             {label: T.translate("event_list.submission_status"), value: 'submission_status_filter' },
-            {label: T.translate("event_list.media_upload_with_type"), value: 'media_upload_with_type' },            
+            {label: T.translate("event_list.media_upload_with_type"), value: 'media_upload_with_type' }, 
+            {label: 'Review Status', value: 'review_status_filter'},           
         ]
 
         const ddl_columns = [
@@ -554,6 +557,7 @@ class SummitEventListPage extends React.Component {
             { value: 'status', label: T.translate("event_list.submission_status") },
             { value: 'progress_flags', label: T.translate("event_list.progress_flags") },
             { value: 'media_uploads', label: T.translate("event_list.media_uploads") },
+            { value: 'review_status', label: T.translate("event_list.review_status") },
         ];
 
         const ddl_filterByEventTypeCapacity = [
@@ -566,6 +570,15 @@ class SummitEventListPage extends React.Component {
             {label: T.translate("event_list.submission_status_accepted"), value: 'Accepted'},
             {label: T.translate("event_list.submission_status_received"), value: 'Received'},
             {label: T.translate("event_list.submission_status_not_submitted"), value: 'NonReceived'}
+        ];
+
+        const review_status_ddl = [
+            {label: T.translate("event_list.review_status_accepted"), value: 'Accepted'},
+            {label: T.translate("event_list.review_status_in_review"), value: 'InReview'},
+            {label: T.translate("event_list.review_status_no_submitted"), value: 'NoSubmitted'},
+            {label: T.translate("event_list.review_status_published"), value: 'Published'},
+            {label: T.translate("event_list.review_status_received"), value: 'Received'},
+            {label: T.translate("event_list.review_status_rejected"), value: 'Rejected'}
         ];
 
         const progress_flag_ddl = currentSummit.presentation_action_types.map(pf => ({value: pf.id, label: pf.label}))
@@ -1003,6 +1016,19 @@ class SummitEventListPage extends React.Component {
                                 value={eventFilters.submission_status_filter}
                                 onChange={this.handleExtraFilterChange}
                                 options={submission_status_ddl}
+                                isClearable={true}
+                                isMulti={true}
+                            />
+                        </div>                
+                    }
+                     {enabledFilters.includes('review_status_filter') &&
+                        <div className={'col-md-6'}> 
+                            <Dropdown
+                                id="review_status_filter"
+                                placeholder={T.translate("event_list.placeholders.review_status")}
+                                value={eventFilters.review_status_filter}
+                                onChange={this.handleExtraFilterChange}
+                                options={review_status_ddl}
                                 isClearable={true}
                                 isMulti={true}
                             />
