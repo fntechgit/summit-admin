@@ -16,15 +16,15 @@ import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import Swal from "sweetalert2";
 import { Modal, Pagination } from 'react-bootstrap';
-import { 
-    FreeTextSearch, 
-    Table, 
-    UploadInput, 
-    Input, 
-    TagInput, 
-    SpeakerInput, 
-    Dropdown, 
-    DateTimePicker, 
+import {
+    FreeTextSearch,
+    Table,
+    UploadInput,
+    Input,
+    TagInput,
+    SpeakerInput,
+    Dropdown,
+    DateTimePicker,
     OperatorInput,
     MemberInput,
     CompanyInput } from 'openstack-uicore-foundation/lib/components';
@@ -134,9 +134,9 @@ class SummitEventListPage extends React.Component {
         this.handleImportEvents = this.handleImportEvents.bind(this);
         this.handleMUXImport = this.handleMUXImport.bind(this);
         this.handleChangeMUXModal = this.handleChangeMUXModal.bind(this);
-        this.handleImportAssetsFromMUX = this.handleImportAssetsFromMUX.bind(this);        
+        this.handleImportAssetsFromMUX = this.handleImportAssetsFromMUX.bind(this);
         this.handleExtraFilterChange = this.handleExtraFilterChange.bind(this);
-        this.handleTagOrSpeakerFilterChange = this.handleTagOrSpeakerFilterChange.bind(this);        
+        this.handleTagOrSpeakerFilterChange = this.handleTagOrSpeakerFilterChange.bind(this);
         this.handleSetPublishedFilter = this.handleSetPublishedFilter.bind(this);
         this.handleChangeStartDate = this.handleChangeStartDate.bind(this);
         this.handleChangeEndDate = this.handleChangeEndDate.bind(this);
@@ -173,7 +173,7 @@ class SummitEventListPage extends React.Component {
         this.extraFilters = {
             allows_attendee_vote_filter: false,
             allows_location_filter: false,
-            allows_publishing_dates_filter: false            
+            allows_publishing_dates_filter: false
         }
     }
 
@@ -218,7 +218,7 @@ class SummitEventListPage extends React.Component {
         const  enabledFilters = Object.keys(filters).filter(e => Array.isArray(filters[e]) ? filters[e]?.some(e => e !== null) : filters[e]?.length > 0);
 
         this.setState({
-            ...this.state, 
+            ...this.state,
             selectedColumns: extraColumns,
             enabledFilters: enabledFilters,
             eventFilters: {...eventFilters, ...filters}
@@ -331,7 +331,7 @@ class SummitEventListPage extends React.Component {
             value = {
                 operator: ev.target.operator,
                 value: ev.target.value
-            }            
+            }
         }
         this.setState({...this.state, eventFilters: {...this.state.eventFilters, [id]: value}, selectedFilterCriteria: null});
     }
@@ -343,7 +343,7 @@ class SummitEventListPage extends React.Component {
     handleTagOrSpeakerFilterChange(ev) {
         let {value, id} = ev.target;
         this.setState({...this.state, eventFilters: {...this.state.eventFilters, [id]: value}});
-    }    
+    }
 
     handleSetPublishedFilter(ev) {
         this.extraFilters.published_filter = ev;
@@ -356,9 +356,9 @@ class SummitEventListPage extends React.Component {
             if(value.length === 0) {
                 this.setState({...this.state, enabledFilters: value, eventFilters: defaultFilters, selectedFilterCriteria: null});
             } else {
-                const removedFilter = this.state.enabledFilters.filter(e => !value.includes(e))[0];            
+                const removedFilter = this.state.enabledFilters.filter(e => !value.includes(e))[0];
                 const defaultValue = removedFilter === 'published_filter' ? null : Array.isArray(this.state.eventFilters[removedFilter]) ? [] : '';
-                let newEventFilters = {...this.state.eventFilters, [removedFilter]: defaultValue};                
+                let newEventFilters = {...this.state.eventFilters, [removedFilter]: defaultValue};
                 this.setState({...this.state, enabledFilters: value, eventFilters: newEventFilters, selectedFilterCriteria: null});
             }
         } else {
@@ -371,7 +371,7 @@ class SummitEventListPage extends React.Component {
         const {start_date_filter} = this.state.eventFilters;
 
         this.setState({...this.state, eventFilters: {
-            ...this.state.eventFilters, 
+            ...this.state.eventFilters,
             start_date_filter: lastDate ? [start_date_filter[0], value.unix()] : [value.unix(), start_date_filter[1]]
         }});
     }
@@ -381,7 +381,7 @@ class SummitEventListPage extends React.Component {
         const {end_date_filter} = this.state.eventFilters;
 
         this.setState({...this.state, eventFilters: {
-            ...this.state.eventFilters, 
+            ...this.state.eventFilters,
             end_date_filter: lastDate ? [end_date_filter[0], value.unix()] : [value.unix(), end_date_filter[1]]
         }});
     }
@@ -391,7 +391,7 @@ class SummitEventListPage extends React.Component {
         const {selectedColumns} = this.state;
         let newColumns = value;
         const all_companies = ['submitter_company', 'speaker_company', 'sponsor'];
-        
+
         if(selectedColumns.includes('all_companies') && !newColumns.includes('all_companies')) {
             newColumns = [...newColumns.filter(e => !all_companies.includes(e))];
         }
@@ -405,7 +405,7 @@ class SummitEventListPage extends React.Component {
             } else if (newCompanies < selectedCompanies) {
                 newColumns = [...newColumns.filter(c => c !== 'all_companies')];
             }
-        }   
+        }
         this.setState({...this.state, selectedColumns: newColumns})
     }
 
@@ -434,22 +434,22 @@ class SummitEventListPage extends React.Component {
         let newEventFilters = {}
         if(filterCriteria) {
             Object.entries(filterCriteria.criteria).map(([key, values]) => {
-                newEventFilters = {...newEventFilters, [key]: values};            
+                newEventFilters = {...newEventFilters, [key]: values};
             })
         }
-        
+
         this.setState({
-            ...this.state, 
-            eventFilters: {...defaultFilters, ...newEventFilters}, 
-            enabledFilters: filterCriteria ? filterCriteria.enabled_filters : [], 
+            ...this.state,
+            eventFilters: {...defaultFilters, ...newEventFilters},
+            enabledFilters: filterCriteria ? filterCriteria.enabled_filters : [],
             selectedFilterCriteria: filterCriteria ? filterCriteria : null
         }, () => this.props.getEvents(term, 1, 10, order, orderDir, this.state.eventFilters, extraColumns));
     }
 
     handleFilterCriteriaDelete(filterCriteriaId) {
         const {extraColumns, term, order, orderDir} = this.props;
-        this.props.deleteFilterCriteria(filterCriteriaId).then(() => 
-            this.setState({...this.state, 
+        this.props.deleteFilterCriteria(filterCriteriaId).then(() =>
+            this.setState({...this.state,
                 eventFilters: {...defaultFilters, orAndFilter: ALL_FILTER},
                 enabledFilters: [],
                 selectedFilterCriteria: null
@@ -508,7 +508,7 @@ class SummitEventListPage extends React.Component {
             {label: 'Activity Type', value: 'event_type_id_filter'},
             {label: 'Activity Category', value: 'track_id_filter'},
             {label: 'Level', value: 'level_filter'},
-            {label: 'Etherpad URL', value: 'etherpad_link'}, 
+            {label: 'Etherpad URL', value: 'etherpad_link'},
             {label: 'Location', value: 'location_id_filter'},
             {label: 'Meeting URL', value: 'meeting_url'},
             {label: 'Progress Flag', value: 'progress_flag'},
@@ -528,8 +528,8 @@ class SummitEventListPage extends React.Component {
             {label: 'Sponsors', value: 'sponsor'},
             {label: 'All Companies', value: 'all_companies'},
             {label: T.translate("event_list.submission_status"), value: 'submission_status_filter' },
-            {label: T.translate("event_list.media_upload_with_type"), value: 'media_upload_with_type' }, 
-            {label: 'Review Status', value: 'review_status_filter'},           
+            {label: T.translate("event_list.media_upload_with_type"), value: 'media_upload_with_type' },
+            {label: 'Review Status', value: 'review_status_filter'},
         ]
 
         const ddl_columns = [
@@ -575,7 +575,7 @@ class SummitEventListPage extends React.Component {
         const review_status_ddl = [
             {label: T.translate("event_list.review_status_accepted"), value: 'Accepted'},
             {label: T.translate("event_list.review_status_in_review"), value: 'InReview'},
-            {label: T.translate("event_list.review_status_no_submitted"), value: 'NoSubmitted'},
+            {label: T.translate("event_list.review_status_no_submitted"), value: 'NotSubmitted'},
             {label: T.translate("event_list.review_status_published"), value: 'Published'},
             {label: T.translate("event_list.review_status_received"), value: 'Received'},
             {label: T.translate("event_list.review_status_rejected"), value: 'Rejected'}
@@ -639,7 +639,7 @@ class SummitEventListPage extends React.Component {
                         <OrAndFilter value={eventFilters.orAndFilter} entity={'events'} onChange={(filter) => this.handleOrAndFilter(filter)}/>
                     </div>
                     <div className="col-md-6">
-                        <SelectFilterCriteria 
+                        <SelectFilterCriteria
                             summitId={currentSummit.id}
                             context={CONTEXT_ACTIVITIES}
                             onDelete={this.handleFilterCriteriaDelete}
@@ -664,7 +664,7 @@ class SummitEventListPage extends React.Component {
                             {T.translate("event_list.apply_filters")}
                         </button>
                     </div>
-                </div>    
+                </div>
                 <SaveFilterCriteria onSave={this.handleFilterCriteriaSave} selectedFilterCriteria={selectedFilterCriteria}/>
                 <div className={'filters-row'}>
                     {enabledFilters.includes('event_type_capacity_filter') &&
@@ -681,7 +681,7 @@ class SummitEventListPage extends React.Component {
                         </div>
                     }
                     {enabledFilters.includes('selection_plan_id_filter') &&
-                        <div className={'col-md-6'}>   
+                        <div className={'col-md-6'}>
                             <Dropdown
                                 id="selection_plan_id_filter"
                                 placeholder={T.translate("event_list.placeholders.selection_plan")}
@@ -707,7 +707,7 @@ class SummitEventListPage extends React.Component {
                         </div>
                     }
                     {enabledFilters.includes('selection_status_filter') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <Dropdown
                                 id="selection_status_filter"
                                 placeholder={T.translate("event_list.placeholders.selection_status")}
@@ -717,7 +717,7 @@ class SummitEventListPage extends React.Component {
                                 isClearable={true}
                                 isMulti={true}
                             />
-                        </div>                
+                        </div>
                     }
                     {enabledFilters.includes('published_filter') &&
                         <div className={'col-md-6'}>
@@ -730,7 +730,7 @@ class SummitEventListPage extends React.Component {
                                 ]}
                                 setValue={newValue => this.handleSetPublishedFilter(newValue)}
                                 style={{ width: "100%", height:40, color: '#337ab7', fontSize: '10px'  }}
-                            />                        
+                            />
                         </div>
                     }
                     {enabledFilters.includes('progress_flag') &&
@@ -747,7 +747,7 @@ class SummitEventListPage extends React.Component {
                       </div>
                     }
                     {enabledFilters.includes('track_id_filter') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <Dropdown
                                 id="track_id_filter"
                                 placeholder={T.translate("event_list.placeholders.track")}
@@ -758,7 +758,7 @@ class SummitEventListPage extends React.Component {
                                 isMulti={true}
                             />
                         </div>
-                    }                
+                    }
                     {enabledFilters.includes('event_type_id_filter') &&
                         <div className={'col-md-6'}>
                             <Dropdown
@@ -773,7 +773,7 @@ class SummitEventListPage extends React.Component {
                         </div>
                     }
                     {enabledFilters.includes('speaker_id_filter') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <SpeakerInput
                                 id="speaker_id_filter"
                                 placeholder={T.translate("event_list.placeholders.speaker")}
@@ -786,7 +786,7 @@ class SummitEventListPage extends React.Component {
                         </div>
                     }
                     {enabledFilters.includes('speaker_company') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <CompanyInput
                                 id='speaker_company'
                                 value={eventFilters.speaker_company}
@@ -810,7 +810,7 @@ class SummitEventListPage extends React.Component {
                         </div>
                     }
                     {enabledFilters.includes('tags_filter') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <TagInput
                                 id="tags_filter"
                                 placeholder={T.translate("event_list.placeholders.tags")}
@@ -823,7 +823,7 @@ class SummitEventListPage extends React.Component {
                         </div>
                     }
                     {enabledFilters.includes('sponsor') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <CompanyInput
                                 id='sponsor'
                                 value={eventFilters.sponsor}
@@ -834,7 +834,7 @@ class SummitEventListPage extends React.Component {
                         </div>
                     }
                     {enabledFilters.includes('all_companies') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <CompanyInput
                                 id='all_companies'
                                 value={eventFilters.all_companies}
@@ -861,14 +861,14 @@ class SummitEventListPage extends React.Component {
                             <div className={'col-md-3'}>
                                 <DateTimePicker
                                     id="start_date_from_filter"
-                                    format={{date:"YYYY-MM-DD", time: "HH:mm"}}                                    
+                                    format={{date:"YYYY-MM-DD", time: "HH:mm"}}
                                     inputProps={{placeholder: T.translate("event_list.placeholders.start_date_from")}}
                                     timezone={currentSummit.time_zone.name}
                                     onChange={(ev) => this.handleChangeStartDate(ev, false)}
                                     value={epochToMomentTimeZone(eventFilters.start_date_filter[0], currentSummit.time_zone_id)}
                                     className={'event-list-date-picker'}
                                 />
-                            </div>                    
+                            </div>
                             <div className={'col-md-3'}>
                                 <DateTimePicker
                                     id="start_date_to_filter"
@@ -894,7 +894,7 @@ class SummitEventListPage extends React.Component {
                                     value={epochToMomentTimeZone(eventFilters.end_date_filter[0], currentSummit.time_zone_id)}
                                     className={'event-list-date-picker'}
                                 />
-                            </div>                    
+                            </div>
                             <div className={'col-md-3'}>
                                 <DateTimePicker
                                     id="end_date_to_filter"
@@ -908,8 +908,8 @@ class SummitEventListPage extends React.Component {
                             </div>
                         </>
                     }
-                    {enabledFilters.includes('submitters') && 
-                        <div className={'col-md-6'}> 
+                    {enabledFilters.includes('submitters') &&
+                        <div className={'col-md-6'}>
                         <MemberInput
                             id="submitters"
                             value={eventFilters.submitters}
@@ -927,7 +927,7 @@ class SummitEventListPage extends React.Component {
                     </div>
                     }
                     {enabledFilters.includes('submitter_company') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <CompanyInput
                                 id='submitter_company'
                                 value={eventFilters.submitter_company}
@@ -949,8 +949,8 @@ class SummitEventListPage extends React.Component {
                             />
                         </div>
                     }
-                    {enabledFilters.includes('streaming_url') && 
-                        <div className={'col-md-6'}> 
+                    {enabledFilters.includes('streaming_url') &&
+                        <div className={'col-md-6'}>
                         <Input
                             id='streaming_url'
                             value={eventFilters.streaming_url}
@@ -959,8 +959,8 @@ class SummitEventListPage extends React.Component {
                         />
                     </div>
                     }
-                    {enabledFilters.includes('meeting_url') && 
-                        <div className={'col-md-6'}> 
+                    {enabledFilters.includes('meeting_url') &&
+                        <div className={'col-md-6'}>
                         <Input
                             id='meeting_url'
                             value={eventFilters.meeting_url}
@@ -969,8 +969,8 @@ class SummitEventListPage extends React.Component {
                         />
                     </div>
                     }
-                    {enabledFilters.includes('etherpad_link') && 
-                        <div className={'col-md-6'}> 
+                    {enabledFilters.includes('etherpad_link') &&
+                        <div className={'col-md-6'}>
                         <Input
                             id='etherpad_link'
                             value={eventFilters.etherpad_link}
@@ -979,8 +979,8 @@ class SummitEventListPage extends React.Component {
                         />
                     </div>
                     }
-                    {enabledFilters.includes('streaming_type') && 
-                        <div className={'col-md-6'}> 
+                    {enabledFilters.includes('streaming_type') &&
+                        <div className={'col-md-6'}>
                         <Dropdown
                             id="streaming_type"
                             value={eventFilters.streaming_type}
@@ -989,27 +989,27 @@ class SummitEventListPage extends React.Component {
                             options={streaming_type_ddl}
                         />
                     </div>
-                    }                    
+                    }
                     {enabledFilters.includes('duration_filter') &&
-                        <div className={'col-md-10 col-md-offset-1'}> 
-                            <OperatorInput 
-                                id="duration_filter" 
+                        <div className={'col-md-10 col-md-offset-1'}>
+                            <OperatorInput
+                                id="duration_filter"
                                 label={T.translate("event_list.duration")}
                                 value={eventFilters.duration_filter}
                                 onChange={this.handleExtraFilterChange}/>
                         </div>
                     }
                     {enabledFilters.includes('speakers_count_filter') &&
-                        <div className={'col-md-10 col-md-offset-1'}> 
-                            <OperatorInput 
-                                id="speakers_count_filter" 
+                        <div className={'col-md-10 col-md-offset-1'}>
+                            <OperatorInput
+                                id="speakers_count_filter"
                                 label={T.translate("event_list.speakers_count")}
                                 value={eventFilters.speakers_count_filter}
                                 onChange={this.handleExtraFilterChange}/>
                         </div>
                     }
                     {enabledFilters.includes('submission_status_filter') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <Dropdown
                                 id="submission_status_filter"
                                 placeholder={T.translate("event_list.placeholders.submission_status")}
@@ -1019,10 +1019,10 @@ class SummitEventListPage extends React.Component {
                                 isClearable={true}
                                 isMulti={true}
                             />
-                        </div>                
+                        </div>
                     }
                      {enabledFilters.includes('review_status_filter') &&
-                        <div className={'col-md-6'}> 
+                        <div className={'col-md-6'}>
                             <Dropdown
                                 id="review_status_filter"
                                 placeholder={T.translate("event_list.placeholders.review_status")}
@@ -1032,11 +1032,11 @@ class SummitEventListPage extends React.Component {
                                 isClearable={true}
                                 isMulti={true}
                             />
-                        </div>                
+                        </div>
                     }
                     {enabledFilters.includes('media_upload_with_type') &&
-                         <div className={'col-md-12'}> 
-                            <MediaTypeFilter 
+                         <div className={'col-md-12'}>
+                            <MediaTypeFilter
                                 id={"media_upload_with_type"}
                                 operatorInitialValue={eventFilters.media_upload_with_type.operator}
                                 filterInitialValue={eventFilters.media_upload_with_type.value}
@@ -1044,8 +1044,8 @@ class SummitEventListPage extends React.Component {
                                 onChange={this.handleExtraFilterChange}
                             />
                         </div>
-                    }                    
-                </div>            
+                    }
+                </div>
 
                 <hr/>
 
@@ -1063,7 +1063,7 @@ class SummitEventListPage extends React.Component {
                         />
                     </div>
                 </div>
- 
+
                 {events.length === 0 &&
                     <div>{T.translate("event_list.no_events")}</div>
                 }
