@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {FreeTextSearch, Table} from "openstack-uicore-foundation/lib/components";
+import {FreeTextSearch, Table, TextArea} from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react";
 import {connect} from "react-redux";
 import {clearNotesParams, getNotes, exportNotes, saveNote, deleteNote} from "../../actions/notes-actions";
@@ -96,9 +96,11 @@ const Notes = ({
             <label>Add new note</label>
           </div>
           <div className="input-group">
-            <textarea
+            <TextArea
               className="form-control"
-              value={newNote} onChange={ev => setNewNote(ev.target.value)}
+              value={newNote}
+              onChange={ev => setNewNote(ev.target.value)}
+              maxLength={1024}
             />
             <span className="input-group-btn">
               <input
