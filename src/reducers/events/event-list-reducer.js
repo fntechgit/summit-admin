@@ -82,7 +82,7 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
                     summit_id : e.summit_id,
                     title: e.title,
                     status: e.status ?? 'Not Submitted',
-                    selection_status: e.selection_status === 'unaccepted' && e.is_published === true ? 'accepted' : e.selection_status,
+                    selection_status: e.selection_status === 'unaccepted' && e.is_published === true ? 'accepted' : e.selection_status ?? 'N/A',
                     published_date: published_date,
                     created_by_fullname: e.hasOwnProperty('created_by') ? `${e.created_by.first_name} ${e.created_by.last_name} (${e.created_by.email})`:'TBD',
                     submitter_company: e.hasOwnProperty('created_by') ? e.created_by.company : 'N/A',
