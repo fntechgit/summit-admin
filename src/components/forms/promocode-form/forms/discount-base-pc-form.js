@@ -4,7 +4,9 @@ import BasePCForm from "./base-pc-form";
 import {Input} from "openstack-uicore-foundation/lib/components";
 import {DiscountTicketTable} from "../../../tables/dicount-ticket-table";
 
-const DiscountBasePCForm = (props) => (
+const DiscountBasePCForm = (props) => {
+  const currencySymbol = props.summit.ticket_types[0]?.currency_symbol || '$';
+  return (
   <>
     <BasePCForm {...props} />
 
@@ -25,7 +27,7 @@ const DiscountBasePCForm = (props) => (
     {props.entity.apply_to_all_tix &&
       <div className="row form-group">
         <div className="col-md-4">
-          <label> {T.translate("edit_promocode.amount")} ($) *</label>
+          <label> {T.translate("edit_promocode.amount")} ({currencySymbol}) *</label>
           <Input
             id="amount"
             type="number"
@@ -69,6 +71,6 @@ const DiscountBasePCForm = (props) => (
       </>
     }
   </>
-);
+)};
 
 export default DiscountBasePCForm;
