@@ -53,7 +53,7 @@ import { saveFilterCriteria, deleteFilterCriteria } from "../../actions/filter-c
 
 const BatchSize = 25;
 
-const fieldNames = [    
+const fieldNames = [
     { columnKey: 'number', value: 'number', sortable: true, render: (item, val) => {
         const hasRequested =  item.refund_requests.some((r) => r.status === 'Requested');
         return `${val}` + (hasRequested ? '&nbsp;<span class="label label-danger">Refund Requested</span>' :'')
@@ -136,14 +136,14 @@ class TicketListPage extends React.Component {
             const { term, order, orderDir, filters, extraColumns } = this.props;
             const  enabledFilters = Object.keys(filters).filter(e => filters[e]?.length > 0);
             this.setState({
-                ...this.state, 
+                ...this.state,
                 selectedColumns: extraColumns,
                 enabledFilters: enabledFilters,
                 ticketFilters: {...ticketFilters, ...filters}
             });
             this.props.getTickets(term, 1, 10, order, orderDir, filters, extraColumns);
         }
-    }    
+    }
 
     handleSelected(attendee_id, isSelected){
         if(isSelected){
@@ -289,7 +289,7 @@ class TicketListPage extends React.Component {
                     this.props.getTickets(term, 1, perPage, order, orderDir, this.state.ticketFilters, this.state.selectedColumns);
                 });
             } else {
-                const removedFilter = this.state.enabledFilters.filter(e => !value.includes(e))[0];            
+                const removedFilter = this.state.enabledFilters.filter(e => !value.includes(e))[0];
                 const defaultValue = removedFilter === 'published_filter' ? null : Array.isArray(this.state.ticketFilters[removedFilter]) ? [] : '';
                 let newEventFilters = {...this.state.ticketFilters, [removedFilter]: defaultValue};
                 this.setState({...this.state, enabledFilters: value, ticketFilters: newEventFilters}, () => {
@@ -305,7 +305,7 @@ class TicketListPage extends React.Component {
         return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
     }
 
-    handleFilterCriteriaSave(filterData) {        
+    handleFilterCriteriaSave(filterData) {
         const {enabledFilters, ticketFilters} = this.state;
         const {currentSummit} = this.props;
         const filterToSave = {
@@ -317,7 +317,7 @@ class TicketListPage extends React.Component {
             criteria: Object.fromEntries(Object.entries(ticketFilters).filter(([key]) => enabledFilters.includes(key))),
             context: CONTEXT_TICKETS,
             visibility: filterData.visibility
-        }        
+        }
         this.props.saveFilterCriteria(filterToSave);
     }
 
@@ -326,12 +326,12 @@ class TicketListPage extends React.Component {
         let newEventFilters = {}
         if(filterCriteria) {
             Object.entries(filterCriteria.criteria).map(([key, values]) => {
-                newEventFilters = {...newEventFilters, [key]: values};            
+                newEventFilters = {...newEventFilters, [key]: values};
             });
         }
 
         this.setState({
-            ...this.state, 
+            ...this.state,
             ticketFilters: {...defaultFilters, ...newEventFilters},
             enabledFilters: filterCriteria ? filterCriteria.enabled_filters : [],
             selectedFilterCriteria: filterCriteria || null
@@ -340,8 +340,8 @@ class TicketListPage extends React.Component {
 
     handleFilterCriteriaDelete(filterCriteriaId) {
         const {term, order, orderDir} = this.props;
-        this.props.deleteFilterCriteria(filterCriteriaId).then(() => 
-            this.setState({...this.state, 
+        this.props.deleteFilterCriteria(filterCriteriaId).then(() =>
+            this.setState({...this.state,
                 ticketFilters: {...defaultFilters},
                 enabledFilters: [],
                 selectedFilterCriteria: null
@@ -362,7 +362,7 @@ class TicketListPage extends React.Component {
             match,
             selectedCount,
             selectedAll,
-        } = this.props;                
+        } = this.props;
 
         const {doCheckIn, showIngestModal, showImportModal, importFile, showPrintModal, selectedViewType, enabledFilters, ticketFilters,selectedFilterCriteria} = this.state;
 
@@ -434,7 +434,7 @@ class TicketListPage extends React.Component {
             {label: 'Ticket Type', value: 'ticketTypesFilter'},
             {label: 'Promo Code', value: 'promocodesFilter'},
             {label: 'Promo Code Tags', value: 'promocodeTagsFilter'},
-            {label: 'Refund Requested', value: 'show_refund_request_pending'},  
+            {label: 'Refund Requested', value: 'show_refund_request_pending'},
             {label: 'Printable', value: 'show_printable'},
             {label: 'Badge Type', value: 'badgeTypesFilter'},
         ]
@@ -506,7 +506,7 @@ class TicketListPage extends React.Component {
                             <OrAndFilter value={ticketFilters.orAndFilter} entity={'tickets'} onChange={(filter) => this.handleFilterChange('orAndFilter', filter)}/>
                         </div>
                         <div className="col-md-6">
-                            <SelectFilterCriteria 
+                            <SelectFilterCriteria
                                 summitId={currentSummit.id}
                                 context={CONTEXT_TICKETS}
                                 onDelete={this.handleFilterCriteriaDelete}
@@ -528,7 +528,7 @@ class TicketListPage extends React.Component {
                         </div>
                     </div>
                     <SaveFilterCriteria onSave={this.handleFilterCriteriaSave} selectedFilterCriteria={selectedFilterCriteria}/>
-                    <div className="row filters-row">
+                    <div className="row filtersWrapper">
                         {enabledFilters.includes('hasOwnerFilter') &&
                         <div className="col-md-6">
                             <SegmentedControl
@@ -640,7 +640,7 @@ class TicketListPage extends React.Component {
                             />
                         </div>
                         }
-                        {enabledFilters.includes('promocodesFilter') && 
+                        {enabledFilters.includes('promocodesFilter') &&
                         <div className="col-md-6">
                             <PromocodeInput
                               id="promocodesFilter"
@@ -654,7 +654,7 @@ class TicketListPage extends React.Component {
                             />
                         </div>
                         }
-                        {enabledFilters.includes('promocodeTagsFilter') && 
+                        {enabledFilters.includes('promocodeTagsFilter') &&
                         <div className="col-md-6">
                             <TagInput
                               id="promocodeTagsFilter"
@@ -666,8 +666,8 @@ class TicketListPage extends React.Component {
                               multi
                             />
                         </div>
-                        }       
-                        {enabledFilters.includes('show_refund_request_pending') && 
+                        }
+                        {enabledFilters.includes('show_refund_request_pending') &&
                         <div className={'col-md-6'}>
                             <div className="form-check abc-checkbox">
                                 <input
@@ -683,7 +683,7 @@ class TicketListPage extends React.Component {
                             </div>
                         </div>
                         }
-                        {enabledFilters.includes('show_printable') && 
+                        {enabledFilters.includes('show_printable') &&
                         <div className={'col-md-6'}>
                             <div className="form-check abc-checkbox">
                                 <input
@@ -714,7 +714,7 @@ class TicketListPage extends React.Component {
                             />
                         </div>
                         }
-                    </div>                    
+                    </div>
                     <hr/>
 
                     <div className={'row'} style={{marginBottom: 15}}>
