@@ -210,7 +210,7 @@ class PromocodeForm extends React.Component {
                             disabled={entity.id !== 0}
                         />
                     </div>
-                    {promocode_types_ddl.length > 0 &&
+                    {promocode_types_ddl?.length > 0 &&
                     <div className="col-md-3">
                         <label> {T.translate("edit_promocode.type")} *</label>
                         <Dropdown
