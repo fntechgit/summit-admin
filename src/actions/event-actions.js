@@ -1047,15 +1047,14 @@ const parseFilters = (filters, term = null) => {
 
     if (filters.hasOwnProperty('speaker_company') && Array.isArray(filters.speaker_company)
         && filters.speaker_company.length > 0) {
-        console.log('parse filter', filters.speaker_company)
         filter.push(
-            `speaker_company==${filters.speaker_company.map(company => escapeFilterValue(company.name)).join('||')}`);
+            `speaker_company==${filters.speaker_company.map(c => escapeFilterValue(c.name)).join('||')}`);
     }
 
     if (filters.hasOwnProperty('submitter_company') && Array.isArray(filters.submitter_company)
         && filters.submitter_company.length > 0) {
         filter.push(
-            `created_by_company==${filters.submitter_company.map(company => escapeFilterValue(company.name)).join('||')}`);
+            `created_by_company==${filters.submitter_company.map(c => escapeFilterValue(c.name)).join('||')}`);
     }
 
     if (filters.hasOwnProperty('sponsor') && Array.isArray(filters.sponsor)
@@ -1066,7 +1065,7 @@ const parseFilters = (filters, term = null) => {
 
     if (filters.hasOwnProperty('all_companies') && Array.isArray(filters.all_companies)
         && filters.all_companies.length > 0) {
-        const companies = filters.all_companies.map(company => escapeFilterValue(tt.name).join('||'));
+        const companies = filters.all_companies.map(c => escapeFilterValue(c.name)).join('||');
         filter.push(`speaker_company==${companies},created_by_company==${companies},sponsor==${companies}`);
     }
 
