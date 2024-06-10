@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const EventsEditableTableHeading = (props) => {
+const EditableTableHeading = (props) => {
   const {
     editEnabled,
     sortable,
@@ -41,7 +41,7 @@ const EventsEditableTableHeading = (props) => {
   );
 };
 
-EventsEditableTableHeading.propTypes = {
+EditableTableHeading.propTypes = {
   onSort: PropTypes.func,
   sortDir: PropTypes.number,
   columnIndex: PropTypes.number,
@@ -50,4 +50,4 @@ EventsEditableTableHeading.propTypes = {
   sortFunc: PropTypes.func,
 };
 
-export default EventsEditableTableHeading;
+export default EditableTableHeading;

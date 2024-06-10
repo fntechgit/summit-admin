@@ -828,7 +828,7 @@ export const normalizeBulkEvents = (entity) => {
             id: e.id,
             title: e.title,
             selection_plan_id: e.selection_plan_id,
-            location_id: e.location.id,
+            location_id: e.location?.id || e.location_id,
             start_date: e.start_date,
             speakers: e.speakers,
             end_date: e.end_date,

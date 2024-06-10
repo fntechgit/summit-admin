@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from "react";
-import EditableTableHeading from "./EventsEditableTableHeading";
-import EventsEditableTableRow from "./EventsEditableTableRow";
+import EditableTableHeading from "./EditableTableHeading";
+import EditableTableRow from "./EditableTableRow";
 import ReactTooltip from "react-tooltip";
-import {
-  getAllEventTypes,
-  getAllTrackCategory,
-  getAllLocations,
-  getAllSelectionPlans,
-} from "../../../utils/summitUtils";
 import T from "i18n-react/dist/i18n-react";
 
 const defaults = {
@@ -18,16 +12,16 @@ const defaults = {
   colWidth: "",
 };
 
-const EventsEditableTable = (props) => {
+const EditableTable = (props) => {
   const { 
     options, 
     columns, 
     currentSummit,
     page,
-    events,
+    data,
     handleSort,
-    updateEvents,
-    handleDeleteEvent,
+    updateData,
+    handleDeleteRow,
     resetData,
   } = props;
   let tableClass = options.hasOwnProperty("className") ? options.className : "";
@@ -35,11 +29,7 @@ const EventsEditableTable = (props) => {
   const [editEnabled, setEditEnabled] = useState(false);
   const [selected, setSelected] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  tableClass += options.actions?.edit ? " table-hover" : "";
-
-  const activityTypeOptions = getAllEventTypes(currentSummit);
-  const activtyCategoryOptions = getAllTrackCategory(currentSummit);
-  const selectionPlanOptions = getAllSelectionPlans(currentSummit);
+  tableClass += options.actions?.edit ? " table-hover" : "";  
 
   const getSortDir = (columnKey, columnIndex, sortCol, sortDir) => {
     if (columnKey && columnKey === sortCol) {
@@ -75,7 +65,7 @@ const EventsEditableTable = (props) => {
 
   useEffect(() => {
     if (selectAll) {
-      setSelected(events);
+      setSelected(data);
       setSelectAll(true);
     } else {
       setSelectAll(false);
@@ -83,31 +73,31 @@ const EventsEditableTable = (props) => {
     }
   }, [selectAll]);
 
-  const updateSelected = (event, checked) => { 
-    let selectedEvent = event;
-    const eventIndex = selected.findIndex((s) => s.id === selectedEvent.id);
-    let exists = eventIndex !== -1;
+  const updateSelected = (row, checked) => { 
+    let selectedRow = row;
+    const rowIndex = selected.findIndex((s) => s.id === selectedRow.id);
+    let exists = rowIndex !== -1;
 
     if (checked) {
       if (exists) {
         // if already on selected list, replace with new data
-        const updatedSelected = Object.assign({}, selectedEvent);
+        const updatedSelected = Object.assign({}, selectedRow);
         const newSelected = selected.slice();
-        newSelected[eventIndex] = updatedSelected;
+        newSelected[rowIndex] = updatedSelected;
         setSelected(newSelected);
       } else {
         // append to list
-        setSelected((currSelected) => [...currSelected, selectedEvent]);
+        setSelected((currSelected) => [...currSelected, selectedRow]);
       }
     } else {
-      setSelected(selected.filter((se) => se.id !== selectedEvent.id));
+      setSelected(selected.filter((se) => se.id !== selectedRow.id));
     }
   };
 
   const onUpdateEvents = (evt) => {
     evt.stopPropagation();
     evt.preventDefault();
-    updateEvents(currentSummit.id, selected);
+    updateData(currentSummit.id, selected);
     resetState();
   };
 
@@ -200,27 +190,24 @@ const EventsEditableTable = (props) => {
         </thead>
         <tbody>
           {columns.length > 0 &&
-            events.map((event, i) => {
-              if (Array.isArray(event) && event.length !== columns.length) {
+            data.map((row, i) => {
+              if (Array.isArray(row) && row.length !== columns.length) {
                 console.warn(
-                  `Data at row ${i} is ${event.length}. It should be ${columns.length}.`
+                  `Data at row ${i} is ${row.length}. It should be ${columns.length}.`
                 );
                 return <tr key={"row_" + i} />;
               }
 
               return (
-                <tr role="row" key={`row_${event["id"]}`}>
-                  <EventsEditableTableRow
-                    event={event}
+                <tr role="row" key={`row_${row["id"]}`}>
+                  <EditableTableRow
+                    row={row}
                     currentSummit={currentSummit}
                     editEnabled={editEnabled}
                     selected={selected}
                     updateSelected={updateSelected}
                     selectAll={selectAll}
-                    deleteEvent={handleDeleteEvent}
-                    activityTypeOptions={activityTypeOptions}
-                    activtyCategoryOptions={activtyCategoryOptions}
-                    selectionPlanOptions={selectionPlanOptions}
+                    deleteRow={handleDeleteRow}
                     columns={columns}
                     actions={options.actions}
                   />
@@ -234,4 +221,4 @@ const EventsEditableTable = (props) => {
   );
 };
 
-export default EventsEditableTable;
+export default EditableTable;

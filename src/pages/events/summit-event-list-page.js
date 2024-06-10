@@ -50,16 +50,38 @@ import SaveFilterCriteria from '../../components/filters/save-filter-criteria';
 import SelectFilterCriteria from '../../components/filters/select-filter-criteria';
 import { saveFilterCriteria, deleteFilterCriteria } from '../../actions/filter-criteria-actions';
 import { CONTEXT_ACTIVITIES } from '../../utils/filter-criteria-constants';
-import EventsEditableTable from "../../components/tables/editable-table/EventsEditableTable";
+import EditableTable from "../../components/tables/editable-table/EditableTable";
 
-const fieldNames = [
-  { columnKey: "speakers", value: "speakers" },
+const fieldNames = (selection_plans_ddl, track_ddl) => [
+  { columnKey: "speakers", value: "speakers", editableField: (extraProps) => (<>
+      <SpeakerInput
+        id="speakers"
+        value={extraProps.value}
+        isClearable={true}
+        placeholder={T.translate("edit_event.search_speakers")}
+        getOptionLabel={(speaker) => `${speaker.first_name} ${speaker.last_name} (${speaker.email})`}
+        {...extraProps}
+      />
+      <div className="speakers-list">
+        {extraProps.rowData?.length > 0 && extraProps.rowData.map(sp => (
+          <div className="speaker-list-pill" title={sp?.email} key={sp?.id}>{`${sp?.first_name} ${sp?.last_name}`} 
+            <i className="fa fa-remove" onClick={() => extraProps.onRemoveOption(sp.id, 'speakers')} />
+          </div>
+        ))}
+      </div>
+    </>
+  ), render: (field) => field.length > 0 ? field.map(s => `${s.first_name} ${s.last_name}`).join(', ') : 'N/A' },
   { columnKey: "created_by_fullname", value: "created_by", sortable: true },
   { columnKey: "published_date", value: "published", sortable: true },
   { columnKey: "duration", value: "duration", sortable: true },
   { columnKey: "speakers_count", value: "speakers_count", sortable: true },
   { columnKey: "speaker_company", value: "speaker_company", sortable: true },
-  { columnKey: "track", value: "track", sortable: true },
+  { columnKey: "track", value: "track", sortable: true, editableField: (extraProps) => (<Dropdown
+    id="track_id"
+    value={extraProps.value}
+    options={track_ddl}
+    {...extraProps}
+    />), render: (field) => field?.name },
   { columnKey: "start_date", value: "start_date", sortable: true },
   { columnKey: "end_date", value: "end_date", sortable: true },
   { columnKey: "submitters", value: "submitters" },
@@ -70,7 +92,12 @@ const fieldNames = [
   },
   { columnKey: "sponsor", value: "sponsor", sortable: true },
   { columnKey: "event_type_capacity", value: "event_type_capacity" },
-  { columnKey: "selection_plan", value: "selection_plan", sortable: true },
+  { columnKey: "selection_plan", value: "selection_plan", sortable: true, editableField: (extraProps) => (<Dropdown
+    id="selection_plan_id"
+    options={selection_plans_ddl}    
+    value={extraProps.value}
+    {...extraProps}
+    />), render: (field) => field?.name },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
   { columnKey: "tags", value: "tags", sortable: true },
@@ -79,18 +106,21 @@ const fieldNames = [
     value: "streaming_url",
     sortable: true,
     title: true,
+    editableField: true
   },
   {
     columnKey: "meeting_url",
     value: "meeting_url",
     sortable: true,
     title: true,
+    editableField: true
   },
   {
     columnKey: "etherpad_link",
     value: "etherpad_link",
     sortable: true,
     title: true,
+    editableField: true
   },
   { columnKey: "streaming_type", value: "streaming_type", sortable: true },
   {
@@ -485,8 +515,15 @@ class SummitEventListPage extends React.Component {
 
     let columns = [
         { columnKey: 'id', value: T.translate("general.id"), sortable: true },
-        { columnKey: 'event_type', value: T.translate("event_list.type"), sortable: true },
-        { columnKey: 'title', value: T.translate("event_list.title"), sortable: true },
+        { columnKey: 'type', value: T.translate("event_list.type"), sortable: true, editableField: (extraProps) => (<Dropdown
+          id="type_id"
+          placeholder={T.translate("event_list.placeholders.event_type")}
+          options={event_type_ddl}
+          isClearable={true}
+          value={extraProps.value}
+          {...extraProps}
+        />), render: (field) => field?.name, },
+        { columnKey: 'title', value: T.translate("event_list.title"), sortable: true, editableField: true },
         { columnKey: 'selection_status', value: T.translate("event_list.selection_status"), sortable: true }
     ];
 
@@ -593,7 +630,7 @@ class SummitEventListPage extends React.Component {
 
     const progress_flag_ddl = currentSummit.presentation_action_types.map(pf => ({value: pf.id, label: pf.label}))
 
-    let showColumns = fieldNames
+    let showColumns = fieldNames(selection_plans_ddl, track_ddl)
     .filter((f) => this.state.selectedColumns.includes(f.columnKey) && !defaultColumns.includes(f.columnKey))
     .map((f2) => {
       let c = {
@@ -606,6 +643,8 @@ class SummitEventListPage extends React.Component {
       if (f2.hasOwnProperty("title")) c = { ...c, title: f2.title };
 
       if (f2.hasOwnProperty("render")) c = { ...c, render: f2.render };
+
+      if (f2.hasOwnProperty("editableField")) c = { ...c, editableField: f2.editableField };
 
       return c;
     });
@@ -1067,15 +1106,15 @@ class SummitEventListPage extends React.Component {
             {events.length > 0 && (
               <div>
                 <div className="summit-event-list-table-wrapper">
-                  <EventsEditableTable
+                  <EditableTable
                     currentSummit={currentSummit}
                     page={page}
                     options={table_options}
-                    events={events}
+                    data={events}
                     columns={columns}
                     handleSort={this.handleSort}
-                    updateEvents={bulkUpdateEvents}
-                    handleDeleteEvent={this.handleDeleteEvent}
+                    updateData={bulkUpdateEvents}
+                    handleDeleteRow={this.handleDeleteEvent}
                     resetData={this.handleResetData}
                   />
                 </div>
