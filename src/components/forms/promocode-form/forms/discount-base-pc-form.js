@@ -5,7 +5,7 @@ import {Input} from "openstack-uicore-foundation/lib/components";
 import {DiscountTicketTable} from "../../../tables/dicount-ticket-table";
 
 const DiscountBasePCForm = (props) => {
-  const currencySymbol = props.summit.ticket_types[0]?.currency_symbol || '$';
+  const currencySymbol = props.summit.default_ticket_type_currency_symbol || '$';
   return (
   <>
     <BasePCForm {...props} />
