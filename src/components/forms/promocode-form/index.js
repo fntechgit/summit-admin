@@ -172,9 +172,11 @@ class PromocodeForm extends React.Component {
         }
 
         if (entity.class_name) {
+            console.log(`PromocodeForm::render entity.class_name ${entity.class_name}`, allClasses);
             let classTypes = allClasses.find(c => c.class_name === entity.class_name).type;
 
             if (classTypes) {
+                console.log(`PromocodeForm::render classTypes`, classTypes);
                 promocode_types_ddl = classTypes.map(t => ({label: t, value: t}));
             }
         }
