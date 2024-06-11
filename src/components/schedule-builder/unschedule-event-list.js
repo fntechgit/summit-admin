@@ -23,10 +23,11 @@ class UnScheduleEventList extends React.Component {
     }
 
     render(){
-        const { events, currentPage, lastPage, onPageChange, onEditEvent, onClickSelected } = this.props;
+        const { events, currentPage, lastPage, onPageChange, onEditEvent, onClickSelected, selectedUnPublishedEvents } = this.props;
 
         return (
             <div>
+                <p className="event-count">{selectedUnPublishedEvents?.length} activities selected</p>
                 { events.length === 0 &&
                     <p className="empty-list-message">{T.translate("errors.empty_list")}</p>
                 }
