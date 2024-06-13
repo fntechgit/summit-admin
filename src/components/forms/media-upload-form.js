@@ -146,7 +146,8 @@ class MediaUploadForm extends React.Component {
                     </div>
                     <div className="col-md-4">
                         <label>
-                            {T.translate("media_upload.max_qty")} <i class="fa fa-info-circle" aria-hidden="true" title={T.translate("media_upload.max_qty_hint")} />
+                            {T.translate("media_upload.max_qty")}{' '}
+                            <i className="fa fa-info-circle" aria-hidden="true" title={T.translate("media_upload.max_qty_hint")} />
                         </label>
                         <Input
                             type="number"
@@ -167,6 +168,7 @@ class MediaUploadForm extends React.Component {
                           value={entity.description}
                           onChange={this.handleChange}
                           error={this.hasErrors('description')}
+                          maxLength={5120}
                         />
                     </div>
                 </div>
