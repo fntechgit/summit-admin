@@ -80,7 +80,8 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
 
     if (settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM?.value) {
       try {
-        parse(settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM.value)
+        const addresses = parse(settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM.value);
+        settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM.value = addresses[0].format();
       } catch(e) {
         errorsTmp.EMAIL_TEMPLATE_GENERIC_FROM = `email is not valid`;
         result = false;
@@ -88,7 +89,8 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
     }
     if (settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM?.value) {
       try {
-        parse(settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM.value)
+        const addresses = parse(settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM.value);
+        settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM.value = addresses[0].format();
       } catch(e) {
         errorsTmp.EMAIL_TEMPLATE_SPEAKERS_FROM = `email is not valid`;
         result = false;

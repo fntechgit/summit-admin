@@ -2664,7 +2664,7 @@ acorn@^8.5.0, acorn@^8.7.1, acorn@^8.8.2:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.11.3.tgz#71e0b14e13a4ec160724b38fb7b0f233b1b81d7a"
   integrity sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==
 
-address-rfc2822@^2.2.0:
+address-rfc2822@^2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/address-rfc2822/-/address-rfc2822-2.2.2.tgz#c61f919a87e14aacabd5bcddd7a81c3aa0892ee2"
   integrity sha512-Kkl42jmfpSjkAtuGYnfD4cwGpGtNvrYaCdDFesb8z9GxlWNAaB/SLkDfmGxhh/qH/GfvKmMxt6Nt6Ek4qjFC7w==
