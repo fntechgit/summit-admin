@@ -994,6 +994,26 @@ const parseFilters = (filters, term = null) => {
         }
     }
 
+    if (filters.created_filter && filters.created_filter.some(e => e !== null)) {
+        if(filters.created_filter.every(e => e !== null )) {
+            // between
+            filter.push(`created[]${filters.created_filter[0]}&&${filters.created_filter[1]}`);
+        } else {
+            filter.push(`${filters.created_filter[0] !== null ? `created>=${filters.created_filter[0]}` : ``}
+            ${filters.created_filter[1] !== null ? `created<=${filters.created_filter[1]}` : ``}`);
+        }
+    }
+
+    if (filters.modified_filter && filters.modified_filter.some(e => e !== null)) {
+        if(filters.modified_filter.every(e => e !== null )) {
+            // between
+            filter.push(`last_edited[]${filters.modified_filter[0]}&&${filters.modified_filter[1]}`);
+        } else {
+            filter.push(`${filters.modified_filter[0] !== null ? `last_edited>=${filters.modified_filter[0]}` : ``}
+            ${filters.modified_filter[1] !== null ? `last_edited<=${filters.modified_filter[1]}` : ``}`);
+        }
+    }
+
     if (filters.duration_filter) {
         // multiply values to send the minutes in seconds
         if (Array.isArray(filters.duration_filter)) {
