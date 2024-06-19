@@ -76,9 +76,9 @@ const assembleTicketsState = (tickets, currencySymbol) => {
         if (t.owner) {
             owner_email = t.owner.email;
 
-            if (t.owner.first_name && t.owner.last_name) {
+            if (t.owner.first_name || t.owner.last_name) {
                 owner_full_name = `${t.owner.first_name} ${t.owner.last_name}`;
-            } else if (t.owner.member?.first_name && t.owner.member?.last_name) {
+            } else if (t.owner.member?.first_name || t.owner.member?.last_name) {
                 owner_full_name = `${t.owner.member.first_name} ${t.owner.member.last_name}`;
             }
 
