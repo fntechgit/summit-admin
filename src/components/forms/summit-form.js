@@ -307,7 +307,7 @@ class SummitForm extends React.Component {
 
     handleSampleNumber(type) {
         const {entity} = this.state;        
-        return `${type}_${entity.registration_slug_prefix}_662A968F26820246192380`.trim().toUpperCase().replace(" ", "_");
+        return `${type}_${entity.registration_slug_prefix.trim()}_662A968F26820246192380`.toUpperCase().replace(/\s/g, "_");
     }
 
     render() {
@@ -400,7 +400,7 @@ class SummitForm extends React.Component {
                         />
                     </div>
                     <div className="col-md-4">
-                        <label> {T.translate("edit_summit.registration_slug")}</label>
+                        <label> {T.translate("edit_summit.registration_slug")} *</label>
                         <Input
                             className="form-control"
                             error={this.hasErrors('registration_slug_prefix')}
