@@ -973,11 +973,7 @@ const parseFilters = (filters, term = null) => {
         if(filters.start_date_filter.every(e => e !== null )) {
             filter.push(`start_date[]${filters.start_date_filter[0]}&&${filters.start_date_filter[1]}`);
         } else {
-            filter.push(`
-            ${filters.start_date_filter[0] !== null ? 
-                `start_date>=${filters.start_date_filter[0]}` : ``}
-            ${filters.start_date_filter[1] !== null ? 
-                `start_date<=${filters.start_date_filter[1]}` : ``}`);
+            filter.push(`${filters.start_date_filter[0] !== null ? `start_date>=${filters.start_date_filter[0]}` : ``}${filters.start_date_filter[1] !== null ? `start_date<=${filters.start_date_filter[1]}` : ``}`);
         }
     }
 
@@ -986,11 +982,25 @@ const parseFilters = (filters, term = null) => {
             // between
             filter.push(`end_date[]${filters.end_date_filter[0]}&&${filters.end_date_filter[1]}`);
         } else {
-            filter.push(`
-            ${filters.end_date_filter[0] !== null ? 
-                `end_date>=${filters.end_date_filter[0]}` : ``}
-            ${filters.end_date_filter[1] !== null ? 
-                `end_date<=${filters.end_date_filter[1]}` : ``}`);
+            filter.push(`${filters.end_date_filter[0] !== null ? `end_date>=${filters.end_date_filter[0]}` : ``}${filters.end_date_filter[1] !== null ? `end_date<=${filters.end_date_filter[1]}` : ``}`);
+        }
+    }
+
+    if (filters.created_filter && filters.created_filter.some(e => e !== null)) {
+        if(filters.created_filter.every(e => e !== null )) {
+            // between
+            filter.push(`created[]${filters.created_filter[0]}&&${filters.created_filter[1]}`);
+        } else {
+            filter.push(`${filters.created_filter[0] !== null ? `created>=${filters.created_filter[0]}` : ``}${filters.created_filter[1] !== null ? `created<=${filters.created_filter[1]}` : ``}`);
+        }
+    }
+
+    if (filters.modified_filter && filters.modified_filter.some(e => e !== null)) {
+        if(filters.modified_filter.every(e => e !== null )) {
+            // between
+            filter.push(`last_edited[]${filters.modified_filter[0]}&&${filters.modified_filter[1]}`);
+        } else {
+            filter.push(`${filters.modified_filter[0] !== null ? `last_edited>=${filters.modified_filter[0]}` : ``}${filters.modified_filter[1] !== null ? `last_edited<=${filters.modified_filter[1]}` : ``}`);
         }
     }
 
