@@ -57,6 +57,7 @@ class SummitForm extends React.Component {
         this.handleAttributeTypeEdit = this.handleAttributeTypeEdit.bind(this);
         this.handleNewAttributeType = this.handleNewAttributeType.bind(this);
         this.getHelpUsersOptionLabel = this.getHelpUsersOptionLabel.bind(this);
+        this.handleSampleNumber = this.handleSampleNumber.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -304,6 +305,11 @@ class SummitForm extends React.Component {
         this.props.generateEncryptionKey();
     }
 
+    handleSampleNumber(type) {
+        const {entity} = this.state;        
+        return `${type}_${entity.registration_slug_prefix.trim()}_662A968F26820246192380`.toUpperCase().replace(/\s/g, "_");
+    }
+
     render() {
         const {entity, showSection, regLiteMarketingSettings, printAppMarketingSettings, regFeedMetadataListSettings} = this.state;
         const {timezones, onSPlanDelete, onAttributeTypeDelete, onRegFeedMetadataDelete} = this.props;
@@ -393,7 +399,32 @@ class SummitForm extends React.Component {
                             onChange={this.handleChange}
                         />
                     </div>
+                    <div className="col-md-4">
+                        <label> {T.translate("edit_summit.registration_slug")} *</label>
+                        <Input
+                            className="form-control"
+                            error={this.hasErrors('registration_slug_prefix')}
+                            id="registration_slug_prefix"
+                            value={entity.registration_slug_prefix}
+                            disabled={entity.paid_tickets_count > 0}
+                            onChange={this.handleChange}
+                        />
+                    </div>
                 </div>
+                {entity.registration_slug_prefix &&
+                    <div className="row form-group">
+                        <div className="col-md-6">
+                            <label> {T.translate("edit_summit.sample_order_qr_prefix")}</label>
+                            <br/>
+                            <span> {this.handleSampleNumber("order")}</span>
+                        </div>
+                        <div className="col-md-6">
+                            <label> {T.translate("edit_summit.sample_ticket_qr_prefix")}</label>
+                            <br/>
+                            <span> {this.handleSampleNumber("ticket")}</span>
+                        </div>
+                    </div>
+                }
                 <div className="row form-group">
                     <div className="col-md-4">
                         <label> {T.translate("edit_summit.link")}</label>
