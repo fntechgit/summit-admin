@@ -1075,6 +1075,7 @@
       "submission_status": "Filter by Submission Status",
       "review_status": "Filter by Review Status",
       "media_upload_type": "Filter by Media Upload Type",
+      "submission_source": "Filter by Submission Source",
       "media_upload_type_id_to_include": "Select the Media Upload Types to include",
       "media_upload_type_id_to_exclude": "Select the Media Upload Types to exclude"
     }
