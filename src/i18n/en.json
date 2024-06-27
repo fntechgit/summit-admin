@@ -468,6 +468,7 @@
   "edit_event": {
     "title": "Title",
     "submitter": "Submitter",
+    "submission_source": "Submission Source",
     "published": "Published",
     "short_description": "Short Description / Abstract",
     "social_summary": "Social Summary",
@@ -565,7 +566,8 @@
       "select_submitter": "Select Submitter ...",
       "search_feedback": "Search by Author, Note",
       "search_comment": "Search by Comment, Creator ID",
-      "allowed_ticket_types": "Select ticket types"
+      "allowed_ticket_types": "Select ticket types",
+      "select_submission_source": "Select a Submission Source"
     }
   },
   "edit_event_material": {
