@@ -1028,6 +1028,7 @@
     "review_status": "Review Status",
     "created": "Created",
     "modified": "Modified",
+    "submission_source": "Submission Source",
     "review_status_accepted": "Accepted",
     "review_status_in_review": "In Review",
     "review_status_no_submitted": "Not Submitted",
