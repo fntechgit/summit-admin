@@ -733,6 +733,7 @@ class ScheduleAdminDashBoard extends React.Component {
       currentUnScheduleOrderBy,
       emptySpots,
       searchingEmpty,
+      totalUnPublished,
       selectedAllUnPublished,
       selectedUnPublishedEvents,
       excludedUnPublishedEvents,
@@ -961,6 +962,7 @@ class ScheduleAdminDashBoard extends React.Component {
                 onEditEvent={this.onEditEvent}
                 onPageChange={this.onUnScheduleEventsPageChange}
                 onClickSelected={this.onUnPublishedSelected}
+                totalUnPublished={totalUnPublished}
                 selectedUnPublishedEvents={selectedUnPublishedEvents}
                 selectedAllUnPublished={selectedAllUnPublished}
                 excludedUnPublishedEvents={excludedUnPublishedEvents}
