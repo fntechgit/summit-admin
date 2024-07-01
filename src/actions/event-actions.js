@@ -1055,6 +1055,10 @@ const parseFilters = (filters, term = null) => {
         filter.push(`streaming_type==${filters.streaming_type}`)
     }
 
+    if(filters.hasOwnProperty('submission_source_filter') && filters.submission_source_filter) {
+        filter.push(`submission_source==${filters.submission_source_filter}`)
+    }
+
     if (filters.hasOwnProperty('speaker_company') && Array.isArray(filters.speaker_company)
         && filters.speaker_company.length > 0) {
         filter.push(

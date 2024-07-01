@@ -74,6 +74,7 @@ export const DEFAULT_ENTITY = {
     custom_order: 0,
     actions: [],
     allowed_ticket_types: [],
+    submission_source: "Admin"
 }
 
 const DEFAULT_STATE_FEEDBACK_STATE = {

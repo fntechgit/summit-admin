@@ -69,6 +69,7 @@ const fieldNames = [
     { columnKey: 'progress_flags', value: 'progress_flags', sortable: true, title: true },
     { columnKey: 'created', value: 'created', sortable: true },
     { columnKey: 'modified', value: 'modified', sortable: true },
+    { columnKey: 'submission_source', value: 'submission_source', sortable: true },
     { columnKey: 'media_uploads', value: 'media_uploads', sortable: false, render :(e, field) => {
             if(!field?.length) return 'N/A';
             return (<>{(e.media_uploads.map( m =>
@@ -120,6 +121,7 @@ const defaultFilters = {
     submission_status_filter: [],
     media_upload_with_type: { operator: null, value: [] },
     review_status_filter: [],
+    submission_source_filter: '',
 };
 
 class SummitEventListPage extends React.Component {
@@ -495,6 +497,8 @@ class SummitEventListPage extends React.Component {
 
         const streaming_type_ddl = [{ label: 'LIVE', value: 'LIVE' }, { label: 'VOD', value: 'VOD' }];
 
+        const submission_source_ddl = [{label: 'Admin', value: 'Admin'}, {label: 'Submission', value: 'Submission'}];
+
         const filters_ddl = [
             {label: 'Activity Type Capacity', value: 'event_type_capacity_filter'},
             {label: 'Selection Plan', value: 'selection_plan_id_filter'},
@@ -525,6 +529,7 @@ class SummitEventListPage extends React.Component {
             {label: 'Review Status', value: 'review_status_filter'},
             {label: 'Created', value: 'created_filter'},
             {label: 'Modified', value: 'modified_filter'},
+            {label: 'Submission Source', value: 'submission_source_filter'}
         ]
 
         const ddl_columns = [
@@ -550,6 +555,7 @@ class SummitEventListPage extends React.Component {
             { value: 'submitter_company', label: T.translate("event_list.submitter_company")},
             { value: 'track', label: T.translate("event_list.track") },
             { value: 'status', label: T.translate("event_list.submission_status") },
+            { value: 'submission_source', label: T.translate("event_list.submission_source") },
             { value: 'progress_flags', label: T.translate("event_list.progress_flags") },
             { value: 'media_uploads', label: T.translate("event_list.media_uploads") },
             { value: 'review_status', label: T.translate("event_list.review_status") },
@@ -1038,6 +1044,17 @@ class SummitEventListPage extends React.Component {
                             options={streaming_type_ddl}
                         />
                     </div>
+                    }
+                    {enabledFilters.includes('submission_source_filter') &&
+                        <div className={'col-md-6'}>
+                            <Dropdown
+                                id="submission_source_filter"
+                                value={eventFilters.submission_source_filter}
+                                onChange={this.handleExtraFilterChange}
+                                placeholder={T.translate("event_list.placeholders.submission_source")}
+                                options={submission_source_ddl}
+                            />
+                        </div>
                     }
                     {enabledFilters.includes('duration_filter') &&
                         <div className={'col-md-10 col-md-offset-1'}>

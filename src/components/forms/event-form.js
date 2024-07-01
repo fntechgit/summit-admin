@@ -709,13 +709,15 @@ render() {
         }
     };
 
+    const submission_source_ddl = [{label: 'Admin', value: 'Admin'}, {label: 'Submission', value: 'Submission'}];
+
     const ticket_types_ddl = currentSummit.ticket_types.map(t => ({value: t.id, label: t.name}));
 
     return (
         <div>
             <input type="hidden" id="id" value={entity.id} />
             <div className="row form-group">
-                <div className="col-md-12">
+                <div className="col-md-8">
                     <label> {T.translate("edit_event.submitter")} </label> &nbsp;
                     <i className='copy-button fa fa-clipboard'
                        onClick={() => { navigator.clipboard.writeText(
@@ -740,6 +742,16 @@ render() {
                             placeholder={T.translate("edit_event.placeholders.select_submitter")}
                         />
                     </div>
+                </div>
+                <div className="col-md-4">
+                    <label> {T.translate("edit_event.submission_source")} </label>
+                    <Dropdown
+                        id="submission_source"
+                        value={entity.submission_source}
+                        onChange={this.handleChange}
+                        placeholder={T.translate("edit_event.placeholders.select_submission_source")}
+                        options={submission_source_ddl}
+                    />
                 </div>
             </div>
             <div className="row form-group">
