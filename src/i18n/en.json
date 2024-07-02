@@ -468,6 +468,7 @@
   "edit_event": {
     "title": "Title",
     "submitter": "Submitter",
+    "submission_source": "Submission Source",
     "published": "Published",
     "short_description": "Short Description / Abstract",
     "social_summary": "Social Summary",
@@ -565,7 +566,8 @@
       "select_submitter": "Select Submitter ...",
       "search_feedback": "Search by Author, Note",
       "search_comment": "Search by Comment, Creator ID",
-      "allowed_ticket_types": "Select ticket types"
+      "allowed_ticket_types": "Select ticket types",
+      "select_submission_source": "Select a Submission Source"
     }
   },
   "edit_event_material": {
@@ -1028,6 +1030,7 @@
     "review_status": "Review Status",
     "created": "Created",
     "modified": "Modified",
+    "submission_source": "Submission Source",
     "review_status_accepted": "Accepted",
     "review_status_in_review": "In Review",
     "review_status_no_submitted": "Not Submitted",
@@ -1075,6 +1078,7 @@
       "submission_status": "Filter by Submission Status",
       "review_status": "Filter by Review Status",
       "media_upload_type": "Filter by Media Upload Type",
+      "submission_source": "Filter by Submission Source",
       "media_upload_type_id_to_include": "Select the Media Upload Types to include",
       "media_upload_type_id_to_exclude": "Select the Media Upload Types to exclude"
     }
