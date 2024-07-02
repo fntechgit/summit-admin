@@ -130,9 +130,9 @@ class NavMenu extends React.Component {
             {name: 'emails', iconClass: 'fa-envelope-o', accessRoute: 'emails',
                 childs: [
                     {name:'email_templates', linkUrl:`emails/templates`},
-                    {name:'sent_email', linkUrl:`emails/sent`},
                 ]
             },
+            {name: 'email_logs', iconClass: 'fa-envelope-o', linkUrl: 'email-logs', accessRoute: 'email-logs'},
             {name: 'admin_access', iconClass: 'fa-arrow-circle-o-right', linkUrl: 'admin-access', accessRoute: 'admin-access'},
             {name: 'media_file_types', iconClass: 'fa-file-text-o', linkUrl: 'media-file-types', accessRoute: 'admin-access'},
         ];

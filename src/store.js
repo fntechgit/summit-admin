@@ -91,7 +91,7 @@ import marketingSettingReducer from './reducers/marketing/marketing-setting-redu
 import paymentProfileReducer from './reducers/payment_profiles/payment-profile-reducer';
 import emailTemplateReducer from './reducers/emails/email-template-reducer';
 import emailTemplateListReducer from './reducers/emails/email-template-list-reducer';
-import sentEmailListReducer from './reducers/emails/sent-email-list-reducer';
+import emailLogListReducer from './reducers/emails/email-log-list-reducer';
 import summitDocListReducer from './reducers/summitdoc/summitdoc-list-reducer';
 import summitDocReducer from "./reducers/summitdoc/summitdoc-reducer";
 import emailFlowEventsListReducer from "./reducers/email_flow_events/email-flow-events-list-reducer";
@@ -242,7 +242,7 @@ const reducers = persistCombineReducers(config, {
     marketingSettingState: marketingSettingReducer,
     emailTemplateState: emailTemplateReducer,
     emailTemplateListState: emailTemplateListReducer,
-    sentEmailListState: sentEmailListReducer,
+    emailLogListState: emailLogListReducer,
     summitDocListState: summitDocListReducer,
     summitDocState: summitDocReducer,
     emailFlowEventsListState: emailFlowEventsListReducer,

@@ -17,23 +17,20 @@ import T from "i18n-react/dist/i18n-react";
 import {connect} from "react-redux";
 import { Breadcrumb } from 'react-breadcrumbs';
 import Restrict from '../routes/restrict';
-import EmailTemplateListPage from "../pages/emails/email-template-list-page";
-import EditEmailTemplatePage from "../pages/emails/edit-email-template-page";
+import EmailLogsListPage from "../pages/emails/email-log-list-page";
 
-class EmailLayout extends React.Component {
+class EmailLogsLayout extends React.Component {
 
     render(){
         const { match, currentSummit } = this.props;
 
         return(
             <div>
-                <Breadcrumb data={{ title: T.translate("emails.email_templates"), pathname: match.url }} />
+                <Breadcrumb data={{ title: T.translate("email_logs.email_logs"), pathname: match.url }} />
 
                 <Switch>
-                    <Route exact strict path={`${match.url}/templates`} component={EmailTemplateListPage}/>
-                    <Route strict exact path={`${match.url}/templates/new`} component={EditEmailTemplatePage}/>
-                    <Route path={`${match.url}/templates/:template_id`} component={EditEmailTemplatePage}/>
-                    <Redirect to={`/app/emails/templates`} />
+                    <Route exact strict path={`${match.url}`} component={EmailLogsListPage}/>                    
+                    <Redirect to={`/app/email-logs`} />
                 </Switch>
             </div>
         );
@@ -45,6 +42,6 @@ const mapStateToProps = ({ currentSummitState }) => ({
     ...currentSummitState
 });
 
-export default Restrict(connect (mapStateToProps, {})(EmailLayout), 'emails');
+export default Restrict(connect (mapStateToProps, {})(EmailLogsLayout), 'email-logs');
 
 
