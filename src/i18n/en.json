@@ -390,6 +390,7 @@
     "id": "Id",
     "email": "Email",
     "enabled": "Enabled",
+    "hidden": "Hidden",
     "submission_begin_date": "Submissions Start",
     "submission_end_date": "Submissions End",
     "submission_lock_down_presentation_status_date": "Submissions Status Lock Down Date",

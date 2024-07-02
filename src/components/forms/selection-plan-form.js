@@ -397,7 +397,7 @@ class SelectionPlanForm extends React.Component {
             <form className="selection-plan-form">
                 <input type="hidden" id="id" value={entity.id}/>
                 <div className="row form-group">
-                    <div className="col-md-3">
+                    <div className="col-md-4">
                         <label> {T.translate("edit_selection_plan.name")} *</label>
                         <Input
                             id="name"
@@ -407,24 +407,21 @@ class SelectionPlanForm extends React.Component {
                             value={entity.name}
                         />
                     </div>
-                    <div className="col-md-3">
-                        <label> {T.translate("edit_selection_plan.max_submissions")}</label>
-                        <Input
-                            className="form-control"
-                            type="number"
-                            error={this.hasErrors('max_submission_allowed_per_user')}
-                            id="max_submission_allowed_per_user"
-                            value={entity.max_submission_allowed_per_user}
-                            onChange={this.handleChange}
-                            min={0}
-                        />
-                    </div>
                     <div className="col-md-2 checkboxes-div">
                         <div className="form-check abc-checkbox">
                             <input type="checkbox" id="is_enabled" checked={entity.is_enabled}
                                    onChange={this.handleChange} className="form-check-input"/>
                             <label className="form-check-label" htmlFor="is_enabled">
                                 {T.translate("edit_selection_plan.enabled")}
+                            </label>
+                        </div>
+                    </div>
+                    <div className="col-md-2 checkboxes-div">
+                        <div className="form-check abc-checkbox">
+                            <input type="checkbox" id="is_hidden" checked={entity.is_hidden}
+                                   onChange={this.handleChange} className="form-check-input"/>
+                            <label className="form-check-label" htmlFor="is_hidden">
+                                {T.translate("edit_selection_plan.hidden")}
                             </label>
                         </div>
                     </div>
@@ -472,6 +469,18 @@ class SelectionPlanForm extends React.Component {
                     </div>
                 </div>
                 <div className="row form-group">
+                    <div className="col-md-6">
+                        <label> {T.translate("edit_selection_plan.max_submissions")}</label>
+                        <Input
+                          className="form-control"
+                          type="number"
+                          error={this.hasErrors('max_submission_allowed_per_user')}
+                          id="max_submission_allowed_per_user"
+                          value={entity.max_submission_allowed_per_user}
+                          onChange={this.handleChange}
+                          min={0}
+                        />
+                    </div>
                     <div className="col-md-6">
                         <label>
                             {T.translate("edit_selection_plan.submission_lock_down_presentation_status_date")} &nbsp;
