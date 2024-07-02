@@ -2382,7 +2382,7 @@
       "select_fields": "Select data to display",
       "template": "Filter by Template",
       "sent_date_from": "Filter Sent Date from",
-      "sent_date_to": "Filter Sent Date to"
+      "sent_date_to": "Filter Sent Date to"      
     }
   },
   "summitdoc": {

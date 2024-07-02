@@ -458,5 +458,17 @@ const parseFilters = (filters) => {
             filter = {...filter, is_sent: 0}
     }
 
+    if (filters.sent_date_filter && filters.sent_date_filter.some(e => e !== null)) {
+        if(filters.sent_date_filter.every(e => e !== null )) {
+            filter = {...filter, from_sent_date: filters.sent_date_filter[0], to_sent_date: filters.sent_date_filter[1]};
+        } else {
+            filter = {...filter, [`${filters.sent_date_filter[0] !== null ? 'from_sent_date' : 'to_sent_date'}`]: filters.sent_date_filter[0] !== null ? filters.sent_date_filter[0] : filters.sent_date_filter[1]}
+        }
+    }
+
+    if (filters.template_filter) {
+        filter = {...filter, identifier__contains: filters.template_filter}
+    }
+
     return checkOrFilter(filters, filter);
 };

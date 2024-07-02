@@ -15,12 +15,14 @@ import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux';
 import T from 'i18n-react/dist/i18n-react';
 import { Pagination } from 'react-bootstrap';
-import { FreeTextSearch, Table, Dropdown } from 'openstack-uicore-foundation/lib/components';
+import { FreeTextSearch, Table, Dropdown, DateTimePicker } from 'openstack-uicore-foundation/lib/components';
+import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
 import { SegmentedControl } from 'segmented-control'
 import { getSentEmails } from "../../actions/email-actions";
 import '../../styles/email-logs-page.less';
+import EmailTemplateInput from '../../components/inputs/email-template-input';
 
-const EmailLogsListPage = ({
+const SentEmailListPage = ({
   emails,
   lastPage,
   currentPage,
@@ -39,6 +41,8 @@ const EmailLogsListPage = ({
 
   const defaultFilters = {
     is_sent_filter: null,
+    sent_date_filter: Array(2).fill(null),
+    template_filter: '',
   }
 
   const [enabledFilters, setEnabledFilters] = useState(Object.keys(filters).filter(e => Array.isArray(filters[e]) ? filters[e]?.some(e => e !== null) : filters[e]?.length > 0));
@@ -77,7 +81,33 @@ const EmailLogsListPage = ({
     } else {
       setEnabledFilters(value);
     }
-  }  
+  }
+
+  const handleChangeDateFilter = (ev, lastDate) => {
+    const { value, id } = ev.target;
+    const newDateFilter = emailFilters[id];
+
+    setEmailFilters({ ...emailFilters, [id]: lastDate ? [newDateFilter[0], value.unix()] : [value.unix(), newDateFilter[1]] })
+  }
+
+  const handleEmailFilterChange = (ev) => {
+    let { value, type, id } = ev.target;
+    if (type === 'operatorinput') {
+      value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;
+      if (id === 'duration_filter') {
+        value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;
+      }
+    }
+    if (type === 'mediatypeinput') {
+      value = {
+        operator: ev.target.operator,
+        value: ev.target.value
+      }
+    }
+    setEmailFilters({ ...emailFilters, [id]: value });
+  }
+
+  console.log("CHJECK FILTER", emailFilters);
 
   const handleColumnsChange = (ev) => {
     const { value } = ev.target;
@@ -147,6 +177,8 @@ const EmailLogsListPage = ({
 
   const filters_ddl = [
     { label: 'Is Sent?', value: 'is_sent_filter' },
+    { label: 'Sent Date', value: 'sent_date_filter' },
+    { label: 'Template', value: 'template_filter' }
   ];
 
   return (
@@ -193,6 +225,43 @@ const EmailLogsListPage = ({
               ]}
               setValue={newValue => handleSetSentFilter(newValue)}
               style={{ width: "100%", height: 40, color: '#337ab7', fontSize: '10px' }}
+            />
+          </div>
+        }
+        {enabledFilters.includes('sent_date_filter') &&
+          <>
+            <div className={'col-md-3'}>
+              <DateTimePicker
+                id="sent_date_filter"
+                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
+                inputProps={{ placeholder: T.translate("email_logs.placeholders.sent_date_from") }}
+                onChange={(ev) => handleChangeDateFilter(ev, false)}
+                timezone={'UTC'}
+                value={epochToMomentTimeZone(emailFilters.sent_date_from_filter, 'UTC')}
+                className={'event-list-date-picker'}
+              />
+            </div>
+            <div className={'col-md-3'}>
+              <DateTimePicker
+                id="sent_date_filter"
+                format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
+                inputProps={{ placeholder: T.translate("email_logs.placeholders.sent_date_to") }}
+                onChange={(ev) => handleChangeDateFilter(ev, true)}
+                timezone={'UTC'}
+                value={epochToMomentTimeZone(emailFilters.sent_date_to_filter, 'UTC')}
+                className={'event-list-date-picker'}
+              />
+            </div>
+          </>
+        }
+        {enabledFilters.includes('template_filter') &&
+          <div className={'col-md-6'}>
+            <EmailTemplateInput
+              id="template_filter"
+              value={emailFilters.template_filter}
+              placeholder={T.translate("email_logs.placeholders.template")}
+              onChange={handleEmailFilterChange}
+              plainValue
             />
           </div>
         }
@@ -256,4 +325,4 @@ export default connect(
   {
     getSentEmails,
   }
-)(EmailLogsListPage);
+)(SentEmailListPage);
