@@ -237,7 +237,7 @@ const SentEmailListPage = ({
                 inputProps={{ placeholder: T.translate("email_logs.placeholders.sent_date_from") }}
                 onChange={(ev) => handleChangeDateFilter(ev, false)}
                 timezone={'UTC'}
-                value={epochToMomentTimeZone(emailFilters.sent_date_from_filter, 'UTC')}
+                value={epochToMomentTimeZone(emailFilters.sent_date_filter[0], 'UTC')}
                 className={'event-list-date-picker'}
               />
             </div>
@@ -248,7 +248,7 @@ const SentEmailListPage = ({
                 inputProps={{ placeholder: T.translate("email_logs.placeholders.sent_date_to") }}
                 onChange={(ev) => handleChangeDateFilter(ev, true)}
                 timezone={'UTC'}
-                value={epochToMomentTimeZone(emailFilters.sent_date_to_filter, 'UTC')}
+                value={epochToMomentTimeZone(emailFilters.sent_date_filter[1], 'UTC')}
                 className={'event-list-date-picker'}
               />
             </div>
@@ -261,6 +261,7 @@ const SentEmailListPage = ({
               value={emailFilters.template_filter}
               placeholder={T.translate("email_logs.placeholders.template")}
               onChange={handleEmailFilterChange}
+              isClearable={true}
               plainValue
             />
           </div>

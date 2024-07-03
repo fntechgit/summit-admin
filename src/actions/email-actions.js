@@ -467,7 +467,7 @@ const parseFilters = (filters) => {
     }
 
     if (filters.template_filter) {
-        filter = {...filter, identifier__contains: filters.template_filter}
+        filter = {...filter, template__identifier__in: filters.template_filter}
     }
 
     return checkOrFilter(filters, filter);
