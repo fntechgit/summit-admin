@@ -371,3 +371,13 @@ export const htmlToString = (html) => {
 }
 
 export const capitalize = string => string ? string.charAt(0).toUpperCase() + string.slice(1) : '';
+
+export const parseDateRangeFilter = (filterObject, filterToParse, filterName) => {
+    if (filterToParse && filterToParse.some(e => e !== null)) {
+        if(filterToParse.every(e => e !== null && e !==0 )) {
+            filterObject.push(`${filterName}[]${filterToParse[0]}&&${filterToParse[1]}`);
+        } else {
+            filterObject.push(`${filterToParse[0] !== null && filterToParse[0] !== 0 ? `${filterName}>=${filterToParse[0]}` : ``}${filterToParse[1] !== null && filterToParse[1] !== 0 ? `${filterName}<=${filterToParse[1]}` : ``}`);
+        }
+    }
+}
