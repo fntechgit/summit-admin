@@ -36,7 +36,7 @@ const SentEmailListPage = ({
   ...props
 }) => {
   useEffect(() => {
-    props.getSentEmails(term, currentPage, perPage, order, orderDir, filters);
+    props.getSentEmails(term, currentPage, perPage, order, 0, filters);
   }, []);
 
   const defaultFilters = {
@@ -106,8 +106,6 @@ const SentEmailListPage = ({
     }
     setEmailFilters({ ...emailFilters, [id]: value });
   }
-
-  console.log("CHJECK FILTER", emailFilters);
 
   const handleColumnsChange = (ev) => {
     const { value } = ev.target;
@@ -262,6 +260,8 @@ const SentEmailListPage = ({
               placeholder={T.translate("email_logs.placeholders.template")}
               onChange={handleEmailFilterChange}
               isClearable={true}
+              cacheOptions
+              defaultOptions              
               plainValue
             />
           </div>

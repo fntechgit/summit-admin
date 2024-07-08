@@ -44,9 +44,9 @@ export default class EmailTemplateInput extends React.Component {
     }
 
     getTemplates (input, callback) {
-        const {ownerId } = this.props;
+        const {ownerId, defaultOptions} = this.props;
 
-        if (!input) {
+        if (!input && !defaultOptions) {
             return Promise.resolve({ options: [] });
         }
 

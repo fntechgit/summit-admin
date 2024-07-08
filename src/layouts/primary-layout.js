@@ -22,7 +22,6 @@ import SummitDirectoryPage from '../pages/summits/summit-directory-page';
 import SpeakerLayout from './speaker-layout';
 import CompanyLayout from './company-layout';
 import EmailLayout from "./email-layout";
-import EmailLogsLayout from './email-logs-layout';
 import AdminAccessLayout from "./admin-access-layout";
 import MediaFileTypeLayout from "./media-file-type-layout";
 import SponsoredProjectLayout from "./sponsored-project-layout";
@@ -57,7 +56,6 @@ class PrimaryLayout extends React.Component {
                         <Route path="/app/tags" component={TagLayout}/>
                         <Route path="/app/sponsored-projects" component={SponsoredProjectLayout}/>
                         <Route path={"/app/emails"} component={EmailLayout}/>
-                        <Route path={"/app/email-logs"} component={EmailLogsLayout}/>
                         <Route path={"/app/admin-access"} component={AdminAccessLayout}/>
                         <Route path={"/app/media-file-types"} component={MediaFileTypeLayout}/>
                         <Route path="/app/summits" component={SummitLayout} />
