@@ -36,7 +36,7 @@ const SentEmailListPage = ({
   ...props
 }) => {
   useEffect(() => {
-    props.getSentEmails(term, currentPage, perPage, order, 0, filters);
+    props.getSentEmails(term, currentPage, perPage, order, orderDir, filters);
   }, []);
 
   const defaultFilters = {

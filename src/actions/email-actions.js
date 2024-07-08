@@ -31,6 +31,7 @@ import {
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {checkOrFilter,getAccessTokenSafely} from '../utils/methods';
 import { saveMarketingSetting } from "./marketing-actions";
+import URI from "urijs";
 
 
 export const REQUEST_TEMPLATES       = 'REQUEST_TEMPLATES';
@@ -234,10 +235,19 @@ const normalizeEntity = (entity) => {
 export const queryTemplates = _.debounce(async (input, callback) => {
 
     const accessToken = await getAccessTokenSafely();
-
+    
+    let endpoint = URI(`${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`);    
+    
     input = escapeFilterValue(input);
 
-    fetch(`${window.EMAIL_API_BASE_URL}/api/v1/mail-templates?identifier__contains=${input}&access_token=${accessToken}`)
+    endpoint.addQuery('access_token', accessToken);    
+    endpoint.addQuery('order','-id')
+
+    if(input) {
+        endpoint.addQuery('identifier__contains', input);
+    }
+
+    fetch(endpoint)
         .then(fetchResponseHandler)
         .then((json) => {
             const options = [...json.data];
