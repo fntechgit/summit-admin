@@ -32,7 +32,7 @@ import {
     fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
-import {checkOrFilter, getAccessTokenSafely, isNumericString} from '../utils/methods';
+import {checkOrFilter, getAccessTokenSafely, isNumericString, parseDateRangeFilter} from '../utils/methods';
 import {getQAUsersBySummitEvent} from "./user-chat-roles-actions";
 import {getAuditLog} from "./audit-log-actions";
 
@@ -969,39 +969,21 @@ const parseFilters = (filters, term = null) => {
         filter.push(`published==${filters.published_filter === 'published' ? '1' : '0'}`);
     }
 
-    if (filters.start_date_filter && filters.start_date_filter.some(e => e !== null)) {
-        if(filters.start_date_filter.every(e => e !== null )) {
-            filter.push(`start_date[]${filters.start_date_filter[0]}&&${filters.start_date_filter[1]}`);
-        } else {
-            filter.push(`${filters.start_date_filter[0] !== null ? `start_date>=${filters.start_date_filter[0]}` : ``}${filters.start_date_filter[1] !== null ? `start_date<=${filters.start_date_filter[1]}` : ``}`);
-        }
+    
+    if (filters.start_date_filter) {
+        parseDateRangeFilter(filter, filters.start_date_filter, 'start_date');
+    }    
+
+    if (filters.end_date_filter) {        
+        parseDateRangeFilter(filter, filters.end_date_filter, 'end_date');
     }
 
-    if (filters.end_date_filter && filters.end_date_filter.some(e => e !== null)) {
-        if(filters.end_date_filter.every(e => e !== null )) {
-            // between
-            filter.push(`end_date[]${filters.end_date_filter[0]}&&${filters.end_date_filter[1]}`);
-        } else {
-            filter.push(`${filters.end_date_filter[0] !== null ? `end_date>=${filters.end_date_filter[0]}` : ``}${filters.end_date_filter[1] !== null ? `end_date<=${filters.end_date_filter[1]}` : ``}`);
-        }
-    }
+    if (filters.created_filter) {
+        parseDateRangeFilter(filter, filters.created_filter, 'created');
+    }    
 
-    if (filters.created_filter && filters.created_filter.some(e => e !== null)) {
-        if(filters.created_filter.every(e => e !== null )) {
-            // between
-            filter.push(`created[]${filters.created_filter[0]}&&${filters.created_filter[1]}`);
-        } else {
-            filter.push(`${filters.created_filter[0] !== null ? `created>=${filters.created_filter[0]}` : ``}${filters.created_filter[1] !== null ? `created<=${filters.created_filter[1]}` : ``}`);
-        }
-    }
-
-    if (filters.modified_filter && filters.modified_filter.some(e => e !== null)) {
-        if(filters.modified_filter.every(e => e !== null )) {
-            // between
-            filter.push(`last_edited[]${filters.modified_filter[0]}&&${filters.modified_filter[1]}`);
-        } else {
-            filter.push(`${filters.modified_filter[0] !== null ? `last_edited>=${filters.modified_filter[0]}` : ``}${filters.modified_filter[1] !== null ? `last_edited<=${filters.modified_filter[1]}` : ``}`);
-        }
+    if (filters.modified_filter) {
+        parseDateRangeFilter(filter, filters.modified_filter, 'last_edited');
     }
 
     if (filters.duration_filter) {

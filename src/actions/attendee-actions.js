@@ -27,7 +27,7 @@ import {
     escapeFilterValue,
     getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {checkOrFilter, getAccessTokenSafely, isNumericString} from '../utils/methods';
+import {checkOrFilter, getAccessTokenSafely, isNumericString, parseDateRangeFilter} from '../utils/methods';
 
 export const REQUEST_ATTENDEES          = 'REQUEST_ATTENDEES';
 export const RECEIVE_ATTENDEES          = 'RECEIVE_ATTENDEES';
@@ -145,17 +145,8 @@ const parseFilters = (filters, term = null) => {
         filter.push('badge_type_id=='+filters.badgeTypeFilter.join('||'));
     }
 
-    if (filters.checkinDateFilter && filters.checkinDateFilter.some(e => e !== null)) {
-        if(filters.checkinDateFilter.every(e => e !== null )) {
-            // added between operator []
-            filter.push(`summit_hall_checked_in_date[]${filters.checkinDateFilter[0]}&&${filters.checkinDateFilter[1]}`);
-        } else {
-            filter.push(`
-            ${filters.checkinDateFilter[0] !== null ? 
-                `summit_hall_checked_in_date>=${filters.checkinDateFilter[0]}` : ``}
-            ${filters.checkinDateFilter[1] !== null ? 
-                `summit_hall_checked_in_date<=${filters.checkinDateFilter[1]}` : ``}`);
-        }
+    if (filters.checkinDateFilter) {
+        parseDateRangeFilter(filter, filters.checkinDateFilter, 'summit_hall_checked_in_date');
     }
 
     if (filters.notes) {
