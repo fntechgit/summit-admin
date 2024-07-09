@@ -318,8 +318,6 @@ export const getSentEmails = (term = null, page = 1, perPage = 10, order = 'id',
 
     const filter = parseFilters(filters);
 
-    console.log('check...', filter);
-
     if (Object.keys(filter).length > 0) {
         params = {...params, ...filter};
     }
