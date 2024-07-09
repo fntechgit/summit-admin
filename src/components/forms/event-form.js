@@ -1017,7 +1017,7 @@ render() {
                 <>
                     <div className="row form-group">
                         <div className="col-md-10">
-                            <label> {T.translate("general.speakers")} </label>
+                            <label> {T.translate("general.speakers")} *</label>
                             <SpeakerInput
                                 id="speaker"
                                 value={speakerToAdd}
