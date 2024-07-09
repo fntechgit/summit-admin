@@ -137,6 +137,7 @@
     "emails": "Emails",
     "email_templates": "Templates",
     "sent_email": "Sent Emails",
+    "email_logs": "Logs",
     "summitdocs": "Event Docs",
     "email_flow_events": "Email Events",
     "email_flow_overrides": "Overrides",
@@ -2363,6 +2364,25 @@
       "select_template": "Select Template",
       "select_version": "-- SELECT A PREVIOUS VERSION TO RESTORE --",
       "see_version": "see version at Github"
+    }
+  },
+  "email_logs": {
+    "email_logs": "Email Logs",
+    "email_list": "Email List",
+    "apply_filters": "Apply Filters",
+    "email_templates": "Email Templates",
+    "subject": "Subject",
+    "from_email": "From Email",
+    "to_email": "To Email",
+    "sent_date": "Sent Date",
+    "last_error": "Last Error",
+    "payload": "Payload",
+    "select_fields":"Show Columns",
+    "placeholders": {
+      "select_fields": "Select data to display",
+      "template": "Filter by Template",
+      "sent_date_from": "Filter Sent Date from",
+      "sent_date_to": "Filter Sent Date to"      
     }
   },
   "summitdoc": {

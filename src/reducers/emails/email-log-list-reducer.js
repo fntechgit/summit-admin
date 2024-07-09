@@ -18,36 +18,41 @@ import
 } from '../../actions/email-actions';
 
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import {epochToMoment} from "openstack-uicore-foundation/lib/utils/methods";
+import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
 
 const DEFAULT_STATE = {
     emails          : [],
     term            : '',
     order           : 'id',
-    orderDir        : 1,
+    orderDir        : 0,
     currentPage     : 1,
     lastPage        : 1,
     perPage         : 10,
     totalEmails     : 0,
+    filters         : {},
 };
 
-const sentEmailListReducer = (state = DEFAULT_STATE, action) => {
+const emailLogListReducer = (state = DEFAULT_STATE, action) => {
     const { type, payload } = action
     switch (type) {
         case LOGOUT_USER: {
             return DEFAULT_STATE;
         }
         case REQUEST_EMAILS: {
-            let {order, orderDir, term} = payload;
+            let {order, orderDir, term, filters} = payload;
 
-            return {...state, order, orderDir, term }
+            return {...state, order, orderDir, term, filters };
         }
         case RECEIVE_EMAILS: {
             let {total, last_page, current_page, data} = payload.response;
 
             data = data.map( m => {
-                let sent_date = m.sent_date ? epochToMoment(m.sent_date).format('MMMM Do YYYY, h:mm:ss a') : '';
-                return {...m, template: m.template.identifier, sent_date: sent_date}
+                let sent_date = m.sent_date ? epochToMomentTimeZone(m.sent_date, "UTC").format('MMMM Do YYYY, h:mm:ss a') : '';                
+                return {...m, 
+                    template: m.template.identifier, 
+                    sent_date: sent_date,
+                    last_error: m.last_error ? m.last_error : 'N/A'
+                }
             });
             return {...state, emails: data, currentPage: current_page, totalEmails: total, lastPage: last_page };
         }
@@ -56,4 +61,4 @@ const sentEmailListReducer = (state = DEFAULT_STATE, action) => {
     }
 };
 
-export default sentEmailListReducer;
+export default emailLogListReducer;
