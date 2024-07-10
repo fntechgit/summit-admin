@@ -170,12 +170,13 @@ class ExtraQuestionForm extends React.Component {
         const {
             currentSummit = null,
             onValueDelete,
-            onValueSave,
             questionClasses,
             updateSubQuestionRuleOrder,
-            updateQuestionValueOrder
+            updateQuestionValueOrder,
+            shouldHideMandatory = false
         } = this.props;
-        const question_class_ddl = questionClasses.map(c => ({label: c.type, value: c.type}));
+
+        const question_class_ddl = questionClasses.map(c => ({label: c.type.split(/(?=[A-Z])/).join(" "), value: c.type}));
 
         const badge_features_ddl = currentSummit && currentSummit.badge_features && currentSummit.badge_features.length > 0 ? currentSummit.badge_features.map(f => ({
             label: f.name,
@@ -236,6 +237,8 @@ class ExtraQuestionForm extends React.Component {
                 delete: {onClick: this.handleDeleteSubQuestionRule}
             }
         }
+
+        const hideMandatory = shouldHideMandatory && (entity.type === 'CheckBox' || (entity.type === 'CheckBoxList' && entity?.values?.length <= 1));
 
         return (
             <>
@@ -326,6 +329,7 @@ class ExtraQuestionForm extends React.Component {
                             </div>
                         </div>
                         }
+                        {!hideMandatory &&
                         <div className="col-md-3 checkboxes-div">
                             <div className="form-check abc-checkbox">
                                 <input type="checkbox" id="mandatory" checked={entity.mandatory}
@@ -335,6 +339,7 @@ class ExtraQuestionForm extends React.Component {
                                 </label>
                             </div>
                         </div>
+                        }
                         {this.props.shouldShowEditable &&
                         <div className="col-md-3 checkboxes-div">
                             <div className="form-check abc-checkbox">
@@ -365,22 +370,27 @@ class ExtraQuestionForm extends React.Component {
                             />
                         </div>
                         }
-                        {badge_features_ddl.length > 0 &&
-                        <div className="col-md-4">
-                            <label>
-                                {T.translate("question_form.allowed_badge_features_types")} &nbsp;
-                                <i className="fa fa-info-circle"
-                                   title={T.translate("question_form.allowed_badge_features_types_info")}/>
-                            </label>
-                            <Dropdown
-                                id="allowed_badge_features_types"
-                                clearable
-                                isMulti
-                                value={entity.allowed_badge_features_types}
-                                onChange={this.handleChange}
-                                options={badge_features_ddl}
-                            />
-                        </div>
+                        {badge_features_ddl.length >= 0 &&
+                        <>
+                            <div className="col-md-2 col-md-offset-1">
+                                <label>Or</label>
+                            </div>
+                            <div className="col-md-4">
+                                <label>
+                                    {T.translate("question_form.allowed_badge_features_types")} &nbsp;
+                                    <i className="fa fa-info-circle"
+                                    title={T.translate("question_form.allowed_badge_features_types_info")}/>
+                                </label>
+                                <Dropdown
+                                    id="allowed_badge_features_types"
+                                    clearable
+                                    isMulti
+                                    value={entity.allowed_badge_features_types}
+                                    onChange={this.handleChange}
+                                    options={badge_features_ddl}
+                                />
+                            </div>
+                        </>
                         }
                     </div>
 

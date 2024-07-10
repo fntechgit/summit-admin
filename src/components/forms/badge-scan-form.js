@@ -14,7 +14,7 @@
 import React from 'react'
 import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { Input } from 'openstack-uicore-foundation/lib/components';
+import {Input, TextArea} from 'openstack-uicore-foundation/lib/components';
 import QuestionsSet from 'openstack-uicore-foundation/lib/utils/questions-set'
 import ExtraQuestionsForm from 'openstack-uicore-foundation/lib/components/extra-questions';
 
@@ -116,7 +116,7 @@ class BadgeScanForm extends React.Component {
                     <div className="row form-group">
                         <div className="col-md-12">
                             <label> {T.translate("edit_badge_scan.notes")} </label>
-                            <textarea
+                            <TextArea
                                 id="notes"
                                 value={entity.notes}
                                 onChange={this.handleChange}

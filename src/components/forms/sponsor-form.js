@@ -16,20 +16,24 @@ import T from 'i18n-react/dist/i18n-react'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
 import Swal from "sweetalert2";
 import { Pagination } from 'react-bootstrap';
-import { SortableTable, CompanyInput, MemberInput, Panel, TextEditor, Input, UploadInput, Table } from 'openstack-uicore-foundation/lib/components';
+import { Dropdown, SortableTable, CompanyInput, MemberInput, Panel, TextEditor, Input, UploadInput, Table } from 'openstack-uicore-foundation/lib/components';
 import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
 import EventInput from '../inputs/event-input';
 import SummitSponsorshipTypeInput from '../inputs/summit-sponsorship-type-input';
 import ExtraQuestionsTable from "../tables/extra-questions-table";
+import { denormalizeLeadReportSettings, renderOptions } from "../../models/lead-report-settings"
 
 class SponsorForm extends React.Component {
     constructor(props) {
         super(props);
 
+        const {entity, errors} = props;
+
         this.state = {
-            entity: {...props.entity},
+            entity: {...entity},
             showSection: '',
-            errors: props.errors
+            errors: errors,
+            selectedColumns: [],
         };
 
         this.handleChangeMember = this.handleChangeMember.bind(this);
@@ -50,6 +54,7 @@ class SponsorForm extends React.Component {
         this.handleMaterialEdit = this.handleMaterialEdit.bind(this);
         this.handleSocialNetworkEdit = this.handleSocialNetworkEdit.bind(this);
         this.handleExtraQuestionEdit = this.handleExtraQuestionEdit.bind(this);
+        this.handleColumnsChange = this.handleColumnsChange.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -59,6 +64,12 @@ class SponsorForm extends React.Component {
         if(!shallowEqual(prevProps.entity, this.props.entity)) {
             state.entity = {...this.props.entity};
             state.errors = {};
+            state.selectedColumns = [];
+            const {lead_report_setting: {columns}} = state.entity;
+
+            if (columns) {
+                state.selectedColumns = renderOptions(denormalizeLeadReportSettings(columns)).map(c => c.value);
+            }
         }
 
         if (!shallowEqual(prevProps.errors, this.props.errors)) {
@@ -235,7 +246,7 @@ class SponsorForm extends React.Component {
 
     handleDelete(element, collection) {
         const {entity} = this.state;
-        const {onAdvertisementDelete, onMaterialDelete, onSocialNetworkDelete } = this.props;
+        const {onAdvertisementDelete, onMaterialDelete, onSocialNetworkDelete} = this.props;
 
         let deleteElement = entity[`${collection}_collection`][`${collection}`].find(s => s.id === element);
 
@@ -257,9 +268,17 @@ class SponsorForm extends React.Component {
         });
     }
 
+    handleColumnsChange(ev) {
+        const {entity, upsertSponsorLeadReportSettings} = this.props;
+        const {value} = ev.target;
+        let newColumns = value;
+        this.setState({...this.state, selectedColumns: newColumns});
+        upsertSponsorLeadReportSettings(entity.id, newColumns);
+    }
+
     render() {
         const {entity, showSection} = this.state;
-        const { currentSummit, onCreateCompany, canEditSponsors, canEditSponsorExtraQuestions } = this.props;
+        const { currentSummit, onCreateCompany, canEditSponsors, canEditSponsorExtraQuestions, canEditLeadReportSettings, availableLeadReportColumns } = this.props;
 
         const advertisement_columns = [
             { columnKey: 'link', value: T.translate("edit_sponsor.link") },
@@ -553,7 +572,7 @@ class SponsorForm extends React.Component {
                     </Panel>
                     </>
                 }
-                { canEditSponsorExtraQuestions &&
+                { entity.id !== 0 && canEditSponsorExtraQuestions &&
                     <Panel show={showSection === 'extra-questions'}
                            title={T.translate("edit_sponsor.extra_questions")}
                            handleClick={this.toggleSection.bind(this, 'extra-questions')}>
@@ -563,6 +582,21 @@ class SponsorForm extends React.Component {
                             onEdit={this.handleExtraQuestionEdit}
                             onDelete={(questionId) => this.props.deleteExtraQuestion(entity.id, questionId)}
                             onReorder={(extraQuestions, questionId, order) => this.props.updateExtraQuestionOrder(extraQuestions, entity.id, questionId, order)}
+                        />
+                    </Panel>
+                }
+                { canEditLeadReportSettings &&
+                    <Panel show={showSection === 'lead-report-settings'}
+                           title={T.translate("edit_sponsor.lead_report_settings")}
+                           handleClick={this.toggleSection.bind(this, 'lead-report-settings')}>
+                        <Dropdown
+                            id="sponsor_columns"
+                            options={availableLeadReportColumns ?? []}
+                            clearable
+                            isMulti
+                            value={this.state.selectedColumns}
+                            onChange={this.handleColumnsChange}
+                            placeholder={T.translate("sponsor_list.placeholders.lead_report_columns")}
                         />
                     </Panel>
                 }

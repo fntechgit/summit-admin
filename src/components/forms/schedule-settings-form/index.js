@@ -118,6 +118,11 @@ class ScheduleSettingsForm extends React.Component {
             {label: 'Activity Type', value: 'EVENT_TYPES'},
         ];
 
+        const time_format_ddl = [
+            {label: '12h', value: '12h'},
+            {label: '24h', value: '24h'}
+        ];
+
         const columns = [
             { columnKey: 'type', render: (filter) => {
                 return (
@@ -202,6 +207,18 @@ class ScheduleSettingsForm extends React.Component {
                           uncheckedIcon={false}
                           checkedIcon={false}
                           className="react-switch"
+                          disabled={!entity.is_enabled}
+                        />
+                    </div>
+                </div>
+                <div className="row form-group">
+                    <div className="col-md-4">
+                        <label> {T.translate("edit_schedule_settings.time_format")} *</label>
+                        <Dropdown
+                          id="time_format"
+                          value={entity.time_format}
+                          options={time_format_ddl}
+                          onChange={this.handleChange}
                           disabled={!entity.is_enabled}
                         />
                     </div>

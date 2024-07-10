@@ -31,12 +31,12 @@ import {
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {SPEAKERS_PROMO_CODE_CLASS_NAME, SPEAKERS_DISCOUNT_CODE_CLASS_NAME} from './promocode-specification-actions';
 import {
-    EXISTING_SPEAKERS_PROMO_CODE, 
+    EXISTING_SPEAKERS_PROMO_CODE,
     EXISTING_SPEAKERS_DISCOUNT_CODE,
     AUTO_GENERATED_SPEAKERS_PROMO_CODE,
     AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
 } from './promocode-actions';
-import {checkOrFilter, getAccessTokenSafely, isNumericString, joinCVSChunks} from '../utils/methods';
+import {getAccessTokenSafely, isNumericString, joinCVSChunks} from '../utils/methods';
 
 export const INIT_SPEAKERS_LIST_PARAMS  = 'INIT_SPEAKERS_LIST_PARAMS';
 
@@ -717,29 +717,12 @@ export const getSpeakersBySummit = (term = null, page = 1, perPage = 10, order =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
-    
     const filter = parseFilters(filters);
 
     dispatch(startLoading());
 
     if(term) {
-        const escapedTerm = escapeFilterValue(term);
-
-        let filterTerm =  [
-            `full_name@@${escapedTerm}`,
-            `email=@${escapedTerm}`,
-            `presentations_title=@${escapedTerm}`,
-            `presentations_abstract=@${escapedTerm}`,
-            `presentations_submitter_full_name@@${escapedTerm}`,
-            `presentations_submitter_email=@${escapedTerm}`
-        ];
-
-        if(isNumericString(escapedTerm)){
-            const filterTermId = parseInt(escapedTerm);
-            filterTerm = [...filterTerm, ...[`id==${filterTermId}`,
-                `member_id==${filterTermId}`,
-                `member_user_external_id==${filterTermId}`]]
-        }
+        let filterTerm = buildTermFilter(term);
 
         filter.push(
             filterTerm.join(',')
@@ -799,7 +782,7 @@ export const exportSummitSpeakers = (
     };
 
     dispatch(startLoading());
-    
+
     const filter = parseFilters(filters);
 
     if (term) {
@@ -811,7 +794,7 @@ export const exportSummitSpeakers = (
     }
 
     if (filter.length > 0){
-        params['filter[]']= filter;
+        params['filter[]'] = filter;
     }
 
     // order
@@ -840,15 +823,20 @@ export const exportSummitSpeakers = (
 }
 
 /**
+ *
+ * @param term
+ * @param filters
  * @param testRecipient
  * @param excerptRecipient
  * @param shouldSendCopy2Submitter
  * @param source
  * @param promoCodeStrategy
  * @param promocodeSpecification
- * @returns {function(*=, *): *}
+ * @returns {function(*, *): Promise<*>}
  */
 export const sendSpeakerEmails = (
+                           term = null,
+                           filters = {},
                            testRecipient = '',
                            excerptRecipient= '',
                            shouldSendCopy2Submitter = false,
@@ -858,7 +846,7 @@ export const sendSpeakerEmails = (
                            ) => async (dispatch, getState) => {
 
     const { currentSummitState, currentSummitSpeakersListState } = getState();
-    const {selectedAll, selectedItems, excludedItems, term, currentFlowEvent, selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter} = currentSummitSpeakersListState;
+    const {selectedAll, selectedItems, excludedItems, currentFlowEvent} = currentSummitSpeakersListState;
     const accessToken = await getAccessTokenSafely();
     const { currentSummit }   = currentSummitState;
     let filter = [];
@@ -871,19 +859,13 @@ export const sendSpeakerEmails = (
         // we don't need the filter criteria, we have the ids
         filter.push(`id==${selectedItems.join('||')}`);
     } else {
-        filter = parseFilters({ selectionPlanFilter, trackFilter, activityTypeFilter, selectionStatusFilter });
+        filter = parseFilters(filters);
 
-        if (term) {
-            const escapedTerm = escapeFilterValue(term);
+        if(term) {
+            let filterTerm = buildTermFilter(term);
+
             filter.push(
-              [
-                  `full_name@@${escapedTerm}`,
-                  `email=@${escapedTerm}`,
-                  `presentations_title=@${escapedTerm}`,
-                  `presentations_abstract=@${escapedTerm}`,
-                  `presentations_submitter_full_name@@${escapedTerm}`,
-                  `presentations_submitter_email=@${escapedTerm}`
-              ].join(',')
+                filterTerm.join(',')
             );
         }
 
@@ -919,11 +901,11 @@ export const sendSpeakerEmails = (
             payload['promo_code_spec']['amount'] = amount;
             payload['promo_code_spec']['rate'] = rate;
             if (!promocodeSpecification.applyToAllTix) {
-                payload['promo_code_spec']['ticket_types_rules'] = 
-                    promocodeSpecification.ticketTypes.map(t => { 
-                        return { 
+                payload['promo_code_spec']['ticket_types_rules'] =
+                    promocodeSpecification.ticketTypes.map(t => {
+                        return {
                             ticket_type_id: t.id,
-                            amount: amount, 
+                            amount: amount,
                             rate: rate
                         };
                     });
@@ -1058,7 +1040,7 @@ const parseFilters = (filters) => {
 
 const buildTermFilter = (term, usePresentationFilters = true) => {
     const escapedTerm = escapeFilterValue(term);
-       
+
     let termFilter =  [
         `full_name=@${escapedTerm}`,
         `first_name=@${escapedTerm}`,
@@ -1067,7 +1049,7 @@ const buildTermFilter = (term, usePresentationFilters = true) => {
     ];
 
     if(usePresentationFilters){
-        termFilter.push( `presentations_title=@${escapedTerm}`);
+        termFilter.push(`presentations_title=@${escapedTerm}`);
         termFilter.push(`presentations_abstract=@${escapedTerm}`);
     }
 

@@ -32,6 +32,7 @@ module.exports = {
             buffer: require.resolve("buffer"),
             fs: require.resolve('fs'),
             process: require.resolve("process"),
+            vm: false,
         }
     },
     module: {

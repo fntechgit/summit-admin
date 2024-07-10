@@ -31,11 +31,13 @@ import {
   setSelectedAll,
   sendEmails,
   changeSearchTerm,
-  exportSponsorPromocodes
+  exportSponsorPromocodes,
+  importSponsorPromocodesCSV
 } from "../../actions/sponsor-actions";
 
 import {validateEmail} from '../../utils/methods';
 import {Breadcrumb} from "react-breadcrumbs";
+import ImportPromocodesBtn from "../../components/import-promocodes";
 
 const fieldNames = [
   {columnKey: 'feature_types', value: 'feature_types'},
@@ -263,9 +265,16 @@ const SponsorPromocodesListPage = ({currentSummit, promocodes, lastPage, current
           <button className="btn btn-primary right-space" onClick={handleNewPromocode}>
             {T.translate("sponsor_promocodes_list.add_promocode")}
           </button>
-          <button className="btn btn-default" onClick={handleExport} >
+          <button className="btn btn-default right-space" onClick={handleExport} >
             {T.translate("general.export")}
           </button>
+          <ImportPromocodesBtn
+              allowedClasses={['SPONSOR_PROMO_CODE', 'SPONSOR_DISCOUNT_CODE']}
+              onImport={props.importSponsorPromocodesCSV}
+              showSpeakers={false}
+              showSponsorId
+              showContactEmail
+          />
         </div>
       </div>
 
@@ -315,6 +324,7 @@ export default connect(
     setSelectedAll,
     sendEmails,
     changeSearchTerm,
-    exportSponsorPromocodes
+    exportSponsorPromocodes,
+    importSponsorPromocodesCSV
   }
 )(SponsorPromocodesListPage);

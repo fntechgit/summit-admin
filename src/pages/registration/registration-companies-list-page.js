@@ -184,8 +184,11 @@ class RegistrationCompaniesListPage extends React.Component {
                     <Modal.Body>
                         <div className="row">
                             <div className="col-md-12">
-                                Format must be the following:<br />
-                                <b>name</b>: company name<br />
+                                Format must be as described using<br />
+                                column name<br />
+                                description of column content values<br /><br />
+                                <b>name</b><br/>
+                                company names<br />
                             </div>
                             <div className="col-md-12 invitation-import-upload-wrapper">
                                 <UploadInput

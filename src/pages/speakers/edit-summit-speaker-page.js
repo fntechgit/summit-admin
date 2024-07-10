@@ -57,7 +57,7 @@ class EditSummitSpeakerPage extends React.Component {
         const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
         const breadcrumb = (entity.id) ? entity.first_name+' '+entity.last_name : T.translate("general.new");
 
-        if (summits.lenght === 0) return (<div> Hold on...</div>);
+        if (summits.length === 0) return (<div> Hold on...</div>);
 
         return(
             <div className="container">

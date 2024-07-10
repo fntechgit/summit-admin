@@ -125,8 +125,25 @@ class EditTicketPage extends React.Component {
     }
 
     handleResendEmail(ticket, ev){
+        const {reSendTicketEmail} = this.props;
         ev.preventDefault();
-        this.props.reSendTicketEmail(ticket.order_id, ticket.id);
+
+        if (ticket.owner.status === "Complete") {
+            reSendTicketEmail(ticket.order_id, ticket.id);
+        } else {
+            Swal.fire({
+                title: T.translate("edit_ticket.attendee_incomplete"),
+                text: T.translate("edit_ticket.attendee_incomplete_msg"),
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: T.translate("general.yes_send")
+            }).then(function(result){
+                if (result.value) {
+                    reSendTicketEmail(ticket.order_id, ticket.id);
+                }
+            });
+        }
     }
 
     handleActivateDeactivate(ticket, ev){
@@ -249,13 +266,20 @@ class EditTicketPage extends React.Component {
         if (!entity || !entity.id) return (<div />);
         if (entity.order_id !== currentOrder.id) return (<div />);
 
-        const tax_columns = [...(entity.refund_requests_taxes?.map(t => {
-            return ({ 
-                columnKey: `tax_${t.tax.id}_refunded_amount`, 
-                value: t.tax.name,
-                render: (row, val) => { return val ?  val : '0'}
-            });
-        }) || [])];
+        const taxColumnsMap = new Map();
+        
+        entity.refund_requests_taxes?.forEach(t => {            
+            const columnKey = `tax_${t.tax.id}_refunded_amount`;
+            if (!taxColumnsMap.has(columnKey)) {
+                taxColumnsMap.set(columnKey, {
+                    columnKey: columnKey,
+                    value: t.tax.name,
+                    render: (row, val) => val ? val : '0'
+                });
+            }
+        });
+        
+        const tax_columns = [...taxColumnsMap.values()];
 
         const refundRequestColumns = [
             { columnKey: 'id', value: T.translate("edit_ticket.refund_request_id") },
@@ -333,15 +357,15 @@ class EditTicketPage extends React.Component {
                     <div>
                         <div className="row">
                             <div className="col-md-6">
-                                <label>{T.translate("edit_ticket.ticket_price")}</label> {`$${entity.raw_cost}`}
+                                <label>{T.translate("edit_ticket.ticket_price")}</label> {`${entity.currency_symbol}${entity.raw_cost}`}
                             </div>
                             <div className="col-md-6">
-                                <label>{T.translate("edit_ticket.net_price")}</label> {`$${(entity.raw_cost - entity.discount)}`}
+                                <label>{T.translate("edit_ticket.net_price")}</label> {`${entity.currency_symbol}${(entity.raw_cost - entity.discount)}`}
                             </div>
                         </div>
                         <div className="row">
                             <div className="col-md-6">
-                                <label>{T.translate("edit_ticket.discount")}</label> {`${entity.discount_rate}% ($${entity.discount})`}
+                                <label>{T.translate("edit_ticket.discount")}</label> {`${entity.discount_rate}% (${entity.currency_symbol}${entity.discount})`}
                             </div>
                         </div>
                         {entity?.applied_taxes.map((at, i) => {
@@ -351,14 +375,14 @@ class EditTicketPage extends React.Component {
                                         <label>{T.translate("edit_ticket.tax_name_rate", {tax_name: at.tax.name})}</label>{` ${at.tax.rate}%`}
                                     </div>
                                     <div className="col-md-6">
-                                        <label>{T.translate("edit_ticket.tax_name_price", {tax_name: at.tax.name})}</label>{` $${at.amount}`}
+                                        <label>{T.translate("edit_ticket.tax_name_price", {tax_name: at.tax.name})}</label>{` ${entity.currency_symbol}${at.amount}`}
                                     </div>
                                 </div>
                             )
                         })}
                         <div className="row">
                             <div className="col-md-6 col-md-offset-6">
-                                <label>{T.translate("edit_ticket.purchase_ticket_price")}</label> {`$${entity.final_amount}`}
+                                <label>{T.translate("edit_ticket.purchase_ticket_price")}</label> {`${entity.currency_symbol}${entity.final_amount}`}
                             </div>
                         </div>
                     </div>                    

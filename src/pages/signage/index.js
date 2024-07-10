@@ -124,7 +124,7 @@ const SignagePage = ({
     props.publishDate(jumpDate, "signage.date_published");
   }
   
-  const viewSign = () => {
+  const viewSign = () => {    
     window.open(`${window.SIGNAGE_BASE_URL}/${sign?.template}#/?summit=${summit.id}&location=${locationId}`);
   };
   

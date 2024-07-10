@@ -57,6 +57,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
     const [templateLoaded, setTemplateLoaded] = useState(false);
     const [previewLoaded, setPreviewLoaded] = useState(false);
     const [mjmlWarning, setMjmlWarning] = useState(false);
+    const [mjmlRenderError, setMjmlRenderError] = useState(null);
 
     const previewRef = useRef(null);
 
@@ -124,13 +125,15 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
         if (mjmlEditor) {
             try {
                 const htmlContent = mjml2html(stateEntity.mjml_content, {
+                    validationLevel: 'strict',
                     keepComments: false,
                     collapseWhitespace: true,
                     minifyOptions: { collapseWhitespace: false }
                 }).html;
                 setStateEntity({ ...stateEntity, html_content: htmlContent })
+                setMjmlRenderError(null);
             } catch (err) {
-                console.log('error mjml to html', err)
+                setMjmlRenderError(err);
             }
         }
     }, [stateEntity.mjml_content, historyVersion])
@@ -247,6 +250,10 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
             setMjmlEditor(true);
             setStateEntity({ ...stateEntity, mjml_content: selectedHistory.content });
         }
+    }
+
+    const isTemplateInvalid = () => {
+        return mjmlEditor && mjmlRenderError !== null;
     }
 
     useEffect(() => {
@@ -481,6 +488,14 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
                                                     </ul>
                                                 </div>
                                                 :
+                                                mjmlRenderError?.message ? 
+                                                <div className='container'>
+                                                    There is an error trying to render the email template:
+                                                    <ul>
+                                                        {mjmlRenderError.message}
+                                                    </ul>
+                                                </div>
+                                                :
                                                 previewLoaded &&
                                                 <iframe
                                                     style={{ ...style }}
@@ -502,7 +517,7 @@ const EmailTemplateForm = ({ entity, match, errors, clients, preview, templateLo
             </div>
             <div className="row">
                 <div className="col-md-12 submit-buttons">
-                    <input type="button" onClick={handleSubmit}
+                    <input type="button" onClick={handleSubmit} disabled={isTemplateInvalid()}
                         className="btn btn-primary pull-right" value={T.translate("general.save")} />
                     {/*<input type="button" onClick={this.handleSendTest}
                             className="btn btn-primary pull-right" value={T.translate("emails.send_test")}/>*/}

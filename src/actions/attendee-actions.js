@@ -27,7 +27,7 @@ import {
     escapeFilterValue,
     getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {checkOrFilter, getAccessTokenSafely, isNumericString} from '../utils/methods';
+import {checkOrFilter, getAccessTokenSafely, isNumericString, parseDateRangeFilter} from '../utils/methods';
 
 export const REQUEST_ATTENDEES          = 'REQUEST_ATTENDEES';
 export const RECEIVE_ATTENDEES          = 'RECEIVE_ATTENDEES';
@@ -110,8 +110,31 @@ const parseFilters = (filters, term = null) => {
             filter.push(`has_checkin==false`)
     }
 
+    if(filters.hasNotesFilter){
+        if(filters.hasNotesFilter === 'HAS_NOTES')
+            filter.push(`has_notes==true`);
+        if(filters.hasNotesFilter === 'HAS_NO_NOTES')
+            filter.push(`has_notes==false`)
+    }
+
     if(Array.isArray(filters.ticketTypeFilter) && filters.ticketTypeFilter.length > 0){
         filter.push('ticket_type_id=='+filters.ticketTypeFilter.join('||'));
+    }
+
+    if (filters?.companyFilter?.length > 0)  {
+        const nonTBD = filters?.companyFilter.filter(cf => cf.id !== 'NULL');
+        let companyFilter = [];
+
+        // has tbd
+        if (nonTBD.length < filters?.companyFilter?.length) {
+            companyFilter.push('has_company==0');
+        }
+
+        if (nonTBD.length > 0) {
+            companyFilter.push('company=='+nonTBD.map(cf => encodeURIComponent(cf.name)).join('||'));
+        }
+
+        filter.push(companyFilter.join(','));
     }
 
     if(Array.isArray(filters.featuresFilter) && filters.featuresFilter.length > 0){
@@ -122,17 +145,13 @@ const parseFilters = (filters, term = null) => {
         filter.push('badge_type_id=='+filters.badgeTypeFilter.join('||'));
     }
 
-    if (filters.checkinDateFilter && filters.checkinDateFilter.some(e => e !== null)) {
-        if(filters.checkinDateFilter.every(e => e !== null )) {
-            // added between operator []
-            filter.push(`summit_hall_checked_in_date[]${filters.checkinDateFilter[0]}&&${filters.checkinDateFilter[1]}`);
-        } else {
-            filter.push(`
-            ${filters.checkinDateFilter[0] !== null ? 
-                `summit_hall_checked_in_date>=${filters.checkinDateFilter[0]}` : ``}
-            ${filters.checkinDateFilter[1] !== null ? 
-                `summit_hall_checked_in_date<=${filters.checkinDateFilter[1]}` : ``}`);
-        }
+    if (filters.checkinDateFilter) {
+        parseDateRangeFilter(filter, filters.checkinDateFilter, 'summit_hall_checked_in_date');
+    }
+
+    if (filters.notes) {
+        const escapedNotes = escapeFilterValue(filters.notes);
+        filter.push(`notes@@${escapedNotes}`);
     }
 
     if (term) {
@@ -172,7 +191,7 @@ export const getAttendees = ( term = null,
     dispatch(startLoading());
 
     const params = {
-        expand       : 'tags',
+        expand       : 'tags,notes',
         page         : page,
         per_page     : perPage,
         access_token : accessToken,
@@ -480,7 +499,7 @@ export const deleteRsvp = (memberId, rsvpId) => async (dispatch) => {
     );
 };
 
-export const sendEmails = (filters = {}, recipientEmail = null) => async (dispatch, getState) => {
+export const sendEmails = (filters = {}, recipientEmail = null, excerptRecipient = null) => async (dispatch, getState) => {
     const { currentSummitState, currentAttendeeListState } = getState();
     const {term, currentFlowEvent, selectedAll, selectedIds, excludedIds} = currentAttendeeListState;
     const accessToken = await getAccessTokenSafely();
@@ -510,8 +529,12 @@ export const sendEmails = (filters = {}, recipientEmail = null) => async (dispat
         email_flow_event : currentFlowEvent
     };
 
-    if(recipientEmail) {
+    if (recipientEmail) {
         payload['test_email_recipient'] = recipientEmail;
+    }
+
+    if (excerptRecipient) {
+        payload['outcome_email_recipient'] = excerptRecipient;
     }
 
     dispatch(startLoading());

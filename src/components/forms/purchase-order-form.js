@@ -127,7 +127,7 @@ class PurchaseOrderForm extends React.Component {
             { columnKey: 'owner_link', value: T.translate("edit_purchase_order.attendee") },
             { columnKey: 'email_link', value: T.translate("edit_purchase_order.owner_email") },
             { columnKey: 'final_amount_formatted', value: T.translate("edit_purchase_order.paid_amount")},
-            { columnKey: 'refunded_amount_formatted', value: T.translate("edit_purchase_order.refunded_amount")},
+            { columnKey: 'refunded_amount_formatted', value: T.translate("edit_purchase_order.total_refunded_amount")},
             { columnKey: 'final_amount_adjusted_formatted', value: T.translate("edit_purchase_order.paid_amount_adjusted")}
         ];
 
@@ -431,15 +431,15 @@ class PurchaseOrderForm extends React.Component {
 
                             <div className="row">
                                 <div className="col-md-6">
-                                    <label>{T.translate("edit_purchase_order.order_price")}</label> {`$${entity.raw_amount}`}
+                                    <label>{T.translate("edit_purchase_order.order_price")}</label> {`${entity.currency_symbol}${entity.raw_amount}`}
                                 </div>
                                 <div className="col-md-6">
-                                    <label>{T.translate("edit_purchase_order.net_price")}</label> {`$${(entity.raw_amount - entity.discount_amount)}`}
+                                    <label>{T.translate("edit_purchase_order.net_price")}</label> {`${entity.currency_symbol}${(entity.raw_amount - entity.discount_amount)}`}
                                 </div>
                             </div>
                             <div className="row">
                                 <div className="col-md-6">
-                                    <label>{T.translate("edit_purchase_order.discount")}</label> {`${entity.discount_rate}% ($${entity.discount_amount})`}
+                                    <label>{T.translate("edit_purchase_order.discount")}</label> {`${entity.discount_rate}% (${entity.currency_symbol}${entity.discount_amount})`}
                                 </div>                        
                             </div>
                             {entity?.applied_taxes.map((tax, i) => {                                
@@ -449,14 +449,14 @@ class PurchaseOrderForm extends React.Component {
                                             <label>{T.translate("edit_purchase_order.tax_name_rate", {tax_name: tax.name})}</label>{` ${tax.rate}%`}
                                         </div>
                                         <div className="col-md-6">
-                                            <label>{T.translate("edit_purchase_order.tax_name_price", {tax_name: tax.name})}</label>{` $${tax.amount}`}
+                                            <label>{T.translate("edit_purchase_order.tax_name_price", {tax_name: tax.name})}</label>{` ${entity.currency_symbol}${tax.amount}`}
                                         </div>
                                     </div>
                                 )                                
                             })}
                             <div className="row">
                                 <div className="col-md-6 col-md-offset-6">
-                                    <label>{T.translate("edit_purchase_order.purchase_order_price")}</label> {`$${entity.amount}`}
+                                    <label>{T.translate("edit_purchase_order.purchase_order_price")}</label> {`${entity.currency_symbol}${entity.amount}`}
                                 </div>
                             </div>
 
@@ -472,7 +472,7 @@ class PurchaseOrderForm extends React.Component {
                             </div>
                             <div className="row">
                                 <div className="col-md-12">
-                                    <label>{T.translate("edit_purchase_order.adjusted_total_order_purchase_price")}</label> {`$${entity.adjusted_total_order_purchase_price?.toFixed(2)}`}
+                                    <label>{T.translate("edit_purchase_order.adjusted_total_order_purchase_price")}</label> {`${entity.currency_symbol}${entity.adjusted_total_order_purchase_price?.toFixed(2)}`}
                                 </div>
                             </div>
                         </Panel>

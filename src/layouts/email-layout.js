@@ -19,7 +19,7 @@ import { Breadcrumb } from 'react-breadcrumbs';
 import Restrict from '../routes/restrict';
 import EmailTemplateListPage from "../pages/emails/email-template-list-page";
 import EditEmailTemplatePage from "../pages/emails/edit-email-template-page";
-import SentEmailListPage from "../pages/emails/sent-email-list-page";
+import EmailLogListPage from '../pages/emails/email-log-list-page';
 
 class EmailLayout extends React.Component {
 
@@ -34,7 +34,7 @@ class EmailLayout extends React.Component {
                     <Route exact strict path={`${match.url}/templates`} component={EmailTemplateListPage}/>
                     <Route strict exact path={`${match.url}/templates/new`} component={EditEmailTemplatePage}/>
                     <Route path={`${match.url}/templates/:template_id`} component={EditEmailTemplatePage}/>
-                    <Route exact strict path={`${match.url}/sent`} component={SentEmailListPage}/>
+                    <Route exact strict path={`${match.url}/log`} component={EmailLogListPage}/>
                     <Redirect to={`/app/emails/templates`} />
                 </Switch>
             </div>

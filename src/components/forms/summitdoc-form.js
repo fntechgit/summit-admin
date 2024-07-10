@@ -147,7 +147,10 @@ class SummitDocForm extends React.Component {
                         />
                     </div>
                     <div className="col-md-4">
-                        <label> {T.translate("summitdoc.event_types")} *</label>
+                        <label>
+                            {T.translate("summitdoc.event_types")} *
+                            &nbsp;<i className="fa fa-info-circle" aria-hidden="true" title={T.translate("summitdoc.event_types_info")} />
+                        </label>
                         <Dropdown
                             id="event_types"
                             value={entity.event_types}

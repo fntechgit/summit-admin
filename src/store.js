@@ -66,6 +66,7 @@ import viewTypeListReducer from './reducers/badges/view-type-list-reducer';
 import viewTypeReducer from './reducers/badges/view-type-reducer';
 import badgeFeatureListReducer from './reducers/badges/badge-feature-list-reducer';
 import badgeFeatureReducer from './reducers/badges/badge-feature-reducer';
+import badgeSettingsReducer from './reducers/badges/badge-settings-reducer';
 import accessLevelListReducer from './reducers/badges/access-level-list-reducer';
 import accessLevelReducer from './reducers/badges/access-level-reducer';
 import orderExtraQuestionListReducer from './reducers/orders/order-extra-question-list-reducer';
@@ -90,7 +91,7 @@ import marketingSettingReducer from './reducers/marketing/marketing-setting-redu
 import paymentProfileReducer from './reducers/payment_profiles/payment-profile-reducer';
 import emailTemplateReducer from './reducers/emails/email-template-reducer';
 import emailTemplateListReducer from './reducers/emails/email-template-list-reducer';
-import sentEmailListReducer from './reducers/emails/sent-email-list-reducer';
+import emailLogListReducer from './reducers/emails/email-log-list-reducer';
 import summitDocListReducer from './reducers/summitdoc/summitdoc-list-reducer';
 import summitDocReducer from "./reducers/summitdoc/summitdoc-reducer";
 import emailFlowEventsListReducer from "./reducers/email_flow_events/email-flow-events-list-reducer";
@@ -208,6 +209,7 @@ const reducers = persistCombineReducers(config, {
     currentBadgeTypeState: badgeTypeReducer,
     currentBadgeFeatureListState: badgeFeatureListReducer,
     currentBadgeFeatureState: badgeFeatureReducer,
+    currentBadgeSettingState: badgeSettingsReducer,
     currentBadgePrintState: badgePrintReducer,
     currentAccessLevelListState: accessLevelListReducer,
     currentAccessLevelState: accessLevelReducer,
@@ -240,7 +242,7 @@ const reducers = persistCombineReducers(config, {
     marketingSettingState: marketingSettingReducer,
     emailTemplateState: emailTemplateReducer,
     emailTemplateListState: emailTemplateListReducer,
-    sentEmailListState: sentEmailListReducer,
+    emailLogListState: emailLogListReducer,
     summitDocListState: summitDocListReducer,
     summitDocState: summitDocReducer,
     emailFlowEventsListState: emailFlowEventsListReducer,

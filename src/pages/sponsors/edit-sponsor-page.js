@@ -32,7 +32,9 @@ import {
     updateSponsorAdsOrder,
     updateSponsorMaterialOrder,
     deleteExtraQuestion,
-    updateExtraQuestionOrder
+    updateExtraQuestionOrder,
+    getSponsorLeadReportSettingsMeta,
+    upsertSponsorLeadReportSettings
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
 
@@ -44,6 +46,7 @@ class EditSponsorPage extends React.Component {
             this.props.getSponsorAdvertisements(entity.id);
             this.props.getSponsorMaterials(entity.id);
             this.props.getSponsorSocialNetworks(entity.id);
+            this.props.getSponsorLeadReportSettingsMeta(entity.id);
         }
     }
 
@@ -58,6 +61,7 @@ class EditSponsorPage extends React.Component {
                 this.props.getSponsorAdvertisements(newId);
                 this.props.getSponsorMaterials(newId);
                 this.props.getSponsorSocialNetworks(newId);
+                this.props.getSponsorLeadReportSettingsMeta(newId);
             }
         }
     }
@@ -68,6 +72,8 @@ class EditSponsorPage extends React.Component {
         const memberObj = new Member(member);
         const canEditSponsors = memberObj.canEditSponsors();
         const canEditSponsorExtraQuestions = memberObj.canEditSponsorExtraQuestions();
+        const canEditLeadReportSettings = memberObj.canEditLeadReportSettings();
+
         return (
             <div className="container">
                 <h3>{title} {T.translate("edit_sponsor.sponsor")}</h3>
@@ -95,8 +101,11 @@ class EditSponsorPage extends React.Component {
                     getSponsorSocialNetworks={this.props.getSponsorSocialNetworks}
                     canEditSponsors={canEditSponsors}
                     canEditSponsorExtraQuestions={canEditSponsorExtraQuestions}
+                    canEditLeadReportSettings={canEditLeadReportSettings}
                     deleteExtraQuestion={this.props.deleteExtraQuestion}
                     updateExtraQuestionOrder={this.props.updateExtraQuestionOrder}
+                    availableLeadReportColumns={entity.available_lead_report_columns}
+                    upsertSponsorLeadReportSettings={this.props.upsertSponsorLeadReportSettings}
                 />
                 }
             </div>
@@ -130,6 +139,8 @@ export default connect(
         updateSponsorAdsOrder,
         updateSponsorMaterialOrder,
         deleteExtraQuestion,
-        updateExtraQuestionOrder
+        updateExtraQuestionOrder,
+        getSponsorLeadReportSettingsMeta,
+        upsertSponsorLeadReportSettings
     }
 )(EditSponsorPage);

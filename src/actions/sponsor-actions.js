@@ -27,10 +27,11 @@ import {
     getCSV,
     escapeFilterValue,
     fetchResponseHandler,
-    fetchErrorHandler
+    fetchErrorHandler,
+    postFile
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
-
+import {normalizeLeadReportSettings} from '../models/lead-report-settings';
 
 export const REQUEST_SPONSORS = 'REQUEST_SPONSORS';
 export const RECEIVE_SPONSORS = 'RECEIVE_SPONSORS';
@@ -113,6 +114,7 @@ export const SPONSOR_SOCIAL_NETWORK_DELETED      = 'SPONSOR_SOCIAL_NETWORK_DELET
 
 export const REQUEST_SPONSOR_PROMOCODES= 'REQUEST_SPONSOR_PROMOCODES';
 export const RECEIVE_SPONSOR_PROMOCODES= 'RECEIVE_SPONSOR_PROMOCODES';
+export const SPONSOR_PROMOCODES_IMPORTED= 'SPONSOR_PROMOCODES_IMPORTED';
 export const CLEAR_ALL_SELECTED_SPONSOR_PROMOCODES= 'CLEAR_ALL_SELECTED_SPONSOR_PROMOCODES';
 export const SELECT_SPONSOR_PROMOCODE= 'SELECT_SPONSOR_PROMOCODE';
 export const SEND_SPONSOR_PROMOCODES_EMAILS= 'SEND_SPONSOR_PROMOCODES_EMAILS';
@@ -121,7 +123,8 @@ export const SET_SELECTED_ALL_SPONSOR_PROMOCODES= 'SET_SELECTED_ALL_SPONSOR_PROM
 export const UNSELECT_SPONSOR_PROMOCODE= 'UNSELECT_SPONSOR_PROMOCODE';
 export const CHANGE_SPONSOR_PROMOCODES_SEARCH_TERM= 'CHANGE_SPONSOR_PROMOCODES_SEARCH_TERM';
 
-
+export const RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META = 'RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META';
+export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED = 'SPONSOR_LEAD_REPORT_SETTINGS_UPDATED';
 
 /******************  SPONSORS ****************************************/
 
@@ -209,7 +212,7 @@ export const getSponsor = (sponsorId) => async (dispatch, getState) => {
 
     const params = {
         access_token : accessToken,
-        expand       : 'company, members, sponsorship, sponsorship.type, featured_event, extra_questions',
+        expand       : 'company, members, sponsorship, sponsorship.type, featured_event, extra_questions, lead_report_setting',
         fields       : 'featured_event.id, featured_event.title'
     };
 
@@ -499,6 +502,11 @@ export const saveSponsorExtraQuestion = (entity) => async (dispatch, getState) =
     dispatch(startLoading());
 
     const normalizedEntity = normalizeSocialNetwork(entity);
+
+    // force mandatory false in certain cases
+    if (entity.type === 'CheckBox' || (entity.type === 'CheckBoxList' && entity?.values?.length <= 1)) {
+        entity.mandatory = false;
+    }
 
     if (entity.id) {
 
@@ -1928,6 +1936,29 @@ export const exportSponsorPromocodes = (term = null, order = 'order', orderDir =
     dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes/csv`, params, filename));
 };
 
+export const importSponsorPromocodesCSV = (file) => async (dispatch, getState) => {
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken
+    };
+
+    postFile(
+      null,
+      createAction(SPONSOR_PROMOCODES_IMPORTED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes/csv`,
+      file,
+      {},
+      authErrorHandler,
+    )(params)(dispatch)
+      .then(() => {
+          dispatch(stopLoading());
+          window.location.reload();
+      });
+};
+
 export const sendEmails = (recipientEmail = null) => async (dispatch, getState) => {
     const { currentSummitState, currentSponsorPromocodeListState } = getState();
     const {term, currentFlowEvent, selectedAll, selectedIds, excludedIds} = currentSponsorPromocodeListState;
@@ -1987,4 +2018,55 @@ export const sendEmails = (recipientEmail = null) => async (dispatch, getState) 
           dispatch(stopLoading());
           return payload;
       });
+};
+
+/******************  LEAD REPORT SETTINGS  ****************************************/
+
+export const getSponsorLeadReportSettingsMeta = (sponsorId) => async (dispatch, getState) => {
+
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken,
+    };
+
+    dispatch(startLoading());
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/lead-report-settings/metadata`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+          dispatch(stopLoading());
+      }
+    );
+};
+
+export const upsertSponsorLeadReportSettings = (sponsorId, allowed_columns) => async (dispatch, getState) => {
+
+    const {currentSummitState} = getState();
+    const {currentSummit} = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = { access_token : accessToken };
+
+    const settings = {
+        'allowed_columns': normalizeLeadReportSettings(allowed_columns)
+    };
+
+    putRequest(
+        null,
+        createAction(SPONSOR_LEAD_REPORT_SETTINGS_UPDATED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/lead-report-settings`,
+        settings,
+        authErrorHandler
+    )(params)(dispatch)
+        .then(() => {
+            dispatch(stopLoading());
+        });
 };

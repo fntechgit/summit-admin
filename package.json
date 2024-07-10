@@ -8,7 +8,8 @@
     "build-dev": "./node_modules/.bin/webpack --config webpack.dev.js",
     "build": "./node_modules/.bin/webpack --config webpack.prod.js",
     "serve": "webpack-dev-server  --port 8080 --open --https --config webpack.dev.js",
-    "clean-branchs": "git branch | grep -v \"master\\|main\\|production\" | xargs git branch -D"
+    "clean-branchs": "git branch | grep -v \"master\\|main\\|production\" | xargs git branch -D",
+    "test" : "yarn jest"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +18,7 @@
     "@babel/plugin-proposal-class-properties": "^7.16.7",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.7",
     "@babel/plugin-proposal-object-rest-spread": "^7.17.3",
+    "@babel/plugin-transform-runtime": "^7.24.3",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-flow": "^7.16.7",
     "@babel/preset-react": "^7.16.7",
@@ -27,10 +29,11 @@
     "@types/googlemaps": "^3.39.3",
     "@types/markerclustererplus": "^2.1.29",
     "@types/react": "^16.9.32",
-    "@uiw/codemirror-theme-sublime": "^4.21.7",
+    "@uiw/codemirror-theme-sublime": "^4.21.23",
     "@uiw/react-codemirror": "^4.21.7",
     "@uiw/react-color-sketch": "^2.1.0",
     "ably": "^1.2.39",
+    "address-rfc2822": "^2.2.2",
     "awesome-bootstrap-checkbox": "^1.0.1",
     "babel-cli": "^6.26.0",
     "babel-loader": "^8.1.0",
@@ -61,13 +64,13 @@
     "less-loader": "^10.2.0",
     "lodash": "^4.17.20",
     "mini-css-extract-plugin": "^2.6.0",
-    "mjml-browser": "^4.14.1",
+    "mjml-browser": "^4.15.3",
     "modern-react-qr-reader": "^1.0.12",
     "moment": "^2.29.1",
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.33",
     "node-sass": "^7.0.1",
-    "openstack-uicore-foundation": "4.1.70",
+    "openstack-uicore-foundation": "4.1.84",
     "path-browserify": "^1.0.1",
     "postcss-loader": "^6.2.1",
     "process": "^0.11.10",
@@ -116,6 +119,59 @@
     "xlsx": "^0.17.0"
   },
   "devDependencies": {
-    "css-minimizer-webpack-plugin": "^4.2.2"
+    "@testing-library/dom": "^10.1.0",
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "12.1.5",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/react-dom": "16.9.24",
+    "babel-jest": "^29.7.0",
+    "css-minimizer-webpack-plugin": "^4.2.2",
+    "flush-promises": "^1.0.2",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^28.1.0",
+    "jest-transform-stub": "^2.0.0",
+    "redux-mock-store": "^1.5.4"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,mjs}"
+    ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
+      "\\.(css|scss)$": "identity-obj-proxy"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/react-rte"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*.{js,jsx,mjs}",
+      "<rootDir>/src/**/?(*.)(spec|test).{js,jsx,mjs}"
+    ],
+    "transform": {
+      "\\.[jt]sx?$": "babel-jest",
+      ".+\\.(css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$": "jest-transform-stub"
+    },
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "moduleFileExtensions": [
+      "web.js",
+      "js",
+      "json",
+      "web.jsx",
+      "jsx",
+      "node",
+      "mjs"
+    ],
+    "globals": {
+      "window": {},
+      "console": {}
+    },
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/testSetupFile.js"
+    ]
   }
 }

@@ -21,14 +21,14 @@ import {
     createAction,
     stopLoading,
     startLoading,
-    showMessage,
     showSuccessMessage,
     authErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
-
+import {DUMMY_ACTION} from '../utils/constants';
 import {getAccessTokenSafely} from '../utils/methods';
 import Swal from "sweetalert2";
 import {saveMarketingSetting} from "./marketing-actions";
+import {normalizeLeadReportSettings} from '../models/lead-report-settings';
 
 export const REQUEST_SUMMIT           = 'REQUEST_SUMMIT';
 export const RECEIVE_SUMMIT           = 'RECEIVE_SUMMIT';
@@ -46,6 +46,8 @@ export const SUMMIT_LOGO_ATTACHED     = 'SUMMIT_LOGO_ATTACHED';
 export const SUMMIT_LOGO_DELETED      = 'SUMMIT_LOGO_DELETED';
 export const CLEAR_SUMMIT             = 'CLEAR_SUMMIT';
 export const REGISTRATION_KEY_GENERATED= 'REGISTRATION_KEY_GENERATED';
+export const RECEIVE_LEAD_REPORT_SETTINGS_META = 'RECEIVE_LEAD_REPORT_SETTINGS_META';
+export const LEAD_REPORT_SETTINGS_UPDATED      = 'LEAD_REPORT_SETTINGS_UPDATED';
 
 export const getSummitById = (summitId) => async (dispatch, getState) => {
 
@@ -54,7 +56,7 @@ export const getSummitById = (summitId) => async (dispatch, getState) => {
 
     const params = {
         access_token : accessToken,
-        expand: 'event_types,tracks,track_groups,values,locations,locations.rooms,locations.attributes.type,locations.floor,meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.values'
+        expand: 'event_types,tracks,track_groups,values,locations,locations.rooms,locations.attributes.type,locations.floor,meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.values,lead_report_settings'
     };
 
     // set id
@@ -270,16 +272,16 @@ export const attachLogo = (entity, file, secondary = false) => async (dispatch, 
     }
 }
 
-const uploadLogo = (entity, file, secondary) => async (dispatch, getState) => {
+const uploadLogo = (entity, file, secondary) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const url = `${window.API_BASE_URL}/api/v1/summits/${entity.id}/logo${secondary ? '/secondary' : ''}`;
     const params = {
         access_token : accessToken
     };
 
-    postRequest(
+    return postRequest(
         null,
-        createAction('DUMMY_ACTION'),
+        createAction(DUMMY_ACTION),
         url,
         file,
         authErrorHandler
@@ -399,6 +401,57 @@ export const generateEncryptionKey = () => async (dispatch, getState) => {
       });
 
 }
+
+/******************  LEAD REPORT SETTINGS  ****************************************/
+
+export const getLeadReportSettingsMeta = () => async (dispatch, getState) => {
+
+    const {currentSummitState} = getState();
+    const accessToken = await getAccessTokenSafely();
+    const {currentSummit} = currentSummitState;
+
+    const params = {
+        access_token: accessToken,
+    };
+
+    dispatch(startLoading());
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_LEAD_REPORT_SETTINGS_META),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/lead-report-settings/metadata`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+          dispatch(stopLoading());
+      }
+    );
+};
+
+export const upsertLeadReportSettings = (allowed_columns) => async (dispatch, getState) => {
+
+    const {currentSummitState} = getState();
+    const {currentSummit} = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = { access_token : accessToken };
+
+    const settings = {
+        'allowed_columns': normalizeLeadReportSettings(allowed_columns)
+    };
+
+    putRequest(
+        null,
+        createAction(LEAD_REPORT_SETTINGS_UPDATED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/lead-report-settings`,
+        settings,
+        authErrorHandler
+    )(params)(dispatch)
+        .then(() => {
+            dispatch(stopLoading());
+        });
+};
 
 
 const normalizeEntity = (entity) => {

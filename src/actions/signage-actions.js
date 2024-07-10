@@ -26,6 +26,7 @@ import {
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
 import Ably from "ably";
+import moment from 'moment-timezone';
 import T from "i18n-react";
 import Swal from "sweetalert2";
 
@@ -99,8 +100,10 @@ export const getSign = (locationId) => async (dispatch, getState) => {
 export const getTemplates = () => async (dispatch, getState) => {
     const {currentSummitState} = getState();
     const {currentSummit} = currentSummitState;
+
+    const now = moment().tz(currentSummit.time_zone_id).unix();
     
-    const response = await fetch(`${window.SIGNAGE_BASE_URL}/templates.json`);
+    const response = await fetch(`${window.SIGNAGE_BASE_URL}/templates.json?t=${now}`);
     if (response.ok) {
         const clients = await response.json();
         let templates = [];

@@ -46,11 +46,15 @@ import
     SPONSOR_EXTRA_QUESTION_DELETED,
     SPONSOR_EXTRA_QUESTION_ADDED,
     SPONSOR_EXTRA_QUESTION_UPDATED,
+    RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META,
+    SPONSOR_LEAD_REPORT_SETTINGS_UPDATED
+
 } from '../../actions/sponsor-actions';
 
 import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
 import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
 import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { denormalizeLeadReportSettings, renderOptions, updateSummitLeadReportSettings } from "../../models/lead-report-settings";
 
 const DEFAULT_ADS_STATE = {
     ads             : [],
@@ -102,7 +106,9 @@ export const DEFAULT_ENTITY = {
     ads_collection                      : DEFAULT_ADS_STATE,
     materials_collection                : DEFAULT_MATERIALS_STATE,
     social_networks_collection          : DEFAULT_SOCIAL_NETWORKS_STATE,
-    extra_questions                     : []
+    extra_questions                     : [],
+    lead_report_setting                 : {},
+    available_lead_report_columns       : [],
 }
 
 const DEFAULT_STATE = {
@@ -141,7 +147,9 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
                 }
             }
 
-            const sponsorship = { ...entity.sponsorship, name: entity.sponsorship?.type.name };
+            if (!entity.lead_report_setting) entity.lead_report_setting = {};
+
+            const sponsorship = { ...entity.sponsorship, name: entity.sponsorship?.type.name };    
 
             return {...state, entity: {...state.entity, ...entity, sponsorship} };
         }
@@ -299,6 +307,13 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
             let updated_extra_question = {...payload.response};
             let extra_questions = state.entity.extra_questions.filter(q => q.id !== updated_extra_question.id);
             return {...state, entity: {...state.entity, extra_questions: [...extra_questions, updated_extra_question]} };
+        }
+        case RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META: {
+            const availableColumns = renderOptions(denormalizeLeadReportSettings(payload.response));
+            return {...state, entity: {...state.entity, available_lead_report_columns: availableColumns}};
+        }
+        case SPONSOR_LEAD_REPORT_SETTINGS_UPDATED: {
+            return {...state, entity: {...state.entity, lead_report_setting: payload.response}};
         }
         default:
             return state;

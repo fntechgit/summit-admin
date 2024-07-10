@@ -247,6 +247,7 @@ const nestedLookup = (json, key) => {
 };
 
 export const parseSpeakerAuditLog = (logString) => {
+    
     const logEntries = logString.split('|');
     const userChanges = {};
     const emailRegExp = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
@@ -265,10 +266,10 @@ export const parseSpeakerAuditLog = (logString) => {
     for (const [email, changeCount] of Object.entries(userChanges)) {
         if (changeCount !== 0) {
             relevantChanges.push(`Speaker ${email} ${changeCount > 0 ? 'was added to the collection' : 'was removed from the collection'}`);
+        }
     }
-  }
 
-  return relevantChanges.join('|');
+    return relevantChanges.length > 0 ? relevantChanges.join('|') : logString;
 }
 
 export const formatAuditLog = (logString) => {
@@ -313,8 +314,12 @@ export const getAvailableBookingDates = (summit) => {
 	} = summit;
 	let bookStartDate = epochToMomentTimeZone(begin_allow_booking_date, time_zone_id);
 	let bookEndDate = epochToMomentTimeZone(end_allow_booking_date, time_zone_id);
+    let isValidStartDate = (new Date(begin_allow_booking_date)).getTime() > 0;
+    let isValidEndDate = (new Date(end_allow_booking_date)).getTime() > 0;
 	let now = moment().tz(time_zone_id);
 	let dates = [];
+
+    if(!isValidStartDate || !isValidEndDate) return dates;
 
 	while (bookStartDate <= bookEndDate) {
 		if (bookStartDate >= now) {
@@ -363,4 +368,16 @@ export const htmlToString = (html) => {
     return new DOMParser()
       .parseFromString(html, "text/html")
       .documentElement.textContent;
+}
+
+export const capitalize = string => string ? string.charAt(0).toUpperCase() + string.slice(1) : '';
+
+export const parseDateRangeFilter = (filterObject, filterToParse, filterName) => {
+    if (filterToParse && filterToParse.some(e => e !== null)) {
+        if(filterToParse.every(e => e !== null && e !==0 )) {
+            filterObject.push(`${filterName}[]${filterToParse[0]}&&${filterToParse[1]}`);
+        } else {
+            filterObject.push(`${filterToParse[0] !== null && filterToParse[0] !== 0 ? `${filterName}>=${filterToParse[0]}` : ``}${filterToParse[1] !== null && filterToParse[1] !== 0 ? `${filterName}<=${filterToParse[1]}` : ``}`);
+        }
+    }
 }

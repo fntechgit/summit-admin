@@ -29,8 +29,9 @@ import {
     fetchErrorHandler,
     escapeFilterValue
 } from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessTokenSafely} from '../utils/methods';
+import {checkOrFilter,getAccessTokenSafely} from '../utils/methods';
 import { saveMarketingSetting } from "./marketing-actions";
+import URI from "urijs";
 
 
 export const REQUEST_TEMPLATES       = 'REQUEST_TEMPLATES';
@@ -234,10 +235,19 @@ const normalizeEntity = (entity) => {
 export const queryTemplates = _.debounce(async (input, callback) => {
 
     const accessToken = await getAccessTokenSafely();
-
+    
+    let endpoint = URI(`${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`);    
+    
     input = escapeFilterValue(input);
 
-    fetch(`${window.EMAIL_API_BASE_URL}/api/v1/mail-templates?identifier__contains=${input}&access_token=${accessToken}`)
+    endpoint.addQuery('access_token', accessToken);    
+    endpoint.addQuery('order','-id')
+
+    if(input) {
+        endpoint.addQuery('identifier__contains', input);
+    }
+
+    fetch(endpoint)
         .then(fetchResponseHandler)
         .then((json) => {
             const options = [...json.data];
@@ -283,18 +293,17 @@ export const getSentEmailsByTemplatesAndEmail = (templates = [], toEmail , page 
     );
 };
 
-export const getSentEmails = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
+export const getSentEmails = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1, filters = {} ) => async (dispatch, getState) => {
 
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
-    const params = {
+    let params = {
         page         : page,
         per_page     : perPage,
         access_token : accessToken,
         expand: 'template',
-        is_sent: 1,
     };
 
     if (term) {
@@ -307,12 +316,18 @@ export const getSentEmails = (term = null, page = 1, perPage = 10, order = 'id',
         params['order']= `${orderDirSign}${order}`;
     }
 
+    const filter = parseFilters(filters);
+
+    if (Object.keys(filter).length > 0) {
+        params = {...params, ...filter};
+    }
+
     return getRequest(
         createAction(REQUEST_EMAILS),
         createAction(RECEIVE_EMAILS),
         `${window.EMAIL_API_BASE_URL}/api/v1/mails`,
         authErrorHandler,
-        {order, orderDir, term}
+        {order, orderDir, term, filters}
     )(params)(dispatch).then(() => {
             dispatch(stopLoading());
         }
@@ -440,3 +455,28 @@ export const customErrorHandler = (err, res) => (dispatch, state) => {
             dispatch(authErrorHandler(err, res));
     }
 }
+
+const parseFilters = (filters) => {
+    let filter = {};
+
+    if(filters.is_sent_filter){
+        if(filters.is_sent_filter === '1')
+            filter = {...filter, is_sent: 1};
+        if(filters.is_sent_filter === '0')
+            filter = {...filter, is_sent: 0}
+    }
+
+    if (filters.sent_date_filter && filters.sent_date_filter.some(e => e !== null)) {
+        if(filters.sent_date_filter.every(e => e !== null )) {
+            filter = {...filter, from_sent_date: filters.sent_date_filter[0], to_sent_date: filters.sent_date_filter[1]};
+        } else {
+            filter = {...filter, [`${filters.sent_date_filter[0] !== null ? 'from_sent_date' : 'to_sent_date'}`]: filters.sent_date_filter[0] !== null ? filters.sent_date_filter[0] : filters.sent_date_filter[1]}
+        }
+    }
+
+    if (filters.template_filter) {
+        filter = {...filter, template__identifier__in: filters.template_filter}
+    }
+
+    return checkOrFilter(filters, filter);
+};

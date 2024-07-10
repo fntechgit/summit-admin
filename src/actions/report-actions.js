@@ -19,6 +19,7 @@ import {
     authErrorHandler, fetchResponseHandler, fetchErrorHandler
 } from 'openstack-uicore-foundation/lib/utils/actions';
 import {getAccessTokenSafely} from '../utils/methods';
+import {DUMMY_ACTION} from '../utils/constants';
 
 
 export const REQUEST_REPORT         = 'REQUEST_REPORT';
@@ -102,7 +103,7 @@ export const exportReport = ( buildQuery, reportName, grouped, preProcessData=nu
 
         const result = await getRequest(
           createAction(REQUEST_EXPORT_REPORT),
-          createAction('DUMMY_ACTION'),
+          createAction(DUMMY_ACTION),
           `${window.REPORT_API_BASE_URL}/reports`,
           authErrorHandler,
           {},

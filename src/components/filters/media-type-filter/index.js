@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import T from 'i18n-react/dist/i18n-react';
 import MediaUploadTypeInput from '../../inputs/media-upload-type-input';
 import Select from 'react-select'

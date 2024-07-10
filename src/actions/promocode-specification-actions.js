@@ -52,20 +52,3 @@ export const validateSpecs = (promoCodeStrategy, entity, callback) => (dispatch)
 export const resetPromoCodeSpecForm = () => (dispatch) => {
     dispatch(createAction(RESET_PROMOCODE_SPEC_FORM)({}));
 };
-
-export const queryMultiSpeakersPromocodes = _.debounce(async (summitId, input, promoCodeStrategy, callback) => {
-
-    const accessToken = await getAccessTokenSafely();
-
-    input = escapeFilterValue(input);
-
-    const params = `filter[]=code=@${input}&filter[]=class_name==${promoCodeStrategy === 1 ? SPEAKERS_PROMO_CODE_CLASS_NAME : SPEAKERS_DISCOUNT_CODE_CLASS_NAME}`;
-
-    fetch(`${window.API_BASE_URL}/api/v1/summits/${summitId}/promo-codes?${params}&access_token=${accessToken}`)
-        .then(fetchResponseHandler)
-        .then((json) => {
-            const options = [...json.data];
-            callback(options);
-        })
-        .catch(fetchErrorHandler);
-}, 500);

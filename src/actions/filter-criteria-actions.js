@@ -27,6 +27,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from '../utils/methods';
 import URI from "urijs";
+import Swal from "sweetalert2";
 
 export const FILTER_CRITERIA_ADDED = 'FILTER_CRITERIA_ADDED';
 export const FILTER_CRITERIA_DELETED = 'FILTER_CRITERIA_DELETED';

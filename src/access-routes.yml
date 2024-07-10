@@ -46,6 +46,11 @@ badge-scans-edit:
   - summit-front-end-administrators
   - sponsors
 
+badge-settings:
+  - super-admins
+  - administrators
+  - summit-front-end-administrators
+
 admin-sponsors:
   - super-admins
   - administrators
@@ -241,6 +246,11 @@ progress-flags:
   - summit-registration-administrators
 
 signage:
+  - super-admins
+  - administrators
+  - summit-front-end-administrators
+
+lead-report-settings-edit:
   - super-admins
   - administrators
   - summit-front-end-administrators

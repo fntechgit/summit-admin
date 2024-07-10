@@ -32,7 +32,7 @@ import {
     fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
-import {checkOrFilter, getAccessTokenSafely, isNumericString} from '../utils/methods';
+import {checkOrFilter, getAccessTokenSafely, isNumericString, parseDateRangeFilter} from '../utils/methods';
 import {getQAUsersBySummitEvent} from "./user-chat-roles-actions";
 import {getAuditLog} from "./audit-log-actions";
 
@@ -180,7 +180,7 @@ export const getEventsForOccupancy = (term = null, roomId = null, currentEvents 
     }
 
     const params = {
-        expand: 'speakers, location',
+        expand: 'speakers, location, track',
         page: page,
         per_page: perPage,
         access_token: accessToken,
@@ -255,7 +255,7 @@ export const getEventsForOccupancyCSV = (term = null, roomId = null, currentEven
         params['order'] = `${orderDirSign}${order}`;
     }
 
-    params['fields'] = 'start_date,title,occupancy,location_name,speaker_fullnames'
+    params['fields'] = 'start_date,title,track,occupancy,location_name,speaker_fullnames'
 
     const filename = `summit-${currentSummit.slug}-rooms-occupancy.csv`;
 
@@ -990,6 +990,11 @@ const parseFilters = (filters, term = null) => {
         filter.push(`selection_status==${filters.selection_status_filter.join('||')}`);
     }
 
+    if (filters.hasOwnProperty('review_status_filter') && Array.isArray(filters.review_status_filter)
+        && filters.review_status_filter.length > 0) {
+        filter.push(`review_status==${filters.review_status_filter.join('||')}`);
+    }
+
     if (filters?.progress_flag?.length > 0) {
         filter.push(
           filters.progress_flag
@@ -1026,29 +1031,21 @@ const parseFilters = (filters, term = null) => {
         filter.push(`published==${filters.published_filter === 'published' ? '1' : '0'}`);
     }
 
-    if (filters.start_date_filter && filters.start_date_filter.some(e => e !== null)) {
-        if(filters.start_date_filter.every(e => e !== null )) {
-            filter.push(`start_date[]${filters.start_date_filter[0]}&&${filters.start_date_filter[1]}`);
-        } else {
-            filter.push(`
-            ${filters.start_date_filter[0] !== null ? 
-                `start_date>=${filters.start_date_filter[0]}` : ``}
-            ${filters.start_date_filter[1] !== null ? 
-                `start_date<=${filters.start_date_filter[1]}` : ``}`);
-        }
+    
+    if (filters.start_date_filter) {
+        parseDateRangeFilter(filter, filters.start_date_filter, 'start_date');
+    }    
+
+    if (filters.end_date_filter) {        
+        parseDateRangeFilter(filter, filters.end_date_filter, 'end_date');
     }
 
-    if (filters.end_date_filter && filters.end_date_filter.some(e => e !== null)) {
-        if(filters.end_date_filter.every(e => e !== null )) {
-            // between
-            filter.push(`end_date[]${filters.end_date_filter[0]}&&${filters.end_date_filter[1]}`);
-        } else {
-            filter.push(`
-            ${filters.end_date_filter[0] !== null ? 
-                `end_date>=${filters.end_date_filter[0]}` : ``}
-            ${filters.end_date_filter[1] !== null ? 
-                `end_date<=${filters.end_date_filter[1]}` : ``}`);
-        }
+    if (filters.created_filter) {
+        parseDateRangeFilter(filter, filters.created_filter, 'created');
+    }    
+
+    if (filters.modified_filter) {
+        parseDateRangeFilter(filter, filters.modified_filter, 'last_edited');
     }
 
     if (filters.duration_filter) {
@@ -1102,17 +1099,20 @@ const parseFilters = (filters, term = null) => {
         filter.push(`streaming_type==${filters.streaming_type}`)
     }
 
+    if(filters.hasOwnProperty('submission_source_filter') && filters.submission_source_filter) {
+        filter.push(`submission_source==${filters.submission_source_filter}`)
+    }
+
     if (filters.hasOwnProperty('speaker_company') && Array.isArray(filters.speaker_company)
         && filters.speaker_company.length > 0) {
-        console.log('parse filter', filters.speaker_company)
         filter.push(
-            `speaker_company==${filters.speaker_company.map(company => escapeFilterValue(company.name)).join('||')}`);
+            `speaker_company==${filters.speaker_company.map(c => escapeFilterValue(c.name)).join('||')}`);
     }
 
     if (filters.hasOwnProperty('submitter_company') && Array.isArray(filters.submitter_company)
         && filters.submitter_company.length > 0) {
         filter.push(
-            `created_by_company==${filters.submitter_company.map(company => escapeFilterValue(company.name)).join('||')}`);
+            `created_by_company==${filters.submitter_company.map(c => escapeFilterValue(c.name)).join('||')}`);
     }
 
     if (filters.hasOwnProperty('sponsor') && Array.isArray(filters.sponsor)
@@ -1123,7 +1123,7 @@ const parseFilters = (filters, term = null) => {
 
     if (filters.hasOwnProperty('all_companies') && Array.isArray(filters.all_companies)
         && filters.all_companies.length > 0) {
-        const companies = filters.all_companies.map(company => escapeFilterValue(tt.name).join('||'));
+        const companies = filters.all_companies.map(c => escapeFilterValue(c.name)).join('||');
         filter.push(`speaker_company==${companies},created_by_company==${companies},sponsor==${companies}`);
     }
 

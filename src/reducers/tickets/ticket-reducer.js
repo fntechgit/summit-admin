@@ -33,6 +33,7 @@ export const DEFAULT_ENTITY = {
     id: 28,
     bought_date: 0,
     currency: "USD",
+    currency_symbol: "$",
     discount: 0,
     external_attendee_id: null,
     external_order_id: null,
@@ -80,6 +81,8 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
         case UPDATE_TICKET: {
             return {...state,  entity: {...payload} };
         }
+        case TICKET_REFUNDED:
+        case TICKET_CANCEL_REFUND:
         case RECEIVE_TICKET: {
             let entity = {...payload.response};
             let bought_date = entity.bought_date ? epochToMomentTimeZone(entity.bought_date, state.summitTZ).format('MMMM Do YYYY, h:mm:ss a') : null;
@@ -87,9 +90,9 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
             let promocode_name = 'N/A';
             let attendee_company = 'N/A';
             let attendee_email = null;
-            const final_amount_formatted = `$${entity.final_amount.toFixed(2)}`;
-            const refunded_amount_formatted = `$${entity.total_refunded_amount.toFixed(2)}`;
-            const adjusted_total_ticket_purchase_price_formatted = `$${((entity.final_amount - entity.total_refunded_amount))}`;;
+            const final_amount_formatted = `${entity.currency_symbol}${entity.final_amount.toFixed(2)}`;
+            const refunded_amount_formatted = `${entity.currency_symbol}${entity.total_refunded_amount.toFixed(2)}`;
+            const adjusted_total_ticket_purchase_price_formatted = `${entity.currency_symbol}${(entity.final_amount - entity.total_refunded_amount).toFixed(2)}`;
             for(var key in entity) {
                 if(entity.hasOwnProperty(key)) {
                     entity[key] = (entity[key] == null) ? '' : entity[key] ;
@@ -109,14 +112,14 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     attendee_full_name = `${entity.owner.member.first_name} ${entity.owner.member.last_name}`;
                 }
             }
-            
-            const approved_refunds_taxes = [];            
+
+            const approved_refunds_taxes = [];
 
             if(entity.hasOwnProperty("refund_requests")){
                 entity.refund_requests = entity.refund_requests.map( r => {
                     r.refunded_taxes.forEach(t => {
                         // field for the tax column of that refund
-                        r[`tax_${t.tax.id}_refunded_amount`] = `$${t.refunded_amount.toFixed(2)}`;
+                        r[`tax_${t.tax.id}_refunded_amount`] = `${entity.currency_symbol}${t.refunded_amount.toFixed(2)}`;
                         // add tax type to array
                         approved_refunds_taxes.push(t);
                     });
@@ -124,12 +127,12 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     return ({...r,
                         requested_by_fullname: r.requested_by ? `${r.requested_by.first_name} ${r.requested_by.last_name}`:'TBD',
                         action_by_fullname: r.action_by ? `${r.action_by.first_name} ${r.action_by.last_name}`:'TBD',
-                        refunded_amount_formatted: `$${r.refunded_amount.toFixed(2)}`,
-                        total_refunded_amount_formatted: `$${r.total_refunded_amount.toFixed(2)}`,
+                        refunded_amount_formatted: `${entity.currency_symbol}${r.refunded_amount.toFixed(2)}`,
+                        total_refunded_amount_formatted: `${entity.currency_symbol}${r.total_refunded_amount.toFixed(2)}`,
                     })
                 })
             }
-            
+
             const unique_approved_refunds_taxes = approved_refunds_taxes.filter((tax, idx, arr) => {
                 return idx === arr.findIndex(obj => obj.id === tax.id);
             });
@@ -147,28 +150,6 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
                     adjusted_total_ticket_purchase_price_formatted,
                     refund_requests_taxes: unique_approved_refunds_taxes
                 } };
-        }
-        case TICKET_REFUNDED:
-        case TICKET_CANCEL_REFUND:
-        {
-            let entity = {...payload.response};
-
-            const refunded_amount_formatted = `$${entity.refunded_amount.toFixed(2)}`;
-            const final_amount_adjusted_formatted = `$${((entity.final_amount - entity.refunded_amount).toFixed(2))}`;
-            if(entity.hasOwnProperty("refund_requests")){
-                entity.refund_requests = entity.refund_requests.map( r => ({...r,
-                    requested_by_fullname: r.requested_by ? `${r.requested_by.first_name} ${r.requested_by.last_name}`:'TBD',
-                    action_by_fullname: r.action_by ? `${r.action_by.first_name} ${r.action_by.last_name}`:'TBD',
-                    refunded_amount_formatted: `$${r.refunded_amount.toFixed(2)}`,
-                    total_refunded_amount_formatted: `$${r.total_refunded_amount.toFixed(2)}`,
-                }))
-            }
-            return {...state, entity:{...state.entity,
-                    refund_requests : entity.refund_requests,
-                    refunded_amount: entity.refunded_amount,
-                    refunded_amount_formatted : refunded_amount_formatted,
-                    final_amount_adjusted_formatted : final_amount_adjusted_formatted
-                }};
         }
         case TICKET_UPDATED: {
             let entity = {...payload.response};

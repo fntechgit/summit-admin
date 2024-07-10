@@ -18,6 +18,8 @@ import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/met
 import { Input, Dropdown, MemberInput, DateTimePicker } from 'openstack-uicore-foundation/lib/components'
 import { getAvailableBookingDates, getDayFromReservation, isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
+import Swal from "sweetalert2";
+
 import '../../styles/booking-room.less';
 
 const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlots, onSubmit, getAvailableSlots }) => {
@@ -91,7 +93,12 @@ const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlot
     const handleSubmit = (ev) => {
         ev.preventDefault();
 
-        const { start_date, end_date } = availableSlots.find(e => e.start_date === timeSlot);
+        if(!bookingDate || !timeSlot) {
+            const msg = `${!bookingDate ? T.translate("edit_room_booking.date") : T.translate("edit_room_booking.available_slots")}: This field may not be blank.`;
+            return Swal.fire("Validation error", msg, "warning");
+        }
+
+        const { start_date, end_date } = availableSlots.find(e => e.start_date === timeSlot);        
 
         let normalizedEntity = {
             id: stateEntity.id || null,
@@ -129,8 +136,6 @@ const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlot
             isDisabled: !as.is_free
         }
     ));
-
-    console.log('STATE ENTITY...', stateEntity, currentRoom);
 
     return (
         <form className="room-booking-form">
@@ -192,7 +197,7 @@ const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlot
                     </div>
                     <div className="row form-group">
                         <div className="col-md-4">
-                            <label> {T.translate("edit_room_booking.date")}</label>
+                            <label> {T.translate("edit_room_booking.date")} *</label>
                             <Dropdown
                                 id="booking_dates"
                                 value={bookingDate}
@@ -203,7 +208,7 @@ const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlot
                         </div>
                         {bookingDate &&
                             <div className="col-md-4">
-                                <label> {T.translate("edit_room_booking.available_slots")}</label>
+                                <label> {T.translate("edit_room_booking.available_slots")} *</label>
                                 <Dropdown
                                     id="available_slots"
                                     value={timeSlot}
@@ -214,7 +219,7 @@ const RoomBookingForm = ({ history, entity, currentSummit, errors, availableSlot
                             </div>
                         }
                         <div className="col-md-4">
-                            <label> {T.translate("edit_room_booking.owner")}</label>
+                            <label> {T.translate("edit_room_booking.owner")} *</label>
                             <MemberInput
                                 id="owner"
                                 value={stateEntity.owner}

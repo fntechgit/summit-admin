@@ -1,4 +1,4 @@
-/**
+    /**
  * Copyright 2018 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import {
     SelectableTable,
     Dropdown,
     PromocodeInput,
-    TagInput
+    TagInput,
+    CompanyInput
 } from 'openstack-uicore-foundation/lib/components';
 import { getSummitById }  from '../../actions/summit-actions';
 import {
@@ -45,10 +46,14 @@ import '../../styles/ticket-list-page.less';
 import OrAndFilter from '../../components/filters/or-and-filter';
 import { ALL_FILTER } from '../../utils/constants';
 import {getBadgeTypes} from "../../actions/badge-actions";
+import SelectFilterCriteria from '../../components/filters/select-filter-criteria';
+import SaveFilterCriteria from '../../components/filters/save-filter-criteria';
+import { CONTEXT_TICKETS } from '../../utils/filter-criteria-constants';
+import { saveFilterCriteria, deleteFilterCriteria } from "../../actions/filter-criteria-actions"
 
 const BatchSize = 25;
 
-const fieldNames = [    
+const fieldNames = [
     { columnKey: 'number', value: 'number', sortable: true, render: (item, val) => {
         const hasRequested =  item.refund_requests.some((r) => r.status === 'Requested');
         return `${val}` + (hasRequested ? '&nbsp;<span class="label label-danger">Refund Requested</span>' :'')
@@ -63,7 +68,22 @@ const fieldNames = [
     { columnKey: 'promo_code_tags', value: 'promo_code_tags'},
     { columnKey: 'badge_type_id', value: 'badge_type', sortable: true},
     { columnKey: 'badge_prints_count', value: 'badge_prints_count', sortable: true},
-]
+];
+
+const defaultFilters = {
+    showOnlyPendingRefundRequests: false,
+    ticketTypesFilter : [],
+    ownerFullNameStartWithFilter:[],
+    viewTypesFilter: [],
+    hasOwnerFilter : null,
+    completedFilter : null,
+    amountFilter: null,
+    hasBadgeFilter : null,
+    showOnlyPrintable: false,
+    promocodesFilter: [],
+    promocodeTagsFilter:[],
+    orAndFilter: ALL_FILTER,
+};
 
 class TicketListPage extends React.Component {
 
@@ -86,6 +106,9 @@ class TicketListPage extends React.Component {
         this.handleColumnsChange = this.handleColumnsChange.bind(this);
         this.handleFiltersChange = this.handleFiltersChange.bind(this);
         this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
+        this.handleFilterCriteriaSave = this.handleFilterCriteriaSave.bind(this);
+        this.handleFilterCriteriaChange = this.handleFilterCriteriaChange.bind(this);
+        this.handleFilterCriteriaDelete = this.handleFilterCriteriaDelete.bind(this);
 
         this.state = {
             showIngestModal: false,
@@ -97,19 +120,9 @@ class TicketListPage extends React.Component {
             selectedColumns: [],
             enabledFilters: [],
             ticketFilters: {
-                showOnlyPendingRefundRequests: false,
-                ticketTypesFilter : [],
-                ownerFullNameStartWithFilter:[],
-                viewTypesFilter: [],
-                hasOwnerFilter : null,
-                completedFilter : null,
-                amountFilter: null,
-                hasBadgeFilter : null,
-                showOnlyPrintable: false,
-                promocodesFilter: [],
-                promocodeTagsFilter:[],
-                orAndFilter: ALL_FILTER,
-            }
+                ...defaultFilters,
+            },
+            selectedFilterCriteria: null,
         }
 
         if (currentSummit && !currentSummit.badge_types) {
@@ -123,14 +136,14 @@ class TicketListPage extends React.Component {
             const { term, order, orderDir, filters, extraColumns } = this.props;
             const  enabledFilters = Object.keys(filters).filter(e => filters[e]?.length > 0);
             this.setState({
-                ...this.state, 
+                ...this.state,
                 selectedColumns: extraColumns,
                 enabledFilters: enabledFilters,
                 ticketFilters: {...ticketFilters, ...filters}
             });
             this.props.getTickets(term, 1, 10, order, orderDir, filters, extraColumns);
         }
-    }    
+    }
 
     handleSelected(attendee_id, isSelected){
         if(isSelected){
@@ -196,7 +209,7 @@ class TicketListPage extends React.Component {
     }
 
     handleFilterChange(key, value) {
-        const {term, order, orderDir, perPage} = this.props;        
+        const {term, order, orderDir, perPage} = this.props;
         const {selectedColumns} = this.state;
         this.setState({...this.state, ticketFilters: {...this.state.ticketFilters, [key]: value }}, () => {
             this.props.getTickets(term, 1, perPage, order, orderDir, this.state.ticketFilters, selectedColumns);
@@ -260,6 +273,7 @@ class TicketListPage extends React.Component {
                     showOnlyPendingRefundRequests: false,
                     ticketTypesFilter : [],
                     ownerFullNameStartWithFilter:[],
+                    ownerCompany: [],
                     viewTypesFilter: [],
                     hasOwnerFilter : null,
                     completedFilter : null,
@@ -275,7 +289,7 @@ class TicketListPage extends React.Component {
                     this.props.getTickets(term, 1, perPage, order, orderDir, this.state.ticketFilters, this.state.selectedColumns);
                 });
             } else {
-                const removedFilter = this.state.enabledFilters.filter(e => !value.includes(e))[0];            
+                const removedFilter = this.state.enabledFilters.filter(e => !value.includes(e))[0];
                 const defaultValue = removedFilter === 'published_filter' ? null : Array.isArray(this.state.ticketFilters[removedFilter]) ? [] : '';
                 let newEventFilters = {...this.state.ticketFilters, [removedFilter]: defaultValue};
                 this.setState({...this.state, enabledFilters: value, ticketFilters: newEventFilters}, () => {
@@ -291,6 +305,50 @@ class TicketListPage extends React.Component {
         return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
     }
 
+    handleFilterCriteriaSave(filterData) {
+        const {enabledFilters, ticketFilters} = this.state;
+        const {currentSummit} = this.props;
+        const filterToSave = {
+            id: filterData.id,
+            show_id: currentSummit.id,
+            name: filterData.name,
+            enabled_filters: enabledFilters,
+            // only save criteria for enabled filters
+            criteria: Object.fromEntries(Object.entries(ticketFilters).filter(([key]) => enabledFilters.includes(key))),
+            context: CONTEXT_TICKETS,
+            visibility: filterData.visibility
+        }
+        this.props.saveFilterCriteria(filterToSave);
+    }
+
+    handleFilterCriteriaChange(filterCriteria) {
+        const {term, order, orderDir} = this.props;
+        let newEventFilters = {}
+        if(filterCriteria) {
+            Object.entries(filterCriteria.criteria).map(([key, values]) => {
+                newEventFilters = {...newEventFilters, [key]: values};
+            });
+        }
+
+        this.setState({
+            ...this.state,
+            ticketFilters: {...defaultFilters, ...newEventFilters},
+            enabledFilters: filterCriteria ? filterCriteria.enabled_filters : [],
+            selectedFilterCriteria: filterCriteria || null
+        }, () => this.props.getTickets(term, 1, 10, order, orderDir, this.state.ticketFilters, this.state.selectedColumns));
+    }
+
+    handleFilterCriteriaDelete(filterCriteriaId) {
+        const {term, order, orderDir} = this.props;
+        this.props.deleteFilterCriteria(filterCriteriaId).then(() =>
+            this.setState({...this.state,
+                ticketFilters: {...defaultFilters},
+                enabledFilters: [],
+                selectedFilterCriteria: null
+            }, () => this.props.getTickets(term, 1, 10, order, orderDir, this.state.ticketFilters, this.state.selectedColumns))
+        );
+    }
+
     render(){
         const {
             currentSummit,
@@ -304,9 +362,9 @@ class TicketListPage extends React.Component {
             match,
             selectedCount,
             selectedAll,
-        } = this.props;                
+        } = this.props;
 
-        const {doCheckIn, showIngestModal, showImportModal, importFile, showPrintModal, selectedViewType, enabledFilters, ticketFilters} = this.state;
+        const {doCheckIn, showIngestModal, showImportModal, importFile, showPrintModal, selectedViewType, enabledFilters, ticketFilters,selectedFilterCriteria} = this.state;
 
         let columns = [
             { columnKey: 'id', value: T.translate("ticket_list.id"), sortable: true },
@@ -371,11 +429,12 @@ class TicketListPage extends React.Component {
             {label: 'Badge', value: 'hasBadgeFilter'},
             {label: 'Amount', value: 'amountFilter'},
             {label: 'Assignee Name', value: 'ownerFullNameStartWithFilter'},
+            {label: 'Owner Company', value: 'ownerCompany'},
             {label: 'View Type', value: 'viewTypesFilter'},
             {label: 'Ticket Type', value: 'ticketTypesFilter'},
             {label: 'Promo Code', value: 'promocodesFilter'},
             {label: 'Promo Code Tags', value: 'promocodeTagsFilter'},
-            {label: 'Refund Requested', value: 'show_refund_request_pending'},  
+            {label: 'Refund Requested', value: 'show_refund_request_pending'},
             {label: 'Printable', value: 'show_printable'},
             {label: 'Badge Type', value: 'badgeTypesFilter'},
         ]
@@ -442,7 +501,19 @@ class TicketListPage extends React.Component {
                         </div>
                     </div>
                     <hr/>
-                    <OrAndFilter value={ticketFilters.orAndFilter} entity={'tickets'} onChange={(filter) => this.handleFilterChange('orAndFilter', filter)}/>
+                    <div className="row">
+                        <div className="col-md-6">
+                            <OrAndFilter value={ticketFilters.orAndFilter} entity={'tickets'} onChange={(filter) => this.handleFilterChange('orAndFilter', filter)}/>
+                        </div>
+                        <div className="col-md-6">
+                            <SelectFilterCriteria
+                                summitId={currentSummit.id}
+                                context={CONTEXT_TICKETS}
+                                onDelete={this.handleFilterCriteriaDelete}
+                                selectedFilterCriteria={selectedFilterCriteria}
+                                onChange={this.handleFilterCriteriaChange} />
+                        </div>
+                    </div>
                     <div className="row">
                         <div className="col-md-6">
                             <Dropdown
@@ -456,7 +527,8 @@ class TicketListPage extends React.Component {
                             />
                         </div>
                     </div>
-                    <div className="row">
+                    <SaveFilterCriteria onSave={this.handleFilterCriteriaSave} selectedFilterCriteria={selectedFilterCriteria}/>
+                    <div className="row filtersWrapper">
                         {enabledFilters.includes('hasOwnerFilter') &&
                         <div className="col-md-6">
                             <SegmentedControl
@@ -467,7 +539,7 @@ class TicketListPage extends React.Component {
                                     { label: T.translate("ticket_list.has_no_owner"), value: "HAS_NO_OWNER",default: ticketFilters.hasOwnerFilter === "HAS_NO_OWNER" },
                                 ]}
                                 setValue={val => this.handleFilterChange('hasOwnerFilter', val)}
-                                className="ticket-list-segment"
+                                className="segmentFilter"
                             />
                         </div>
                         }
@@ -481,7 +553,7 @@ class TicketListPage extends React.Component {
                                   { label: T.translate("ticket_list.incomplete"), value: "Incomplete",default: ticketFilters.completedFilter === "Incomplete" },
                               ]}
                               setValue={val => this.handleFilterChange('completedFilter', val)}
-                              className="ticket-list-segment"
+                              className="segmentFilter"
                             />
                         </div>
                         }
@@ -495,7 +567,7 @@ class TicketListPage extends React.Component {
                                     { label: T.translate("ticket_list.has_no_badge"), value: "HAS_NO_BADGE",default: ticketFilters.hasBadgeFilter === "HAS_NO_BADGE" },
                                 ]}
                                 setValue={newValue => this.handleFilterChange('hasBadgeFilter', newValue)}
-                                className="ticket-list-segment"
+                                className="segmentFilter"
                             />
                         </div>
                         }
@@ -509,7 +581,7 @@ class TicketListPage extends React.Component {
                                   { label: T.translate("ticket_list.free"), value: "Free",default: ticketFilters.amountFilter === "Free" },
                               ]}
                               setValue={val => this.handleFilterChange('amountFilter', val)}
-                              className="ticket-list-segment"
+                              className="segmentFilter"
                             />
                         </div>
                         }
@@ -523,9 +595,22 @@ class TicketListPage extends React.Component {
                                 options={alphabet}
                                 isClearable={true}
                                 isMulti
-                                className="ticket-types-filter"
+                                className="dropdownFilter"
                             />
                         </div>
+                        }
+                        {enabledFilters.includes('ownerCompany') &&
+                          <div className={'col-md-6'}>
+                              <CompanyInput
+                                id='ownerCompany'
+                                className="dropdownFilter"
+                                value={ticketFilters.ownerCompany}
+                                placeholder={T.translate("ticket_list.placeholders.owner_company")}
+                                onChange={ev => this.handleFilterChange('ownerCompany', ev.target.value)}
+                                extraOptions={[{value: 'NULL', label: 'TBD'}]}
+                                multi
+                              />
+                          </div>
                         }
                         {enabledFilters.includes('viewTypesFilter') &&
                         <div className={'col-md-6'}>
@@ -537,7 +622,7 @@ class TicketListPage extends React.Component {
                                 options={viewTypesOptions}
                                 isClearable={true}
                                 isMulti
-                                className="view-types-filter"
+                                className="dropdownFilter"
                             />
                         </div>
                         }
@@ -551,38 +636,38 @@ class TicketListPage extends React.Component {
                               options={ticketTypesOptions}
                               isClearable={true}
                               isMulti
-                              className="ticket-types-filter"
+                              className="dropdownFilter"
                             />
                         </div>
                         }
-                        {enabledFilters.includes('promocodesFilter') && 
+                        {enabledFilters.includes('promocodesFilter') &&
                         <div className="col-md-6">
                             <PromocodeInput
                               id="promocodesFilter"
                               value={ticketFilters.promocodesFilter}
                               onChange={ev => this.handleFilterChange('promocodesFilter', ev.target.value)}
                               summitId={currentSummit.id}
-                              className="promocodes-filter"
+                              className="dropdownFilter"
                               placeholder={T.translate('ticket_list.placeholders.promocodes')}
                               isClearable
                               multi
                             />
                         </div>
                         }
-                        {enabledFilters.includes('promocodeTagsFilter') && 
+                        {enabledFilters.includes('promocodeTagsFilter') &&
                         <div className="col-md-6">
                             <TagInput
                               id="promocodeTagsFilter"
                               value={ticketFilters.promocodeTagsFilter}
                               onChange={ev => this.handleFilterChange('promocodeTagsFilter', ev.target.value)}
-                              className="promocodes-filter"
+                              className="dropdownFilter"
                               placeholder={T.translate('ticket_list.placeholders.promocodes_tags')}
                               isClearable
                               multi
                             />
                         </div>
-                        }       
-                        {enabledFilters.includes('show_refund_request_pending') && 
+                        }
+                        {enabledFilters.includes('show_refund_request_pending') &&
                         <div className={'col-md-6'}>
                             <div className="form-check abc-checkbox">
                                 <input
@@ -598,7 +683,7 @@ class TicketListPage extends React.Component {
                             </div>
                         </div>
                         }
-                        {enabledFilters.includes('show_printable') && 
+                        {enabledFilters.includes('show_printable') &&
                         <div className={'col-md-6'}>
                             <div className="form-check abc-checkbox">
                                 <input
@@ -625,12 +710,11 @@ class TicketListPage extends React.Component {
                               options={badgeTypesOptions}
                               isClearable={true}
                               isMulti
-                              className="badge-type-filter"
+                              className="dropdownFilter"
                             />
                         </div>
                         }
                     </div>
-
                     <hr/>
 
                     <div className={'row'} style={{marginBottom: 15}}>
@@ -813,5 +897,7 @@ export default connect (
         printTickets,
         getTicket,
         getBadgeTypes,
+        saveFilterCriteria,
+        deleteFilterCriteria
     }
 )(TicketListPage);

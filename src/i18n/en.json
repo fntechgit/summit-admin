@@ -54,6 +54,7 @@
     "are_you_sure": "Are you sure?",
     "yes_delete": "Yes, delete.",
     "yes_remove": "Yes, remove.",
+    "yes_send": "Yes, send.",
     "id": "Id",
     "label": "Label",
     "value": "Value",
@@ -92,13 +93,13 @@
     "featured_speakers": "Featured Speakers",
     "merge_speakers": "Merge",
     "companies": "Companies",
-    "sponsorship_types": "Sponsorship Types",
+    "sponsorship_types": "Tiers",
     "tags": "Tags",
     "attendees": "Attendees",
     "attendee-list": "Attendee List",
     "badge_checkin": "Check In",
-    "promocodes": "Promocodes",
-    "promocode_list": "Promocodes",
+    "promocodes": "Promo Codes",
+    "promocode_list": "Promo Codes",
     "event_types": "Activity Types",
     "event_categories": "Activity Categories",
     "event_category_groups": "Activity Category Groups",
@@ -113,6 +114,7 @@
     "access_level_list": "Access Levels",
     "view_type_list": "View Types",
     "badge_type_list": "Badge Types",
+    "badge_settings": "Badge Settings",
     "taxes": "Taxes",
     "tax_type_list": "Tax Types",
     "refund_policy_list": "Automatic Refund Polices",
@@ -127,14 +129,15 @@
     "order_extra_questions": "Extra Questions",
     "sponsors": "Sponsors",
     "sponsor_list": "Sponsor List",
-    "sponsorship_list": "Sponsorships",
-    "sponsors_promocodes": "Promocodes",
+    "sponsorship_list": "Tiers",
+    "sponsors_promocodes": "Promo Codes",
     "badge_scans": "Badge Scans",
     "marketing": "Marketing",
     "payment_profiles_list": "Payment Profiles",
     "emails": "Emails",
     "email_templates": "Templates",
     "sent_email": "Sent Emails",
+    "email_logs": "Logs",
     "summitdocs": "Event Docs",
     "email_flow_events": "Email Events",
     "email_flow_overrides": "Overrides",
@@ -281,6 +284,9 @@
     "external_summit_id": "External Id",
     "max_submission_allowed_per_user": "Max. Submissions per User",
     "slug": "Slug",
+    "registration_slug": "Registration Slug",
+    "sample_order_qr_prefix": "Sample Order Number",
+    "sample_ticket_qr_prefix": "Sample Ticket Number",
     "link": "Event Page Link",
     "registration_link": "Registration Link",
     "registration_disclaimer_content": "Disclaimer",
@@ -385,6 +391,7 @@
     "id": "Id",
     "email": "Email",
     "enabled": "Enabled",
+    "hidden": "Hidden",
     "submission_begin_date": "Submissions Start",
     "submission_end_date": "Submissions End",
     "submission_lock_down_presentation_status_date": "Submissions Status Lock Down Date",
@@ -463,6 +470,7 @@
   "edit_event": {
     "title": "Title",
     "submitter": "Submitter",
+    "submission_source": "Submission Source",
     "published": "Published",
     "short_description": "Short Description / Abstract",
     "social_summary": "Social Summary",
@@ -561,7 +569,8 @@
       "select_submitter": "Select Submitter ...",
       "search_feedback": "Search by Author, Note",
       "search_comment": "Search by Comment, Creator ID",
-      "allowed_ticket_types": "Select ticket types"
+      "allowed_ticket_types": "Select ticket types",
+      "select_submission_source": "Select a Submission Source"
     }
   },
   "edit_event_material": {
@@ -692,13 +701,13 @@
     "company_saved": "Company saved successfully.",
     "company_created": "Company created successfully.",
     "project_name": "Sponsored Project",
-    "sponsorship_type": "Sponsorship Type",
+    "sponsorship_type": "Tier",
     "add_project_sponsorship": "Add Project Sponsorship",
     "delete_supporting_company_warning": "",
     "placeholders": {
       "select_country": "Select Country",
       "sponsored_project": "Select Sponsored Project",
-      "sponsorship_type": "Select Sponsorship Type"
+      "sponsorship_type": "Select Tier"
     }
   },
   "tag_list": {
@@ -759,6 +768,7 @@
     "company": "Company",
     "status": "Status",
     "tags": "Tags",
+    "has_notes": "Notes",
     "delete_attendee_warning": "Are you sure you want to delete attendee",
     "send_emails": "Send",
     "resend_done": "Emails sent successfully.",
@@ -778,7 +788,9 @@
       "badge_feature": "Filter by Badge Feature",
       "checkin_date_from": "Filter Check In Date from",
       "checkin_date_to": "Filter Check In Date to",
-      "tags": "Filter by tag"
+      "tags": "Filter by tag",
+      "company": "Filter by company",
+      "notes": "Filter by note"
     }
   },
   "edit_attendee": {
@@ -830,10 +842,10 @@
   },
   "promocode_list": {
     "id": "#",
-    "promocode_list": "Promocode List",
-    "promocodes": "Promocodes",
-    "no_promocodes": "No promocodes found for current search criteria.",
-    "add_promocode": "Add Promocode",
+    "promocode_list": "Promo Code List",
+    "promocodes": "Promo Codes",
+    "no_promocodes": "No promo codes found for current search criteria.",
+    "add_promocode": "Add Promo Code",
     "code": "Code",
     "type": "Type",
     "description": "Description",
@@ -843,7 +855,7 @@
     "emailed": "Emailed",
     "redeemed": "Redeemed",
     "creator": "Creator",
-    "remove_promocode_warning": "Are you sure you want to delete promocode for attendee",
+    "remove_promocode_warning": "Are you sure you want to delete promo code for attendee",
     "import": "Import",
     "import_promocodes": "Import Promo Codes",
     "ingest": "Ingest File",
@@ -858,7 +870,7 @@
     }
   },
   "edit_promocode": {
-    "promocode": "Promocode",
+    "promocode": "Promo Code",
     "code": "Code",
     "description": "Description",
     "class_name": "Class",
@@ -883,8 +895,8 @@
     "rate": "Rate",
     "apply_to_all_tix": "Apply to all Ticket Types",
     "badge_features_apply_to_all_tix_retroactively": "Apply to Tickets already using this Promo Code ?",
-    "promocode_saved": "Promocode saved successfully.",
-    "promocode_created": "Promocode created successfully.",
+    "promocode_saved": "Promo Code saved successfully.",
+    "promocode_created": "Promo Code created successfully.",
     "apply_to_all_tix_discounts": "Discounts",
     "placeholders": {
       "select_badge_features": "Select one or more Badge Features",
@@ -1018,6 +1030,16 @@
     "allows_publishing_dates_filter": "Allows publishing dates",
     "apply_filters": "Apply Filters",
     "select_fields": "Show Columns",
+    "review_status": "Review Status",
+    "created": "Created",
+    "modified": "Modified",
+    "submission_source": "Submission Source",
+    "review_status_accepted": "Accepted",
+    "review_status_in_review": "In Review",
+    "review_status_no_submitted": "Not Submitted",
+    "review_status_published": "Published",
+    "review_status_received": "Received",
+    "review_status_rejected": "Rejected",
     "submission_status_accepted": "Accepted",
     "submission_status_received": "Received",
     "submission_status_not_submitted": "Not Submitted",
@@ -1045,6 +1067,10 @@
       "start_date_to": "Filter Start Date to",
       "end_date_from": "Filter End Date from",
       "end_date_to": "Filter End Date to",
+      "created_from": "Filter Created Date from",
+      "created_to": "Filter Created Date to",
+      "modified_from": "Filter Modified Date from",
+      "modified_to": "Filter Modified Date to",
       "select_fields": "Select data to display",
       "submitters": "Filter by Submitter",
       "submitter_company": "Filter by Submitter Company",
@@ -1055,7 +1081,9 @@
       "sponsor": "Filter by Sponsor",
       "all_companies": "Filter by All Companies",
       "submission_status": "Filter by Submission Status",
+      "review_status": "Filter by Review Status",
       "media_upload_type": "Filter by Media Upload Type",
+      "submission_source": "Filter by Submission Source",
       "media_upload_type_id_to_include": "Select the Media Upload Types to include",
       "media_upload_type_id_to_exclude": "Select the Media Upload Types to exclude"
     }
@@ -1541,6 +1569,7 @@
       "search_tickets": "Search by Ticket #, Buyer, Assignee, Promo Code, Promo Code Description",
       "ticket_types": "Filter By Ticket Types ...",
       "owner_first_name": "First name starts with ...",
+      "owner_company": "Select Company",
       "view_types": "Filter by View Types ...",
       "view_type": "Select a View Type ...",
       "promocodes": "Select a Promo Code ...",
@@ -1561,7 +1590,7 @@
     "order_number": "Order #",
     "paid_amount": "Purchase Ticket Price",
     "badge": "Badge",
-    "promocode": "Promocode",
+    "promocode": "Promo Code",
     "attendee": "Attendee",
     "is_member": "Is Member?",
     "company": "Company",
@@ -1601,7 +1630,7 @@
     "net_selling_price": "Net Price",
     "refund": "Refund",
     "refund_modal_title": "Refund Ticket",
-    "refund_amount_info": "All taxes will be added automatically to the amount refunded if they apply",
+    "refund_amount_info": "Prorated tax amount will be added to the refund amount automatically, if applicable",
     "refund_amount_error": "The amount to refund cannot be higher than the net selling price plus the amount refunded",
     "refund_request_status": "Status",
     "refund_request_id": "#",
@@ -1629,6 +1658,8 @@
     "tax_name_rate": "{tax_name} Rate",
     "tax_name_price": "{tax_name} Price",
     "purchase_ticket_price": "Purchase Ticket Price",
+    "attendee_incomplete": "Attendee Info Incomplete",
+    "attendee_incomplete_msg": "This attendee's ticket has not been issued because their information is incomplete.  Would you like to send a reminder for them to complete their information so the ticket can be issued?",
     "placeholders": {
       "refund_notes": "Provide Optional Notes",
       "refund_reject_notes": "Provide Optional Notes",
@@ -1802,6 +1833,7 @@
     "no_events": "No activites found for current search criteria.",
     "title": "Title",
     "room": "Room",
+    "track": "Track",
     "start": "Start",
     "speakers": "Speakers",
     "currentEvents": "Show only current activites",
@@ -2072,6 +2104,7 @@
     "order": "Order",
     "remove_warning": "Are you sure you want to delete sponsor ",
     "placeholders": {
+      "lead_report_columns": "Select lead report columns to show",
       "search_sponsors": "Search by Sponsorship, Company, Size"
     }
   },
@@ -2082,7 +2115,7 @@
     "company": "Company",
     "is_published": "Is Published ?",
     "sponsorship": "Sponsorship",
-    "sponsorship_type":"Sponsorship Type",
+    "sponsorship_type":"Tier",
     "sponsor_page": "Sponsor Page",
     "extra_questions": "Extra Questions",
     "intro": "Intro",
@@ -2131,18 +2164,19 @@
     "remove_warning_social_networks": "Are you sure you want to delete social network ",
     "remove_warning_extra_question": "Are you sure you want to delete extra question ",
     "remove_value_warning": "Are you sure you want to delete value ",
+    "lead_report_settings": "Lead Report Settings",
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
-      "sponsorship_type": "Start Typing to choose a Sponsorship Type",
+      "sponsorship_type": "Start Typing to choose a Tier",
       "select_material_type": "Select Material Type"
     }
   },
   "sponsorship_list": {
     "sponsorships": "Sponsorships",
-    "sponsorship_types": "Sponsorship Types",
+    "sponsorship_types": "Tiers",
     "sponsorship_list": "Sponsorships List",
-    "sponsorship_types_list": "Sponsorship Type List",
-    "sponsorship_type": "Sponsorship Type",
+    "sponsorship_types_list": "Tier List",
+    "sponsorship_type": "Tier",
     "widget_title": "Widget Title",
     "no_sponsorships": "No sponsorships found for current search criteria.",
     "add_sponsorship": "Add Sponsorship",
@@ -2166,8 +2200,8 @@
   },
   "sponsor_promocodes_list": {
     "no_sponsors": "No sponsors found for current search criteria.",
-    "promocodes_list": "Sponsor Promocode List",
-    "promocodes": "Promocodes",
+    "promocodes_list": "Sponsor Promo Code List",
+    "promocodes": "Promo Codes",
     "sponsor": "Sponsor",
     "tier": "Tier",
     "code": "Code",
@@ -2188,7 +2222,7 @@
     "invalid_recipient_email": "Please use a valid email",
     "please_confirm": "Please confirm.",
     "select_fields": "Show columns",
-    "add_promocode": "Add Promocode",
+    "add_promocode": "Add Promo Code",
     "infinite" : "Infinite",
     "placeholders": {
       "test_recipient": "Optional Test Recipient",
@@ -2197,18 +2231,18 @@
     }
   },
   "summit_sponsorship_list": {
-    "summit_sponsorship_list": "Summit Sponsorship Type List",
-    "add_sponsorship": "Add Summit Sponsorship Type",
-    "no_sponsorships": "No summit sponsorship types found for current search criteria.",
-    "remove_warning": "Are you sure you want to delete summit sponsorship type ",
-    "sponsorship_type": "Summit Sponsorship Type",
+    "summit_sponsorship_list": "Summit Tier List",
+    "add_sponsorship": "Add Summit Tier",
+    "no_sponsorships": "No summit tiers found for current search criteria.",
+    "remove_warning": "Are you sure you want to delete summit tier ",
+    "sponsorship_type": "Summit Tier",
     "label": "Label",
     "size": "Size"
   },
   "edit_summit_sponsorship": {
     "sponsorship": "Sponsorship",
     "widget_title": "Widget Title",
-    "sponsorship_type": "Sponsorship Type",
+    "sponsorship_type": "Tier",
     "lobby_template": "Lobby Template",
     "expo_hall_template": "Expo Hall Template",
     "sponsor_page_template": "Sponsor Page Template",
@@ -2249,6 +2283,14 @@
     "notes": "Notes",
     "extra_questions": "Extra Questions",
     "badge_scan_saved": "Badge Scan saved successfully"
+  },
+  "badge_settings": {
+    "badge_settings": "Badge Settings",
+    "badge_template_background_img": "BADGE_TEMPLATE_BACKGROUND_IMG",
+    "badge_template_first_name_color": "BADGE_TEMPLATE_FIRST_NAME_COLOR",
+    "badge_template_last_name_color": "BADGE_TEMPLATE_LAST_NAME_COLOR",
+    "badge_template_company_color": "BADGE_TEMPLATE_COMPANY_COLOR",
+    "badge_template_settings_updated": "Badge settings updated."
   },
   "marketing": {
     "settings": "Marketing Settings",
@@ -2327,6 +2369,25 @@
       "see_version": "see version at Github"
     }
   },
+  "email_logs": {
+    "email_logs": "Email Logs",
+    "email_list": "Email List",
+    "apply_filters": "Apply Filters",
+    "email_templates": "Email Templates",
+    "subject": "Subject",
+    "from_email": "From Email",
+    "to_email": "To Email",
+    "sent_date": "Sent Date",
+    "last_error": "Last Error",
+    "payload": "Payload",
+    "select_fields":"Show Columns",
+    "placeholders": {
+      "select_fields": "Select data to display",
+      "template": "Filter by Template",
+      "sent_date_from": "Filter Sent Date from",
+      "sent_date_to": "Filter Sent Date to"      
+    }
+  },
   "summitdoc": {
     "summitdocs": "Event Docs",
     "summitdoc": "Event Doc",
@@ -2345,6 +2406,7 @@
     "created": "Doc created successfully.",
     "selection_plan": "Selection Plan",
     "web_link": "Web Link",
+    "event_types_info": "Docs without a selection plan will display always despite this selection.",
     "placeholders": {
       "search": "Search docs by name",
       "select_type": "Select Activity Type",
@@ -2629,7 +2691,7 @@
   },
   "edit_sponsored_project": {
     "sponsored_project": "Sponsored Project",
-    "add_sponsorship_type": "Add Sponsorship Type",
+    "add_sponsorship_type": "Add Tier",
     "name": "Name",
     "description": "Description",
     "is_active": "Is Active?",
@@ -2639,8 +2701,8 @@
     "logo": "Logo",
     "saved": "Sponsored Project saved successfully.",
     "created": "Sponsored Project created successfully.",
-    "sponsorship_types": "Sponsorship Types",
-    "remove_sponsorship_type_warning": "Are you sure you want to delete this Sponsorship Type",
+    "sponsorship_types": "Tiers",
+    "remove_sponsorship_type_warning": "Are you sure you want to delete this Tier",
     "subprojects": "Subprojects",
     "parent_project": "Parent Project",
     "add_subproject": "Add Sub Project",
@@ -2651,14 +2713,14 @@
   },
   "edit_sponsored_project_sponsorship_type": {
     "supporting_companies": "Supporting Companies",
-    "sponsorship_type": "Sponsorship Type",
+    "sponsorship_type": "Tier",
     "description": "description",
     "add_supporting_company": "Add Supporting Company",
     "is_active": "is Active?",
     "name": "Name",
     "remove_supporting_company_warning": "Are you sure you want to delete this Supporting Company",
-    "saved": "Sponsorship Type saved successfully.",
-    "created": "Sponsorship Type created successfully."
+    "saved": "Tier saved successfully.",
+    "created": "Tier created successfully."
   },
   "edit_sponsored_project_sponsorship_type_supporting_company": {
     "supporting_company": "Supporting Company",
@@ -2681,6 +2743,7 @@
     "is_my_schedule": "Is my schedule?",
     "access_levels_only": "Filter events by Access Levels",
     "hide_past_permanent": "Hide past permanent events",
+    "time_format": "Default time format",
     "filter_title": "Filter",
     "filter_subtitle": "Activate filters to by displayed on side panel",
     "color_title": "Color By",
@@ -2759,10 +2822,10 @@
   },
   "audit_log": {
     "log_entries": "Log Entries",
-    "sponsorship_types": "Sponsorship Types",
+    "sponsorship_types": "Tiers",
     "title": "Audit Log",
-    "sponsorship_types_list": "Sponsorship Type List",
-    "sponsorship_type": "Sponsorship Type",
+    "sponsorship_types_list": "Tier List",
+    "sponsorship_type": "Tier",
     "no_log_entries": "No log entries found for current search criteria.",
     "action": "Action",
     "date": "Date",
@@ -2822,7 +2885,7 @@
   },
   "promo_code_specification": {
     "select_promo_code_type": "-- SELECT PROMO CODE TYPE --",
-    "promo_code_mandatory": "Existing promocode is mandatory",
+    "promo_code_mandatory": "Existing promo code is mandatory",
     "type_mandatory": "Type is mandatory",
     "placeholders": {
       "amount": "Amount ($)",
@@ -2919,5 +2982,17 @@
   "select_filter_criteria": {
     "placeholder": "Select filter criteria",
     "remove_filter_criteria_warning": "Are you sure you want to remove the filter criteria "
+  },
+  "lead_report_settings": {
+    "all_questions": "All Questions",
+    "attendee_question_section": "Attendee Extra Question",
+    "sponsor_question_section": "Sponsor Extra Question"
+  },
+  "send_emails_modal": {
+    "title": "You are about to send an EMAIL BLAST to {recipients}!",
+    "warning": "You are about to send the {template} email template to {qty} {recipients}.",
+    "test_warning": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
+    "send_emails":  "Send",
+    "excerpt_email": "Excerpt Recipient"
   }
 }

@@ -86,6 +86,7 @@ const BasePCForm = (props) => {
             value={props.entity.notes}
             onChange={props.handleChange}
             className="form-control"
+            maxLength={2048}
           />
         </div>
       </div>
