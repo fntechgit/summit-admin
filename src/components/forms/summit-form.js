@@ -457,7 +457,7 @@ class SummitForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("edit_summit.slug")}</label>
+            <label> {T.translate("edit_summit.slug")} *</label>
             <Input
               className="form-control"
               error={this.hasErrors("slug")}
