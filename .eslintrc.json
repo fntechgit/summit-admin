@@ -1,0 +1,42 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": ["plugin:react/recommended", "airbnb", "prettier"],
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": ["react"],
+  "rules": {
+    "quotes": ["error", "double"],
+    "react/jsx-filename-extension": ["warn", { "extensions": [".js", ".jsx"] }],
+    "import/no-extraneous-dependencies": "warn",
+    "react/no-unused-class-component-methods": "warn",
+    "class-methods-use-this": "warn",
+    "import/no-unresolved": "warn",
+    "no-underscore-dangle": "warn",
+    "camelcase": "warn",
+    "react/forbid-prop-types": "warn",
+    "no-magic-numbers": [
+      "error",
+      { "ignoreArrayIndexes": true, "ignore": [0] }
+    ],
+    "import/no-dynamic-require": "warn",
+    "no-shadow": "warn",
+    "global-require": "warn",
+    "no-param-reassign": "warn",
+    "react/require-default-props": "warn",
+    "react/prop-types": "warn",
+    "react/jsx-no-useless-fragment": "warn",
+    "import/prefer-default-export": "warn",
+    "no-plusplus": "off",
+    "no-continue": "off"
+  },
+  "ignorePatterns": ["src/__mocks__"]
+}
