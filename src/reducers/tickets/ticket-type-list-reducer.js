@@ -21,15 +21,19 @@ import {
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
+import moment from 'moment-timezone';
+
 const DEFAULT_STATE = {
   ticketTypes: [],
-  order: "name",
+  term: '',
+  order: 'name',
   orderDir: 1,
   totalTicketTypes: 0,
-  audienceFilter: [],
+  filters: {},
   currentPage: 1,
   lastPage: 1,
-  perPage: 10
+  perPage: 10,
+  summitTZ: '',
 };
 
 const ticketTypeListReducer = (state = DEFAULT_STATE, action) => {
@@ -40,15 +44,8 @@ const ticketTypeListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_TICKET_TYPES: {
-      let { order, orderDir, currentPage, perPage, audienceFilter } = payload;
-      return {
-        ...state,
-        order,
-        orderDir,
-        currentPage,
-        perPage,
-        audienceFilter
-      };
+      let {term, order, orderDir, currentPage, perPage, filters, summitTZ} = payload;
+      return {...state, term, order, orderDir, currentPage, perPage, filters, summitTZ}
     }
     case RECEIVE_TICKET_TYPES: {
       let { total, last_page } = payload.response;
@@ -56,12 +53,14 @@ const ticketTypeListReducer = (state = DEFAULT_STATE, action) => {
         return {
           id: t.id,
           name: t.name,
+          description: t.description,
           audience: t.audience,
-          external_id: t.external_id,
-          badge_type_name: t.hasOwnProperty("badge_type")
-            ? t.badge_type.name
-            : "TBD",
-          cost: t?.cost
+          external_id: t.external_id ? t.external_id : 'N/A',
+          badge_type_name: t.hasOwnProperty("badge_type") ? t.badge_type.name : 'TBD',
+          cost: t?.cost,
+          quantity_2_sell: t?.quantity_2_sell,
+          sales_start_date: t.sales_start_date ? moment(t.sales_start_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') : 'TBD',
+          sales_end_date: t.sales_end_date ? moment(t.sales_end_date * 1000).tz(state.summitTZ).format('MMMM Do YYYY, h:mm a') : 'TBD',
         };
       });
 

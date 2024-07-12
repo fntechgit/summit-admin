@@ -431,3 +431,7 @@ export const parseDateRangeFilter = (
     }
   }
 };
+
+export const handleDDLSortByLabel = (ddlArray) => {
+    return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
+}

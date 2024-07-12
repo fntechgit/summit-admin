@@ -11,15 +11,12 @@
  * limitations under the License.
  **/
 
-import React from "react";
-import T from "i18n-react/dist/i18n-react";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import {
-  Input,
-  DateTimePicker,
-  Dropdown
-} from "openstack-uicore-foundation/lib/components";
+import React from 'react'
+import T from 'i18n-react/dist/i18n-react'
+import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
+import { Input, DateTimePicker, Dropdown } from 'openstack-uicore-foundation/lib/components';
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import TextAreaInputWithCounter from '../inputs/text-area-input-with-counter';
 
 class TicketTypeForm extends React.Component {
   constructor(props) {
@@ -95,9 +92,9 @@ class TicketTypeForm extends React.Component {
     }));
     let badge_type_ddl = currentSummit.badge_types
       ? currentSummit.badge_types.map((bt) => ({
-          label: bt.name,
-          value: bt.id
-        }))
+        label: bt.name,
+        value: bt.id
+      }))
       : [];
 
     let audience_ddl = [
@@ -143,11 +140,13 @@ class TicketTypeForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-8">
             <label> {T.translate("edit_ticket_type.description")}</label>
-            <textarea
+            <TextAreaInputWithCounter
               id="description"
               value={entity.description}
               onChange={this.handleChange}
               className="form-control"
+              rows={4}
+              maxLength={255}
             />
           </div>
           <div className="col-md-4">
