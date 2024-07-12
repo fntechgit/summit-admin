@@ -11,224 +11,263 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import T from 'i18n-react/dist/i18n-react'
-import { connect } from 'react-redux';
-import {Dropdown, Input, PromocodeInput, TagInput, TicketTypesInput } from 'openstack-uicore-foundation/lib/components';
-import BadgeFeatureInput from '../inputs/badge-feature-input';
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import { connect } from "react-redux";
 import {
-    resetPromoCodeSpecForm, 
-    updateSpecs, 
-    SPEAKERS_PROMO_CODE_CLASS_NAME, 
-    SPEAKERS_DISCOUNT_CODE_CLASS_NAME
-} from '../../actions/promocode-specification-actions';
+  Dropdown,
+  Input,
+  PromocodeInput,
+  TagInput,
+  TicketTypesInput
+} from "openstack-uicore-foundation/lib/components";
+import BadgeFeatureInput from "../inputs/badge-feature-input";
 import {
-    EXISTING_SPEAKERS_PROMO_CODE, 
-    EXISTING_SPEAKERS_DISCOUNT_CODE,
-    AUTO_GENERATED_SPEAKERS_PROMO_CODE,
-    AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
-} from '../../actions/promocode-actions';
-import {hasErrors} from "../../utils/methods";
+  resetPromoCodeSpecForm,
+  updateSpecs,
+  SPEAKERS_PROMO_CODE_CLASS_NAME,
+  SPEAKERS_DISCOUNT_CODE_CLASS_NAME
+} from "../../actions/promocode-specification-actions";
+import {
+  EXISTING_SPEAKERS_PROMO_CODE,
+  EXISTING_SPEAKERS_DISCOUNT_CODE,
+  AUTO_GENERATED_SPEAKERS_PROMO_CODE,
+  AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
+} from "../../actions/promocode-actions";
+import { hasErrors } from "../../utils/methods";
 
 class SpeakerPromoCodeSpecForm extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleNewTag = this.handleNewTag.bind(this);
+  }
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleNewTag = this.handleNewTag.bind(this);
+  componentDidMount() {
+    this.props.resetPromoCodeSpecForm();
+  }
+
+  handleChange(ev) {
+    const { promoCodeStrategy } = this.props;
+    let entity = { ...this.props.entity };
+    let errors = { ...this.props.errors };
+    let { value, id } = ev.target;
+
+    if (ev.target.type === "checkbox") {
+      value = ev.target.checked;
     }
 
-    componentDidMount() {
-        this.props.resetPromoCodeSpecForm();
-    }
+    errors[id] = "";
+    entity[id] = value;
+    this.props.updateSpecs(promoCodeStrategy, entity);
+  }
 
-    handleChange(ev) {
-        const {promoCodeStrategy} = this.props;
-        let entity = {...this.props.entity};
-        let errors = {...this.props.errors};
-        let {value, id} = ev.target;
+  handleNewTag(newTag) {
+    const { promoCodeStrategy } = this.props;
+    let entity = { ...this.props.entity };
+    entity.tags = [...entity.tags, { tag: newTag }];
+    this.props.updateSpecs(promoCodeStrategy, entity);
+  }
 
-        if (ev.target.type === 'checkbox') {
-            value = ev.target.checked;
-        }
+  render() {
+    const { entity, errors, promoCodeStrategy, summit } = this.props;
 
-        errors[id] = '';
-        entity[id] = value;
-        this.props.updateSpecs(promoCodeStrategy, entity);
-    }
+    let promoCodeTypeDDL = [
+      {
+        label: T.translate("promo_code_specification.select_promo_code_type"),
+        value: ""
+      },
+      { label: "Accepted", value: "accepted" },
+      { label: "Alternate", value: "alternate" }
+    ];
 
-    handleNewTag(newTag) {
-        const {promoCodeStrategy} = this.props;
-        let entity = {...this.props.entity};
-        entity.tags = [...entity.tags, {tag: newTag}]
-        this.props.updateSpecs(promoCodeStrategy, entity);
-    }
-
-    render() {
-        const { entity, errors, promoCodeStrategy, summit } = this.props;
-
-        let promoCodeTypeDDL = [
-            { label: T.translate("promo_code_specification.select_promo_code_type"), value: '' },
-            { label: 'Accepted', value: 'accepted' },
-            { label: 'Alternate', value: 'alternate' },
-        ];
-
-        return (
-            <form className="speakers-promo-code-spec-form">
-                { [EXISTING_SPEAKERS_PROMO_CODE, EXISTING_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy) &&
-                <>
-                    <hr />
-                    <div className="row form-group">
-                        <div className="col-md-12">
-                            <PromocodeInput
-                                id="existingPromoCode"
-                                value={entity.existingPromoCode}
-                                onChange={this.handleChange}
-                                summitId={summit.id}
-                                className="promocodes-filter"
-                                placeholder={promoCodeStrategy === 1 ? 
-                                    T.translate("promo_code_specification.placeholders.speakers_promo_code") : 
-                                    T.translate("promo_code_specification.placeholders.speakers_discount_code")}
-                                isClearable={true}
-                                error={hasErrors('existingPromoCode', errors)}
-                                extraFilters={[
-                                    `class_name==${promoCodeStrategy === 1 ? SPEAKERS_PROMO_CODE_CLASS_NAME : SPEAKERS_DISCOUNT_CODE_CLASS_NAME}`
-                                ]}
-                            />
-                        </div>
+    return (
+      <form className="speakers-promo-code-spec-form">
+        {[
+          EXISTING_SPEAKERS_PROMO_CODE,
+          EXISTING_SPEAKERS_DISCOUNT_CODE
+        ].includes(promoCodeStrategy) && (
+          <>
+            <hr />
+            <div className="row form-group">
+              <div className="col-md-12">
+                <PromocodeInput
+                  id="existingPromoCode"
+                  value={entity.existingPromoCode}
+                  onChange={this.handleChange}
+                  summitId={summit.id}
+                  className="promocodes-filter"
+                  placeholder={
+                    promoCodeStrategy === 1
+                      ? T.translate(
+                          "promo_code_specification.placeholders.speakers_promo_code"
+                        )
+                      : T.translate(
+                          "promo_code_specification.placeholders.speakers_discount_code"
+                        )
+                  }
+                  isClearable={true}
+                  error={hasErrors("existingPromoCode", errors)}
+                  extraFilters={[
+                    `class_name==${
+                      promoCodeStrategy === 1
+                        ? SPEAKERS_PROMO_CODE_CLASS_NAME
+                        : SPEAKERS_DISCOUNT_CODE_CLASS_NAME
+                    }`
+                  ]}
+                />
+              </div>
+            </div>
+            <hr />
+          </>
+        )}
+        {[
+          AUTO_GENERATED_SPEAKERS_PROMO_CODE,
+          AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE
+        ].includes(promoCodeStrategy) && (
+          <>
+            <hr />
+            <div className="row form-group">
+              <div className="col-md-12">
+                <Dropdown
+                  id="type"
+                  value={entity.type}
+                  onChange={this.handleChange}
+                  options={promoCodeTypeDDL}
+                  isClearable={true}
+                  error={hasErrors("type", errors)}
+                />
+              </div>
+            </div>
+            <div className="row form-group">
+              <div className="col-md-12">
+                <TagInput
+                  id="tags"
+                  clearable
+                  isMulti
+                  allowCreate
+                  value={entity.tags}
+                  onChange={this.handleChange}
+                  onCreate={this.handleNewTag}
+                  placeholder={T.translate(
+                    "promo_code_specification.placeholders.tags"
+                  )}
+                />
+              </div>
+            </div>
+            <div className="row form-group">
+              <div className="col-md-12">
+                <BadgeFeatureInput
+                  id="badgeFeatures"
+                  value={entity.badgeFeatures}
+                  summitId={summit.id}
+                  onChange={this.handleChange}
+                  placeholder={T.translate(
+                    "promo_code_specification.placeholders.badge_features"
+                  )}
+                  isMulti={true}
+                  isClearable={true}
+                />
+              </div>
+            </div>
+            {promoCodeStrategy === AUTO_GENERATED_SPEAKERS_PROMO_CODE && (
+              <div className="row form-group">
+                <div className="col-md-12">
+                  <TicketTypesInput
+                    id="ticketTypes"
+                    value={entity.ticketTypes}
+                    summitId={summit.id}
+                    onChange={this.handleChange}
+                    placeholder={T.translate(
+                      "promo_code_specification.placeholders.ticket_types"
+                    )}
+                    isMulti={true}
+                    isClearable={true}
+                  />
+                </div>
+              </div>
+            )}
+            {promoCodeStrategy === AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE && (
+              <>
+                <div className="row form-group">
+                  <div className="col-md-12">
+                    <div className="form-check abc-checkbox">
+                      <input
+                        type="checkbox"
+                        id="applyToAllTix"
+                        checked={entity.applyToAllTix}
+                        onChange={this.handleChange}
+                        className="form-check-input"
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor="applyToAllTix"
+                      >
+                        {T.translate("edit_promocode.apply_to_all_tix")}
+                      </label>
                     </div>
-                    <hr />
-                </>
-                }
-                { [AUTO_GENERATED_SPEAKERS_PROMO_CODE, AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy) &&
-                <>
-                    <hr />
-                    <div className="row form-group">
-                        <div className="col-md-12">
-                            <Dropdown
-                                id="type"
-                                value={entity.type}
-                                onChange={this.handleChange}
-                                options={promoCodeTypeDDL}
-                                isClearable={true}
-                                error={hasErrors('type', errors)}
-                            />
-                        </div>
+                  </div>
+                </div>
+                {!entity.applyToAllTix && (
+                  <div className="row form-group">
+                    <div className="col-md-12">
+                      <TicketTypesInput
+                        id="ticketTypes"
+                        value={entity.ticketTypes}
+                        summitId={summit.id}
+                        onChange={this.handleChange}
+                        placeholder={T.translate(
+                          "promo_code_specification.placeholders.ticket_types"
+                        )}
+                        isMulti={true}
+                        isClearable={true}
+                      />
                     </div>
-                    <div className="row form-group">
-                        <div className="col-md-12">
-                             <TagInput
-                                id="tags"
-                                clearable
-                                isMulti
-                                allowCreate
-                                value={entity.tags}
-                                onChange={this.handleChange}
-                                onCreate={this.handleNewTag}
-                                placeholder={T.translate("promo_code_specification.placeholders.tags")}
-                            />
-                        </div>
-                    </div>
-                    <div className="row form-group">
-                        <div className="col-md-12">
-                            <BadgeFeatureInput
-                                id="badgeFeatures"
-                                value={entity.badgeFeatures}
-                                summitId={summit.id}
-                                onChange={this.handleChange}
-                                placeholder={T.translate("promo_code_specification.placeholders.badge_features")}
-                                isMulti={true}
-                                isClearable={true}
-                            />
-                        </div>
-                    </div>
-                    {promoCodeStrategy === AUTO_GENERATED_SPEAKERS_PROMO_CODE &&
-                    <div className="row form-group">
-                        <div className="col-md-12">
-                            <TicketTypesInput
-                                id="ticketTypes"
-                                value={entity.ticketTypes}
-                                summitId={summit.id}
-                                onChange={this.handleChange}
-                                placeholder={T.translate("promo_code_specification.placeholders.ticket_types")}
-                                isMulti={true}
-                                isClearable={true}
-                            />
-                        </div>
-                    </div>
-                    }
-                    {promoCodeStrategy === AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE &&
-                    <>
-                        <div className="row form-group">
-                            <div className="col-md-12">
-                                <div className="form-check abc-checkbox">
-                                    <input type="checkbox" id="applyToAllTix" checked={entity.applyToAllTix}
-                                        onChange={this.handleChange} className="form-check-input"/>
-                                    <label className="form-check-label" htmlFor="applyToAllTix">
-                                        {T.translate("edit_promocode.apply_to_all_tix")}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        {!entity.applyToAllTix &&
-                        <div className="row form-group">
-                            <div className="col-md-12">
-                                <TicketTypesInput
-                                    id="ticketTypes"
-                                    value={entity.ticketTypes}
-                                    summitId={summit.id}
-                                    onChange={this.handleChange}
-                                    placeholder={T.translate("promo_code_specification.placeholders.ticket_types")}
-                                    isMulti={true}
-                                    isClearable={true}
-                                />
-                            </div>
-                        </div>
-                        }
-                        <div className="row form-group">
-                            <div className="col-md-5">
-                                <Input 
-                                    id="amount" 
-                                    value={entity.rate ? '' : entity.amount}
-                                    readOnly={entity.rate}
-                                    type="number" 
-                                    className="form-control" 
-                                    placeholder={T.translate("promo_code_specification.placeholders.amount")}
-                                    onChange={this.handleChange}
-                                    error={hasErrors('amount', errors)}
-                                />
-                            </div>
-                            <div className="col-md-2">
-                                OR
-                            </div>
-                            <div className="col-md-5">
-                                <Input 
-                                    id="rate" 
-                                    value={entity.amount ? '' : entity.rate}
-                                    readOnly={entity.amount}
-                                    type="number" 
-                                    className="form-control" 
-                                    placeholder={T.translate("promo_code_specification.placeholders.rate")}
-                                    onChange={this.handleChange}
-                                    error={hasErrors('rate', errors)}
-                                />
-                            </div>
-                        </div>
-                    </>
-                    }
-                    <hr />
-                </>
-                }
-            </form>
-        );
-    }
+                  </div>
+                )}
+                <div className="row form-group">
+                  <div className="col-md-5">
+                    <Input
+                      id="amount"
+                      value={entity.rate ? "" : entity.amount}
+                      readOnly={entity.rate}
+                      type="number"
+                      className="form-control"
+                      placeholder={T.translate(
+                        "promo_code_specification.placeholders.amount"
+                      )}
+                      onChange={this.handleChange}
+                      error={hasErrors("amount", errors)}
+                    />
+                  </div>
+                  <div className="col-md-2">OR</div>
+                  <div className="col-md-5">
+                    <Input
+                      id="rate"
+                      value={entity.amount ? "" : entity.rate}
+                      readOnly={entity.amount}
+                      type="number"
+                      className="form-control"
+                      placeholder={T.translate(
+                        "promo_code_specification.placeholders.rate"
+                      )}
+                      onChange={this.handleChange}
+                      error={hasErrors("rate", errors)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            <hr />
+          </>
+        )}
+      </form>
+    );
+  }
 }
 
-export default connect(
-    null,
-    {
-        resetPromoCodeSpecForm,
-        updateSpecs
-    }
-)(SpeakerPromoCodeSpecForm);
+export default connect(null, {
+  resetPromoCodeSpecForm,
+  updateSpecs
+})(SpeakerPromoCodeSpecForm);

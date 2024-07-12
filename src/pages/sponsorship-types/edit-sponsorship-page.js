@@ -11,74 +11,78 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import SponsorshipForm from '../../components/forms/sponsorship-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getSponsorship, resetSponsorshipForm, saveSponsorship } from "../../actions/sponsorship-actions";
+import SponsorshipForm from "../../components/forms/sponsorship-form";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getSponsorship,
+  resetSponsorshipForm,
+  saveSponsorship
+} from "../../actions/sponsorship-actions";
 
 class EditSponsorshipPage extends React.Component {
+  constructor(props) {
+    const sponsorshipId = props.match.params.sponsorship_id;
+    super(props);
 
-    constructor(props) {
-        const sponsorshipId = props.match.params.sponsorship_id;
-        super(props);
-
-        if (!sponsorshipId) {
-            props.resetSponsorshipForm();
-        } else {
-            props.getSponsorship(sponsorshipId);
-        }
+    if (!sponsorshipId) {
+      props.resetSponsorshipForm();
+    } else {
+      props.getSponsorship(sponsorshipId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.sponsorship_id;
-        const newId = this.props.match.params.sponsorship_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.sponsorship_id;
+    const newId = this.props.match.params.sponsorship_id;
 
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetSponsorshipForm();
-            } else {
-                this.props.getSponsorship(newId);
-            }
-        }
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetSponsorshipForm();
+      } else {
+        this.props.getSponsorship(newId);
+      }
     }
+  }
 
-    render(){
-        const {currentSummit, entity, errors, match, history} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+  render() {
+    const { currentSummit, entity, errors, match, history } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_sponsorship.sponsorship")}</h3>
-                <hr/>
-                {currentSummit &&
-                <SponsorshipForm
-                    entity={entity}
-                    currentSummit={currentSummit}
-                    errors={errors}
-                    onSubmit={this.props.saveSponsorship}
-                />
-                }
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("edit_sponsorship.sponsorship")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <SponsorshipForm
+            entity={entity}
+            currentSummit={currentSummit}
+            errors={errors}
+            onSubmit={this.props.saveSponsorship}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState, currentSponsorshipState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentSponsorshipState
+  currentSummit: currentSummitState.currentSummit,
+  ...currentSponsorshipState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getSponsorship,
-        resetSponsorshipForm,
-        saveSponsorship,
-    }
-)(EditSponsorshipPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getSponsorship,
+  resetSponsorshipForm,
+  saveSponsorship
+})(EditSponsorshipPage);

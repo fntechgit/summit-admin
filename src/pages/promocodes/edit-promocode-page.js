@@ -11,121 +11,127 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import PromocodeForm from '../../components/forms/promocode-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getPromocode, 
-    getPromocodeMeta, 
-    resetPromocodeForm, 
-    sendEmail, 
-    addBadgeFeatureToPromocode, 
-    removeBadgeFeatureFromPromocode, 
-    savePromocode, 
-    assignSpeaker,
-    getAssignedSpeakers,
-    unAssignSpeaker
+import { Breadcrumb } from "react-breadcrumbs";
+import PromocodeForm from "../../components/forms/promocode-form";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getPromocode,
+  getPromocodeMeta,
+  resetPromocodeForm,
+  sendEmail,
+  addBadgeFeatureToPromocode,
+  removeBadgeFeatureFromPromocode,
+  savePromocode,
+  assignSpeaker,
+  getAssignedSpeakers,
+  unAssignSpeaker
 } from "../../actions/promocode-actions";
-import { getBadgeFeatures, getBadgeTypes } from '../../actions/badge-actions'
-import '../../styles/edit-promocode-page.less';
-import {createCompany} from "../../actions/sponsor-actions";
+import { getBadgeFeatures, getBadgeTypes } from "../../actions/badge-actions";
+import "../../styles/edit-promocode-page.less";
+import { createCompany } from "../../actions/sponsor-actions";
 
 class EditPromocodePage extends React.Component {
+  constructor(props) {
+    const { currentSummit, match } = props;
+    const promocodeId = match.params.promocode_id;
+    super(props);
 
-    constructor(props) {
-        const {currentSummit, match} = props;
-        const promocodeId = match.params.promocode_id;
-        super(props);
-
-        if (!promocodeId) {
-            props.resetPromocodeForm();
-        } else {
-            props.getPromocode(promocodeId);
-        }
-
-        props.getPromocodeMeta();
-        if (!currentSummit.badge_features) props.getBadgeFeatures();
-        if (!currentSummit.badge_types) props.getBadgeTypes()
+    if (!promocodeId) {
+      props.resetPromocodeForm();
+    } else {
+      props.getPromocode(promocodeId);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.promocode_id;
-        const newId = this.props.match.params.promocode_id;
+    props.getPromocodeMeta();
+    if (!currentSummit.badge_features) props.getBadgeFeatures();
+    if (!currentSummit.badge_types) props.getBadgeTypes();
+  }
 
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetPromocodeForm();
-            } else {
-                this.props.getPromocode(newId);
-            }
-        }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.promocode_id;
+    const newId = this.props.match.params.promocode_id;
+
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetPromocodeForm();
+      } else {
+        this.props.getPromocode(newId);
+      }
+    }
+  }
+
+  render() {
+    const { currentSummit, allTypes, allClasses, entity, errors, match } =
+      this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.code : T.translate("general.new");
+
+    if (entity.id && match.params.promocode_id != entity.id) {
+      return null;
     }
 
-    render(){
-        const {currentSummit, allTypes, allClasses, entity, errors, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.code : T.translate("general.new");
-
-        if (entity.id && match.params.promocode_id != entity.id) {
-            return null;
-        }
-
-        if (!allClasses.length || !currentSummit.badge_features || !currentSummit.badge_types) {
-            return (<div/>);
-        }
-
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_promocode.promocode")}</h3>
-                <hr/>
-                {currentSummit &&
-                <PromocodeForm
-                    history={this.props.history}
-                    currentSummit={currentSummit}
-                    allTypes={allTypes}
-                    allClasses={allClasses}
-                    entity={entity}
-                    errors={errors}
-                    onSendEmail={this.props.sendEmail}
-                    onBadgeFeatureLink={this.props.addBadgeFeatureToPromocode}
-                    onBadgeFeatureUnLink={this.props.removeBadgeFeatureFromPromocode}
-                    onCreateCompany={this.props.createCompany}
-                    onSubmit={this.props.savePromocode}
-                    assignSpeaker={this.props.assignSpeaker}
-                    getAssignedSpeakers={this.props.getAssignedSpeakers}
-                    unAssignSpeaker={this.props.unAssignSpeaker}
-                    resetPromocodeForm={this.props.resetPromocodeForm}
-                />
-                }
-            </div>
-        )
+    if (
+      !allClasses.length ||
+      !currentSummit.badge_features ||
+      !currentSummit.badge_types
+    ) {
+      return <div />;
     }
+
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("edit_promocode.promocode")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <PromocodeForm
+            history={this.props.history}
+            currentSummit={currentSummit}
+            allTypes={allTypes}
+            allClasses={allClasses}
+            entity={entity}
+            errors={errors}
+            onSendEmail={this.props.sendEmail}
+            onBadgeFeatureLink={this.props.addBadgeFeatureToPromocode}
+            onBadgeFeatureUnLink={this.props.removeBadgeFeatureFromPromocode}
+            onCreateCompany={this.props.createCompany}
+            onSubmit={this.props.savePromocode}
+            assignSpeaker={this.props.assignSpeaker}
+            getAssignedSpeakers={this.props.getAssignedSpeakers}
+            unAssignSpeaker={this.props.unAssignSpeaker}
+            resetPromocodeForm={this.props.resetPromocodeForm}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState, currentPromocodeState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentPromocodeState
+  currentSummit: currentSummitState.currentSummit,
+  ...currentPromocodeState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getPromocode,
-        getPromocodeMeta,
-        getBadgeFeatures,
-        getBadgeTypes,
-        resetPromocodeForm,
-        sendEmail,
-        createCompany,
-        addBadgeFeatureToPromocode,
-        removeBadgeFeatureFromPromocode,
-        savePromocode,
-        assignSpeaker,
-        getAssignedSpeakers,
-        unAssignSpeaker
-    }
-)(EditPromocodePage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getPromocode,
+  getPromocodeMeta,
+  getBadgeFeatures,
+  getBadgeTypes,
+  resetPromocodeForm,
+  sendEmail,
+  createCompany,
+  addBadgeFeatureToPromocode,
+  removeBadgeFeatureFromPromocode,
+  savePromocode,
+  assignSpeaker,
+  getAssignedSpeakers,
+  unAssignSpeaker
+})(EditPromocodePage);

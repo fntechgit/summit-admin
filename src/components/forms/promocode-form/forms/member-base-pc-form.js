@@ -10,11 +10,19 @@ const MemberBasePCForm = (props) => (
           id="owner"
           owner={props.entity.owner}
           onChange={props.handleChange}
-          errors={{email: props.hasErrors('email'), first_name: props.hasErrors('first_name'), last_name: props.hasErrors('last_name')}}
+          errors={{
+            email: props.hasErrors("email"),
+            first_name: props.hasErrors("first_name"),
+            last_name: props.hasErrors("last_name")
+          }}
         />
       </div>
     </div>
-    <EmailRedeemForm entity={props.entity} handleChange={props.handleChange} handleSendEmail={props.handleSendEmail} />
+    <EmailRedeemForm
+      entity={props.entity}
+      handleChange={props.handleChange}
+      handleSendEmail={props.handleSendEmail}
+    />
   </>
 );
 

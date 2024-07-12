@@ -11,65 +11,73 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_PURCHASE_ORDERS,
-    REQUEST_PURCHASE_ORDERS,
-} from '../../actions/order-actions';
+import {
+  RECEIVE_PURCHASE_ORDERS,
+  REQUEST_PURCHASE_ORDERS
+} from "../../actions/order-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
 const DEFAULT_STATE = {
-    purchaseOrders          : {},
-    term                    : null,
-    order                   : 'created',
-    orderDir                : 1,
-    currentPage             : 1,
-    lastPage                : 1,
-    perPage                 : 10,
-    totalPurchaseOrders     : 0,
-    summitTZ                : '',
+  purchaseOrders: {},
+  term: null,
+  order: "created",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalPurchaseOrders: 0,
+  summitTZ: ""
 };
 
 const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_PURCHASE_ORDERS: {
-            let {order, orderDir, term, summitTZ} = payload;
-
-            return {...state, order, orderDir, term, summitTZ }
-        }
-        case RECEIVE_PURCHASE_ORDERS: {
-            let {current_page, total, last_page} = payload.response;
-
-            let purchaseOrders = payload.response.data.map(a => {
-                let bought_date = epochToMomentTimeZone(a.created, state.summitTZ).format('MMMM Do YYYY, h:mm:ss a');
-
-                return {
-                    id: a.id,
-                    number: a.number,
-                    owner_id: a.owner_id,
-                    owner_name: a.owner_first_name + ' ' + a.owner_last_name,
-                    owner_email: a.owner_email,
-                    company: a.owner_company,
-                    bought_date: bought_date,
-                    amount: `${a.currency_symbol}${a.amount}`,
-                    payment_method: a.payment_method,
-                    status: a.status
-                };
-            })
-
-            return {...state, purchaseOrders: purchaseOrders, currentPage: current_page, totalPurchaseOrders: total, lastPage: last_page };
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_PURCHASE_ORDERS: {
+      let { order, orderDir, term, summitTZ } = payload;
+
+      return { ...state, order, orderDir, term, summitTZ };
+    }
+    case RECEIVE_PURCHASE_ORDERS: {
+      let { current_page, total, last_page } = payload.response;
+
+      let purchaseOrders = payload.response.data.map((a) => {
+        let bought_date = epochToMomentTimeZone(
+          a.created,
+          state.summitTZ
+        ).format("MMMM Do YYYY, h:mm:ss a");
+
+        return {
+          id: a.id,
+          number: a.number,
+          owner_id: a.owner_id,
+          owner_name: a.owner_first_name + " " + a.owner_last_name,
+          owner_email: a.owner_email,
+          company: a.owner_company,
+          bought_date: bought_date,
+          amount: `${a.currency_symbol}${a.amount}`,
+          payment_method: a.payment_method,
+          status: a.status
+        };
+      });
+
+      return {
+        ...state,
+        purchaseOrders: purchaseOrders,
+        currentPage: current_page,
+        totalPurchaseOrders: total,
+        lastPage: last_page
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default purchaseOrderListReducer;

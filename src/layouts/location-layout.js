@@ -11,38 +11,46 @@
  * limitations under the License.
  **/
 
-import React from 'react'
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Switch, Route } from 'react-router-dom';
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Switch, Route } from "react-router-dom";
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import LocationListPage from '../pages/locations/location-list-page'
-import LocationIdLayout from './location-id-layout'
+import LocationListPage from "../pages/locations/location-list-page";
+import LocationIdLayout from "./location-id-layout";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class LocationLayout extends React.Component {
+  render() {
+    const { match } = this.props;
 
-    render(){
-        const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("location_list.locations"),
+            pathname: match.url
+          }}
+        />
 
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("location_list.locations"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={LocationListPage}/>
-                    <Route exact strict path={`${match.url}/new`} component={LocationIdLayout}/>
-                    <Route path={`${match.url}/:location_id(\\d+)`} component={LocationIdLayout}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route strict exact path={match.url} component={LocationListPage} />
+          <Route
+            exact
+            strict
+            path={`${match.url}/new`}
+            component={LocationIdLayout}
+          />
+          <Route
+            path={`${match.url}/:location_id(\\d+)`}
+            component={LocationIdLayout}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(LocationLayout, 'locations');
-
-
+export default Restrict(LocationLayout, "locations");

@@ -11,70 +11,66 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import TagForm from '../../components/forms/tag-form';
-import { getTag, resetTagForm, saveTag } from '../../actions/tag-actions';
-import '../../styles/edit-company-page.less';
+import { Breadcrumb } from "react-breadcrumbs";
+import TagForm from "../../components/forms/tag-form";
+import { getTag, resetTagForm, saveTag } from "../../actions/tag-actions";
+import "../../styles/edit-company-page.less";
 
 class EditTagPage extends React.Component {
+  constructor(props) {
+    const tagId = props.match.params.tag_id;
+    super(props);
 
-    constructor(props) {
-        const tagId = props.match.params.tag_id;
-        super(props);
-
-        if (!tagId) {
-            props.resetTagForm();
-        } else {
-            props.getTag(tagId);
-        }        
+    if (!tagId) {
+      props.resetTagForm();
+    } else {
+      props.getTag(tagId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.tag_id;
-        const newId = this.props.match.params.tag_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.tag_id;
+    const newId = this.props.match.params.tag_id;
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetTagForm();
-            } else {
-                this.props.getTag(newId);
-            }
-        }
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetTagForm();
+      } else {
+        this.props.getTag(newId);
+      }
     }
+  }
 
-    render(){
-        const { entity, errors, match, saveTag } = this.props;
+  render() {
+    const { entity, errors, match, saveTag } = this.props;
 
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_tag.tag")}</h3>
-                <hr/>
-                <TagForm
-                    entity={entity}
-                    errors={errors}
-                    onSubmit={saveTag}                    
-                />
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("edit_tag.tag")}
+        </h3>
+        <hr />
+        <TagForm entity={entity} errors={errors} onSubmit={saveTag} />
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentTagState }) => ({
-    ...currentTagState,
+  ...currentTagState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getTag, 
-        resetTagForm, 
-        saveTag
-    }
-)(EditTagPage);
+export default connect(mapStateToProps, {
+  getTag,
+  resetTagForm,
+  saveTag
+})(EditTagPage);

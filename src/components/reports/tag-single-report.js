@@ -11,116 +11,115 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Table } from 'openstack-uicore-foundation/lib/components'
-const Query = require('graphql-query-builder');
-import wrapReport from './report-wrapper';
-
+import React from "react";
+import { Table } from "openstack-uicore-foundation/lib/components";
+const Query = require("graphql-query-builder");
+import wrapReport from "./report-wrapper";
 
 class SingleTagReport extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        let reportName = props.location.state ? props.location.state.name : `Tag ${props.match.params.tag_id}`;
+    let reportName = props.location.state
+      ? props.location.state.name
+      : `Tag ${props.match.params.tag_id}`;
 
-        this.state = {
-            reportName: reportName
-        };
+    this.state = {
+      reportName: reportName
+    };
 
-        this.buildReportQuery = this.buildReportQuery.bind(this);
-        this.getName = this.getName.bind(this);
+    this.buildReportQuery = this.buildReportQuery.bind(this);
+    this.getName = this.getName.bind(this);
+  }
 
+  buildReportQuery(filters, listFilters, sortKey, sortDir) {
+    let tag_id = this.props.match.params.tag_id;
+    const { currentSummit } = this.props;
+
+    listFilters.summitId = currentSummit.id;
+    listFilters.tagId = parseInt(tag_id);
+    listFilters.published = true;
+
+    if (sortKey) {
+      let querySortKey = this.translateSortKey(sortKey);
+      let order = sortDir == 1 ? "" : "-";
+      filters.ordering = order + "" + querySortKey;
     }
 
-    buildReportQuery(filters, listFilters, sortKey, sortDir) {
-        let tag_id = this.props.match.params.tag_id;
-        const {currentSummit} = this.props;
+    let query = new Query("presentations", listFilters);
+    let results = new Query("results", filters);
+    results.find(["id", "title", "attendingMedia", "speakerNames"]);
+    query.find([{ results: results }, "totalCount"]);
 
-        listFilters.summitId = currentSummit.id;
-        listFilters.tagId = parseInt(tag_id);
-        listFilters.published = true;
+    return query;
+  }
 
-        if (sortKey) {
-            let querySortKey = this.translateSortKey(sortKey);
-            let order = (sortDir == 1) ? '' : '-';
-            filters.ordering = order + '' + querySortKey;
-        }
+  translateSortKey(key) {
+    let sortKey = key;
 
-        let query = new Query("presentations", listFilters);
-        let results = new Query("results", filters);
-        results.find(["id", "title", "attendingMedia", "speakerNames"]);
-        query.find([{"results": results}, "totalCount"]);
+    return sortKey;
+  }
 
-        return query;
-    }
+  preProcessData(data, extraData, forExport = false) {
+    let processedData = data.map((it) => {
+      let attMedia = it.attendingMedia;
 
-    translateSortKey(key) {
-        let sortKey = key;
+      if (!forExport) {
+        attMedia = it.attendingMedia
+          ? '<div class="text-center"><i class="fa fa-times" aria-hidden="true"/></div>'
+          : '<div class="text-center"><i class="fa fa-check" aria-hidden="true"/></div>';
+      }
 
-        return sortKey;
-    }
+      return {
+        id: it.id,
+        title: it.title,
+        speakers: it.speakerNames,
+        attendingMedia: attMedia
+      };
+    });
 
-    preProcessData(data, extraData, forExport=false) {
-        let processedData = data.map(it => {
-            let attMedia = it.attendingMedia;
+    let columns = [
+      { columnKey: "id", value: "Event Id", sortable: true },
+      { columnKey: "title", value: "Title" },
+      { columnKey: "speakers", value: "Speakers" },
+      { columnKey: "attendingMedia", value: "Att. Media" }
+    ];
 
-            if(!forExport) {
-                attMedia = it.attendingMedia ? '<div class="text-center"><i class="fa fa-times" aria-hidden="true"/></div>' :
-                    '<div class="text-center"><i class="fa fa-check" aria-hidden="true"/></div>';
-            }
+    return { reportData: processedData, tableColumns: columns };
+  }
 
-            return ({
-                id: it.id,
-                title: it.title,
-                speakers: it.speakerNames,
-                attendingMedia: attMedia
-            });
-        });
+  getName() {
+    return this.state.reportName;
+  }
 
-        let columns = [
-            { columnKey: 'id', value: 'Event Id', sortable: true },
-            { columnKey: 'title', value: 'Title' },
-            { columnKey: 'speakers', value: 'Speakers' },
-            { columnKey: 'attendingMedia', value: 'Att. Media' },
-        ];
+  render() {
+    let { data, extraData, totalCount, sortKey, sortDir } = this.props;
+    let storedDataName = this.props.name;
 
-        return {reportData: processedData, tableColumns: columns};
-    }
+    if (!data || storedDataName !== this.getName()) return <div />;
 
+    let report_options = {
+      sortCol: sortKey,
+      sortDir: sortDir,
+      actions: {}
+    };
 
-    getName() {
-        return this.state.reportName;
-    }
+    let { reportData, tableColumns } = this.preProcessData(data, extraData);
 
-    render() {
-        let {data, extraData, totalCount, sortKey, sortDir} = this.props;
-        let storedDataName = this.props.name;
-
-        if (!data || storedDataName !== this.getName()) return (<div />)
-
-        let report_options = {
-            sortCol: sortKey,
-            sortDir: sortDir,
-            actions: {}
-        };
-
-        let {reportData, tableColumns} = this.preProcessData(data, extraData);
-
-        return (
-            <div className="panel panel-default">
-                <div className="panel-heading">Events ({totalCount})</div>
-                <div className="table-responsive">
-                    <Table
-                        options={report_options}
-                        data={reportData}
-                        columns={tableColumns}
-                        onSort={this.props.onSort}
-                    />
-                </div>
-            </div>
-        );
-    }
+    return (
+      <div className="panel panel-default">
+        <div className="panel-heading">Events ({totalCount})</div>
+        <div className="table-responsive">
+          <Table
+            options={report_options}
+            data={reportData}
+            columns={tableColumns}
+            onSort={this.props.onSort}
+          />
+        </div>
+      </div>
+    );
+  }
 }
 
-
-export default wrapReport(SingleTagReport, {pagination: true});
+export default wrapReport(SingleTagReport, { pagination: true });

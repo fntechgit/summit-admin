@@ -11,51 +11,59 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_SPONSORSHIPS,
-    REQUEST_SPONSORSHIPS,
-    SPONSORSHIP_DELETED,
-} from '../../actions/sponsorship-actions';
+import {
+  RECEIVE_SPONSORSHIPS,
+  REQUEST_SPONSORSHIPS,
+  SPONSORSHIP_DELETED
+} from "../../actions/sponsorship-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    sponsorships            : [],
-    currentPage             : 1,
-    lastPage                : 1,
-    perPage                 : 10,
-    order                   : 'name',
-    orderDir                : 1,
-    totalSponsorships       : 0
+  sponsorships: [],
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  order: "name",
+  orderDir: 1,
+  totalSponsorships: 0
 };
 
 const sponsorshipListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_SPONSORSHIPS: {
-            let {order, orderDir} = payload;
-
-            return {...state, order, orderDir }
-        }
-        case RECEIVE_SPONSORSHIPS: {
-            let { current_page, total, last_page } = payload.response;
-            let sponsorships = payload.response.data;
-
-            return {...state, sponsorships: sponsorships, totalSponsorships: total, currentPage: current_page, lastPage: last_page };
-        }
-        case SPONSORSHIP_DELETED: {
-            let {sponsorshipId} = payload;
-            return {...state, sponsorships: state.sponsorships.filter(t => t.id !== sponsorshipId)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_SPONSORSHIPS: {
+      let { order, orderDir } = payload;
+
+      return { ...state, order, orderDir };
+    }
+    case RECEIVE_SPONSORSHIPS: {
+      let { current_page, total, last_page } = payload.response;
+      let sponsorships = payload.response.data;
+
+      return {
+        ...state,
+        sponsorships: sponsorships,
+        totalSponsorships: total,
+        currentPage: current_page,
+        lastPage: last_page
+      };
+    }
+    case SPONSORSHIP_DELETED: {
+      let { sponsorshipId } = payload;
+      return {
+        ...state,
+        sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId)
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default sponsorshipListReducer;

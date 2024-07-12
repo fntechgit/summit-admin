@@ -11,76 +11,85 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import ImageForm from '../../components/forms/image-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getLocationMap, resetLocationMapForm, saveLocationMap } from "../../actions/location-actions";
+import ImageForm from "../../components/forms/image-form";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getLocationMap,
+  resetLocationMapForm,
+  saveLocationMap
+} from "../../actions/location-actions";
 
 class EditLocationMapPage extends React.Component {
+  constructor(props) {
+    const { currentLocation, match } = props;
+    const mapId = match.params.map_id;
+    super(props);
 
-    constructor(props) {
-        const {currentLocation, match} = props;
-        const mapId = match.params.map_id;
-        super(props);
-
-        if (!mapId || !currentLocation) {
-            props.resetLocationMapForm();
-        } else {
-            props.getLocationMap(currentLocation.id, mapId);
-        }
+    if (!mapId || !currentLocation) {
+      props.resetLocationMapForm();
+    } else {
+      props.getLocationMap(currentLocation.id, mapId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.map_id;
-        const newId = this.props.match.params.map_id;
-        const {currentLocation} = this.props;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.map_id;
+    const newId = this.props.match.params.map_id;
+    const { currentLocation } = this.props;
 
-        if (oldId !== newId && currentLocation) {
-            this.props.getLocationMap(currentLocation.id, newId);
-        }
+    if (oldId !== newId && currentLocation) {
+      this.props.getLocationMap(currentLocation.id, newId);
     }
+  }
 
-    render(){
-        const {currentSummit, currentLocation, entity, errors, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+  render() {
+    const { currentSummit, currentLocation, entity, errors, match } =
+      this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_location.map")}</h3>
-                <hr/>
-                {currentSummit &&
-                <ImageForm
-                    history={this.props.history}
-                    currentSummit={currentSummit}
-                    locationId={currentLocation.id}
-                    entity={entity}
-                    valueField="image_url"
-                    errors={errors}
-                    onSubmit={this.props.saveLocationMap}
-                />
-                }
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("edit_location.map")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <ImageForm
+            history={this.props.history}
+            currentSummit={currentSummit}
+            locationId={currentLocation.id}
+            entity={entity}
+            valueField="image_url"
+            errors={errors}
+            onSubmit={this.props.saveLocationMap}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentLocationState, currentLocationMapState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    currentLocation : currentLocationState.entity,
-    ...currentLocationMapState
+const mapStateToProps = ({
+  currentSummitState,
+  currentLocationState,
+  currentLocationMapState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  currentLocation: currentLocationState.entity,
+  ...currentLocationMapState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getLocationMap,
-        resetLocationMapForm,
-        saveLocationMap,
-    }
-)(EditLocationMapPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getLocationMap,
+  resetLocationMapForm,
+  saveLocationMap
+})(EditLocationMapPage);

@@ -1,5 +1,3 @@
-import BannersTable from './BannersTable';
+import BannersTable from "./BannersTable";
 
-export {
-	BannersTable
-};
+export { BannersTable };

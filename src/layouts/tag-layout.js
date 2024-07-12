@@ -11,37 +11,44 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict'
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import EditTagPage from '../pages/tags/edit-tag-page';
-import TagListPage from '../pages/tags/tag-list-page';
+import EditTagPage from "../pages/tags/edit-tag-page";
+import TagListPage from "../pages/tags/tag-list-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class TagLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{ title: T.translate("tag_list.tags"), pathname: match.url }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("tag_list.tags"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={`${match.url}/new`} component={EditTagPage}/>
-                    <Route strict exact path={`${match.url}/:tag_id(\\d+)`} component={EditTagPage}/>
-                    <Route strict exact path={match.url} component={TagListPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditTagPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:tag_id(\\d+)`}
+            component={EditTagPage}
+          />
+          <Route strict exact path={match.url} component={TagListPage} />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(TagLayout), 'tags');
-
-
+export default Restrict(withRouter(TagLayout), "tags");

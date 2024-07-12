@@ -10,42 +10,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import URI from "urijs"
-import React from 'react'
-import { withRouter } from 'react-router-dom'
+import URI from "urijs";
+import React from "react";
+import { withRouter } from "react-router-dom";
 
 class LogOutCallbackRoute extends React.Component {
+  constructor(props) {
+    const { doLogout, location, history } = props;
+    const storedState = window.localStorage.getItem("post_logout_state");
+    const query = URI.parseQuery(location.search);
 
-    constructor(props){
-        const { doLogout, location, history } = props;
-        const storedState = window.localStorage.getItem('post_logout_state');
-        const query = URI.parseQuery(location.search);
+    window.localStorage.removeItem("post_logout_state");
 
-        window.localStorage.removeItem('post_logout_state');
+    super(props);
 
-        super(props);
+    this.state = {
+      error: null
+    };
 
-        this.state = {
-            error: null
-        };
-
-        if (!query.hasOwnProperty("state")) {
-            this.state.error = 'Missing State.';
-        } else if (query["state"] !== storedState) {
-            this.state.error = 'Invalid State.';
-        }
-
-        doLogout();
-        history.push("/");
+    if (!query.hasOwnProperty("state")) {
+      this.state.error = "Missing State.";
+    } else if (query["state"] !== storedState) {
+      this.state.error = "Invalid State.";
     }
 
-    render() {
-        if(this.state.error != null){
-            return (<p>${this.state.error}</p>)
-        }
-        return null;
+    doLogout();
+    history.push("/");
+  }
+
+  render() {
+    if (this.state.error != null) {
+      return <p>${this.state.error}</p>;
     }
+    return null;
+  }
 }
 
 export default withRouter(LogOutCallbackRoute);
-

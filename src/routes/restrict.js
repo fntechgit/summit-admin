@@ -11,36 +11,31 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import { connect } from 'react-redux';
-import UnAuthorizedPage from '../pages/unauthorized-page'
-import Member from '../models/member'
+import React from "react";
+import { connect } from "react-redux";
+import UnAuthorizedPage from "../pages/unauthorized-page";
+import Member from "../models/member";
 
 const Restrict = (WrappedComponent, route) => {
+  const mapStateToProps = ({ loggedUserState }) => ({
+    member: loggedUserState.member
+  });
 
-    const mapStateToProps = ({ loggedUserState }) => ({
-        member: loggedUserState.member
-    })
+  class WithAuthorization extends React.Component {
+    render() {
+      let { member } = this.props;
+      let memberObj = new Member(member);
+      let hasAccess = memberObj.hasAccess(route);
 
-    class WithAuthorization extends React.Component {
-
-
-        render() {
-            let {member} = this.props;
-            let memberObj = new Member(member);
-            let hasAccess = memberObj.hasAccess(route);
-
-            if (hasAccess) {
-                return <WrappedComponent {...this.props} />
-            } else {
-                return <UnAuthorizedPage />
-            }
-        }
+      if (hasAccess) {
+        return <WrappedComponent {...this.props} />;
+      } else {
+        return <UnAuthorizedPage />;
+      }
     }
+  }
 
-    return connect(mapStateToProps, {})(WithAuthorization)
-}
+  return connect(mapStateToProps, {})(WithAuthorization);
+};
 
-
-export default Restrict
-
+export default Restrict;

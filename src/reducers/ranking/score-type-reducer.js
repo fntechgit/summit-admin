@@ -11,64 +11,63 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_SCORE_TYPE,
-    RESET_SCORE_TYPE_FORM,
-    SCORE_TYPE_UPDATED,
-} from '../../actions/ranking-actions';
+import {
+  RECEIVE_SCORE_TYPE,
+  RESET_SCORE_TYPE_FORM,
+  SCORE_TYPE_UPDATED
+} from "../../actions/ranking-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id          : 0,
-    name        : '',
-    score       : 0,
-    description : '',
-}
+  id: 0,
+  name: "",
+  score: 0,
+  description: ""
+};
 
 const DEFAULT_STATE = {
-    entity      : DEFAULT_ENTITY,
-    errors      : {},
+  entity: DEFAULT_ENTITY,
+  errors: {}
 };
 
 const scoreTypeReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-            }
-        }
-        case SET_CURRENT_SUMMIT:
-        case RESET_SCORE_TYPE_FORM: {
-            return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        case RECEIVE_SCORE_TYPE: {
-            const entity = {...payload.response};
-
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
-        }
-        case SCORE_TYPE_UPDATED: {
-            const entity = {...payload.response};
-            return {...state,  entity: {...entity}, errors: {} };
-        }
-        case VALIDATE: {
-            return {...state,  errors: payload.errors };
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
+      } else {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
     }
+    case SET_CURRENT_SUMMIT:
+    case RESET_SCORE_TYPE_FORM: {
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case RECEIVE_SCORE_TYPE: {
+      const entity = { ...payload.response };
+
+      for (var key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
+        }
+      }
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case SCORE_TYPE_UPDATED: {
+      const entity = { ...payload.response };
+      return { ...state, entity: { ...entity }, errors: {} };
+    }
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
+    default:
+      return state;
+  }
 };
 
 export default scoreTypeReducer;

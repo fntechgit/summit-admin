@@ -11,38 +11,52 @@
  * limitations under the License.
  **/
 
- import React from 'react'
- import { Switch, Route, withRouter } from 'react-router-dom';
- import T from "i18n-react/dist/i18n-react";
- import { Breadcrumb } from 'react-breadcrumbs';
- import Restrict from '../routes/restrict';
-  
- import EditSpeakerAttendancePage from '../pages/summit_speakers/edit-speaker-attendance-page';
- import SummitSpeakersListPage from '../pages/summit_speakers/summit-speakers-list-page';
- import NoMatchPage from "../pages/no-match-page";
- 
- 
- class SummitSpeakersLayout extends React.Component {
- 
-     render(){
-         const { match } = this.props;
-         return(
-             <div>
-                 <Breadcrumb data={{ title: T.translate("summit_speakers_list.summit_speakers"), pathname: match.url }} />
- 
-                 <Switch>
-                     <Route exact strict path={match.url} component={SummitSpeakersListPage}/>
-                     <Route exact strict path={`${match.url}/new`} component={EditSpeakerAttendancePage}/>
-                     <Route exact strict path={`${match.url}/:attendance_id(\\d+)`} component={EditSpeakerAttendancePage}/>
-                     <Route component={NoMatchPage}/>
-                 </Switch>
-             </div>
-         );
-     }
- 
- }
- 
- export default Restrict(withRouter(SummitSpeakersLayout), 'speakers');
- 
- 
- 
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
+import T from "i18n-react/dist/i18n-react";
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
+
+import EditSpeakerAttendancePage from "../pages/summit_speakers/edit-speaker-attendance-page";
+import SummitSpeakersListPage from "../pages/summit_speakers/summit-speakers-list-page";
+import NoMatchPage from "../pages/no-match-page";
+
+class SummitSpeakersLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("summit_speakers_list.summit_speakers"),
+            pathname: match.url
+          }}
+        />
+
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={SummitSpeakersListPage}
+          />
+          <Route
+            exact
+            strict
+            path={`${match.url}/new`}
+            component={EditSpeakerAttendancePage}
+          />
+          <Route
+            exact
+            strict
+            path={`${match.url}/:attendance_id(\\d+)`}
+            component={EditSpeakerAttendancePage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
+}
+
+export default Restrict(withRouter(SummitSpeakersLayout), "speakers");

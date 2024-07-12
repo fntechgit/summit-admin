@@ -11,30 +11,30 @@
  * limitations under the License.
  **/
 
-import SingleTagReport from './tag-single-report'
-import TagReport from './tag-report'
-import RsvpReport from './rsvp-report'
-import RsvpEventReport from './rsvp-event-report'
-import RoomReport from './room-report'
-import PresentationVideoReport from './presentation-video-report'
-import FeedbackReport from './feedback-report'
-import FeedbackGroupReport from './feedback-group-report'
-import SmartSpeakerReport from './smart-speaker-report'
-import SmartPresentationReport from './smart-presentation-report'
+import SingleTagReport from "./tag-single-report";
+import TagReport from "./tag-report";
+import RsvpReport from "./rsvp-report";
+import RsvpEventReport from "./rsvp-event-report";
+import RoomReport from "./room-report";
+import PresentationVideoReport from "./presentation-video-report";
+import FeedbackReport from "./feedback-report";
+import FeedbackGroupReport from "./feedback-group-report";
+import SmartSpeakerReport from "./smart-speaker-report";
+import SmartPresentationReport from "./smart-presentation-report";
 import MetricsReport from "./metrics-report";
 import AttendeeReport from "./attendee-report";
 
 export {
-    RsvpReport,
-    RsvpEventReport,
-    RoomReport,
-    PresentationVideoReport,
-    FeedbackReport,
-    FeedbackGroupReport,
-    TagReport,
-    SingleTagReport,
-    SmartSpeakerReport,
-    SmartPresentationReport,
-    MetricsReport,
-    AttendeeReport
-}
+  RsvpReport,
+  RsvpEventReport,
+  RoomReport,
+  PresentationVideoReport,
+  FeedbackReport,
+  FeedbackGroupReport,
+  TagReport,
+  SingleTagReport,
+  SmartSpeakerReport,
+  SmartPresentationReport,
+  MetricsReport,
+  AttendeeReport
+};

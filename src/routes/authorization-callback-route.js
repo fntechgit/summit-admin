@@ -11,37 +11,36 @@
  * limitations under the License.
  **/
 
-import history from '../history'
-import React from 'react'
-import { Route, Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
+import history from "../history";
+import React from "react";
+import { Route, Redirect } from "react-router-dom";
+import { connect } from "react-redux";
 import AbstractAuthorizationCallbackRoute from "openstack-uicore-foundation/lib/security/abstract-auth-callback-route";
 import { getUserInfo } from "openstack-uicore-foundation/lib/security/actions";
 
 class AuthorizationCallbackRoute extends AbstractAuthorizationCallbackRoute {
+  constructor(props) {
+    super(process.env["IDP_BASE_URL"], process.env["OAUTH2_CLIENT_ID"], props);
+  }
 
-    constructor(props){
-        super(process.env['IDP_BASE_URL'], process.env['OAUTH2_CLIENT_ID'], props);
-    }
+  _callback(backUrl) {
+    if (!backUrl) backUrl = "/app/directory";
+    this.props.getUserInfo("groups", "", backUrl, history);
+  }
 
-    _callback(backUrl) {
-        if(!backUrl) backUrl = '/app/directory';
-        this.props.getUserInfo('groups','', backUrl, history);
-    }
-
-    _redirect2Error(error){
-        return (
-            <Route render={ props => {
-                return <Redirect to={`/error?error=${error}`} />
-            }} />
-        )
-    }
+  _redirect2Error(error) {
+    return (
+      <Route
+        render={(props) => {
+          return <Redirect to={`/error?error=${error}`} />;
+        }}
+      />
+    );
+  }
 }
 
-const mapStateToProps = ({ loggedUserState }) => ({
-})
+const mapStateToProps = ({ loggedUserState }) => ({});
 
-export default connect(mapStateToProps,{
-    getUserInfo
-})(AuthorizationCallbackRoute)
-
+export default connect(mapStateToProps, {
+  getUserInfo
+})(AuthorizationCallbackRoute);

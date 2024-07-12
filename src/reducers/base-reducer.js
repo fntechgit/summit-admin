@@ -11,46 +11,53 @@
  * limitations under the License.
  **/
 
-import { START_LOADING, STOP_LOADING, RESET_LOADING } from "openstack-uicore-foundation/lib/utils/actions";
-import { RECEIVE_COUNTRIES } from 'openstack-uicore-foundation/lib/utils/query-actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import {RECEIVE_TIMEZONES} from '../actions/base-actions';
+import {
+  START_LOADING,
+  STOP_LOADING,
+  RESET_LOADING
+} from "openstack-uicore-foundation/lib/utils/actions";
+import { RECEIVE_COUNTRIES } from "openstack-uicore-foundation/lib/utils/query-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { RECEIVE_TIMEZONES } from "../actions/base-actions";
 
 const DEFAULT_STATE = {
-    loading: 0,
-    countries: [],
-    timezones: [],
+  loading: 0,
+  countries: [],
+  timezones: []
 };
 
 const baseReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
+  const { type, payload } = action;
 
-    switch(type){
-        case LOGOUT_USER:
-            return DEFAULT_STATE;
-        case START_LOADING: {
-            //let loadingCount = state.loading + 1;
-            return {...state, loading: 1};
-        }
-        break;
-        case STOP_LOADING: {
-            //let loadingCount = state.loading <= 1 ? 0 : (state.loading - 1);
-            return {...state, loading: 0};
-        }
-        break;
-        case RESET_LOADING: {
-            return {...state, loading: 0};
-        }
-        break;
-        case RECEIVE_COUNTRIES:
-            return {...state, countries: payload};
-        case RECEIVE_TIMEZONES:
-            const {data} = payload.response;
-            return {...state, timezones: data};
-        default:
-            return state;
-        break;
-    }
-}
+  switch (type) {
+    case LOGOUT_USER:
+      return DEFAULT_STATE;
+    case START_LOADING:
+      {
+        //let loadingCount = state.loading + 1;
+        return { ...state, loading: 1 };
+      }
+      break;
+    case STOP_LOADING:
+      {
+        //let loadingCount = state.loading <= 1 ? 0 : (state.loading - 1);
+        return { ...state, loading: 0 };
+      }
+      break;
+    case RESET_LOADING:
+      {
+        return { ...state, loading: 0 };
+      }
+      break;
+    case RECEIVE_COUNTRIES:
+      return { ...state, countries: payload };
+    case RECEIVE_TIMEZONES:
+      const { data } = payload.response;
+      return { ...state, timezones: data };
+    default:
+      return state;
+      break;
+  }
+};
 
-export default baseReducer
+export default baseReducer;

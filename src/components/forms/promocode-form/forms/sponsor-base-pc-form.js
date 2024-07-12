@@ -1,8 +1,11 @@
 import React from "react";
 import T from "i18n-react";
-import {Input, SponsorInput} from "openstack-uicore-foundation/lib/components";
+import {
+  Input,
+  SponsorInput
+} from "openstack-uicore-foundation/lib/components";
 import MemberBasePCForm from "./member-base-pc-form";
-import {hasErrors} from "../../../../utils/methods";
+import { hasErrors } from "../../../../utils/methods";
 
 const SponsorBasePCForm = (props) => (
   <>
@@ -16,7 +19,7 @@ const SponsorBasePCForm = (props) => (
           summitId={props.summit.id}
           allowCreate
           onCreate={props.onCreateCompany}
-          error={props.hasErrors('sponsor_id')}
+          error={props.hasErrors("sponsor_id")}
         />
       </div>
       <div className="col-md-6">
@@ -24,7 +27,7 @@ const SponsorBasePCForm = (props) => (
         <Input
           id="contact_email"
           className="form-control"
-          error={props.hasErrors('contact_email')}
+          error={props.hasErrors("contact_email")}
           onChange={props.handleChange}
           value={props.entity.contact_email}
         />

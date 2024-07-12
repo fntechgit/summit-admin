@@ -11,103 +11,133 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route } from 'react-router-dom';
+import React from "react";
+import { Switch, Route } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import EditSummitEventPage from '../pages/events/edit-summit-event-page';
-import EditEventMaterialPage from '../pages/events/edit-event-material-page';
-import EditEventCommentPage from '../pages/events/edit-event-comment-page';
+import { Breadcrumb } from "react-breadcrumbs";
+import EditSummitEventPage from "../pages/events/edit-summit-event-page";
+import EditEventMaterialPage from "../pages/events/edit-event-material-page";
+import EditEventCommentPage from "../pages/events/edit-event-comment-page";
 import NoMatchPage from "../pages/no-match-page";
-import { getEvent, resetEventForm } from '../actions/event-actions';
-import { getRsvpTemplates } from '../actions/rsvp-template-actions';
-import {connect} from "react-redux";
-
+import { getEvent, resetEventForm } from "../actions/event-actions";
+import { getRsvpTemplates } from "../actions/rsvp-template-actions";
+import { connect } from "react-redux";
 
 class EventIdLayout extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        let eventId = props.match.params.event_id;
+    let eventId = props.match.params.event_id;
 
-        if (!eventId) {
-            props.resetEventForm();
-        } else {
-            props.getEvent(eventId);
-        }
-
-        props.getRsvpTemplates();
+    if (!eventId) {
+      props.resetEventForm();
+    } else {
+      props.getEvent(eventId);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.event_id;
-        const newId = this.props.match.params.event_id;
+    props.getRsvpTemplates();
+  }
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetEventForm();
-            } else {
-                this.props.getEvent(newId);
-            }
-        }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.event_id;
+    const newId = this.props.match.params.event_id;
+
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetEventForm();
+      } else {
+        this.props.getEvent(newId);
+      }
     }
+  }
 
-    render(){
-        const { match, entity } = this.props;
-        let eventId = this.props.match.params.event_id;
-        let breadcrumb = entity.id ? entity.title : T.translate("general.new");
+  render() {
+    const { match, entity } = this.props;
+    let eventId = this.props.match.params.event_id;
+    let breadcrumb = entity.id ? entity.title : T.translate("general.new");
 
-        if(eventId && entity.id !== parseInt(eventId)) return(<div />);
+    if (eventId && entity.id !== parseInt(eventId)) return <div />;
 
-        return(
-            <div>
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+    return (
+      <div>
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
 
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={EditSummitEventPage}
+          />
+          <Route
+            path={`${match.url}/materials`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_event.materials"),
+                    pathname: match.url
+                  }}
+                />
                 <Switch>
-                    <Route exact strict path={match.url} component={EditSummitEventPage}/>
-                    <Route path={`${match.url}/materials`} render={
-                        props => (
-                            <div>
-                                <Breadcrumb data={{ title: T.translate("edit_event.materials"), pathname: match.url }} />
-                                <Switch>
-                                    <Route strict exact path={`${props.match.url}/new`} component={EditEventMaterialPage} />
-                                    <Route strict exact path={`${props.match.url}/:material_id`} component={EditEventMaterialPage} />
-                                    <Route strict exact path={`${props.match.url}/:comment_id`} component={EditEventCommentPage} />
-                                    <Route component={NoMatchPage}/>
-                                </Switch>
-                            </div>
-                        )}
-                    />
-                    <Route path={`${match.url}/comments`} render={
-                        props => (
-                            <div>
-                                <Breadcrumb data={{ title: T.translate("edit_event.comments"), pathname: match.url }} />
-                                <Switch>
-                                    <Route strict exact path={`${props.match.url}/:comment_id`} component={EditEventCommentPage} />
-                                    <Route component={NoMatchPage}/>
-                                </Switch>
-                            </div>
-                        )}
-                    />
-                    <Route component={NoMatchPage}/>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditEventMaterialPage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:material_id`}
+                    component={EditEventMaterialPage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:comment_id`}
+                    component={EditEventCommentPage}
+                  />
+                  <Route component={NoMatchPage} />
                 </Switch>
-            </div>
-        );
-    }
-
+              </div>
+            )}
+          />
+          <Route
+            path={`${match.url}/comments`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_event.comments"),
+                    pathname: match.url
+                  }}
+                />
+                <Switch>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:comment_id`}
+                    component={EditEventCommentPage}
+                  />
+                  <Route component={NoMatchPage} />
+                </Switch>
+              </div>
+            )}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitEventState }) => ({
-    ...currentSummitEventState
-})
+  ...currentSummitEventState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getEvent,
-        resetEventForm,
-        getRsvpTemplates
-    }
-)(EventIdLayout);
-
-
+export default connect(mapStateToProps, {
+  getEvent,
+  resetEventForm,
+  getRsvpTemplates
+})(EventIdLayout);

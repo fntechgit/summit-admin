@@ -1,114 +1,111 @@
-@import 'schedule-builder-variables';
+@import "schedule-builder-variables";
 //
 // Burger menu custom styles
 //
 .bm-burger-button {
-    position: absolute;
-    width: 30px;
-    height: 25px;
-    left: 36px;
-    top: 12px;
+  position: absolute;
+  width: 30px;
+  height: 25px;
+  left: 36px;
+  top: 12px;
 }
 
 .bm-menu-wrap {
-    top: 0;
-    z-index: @event_z_index+1 !important;
+  top: 0;
+  z-index: @event_z_index+1 !important;
 }
 
 .right .bm-burger-button {
-    left: initial;
-    right: 36px;
+  left: initial;
+  right: 36px;
 }
 
 .bm-burger-bars {
-    background: #373a47;
+  background: #373a47;
 }
 
 .bm-morph-shape {
-    fill: #373a47;
+  fill: #373a47;
 }
 
 /* Position and sizing of clickable cross button */
 .bm-cross-button {
-    height: 24px;
-    width: 24px;
-    right: 20px !important;
+  height: 24px;
+  width: 24px;
+  right: 20px !important;
 }
 
 /* Color/shape of close button cross */
 .bm-cross {
-    background: #bdc3c7;
+  background: #bdc3c7;
 }
 
 .bm-menu {
-    background: #373a47;
+  background: #373a47;
 
-    a {
-        color: #b8b7ad;
-        font-size: 1.2em;
+  a {
+    color: #b8b7ad;
+    font-size: 1.2em;
 
-        &:hover,
-        &:focus {
-            color: #c94e50;
-            text-decoration: none;
-        }
+    &:hover,
+    &:focus {
+      color: #c94e50;
+      text-decoration: none;
     }
+  }
 }
 
 .bm-item-list {
-    padding-top: 5px;
+  padding-top: 5px;
 }
 
 .bm-item-list a {
-    padding: 0.5em;
+  padding: 0.5em;
 
-    span {
-        margin-left: 10px;
-        font-weight: 700;
-    }
+  span {
+    margin-left: 10px;
+    font-weight: 700;
+  }
 }
 
 #summit-admin-menu {
+  .menu-item {
+    display: block;
+    cursor: pointer;
+    color: #d0cece;
+    .fa {
+      margin-right: 10px;
+    }
+    &:hover {
+      color: #dfded8;
+      font-weight: bold;
+    }
+  }
+  .submenu {
+    padding-left: 1.5em;
     .menu-item {
-        display: block;
-        cursor: pointer;
-        color: #d0cece;
-        .fa {
-            margin-right: 10px;
-        }
-        &:hover {
-            color: #dfded8;
-            font-weight: bold;
-        }
+      padding-top: 0.3em;
+      padding-bottom: 0.3em;
+      &:hover {
+        color: #dfded8;
+        font-weight: bold;
+      }
     }
-    .submenu {
-        padding-left: 1.5em;
-        .menu-item {
-            padding-top: 0.3em;
-            padding-bottom: 0.3em;
-            &:hover {
-                color: #dfded8;
-                font-weight: bold;
-            }
-        }
+  }
+  .separator {
+    border-bottom: 1px solid #b8b7ad;
+    color: #b8b7ad;
+    margin: 10px 0 10px 0;
+    padding: 5px 0 5px 10px;
+    font-size: 1.5em;
+  }
+  .edit-summit {
+    font-size: 15px;
+    margin-left: 5px;
+    cursor: pointer;
+    &:hover {
+      color: #dfded8;
+      font-weight: bold;
     }
-    .separator {
-        border-bottom: 1px solid #b8b7ad;
-        color: #b8b7ad;
-        margin: 10px 0 10px 0;
-        padding: 5px 0 5px 10px;
-        font-size: 1.5em;
-    }
-    .edit-summit {
-        font-size: 15px;
-        margin-left: 5px;
-        cursor: pointer;
-        &:hover {
-            color: #dfded8;
-            font-weight: bold;
-        }
-    }
+  }
 }
-
-
-

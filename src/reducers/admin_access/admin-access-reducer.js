@@ -11,71 +11,79 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_ADMIN_ACCESS,
-    RESET_ADMIN_ACCESS_FORM,
-    UPDATE_ADMIN_ACCESS,
-    ADMIN_ACCESS_ADDED,
-} from '../../actions/admin-access-actions';
+import {
+  RECEIVE_ADMIN_ACCESS,
+  RESET_ADMIN_ACCESS_FORM,
+  UPDATE_ADMIN_ACCESS,
+  ADMIN_ACCESS_ADDED
+} from "../../actions/admin-access-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id         : 0,
-    title      : '',
-    members    : [],
-    summits    : [],
+  id: 0,
+  title: "",
+  members: [],
+  summits: []
 };
 
 const DEFAULT_STATE = {
-    entity          : DEFAULT_ENTITY,
-    errors          : {},
+  entity: DEFAULT_ENTITY,
+  errors: {}
 };
 
 const adminAccessReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-            }
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER:
+      {
+        // we need this in case the token expired while editing the form
+        if (payload.hasOwnProperty("persistStore")) {
+          return state;
+        } else {
+          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
-        break;
-        case SET_CURRENT_SUMMIT:
-        case RESET_ADMIN_ACCESS_FORM: {
-            return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        break;
-        case UPDATE_ADMIN_ACCESS: {
-            return {...state,  entity: {...payload}, errors: {} };
-        }
-        break;
-        case ADMIN_ACCESS_ADDED:
-        case RECEIVE_ADMIN_ACCESS: {
-            let entity = {...payload.response};
+      }
+      break;
+    case SET_CURRENT_SUMMIT:
+    case RESET_ADMIN_ACCESS_FORM:
+      {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
+      break;
+    case UPDATE_ADMIN_ACCESS:
+      {
+        return { ...state, entity: { ...payload }, errors: {} };
+      }
+      break;
+    case ADMIN_ACCESS_ADDED:
+    case RECEIVE_ADMIN_ACCESS:
+      {
+        let entity = { ...payload.response };
 
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
+        for (var key in entity) {
+          if (entity.hasOwnProperty(key)) {
+            entity[key] = entity[key] == null ? "" : entity[key];
+          }
+        }
 
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity}, preview: null };
-        }
-        break;
-        case VALIDATE: {
-            return {...state,  errors: payload.errors };
-        }
-        break;
-        default:
-            return state;
-    }
+        return {
+          ...state,
+          entity: { ...DEFAULT_ENTITY, ...entity },
+          preview: null
+        };
+      }
+      break;
+    case VALIDATE:
+      {
+        return { ...state, errors: payload.errors };
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default adminAccessReducer;

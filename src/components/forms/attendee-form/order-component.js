@@ -11,38 +11,42 @@
  * limitations under the License.
  **/
 
-import React from 'react';
+import React from "react";
 import history from "../../../history";
-import T from 'i18n-react/dist/i18n-react';
+import T from "i18n-react/dist/i18n-react";
 
 export default class OrderComponent extends React.Component {
+  handleOrderLink = (ev, order) => {
+    const { summitId } = this.props;
+    ev.preventDefault();
+    history.push(`/app/summits/${summitId}/purchase-orders/${order.id}`);
+  };
 
-    handleOrderLink = (ev, order) => {
-        const {summitId} = this.props;
-        ev.preventDefault();
-        history.push(`/app/summits/${summitId}/purchase-orders/${order.id}`);
-    };
+  render() {
+    let { orders } = this.props;
 
-    render() {
-        let {orders} = this.props;
-
-        return (
-            <div className="order-component">
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <legend> {T.translate("edit_attendee.orders")} </legend>
-                        {orders.map(o =>
-                            <div key={'ord_' + o.id} className="btn-group btn-group-xs order-btn">
-                                <a href="" className="order btn btn-default" onClick={ev => this.handleOrderLink(ev, o)}>
-                                    {o.number}
-                                </a>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        );
-
-    }
+    return (
+      <div className="order-component">
+        <div className="row form-group">
+          <div className="col-md-12">
+            <legend> {T.translate("edit_attendee.orders")} </legend>
+            {orders.map((o) => (
+              <div
+                key={"ord_" + o.id}
+                className="btn-group btn-group-xs order-btn"
+              >
+                <a
+                  href=""
+                  className="order btn btn-default"
+                  onClick={(ev) => this.handleOrderLink(ev, o)}
+                >
+                  {o.number}
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
-

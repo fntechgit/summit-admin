@@ -11,107 +11,113 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Table } from 'openstack-uicore-foundation/lib/components'
-const Query = require('graphql-query-builder');
-import wrapReport from './report-wrapper';
+import React from "react";
+import { Table } from "openstack-uicore-foundation/lib/components";
+const Query = require("graphql-query-builder");
+import wrapReport from "./report-wrapper";
 import history from "../../history";
 
-
 class TagReport extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = { };
+    this.state = {};
 
-        this.buildReportQuery = this.buildReportQuery.bind(this);
+    this.buildReportQuery = this.buildReportQuery.bind(this);
+  }
 
+  buildReportQuery(filters, listFilters, sortKey, sortDir) {
+    const { currentSummit } = this.props;
+
+    listFilters.summitId = currentSummit.id;
+    listFilters.published = true;
+
+    if (sortKey) {
+      let querySortKey = this.translateSortKey(sortKey);
+      let order = sortDir == 1 ? "" : "-";
+      filters.ordering = order + "" + querySortKey;
     }
 
-    buildReportQuery(filters, listFilters, sortKey, sortDir) {
-        const {currentSummit} = this.props;
+    let query = new Query("tags", listFilters);
 
-        listFilters.summitId = currentSummit.id;
-        listFilters.published = true;
+    let results = new Query("results", filters);
+    results.find(["id", "tag", `eventCount(summitId:${currentSummit.id})`]);
 
-        if (sortKey) {
-            let querySortKey = this.translateSortKey(sortKey);
-            let order = (sortDir == 1) ? '' : '-';
-            filters.ordering = order + '' + querySortKey;
-        }
+    query.find([{ results: results }, "totalCount"]);
 
-        let query = new Query("tags", listFilters);
+    return query;
+  }
 
-        let results = new Query("results", filters);
-        results.find(["id", "tag", `eventCount(summitId:${currentSummit.id})`]);
+  preProcessData(data, extraData, forExport = false) {
+    let processedData = data.map((it) => {
+      let tag = forExport ? (
+        it.tag
+      ) : (
+        <a
+          onClick={() => {
+            history.push(`tag_report/${it.id}`, { name: it.tag });
+          }}
+        >
+          {it.tag}
+        </a>
+      );
 
-        query.find([{"results": results}, "totalCount"]);
+      return {
+        id: it.id,
+        tag: tag,
+        count: it.eventCount
+      };
+    });
 
-        return query;
-    }
+    let columns = [
+      { columnKey: "tag", value: "Tag", sortable: true },
+      { columnKey: "count", value: "Count", sortable: true }
+    ];
 
-    preProcessData(data, extraData, forExport=false) {
+    return { reportData: processedData, tableColumns: columns };
+  }
 
-        let processedData = data.map(it => {
-            let tag = forExport ? it.tag : <a onClick={() => {history.push(`tag_report/${it.id}`, {name: it.tag})}} >{it.tag}</a>
+  translateSortKey(key) {
+    let sortKey = key;
 
-            return ({
-                id: it.id,
-                tag: tag,
-                count: it.eventCount,
-            });
-        });
+    return sortKey;
+  }
 
-        let columns = [
-            { columnKey: 'tag', value: 'Tag', sortable: true },
-            { columnKey: 'count', value: 'Count', sortable: true },
-        ];
+  getName() {
+    return "Tag Report";
+  }
 
-        return {reportData: processedData, tableColumns: columns};
-    }
+  render() {
+    let { data, extraData, totalCount, sortKey, sortDir } = this.props;
+    let storedDataName = this.props.name;
 
-    translateSortKey(key) {
-        let sortKey = key;
+    if (!data || storedDataName !== this.getName()) return <div />;
 
-        return sortKey;
-    }
+    let report_options = {
+      sortCol: sortKey,
+      sortDir: sortDir,
+      actions: {}
+    };
 
-    getName() {
-        return 'Tag Report';
-    }
+    let { reportData, tableColumns } = this.preProcessData(data, extraData);
 
-    render() {
-        let {data, extraData, totalCount, sortKey, sortDir} = this.props;
-        let storedDataName = this.props.name;
+    return (
+      <div className="tag-report">
+        <div className="panel panel-default">
+          <div className="panel-heading"> Tags ({totalCount}) </div>
 
-        if (!data || storedDataName !== this.getName()) return (<div />)
-
-        let report_options = {
-            sortCol: sortKey,
-            sortDir: sortDir,
-            actions: {}
-        };
-
-        let {reportData, tableColumns} = this.preProcessData(data, extraData);
-
-        return (
-            <div className="tag-report">
-                <div className="panel panel-default">
-                    <div className="panel-heading"> Tags ({totalCount}) </div>
-
-                    <div className="table">
-                        <Table
-                            options={report_options}
-                            data={reportData}
-                            columns={tableColumns}
-                            onSort={this.props.onSort}
-                        />
-                    </div>
-                </div>
-            </div>
-        );
-    }
+          <div className="table">
+            <Table
+              options={report_options}
+              data={reportData}
+              columns={tableColumns}
+              onSort={this.props.onSort}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
-
-export default wrapReport(TagReport, {pagination: true});
+export default wrapReport(TagReport, { pagination: true });

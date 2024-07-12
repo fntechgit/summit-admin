@@ -11,69 +11,87 @@
  * limitations under the License.
  **/
 
-import React, {useState} from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React, { useState } from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import { checkInBadge } from "../../actions/badge-actions";
-import QrReader from 'modern-react-qr-reader'
-import {isMobile} from 'react-device-detect';
+import QrReader from "modern-react-qr-reader";
+import { isMobile } from "react-device-detect";
 import Swal from "sweetalert2";
-import styles from '../../styles/badge-checkin-page.module.less';
+import styles from "../../styles/badge-checkin-page.module.less";
 
-const BadgeCheckinPage = ({match, currentSummit, checkInBadge}) => {
-    const [scanning, setScanning] = useState(false);
-    const [camera, setCamera] = useState('environment');
+const BadgeCheckinPage = ({ match, currentSummit, checkInBadge }) => {
+  const [scanning, setScanning] = useState(false);
+  const [camera, setCamera] = useState("environment");
 
-    const handleCheckIn = (data) => {
-        if (data && !scanning) {
-            setScanning(true);
-            checkInBadge(data)
-            .then(() => {
-                Swal.fire(T.translate("badge_checkin.checked_in"), `${qrValid[3]} (${qrValid[2]}) checked in!`, "success");
-            })
-            .finally(() => {
-                setScanning(false);
-            })
-        }
-    }
-
-    const handleError = () => {
-        Swal.fire({
-            title: "Error",
-            text: "cannot read QR code, please try again",
-            type: "warning",
+  const handleCheckIn = (data) => {
+    if (data && !scanning) {
+      setScanning(true);
+      checkInBadge(data)
+        .then(() => {
+          Swal.fire(
+            T.translate("badge_checkin.checked_in"),
+            `${qrValid[3]} (${qrValid[2]}) checked in!`,
+            "success"
+          );
+        })
+        .finally(() => {
+          setScanning(false);
         });
     }
+  };
 
-    return(
-        <div className="container">
-            <Breadcrumb data={{ title: T.translate("badge_checkin.checkin"), pathname: match.url }} />
-            <h3>Scan badge to check in:</h3>
-            <hr/>
-            <div className={styles.qrReaderContainer}>
-                <QrReader
-                    delay={2000}
-                    onError={handleError}
-                    onScan={handleCheckIn}
-                    facingMode={camera}
-                    containerStyle={{ width: '100vw' }}
-                    videoStyle={{width: '100vw'}}
-                />
-            </div>
-            <br/>
-            {isMobile && 
-            <button className="btn btn-primary" onClick={() => setCamera(camera === 'environment' ? 'user' : 'environment')}>
-                <i className="fa fa-camera" aria-hidden="true" title={T.translate("badge_checkin.switch_camera")}/>
-                &nbsp;{T.translate("badge_checkin.switch_camera")}
-            </button>}
+  const handleError = () => {
+    Swal.fire({
+      title: "Error",
+      text: "cannot read QR code, please try again",
+      type: "warning"
+    });
+  };
 
-        </div>
-    )
-}
+  return (
+    <div className="container">
+      <Breadcrumb
+        data={{
+          title: T.translate("badge_checkin.checkin"),
+          pathname: match.url
+        }}
+      />
+      <h3>Scan badge to check in:</h3>
+      <hr />
+      <div className={styles.qrReaderContainer}>
+        <QrReader
+          delay={2000}
+          onError={handleError}
+          onScan={handleCheckIn}
+          facingMode={camera}
+          containerStyle={{ width: "100vw" }}
+          videoStyle={{ width: "100vw" }}
+        />
+      </div>
+      <br />
+      {isMobile && (
+        <button
+          className="btn btn-primary"
+          onClick={() =>
+            setCamera(camera === "environment" ? "user" : "environment")
+          }
+        >
+          <i
+            className="fa fa-camera"
+            aria-hidden="true"
+            title={T.translate("badge_checkin.switch_camera")}
+          />
+          &nbsp;{T.translate("badge_checkin.switch_camera")}
+        </button>
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState }) => ({
-    currentSummit   : currentSummitState.currentSummit,
-})
+  currentSummit: currentSummitState.currentSummit
+});
 
-export default connect (mapStateToProps, { checkInBadge })(BadgeCheckinPage);
+export default connect(mapStateToProps, { checkInBadge })(BadgeCheckinPage);

@@ -11,36 +11,50 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {Switch, Route, Redirect} from 'react-router-dom';
+import React from "react";
+import { Switch, Route, Redirect } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import {connect} from "react-redux";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 import MediaFileTypeListPage from "../pages/media_file_types/media-file-type-list-page";
 import EditMediaFileTypePage from "../pages/media_file_types/edit-media-file-type-page";
 
 class MediaFileTypeLayout extends React.Component {
+  render() {
+    const { match } = this.props;
 
-    render(){
-        const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("media_file_type.media_file_types"),
+            pathname: match.url
+          }}
+        />
 
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("media_file_type.media_file_types"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={match.url} component={MediaFileTypeListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditMediaFileTypePage}/>
-                    <Route path={`${match.url}/:media_file_type_id(\\d+)`} component={EditMediaFileTypePage}/>
-                    <Redirect to={`/app/media-file-types`} />
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={MediaFileTypeListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditMediaFileTypePage}
+          />
+          <Route
+            path={`${match.url}/:media_file_type_id(\\d+)`}
+            component={EditMediaFileTypePage}
+          />
+          <Redirect to={`/app/media-file-types`} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(connect (null, {})(MediaFileTypeLayout), 'admin-access');
-
-
+export default Restrict(connect(null, {})(MediaFileTypeLayout), "admin-access");

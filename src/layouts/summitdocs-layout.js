@@ -11,35 +11,44 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 import NoMatchPage from "../pages/no-match-page";
 import SummitDocListPage from "../pages/summitdocs/summitdoc-list-page";
 import EditSummitDocPage from "../pages/summitdocs/edit-summitdoc-page";
 
 class SummitDocsLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("summitdoc.summitdocs"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("summitdoc.summitdocs"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={match.url} component={SummitDocListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditSummitDocPage}/>
-                    <Route path={`${match.url}/:summitdoc_id(\\d+)`} component={EditSummitDocPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route exact strict path={match.url} component={SummitDocListPage} />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditSummitDocPage}
+          />
+          <Route
+            path={`${match.url}/:summitdoc_id(\\d+)`}
+            component={EditSummitDocPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(SummitDocsLayout), 'general');
-
-
+export default Restrict(withRouter(SummitDocsLayout), "general");

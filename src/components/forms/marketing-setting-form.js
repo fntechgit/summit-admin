@@ -11,228 +11,240 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import T from 'i18n-react/dist/i18n-react'
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import {Dropdown, Input, UploadInput, TextEditorV2} from 'openstack-uicore-foundation/lib/components'
-import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import {
+  Dropdown,
+  Input,
+  UploadInput,
+  TextEditorV2
+} from "openstack-uicore-foundation/lib/components";
+import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import history from "../../history";
-import HexColorInput from '../inputs/hex-color-input';
+import HexColorInput from "../inputs/hex-color-input";
 
 import Swal from "sweetalert2";
 
 const setting_types_ddl = [
-    {label: 'Plain Text', value: 'TEXT'},
-    {label: 'Html', value: 'TEXTAREA'},
-    {label: 'File', value: 'FILE'},
-    {label: 'Hex Color', value: 'HEX_COLOR'},
+  { label: "Plain Text", value: "TEXT" },
+  { label: "Html", value: "TEXTAREA" },
+  { label: "File", value: "FILE" },
+  { label: "Hex Color", value: "HEX_COLOR" }
 ];
 
 class MarketingSettingForm extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      entity: { ...props.entity },
+      errors: props.errors
+    };
 
-        this.state = {
-            entity: {...props.entity},
-            errors: props.errors
-        };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleUploadFile = this.handleUploadFile.bind(this);
+    this.handleRemoveFile = this.handleRemoveFile.bind(this);
+  }
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleUploadFile = this.handleUploadFile.bind(this);
-        this.handleRemoveFile = this.handleRemoveFile.bind(this);
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const state = {};
+    scrollToError(this.props.errors);
+
+    if (!shallowEqual(prevProps.entity, this.props.entity)) {
+      state.entity = { ...this.props.entity };
+      state.errors = {};
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        scrollToError(this.props.errors);
-
-        if(!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = {...this.props.entity};
-            state.errors = {};
-        }
-
-        if (!shallowEqual(prevProps.errors, this.props.errors)) {
-            state.errors = {...this.props.errors};
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({...this.state, ...state})
-        }
+    if (!shallowEqual(prevProps.errors, this.props.errors)) {
+      state.errors = { ...this.props.errors };
     }
 
-    handleChange(ev) {
-        let entity = {...this.state.entity};
-        let errors = {...this.state.errors};
-        let {value, id} = ev.target;
+    if (!isEmpty(state)) {
+      this.setState({ ...this.state, ...state });
+    }
+  }
 
-        if (ev.target.type === 'checkbox') {
-            value = ev.target.checked;
-        }
+  handleChange(ev) {
+    let entity = { ...this.state.entity };
+    let errors = { ...this.state.errors };
+    let { value, id } = ev.target;
 
-        if (ev.target.type === 'number') {
-            value = parseInt(ev.target.value);
-        }
-
-        errors[id] = '';
-        entity[id] = value;
-        this.setState({entity: entity, errors: errors});
+    if (ev.target.type === "checkbox") {
+      value = ev.target.checked;
     }
 
-    handleSubmit(ev) {
-        ev.preventDefault();
-        const {entity, file} = this.state;
-        const { currentSummit } = this.props;
-        if((entity.type !== 'FILE' && !entity.value) || (entity.type === 'FILE' && !file)) {
-            const msg = `${setting_types_ddl.find(e => e.value === entity.type)?.label}: This field may not be blank.`;
-            return Swal.fire("Validation error", msg, "warning");
-        }
-
-        this.props.onSubmit(entity, file).then((payload) => {
-            if(entity.id && entity.id > 0){
-                // UPDATE
-                this.props.showSuccessMessage(T.translate("marketing.setting_saved"));
-                return;
-            }
-
-            const success_message = {
-                title: T.translate("general.done"),
-                html: T.translate("marketing.setting_created"),
-                type: 'success'
-            };
-
-            this.props.showMessage(
-                success_message,
-                () => {
-                    history.push(`/app/summits/${currentSummit.id}/marketing/${payload.response.id}`)
-                }
-            );
-        })
+    if (ev.target.type === "number") {
+      value = parseInt(ev.target.value);
     }
 
-    hasErrors(field) {
-        let {errors} = this.state;
-        if(field in errors) {
-            return errors[field];
-        }
+    errors[id] = "";
+    entity[id] = value;
+    this.setState({ entity: entity, errors: errors });
+  }
 
-        return '';
+  handleSubmit(ev) {
+    ev.preventDefault();
+    const { entity, file } = this.state;
+    const { currentSummit } = this.props;
+    if (
+      (entity.type !== "FILE" && !entity.value) ||
+      (entity.type === "FILE" && !file)
+    ) {
+      const msg = `${
+        setting_types_ddl.find((e) => e.value === entity.type)?.label
+      }: This field may not be blank.`;
+      return Swal.fire("Validation error", msg, "warning");
     }
 
-    handleUploadFile(file) {
-        let entity = {...this.state.entity};
+    this.props.onSubmit(entity, file).then((payload) => {
+      if (entity.id && entity.id > 0) {
+        // UPDATE
+        this.props.showSuccessMessage(T.translate("marketing.setting_saved"));
+        return;
+      }
 
-        entity.file_preview = file.preview;
+      const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("marketing.setting_created"),
+        type: "success"
+      };
 
-        this.setState({file: file, entity: entity});
-    }
-
-    handleRemoveFile(ev) {
-        let entity = {...this.state.entity};
-
-        entity.file_preview = '';
-        this.setState({entity: entity});
-    }
-
-    render() {
-        const {entity} = this.state;
-
-        return (
-            <form className="marketing-setting-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("marketing.type")} *</label>
-                        <Dropdown
-                            id="type"
-                            value={entity.type}
-                            placeholder={T.translate("marketing.placeholders.select_type")}
-                            options={setting_types_ddl}
-                            onChange={this.handleChange}
-                            disabled={entity.id !== 0}
-                        />
-                    </div>
-                    <div className="col-md-4">
-                        <label> {T.translate("marketing.key")} *</label>
-                        <Input
-                            id="key"
-                            value={entity.key}
-                            onChange={this.handleChange}
-                            className="form-control"
-                            error={this.hasErrors('key')}
-                        />
-                    </div>
-                    <div className="col-md-4">
-                        <label> {T.translate("marketing.selection_plan")}</label>
-                        <Input
-                            id="selection_plan_id"
-                            value={entity.selection_plan_id}
-                            onChange={this.handleChange}
-                            className="form-control"
-                            error={this.hasErrors('selection_plan_id')}
-                        />
-                    </div>
-                </div>
-                <div className="row form-group">
-                    {entity.type === 'TEXT' &&
-                    <div className="col-md-4">
-                        <label> {T.translate("marketing.plain_text")} *</label>
-                        <Input
-                            id="value"
-                            value={entity.value}
-                            onChange={this.handleChange}
-                            className="form-control"
-                            error={this.hasErrors('value')}
-                        />
-                    </div>
-                    }
-                    {entity.type === 'TEXTAREA' &&
-                    <div className="col-md-8">
-                        <label> {T.translate("marketing.html")} *</label>
-                        <TextEditorV2
-                            id="value"
-                            value={entity.value}
-                            onChange={this.handleChange}
-                            error={this.hasErrors('value')}
-                        />
-                    </div>
-                    }
-                    {entity.type === 'FILE' &&
-                    <div className="col-md-12">
-                        <label> {T.translate("marketing.file")} *</label>
-                        <UploadInput
-                            value={entity.file_preview || entity.file}
-                            handleUpload={this.handleUploadFile}
-                            handleRemove={this.handleRemoveFile}
-                            className="dropzone col-md-6"
-                            multiple={false}
-                        />
-                    </div>
-                    }
-                    {entity.type === 'HEX_COLOR' &&
-                    <div className="col-md-4">
-                        <label> {T.translate("marketing.hex_color")} *</label>
-                        <HexColorInput
-                            onChange={this.handleChange}
-                            id="value"
-                            value={entity.value}
-                            className="form-control"
-                            error={this.hasErrors('value')}
-                        />
-                    </div>
-                    }
-                </div>
-
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                               className="btn btn-primary pull-right" value={T.translate("general.save")}/>
-                    </div>
-                </div>
-            </form>
+      this.props.showMessage(success_message, () => {
+        history.push(
+          `/app/summits/${currentSummit.id}/marketing/${payload.response.id}`
         );
+      });
+    });
+  }
+
+  hasErrors(field) {
+    let { errors } = this.state;
+    if (field in errors) {
+      return errors[field];
     }
+
+    return "";
+  }
+
+  handleUploadFile(file) {
+    let entity = { ...this.state.entity };
+
+    entity.file_preview = file.preview;
+
+    this.setState({ file: file, entity: entity });
+  }
+
+  handleRemoveFile(ev) {
+    let entity = { ...this.state.entity };
+
+    entity.file_preview = "";
+    this.setState({ entity: entity });
+  }
+
+  render() {
+    const { entity } = this.state;
+
+    return (
+      <form className="marketing-setting-form">
+        <input type="hidden" id="id" value={entity.id} />
+        <div className="row form-group">
+          <div className="col-md-4">
+            <label> {T.translate("marketing.type")} *</label>
+            <Dropdown
+              id="type"
+              value={entity.type}
+              placeholder={T.translate("marketing.placeholders.select_type")}
+              options={setting_types_ddl}
+              onChange={this.handleChange}
+              disabled={entity.id !== 0}
+            />
+          </div>
+          <div className="col-md-4">
+            <label> {T.translate("marketing.key")} *</label>
+            <Input
+              id="key"
+              value={entity.key}
+              onChange={this.handleChange}
+              className="form-control"
+              error={this.hasErrors("key")}
+            />
+          </div>
+          <div className="col-md-4">
+            <label> {T.translate("marketing.selection_plan")}</label>
+            <Input
+              id="selection_plan_id"
+              value={entity.selection_plan_id}
+              onChange={this.handleChange}
+              className="form-control"
+              error={this.hasErrors("selection_plan_id")}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          {entity.type === "TEXT" && (
+            <div className="col-md-4">
+              <label> {T.translate("marketing.plain_text")} *</label>
+              <Input
+                id="value"
+                value={entity.value}
+                onChange={this.handleChange}
+                className="form-control"
+                error={this.hasErrors("value")}
+              />
+            </div>
+          )}
+          {entity.type === "TEXTAREA" && (
+            <div className="col-md-8">
+              <label> {T.translate("marketing.html")} *</label>
+              <TextEditorV2
+                id="value"
+                value={entity.value}
+                onChange={this.handleChange}
+                error={this.hasErrors("value")}
+              />
+            </div>
+          )}
+          {entity.type === "FILE" && (
+            <div className="col-md-12">
+              <label> {T.translate("marketing.file")} *</label>
+              <UploadInput
+                value={entity.file_preview || entity.file}
+                handleUpload={this.handleUploadFile}
+                handleRemove={this.handleRemoveFile}
+                className="dropzone col-md-6"
+                multiple={false}
+              />
+            </div>
+          )}
+          {entity.type === "HEX_COLOR" && (
+            <div className="col-md-4">
+              <label> {T.translate("marketing.hex_color")} *</label>
+              <HexColorInput
+                onChange={this.handleChange}
+                id="value"
+                value={entity.value}
+                className="form-control"
+                error={this.hasErrors("value")}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <input
+              type="button"
+              onClick={this.handleSubmit}
+              className="btn btn-primary pull-right"
+              value={T.translate("general.save")}
+            />
+          </div>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default MarketingSettingForm;

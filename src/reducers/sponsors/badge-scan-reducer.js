@@ -12,79 +12,93 @@
  **/
 
 import {
-    RECEIVE_BADGE_SCAN,
-    BADGE_SCAN_UPDATED,
-    RESET_BADGE_SCAN_FORM,
-} from '../../actions/sponsor-actions';
+  RECEIVE_BADGE_SCAN,
+  BADGE_SCAN_UPDATED,
+  RESET_BADGE_SCAN_FORM
+} from "../../actions/sponsor-actions";
 
-import { LOGOUT_USER, VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import {
+  LOGOUT_USER,
+  VALIDATE
+} from "openstack-uicore-foundation/lib/utils/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id: 0,
-    notes: '',
-    sponsor_extra_questions: [],
-    extra_questions: [],
-    attendee_full_name: '',
-    attendee_company: '',
-}
+  id: 0,
+  notes: "",
+  sponsor_extra_questions: [],
+  extra_questions: [],
+  attendee_full_name: "",
+  attendee_company: ""
+};
 
 const DEFAULT_STATE = {
-    entity: DEFAULT_ENTITY,
-    errors: {}
+  entity: DEFAULT_ENTITY,
+  errors: {}
 };
 
 const badgeScanReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-            }
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER:
+      {
+        // we need this in case the token expired while editing the form
+        if (payload.hasOwnProperty("persistStore")) {
+          return state;
+        } else {
+          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
-            break;
-        case SET_CURRENT_SUMMIT:
-        case RESET_BADGE_SCAN_FORM: {
-            return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
-            break;
-        case RECEIVE_BADGE_SCAN: {
-            const badgeScan = payload.response;
+      }
+      break;
+    case SET_CURRENT_SUMMIT:
+    case RESET_BADGE_SCAN_FORM:
+      {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
+      break;
+    case RECEIVE_BADGE_SCAN: {
+      const badgeScan = payload.response;
 
-            const newBadgeScan = {...DEFAULT_ENTITY}
+      const newBadgeScan = { ...DEFAULT_ENTITY };
 
-            newBadgeScan.id = badgeScan.id;
-            newBadgeScan.notes = badgeScan.notes;
-            newBadgeScan.extra_questions = badgeScan.extra_questions;
+      newBadgeScan.id = badgeScan.id;
+      newBadgeScan.notes = badgeScan.notes;
+      newBadgeScan.extra_questions = badgeScan.extra_questions;
 
-            if (badgeScan.badge.ticket.owner.first_name && badgeScan.badge.ticket.owner.last_name) {
-                newBadgeScan.attendee_full_name = `${badgeScan.badge.ticket.owner.first_name} ${badgeScan.badge.ticket.owner.last_name}`;
-            } else if (badgeScan.badge.ticket.owner.member?.first_name && badgeScan.badge.ticket.owner.member?.last_name) {
-                newBadgeScan.attendee_full_name = `${badgeScan.badge.ticket.owner.member.first_name} ${badgeScan.badge.ticket.owner.member.last_name}`;
-            }
-            if (badgeScan.badge.ticket.owner.company) {
-                newBadgeScan.attendee_company = badgeScan.badge.ticket.owner.company;
-            } else if (badgeScan.badge.ticket.owner.member?.company) {
-                newBadgeScan.attendee_company = badgeScan.badge.ticket.owner.member?.company;
-            }            
-            newBadgeScan.sponsor_extra_questions = badgeScan.sponsor?.extra_questions;
+      if (
+        badgeScan.badge.ticket.owner.first_name &&
+        badgeScan.badge.ticket.owner.last_name
+      ) {
+        newBadgeScan.attendee_full_name = `${badgeScan.badge.ticket.owner.first_name} ${badgeScan.badge.ticket.owner.last_name}`;
+      } else if (
+        badgeScan.badge.ticket.owner.member?.first_name &&
+        badgeScan.badge.ticket.owner.member?.last_name
+      ) {
+        newBadgeScan.attendee_full_name = `${badgeScan.badge.ticket.owner.member.first_name} ${badgeScan.badge.ticket.owner.member.last_name}`;
+      }
+      if (badgeScan.badge.ticket.owner.company) {
+        newBadgeScan.attendee_company = badgeScan.badge.ticket.owner.company;
+      } else if (badgeScan.badge.ticket.owner.member?.company) {
+        newBadgeScan.attendee_company =
+          badgeScan.badge.ticket.owner.member?.company;
+      }
+      newBadgeScan.sponsor_extra_questions = badgeScan.sponsor?.extra_questions;
 
-            return { ...state, entity: { ...newBadgeScan } }
-        }
-        case BADGE_SCAN_UPDATED: {
-            return state;
-        }
-            break;
-        case VALIDATE: {
-            return { ...state, errors: payload.errors };
-        }
-            break;
-        default:
-            return state;
+      return { ...state, entity: { ...newBadgeScan } };
     }
+    case BADGE_SCAN_UPDATED:
+      {
+        return state;
+      }
+      break;
+    case VALIDATE:
+      {
+        return { ...state, errors: payload.errors };
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default badgeScanReducer;

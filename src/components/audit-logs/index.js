@@ -1,11 +1,29 @@
-import React, {useEffect} from "react";
-import {FreeTextSearch, Table} from "openstack-uicore-foundation/lib/components";
+import React, { useEffect } from "react";
+import {
+  FreeTextSearch,
+  Table
+} from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react";
-import {Pagination} from "react-bootstrap";
-import {connect} from "react-redux";
-import {clearAuditLogParams, getAuditLog} from "../../actions/audit-log-actions";
+import { Pagination } from "react-bootstrap";
+import { connect } from "react-redux";
+import {
+  clearAuditLogParams,
+  getAuditLog
+} from "../../actions/audit-log-actions";
 
-const AuditLogs = ({entityFilter = [], term, logEntries, perPage, lastPage, currentPage, order, orderDir, columns, getAuditLog, clearAuditLogParams}) => {
+const AuditLogs = ({
+  entityFilter = [],
+  term,
+  logEntries,
+  perPage,
+  lastPage,
+  currentPage,
+  order,
+  orderDir,
+  columns,
+  getAuditLog,
+  clearAuditLogParams
+}) => {
   const audit_log_table_options = {
     sortCol: order,
     sortDir: orderDir,
@@ -13,13 +31,27 @@ const AuditLogs = ({entityFilter = [], term, logEntries, perPage, lastPage, curr
   };
 
   const audit_log_columns = [
-    { columnKey: 'created', value: T.translate("audit_log.date"), sortable: true },
-    { columnKey: 'action', value: T.translate("audit_log.action"), sortable: false },
-    { columnKey: 'event_id', value: T.translate("audit_log.event"), sortable: true },
-    { columnKey: 'user', value: T.translate("audit_log.user"), sortable: false }
+    {
+      columnKey: "created",
+      value: T.translate("audit_log.date"),
+      sortable: true
+    },
+    {
+      columnKey: "action",
+      value: T.translate("audit_log.action"),
+      sortable: false
+    },
+    {
+      columnKey: "event_id",
+      value: T.translate("audit_log.event"),
+      sortable: true
+    },
+    { columnKey: "user", value: T.translate("audit_log.user"), sortable: false }
   ];
 
-  const show_columns = columns ? audit_log_columns.filter(c => columns.includes(c.columnKey)) : audit_log_columns;
+  const show_columns = columns
+    ? audit_log_columns.filter((c) => columns.includes(c.columnKey))
+    : audit_log_columns;
 
   const handleSort = (index, key, dir, func) => {
     getAuditLog(entityFilter, term, currentPage, perPage, key, dir);
@@ -38,27 +70,26 @@ const AuditLogs = ({entityFilter = [], term, logEntries, perPage, lastPage, curr
 
     return () => {
       clearAuditLogParams();
-    }
+    };
   }, []);
-
 
   return (
     <>
-      <div className={'row'}>
-        <div className={'col-md-8'}>
+      <div className={"row"}>
+        <div className={"col-md-8"}>
           <FreeTextSearch
-            value={term ?? ''}
+            value={term ?? ""}
             placeholder={T.translate("audit_log.placeholders.search_log")}
             onSearch={handleSearch}
           />
         </div>
       </div>
 
-      {logEntries.length === 0 &&
+      {logEntries.length === 0 && (
         <div>{T.translate("audit_log.no_log_entries")}</div>
-      }
+      )}
 
-      {logEntries.length > 0 &&
+      {logEntries.length > 0 && (
         <>
           <Table
             options={audit_log_table_options}
@@ -80,19 +111,16 @@ const AuditLogs = ({entityFilter = [], term, logEntries, perPage, lastPage, curr
             onSelect={handlePageChange}
           />
         </>
-      }
+      )}
     </>
-  )
-}
+  );
+};
 
-const mapStateToProps = ({auditLogState}) => ({
-  ...auditLogState,
+const mapStateToProps = ({ auditLogState }) => ({
+  ...auditLogState
 });
 
-export default connect(
-  mapStateToProps,
-  {
-    getAuditLog,
-    clearAuditLogParams
-  }
-)(AuditLogs);
+export default connect(mapStateToProps, {
+  getAuditLog,
+  clearAuditLogParams
+})(AuditLogs);

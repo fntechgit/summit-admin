@@ -11,96 +11,110 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_FLOOR,
-    RESET_FLOOR_FORM,
-    UPDATE_FLOOR,
-    FLOOR_ADDED,
-    FLOOR_UPDATED,
-    ROOM_DELETED,
-    FLOOR_IMAGE_ATTACHED,
-    FLOOR_IMAGE_DELETED
-} from '../../actions/location-actions';
+import {
+  RECEIVE_FLOOR,
+  RESET_FLOOR_FORM,
+  UPDATE_FLOOR,
+  FLOOR_ADDED,
+  FLOOR_UPDATED,
+  ROOM_DELETED,
+  FLOOR_IMAGE_ATTACHED,
+  FLOOR_IMAGE_DELETED
+} from "../../actions/location-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id                  : 0,
-    name                : '',
-    description         : '',
-    number              : 0,
-    rooms               : [],
-}
+  id: 0,
+  name: "",
+  description: "",
+  number: 0,
+  rooms: []
+};
 
 const DEFAULT_STATE = {
-    entity      : DEFAULT_ENTITY,
-    errors      : {},
+  entity: DEFAULT_ENTITY,
+  errors: {}
 };
 
 const floorReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-            }
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER:
+      {
+        // we need this in case the token expired while editing the form
+        if (payload.hasOwnProperty("persistStore")) {
+          return state;
+        } else {
+          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
-        break;
-        case SET_CURRENT_SUMMIT:
-        case RESET_FLOOR_FORM: {
-            return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        break;
-        case UPDATE_FLOOR: {
-            return {...state,  entity: {...payload}, errors: {} };
-        }
-        break;
-        case FLOOR_ADDED:
-        case RECEIVE_FLOOR: {
-            let entity = {...payload.response};
+      }
+      break;
+    case SET_CURRENT_SUMMIT:
+    case RESET_FLOOR_FORM:
+      {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
+      break;
+    case UPDATE_FLOOR:
+      {
+        return { ...state, entity: { ...payload }, errors: {} };
+      }
+      break;
+    case FLOOR_ADDED:
+    case RECEIVE_FLOOR:
+      {
+        let entity = { ...payload.response };
 
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
+        for (var key in entity) {
+          if (entity.hasOwnProperty(key)) {
+            entity[key] = entity[key] == null ? "" : entity[key];
+          }
+        }
 
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
-        }
-        break;
-        case FLOOR_UPDATED: {
-            return state;
-        }
-        break;
-        case ROOM_DELETED: {
-            let {roomId} = payload;
-            return {...state, entity: {...state.entity, rooms: state.entity.rooms.filter(r => r.id !== roomId)}};
-        }
-        break;
-        case VALIDATE: {
-            return {...state,  errors: payload.errors };
-        }
-        break;
-        case FLOOR_IMAGE_ATTACHED: {
-            let image = {...payload.response};
-            //let image = {...state.entity.image, url:  state.entity.image.url + '?' + new Date().getTime()};
-            return {...state, entity: {...state.entity, image: image.url} };
-        }
-        break;
-        case FLOOR_IMAGE_DELETED: {
-            let {floorId} = payload;
-            return {...state, entity: {...state.entity, image: null} };
-        }
-        break;
-        default:
-            return state;
-    }
+        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+      }
+      break;
+    case FLOOR_UPDATED:
+      {
+        return state;
+      }
+      break;
+    case ROOM_DELETED:
+      {
+        let { roomId } = payload;
+        return {
+          ...state,
+          entity: {
+            ...state.entity,
+            rooms: state.entity.rooms.filter((r) => r.id !== roomId)
+          }
+        };
+      }
+      break;
+    case VALIDATE:
+      {
+        return { ...state, errors: payload.errors };
+      }
+      break;
+    case FLOOR_IMAGE_ATTACHED:
+      {
+        let image = { ...payload.response };
+        //let image = {...state.entity.image, url:  state.entity.image.url + '?' + new Date().getTime()};
+        return { ...state, entity: { ...state.entity, image: image.url } };
+      }
+      break;
+    case FLOOR_IMAGE_DELETED:
+      {
+        let { floorId } = payload;
+        return { ...state, entity: { ...state.entity, image: null } };
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default floorReducer;

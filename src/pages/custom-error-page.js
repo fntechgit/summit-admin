@@ -10,39 +10,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react';
+import React from "react";
 import URI from "urijs";
 import Swal from "sweetalert2";
-import '../styles/error-page.less';
+import "../styles/error-page.less";
 import T from "i18n-react/dist/i18n-react";
-import {getBackURL} from "openstack-uicore-foundation/lib/utils/methods";
-import {doLogin} from "openstack-uicore-foundation/lib/security/methods";
+import { getBackURL } from "openstack-uicore-foundation/lib/utils/methods";
+import { doLogin } from "openstack-uicore-foundation/lib/security/methods";
 
 class CustomErrorPage extends React.Component {
+  componentDidMount() {
+    let query = URI.parseQuery(this.props.location.search);
+    Swal.fire(query.error, query.error_description, "error");
+  }
 
-    componentDidMount() {
-        let query = URI.parseQuery(this.props.location.search);
-        Swal.fire(query.error,
-            query.error_description,
-            "error");
-    }
+  onClickLogin() {
+    doLogin(getBackURL());
+  }
 
-    onClickLogin(){
-        doLogin(getBackURL());
-    }
+  render() {
+    return (
+      <div className="error_page_wrapper container">
+        <h1>{T.translate("landing.not_logged_in")}</h1>
 
-    render(){
-        return (
-            <div className="error_page_wrapper container">
-                <h1>{T.translate("landing.not_logged_in")}</h1>
-
-                <br/><br/>
-                <button className="btn btn-primary btn-lg" onClick={this.onClickLogin.bind(this)}>
-                    {T.translate("landing.log_in")}
-                </button>
-            </div>
-        );
-    }
+        <br />
+        <br />
+        <button
+          className="btn btn-primary btn-lg"
+          onClick={this.onClickLogin.bind(this)}
+        >
+          {T.translate("landing.log_in")}
+        </button>
+      </div>
+    );
+  }
 }
 
 export default CustomErrorPage;

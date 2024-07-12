@@ -11,35 +11,49 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 import NoMatchPage from "../pages/no-match-page";
 import MarketingSettingListPage from "../pages/marketing/marketing-setting-list-page";
 import EditMarketingSettingPage from "../pages/marketing/edit-marketing-setting-page";
 
 class MarketingLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("marketing.settings"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("marketing.settings"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={match.url} component={MarketingSettingListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditMarketingSettingPage}/>
-                    <Route path={`${match.url}/:setting_id(\\d+)`} component={EditMarketingSettingPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={MarketingSettingListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditMarketingSettingPage}
+          />
+          <Route
+            path={`${match.url}/:setting_id(\\d+)`}
+            component={EditMarketingSettingPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(MarketingLayout), 'marketing');
-
-
+export default Restrict(withRouter(MarketingLayout), "marketing");

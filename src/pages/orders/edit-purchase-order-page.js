@@ -11,101 +11,108 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { getSummitById }  from '../../actions/summit-actions';
+import { getSummitById } from "../../actions/summit-actions";
 
-import { getPurchaseOrder,
-         savePurchaseOrder,
-         addTicketsToOrder,
-        deletePurchaseOrder,
-        reSendOrderEmail,
+import {
+  getPurchaseOrder,
+  savePurchaseOrder,
+  addTicketsToOrder,
+  deletePurchaseOrder,
+  reSendOrderEmail
 } from "../../actions/order-actions";
 
 import PurchaseOrderForm from "../../components/forms/purchase-order-form";
 import Swal from "sweetalert2";
 
-import '../../styles/edit-purchase-order-page.less';
+import "../../styles/edit-purchase-order-page.less";
 
 class EditPurchaseOrderPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleDeleteOrder = this.handleDeleteOrder.bind(this);
+    this.handleResendEmail = this.handleResendEmail.bind(this);
+  }
 
-    constructor(props) {
-        super(props);
-        this.handleDeleteOrder = this.handleDeleteOrder.bind(this);
-        this.handleResendEmail = this.handleResendEmail.bind(this);
-    }
+  handleResendEmail(order, ev) {
+    this.props.reSendOrderEmail(order.id);
+  }
 
-    handleResendEmail(order, ev){
-        this.props.reSendOrderEmail(order.id);
-    }
+  handleDeleteOrder(order, ev) {
+    const { deletePurchaseOrder } = this.props;
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_purchase_order.remove_warning"),
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deletePurchaseOrder(order.id);
+      }
+    });
+  }
 
-    handleDeleteOrder(order, ev) {
-        const {deletePurchaseOrder} = this.props;
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("edit_purchase_order.remove_warning"),
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deletePurchaseOrder(order.id);
-            }
-        });
-    }
+  render() {
+    const { currentSummit, entity, errors, match } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
 
-    render(){
-        const {currentSummit, entity, errors, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-
-        return(
-            <div className="container">
-                <h3>
-                    {title} {T.translate("edit_purchase_order.purchase_order")}
-                    {entity.id !== 0 &&
-                    <div className="pull-right form-inline">
-                        <button className="btn btn-sm btn-danger" onClick={this.handleDeleteOrder.bind(this, entity)}>
-                            {T.translate("edit_purchase_order.delete_order")}
-                        </button>
-                        { entity.status === 'Paid' &&
-                        <button className="btn btn-sm btn-primary left-space"
-                                onClick={this.handleResendEmail.bind(this, entity)}>
-                            {T.translate("edit_purchase_order.resend_order_email")}
-                        </button>
-                        }
-                    </div>
-                    }
-                </h3>
-                <hr/>
-
-                <PurchaseOrderForm
-                    history={this.props.history}
-                    currentSummit={currentSummit}
-                    entity={entity}
-                    errors={errors}
-                    onSubmit={this.props.savePurchaseOrder}
-                    addTickets={this.props.addTicketsToOrder}
-                />
+    return (
+      <div className="container">
+        <h3>
+          {title} {T.translate("edit_purchase_order.purchase_order")}
+          {entity.id !== 0 && (
+            <div className="pull-right form-inline">
+              <button
+                className="btn btn-sm btn-danger"
+                onClick={this.handleDeleteOrder.bind(this, entity)}
+              >
+                {T.translate("edit_purchase_order.delete_order")}
+              </button>
+              {entity.status === "Paid" && (
+                <button
+                  className="btn btn-sm btn-primary left-space"
+                  onClick={this.handleResendEmail.bind(this, entity)}
+                >
+                  {T.translate("edit_purchase_order.resend_order_email")}
+                </button>
+              )}
             </div>
-        )
-    }
+          )}
+        </h3>
+        <hr />
+
+        <PurchaseOrderForm
+          history={this.props.history}
+          currentSummit={currentSummit}
+          entity={entity}
+          errors={errors}
+          onSubmit={this.props.savePurchaseOrder}
+          addTickets={this.props.addTicketsToOrder}
+        />
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentPurchaseOrderState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentPurchaseOrderState
-})
+const mapStateToProps = ({
+  currentSummitState,
+  currentPurchaseOrderState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentPurchaseOrderState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getPurchaseOrder,
-        savePurchaseOrder,
-        addTicketsToOrder,
-        deletePurchaseOrder,
-        reSendOrderEmail,
-    }
-)(EditPurchaseOrderPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getPurchaseOrder,
+  savePurchaseOrder,
+  addTicketsToOrder,
+  deletePurchaseOrder,
+  reSendOrderEmail
+})(EditPurchaseOrderPage);

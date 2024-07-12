@@ -11,173 +11,182 @@
  * limitations under the License.
  **/
 import {
-    getRequest,
-    postRequest,
-    deleteRequest,
-    createAction,
-    stopLoading,
-    startLoading,
-    authErrorHandler,
-    putFile,
-    postFile,
-    putRequest
-} from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessTokenSafely} from '../utils/methods';
+  getRequest,
+  postRequest,
+  deleteRequest,
+  createAction,
+  stopLoading,
+  startLoading,
+  authErrorHandler,
+  putFile,
+  postFile,
+  putRequest
+} from "openstack-uicore-foundation/lib/utils/actions";
+import { getAccessTokenSafely } from "../utils/methods";
 
 import Swal from "sweetalert2";
 
-export const REQUEST_SETTINGS = 'REQUEST_SETTINGS';
-export const RECEIVE_SETTINGS = 'RECEIVE_SETTINGS';
-export const RECEIVE_SETTING = 'RECEIVE_SETTING';
-export const RESET_SETTING_FORM = 'RESET_SETTING_FORM';
-export const UPDATE_SETTING = 'UPDATE_SETTING';
-export const SETTING_UPDATED = 'SETTING_UPDATED';
-export const SETTING_ADDED = 'SETTING_ADDED';
-export const SETTING_DELETED = 'SETTING_DELETED';
-export const SETTINGS_CLONED = 'SETTINGS_CLONED';
-export const REQUEST_SELECTION_PLAN_SETTINGS = 'REQUEST_SELECTION_PLAN_SETTINGS';
-export const RECEIVE_SELECTION_PLAN_SETTINGS = 'RECEIVE_SELECTION_PLAN_SETTINGS';
-export const REQUEST_REG_LITE_SETTINGS = 'REQUEST_REG_LITE_SETTINGS';
-export const RECEIVE_REG_LITE_SETTINGS = 'RECEIVE_REG_LITE_SETTINGS';
-export const REQUEST_PRINT_APP_SETTINGS = 'REQUEST_PRINT_APP_SETTINGS';
-export const RECEIVE_PRINT_APP_SETTINGS = 'RECEIVE_PRINT_APP_SETTINGS';
+export const REQUEST_SETTINGS = "REQUEST_SETTINGS";
+export const RECEIVE_SETTINGS = "RECEIVE_SETTINGS";
+export const RECEIVE_SETTING = "RECEIVE_SETTING";
+export const RESET_SETTING_FORM = "RESET_SETTING_FORM";
+export const UPDATE_SETTING = "UPDATE_SETTING";
+export const SETTING_UPDATED = "SETTING_UPDATED";
+export const SETTING_ADDED = "SETTING_ADDED";
+export const SETTING_DELETED = "SETTING_DELETED";
+export const SETTINGS_CLONED = "SETTINGS_CLONED";
+export const REQUEST_SELECTION_PLAN_SETTINGS =
+  "REQUEST_SELECTION_PLAN_SETTINGS";
+export const RECEIVE_SELECTION_PLAN_SETTINGS =
+  "RECEIVE_SELECTION_PLAN_SETTINGS";
+export const REQUEST_REG_LITE_SETTINGS = "REQUEST_REG_LITE_SETTINGS";
+export const RECEIVE_REG_LITE_SETTINGS = "RECEIVE_REG_LITE_SETTINGS";
+export const REQUEST_PRINT_APP_SETTINGS = "REQUEST_PRINT_APP_SETTINGS";
+export const RECEIVE_PRINT_APP_SETTINGS = "RECEIVE_PRINT_APP_SETTINGS";
 
-export const getMarketingSettings = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1) => (dispatch, getState) => {
-
-    const {currentSummitState} = getState();
-    const {currentSummit} = currentSummitState;
+export const getMarketingSettings =
+  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
 
     const params = {
-        page: page,
-        per_page: perPage,
+      page: page,
+      per_page: perPage
     };
 
     if (term) {
-        params.key__contains = term;
+      params.key__contains = term;
     }
 
     // order
     if (order != null && orderDir != null) {
-        const orderDirSign = (orderDir === 1) ? '' : '-';
-        params['order'] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params["order"] = `${orderDirSign}${order}`;
     }
 
     return getRequest(
-        createAction(REQUEST_SETTINGS),
-        createAction(RECEIVE_SETTINGS),
-        `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
-        authErrorHandler,
-        {order, orderDir, term}
+      createAction(REQUEST_SETTINGS),
+      createAction(RECEIVE_SETTINGS),
+      `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
+      authErrorHandler,
+      { order, orderDir, term }
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
+      dispatch(stopLoading());
+    });
+  };
 
-export const getMarketingSettingsForRegLite = (page = 1, perPage = 100) => (dispatch, getState) => {
-    const {currentSummitState} = getState();
-    const {currentSummit} = currentSummitState;
+export const getMarketingSettingsForRegLite =
+  (page = 1, perPage = 100) =>
+  (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
 
     const params = {
-        page: page,
-        per_page: perPage,
-        key__contains : 'REG_LITE',
-    }
+      page: page,
+      per_page: perPage,
+      key__contains: "REG_LITE"
+    };
 
     return getRequest(
-        createAction(REQUEST_REG_LITE_SETTINGS),
-        createAction(RECEIVE_REG_LITE_SETTINGS),
-        `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
-        authErrorHandler,
-        {}
+      createAction(REQUEST_REG_LITE_SETTINGS),
+      createAction(RECEIVE_REG_LITE_SETTINGS),
+      `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
+      authErrorHandler,
+      {}
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-}
+      dispatch(stopLoading());
+    });
+  };
 
-export const getMarketingSettingsForPrintApp = (page = 1, perPage = 10) => (dispatch, getState) => {
-    const {currentSummitState} = getState();
-    const {currentSummit} = currentSummitState;
+export const getMarketingSettingsForPrintApp =
+  (page = 1, perPage = 10) =>
+  (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
 
     const params = {
-        page: page,
-        per_page: perPage,
-        key__contains : 'PRINT_APP',
-    }
+      page: page,
+      per_page: perPage,
+      key__contains: "PRINT_APP"
+    };
 
     return getRequest(
-        createAction(REQUEST_PRINT_APP_SETTINGS),
-        createAction(RECEIVE_PRINT_APP_SETTINGS),
-        `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
-        authErrorHandler,
-        {}
+      createAction(REQUEST_PRINT_APP_SETTINGS),
+      createAction(RECEIVE_PRINT_APP_SETTINGS),
+      `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
+      authErrorHandler,
+      {}
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-}
+      dispatch(stopLoading());
+    });
+  };
 
-export const getMarketingSettingsBySelectionPlan = (selectionPlanId, term = null, page = 1, perPage = 10, order = 'id', orderDir = 1) => (dispatch, getState) => {
-
-    const {currentSummitState} = getState();
-    const {currentSummit} = currentSummitState;
+export const getMarketingSettingsBySelectionPlan =
+  (
+    selectionPlanId,
+    term = null,
+    page = 1,
+    perPage = 10,
+    order = "id",
+    orderDir = 1
+  ) =>
+  (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
 
     const params = {
-        page: page,
-        per_page: perPage,
-        selection_plan_id: selectionPlanId
+      page: page,
+      per_page: perPage,
+      selection_plan_id: selectionPlanId
     };
 
     if (term) {
-        params.key__contains = term;
+      params.key__contains = term;
     }
 
     // order
     if (order != null && orderDir != null) {
-        const orderDirSign = (orderDir === 1) ? '' : '-';
-        params['order'] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params["order"] = `${orderDirSign}${order}`;
     }
 
     return getRequest(
-        createAction(REQUEST_SELECTION_PLAN_SETTINGS),
-        createAction(RECEIVE_SELECTION_PLAN_SETTINGS),
-        `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
-        authErrorHandler,
-        {order, orderDir, term}
+      createAction(REQUEST_SELECTION_PLAN_SETTINGS),
+      createAction(RECEIVE_SELECTION_PLAN_SETTINGS),
+      `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/all/shows/${currentSummit.id}`,
+      authErrorHandler,
+      { order, orderDir, term }
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
+      dispatch(stopLoading());
+    });
+  };
 
 export const getMarketingSetting = (settingId) => (dispatch, getState) => {
+  dispatch(startLoading());
 
-    dispatch(startLoading());
+  const params = {};
 
-    const params = {};
-
-    return getRequest(
-        null,
-        createAction(RECEIVE_SETTING),
-        `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/${settingId}`,
-        authErrorHandler
-    )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
+  return getRequest(
+    null,
+    createAction(RECEIVE_SETTING),
+    `${window.MARKETING_API_BASE_URL}/api/public/v1/config-values/${settingId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
 };
 
 export const resetSettingForm = () => (dispatch, getState) => {
-    dispatch(createAction(RESET_SETTING_FORM)({}));
+  dispatch(createAction(RESET_SETTING_FORM)({}));
 };
 
 /**
@@ -185,173 +194,163 @@ export const resetSettingForm = () => (dispatch, getState) => {
  * @param file
  * @returns {(function(*=, *): Promise<void>)|*}
  */
-export const saveMarketingSetting = (entity, file = null) => async (dispatch, getState) => {
+export const saveMarketingSetting =
+  (entity, file = null) =>
+  async (dispatch, getState) => {
+    if (entity.type === "FILE" && !file) return Promise.resolve();
+    if (entity.type === "HEX_COLOR" && !entity.value) return Promise.resolve();
 
-    if(entity.type === 'FILE' && !file) return Promise.resolve();
-    if(entity.type === 'HEX_COLOR' && !entity.value) return Promise.resolve();
-
-    const {currentSummitState} = getState();
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
 
     const normalizedEntity = normalizeEntity(entity, currentSummit.id);
-    const params = {access_token: accessToken};
-
+    const params = { access_token: accessToken };
 
     if (entity.id) {
-
-        if(file)
-            return putFile(
-                createAction(UPDATE_SETTING),
-                createAction(SETTING_UPDATED),
-                `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
-                file,
-                normalizedEntity,
-                customErrorHandler,
-                entity
-            )(params)(dispatch)
-                .then((payload) => {
-                    dispatch(stopLoading());
-                    return payload;
-                });
-        // regular PUT
-        return putRequest(
-            createAction(UPDATE_SETTING),
-            createAction(SETTING_UPDATED),
-            `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
-            normalizedEntity,
-            customErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(stopLoading());
-                return payload;
-            });
-    }
-
-    if(file)
-        return postFile(
-            createAction(UPDATE_SETTING),
-            createAction(SETTING_ADDED),
-            `${window.MARKETING_API_BASE_URL}/api/v1/config-values`,
-            file,
-            normalizedEntity,
-            customErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(stopLoading());
-                return payload
-            });
-    // regular POST
-    return postRequest(
+      if (file)
+        return putFile(
+          createAction(UPDATE_SETTING),
+          createAction(SETTING_UPDATED),
+          `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
+          file,
+          normalizedEntity,
+          customErrorHandler,
+          entity
+        )(params)(dispatch).then((payload) => {
+          dispatch(stopLoading());
+          return payload;
+        });
+      // regular PUT
+      return putRequest(
         createAction(UPDATE_SETTING),
-        createAction(SETTING_ADDED),
-        `${window.MARKETING_API_BASE_URL}/api/v1/config-values`,
+        createAction(SETTING_UPDATED),
+        `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
         normalizedEntity,
         customErrorHandler,
         entity
-    )(params)(dispatch)
-        .then((payload) => {
-            dispatch(stopLoading());
-            return payload
-        });
-}
+      )(params)(dispatch).then((payload) => {
+        dispatch(stopLoading());
+        return payload;
+      });
+    }
+
+    if (file)
+      return postFile(
+        createAction(UPDATE_SETTING),
+        createAction(SETTING_ADDED),
+        `${window.MARKETING_API_BASE_URL}/api/v1/config-values`,
+        file,
+        normalizedEntity,
+        customErrorHandler,
+        entity
+      )(params)(dispatch).then((payload) => {
+        dispatch(stopLoading());
+        return payload;
+      });
+    // regular POST
+    return postRequest(
+      createAction(UPDATE_SETTING),
+      createAction(SETTING_ADDED),
+      `${window.MARKETING_API_BASE_URL}/api/v1/config-values`,
+      normalizedEntity,
+      customErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(stopLoading());
+      return payload;
+    });
+  };
 
 export const deleteSetting = (settingId) => async (dispatch, getState) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const accessToken = await getAccessTokenSafely();
+  const params = {
+    access_token: accessToken
+  };
 
-    const params = {
-        access_token: accessToken
-    };
-
-    return deleteRequest(
-        null,
-        createAction(SETTING_DELETED)({settingId}),
-        `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${settingId}`,
-        null,
-        authErrorHandler
-    )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
+  return deleteRequest(
+    null,
+    createAction(SETTING_DELETED)({ settingId }),
+    `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${settingId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
 };
 
-export const cloneMarketingSettings = (summitId) => async (dispatch, getState) => {
-
-    const {currentSummitState} = getState();
+export const cloneMarketingSettings =
+  (summitId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
 
     const params = {
-        access_token: accessToken
+      access_token: accessToken
     };
 
     return postRequest(
-        null,
-        createAction(SETTINGS_CLONED),
-        `${window.MARKETING_API_BASE_URL}/api/v1/config-values/all/shows/${summitId}/clone/${currentSummit.id}`,
-        null,
-        authErrorHandler
+      null,
+      createAction(SETTINGS_CLONED),
+      `${window.MARKETING_API_BASE_URL}/api/v1/config-values/all/shows/${summitId}/clone/${currentSummit.id}`,
+      null,
+      authErrorHandler
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-            dispatch(getMarketingSettings());
-        }
-    );
-};
-
+      dispatch(stopLoading());
+      dispatch(getMarketingSettings());
+    });
+  };
 
 const normalizeEntity = (entity, summitId) => {
-    const normalizedEntity = {...entity};
-    normalizedEntity['show_id'] = summitId;
-    delete (normalizedEntity['id']);
-    delete (normalizedEntity['created']);
-    delete (normalizedEntity['modified']);
-    if(entity.type !== 'FILE'){
-        delete(normalizedEntity['file'])
-    }
+  const normalizedEntity = { ...entity };
+  normalizedEntity["show_id"] = summitId;
+  delete normalizedEntity["id"];
+  delete normalizedEntity["created"];
+  delete normalizedEntity["modified"];
+  if (entity.type !== "FILE") {
+    delete normalizedEntity["file"];
+  }
 
-    delete(normalizedEntity['file_preview'])
-    return normalizedEntity;
-
-}
+  delete normalizedEntity["file_preview"];
+  return normalizedEntity;
+};
 
 export const customErrorHandler = (err, res) => (dispatch, state) => {
-    const code = err.status;
-    let msg = '';
+  const code = err.status;
+  let msg = "";
 
-    dispatch(stopLoading());
+  dispatch(stopLoading());
 
-    switch (code) {
-        case 412:
-            if (Array.isArray(err.response.body)) {
-                err.response.body.forEach(er => {
-                    msg += er + '<br>';
-                });
-            } else {
-                for (var [key, value] of Object.entries(err.response.body)) {
-                    if (isNaN(key)) {
-                        msg += key + ': ';
-                    }
+  switch (code) {
+    case 412:
+      if (Array.isArray(err.response.body)) {
+        err.response.body.forEach((er) => {
+          msg += er + "<br>";
+        });
+      } else {
+        for (var [key, value] of Object.entries(err.response.body)) {
+          if (isNaN(key)) {
+            msg += key + ": ";
+          }
 
-                    msg += value + '<br>';
-                }
-            }
+          msg += value + "<br>";
+        }
+      }
 
-            Swal.fire("Validation error", msg, "warning");
+      Swal.fire("Validation error", msg, "warning");
 
-            if (err.response.body.errors) {
-                dispatch({
-                    type: VALIDATE,
-                    payload: {errors: err.response.body}
-                });
-            }
+      if (err.response.body.errors) {
+        dispatch({
+          type: VALIDATE,
+          payload: { errors: err.response.body }
+        });
+      }
 
-            break;
-        default:
-            dispatch(authErrorHandler(err, res));
-    }
-}
+      break;
+    default:
+      dispatch(authErrorHandler(err, res));
+  }
+};

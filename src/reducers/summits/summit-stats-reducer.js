@@ -1,5 +1,5 @@
-import {LOGOUT_USER} from 'openstack-uicore-foundation/lib/security/actions';
-import {RECEIVE_SUMMIT, REQUEST_SUMMIT} from '../../actions/summit-actions';
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { RECEIVE_SUMMIT, REQUEST_SUMMIT } from "../../actions/summit-actions";
 
 import {
   RECEIVE_ATTENDEE_CHECK_INS,
@@ -9,10 +9,10 @@ import {
   REQUEST_ATTENDEE_CHECK_INS,
   REQUEST_TICKETS_SOLD,
   RECEIVE_TICKETS_SOLD
-} from '../../actions/summit-stats-actions'
+} from "../../actions/summit-stats-actions";
 
 const DEFAULT_STATE = {
-  summitTZ: 'UTC',
+  summitTZ: "UTC",
   loadingData: false,
   total_active_tickets: 0,
   total_inactive_tickets: 0,
@@ -28,56 +28,65 @@ const DEFAULT_STATE = {
   total_virtual_non_checked_in_attendees: 0,
   total_tickets_per_badge_feature: [],
   attendee_checkins: [],
-  attendeeTimeUnit: 'Day',
+  attendeeTimeUnit: "Day",
   tickets_sold: [],
-  ticketsTimeUnit: 'Day'
+  ticketsTimeUnit: "Day"
 };
 
 const summitStatsReducer = (state = DEFAULT_STATE, action) => {
-  const {type, payload} = action
+  const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER: {
-      return DEFAULT_STATE
+      return DEFAULT_STATE;
     }
     case REQUEST_SUMMIT: {
-      return DEFAULT_STATE
+      return DEFAULT_STATE;
     }
     case RECEIVE_SUMMIT: {
-      let entity = {...payload.response};
-      return {...state, summitTZ: entity.time_zone_id}
+      let entity = { ...payload.response };
+      return { ...state, summitTZ: entity.time_zone_id };
     }
     case REGISTRATION_DATA_REQUESTED: {
-      return {...state, loadingData: true, attendees: []};
+      return { ...state, loadingData: true, attendees: [] };
     }
     case RECEIVE_REGISTRATION_STATS: {
       const stats = payload.response;
-      return {...state, ...stats};
+      return { ...state, ...stats };
     }
     case REQUEST_ATTENDEE_CHECK_INS: {
-      return {...state, attendeeTimeUnit: payload.attendeeTimeUnit, loadingData: true}
+      return {
+        ...state,
+        attendeeTimeUnit: payload.attendeeTimeUnit,
+        loadingData: true
+      };
     }
     case RECEIVE_ATTENDEE_CHECK_INS: {
-      const {data, current_page, last_page} = payload.response;
-      const attendee_checkins = current_page === 1 ? data : [...state.attendee_checkins, ...data];
+      const { data, current_page, last_page } = payload.response;
+      const attendee_checkins =
+        current_page === 1 ? data : [...state.attendee_checkins, ...data];
       const loadingData = current_page < last_page;
-      return {...state, attendee_checkins, loadingData};
+      return { ...state, attendee_checkins, loadingData };
     }
     case REQUEST_TICKETS_SOLD: {
-      return {...state, ticketsTimeUnit: payload.ticketsTimeUnit, loadingData: true}
+      return {
+        ...state,
+        ticketsTimeUnit: payload.ticketsTimeUnit,
+        loadingData: true
+      };
     }
     case RECEIVE_TICKETS_SOLD: {
-      const {data, current_page, last_page} = payload.response;
-      const tickets_sold = current_page === 1 ? data : [...state.tickets_sold, ...data];
+      const { data, current_page, last_page } = payload.response;
+      const tickets_sold =
+        current_page === 1 ? data : [...state.tickets_sold, ...data];
       const loadingData = current_page < last_page;
-      return {...state, tickets_sold, loadingData};
+      return { ...state, tickets_sold, loadingData };
     }
     case REGISTRATION_DATA_LOADED: {
-      return {...state, loadingData: false}
+      return { ...state, loadingData: false };
     }
     default:
       return state;
   }
+};
 
-}
-
-export default summitStatsReducer
+export default summitStatsReducer;

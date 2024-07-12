@@ -11,162 +11,179 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Pagination } from 'react-bootstrap';
-import {FreeTextSearch, Table} from 'openstack-uicore-foundation/lib/components';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getMediaFileTypes, deleteMediaFileType } from "../../actions/media-file-type-actions";
+import { Pagination } from "react-bootstrap";
+import {
+  FreeTextSearch,
+  Table
+} from "openstack-uicore-foundation/lib/components";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getMediaFileTypes,
+  deleteMediaFileType
+} from "../../actions/media-file-type-actions";
 
 class MediaFileTypeListPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
+    this.handleNewMediaFileType = this.handleNewMediaFileType.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
 
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handlePageChange = this.handlePageChange.bind(this);
-        this.handleSort = this.handleSort.bind(this);
-        this.handleSearch = this.handleSearch.bind(this);
-        this.handleNewMediaFileType = this.handleNewMediaFileType.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
+    this.state = {};
+  }
 
-        this.state = {
-        }
-    }
+  componentDidMount() {
+    this.props.getMediaFileTypes();
+  }
 
-    componentDidMount() {
-        this.props.getMediaFileTypes();
-    }
+  handleEdit(media_file_type_id) {
+    const { history } = this.props;
+    history.push(`/app/media-file-types/${media_file_type_id}`);
+  }
 
-    handleEdit(media_file_type_id) {
-        const {history} = this.props;
-        history.push(`/app/media-file-types/${media_file_type_id}`);
-    }
+  handlePageChange(page) {
+    const { term, order, orderDir, perPage } = this.props;
+    this.props.getMediaFileTypes(term, page, perPage, order, orderDir);
+  }
 
-    handlePageChange(page) {
-        const {term, order, orderDir, perPage} = this.props;
-        this.props.getMediaFileTypes(term, page, perPage, order, orderDir);
-    }
+  handleSort(index, key, dir, func) {
+    const { term, page, perPage } = this.props;
+    this.props.getMediaFileTypes(term, page, perPage, key, dir);
+  }
 
-    handleSort(index, key, dir, func) {
-        const {term, page, perPage} = this.props;
-        this.props.getMediaFileTypes(term, page, perPage, key, dir);
-    }
+  handleSearch(term) {
+    const { order, orderDir, page, perPage } = this.props;
+    this.props.getMediaFileTypes(term, page, perPage, order, orderDir);
+  }
 
-    handleSearch(term) {
-        const {order, orderDir, page, perPage} = this.props;
-        this.props.getMediaFileTypes(term, page, perPage, order, orderDir);
-    }
+  handleNewMediaFileType(ev) {
+    const { history } = this.props;
+    ev.preventDefault();
 
-    handleNewMediaFileType(ev) {
-        const {history} = this.props;
-        ev.preventDefault();
+    history.push(`/app/media-file-types/new`);
+  }
 
-        history.push(`/app/media-file-types/new`);
-    }
+  handleDelete(typeId) {
+    const { deleteMediaFileType, media_file_types } = this.props;
+    let media_file_type = media_file_types.find((t) => t.id === typeId);
 
-    handleDelete(typeId) {
-        const {deleteMediaFileType, media_file_types} = this.props;
-        let media_file_type = media_file_types.find(t => t.id === typeId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text:
+        T.translate("media_file_type.delete_warning") +
+        " " +
+        media_file_type.name,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteMediaFileType(accessId);
+      }
+    });
+  }
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("media_file_type.delete_warning") + ' ' + media_file_type.name,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deleteMediaFileType(accessId);
-            }
-        });
-    }
+  canEdit = (item) => !item.is_system_defined;
 
-    canEdit = (item) => !item.is_system_defined;
+  render() {
+    const { media_file_types, lastPage, currentPage, term, order, orderDir } =
+      this.props;
 
-    render(){
-        const {media_file_types, lastPage, currentPage, term, order, orderDir} = this.props;
+    const columns = [
+      { columnKey: "id", value: T.translate("general.id"), sortable: true },
+      {
+        columnKey: "name",
+        value: T.translate("media_file_type.name"),
+        sortable: true
+      },
+      {
+        columnKey: "description",
+        value: T.translate("media_file_type.description")
+      },
+      {
+        columnKey: "allowed_extensions",
+        value: T.translate("media_file_type.allowed_extensions")
+      }
+    ];
 
-        const columns = [
-            { columnKey: 'id', value: T.translate("general.id"), sortable: true },
-            { columnKey: 'name', value: T.translate("media_file_type.name"), sortable: true },
-            { columnKey: 'description', value: T.translate("media_file_type.description") },
-            { columnKey: 'allowed_extensions', value: T.translate("media_file_type.allowed_extensions")},
-        ];
+    const table_options = {
+      sortCol: order,
+      sortDir: orderDir,
+      actions: {
+        edit: { onClick: this.handleEdit },
+        delete: { onClick: this.handleDelete, display: this.canEdit }
+      }
+    };
 
-        const table_options = {
-            sortCol: order,
-            sortDir: orderDir,
-            actions: {
-                edit: {onClick: this.handleEdit},
-                delete: { onClick: this.handleDelete, display: this.canEdit }
-            }
-        };
+    return (
+      <div className="container">
+        <h3> {T.translate("media_file_type.media_file_type_list")}</h3>
+        <div className={"row"}>
+          <div className={"col-md-6"}>
+            <FreeTextSearch
+              value={term}
+              placeholder={T.translate("media_file_type.placeholders.search")}
+              onSearch={this.handleSearch}
+            />
+          </div>
+          <div className="col-md-6 text-right">
+            <button
+              className="btn btn-primary right-space"
+              onClick={this.handleNewMediaFileType}
+            >
+              {T.translate("media_file_type.add")}
+            </button>
+          </div>
+        </div>
 
-        return(
-            <div className="container">
-                <h3> {T.translate("media_file_type.media_file_type_list")}</h3>
-                <div className={'row'}>
-                    <div className={'col-md-6'}>
-                        <FreeTextSearch
-                            value={term}
-                            placeholder={T.translate("media_file_type.placeholders.search")}
-                            onSearch={this.handleSearch}
-                        />
-                    </div>
-                    <div className="col-md-6 text-right">
-                        <button className="btn btn-primary right-space" onClick={this.handleNewMediaFileType}>
-                            {T.translate("media_file_type.add")}
-                        </button>
-                    </div>
-                </div>
+        {media_file_types.length === 0 && (
+          <div>{T.translate("media_file_type.no_results")}</div>
+        )}
 
-                {media_file_types.length === 0 &&
-                <div>{T.translate("media_file_type.no_results")}</div>
-                }
-
-                {media_file_types.length > 0 &&
-                <div>
-                    <Table
-                        options={table_options}
-                        data={media_file_types}
-                        columns={columns}
-                        onSort={this.handleSort}
-                    />
-                    <Pagination
-                        bsSize="medium"
-                        prev
-                        next
-                        first
-                        last
-                        ellipsis
-                        boundaryLinks
-                        maxButtons={10}
-                        items={lastPage}
-                        activePage={currentPage}
-                        onSelect={this.handlePageChange}
-                    />
-                </div>
-                }
-
-            </div>
-        )
-    }
+        {media_file_types.length > 0 && (
+          <div>
+            <Table
+              options={table_options}
+              data={media_file_types}
+              columns={columns}
+              onSort={this.handleSort}
+            />
+            <Pagination
+              bsSize="medium"
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              maxButtons={10}
+              items={lastPage}
+              activePage={currentPage}
+              onSelect={this.handlePageChange}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ directoryState, mediaFileTypeListState }) => ({
-    summits         : directoryState.summits,
-    ...mediaFileTypeListState
-})
+  summits: directoryState.summits,
+  ...mediaFileTypeListState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getMediaFileTypes,
-        deleteMediaFileType
-    }
-)(MediaFileTypeListPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getMediaFileTypes,
+  deleteMediaFileType
+})(MediaFileTypeListPage);

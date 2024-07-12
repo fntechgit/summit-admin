@@ -11,148 +11,163 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Pagination } from 'react-bootstrap';
-import { FreeTextSearch, Table } from 'openstack-uicore-foundation/lib/components';
+import { Pagination } from "react-bootstrap";
+import {
+  FreeTextSearch,
+  Table
+} from "openstack-uicore-foundation/lib/components";
 import { getCompanies, deleteCompany } from "../../actions/company-actions";
 
-
 class CompanyListPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    props.getCompanies();
 
-        props.getCompanies();
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
+    this.handleNewCompany = this.handleNewCompany.bind(this);
 
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
-        this.handlePageChange = this.handlePageChange.bind(this);
-        this.handleSort = this.handleSort.bind(this);
-        this.handleSearch = this.handleSearch.bind(this);
-        this.handleNewCompany = this.handleNewCompany.bind(this);
+    this.state = {};
+  }
 
-        this.state = {}
-    }
+  handleEdit(company_id) {
+    const { history } = this.props;
+    history.push(`/app/companies/${company_id}`);
+  }
 
-    handleEdit(company_id) {
-        const {history} = this.props;
-        history.push(`/app/companies/${company_id}`);
-    }
+  handleDelete(companyId) {
+    const { deleteCompany, companies } = this.props;
+    let company = companies.find((s) => s.id === companyId);
 
-    handleDelete(companyId) {
-        const {deleteCompany, companies} = this.props;
-        let company = companies.find(s => s.id === companyId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text:
+        T.translate("company_list.delete_company_warning") + " " + company.name,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteCompany(companyId);
+      }
+    });
+  }
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("company_list.delete_company_warning") + ' ' + company.name,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deleteCompany(companyId);
-            }
-        });
-    }
+  handlePageChange(page) {
+    const { term, order, orderDir, perPage } = this.props;
+    this.props.getCompanies(term, page, perPage, order, orderDir);
+  }
 
-    handlePageChange(page) {
-        const {term, order, orderDir, perPage} = this.props;
-        this.props.getCompanies(term, page, perPage, order, orderDir);
-    }
+  handleSort(index, key, dir, func) {
+    const { term, page, perPage } = this.props;
+    this.props.getCompanies(term, page, perPage, key, dir);
+  }
 
-    handleSort(index, key, dir, func) {
-        const {term, page, perPage} = this.props;
-        this.props.getCompanies(term, page, perPage, key, dir);
-    }
+  handleSearch(term) {
+    const { order, orderDir, page, perPage } = this.props;
+    this.props.getCompanies(term, page, perPage, order, orderDir);
+  }
 
-    handleSearch(term) {
-        const {order, orderDir, page, perPage} = this.props;
-        this.props.getCompanies(term, page, perPage, order, orderDir);
-    }
+  handleNewCompany(ev) {
+    const { history } = this.props;
+    history.push(`/app/companies/new`);
+  }
 
-    handleNewCompany(ev) {
-        const {history} = this.props;
-        history.push(`/app/companies/new`);
-    }
+  render() {
+    const {
+      companies,
+      lastPage,
+      currentPage,
+      term,
+      order,
+      orderDir,
+      totalCompanies
+    } = this.props;
 
-    render(){
-        const {companies, lastPage, currentPage, term, order, orderDir, totalCompanies } = this.props;
+    const columns = [
+      { columnKey: "id", value: "Id", sortable: true },
+      { columnKey: "name", value: T.translate("general.name"), sortable: true },
+      { columnKey: "contact_email", value: T.translate("general.email") },
+      {
+        columnKey: "member_level",
+        value: T.translate("company_list.member_level")
+      }
+    ];
 
-        const columns = [
-            { columnKey: 'id', value: 'Id', sortable: true },
-            { columnKey: 'name', value: T.translate("general.name"), sortable: true },
-            { columnKey: 'contact_email', value: T.translate("general.email")},
-            { columnKey: 'member_level', value: T.translate("company_list.member_level")}
-        ];
+    const table_options = {
+      sortCol: order,
+      sortDir: orderDir,
+      actions: {
+        edit: { onClick: this.handleEdit },
+        delete: { onClick: this.handleDelete }
+      }
+    };
 
-        const table_options = {
-            sortCol: order,
-            sortDir: orderDir,
-            actions: {
-                edit: {onClick: this.handleEdit},
-                delete: {onClick: this.handleDelete}
-            }
-        };
+    return (
+      <div className="container">
+        <h3>
+          {" "}
+          {T.translate("company_list.company_list")} ({totalCompanies}){" "}
+        </h3>
+        <div className={"row"}>
+          <div className={"col-md-6"}>
+            <FreeTextSearch
+              value={term}
+              placeholder={T.translate(
+                "company_list.placeholders.search_companies"
+              )}
+              onSearch={this.handleSearch}
+            />
+          </div>
+          <div className="col-md-6 text-right">
+            <button className="btn btn-primary" onClick={this.handleNewCompany}>
+              {T.translate("company_list.add_company")}
+            </button>
+          </div>
+        </div>
 
-        return(
-            <div className="container">
-                <h3> {T.translate("company_list.company_list")} ({totalCompanies}) </h3>
-                <div className={'row'}>
-                    <div className={'col-md-6'}>
-                        <FreeTextSearch
-                            value={term}
-                            placeholder={T.translate("company_list.placeholders.search_companies")}
-                            onSearch={this.handleSearch}
-                        />
-                    </div>
-                    <div className="col-md-6 text-right">
-                        <button className="btn btn-primary" onClick={this.handleNewCompany}>
-                            {T.translate("company_list.add_company")}
-                        </button>
-                    </div>
-                </div>
-
-                {companies.length > 0 &&
-                <div>
-                    <Table
-                        options={table_options}
-                        data={companies}
-                        columns={columns}
-                        onSort={this.handleSort}
-                    />
-                    <Pagination
-                        bsSize="medium"
-                        prev
-                        next
-                        first
-                        last
-                        ellipsis
-                        boundaryLinks
-                        maxButtons={10}
-                        items={lastPage}
-                        activePage={currentPage}
-                        onSelect={this.handlePageChange}
-                    />
-                </div>
-                }
-            </div>
-        )
-    }
+        {companies.length > 0 && (
+          <div>
+            <Table
+              options={table_options}
+              data={companies}
+              columns={columns}
+              onSort={this.handleSort}
+            />
+            <Pagination
+              bsSize="medium"
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              maxButtons={10}
+              items={lastPage}
+              activePage={currentPage}
+              onSelect={this.handlePageChange}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentCompanyListState }) => ({
-    ...currentCompanyListState
+  ...currentCompanyListState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getCompanies,
-        deleteCompany
-    }
-)(CompanyListPage);
+export default connect(mapStateToProps, {
+  getCompanies,
+  deleteCompany
+})(CompanyListPage);

@@ -11,35 +11,36 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import Select from 'react-select'
+import React from "react";
+import Select from "react-select";
 
-const TicketTypeFilter = ({types, value, onChange, ...rest}) => {
-  
-    const handleFilterChange = (value) => {
-        let theValue = rest.isMulti ? value.map(v => v.value) : value.value;
-        onChange(theValue);
-    }
-    
-    let theValue = null;
-    const options = types.map(t => ({value: t.id, label: t.name}));
-    
-    if (value) {
-        theValue = rest.isMulti ? options.filter(op => value.includes(op.value)) : options.find(op => op.value === value);
-    }
-    
-    return (
-      <div className="type-filter">
-          <label>Filter by Ticket Type</label>
-          <Select
-            value={theValue}
-            id="ticket-type-filter"
-            options={options}
-            onChange={handleFilterChange}
-            {...rest}
-          />
-      </div>
-    );
-}
+const TicketTypeFilter = ({ types, value, onChange, ...rest }) => {
+  const handleFilterChange = (value) => {
+    let theValue = rest.isMulti ? value.map((v) => v.value) : value.value;
+    onChange(theValue);
+  };
+
+  let theValue = null;
+  const options = types.map((t) => ({ value: t.id, label: t.name }));
+
+  if (value) {
+    theValue = rest.isMulti
+      ? options.filter((op) => value.includes(op.value))
+      : options.find((op) => op.value === value);
+  }
+
+  return (
+    <div className="type-filter">
+      <label>Filter by Ticket Type</label>
+      <Select
+        value={theValue}
+        id="ticket-type-filter"
+        options={options}
+        onChange={handleFilterChange}
+        {...rest}
+      />
+    </div>
+  );
+};
 
 export default TicketTypeFilter;

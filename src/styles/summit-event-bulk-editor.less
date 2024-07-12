@@ -1,51 +1,50 @@
 .bulk-edit-form {
-    width: 100%;
-    overflow-x: auto;
-    padding-bottom: 30px;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 30px;
 }
 
 .bulk-edit-table {
-    overflow: auto;
-    height: 700px;
-    margin-bottom: 15px;
+  overflow: auto;
+  height: 700px;
+  margin-bottom: 15px;
 }
 
 .bulk-edit-row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 0 30px;
-    align-items: baseline;
-    padding-bottom: 10px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0 30px;
+  align-items: baseline;
+  padding-bottom: 10px;
 }
 
 .bulk-edit-col {
-    min-width: 250px;
-    align-self: flex-start;
+  min-width: 250px;
+  align-self: flex-start;
 
-    &-title {
-        padding: 1em 0;
-        font-weight: 700;
-    }
+  &-title {
+    padding: 1em 0;
+    font-weight: 700;
+  }
 
-    &-empty {
-        min-width: 380px;
-    }
+  &-empty {
+    min-width: 380px;
+  }
 
-    &-id {
-        min-width: 100px;
-    }
+  &-id {
+    min-width: 100px;
+  }
 
-    .bulk-edit-date-picker {
-        >div:first-of-type {
-            width: 100%;
-        }
+  .bulk-edit-date-picker {
+    > div:first-of-type {
+      width: 100%;
     }
+  }
 }
 
 @media only screen and (max-width: 768px) {
-
-    .bulk-edit-table {
-        overflow: auto;
-        height: 50dvh;
-    }
+  .bulk-edit-table {
+    overflow: auto;
+    height: 50dvh;
+  }
 }

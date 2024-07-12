@@ -11,86 +11,110 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Switch, Route } from 'react-router-dom';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Switch, Route } from "react-router-dom";
+import { Breadcrumb } from "react-breadcrumbs";
 import NoMatchPage from "../pages/no-match-page";
 import EditSponsoredProjectSponsorshipTypePage from "../pages/sponsored_projects/edit-sponsored-project-sponsorship-type-page";
-import {getSponsorshipType, resetSponsorshipTypeForm} from "../actions/sponsored-project-actions";
+import {
+  getSponsorshipType,
+  resetSponsorshipTypeForm
+} from "../actions/sponsored-project-actions";
 import SponsoredProjectSponsorshipTypeSupportingCompanyLayout from "./sponsored-project-sponsorship-type-supporting-company-layout";
 import T from "i18n-react";
 
 class SponsoredProjectSponsorshipTypeLayout extends React.Component {
+  constructor(props) {
+    super(props);
+    const sponsorship_id = props.match.params.sponsorship_id;
 
-    constructor(props) {
-        super(props);
-        const sponsorship_id = props.match.params.sponsorship_id;
+    const { currentSponsoredProject } = this.props;
 
-        const {currentSponsoredProject} = this.props;
-
-        if (!sponsorship_id || !currentSponsoredProject) {
-            props.resetSponsorshipTypeForm();
-        } else {
-            props.getSponsorshipType(currentSponsoredProject.id, sponsorship_id);
-        }
+    if (!sponsorship_id || !currentSponsoredProject) {
+      props.resetSponsorshipTypeForm();
+    } else {
+      props.getSponsorshipType(currentSponsoredProject.id, sponsorship_id);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.sponsorship_id;
-        const newId = this.props.match.params.sponsorship_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.sponsorship_id;
+    const newId = this.props.match.params.sponsorship_id;
 
-        if (oldId !== newId) {
-            if (!newId) {
-                props.resetSponsorshipTypeForm();
-            } else {
-                const {currentSponsoredProject} = this.props;
-                props.getSponsorshipType(currentSponsoredProject.id, newId);
-            }
-        }
+    if (oldId !== newId) {
+      if (!newId) {
+        props.resetSponsorshipTypeForm();
+      } else {
+        const { currentSponsoredProject } = this.props;
+        props.getSponsorshipType(currentSponsoredProject.id, newId);
+      }
     }
+  }
 
-    render() {
-        let {match, currentSponsorshipType} = this.props;
-        let breadcrumb = currentSponsorshipType.id ? currentSponsorshipType.name : T.translate("general.new");
-        return (
-            <div>
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+  render() {
+    let { match, currentSponsorshipType } = this.props;
+    let breadcrumb = currentSponsorshipType.id
+      ? currentSponsorshipType.name
+      : T.translate("general.new");
+    return (
+      <div>
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <Switch>
+          <Route
+            path={`${match.url}/supporting-companies`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate(
+                      "edit_sponsored_project_sponsorship_type.supporting_companies"
+                    ),
+                    pathname: match.url
+                  }}
+                />
                 <Switch>
-                    <Route path={`${match.url}/supporting-companies`} render={
-                        props => (
-                            <div>
-                                <Breadcrumb data={{ title: T.translate("edit_sponsored_project_sponsorship_type.supporting_companies"), pathname: match.url }} />
-                                <Switch>
-                                    <Route path={`${props.match.url}/:supporting_company_id(\\d+)`} component={SponsoredProjectSponsorshipTypeSupportingCompanyLayout} />
-                                    <Route exact strict path={`${props.match.url}/new`} component={SponsoredProjectSponsorshipTypeSupportingCompanyLayout} />
-                                    <Route component={NoMatchPage}/>
-                                </Switch>
-                            </div>
-                        )}
-                    />
-                    <Route strict exact path={match.url} component={EditSponsoredProjectSponsorshipTypePage}/>
-                    <Route component={NoMatchPage}/>
+                  <Route
+                    path={`${props.match.url}/:supporting_company_id(\\d+)`}
+                    component={
+                      SponsoredProjectSponsorshipTypeSupportingCompanyLayout
+                    }
+                  />
+                  <Route
+                    exact
+                    strict
+                    path={`${props.match.url}/new`}
+                    component={
+                      SponsoredProjectSponsorshipTypeSupportingCompanyLayout
+                    }
+                  />
+                  <Route component={NoMatchPage} />
                 </Switch>
-            </div>
-        );
-    }
+              </div>
+            )}
+          />
+          <Route
+            strict
+            exact
+            path={match.url}
+            component={EditSponsoredProjectSponsorshipTypePage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ sponsoredProjectState, sponsoredProjectSponsorshipTypeState }) => ({
-    currentSponsoredProject : sponsoredProjectState.entity,
-    currentSponsorshipType : sponsoredProjectSponsorshipTypeState.entity,
+const mapStateToProps = ({
+  sponsoredProjectState,
+  sponsoredProjectSponsorshipTypeState
+}) => ({
+  currentSponsoredProject: sponsoredProjectState.entity,
+  currentSponsorshipType: sponsoredProjectSponsorshipTypeState.entity
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        resetSponsorshipTypeForm,
-        getSponsorshipType
-    }
-)(SponsoredProjectSponsorshipTypeLayout);
-
-
-
-
-
+export default connect(mapStateToProps, {
+  resetSponsorshipTypeForm,
+  getSponsorshipType
+})(SponsoredProjectSponsorshipTypeLayout);

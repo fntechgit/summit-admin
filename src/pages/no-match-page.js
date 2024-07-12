@@ -10,20 +10,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react';
+import React from "react";
 
-import '../styles/no-match-page.less';
-
+import "../styles/no-match-page.less";
 
 export default class NoMatchPage extends React.Component {
-
-    render(){
-
-        return (
-            <div className="no_match_page_wrapper container">
-                <h1>YOU JUST GOT 404'D</h1>
-                <h3>This URL does not match any page in the admin.</h3>
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div className="no_match_page_wrapper container">
+        <h1>YOU JUST GOT 404'D</h1>
+        <h3>This URL does not match any page in the admin.</h3>
+      </div>
+    );
+  }
 }

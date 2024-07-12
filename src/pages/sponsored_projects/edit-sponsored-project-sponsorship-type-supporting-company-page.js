@@ -10,64 +10,70 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react";
 import SponsoredProjectSponsorshipTypeSupportingCompanyForm from "../../components/forms/sponsored-project-sponsorship-type-supporting-company-form";
-import history from '../../history';
+import history from "../../history";
 
-import {
-    saveSupportingCompany,
-} from "../../actions/sponsored-project-actions";
+import { saveSupportingCompany } from "../../actions/sponsored-project-actions";
 
 class EditSponsoredProjectSponsorshipTypeSupportingCompanyPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleOnSubmit = this.handleOnSubmit.bind(this);
+  }
 
-    constructor(props) {
-        super(props);
-        this.handleOnSubmit = this.handleOnSubmit.bind(this);
-    }
+  handleOnSubmit(entity) {
+    this.props
+      .saveSupportingCompany(
+        this.props.currentSponsoredProject.id,
+        this.props.currentSponsorshipType.id,
+        entity
+      )
+      .then(() => {
+        history.push(
+          `/app/sponsored-projects/${this.props.currentSponsoredProject.id}/sponsorship-types/${this.props.currentSponsorshipType.id}`
+        );
+      });
+  }
 
-    handleOnSubmit(entity){
-        this.props.saveSupportingCompany
-        (
-            this.props.currentSponsoredProject.id,
-            this.props.currentSponsorshipType.id,
-            entity
-        ).then(() => {
-            history.push(`/app/sponsored-projects/${this.props.currentSponsoredProject.id}/sponsorship-types/${this.props.currentSponsorshipType.id}`)
-        });
-    }
-
-    render(){
-        const {entity, errors, history, currentSponsoredProject} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        return(
-            <div className="container">
-                <h3>{title} {T.translate("edit_sponsored_project_sponsorship_type_supporting_company.supporting_company")}</h3>
-                <hr/>
-                <SponsoredProjectSponsorshipTypeSupportingCompanyForm
-                    history={history}
-                    entity={entity}
-                    project={currentSponsoredProject}
-                    errors={errors}
-                    onSubmit={this.handleOnSubmit}
-                />
-            </div>
-        )
-    }
+  render() {
+    const { entity, errors, history, currentSponsoredProject } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    return (
+      <div className="container">
+        <h3>
+          {title}{" "}
+          {T.translate(
+            "edit_sponsored_project_sponsorship_type_supporting_company.supporting_company"
+          )}
+        </h3>
+        <hr />
+        <SponsoredProjectSponsorshipTypeSupportingCompanyForm
+          history={history}
+          entity={entity}
+          project={currentSponsoredProject}
+          errors={errors}
+          onSubmit={this.handleOnSubmit}
+        />
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({   sponsoredProjectState,
-                             sponsoredProjectSponsorshipTypeState,
-                             sponsoredProjectSponsorshipTypeSupportingCompanyState}) => ({
-    currentSponsoredProject : sponsoredProjectState.entity,
-    currentSponsorshipType: sponsoredProjectSponsorshipTypeState.entity,
-    ...sponsoredProjectSponsorshipTypeSupportingCompanyState
+const mapStateToProps = ({
+  sponsoredProjectState,
+  sponsoredProjectSponsorshipTypeState,
+  sponsoredProjectSponsorshipTypeSupportingCompanyState
+}) => ({
+  currentSponsoredProject: sponsoredProjectState.entity,
+  currentSponsorshipType: sponsoredProjectSponsorshipTypeState.entity,
+  ...sponsoredProjectSponsorshipTypeSupportingCompanyState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        saveSupportingCompany
-    }
-)(EditSponsoredProjectSponsorshipTypeSupportingCompanyPage);
+export default connect(mapStateToProps, {
+  saveSupportingCompany
+})(EditSponsoredProjectSponsorshipTypeSupportingCompanyPage);

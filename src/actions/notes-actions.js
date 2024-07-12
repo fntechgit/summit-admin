@@ -12,112 +12,124 @@
  **/
 
 import {
-    getRequest,
-    createAction,
-    stopLoading,
-    startLoading,
-    authErrorHandler,
-    escapeFilterValue,
-    deleteRequest,
-    showSuccessMessage,
-    postRequest, getCSV
-} from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessTokenSafely} from '../utils/methods';
+  getRequest,
+  createAction,
+  stopLoading,
+  startLoading,
+  authErrorHandler,
+  escapeFilterValue,
+  deleteRequest,
+  showSuccessMessage,
+  postRequest,
+  getCSV
+} from "openstack-uicore-foundation/lib/utils/actions";
+import { getAccessTokenSafely } from "../utils/methods";
 import T from "i18n-react";
 
-export const CLEAR_NOTES_PARAMS = 'CLEAR_NOTES_PARAMS';
-export const REQUEST_NOTES = 'REQUEST_NOTES';
-export const RECEIVE_NOTES = 'RECEIVE_NOTES';
-export const NOTE_ADDED = 'NOTE_ADDED';
-export const NOTE_DELETED = 'NOTE_DELETED';
+export const CLEAR_NOTES_PARAMS = "CLEAR_NOTES_PARAMS";
+export const REQUEST_NOTES = "REQUEST_NOTES";
+export const RECEIVE_NOTES = "RECEIVE_NOTES";
+export const NOTE_ADDED = "NOTE_ADDED";
+export const NOTE_DELETED = "NOTE_DELETED";
 
-export const getNotes = (attendeeId, ticketId, term = null, page, perPage, order, orderDir) => async (dispatch, getState) => {
-
-    const {currentSummitState} = getState();
+export const getNotes =
+  (attendeeId, ticketId, term = null, page, perPage, order, orderDir) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
     const filter = [];
 
     dispatch(startLoading());
 
     if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`author_email=@${escapedTerm},author_fullname=@${escapedTerm},content=@${escapedTerm}`);
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(
+        `author_email=@${escapedTerm},author_fullname=@${escapedTerm},content=@${escapedTerm}`
+      );
     }
 
     if (ticketId) {
-        filter.push(`ticket_id==${ticketId}`)
+      filter.push(`ticket_id==${ticketId}`);
     }
 
     const params = {
-        page,
-        per_page: perPage,
-        expand: 'author,ticket',
-        access_token: accessToken,
+      page,
+      per_page: perPage,
+      expand: "author,ticket",
+      access_token: accessToken
     };
 
-    if(filter.length > 0){
-        params['filter[]']= filter;
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
     }
 
     // order
-    if(order != null && orderDir != null){
-        const orderDirSign = (orderDir === 1) ? '+' : '-';
-        params['order']= `${orderDirSign}${order}`;
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "+" : "-";
+      params["order"] = `${orderDirSign}${order}`;
     }
 
     return getRequest(
-        createAction(REQUEST_NOTES),
-        createAction(RECEIVE_NOTES),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes`,
-        authErrorHandler,
-        {page, perPage, order, orderDir, term}
+      createAction(REQUEST_NOTES),
+      createAction(RECEIVE_NOTES),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes`,
+      authErrorHandler,
+      { page, perPage, order, orderDir, term }
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
+      dispatch(stopLoading());
+    });
+  };
 
-export const exportNotes = (attendeeId, ticketId, term = null, order, orderDir) => async (dispatch, getState) => {
-
-    const {currentSummitState} = getState();
+export const exportNotes =
+  (attendeeId, ticketId, term = null, order, orderDir) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
     const filter = [];
     const filename = `${attendeeId}-notes.csv`;
 
     if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`author_email=@${escapedTerm},author_fullname=@${escapedTerm},content=@${escapedTerm}`);
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(
+        `author_email=@${escapedTerm},author_fullname=@${escapedTerm},content=@${escapedTerm}`
+      );
     }
 
     if (ticketId) {
-        filter.push(`ticket_id==${ticketId}`)
+      filter.push(`ticket_id==${ticketId}`);
     }
 
     const params = {
-        expand: 'author,ticket',
-        access_token: accessToken,
+      expand: "author,ticket",
+      access_token: accessToken
     };
 
-    if(filter.length > 0){
-        params['filter[]']= filter;
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
     }
 
     // order
-    if(order != null && orderDir != null){
-        const orderDirSign = (orderDir === 1) ? '+' : '-';
-        params['order']= `${orderDirSign}${order}`;
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "+" : "-";
+      params["order"] = `${orderDirSign}${order}`;
     }
 
-    dispatch(getCSV(`${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes/csv`, params, filename));
+    dispatch(
+      getCSV(
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes/csv`,
+        params,
+        filename
+      )
+    );
+  };
 
-};
-
-export const saveNote = (attendeeId, ticketId, content) => async (dispatch, getState) => {
+export const saveNote =
+  (attendeeId, ticketId, content) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+    const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
 
@@ -126,8 +138,8 @@ export const saveNote = (attendeeId, ticketId, content) => async (dispatch, getS
     if (ticketId) note.ticket_id = ticketId;
 
     const params = {
-        access_token: accessToken,
-        expand: 'author,ticket',
+      access_token: accessToken,
+      expand: "author,ticket"
     };
 
     return postRequest(
@@ -136,41 +148,40 @@ export const saveNote = (attendeeId, ticketId, content) => async (dispatch, getS
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes`,
       note,
       authErrorHandler
-    )(params)(dispatch)
-      .then((payload) => {
-          dispatch(showSuccessMessage(T.translate("notes.note_created")));
-      });
-};
+    )(params)(dispatch).then((payload) => {
+      dispatch(showSuccessMessage(T.translate("notes.note_created")));
+    });
+  };
 
-export const deleteNote = (attendeeId, noteId) => async (dispatch, getState) => {
+export const deleteNote =
+  (attendeeId, noteId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+    const { currentSummit } = currentSummitState;
 
     const params = {
-        access_token : accessToken,
+      access_token: accessToken
     };
 
     return deleteRequest(
       null,
-      createAction(NOTE_DELETED)({noteId}),
+      createAction(NOTE_DELETED)({ noteId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/notes/${noteId}`,
       null,
       authErrorHandler
     )(params)(dispatch).then(() => {
-          dispatch(stopLoading());
-      }
-    );
-};
+      dispatch(stopLoading());
+    });
+  };
 
 export const clearNotesParams = () => async (dispatch, getState) => {
-    dispatch(createAction(CLEAR_NOTES_PARAMS)());
+  dispatch(createAction(CLEAR_NOTES_PARAMS)());
 };
 
 const normalizeEntity = (entity) => {
-    const normalizedEntity = {...entity};
+  const normalizedEntity = { ...entity };
 
-    /*normalizedEntity.member_id = (normalizedEntity.member != null) ? normalizedEntity.member.id : 0;
+  /*normalizedEntity.member_id = (normalizedEntity.member != null) ? normalizedEntity.member.id : 0;
 
     delete normalizedEntity['summit_hall_checked_in_date'];
     delete normalizedEntity['member'];
@@ -184,5 +195,5 @@ const normalizeEntity = (entity) => {
         delete (normalizedEntity.company_id);
     }*/
 
-    return normalizedEntity;
+  return normalizedEntity;
 };

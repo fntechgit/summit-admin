@@ -11,23 +11,37 @@
  * limitations under the License.
  **/
 
-import React, {useMemo} from 'react'
-import {Pie} from "react-chartjs-2";
-import Chart from 'chart.js/auto';
-import {isMobile} from 'react-device-detect';
-import {getRandomColors, createDonnutCanvas} from "../utils";
-import styles from './index.module.less'
+import React, { useMemo } from "react";
+import { Pie } from "react-chartjs-2";
+import Chart from "chart.js/auto";
+import { isMobile } from "react-device-detect";
+import { getRandomColors, createDonnutCanvas } from "../utils";
+import styles from "./index.module.less";
 
-
-const PieGraph = ({title, subtitle = null, legendTitle= null, data, labels, colors = null, colorPalette = null}) => {
-  const fillColors = useMemo(() => colors || getRandomColors(data.length, colorPalette), [colors, data.length]);
+const PieGraph = ({
+  title,
+  subtitle = null,
+  legendTitle = null,
+  data,
+  labels,
+  colors = null,
+  colorPalette = null
+}) => {
+  const fillColors = useMemo(
+    () => colors || getRandomColors(data.length, colorPalette),
+    [colors, data.length]
+  );
   const height = Math.max(600, labels.length * 68);
-  const graphSize = isMobile ? { width: 400, height: height } : { width: 600, height: height };
-  const legendPos = isMobile ? 'bottom' : 'right';
-  const legendAlign = isMobile ? 'start' : 'center';
-  const layoutPadding = isMobile ? { top: 10, left: 10, right: 10, bottom: 30 } : { top: 80, left: 30, right: 30, bottom: 80 };
+  const graphSize = isMobile
+    ? { width: 400, height: height }
+    : { width: 600, height: height };
+  const legendPos = isMobile ? "bottom" : "right";
+  const legendAlign = isMobile ? "start" : "center";
+  const layoutPadding = isMobile
+    ? { top: 10, left: 10, right: 10, bottom: 30 }
+    : { top: 80, left: 30, right: 30, bottom: 80 };
   const titlePadding = isMobile ? { top: 10, left: 0, right: 0, bottom: 0 } : 0;
-  
+
   const chartData = {
     labels: labels,
     datasets: [
@@ -35,9 +49,9 @@ const PieGraph = ({title, subtitle = null, legendTitle= null, data, labels, colo
         data: data,
         backgroundColor: fillColors,
         borderColor: "#fff",
-        borderWidth: 1,
-      },
-    ],
+        borderWidth: 1
+      }
+    ]
   };
 
   const chartOptions = {
@@ -46,24 +60,28 @@ const PieGraph = ({title, subtitle = null, legendTitle= null, data, labels, colo
       padding: layoutPadding
     },
     parsing: {
-      key: 'value'
+      key: "value"
     },
     responsive: true,
     plugins: {
       tooltip: {
         callbacks: {
-          label: context => context.label || ''
+          label: (context) => context.label || ""
         }
       },
       legend: {
-        title: {text: legendTitle, display: !!legendTitle, padding: titlePadding},
+        title: {
+          text: legendTitle,
+          display: !!legendTitle,
+          padding: titlePadding
+        },
         display: true,
         position: legendPos,
         align: legendAlign,
         maxWidth: 450,
         labels: {
           usePointStyle: true,
-          font: {size: 12, lineHeight: 2.5},
+          font: { size: 12, lineHeight: 2.5 },
           padding: 35,
           boxHeight: 60,
           generateLabels: (chart) => {
@@ -76,12 +94,20 @@ const PieGraph = ({title, subtitle = null, legendTitle= null, data, labels, colo
               let percent = 0;
               // we need this so that legend title is not cut off when labels are shorter that legend title
               const labelText = dataItem.label || label;
-              const labelTextExt = legendTitle ? labelText.padEnd(legendTitle.length + 5) : labelText;
+              const labelTextExt = legendTitle
+                ? labelText.padEnd(legendTitle.length + 5)
+                : labelText;
 
               if (dataItem.total) {
-                percent = dataItem.total > 0 ? Math.round((dataItem.value / dataItem.total) * 100) : 100;
-              } else if (dataItem.divider){
-                percent = dataItem.divider > 0 ? Math.round((dataItem.value / dataItem.divider) * 100) : 100;
+                percent =
+                  dataItem.total > 0
+                    ? Math.round((dataItem.value / dataItem.total) * 100)
+                    : 100;
+              } else if (dataItem.divider) {
+                percent =
+                  dataItem.divider > 0
+                    ? Math.round((dataItem.value / dataItem.divider) * 100)
+                    : 100;
               }
 
               return {
@@ -91,29 +117,31 @@ const PieGraph = ({title, subtitle = null, legendTitle= null, data, labels, colo
                 strokeStyle: color,
                 hidden: chart._hiddenIndices[i],
                 index: i,
-                pointStyle: createDonnutCanvas(arc, percent),
+                pointStyle: createDonnutCanvas(arc, percent)
               };
             }, this);
           }
         }
-      },
+      }
     }
   };
 
   return (
     <div className={styles.wrapper}>
       <h5 className={styles.title}>{title}</h5>
-      {subtitle &&
-      <div className={styles.subtitle}>
-        {subtitle.map(text => <p key={text}>{text}</p>)}
-      </div>
-      }
+      {subtitle && (
+        <div className={styles.subtitle}>
+          {subtitle.map((text) => (
+            <p key={text}>{text}</p>
+          ))}
+        </div>
+      )}
       <div>
-        {data.length === 0 && labels.length === 0 ?
+        {data.length === 0 && labels.length === 0 ? (
           <div className={styles.noData}>NO DATA</div>
-          :
+        ) : (
           <Pie data={chartData} {...graphSize} options={chartOptions} />
-        }
+        )}
       </div>
     </div>
   );

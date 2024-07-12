@@ -11,154 +11,162 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import T from 'i18n-react/dist/i18n-react'
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import {queryTags} from 'openstack-uicore-foundation/lib/utils/query-actions'
-import { Input, SimpleLinkList } from 'openstack-uicore-foundation/lib/components'
-import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import { queryTags } from "openstack-uicore-foundation/lib/utils/query-actions";
+import {
+  Input,
+  SimpleLinkList
+} from "openstack-uicore-foundation/lib/components";
+import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class TagGroupForm extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            entity: {...props.entity},
-            errors: props.errors
-        };
+    this.state = {
+      entity: { ...props.entity },
+      errors: props.errors
+    };
 
-        this.handleAllowedTagLink = this.handleAllowedTagLink.bind(this);
-        this.handleAllowedTagUnLink = this.handleAllowedTagUnLink.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleAllowedTagLink = this.handleAllowedTagLink.bind(this);
+    this.handleAllowedTagUnLink = this.handleAllowedTagUnLink.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const state = {};
+    scrollToError(this.props.errors);
+
+    if (!shallowEqual(prevProps.entity, this.props.entity)) {
+      state.entity = { ...this.props.entity };
+      state.errors = {};
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        scrollToError(this.props.errors);
-
-        if(!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = {...this.props.entity};
-            state.errors = {};
-        }
-
-        if (!shallowEqual(prevProps.errors, this.props.errors)) {
-            state.errors = {...this.props.errors};
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({...this.state, ...state})
-        }
+    if (!shallowEqual(prevProps.errors, this.props.errors)) {
+      state.errors = { ...this.props.errors };
     }
 
-    handleChange(ev) {
-        let entity = {...this.state.entity};
-        let errors = {...this.state.errors};
-        let {value, id} = ev.target;
+    if (!isEmpty(state)) {
+      this.setState({ ...this.state, ...state });
+    }
+  }
 
-        errors[id] = '';
-        entity[id] = value;
-        this.setState({entity: entity, errors: errors});
+  handleChange(ev) {
+    let entity = { ...this.state.entity };
+    let errors = { ...this.state.errors };
+    let { value, id } = ev.target;
+
+    errors[id] = "";
+    entity[id] = value;
+    this.setState({ entity: entity, errors: errors });
+  }
+
+  handleSubmit(ev) {
+    let entity = { ...this.state.entity };
+
+    ev.preventDefault();
+
+    this.props.onSubmit(entity);
+  }
+
+  hasErrors(field) {
+    let { errors } = this.state;
+    if (field in errors) {
+      return errors[field];
     }
 
-    handleSubmit(ev) {
-        let entity = {...this.state.entity};
+    return "";
+  }
 
-        ev.preventDefault();
+  handleAllowedTagLink(value) {
+    this.props.onAddTagToGroup(value);
+  }
 
-        this.props.onSubmit(entity);
-    }
+  handleAllowedTagUnLink(valueId) {
+    this.props.onRemoveTagFromGroup(valueId);
+  }
 
-    hasErrors(field) {
-        let {errors} = this.state;
-        if(field in errors) {
-            return errors[field];
-        }
+  render() {
+    const { entity } = this.state;
+    const { currentSummit } = this.props;
 
-        return '';
-    }
+    let allowedTagsColumns = [
+      { columnKey: "tag", value: T.translate("edit_tag_group.tag") }
+    ];
 
-    handleAllowedTagLink(value) {
-        this.props.onAddTagToGroup(value);
-    }
+    let allowedTagsOptions = {
+      title: T.translate("edit_tag_group.allowed_tags"),
+      sortCol: "tag",
+      valueKey: "id",
+      labelKey: "tag",
+      onCreateTag: this.props.onCreateTag,
+      actions: {
+        search: (input, callback) => {
+          queryTags(null, input, callback);
+        },
+        delete: { onClick: this.handleAllowedTagUnLink },
+        add: { onClick: this.handleAllowedTagLink },
+        custom: [
+          {
+            name: "copy_to_category",
+            tooltip: "copy to all categories",
+            icon: <i className="fa fa-files-o" />,
+            onClick: this.props.onCopyTag
+          }
+        ]
+      }
+    };
 
-    handleAllowedTagUnLink(valueId) {
-        this.props.onRemoveTagFromGroup(valueId);
-    }
+    return (
+      <form className="tag-group-form">
+        <input type="hidden" id="id" value={entity.id} />
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label> {T.translate("edit_tag_group.name")} *</label>
+            <Input
+              id="name"
+              value={entity.name}
+              onChange={this.handleChange}
+              className="form-control"
+              error={this.hasErrors("name")}
+            />
+          </div>
+          <div className="col-md-6">
+            <label> {T.translate("edit_tag_group.label")}</label>
+            <Input
+              id="label"
+              value={entity.label}
+              onChange={this.handleChange}
+              className="form-control"
+              error={this.hasErrors("label")}
+            />
+          </div>
+        </div>
 
+        {entity.id !== 0 && (
+          <SimpleLinkList
+            values={entity.allowed_tags}
+            columns={allowedTagsColumns}
+            options={allowedTagsOptions}
+          />
+        )}
 
-    render() {
-        const {entity} = this.state;
-        const {currentSummit} = this.props;
-
-        let allowedTagsColumns = [
-            { columnKey: 'tag', value: T.translate("edit_tag_group.tag") }
-        ];
-
-        let allowedTagsOptions = {
-            title: T.translate("edit_tag_group.allowed_tags"),
-            sortCol: "tag",
-            valueKey: "id",
-            labelKey: "tag",
-            onCreateTag: this.props.onCreateTag,
-            actions: {
-                search: (input, callback) => { queryTags(null, input, callback); },
-                delete: { onClick: this.handleAllowedTagUnLink },
-                add: { onClick: this.handleAllowedTagLink },
-                custom: [
-                    {
-                        name: 'copy_to_category',
-                        tooltip: 'copy to all categories',
-                        icon: <i className="fa fa-files-o"/>,
-                        onClick: this.props.onCopyTag
-                    }
-                ]
-            }
-        };
-
-        return (
-            <form className="tag-group-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="row form-group">
-                    <div className="col-md-6">
-                        <label> {T.translate("edit_tag_group.name")} *</label>
-                        <Input
-                            id="name"
-                            value={entity.name}
-                            onChange={this.handleChange}
-                            className="form-control"
-                            error={this.hasErrors('name')}
-                        />
-                    </div>
-                    <div className="col-md-6">
-                        <label> {T.translate("edit_tag_group.label")}</label>
-                        <Input
-                            id="label"
-                            value={entity.label}
-                            onChange={this.handleChange}
-                            className="form-control"
-                            error={this.hasErrors('label')}
-                        />
-                    </div>
-                </div>
-
-                {entity.id !== 0 &&
-                <SimpleLinkList
-                    values={entity.allowed_tags}
-                    columns={allowedTagsColumns}
-                    options={allowedTagsOptions}
-                />
-                }
-
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                               className="btn btn-primary pull-right" value={T.translate("general.save")}/>
-                    </div>
-                </div>
-            </form>
-        );
-    }
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <input
+              type="button"
+              onClick={this.handleSubmit}
+              className="btn btn-primary pull-right"
+              value={T.translate("general.save")}
+            />
+          </div>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default TagGroupForm;

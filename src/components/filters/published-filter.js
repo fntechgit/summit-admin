@@ -11,44 +11,51 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {ButtonToolbar, ToggleButtonGroup, ToggleButton} from 'react-bootstrap'
+import React from "react";
+import {
+  ButtonToolbar,
+  ToggleButtonGroup,
+  ToggleButton
+} from "react-bootstrap";
 
 export default class PublishedFilter extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
+  }
 
+  handleFilterChange(value) {
+    let published = null;
+
+    if (value.length === 1) {
+      if (value.includes("published")) {
+        published = true;
+      } else if (value.includes("not-published")) {
+        published = false;
+      }
     }
 
-    handleFilterChange(value) {
-        let published = null;
+    this.props.onChange(published);
+  }
 
-        if (value.length === 1) {
-            if ( value.includes('published')) {
-                published = true;
-            } else if ( value.includes('not-published')){
-                published = false;
-            }
-        }
+  render() {
+    let { value, onChange, ...rest } = this.props;
 
-        this.props.onChange(published);
-    }
-
-    render() {
-        let {value, onChange, ...rest} = this.props;
-
-        return (
-            <div className="published-filter">
-                <label>Filter by Published</label>
-                <ButtonToolbar>
-                    <ToggleButtonGroup type="checkbox" defaultValue={["published", "not-published"]} onChange={this.handleFilterChange}>
-                        <ToggleButton value="published">Published</ToggleButton>
-                        <ToggleButton value="not-published">Not Published</ToggleButton>
-                    </ToggleButtonGroup>
-                </ButtonToolbar>
-            </div>
-        );
-    }
+    return (
+      <div className="published-filter">
+        <label>Filter by Published</label>
+        <ButtonToolbar>
+          <ToggleButtonGroup
+            type="checkbox"
+            defaultValue={["published", "not-published"]}
+            onChange={this.handleFilterChange}
+          >
+            <ToggleButton value="published">Published</ToggleButton>
+            <ToggleButton value="not-published">Not Published</ToggleButton>
+          </ToggleButtonGroup>
+        </ButtonToolbar>
+      </div>
+    );
+  }
 }

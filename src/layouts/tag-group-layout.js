@@ -11,36 +11,46 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
-import EditTagGroupPage from '../pages/tag_groups/edit-tag-group-page';
-import TagGroupListPage from '../pages/tag_groups/tag-group-list-page';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
+import EditTagGroupPage from "../pages/tag_groups/edit-tag-group-page";
+import TagGroupListPage from "../pages/tag_groups/tag-group-list-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class TagGroupLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("tag_group_list.tag_groups"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("tag_group_list.tag_groups"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={TagGroupListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditTagGroupPage}/>
-                    <Route strict exact path={`${match.url}/:tag_group_id(\\d+)`} component={EditTagGroupPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route strict exact path={match.url} component={TagGroupListPage} />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditTagGroupPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:tag_group_id(\\d+)`}
+            component={EditTagGroupPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(TagGroupLayout), 'tags');
-
-
+export default Restrict(withRouter(TagGroupLayout), "tags");

@@ -11,33 +11,38 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
+import React from "react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 
 export default class PublishedInFilter extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
+  }
 
-    }
+  handleFilterChange(ev) {
+    this.props.onChange(ev.target.checked);
+  }
 
-    handleFilterChange(ev) {
-        this.props.onChange(ev.target.checked);
-    }
+  render() {
+    let { value, onChange, ...rest } = this.props;
 
-    render() {
-        let {value, onChange, ...rest} = this.props;
-
-        return (
-            <div className="published-in-filter checkboxes-div">
-                <div className="form-check abc-checkbox">
-                  <input type="checkbox" id="published_in" checked={value ? true : false} onChange={this.handleFilterChange} className="form-check-input" />
-                  <label className="form-check-label" htmlFor="published_in">
-                    Only on Schedule
-                  </label>
-                </div>
-            </div>
-        );
-    }
+    return (
+      <div className="published-in-filter checkboxes-div">
+        <div className="form-check abc-checkbox">
+          <input
+            type="checkbox"
+            id="published_in"
+            checked={value ? true : false}
+            onChange={this.handleFilterChange}
+            className="form-check-input"
+          />
+          <label className="form-check-label" htmlFor="published_in">
+            Only on Schedule
+          </label>
+        </div>
+      </div>
+    );
+  }
 }

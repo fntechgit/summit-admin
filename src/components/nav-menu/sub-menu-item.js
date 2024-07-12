@@ -11,43 +11,49 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import T from 'i18n-react/dist/i18n-react';
-import MenuItem from './menu-item';
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import MenuItem from "./menu-item";
 import Member from "../../models/member";
 
 export default class SubMenuItem extends React.Component {
-
-
-    render() {
-
-        let {name, iconClass, subMenuOpen, onClick, onItemClick, childs, memberObj} = this.props;
-        childs = childs.filter( item => {
-            return !item.hasOwnProperty('accessRoute') || memberObj.hasAccess(item.accessRoute);
-        });
-        return (
-            <div>
-                <a id={name + '-menu'} className="menu-item" onClick={onClick} >
-                    <i className={iconClass + ' fa'} />
-                    {T.translate('menu.' + name)}
-                </a>
-                {subMenuOpen === name &&
-                <div className="submenu">
-                    {childs.map(ch => {
-                        return (
-                            <MenuItem
-                                key={ch.name}
-                                {...ch}
-                                iconClass="fa-chevron-right"
-                                onClick={(e) => onItemClick(e, ch.linkUrl)}
-                            />
-                        );
-                    })}
-                </div>
-                }
-            </div>
-        );
-
-    }
+  render() {
+    let {
+      name,
+      iconClass,
+      subMenuOpen,
+      onClick,
+      onItemClick,
+      childs,
+      memberObj
+    } = this.props;
+    childs = childs.filter((item) => {
+      return (
+        !item.hasOwnProperty("accessRoute") ||
+        memberObj.hasAccess(item.accessRoute)
+      );
+    });
+    return (
+      <div>
+        <a id={name + "-menu"} className="menu-item" onClick={onClick}>
+          <i className={iconClass + " fa"} />
+          {T.translate("menu." + name)}
+        </a>
+        {subMenuOpen === name && (
+          <div className="submenu">
+            {childs.map((ch) => {
+              return (
+                <MenuItem
+                  key={ch.name}
+                  {...ch}
+                  iconClass="fa-chevron-right"
+                  onClick={(e) => onItemClick(e, ch.linkUrl)}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
 }
-

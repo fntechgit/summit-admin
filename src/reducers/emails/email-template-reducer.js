@@ -11,125 +11,155 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_TEMPLATE,
-    RESET_TEMPLATE_FORM,
-    TEMPLATE_ADDED,
-    TEMPLATE_UPDATED,
-    RECEIVE_EMAIL_CLIENTS,
-    TEMPLATE_RENDER_RECEIVED,
-    VALIDATE_RENDER,
-    REQUEST_TEMPLATE_RENDER,
-    UPDATE_JSON_DATA
-} from '../../actions/email-actions';
+import {
+  RECEIVE_TEMPLATE,
+  RESET_TEMPLATE_FORM,
+  TEMPLATE_ADDED,
+  TEMPLATE_UPDATED,
+  RECEIVE_EMAIL_CLIENTS,
+  TEMPLATE_RENDER_RECEIVED,
+  VALIDATE_RENDER,
+  REQUEST_TEMPLATE_RENDER,
+  UPDATE_JSON_DATA
+} from "../../actions/email-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
-import emailTemplateDefaultValues from '../../data/email_template_variables_sample.json';
+import emailTemplateDefaultValues from "../../data/email_template_variables_sample.json";
 
 export const DEFAULT_ENTITY = {
-    id              : 0,
-    identifier      : '',
-    html_content    : '',
-    original_html_content: '',
-    mjml_content    : '',
-    original_mjml_content: '',
-    plain_content   : '',
-    from_email      : '',
-    subject         : '',
-    // default values
-    max_retries     : 1,
-    is_active       : true,
-    allowed_clients : [],
-    parent          : null,
-    versions        : [],
+  id: 0,
+  identifier: "",
+  html_content: "",
+  original_html_content: "",
+  mjml_content: "",
+  original_mjml_content: "",
+  plain_content: "",
+  from_email: "",
+  subject: "",
+  // default values
+  max_retries: 1,
+  is_active: true,
+  allowed_clients: [],
+  parent: null,
+  versions: []
 };
 
 const DEFAULT_STATE = {
-    entity          : DEFAULT_ENTITY,
-    templateLoading : false,
-    clients         : null,
-    preview         : null,
-    json_data       : emailTemplateDefaultValues,
-    errors          : {},
-    render_errors   : []
+  entity: DEFAULT_ENTITY,
+  templateLoading: false,
+  clients: null,
+  preview: null,
+  json_data: emailTemplateDefaultValues,
+  errors: {},
+  render_errors: []
 };
 
 const emailTemplateReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return DEFAULT_STATE;
-            }
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER:
+      {
+        // we need this in case the token expired while editing the form
+        if (payload.hasOwnProperty("persistStore")) {
+          return state;
+        } else {
+          return DEFAULT_STATE;
         }
-        break;
-        case SET_CURRENT_SUMMIT:
-        case RESET_TEMPLATE_FORM: {
-            return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        break;        
-        case RECEIVE_TEMPLATE: {
-            let entity = {...payload.response};
+      }
+      break;
+    case SET_CURRENT_SUMMIT:
+    case RESET_TEMPLATE_FORM:
+      {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
+      break;
+    case RECEIVE_TEMPLATE:
+      {
+        let entity = { ...payload.response };
 
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
+        for (var key in entity) {
+          if (entity.hasOwnProperty(key)) {
+            entity[key] = entity[key] == null ? "" : entity[key];
+          }
+        }
 
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity,
-                    original_mjml_content: entity.mjml_content,
-                    original_html_content: entity.html_content}, preview: null };
-        }
-        break;
-        case TEMPLATE_ADDED:
-        case TEMPLATE_UPDATED:
-            let entity = {...payload.response};
+        return {
+          ...state,
+          entity: {
+            ...DEFAULT_ENTITY,
+            ...entity,
+            original_mjml_content: entity.mjml_content,
+            original_html_content: entity.html_content
+          },
+          preview: null
+        };
+      }
+      break;
+    case TEMPLATE_ADDED:
+    case TEMPLATE_UPDATED:
+      let entity = { ...payload.response };
 
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
+      for (var key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
+        }
+      }
 
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity,
-                    original_mjml_content: entity.mjml_content,
-                    original_html_content: entity.html_content}};
-            break;
-        case RECEIVE_EMAIL_CLIENTS: {
-            return {...state, clients: payload.response.data };
+      return {
+        ...state,
+        entity: {
+          ...DEFAULT_ENTITY,
+          ...entity,
+          original_mjml_content: entity.mjml_content,
+          original_html_content: entity.html_content
         }
-        break;
-        case REQUEST_TEMPLATE_RENDER: {
-            return {...state, templateLoading: true}
-        }
-        break;
-        case TEMPLATE_RENDER_RECEIVED: {
-            return {...state, templateLoading: false, preview: payload.response.html_content, render_errors: [] };
-        }
-        break;
-        case VALIDATE_RENDER: {
-            return {...state, templateLoading: false, render_errors: payload.errors };
-        }
-        break;
-        case UPDATE_JSON_DATA: {
-            return {...state,  json_data: payload };
-        }
-        break;
-        case VALIDATE: {
-            return {...state,  errors: payload.errors };
-        }
-        break;
-        default:
-            return state;
-    }
+      };
+      break;
+    case RECEIVE_EMAIL_CLIENTS:
+      {
+        return { ...state, clients: payload.response.data };
+      }
+      break;
+    case REQUEST_TEMPLATE_RENDER:
+      {
+        return { ...state, templateLoading: true };
+      }
+      break;
+    case TEMPLATE_RENDER_RECEIVED:
+      {
+        return {
+          ...state,
+          templateLoading: false,
+          preview: payload.response.html_content,
+          render_errors: []
+        };
+      }
+      break;
+    case VALIDATE_RENDER:
+      {
+        return {
+          ...state,
+          templateLoading: false,
+          render_errors: payload.errors
+        };
+      }
+      break;
+    case UPDATE_JSON_DATA:
+      {
+        return { ...state, json_data: payload };
+      }
+      break;
+    case VALIDATE:
+      {
+        return { ...state, errors: payload.errors };
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default emailTemplateReducer;

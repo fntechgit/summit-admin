@@ -1,80 +1,78 @@
-import React from 'react';
+import React from "react";
 
 export default class AffiliationsActionsTableCell extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      is_editing: false
+    };
+  }
 
-        this.state = {
-            is_editing: false
-        }
+  onDelete(id, ev) {
+    ev.preventDefault();
+    this.props.actions.delete(id);
+  }
 
+  onSave(id, ev) {
+    ev.preventDefault();
+
+    this.setState({
+      is_editing: false
+    });
+
+    this.props.actions.save(id);
+  }
+
+  onEdit(id, ev) {
+    ev.preventDefault();
+
+    this.setState({
+      is_editing: true
+    });
+
+    this.props.actions.edit(id);
+  }
+
+  onCancel(id, ev) {
+    ev.preventDefault();
+
+    this.setState({
+      is_editing: false
+    });
+
+    this.props.actions.cancel(id);
+  }
+
+  render() {
+    let { actions, id } = this.props;
+
+    if (this.state.is_editing) {
+      return (
+        <td className="actions">
+          <a href="" onClick={this.onSave.bind(this, id)} data-tip="save">
+            <i className="fa fa-floppy-o" />
+          </a>
+          <a href="" onClick={this.onCancel.bind(this, id)} data-tip="cancel">
+            <i className="fa fa-times" />
+          </a>
+        </td>
+      );
+    } else {
+      return (
+        <td className="actions">
+          {"edit" in actions && (
+            <a href="" onClick={this.onEdit.bind(this, id)} data-tip="edit">
+              <i className="fa fa-pencil-square-o" />
+            </a>
+          )}
+          {"delete" in actions && (
+            <a href="" onClick={this.onDelete.bind(this, id)} data-tip="delete">
+              <i className="fa fa-trash-o" />
+            </a>
+          )}
+        </td>
+      );
     }
-
-    onDelete(id, ev) {
-        ev.preventDefault();
-        this.props.actions.delete(id);
-    }
-
-    onSave(id, ev) {
-        ev.preventDefault();
-
-        this.setState({
-            is_editing: false
-        });
-
-        this.props.actions.save(id);
-    }
-
-    onEdit(id, ev) {
-        ev.preventDefault();
-
-        this.setState({
-            is_editing: true
-        });
-
-        this.props.actions.edit(id);
-    }
-
-    onCancel(id, ev) {
-        ev.preventDefault();
-
-        this.setState({
-            is_editing: false
-        });
-
-        this.props.actions.cancel(id);
-    }
-
-    render() {
-        let {actions, id} = this.props;
-
-        if (this.state.is_editing) {
-            return (
-                <td className="actions">
-                    <a href="" onClick={this.onSave.bind(this,id)} data-tip="save" >
-                        <i className="fa fa-floppy-o"/>
-                    </a>
-                    <a href="" onClick={this.onCancel.bind(this,id)} data-tip="cancel" >
-                        <i className="fa fa-times"/>
-                    </a>
-                </td>
-            );
-        } else {
-            return (
-                <td className="actions">
-                    {'edit' in actions &&
-                        <a href="" onClick={this.onEdit.bind(this,id)} data-tip="edit" >
-                            <i className="fa fa-pencil-square-o"/>
-                        </a>
-                    }
-                    {'delete' in actions &&
-                        <a href="" onClick={this.onDelete.bind(this,id)} data-tip="delete" >
-                            <i className="fa fa-trash-o"/>
-                        </a>
-                    }
-                </td>
-            );
-        }
-    }
-};
+  }
+}

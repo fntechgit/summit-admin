@@ -16,7 +16,11 @@ import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import ScoreTypeForm from "../../components/forms/score-type-form";
-import { getScoreType, resetScoreTypeForm, saveScoreType } from "../../actions/ranking-actions";
+import {
+  getScoreType,
+  resetScoreTypeForm,
+  saveScoreType
+} from "../../actions/ranking-actions";
 
 class EditScoreTypePage extends React.Component {
   constructor(props) {
@@ -40,7 +44,9 @@ class EditScoreTypePage extends React.Component {
 
   render() {
     const { currentSummit, entity, errors, match } = this.props;
-    const title = entity.id ? T.translate("general.edit") : T.translate("general.add");
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
     const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
     return (
@@ -50,20 +56,30 @@ class EditScoreTypePage extends React.Component {
           {title} {T.translate("edit_score_type.score_type")}
         </h3>
         <hr />
-        {currentSummit && <ScoreTypeForm entity={entity} errors={errors} onSubmit={this.handleSubmit} />}
+        {currentSummit && (
+          <ScoreTypeForm
+            entity={entity}
+            errors={errors}
+            onSubmit={this.handleSubmit}
+          />
+        )}
       </div>
     );
   }
 }
 
-const mapStateToProps = ({ currentSummitState, ratingTypeState, scoreTypeState }) => ({
+const mapStateToProps = ({
+  currentSummitState,
+  ratingTypeState,
+  scoreTypeState
+}) => ({
   currentSummit: currentSummitState.currentSummit,
   ratingType: ratingTypeState.entity,
-  ...scoreTypeState,
+  ...scoreTypeState
 });
 
 export default connect(mapStateToProps, {
   getScoreType,
   resetScoreTypeForm,
-  saveScoreType,
+  saveScoreType
 })(EditScoreTypePage);

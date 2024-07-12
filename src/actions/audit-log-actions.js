@@ -12,60 +12,69 @@
  **/
 
 import {
-    getRequest,
-    createAction,
-    stopLoading,
-    startLoading,
-    authErrorHandler,
-    escapeFilterValue
-} from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessTokenSafely} from '../utils/methods';
+  getRequest,
+  createAction,
+  stopLoading,
+  startLoading,
+  authErrorHandler,
+  escapeFilterValue
+} from "openstack-uicore-foundation/lib/utils/actions";
+import { getAccessTokenSafely } from "../utils/methods";
 
-export const CLEAR_LOG_PARAMS = 'CLEAR_LOG_PARAMS';
-export const REQUEST_LOG = 'REQUEST_LOG';
-export const RECEIVE_LOG = 'RECEIVE_LOG';
+export const CLEAR_LOG_PARAMS = "CLEAR_LOG_PARAMS";
+export const REQUEST_LOG = "REQUEST_LOG";
+export const RECEIVE_LOG = "RECEIVE_LOG";
 
-export const getAuditLog = (entityFilter = [], term = null, page = 1, perPage = 100, order = null, orderDir = 1) => async (dispatch, getState) => {
-
-    const {currentSummitState} = getState();
+export const getAuditLog =
+  (
+    entityFilter = [],
+    term = null,
+    page = 1,
+    perPage = 100,
+    order = null,
+    orderDir = 1
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
     const filter = [`summit_id==${currentSummit.id}`];
 
     dispatch(startLoading());
 
     if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`user_email=@${escapedTerm},user_full_name=@${escapedTerm},action=@${escapedTerm}`);
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(
+        `user_email=@${escapedTerm},user_full_name=@${escapedTerm},action=@${escapedTerm}`
+      );
     }
 
     const params = {
-        page: page,
-        per_page: perPage,
-        expand: 'user',
-        access_token: accessToken,
+      page: page,
+      per_page: perPage,
+      expand: "user",
+      access_token: accessToken
     };
 
-    params['filter[]'] = [...filter, ...entityFilter];
+    params["filter[]"] = [...filter, ...entityFilter];
 
     // order
     if (order != null && orderDir != null) {
-        const orderDirSign = (orderDir === 1) ? '+' : '-';
-        params['order'] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === 1 ? "+" : "-";
+      params["order"] = `${orderDirSign}${order}`;
     }
 
     return getRequest(
-        createAction(REQUEST_LOG),
-        createAction(RECEIVE_LOG),
-        `${window.API_BASE_URL}/api/v1/audit-logs`,
-        authErrorHandler,
-        {page, perPage, order, orderDir, term}
+      createAction(REQUEST_LOG),
+      createAction(RECEIVE_LOG),
+      `${window.API_BASE_URL}/api/v1/audit-logs`,
+      authErrorHandler,
+      { page, perPage, order, orderDir, term }
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
+      dispatch(stopLoading());
+    });
+  };
 
 export const clearAuditLogParams = () => async (dispatch, getState) => {
-    dispatch(createAction(CLEAR_LOG_PARAMS)());
+  dispatch(createAction(CLEAR_LOG_PARAMS)());
 };

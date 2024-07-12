@@ -11,25 +11,22 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import T from "i18n-react/dist/i18n-react"
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
 
 export default class UnAuthorizedPage extends React.Component {
+  constructor(props) {
+    super(props);
+  }
 
-    constructor(props){
-        super(props);
-    }
-
-    render() {
-
-        return (
-            <div>
-                <div className="container not-allowed-page">
-                    <h1>Sorry... </h1>
-                    <h3>{T.translate("errors.not_allowed")}</h3>
-                </div>
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div>
+        <div className="container not-allowed-page">
+          <h1>Sorry... </h1>
+          <h3>{T.translate("errors.not_allowed")}</h3>
+        </div>
+      </div>
+    );
+  }
 }
-

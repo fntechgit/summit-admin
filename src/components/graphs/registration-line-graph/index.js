@@ -11,30 +11,33 @@
  * limitations under the License.
  **/
 
-import React, {useMemo} from 'react'
-import {Line} from "react-chartjs-2";
-import Chart from 'chart.js/auto';
-import {isMobile} from 'react-device-detect';
-import styles from './index.module.less'
+import React, { useMemo } from "react";
+import { Line } from "react-chartjs-2";
+import Chart from "chart.js/auto";
+import { isMobile } from "react-device-detect";
+import styles from "./index.module.less";
 
+const LineGraph = ({ title, legend, data, labels, children }) => {
+  const graphSize = isMobile
+    ? { width: 400, height: 400 + labels.length * 60 }
+    : { width: 600, height: 600 };
+  const layoutPadding = isMobile
+    ? { top: 10, left: 10, right: 10, bottom: 30 }
+    : { top: 80, left: 80, right: 80, bottom: 80 };
 
-const LineGraph = ({title, legend, data, labels, children}) => {
-  const graphSize = isMobile ? { width: 400, height: (400 + (labels.length * 60)) } : { width: 600, height: 600 };
-  const layoutPadding = isMobile ? { top: 10, left: 10, right: 10, bottom: 30 } : { top: 80, left: 80, right: 80, bottom: 80 };
-  
   const chartData = {
     labels: labels,
     datasets: [
       {
         label: legend,
         data: data,
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        borderWidth: 1,
-      },
-    ],
+        borderColor: "rgb(255, 99, 132)",
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+        borderWidth: 1
+      }
+    ]
   };
-  
+
   const chartOptions = {
     maintainAspectRatio: false,
     layout: {
@@ -44,9 +47,9 @@ const LineGraph = ({title, legend, data, labels, children}) => {
     plugins: {
       tooltip: {
         callbacks: {
-          label: context => context.value
+          label: (context) => context.value
         }
-      },
+      }
     },
     scales: {
       y: {
@@ -58,13 +61,13 @@ const LineGraph = ({title, legend, data, labels, children}) => {
       }
     }
   };
-  
+
   return (
     <div className={styles.wrapper}>
       <h5 className={styles.title}>{title}</h5>
       {children}
       <div>
-        <Line data={chartData} {...graphSize} options={chartOptions}/>
+        <Line data={chartData} {...graphSize} options={chartOptions} />
       </div>
     </div>
   );

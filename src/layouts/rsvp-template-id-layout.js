@@ -11,91 +11,104 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Switch, Route } from 'react-router-dom';
-import { Breadcrumb } from 'react-breadcrumbs';
+import { Switch, Route } from "react-router-dom";
+import { Breadcrumb } from "react-breadcrumbs";
 
-import { getRsvpTemplate, resetRsvpTemplateForm }  from '../actions/rsvp-template-actions';
+import {
+  getRsvpTemplate,
+  resetRsvpTemplateForm
+} from "../actions/rsvp-template-actions";
 
-import RsvpQuestionLayout from './rsvp-question-layout';
-import EditRsvpTemplatePage from '../pages/rsvps/edit-rsvp-template-page';
-import NoMatchPage from '../pages/no-match-page';
+import RsvpQuestionLayout from "./rsvp-question-layout";
+import EditRsvpTemplatePage from "../pages/rsvps/edit-rsvp-template-page";
+import NoMatchPage from "../pages/no-match-page";
 
 class RsvpTemplateIdLayout extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    const rsvpTemplateId = props.match.params.rsvp_template_id;
 
-        const rsvpTemplateId = props.match.params.rsvp_template_id;
-
-        if (!rsvpTemplateId) {
-            props.resetRsvpTemplateForm();
-        } else {
-            props.getRsvpTemplate(rsvpTemplateId);
-        }
+    if (!rsvpTemplateId) {
+      props.resetRsvpTemplateForm();
+    } else {
+      props.getRsvpTemplate(rsvpTemplateId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.rsvp_template_id;
-        const newId = this.props.match.params.rsvp_template_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.rsvp_template_id;
+    const newId = this.props.match.params.rsvp_template_id;
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetRsvpTemplateForm();
-            } else {
-                this.props.getRsvpTemplate(newId);
-            }
-        }
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetRsvpTemplateForm();
+      } else {
+        this.props.getRsvpTemplate(newId);
+      }
     }
+  }
 
-    render() {
-        let {match, currentRsvpTemplate} = this.props;
-        let rsvpTemplateId = match.params.rsvp_template_id;
-        let breadcrumb = currentRsvpTemplate.id ? currentRsvpTemplate.title : T.translate("general.new");
+  render() {
+    let { match, currentRsvpTemplate } = this.props;
+    let rsvpTemplateId = match.params.rsvp_template_id;
+    let breadcrumb = currentRsvpTemplate.id
+      ? currentRsvpTemplate.title
+      : T.translate("general.new");
 
-        if (rsvpTemplateId && !currentRsvpTemplate.id) return (<div/>);
+    if (rsvpTemplateId && !currentRsvpTemplate.id) return <div />;
 
-        return (
-            <div>
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+    return (
+      <div>
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <Switch>
+          <Route
+            path={`${match.url}/questions`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_rsvp_template.questions"),
+                    pathname: match.url
+                  }}
+                />
                 <Switch>
-                    <Route path={`${match.url}/questions`} render={
-                        props => (
-                            <div>
-                                <Breadcrumb data={{ title: T.translate("edit_rsvp_template.questions"), pathname: match.url }} />
-                                <Switch>
-                                    <Route path={`${props.match.url}/:rsvp_question_id(\\d+)`} component={RsvpQuestionLayout} />
-                                    <Route exact strict path={`${props.match.url}/new`} component={RsvpQuestionLayout} />
-                                    <Route component={NoMatchPage}/>
-                                </Switch>
-                            </div>
-                        )}
-                    />
-                    <Route strict exact path={match.url} component={EditRsvpTemplatePage} />
-                    <Route component={NoMatchPage}/>
+                  <Route
+                    path={`${props.match.url}/:rsvp_question_id(\\d+)`}
+                    component={RsvpQuestionLayout}
+                  />
+                  <Route
+                    exact
+                    strict
+                    path={`${props.match.url}/new`}
+                    component={RsvpQuestionLayout}
+                  />
+                  <Route component={NoMatchPage} />
                 </Switch>
-            </div>
-        );
-    }
+              </div>
+            )}
+          />
+          <Route
+            strict
+            exact
+            path={match.url}
+            component={EditRsvpTemplatePage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-
 const mapStateToProps = ({ currentRsvpTemplateState }) => ({
-    currentRsvpTemplate   : currentRsvpTemplateState.entity
+  currentRsvpTemplate: currentRsvpTemplateState.entity
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getRsvpTemplate,
-        resetRsvpTemplateForm
-    }
-)(RsvpTemplateIdLayout);
-
-
-
-
-
-
+export default connect(mapStateToProps, {
+  getRsvpTemplate,
+  resetRsvpTemplateForm
+})(RsvpTemplateIdLayout);

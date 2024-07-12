@@ -10,66 +10,73 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import RegFeedMetadataForm from '../../components/forms/reg-feed-metadata-form';
-import { resetRegFeedMetadataForm, getRegFeedMetadata, saveRegFeedMetadata } from '../../actions/reg-feed-metadata-actions';
+import RegFeedMetadataForm from "../../components/forms/reg-feed-metadata-form";
+import {
+  resetRegFeedMetadataForm,
+  getRegFeedMetadata,
+  saveRegFeedMetadata
+} from "../../actions/reg-feed-metadata-actions";
 
 class EditRegFeedMetadataPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    let regFeedMetadataId = this.props.match.params.reg_feed_metadata_id;
 
-        let regFeedMetadataId = this.props.match.params.reg_feed_metadata_id;        
-
-        if (!regFeedMetadataId) {
-            this.props.resetRegFeedMetadataForm();
-        } else {
-            this.props.getRegFeedMetadata(regFeedMetadataId);
-        }
+    if (!regFeedMetadataId) {
+      this.props.resetRegFeedMetadataForm();
+    } else {
+      this.props.getRegFeedMetadata(regFeedMetadataId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.reg_feed_metadata_id;
-        const newId = this.props.match.params.reg_feed_metadata_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.reg_feed_metadata_id;
+    const newId = this.props.match.params.reg_feed_metadata_id;
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetRegFeedMetadataForm();
-            } else {
-                this.props.getRegFeedMetadata(newId);
-            }
-        }
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetRegFeedMetadataForm();
+      } else {
+        this.props.getRegFeedMetadata(newId);
+      }
     }
+  }
 
-    render() {
-        const { entity } = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
+  render() {
+    const { entity } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
 
-        return (
-            <div className="container">
-                <h3>{title} {T.translate("edit_reg_feed_metadata.reg_feed_metadata")}</h3>
-                <hr />
-                <RegFeedMetadataForm
-                    entity={entity}
-                    onSubmit={this.props.saveRegFeedMetadata}
-                />
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <h3>
+          {title} {T.translate("edit_reg_feed_metadata.reg_feed_metadata")}
+        </h3>
+        <hr />
+        <RegFeedMetadataForm
+          entity={entity}
+          onSubmit={this.props.saveRegFeedMetadata}
+        />
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentRegFeedMetadataState }) => ({
-    currentSummit: currentSummitState.currentSummit,
-    ...currentRegFeedMetadataState
+const mapStateToProps = ({
+  currentSummitState,
+  currentRegFeedMetadataState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentRegFeedMetadataState
 });
 
-export default connect(
-    mapStateToProps,
-    {
-        getRegFeedMetadata,
-        resetRegFeedMetadataForm,
-        saveRegFeedMetadata,
-    }
-)(EditRegFeedMetadataPage);
+export default connect(mapStateToProps, {
+  getRegFeedMetadata,
+  resetRegFeedMetadataForm,
+  saveRegFeedMetadata
+})(EditRegFeedMetadataPage);

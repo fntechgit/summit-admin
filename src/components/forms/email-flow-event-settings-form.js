@@ -10,16 +10,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React, {useEffect, useState} from 'react';
-import T from 'i18n-react/dist/i18n-react';
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css';
-import {hasErrors, scrollToError} from "../../utils/methods";
-import {Input, UploadInput} from "openstack-uicore-foundation/lib/components";
-import HexColorInput from '../inputs/hex-color-input';
-import Swal from 'sweetalert2';
-import {parse} from 'address-rfc2822';
+import React, { useEffect, useState } from "react";
+import T from "i18n-react/dist/i18n-react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import { hasErrors, scrollToError } from "../../utils/methods";
+import { Input, UploadInput } from "openstack-uicore-foundation/lib/components";
+import HexColorInput from "../inputs/hex-color-input";
+import Swal from "sweetalert2";
+import { parse } from "address-rfc2822";
 
-const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
+const EmailFlowEventSettingsForm = ({ id, entity, errors, ...props }) => {
   const [_errors, setErrors] = useState(errors);
   const [_entity, setEntity] = useState(entity);
 
@@ -30,49 +30,48 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
 
   useEffect(() => {
     scrollToError(errors);
-    setErrors(errors)
+    setErrors(errors);
   }, [errors]);
 
-
   const handleChange = (ev) => {
-    let {value, id} = ev.target;
-    const errorsTmp = {..._errors};
-    const entityTmp = {..._entity};
+    let { value, id } = ev.target;
+    const errorsTmp = { ..._errors };
+    const entityTmp = { ..._entity };
 
-    if (ev.target.type === 'checkbox') {
+    if (ev.target.type === "checkbox") {
       value = ev.target.checked;
     }
 
-    errorsTmp[id] = '';
+    errorsTmp[id] = "";
 
-    entityTmp[id] = {...entityTmp[id], value};
+    entityTmp[id] = { ...entityTmp[id], value };
     setErrors(errorsTmp);
     setEntity(entityTmp);
-  }
+  };
 
   const handleUploadFile = (file, data) => {
-    const {id} = data;
-    const entityTmp = {..._entity};
+    const { id } = data;
+    const entityTmp = { ..._entity };
 
     entityTmp[id].file = file;
-    entityTmp[id].file_preview = file.preview
+    entityTmp[id].file_preview = file.preview;
 
     setEntity(entityTmp);
-  }
+  };
 
   const handleRemoveFile = (ev, data) => {
-    const {id} = data;
-    const entityTmp = {..._entity};
+    const { id } = data;
+    const entityTmp = { ..._entity };
 
-    entityTmp[id].file_preview = '';
-    entityTmp[id].file = '';
+    entityTmp[id].file_preview = "";
+    entityTmp[id].file = "";
 
     if (entityTmp[id].id) {
       props.onDeleteImage(entityTmp[id].id);
     }
 
     setEntity(entityTmp);
-  }
+  };
 
   const validate = (settingsToSave) => {
     let result = true;
@@ -80,18 +79,24 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
 
     if (settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM?.value) {
       try {
-        const addresses = parse(settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM.value);
-        settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM.value = addresses[0].format();
-      } catch(e) {
+        const addresses = parse(
+          settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM.value
+        );
+        settingsToSave.EMAIL_TEMPLATE_GENERIC_FROM.value =
+          addresses[0].format();
+      } catch (e) {
         errorsTmp.EMAIL_TEMPLATE_GENERIC_FROM = `email is not valid`;
         result = false;
       }
     }
     if (settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM?.value) {
       try {
-        const addresses = parse(settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM.value);
-        settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM.value = addresses[0].format();
-      } catch(e) {
+        const addresses = parse(
+          settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM.value
+        );
+        settingsToSave.EMAIL_TEMPLATE_SPEAKERS_FROM.value =
+          addresses[0].format();
+      } catch (e) {
         errorsTmp.EMAIL_TEMPLATE_SPEAKERS_FROM = `email is not valid`;
         result = false;
       }
@@ -102,7 +107,7 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
     }
 
     return result;
-  }
+  };
 
   const handleSubmit = (ev) => {
     ev.preventDefault();
@@ -111,9 +116,9 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
     const settingsToSave = Object.fromEntries(
       Object.entries(_entity).filter(([key, values]) => {
         return (
-          (values.type === 'TEXT' && (values.value !== '' || values.id)) ||
-          (values.type === 'HEX_COLOR' && values.value !== '') ||
-          (values.type === 'FILE' && values.file)
+          (values.type === "TEXT" && (values.value !== "" || values.id)) ||
+          (values.type === "HEX_COLOR" && values.value !== "") ||
+          (values.type === "FILE" && values.file)
         );
       })
     );
@@ -122,35 +127,53 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
       props.onSubmit(settingsToSave).then(() => {
         const success_message = {
           title: T.translate("general.done"),
-          html: T.translate("email_flow_events_settings.email_template_settings_updated"),
-          type: 'success'
+          html: T.translate(
+            "email_flow_events_settings.email_template_settings_updated"
+          ),
+          type: "success"
         };
 
         Swal.fire(success_message);
       });
     }
-  }
+  };
 
   return (
     <form className="email-flow-event-form">
-      <input type="hidden" id="id" value={_entity.id}/>
+      <input type="hidden" id="id" value={_entity.id} />
       <div className="row form-group">
-        <div className='col-md-6'>
-          <label>{T.translate("email_flow_events_settings.email_template_generic_banner")}</label><br/>
+        <div className="col-md-6">
+          <label>
+            {T.translate(
+              "email_flow_events_settings.email_template_generic_banner"
+            )}
+          </label>
+          <br />
           <UploadInput
             id="EMAIL_TEMPLATE_GENERIC_BANNER"
-            value={_entity?.EMAIL_TEMPLATE_GENERIC_BANNER?.file_preview || _entity?.EMAIL_TEMPLATE_GENERIC_BANNER?.file}
+            value={
+              _entity?.EMAIL_TEMPLATE_GENERIC_BANNER?.file_preview ||
+              _entity?.EMAIL_TEMPLATE_GENERIC_BANNER?.file
+            }
             handleUpload={handleUploadFile}
             handleRemove={handleRemoveFile}
             className="dropzone col-md-6"
             multiple={false}
           />
         </div>
-        <div className='col-md-6'>
-          <label>{T.translate("email_flow_events_settings.email_template_generic_speaker_banner")}</label><br/>
+        <div className="col-md-6">
+          <label>
+            {T.translate(
+              "email_flow_events_settings.email_template_generic_speaker_banner"
+            )}
+          </label>
+          <br />
           <UploadInput
             id="EMAIL_TEMPLATE_GENERIC_SPEAKER_BANNER"
-            value={_entity?.EMAIL_TEMPLATE_GENERIC_SPEAKER_BANNER?.file_preview || _entity?.EMAIL_TEMPLATE_GENERIC_SPEAKER_BANNER?.file}
+            value={
+              _entity?.EMAIL_TEMPLATE_GENERIC_SPEAKER_BANNER?.file_preview ||
+              _entity?.EMAIL_TEMPLATE_GENERIC_SPEAKER_BANNER?.file
+            }
             handleUpload={handleUploadFile}
             handleRemove={handleRemoveFile}
             className="dropzone col-md-6"
@@ -159,22 +182,38 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
         </div>
       </div>
       <div className="row form-group">
-        <div className='col-md-6'>
-          <label>{T.translate("email_flow_events_settings.email_template_ticket_top_graphic")}</label><br/>
+        <div className="col-md-6">
+          <label>
+            {T.translate(
+              "email_flow_events_settings.email_template_ticket_top_graphic"
+            )}
+          </label>
+          <br />
           <UploadInput
             id="EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC"
-            value={_entity?.EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC?.file_preview || _entity?.EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC?.file}
+            value={
+              _entity?.EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC?.file_preview ||
+              _entity?.EMAIL_TEMPLATE_TICKET_TOP_GRAPHIC?.file
+            }
             handleUpload={handleUploadFile}
             handleRemove={handleRemoveFile}
             className="dropzone col-md-6"
             multiple={false}
           />
         </div>
-        <div className='col-md-6'>
-          <label>{T.translate("email_flow_events_settings.email_template_ticket_bottom_graphic")}</label><br/>
+        <div className="col-md-6">
+          <label>
+            {T.translate(
+              "email_flow_events_settings.email_template_ticket_bottom_graphic"
+            )}
+          </label>
+          <br />
           <UploadInput
             id="EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC"
-            value={_entity?.EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC?.file_preview || _entity?.EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC?.file}
+            value={
+              _entity?.EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC?.file_preview ||
+              _entity?.EMAIL_TEMPLATE_TICKET_BOTTOM_GRAPHIC?.file
+            }
             handleUpload={handleUploadFile}
             handleRemove={handleRemoveFile}
             className="dropzone col-md-6"
@@ -184,58 +223,84 @@ const EmailFlowEventSettingsForm = ({id, entity, errors, ...props}) => {
       </div>
 
       <div className="row form-group">
-        <div className='col-md-6'>
-          <label>{T.translate("email_flow_events_settings.email_template_generic_from")}</label><br/>
+        <div className="col-md-6">
+          <label>
+            {T.translate(
+              "email_flow_events_settings.email_template_generic_from"
+            )}
+          </label>
+          <br />
           <Input
             id="EMAIL_TEMPLATE_GENERIC_FROM"
             value={_entity?.EMAIL_TEMPLATE_GENERIC_FROM?.value}
             onChange={handleChange}
             type="email"
             className="form-control"
-            error={hasErrors('EMAIL_TEMPLATE_GENERIC_FROM', _errors)}
+            error={hasErrors("EMAIL_TEMPLATE_GENERIC_FROM", _errors)}
           />
         </div>
-        <div className='col-md-6'>
-          <label>{T.translate("email_flow_events_settings.email_template_speakers_from")}</label><br/>
+        <div className="col-md-6">
+          <label>
+            {T.translate(
+              "email_flow_events_settings.email_template_speakers_from"
+            )}
+          </label>
+          <br />
           <Input
             id="EMAIL_TEMPLATE_SPEAKERS_FROM"
             value={_entity?.EMAIL_TEMPLATE_SPEAKERS_FROM?.value}
             onChange={handleChange}
             type="email"
             className="form-control"
-            error={hasErrors('EMAIL_TEMPLATE_SPEAKERS_FROM', _errors)}
+            error={hasErrors("EMAIL_TEMPLATE_SPEAKERS_FROM", _errors)}
           />
         </div>
       </div>
       <div className="row form-group">
-        <div className='col-md-6'>
-          <label>{T.translate("email_flow_events_settings.email_template_primary_color")}</label><br/>
+        <div className="col-md-6">
+          <label>
+            {T.translate(
+              "email_flow_events_settings.email_template_primary_color"
+            )}
+          </label>
+          <br />
           <HexColorInput
             onChange={handleChange}
             id="EMAIL_TEMPLATE_PRIMARY_COLOR"
             value={_entity?.EMAIL_TEMPLATE_PRIMARY_COLOR?.value}
-            className="form-control"/>
+            className="form-control"
+          />
         </div>
-        <div className='col-md-6'>
-          <label>{T.translate("email_flow_events_settings.email_template_secondary_color")}</label><br/>
+        <div className="col-md-6">
+          <label>
+            {T.translate(
+              "email_flow_events_settings.email_template_secondary_color"
+            )}
+          </label>
+          <br />
           <HexColorInput
             onChange={handleChange}
             id="EMAIL_TEMPLATE_SECONDARY_COLOR"
             value={_entity?.EMAIL_TEMPLATE_SECONDARY_COLOR?.value}
-            className="form-control"/>
+            className="form-control"
+          />
         </div>
       </div>
 
-      <hr/>
+      <hr />
 
       <div className="row">
         <div className="col-md-12 submit-buttons">
-          <input type="button" onClick={handleSubmit}
-                 className="btn btn-primary pull-right" value={T.translate("general.save")}/>
+          <input
+            type="button"
+            onClick={handleSubmit}
+            className="btn btn-primary pull-right"
+            value={T.translate("general.save")}
+          />
         </div>
       </div>
     </form>
   );
-}
+};
 
 export default EmailFlowEventSettingsForm;

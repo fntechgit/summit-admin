@@ -11,36 +11,50 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {Switch, Route, Redirect} from 'react-router-dom';
+import React from "react";
+import { Switch, Route, Redirect } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import {connect} from "react-redux";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 import AdminAccessListPage from "../pages/admin_access/admin-access-list-page";
 import EditAdminAccessPage from "../pages/admin_access/edit-admin-access-page";
 
 class AdminAccessLayout extends React.Component {
+  render() {
+    const { match } = this.props;
 
-    render(){
-        const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("admin_access.admin_access"),
+            pathname: match.url
+          }}
+        />
 
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("admin_access.admin_access"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={match.url} component={AdminAccessListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditAdminAccessPage}/>
-                    <Route path={`${match.url}/:access_id(\\d+)`} component={EditAdminAccessPage}/>
-                    <Redirect to={`/app/admin-access`} />
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={AdminAccessListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditAdminAccessPage}
+          />
+          <Route
+            path={`${match.url}/:access_id(\\d+)`}
+            component={EditAdminAccessPage}
+          />
+          <Redirect to={`/app/admin-access`} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(connect (null, {})(AdminAccessLayout), 'admin-access');
-
-
+export default Restrict(connect(null, {})(AdminAccessLayout), "admin-access");

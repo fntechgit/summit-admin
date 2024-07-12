@@ -11,37 +11,47 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import EditPromocodePage from '../pages/promocodes/edit-promocode-page'
-import PromocodeListPage from '../pages/promocodes/promocode-list-page'
+import EditPromocodePage from "../pages/promocodes/edit-promocode-page";
+import PromocodeListPage from "../pages/promocodes/promocode-list-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class PromocodeLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("promocode_list.promocodes"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("promocode_list.promocodes"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={PromocodeListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditPromocodePage}/>
-                    <Route strict exact path={`${match.url}/:promocode_id(\\d+)`} component={EditPromocodePage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route strict exact path={match.url} component={PromocodeListPage} />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditPromocodePage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:promocode_id(\\d+)`}
+            component={EditPromocodePage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(PromocodeLayout), 'tickets');
-
-
+export default Restrict(withRouter(PromocodeLayout), "tickets");

@@ -11,73 +11,77 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_SETTING,
-    RESET_SETTING_FORM,
-    UPDATE_SETTING,
-    SETTING_ADDED
-} from '../../actions/marketing-actions';
+import {
+  RECEIVE_SETTING,
+  RESET_SETTING_FORM,
+  UPDATE_SETTING,
+  SETTING_ADDED
+} from "../../actions/marketing-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id          : 0,
-    key         : '',
-    type        : null,
-    value       : '',
-    file_preview: '',
-    selection_plan_id: 0,
-}
+  id: 0,
+  key: "",
+  type: null,
+  value: "",
+  file_preview: "",
+  selection_plan_id: 0
+};
 
 const DEFAULT_STATE = {
-    entity      : DEFAULT_ENTITY,
-    errors      : {}
+  entity: DEFAULT_ENTITY,
+  errors: {}
 };
 
 const marketingSettingReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-            }
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER:
+      {
+        // we need this in case the token expired while editing the form
+        if (payload.hasOwnProperty("persistStore")) {
+          return state;
+        } else {
+          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
-        break;
-        case SET_CURRENT_SUMMIT:
-        case RESET_SETTING_FORM: {
-            return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        break;
-        case UPDATE_SETTING: {
-            return {...state,  entity: {...payload}, errors: {} };
-        }
-        break;
-        case SETTING_ADDED:
-        case RECEIVE_SETTING: {
-            let entity = {...payload.response};
+      }
+      break;
+    case SET_CURRENT_SUMMIT:
+    case RESET_SETTING_FORM:
+      {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
+      break;
+    case UPDATE_SETTING:
+      {
+        return { ...state, entity: { ...payload }, errors: {} };
+      }
+      break;
+    case SETTING_ADDED:
+    case RECEIVE_SETTING:
+      {
+        let entity = { ...payload.response };
 
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
+        for (var key in entity) {
+          if (entity.hasOwnProperty(key)) {
+            entity[key] = entity[key] == null ? "" : entity[key];
+          }
+        }
 
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
-        }
-        break;
-        case VALIDATE: {
-            return {...state,  errors: payload.errors };
-        }
-        break;
-        default:
-            return state;
-    }
+        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+      }
+      break;
+    case VALIDATE:
+      {
+        return { ...state, errors: payload.errors };
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default marketingSettingReducer;

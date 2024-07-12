@@ -11,11 +11,11 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {connect} from 'react-redux';
-import {Modal, Pagination} from "react-bootstrap";
+import React from "react";
+import { connect } from "react-redux";
+import { Modal, Pagination } from "react-bootstrap";
 import Swal from "sweetalert2";
-import T from 'i18n-react/dist/i18n-react';
+import T from "i18n-react/dist/i18n-react";
 import {
   FreeTextSearch,
   SelectableTable,
@@ -23,26 +23,36 @@ import {
   Dropdown,
   TagInput,
   Input
-} from 'openstack-uicore-foundation/lib/components';
-import {getSummitById} from '../../actions/summit-actions';
+} from "openstack-uicore-foundation/lib/components";
+import { getSummitById } from "../../actions/summit-actions";
 import {
-  exportInvitationsCSV, getInvitations, importInvitationsCSV, selectInvitation, unSelectInvitation,
-  clearAllSelectedInvitations, deleteAllRegistrationInvitation, deleteRegistrationInvitation, setCurrentFlowEvent,
-  setSelectedAll, sendEmails
-}
-  from "../../actions/registration-invitation-actions";
+  exportInvitationsCSV,
+  getInvitations,
+  importInvitationsCSV,
+  selectInvitation,
+  unSelectInvitation,
+  clearAllSelectedInvitations,
+  deleteAllRegistrationInvitation,
+  deleteRegistrationInvitation,
+  setCurrentFlowEvent,
+  setSelectedAll,
+  sendEmails
+} from "../../actions/registration-invitation-actions";
 import AcceptanceCriteriaDropdown from "../../components/inputs/acceptance-criteria-dropdown";
-import {MaxTextLengthForTicketTypesOnTable, MaxTextLengthForTagsOnTable, ALL_FILTER} from '../../utils/constants';
+import {
+  MaxTextLengthForTicketTypesOnTable,
+  MaxTextLengthForTagsOnTable,
+  ALL_FILTER
+} from "../../utils/constants";
 
 import "../../styles/registration-invitation-list-page.less";
-import {SegmentedControl} from "segmented-control";
-import OrAndFilter from '../../components/filters/or-and-filter';
-import {validateEmail} from '../../utils/methods';
+import { SegmentedControl } from "segmented-control";
+import OrAndFilter from "../../components/filters/or-and-filter";
+import { validateEmail } from "../../utils/methods";
 import InvitationStatusDropdown from "../../components/inputs/invitation-status-dropdown";
 import SendEmailModal from "../../components/send-email-modal/index.jsx";
 
 class RegistrationInvitationsListPage extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -72,13 +82,13 @@ class RegistrationInvitationsListPage extends React.Component {
       invitationFilter: {
         orAndFilter: ALL_FILTER
       },
-      testRecipient: '',
-      showEmailModal: false,
-    }
+      testRecipient: "",
+      showEmailModal: false
+    };
   }
 
   componentDidMount() {
-    const {currentSummit} = this.props;
+    const { currentSummit } = this.props;
     if (currentSummit) {
       const {
         term,
@@ -91,7 +101,9 @@ class RegistrationInvitationsListPage extends React.Component {
         status,
         isSent
       } = this.props;
-      const {invitationFilter: {orAndFilter}} = this.state;
+      const {
+        invitationFilter: { orAndFilter }
+      } = this.state;
       this.props.getInvitations(term, currentPage, perPage, order, orderDir, {
         status,
         isSent,
@@ -103,8 +115,19 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleSearch(term) {
-    const {order, orderDir, page, perPage, allowedTicketTypesIds, tagFilter, status, isSent} = this.props;
-    const {invitationFilter: {orAndFilter}} = this.state;
+    const {
+      order,
+      orderDir,
+      page,
+      perPage,
+      allowedTicketTypesIds,
+      tagFilter,
+      status,
+      isSent
+    } = this.props;
+    const {
+      invitationFilter: { orAndFilter }
+    } = this.state;
     this.props.getInvitations(term, page, perPage, order, orderDir, {
       status,
       isSent,
@@ -115,18 +138,19 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleEdit(invitation_id) {
-    const {currentSummit, history} = this.props;
-    history.push(`/app/summits/${currentSummit.id}/registration-invitations/${invitation_id}`);
+    const { currentSummit, history } = this.props;
+    history.push(
+      `/app/summits/${currentSummit.id}/registration-invitations/${invitation_id}`
+    );
   }
 
   handleChangeFlowEvent(ev) {
-    const {value, id} = ev.target;
+    const { value, id } = ev.target;
     this.props.setCurrentFlowEvent(value);
   }
 
   handleDeleteAll() {
-
-    const {deleteAllRegistrationInvitation} = this.props;
+    const { deleteAllRegistrationInvitation } = this.props;
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
@@ -143,12 +167,16 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleDelete(invitation_id) {
-    const {deleteRegistrationInvitation, invitations} = this.props;
-    let invitation = invitations.find(i => i.id === invitation_id);
+    const { deleteRegistrationInvitation, invitations } = this.props;
+    let invitation = invitations.find((i) => i.id === invitation_id);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("registration_invitation_list.remove_warning") + ' (' + invitation.email + ") .",
+      text:
+        T.translate("registration_invitation_list.remove_warning") +
+        " (" +
+        invitation.email +
+        ") .",
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -161,46 +189,69 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleNewInvitation() {
-    const {currentSummit, history} = this.props;
-    history.push(`/app/summits/${currentSummit.id}/registration-invitations/new`);
+    const { currentSummit, history } = this.props;
+    history.push(
+      `/app/summits/${currentSummit.id}/registration-invitations/new`
+    );
   }
 
   handleSendClick(ev) {
     ev.stopPropagation();
     ev.preventDefault();
 
-    const { selectedCount, currentFlowEvent} = this.props;
-    const {testRecipient} = this.state;
+    const { selectedCount, currentFlowEvent } = this.props;
+    const { testRecipient } = this.state;
 
     if (!currentFlowEvent) {
-      Swal.fire("Validation error", T.translate("registration_invitation_list.select_template"), "warning");
+      Swal.fire(
+        "Validation error",
+        T.translate("registration_invitation_list.select_template"),
+        "warning"
+      );
       return false;
     }
 
     if (selectedCount === 0) {
-      Swal.fire("Validation error", T.translate("registration_invitation_list.select_items"), "warning");
+      Swal.fire(
+        "Validation error",
+        T.translate("registration_invitation_list.select_items"),
+        "warning"
+      );
       return false;
     }
 
-    if (testRecipient !== '' && !validateEmail(testRecipient)) {
-      Swal.fire("Validation error", T.translate("registration_invitation_list.invalid_recipient_email"), "warning");
-      return false
+    if (testRecipient !== "" && !validateEmail(testRecipient)) {
+      Swal.fire(
+        "Validation error",
+        T.translate("registration_invitation_list.invalid_recipient_email"),
+        "warning"
+      );
+      return false;
     }
 
-    this.setState({showEmailModal: true});
-
+    this.setState({ showEmailModal: true });
   }
 
   handleSendEmails = (excerpt) => {
-    const {status, isSent, sendEmails, allowedTicketTypesIds, tagFilter} = this.props;
-    const {invitationFilter: {orAndFilter}, testRecipient} = this.state;
+    const { status, isSent, sendEmails, allowedTicketTypesIds, tagFilter } =
+      this.props;
+    const {
+      invitationFilter: { orAndFilter },
+      testRecipient
+    } = this.state;
 
-    this.setState({showEmailModal: false});
+    this.setState({ showEmailModal: false });
 
-    const filters = {status, isSent, allowedTicketTypesIds, tagFilter, orAndFilter};
+    const filters = {
+      status,
+      isSent,
+      allowedTicketTypesIds,
+      tagFilter,
+      orAndFilter
+    };
 
     sendEmails(filters, testRecipient, excerpt);
-  }
+  };
 
   handleSelected(invitation_id, isSelected) {
     if (isSelected) {
@@ -220,10 +271,13 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleTicketTypeSelected(ev) {
-    const {term, page, order, orderDir, perPage, status, isSent, tagFilter} = this.props;
-    let {value} = ev.target;
+    const { term, page, order, orderDir, perPage, status, isSent, tagFilter } =
+      this.props;
+    let { value } = ev.target;
     const ticketTypeFilter = [...value];
-    const {invitationFilter: {orAndFilter}} = this.state;
+    const {
+      invitationFilter: { orAndFilter }
+    } = this.state;
     this.props.getInvitations(term, page, perPage, order, orderDir, {
       status,
       isSent,
@@ -234,8 +288,18 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleSort(index, key, dir, func) {
-    const {term, page, perPage, allowedTicketTypesIds, tagFilter, status, isSent} = this.props;
-    const {invitationFilter: {orAndFilter}} = this.state;
+    const {
+      term,
+      page,
+      perPage,
+      allowedTicketTypesIds,
+      tagFilter,
+      status,
+      isSent
+    } = this.props;
+    const {
+      invitationFilter: { orAndFilter }
+    } = this.state;
     this.props.getInvitations(term, page, perPage, key, dir, {
       status,
       isSent,
@@ -246,8 +310,19 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handlePageChange(page) {
-    const {term, order, orderDir, perPage, allowedTicketTypesIds, tagFilter, status, isSent} = this.props;
-    const {invitationFilter: {orAndFilter}} = this.state;
+    const {
+      term,
+      order,
+      orderDir,
+      perPage,
+      allowedTicketTypesIds,
+      tagFilter,
+      status,
+      isSent
+    } = this.props;
+    const {
+      invitationFilter: { orAndFilter }
+    } = this.state;
     this.props.getInvitations(term, page, perPage, order, orderDir, {
       status,
       isSent,
@@ -258,16 +333,26 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleImportInvitations() {
-    const {importFile, acceptanceCriteria} = this.state;
-    this.setState({showImportModal: false});
+    const { importFile, acceptanceCriteria } = this.state;
+    this.setState({ showImportModal: false });
     if (importFile && acceptanceCriteria) {
       this.props.importInvitationsCSV(importFile, acceptanceCriteria);
     }
   }
 
   handleExportInvitations() {
-    const {term, order, orderDir, allowedTicketTypesIds, tagFilter, status, isSent} = this.props;
-    const {invitationFilter: {orAndFilter}} = this.state;
+    const {
+      term,
+      order,
+      orderDir,
+      allowedTicketTypesIds,
+      tagFilter,
+      status,
+      isSent
+    } = this.props;
+    const {
+      invitationFilter: { orAndFilter }
+    } = this.state;
     this.props.exportInvitationsCSV(term, order, orderDir, {
       status,
       isSent,
@@ -278,8 +363,19 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleTagFilterChange(ev) {
-    const {term, order, page, orderDir, perPage, allowedTicketTypesIds, status, isSent} = this.props;
-    const {invitationFilter: {orAndFilter}} = this.state;
+    const {
+      term,
+      order,
+      page,
+      orderDir,
+      perPage,
+      allowedTicketTypesIds,
+      status,
+      isSent
+    } = this.props;
+    const {
+      invitationFilter: { orAndFilter }
+    } = this.state;
     this.props.getInvitations(term, page, perPage, order, orderDir, {
       status,
       isSent,
@@ -291,8 +387,19 @@ class RegistrationInvitationsListPage extends React.Component {
 
   handleChangeStatus(ev) {
     const newValue = ev.target.value;
-    const {term, order, page, orderDir, perPage, allowedTicketTypesIds, tagFilter, isSent} = this.props;
-    const {invitationFilter: {orAndFilter}} = this.state;
+    const {
+      term,
+      order,
+      page,
+      orderDir,
+      perPage,
+      allowedTicketTypesIds,
+      tagFilter,
+      isSent
+    } = this.props;
+    const {
+      invitationFilter: { orAndFilter }
+    } = this.state;
 
     this.props.getInvitations(term, page, perPage, order, orderDir, {
       status: newValue,
@@ -304,8 +411,19 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleChangeNoSent(newValue) {
-    const {term, order, page, orderDir, perPage, allowedTicketTypesIds, tagFilter, status} = this.props;
-    const {invitationFilter: {orAndFilter}} = this.state;
+    const {
+      term,
+      order,
+      page,
+      orderDir,
+      perPage,
+      allowedTicketTypesIds,
+      tagFilter,
+      status
+    } = this.props;
+    const {
+      invitationFilter: { orAndFilter }
+    } = this.state;
     this.props.getInvitations(term, page, perPage, order, orderDir, {
       status,
       isSent: newValue,
@@ -316,8 +434,21 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleOrAndFilter(ev) {
-    this.setState({...this.state, invitationFilter: {...this.state.invitationFilter, orAndFilter: ev}});
-    const {term, order, orderDir, currentPage, perPage, allowedTicketTypesIds, tagFilter, status, isSent} = this.props;
+    this.setState({
+      ...this.state,
+      invitationFilter: { ...this.state.invitationFilter, orAndFilter: ev }
+    });
+    const {
+      term,
+      order,
+      orderDir,
+      currentPage,
+      perPage,
+      allowedTicketTypesIds,
+      tagFilter,
+      status,
+      isSent
+    } = this.props;
     this.props.getInvitations(term, currentPage, perPage, order, orderDir, {
       status,
       isSent,
@@ -328,47 +459,90 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   render() {
-
     const {
-      currentSummit, invitations, term, order,
-      orderDir, totalInvitations,
-      lastPage, currentPage,
+      currentSummit,
+      invitations,
+      term,
+      order,
+      orderDir,
+      totalInvitations,
+      lastPage,
+      currentPage,
       selectedCount,
       status,
       isSent,
       currentFlowEvent,
-      selectedAll, allowedTicketTypesIds, tagFilter
+      selectedAll,
+      allowedTicketTypesIds,
+      tagFilter
     } = this.props;
 
-    const {showImportModal, importFile, acceptanceCriteria, invitationFilter, testRecipient, showEmailModal} = this.state;
+    const {
+      showImportModal,
+      importFile,
+      acceptanceCriteria,
+      invitationFilter,
+      testRecipient,
+      showEmailModal
+    } = this.state;
 
     const columns = [
-      {columnKey: 'id', value: T.translate("general.id"), sortable: true},
-      {columnKey: 'email', value: T.translate("registration_invitation_list.email")},
-      {columnKey: 'first_name', value: T.translate("registration_invitation_list.first_name")},
-      {columnKey: 'last_name', value: T.translate("registration_invitation_list.last_name")},
-      {columnKey: 'status', value: T.translate("registration_invitation_list.status")},
-      {columnKey: 'is_sent', value: T.translate("registration_invitation_list.sent")},
+      { columnKey: "id", value: T.translate("general.id"), sortable: true },
       {
-        columnKey: 'allowed_ticket_types',
+        columnKey: "email",
+        value: T.translate("registration_invitation_list.email")
+      },
+      {
+        columnKey: "first_name",
+        value: T.translate("registration_invitation_list.first_name")
+      },
+      {
+        columnKey: "last_name",
+        value: T.translate("registration_invitation_list.last_name")
+      },
+      {
+        columnKey: "status",
+        value: T.translate("registration_invitation_list.status")
+      },
+      {
+        columnKey: "is_sent",
+        value: T.translate("registration_invitation_list.sent")
+      },
+      {
+        columnKey: "allowed_ticket_types",
         value: T.translate("registration_invitation_list.allowed_ticket_types"),
         render: (t) =>
-          t.allowed_ticket_types_full.length > MaxTextLengthForTicketTypesOnTable ?
+          t.allowed_ticket_types_full.length >
+          MaxTextLengthForTicketTypesOnTable ? (
             <>
-              {`${t.allowed_ticket_types}...`}&nbsp;<i className="fa fa-info-circle" aria-hidden="true"
-                                                       title={t.allowed_ticket_types_full}/>
+              {`${t.allowed_ticket_types}...`}&nbsp;
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={t.allowed_ticket_types_full}
+              />
             </>
-            : t.allowed_ticket_types
+          ) : (
+            t.allowed_ticket_types
+          )
       },
       {
-        columnKey: 'tags', value: T.translate("registration_invitation_list.tags"), render: (t) =>
-          t.tags_full.length > MaxTextLengthForTagsOnTable ?
+        columnKey: "tags",
+        value: T.translate("registration_invitation_list.tags"),
+        render: (t) =>
+          t.tags_full.length > MaxTextLengthForTagsOnTable ? (
             <>
-              {`${t.tags}...`}&nbsp;<i className="fa fa-info-circle" aria-hidden="true" title={t.tags_full}/>
+              {`${t.tags}...`}&nbsp;
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={t.tags_full}
+              />
             </>
-            :
+          ) : (
             t.tags
-      },
+          )
+      }
     ];
 
     const table_options = {
@@ -380,54 +554,83 @@ class RegistrationInvitationsListPage extends React.Component {
           onClick: this.handleEdit,
           onSelected: this.handleSelected,
           onSelectedAll: this.handleSelectedAll
-
         },
-        delete: {onClick: this.handleDelete},
+        delete: { onClick: this.handleDelete }
       }
-    }
+    };
 
-    if (!currentSummit.id) return (<div/>);
+    if (!currentSummit.id) return <div />;
 
-    const ticketTypesFilterDDL = currentSummit.ticket_types.map(t => {
-      return {label: t.name, value: t.id};
+    const ticketTypesFilterDDL = currentSummit.ticket_types.map((t) => {
+      return { label: t.name, value: t.id };
     });
 
     let flowEventsDDL = [
-      {label: '-- SELECT EMAIL EVENT --', value: ''},
-      {label: 'SUMMIT_REGISTRATION_INVITE_REGISTRATION', value: 'SUMMIT_REGISTRATION_INVITE_REGISTRATION'},
-      {label: 'SUMMIT_REGISTRATION_REINVITE_REGISTRATION', value: 'SUMMIT_REGISTRATION_REINVITE_REGISTRATION'},
+      { label: "-- SELECT EMAIL EVENT --", value: "" },
+      {
+        label: "SUMMIT_REGISTRATION_INVITE_REGISTRATION",
+        value: "SUMMIT_REGISTRATION_INVITE_REGISTRATION"
+      },
+      {
+        label: "SUMMIT_REGISTRATION_REINVITE_REGISTRATION",
+        value: "SUMMIT_REGISTRATION_REINVITE_REGISTRATION"
+      }
     ];
 
     return (
       <div>
         <div className="container">
-          <h3> {T.translate("registration_invitation_list.invitation_list")} ({totalInvitations})</h3>
+          <h3>
+            {" "}
+            {T.translate("registration_invitation_list.invitation_list")} (
+            {totalInvitations})
+          </h3>
           <div className="actions-wrapper">
             <div className="row">
               <div className="col-md-6">
                 <FreeTextSearch
                   value={term}
-                  placeholder={T.translate("registration_invitation_list.placeholders.search")}
+                  placeholder={T.translate(
+                    "registration_invitation_list.placeholders.search"
+                  )}
                   onSearch={this.handleSearch}
                 />
               </div>
               <div className="col-md-6 text-right">
-                <button className="btn btn-default right-space" onClick={() => this.setState({showImportModal: true})}>
+                <button
+                  className="btn btn-default right-space"
+                  onClick={() => this.setState({ showImportModal: true })}
+                >
                   {T.translate("registration_invitation_list.import")}
                 </button>
-                <button className="btn btn-default right-space" onClick={this.handleExportInvitations}>
+                <button
+                  className="btn btn-default right-space"
+                  onClick={this.handleExportInvitations}
+                >
                   {T.translate("registration_invitation_list.export")}
                 </button>
-                <button className="btn btn-primary right-space" onClick={this.handleNewInvitation}>
+                <button
+                  className="btn btn-primary right-space"
+                  onClick={this.handleNewInvitation}
+                >
                   {T.translate("registration_invitation_list.add_invitation")}
                 </button>
-                <button className="btn btn-danger" onClick={this.handleDeleteAll}>
-                  {T.translate("registration_invitation_list.delete_all_invitations")}
+                <button
+                  className="btn btn-danger"
+                  onClick={this.handleDeleteAll}
+                >
+                  {T.translate(
+                    "registration_invitation_list.delete_all_invitations"
+                  )}
                 </button>
               </div>
             </div>
-            <OrAndFilter style={{marginTop: 15}} value={invitationFilter.orAndFilter} entity={'invitations'}
-                         onChange={(filter) => this.handleOrAndFilter(filter)}/>
+            <OrAndFilter
+              style={{ marginTop: 15 }}
+              value={invitationFilter.orAndFilter}
+              entity={"invitations"}
+              onChange={(filter) => this.handleOrAndFilter(filter)}
+            />
             <div className="row">
               <div className="col-md-6">
                 <TagInput
@@ -436,14 +639,18 @@ class RegistrationInvitationsListPage extends React.Component {
                   isMulti
                   value={tagFilter}
                   onChange={this.handleTagFilterChange}
-                  placeholder={T.translate("registration_invitation_list.placeholders.tags")}
+                  placeholder={T.translate(
+                    "registration_invitation_list.placeholders.tags"
+                  )}
                 />
               </div>
-              <div className='col-md-6'>
+              <div className="col-md-6">
                 <Dropdown
                   id="allowed_ticket_types_filter"
                   value={allowedTicketTypesIds}
-                  placeholder={T.translate("registration_invitation_list.placeholders.allowed_ticket_types_filter")}
+                  placeholder={T.translate(
+                    "registration_invitation_list.placeholders.allowed_ticket_types_filter"
+                  )}
                   onChange={this.handleTicketTypeSelected}
                   options={ticketTypesFilterDDL}
                   isMulti={true}
@@ -452,20 +659,33 @@ class RegistrationInvitationsListPage extends React.Component {
             </div>
             <div className="row">
               <div className="col-md-6">
-                <div className={'row'}>
+                <div className={"row"}>
                   <div className="col-md-6">
                     <SegmentedControl
                       name="isSent"
                       options={[
-                        {label: "All", value: null, default: isSent === null},
-                        {label: "Sent", value: "true", default: isSent === "true"},
-                        {label: "Non Sent", value: "false", default: isSent === "false"},
+                        { label: "All", value: null, default: isSent === null },
+                        {
+                          label: "Sent",
+                          value: "true",
+                          default: isSent === "true"
+                        },
+                        {
+                          label: "Non Sent",
+                          value: "false",
+                          default: isSent === "false"
+                        }
                       ]}
-                      setValue={newValue => this.handleChangeNoSent(newValue)}
-                      style={{width: "100%", height: 40, color: '#337ab7', fontSize: '10px'}}
+                      setValue={(newValue) => this.handleChangeNoSent(newValue)}
+                      style={{
+                        width: "100%",
+                        height: 40,
+                        color: "#337ab7",
+                        fontSize: "10px"
+                      }}
                     />
                   </div>
-                  <div className=" col-md-6" style={{paddingTop: 10}}>
+                  <div className=" col-md-6" style={{ paddingTop: 10 }}>
                     <InvitationStatusDropdown
                       id="status"
                       value={status}
@@ -476,7 +696,7 @@ class RegistrationInvitationsListPage extends React.Component {
                 </div>
               </div>
             </div>
-            <div className='row'>
+            <div className="row">
               <div className="col-md-6 text-right">
                 <Dropdown
                   id="flow_event"
@@ -485,23 +705,33 @@ class RegistrationInvitationsListPage extends React.Component {
                   options={flowEventsDDL}
                 />
               </div>
-              <div className={'col-md-4'}>
+              <div className={"col-md-4"}>
                 <Input
                   id="testRecipient"
                   value={testRecipient}
-                  onChange={(ev) => this.setState({...this.state, testRecipient: ev.target.value})}
-                  placeholder={T.translate("registration_invitation_list.placeholders.test_recipient")}
+                  onChange={(ev) =>
+                    this.setState({
+                      ...this.state,
+                      testRecipient: ev.target.value
+                    })
+                  }
+                  placeholder={T.translate(
+                    "registration_invitation_list.placeholders.test_recipient"
+                  )}
                   className="form-control"
                 />
               </div>
-              <div className={'col-md-2'}>
-                <button className="btn btn-default right-space" onClick={this.handleSendClick}>
+              <div className={"col-md-2"}>
+                <button
+                  className="btn btn-default right-space"
+                  onClick={this.handleSendClick}
+                >
                   {T.translate("registration_invitation_list.send_emails")}
                 </button>
               </div>
               <SendEmailModal
                 show={showEmailModal}
-                onHide={() => this.setState({showEmailModal: false})}
+                onHide={() => this.setState({ showEmailModal: false })}
                 recipients="invitations"
                 template={currentFlowEvent}
                 qty={selectedCount}
@@ -511,15 +741,23 @@ class RegistrationInvitationsListPage extends React.Component {
             </div>
           </div>
 
-          {invitations.length === 0 &&
-            <div>{T.translate("registration_invitation_list.no_invitations")}</div>
-          }
-
-          {invitations.length > 0 &&
+          {invitations.length === 0 && (
             <div>
-              {selectedCount > 0 &&
-                <span><b>{T.translate("registration_invitation_list.items_qty", {qty: selectedCount})}</b></span>
-              }
+              {T.translate("registration_invitation_list.no_invitations")}
+            </div>
+          )}
+
+          {invitations.length > 0 && (
+            <div>
+              {selectedCount > 0 && (
+                <span>
+                  <b>
+                    {T.translate("registration_invitation_list.items_qty", {
+                      qty: selectedCount
+                    })}
+                  </b>
+                </span>
+              )}
               <SelectableTable
                 options={table_options}
                 data={invitations}
@@ -540,75 +778,90 @@ class RegistrationInvitationsListPage extends React.Component {
                 onSelect={this.handlePageChange}
               />
             </div>
-          }
-
+          )}
         </div>
 
-        <Modal show={showImportModal} onHide={() => this.setState({showImportModal: false})}>
+        <Modal
+          show={showImportModal}
+          onHide={() => this.setState({ showImportModal: false })}
+        >
           <Modal.Header closeButton>
-            <Modal.Title>{T.translate("registration_invitation_list.import_invitations")}</Modal.Title>
+            <Modal.Title>
+              {T.translate("registration_invitation_list.import_invitations")}
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="row">
               <div className="col-md-12">
-                Format must be the following:<br/>
-                <b>email</b>: invitee email<br/>
-                <b>first_name</b>: invitee First Name<br/>
-                <b>last_name</b>: invitee Last Name<br/>
-                <b>allowed_ticket_types (optional) </b>: Pipe Separated list of ticket types IDs<br/>
-                <b>tags (optional) </b>: Pipe Separated list of tags<br/>
+                Format must be the following:
+                <br />
+                <b>email</b>: invitee email
+                <br />
+                <b>first_name</b>: invitee First Name
+                <br />
+                <b>last_name</b>: invitee Last Name
+                <br />
+                <b>allowed_ticket_types (optional) </b>: Pipe Separated list of
+                ticket types IDs
+                <br />
+                <b>tags (optional) </b>: Pipe Separated list of tags
+                <br />
               </div>
               <div className="col-md-12 acceptance-criteria-wrapper">
                 <AcceptanceCriteriaDropdown
                   id="acceptance-criteria"
                   value={acceptanceCriteria}
-                  onChange={ev => this.setState({acceptanceCriteria: ev.target.value})}
+                  onChange={(ev) =>
+                    this.setState({ acceptanceCriteria: ev.target.value })
+                  }
                 />
               </div>
               <div className="col-md-12 invitation-import-upload-wrapper">
                 <UploadInput
                   value={importFile && importFile.name}
-                  handleUpload={(file) => this.setState({importFile: file})}
-                  handleRemove={() => this.setState({importFile: null})}
+                  handleUpload={(file) => this.setState({ importFile: file })}
+                  handleRemove={() => this.setState({ importFile: null })}
                   className="dropzone col-md-6"
                   multiple={false}
                   accept=".csv"
                 />
               </div>
-
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <button disabled={!importFile || !acceptanceCriteria} className="btn btn-primary"
-                    onClick={this.handleImportInvitations}>
+            <button
+              disabled={!importFile || !acceptanceCriteria}
+              className="btn btn-primary"
+              onClick={this.handleImportInvitations}
+            >
               {T.translate("registration_invitation_list.ingest")}
             </button>
           </Modal.Footer>
         </Modal>
       </div>
-    )
+    );
   }
 }
 
-const mapStateToProps = ({currentSummitState, RegistrationInvitationListState}) => ({
+const mapStateToProps = ({
+  currentSummitState,
+  RegistrationInvitationListState
+}) => ({
   currentSummit: currentSummitState.currentSummit,
   ...RegistrationInvitationListState
 });
 
-export default connect(
-  mapStateToProps,
-  {
-    getSummitById,
-    getInvitations,
-    importInvitationsCSV,
-    exportInvitationsCSV,
-    selectInvitation,
-    unSelectInvitation,
-    clearAllSelectedInvitations,
-    deleteAllRegistrationInvitation,
-    deleteRegistrationInvitation,
-    setCurrentFlowEvent,
-    setSelectedAll,
-    sendEmails,
-  }
-)(RegistrationInvitationsListPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getInvitations,
+  importInvitationsCSV,
+  exportInvitationsCSV,
+  selectInvitation,
+  unSelectInvitation,
+  clearAllSelectedInvitations,
+  deleteAllRegistrationInvitation,
+  deleteRegistrationInvitation,
+  setCurrentFlowEvent,
+  setSelectedAll,
+  sendEmails
+})(RegistrationInvitationsListPage);

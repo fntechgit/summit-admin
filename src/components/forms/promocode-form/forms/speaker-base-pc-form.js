@@ -1,6 +1,6 @@
 import React from "react";
 import T from "i18n-react";
-import {SpeakerInput} from "openstack-uicore-foundation/lib/components";
+import { SpeakerInput } from "openstack-uicore-foundation/lib/components";
 import EmailRedeemForm from "./email-redeem-form";
 
 const SpeakerBasePCForm = (props) => (
@@ -13,12 +13,16 @@ const SpeakerBasePCForm = (props) => (
           value={props.entity.speaker}
           onChange={props.handleChange}
           summitId={props.summit.id}
-          error={props.hasErrors('speaker_id')}
+          error={props.hasErrors("speaker_id")}
         />
       </div>
     </div>
 
-    <EmailRedeemForm entity={props.entity} handleChange={props.handleChange} handleSendEmail={props.handleSendEmail} />
+    <EmailRedeemForm
+      entity={props.entity}
+      handleChange={props.handleChange}
+      handleSendEmail={props.handleSendEmail}
+    />
   </>
 );
 

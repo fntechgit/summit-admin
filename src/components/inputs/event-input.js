@@ -11,85 +11,89 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import AsyncSelect from 'react-select/lib/Async';
-import { queryEvents } from '../../actions/event-actions';
+import React from "react";
+import AsyncSelect from "react-select/lib/Async";
+import { queryEvents } from "../../actions/event-actions";
 
 export default class EventInput extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.getTemplates = this.getTemplates.bind(this);
+  }
 
-        this.handleChange = this.handleChange.bind(this);
-        this.getTemplates = this.getTemplates.bind(this);
+  handleChange(value, { action }) {
+    const { plainValue } = this.props;
+    let theValue = null;
+
+    if (action === "clear") {
+      theValue = plainValue ? "" : { id: "", title: "" };
+    } else {
+      theValue = plainValue
+        ? value.label
+        : { id: value.value, title: value.label };
     }
 
-    handleChange(value, { action }) {
-        const { plainValue } = this.props;
-        let theValue = null;
+    const ev = {
+      target: {
+        id: this.props.id,
+        value: theValue,
+        type: "eventinput"
+      }
+    };
 
-        if (action === 'clear') {
-            theValue = plainValue ? '' : { id: '', title: '' };
-        } else {
-            theValue = plainValue ? value.label : { id: value.value, title: value.label };
-        }
+    this.props.onChange(ev);
+  }
 
-        const ev = {
-            target: {
-                id: this.props.id,
-                value: theValue,
-                type: 'eventinput'
-            }
-        };
+  getTemplates(input, callback) {
+    const { summitId } = this.props;
 
-        this.props.onChange(ev);
+    if (!input) {
+      return Promise.resolve({ options: [] });
     }
 
-    getTemplates(input, callback) {
-        const { summitId } = this.props;
+    // we need to map into value/label because of a bug in react-select 2
+    // https://github.com/JedWatson/react-select/issues/2998
 
-        if (!input) {
-            return Promise.resolve({ options: [] });
-        }
+    const translateOptions = (options) => {
+      const newOptions = options.map((c) => ({
+        value: c.id.toString(),
+        label: c.title
+      }));
+      callback(newOptions);
+    };
 
-        // we need to map into value/label because of a bug in react-select 2
-        // https://github.com/JedWatson/react-select/issues/2998
+    queryEvents(summitId, input, translateOptions);
+  }
 
-        const translateOptions = (options) => {
-            const newOptions = options.map(c => ({ value: c.id.toString(), label: c.title }));
-            callback(newOptions);
-        };
+  render() {
+    const { error, value, onChange, id, multi, plainValue, ...rest } =
+      this.props;
+    const has_error = this.props.hasOwnProperty("error") && error !== "";
 
-        queryEvents(summitId, input, translateOptions);
+    // we need to map into value/label because of a bug in react-select 2
+    // https://github.com/JedWatson/react-select/issues/2998
+    let theValue = null;
+
+    if (value) {
+      theValue = plainValue
+        ? { value: value, label: value }
+        : { value: value.id?.toString(), label: value.title };
     }
 
-    render() {
-        const { error, value, onChange, id, multi, plainValue, ...rest } = this.props;
-        const has_error = (this.props.hasOwnProperty('error') && error !== '');
-
-        // we need to map into value/label because of a bug in react-select 2
-        // https://github.com/JedWatson/react-select/issues/2998
-        let theValue = null;
-
-        if (value) {
-            theValue = plainValue ? { value: value, label: value } : { value: value.id?.toString(), label: value.title }
-        }
-
-        return (
-            <div>
-                <AsyncSelect
-                    value={theValue}
-                    onChange={this.handleChange}
-                    loadOptions={this.getTemplates}                    
-                    isMulti={false}
-                    isClearable={true}
-                    {...rest}
-                />
-                {has_error &&
-                    <p className="error-label">{error}</p>
-                }
-            </div>
-        );
-
-    }
+    return (
+      <div>
+        <AsyncSelect
+          value={theValue}
+          onChange={this.handleChange}
+          loadOptions={this.getTemplates}
+          isMulti={false}
+          isClearable={true}
+          {...rest}
+        />
+        {has_error && <p className="error-label">{error}</p>}
+      </div>
+    );
+  }
 }

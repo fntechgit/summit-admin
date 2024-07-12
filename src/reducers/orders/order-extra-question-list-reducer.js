@@ -11,64 +11,71 @@
  * limitations under the License.
  **/
 import React from "react";
-import {RawHTML} from "openstack-uicore-foundation/lib/components";
+import { RawHTML } from "openstack-uicore-foundation/lib/components";
 
-import
-{
-    RECEIVE_ORDER_EXTRA_QUESTIONS,
-    REQUEST_ORDER_EXTRA_QUESTIONS,
-    ORDER_EXTRA_QUESTION_DELETED,
-    ORDER_EXTRA_QUESTION_ORDER_UPDATED
-} from '../../actions/order-actions';
+import {
+  RECEIVE_ORDER_EXTRA_QUESTIONS,
+  REQUEST_ORDER_EXTRA_QUESTIONS,
+  ORDER_EXTRA_QUESTION_DELETED,
+  ORDER_EXTRA_QUESTION_ORDER_UPDATED
+} from "../../actions/order-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    orderExtraQuestions         : [],
-    order                       : 'order',
-    orderDir                    : 1,
-    totalOrderExtraQuestions    : 0
+  orderExtraQuestions: [],
+  order: "order",
+  orderDir: 1,
+  totalOrderExtraQuestions: 0
 };
 
 const orderExtraQuestionListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_ORDER_EXTRA_QUESTIONS: {
-            const {order, orderDir} = payload;
-
-            return {...state, order, orderDir }
-        }
-        case RECEIVE_ORDER_EXTRA_QUESTIONS: {
-            const { total } = payload.response;
-
-            return {...state, orderExtraQuestions: payload.response.data, totalOrderExtraQuestions: total };
-        }
-        case ORDER_EXTRA_QUESTION_ORDER_UPDATED: {
-            const questions = payload.map(q => {
-
-                return {
-                    id: q.id,
-                    name: q.name,
-                    label: q.label,
-                    type: q.type,
-                    order: parseInt(q.order)
-                };
-            });
-
-            return {...state, orderExtraQuestions: questions };
-        }
-        case ORDER_EXTRA_QUESTION_DELETED: {
-            const {orderExtraQuestionId} = payload;
-            return {...state, orderExtraQuestions: state.orderExtraQuestions.filter(t => t.id !== orderExtraQuestionId)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_ORDER_EXTRA_QUESTIONS: {
+      const { order, orderDir } = payload;
+
+      return { ...state, order, orderDir };
+    }
+    case RECEIVE_ORDER_EXTRA_QUESTIONS: {
+      const { total } = payload.response;
+
+      return {
+        ...state,
+        orderExtraQuestions: payload.response.data,
+        totalOrderExtraQuestions: total
+      };
+    }
+    case ORDER_EXTRA_QUESTION_ORDER_UPDATED: {
+      const questions = payload.map((q) => {
+        return {
+          id: q.id,
+          name: q.name,
+          label: q.label,
+          type: q.type,
+          order: parseInt(q.order)
+        };
+      });
+
+      return { ...state, orderExtraQuestions: questions };
+    }
+    case ORDER_EXTRA_QUESTION_DELETED: {
+      const { orderExtraQuestionId } = payload;
+      return {
+        ...state,
+        orderExtraQuestions: state.orderExtraQuestions.filter(
+          (t) => t.id !== orderExtraQuestionId
+        )
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default orderExtraQuestionListReducer;

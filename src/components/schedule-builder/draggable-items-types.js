@@ -11,6 +11,6 @@
  * limitations under the License.
  **/
 export const DraggableItemTypes = {
-    UNSCHEDULEEVENT: 'UnScheduleEvent',
-    SCHEDULEEVENT: 'ScheduleEvent',
+  UNSCHEDULEEVENT: "UnScheduleEvent",
+  SCHEDULEEVENT: "ScheduleEvent"
 };

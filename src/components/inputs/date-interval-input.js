@@ -11,20 +11,27 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import moment from 'moment-timezone';
+import React from "react";
+import moment from "moment-timezone";
 import { DateTimePicker } from "openstack-uicore-foundation/lib/components";
 
-const HourIntervalInput = ({ onChange, onClear, fromDate, toDate, fromId, toId, timezone = 'UTC' }) => {
-
+const HourIntervalInput = ({
+  onChange,
+  onClear,
+  fromDate,
+  toDate,
+  fromId,
+  toId,
+  timezone = "UTC"
+}) => {
   const handleClear = () => {
     onClear();
-  }
+  };
 
   const handleChangeTime = (ev) => {
     let { value, id } = ev.target;
-    onChange({ target: { value: value.format('HHmm'), id } });
-  }
+    onChange({ target: { value: value.format("HHmm"), id } });
+  };
 
   return (
     <div className="inline">
@@ -33,22 +40,33 @@ const HourIntervalInput = ({ onChange, onClear, fromDate, toDate, fromId, toId, 
         id={fromId}
         onChange={handleChangeTime}
         format={{ date: false, time: "HH:mm" }}
-        value={moment(`${fromDate}`.length === 3 ? `0${fromDate}` : fromDate, 'HHmm')}
+        value={moment(
+          `${fromDate}`.length === 3 ? `0${fromDate}` : fromDate,
+          "HHmm"
+        )}
         timezone={timezone}
       />
       &nbsp;&nbsp;To:&nbsp;&nbsp;
       <DateTimePicker
         id={toId}
         onChange={handleChangeTime}
-        validation={{ before: moment(`${fromDate}`.length === 3 ? `0${fromDate}` : fromDate, 'HHmm'), after: '>' }}
+        validation={{
+          before: moment(
+            `${fromDate}`.length === 3 ? `0${fromDate}` : fromDate,
+            "HHmm"
+          ),
+          after: ">"
+        }}
         format={{ date: false, time: "HH:mm" }}
-        value={moment(`${toDate}`.length === 3 ? `0${toDate}` : toDate, 'HHmm')}
+        value={moment(`${toDate}`.length === 3 ? `0${toDate}` : toDate, "HHmm")}
         timezone={timezone}
       />
       &nbsp;&nbsp;
-      <button type="button" className="btn btn-danger" onClick={handleClear}>Clear</button>
+      <button type="button" className="btn btn-danger" onClick={handleClear}>
+        Clear
+      </button>
     </div>
   );
-}
+};
 
 export default HourIntervalInput;

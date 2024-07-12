@@ -11,128 +11,154 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
-import {FreeTextSearch, Table} from 'openstack-uicore-foundation/lib/components';
-import { getSummitById }  from '../../actions/summit-actions';
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
+import {
+  FreeTextSearch,
+  Table
+} from "openstack-uicore-foundation/lib/components";
+import { getSummitById } from "../../actions/summit-actions";
 import { getEmailFlowEvents } from "../../actions/email-flows-events-actions";
-import {Pagination} from "react-bootstrap";
+import { Pagination } from "react-bootstrap";
 
 class EmailFlowEventListPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
+    this.state = {};
+  }
 
-    constructor(props) {
-        super(props);
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handleSort = this.handleSort.bind(this);
-        this.handlePageChange = this.handlePageChange.bind(this);
-        this.handleSearch = this.handleSearch.bind(this);
-        this.state = {}
+  handleSearch(term) {
+    const { order, orderDir, page, perPage } = this.props;
+    this.props.getEmailFlowEvents(term, page, perPage, order, orderDir);
+  }
 
+  componentDidMount() {
+    const { currentSummit, term, order, orderDir, page, perPage } = this.props;
+    if (currentSummit) {
+      this.props.getEmailFlowEvents(term, page, perPage, order, orderDir);
     }
+  }
 
-    handleSearch(term) {
-        const {order, orderDir, page, perPage} = this.props;
-        this.props.getEmailFlowEvents(term, page, perPage, order, orderDir);
-    }
+  handleEdit(event_id) {
+    const { currentSummit, history } = this.props;
+    history.push(
+      `/app/summits/${currentSummit.id}/email-flow-events/${event_id}`
+    );
+  }
 
-    componentDidMount() {
-        const {currentSummit, term, order, orderDir, page, perPage} = this.props;
-        if(currentSummit) {
-            this.props.getEmailFlowEvents(term, page, perPage, order, orderDir);
-        }
-    }
+  handlePageChange(page) {
+    const { term, order, orderDir, perPage } = this.props;
+    this.props.getEmailFlowEvents(term, page, perPage, order, orderDir);
+  }
 
-    handleEdit(event_id) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/email-flow-events/${event_id}`);
-    }
+  handleSort(index, key, dir, func) {
+    const { term, page, perPage } = this.props;
+    this.props.getEmailFlowEvents(term, page, perPage, key, dir);
+  }
 
-    handlePageChange(page) {
-        const {term, order, orderDir, perPage} = this.props;
-        this.props.getEmailFlowEvents(term, page, perPage, order, orderDir);
-    }
+  render() {
+    const {
+      currentSummit,
+      emailFlowEvents,
+      order,
+      orderDir,
+      totalEmailFlowEvents,
+      lastPage,
+      currentPage,
+      term
+    } = this.props;
 
-    handleSort(index, key, dir, func) {
-        const {term, page, perPage} = this.props;
-        this.props.getEmailFlowEvents(term, page, perPage, key, dir);
-    }
+    const columns = [
+      {
+        columnKey: "flow_name",
+        value: T.translate("email_flow_event_list.flow_name"),
+        sortable: true
+      },
+      {
+        columnKey: "event_type_name",
+        value: T.translate("email_flow_event_list.event_type_name"),
+        title: true
+      },
+      {
+        columnKey: "email_template_identifier",
+        value: T.translate("email_flow_event_list.email_template_identifier"),
+        title: true
+      }
+    ];
 
-    render(){
-        const {currentSummit, emailFlowEvents, order, orderDir, totalEmailFlowEvents, lastPage, currentPage, term} = this.props;
+    const table_options = {
+      sortCol: order,
+      sortDir: orderDir,
+      actions: {
+        edit: { onClick: this.handleEdit }
+      }
+    };
 
-        const columns = [
-            { columnKey: 'flow_name', value: T.translate("email_flow_event_list.flow_name"), sortable: true },
-            { columnKey: 'event_type_name', value: T.translate("email_flow_event_list.event_type_name"), title: true },
-            { columnKey: 'email_template_identifier', value: T.translate("email_flow_event_list.email_template_identifier"), title: true }
-        ];
+    if (!currentSummit.id) return <div />;
 
-        const table_options = {
-            sortCol: order,
-            sortDir: orderDir,
-            actions: {
-                edit: { onClick: this.handleEdit },
-            }
-        }
+    return (
+      <div className="container">
+        <h3>
+          {" "}
+          {T.translate("email_flow_event_list.email_flow_event_list")} (
+          {totalEmailFlowEvents})
+        </h3>
+        <div className={"row"}>
+          <div className={"col-md-6"}>
+            <FreeTextSearch
+              value={term ?? ""}
+              placeholder={T.translate(
+                "email_flow_event_list.placeholders.search"
+              )}
+              onSearch={this.handleSearch}
+            />
+          </div>
+        </div>
 
-        if(!currentSummit.id) return (<div />);
+        {emailFlowEvents.length === 0 && (
+          <div>{T.translate("email_flow_event_list.no_email_flow_events")}</div>
+        )}
 
-        return(
-            <div className="container">
-                <h3> {T.translate("email_flow_event_list.email_flow_event_list")} ({totalEmailFlowEvents})</h3>
-                <div className={'row'}>
-                    <div className={'col-md-6'}>
-                        <FreeTextSearch
-                            value={term ?? ''}
-                            placeholder={T.translate("email_flow_event_list.placeholders.search")}
-                            onSearch={this.handleSearch}
-                        />
-                    </div>
-                </div>
+        {emailFlowEvents.length > 0 && (
+          <div className="email-flow-table-wrapper">
+            <Table
+              options={table_options}
+              data={emailFlowEvents}
+              columns={columns}
+              onSort={this.handleSort}
+            />
 
-                {emailFlowEvents.length === 0 &&
-                <div>{T.translate("email_flow_event_list.no_email_flow_events")}</div>
-                }
-
-                {emailFlowEvents.length > 0 &&
-                <div className='email-flow-table-wrapper'>
-                    <Table
-                        options={table_options}
-                        data={emailFlowEvents}
-                        columns={columns}
-                        onSort={this.handleSort}
-                    />
-
-                    <Pagination
-                        bsSize="medium"
-                        prev
-                        next
-                        first
-                        last
-                        ellipsis
-                        boundaryLinks
-                        maxButtons={10}
-                        items={lastPage}
-                        activePage={currentPage}
-                        onSelect={this.handlePageChange}
-                        />
-                </div>
-                }
-
-            </div>
-        )
-    }
+            <Pagination
+              bsSize="medium"
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              maxButtons={10}
+              items={lastPage}
+              activePage={currentPage}
+              onSelect={this.handlePageChange}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState, emailFlowEventsListState }) => ({
-    currentSummit   : currentSummitState.currentSummit,
-    ...emailFlowEventsListState
-})
+  currentSummit: currentSummitState.currentSummit,
+  ...emailFlowEventsListState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getEmailFlowEvents,
-    }
-)(EmailFlowEventListPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getEmailFlowEvents
+})(EmailFlowEventListPage);

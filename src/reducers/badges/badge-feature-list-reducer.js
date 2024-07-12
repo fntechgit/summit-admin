@@ -11,48 +11,57 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_BADGE_FEATURES,
-    REQUEST_BADGE_FEATURES,
-    BADGE_FEATURE_DELETED,
-} from '../../actions/badge-actions';
+import {
+  RECEIVE_BADGE_FEATURES,
+  REQUEST_BADGE_FEATURES,
+  BADGE_FEATURE_DELETED
+} from "../../actions/badge-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    badgeFeatures       : [],
-    order               : 'name',
-    orderDir            : 1,
-    totalBadgeFeatures  : 0
+  badgeFeatures: [],
+  order: "name",
+  orderDir: 1,
+  totalBadgeFeatures: 0
 };
 
 const badgeFeatureListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_BADGE_FEATURES: {
-            let {order, orderDir} = payload;
-
-            return {...state, order, orderDir }
-        }
-        case RECEIVE_BADGE_FEATURES: {
-            let { total } = payload.response;
-            let badgeFeatures = payload.response.data;
-
-            return {...state, badgeFeatures: badgeFeatures, totalBadgeFeatures: total };
-        }
-        case BADGE_FEATURE_DELETED: {
-            let {badgeFeatureId} = payload;
-            return {...state, badgeFeatures: state.badgeFeatures.filter(t => t.id !== badgeFeatureId), totalBadgeFeatures: (state.totalBadgeFeatures - 1)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_BADGE_FEATURES: {
+      let { order, orderDir } = payload;
+
+      return { ...state, order, orderDir };
+    }
+    case RECEIVE_BADGE_FEATURES: {
+      let { total } = payload.response;
+      let badgeFeatures = payload.response.data;
+
+      return {
+        ...state,
+        badgeFeatures: badgeFeatures,
+        totalBadgeFeatures: total
+      };
+    }
+    case BADGE_FEATURE_DELETED: {
+      let { badgeFeatureId } = payload;
+      return {
+        ...state,
+        badgeFeatures: state.badgeFeatures.filter(
+          (t) => t.id !== badgeFeatureId
+        ),
+        totalBadgeFeatures: state.totalBadgeFeatures - 1
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default badgeFeatureListReducer;

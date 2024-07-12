@@ -355,18 +355,18 @@
     "reg_lite_show_company_input": "Show user company input during registration?",
     "reg_lite_company_ddl_placeholder": "Company Dropdown Placeholder",
     "reg_lite_company_ddl_placeholder_info": "This placeholder will be used for the company dropdown field on the registration lite.",
-    "reg_lite_initial_order_complete_step_1st_paragraph" : "Initial Order Complete 1st Paragraph",
-    "reg_lite_initial_order_complete_step_1st_paragraph_info" : "1st Paragraph shown on Order Complete Step When is the first order of the Buyer.",
-    "reg_lite_initial_order_complete_step_2nd_paragraph" : "Initial Order Complete 2nd Paragraph",
+    "reg_lite_initial_order_complete_step_1st_paragraph": "Initial Order Complete 1st Paragraph",
+    "reg_lite_initial_order_complete_step_1st_paragraph_info": "1st Paragraph shown on Order Complete Step When is the first order of the Buyer.",
+    "reg_lite_initial_order_complete_step_2nd_paragraph": "Initial Order Complete 2nd Paragraph",
     "reg_lite_initial_order_complete_step_2nd_paragraph_info": "2nd Paragraph shown on Order Complete Step When is the first order of the Buyer.",
-    "reg_lite_initial_order_complete_btn_label" : "Initial Order Complete Button",
-    "reg_lite_initial_order_complete_btn_label_info" : "Order Complete Button Text shown on Order Complete Step When is the first order of the Buyer.",
-    "reg_lite_order_complete_step_1st_paragraph" : "Order Complete 1st Paragraph",
-    "reg_lite_order_complete_step_1st_paragraph_info" : "1st Paragraph shown on Order Complete Step When is not the first order of the Buyer.",
-    "reg_lite_order_complete_step_2nd_paragraph" : "Order Complete 2nd Paragraph",
+    "reg_lite_initial_order_complete_btn_label": "Initial Order Complete Button",
+    "reg_lite_initial_order_complete_btn_label_info": "Order Complete Button Text shown on Order Complete Step When is the first order of the Buyer.",
+    "reg_lite_order_complete_step_1st_paragraph": "Order Complete 1st Paragraph",
+    "reg_lite_order_complete_step_1st_paragraph_info": "1st Paragraph shown on Order Complete Step When is not the first order of the Buyer.",
+    "reg_lite_order_complete_step_2nd_paragraph": "Order Complete 2nd Paragraph",
     "reg_lite_order_complete_step_2nd_paragraph_info": "2nd Paragraph shown on Order Complete Step When is not the first order of the Buyer.",
-    "reg_lite_order_complete_btn_label" : "Order Complete Button",
-    "reg_lite_order_complete_btn_label_info" : "Order Complete Button Text shown on Order Complete Step When is not the first order of the Buyer.",
+    "reg_lite_order_complete_btn_label": "Order Complete Button",
+    "reg_lite_order_complete_btn_label_info": "Order Complete Button Text shown on Order Complete Step When is not the first order of the Buyer.",
     "reg_lite_no_allowed_tickets_message": "No Allowed Tickets Message",
     "reg_lite_no_allowed_tickets_message_info": "This message is shown when there are no available tickets to buy",
     "print_app_hide_find_ticket_by_fullname": "Hide Find By FullName Criteria",
@@ -594,10 +594,10 @@
   "edit_event_comment": {
     "comment": "Comment",
     "comments": "Comments",
-    "owner_name" : "Owner Name",
-    "is_activity" : "Is Activity?",
-    "is_public" : "Is Public?",
-    "body" : "Body",
+    "owner_name": "Owner Name",
+    "is_activity": "Is Activity?",
+    "is_public": "Is Public?",
+    "body": "Body",
     "event_comment_saved": "Comment saved successfully."
   },
   "speaker_list": {
@@ -904,7 +904,7 @@
       "select_class_name": "Select a Class",
       "select_tags": "Select Tags"
     },
-    "info":{
+    "info": {
       "quantity_available": "If zero is set, then Promo Code has no limit to be used"
     }
   },
@@ -2112,7 +2112,7 @@
     "company": "Company",
     "is_published": "Is Published ?",
     "sponsorship": "Sponsorship",
-    "sponsorship_type":"Tier",
+    "sponsorship_type": "Tier",
     "sponsor_page": "Sponsor Page",
     "extra_questions": "Extra Questions",
     "intro": "Intro",
@@ -2129,16 +2129,16 @@
     "carousel_advertise_image": "Carousel Advertise Image",
     "carousel_advertise_image_alt_text": "Carousel Advertise Image Alt Text",
     "featured_event": "Feature Event",
-    "advertisements" : "Advertisements",
+    "advertisements": "Advertisements",
     "advertisement": "Advertisement",
-    "add_advertisement" : "Add Advertisement",
-    "materials" : "Materials",
+    "add_advertisement": "Add Advertisement",
+    "materials": "Materials",
     "material": "Material",
-    "add_materials" : "Add Material",
-    "extra_question" : "Extra Question",
-    "social_networks" : "Social Networks",
-    "social_network" : "Social Network",
-    "add_social_networks" : "Add Social Network",
+    "add_materials": "Add Material",
+    "extra_question": "Extra Question",
+    "social_networks": "Social Networks",
+    "social_network": "Social Network",
+    "add_social_networks": "Add Social Network",
     "type": "Type",
     "link": "Link",
     "advertise_image": "Advertise Image",
@@ -2220,7 +2220,7 @@
     "please_confirm": "Please confirm.",
     "select_fields": "Show columns",
     "add_promocode": "Add Promo Code",
-    "infinite" : "Infinite",
+    "infinite": "Infinite",
     "placeholders": {
       "test_recipient": "Optional Test Recipient",
       "search_promocodes": "Search Sponsors by Name, Tier, Code",
@@ -2377,12 +2377,12 @@
     "sent_date": "Sent Date",
     "last_error": "Last Error",
     "payload": "Payload",
-    "select_fields":"Show Columns",
+    "select_fields": "Show Columns",
     "placeholders": {
       "select_fields": "Select data to display",
       "template": "Filter by Template",
       "sent_date_from": "Filter Sent Date from",
-      "sent_date_to": "Filter Sent Date to"      
+      "sent_date_to": "Filter Sent Date to"
     }
   },
   "summitdoc": {
@@ -2535,7 +2535,7 @@
       "search": "Search invitations by term",
       "tags": "Filter by Tags",
       "ddl_flow_event": "-- SELECT EMAIL TEMPLATE FOR INVITE--",
-      "ddl_selection_plan" : "-- SELECT A SELECTION PLAN FOR INVITE--"
+      "ddl_selection_plan": "-- SELECT A SELECTION PLAN FOR INVITE--"
     }
   },
   "mail_activity": {
@@ -2924,7 +2924,6 @@
       "has_not_media_upload_with_type==": "Select the Media Upload Types to exclude",
       "operator": "Has or Not Has Media Upload Types"
     }
-
   },
   "edit_reg_feed_metadata": {
     "reg_feed_metadata": "Registration Feed Metadata",
@@ -2989,7 +2988,7 @@
     "title": "You are about to send an EMAIL BLAST to {recipients}!",
     "warning": "You are about to send the {template} email template to {qty} {recipients}.",
     "test_warning": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
-    "send_emails":  "Send",
+    "send_emails": "Send",
     "excerpt_email": "Excerpt Recipient"
   }
 }

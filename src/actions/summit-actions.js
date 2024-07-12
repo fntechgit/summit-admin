@@ -12,503 +12,496 @@
  **/
 
 import T from "i18n-react/dist/i18n-react";
-import history from '../history'
+import history from "../history";
 import {
-    getRequest,
-    putRequest,
-    postRequest,
-    deleteRequest,
-    createAction,
-    stopLoading,
-    startLoading,
-    showSuccessMessage,
-    authErrorHandler
-} from 'openstack-uicore-foundation/lib/utils/actions';
-import {DUMMY_ACTION} from '../utils/constants';
-import {getAccessTokenSafely} from '../utils/methods';
+  getRequest,
+  putRequest,
+  postRequest,
+  deleteRequest,
+  createAction,
+  stopLoading,
+  startLoading,
+  showSuccessMessage,
+  authErrorHandler
+} from "openstack-uicore-foundation/lib/utils/actions";
+import { DUMMY_ACTION } from "../utils/constants";
+import { getAccessTokenSafely } from "../utils/methods";
 import Swal from "sweetalert2";
-import {saveMarketingSetting} from "./marketing-actions";
-import {normalizeLeadReportSettings} from '../models/lead-report-settings';
+import { saveMarketingSetting } from "./marketing-actions";
+import { normalizeLeadReportSettings } from "../models/lead-report-settings";
 
-export const REQUEST_SUMMIT           = 'REQUEST_SUMMIT';
-export const RECEIVE_SUMMIT           = 'RECEIVE_SUMMIT';
-export const REQUEST_SUMMITS          = 'REQUEST_SUMMITS';
-export const RECEIVE_SUMMITS          = 'RECEIVE_SUMMITS';
-export const REQUEST_ALL_SUMMITS      = 'REQUEST_ALL_SUMMITS';
-export const RECEIVE_ALL_SUMMITS      = 'RECEIVE_ALL_SUMMITS';
-export const SET_CURRENT_SUMMIT       = 'SET_CURRENT_SUMMIT';
-export const RESET_SUMMIT_FORM        = 'RESET_SUMMIT_FORM';
-export const UPDATE_SUMMIT            = 'UPDATE_SUMMIT';
-export const SUMMIT_UPDATED           = 'SUMMIT_UPDATED';
-export const SUMMIT_ADDED             = 'SUMMIT_ADDED';
-export const SUMMIT_DELETED           = 'SUMMIT_DELETED';
-export const SUMMIT_LOGO_ATTACHED     = 'SUMMIT_LOGO_ATTACHED';
-export const SUMMIT_LOGO_DELETED      = 'SUMMIT_LOGO_DELETED';
-export const CLEAR_SUMMIT             = 'CLEAR_SUMMIT';
-export const REGISTRATION_KEY_GENERATED= 'REGISTRATION_KEY_GENERATED';
-export const RECEIVE_LEAD_REPORT_SETTINGS_META = 'RECEIVE_LEAD_REPORT_SETTINGS_META';
-export const LEAD_REPORT_SETTINGS_UPDATED      = 'LEAD_REPORT_SETTINGS_UPDATED';
+export const REQUEST_SUMMIT = "REQUEST_SUMMIT";
+export const RECEIVE_SUMMIT = "RECEIVE_SUMMIT";
+export const REQUEST_SUMMITS = "REQUEST_SUMMITS";
+export const RECEIVE_SUMMITS = "RECEIVE_SUMMITS";
+export const REQUEST_ALL_SUMMITS = "REQUEST_ALL_SUMMITS";
+export const RECEIVE_ALL_SUMMITS = "RECEIVE_ALL_SUMMITS";
+export const SET_CURRENT_SUMMIT = "SET_CURRENT_SUMMIT";
+export const RESET_SUMMIT_FORM = "RESET_SUMMIT_FORM";
+export const UPDATE_SUMMIT = "UPDATE_SUMMIT";
+export const SUMMIT_UPDATED = "SUMMIT_UPDATED";
+export const SUMMIT_ADDED = "SUMMIT_ADDED";
+export const SUMMIT_DELETED = "SUMMIT_DELETED";
+export const SUMMIT_LOGO_ATTACHED = "SUMMIT_LOGO_ATTACHED";
+export const SUMMIT_LOGO_DELETED = "SUMMIT_LOGO_DELETED";
+export const CLEAR_SUMMIT = "CLEAR_SUMMIT";
+export const REGISTRATION_KEY_GENERATED = "REGISTRATION_KEY_GENERATED";
+export const RECEIVE_LEAD_REPORT_SETTINGS_META =
+  "RECEIVE_LEAD_REPORT_SETTINGS_META";
+export const LEAD_REPORT_SETTINGS_UPDATED = "LEAD_REPORT_SETTINGS_UPDATED";
 
 export const getSummitById = (summitId) => async (dispatch, getState) => {
+  const accessToken = await getAccessTokenSafely();
+  dispatch(startLoading());
 
-    const accessToken = await getAccessTokenSafely();
+  const params = {
+    access_token: accessToken,
+    expand:
+      "event_types,tracks,track_groups,values,locations,locations.rooms,locations.attributes.type,locations.floor,meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.values,lead_report_settings"
+  };
+
+  // set id
+  dispatch(createAction(REQUEST_SUMMIT)({ id: summitId }));
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SUMMIT),
+    `${window.API_BASE_URL}/api/v2/summits/${summitId}`,
+    (err, res) => (dispatch, state) => {
+      let code = err.status;
+      let msg = "";
+      dispatch(stopLoading());
+      switch (code) {
+        case 404:
+          msg = "";
+          if (err.response.body && err.response.body.message)
+            msg = err.response.body.message;
+          else if (err.response.error && err.response.error.message)
+            msg = err.response.error.message;
+          else msg = err.message;
+          Swal.fire("Not Found", msg, "warning");
+          // reset id
+          dispatch(createAction(CLEAR_SUMMIT)({}));
+          break;
+        default:
+          authErrorHandler(err, res)(dispatch, state);
+      }
+    }
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const setCurrentSummit = (summit) => async (dispatch, getState) => {
+  const accessToken = await getAccessTokenSafely();
+
+  if (summit) {
     dispatch(startLoading());
 
     const params = {
-        access_token : accessToken,
-        expand: 'event_types,tracks,track_groups,values,locations,locations.rooms,locations.attributes.type,locations.floor,meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.values,lead_report_settings'
+      access_token: accessToken,
+      expand: "event_types,tracks,locations,locations.rooms,registration_stats"
     };
 
-    // set id
-    dispatch(createAction(REQUEST_SUMMIT)({id : summitId}));
-
-    return getRequest
-    (
-        null,
-        createAction(RECEIVE_SUMMIT),
-        `${window.API_BASE_URL}/api/v2/summits/${summitId}`,
-        (err, res) => (dispatch, state) => {
-            let code = err.status;
-            let msg = '';
-            dispatch(stopLoading());
-            switch (code) {
-                case 404:
-                    msg = "";
-                    if (err.response.body && err.response.body.message) msg = err.response.body.message;
-                    else if (err.response.error && err.response.error.message) msg = err.response.error.message;
-                    else msg = err.message;
-                    Swal.fire("Not Found", msg, "warning");
-                    // reset id
-                    dispatch(createAction(CLEAR_SUMMIT)({}));
-                    break;
-                default:
-                    authErrorHandler(err, res)(dispatch, state);
-            }
-        }
+    return getRequest(
+      null,
+      createAction(SET_CURRENT_SUMMIT),
+      `${window.API_BASE_URL}/api/v1/summits/${summit.id}`,
+      authErrorHandler
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-}
+      dispatch(stopLoading());
 
-export const setCurrentSummit = (summit) => async (dispatch, getState) =>
-{
-    const accessToken = await getAccessTokenSafely();
+      if (summit) history.push(`/app/summits/${summit.id}/dashboard`);
+    });
+  } else {
+    dispatch(createAction(RESET_SUMMIT_FORM)({}));
+  }
+};
 
-    if (summit) {
-        dispatch(startLoading());
-
-        const params = {
-            access_token : accessToken,
-            expand: 'event_types,tracks,locations,locations.rooms,registration_stats'
-        };
-
-        return getRequest(
-            null,
-            createAction(SET_CURRENT_SUMMIT),
-            `${window.API_BASE_URL}/api/v1/summits/${summit.id}`,
-            authErrorHandler
-        )(params)(dispatch).then(() => {
-                dispatch(stopLoading());
-
-                if(summit)
-                    history.push(`/app/summits/${summit.id}/dashboard`);
-            }
-        );
-    } else {
-        dispatch(createAction(RESET_SUMMIT_FORM)({}));
-    }
-
-}
-
-export const loadSummits = (page = 1, perPage = 10) => async (dispatch, getState) => {
-
+export const loadSummits =
+  (page = 1, perPage = 10) =>
+  async (dispatch, getState) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
     const params = {
-        access_token : accessToken,
-        expand: 'none',
-        relations: 'none',
-        page: page,
-        per_page: perPage,
-        order: '-start_date',
+      access_token: accessToken,
+      expand: "none",
+      relations: "none",
+      page: page,
+      per_page: perPage,
+      order: "-start_date"
     };
 
     getRequest(
-        createAction(REQUEST_SUMMITS),
-        createAction(RECEIVE_SUMMITS),
-        `${window.API_BASE_URL}/api/v1/summits/all`,
-        authErrorHandler
+      createAction(REQUEST_SUMMITS),
+      createAction(RECEIVE_SUMMITS),
+      `${window.API_BASE_URL}/api/v1/summits/all`,
+      authErrorHandler
     )(params)(dispatch, getState).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-}
+      dispatch(stopLoading());
+    });
+  };
 
 export const getAllSummits = () => async (dispatch, getState) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const accessToken = await getAccessTokenSafely();
+  const params = {
+    access_token: accessToken,
+    expand: "none",
+    relations: "none",
+    page: 1,
+    per_page: 100,
+    order: "-start_date"
+  };
 
-    const params = {
-        access_token : accessToken,
-        expand: 'none',
-        relations: 'none',
-        page: 1,
-        per_page: 100,
-        order: '-start_date',
-    };
-
-    getRequest(
-        createAction(REQUEST_ALL_SUMMITS),
-        createAction(RECEIVE_ALL_SUMMITS),
-        `${window.API_BASE_URL}/api/v1/summits/all`,
-        authErrorHandler
-    )(params)(dispatch, getState);
-}
+  getRequest(
+    createAction(REQUEST_ALL_SUMMITS),
+    createAction(RECEIVE_ALL_SUMMITS),
+    `${window.API_BASE_URL}/api/v1/summits/all`,
+    authErrorHandler
+  )(params)(dispatch, getState);
+};
 
 export const resetSummitForm = () => (dispatch, getState) => {
-    dispatch(createAction(RESET_SUMMIT_FORM)({}));
+  dispatch(createAction(RESET_SUMMIT_FORM)({}));
 };
 
 export const saveSummit = (entity) => async (dispatch, getState) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const accessToken = await getAccessTokenSafely();
+  dispatch(startLoading());
 
-    dispatch(startLoading());
+  const normalizedEntity = normalizeEntity(entity);
 
-    const normalizedEntity = normalizeEntity(entity);
+  const params = {
+    access_token: accessToken
+  };
 
-    const params = {
-        access_token : accessToken
-    };
-
-    if (entity.id) {
-
-        return putRequest(
-            createAction(UPDATE_SUMMIT),
-            createAction(SUMMIT_UPDATED),
-            `${window.API_BASE_URL}/api/v1/summits/${entity.id}`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(showSuccessMessage(T.translate("edit_summit.summit_saved")));
-                return payload;
-            });
-
-    } else {
-        const success_message = {
-            title: T.translate("general.done"),
-            html: T.translate("edit_summit.summit_created"),
-            type: 'success'
-        };
-
-        return postRequest(
-            createAction(UPDATE_SUMMIT),
-            createAction(SUMMIT_ADDED),
-            `${window.API_BASE_URL}/api/v1/summits`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(showSuccessMessage(T.translate("edit_summit.summit_created")));
-                return payload;
-            });
-    }
-}
-
-export const deleteSummit = (summitId) => async (dispatch, getState) => {
-
-    const accessToken = await getAccessTokenSafely();
-
-    const params = {
-        access_token : accessToken
-    };
-
-    return deleteRequest(
-        null,
-        createAction(SUMMIT_DELETED)({summitId}),
-        `${window.API_BASE_URL}/api/v1/summits/${summitId}`,
-        null,
-        authErrorHandler
-    )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
-
-
-export const attachLogo = (entity, file, secondary = false) => async (dispatch, getState) => {
-
-    const accessToken = await getAccessTokenSafely();
-
-    dispatch(startLoading());
-
-    const params = {
-        access_token : accessToken
-    };
-
-    const normalizedEntity = normalizeEntity(entity);
-
-    if (entity.id) {
-        dispatch(uploadLogo(entity, file, secondary));
-    } else {
-        return postRequest(
-            createAction(UPDATE_SUMMIT),
-            createAction(SUMMIT_ADDED),
-            `${window.API_BASE_URL}/api/v1/summits`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                    dispatch(uploadLogo(payload.response, file, secondary));
-                }
-            );
-    }
-}
-
-const uploadLogo = (entity, file, secondary) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-    const url = `${window.API_BASE_URL}/api/v1/summits/${entity.id}/logo${secondary ? '/secondary' : ''}`;
-    const params = {
-        access_token : accessToken
+  if (entity.id) {
+    return putRequest(
+      createAction(UPDATE_SUMMIT),
+      createAction(SUMMIT_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summits/${entity.id}`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(showSuccessMessage(T.translate("edit_summit.summit_saved")));
+      return payload;
+    });
+  } else {
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_summit.summit_created"),
+      type: "success"
     };
 
     return postRequest(
-        null,
-        createAction(DUMMY_ACTION),
-        url,
-        file,
-        authErrorHandler
-    )(params)(dispatch)
-        .then(({response}) => {
-            const payload = {};
-            if (secondary) payload.secondary_logo = response.url;
-            else payload.logo = response.url;
+      createAction(UPDATE_SUMMIT),
+      createAction(SUMMIT_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(showSuccessMessage(T.translate("edit_summit.summit_created")));
+      return payload;
+    });
+  }
+};
 
-            dispatch(createAction(SUMMIT_LOGO_ATTACHED)(payload));
-            dispatch(stopLoading());
-        });
+export const deleteSummit = (summitId) => async (dispatch, getState) => {
+  const accessToken = await getAccessTokenSafely();
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return deleteRequest(
+    null,
+    createAction(SUMMIT_DELETED)({ summitId }),
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const attachLogo =
+  (entity, file, secondary = false) =>
+  async (dispatch, getState) => {
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    const normalizedEntity = normalizeEntity(entity);
+
+    if (entity.id) {
+      dispatch(uploadLogo(entity, file, secondary));
+    } else {
+      return postRequest(
+        createAction(UPDATE_SUMMIT),
+        createAction(SUMMIT_ADDED),
+        `${window.API_BASE_URL}/api/v1/summits`,
+        normalizedEntity,
+        authErrorHandler,
+        entity
+      )(params)(dispatch).then((payload) => {
+        dispatch(uploadLogo(payload.response, file, secondary));
+      });
+    }
+  };
+
+const uploadLogo = (entity, file, secondary) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+  const url = `${window.API_BASE_URL}/api/v1/summits/${entity.id}/logo${
+    secondary ? "/secondary" : ""
+  }`;
+  const params = {
+    access_token: accessToken
+  };
+
+  return postRequest(
+    null,
+    createAction(DUMMY_ACTION),
+    url,
+    file,
+    authErrorHandler
+  )(params)(dispatch).then(({ response }) => {
+    const payload = {};
+    if (secondary) payload.secondary_logo = response.url;
+    else payload.logo = response.url;
+
+    dispatch(createAction(SUMMIT_LOGO_ATTACHED)(payload));
+    dispatch(stopLoading());
+  });
 };
 
 export const deleteLogo = (secondary) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
-    const url = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/logo${secondary ? '/secondary' : ''}`;
-    const payload = {};
-    if (secondary) payload.secondary_logo = null;
-    else payload.logo = null;
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const url = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/logo${
+    secondary ? "/secondary" : ""
+  }`;
+  const payload = {};
+  if (secondary) payload.secondary_logo = null;
+  else payload.logo = null;
 
-    const params = {
-        access_token : accessToken
-    };
+  const params = {
+    access_token: accessToken
+  };
 
-    return deleteRequest(
-        null,
-        createAction(SUMMIT_LOGO_DELETED)(payload),
-        url,
-        null,
-        authErrorHandler
-    )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
+  return deleteRequest(
+    null,
+    createAction(SUMMIT_LOGO_DELETED)(payload),
+    url,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
 };
 
 /**
  * @param regLiteMarketingSettings
  * @returns {function(*, *): Promise<unknown[]>}
  */
-export const saveRegistrationLiteMarketingSettings = (regLiteMarketingSettings) => async (dispatch) => {
+export const saveRegistrationLiteMarketingSettings =
+  (regLiteMarketingSettings) => async (dispatch) => {
+    return Promise.all(
+      Object.keys(regLiteMarketingSettings).map((m) => {
+        const setting_type = "TEXT";
+        let value = regLiteMarketingSettings[m].value ?? "";
 
-    return Promise.all(Object.keys(regLiteMarketingSettings).map(m => {
-
-        const setting_type = 'TEXT';
-        let value = regLiteMarketingSettings[m].value ?? '';
-
-        if (typeof value == "boolean"){
-            value = value ? '1' : '0';
+        if (typeof value == "boolean") {
+          value = value ? "1" : "0";
         }
 
         const mkt_setting = {
-            id: regLiteMarketingSettings[m].id,
-            type: setting_type,
-            key: m.toUpperCase(),
-            value: value,
-        }
+          id: regLiteMarketingSettings[m].id,
+          type: setting_type,
+          key: m.toUpperCase(),
+          value: value
+        };
 
         return dispatch(saveMarketingSetting(mkt_setting));
-    }));
-
-}
+      })
+    );
+  };
 
 /**
  * @param regLiteMarketingSettings
  * @returns {function(*, *): Promise<unknown[]>}
  */
-export const savePrintAppMarketingSettings = (printAppMarketingSettings) => async (dispatch) => {
+export const savePrintAppMarketingSettings =
+  (printAppMarketingSettings) => async (dispatch) => {
+    return Promise.all(
+      Object.keys(printAppMarketingSettings).map((m) => {
+        const setting_type = "TEXT";
+        let value = printAppMarketingSettings[m].value ?? "";
 
-    return Promise.all(Object.keys(printAppMarketingSettings).map(m => {
-
-        const setting_type = 'TEXT';
-        let value = printAppMarketingSettings[m].value ?? '';
-
-        if (typeof value == "boolean"){
-            value = value ? '1' : '0';
+        if (typeof value == "boolean") {
+          value = value ? "1" : "0";
         }
 
         const mkt_setting = {
-            id: printAppMarketingSettings[m].id,
-            type: setting_type,
-            key: m.toUpperCase(),
-            value: value,
-        }
+          id: printAppMarketingSettings[m].id,
+          type: setting_type,
+          key: m.toUpperCase(),
+          value: value
+        };
 
         return dispatch(saveMarketingSetting(mkt_setting));
-    }));
-
-}
+      })
+    );
+  };
 
 /**
  * @returns {function(*, *): Promise<unknown[]>}
  */
 export const generateEncryptionKey = () => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const params = {
-        access_token : accessToken
-    };
+  const params = {
+    access_token: accessToken
+  };
 
-    putRequest(
-      null,
-      createAction(REGISTRATION_KEY_GENERATED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/qr-codes/all/enc-key`,
-      null,
-      authErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-          dispatch(stopLoading());
-      });
-
-}
+  putRequest(
+    null,
+    createAction(REGISTRATION_KEY_GENERATED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/qr-codes/all/enc-key`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
 /******************  LEAD REPORT SETTINGS  ****************************************/
 
 export const getLeadReportSettingsMeta = () => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
 
-    const {currentSummitState} = getState();
-    const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+  const params = {
+    access_token: accessToken
+  };
 
-    const params = {
-        access_token: accessToken,
-    };
+  dispatch(startLoading());
 
-    dispatch(startLoading());
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_LEAD_REPORT_SETTINGS_META),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/lead-report-settings/metadata`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-          dispatch(stopLoading());
-      }
-    );
+  return getRequest(
+    null,
+    createAction(RECEIVE_LEAD_REPORT_SETTINGS_META),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/lead-report-settings/metadata`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
 };
 
-export const upsertLeadReportSettings = (allowed_columns) => async (dispatch, getState) => {
-
-    const {currentSummitState} = getState();
-    const {currentSummit} = currentSummitState;
+export const upsertLeadReportSettings =
+  (allowed_columns) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
-    const params = { access_token : accessToken };
+    const params = { access_token: accessToken };
 
     const settings = {
-        'allowed_columns': normalizeLeadReportSettings(allowed_columns)
+      allowed_columns: normalizeLeadReportSettings(allowed_columns)
     };
 
     putRequest(
-        null,
-        createAction(LEAD_REPORT_SETTINGS_UPDATED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/lead-report-settings`,
-        settings,
-        authErrorHandler
-    )(params)(dispatch)
-        .then(() => {
-            dispatch(stopLoading());
-        });
-};
-
+      null,
+      createAction(LEAD_REPORT_SETTINGS_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/lead-report-settings`,
+      settings,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 const normalizeEntity = (entity) => {
-    const normalizedEntity = {...entity};
+  const normalizedEntity = { ...entity };
 
-    delete(normalizedEntity['id']);
-    delete(normalizedEntity['created']);
-    delete(normalizedEntity['last_edited']);
-    delete(normalizedEntity['logo']);
-    delete(normalizedEntity['attendees_count']);
-    delete(normalizedEntity['event_types']);
-    delete(normalizedEntity['locations']);
-    delete(normalizedEntity['max_submission_allowed_per_user']);
-    delete(normalizedEntity['page_url']);
-    delete(normalizedEntity['presentation_voters_count']);
-    delete(normalizedEntity['presentation_votes_count']);
-    delete(normalizedEntity['presentations_submitted_count']);
-    delete(normalizedEntity['published_events_count']);
-    delete(normalizedEntity['schedule_event_detail_url']);
-    delete(normalizedEntity['schedule_page_url']);
-    delete(normalizedEntity['speaker_announcement_email_accepted_alternate_count']);
-    delete(normalizedEntity['speaker_announcement_email_accepted_count']);
-    delete(normalizedEntity['speaker_announcement_email_accepted_rejected_count']);
-    delete(normalizedEntity['speaker_announcement_email_alternate_count']);
-    delete(normalizedEntity['speaker_announcement_email_alternate_rejected_count']);
-    delete(normalizedEntity['speaker_announcement_email_rejected_count']);
-    delete(normalizedEntity['speakers_count']);
-    delete(normalizedEntity['ticket_types']);
-    delete(normalizedEntity['time_zone']);
-    delete(normalizedEntity['timestamp']);
-    delete(normalizedEntity['tracks']);
-    delete(normalizedEntity['wifi_connections']);
-    delete(normalizedEntity['qr_codes_enc_key']);
+  delete normalizedEntity["id"];
+  delete normalizedEntity["created"];
+  delete normalizedEntity["last_edited"];
+  delete normalizedEntity["logo"];
+  delete normalizedEntity["attendees_count"];
+  delete normalizedEntity["event_types"];
+  delete normalizedEntity["locations"];
+  delete normalizedEntity["max_submission_allowed_per_user"];
+  delete normalizedEntity["page_url"];
+  delete normalizedEntity["presentation_voters_count"];
+  delete normalizedEntity["presentation_votes_count"];
+  delete normalizedEntity["presentations_submitted_count"];
+  delete normalizedEntity["published_events_count"];
+  delete normalizedEntity["schedule_event_detail_url"];
+  delete normalizedEntity["schedule_page_url"];
+  delete normalizedEntity[
+    "speaker_announcement_email_accepted_alternate_count"
+  ];
+  delete normalizedEntity["speaker_announcement_email_accepted_count"];
+  delete normalizedEntity["speaker_announcement_email_accepted_rejected_count"];
+  delete normalizedEntity["speaker_announcement_email_alternate_count"];
+  delete normalizedEntity[
+    "speaker_announcement_email_alternate_rejected_count"
+  ];
+  delete normalizedEntity["speaker_announcement_email_rejected_count"];
+  delete normalizedEntity["speakers_count"];
+  delete normalizedEntity["ticket_types"];
+  delete normalizedEntity["time_zone"];
+  delete normalizedEntity["timestamp"];
+  delete normalizedEntity["tracks"];
+  delete normalizedEntity["wifi_connections"];
+  delete normalizedEntity["qr_codes_enc_key"];
 
-    if (!normalizedEntity['registration_allowed_refund_request_till_date']) normalizedEntity['registration_allowed_refund_request_till_date'] = null;
-    if (!normalizedEntity['registration_begin_date']) normalizedEntity['registration_begin_date'] = null;
-    if (!normalizedEntity['registration_end_date']) normalizedEntity['registration_end_date'] = null;
-    if (!normalizedEntity['schedule_start_date']) normalizedEntity['schedule_start_date'] = null;
-    if (!normalizedEntity['start_showing_venues_date']) normalizedEntity['start_showing_venues_date'] = null;
-    if (!normalizedEntity['start_date']) normalizedEntity['start_date'] = null;
-    if (!normalizedEntity['end_date']) normalizedEntity['end_date'] = null;
+  if (!normalizedEntity["registration_allowed_refund_request_till_date"])
+    normalizedEntity["registration_allowed_refund_request_till_date"] = null;
+  if (!normalizedEntity["registration_begin_date"])
+    normalizedEntity["registration_begin_date"] = null;
+  if (!normalizedEntity["registration_end_date"])
+    normalizedEntity["registration_end_date"] = null;
+  if (!normalizedEntity["schedule_start_date"])
+    normalizedEntity["schedule_start_date"] = null;
+  if (!normalizedEntity["start_showing_venues_date"])
+    normalizedEntity["start_showing_venues_date"] = null;
+  if (!normalizedEntity["start_date"]) normalizedEntity["start_date"] = null;
+  if (!normalizedEntity["end_date"]) normalizedEntity["end_date"] = null;
 
-    if (!normalizedEntity['meeting_room_booking_max_allowed'])
-        delete(normalizedEntity['meeting_room_booking_max_allowed']);
+  if (!normalizedEntity["meeting_room_booking_max_allowed"])
+    delete normalizedEntity["meeting_room_booking_max_allowed"];
 
-    if (!normalizedEntity['meeting_room_booking_slot_length'])
-        delete(normalizedEntity['meeting_room_booking_slot_length']);
+  if (!normalizedEntity["meeting_room_booking_slot_length"])
+    delete normalizedEntity["meeting_room_booking_slot_length"];
 
-    if (normalizedEntity['api_feed_type'] === 'none')
-        normalizedEntity['api_feed_type'] = '';
+  if (normalizedEntity["api_feed_type"] === "none")
+    normalizedEntity["api_feed_type"] = "";
 
-    if (normalizedEntity['external_registration_feed_type'] === 'none')
-        normalizedEntity['external_registration_feed_type'] = '';
+  if (normalizedEntity["external_registration_feed_type"] === "none")
+    normalizedEntity["external_registration_feed_type"] = "";
 
-    if(normalizedEntity['mux_allowed_domains']){
-        normalizedEntity['mux_allowed_domains'] = normalizedEntity['mux_allowed_domains'].map((e)=> e.value);
-    }
-    return normalizedEntity;
-
-}
+  if (normalizedEntity["mux_allowed_domains"]) {
+    normalizedEntity["mux_allowed_domains"] = normalizedEntity[
+      "mux_allowed_domains"
+    ].map((e) => e.value);
+  }
+  return normalizedEntity;
+};

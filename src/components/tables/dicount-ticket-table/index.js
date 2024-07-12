@@ -1,5 +1,3 @@
-import DiscountTicketTable from './DiscountTicketTable';
+import DiscountTicketTable from "./DiscountTicketTable";
 
-export {
-	DiscountTicketTable
-};
+export { DiscountTicketTable };

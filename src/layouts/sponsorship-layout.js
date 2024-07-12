@@ -11,37 +11,52 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import SponsorshipListPage from '../pages/sponsorship-types/sponsorship-list-page'
-import EditSponsorshipPage from '../pages/sponsorship-types/edit-sponsorship-page'
+import SponsorshipListPage from "../pages/sponsorship-types/sponsorship-list-page";
+import EditSponsorshipPage from "../pages/sponsorship-types/edit-sponsorship-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class SponsorshipLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("sponsorship_list.sponsorship_types"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("sponsorship_list.sponsorship_types"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={SponsorshipListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditSponsorshipPage}/>
-                    <Route strict exact path={`${match.url}/:sponsorship_id(\\d+)`} component={EditSponsorshipPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            strict
+            exact
+            path={match.url}
+            component={SponsorshipListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditSponsorshipPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:sponsorship_id(\\d+)`}
+            component={EditSponsorshipPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(SponsorshipLayout), 'sponsors');
-
-
+export default Restrict(withRouter(SponsorshipLayout), "sponsors");

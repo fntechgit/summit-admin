@@ -11,77 +11,82 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_ACCESS_LEVEL,
-    RESET_ACCESS_LEVEL_FORM,
-    UPDATE_ACCESS_LEVEL,
-    ACCESS_LEVEL_UPDATED,
-    ACCESS_LEVEL_ADDED
-} from '../../actions/badge-actions';
+import {
+  RECEIVE_ACCESS_LEVEL,
+  RESET_ACCESS_LEVEL_FORM,
+  UPDATE_ACCESS_LEVEL,
+  ACCESS_LEVEL_UPDATED,
+  ACCESS_LEVEL_ADDED
+} from "../../actions/badge-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id                  : 0,
-    name                : '',
-    description         : '',
-    template_content    : '',
-    is_default          : 0
-}
+  id: 0,
+  name: "",
+  description: "",
+  template_content: "",
+  is_default: 0
+};
 
 const DEFAULT_STATE = {
-    entity      : DEFAULT_ENTITY,
-    errors      : {}
+  entity: DEFAULT_ENTITY,
+  errors: {}
 };
 
 const accessLevelReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-            }
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER:
+      {
+        // we need this in case the token expired while editing the form
+        if (payload.hasOwnProperty("persistStore")) {
+          return state;
+        } else {
+          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
-        break;
-        case SET_CURRENT_SUMMIT:
-        case RESET_ACCESS_LEVEL_FORM: {
-            return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        break;
-        case UPDATE_ACCESS_LEVEL: {
-            return {...state,  entity: {...payload}, errors: {} };
-        }
-        break;
-        case ACCESS_LEVEL_ADDED:
-        case RECEIVE_ACCESS_LEVEL: {
-            let entity = {...payload.response};
+      }
+      break;
+    case SET_CURRENT_SUMMIT:
+    case RESET_ACCESS_LEVEL_FORM:
+      {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
+      break;
+    case UPDATE_ACCESS_LEVEL:
+      {
+        return { ...state, entity: { ...payload }, errors: {} };
+      }
+      break;
+    case ACCESS_LEVEL_ADDED:
+    case RECEIVE_ACCESS_LEVEL:
+      {
+        let entity = { ...payload.response };
 
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
+        for (var key in entity) {
+          if (entity.hasOwnProperty(key)) {
+            entity[key] = entity[key] == null ? "" : entity[key];
+          }
+        }
 
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
-        }
-        break;
-        case ACCESS_LEVEL_UPDATED: {
-            return state;
-        }
-        break;
-        case VALIDATE: {
-            return {...state,  errors: payload.errors };
-        }
-        break;
-        default:
-            return state;
-    }
+        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+      }
+      break;
+    case ACCESS_LEVEL_UPDATED:
+      {
+        return state;
+      }
+      break;
+    case VALIDATE:
+      {
+        return { ...state, errors: payload.errors };
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default accessLevelReducer;

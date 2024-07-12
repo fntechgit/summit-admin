@@ -11,47 +11,51 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { SegmentedControl } from 'segmented-control'
+import React from "react";
+import { SegmentedControl } from "segmented-control";
 
 export default class AttendanceFilter extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
 
-        this.state = {
-            filterValue: this.props.value
-        }
+    this.state = {
+      filterValue: this.props.value
+    };
+  }
 
+  handleFilterChange(value) {
+    const { filterValue } = this.state;
+    if (value !== filterValue) {
+      this.setState({ filterValue: value }, () => this.props.onChange(value));
     }
+  }
 
-    handleFilterChange(value) {
-        const { filterValue } = this.state;
-        if (value !== filterValue) {
-            this.setState({ filterValue: value }, () => this.props.onChange(value))
-        }
-    }
+  render() {
+    let { onChange, ...rest } = this.props;
+    let { filterValue } = this.state;
 
-    render() {
-        let { onChange, ...rest } = this.props;
-        let { filterValue } = this.state;
-
-        return (
-            <div className="attendance-filter">
-                <label>Filter by Attendance (pressed = show)</label>
-                <SegmentedControl
-                    name="memberFilter"
-                    value={filterValue}
-                    options={[
-                        { label: "All", value: null, default: true },
-                        { label: "Registered for Summit", value: "paidtickets" },
-                        { label: "Willing to speak", value: "confirmed" },
-                    ]}
-                    setValue={newValue => this.handleFilterChange(newValue)}
-                    style={{ width: "100%", height: 40, color: '#337ab7', fontSize: '10px' }}
-                />
-            </div>
-        );
-    }
+    return (
+      <div className="attendance-filter">
+        <label>Filter by Attendance (pressed = show)</label>
+        <SegmentedControl
+          name="memberFilter"
+          value={filterValue}
+          options={[
+            { label: "All", value: null, default: true },
+            { label: "Registered for Summit", value: "paidtickets" },
+            { label: "Willing to speak", value: "confirmed" }
+          ]}
+          setValue={(newValue) => this.handleFilterChange(newValue)}
+          style={{
+            width: "100%",
+            height: 40,
+            color: "#337ab7",
+            fontSize: "10px"
+          }}
+        />
+      </div>
+    );
+  }
 }

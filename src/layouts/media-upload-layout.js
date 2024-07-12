@@ -11,37 +11,51 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {Switch, Route} from 'react-router-dom';
+import React from "react";
+import { Switch, Route } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import {connect} from "react-redux";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 import MediaUploadListPage from "../pages/media_uploads/media-upload-list-page";
 import EditMediaUploadPage from "../pages/media_uploads/edit-media-upload-page";
 import NoMatchPage from "../pages/no-match-page";
 
 class MediaUploadLayout extends React.Component {
+  render() {
+    const { match } = this.props;
 
-    render(){
-        const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("media_upload.media_uploads"),
+            pathname: match.url
+          }}
+        />
 
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("media_upload.media_uploads"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={match.url} component={MediaUploadListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditMediaUploadPage}/>
-                    <Route path={`${match.url}/:media_upload_id(\\d+)`} component={EditMediaUploadPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={MediaUploadListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditMediaUploadPage}
+          />
+          <Route
+            path={`${match.url}/:media_upload_id(\\d+)`}
+            component={EditMediaUploadPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(connect (null, {})(MediaUploadLayout), 'events');
-
-
+export default Restrict(connect(null, {})(MediaUploadLayout), "events");

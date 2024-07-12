@@ -11,38 +11,35 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
 
 export default class MergeableMergeRow extends React.Component {
+  getFieldClass(field, column) {
+    let { disabled } = this.props;
+    if (disabled) return "";
+    return "selected";
+  }
 
-    getFieldClass(field, column) {
-        let {disabled} = this.props;
-        if (disabled) return '';
-        return 'selected';
-    }
+  render() {
+    let { name, values } = this.props;
 
-    render() {
-        let {name, values} = this.props;
-
-        return (
-            <div className="row field-box">
-                <div className="col-md-2">
-                    <label> {T.translate("merge_speakers." + name)} </label>
-                </div>
-                <div className="col-md-5">
-                    <div className={this.getFieldClass(name, 0) + ' form-control field'}>
-                        {values[0]}
-                    </div>
-                </div>
-                <div className="col-md-5">
-                    <div className={this.getFieldClass(name, 1) + ' form-control field'}>
-                        {values[1]}
-                    </div>
-                </div>
-            </div>
-        );
-
-    }
+    return (
+      <div className="row field-box">
+        <div className="col-md-2">
+          <label> {T.translate("merge_speakers." + name)} </label>
+        </div>
+        <div className="col-md-5">
+          <div className={this.getFieldClass(name, 0) + " form-control field"}>
+            {values[0]}
+          </div>
+        </div>
+        <div className="col-md-5">
+          <div className={this.getFieldClass(name, 1) + " form-control field"}>
+            {values[1]}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
-

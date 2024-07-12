@@ -11,117 +11,141 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Table } from 'openstack-uicore-foundation/lib/components';
-import { getEventCategoryGroups, deleteEventCategoryGroup } from "../../actions/event-category-actions";
+import { Table } from "openstack-uicore-foundation/lib/components";
+import {
+  getEventCategoryGroups,
+  deleteEventCategoryGroup
+} from "../../actions/event-category-actions";
 
 class EventCategoryGroupListPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handleNew = this.handleNew.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
+  }
 
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handleNew = this.handleNew.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
+  componentDidMount() {
+    const { currentSummit } = this.props;
+    if (currentSummit) {
+      this.props.getEventCategoryGroups();
     }
+  }
 
-    componentDidMount() {
-        const {currentSummit} = this.props;
-        if(currentSummit) {
-            this.props.getEventCategoryGroups();
-        }
-    }
+  handleEdit(groupId) {
+    const { currentSummit, history } = this.props;
+    history.push(
+      `/app/summits/${currentSummit.id}/event-category-groups/${groupId}`
+    );
+  }
 
-    handleEdit(groupId) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/event-category-groups/${groupId}`);
-    }
+  handleNew(ev) {
+    const { currentSummit, history } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/event-category-groups/new`);
+  }
 
-    handleNew(ev) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/event-category-groups/new`);
-    }
+  handleDelete(groupId) {
+    const { deleteEventCategoryGroup, eventCategoryGroups } = this.props;
+    let group = eventCategoryGroups.find((g) => g.id === groupId);
 
-    handleDelete(groupId) {
-        const {deleteEventCategoryGroup, eventCategoryGroups} = this.props;
-        let group = eventCategoryGroups.find(g => g.id === groupId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text:
+        T.translate("event_category_group_list.delete_warning") +
+        " " +
+        group.name,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteEventCategoryGroup(groupId);
+      }
+    });
+  }
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("event_category_group_list.delete_warning") + ' ' + group.name,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deleteEventCategoryGroup(groupId);
-            }
-        });
-    }
+  render() {
+    const { currentSummit, eventCategoryGroups, summits } = this.props;
 
-    render(){
-        const {currentSummit, eventCategoryGroups, summits} = this.props;
+    const columns = [
+      { columnKey: "id", value: T.translate("general.id") },
+      {
+        columnKey: "name",
+        value: T.translate("event_category_group_list.name")
+      },
+      {
+        columnKey: "type",
+        value: T.translate("event_category_group_list.type")
+      },
+      {
+        columnKey: "categories",
+        value: T.translate("event_category_group_list.categories")
+      },
+      {
+        columnKey: "color",
+        value: T.translate("event_category_group_list.color")
+      }
+    ];
 
-        const columns = [
-            { columnKey: 'id', value: T.translate("general.id") },
-            { columnKey: 'name', value: T.translate("event_category_group_list.name") },
-            { columnKey: 'type', value: T.translate("event_category_group_list.type") },
-            { columnKey: 'categories', value: T.translate("event_category_group_list.categories") },
-            { columnKey: 'color', value: T.translate("event_category_group_list.color") }
-        ];
+    const table_options = {
+      actions: {
+        edit: { onClick: this.handleEdit },
+        delete: { onClick: this.handleDelete }
+      }
+    };
 
-        const table_options = {
-            actions: {
-                edit: {onClick: this.handleEdit},
-                delete: { onClick: this.handleDelete }
-            }
-        }
+    if (!currentSummit.id) return <div />;
 
-        if(!currentSummit.id) return(<div />);
+    return (
+      <div className="container">
+        <h3> {T.translate("event_category_list.event_category_list")} </h3>
+        <div className={"row"}>
+          <div className="col-md-6 col-md-offset-6 text-right">
+            <button
+              className="btn btn-primary right-space"
+              onClick={this.handleNew}
+            >
+              {T.translate("event_category_group_list.add_category_group")}
+            </button>
+          </div>
+        </div>
 
-        return(
-            <div className="container">
-                <h3> {T.translate("event_category_list.event_category_list")} </h3>
-                <div className={'row'}>
-                    <div className="col-md-6 col-md-offset-6 text-right">
-                        <button className="btn btn-primary right-space" onClick={this.handleNew}>
-                            {T.translate("event_category_group_list.add_category_group")}
-                        </button>
-                    </div>
-                </div>
+        {eventCategoryGroups.length === 0 && (
+          <div className="no-items">
+            {T.translate("event_category_group_list.no_items")}
+          </div>
+        )}
 
-                {eventCategoryGroups.length === 0 &&
-                <div className="no-items">{T.translate("event_category_group_list.no_items")}</div>
-                }
-
-                {eventCategoryGroups.length > 0 &&
-                <div>
-                    <Table
-                        options={table_options}
-                        data={eventCategoryGroups}
-                        columns={columns}
-                    />
-                </div>
-                }
-
-            </div>
-        )
-    }
+        {eventCategoryGroups.length > 0 && (
+          <div>
+            <Table
+              options={table_options}
+              data={eventCategoryGroups}
+              columns={columns}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ directoryState, currentSummitState, currentEventCategoryGroupListState }) => ({
-    currentSummit   : currentSummitState.currentSummit,
-    ...currentEventCategoryGroupListState
-})
+const mapStateToProps = ({
+  directoryState,
+  currentSummitState,
+  currentEventCategoryGroupListState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentEventCategoryGroupListState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getEventCategoryGroups,
-        deleteEventCategoryGroup
-    }
-)(EventCategoryGroupListPage);
+export default connect(mapStateToProps, {
+  getEventCategoryGroups,
+  deleteEventCategoryGroup
+})(EventCategoryGroupListPage);

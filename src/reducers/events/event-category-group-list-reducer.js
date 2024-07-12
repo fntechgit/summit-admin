@@ -12,49 +12,54 @@
  **/
 
 import {
-    RECEIVE_EVENT_CATEGORY_GROUPS,
-    REQUEST_EVENT_CATEGORY_GROUPS,
-    EVENT_CATEGORY_GROUP_DELETED
-} from '../../actions/event-category-actions';
+  RECEIVE_EVENT_CATEGORY_GROUPS,
+  REQUEST_EVENT_CATEGORY_GROUPS,
+  EVENT_CATEGORY_GROUP_DELETED
+} from "../../actions/event-category-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    eventCategoryGroups : []
+  eventCategoryGroups: []
 };
 
 const eventCategoryGroupListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_EVENT_CATEGORY_GROUPS: {
-
-            return {...state }
-        }
-        case RECEIVE_EVENT_CATEGORY_GROUPS: {
-            let eventCategoryGroups = payload.response.data.map(e => {
-                return {
-                    id: e.id,
-                    name: e.name,
-                    color: `<div style="background-color: ${e.color}">&nbsp;</div>`,
-                    type: (e.class_name === 'PresentationCategoryGroup') ? 'Public' : 'Private',
-                    categories: e.tracks.map(c => c.name).join(', ')
-                };
-            })
-
-            return {...state, eventCategoryGroups };
-        }
-        case EVENT_CATEGORY_GROUP_DELETED: {
-            let {groupId} = payload;
-            return {...state, eventCategoryGroups: state.eventCategoryGroups.filter(g => g.id !== groupId)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_EVENT_CATEGORY_GROUPS: {
+      return { ...state };
+    }
+    case RECEIVE_EVENT_CATEGORY_GROUPS: {
+      let eventCategoryGroups = payload.response.data.map((e) => {
+        return {
+          id: e.id,
+          name: e.name,
+          color: `<div style="background-color: ${e.color}">&nbsp;</div>`,
+          type:
+            e.class_name === "PresentationCategoryGroup" ? "Public" : "Private",
+          categories: e.tracks.map((c) => c.name).join(", ")
+        };
+      });
+
+      return { ...state, eventCategoryGroups };
+    }
+    case EVENT_CATEGORY_GROUP_DELETED: {
+      let { groupId } = payload;
+      return {
+        ...state,
+        eventCategoryGroups: state.eventCategoryGroups.filter(
+          (g) => g.id !== groupId
+        )
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default eventCategoryGroupListReducer;

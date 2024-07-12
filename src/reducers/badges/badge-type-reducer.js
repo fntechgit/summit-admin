@@ -11,124 +11,162 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_BADGE_TYPE,
-    RESET_BADGE_TYPE_FORM,
-    UPDATE_BADGE_TYPE,
-    BADGE_TYPE_UPDATED,
-    BADGE_TYPE_ADDED,
-    BADGE_ACCESS_LEVEL_ADDED,
-    BADGE_ACCESS_LEVEL_REMOVED,
-    FEATURE_ADDED_TO_TYPE,
-    FEATURE_REMOVED_FROM_TYPE,
-    BADGE_VIEW_TYPE_ADDED,
-    BADGE_VIEW_TYPE_REMOVED
-} from '../../actions/badge-actions';
+import {
+  RECEIVE_BADGE_TYPE,
+  RESET_BADGE_TYPE_FORM,
+  UPDATE_BADGE_TYPE,
+  BADGE_TYPE_UPDATED,
+  BADGE_TYPE_ADDED,
+  BADGE_ACCESS_LEVEL_ADDED,
+  BADGE_ACCESS_LEVEL_REMOVED,
+  FEATURE_ADDED_TO_TYPE,
+  FEATURE_REMOVED_FROM_TYPE,
+  BADGE_VIEW_TYPE_ADDED,
+  BADGE_VIEW_TYPE_REMOVED
+} from "../../actions/badge-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id                  : 0,
-    name                : '',
-    description         : '',
-    is_default          : 0,
-    access_levels       : [],
-    badge_features      : [],
-    allowed_view_types  : [],
-}
+  id: 0,
+  name: "",
+  description: "",
+  is_default: 0,
+  access_levels: [],
+  badge_features: [],
+  allowed_view_types: []
+};
 
 const DEFAULT_STATE = {
-    entity      : DEFAULT_ENTITY,
-    errors      : {}
+  entity: DEFAULT_ENTITY,
+  errors: {}
 };
 
 const badgeTypeReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-            }
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER:
+      {
+        // we need this in case the token expired while editing the form
+        if (payload.hasOwnProperty("persistStore")) {
+          return state;
+        } else {
+          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
-        break;
-        case SET_CURRENT_SUMMIT:
-        case RESET_BADGE_TYPE_FORM: {
-            return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        break;
-        case UPDATE_BADGE_TYPE: {
-            return {...state,  entity: {...payload}, errors: {} };
-        }
-        break;
-        case BADGE_TYPE_ADDED:
-        case RECEIVE_BADGE_TYPE: {
-            let entity = {...payload.response};
+      }
+      break;
+    case SET_CURRENT_SUMMIT:
+    case RESET_BADGE_TYPE_FORM:
+      {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
+      break;
+    case UPDATE_BADGE_TYPE:
+      {
+        return { ...state, entity: { ...payload }, errors: {} };
+      }
+      break;
+    case BADGE_TYPE_ADDED:
+    case RECEIVE_BADGE_TYPE:
+      {
+        let entity = { ...payload.response };
 
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
+        for (var key in entity) {
+          if (entity.hasOwnProperty(key)) {
+            entity[key] = entity[key] == null ? "" : entity[key];
+          }
+        }
 
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity} };
-        }
-        break;
-        case BADGE_TYPE_UPDATED: {
-            return state;
-        }
-        break;
-        case BADGE_ACCESS_LEVEL_ADDED: {
-            let newAccessLevel = {...payload.accessLevel};
-            let accessLevels = [...state.entity.access_levels, newAccessLevel];
+        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+      }
+      break;
+    case BADGE_TYPE_UPDATED:
+      {
+        return state;
+      }
+      break;
+    case BADGE_ACCESS_LEVEL_ADDED:
+      {
+        let newAccessLevel = { ...payload.accessLevel };
+        let accessLevels = [...state.entity.access_levels, newAccessLevel];
 
-            return {...state, entity: {...state.entity, access_levels: accessLevels}, errors: {} };
-        }
-        break;
-        case BADGE_ACCESS_LEVEL_REMOVED: {
-            let {accessLevelId} = payload;
-            let accessLevels = state.entity.access_levels.filter(a => a.id !== accessLevelId);
-            return {...state, entity: {...state.entity, access_levels: accessLevels} };
-        }
-        break;
-        case BADGE_VIEW_TYPE_ADDED: {
-            let newViewType = {...payload.viewType};
-            let viewTypes = [...state.entity.allowed_view_types, newViewType];
+        return {
+          ...state,
+          entity: { ...state.entity, access_levels: accessLevels },
+          errors: {}
+        };
+      }
+      break;
+    case BADGE_ACCESS_LEVEL_REMOVED:
+      {
+        let { accessLevelId } = payload;
+        let accessLevels = state.entity.access_levels.filter(
+          (a) => a.id !== accessLevelId
+        );
+        return {
+          ...state,
+          entity: { ...state.entity, access_levels: accessLevels }
+        };
+      }
+      break;
+    case BADGE_VIEW_TYPE_ADDED:
+      {
+        let newViewType = { ...payload.viewType };
+        let viewTypes = [...state.entity.allowed_view_types, newViewType];
 
-            return {...state, entity: {...state.entity, allowed_view_types: viewTypes}, errors: {} };
-        }
-        break;
-        case BADGE_VIEW_TYPE_REMOVED: {            
-            let {viewTypeId} = payload;
-            let viewTypes = state.entity.allowed_view_types.filter(a => a.id !== viewTypeId);
-            return {...state, entity: {...state.entity, allowed_view_types: viewTypes} };
-        }
-        break;
-        case FEATURE_ADDED_TO_TYPE: {
-            let newFeature = {...payload.feature};
-            let badgeFeatures = [...state.entity.badge_features, newFeature];
+        return {
+          ...state,
+          entity: { ...state.entity, allowed_view_types: viewTypes },
+          errors: {}
+        };
+      }
+      break;
+    case BADGE_VIEW_TYPE_REMOVED:
+      {
+        let { viewTypeId } = payload;
+        let viewTypes = state.entity.allowed_view_types.filter(
+          (a) => a.id !== viewTypeId
+        );
+        return {
+          ...state,
+          entity: { ...state.entity, allowed_view_types: viewTypes }
+        };
+      }
+      break;
+    case FEATURE_ADDED_TO_TYPE:
+      {
+        let newFeature = { ...payload.feature };
+        let badgeFeatures = [...state.entity.badge_features, newFeature];
 
-            return {...state, entity: {...state.entity, badge_features: badgeFeatures}, errors: {} };
-        }
-        break;
-        case FEATURE_REMOVED_FROM_TYPE: {
-            let {featureId} = payload;
-            let badgeFeatures = state.entity.badge_features.filter(f => f.id !== featureId);
-            return {...state, entity: {...state.entity, badge_features: badgeFeatures} };
-        }
-        break;
-        case VALIDATE: {
-            return {...state,  errors: payload.errors };
-        }
-        break;
-        default:
-            return state;
-    }
+        return {
+          ...state,
+          entity: { ...state.entity, badge_features: badgeFeatures },
+          errors: {}
+        };
+      }
+      break;
+    case FEATURE_REMOVED_FROM_TYPE:
+      {
+        let { featureId } = payload;
+        let badgeFeatures = state.entity.badge_features.filter(
+          (f) => f.id !== featureId
+        );
+        return {
+          ...state,
+          entity: { ...state.entity, badge_features: badgeFeatures }
+        };
+      }
+      break;
+    case VALIDATE:
+      {
+        return { ...state, errors: payload.errors };
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default badgeTypeReducer;

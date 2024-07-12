@@ -11,54 +11,61 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_EMAILS,
-    REQUEST_EMAILS
-} from '../../actions/email-actions';
+import { RECEIVE_EMAILS, REQUEST_EMAILS } from "../../actions/email-actions";
 
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import {epochToMomentTimeZone} from "openstack-uicore-foundation/lib/utils/methods";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
 const DEFAULT_STATE = {
-    emails          : [],
-    term            : '',
-    order           : 'id',
-    orderDir        : 0,
-    currentPage     : 1,
-    lastPage        : 1,
-    perPage         : 10,
-    totalEmails     : 0,
-    filters         : {},
+  emails: [],
+  term: "",
+  order: "id",
+  orderDir: 0,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalEmails: 0,
+  filters: {}
 };
 
 const emailLogListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_EMAILS: {
-            let {order, orderDir, term, filters} = payload;
-
-            return {...state, order, orderDir, term, filters };
-        }
-        case RECEIVE_EMAILS: {
-            let {total, last_page, current_page, data} = payload.response;
-
-            data = data.map( m => {
-                let sent_date = m.sent_date ? epochToMomentTimeZone(m.sent_date, "UTC").format('MMMM Do YYYY, h:mm:ss a') : '';                
-                return {...m, 
-                    template: m.template.identifier, 
-                    sent_date: sent_date,
-                    last_error: m.last_error ? m.last_error : 'N/A'
-                }
-            });
-            return {...state, emails: data, currentPage: current_page, totalEmails: total, lastPage: last_page };
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_EMAILS: {
+      let { order, orderDir, term, filters } = payload;
+
+      return { ...state, order, orderDir, term, filters };
+    }
+    case RECEIVE_EMAILS: {
+      let { total, last_page, current_page, data } = payload.response;
+
+      data = data.map((m) => {
+        let sent_date = m.sent_date
+          ? epochToMomentTimeZone(m.sent_date, "UTC").format(
+              "MMMM Do YYYY, h:mm:ss a"
+            )
+          : "";
+        return {
+          ...m,
+          template: m.template.identifier,
+          sent_date: sent_date,
+          last_error: m.last_error ? m.last_error : "N/A"
+        };
+      });
+      return {
+        ...state,
+        emails: data,
+        currentPage: current_page,
+        totalEmails: total,
+        lastPage: last_page
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default emailLogListReducer;

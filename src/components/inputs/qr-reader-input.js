@@ -11,67 +11,74 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import Swal from 'sweetalert2'
-import QrReader from 'modern-react-qr-reader'
-import { Modal } from 'react-bootstrap';
+import React from "react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import Swal from "sweetalert2";
+import QrReader from "modern-react-qr-reader";
+import { Modal } from "react-bootstrap";
 
 export default class QrReaderInput extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      showModal: false
+    };
 
-        this.state = {
-            showModal: false
-        };
+    this.handleScan = this.handleScan.bind(this);
+    this.handleError = this.handleError.bind(this);
+  }
 
-        this.handleScan = this.handleScan.bind(this);
-        this.handleError = this.handleError.bind(this);
+  handleScan(data) {
+    if (data) {
+      this.setState({ showModal: false });
+      this.props.onScan(data);
     }
+  }
 
+  handleError(err) {
+    this.setState({ showModal: false });
 
-    handleScan(data) {
-        if (data) {
-            this.setState({showModal: false});
-            this.props.onScan(data);
-        }
-    }
+    Swal.fire({
+      title: "Error",
+      text: "cannot read QR code, please try again",
+      type: "warning"
+    });
+  }
 
-    handleError(err) {
-        this.setState({showModal: false});
+  render() {
+    let { showModal } = this.state;
 
-        Swal.fire({
-            title: "Error",
-            text: "cannot read QR code, please try again",
-            type: "warning",
-        });
-    }
+    return (
+      <div>
+        <button
+          className="btn btn-default"
+          onClick={() => {
+            this.setState({ showModal: true });
+          }}
+        >
+          Scan QR
+        </button>
 
-    render() {
-        let { showModal } = this.state;
-
-        return (
-            <div>
-                <button className="btn btn-default" onClick={() => {this.setState({showModal: true})}} >
-                    Scan QR
-                </button>
-
-                <Modal show={showModal} onHide={() => {this.setState({showModal: false})}} >
-                    <Modal.Header closeButton>
-                        <Modal.Title>Scan QR</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <QrReader
-                            delay={300}
-                            onError={this.handleError}
-                            onScan={this.handleScan}
-                            style={{ width: '100%' }}
-                        />
-                    </Modal.Body>
-                </Modal>
-            </div>
-        );
-
-    }
+        <Modal
+          show={showModal}
+          onHide={() => {
+            this.setState({ showModal: false });
+          }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Scan QR</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <QrReader
+              delay={300}
+              onError={this.handleError}
+              onScan={this.handleScan}
+              style={{ width: "100%" }}
+            />
+          </Modal.Body>
+        </Modal>
+      </div>
+    );
+  }
 }

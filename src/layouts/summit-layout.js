@@ -11,31 +11,31 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
-import EditSummitPage from '../pages/summits/edit-summit-page';
-import SummitIdLayout from './summit-id-layout'
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
+import EditSummitPage from "../pages/summits/edit-summit-page";
+import SummitIdLayout from "./summit-id-layout";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class SummitLayout extends React.Component {
+  render() {
+    const { match } = this.props;
 
-    render(){
-        const { match } = this.props;
-
-        return(
-            <div>
-                <Switch>
-                    <Route exact strict path={`${match.url}/new`} component={EditSummitPage}/>
-                    <Route path={`${match.url}/:summit_id`} component={SummitIdLayout}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+    return (
+      <div>
+        <Switch>
+          <Route
+            exact
+            strict
+            path={`${match.url}/new`}
+            component={EditSummitPage}
+          />
+          <Route path={`${match.url}/:summit_id`} component={SummitIdLayout} />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
 export default withRouter(SummitLayout);
-
-

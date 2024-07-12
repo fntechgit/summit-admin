@@ -11,11 +11,18 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
-const TextAreaInputWithCounter = ({ className, maxLength, rows, id, value, onChange, ...rest }) => {
-
+const TextAreaInputWithCounter = ({
+  className,
+  maxLength,
+  rows,
+  id,
+  value,
+  onChange,
+  ...rest
+}) => {
   return (
     <>
       <textarea
@@ -27,21 +34,21 @@ const TextAreaInputWithCounter = ({ className, maxLength, rows, id, value, onCha
         onChange={onChange}
         {...rest}
       />
-      <span className='character-counter'>{`${value?.length}/${maxLength}`}</span>
+      <span className="character-counter">{`${value?.length}/${maxLength}`}</span>
     </>
   );
-}
+};
 
 TextAreaInputWithCounter.propTypes = {
-    className: PropTypes.string,
-    rows: PropTypes.number,
-    maxLength: PropTypes.number.isRequired,
-    id: PropTypes.string,
-    onChange: PropTypes.func.isRequired
-}
+  className: PropTypes.string,
+  rows: PropTypes.number,
+  maxLength: PropTypes.number.isRequired,
+  id: PropTypes.string,
+  onChange: PropTypes.func.isRequired
+};
 
 TextAreaInputWithCounter.defaultProps = {
-    rows: 5,    
-}
+  rows: 5
+};
 
 export default TextAreaInputWithCounter;

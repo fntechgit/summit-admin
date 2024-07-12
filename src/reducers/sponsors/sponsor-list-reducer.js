@@ -11,67 +11,69 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_SPONSORS,
-    REQUEST_SPONSORS,
-    SPONSOR_DELETED,
-    SPONSOR_ORDER_UPDATED
-} from '../../actions/sponsor-actions';
+import {
+  RECEIVE_SPONSORS,
+  REQUEST_SPONSORS,
+  SPONSOR_DELETED,
+  SPONSOR_ORDER_UPDATED
+} from "../../actions/sponsor-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    sponsors            : [],
-    order               : 'order',
-    orderDir            : 1,
-    totalSponsors       : 0,
+  sponsors: [],
+  order: "order",
+  orderDir: 1,
+  totalSponsors: 0
 };
 
 const sponsorListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_SPONSORS: {
-            let {order, orderDir, term} = payload;
-
-            return {...state, order, orderDir, term }
-        }
-        case RECEIVE_SPONSORS: {
-            let { total } = payload.response;
-            let sponsors = payload.response.data;
-
-            sponsors = sponsors.map(s => {
-                let sponsorship_name = (s.sponsorship) ? s.sponsorship.type.name : '';
-                let company_name = (s.company) ? s.company.name : '';
-
-                return ({...s, sponsorship_name, company_name});
-            });
-
-            return {...state, sponsors: sponsors, totalSponsors: total };
-        }
-        case SPONSOR_ORDER_UPDATED: {
-            let sponsors = payload.map((s, index) => {
-                let sponsorship_name = (s.sponsorship) ? s.sponsorship.type.name : '';
-                let company_name = (s.company) ? s.company.name : '';
-                let order = s.order + index;
-
-                return ({...s, sponsorship_name, company_name, order});
-            });
-
-            return {...state, sponsors: sponsors };
-        }
-        case SPONSOR_DELETED: {
-            let {sponsorId} = payload;
-            return {...state, sponsors: state.sponsors.filter(t => t.id !== sponsorId)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_SPONSORS: {
+      let { order, orderDir, term } = payload;
+
+      return { ...state, order, orderDir, term };
+    }
+    case RECEIVE_SPONSORS: {
+      let { total } = payload.response;
+      let sponsors = payload.response.data;
+
+      sponsors = sponsors.map((s) => {
+        let sponsorship_name = s.sponsorship ? s.sponsorship.type.name : "";
+        let company_name = s.company ? s.company.name : "";
+
+        return { ...s, sponsorship_name, company_name };
+      });
+
+      return { ...state, sponsors: sponsors, totalSponsors: total };
+    }
+    case SPONSOR_ORDER_UPDATED: {
+      let sponsors = payload.map((s, index) => {
+        let sponsorship_name = s.sponsorship ? s.sponsorship.type.name : "";
+        let company_name = s.company ? s.company.name : "";
+        let order = s.order + index;
+
+        return { ...s, sponsorship_name, company_name, order };
+      });
+
+      return { ...state, sponsors: sponsors };
+    }
+    case SPONSOR_DELETED: {
+      let { sponsorId } = payload;
+      return {
+        ...state,
+        sponsors: state.sponsors.filter((t) => t.id !== sponsorId)
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default sponsorListReducer;

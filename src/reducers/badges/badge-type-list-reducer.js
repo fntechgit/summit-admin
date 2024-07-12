@@ -11,53 +11,58 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_BADGE_TYPES,
-    REQUEST_BADGE_TYPES,
-    BADGE_TYPE_DELETED,
-} from '../../actions/badge-actions';
+import {
+  RECEIVE_BADGE_TYPES,
+  REQUEST_BADGE_TYPES,
+  BADGE_TYPE_DELETED
+} from "../../actions/badge-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    badgeTypes            : [],
-    order               : 'name',
-    orderDir            : 1,
-    totalBadgeTypes       : 0
+  badgeTypes: [],
+  order: "name",
+  orderDir: 1,
+  totalBadgeTypes: 0
 };
 
 const badgeTypeListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_BADGE_TYPES: {
-            let {order, orderDir} = payload;
-
-            return {...state, order, orderDir }
-        }
-        case RECEIVE_BADGE_TYPES: {
-            let { total } = payload.response;
-            let badgeTypes = payload.response.data;
-
-            badgeTypes = badgeTypes.map(b => {
-                let access_level_names = b.access_levels.map(al => al.name).join(' ,');
-                return {...b, access_level_names};
-            });
-
-            return {...state, badgeTypes: badgeTypes, totalBadgeTypes: total };
-        }
-        case BADGE_TYPE_DELETED: {
-            let {badgeTypeId} = payload;
-            return {...state, badgeTypes: state.badgeTypes.filter(t => t.id !== badgeTypeId), totalBadgeTypes: (state.totalBadgeTypes - 1)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_BADGE_TYPES: {
+      let { order, orderDir } = payload;
+
+      return { ...state, order, orderDir };
+    }
+    case RECEIVE_BADGE_TYPES: {
+      let { total } = payload.response;
+      let badgeTypes = payload.response.data;
+
+      badgeTypes = badgeTypes.map((b) => {
+        let access_level_names = b.access_levels
+          .map((al) => al.name)
+          .join(" ,");
+        return { ...b, access_level_names };
+      });
+
+      return { ...state, badgeTypes: badgeTypes, totalBadgeTypes: total };
+    }
+    case BADGE_TYPE_DELETED: {
+      let { badgeTypeId } = payload;
+      return {
+        ...state,
+        badgeTypes: state.badgeTypes.filter((t) => t.id !== badgeTypeId),
+        totalBadgeTypes: state.totalBadgeTypes - 1
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default badgeTypeListReducer;

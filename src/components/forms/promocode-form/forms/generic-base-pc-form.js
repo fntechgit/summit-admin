@@ -1,11 +1,13 @@
 import React from "react";
 import T from "i18n-react";
 import BasePCForm from "./base-pc-form";
-import {Dropdown} from "openstack-uicore-foundation/lib/components";
+import { Dropdown } from "openstack-uicore-foundation/lib/components";
 
 const GenericBasePCForm = (props) => {
-
-  let ticket_types_ddl = props.summit.ticket_types.map(f => ({label:f.name, value:f.id}));
+  let ticket_types_ddl = props.summit.ticket_types.map((f) => ({
+    label: f.name,
+    value: f.id
+  }));
 
   return (
     <>
@@ -17,7 +19,9 @@ const GenericBasePCForm = (props) => {
             id="allowed_ticket_types"
             value={props.entity.allowed_ticket_types}
             onChange={props.handleChange}
-            placeholder={T.translate("edit_promocode.placeholders.select_ticket_types")}
+            placeholder={T.translate(
+              "edit_promocode.placeholders.select_ticket_types"
+            )}
             options={ticket_types_ddl}
             isMulti
           />
