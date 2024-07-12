@@ -6,7 +6,7 @@ import { Pagination } from "react-bootstrap";
 import { connect } from "react-redux";
 import { clearAuditLogParams, getAuditLog } from "../../actions/audit-log-actions";
 
-const AuditLogs = ({ entityFilter = [],  term, logEntries, perPage, lastPage, currentPage, order, orderDir, columns, getAuditLog, clearAuditLogParams, filters }) => {
+const AuditLogs = ({ entityFilter = [], currentSummit, term, logEntries, perPage, lastPage, currentPage, order, orderDir, columns, getAuditLog, clearAuditLogParams, filters }) => {
 
   const defaultFilters = {
     user_id_filter: [],
@@ -167,8 +167,8 @@ const AuditLogs = ({ entityFilter = [],  term, logEntries, perPage, lastPage, cu
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
                 inputProps={{ placeholder: T.translate("audit_log.placeholders.created_date_from") }}
                 onChange={(ev) => handleChangeDateFilter(ev, false)}
-                timezone={'UTC'}
-                value={epochToMomentTimeZone(auditLogFilters.created_date_filter[0], 'UTC')}
+                timezone={currentSummit.time_zone_id}
+                value={epochToMomentTimeZone(auditLogFilters.created_date_filter[0], currentSummit.time_zone_id)}
                 className={'event-list-date-picker'}
               />
             </div>
@@ -178,8 +178,8 @@ const AuditLogs = ({ entityFilter = [],  term, logEntries, perPage, lastPage, cu
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
                 inputProps={{ placeholder: T.translate("audit_log.placeholders.created_date_to") }}
                 onChange={(ev) => handleChangeDateFilter(ev, true)}
-                timezone={'UTC'}
-                value={epochToMomentTimeZone(auditLogFilters.created_date_filter[1], 'UTC')}
+                timezone={currentSummit.time_zone_id}
+                value={epochToMomentTimeZone(auditLogFilters.created_date_filter[1], currentSummit.time_zone_id)}
                 className={'event-list-date-picker'}
               />
             </div>
@@ -218,7 +218,8 @@ const AuditLogs = ({ entityFilter = [],  term, logEntries, perPage, lastPage, cu
   );
 };
 
-const mapStateToProps = ({ auditLogState }) => ({
+const mapStateToProps = ({ currentSummitState, auditLogState }) => ({
+  currentSummit: currentSummitState.currentSummit,
   ...auditLogState,
 });
 

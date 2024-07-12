@@ -82,7 +82,7 @@ const parseFilters = (filters, term = null) => {
         if (isNumericString(term)) {
             searchString += `entity_id==${term}`;
         } else {
-            searchString += `action=@${escapedTerm}`
+            searchString += `action@@${escapedTerm}`
         }
 
         filter.push(searchString);
