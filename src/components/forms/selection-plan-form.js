@@ -66,9 +66,7 @@ class SelectionPlanForm extends React.Component {
         this.handleAddEventType = this.handleAddEventType.bind(this);
         this.handleAddRatingType = this.handleAddRatingType.bind(this);
         this.handleDeleteRatingType = this.handleDeleteRatingType.bind(this);
-        this.handleEditRatingType = this.handleEditRatingType.bind(this);
-        this.handleAddProgressFlag = this.handleAddProgressFlag.bind(this);
-        this.handleEditProgressFlag = this.handleEditProgressFlag.bind(this);
+        this.handleEditRatingType = this.handleEditRatingType.bind(this);        
         this.handleRemoveProgressFlag = this.handleRemoveProgressFlag.bind(this);
         this.toggleSection = this.toggleSection.bind(this);
         this.handleNotificationEmailTemplateChange = this.handleNotificationEmailTemplateChange.bind(this);
@@ -239,15 +237,7 @@ class SelectionPlanForm extends React.Component {
     linkSummitProgressFlag(progressFlag) {
         let {currentSummit} = this.props;
         this.props.onAssignProgressFlag2SelectionPlan(currentSummit.id, this.state.entity.id, progressFlag.id);
-    }
-
-    handleAddProgressFlag() {
-        this.props.onAddProgressFlag();
-    }
-
-    handleEditProgressFlag(progressFlagId) {
-        this.props.onEditProgressFlag(progressFlagId)
-    }
+    }    
 
     handleRemoveProgressFlag(progressFlagId) {
         this.props.onUnassignProgressFlag(progressFlagId)
@@ -375,7 +365,6 @@ class SelectionPlanForm extends React.Component {
             sortCol: actionTypesOrder,
             sortDir: actionTypesOrderDir,
             actions: {
-                edit: {onClick: this.handleEditProgressFlag},
                 delete: {onClick: this.handleRemoveProgressFlag},
             }
         }
@@ -707,15 +696,11 @@ class SelectionPlanForm extends React.Component {
                         <div className={'row'}>
                             <Many2ManyDropDown id="addAllowedPresentationActionType"
                                                isClearable={true}
+                                               CSSClass="col-md-9"
                                                placeholder={T.translate("edit_selection_plan.placeholders.link_presentation_action_type")}
                                                fetchOptions={this.fetchSummitPresentationActionTypes}
                                                onAdd={this.linkSummitProgressFlag}
-                            />
-                            <div className="col-md-6 text-right col-md-offset-6">
-                                <button className="btn btn-primary right-space" onClick={this.handleAddProgressFlag}>
-                                    {T.translate("edit_selection_plan.add_presentation_action_type")}
-                                </button>
-                            </div>
+                            />                            
                         </div>
                         {entity.allowed_presentation_action_types.length === 0 &&
                         <div>{T.translate("edit_selection_plan.no_presentation_action_types")}</div>
