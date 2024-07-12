@@ -730,54 +730,56 @@ class SelectionPlanForm extends React.Component {
                         />
                         }
                     </Panel>
-                    <Panel
-                        show={showSection === 'allowed_members'}
-                        title={T.translate("edit_selection_plan.allowed_members")}
-                        handleClick={() => {
-                            this.toggleSection('allowed_members')
-                        }}
-                        className="allowed-members-panel"
-                    >
-                        <div className="allowed-members-header">
-                            <div className="pull-right input-group">
-                                <input className="form-control"
-                                       onChange={ev => this.setState({newMemberEmail: ev.target.value})}
-                                       value={newMemberEmail}/>
-                                <span className="input-group-btn">
-                                    <button type="button" className="btn btn-default add-button"
-                                            onClick={this.handleAddAllowedMember} disabled={!newMemberEmail}>
-                                        {T.translate("general.add")}
+                    {!this.props.entity.is_hidden &&
+                        <Panel
+                            show={showSection === 'allowed_members'}
+                            title={T.translate("edit_selection_plan.allowed_members")}
+                            handleClick={() => {
+                                this.toggleSection('allowed_members')
+                            }}
+                            className="allowed-members-panel"
+                        >
+                            <div className="allowed-members-header">
+                                <div className="pull-right input-group">
+                                    <input className="form-control"
+                                        onChange={ev => this.setState({newMemberEmail: ev.target.value})}
+                                        value={newMemberEmail}/>
+                                    <span className="input-group-btn">
+                                        <button type="button" className="btn btn-default add-button"
+                                                onClick={this.handleAddAllowedMember} disabled={!newMemberEmail}>
+                                            {T.translate("general.add")}
+                                        </button>
+                                    </span>
+                                </div>
+
+                                <div className="pull-left input-group">
+                                    <button type="button" className="btn btn-primary"
+                                            onClick={() => this.setState({showImportModal: true})}>
+                                        {T.translate("edit_selection_plan.import")}
                                     </button>
-                                </span>
+                                </div>
                             </div>
 
-                            <div className="pull-left input-group">
-                                <button type="button" className="btn btn-primary"
-                                        onClick={() => this.setState({showImportModal: true})}>
-                                    {T.translate("edit_selection_plan.import")}
-                                </button>
-                            </div>
-                        </div>
-
-                        <Table
-                            data={allowedMembers.data}
-                            columns={allowedMembersColumns}
-                            options={allowedMembersOptions}
-                        />
-                        <Pagination
-                            bsSize="medium"
-                            prev
-                            next
-                            first
-                            last
-                            ellipsis
-                            boundaryLinks
-                            maxButtons={10}
-                            items={allowedMembers.lastPage}
-                            activePage={allowedMembers.currentPage}
-                            onSelect={this.handleAllowedMembersPageChange}
-                        />
-                    </Panel>
+                            <Table
+                                data={allowedMembers.data}
+                                columns={allowedMembersColumns}
+                                options={allowedMembersOptions}
+                            />
+                            <Pagination
+                                bsSize="medium"
+                                prev
+                                next
+                                first
+                                last
+                                ellipsis
+                                boundaryLinks
+                                maxButtons={10}
+                                items={allowedMembers.lastPage}
+                                activePage={allowedMembers.currentPage}
+                                onSelect={this.handleAllowedMembersPageChange}
+                            />
+                        </Panel>
+                    }
                     <Panel
                         show={showSection === 'cfp_settings'}
                         title={T.translate("edit_selection_plan.cfp_settings")}
