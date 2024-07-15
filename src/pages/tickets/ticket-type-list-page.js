@@ -9,84 +9,151 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ */
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import { ActionDropdown, FreeTextSearch, Dropdown, Table, DateTimePicker } from "openstack-uicore-foundation/lib/components";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods"
+import {
+  ActionDropdown,
+  FreeTextSearch,
+  Dropdown,
+  Table,
+  DateTimePicker
+} from "openstack-uicore-foundation/lib/components";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { getSummitById } from "../../actions/summit-actions";
-import { getTicketTypes, deleteTicketType, seedTicketTypes, changeTicketTypesCurrency } from "../../actions/ticket-actions";
-import { getBadgeTypes } from "../../actions/badge-actions"
+import {
+  getTicketTypes,
+  deleteTicketType,
+  seedTicketTypes,
+  changeTicketTypesCurrency
+} from "../../actions/ticket-actions";
+import { getBadgeTypes } from "../../actions/badge-actions";
 import { handleDDLSortByLabel } from "../../utils/methods";
+import { DATE_FILTER_ARRAY_SIZE } from "../../utils/constants";
 
-const TicketTypeListPage = ({ ticketTypes, currentSummit, term, order, orderDir, currentPage, perPage, lastPage, filters, totalTicketTypes, ...props }) => {
-
+const TicketTypeListPage = function ({
+  ticketTypes,
+  currentSummit,
+  term,
+  order,
+  orderDir,
+  currentPage,
+  perPage,
+  lastPage,
+  filters,
+  totalTicketTypes,
+  ...props
+}) {
   const defaultFilters = {
     audience_filter: [],
     badge_type_filter: [],
-    sale_period_filter: Array(2).fill(null),
+    sale_period_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null)
   };
 
-  const [enabledFilters, setEnabledFilters] = useState(Object.keys(filters).filter(e => Array.isArray(filters[e]) ? filters[e]?.some(e => e !== null) : filters[e]?.length > 0));
-  const [ticketTypeFilters, setTicketTypeFilters] = useState({ ...defaultFilters, ...filters });
+  const [enabledFilters, setEnabledFilters] = useState(
+    Object.keys(filters).filter((e) =>
+      Array.isArray(filters[e])
+        ? filters[e]?.some((e) => e !== null)
+        : filters[e]?.length > 0
+    )
+  );
+  const [ticketTypeFilters, setTicketTypeFilters] = useState({
+    ...defaultFilters,
+    ...filters
+  });
 
   const [selectedColumns, setSelectedColumns] = useState([]);
 
   useEffect(() => {
     if (currentSummit) {
-      props.getTicketTypes(currentSummit, term, order, orderDir, currentPage, perPage, ticketTypeFilters);
+      props.getTicketTypes(
+        currentSummit,
+        term,
+        order,
+        orderDir,
+        currentPage,
+        perPage,
+        ticketTypeFilters
+      );
       if (!currentSummit.badge_types) {
         props.getBadgeTypes();
       }
     }
   }, [currentSummit?.id]);
 
-
   const handlePageChange = (page) => {
-    props.getTicketTypes(currentSummit, term, order, orderDir, page, perPage, ticketTypeFilters);
-  }
+    props.getTicketTypes(
+      currentSummit,
+      term,
+      order,
+      orderDir,
+      page,
+      perPage,
+      ticketTypeFilters
+    );
+  };
 
   const handleEdit = (ticket_type_id) => {
-    props.history.push(`/app/summits/${currentSummit.id}/ticket-types/${ticket_type_id}`);
-  }
+    props.history.push(
+      `/app/summits/${currentSummit.id}/ticket-types/${ticket_type_id}`
+    );
+  };
 
   const handleSeedTickets = (ev) => {
     ev.preventDefault();
     props.seedTicketTypes();
-  }
+  };
 
   const handleDelete = (ticketTypeId) => {
-    const ticketType = ticketTypes.find(t => t.id === ticketTypeId);
+    const ticketType = ticketTypes.find((t) => t.id === ticketTypeId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: `${T.translate("ticket_type_list.remove_warning")} ${ticketType.name}`,
+      text: `${T.translate("ticket_type_list.remove_warning")} ${
+        ticketType.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         props.deleteTicketType(ticketTypeId);
       }
     });
-  }
+  };
 
-  const handleSort = (index, key, dir, func) => {
-    props.getTicketTypes(currentSummit, term, key, dir, currentPage, perPage, ticketTypeFilters);
-  }
+  const handleSort = (index, key, dir) => {
+    props.getTicketTypes(
+      currentSummit,
+      term,
+      key,
+      dir,
+      currentPage,
+      perPage,
+      ticketTypeFilters
+    );
+  };
 
-  const handleNewTicketType = (ev) => {
+  const handleNewTicketType = () => {
     props.history.push(`/app/summits/${currentSummit.id}/ticket-types/new`);
-  }
+  };
 
   const handleSearch = (newTerm) => {
-    props.getTicketTypes(currentSummit, newTerm, order, orderDir, currentPage, perPage, ticketTypeFilters);
-  }
+    props.getTicketTypes(
+      currentSummit,
+      newTerm,
+      order,
+      orderDir,
+      currentPage,
+      perPage,
+      ticketTypeFilters
+    );
+  };
 
   const handleFiltersChange = (ev) => {
     const { value } = ev.target;
@@ -95,55 +162,76 @@ const TicketTypeListPage = ({ ticketTypes, currentSummit, term, order, orderDir,
         setEnabledFilters(value);
         setTicketTypeFilters(defaultFilters);
       } else {
-        const removedFilter = enabledFilters.filter(e => !value.includes(e))[0];
-        const defaultValue = Array.isArray(ticketTypeFilters[removedFilter]) ? [] : "";
-        let newTicketTypeFilter = { ...ticketTypeFilters, [removedFilter]: defaultValue };
+        const removedFilter = enabledFilters.filter(
+          (e) => !value.includes(e)
+        )[0];
+        const defaultValue = Array.isArray(ticketTypeFilters[removedFilter])
+          ? []
+          : "";
+        const newTicketTypeFilter = {
+          ...ticketTypeFilters,
+          [removedFilter]: defaultValue
+        };
         setEnabledFilters(value);
         setTicketTypeFilters(newTicketTypeFilter);
       }
     } else {
       setEnabledFilters(value);
     }
-  }
+  };
 
   const handleChangeDateFilter = (ev, lastDate) => {
     const { value, id } = ev.target;
     const newDateFilter = ticketTypeFilters[id];
 
-    setTicketTypeFilters({ ...ticketTypeFilters, [id]: lastDate ? [newDateFilter[0], value.unix()] : [value.unix(), newDateFilter[1]] })
-  }
+    setTicketTypeFilters({
+      ...ticketTypeFilters,
+      [id]: lastDate
+        ? [newDateFilter[0], value.unix()]
+        : [value.unix(), newDateFilter[1]]
+    });
+  };
 
   const handleTicketTypeFilterChange = (ev) => {
-    let { value, type, id } = ev.target;
+    const { value, id } = ev.target;
     setTicketTypeFilters({ ...ticketTypeFilters, [id]: value });
-  }
+  };
 
   const handleApplyTicketTypeFilters = () => {
-    props.getTicketTypes(currentSummit, term, order, orderDir, currentPage, perPage, ticketTypeFilters);
-  }
+    props.getTicketTypes(
+      currentSummit,
+      term,
+      order,
+      orderDir,
+      currentPage,
+      perPage,
+      ticketTypeFilters
+    );
+  };
 
   const handleChangeCurrency = (currency) => {
-
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("ticket_type_list.change_currency_warning") + " " + currency,
+      text: `${T.translate(
+        "ticket_type_list.change_currency_warning"
+      )} ${currency}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       confirmButtonText: T.translate("ticket_type_list.yes_change")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         props.changeTicketTypesCurrency(currency);
       }
     });
-  }
+  };
 
   const handleColumnsChange = (ev) => {
     const { value } = ev.target;
-    let newColumns = value;
+    const newColumns = value;
 
     setSelectedColumns(newColumns);
-  }
+  };
 
   const fieldNames = [
     { columnKey: "audience", value: "audience" },
@@ -152,41 +240,69 @@ const TicketTypeListPage = ({ ticketTypes, currentSummit, term, order, orderDir,
     { columnKey: "cost", value: "cost" },
     { columnKey: "quantity_2_sell", value: "quantity_2_sell" },
     { columnKey: "sales_start_date", value: "sales_start_date" },
-    { columnKey: "sales_end_date", value: "sales_end_date" },
+    { columnKey: "sales_end_date", value: "sales_end_date" }
   ];
 
-  let showColumns = fieldNames
-    .filter(f => selectedColumns.includes(f.columnKey))
-    .map(f2 => {
+  const showColumns = fieldNames
+    .filter((f) => selectedColumns.includes(f.columnKey))
+    .map((f2) => {
       let c = {
         columnKey: f2.columnKey,
         value: T.translate(`ticket_type_list.${f2.value}`),
-        sortable: f2.sortable,
-      }
+        sortable: f2.sortable
+      };
       // optional fields
-      if (f2.hasOwnProperty("title"))
-        c = { ...c, title: f2.title }
+      if (f2.hasOwnProperty("title")) c = { ...c, title: f2.title };
 
-      if (f2.hasOwnProperty("render"))
-        c = { ...c, render: f2.render }
+      if (f2.hasOwnProperty("render")) c = { ...c, render: f2.render };
 
       return c;
     });
 
   let columns = [
-    { columnKey: "id", value: T.translate("ticket_type_list.id"), sortable: true },
-    { columnKey: "name", value: T.translate("ticket_type_list.name"), sortable: true },
-    { columnKey: "description", value: T.translate("ticket_type_list.description") },
+    {
+      columnKey: "id",
+      value: T.translate("ticket_type_list.id"),
+      sortable: true
+    },
+    {
+      columnKey: "name",
+      value: T.translate("ticket_type_list.name"),
+      sortable: true
+    },
+    {
+      columnKey: "description",
+      value: T.translate("ticket_type_list.description")
+    }
   ];
 
   const ddl_columns = [
-    { value: "audience", label: T.translate("ticket_type_list.audience"), sortable: true },
-    { value: "external_id", label: T.translate("ticket_type_list.external_id") },
-    { value: "badge_type_name", label: T.translate("ticket_type_list.badge_type_name") },
+    {
+      value: "audience",
+      label: T.translate("ticket_type_list.audience"),
+      sortable: true
+    },
+    {
+      value: "external_id",
+      label: T.translate("ticket_type_list.external_id")
+    },
+    {
+      value: "badge_type_name",
+      label: T.translate("ticket_type_list.badge_type_name")
+    },
     { value: "cost", label: T.translate("ticket_type_list.cost") },
-    { value: "quantity_2_sell", label: T.translate("ticket_type_list.quantity_2_sell") },
-    { value: "sales_start_date", label: T.translate("ticket_type_list.sales_start_date") },
-    { value: "sales_end_date", label: T.translate("ticket_type_list.sales_end_date") },
+    {
+      value: "quantity_2_sell",
+      label: T.translate("ticket_type_list.quantity_2_sell")
+    },
+    {
+      value: "sales_start_date",
+      label: T.translate("ticket_type_list.sales_start_date")
+    },
+    {
+      value: "sales_end_date",
+      label: T.translate("ticket_type_list.sales_end_date")
+    }
   ];
 
   columns = [...columns, ...showColumns];
@@ -198,7 +314,7 @@ const TicketTypeListPage = ({ ticketTypes, currentSummit, term, order, orderDir,
       edit: { onClick: handleEdit },
       delete: { onClick: handleDelete }
     }
-  }
+  };
 
   const filters_ddl = [
     { label: "Audience", value: "audience_filter" },
@@ -209,143 +325,189 @@ const TicketTypeListPage = ({ ticketTypes, currentSummit, term, order, orderDir,
   const audienceDDL = [
     { label: "All", value: "All" },
     { label: "With Invitation", value: "WithInvitation" },
-    { label: "Without Invitation", value: "WithoutInvitation" },
+    { label: "Without Invitation", value: "WithoutInvitation" }
   ];
 
-  const badge_types_ddl = currentSummit.badge_types?.map(bt => ({ value: bt.id, label: bt.name }))
+  const badge_types_ddl = currentSummit.badge_types?.map((bt) => ({
+    value: bt.id,
+    label: bt.name
+  }));
 
-  const currencyOptions = currentSummit.supported_currencies.map(c => ({ value: c, label: c }));
-  const defaultCurrency = currentSummit.default_ticket_type_currency || ticketTypes?.[0]?.currency || "USD";
+  const currencyOptions = currentSummit.supported_currencies.map((c) => ({
+    value: c,
+    label: c
+  }));
+  const defaultCurrency =
+    currentSummit.default_ticket_type_currency ||
+    ticketTypes?.[0]?.currency ||
+    "USD";
 
-  if (!currentSummit.id) return (<div />);
+  if (!currentSummit.id) return <div />;
 
   return (
     <div className="container">
-      <h3> {T.translate("ticket_type_list.ticket_type_list")} ({totalTicketTypes})</h3>
-      <div className={"row"}>
+      <h3>
+        {" "}
+        {T.translate("ticket_type_list.ticket_type_list")} ({totalTicketTypes})
+      </h3>
+      <div className="row">
         <div className="col-md-5">
           <FreeTextSearch
             value={term}
-            placeholder={T.translate("ticket_type_list.placeholders.search_ticket_types")}
+            placeholder={T.translate(
+              "ticket_type_list.placeholders.search_ticket_types"
+            )}
             onSearch={handleSearch}
           />
         </div>
         <div className="col-md-7 text-right">
-          {ticketTypes?.length > 0 &&
+          {ticketTypes?.length > 0 && (
             <span className="right-space">
               <ActionDropdown
                 value={{ value: defaultCurrency, label: defaultCurrency }}
                 options={currencyOptions}
                 actionLabel={T.translate("ticket_type_list.apply")}
-                placeholder={T.translate("ticket_type_list.placeholders.select_currency")}
+                placeholder={T.translate(
+                  "ticket_type_list.placeholders.select_currency"
+                )}
                 onClick={handleChangeCurrency}
               />
             </span>
-          }
-          <button className="btn btn-primary right-space" onClick={handleNewTicketType}>
+          )}
+          <button
+            className="btn btn-primary right-space"
+            onClick={handleNewTicketType}
+            type="button"
+          >
             {T.translate("ticket_type_list.add_ticket_type")}
           </button>
-          {currentSummit.external_registration_feed_type == "Eventbrite" &&
-            <button className="btn btn-default" onClick={handleSeedTickets}>
+          {currentSummit.external_registration_feed_type === "Eventbrite" && (
+            <button
+              className="btn btn-default"
+              onClick={handleSeedTickets}
+              type="button"
+            >
               {T.translate("ticket_type_list.seed_tickets")}
             </button>
-          }
+          )}
         </div>
       </div>
       <hr />
-      <div className={"row"}>
-        <div className={"col-md-6"}>
+      <div className="row">
+        <div className="col-md-6">
           <Dropdown
             id="enabled_filters"
-            placeholder={"Enabled Filters"}
+            placeholder="Enabled Filters"
             value={enabledFilters}
             onChange={handleFiltersChange}
             options={handleDDLSortByLabel(filters_ddl)}
-            isClearable={true}
-            isMulti={true}
+            isClearable
+            isMulti
           />
         </div>
-        <div className={"col-md-6"}>
-          <button className="btn btn-primary right-space" onClick={handleApplyTicketTypeFilters}>
+        <div className="col-md-6">
+          <button
+            className="btn btn-primary right-space"
+            onClick={handleApplyTicketTypeFilters}
+            type="button"
+          >
             {T.translate("ticket_type_list.apply_filters")}
           </button>
         </div>
       </div>
       <div className="filters-row">
-        {enabledFilters.includes("audience_filter") &&
-          <div className={"col-md-6"}>
+        {enabledFilters.includes("audience_filter") && (
+          <div className="col-md-6">
             <Dropdown
               id="audience_filter"
               value={ticketTypeFilters.audience_filter}
               onChange={handleTicketTypeFilterChange}
               options={audienceDDL}
-              isClearable={true}
-              placeholder={"Filter By Audience"}
+              isClearable
+              placeholder="Filter By Audience"
               isMulti
             />
           </div>
-        }
-        {enabledFilters.includes("badge_type_filter") &&
-          <div className={"col-md-6"}>
+        )}
+        {enabledFilters.includes("badge_type_filter") && (
+          <div className="col-md-6">
             <Dropdown
               id="badge_type_filter"
               value={ticketTypeFilters.badge_type_filter}
               onChange={handleTicketTypeFilterChange}
               options={badge_types_ddl}
-              isClearable={true}
-              placeholder={"Filter By Badge Type"}
+              isClearable
+              placeholder="Filter By Badge Type"
               isMulti
             />
           </div>
-        }
-        {enabledFilters.includes("sale_period_filter") &&
+        )}
+        {enabledFilters.includes("sale_period_filter") && (
           <>
-            <div className={"col-md-3"}>
+            <div className="col-md-3">
               <DateTimePicker
                 id="sale_period_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{ placeholder: T.translate("ticket_type_list.placeholders.sale_period_from") }}
+                inputProps={{
+                  placeholder: T.translate(
+                    "ticket_type_list.placeholders.sale_period_from"
+                  )
+                }}
                 onChange={(ev) => handleChangeDateFilter(ev, false)}
                 timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(ticketTypeFilters.sale_period_filter[0], currentSummit.time)}
-                className={"event-list-date-picker"}
+                value={epochToMomentTimeZone(
+                  ticketTypeFilters.sale_period_filter[0],
+                  currentSummit.time
+                )}
+                className="event-list-date-picker"
               />
             </div>
-            <div className={"col-md-3"}>
+            <div className="col-md-3">
               <DateTimePicker
                 id="sale_period_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{ placeholder: T.translate("ticket_type_list.placeholders.sale_period_to") }}
+                inputProps={{
+                  placeholder: T.translate(
+                    "ticket_type_list.placeholders.sale_period_to"
+                  )
+                }}
                 onChange={(ev) => handleChangeDateFilter(ev, true)}
                 timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(ticketTypeFilters.sale_period_filter[1], currentSummit.time_zone_id)}
-                className={"event-list-date-picker"}
+                value={epochToMomentTimeZone(
+                  ticketTypeFilters.sale_period_filter[1],
+                  currentSummit.time_zone_id
+                )}
+                className="event-list-date-picker"
               />
             </div>
           </>
-        }
+        )}
       </div>
       <hr />
-      <div className={"row"} style={{ marginBottom: 15 }}>
-        <div className={"col-md-12"}>
-          <label>{T.translate("ticket_type_list.select_fields")}</label>
+      <div className="row" style={{ marginBottom: 15 }}>
+        <div className="col-md-12">
+          <label htmlFor="select_fields">
+            {T.translate("ticket_type_list.select_fields")}
+          </label>
           <Dropdown
             id="select_fields"
-            placeholder={T.translate("ticket_type_list.placeholders.select_fields")}
+            placeholder={T.translate(
+              "ticket_type_list.placeholders.select_fields"
+            )}
             value={selectedColumns}
             onChange={handleColumnsChange}
             options={handleDDLSortByLabel(ddl_columns)}
-            isClearable={true}
-            isMulti={true}
+            isClearable
+            isMulti
           />
         </div>
       </div>
 
-      {ticketTypes.length === 0 &&
+      {ticketTypes.length === 0 && (
         <div>{T.translate("ticket_type_list.no_ticket_types")}</div>
-      }
+      )}
 
-      {ticketTypes.length > 0 &&
+      {ticketTypes.length > 0 && (
         <div>
           <Table
             options={table_options}
@@ -367,25 +529,24 @@ const TicketTypeListPage = ({ ticketTypes, currentSummit, term, order, orderDir,
             onSelect={handlePageChange}
           />
         </div>
-      }
-
+      )}
     </div>
-  )
-}
+  );
+};
 
-const mapStateToProps = ({ currentSummitState, currentTicketTypeListState }) => ({
+const mapStateToProps = ({
+  currentSummitState,
+  currentTicketTypeListState
+}) => ({
   currentSummit: currentSummitState.currentSummit,
   ...currentTicketTypeListState
-})
+});
 
-export default connect(
-  mapStateToProps,
-  {
-    getSummitById,
-    getBadgeTypes,
-    getTicketTypes,
-    deleteTicketType,
-    seedTicketTypes,
-    changeTicketTypesCurrency
-  }
-)(TicketTypeListPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getBadgeTypes,
+  getTicketTypes,
+  deleteTicketType,
+  seedTicketTypes,
+  changeTicketTypesCurrency
+})(TicketTypeListPage);

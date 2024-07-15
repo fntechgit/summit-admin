@@ -9,14 +9,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ */
 
-import React from 'react'
-import T from 'i18n-react/dist/i18n-react'
-import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
-import { Input, DateTimePicker, Dropdown } from 'openstack-uicore-foundation/lib/components';
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import {
+  Input,
+  DateTimePicker,
+  Dropdown
+} from "openstack-uicore-foundation/lib/components";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
-import TextAreaInputWithCounter from '../inputs/text-area-input-with-counter';
+import TextAreaInputWithCounter from "../inputs/text-area-input-with-counter";
+import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
 
 class TicketTypeForm extends React.Component {
   constructor(props) {
@@ -31,51 +36,55 @@ class TicketTypeForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const state = {};
-    scrollToError(this.props.errors);
+  componentDidUpdate(prevProps) {
+    const newState = {};
+    const { errors, entity } = this.props;
+    scrollToError(errors);
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
-      state.errors = {};
+    if (!shallowEqual(prevProps.entity, entity)) {
+      newState.entity = { ...entity };
+      newState.errors = {};
     }
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
+    if (!shallowEqual(prevProps.errors, errors)) {
+      newState.errors = { ...errors };
     }
 
-    if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
+    if (!isEmpty(newState)) {
+      this.setState((prevState) => ({ ...prevState, ...newState }));
     }
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+    const { entity: currentEntity, errors: currentErrors } = this.state;
+    const entity = { ...currentEntity };
+    const errors = { ...currentErrors };
+    const { id } = ev.target;
+    let { value } = ev.target;
 
     if (ev.target.type === "checkbox") {
       value = ev.target.checked;
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
     }
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
-    let entity = { ...this.state.entity };
+    const { onSubmit } = this.props;
+    const { entity } = this.state;
     ev.preventDefault();
 
-    this.props.onSubmit(this.state.entity);
+    onSubmit(entity);
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -86,18 +95,18 @@ class TicketTypeForm extends React.Component {
   render() {
     const { entity } = this.state;
     const { currentSummit } = this.props;
-    let currency_ddl = currentSummit.supported_currencies.map((i) => ({
+    const currency_ddl = currentSummit.supported_currencies.map((i) => ({
       label: i,
       value: i
     }));
-    let badge_type_ddl = currentSummit.badge_types
+    const badge_type_ddl = currentSummit.badge_types
       ? currentSummit.badge_types.map((bt) => ({
-        label: bt.name,
-        value: bt.id
-      }))
+          label: bt.name,
+          value: bt.id
+        }))
       : [];
 
-    let audience_ddl = [
+    const audience_ddl = [
       { label: "With Invitation", value: "WithInvitation" },
       { label: "Without Invitation", value: "WithoutInvitation" },
       { label: "All", value: "All" }
@@ -108,7 +117,10 @@ class TicketTypeForm extends React.Component {
         <input type="hidden" id="id" value={entity.id} />
         <div className="row form-group">
           <div className="col-md-4">
-            <label> {T.translate("edit_ticket_type.name")} *</label>
+            <label htmlFor="name">
+              {" "}
+              {T.translate("edit_ticket_type.name")} *
+            </label>
             <Input
               id="name"
               className="form-control"
@@ -118,7 +130,10 @@ class TicketTypeForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("edit_ticket_type.external_id")}</label>
+            <label htmlFor="external_id">
+              {" "}
+              {T.translate("edit_ticket_type.external_id")}
+            </label>
             <Input
               className="form-control"
               error={this.hasErrors("external_id")}
@@ -128,7 +143,10 @@ class TicketTypeForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("edit_ticket_type.badge_type_id")}</label>
+            <label htmlFor="badge_type_id">
+              {" "}
+              {T.translate("edit_ticket_type.badge_type_id")}
+            </label>
             <Dropdown
               id="badge_type_id"
               value={entity.badge_type_id}
@@ -139,7 +157,10 @@ class TicketTypeForm extends React.Component {
         </div>
         <div className="row form-group">
           <div className="col-md-8">
-            <label> {T.translate("edit_ticket_type.description")}</label>
+            <label htmlFor="description">
+              {" "}
+              {T.translate("edit_ticket_type.description")}
+            </label>
             <TextAreaInputWithCounter
               id="description"
               value={entity.description}
@@ -150,7 +171,10 @@ class TicketTypeForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("edit_ticket_type.audience")}</label>
+            <label htmlFor="audience">
+              {" "}
+              {T.translate("edit_ticket_type.audience")}
+            </label>
             <Dropdown
               id="audience"
               value={entity.audience}
@@ -165,7 +189,10 @@ class TicketTypeForm extends React.Component {
         </div>
         <div className="row form-group">
           <div className="col-md-4">
-            <label> {T.translate("edit_ticket_type.cost")}</label>
+            <label htmlFor="cost">
+              {" "}
+              {T.translate("edit_ticket_type.cost")}
+            </label>
             <Input
               id="cost"
               className="form-control"
@@ -175,7 +202,10 @@ class TicketTypeForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("edit_ticket_type.currency")}</label>
+            <label htmlFor="currency">
+              {" "}
+              {T.translate("edit_ticket_type.currency")}
+            </label>
             <Dropdown
               id="currency"
               value={entity.currency}
@@ -190,7 +220,10 @@ class TicketTypeForm extends React.Component {
         </div>
         <div className="row form-group">
           <div className="col-md-4">
-            <label> {T.translate("edit_ticket_type.quantity_to_sell")}</label>
+            <label htmlFor="quantity_2_sell">
+              {" "}
+              {T.translate("edit_ticket_type.quantity_to_sell")}
+            </label>
             <Input
               id="quantity_2_sell"
               type="number"
@@ -201,7 +234,7 @@ class TicketTypeForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label>
+            <label htmlFor="max_quantity_per_order">
               {" "}
               {T.translate("edit_ticket_type.max_quantity_to_sell_per_order")}
             </label>
@@ -217,7 +250,10 @@ class TicketTypeForm extends React.Component {
         </div>
         <div className="row form-group">
           <div className="col-md-4">
-            <label> {T.translate("edit_ticket_type.sales_start_date")}</label>
+            <label htmlFor="sales_start_date">
+              {" "}
+              {T.translate("edit_ticket_type.sales_start_date")}
+            </label>
             <DateTimePicker
               id="sales_start_date"
               onChange={this.handleChange}
@@ -230,7 +266,10 @@ class TicketTypeForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("edit_ticket_type.sales_end_date")}</label>
+            <label htmlFor="sales_end_date">
+              {" "}
+              {T.translate("edit_ticket_type.sales_end_date")}
+            </label>
             <DateTimePicker
               id="sales_end_date"
               onChange={this.handleChange}
