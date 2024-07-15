@@ -36,7 +36,8 @@
     "react/jsx-no-useless-fragment": "warn",
     "import/prefer-default-export": "warn",
     "no-plusplus": "off",
-    "no-continue": "off"
+    "no-continue": "off",
+    "no-prototype-builtins": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }
