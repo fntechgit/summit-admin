@@ -212,6 +212,7 @@ export const adjustEventDuration = (evt, entity) => {
   return adjustedEntity;
 };
 
+/* eslint no-bitwise: "warn" */
 export const uuidv4 = () => {
   const HEX_RADIX = 16;
   // eslint-disable-next-line no-magic-numbers

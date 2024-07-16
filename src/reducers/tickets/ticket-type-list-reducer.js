@@ -37,7 +37,8 @@ const DEFAULT_STATE = {
   summitTZ: ""
 };
 
-const ticketTypeListReducer = (action, state = DEFAULT_STATE) => {
+// eslint-disable-next-line default-param-last
+const ticketTypeListReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case SET_CURRENT_SUMMIT:
