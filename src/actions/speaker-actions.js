@@ -855,9 +855,22 @@ export const sendSpeakerEmails = (
         access_token : accessToken,
     };
 
+  const payload =  {
+    email_flow_event : currentFlowEvent,
+    should_send_copy_2_submitter : shouldSendCopy2Submitter,
+  };
+
     if (!selectedAll && selectedItems.length > 0) {
         // we don't need the filter criteria, we have the ids
         filter.push(`id==${selectedItems.join('||')}`);
+        const originalFilters = parseFilters(filters);
+        if (term) {
+          const filterTerm = buildTermFilter(term);
+          originalFilters.push(filterTerm.join(","));
+        }
+
+        payload["original_filter"] = originalFilters;
+
     } else {
         filter = parseFilters(filters);
 
@@ -877,11 +890,6 @@ export const sendSpeakerEmails = (
     if (filter.length > 0) {
         params['filter[]'] = filter;
     }
-
-    const payload =  {
-        email_flow_event : currentFlowEvent,
-        should_send_copy_2_submitter : shouldSendCopy2Submitter,
-    };
 
     if ([EXISTING_SPEAKERS_PROMO_CODE, EXISTING_SPEAKERS_DISCOUNT_CODE].includes(promoCodeStrategy)) {
         payload['promo_code'] = promocodeSpecification.existingPromoCode.code;

@@ -165,9 +165,20 @@ export const sendSubmitterEmails = (
         access_token : accessToken,
     };
 
+    const payload =  {
+      email_flow_event : currentFlowEvent,
+    };
+
     if (!selectedAll && selectedItems.length > 0) {
         // we don't need the filter criteria, we have the ids
         filter.push(`id==${selectedItems.join('||')}`);
+        const originalFilters = parseFilters(filters);
+        if (term) {
+          const filterTerm = buildTermFilter(term);
+          originalFilters.push(filterTerm.join(","));
+        }
+
+        payload["original_filter"] = originalFilters;
     } else {
         filter = parseFilters(filters);
 
@@ -191,10 +202,6 @@ export const sendSubmitterEmails = (
     if (filter.length > 0) {
         params['filter[]'] = filter;
     }
-
-    const payload =  {
-        email_flow_event : currentFlowEvent,
-    };
 
     if(testRecipient) {
         payload.test_email_recipient = testRecipient;
