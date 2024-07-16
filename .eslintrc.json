@@ -37,7 +37,10 @@
     "import/prefer-default-export": "warn",
     "no-plusplus": "off",
     "no-continue": "off",
-    "no-prototype-builtins": "warn"
+    "no-prototype-builtins": "warn",
+    "no-use-before-define": "warn",
+    "radix": "warn",
+    "no-unused-vars": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }

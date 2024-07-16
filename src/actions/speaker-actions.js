@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -29,6 +28,7 @@ import {
   getRawCSV,
   downloadFileByContent
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import {
   SPEAKERS_PROMO_CODE_CLASS_NAME,
   SPEAKERS_DISCOUNT_CODE_CLASS_NAME
@@ -44,9 +44,13 @@ import {
   isNumericString,
   joinCVSChunks
 } from "../utils/methods";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE
+} from "../utils/constants";
 
 export const INIT_SPEAKERS_LIST_PARAMS = "INIT_SPEAKERS_LIST_PARAMS";
-
 export const REQUEST_SPEAKERS = "REQUEST_SPEAKERS";
 export const RECEIVE_SPEAKERS = "RECEIVE_SPEAKERS";
 export const RECEIVE_SPEAKER = "RECEIVE_SPEAKER";
@@ -87,12 +91,48 @@ export const SEND_SPEAKERS_EMAILS = "SEND_SPEAKERS_EMAILS";
 export const SET_SPEAKERS_CURRENT_FLOW_EVENT =
   "SET_SPEAKERS_CURRENT_FLOW_EVENT";
 
-export const initSpeakersList = () => async (dispatch, getState) => {
+export const initSpeakersList = () => async (dispatch) => {
   dispatch(createAction(INIT_SPEAKERS_LIST_PARAMS)());
 };
 
+const buildTermFilter = (term, usePresentationFilters = true) => {
+  const escapedTerm = escapeFilterValue(term);
+
+  let termFilter = [
+    `full_name=@${escapedTerm}`,
+    `first_name=@${escapedTerm}`,
+    `last_name=@${escapedTerm}`,
+    `email=@${escapedTerm}`
+  ];
+
+  if (usePresentationFilters) {
+    termFilter.push(`presentations_title=@${escapedTerm}`);
+    termFilter.push(`presentations_abstract=@${escapedTerm}`);
+  }
+
+  if (isNumericString(escapedTerm)) {
+    const filterTermId = parseInt(escapedTerm);
+    termFilter = [
+      ...termFilter,
+      ...[
+        `id==${filterTermId}`,
+        `member_id==${filterTermId}`,
+        `member_user_external_id==${filterTermId}`
+      ]
+    ];
+  }
+
+  return termFilter;
+};
+
 export const getSpeakers =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const filter = [];
@@ -100,13 +140,13 @@ export const getSpeakers =
     dispatch(startLoading());
 
     if (term) {
-      let filterTerm = buildTermFilter(term, false);
+      const filterTerm = buildTermFilter(term, false);
 
       filter.push(filterTerm.join(","));
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -117,8 +157,8 @@ export const getSpeakers =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -256,7 +296,7 @@ export const saveSpeaker = (entity) => async (dispatch) => {
     )({})(dispatch).then(() => {
       dispatch(
         showMessage(success_message, () => {
-          history.push(`/app/speakers`);
+          history.push("/app/speakers");
         })
       );
     });
@@ -273,19 +313,18 @@ export const attachPicture = (entity, file, picAttr) => async (dispatch) => {
   const uploadFile = picAttr === "profile" ? uploadProfilePic : uploadBigPic;
 
   if (entity.id) {
-    dispatch(uploadFile(entity, file));
-  } else {
-    return postRequest(
-      createAction(UPDATE_SPEAKER),
-      createAction(SPEAKER_ADDED),
-      `${window.API_BASE_URL}/api/v1/speakers?access_token=${accessToken}`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )({})(dispatch).then((payload) => {
-      dispatch(uploadFile(payload.response, file));
-    });
+    return dispatch(uploadFile(entity, file));
   }
+  return postRequest(
+    createAction(UPDATE_SPEAKER),
+    createAction(SPEAKER_ADDED),
+    `${window.API_BASE_URL}/api/v1/speakers?access_token=${accessToken}`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )({})(dispatch).then((payload) => {
+    dispatch(uploadFile(payload.response, file));
+  });
 };
 
 const uploadProfilePic = (entity, file) => async (dispatch) => {
@@ -330,28 +369,34 @@ const normalizeEntity = (entity) => {
     delete normalizedEntity.member_id;
   }
 
-  delete normalizedEntity["presentations"];
-  delete normalizedEntity["all_presentations"];
-  delete normalizedEntity["moderated_presentations"];
-  delete normalizedEntity["all_moderated_presentations"];
-  delete normalizedEntity["other_presentation_links"];
-  delete normalizedEntity["affiliations"];
-  delete normalizedEntity["gender"];
-  delete normalizedEntity["pic"];
-  delete normalizedEntity["member"];
-  delete normalizedEntity["summit_assistances"];
-  delete normalizedEntity["code_redeemed"];
-  delete normalizedEntity["active_involvements"];
-  delete normalizedEntity["travel_preferences"];
+  delete normalizedEntity.presentations;
+  delete normalizedEntity.all_presentations;
+  delete normalizedEntity.moderated_presentations;
+  delete normalizedEntity.all_moderated_presentations;
+  delete normalizedEntity.other_presentation_links;
+  delete normalizedEntity.affiliations;
+  delete normalizedEntity.gender;
+  delete normalizedEntity.pic;
+  delete normalizedEntity.member;
+  delete normalizedEntity.summit_assistances;
+  delete normalizedEntity.code_redeemed;
+  delete normalizedEntity.active_involvements;
+  delete normalizedEntity.travel_preferences;
   return normalizedEntity;
 };
 
-/****************************************************************************************************/
+/** ************************************************************************************************* */
 /* SPEAKER ATTENDANCE */
-/****************************************************************************************************/
+/** ************************************************************************************************* */
 
 export const getAttendances =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = "1") =>
+  (
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -369,14 +414,14 @@ export const getAttendances =
     }
 
     const req_params = {
-      order: order,
+      order,
       orderDir: parseInt(orderDir),
-      term: term
+      term
     };
 
     const params = {
       expand: "speaker",
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -388,7 +433,7 @@ export const getAttendances =
     // order
     if (order != null && orderDir != null) {
       orderDir = orderDir === "1" ? "+" : "-";
-      params["order"] = `${orderDir}${order}`;
+      params.order = `${orderDir}${order}`;
     }
 
     return getRequest(
@@ -536,12 +581,12 @@ export const sendAttendanceEmail =
   };
 
 export const exportAttendances =
-  (term = null, order = "code", orderDir = 1) =>
+  (term = null, order = "code", orderDir = DEFAULT_ORDER_DIR) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filename = currentSummit.name + "-Speaker-Attendance.csv";
+    const filename = `${currentSummit.name}-Speaker-Attendance.csv`;
     const filter = [];
     const params = {
       access_token: accessToken
@@ -560,8 +605,8 @@ export const exportAttendances =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     dispatch(
@@ -579,17 +624,17 @@ const normalizeAttendance = (entity) => {
   normalizedEntity.speaker_id =
     normalizedEntity.speaker != null ? normalizedEntity.speaker.id : 0;
 
-  delete normalizedEntity["speaker"];
+  delete normalizedEntity.speaker;
 
   return normalizedEntity;
 };
 
-/****************************************************************************************************/
+/** ************************************************************************************************* */
 /* FEATURED SPEAKERS */
-/****************************************************************************************************/
+/** ************************************************************************************************* */
 
 export const getFeaturedSpeakers =
-  (term = null, page = 1, perPage = 100) =>
+  (term = null, page = DEFAULT_CURRENT_PAGE, perPage = DEFAULT_PER_PAGE) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -614,12 +659,12 @@ export const getFeaturedSpeakers =
     }
 
     const req_params = {
-      term: term
+      term
     };
 
     const params = {
       expand: "speaker",
-      page: page,
+      page,
       per_page: perPage,
       order: "+order",
       access_token: accessToken
@@ -707,17 +752,17 @@ export const removeFeaturedSpeaker =
     });
   };
 
-/****************************************************************************************************/
+/** ************************************************************************************************* */
 /* SPEAKERS BY SUMMIT */
-/****************************************************************************************************/
+/** ************************************************************************************************* */
 
 export const getSpeakersBySummit =
   (
     term = null,
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "full_name",
-    orderDir = 1,
+    orderDir = DEFAULT_ORDER_DIR,
     filters = {}
   ) =>
   async (dispatch, getState) => {
@@ -729,13 +774,13 @@ export const getSpeakersBySummit =
     dispatch(startLoading());
 
     if (term) {
-      let filterTerm = buildTermFilter(term);
+      const filterTerm = buildTermFilter(term);
 
       filter.push(filterTerm.join(","));
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand:
@@ -751,8 +796,8 @@ export const getSpeakersBySummit =
     // order
     if (order != null && orderDir != null) {
       if (order === "") order = "full_name";
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -775,14 +820,14 @@ export const getSpeakersBySummit =
   };
 
 export const exportSummitSpeakers =
-  (term = null, order = "id", orderDir = 1, filters = {}) =>
+  (term = null, order = "id", orderDir = DEFAULT_ORDER_DIR, filters = {}) =>
   async (dispatch, getState) => {
     const csvMIME = "text/csv;charset=utf-8";
     const pageSize = 500;
     const { currentSummitState, currentSummitSpeakersListState } = getState();
     const { currentSummit } = currentSummitState;
     const { totalItems } = currentSummitSpeakersListState;
-    const filename = currentSummit.name + "-Speakers.csv";
+    const filename = `${currentSummit.name}-Speakers.csv`;
     const totalPages = Math.ceil(totalItems / pageSize);
     const cvsFiles = [];
     const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers/csv`;
@@ -797,7 +842,7 @@ export const exportSummitSpeakers =
     const filter = parseFilters(filters);
 
     if (term) {
-      let filterTerm = buildTermFilter(term);
+      const filterTerm = buildTermFilter(term);
 
       filter.push(filterTerm.join(","));
     }
@@ -808,8 +853,8 @@ export const exportSummitSpeakers =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     for (let i = 1; i <= totalPages; i++) {
@@ -827,6 +872,7 @@ export const exportSummitSpeakers =
         dispatch(stopLoading());
       })
       .catch((err) => {
+        console.log(err);
         dispatch(stopLoading());
       });
   };
@@ -866,14 +912,26 @@ export const sendSpeakerEmails =
       access_token: accessToken
     };
 
+    const payload = {
+      email_flow_event: currentFlowEvent,
+      should_send_copy_2_submitter: shouldSendCopy2Submitter
+    };
+
     if (!selectedAll && selectedItems.length > 0) {
       // we don't need the filter criteria, we have the ids
       filter.push(`id==${selectedItems.join("||")}`);
+      const originalFilters = parseFilters(filters);
+      if (term) {
+        const filterTerm = buildTermFilter(term);
+        originalFilters.push(filterTerm.join(","));
+      }
+
+      payload["original_filter[]"] = originalFilters;
     } else {
       filter = parseFilters(filters);
 
       if (term) {
-        let filterTerm = buildTermFilter(term);
+        const filterTerm = buildTermFilter(term);
 
         filter.push(filterTerm.join(","));
       }
@@ -887,17 +945,12 @@ export const sendSpeakerEmails =
       params["filter[]"] = filter;
     }
 
-    const payload = {
-      email_flow_event: currentFlowEvent,
-      should_send_copy_2_submitter: shouldSendCopy2Submitter
-    };
-
     if (
       [EXISTING_SPEAKERS_PROMO_CODE, EXISTING_SPEAKERS_DISCOUNT_CODE].includes(
         promoCodeStrategy
       )
     ) {
-      payload["promo_code"] = promocodeSpecification.existingPromoCode.code;
+      payload.promo_code = promocodeSpecification.existingPromoCode.code;
     } else if (
       [
         AUTO_GENERATED_SPEAKERS_PROMO_CODE,
@@ -905,10 +958,10 @@ export const sendSpeakerEmails =
       ].includes(promoCodeStrategy)
     ) {
       const className =
-        promoCodeStrategy === 3
+        promoCodeStrategy === AUTO_GENERATED_SPEAKERS_PROMO_CODE
           ? SPEAKERS_PROMO_CODE_CLASS_NAME
           : SPEAKERS_DISCOUNT_CODE_CLASS_NAME;
-      payload["promo_code_spec"] = {
+      payload.promo_code_spec = {
         class_name: className,
         type: promocodeSpecification.type,
         allowed_ticket_types: promocodeSpecification.ticketTypes.map(
@@ -925,27 +978,25 @@ export const sendSpeakerEmails =
         const rate = promocodeSpecification.rate
           ? parseFloat(promocodeSpecification.rate)
           : 0;
-        payload["promo_code_spec"]["amount"] = amount;
-        payload["promo_code_spec"]["rate"] = rate;
+        payload.promo_code_spec.amount = amount;
+        payload.promo_code_spec.rate = rate;
         if (!promocodeSpecification.applyToAllTix) {
-          payload["promo_code_spec"]["ticket_types_rules"] =
-            promocodeSpecification.ticketTypes.map((t) => {
-              return {
-                ticket_type_id: t.id,
-                amount: amount,
-                rate: rate
-              };
-            });
+          payload.promo_code_spec.ticket_types_rules =
+            promocodeSpecification.ticketTypes.map((t) => ({
+              ticket_type_id: t.id,
+              amount,
+              rate
+            }));
         }
       }
     }
 
     if (testRecipient) {
-      payload["test_email_recipient"] = testRecipient;
+      payload.test_email_recipient = testRecipient;
     }
 
     if (excerptRecipient) {
-      payload["outcome_email_recipient"] = excerptRecipient;
+      payload.outcome_email_recipient = excerptRecipient;
     }
 
     dispatch(startLoading());
@@ -998,8 +1049,9 @@ const parseFilters = (filters) => {
     filters.selectionPlanFilter.length > 0
   ) {
     filter.push(
-      "presentations_selection_plan_id==" +
-        filters.selectionPlanFilter.join("||")
+      `presentations_selection_plan_id==${filters.selectionPlanFilter.join(
+        "||"
+      )}`
     );
   }
 
@@ -1008,7 +1060,7 @@ const parseFilters = (filters) => {
     Array.isArray(filters.trackFilter) &&
     filters.trackFilter.length > 0
   ) {
-    filter.push("presentations_track_id==" + filters.trackFilter.join("||"));
+    filter.push(`presentations_track_id==${filters.trackFilter.join("||")}`);
   }
 
   if (
@@ -1017,7 +1069,7 @@ const parseFilters = (filters) => {
     filters.activityTypeFilter.length > 0
   ) {
     filter.push(
-      "presentations_type_id==" + filters.activityTypeFilter.join("||")
+      `presentations_type_id==${filters.activityTypeFilter.join("||")}`
     );
   }
 
@@ -1055,9 +1107,9 @@ const parseFilters = (filters) => {
       filter.push(
         filters.selectionStatusFilter.reduce(
           (accumulator, at) =>
-            accumulator +
-            (accumulator !== "" ? "," : "") +
-            `has_${at}_presentations==true`,
+            `${
+              accumulator + (accumulator !== "" ? "," : "")
+            }has_${at}_presentations==true`,
           ""
         )
       );
@@ -1071,48 +1123,19 @@ const parseFilters = (filters) => {
     filters.mediaUploadTypeFilter.value.length > 0
   ) {
     filter.push(
-      `${filters.mediaUploadTypeFilter.operator}` +
-        filters.mediaUploadTypeFilter.value
-          .map((v) => v.id)
-          .join(
-            filters.mediaUploadTypeFilter.operator ===
-              "has_media_upload_with_type=="
-              ? "||"
-              : "&&"
-          )
+      `${
+        filters.mediaUploadTypeFilter.operator
+      }${filters.mediaUploadTypeFilter.value
+        .map((v) => v.id)
+        .join(
+          filters.mediaUploadTypeFilter.operator ===
+            "has_media_upload_with_type=="
+            ? "||"
+            : "&&"
+        )}`
     );
   }
 
-  //return checkOrFilter(filters, filter);
+  // return checkOrFilter(filters, filter);
   return filter;
-};
-
-const buildTermFilter = (term, usePresentationFilters = true) => {
-  const escapedTerm = escapeFilterValue(term);
-
-  let termFilter = [
-    `full_name=@${escapedTerm}`,
-    `first_name=@${escapedTerm}`,
-    `last_name=@${escapedTerm}`,
-    `email=@${escapedTerm}`
-  ];
-
-  if (usePresentationFilters) {
-    termFilter.push(`presentations_title=@${escapedTerm}`);
-    termFilter.push(`presentations_abstract=@${escapedTerm}`);
-  }
-
-  if (isNumericString(escapedTerm)) {
-    const filterTermId = parseInt(escapedTerm);
-    termFilter = [
-      ...termFilter,
-      ...[
-        `id==${filterTermId}`,
-        `member_id==${filterTermId}`,
-        `member_user_external_id==${filterTermId}`
-      ]
-    ];
-  }
-
-  return termFilter;
 };

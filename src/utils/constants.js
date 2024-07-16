@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 export const DefaultEventMinutesDuration = 10;
 export const ScheduleEventsSearchResultMaxPage = 25;
@@ -67,3 +67,9 @@ export const REG_LITE_BOOLEAN_SETTINGS = [
 ];
 
 export const DUMMY_ACTION = "DUMMY_ACTION";
+
+export const RADIX_10 = 10;
+export const DEFAULT_CURRENT_PAGE = 1;
+export const DEFAULT_PER_PAGE = 10;
+
+export const DEFAULT_ORDER_DIR = 1;

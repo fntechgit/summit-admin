@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -24,7 +24,12 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
-import { SpeakersSources as sources } from "../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE,
+  SpeakersSources as sources
+} from "../utils/constants";
 
 export const INIT_SUBMITTERS_LIST_PARAMS = "INIT_SUBMITTERS_LIST_PARAMS";
 
@@ -38,17 +43,17 @@ export const SEND_SUBMITTERS_EMAILS = "SEND_SUBMITTERS_EMAILS";
 export const SET_SUBMITTERS_CURRENT_FLOW_EVENT =
   "SET_SUBMITTERS_CURRENT_FLOW_EVENT";
 
-export const initSubmittersList = () => async (dispatch, getState) => {
+export const initSubmittersList = () => async (dispatch) => {
   dispatch(createAction(INIT_SUBMITTERS_LIST_PARAMS)());
 };
 
 export const getSubmittersBySummit =
   (
     term = null,
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "full_name",
-    orderDir = 1,
+    orderDir = DEFAULT_ORDER_DIR,
     filters = {},
     source = null
   ) =>
@@ -66,13 +71,13 @@ export const getSubmittersBySummit =
     dispatch(startLoading());
 
     if (term) {
-      let filterTerm = buildTermFilter(term);
+      const filterTerm = buildTermFilter(term);
 
       filter.push(filterTerm.join(","));
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand:
@@ -88,8 +93,8 @@ export const getSubmittersBySummit =
     // order
     if (order != null && orderDir != null) {
       if (order === "") order = "full_name";
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -112,12 +117,18 @@ export const getSubmittersBySummit =
   };
 
 export const exportSummitSubmitters =
-  (term = null, order = "id", orderDir = 1, filters = {}, source = null) =>
+  (
+    term = null,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    filters = {},
+    source = null
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filename = currentSummit.name + "-Submitters.csv";
+    const filename = `${currentSummit.name}-Submitters.csv`;
     const params = {
       access_token: accessToken
     };
@@ -129,7 +140,7 @@ export const exportSummitSubmitters =
     }
 
     if (term) {
-      let filterTerm = buildTermFilter(term);
+      const filterTerm = buildTermFilter(term);
 
       filter.push(filterTerm.join(","));
     }
@@ -140,8 +151,8 @@ export const exportSummitSubmitters =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     dispatch(
@@ -189,9 +200,20 @@ export const sendSubmitterEmails =
       access_token: accessToken
     };
 
+    const payload = {
+      email_flow_event: currentFlowEvent
+    };
+
     if (!selectedAll && selectedItems.length > 0) {
       // we don't need the filter criteria, we have the ids
       filter.push(`id==${selectedItems.join("||")}`);
+      const originalFilters = parseFilters(filters);
+      if (term) {
+        const filterTerm = buildTermFilter(term);
+        originalFilters.push(filterTerm.join(","));
+      }
+
+      payload["original_filter[]"] = originalFilters;
     } else {
       filter = parseFilters(filters);
 
@@ -200,7 +222,7 @@ export const sendSubmitterEmails =
       }
 
       if (term) {
-        let filterTerm = buildTermFilter(term);
+        const filterTerm = buildTermFilter(term);
 
         filter.push(filterTerm.join(","));
       }
@@ -213,10 +235,6 @@ export const sendSubmitterEmails =
     if (filter.length > 0) {
       params["filter[]"] = filter;
     }
-
-    const payload = {
-      email_flow_event: currentFlowEvent
-    };
 
     if (testRecipient) {
       payload.test_email_recipient = testRecipient;
@@ -276,12 +294,11 @@ const parseFilters = (filters) => {
     filters.selectionPlanFilter.length > 0
   ) {
     filter.push(
-      "presentations_selection_plan_id==" +
-        filters.selectionPlanFilter.reduce(
-          (accumulator, sp) =>
-            accumulator + (accumulator !== "" ? "||" : "") + `${sp}`,
-          ""
-        )
+      `presentations_selection_plan_id==${filters.selectionPlanFilter.reduce(
+        (accumulator, sp) =>
+          `${accumulator + (accumulator !== "" ? "||" : "")}${sp}`,
+        ""
+      )}`
     );
   }
 
@@ -291,12 +308,11 @@ const parseFilters = (filters) => {
     filters.trackFilter.length > 0
   ) {
     filter.push(
-      "presentations_track_id==" +
-        filters.trackFilter.reduce(
-          (accumulator, t) =>
-            accumulator + (accumulator !== "" ? "||" : "") + `${t}`,
-          ""
-        )
+      `presentations_track_id==${filters.trackFilter.reduce(
+        (accumulator, t) =>
+          `${accumulator + (accumulator !== "" ? "||" : "")}${t}`,
+        ""
+      )}`
     );
   }
 
@@ -306,12 +322,11 @@ const parseFilters = (filters) => {
     filters.activityTypeFilter.length > 0
   ) {
     filter.push(
-      "presentations_type_id==" +
-        filters.activityTypeFilter.reduce(
-          (accumulator, at) =>
-            accumulator + (accumulator !== "" ? "||" : "") + `${at}`,
-          ""
-        )
+      `presentations_type_id==${filters.activityTypeFilter.reduce(
+        (accumulator, at) =>
+          `${accumulator + (accumulator !== "" ? "||" : "")}${at}`,
+        ""
+      )}`
     );
   }
 
@@ -349,9 +364,9 @@ const parseFilters = (filters) => {
       filter.push(
         filters.selectionStatusFilter.reduce(
           (accumulator, at) =>
-            accumulator +
-            (accumulator !== "" ? "," : "") +
-            `has_${at}_presentations==true`,
+            `${
+              accumulator + (accumulator !== "" ? "," : "")
+            }has_${at}_presentations==true`,
           ""
         )
       );
@@ -365,19 +380,20 @@ const parseFilters = (filters) => {
     filters.mediaUploadTypeFilter.value.length > 0
   ) {
     filter.push(
-      `${filters.mediaUploadTypeFilter.operator}` +
-        filters.mediaUploadTypeFilter.value
-          .map((v) => v.id)
-          .join(
-            filters.mediaUploadTypeFilter.operator ===
-              "has_media_upload_with_type=="
-              ? "||"
-              : "&&"
-          )
+      `${
+        filters.mediaUploadTypeFilter.operator
+      }${filters.mediaUploadTypeFilter.value
+        .map((v) => v.id)
+        .join(
+          filters.mediaUploadTypeFilter.operator ===
+            "has_media_upload_with_type=="
+            ? "||"
+            : "&&"
+        )}`
     );
   }
 
-  //return checkOrFilter(filters, filter);
+  // return checkOrFilter(filters, filter);
   return filter;
 };
 
