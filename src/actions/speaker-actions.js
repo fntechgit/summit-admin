@@ -926,7 +926,7 @@ export const sendSpeakerEmails =
         originalFilters.push(filterTerm.join(","));
       }
 
-      payload["original_filter[]"] = originalFilters;
+      payload.original_filter = originalFilters;
     } else {
       filter = parseFilters(filters);
 
