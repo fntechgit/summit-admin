@@ -9,95 +9,76 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import moment from "moment-timezone";
-import {
-    CLEAR_LOG_PARAMS,
-    REQUEST_LOG,
-    RECEIVE_LOG
-} from "../../actions/audit-log-actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import {
+  CLEAR_LOG_PARAMS,
+  REQUEST_LOG,
+  RECEIVE_LOG
+} from "../../actions/audit-log-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { formatAuditLog, parseSpeakerAuditLog } from "../../utils/methods";
 
 const DEFAULT_STATE = {
-    term: '',
-    logEntries: [],
-    currentPage: 1,
-    lastPage: 1,
-    perPage: 10,
-    order: 'created',
-    orderDir: 1,
-    totalLogEntries: 0,
-    summitTZ: '',
-    filters: {}
+  term: "",
+  logEntries: [],
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  order: "created",
+  orderDir: 1,
+  totalLogEntries: 0,
+  summitTZ: "",
+  filters: {}
 };
 
+// eslint-disable-next-line default-param-last
 const auditLogReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case CLEAR_LOG_PARAMS:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_LOG: {
-            let { term, order, orderDir, summitTZ } = payload;
-            return { ...state, term, order, orderDir, summitTZ }
-        }
-        case RECEIVE_LOG: {
-            let { current_page, total, last_page } = payload.response;
-
-            let logEntries = payload.response.data.map(e => {
-                const logEntryAction = e.action.startsWith('Speaker') ? parseSpeakerAuditLog(e.action) : e.action
-                return {
-                    ...e,
-                    event: e.event_id,
-                    user: `${e.user.first_name} ${e.user.last_name} (${e.user.id})`,
-                    created: moment(epochToMomentTimeZone(e.created, state.summitTZ)).format('MMMM Do YYYY, h:mm a'),
-                    action: formatAuditLog(logEntryAction)
-                };
-            });
-
-            return { ...state, logEntries: logEntries, totalLogEntries: total, currentPage: current_page, lastPage: last_page };
-        }
-        case REQUEST_LOG: {
-            let { order, orderDir } = payload;
-            return { ...state, order, orderDir };
-        }
-        case RECEIVE_LOG: {
-            let { current_page, total, last_page } = payload.response;
-
-            let logEntries = payload.response.data.map((e) => {
-                const logEntryAction = e.action.startsWith("Speaker")
-                    ? parseSpeakerAuditLog(e.action)
-                    : e.action;
-                const userTimeZone = moment.tz.guess();
-                return {
-                    ...e,
-                    event: e.event_id,
-                    user: `${e.user.first_name} ${e.user.last_name} (${e.user.id})`,
-                    created: moment(
-                        epochToMomentTimeZone(e.created, userTimeZone)
-                    ).format("MMMM Do YYYY, h:mm a"),
-                    action: formatAuditLog(logEntryAction)
-                };
-            });
-
-            return {
-                ...state,
-                logEntries: logEntries,
-                totalLogEntries: total,
-                currentPage: current_page,
-                lastPage: last_page
-            };
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case CLEAR_LOG_PARAMS:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_LOG: {
+      const { term, order, orderDir, summitTZ } = payload;
+      return { ...state, term, order, orderDir, summitTZ };
+    }
+    case RECEIVE_LOG: {
+      const { current_page, total, last_page } = payload.response;
+
+      const logEntries = payload.response.data.map((e) => {
+        const logEntryAction = e.action.startsWith("Speaker")
+          ? parseSpeakerAuditLog(e.action)
+          : e.action;
+        const userTimeZone = moment.tz.guess();
+        return {
+          ...e,
+          event: e.event_id,
+          user: `${e.user.first_name} ${e.user.last_name} (${e.user.id})`,
+          created: moment(
+            epochToMomentTimeZone(e.created, userTimeZone)
+          ).format("MMMM Do YYYY, h:mm a"),
+          action: formatAuditLog(logEntryAction)
+        };
+      });
+
+      return {
+        ...state,
+        logEntries,
+        totalLogEntries: total,
+        currentPage: current_page,
+        lastPage: last_page
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default auditLogReducer;

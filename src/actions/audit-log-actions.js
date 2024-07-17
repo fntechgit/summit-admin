@@ -9,88 +9,112 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import {
-    getRequest,
-    createAction,
-    stopLoading,
-    startLoading,
-    authErrorHandler,
-    escapeFilterValue
-} from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessTokenSafely,isNumericString, parseDateRangeFilter} from '../utils/methods';
+  getRequest,
+  createAction,
+  stopLoading,
+  startLoading,
+  authErrorHandler,
+  escapeFilterValue
+} from "openstack-uicore-foundation/lib/utils/actions";
+import {
+  getAccessTokenSafely,
+  isNumericString,
+  parseDateRangeFilter
+} from "../utils/methods";
+import { DEFAULT_CURRENT_PAGE, DEFAULT_ORDER_DIR } from "../utils/constants";
 
 export const CLEAR_LOG_PARAMS = "CLEAR_LOG_PARAMS";
 export const REQUEST_LOG = "REQUEST_LOG";
 export const RECEIVE_LOG = "RECEIVE_LOG";
 
-export const getAuditLog = (entityFilter = [], term = null, page = 1, perPage = 100, order = null, orderDir = 1, filters = {}) => async (dispatch, getState) => {
+const DEFAULT_PER_PAGE_AUDIT_LOG = 100;
 
-    const {currentSummitState} = getState();
+export const getAuditLog =
+  (
+    entityFilter = [],
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE_AUDIT_LOG,
+    order = null,
+    orderDir = DEFAULT_ORDER_DIR,
+    filters = {}
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
     const summitTZ = currentSummit.time_zone.name;
     const summitFilter = [`summit_id==${currentSummit.id}`];
 
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       expand: "user",
       access_token: accessToken
     };
 
-    const parsedFilters = [...summitFilter, ...entityFilter, ...parseFilters(filters, term)];
+    const parsedFilters = [
+      ...summitFilter,
+      ...entityFilter,
+      ...parseFilters(filters, term)
+    ];
 
-    params['filter[]'] = parsedFilters;
+    params["filter[]"] = parsedFilters;
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
-        createAction(REQUEST_LOG),
-        createAction(RECEIVE_LOG),
-        `${window.API_BASE_URL}/api/v1/audit-logs`,
-        authErrorHandler,
-        {page, perPage, order, orderDir, term, summitTZ, filters}
+      createAction(REQUEST_LOG),
+      createAction(RECEIVE_LOG),
+      `${window.API_BASE_URL}/api/v1/audit-logs`,
+      authErrorHandler,
+      { page, perPage, order, orderDir, term, summitTZ, filters }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
 
 const parseFilters = (filters, term = null) => {
-    const filter = [];
-    
-    if (filters.created_date_filter) {
-        parseDateRangeFilter(filter, filters.created_date_filter, 'created');
+  const filter = [];
+
+  if (filters.created_date_filter) {
+    parseDateRangeFilter(filter, filters.created_date_filter, "created");
+  }
+
+  if (
+    filters.hasOwnProperty("user_id_filter") &&
+    Array.isArray(filters.user_id_filter) &&
+    filters.user_id_filter.length > 0
+  ) {
+    filter.push(
+      `user_id==${filters.user_id_filter.map((t) => t.id).join("||")}`
+    );
+  }
+
+  if (term) {
+    const escapedTerm = escapeFilterValue(term);
+    let searchString = "";
+
+    if (isNumericString(term)) {
+      searchString += `entity_id==${term}`;
+    } else {
+      searchString += `action@@${escapedTerm}`;
     }
 
-    if (filters.hasOwnProperty('user_id_filter') && Array.isArray(filters.user_id_filter)
-        && filters.user_id_filter.length > 0) {
-        filter.push(`user_id==${filters.user_id_filter.map(t => t.id).join('||')}`);
-    }
+    filter.push(searchString);
+  }
 
-    if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        let searchString = '';
-
-        if (isNumericString(term)) {
-            searchString += `entity_id==${term}`;
-        } else {
-            searchString += `action@@${escapedTerm}`
-        }
-
-        filter.push(searchString);
-    }
-
-
-    return filter;
-}
+  return filter;
+};
 
 export const clearAuditLogParams = () => async (dispatch, getState) => {
   dispatch(createAction(CLEAR_LOG_PARAMS)());

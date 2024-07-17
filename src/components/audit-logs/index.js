@@ -1,25 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { FreeTextSearch, Table, Dropdown, MemberInput, DateTimePicker } from "openstack-uicore-foundation/lib/components";
+import {
+  FreeTextSearch,
+  Table,
+  Dropdown,
+  MemberInput,
+  DateTimePicker
+} from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react";
-import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { Pagination } from "react-bootstrap";
 import { connect } from "react-redux";
-import { clearAuditLogParams, getAuditLog } from "../../actions/audit-log-actions";
+import {
+  clearAuditLogParams,
+  getAuditLog
+} from "../../actions/audit-log-actions";
+import {
+  DATE_FILTER_ARRAY_SIZE,
+  DEFAULT_CURRENT_PAGE
+} from "../../utils/constants";
 
-const AuditLogs = ({ entityFilter = [], currentSummit, term, logEntries, perPage, lastPage, currentPage, order, orderDir, columns, getAuditLog, clearAuditLogParams, filters }) => {
-
+const AuditLogs = function ({
+  entityFilter = [],
+  currentSummit,
+  term,
+  logEntries,
+  perPage,
+  lastPage,
+  currentPage,
+  order,
+  orderDir,
+  columns,
+  getAuditLog,
+  clearAuditLogParams,
+  filters
+}) {
   const defaultFilters = {
     user_id_filter: [],
-    created_date_filter: Array(2).fill(null)
-  }
+    created_date_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null)
+  };
 
-  const [enabledFilters, setEnabledFilters] = useState(Object.keys(filters).filter(e => Array.isArray(filters[e]) ? filters[e]?.some(e => e !== null) : filters[e]?.length > 0));
-  const [auditLogFilters, setAuditLogFilters] = useState({ ...defaultFilters, ...filters });
+  const [enabledFilters, setEnabledFilters] = useState(
+    Object.keys(filters).filter((e) =>
+      Array.isArray(filters[e])
+        ? filters[e]?.some((e) => e !== null)
+        : filters[e]?.length > 0
+    )
+  );
+  const [auditLogFilters, setAuditLogFilters] = useState({
+    ...defaultFilters,
+    ...filters
+  });
 
   const filters_ddl = [
-    { label: 'Created', value: 'created_date_filter' },
-    { label: 'Member', value: 'user_id_filter' },
-  ]
+    { label: "Created", value: "created_date_filter" },
+    { label: "Member", value: "user_id_filter" }
+  ];
 
   const audit_log_table_options = {
     sortCol: order,
@@ -51,20 +86,43 @@ const AuditLogs = ({ entityFilter = [], currentSummit, term, logEntries, perPage
     : audit_log_columns;
 
   const handleSort = (index, key, dir, func) => {
-    getAuditLog(entityFilter, term, currentPage, perPage, key, dir, auditLogFilters);
+    getAuditLog(
+      entityFilter,
+      term,
+      currentPage,
+      perPage,
+      key,
+      dir,
+      auditLogFilters
+    );
   };
 
   const handlePageChange = (page) => {
-    getAuditLog(entityFilter, term, page, perPage, order, orderDir, auditLogFilters);
+    getAuditLog(
+      entityFilter,
+      term,
+      page,
+      perPage,
+      order,
+      orderDir,
+      auditLogFilters
+    );
   };
 
   const handleSearch = (newTerm) => {
-    getAuditLog(entityFilter, newTerm, currentPage, perPage, order, orderDir, auditLogFilters);
+    getAuditLog(
+      entityFilter,
+      newTerm,
+      currentPage,
+      perPage,
+      order,
+      orderDir,
+      auditLogFilters
+    );
   };
 
-  const handleDDLSortByLabel = (ddlArray) => {
-    return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
-  }
+  const handleDDLSortByLabel = (ddlArray) =>
+    ddlArray.sort((a, b) => a.label.localeCompare(b.label));
 
   const handleFiltersChange = (ev) => {
     const { value } = ev.target;
@@ -73,35 +131,63 @@ const AuditLogs = ({ entityFilter = [], currentSummit, term, logEntries, perPage
         setEnabledFilters(value);
         setAuditLogFilters(defaultFilters);
       } else {
-        const removedFilter = enabledFilters.filter(e => !value.includes(e))[0];
-        const defaultValue = Array.isArray(auditLogFilters[removedFilter]) ? [] : '';
-        let newEventFilters = { ...auditLogFilters, [removedFilter]: defaultValue };
+        const removedFilter = enabledFilters.filter(
+          (e) => !value.includes(e)
+        )[0];
+        const defaultValue = Array.isArray(auditLogFilters[removedFilter])
+          ? []
+          : "";
+        const newEventFilters = {
+          ...auditLogFilters,
+          [removedFilter]: defaultValue
+        };
         setEnabledFilters(value);
         setAuditLogFilters(newEventFilters);
       }
     } else {
       setEnabledFilters(value);
     }
-  }
+  };
 
   const handleChangeDateFilter = (ev, lastDate) => {
     const { value, id } = ev.target;
     const newDateFilter = auditLogFilters[id];
 
-    setAuditLogFilters({ ...auditLogFilters, [id]: lastDate ? [newDateFilter[0], value.unix()] : [value.unix(), newDateFilter[1]] })
-  }
+    setAuditLogFilters({
+      ...auditLogFilters,
+      [id]: lastDate
+        ? [newDateFilter[0], value.unix()]
+        : [value.unix(), newDateFilter[1]]
+    });
+  };
 
   const handleAuditLogFilterChange = (ev) => {
-    let { value, type, id } = ev.target;
+    const { value, id } = ev.target;
     setAuditLogFilters({ ...auditLogFilters, [id]: value });
-  }
+  };
 
   const handleApplyAuditLogFilters = () => {
-    getAuditLog(entityFilter, term, currentPage, perPage, order, orderDir, auditLogFilters);
-  }
+    getAuditLog(
+      entityFilter,
+      term,
+      currentPage,
+      perPage,
+      order,
+      orderDir,
+      auditLogFilters
+    );
+  };
 
   useEffect(() => {
-    getAuditLog(entityFilter, term, 1, perPage, order, orderDir, filters);
+    getAuditLog(
+      entityFilter,
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      filters
+    );
 
     return () => {
       clearAuditLogParams();
@@ -110,8 +196,8 @@ const AuditLogs = ({ entityFilter = [], currentSummit, term, logEntries, perPage
 
   return (
     <>
-      <div className={"row"}>
-        <div className={"col-md-8"}>
+      <div className="row">
+        <div className="col-md-8">
           <FreeTextSearch
             value={term ?? ""}
             placeholder={T.translate("audit_log.placeholders.search_log")}
@@ -122,35 +208,37 @@ const AuditLogs = ({ entityFilter = [], currentSummit, term, logEntries, perPage
 
       <hr />
 
-      <div className={'row'}>
-        <div className={'col-md-6'}>
+      <div className="row">
+        <div className="col-md-6">
           <Dropdown
             id="enabled_filters"
-            placeholder={'Enabled Filters'}
+            placeholder="Enabled Filters"
             value={enabledFilters}
             onChange={handleFiltersChange}
             options={handleDDLSortByLabel(filters_ddl)}
-            isClearable={true}
-            isMulti={true}
+            isClearable
+            isMulti
           />
         </div>
-        <div className={'col-md-6'}>
-          <button className="btn btn-primary right-space" onClick={handleApplyAuditLogFilters}>
+        <div className="col-md-6">
+          <button
+            className="btn btn-primary right-space"
+            onClick={handleApplyAuditLogFilters}
+            type="button"
+          >
             {T.translate("audit_log.apply_filters")}
           </button>
         </div>
       </div>
-      <div className='filters-row'>
-        {enabledFilters.includes('user_id_filter') &&
+      <div className="filters-row">
+        {enabledFilters.includes("user_id_filter") && (
           <div className="col-md-6">
             <MemberInput
               id="user_id_filter"
-              getOptionLabel={
-                (member) => {
-                  return member.hasOwnProperty("email") ?
-                    `${member.first_name} ${member.last_name} (${member.email})` :
-                    `${member.first_name} ${member.last_name} (${member.id})`;
-                }
+              getOptionLabel={(member) =>
+                member.hasOwnProperty("email")
+                  ? `${member.first_name} ${member.last_name} (${member.email})`
+                  : `${member.first_name} ${member.last_name} (${member.id})`
               }
               placeholder={T.translate("audit_log.placeholders.user_id")}
               value={auditLogFilters.user_id_filter}
@@ -158,36 +246,51 @@ const AuditLogs = ({ entityFilter = [], currentSummit, term, logEntries, perPage
               isClearable
               onChange={handleAuditLogFilterChange}
             />
-          </div>}
-        {enabledFilters.includes('created_date_filter') &&
+          </div>
+        )}
+        {enabledFilters.includes("created_date_filter") && (
           <>
-            <div className={'col-md-3'}>
+            <div className="col-md-3">
               <DateTimePicker
                 id="created_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{ placeholder: T.translate("audit_log.placeholders.created_date_from") }}
+                inputProps={{
+                  placeholder: T.translate(
+                    "audit_log.placeholders.created_date_from"
+                  )
+                }}
                 onChange={(ev) => handleChangeDateFilter(ev, false)}
                 timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(auditLogFilters.created_date_filter[0], currentSummit.time_zone_id)}
-                className={'event-list-date-picker'}
+                value={epochToMomentTimeZone(
+                  auditLogFilters.created_date_filter[0],
+                  currentSummit.time_zone_id
+                )}
+                className="event-list-date-picker"
               />
             </div>
-            <div className={'col-md-3'}>
+            <div className="col-md-3">
               <DateTimePicker
                 id="created_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{ placeholder: T.translate("audit_log.placeholders.created_date_to") }}
+                inputProps={{
+                  placeholder: T.translate(
+                    "audit_log.placeholders.created_date_to"
+                  )
+                }}
                 onChange={(ev) => handleChangeDateFilter(ev, true)}
                 timezone={currentSummit.time_zone_id}
-                value={epochToMomentTimeZone(auditLogFilters.created_date_filter[1], currentSummit.time_zone_id)}
-                className={'event-list-date-picker'}
+                value={epochToMomentTimeZone(
+                  auditLogFilters.created_date_filter[1],
+                  currentSummit.time_zone_id
+                )}
+                className="event-list-date-picker"
               />
             </div>
           </>
-        }
+        )}
       </div>
 
-      {logEntries.length === 0 && (      
+      {logEntries.length === 0 && (
         <div>{T.translate("audit_log.no_log_entries")}</div>
       )}
 
@@ -220,7 +323,7 @@ const AuditLogs = ({ entityFilter = [], currentSummit, term, logEntries, perPage
 
 const mapStateToProps = ({ currentSummitState, auditLogState }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...auditLogState,
+  ...auditLogState
 });
 
 export default connect(mapStateToProps, {
