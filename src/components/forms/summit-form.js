@@ -709,6 +709,7 @@ class SummitForm extends React.Component {
             /> */}
             <TextEditor
               id="registration_disclaimer_content"
+              className="registration_disclaimer_input"
               value={entity.registration_disclaimer_content}
               onChange={this.handleChange}
             />
