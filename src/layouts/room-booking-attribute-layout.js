@@ -11,34 +11,47 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {Switch, Route, Redirect} from 'react-router-dom';
+import React from "react";
+import { Switch, Route, Redirect } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
+import { Breadcrumb } from "react-breadcrumbs";
 import EditRoomBookingAttributePage from "../pages/room_bookings/edit-room-booking-attribute-page";
-import {connect} from "react-redux";
+import { connect } from "react-redux";
 
 class RoomBookingAttributeLayout extends React.Component {
+  render() {
+    const { match, currentSummit } = this.props;
 
-    render(){
-        const { match, currentSummit } = this.props;
-
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("room_bookings.room_bookings_attributes"), pathname: match.url }} />
-                <Switch>
-                    <Route strict exact path={`${match.url}/new`} component={EditRoomBookingAttributePage} />
-                    <Route strict exact path={`${match.url}/:attribute_id(\\d+)`} component={EditRoomBookingAttributePage} />
-                    <Redirect to={`/app/summits/${currentSummit.id}`} />
-                </Switch>
-            </div>
-        );
-    }
-
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("room_bookings.room_bookings_attributes"),
+            pathname: match.url
+          }}
+        />
+        <Switch>
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditRoomBookingAttributePage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:attribute_id(\\d+)`}
+            component={EditRoomBookingAttributePage}
+          />
+          <Redirect to={`/app/summits/${currentSummit.id}`} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState }) => ({
-    ...currentSummitState
+  ...currentSummitState
 });
 
-export default connect (mapStateToProps, {})(RoomBookingAttributeLayout);
+export default connect(mapStateToProps, {})(RoomBookingAttributeLayout);

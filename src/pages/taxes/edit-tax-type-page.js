@@ -11,79 +11,84 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import TaxTypeForm from '../../components/forms/tax-type-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getTaxType, resetTaxTypeForm, saveTaxType, addTicketToTaxType, removeTicketFromTaxType } from "../../actions/tax-actions";
+import TaxTypeForm from "../../components/forms/tax-type-form";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getTaxType,
+  resetTaxTypeForm,
+  saveTaxType,
+  addTicketToTaxType,
+  removeTicketFromTaxType
+} from "../../actions/tax-actions";
 
 class EditTaxTypePage extends React.Component {
+  constructor(props) {
+    const taxTypeId = props.match.params.tax_type_id;
+    super(props);
 
-    constructor(props) {
-        const taxTypeId = props.match.params.tax_type_id;
-        super(props);
-
-        if (!taxTypeId) {
-            props.resetTaxTypeForm();
-        } else {
-            props.getTaxType(taxTypeId);
-        }
+    if (!taxTypeId) {
+      props.resetTaxTypeForm();
+    } else {
+      props.getTaxType(taxTypeId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.tax_type_id;
-        const newId = this.props.match.params.tax_type_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.tax_type_id;
+    const newId = this.props.match.params.tax_type_id;
 
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetTaxTypeForm();
-            } else {
-                this.props.getTaxType(newId);
-            }
-        }
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetTaxTypeForm();
+      } else {
+        this.props.getTaxType(newId);
+      }
     }
+  }
 
-    render(){
-        const {currentSummit, entity, errors, match, history} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+  render() {
+    const { currentSummit, entity, errors, match, history } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_tax_type.tax_type")}</h3>
-                <hr/>
-                {currentSummit &&
-                <TaxTypeForm
-                    entity={entity}
-                    currentSummit={currentSummit}
-                    errors={errors}
-                    onTicketLink={this.props.addTicketToTaxType}
-                    onTicketUnLink={this.props.removeTicketFromTaxType}
-                    onSubmit={this.props.saveTaxType}
-                />
-                }
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("edit_tax_type.tax_type")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <TaxTypeForm
+            entity={entity}
+            currentSummit={currentSummit}
+            errors={errors}
+            onTicketLink={this.props.addTicketToTaxType}
+            onTicketUnLink={this.props.removeTicketFromTaxType}
+            onSubmit={this.props.saveTaxType}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState, currentTaxTypeState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentTaxTypeState
+  currentSummit: currentSummitState.currentSummit,
+  ...currentTaxTypeState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getTaxType,
-        resetTaxTypeForm,
-        saveTaxType,
-        addTicketToTaxType,
-        removeTicketFromTaxType
-    }
-)(EditTaxTypePage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getTaxType,
+  resetTaxTypeForm,
+  saveTaxType,
+  addTicketToTaxType,
+  removeTicketFromTaxType
+})(EditTaxTypePage);

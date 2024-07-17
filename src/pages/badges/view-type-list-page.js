@@ -11,161 +11,183 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Pagination } from 'react-bootstrap';
-import { Table, FreeTextSearch } from 'openstack-uicore-foundation/lib/components';
-import { getSummitById } from '../../actions/summit-actions';
+import { Pagination } from "react-bootstrap";
+import {
+  Table,
+  FreeTextSearch
+} from "openstack-uicore-foundation/lib/components";
+import { getSummitById } from "../../actions/summit-actions";
 import { getViewTypes, deleteViewType } from "../../actions/badge-actions";
 
 class ViewTypeListPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleNewViewType = this.handleNewViewType.bind(this);
 
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
-        this.handleSort = this.handleSort.bind(this);
-        this.handleSearch = this.handleSearch.bind(this);
-        this.handlePageChange = this.handlePageChange.bind(this);
-        this.handleNewViewType = this.handleNewViewType.bind(this);
+    this.state = {};
+  }
 
-        this.state = {}
-
+  componentDidMount() {
+    const { currentSummit } = this.props;
+    if (currentSummit) {
+      this.props.getViewTypes();
     }
+  }
 
-    componentDidMount() {
-        const { currentSummit } = this.props;
-        if (currentSummit) {
-            this.props.getViewTypes();
-        }
-    }
+  handleEdit(view_type_id) {
+    const { currentSummit, history } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/view-types/${view_type_id}`);
+  }
 
-    handleEdit(view_type_id) {
-        const { currentSummit, history } = this.props;
-        history.push(`/app/summits/${currentSummit.id}/view-types/${view_type_id}`);
-    }
+  handleDelete(viewTypeId) {
+    const { deleteViewType, viewTypes } = this.props;
+    let viewType = viewTypes.find((t) => t.id === viewTypeId);
 
-    handleDelete(viewTypeId) {
-        const { deleteViewType, viewTypes } = this.props;
-        let viewType = viewTypes.find(t => t.id === viewTypeId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("view_type_list.remove_warning") + " " + viewType.name,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteViewType(viewTypeId);
+      }
+    });
+  }
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("view_type_list.remove_warning") + ' ' + viewType.name,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function (result) {
-            if (result.value) {
-                deleteViewType(viewTypeId);
-            }
-        });
-    }
+  handleSort(index, key, dir, func) {
+    const { term, page, perPage } = this.props;
+    this.props.getViewTypes(term, page, perPage, key, dir);
+  }
 
-    handleSort(index, key, dir, func) {
-        const {term, page, perPage} = this.props;
-        this.props.getViewTypes(term, page, perPage, key, dir);
-    }
+  handlePageChange(page) {
+    const { term, order, orderDir, perPage } = this.props;
+    this.props.getViewTypes(term, page, perPage, order, orderDir);
+  }
 
-    handlePageChange(page) {
-        const {term, order, orderDir, perPage} = this.props;
-        this.props.getViewTypes(term, page, perPage, order, orderDir);
-    }
+  handleSearch(term) {
+    const { order, orderDir, page, perPage } = this.props;
+    this.props.getViewTypes(term, page, perPage, order, orderDir);
+  }
 
-    handleSearch(term) {
-        const {order, orderDir, page, perPage} = this.props;
-        this.props.getViewTypes(term, page, perPage, order, orderDir);
-    }
+  handleNewViewType(ev) {
+    const { currentSummit, history } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/view-types/new`);
+  }
 
-    handleNewViewType(ev) {
-        const { currentSummit, history } = this.props;
-        history.push(`/app/summits/${currentSummit.id}/view-types/new`);
-    }
+  render() {
+    const {
+      currentSummit,
+      viewTypes,
+      term = "",
+      lastPage,
+      currentPage,
+      order,
+      orderDir,
+      totalViewTypes
+    } = this.props;
 
-    render() {
-        const { currentSummit, viewTypes, term = '', lastPage, currentPage, order, orderDir, totalViewTypes } = this.props;
+    const columns = [
+      {
+        columnKey: "name",
+        value: T.translate("view_type_list.name"),
+        sortable: true
+      },
+      {
+        columnKey: "is_default",
+        value: T.translate("view_type_list.is_default"),
+        render: (vt) => (vt.is_default === true ? "Yes" : "No")
+      }
+    ];
 
-        const columns = [
-            { columnKey: 'name', value: T.translate("view_type_list.name"), sortable: true },
-            { columnKey: 'is_default', value: T.translate("view_type_list.is_default"), render: (vt) => vt.is_default === true ? 'Yes' : 'No' }
-        ];
+    const table_options = {
+      sortCol: order,
+      sortDir: orderDir,
+      actions: {
+        edit: { onClick: this.handleEdit },
+        delete: { onClick: this.handleDelete }
+      }
+    };
 
-        const table_options = {
-            sortCol: order,
-            sortDir: orderDir,
-            actions: {
-                edit: { onClick: this.handleEdit },
-                delete: { onClick: this.handleDelete }
-            }
-        }
+    if (!currentSummit.id) return <div />;
 
-        if (!currentSummit.id) return (<div />);
+    return (
+      <div className="container">
+        <h3>
+          {" "}
+          {T.translate("view_type_list.view_types")} ({totalViewTypes})
+        </h3>
+        <div className={"row"}>
+          <div className={"col-md-6"}>
+            <FreeTextSearch
+              value={term ?? ""}
+              placeholder={T.translate(
+                "view_type_list.placeholders.search_view_type"
+              )}
+              onSearch={this.handleSearch}
+            />
+          </div>
+          <div className="col-md-6 text-right">
+            <button
+              className="btn btn-primary right-space"
+              onClick={this.handleNewViewType}
+            >
+              {T.translate("view_type_list.add_view_type")}
+            </button>
+          </div>
+        </div>
 
-        return (
-            <div className="container">
-                <h3> {T.translate("view_type_list.view_types")} ({totalViewTypes})</h3>
-                <div className={'row'}>
-                    <div className={'col-md-6'}>
-                        <FreeTextSearch
-                            value={term ?? ''}
-                            placeholder={T.translate("view_type_list.placeholders.search_view_type")}
-                            onSearch={this.handleSearch}
-                        />
-                    </div>
-                    <div className="col-md-6 text-right">
-                        <button className="btn btn-primary right-space" onClick={this.handleNewViewType}>
-                            {T.translate("view_type_list.add_view_type")}
-                        </button>
-                    </div>
-                </div>
+        {viewTypes.length === 0 && (
+          <div>{T.translate("view_type_list.no_view_type")}</div>
+        )}
 
-                {viewTypes.length === 0 &&
-                    <div>{T.translate("view_type_list.no_view_type")}</div>
-                }
-
-                {viewTypes.length > 0 &&
-                    <>
-                        <Table
-                            options={table_options}
-                            data={viewTypes}
-                            columns={columns}
-                            onSort={this.handleSort}
-                        />
-                        <Pagination
-                            bsSize="medium"
-                            prev
-                            next
-                            first
-                            last
-                            ellipsis
-                            boundaryLinks
-                            maxButtons={10}
-                            items={lastPage}
-                            activePage={currentPage}
-                            onSelect={this.handlePageChange}
-                        />
-                    </>
-                }
-
-            </div>
-        )
-    }
+        {viewTypes.length > 0 && (
+          <>
+            <Table
+              options={table_options}
+              data={viewTypes}
+              columns={columns}
+              onSort={this.handleSort}
+            />
+            <Pagination
+              bsSize="medium"
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              maxButtons={10}
+              items={lastPage}
+              activePage={currentPage}
+              onSelect={this.handlePageChange}
+            />
+          </>
+        )}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState, currentViewTypeListState }) => ({
-    currentSummit: currentSummitState.currentSummit,
-     ...currentViewTypeListState,    
-})
+  currentSummit: currentSummitState.currentSummit,
+  ...currentViewTypeListState
+});
 
-export default connect(
-    mapStateToProps,
-    {
-        getSummitById,
-        getViewTypes,        
-        deleteViewType
-    }
-)(ViewTypeListPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getViewTypes,
+  deleteViewType
+})(ViewTypeListPage);

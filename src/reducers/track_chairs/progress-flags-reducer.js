@@ -11,61 +11,67 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_PROGRESS_FLAGS,
-    PROGRESS_FLAG_ADDED,
-    PROGRESS_FLAG_DELETED,
-    PROGRESS_FLAG_UPDATED,
-    PROGRESS_FLAG_REORDERED
-} from '../../actions/track-chair-actions';
+import {
+  RECEIVE_PROGRESS_FLAGS,
+  PROGRESS_FLAG_ADDED,
+  PROGRESS_FLAG_DELETED,
+  PROGRESS_FLAG_UPDATED,
+  PROGRESS_FLAG_REORDERED
+} from "../../actions/track-chair-actions";
 
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    progressFlags : [],
+  progressFlags: []
 };
 
 const progressFlagsReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action;
-    switch (type) {
-        case LOGOUT_USER: {
-            return state;
-        }
-        case RECEIVE_PROGRESS_FLAGS: {
-            const {data} = payload.response;
-
-            return {...state, progressFlags: data };
-        }
-        case PROGRESS_FLAG_ADDED: {
-            const newFlag = payload.response;
-
-            return {...state, progressFlags: [...state.progressFlags, newFlag]};
-        }
-        case PROGRESS_FLAG_UPDATED: {
-            const editedFlag = payload.response;
-
-            const progressFlags = state.progressFlags.map(f => {
-                if (f.id === editedFlag.id) {
-                    return editedFlag;
-                }
-
-                return f;
-            }).sort((a,b) => a.order - b.order);
-
-            return {...state, progressFlags};
-        }
-        case PROGRESS_FLAG_REORDERED: {
-            return {...state, progressFlags: payload };
-        }
-        case PROGRESS_FLAG_DELETED: {
-            const {progressFlagId} = payload;
-
-            return {...state, progressFlags: state.progressFlags.filter(f => f.id !== progressFlagId)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER: {
+      return state;
     }
+    case RECEIVE_PROGRESS_FLAGS: {
+      const { data } = payload.response;
+
+      return { ...state, progressFlags: data };
+    }
+    case PROGRESS_FLAG_ADDED: {
+      const newFlag = payload.response;
+
+      return { ...state, progressFlags: [...state.progressFlags, newFlag] };
+    }
+    case PROGRESS_FLAG_UPDATED: {
+      const editedFlag = payload.response;
+
+      const progressFlags = state.progressFlags
+        .map((f) => {
+          if (f.id === editedFlag.id) {
+            return editedFlag;
+          }
+
+          return f;
+        })
+        .sort((a, b) => a.order - b.order);
+
+      return { ...state, progressFlags };
+    }
+    case PROGRESS_FLAG_REORDERED: {
+      return { ...state, progressFlags: payload };
+    }
+    case PROGRESS_FLAG_DELETED: {
+      const { progressFlagId } = payload;
+
+      return {
+        ...state,
+        progressFlags: state.progressFlags.filter(
+          (f) => f.id !== progressFlagId
+        )
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default progressFlagsReducer;

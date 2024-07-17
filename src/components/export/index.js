@@ -18,46 +18,53 @@ const ExcelFile = ReactExport.ExcelFile;
 const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
 const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
-
 export default class ExportData extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.renderData = this.renderData.bind(this);
+  }
 
-        this.renderData = this.renderData.bind(this);
-    }
+  renderData() {
+    let { data } = this.props;
 
-    renderData() {
-        let {data} = this.props;
-
-        let sheets = data.filter(it => it.data.length > 0).map((group, groupIdx) => {
-
-            let columns = Object.keys(group.data[0]).map((col, colIdx) => {
-               return (
-                   <ExcelColumn key={'col_'+groupIdx+'_'+colIdx} label={col} value={col}/>
-               ) ;
-            });
-
-            return (
-                <ExcelSheet key={'grp_'+groupIdx} data={group.data} name={group.name}>
-                    {columns}
-                </ExcelSheet>
-            );
+    let sheets = data
+      .filter((it) => it.data.length > 0)
+      .map((group, groupIdx) => {
+        let columns = Object.keys(group.data[0]).map((col, colIdx) => {
+          return (
+            <ExcelColumn
+              key={"col_" + groupIdx + "_" + colIdx}
+              label={col}
+              value={col}
+            />
+          );
         });
 
-        return sheets;
-    }
-
-    render() {
-        const {reportName} = this.props;
-        const sheets = this.renderData();
-
-        if (sheets.length === 0) return null;
-
         return (
-            <ExcelFile filename={reportName} hideElement={true}>
-                {sheets}
-            </ExcelFile>
+          <ExcelSheet
+            key={"grp_" + groupIdx}
+            data={group.data}
+            name={group.name}
+          >
+            {columns}
+          </ExcelSheet>
         );
-    }
+      });
+
+    return sheets;
+  }
+
+  render() {
+    const { reportName } = this.props;
+    const sheets = this.renderData();
+
+    if (sheets.length === 0) return null;
+
+    return (
+      <ExcelFile filename={reportName} hideElement={true}>
+        {sheets}
+      </ExcelFile>
+    );
+  }
 }

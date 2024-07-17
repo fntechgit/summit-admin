@@ -11,32 +11,42 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
-import EmailFlowEventSettingsPage from '../pages/email_flow_events/email-flow-events-settings-page';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
+import EmailFlowEventSettingsPage from "../pages/email_flow_events/email-flow-events-settings-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class EmailFlowEventSettingsLayout extends React.Component {
-
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("email_flow_events_settings.email_flow_settings"), pathname: match.url }} />
-                <Switch>
-                    <Route exact strict path={match.url} component={EmailFlowEventSettingsPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate(
+              "email_flow_events_settings.email_flow_settings"
+            ),
+            pathname: match.url
+          }}
+        />
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={EmailFlowEventSettingsPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(EmailFlowEventSettingsLayout), 'email-flow-events');
-
-
+export default Restrict(
+  withRouter(EmailFlowEventSettingsLayout),
+  "email-flow-events"
+);

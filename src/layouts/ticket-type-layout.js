@@ -11,37 +11,47 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import TicketTypeListPage from '../pages/tickets/ticket-type-list-page'
-import EditTicketTypePage from '../pages/tickets/edit-ticket-type-page'
+import TicketTypeListPage from "../pages/tickets/ticket-type-list-page";
+import EditTicketTypePage from "../pages/tickets/edit-ticket-type-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class TicketTypeLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("ticket_type_list.ticket_types"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("ticket_type_list.ticket_types"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={TicketTypeListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditTicketTypePage}/>
-                    <Route strict exact path={`${match.url}/:ticket_type_id(\\d+)`} component={EditTicketTypePage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route strict exact path={match.url} component={TicketTypeListPage} />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditTicketTypePage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:ticket_type_id(\\d+)`}
+            component={EditTicketTypePage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(TicketTypeLayout), 'tickets');
-
-
+export default Restrict(withRouter(TicketTypeLayout), "tickets");

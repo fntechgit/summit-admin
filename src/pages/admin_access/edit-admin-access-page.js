@@ -11,77 +11,79 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import AdminAccessForm from '../../components/forms/admin-access-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getAdminAccess, resetAdminAccessForm, saveAdminAccess } from "../../actions/admin-access-actions";
+import { Breadcrumb } from "react-breadcrumbs";
+import AdminAccessForm from "../../components/forms/admin-access-form";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getAdminAccess,
+  resetAdminAccessForm,
+  saveAdminAccess
+} from "../../actions/admin-access-actions";
 
 //import '../../styles/edit-admin-access-page.less';
 
-
 class EditAdminAccessPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {};
 
-        this.state = {};
+    const accessId = props.match.params.access_id;
 
-        const accessId = props.match.params.access_id;
-
-        if (!accessId) {
-            props.resetAdminAccessForm();
-        } else {
-            props.getAdminAccess(accessId);
-        }
+    if (!accessId) {
+      props.resetAdminAccessForm();
+    } else {
+      props.getAdminAccess(accessId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.access_id;
-        const newId = this.props.match.params.access_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.access_id;
+    const newId = this.props.match.params.access_id;
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetTemplateForm();
-            } else {
-                this.props.getAdminAccess(newId);
-            }
-        }
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetTemplateForm();
+      } else {
+        this.props.getAdminAccess(newId);
+      }
     }
+  }
 
-    render(){
-        const {entity, errors, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.title : T.translate("general.new");
+  render() {
+    const { entity, errors, match } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.title : T.translate("general.new");
 
-        return(
-            <div className="container edit-admin-access-page">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("admin_access.admin_access")}</h3>
-                <hr/>
-                <AdminAccessForm
-                    entity={entity}
-                    errors={errors}
-                    onSubmit={this.props.saveAdminAccess}
-                />
-            </div>
-
-        )
-    }
+    return (
+      <div className="container edit-admin-access-page">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("admin_access.admin_access")}
+        </h3>
+        <hr />
+        <AdminAccessForm
+          entity={entity}
+          errors={errors}
+          onSubmit={this.props.saveAdminAccess}
+        />
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ adminAccessState }) => ({
-    ...adminAccessState
+  ...adminAccessState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getAdminAccess,
-        resetAdminAccessForm,
-        saveAdminAccess
-    }
-)(EditAdminAccessPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getAdminAccess,
+  resetAdminAccessForm,
+  saveAdminAccess
+})(EditAdminAccessPage);

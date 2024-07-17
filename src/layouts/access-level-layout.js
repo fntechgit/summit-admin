@@ -11,37 +11,52 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import AccessLevelListPage from '../pages/badges/access-level-list-page'
-import EditAccessLevelPage from '../pages/badges/edit-access-level-page'
+import AccessLevelListPage from "../pages/badges/access-level-list-page";
+import EditAccessLevelPage from "../pages/badges/edit-access-level-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class AccessLevelLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("access_level_list.access_levels"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("access_level_list.access_levels"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={AccessLevelListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditAccessLevelPage}/>
-                    <Route strict exact path={`${match.url}/:access_level_id(\\d+)`} component={EditAccessLevelPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            strict
+            exact
+            path={match.url}
+            component={AccessLevelListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditAccessLevelPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:access_level_id(\\d+)`}
+            component={EditAccessLevelPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(AccessLevelLayout), 'badges');
-
-
+export default Restrict(withRouter(AccessLevelLayout), "badges");

@@ -11,84 +11,98 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import SpeakerForm from '../../components/forms/speaker-form';
-import { getSpeaker, resetSpeakerForm, saveSpeaker, attachPicture } from "../../actions/speaker-actions";
-import { loadSummits } from '../../actions/summit-actions';
-import '../../styles/edit-summit-speaker-page.less';
+import { Breadcrumb } from "react-breadcrumbs";
+import SpeakerForm from "../../components/forms/speaker-form";
+import {
+  getSpeaker,
+  resetSpeakerForm,
+  saveSpeaker,
+  attachPicture
+} from "../../actions/speaker-actions";
+import { loadSummits } from "../../actions/summit-actions";
+import "../../styles/edit-summit-speaker-page.less";
 
 class EditSummitSpeakerPage extends React.Component {
+  constructor(props) {
+    const { summits, match } = props;
+    const speakerId = match.params.speaker_id;
+    super(props);
 
-    constructor(props) {
-        const {summits, match} = props;
-        const speakerId = match.params.speaker_id;
-        super(props);
-
-        if (!speakerId) {
-            props.resetSpeakerForm();
-        } else {
-            props.getSpeaker(speakerId);
-        }
-
-        if (summits.length === 0) {
-            props.loadSummits();
-        }
+    if (!speakerId) {
+      props.resetSpeakerForm();
+    } else {
+      props.getSpeaker(speakerId);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.speaker_id;
-        const newId = this.props.match.params.speaker_id;
-
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetSpeakerForm();
-            } else {
-                this.props.getSpeaker(newId);
-            }
-        }
+    if (summits.length === 0) {
+      props.loadSummits();
     }
+  }
 
-    render(){
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.speaker_id;
+    const newId = this.props.match.params.speaker_id;
 
-        const {entity, errors, summits, history, saveSpeaker, attachPicture, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.first_name+' '+entity.last_name : T.translate("general.new");
-
-        if (summits.length === 0) return (<div> Hold on...</div>);
-
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("general.speaker")}</h3>
-                <hr/>
-                <SpeakerForm
-                    summits={summits}
-                    history={history}
-                    entity={entity}
-                    errors={errors}
-                    onSubmit={saveSpeaker}
-                    onAttach={attachPicture}
-                />
-            </div>
-        )
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetSpeakerForm();
+      } else {
+        this.props.getSpeaker(newId);
+      }
     }
+  }
+
+  render() {
+    const {
+      entity,
+      errors,
+      summits,
+      history,
+      saveSpeaker,
+      attachPicture,
+      match
+    } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id
+      ? entity.first_name + " " + entity.last_name
+      : T.translate("general.new");
+
+    if (summits.length === 0) return <div> Hold on...</div>;
+
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("general.speaker")}
+        </h3>
+        <hr />
+        <SpeakerForm
+          summits={summits}
+          history={history}
+          entity={entity}
+          errors={errors}
+          onSubmit={saveSpeaker}
+          onAttach={attachPicture}
+        />
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSpeakerState, directoryState }) => ({
-    summits: directoryState.summits,
-    ...currentSpeakerState
+  summits: directoryState.summits,
+  ...currentSpeakerState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        loadSummits,
-        getSpeaker,
-        resetSpeakerForm,
-        saveSpeaker,
-        attachPicture
-    }
-)(EditSummitSpeakerPage);
+export default connect(mapStateToProps, {
+  loadSummits,
+  getSpeaker,
+  resetSpeakerForm,
+  saveSpeaker,
+  attachPicture
+})(EditSummitSpeakerPage);

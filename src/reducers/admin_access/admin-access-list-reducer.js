@@ -11,56 +11,67 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_ADMIN_ACCESSES,
-    REQUEST_ADMIN_ACCESSES,
-    ADMIN_ACCESS_DELETED,
-} from '../../actions/admin-access-actions';
+import {
+  RECEIVE_ADMIN_ACCESSES,
+  REQUEST_ADMIN_ACCESSES,
+  ADMIN_ACCESS_DELETED
+} from "../../actions/admin-access-actions";
 
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    admin_accesses  : [],
-    term            : null,
-    order           : 'id',
-    orderDir        : 1,
-    currentPage     : 1,
-    lastPage        : 1,
-    perPage         : 10,
+  admin_accesses: [],
+  term: null,
+  order: "id",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10
 };
 
 const adminAccessListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action;
-    switch (type) {
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_ADMIN_ACCESSES: {
-            let {order, orderDir, term} = payload;
-
-            return {...state, order, orderDir, term }
-        }
-        case RECEIVE_ADMIN_ACCESSES: {
-            let {total, last_page, current_page} = payload.response;
-            let admin_accesses = payload.response.data.map(aa => {
-                return {
-                    id: aa.id,
-                    title: aa.title,
-                    members: aa.members.map(m => `${m.first_name} ${m.last_name}`).join(', '),
-                    summits: aa.summits.map(s => s.name).join(', '),
-                };
-            });
-
-            return {...state, admin_accesses: admin_accesses, currentPage: current_page, lastPage: last_page };
-        }
-        case ADMIN_ACCESS_DELETED: {
-            let {adminAccessId} = payload;
-            return {...state, admin_accesses: state.admin_accesses.filter(aa => aa.id !== adminAccessId)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_ADMIN_ACCESSES: {
+      let { order, orderDir, term } = payload;
+
+      return { ...state, order, orderDir, term };
+    }
+    case RECEIVE_ADMIN_ACCESSES: {
+      let { total, last_page, current_page } = payload.response;
+      let admin_accesses = payload.response.data.map((aa) => {
+        return {
+          id: aa.id,
+          title: aa.title,
+          members: aa.members
+            .map((m) => `${m.first_name} ${m.last_name}`)
+            .join(", "),
+          summits: aa.summits.map((s) => s.name).join(", ")
+        };
+      });
+
+      return {
+        ...state,
+        admin_accesses: admin_accesses,
+        currentPage: current_page,
+        lastPage: last_page
+      };
+    }
+    case ADMIN_ACCESS_DELETED: {
+      let { adminAccessId } = payload;
+      return {
+        ...state,
+        admin_accesses: state.admin_accesses.filter(
+          (aa) => aa.id !== adminAccessId
+        )
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default adminAccessListReducer;

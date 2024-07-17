@@ -11,76 +11,89 @@
  * limitations under the License.
  **/
 
-import React, {useEffect} from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import ScheduleSettingsForm from '../../components/forms/schedule-settings-form';
+import ScheduleSettingsForm from "../../components/forms/schedule-settings-form";
 import {
-    getScheduleSetting,
-    resetScheduleSettingsForm,
-    saveScheduleSettings,
+  getScheduleSetting,
+  resetScheduleSettingsForm,
+  saveScheduleSettings
 } from "../../actions/schedule-settings-actions";
 
-import '../../styles/edit-schedule-settings-page.less'
+import "../../styles/edit-schedule-settings-page.less";
 
-const EditScheduleSettingsPage = ({currentSummit, match, scheduleSettings, entity, errors, ...props}) => {
-    const scheduleSettingsId = match.params.schedule_settings_id;
-    const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-    const breadcrumb = (entity.id) ? entity.key : T.translate("general.new");
+const EditScheduleSettingsPage = ({
+  currentSummit,
+  match,
+  scheduleSettings,
+  entity,
+  errors,
+  ...props
+}) => {
+  const scheduleSettingsId = match.params.schedule_settings_id;
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.key : T.translate("general.new");
 
-    useEffect(() => {
-        if (scheduleSettingsId) {
-          props.getScheduleSetting(scheduleSettingsId);
-        } else {
-          props.resetScheduleSettingsForm();
-        }
-    }, [scheduleSettingsId]);
+  useEffect(() => {
+    if (scheduleSettingsId) {
+      props.getScheduleSetting(scheduleSettingsId);
+    } else {
+      props.resetScheduleSettingsForm();
+    }
+  }, [scheduleSettingsId]);
 
-   const createKey = () => {
-        const keys = scheduleSettings.map(ss => ss.key);
-        let keyNumber = scheduleSettings.length;
+  const createKey = () => {
+    const keys = scheduleSettings.map((ss) => ss.key);
+    let keyNumber = scheduleSettings.length;
 
-        while (keys.includes(`schedule_${keyNumber}`)) {
-            keyNumber++
-        }
-
-        return `schedule_${keyNumber}`;
+    while (keys.includes(`schedule_${keyNumber}`)) {
+      keyNumber++;
     }
 
-    if (!entity.id) {
-        entity.key = createKey();
-    }
+    return `schedule_${keyNumber}`;
+  };
 
-    return(
-      <div className="container">
-          <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-          <h3>{title} {T.translate("edit_schedule_settings.schedule_settings")}</h3>
-          <hr/>
-          {currentSummit &&
-            <ScheduleSettingsForm
-              entity={entity}
-              summit={currentSummit}
-              errors={errors}
-              onSubmit={props.saveScheduleSettings}
-            />
-          }
-      </div>
-    )
-}
+  if (!entity.id) {
+    entity.key = createKey();
+  }
 
-const mapStateToProps = ({ currentSummitState, scheduleSettingsState, baseState, scheduleSettingsListState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    loading: baseState.loading,
-    scheduleSettings: scheduleSettingsListState.scheduleSettings,
-    ...scheduleSettingsState
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <h3>
+        {title} {T.translate("edit_schedule_settings.schedule_settings")}
+      </h3>
+      <hr />
+      {currentSummit && (
+        <ScheduleSettingsForm
+          entity={entity}
+          summit={currentSummit}
+          errors={errors}
+          onSubmit={props.saveScheduleSettings}
+        />
+      )}
+    </div>
+  );
+};
+
+const mapStateToProps = ({
+  currentSummitState,
+  scheduleSettingsState,
+  baseState,
+  scheduleSettingsListState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  loading: baseState.loading,
+  scheduleSettings: scheduleSettingsListState.scheduleSettings,
+  ...scheduleSettingsState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getScheduleSetting,
-        resetScheduleSettingsForm,
-        saveScheduleSettings,
-    }
-)(EditScheduleSettingsPage);
+export default connect(mapStateToProps, {
+  getScheduleSetting,
+  resetScheduleSettingsForm,
+  saveScheduleSettings
+})(EditScheduleSettingsPage);

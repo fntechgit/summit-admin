@@ -11,54 +11,57 @@
  * limitations under the License.
  **/
 
-import React, {useState} from 'react'
-import {DateTimePicker} from "openstack-uicore-foundation/lib/components";
+import React, { useState } from "react";
+import { DateTimePicker } from "openstack-uicore-foundation/lib/components";
 
-const DateIntervalFilter = ({ onFilter, timezone = 'UTC'}) => {
-
+const DateIntervalFilter = ({ onFilter, timezone = "UTC" }) => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
 
   const handleFilter = () => {
     onFilter(fromDate?.unix() || null, toDate?.unix() || null);
-  }
+  };
 
   const handleClear = () => {
     setFromDate(null);
     setToDate(null);
     onFilter(null, null);
-  }
-  
+  };
+
   const onChangeFromDate = (newDate) => {
     if (!toDate) setToDate(newDate);
     setFromDate(newDate);
-  }
+  };
 
   return (
     <div className="inline">
       From: &nbsp;&nbsp;
       <DateTimePicker
         id="fromDate"
-        onChange={ev => onChangeFromDate(ev.target.value)}
-        format={{date: "YYYY-MM-DD", time: "HH:mm"}}
+        onChange={(ev) => onChangeFromDate(ev.target.value)}
+        format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
         value={fromDate}
         timezone={timezone}
       />
       &nbsp;&nbsp;To:&nbsp;&nbsp;
       <DateTimePicker
         id="toDate"
-        onChange={ev => setToDate(ev.target.value)}
-        validation={{ before: (fromDate?.unix() -1), after: '>=' }}
-        format={{date: "YYYY-MM-DD", time: "HH:mm"}}
+        onChange={(ev) => setToDate(ev.target.value)}
+        validation={{ before: fromDate?.unix() - 1, after: ">=" }}
+        format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
         value={toDate}
         timezone={timezone}
       />
       &nbsp;&nbsp;
-      <button className="btn btn-default" onClick={handleFilter}>Filter</button>
+      <button className="btn btn-default" onClick={handleFilter}>
+        Filter
+      </button>
       &nbsp;&nbsp;
-      <button className="btn btn-danger" onClick={handleClear}>Clear</button>
+      <button className="btn btn-danger" onClick={handleClear}>
+        Clear
+      </button>
     </div>
   );
-}
+};
 
 export default DateIntervalFilter;

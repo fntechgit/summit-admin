@@ -10,161 +10,204 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
-import { Pagination } from 'react-bootstrap';
-import { FreeTextSearch, Table } from 'openstack-uicore-foundation/lib/components';
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
+import { Pagination } from "react-bootstrap";
+import {
+  FreeTextSearch,
+  Table
+} from "openstack-uicore-foundation/lib/components";
 import { getPurchaseOrders } from "../../actions/order-actions";
-import QrReaderInput from '../../components/inputs/qr-reader-input';
-import { getTicket } from '../../actions/ticket-actions'
+import QrReaderInput from "../../components/inputs/qr-reader-input";
+import { getTicket } from "../../actions/ticket-actions";
 
 class PurchaseOrderListPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.handleQRScan = this.handleQRScan.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
+    this.handleNewOrder = this.handleNewOrder.bind(this);
 
-        this.handleQRScan = this.handleQRScan.bind(this);
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handlePageChange = this.handlePageChange.bind(this);
-        this.handleSort = this.handleSort.bind(this);
-        this.handleSearch = this.handleSearch.bind(this);
-        this.handleNewOrder = this.handleNewOrder.bind(this);
+    this.state = {};
+  }
 
-
-        this.state = {};
+  componentDidMount() {
+    const { currentSummit, term, currentPage, perPage, order, orderDir } =
+      this.props;
+    if (currentSummit) {
+      this.props.getPurchaseOrders(term, currentPage, perPage, order, orderDir);
     }
+  }
 
-    componentDidMount() {
-        const {currentSummit, term, currentPage, perPage, order, orderDir} = this.props;
-        if(currentSummit) {
-            this.props.getPurchaseOrders(term, currentPage, perPage, order, orderDir);
-        }
-    }
+  handleQRScan(qrCode) {
+    const { currentSummit, history } = this.props;
+    this.props.getTicket(btoa(qrCode)).then((data) => {
+      history.push(
+        `/app/summits/${currentSummit.id}/purchase-orders/${data.order_id}/tickets/${data.id}`
+      );
+    });
+  }
 
-    handleQRScan(qrCode) {
-        const {currentSummit, history} = this.props;
-        this.props.getTicket(btoa(qrCode)).then(
-            (data) => {
-                history.push(`/app/summits/${currentSummit.id}/purchase-orders/${data.order_id}/tickets/${data.id}`);
-            }
-        );
-    }
+  handleEdit(purchaseOrderId) {
+    const { currentSummit, history } = this.props;
+    history.push(
+      `/app/summits/${currentSummit.id}/purchase-orders/${purchaseOrderId}`
+    );
+  }
 
-    handleEdit(purchaseOrderId) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/purchase-orders/${purchaseOrderId}`);
-    }
+  handlePageChange(page) {
+    const { term, order, orderDir, perPage } = this.props;
+    this.props.getPurchaseOrders(term, page, perPage, order, orderDir);
+  }
 
-    handlePageChange(page) {
-        const {term, order, orderDir, perPage} = this.props;
-        this.props.getPurchaseOrders(term, page, perPage, order, orderDir);
-    }
+  handleSort(index, key, dir, func) {
+    const { term, page, perPage } = this.props;
+    key = key === "name" ? "last_name" : key;
+    this.props.getPurchaseOrders(term, page, perPage, key, dir);
+  }
 
-    handleSort(index, key, dir, func) {
-        const {term, page, perPage} = this.props;
-        key = (key === 'name') ? 'last_name' : key;
-        this.props.getPurchaseOrders(term, page, perPage, key, dir);
-    }
+  handleSearch(term) {
+    const { order, orderDir, page, perPage } = this.props;
+    this.props.getPurchaseOrders(term, page, perPage, order, orderDir);
+  }
 
-    handleSearch(term) {
-        const {order, orderDir, page, perPage} = this.props;
-        this.props.getPurchaseOrders(term, page, perPage, order, orderDir);
-    }
+  handleNewOrder(ev) {
+    const { currentSummit, history } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/purchase-orders/new`);
+  }
 
-    handleNewOrder(ev) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/purchase-orders/new`);
-    }
+  render() {
+    const {
+      currentSummit,
+      purchaseOrders,
+      lastPage,
+      currentPage,
+      term,
+      order,
+      orderDir,
+      totalPurchaseOrders
+    } = this.props;
 
-    render(){
-        const {currentSummit, purchaseOrders, lastPage, currentPage, term, order, orderDir, totalPurchaseOrders} = this.props;
+    const columns = [
+      {
+        columnKey: "number",
+        value: T.translate("purchase_order_list.number"),
+        sortable: true
+      },
+      {
+        columnKey: "owner_id",
+        value: T.translate("purchase_order_list.owner_id")
+      },
+      {
+        columnKey: "owner_name",
+        value: T.translate("general.name"),
+        sortable: true
+      },
+      {
+        columnKey: "owner_email",
+        value: T.translate("general.email"),
+        sortable: true
+      },
+      {
+        columnKey: "company",
+        value: T.translate("purchase_order_list.company")
+      },
+      {
+        columnKey: "bought_date",
+        value: T.translate("purchase_order_list.bought_date"),
+        sortable: true
+      },
+      { columnKey: "amount", value: T.translate("purchase_order_list.price") },
+      {
+        columnKey: "payment_method",
+        value: T.translate("purchase_order_list.payment_method")
+      },
+      { columnKey: "status", value: T.translate("purchase_order_list.status") }
+    ];
 
-        const columns = [
-            { columnKey: 'number', value: T.translate("purchase_order_list.number"), sortable: true},
-            { columnKey: 'owner_id', value: T.translate("purchase_order_list.owner_id") },
-            { columnKey: 'owner_name', value: T.translate("general.name"), sortable: true },
-            { columnKey: 'owner_email', value: T.translate("general.email") , sortable: true},
-            { columnKey: 'company', value: T.translate("purchase_order_list.company")},
-            { columnKey: 'bought_date', value: T.translate("purchase_order_list.bought_date"), sortable: true },
-            { columnKey: 'amount', value: T.translate("purchase_order_list.price") },
-            { columnKey: 'payment_method', value: T.translate("purchase_order_list.payment_method") },
-            { columnKey: 'status', value: T.translate("purchase_order_list.status")},
-        ];
+    const table_options = {
+      sortCol: order === "last_name" ? "name" : order,
+      sortDir: orderDir,
+      actions: {
+        edit: { onClick: this.handleEdit }
+      }
+    };
 
-        const table_options = {
-            sortCol: (order === 'last_name') ? 'name' : order,
-            sortDir: orderDir,
-            actions: {
-                edit: {onClick: this.handleEdit},
-            }
-        }
+    if (!currentSummit.id) return <div />;
 
-        if(!currentSummit.id) return (<div />);
+    return (
+      <div className="container large">
+        <h3>
+          {" "}
+          {T.translate("purchase_order_list.purchase_orders")} (
+          {totalPurchaseOrders})
+        </h3>
+        <div className={"row"}>
+          <div className={"col-md-6"}>
+            <FreeTextSearch
+              value={term ?? ""}
+              placeholder={T.translate(
+                "purchase_order_list.placeholders.search_orders"
+              )}
+              onSearch={this.handleSearch}
+            />
+          </div>
+          <div className="col-md-2">
+            <QrReaderInput onScan={this.handleQRScan} />
+          </div>
+          <div className="col-md-4 text-right">
+            <button className="btn btn-primary" onClick={this.handleNewOrder}>
+              {T.translate("purchase_order_list.add_order")}
+            </button>
+          </div>
+        </div>
 
-        return(
-            <div className="container large">
-                <h3> {T.translate("purchase_order_list.purchase_orders")} ({totalPurchaseOrders})</h3>
-                <div className={'row'}>
-                    <div className={'col-md-6'}>
-                        <FreeTextSearch
-                            value={term ?? ''}
-                            placeholder={T.translate("purchase_order_list.placeholders.search_orders")}
-                            onSearch={this.handleSearch}
-                        />
-                    </div>
-                    <div className="col-md-2">
-                        <QrReaderInput onScan={this.handleQRScan} />
-                    </div>
-                    <div className="col-md-4 text-right">
-                        <button className="btn btn-primary" onClick={this.handleNewOrder}>
-                            {T.translate("purchase_order_list.add_order")}
-                        </button>
-                    </div>
-                </div>
+        {purchaseOrders.length === 0 && (
+          <div>{T.translate("purchase_order_list.no_orders")}</div>
+        )}
 
-                {purchaseOrders.length === 0 &&
-                <div>{T.translate("purchase_order_list.no_orders")}</div>
-                }
-
-                {purchaseOrders.length > 0 &&
-                <div>
-                    <Table
-                        options={table_options}
-                        data={purchaseOrders}
-                        columns={columns}
-                        onSort={this.handleSort}
-                    />
-                    <Pagination
-                        bsSize="medium"
-                        prev
-                        next
-                        first
-                        last
-                        ellipsis
-                        boundaryLinks
-                        maxButtons={10}
-                        items={lastPage}
-                        activePage={currentPage}
-                        onSelect={this.handlePageChange}
-                    />
-                </div>
-                }
-
-            </div>
-        )
-    }
+        {purchaseOrders.length > 0 && (
+          <div>
+            <Table
+              options={table_options}
+              data={purchaseOrders}
+              columns={columns}
+              onSort={this.handleSort}
+            />
+            <Pagination
+              bsSize="medium"
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              maxButtons={10}
+              items={lastPage}
+              activePage={currentPage}
+              onSelect={this.handlePageChange}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentPurchaseOrderListState }) => ({
-    currentSummit   : currentSummitState.currentSummit,
-    ...currentPurchaseOrderListState
-})
+const mapStateToProps = ({
+  currentSummitState,
+  currentPurchaseOrderListState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentPurchaseOrderListState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getPurchaseOrders,
-        getTicket
-    }
-)(PurchaseOrderListPage);
+export default connect(mapStateToProps, {
+  getPurchaseOrders,
+  getTicket
+})(PurchaseOrderListPage);

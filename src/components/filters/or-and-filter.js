@@ -10,29 +10,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react'
-import T from 'i18n-react/dist/i18n-react';
-import { ALL_FILTER, OR_FILTER } from '../../utils/constants';
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import { ALL_FILTER, OR_FILTER } from "../../utils/constants";
 
-const OrAndFilter = ({ entity, value, onChange, ...rest}) => {    
+const OrAndFilter = ({ entity, value, onChange, ...rest }) => {
+  const changeFilter = () => {
+    onChange(value === ALL_FILTER ? OR_FILTER : ALL_FILTER);
+  };
 
-    const changeFilter = () => {
-        onChange(value === ALL_FILTER ? OR_FILTER : ALL_FILTER);
-    }
+  const fitlerStyle = {
+    cursor: "pointer",
+    textDecoration: "underline"
+  };
 
-    const fitlerStyle = {
-        cursor: 'pointer',
-        textDecoration: 'underline'
-    }
-    
-    return (
-      <div className="and-or-filter" {...rest}>
-          <label>{T.translate("and_or_filter.search", {entity: entity})}
-            <span style={fitlerStyle} onClick={() => changeFilter()}>
-                {value === ALL_FILTER ? T.translate("and_or_filter.all") : T.translate("and_or_filter.any")}</span> 
-            {T.translate("and_or_filter.following")}</label>
-      </div>
-    );
-}
+  return (
+    <div className="and-or-filter" {...rest}>
+      <label>
+        {T.translate("and_or_filter.search", { entity: entity })}
+        <span style={fitlerStyle} onClick={() => changeFilter()}>
+          {value === ALL_FILTER
+            ? T.translate("and_or_filter.all")
+            : T.translate("and_or_filter.any")}
+        </span>
+        {T.translate("and_or_filter.following")}
+      </label>
+    </div>
+  );
+};
 
 export default OrAndFilter;

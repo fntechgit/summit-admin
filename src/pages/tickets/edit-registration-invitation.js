@@ -11,91 +11,98 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import { getSummitById }  from '../../actions/summit-actions';
-import { getRegistrationInvitation ,
-    resetRegistrationInvitationForm,
-    saveRegistrationInvitation } from "../../actions/registration-invitation-actions";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getRegistrationInvitation,
+  resetRegistrationInvitationForm,
+  saveRegistrationInvitation
+} from "../../actions/registration-invitation-actions";
 import RegistrationInvitationForm from "../../components/forms/registration-invitation-form";
-import {getSentEmailsByTemplatesAndEmail} from '../../actions/email-actions';
+import { getSentEmailsByTemplatesAndEmail } from "../../actions/email-actions";
 import EmailActivity from "../../components/forms/email-activity";
 
 class EditRegistrationInvitationPage extends React.Component {
+  componentDidMount() {
+    const { getSentEmailsByTemplatesAndEmail } = this.props;
+    let registrationInvitationId =
+      this.props.match.params.registration_invitation_id;
 
-    componentDidMount () {
-        const {getSentEmailsByTemplatesAndEmail} = this.props;
-        let registrationInvitationId = this.props.match.params.registration_invitation_id;
-
-        if (!registrationInvitationId) {
-            this.props.resetRegistrationInvitationForm();
-            return;
-        }
-
-        this.props.getRegistrationInvitation(registrationInvitationId).then((payload) => {
-            getSentEmailsByTemplatesAndEmail(
-                [
-                    'SUMMIT_REGISTRATION_INVITE_REGISTRATION',
-                    'SUMMIT_REGISTRATION_REINVITE_REGISTRATION'
-                ],
-                payload.email
-            )
-        });
+    if (!registrationInvitationId) {
+      this.props.resetRegistrationInvitationForm();
+      return;
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.registration_invitation_id;
-        const newId = this.props.match.params.registration_invitation_id;
+    this.props
+      .getRegistrationInvitation(registrationInvitationId)
+      .then((payload) => {
+        getSentEmailsByTemplatesAndEmail(
+          [
+            "SUMMIT_REGISTRATION_INVITE_REGISTRATION",
+            "SUMMIT_REGISTRATION_REINVITE_REGISTRATION"
+          ],
+          payload.email
+        );
+      });
+  }
 
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetRegistrationInvitationForm();
-            } else {
-                this.props.getRegistrationInvitation(newId);
-            }
-        }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.registration_invitation_id;
+    const newId = this.props.match.params.registration_invitation_id;
+
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetRegistrationInvitationForm();
+      } else {
+        this.props.getRegistrationInvitation(newId);
+      }
     }
+  }
 
-    render(){
-        const {currentSummit, entity, errors, match, emailActivity} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.id : T.translate("general.new");
+  render() {
+    const { currentSummit, entity, errors, match, emailActivity } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.id : T.translate("general.new");
 
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_registration_invitation.registration_invitation")}</h3>
-                <hr/>
-                {currentSummit &&
-                    <RegistrationInvitationForm
-                        entity={entity}
-                        errors={errors}
-                        currentSummit={currentSummit}
-                        onSubmit={this.props.saveRegistrationInvitation}
-                    />
-                }
-                <EmailActivity
-                        emailActivity={emailActivity}
-                />
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title}{" "}
+          {T.translate("edit_registration_invitation.registration_invitation")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <RegistrationInvitationForm
+            entity={entity}
+            errors={errors}
+            currentSummit={currentSummit}
+            onSubmit={this.props.saveRegistrationInvitation}
+          />
+        )}
+        <EmailActivity emailActivity={emailActivity} />
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentRegistrationInvitationState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentRegistrationInvitationState
+const mapStateToProps = ({
+  currentSummitState,
+  currentRegistrationInvitationState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentRegistrationInvitationState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getRegistrationInvitation,
-        resetRegistrationInvitationForm,
-        saveRegistrationInvitation,
-        getSentEmailsByTemplatesAndEmail,
-    }
-)(EditRegistrationInvitationPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getRegistrationInvitation,
+  resetRegistrationInvitationForm,
+  saveRegistrationInvitation,
+  getSentEmailsByTemplatesAndEmail
+})(EditRegistrationInvitationPage);

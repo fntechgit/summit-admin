@@ -11,42 +11,61 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {Switch, Route, Redirect} from 'react-router-dom';
+import React from "react";
+import { Switch, Route, Redirect } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import {connect} from "react-redux";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 import EmailTemplateListPage from "../pages/emails/email-template-list-page";
 import EditEmailTemplatePage from "../pages/emails/edit-email-template-page";
-import EmailLogListPage from '../pages/emails/email-log-list-page';
+import EmailLogListPage from "../pages/emails/email-log-list-page";
 
 class EmailLayout extends React.Component {
+  render() {
+    const { match, currentSummit } = this.props;
 
-    render(){
-        const { match, currentSummit } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("emails.email_templates"),
+            pathname: match.url
+          }}
+        />
 
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("emails.email_templates"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={`${match.url}/templates`} component={EmailTemplateListPage}/>
-                    <Route strict exact path={`${match.url}/templates/new`} component={EditEmailTemplatePage}/>
-                    <Route path={`${match.url}/templates/:template_id`} component={EditEmailTemplatePage}/>
-                    <Route exact strict path={`${match.url}/log`} component={EmailLogListPage}/>
-                    <Redirect to={`/app/emails/templates`} />
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            exact
+            strict
+            path={`${match.url}/templates`}
+            component={EmailTemplateListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/templates/new`}
+            component={EditEmailTemplatePage}
+          />
+          <Route
+            path={`${match.url}/templates/:template_id`}
+            component={EditEmailTemplatePage}
+          />
+          <Route
+            exact
+            strict
+            path={`${match.url}/log`}
+            component={EmailLogListPage}
+          />
+          <Redirect to={`/app/emails/templates`} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState }) => ({
-    ...currentSummitState
+  ...currentSummitState
 });
 
-export default Restrict(connect (mapStateToProps, {})(EmailLayout), 'emails');
-
-
+export default Restrict(connect(mapStateToProps, {})(EmailLayout), "emails");

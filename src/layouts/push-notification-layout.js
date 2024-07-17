@@ -11,37 +11,55 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import PushNotificationListPage from '../pages/push_notifications/push-notification-list-page'
-import EditPushNotificationPage from '../pages/push_notifications/edit-push-notification-page'
+import PushNotificationListPage from "../pages/push_notifications/push-notification-list-page";
+import EditPushNotificationPage from "../pages/push_notifications/edit-push-notification-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class PushNotificationLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("push_notification_list.push_notifications"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("push_notification_list.push_notifications"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={PushNotificationListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditPushNotificationPage}/>
-                    <Route strict exact path={`${match.url}/:push_notification_id(\\d+)`} component={EditPushNotificationPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            strict
+            exact
+            path={match.url}
+            component={PushNotificationListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditPushNotificationPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:push_notification_id(\\d+)`}
+            component={EditPushNotificationPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(PushNotificationLayout), 'push-notifictations');
-
-
+export default Restrict(
+  withRouter(PushNotificationLayout),
+  "push-notifictations"
+);

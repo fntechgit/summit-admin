@@ -11,16 +11,21 @@
  * limitations under the License.
  **/
 
-import React, { useEffect, useState } from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
-import { Pagination } from 'react-bootstrap';
-import { FreeTextSearch, Table, Dropdown, DateTimePicker } from 'openstack-uicore-foundation/lib/components';
-import { epochToMomentTimeZone } from 'openstack-uicore-foundation/lib/utils/methods'
-import { SegmentedControl } from 'segmented-control'
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
+import { Pagination } from "react-bootstrap";
+import {
+  FreeTextSearch,
+  Table,
+  Dropdown,
+  DateTimePicker
+} from "openstack-uicore-foundation/lib/components";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { SegmentedControl } from "segmented-control";
 import { getSentEmails } from "../../actions/email-actions";
-import '../../styles/email-logs-page.less';
-import EmailTemplateInput from '../../components/inputs/email-template-input';
+import "../../styles/email-logs-page.less";
+import EmailTemplateInput from "../../components/inputs/email-template-input";
 
 const SentEmailListPage = ({
   emails,
@@ -42,11 +47,20 @@ const SentEmailListPage = ({
   const defaultFilters = {
     is_sent_filter: null,
     sent_date_filter: Array(2).fill(null),
-    template_filter: '',
-  }
+    template_filter: ""
+  };
 
-  const [enabledFilters, setEnabledFilters] = useState(Object.keys(filters).filter(e => Array.isArray(filters[e]) ? filters[e]?.some(e => e !== null) : filters[e]?.length > 0));
-  const [emailFilters, setEmailFilters] = useState({ ...defaultFilters, ...filters });
+  const [enabledFilters, setEnabledFilters] = useState(
+    Object.keys(filters).filter((e) =>
+      Array.isArray(filters[e])
+        ? filters[e]?.some((e) => e !== null)
+        : filters[e]?.length > 0
+    )
+  );
+  const [emailFilters, setEmailFilters] = useState({
+    ...defaultFilters,
+    ...filters
+  });
   const [selectedColumns, setSelectedColumns] = useState([]);
 
   const handlePageChange = (newPage) => {
@@ -63,7 +77,7 @@ const SentEmailListPage = ({
 
   const handleDDLSortByLabel = (ddlArray) => {
     return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
-  }
+  };
 
   const handleFiltersChange = (ev) => {
     const { value } = ev.target;
@@ -72,119 +86,152 @@ const SentEmailListPage = ({
         setEnabledFilters(value);
         setEmailFilters(defaultFilters);
       } else {
-        const removedFilter = enabledFilters.filter(e => !value.includes(e))[0];
-        const defaultValue = Array.isArray(emailFilters[removedFilter]) ? [] : '';
-        let newEventFilters = { ...emailFilters, [removedFilter]: defaultValue };
+        const removedFilter = enabledFilters.filter(
+          (e) => !value.includes(e)
+        )[0];
+        const defaultValue = Array.isArray(emailFilters[removedFilter])
+          ? []
+          : "";
+        let newEventFilters = {
+          ...emailFilters,
+          [removedFilter]: defaultValue
+        };
         setEnabledFilters(value);
         setEmailFilters(newEventFilters);
       }
     } else {
       setEnabledFilters(value);
     }
-  }
+  };
 
   const handleChangeDateFilter = (ev, lastDate) => {
     const { value, id } = ev.target;
     const newDateFilter = emailFilters[id];
 
-    setEmailFilters({ ...emailFilters, [id]: lastDate ? [newDateFilter[0], value.unix()] : [value.unix(), newDateFilter[1]] })
-  }
+    setEmailFilters({
+      ...emailFilters,
+      [id]: lastDate
+        ? [newDateFilter[0], value.unix()]
+        : [value.unix(), newDateFilter[1]]
+    });
+  };
 
   const handleEmailFilterChange = (ev) => {
     let { value, type, id } = ev.target;
-    if (type === 'operatorinput') {
-      value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;
-      if (id === 'duration_filter') {
-        value = Array.isArray(value) ? value : `${ev.target.operator}${ev.target.value}`;
+    if (type === "operatorinput") {
+      value = Array.isArray(value)
+        ? value
+        : `${ev.target.operator}${ev.target.value}`;
+      if (id === "duration_filter") {
+        value = Array.isArray(value)
+          ? value
+          : `${ev.target.operator}${ev.target.value}`;
       }
     }
-    if (type === 'mediatypeinput') {
+    if (type === "mediatypeinput") {
       value = {
         operator: ev.target.operator,
         value: ev.target.value
-      }
+      };
     }
     setEmailFilters({ ...emailFilters, [id]: value });
-  }
+  };
 
   const handleColumnsChange = (ev) => {
     const { value } = ev.target;
     let newColumns = value;
 
     setSelectedColumns(newColumns);
-  }
+  };
 
   const handleSetSentFilter = (ev) => {
-    setEmailFilters({ ...emailFilters, is_sent_filter: ev })
-  }
+    setEmailFilters({ ...emailFilters, is_sent_filter: ev });
+  };
 
   const handleApplyEmailFilters = () => {
-    props.getSentEmails(term, currentPage, perPage, order, orderDir, emailFilters);
-  }
+    props.getSentEmails(
+      term,
+      currentPage,
+      perPage,
+      order,
+      orderDir,
+      emailFilters
+    );
+  };
 
   const fieldNames = [
-    { columnKey: 'last_error', value: 'last_error' },
-    { columnKey: 'payload', value: 'payload', render: (row, data) => <div className='email-table-payload'>{data}</div> },
+    { columnKey: "last_error", value: "last_error" },
+    {
+      columnKey: "payload",
+      value: "payload",
+      render: (row, data) => <div className="email-table-payload">{data}</div>
+    }
   ];
 
   let showColumns = fieldNames
-    .filter(f => selectedColumns.includes(f.columnKey))
-    .map(f2 => {
+    .filter((f) => selectedColumns.includes(f.columnKey))
+    .map((f2) => {
       let c = {
         columnKey: f2.columnKey,
         value: T.translate(`email_logs.${f2.value}`),
-        sortable: f2.sortable,
-      }
+        sortable: f2.sortable
+      };
       // optional fields
-      if (f2.hasOwnProperty('title'))
-        c = { ...c, title: f2.title }
+      if (f2.hasOwnProperty("title")) c = { ...c, title: f2.title };
 
-      if (f2.hasOwnProperty('render'))
-        c = { ...c, render: f2.render }
+      if (f2.hasOwnProperty("render")) c = { ...c, render: f2.render };
 
       return c;
     });
 
-
   let columns = [
-    { columnKey: 'id', value: T.translate("general.id"), sortable: true },
+    { columnKey: "id", value: T.translate("general.id"), sortable: true },
     {
-      columnKey: 'template',
+      columnKey: "template",
       value: T.translate("email_logs.email_templates"),
-      styles: { wordBreak: 'break-all' },
+      styles: { wordBreak: "break-all" },
       sortable: true
     },
-    { columnKey: 'subject', value: T.translate("email_logs.subject") },
-    { columnKey: 'from_email', value: T.translate("email_logs.from_email") },
-    { columnKey: 'to_email', value: T.translate("email_logs.to_email"), styles: { wordBreak: 'break-word' }, },
-    { columnKey: 'sent_date', value: T.translate("email_logs.sent_date"), sortable: true },
-
+    { columnKey: "subject", value: T.translate("email_logs.subject") },
+    { columnKey: "from_email", value: T.translate("email_logs.from_email") },
+    {
+      columnKey: "to_email",
+      value: T.translate("email_logs.to_email"),
+      styles: { wordBreak: "break-word" }
+    },
+    {
+      columnKey: "sent_date",
+      value: T.translate("email_logs.sent_date"),
+      sortable: true
+    }
   ];
 
   const ddl_columns = [
-    { value: 'last_error', label: T.translate("email_logs.last_error") },
-    { value: 'payload', label: T.translate("email_logs.payload") }
+    { value: "last_error", label: T.translate("email_logs.last_error") },
+    { value: "payload", label: T.translate("email_logs.payload") }
   ];
 
   columns = [...columns, ...showColumns];
 
   const table_options = {
     sortCol: order,
-    sortDir: orderDir,
+    sortDir: orderDir
   };
 
   const filters_ddl = [
-    { label: 'Is Sent?', value: 'is_sent_filter' },
-    { label: 'Sent Date', value: 'sent_date_filter' },
-    { label: 'Template', value: 'template_filter' }
+    { label: "Is Sent?", value: "is_sent_filter" },
+    { label: "Sent Date", value: "sent_date_filter" },
+    { label: "Template", value: "template_filter" }
   ];
 
   return (
     <div className="container">
-
-      <h3> {T.translate("email_logs.email_list")} ({totalEmails})</h3>
-      <div className={'row'}>
-        <div className={'col-md-6'}>
+      <h3>
+        {" "}
+        {T.translate("email_logs.email_list")} ({totalEmails})
+      </h3>
+      <div className={"row"}>
+        <div className={"col-md-6"}>
           <FreeTextSearch
             value={term}
             placeholder={T.translate("emails.placeholders.search_emails")}
@@ -193,11 +240,11 @@ const SentEmailListPage = ({
         </div>
       </div>
       <hr />
-      <div className={'row'}>
-        <div className={'col-md-6'}>
+      <div className={"row"}>
+        <div className={"col-md-6"}>
           <Dropdown
             id="enabled_filters"
-            placeholder={'Enabled Filters'}
+            placeholder={"Enabled Filters"}
             value={enabledFilters}
             onChange={handleFiltersChange}
             options={handleDDLSortByLabel(filters_ddl)}
@@ -205,55 +252,89 @@ const SentEmailListPage = ({
             isMulti={true}
           />
         </div>
-        <div className={'col-md-6'}>
-          <button className="btn btn-primary right-space" onClick={handleApplyEmailFilters}>
+        <div className={"col-md-6"}>
+          <button
+            className="btn btn-primary right-space"
+            onClick={handleApplyEmailFilters}
+          >
             {T.translate("email_logs.apply_filters")}
           </button>
         </div>
       </div>
-      <div className='filters-row'>
-        {enabledFilters.includes('is_sent_filter') &&
-          <div className={'col-md-6'}>
+      <div className="filters-row">
+        {enabledFilters.includes("is_sent_filter") && (
+          <div className={"col-md-6"}>
             <SegmentedControl
               name="is_sent_filter"
               options={[
-                { label: "All", value: null, default: emailFilters.is_sent_filter === null },
-                { label: "Sent", value: "1", default: emailFilters.is_sent_filter === "1" },
-                { label: "Not Sent", value: "0", default: emailFilters.is_sent_filter === "0" },
+                {
+                  label: "All",
+                  value: null,
+                  default: emailFilters.is_sent_filter === null
+                },
+                {
+                  label: "Sent",
+                  value: "1",
+                  default: emailFilters.is_sent_filter === "1"
+                },
+                {
+                  label: "Not Sent",
+                  value: "0",
+                  default: emailFilters.is_sent_filter === "0"
+                }
               ]}
-              setValue={newValue => handleSetSentFilter(newValue)}
-              style={{ width: "100%", height: 40, color: '#337ab7', fontSize: '10px' }}
+              setValue={(newValue) => handleSetSentFilter(newValue)}
+              style={{
+                width: "100%",
+                height: 40,
+                color: "#337ab7",
+                fontSize: "10px"
+              }}
             />
           </div>
-        }
-        {enabledFilters.includes('sent_date_filter') &&
+        )}
+        {enabledFilters.includes("sent_date_filter") && (
           <>
-            <div className={'col-md-3'}>
+            <div className={"col-md-3"}>
               <DateTimePicker
                 id="sent_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{ placeholder: T.translate("email_logs.placeholders.sent_date_from") }}
+                inputProps={{
+                  placeholder: T.translate(
+                    "email_logs.placeholders.sent_date_from"
+                  )
+                }}
                 onChange={(ev) => handleChangeDateFilter(ev, false)}
-                timezone={'UTC'}
-                value={epochToMomentTimeZone(emailFilters.sent_date_filter[0], 'UTC')}
-                className={'event-list-date-picker'}
+                timezone={"UTC"}
+                value={epochToMomentTimeZone(
+                  emailFilters.sent_date_filter[0],
+                  "UTC"
+                )}
+                className={"event-list-date-picker"}
               />
             </div>
-            <div className={'col-md-3'}>
+            <div className={"col-md-3"}>
               <DateTimePicker
                 id="sent_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
-                inputProps={{ placeholder: T.translate("email_logs.placeholders.sent_date_to") }}
+                inputProps={{
+                  placeholder: T.translate(
+                    "email_logs.placeholders.sent_date_to"
+                  )
+                }}
                 onChange={(ev) => handleChangeDateFilter(ev, true)}
-                timezone={'UTC'}
-                value={epochToMomentTimeZone(emailFilters.sent_date_filter[1], 'UTC')}
-                className={'event-list-date-picker'}
+                timezone={"UTC"}
+                value={epochToMomentTimeZone(
+                  emailFilters.sent_date_filter[1],
+                  "UTC"
+                )}
+                className={"event-list-date-picker"}
               />
             </div>
           </>
-        }
-        {enabledFilters.includes('template_filter') &&
-          <div className={'col-md-6'}>
+        )}
+        {enabledFilters.includes("template_filter") && (
+          <div className={"col-md-6"}>
             <EmailTemplateInput
               id="template_filter"
               value={emailFilters.template_filter}
@@ -261,14 +342,14 @@ const SentEmailListPage = ({
               onChange={handleEmailFilterChange}
               isClearable={true}
               cacheOptions
-              defaultOptions              
+              defaultOptions
               plainValue
             />
           </div>
-        }
+        )}
       </div>
-      <div className={'row'} style={{ marginBottom: 15 }}>
-        <div className={'col-md-12'}>
+      <div className={"row"} style={{ marginBottom: 15 }}>
+        <div className={"col-md-12"}>
           <label>{T.translate("email_logs.select_fields")}</label>
           <Dropdown
             id="select_fields"
@@ -282,13 +363,11 @@ const SentEmailListPage = ({
         </div>
       </div>
 
-      {emails.length === 0 &&
-        <div>{T.translate("emails.no_emails")}</div>
-      }
+      {emails.length === 0 && <div>{T.translate("emails.no_emails")}</div>}
 
-      {emails.length > 0 &&
+      {emails.length > 0 && (
         <>
-          <div className='email-logs-table-wrapper'>
+          <div className="email-logs-table-wrapper">
             <Table
               options={table_options}
               data={emails}
@@ -310,20 +389,16 @@ const SentEmailListPage = ({
             onSelect={handlePageChange}
           />
         </>
-      }
-
+      )}
     </div>
-  )
-}
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, emailLogListState }) => ({
   currentSummit: currentSummitState.currentSummit,
   ...emailLogListState
-})
+});
 
-export default connect(
-  mapStateToProps,
-  {
-    getSentEmails,
-  }
-)(SentEmailListPage);
+export default connect(mapStateToProps, {
+  getSentEmails
+})(SentEmailListPage);

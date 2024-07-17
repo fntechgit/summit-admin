@@ -11,36 +11,51 @@
  * limitations under the License.
  **/
 
-import React from 'react'
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Switch, Route } from 'react-router-dom';
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Switch, Route } from "react-router-dom";
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import RsvpTemplateListPage from '../pages/rsvps/rsvp-template-list-page';
-import RsvpTemplateIdLayout from './rsvp-template-id-layout';
+import RsvpTemplateListPage from "../pages/rsvps/rsvp-template-list-page";
+import RsvpTemplateIdLayout from "./rsvp-template-id-layout";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class RsvpTemplateLayout extends React.Component {
+  render() {
+    const { match } = this.props;
 
-    render(){
-        const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("rsvp_template_list.rsvp_template_list"),
+            pathname: match.url
+          }}
+        />
 
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("rsvp_template_list.rsvp_template_list"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={match.url} component={RsvpTemplateListPage} />
-                    <Route path={`${match.url}/:rsvp_template_id(\\d+)`} component={RsvpTemplateIdLayout} />
-                    <Route exact strict path={`${match.url}/new`} component={RsvpTemplateIdLayout} />
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={RsvpTemplateListPage}
+          />
+          <Route
+            path={`${match.url}/:rsvp_template_id(\\d+)`}
+            component={RsvpTemplateIdLayout}
+          />
+          <Route
+            exact
+            strict
+            path={`${match.url}/new`}
+            component={RsvpTemplateIdLayout}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(RsvpTemplateLayout, 'rsvp');
+export default Restrict(RsvpTemplateLayout, "rsvp");

@@ -11,103 +11,107 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import EventCategoryGroupForm from '../../components/forms/event-category-group-form';
+import { Breadcrumb } from "react-breadcrumbs";
+import EventCategoryGroupForm from "../../components/forms/event-category-group-form";
 import {
-    getEventCategoryGroup,
-    resetEventCategoryGroupForm,
-    saveEventCategoryGroup,
-    addCategoryToGroup,
-    removeCategoryFromGroup,
-    addAllowedGroupToGroup,
-    removeAllowedGroupFromGroup,
-    getEventCategoryGroupMeta
+  getEventCategoryGroup,
+  resetEventCategoryGroupForm,
+  saveEventCategoryGroup,
+  addCategoryToGroup,
+  removeCategoryFromGroup,
+  addAllowedGroupToGroup,
+  removeAllowedGroupFromGroup,
+  getEventCategoryGroupMeta
 } from "../../actions/event-category-actions";
 
 //import '../../styles/edit-summit-attendee-page.less';
 
 class EditEventCategoryGroupPage extends React.Component {
+  constructor(props) {
+    super(props);
+  }
 
-    constructor(props) {
-        super(props);
+  componentDidMount() {
+    const { allClasses } = this.props;
+    let groupId = this.props.match.params.group_id;
+
+    if (!groupId) {
+      this.props.resetEventCategoryGroupForm();
+    } else {
+      this.props.getEventCategoryGroup(groupId);
     }
 
-    componentDidMount () {
-        const {allClasses} = this.props;
-        let groupId = this.props.match.params.group_id;
-
-        if (!groupId) {
-            this.props.resetEventCategoryGroupForm();
-        } else {
-            this.props.getEventCategoryGroup(groupId);
-        }
-
-        if(allClasses.length === 0){
-            this.props.getEventCategoryGroupMeta();
-        }
+    if (allClasses.length === 0) {
+      this.props.getEventCategoryGroupMeta();
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.group_id;
-        const newId = this.props.match.params.group_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.group_id;
+    const newId = this.props.match.params.group_id;
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetEventCategoryGroupForm();
-            } else {
-                this.props.getEventCategoryGroup(newId);
-            }
-        }
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetEventCategoryGroupForm();
+      } else {
+        this.props.getEventCategoryGroup(newId);
+      }
     }
+  }
 
-    render(){
-        const {currentSummit, entity, allClasses, errors, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+  render() {
+    const { currentSummit, entity, allClasses, errors, match } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-        if (!allClasses.length) return (<div />);
+    if (!allClasses.length) return <div />;
 
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_event_category_group.event_category_group")}</h3>
-                <hr/>
-                {currentSummit &&
-                <EventCategoryGroupForm
-                    currentSummit={currentSummit}
-                    allClasses={allClasses}
-                    entity={entity}
-                    errors={errors}
-                    onTrackLink={this.props.addCategoryToGroup}
-                    onTrackUnLink={this.props.removeCategoryFromGroup}
-                    onAllowedGroupLink={this.props.addAllowedGroupToGroup}
-                    onAllowedGroupUnLink={this.props.removeAllowedGroupFromGroup}
-                    onSubmit={this.props.saveEventCategoryGroup}
-                />
-                }
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title}{" "}
+          {T.translate("edit_event_category_group.event_category_group")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <EventCategoryGroupForm
+            currentSummit={currentSummit}
+            allClasses={allClasses}
+            entity={entity}
+            errors={errors}
+            onTrackLink={this.props.addCategoryToGroup}
+            onTrackUnLink={this.props.removeCategoryFromGroup}
+            onAllowedGroupLink={this.props.addAllowedGroupToGroup}
+            onAllowedGroupUnLink={this.props.removeAllowedGroupFromGroup}
+            onSubmit={this.props.saveEventCategoryGroup}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentEventCategoryGroupState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentEventCategoryGroupState
-})
+const mapStateToProps = ({
+  currentSummitState,
+  currentEventCategoryGroupState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentEventCategoryGroupState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getEventCategoryGroup,
-        resetEventCategoryGroupForm,
-        saveEventCategoryGroup,
-        addCategoryToGroup,
-        removeCategoryFromGroup,
-        addAllowedGroupToGroup,
-        removeAllowedGroupFromGroup,
-        getEventCategoryGroupMeta
-    }
-)(EditEventCategoryGroupPage);
+export default connect(mapStateToProps, {
+  getEventCategoryGroup,
+  resetEventCategoryGroupForm,
+  saveEventCategoryGroup,
+  addCategoryToGroup,
+  removeCategoryFromGroup,
+  addAllowedGroupToGroup,
+  removeAllowedGroupFromGroup,
+  getEventCategoryGroupMeta
+})(EditEventCategoryGroupPage);

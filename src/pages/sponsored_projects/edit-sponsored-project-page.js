@@ -11,139 +11,155 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import SponsoredProjectForm from '../../components/forms/sponsored-project-form';
+import SponsoredProjectForm from "../../components/forms/sponsored-project-form";
 import {
-    getAsParentProject,
-    getSponsoredProject,
-    saveSponsoredProject,
-    deleteSubProject,
-    deleteSponsorshipType,
-    updateSponsorShipTypeOrder,
-    attachLogo,
-    removeLogo
+  getAsParentProject,
+  getSponsoredProject,
+  saveSponsoredProject,
+  deleteSubProject,
+  deleteSponsorshipType,
+  updateSponsorShipTypeOrder,
+  attachLogo,
+  removeLogo
 } from "../../actions/sponsored-project-actions";
-import '../../styles/edit-company-page.less';
+import "../../styles/edit-company-page.less";
 import Swal from "sweetalert2";
-import FragmentParser from '../../utils/fragmen-parser';
+import FragmentParser from "../../utils/fragmen-parser";
 
 class EditSponsoredProjectPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleDeleteSponsorshipType =
+      this.handleDeleteSponsorshipType.bind(this);
+    this.handleReorderSponsorshipType =
+      this.handleReorderSponsorshipType.bind(this);
+    this.handleDeleteSubproject = this.handleDeleteSubproject.bind(this);
 
-    constructor(props) {
-        super(props);
-        this.handleDeleteSponsorshipType = this.handleDeleteSponsorshipType.bind(this);
-        this.handleReorderSponsorshipType = this.handleReorderSponsorshipType.bind(this);
-        this.handleDeleteSubproject = this.handleDeleteSubproject.bind(this);
+    this.fragmentParser = new FragmentParser();
+    let parentProjectId = this.fragmentParser.getParam("parent_project_id");
 
-        this.fragmentParser = new FragmentParser();
-        let parentProjectId = this.fragmentParser.getParam('parent_project_id');
+    this.state = {
+      parentProjectId: parentProjectId
+    };
+  }
 
-        this.state = {
-            parentProjectId: parentProjectId,
-        };
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.sponsored_project_id;
+    const newId = this.props.match.params.sponsored_project_id;
+
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetSponsoredProjectForm();
+      } else {
+        this.props.getSponsoredProject(newId);
+      }
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.sponsored_project_id;
-        const newId = this.props.match.params.sponsored_project_id;
+  handleDeleteSponsorshipType(id) {
+    const { deleteSponsorshipType, entity } = this.props;
+    let sponsorshipType = entity.sponsorship_types.find((q) => q.id === id);
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetSponsoredProjectForm();
-            } else {
-                this.props.getSponsoredProject(newId);
-            }
-        }
-    }
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text:
+        T.translate("edit_sponsored_project.remove_sponsorship_type_warning") +
+        " " +
+        sponsorshipType.name,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteSponsorshipType(entity.id, id);
+      }
+    });
+  }
 
-    handleDeleteSponsorshipType(id) {
-        const {deleteSponsorshipType, entity} = this.props;
-        let sponsorshipType = entity.sponsorship_types.find(q => q.id === id);
+  handleReorderSponsorshipType(sponsorshipTypes, id, newOrder) {
+    const { updateSponsorShipTypeOrder, entity } = this.props;
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("edit_sponsored_project.remove_sponsorship_type_warning") + ' ' + sponsorshipType.name,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deleteSponsorshipType(entity.id, id);
-            }
-        });
-    }
+    entity.sponsorship_types = [...sponsorshipTypes];
 
-    handleReorderSponsorshipType(sponsorshipTypes, id, newOrder) {
-        const {updateSponsorShipTypeOrder, entity} = this.props;
+    this.setState({ entity });
+    updateSponsorShipTypeOrder(sponsorshipTypes, entity.id, id, newOrder);
+  }
 
-        entity.sponsorship_types = [...sponsorshipTypes];
+  handleDeleteSubproject(subprojectId) {
+    const { entity, deleteSubProject } = this.props;
 
-        this.setState({entity});
-        updateSponsorShipTypeOrder(sponsorshipTypes, entity.id, id, newOrder);
-    }
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_sponsored_project.remove_subproject_warning"),
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteSubProject(subprojectId);
+      }
+    });
+  }
 
-    handleDeleteSubproject(subprojectId) {
-        const {entity, deleteSubProject} = this.props;
-        
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("edit_sponsored_project.remove_subproject_warning"),
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deleteSubProject(subprojectId);
-            }
-        });
-    }
+  render() {
+    const {
+      entity,
+      errors,
+      summits,
+      history,
+      getAsParentProject,
+      getSponsoredProject,
+      saveSponsoredProject,
+      attachLogo,
+      removeLogo,
+      match
+    } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
 
-    render(){
-        const {entity, errors, summits, history, getAsParentProject, getSponsoredProject, saveSponsoredProject, attachLogo, removeLogo, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-
-        return(
-            <div className="container">
-                <h3>{title} {T.translate("edit_sponsored_project.sponsored_project")}</h3>
-                <hr/>
-                <SponsoredProjectForm
-                    summits={summits}
-                    history={history}
-                    entity={entity}
-                    errors={errors}
-                    onSponsorshipTypeReorder={this.handleReorderSponsorshipType}
-                    onSponsorshipTypeDelete={this.handleDeleteSponsorshipType}
-                    onSubmit={saveSponsoredProject}
-                    onAttachLogo={attachLogo}
-                    onRemoveLogo={removeLogo}
-                    parentProjectId={this.state.parentProjectId}
-                    getParentProject={getAsParentProject}
-                    getSponsoredProject={getSponsoredProject}
-                    onSubprojectDelete={this.handleDeleteSubproject}
-                />
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <h3>
+          {title} {T.translate("edit_sponsored_project.sponsored_project")}
+        </h3>
+        <hr />
+        <SponsoredProjectForm
+          summits={summits}
+          history={history}
+          entity={entity}
+          errors={errors}
+          onSponsorshipTypeReorder={this.handleReorderSponsorshipType}
+          onSponsorshipTypeDelete={this.handleDeleteSponsorshipType}
+          onSubmit={saveSponsoredProject}
+          onAttachLogo={attachLogo}
+          onRemoveLogo={removeLogo}
+          parentProjectId={this.state.parentProjectId}
+          getParentProject={getAsParentProject}
+          getSponsoredProject={getSponsoredProject}
+          onSubprojectDelete={this.handleDeleteSubproject}
+        />
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ sponsoredProjectState }) => ({
-    ...sponsoredProjectState
+  ...sponsoredProjectState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getAsParentProject,
-        getSponsoredProject,
-        saveSponsoredProject,
-        deleteSubProject,
-        deleteSponsorshipType,
-        updateSponsorShipTypeOrder,
-        attachLogo,
-        removeLogo
-    }
-)(EditSponsoredProjectPage);
+export default connect(mapStateToProps, {
+  getAsParentProject,
+  getSponsoredProject,
+  saveSponsoredProject,
+  deleteSubProject,
+  deleteSponsorshipType,
+  updateSponsorShipTypeOrder,
+  attachLogo,
+  removeLogo
+})(EditSponsoredProjectPage);

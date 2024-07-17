@@ -11,129 +11,147 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import ExtraQuestionForm from '../../components/forms/extra-question-form';
-import { getSummitById } from '../../actions/summit-actions';
+import ExtraQuestionForm from "../../components/forms/extra-question-form";
+import { getSummitById } from "../../actions/summit-actions";
 import {
-    getOrderExtraQuestionMeta,
-    getOrderExtraQuestion,
-    resetOrderExtraQuestionForm,
-    saveOrderExtraQuestion,
-    deleteOrderExtraQuestionValue,
-    saveOrderExtraQuestionValue,
-    deleteOrderExtraQuestionsSubQuestionsRule,
-    updateOrderExtraQuestionsSubQuestionsRuleOrder,
-    updateOrderExtraQuestionValueOrder,
+  getOrderExtraQuestionMeta,
+  getOrderExtraQuestion,
+  resetOrderExtraQuestionForm,
+  saveOrderExtraQuestion,
+  deleteOrderExtraQuestionValue,
+  saveOrderExtraQuestionValue,
+  deleteOrderExtraQuestionsSubQuestionsRule,
+  updateOrderExtraQuestionsSubQuestionsRuleOrder,
+  updateOrderExtraQuestionValueOrder
 } from "../../actions/order-actions";
-import { getBadgeFeatures } from '../../actions/badge-actions';
+import { getBadgeFeatures } from "../../actions/badge-actions";
 import Swal from "sweetalert2";
 
 class EditOrderExtraQuestionPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    props.getOrderExtraQuestionMeta();
+    props.getBadgeFeatures();
 
-        props.getOrderExtraQuestionMeta();
-        props.getBadgeFeatures();
+    this.handleValueSave = this.handleValueSave.bind(this);
+    this.handleValueDelete = this.handleValueDelete.bind(this);
+    this.handleRuleDelete = this.handleRuleDelete.bind(this);
+  }
 
-        this.handleValueSave = this.handleValueSave.bind(this);
-        this.handleValueDelete = this.handleValueDelete.bind(this);
-        this.handleRuleDelete = this.handleRuleDelete.bind(this);
-    }
+  handleValueDelete(valueId) {
+    const { deleteOrderExtraQuestionValue, currentSummit, entity } = this.props;
+    let value = entity.values.find((v) => v.id === valueId);
 
-    handleValueDelete(valueId) {
-        const { deleteOrderExtraQuestionValue, currentSummit, entity } = this.props;
-        let value = entity.values.find(v => v.id === valueId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text:
+        T.translate("edit_order_extra_question.remove_value_warning") +
+        " " +
+        value.value,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteOrderExtraQuestionValue(entity.id, valueId);
+      }
+    });
+  }
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("edit_order_extra_question.remove_value_warning") + ' ' + value.value,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function (result) {
-            if (result.value) {
-                deleteOrderExtraQuestionValue(entity.id, valueId);
+  handleRuleDelete(valueId) {
+    const { deleteOrderExtraQuestionsSubQuestionsRule, entity } = this.props;
+    let value = entity.sub_question_rules.find((v) => v.id === valueId);
+
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate(
+        "edit_order_extra_question_sub_rule.remove_rule_warning"
+      ),
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteOrderExtraQuestionsSubQuestionsRule(entity.id, valueId);
+      }
+    });
+  }
+
+  handleValueSave(valueEntity) {
+    const { entity } = this.props;
+    this.props.saveOrderExtraQuestionValue(entity.id, valueEntity);
+  }
+
+  render() {
+    const {
+      currentSummit,
+      entity,
+      errors,
+      allClasses,
+      updateOrderExtraQuestionsSubQuestionsRuleOrder,
+      updateOrderExtraQuestionValueOrder
+    } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+
+    return (
+      <div className="container">
+        <h3>
+          {title}{" "}
+          {T.translate("edit_order_extra_question.order_extra_question")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <ExtraQuestionForm
+            currentSummit={currentSummit}
+            questionClasses={allClasses}
+            entity={entity}
+            errors={errors}
+            shouldAllowSubRules={true}
+            shouldShowUsage={true}
+            shouldShowPrintable={true}
+            summitExtraQuestions={currentSummit.order_extra_questions}
+            onValueDelete={this.handleValueDelete}
+            onValueSave={this.handleValueSave}
+            onRuleDelete={this.handleRuleDelete}
+            onSubmit={this.props.saveOrderExtraQuestion}
+            updateSubQuestionRuleOrder={
+              updateOrderExtraQuestionsSubQuestionsRuleOrder
             }
-        });
-    }
-
-    handleRuleDelete(valueId) {
-        const { deleteOrderExtraQuestionsSubQuestionsRule, entity } = this.props;
-        let value = entity.sub_question_rules.find(v => v.id === valueId);
-
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("edit_order_extra_question_sub_rule.remove_rule_warning"),
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function (result) {
-            if (result.value) {
-                deleteOrderExtraQuestionsSubQuestionsRule(entity.id, valueId);
-            }
-        });
-    }
-
-    handleValueSave(valueEntity) {
-        const { entity } = this.props;
-        this.props.saveOrderExtraQuestionValue(entity.id, valueEntity);
-    }
-
-    render() {
-        const { currentSummit, entity, errors, allClasses, updateOrderExtraQuestionsSubQuestionsRuleOrder, updateOrderExtraQuestionValueOrder } = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-
-        return (
-            <div className="container">
-                <h3>{title} {T.translate("edit_order_extra_question.order_extra_question")}</h3>
-                <hr />
-                {currentSummit &&
-                    <ExtraQuestionForm
-                        currentSummit={currentSummit}
-                        questionClasses={allClasses}
-                        entity={entity}
-                        errors={errors}
-                        shouldAllowSubRules={true}
-                        shouldShowUsage={true}
-                        shouldShowPrintable={true}
-                        summitExtraQuestions={currentSummit.order_extra_questions}
-                        onValueDelete={this.handleValueDelete}
-                        onValueSave={this.handleValueSave}
-                        onRuleDelete={this.handleRuleDelete}
-                        onSubmit={this.props.saveOrderExtraQuestion}
-                        updateSubQuestionRuleOrder={updateOrderExtraQuestionsSubQuestionsRuleOrder}
-                        updateQuestionValueOrder={updateOrderExtraQuestionValueOrder}
-                        shouldShowEditable={false}
-                    />
-                }
-            </div>
-        )
-    }
+            updateQuestionValueOrder={updateOrderExtraQuestionValueOrder}
+            shouldShowEditable={false}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentOrderExtraQuestionState }) => ({
-    currentSummit: currentSummitState.currentSummit,
-    ...currentOrderExtraQuestionState
+const mapStateToProps = ({
+  currentSummitState,
+  currentOrderExtraQuestionState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentOrderExtraQuestionState
 });
 
-export default connect(
-    mapStateToProps,
-    {
-        getSummitById,
-        getOrderExtraQuestion,
-        getOrderExtraQuestionMeta,
-        resetOrderExtraQuestionForm,
-        deleteOrderExtraQuestionValue,
-        saveOrderExtraQuestionValue,
-        saveOrderExtraQuestion,
-        deleteOrderExtraQuestionsSubQuestionsRule,
-        updateOrderExtraQuestionsSubQuestionsRuleOrder,
-        getBadgeFeatures,
-        updateOrderExtraQuestionValueOrder,
-    }
-)(EditOrderExtraQuestionPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getOrderExtraQuestion,
+  getOrderExtraQuestionMeta,
+  resetOrderExtraQuestionForm,
+  deleteOrderExtraQuestionValue,
+  saveOrderExtraQuestionValue,
+  saveOrderExtraQuestion,
+  deleteOrderExtraQuestionsSubQuestionsRule,
+  updateOrderExtraQuestionsSubQuestionsRuleOrder,
+  getBadgeFeatures,
+  updateOrderExtraQuestionValueOrder
+})(EditOrderExtraQuestionPage);

@@ -11,37 +11,47 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import TaxTypeListPage from '../pages/taxes/tax-type-list-page'
-import EditTaxTypePage from '../pages/taxes/edit-tax-type-page'
+import TaxTypeListPage from "../pages/taxes/tax-type-list-page";
+import EditTaxTypePage from "../pages/taxes/edit-tax-type-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class TaxTypeLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("tax_type_list.tax_types"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("tax_type_list.tax_types"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={TaxTypeListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditTaxTypePage}/>
-                    <Route strict exact path={`${match.url}/:tax_type_id(\\d+)`} component={EditTaxTypePage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route strict exact path={match.url} component={TaxTypeListPage} />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditTaxTypePage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:tax_type_id(\\d+)`}
+            component={EditTaxTypePage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(TaxTypeLayout), 'taxes');
-
-
+export default Restrict(withRouter(TaxTypeLayout), "taxes");

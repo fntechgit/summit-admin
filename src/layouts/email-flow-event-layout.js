@@ -11,34 +11,44 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
-import EmailFlowEventListPage from '../pages/email_flow_events/email-flow-events-list-page';
-import EditEmailFlowEventPage from '../pages/email_flow_events/edit-email-flow-event-page';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
+import EmailFlowEventListPage from "../pages/email_flow_events/email-flow-events-list-page";
+import EditEmailFlowEventPage from "../pages/email_flow_events/edit-email-flow-event-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class EmailFlowEventLayout extends React.Component {
-
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("email_flow_event_list.email_flow_events"), pathname: match.url }} />
-                <Switch>
-                    <Route strict exact path={match.url} component={EmailFlowEventListPage}/>
-                    <Route strict exact path={`${match.url}/:event_id(\\d+)`} component={EditEmailFlowEventPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("email_flow_event_list.email_flow_events"),
+            pathname: match.url
+          }}
+        />
+        <Switch>
+          <Route
+            strict
+            exact
+            path={match.url}
+            component={EmailFlowEventListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:event_id(\\d+)`}
+            component={EditEmailFlowEventPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(EmailFlowEventLayout), 'email-flow-events');
-
-
+export default Restrict(withRouter(EmailFlowEventLayout), "email-flow-events");

@@ -11,37 +11,47 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import BadgeTypeListPage from '../pages/badges/badge-type-list-page'
-import EditBadgeTypePage from '../pages/badges/edit-badge-type-page'
+import BadgeTypeListPage from "../pages/badges/badge-type-list-page";
+import EditBadgeTypePage from "../pages/badges/edit-badge-type-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class BadgeTypeLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("badge_type_list.badge_types"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("badge_type_list.badge_types"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={BadgeTypeListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditBadgeTypePage}/>
-                    <Route strict exact path={`${match.url}/:badge_type_id(\\d+)`} component={EditBadgeTypePage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route strict exact path={match.url} component={BadgeTypeListPage} />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditBadgeTypePage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:badge_type_id(\\d+)`}
+            component={EditBadgeTypePage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(BadgeTypeLayout), 'badges');
-
-
+export default Restrict(withRouter(BadgeTypeLayout), "badges");

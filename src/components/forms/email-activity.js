@@ -10,39 +10,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react'
-import { Table } from 'openstack-uicore-foundation/lib/components';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import { Table } from "openstack-uicore-foundation/lib/components";
+import T from "i18n-react/dist/i18n-react";
 
 class EmailActivity extends React.Component {
+  render() {
+    let { emailActivity } = this.props;
 
-    render() {
-        let {emailActivity} = this.props;
+    if (emailActivity.length === 0) return null;
 
-        if(emailActivity.length === 0) return null;
+    let columns = [
+      {
+        columnKey: "template_identifier",
+        value: T.translate("mail_activity.template_identifier")
+      },
+      { columnKey: "subject", value: T.translate("mail_activity.subject") },
+      { columnKey: "sent_date", value: T.translate("mail_activity.sent_date") }
+    ];
 
-        let columns = [
-            { columnKey: 'template_identifier', value: T.translate("mail_activity.template_identifier")},
-            { columnKey: 'subject', value: T.translate("mail_activity.subject") },
-            { columnKey: 'sent_date', value: T.translate("mail_activity.sent_date") },
-        ];
+    let table_options = {
+      actions: {}
+    };
 
-        let table_options = {
-            actions:{ }
-        };
-
-        return (
-            <div>
-            <h4>{T.translate("mail_activity.mail_activity")}</h4>
-            <hr/>
-            <Table
-                options={table_options}
-                data={emailActivity}
-                columns={columns}
-            />
-            </div>
-        );
-    }
+    return (
+      <div>
+        <h4>{T.translate("mail_activity.mail_activity")}</h4>
+        <hr />
+        <Table options={table_options} data={emailActivity} columns={columns} />
+      </div>
+    );
+  }
 }
 
 export default EmailActivity;

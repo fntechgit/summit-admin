@@ -10,47 +10,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react';
-import {Popover, OverlayTrigger} from 'react-bootstrap';
-import { RawHTML } from 'openstack-uicore-foundation/lib/components';
+import React from "react";
+import { Popover, OverlayTrigger } from "react-bootstrap";
+import { RawHTML } from "openstack-uicore-foundation/lib/components";
 
 class ScheduleEventResult extends React.Component {
+  popoverHoverFocus() {
+    const { event } = this.props;
+    return (
+      <Popover id="popover-trigger-focus" title={event.title}>
+        <RawHTML>{event.description}</RawHTML>
+      </Popover>
+    );
+  }
 
-    popoverHoverFocus(){
-        const { event } = this.props;
-        return(
-            <Popover id="popover-trigger-focus" title={event.title}>
-                <RawHTML>{event.description}</RawHTML>
-            </Popover>
-        )
-    }
+  onClickEdit() {
+    let { event, onEditEvent } = this.props;
+    onEditEvent(event);
+  }
 
-    onClickEdit(){
-        let { event, onEditEvent } = this.props;
-        onEditEvent(event);
-    }
-
-    render(){
-        const { event } = this.props;
-        return (
-                <div className='row'>
-                    <div className="col-md-12">
-                        <div className="schedule-event-result">
-                            <div className="event-container">
-                                <OverlayTrigger trigger={['hover']} placement="bottom" overlay={this.popoverHoverFocus()}>
-                                    <span className="event-title">
-                                        { event.title }
-                                    </span>
-                                </OverlayTrigger>
-                            </div>
-                            <div className="event-actions">
-                                <i className="fa fa-pencil-square-o edit-published-event-btn" title="edit event" aria-hidden="true" onClick={this.onClickEdit.bind(this)}/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        )
-    }
+  render() {
+    const { event } = this.props;
+    return (
+      <div className="row">
+        <div className="col-md-12">
+          <div className="schedule-event-result">
+            <div className="event-container">
+              <OverlayTrigger
+                trigger={["hover"]}
+                placement="bottom"
+                overlay={this.popoverHoverFocus()}
+              >
+                <span className="event-title">{event.title}</span>
+              </OverlayTrigger>
+            </div>
+            <div className="event-actions">
+              <i
+                className="fa fa-pencil-square-o edit-published-event-btn"
+                title="edit event"
+                aria-hidden="true"
+                onClick={this.onClickEdit.bind(this)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default ScheduleEventResult;

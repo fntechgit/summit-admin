@@ -11,255 +11,275 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import T from 'i18n-react/dist/i18n-react';
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css';
-import { Input, SimpleLinkList } from 'openstack-uicore-foundation/lib/components';
-import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../utils/methods";
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import {
+  Input,
+  SimpleLinkList
+} from "openstack-uicore-foundation/lib/components";
+import {
+  isEmpty,
+  scrollToError,
+  shallowEqual,
+  hasErrors
+} from "../../utils/methods";
 
 class BadgeTypeForm extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      entity: { ...props.entity },
+      errors: props.errors
+    };
 
-        this.state = {
-            entity: {...props.entity},
-            errors: props.errors
-        };
+    this.handleAccessLevelLink = this.handleAccessLevelLink.bind(this);
+    this.handleAccessLevelUnLink = this.handleAccessLevelUnLink.bind(this);
+    this.queryAccessLevels = this.queryAccessLevels.bind(this);
+    this.handleFeatureLink = this.handleFeatureLink.bind(this);
+    this.handleFeatureUnLink = this.handleFeatureUnLink.bind(this);
+    this.queryFeatures = this.queryFeatures.bind(this);
+    this.handleViewTypeLink = this.handleViewTypeLink.bind(this);
+    this.handleViewTypeUnLink = this.handleViewTypeUnLink.bind(this);
+    this.queryViewTypes = this.queryViewTypes.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
 
-        this.handleAccessLevelLink = this.handleAccessLevelLink.bind(this);
-        this.handleAccessLevelUnLink = this.handleAccessLevelUnLink.bind(this);
-        this.queryAccessLevels = this.queryAccessLevels.bind(this);
-        this.handleFeatureLink = this.handleFeatureLink.bind(this);
-        this.handleFeatureUnLink = this.handleFeatureUnLink.bind(this);
-        this.queryFeatures = this.queryFeatures.bind(this);
-        this.handleViewTypeLink = this.handleViewTypeLink.bind(this);
-        this.handleViewTypeUnLink = this.handleViewTypeUnLink.bind(this);
-        this.queryViewTypes = this.queryViewTypes.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const state = {};
+    scrollToError(this.props.errors);
+
+    if (!shallowEqual(prevProps.entity, this.props.entity)) {
+      state.entity = { ...this.props.entity };
+      state.errors = {};
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        scrollToError(this.props.errors);
-
-        if(!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = {...this.props.entity};
-            state.errors = {};
-        }
-
-        if (!shallowEqual(prevProps.errors, this.props.errors)) {
-            state.errors = {...this.props.errors};
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({...this.state, ...state})
-        }
+    if (!shallowEqual(prevProps.errors, this.props.errors)) {
+      state.errors = { ...this.props.errors };
     }
 
-    handleChange(ev) {
-        const entity = {...this.state.entity};
-        const errors = {...this.state.errors};
-        let {value, id} = ev.target;
+    if (!isEmpty(state)) {
+      this.setState({ ...this.state, ...state });
+    }
+  }
 
-        if (ev.target.type === 'checkbox') {
-            value = ev.target.checked;
-        }
+  handleChange(ev) {
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
+    let { value, id } = ev.target;
 
-        errors[id] = '';
-        entity[id] = value;
-        this.setState({entity: entity, errors: errors});
+    if (ev.target.type === "checkbox") {
+      value = ev.target.checked;
     }
 
-    handleSubmit(ev) {
-        ev.preventDefault();
-        this.props.onSubmit(this.state.entity);
-    }
+    errors[id] = "";
+    entity[id] = value;
+    this.setState({ entity: entity, errors: errors });
+  }
 
-    handleAccessLevelLink(accessLevel) {
-        const {entity} = this.state;
-        this.props.onAccessLevelLink(entity.id, accessLevel);
-    }
+  handleSubmit(ev) {
+    ev.preventDefault();
+    this.props.onSubmit(this.state.entity);
+  }
 
-    handleAccessLevelUnLink(accessLevelId) {
-        const {entity} = this.state;
-        this.props.onAccessLevelUnLink(entity.id, accessLevelId);
-    }
+  handleAccessLevelLink(accessLevel) {
+    const { entity } = this.state;
+    this.props.onAccessLevelLink(entity.id, accessLevel);
+  }
 
-    queryAccessLevels(input, callback) {
-        const {currentSummit} = this.props;
-        const accessLevels = currentSummit.access_level_types.filter(f => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1);
-        callback(accessLevels);
-    }
+  handleAccessLevelUnLink(accessLevelId) {
+    const { entity } = this.state;
+    this.props.onAccessLevelUnLink(entity.id, accessLevelId);
+  }
 
-    handleFeatureLink(feature) {
-        const {entity} = this.state;
-        this.props.onFeatureLink(entity.id, feature);
-    }
+  queryAccessLevels(input, callback) {
+    const { currentSummit } = this.props;
+    const accessLevels = currentSummit.access_level_types.filter(
+      (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
+    );
+    callback(accessLevels);
+  }
 
-    handleFeatureUnLink(featureId) {
-        const {entity} = this.state;
-        this.props.onFeatureUnLink(entity.id, featureId);
-    }
+  handleFeatureLink(feature) {
+    const { entity } = this.state;
+    this.props.onFeatureLink(entity.id, feature);
+  }
 
-    queryFeatures(input, callback) {
-        const {currentSummit} = this.props;
-        const features = currentSummit.badge_features.filter(f => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1);
-        callback(features);
-    }
+  handleFeatureUnLink(featureId) {
+    const { entity } = this.state;
+    this.props.onFeatureUnLink(entity.id, featureId);
+  }
 
-    handleViewTypeLink(viewType) {
-        const {entity} = this.state;
-        this.props.onViewTypeLink(entity.id, viewType);
-    }
+  queryFeatures(input, callback) {
+    const { currentSummit } = this.props;
+    const features = currentSummit.badge_features.filter(
+      (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
+    );
+    callback(features);
+  }
 
-    handleViewTypeUnLink(viewType) {
-        const {entity} = this.state;        
-        this.props.onViewTypeUnLink(entity.id, viewType);
-    }
+  handleViewTypeLink(viewType) {
+    const { entity } = this.state;
+    this.props.onViewTypeLink(entity.id, viewType);
+  }
 
-    queryViewTypes(input, callback) {
-        const {currentSummit} = this.props;
-        const ViewTypes = currentSummit.badge_view_types.filter(f => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1);
-        callback(ViewTypes);
-    }
+  handleViewTypeUnLink(viewType) {
+    const { entity } = this.state;
+    this.props.onViewTypeUnLink(entity.id, viewType);
+  }
 
+  queryViewTypes(input, callback) {
+    const { currentSummit } = this.props;
+    const ViewTypes = currentSummit.badge_view_types.filter(
+      (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
+    );
+    callback(ViewTypes);
+  }
 
-    render() {
-        const {entity, errors} = this.state;
-        const accessLevelColumns = [
-            { columnKey: 'name', value: T.translate("edit_badge_type.name") },
-        ];
+  render() {
+    const { entity, errors } = this.state;
+    const accessLevelColumns = [
+      { columnKey: "name", value: T.translate("edit_badge_type.name") }
+    ];
 
-        const accessLevelOptions = {
-            title: T.translate("edit_badge_type.access_levels"),
-            valueKey: "name",
-            labelKey: "name",
-            defaultOptions: true,
-            actions: {
-                search: this.queryAccessLevels,
-                delete: { onClick: this.handleAccessLevelUnLink },
-                add: { onClick: this.handleAccessLevelLink }
-            }
-        };
+    const accessLevelOptions = {
+      title: T.translate("edit_badge_type.access_levels"),
+      valueKey: "name",
+      labelKey: "name",
+      defaultOptions: true,
+      actions: {
+        search: this.queryAccessLevels,
+        delete: { onClick: this.handleAccessLevelUnLink },
+        add: { onClick: this.handleAccessLevelLink }
+      }
+    };
 
-        const featuresColumns = [
-            { columnKey: 'name', value: T.translate("edit_badge_type.name") },
-        ];
+    const featuresColumns = [
+      { columnKey: "name", value: T.translate("edit_badge_type.name") }
+    ];
 
-        const featuresOptions = {
-            title: T.translate("edit_badge_type.badge_features"),
-            valueKey: "name",
-            labelKey: "name",
-            defaultOptions: true,
-            actions: {
-                search: this.queryFeatures,
-                delete: { onClick: this.handleFeatureUnLink },
-                add: { onClick: this.handleFeatureLink }
-            }
-        };
+    const featuresOptions = {
+      title: T.translate("edit_badge_type.badge_features"),
+      valueKey: "name",
+      labelKey: "name",
+      defaultOptions: true,
+      actions: {
+        search: this.queryFeatures,
+        delete: { onClick: this.handleFeatureUnLink },
+        add: { onClick: this.handleFeatureLink }
+      }
+    };
 
-        const viewTypesColumns = [
-            { columnKey: 'name', value: T.translate("edit_badge_type.name") },
-        ];
+    const viewTypesColumns = [
+      { columnKey: "name", value: T.translate("edit_badge_type.name") }
+    ];
 
-        const viewTypesOptions = {
-            title: T.translate("edit_badge_type.view_types"),
-            valueKey: "name",
-            labelKey: "name",
-            defaultOptions: true,
-            actions: {
-                search: this.queryViewTypes,
-                delete: { onClick: this.handleViewTypeUnLink },
-                add: { onClick: this.handleViewTypeLink }
-            }
-        };
+    const viewTypesOptions = {
+      title: T.translate("edit_badge_type.view_types"),
+      valueKey: "name",
+      labelKey: "name",
+      defaultOptions: true,
+      actions: {
+        search: this.queryViewTypes,
+        delete: { onClick: this.handleViewTypeUnLink },
+        add: { onClick: this.handleViewTypeLink }
+      }
+    };
 
-        return (
-            <form className="badge-type-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_badge_type.name")} *</label>
-                        <Input
-                            id="name"
-                            className="form-control"
-                            error={hasErrors('name', errors)}
-                            onChange={this.handleChange}
-                            value={entity.name}
-                        />
-                    </div>
-                    <div className="col-md-4 checkboxes-div">
-                        <div className="form-check abc-checkbox">
-                            <input type="checkbox" id="is_default" checked={entity.is_default}
-                                   onChange={this.handleChange} className="form-check-input" />
-                            <label className="form-check-label" htmlFor="is_default">
-                                {T.translate("edit_badge_type.default")}
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-10">
-                        <label> {T.translate("edit_badge_type.description")} *</label>
-                        <textarea
-                            id="description"
-                            value={entity.description}
-                            onChange={this.handleChange}
-                            rows={6}
-                            maxLength={500}
-                            className="form-control"
-                        />
-                        <span className='character-counter'>{`${entity.description?.length}/500`}</span>
-                    </div>
-                </div>
+    return (
+      <form className="badge-type-form">
+        <input type="hidden" id="id" value={entity.id} />
+        <div className="row form-group">
+          <div className="col-md-4">
+            <label> {T.translate("edit_badge_type.name")} *</label>
+            <Input
+              id="name"
+              className="form-control"
+              error={hasErrors("name", errors)}
+              onChange={this.handleChange}
+              value={entity.name}
+            />
+          </div>
+          <div className="col-md-4 checkboxes-div">
+            <div className="form-check abc-checkbox">
+              <input
+                type="checkbox"
+                id="is_default"
+                checked={entity.is_default}
+                onChange={this.handleChange}
+                className="form-check-input"
+              />
+              <label className="form-check-label" htmlFor="is_default">
+                {T.translate("edit_badge_type.default")}
+              </label>
+            </div>
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-10">
+            <label> {T.translate("edit_badge_type.description")} *</label>
+            <textarea
+              id="description"
+              value={entity.description}
+              onChange={this.handleChange}
+              rows={6}
+              maxLength={500}
+              className="form-control"
+            />
+            <span className="character-counter">{`${entity.description?.length}/500`}</span>
+          </div>
+        </div>
 
+        {entity.id !== 0 && (
+          <>
+            <hr />
+            <SimpleLinkList
+              values={entity.access_levels}
+              columns={accessLevelColumns}
+              options={accessLevelOptions}
+            />
+          </>
+        )}
 
-                {entity.id !== 0 &&
-                    <>
-                        <hr />
-                        <SimpleLinkList
-                            values={entity.access_levels}
-                            columns={accessLevelColumns}
-                            options={accessLevelOptions}
-                        />
-                    </>
-                }
+        {entity.id !== 0 && (
+          <>
+            <hr />
+            <SimpleLinkList
+              values={entity.badge_features}
+              columns={featuresColumns}
+              options={featuresOptions}
+            />
+          </>
+        )}
 
-                {entity.id !== 0 &&
-                    <>
-                        <hr />
-                        <SimpleLinkList
-                            values={entity.badge_features}
-                            columns={featuresColumns}
-                            options={featuresOptions}
-                        />
-                    </>
-                }
+        {entity.id !== 0 && (
+          <>
+            <hr />
+            <SimpleLinkList
+              values={entity.allowed_view_types}
+              columns={viewTypesColumns}
+              options={viewTypesOptions}
+            />
+          </>
+        )}
 
-                {entity.id !== 0 &&
-                    <>
-                        <hr />
-                        <SimpleLinkList
-                            values={entity.allowed_view_types}
-                            columns={viewTypesColumns}
-                            options={viewTypesOptions}
-                        />
-                    </>
-                }
+        <hr />
 
-                <hr />
-
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                               className="btn btn-primary pull-right" value={T.translate("general.save")}/>
-                    </div>
-                </div>
-            </form>
-        );
-    }
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <input
+              type="button"
+              onClick={this.handleSubmit}
+              className="btn btn-primary pull-right"
+              value={T.translate("general.save")}
+            />
+          </div>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default BadgeTypeForm;

@@ -9,7 +9,14 @@
     "build": "./node_modules/.bin/webpack --config webpack.prod.js",
     "serve": "webpack-dev-server  --port 8080 --open --https --config webpack.dev.js",
     "clean-branchs": "git branch | grep -v \"master\\|main\\|production\" | xargs git branch -D",
-    "test" : "yarn jest"
+    "test": "yarn jest",
+    "prepare": "husky",
+    "lint": "eslint src",
+    "precommit": "yarn lint-staged --diff=origin/master --verbose"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": "eslint --fix",
+    "**/*": "prettier --write --ignore-unknown"
   },
   "author": "",
   "license": "ISC",
@@ -131,7 +138,19 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^28.1.0",
     "jest-transform-stub": "^2.0.0",
-    "redux-mock-store": "^1.5.4"
+    "redux-mock-store": "^1.5.4",
+    "eslint": "8.2.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.1.0",
+    "prettier": "^2.0.5",
+    "eslint-config-prettier": "^9.1.0",
+    "@babel/eslint-parser": "^7.24.7"
   },
   "jest": {
     "collectCoverageFrom": [

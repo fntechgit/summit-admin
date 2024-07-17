@@ -11,122 +11,133 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
-import { Breadcrumb } from 'react-breadcrumbs';
-import { getCurrentEventForOccupancy, saveOccupancy } from "../../actions/event-actions";
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
+import { Breadcrumb } from "react-breadcrumbs";
+import {
+  getCurrentEventForOccupancy,
+  saveOccupancy
+} from "../../actions/event-actions";
 import FragmentParser from "../../utils/fragmen-parser";
 
-import '../../styles/room-occupancy-page.less';
+import "../../styles/room-occupancy-page.less";
 
 class CurrentEventOccupancyPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.interval = null;
+    this.fragmentParser = new FragmentParser();
+  }
 
-        this.interval       = null;
-        this.fragmentParser = new FragmentParser();
+  componentDidMount() {
+    let roomId = this.props.match.params.room_id;
+    const { getCurrentEventForOccupancy } = this.props;
+    let eventIdHash = this.fragmentParser.getParam("event");
 
+    getCurrentEventForOccupancy(roomId, eventIdHash);
+
+    this.interval = setInterval(
+      getCurrentEventForOccupancy,
+      1000 * 60 * 5,
+      roomId,
+      eventIdHash
+    ); //every 2 minutes
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.room_id;
+    const newId = this.props.match.params.room_id;
+    let eventIdHash = this.fragmentParser.getParam("event");
+
+    if (newId !== oldId) {
+      this.props.getCurrentEventForOccupancy(newId, eventIdHash);
+    }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  changeOccupancy(event, add, ev) {
+    let values = ["EMPTY", "25%", "50%", "75%", "FULL", "OVERFLOW"];
+
+    let key = values.indexOf(event.occupancy);
+
+    ev.preventDefault();
+
+    if (add) {
+      if (event.occupancy === "FULL") return;
+      event.occupancy = values[key + 1];
+    } else {
+      if (event.occupancy === "EMPTY") return;
+      event.occupancy = values[key - 1];
     }
 
-    componentDidMount() {
-        let roomId = this.props.match.params.room_id;
-        const {getCurrentEventForOccupancy} = this.props;
-        let eventIdHash = this.fragmentParser.getParam('event');
+    this.props.saveOccupancy(event);
+  }
 
-        getCurrentEventForOccupancy(roomId, eventIdHash);
+  render() {
+    const { currentEvent, match } = this.props;
 
-        this.interval = setInterval(getCurrentEventForOccupancy, 1000*60*5, roomId, eventIdHash); //every 2 minutes
+    if (!currentEvent.id) {
+      return (
+        <div className="currentEventView text-center">
+          <Breadcrumb
+            data={{ title: match.params.room_id, pathname: match.url }}
+          />
+          <div>{T.translate("room_occupancy.no_current_event")}</div>
+        </div>
+      );
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.room_id;
-        const newId = this.props.match.params.room_id;
-        let eventIdHash = this.fragmentParser.getParam('event');
+    return (
+      <div className="currentEventView text-center">
+        <Breadcrumb data={{ title: currentEvent.room, pathname: match.url }} />
 
-        if (newId !== oldId) {
-            this.props.getCurrentEventForOccupancy(newId, eventIdHash);
-        }
-    }
+        <div className="container">
+          <h3>{currentEvent.title}</h3>
 
-    componentWillUnmount() {
-        clearInterval(this.interval);
-    }
+          <label>Speakers:</label>
+          <div>{currentEvent.speakers}</div>
 
-    changeOccupancy(event, add, ev) {
-        let values = ['EMPTY', '25%', '50%', '75%', 'FULL','OVERFLOW'];
+          <label>From:</label>
+          <div>{currentEvent.start_date}</div>
 
-        let key = values.indexOf(event.occupancy);
+          <label>To:</label>
+          <div>{currentEvent.end_date}</div>
 
-        ev.preventDefault();
-
-        if (add) {
-            if (event.occupancy === 'FULL') return;
-            event.occupancy = values[key + 1];
-        } else {
-            if (event.occupancy === 'EMPTY') return;
-            event.occupancy = values[key - 1];
-        }
-
-        this.props.saveOccupancy(event);
-
-    }
-
-
-    render(){
-        const {currentEvent, match} = this.props;
-
-        if (!currentEvent.id) {
-            return (
-                <div className="currentEventView text-center">
-                    <Breadcrumb data={{ title: match.params.room_id, pathname: match.url }}/>
-                    <div>{T.translate("room_occupancy.no_current_event")}</div>
-                </div>
-            );
-        }
-
-        return(
-            <div className="currentEventView text-center">
-                <Breadcrumb data={{ title: currentEvent.room, pathname: match.url }}/>
-
-                <div className="container">
-                    <h3>{currentEvent.title}</h3>
-
-                    <label>Speakers:</label>
-                    <div>{currentEvent.speakers}</div>
-
-                    <label>From:</label>
-                    <div>{currentEvent.start_date}</div>
-
-                    <label>To:</label>
-                    <div>{currentEvent.end_date}</div>
-
-                    <div className="form-inline occupancy">
-                        <button className="btn btn-default" onClick={this.changeOccupancy.bind(this, currentEvent, false)}>
-                            <i className="fa fa-minus"/>
-                        </button>
-                        <span>{currentEvent.occupancy}</span>
-                        <button className="btn btn-default" onClick={this.changeOccupancy.bind(this, currentEvent, true)}>
-                            <i className="fa fa-plus"/>
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-        )
-    }
+          <div className="form-inline occupancy">
+            <button
+              className="btn btn-default"
+              onClick={this.changeOccupancy.bind(this, currentEvent, false)}
+            >
+              <i className="fa fa-minus" />
+            </button>
+            <span>{currentEvent.occupancy}</span>
+            <button
+              className="btn btn-default"
+              onClick={this.changeOccupancy.bind(this, currentEvent, true)}
+            >
+              <i className="fa fa-plus" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentRoomOccupancyState }) => ({
-    currentSummit   : currentSummitState.currentSummit,
-    currentEvent    : currentRoomOccupancyState.currentEvent
-})
+const mapStateToProps = ({
+  currentSummitState,
+  currentRoomOccupancyState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  currentEvent: currentRoomOccupancyState.currentEvent
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getCurrentEventForOccupancy,
-        saveOccupancy
-    }
-)(CurrentEventOccupancyPage);
+export default connect(mapStateToProps, {
+  getCurrentEventForOccupancy,
+  saveOccupancy
+})(CurrentEventOccupancyPage);

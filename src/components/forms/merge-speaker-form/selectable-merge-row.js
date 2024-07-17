@@ -11,45 +11,47 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
 
 export default class SelectableMergeRow extends React.Component {
+  handleClick(field, column) {
+    if (this.props.values[column]) this.props.onClick(field, column);
+  }
 
-    handleClick(field, column)  {
-        if (this.props.values[column])
-            this.props.onClick(field, column);
-    }
+  getFieldClass(field, column) {
+    let { selected, disabled } = this.props;
 
-    getFieldClass(field, column) {
-        let {selected, disabled} = this.props;
+    if (disabled) return "";
+    if (selected === column) return "selected";
+    return "unselected";
+  }
 
-        if (disabled) return '';
-        if (selected === column) return 'selected';
-        return 'unselected';
-    }
+  render() {
+    let { name, values } = this.props;
 
-    render() {
-        let {name, values} = this.props;
-
-        return (
-            <div className="row field-box">
-                <div className="col-md-2">
-                    <label> {T.translate("merge_speakers." + name)} </label>
-                </div>
-                <div className="col-md-5">
-                    <div onClick={this.handleClick.bind(this, name, 0)} className={this.getFieldClass(name, 0) + ' form-control field'}>
-                        {values[0]}
-                    </div>
-                </div>
-                <div className="col-md-5">
-                    <div onClick={this.props.onClick.bind(this, name, 1)} className={this.getFieldClass(name, 1) + ' form-control field'}>
-                        {values[1]}
-                    </div>
-                </div>
-            </div>
-        );
-
-    }
+    return (
+      <div className="row field-box">
+        <div className="col-md-2">
+          <label> {T.translate("merge_speakers." + name)} </label>
+        </div>
+        <div className="col-md-5">
+          <div
+            onClick={this.handleClick.bind(this, name, 0)}
+            className={this.getFieldClass(name, 0) + " form-control field"}
+          >
+            {values[0]}
+          </div>
+        </div>
+        <div className="col-md-5">
+          <div
+            onClick={this.props.onClick.bind(this, name, 1)}
+            className={this.getFieldClass(name, 1) + " form-control field"}
+          >
+            {values[1]}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
-

@@ -1,47 +1,57 @@
-import React, {useEffect, useState} from "react";
-import {FreeTextSearch, Table, TextArea} from "openstack-uicore-foundation/lib/components";
+import React, { useEffect, useState } from "react";
+import {
+  FreeTextSearch,
+  Table,
+  TextArea
+} from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react";
-import {connect} from "react-redux";
-import {clearNotesParams, getNotes, exportNotes, saveNote, deleteNote} from "../../actions/notes-actions";
-import {Pagination} from "react-bootstrap";
+import { connect } from "react-redux";
+import {
+  clearNotesParams,
+  getNotes,
+  exportNotes,
+  saveNote,
+  deleteNote
+} from "../../actions/notes-actions";
+import { Pagination } from "react-bootstrap";
 import Swal from "sweetalert2";
 
-import styles from './index.module.less';
+import styles from "./index.module.less";
 
 const Notes = ({
-                 attendeeId,
-                 ticketId,
-                 notes,
-                 term,
-                 currentPage,
-                 perPage,
-                 lastPage,
-                 order,
-                 orderDir,
-                 columns,
-                 getNotes,
-                 exportNotes,
-                 saveNote,
-                 deleteNote,
-                 clearNotesParams
-               }) => {
-  const [newNote, setNewNote] = useState('');
+  attendeeId,
+  ticketId,
+  notes,
+  term,
+  currentPage,
+  perPage,
+  lastPage,
+  order,
+  orderDir,
+  columns,
+  getNotes,
+  exportNotes,
+  saveNote,
+  deleteNote,
+  clearNotesParams
+}) => {
+  const [newNote, setNewNote] = useState("");
 
   const handleSaveNote = () => {
-    saveNote(attendeeId, ticketId, newNote).then(() => setNewNote(''));
-  }
+    saveNote(attendeeId, ticketId, newNote).then(() => setNewNote(""));
+  };
 
   const handleDeleteNote = (noteId) => {
     const msg = {
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("notes.remove_warning")} ${noteId}`,
-      type: 'warning'
+      type: "warning"
     };
 
-    Swal.fire(msg).then(function(){
+    Swal.fire(msg).then(function () {
       deleteNote(attendeeId, noteId);
     });
-  }
+  };
   const handleSort = (index, key, dir, func) => {
     getNotes(attendeeId, ticketId, term, currentPage, perPage, key, dir);
   };
@@ -51,7 +61,15 @@ const Notes = ({
   };
 
   const handleSearch = (newTerm) => {
-    getNotes(attendeeId, ticketId, newTerm, currentPage, perPage, order, orderDir);
+    getNotes(
+      attendeeId,
+      ticketId,
+      newTerm,
+      currentPage,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const handleExport = (index, key, dir, func) => {
@@ -63,7 +81,7 @@ const Notes = ({
 
     return () => {
       clearNotesParams();
-    }
+    };
   }, []);
 
   const table_options = {
@@ -71,22 +89,34 @@ const Notes = ({
     sortCol: order,
     sortDir: orderDir,
     actions: {
-      delete: {onClick: handleDeleteNote}
+      delete: { onClick: handleDeleteNote }
     }
   };
 
   const table_columns = [
-    {columnKey: 'id', value: T.translate("notes.id"), sortable: true},
-    {columnKey: 'created', value: T.translate("notes.created"), sortable: true},
-    {columnKey: 'author_fullname', value: T.translate("notes.author_fullname"), sortable: true},
-    {columnKey: 'author_email', value: T.translate("notes.author_email"), sortable: true},
-    {columnKey: 'ticket_link', value: T.translate("notes.ticket_id")},
-    {columnKey: 'content', value: T.translate("notes.content")}
+    { columnKey: "id", value: T.translate("notes.id"), sortable: true },
+    {
+      columnKey: "created",
+      value: T.translate("notes.created"),
+      sortable: true
+    },
+    {
+      columnKey: "author_fullname",
+      value: T.translate("notes.author_fullname"),
+      sortable: true
+    },
+    {
+      columnKey: "author_email",
+      value: T.translate("notes.author_email"),
+      sortable: true
+    },
+    { columnKey: "ticket_link", value: T.translate("notes.ticket_id") },
+    { columnKey: "content", value: T.translate("notes.content") }
   ];
 
-  const show_columns = columns ? table_columns.filter(c => columns.include(c.columnKey)) : table_columns;
-
-
+  const show_columns = columns
+    ? table_columns.filter((c) => columns.include(c.columnKey))
+    : table_columns;
 
   return (
     <>
@@ -99,7 +129,7 @@ const Notes = ({
             <TextArea
               className="form-control"
               value={newNote}
-              onChange={ev => setNewNote(ev.target.value)}
+              onChange={(ev) => setNewNote(ev.target.value)}
               maxLength={1024}
             />
             <span className="input-group-btn">
@@ -116,23 +146,24 @@ const Notes = ({
       <div className="row">
         <div className="col-md-6">
           <FreeTextSearch
-            value={term ?? ''}
+            value={term ?? ""}
             placeholder={T.translate("notes.placeholders.search")}
             onSearch={handleSearch}
           />
         </div>
         <div className="col-md-6">
-          <button className="btn btn-default exportButton pull-right" onClick={handleExport}>
+          <button
+            className="btn btn-default exportButton pull-right"
+            onClick={handleExport}
+          >
             {T.translate("general.export")}
           </button>
         </div>
       </div>
 
-      {notes.length === 0 &&
-        <div>{T.translate("notes.no_entries")}</div>
-      }
+      {notes.length === 0 && <div>{T.translate("notes.no_entries")}</div>}
 
-      {notes.length > 0 &&
+      {notes.length > 0 && (
         <>
           <Table
             options={table_options}
@@ -154,22 +185,19 @@ const Notes = ({
             onSelect={handlePageChange}
           />
         </>
-      }
+      )}
     </>
-  )
-}
+  );
+};
 
-const mapStateToProps = ({notesState}) => ({
-  ...notesState,
+const mapStateToProps = ({ notesState }) => ({
+  ...notesState
 });
 
-export default connect(
-  mapStateToProps,
-  {
-    getNotes,
-    exportNotes,
-    saveNote,
-    deleteNote,
-    clearNotesParams
-  }
-)(Notes);
+export default connect(mapStateToProps, {
+  getNotes,
+  exportNotes,
+  saveNote,
+  deleteNote,
+  clearNotesParams
+})(Notes);

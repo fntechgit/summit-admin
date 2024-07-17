@@ -11,126 +11,131 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import T from 'i18n-react/dist/i18n-react'
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { Input, EditableTable } from 'openstack-uicore-foundation/lib/components'
-import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
-
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import {
+  Input,
+  EditableTable
+} from "openstack-uicore-foundation/lib/components";
+import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class RoomBookingAttributeForm extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            entity: {...props.entity},
-        };
+    this.state = {
+      entity: { ...props.entity }
+    };
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleSaveAttribute = this.handleSaveAttribute.bind(this);
-        this.handleDeleteAttribute = this.handleDeleteAttribute.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleSaveAttribute = this.handleSaveAttribute.bind(this);
+    this.handleDeleteAttribute = this.handleDeleteAttribute.bind(this);
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const state = {};
+    scrollToError(this.props.errors);
+
+    if (!shallowEqual(prevProps.entity, this.props.entity)) {
+      state.entity = { ...this.props.entity };
+      state.errors = {};
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        scrollToError(this.props.errors);
-
-        if(!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = {...this.props.entity};
-            state.errors = {};
-        }
-
-        if (!shallowEqual(prevProps.errors, this.props.errors)) {
-            state.errors = {...this.props.errors};
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({...this.state, ...state})
-        }
+    if (!shallowEqual(prevProps.errors, this.props.errors)) {
+      state.errors = { ...this.props.errors };
     }
 
-    handleChange(ev) {
-        let entity = {...this.state.entity};
-        let {value, id} = ev.target;
+    if (!isEmpty(state)) {
+      this.setState({ ...this.state, ...state });
+    }
+  }
 
-        if (ev.target.type === 'number') {
-            value = parseInt(ev.target.value);
-        }
+  handleChange(ev) {
+    let entity = { ...this.state.entity };
+    let { value, id } = ev.target;
 
-        entity[id] = value;
-        this.setState({entity: entity});
+    if (ev.target.type === "number") {
+      value = parseInt(ev.target.value);
     }
 
-    handleSubmit(ev) {
-        let entity = {...this.state.entity};
+    entity[id] = value;
+    this.setState({ entity: entity });
+  }
 
-        ev.preventDefault();
+  handleSubmit(ev) {
+    let entity = { ...this.state.entity };
 
-        this.props.onSubmit(entity);
-    }
+    ev.preventDefault();
 
-    handleSaveAttribute(attribute) {
-        let entity = {...this.state.entity};
-        this.props.onSaveAttribute(entity.id, attribute);
-    }
+    this.props.onSubmit(entity);
+  }
 
-    handleDeleteAttribute(attributeId) {
-        let entity = {...this.state.entity};
-        this.props.onDeleteAttribute(entity.id, attributeId);
-    }
+  handleSaveAttribute(attribute) {
+    let entity = { ...this.state.entity };
+    this.props.onSaveAttribute(entity.id, attribute);
+  }
 
+  handleDeleteAttribute(attributeId) {
+    let entity = { ...this.state.entity };
+    this.props.onDeleteAttribute(entity.id, attributeId);
+  }
 
-    render() {
-        const {currentSummit, entity} = this.state;
+  render() {
+    const { currentSummit, entity } = this.state;
 
-        let value_columns = [
-            { columnKey: 'value', value: T.translate("general.value") }
-        ];
+    let value_columns = [
+      { columnKey: "value", value: T.translate("general.value") }
+    ];
 
-        let value_options = {
-            actions: {
-                save: {onClick: this.handleSaveAttribute},
-                delete: {onClick: this.handleDeleteAttribute}
-            }
-        }
+    let value_options = {
+      actions: {
+        save: { onClick: this.handleSaveAttribute },
+        delete: { onClick: this.handleDeleteAttribute }
+      }
+    };
 
-        return (
-            <form className="room-booking-attribute-form">
-                <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("general.type")} *</label>
-                        <Input
-                            id="type"
-                            value={entity.type}
-                            onChange={this.handleChange}
-                            className="form-control"
-                        />
-                    </div>
-                </div>
+    return (
+      <form className="room-booking-attribute-form">
+        <div className="row form-group">
+          <div className="col-md-4">
+            <label> {T.translate("general.type")} *</label>
+            <Input
+              id="type"
+              value={entity.type}
+              onChange={this.handleChange}
+              className="form-control"
+            />
+          </div>
+        </div>
 
-                {entity.id !== 0 &&
-                <div className="row">
-                    <div className="col-md-12">
-                        <label> {T.translate("general.values")} *</label>
-                        <EditableTable
-                            options={value_options}
-                            data={entity.values}
-                            columns={value_columns}
-                        />
-                    </div>
-                </div>
-                }
+        {entity.id !== 0 && (
+          <div className="row">
+            <div className="col-md-12">
+              <label> {T.translate("general.values")} *</label>
+              <EditableTable
+                options={value_options}
+                data={entity.values}
+                columns={value_columns}
+              />
+            </div>
+          </div>
+        )}
 
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                               className="btn btn-primary pull-right" value={T.translate("general.save")}/>
-                    </div>
-                </div>
-            </form>
-        );
-    }
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <input
+              type="button"
+              onClick={this.handleSubmit}
+              className="btn btn-primary pull-right"
+              value={T.translate("general.save")}
+            />
+          </div>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default RoomBookingAttributeForm;

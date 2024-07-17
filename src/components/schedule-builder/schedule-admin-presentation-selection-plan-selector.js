@@ -10,37 +10,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react';
-import Select from 'react-select';
+import React from "react";
+import Select from "react-select";
 import T from "i18n-react/dist/i18n-react";
 
 class ScheduleAdminPresentationSelectionPlanSelector extends React.Component {
+  constructor(props) {
+    super(props);
+    this.onChange = this.onChange.bind(this);
+  }
 
-    constructor(props){
-        super(props);
-        this.onChange = this.onChange.bind(this);
-    }
+  onChange(selectedOption) {
+    this.props.onPresentationSelectionPlanChanged(
+      selectedOption ? selectedOption.value : null
+    );
+  }
 
-    onChange(selectedOption){
-        this.props.onPresentationSelectionPlanChanged(selectedOption ? selectedOption.value : null);
-    }
+  render() {
+    let { presentationSelectionPlans, currentValue } = this.props;
+    let theValue = presentationSelectionPlans.find(
+      (op) => op.value === currentValue
+    );
 
-    render(){
-        let { presentationSelectionPlans, currentValue } = this.props;
-        let theValue = presentationSelectionPlans.find(op => op.value === currentValue);
-
-        return (
-            <Select
-                placeholder={T.translate("schedule.placeholders.select_presentation_selection_plan")}
-                className="presentation-selection-plan-selector"
-                name="form-field-name"
-                value={theValue}
-                onChange={this.onChange}
-                options={presentationSelectionPlans}
-                isClearable={true}
-            />
-        )
-    }
+    return (
+      <Select
+        placeholder={T.translate(
+          "schedule.placeholders.select_presentation_selection_plan"
+        )}
+        className="presentation-selection-plan-selector"
+        name="form-field-name"
+        value={theValue}
+        onChange={this.onChange}
+        options={presentationSelectionPlans}
+        isClearable={true}
+      />
+    );
+  }
 }
 
 export default ScheduleAdminPresentationSelectionPlanSelector;

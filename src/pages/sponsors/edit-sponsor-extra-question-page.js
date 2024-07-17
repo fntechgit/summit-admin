@@ -11,59 +11,78 @@
  * limitations under the License.
  **/
 
-import React, {useEffect} from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import { getSponsorExtraQuestion, saveSponsorExtraQuestion, resetSponsorExtraQuestionForm, getExtraQuestionMeta, deleteSponsorExtraQuestionValue, saveSponsorExtraQuestionValue, updateSponsorExtraQuestionValueOrder } from "../../actions/sponsor-actions";
+import {
+  getSponsorExtraQuestion,
+  saveSponsorExtraQuestion,
+  resetSponsorExtraQuestionForm,
+  getExtraQuestionMeta,
+  deleteSponsorExtraQuestionValue,
+  saveSponsorExtraQuestionValue,
+  updateSponsorExtraQuestionValueOrder
+} from "../../actions/sponsor-actions";
 import ExtraQuestionForm from "../../components/forms/extra-question-form";
 import Swal from "sweetalert2";
 
-const EditSponsorExtraQuestionPage = ({ currentSummit, entity, errors, match, allClasses, ...props }) => {
-    const extraQuestionId = match.params.extra_question_id;
-    const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-    const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+const EditSponsorExtraQuestionPage = ({
+  currentSummit,
+  entity,
+  errors,
+  match,
+  allClasses,
+  ...props
+}) => {
+  const extraQuestionId = match.params.extra_question_id;
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-    useEffect(() => {
-      props.getExtraQuestionMeta();
-    }, []);
+  useEffect(() => {
+    props.getExtraQuestionMeta();
+  }, []);
 
-    useEffect(() => {
-      if (!extraQuestionId) {
-        props.resetSponsorExtraQuestionForm();
-      } else {
-        props.getSponsorExtraQuestion(extraQuestionId);
-      }
-    }, [extraQuestionId]);
-
+  useEffect(() => {
+    if (!extraQuestionId) {
+      props.resetSponsorExtraQuestionForm();
+    } else {
+      props.getSponsorExtraQuestion(extraQuestionId);
+    }
+  }, [extraQuestionId]);
 
   const handleValueDelete = (valueId) => {
-    const value = entity.values.find(v => v.id === valueId);
+    const value = entity.values.find((v) => v.id === valueId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("edit_sponsor.remove_value_warning") + ' ' + value.value,
+      text:
+        T.translate("edit_sponsor.remove_value_warning") + " " + value.value,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function(result){
+    }).then(function (result) {
       if (result.value) {
         props.deleteSponsorExtraQuestionValue(entity.id, valueId);
       }
     });
-  }
+  };
 
   const handleValueSave = (valueEntity) => {
     props.saveSponsorExtraQuestionValue(entity.id, valueEntity);
-  }
+  };
 
   return (
     <div className="container">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-      <h3>{title} {T.translate("edit_sponsor.extra_question")}</h3>
+      <h3>
+        {title} {T.translate("edit_sponsor.extra_question")}
+      </h3>
       <hr />
-      {currentSummit &&
+      {currentSummit && (
         <ExtraQuestionForm
           shouldAllowSubRules={false}
           shouldShowUsage={false}
@@ -78,25 +97,25 @@ const EditSponsorExtraQuestionPage = ({ currentSummit, entity, errors, match, al
           updateQuestionValueOrder={props.updateSponsorExtraQuestionValueOrder}
           shouldHideMandatory={true}
         />
-      }
+      )}
     </div>
-  )
-}
+  );
+};
 
-const mapStateToProps = ({ currentSummitState, currentSponsorExtraQuestionState }) => ({
+const mapStateToProps = ({
+  currentSummitState,
+  currentSponsorExtraQuestionState
+}) => ({
   currentSummit: currentSummitState.currentSummit,
   ...currentSponsorExtraQuestionState
 });
 
-export default connect(
-  mapStateToProps,
-  {
-    getExtraQuestionMeta,
-    resetSponsorExtraQuestionForm,
-    getSponsorExtraQuestion,
-    saveSponsorExtraQuestion,
-    deleteSponsorExtraQuestionValue,
-    saveSponsorExtraQuestionValue,
-    updateSponsorExtraQuestionValueOrder
-  }
-)(EditSponsorExtraQuestionPage);
+export default connect(mapStateToProps, {
+  getExtraQuestionMeta,
+  resetSponsorExtraQuestionForm,
+  getSponsorExtraQuestion,
+  saveSponsorExtraQuestion,
+  deleteSponsorExtraQuestionValue,
+  saveSponsorExtraQuestionValue,
+  updateSponsorExtraQuestionValueOrder
+})(EditSponsorExtraQuestionPage);

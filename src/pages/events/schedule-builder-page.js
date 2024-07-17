@@ -10,37 +10,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react'
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import ScheduleAdminDashBoard from '../../components/schedule-builder/schedule-admin-dashboard';
-import { connect } from 'react-redux';
-import '../../styles/schedule-builder-page.less';
-import { getSummitById}  from '../../actions/summit-actions';
+import { Breadcrumb } from "react-breadcrumbs";
+import ScheduleAdminDashBoard from "../../components/schedule-builder/schedule-admin-dashboard";
+import { connect } from "react-redux";
+import "../../styles/schedule-builder-page.less";
+import { getSummitById } from "../../actions/summit-actions";
 
 class ScheduleBuilderPage extends React.Component {
+  render() {
+    const { currentSummit, match } = this.props;
+    if (!currentSummit.id) return <div />;
 
-
-    render(){
-        const {currentSummit, match} = this.props;
-        if(!currentSummit.id) return(<div />);
-
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("schedule.schedule"), pathname: match.url }} />
-                <ScheduleAdminDashBoard history={this.props.history} summit={currentSummit} pixelsPerMinute={3}/>
-            </div>
-        )
-    }
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("schedule.schedule"),
+            pathname: match.url
+          }}
+        />
+        <ScheduleAdminDashBoard
+          history={this.props.history}
+          summit={currentSummit}
+          pixelsPerMinute={3}
+        />
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState }) => ({
-    currentSummit : currentSummitState.currentSummit
+  currentSummit: currentSummitState.currentSummit
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById
-    }
-)(ScheduleBuilderPage);
+export default connect(mapStateToProps, {
+  getSummitById
+})(ScheduleBuilderPage);

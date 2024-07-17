@@ -11,43 +11,50 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {ButtonToolbar, ToggleButtonGroup, ToggleButton} from 'react-bootstrap'
+import React from "react";
+import {
+  ButtonToolbar,
+  ToggleButtonGroup,
+  ToggleButton
+} from "react-bootstrap";
 
 export default class MediaFilter extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
+  }
 
+  handleFilterChange(value) {
+    let published = null;
+
+    if (value.length === 1) {
+      if (value.includes("published")) {
+        published = true;
+      } else if (value.includes("not-published")) {
+        published = false;
+      }
     }
 
-    handleFilterChange(value) {
-        let published = null;
+    this.props.onChange(value);
+  }
 
-        if (value.length === 1) {
-            if ( value.includes('published')) {
-                published = true;
-            } else if ( value.includes('not-published')){
-                published = false;
-            }
-        }
+  render() {
+    let { value, onChange, ...rest } = this.props;
 
-        this.props.onChange(value);
-    }
-
-    render() {
-        let {value, onChange, ...rest} = this.props;
-
-        return (
-            <div className="published-filter">
-                <label>Attending Media Filter</label>
-                <ButtonToolbar>
-                    <ToggleButtonGroup type="checkbox" value={value} onChange={this.handleFilterChange}>
-                        <ToggleButton value="1">Only Attending Media</ToggleButton>
-                    </ToggleButtonGroup>
-                </ButtonToolbar>
-            </div>
-        );
-    }
+    return (
+      <div className="published-filter">
+        <label>Attending Media Filter</label>
+        <ButtonToolbar>
+          <ToggleButtonGroup
+            type="checkbox"
+            value={value}
+            onChange={this.handleFilterChange}
+          >
+            <ToggleButton value="1">Only Attending Media</ToggleButton>
+          </ToggleButtonGroup>
+        </ButtonToolbar>
+      </div>
+    );
+  }
 }

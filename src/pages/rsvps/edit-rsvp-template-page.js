@@ -11,114 +11,131 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import RsvpTemplateForm from '../../components/forms/rsvp-template-form';
-import RsvpForm from '../../components/forms/rsvp-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getRsvpTemplate, resetRsvpTemplateForm, saveRsvpTemplate, updateQuestionsOrder, deleteRsvpQuestion } from "../../actions/rsvp-template-actions";
-import { Modal } from 'react-bootstrap';
+import RsvpTemplateForm from "../../components/forms/rsvp-template-form";
+import RsvpForm from "../../components/forms/rsvp-form";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getRsvpTemplate,
+  resetRsvpTemplateForm,
+  saveRsvpTemplate,
+  updateQuestionsOrder,
+  deleteRsvpQuestion
+} from "../../actions/rsvp-template-actions";
+import { Modal } from "react-bootstrap";
 
 //import '../../styles/edit-rsvp-template-page.less';
 
 class EditRsvpTemplatePage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      showModal: false
+    };
 
-        this.state = {
-            showModal: false,
-        };
+    this.handleDeleteQuestion = this.handleDeleteQuestion.bind(this);
+    this.handleReorderQuestion = this.handleReorderQuestion.bind(this);
+  }
 
-        this.handleDeleteQuestion = this.handleDeleteQuestion.bind(this);
-        this.handleReorderQuestion = this.handleReorderQuestion.bind(this);
-    }
+  handleDeleteQuestion(rsvpQuestionId) {
+    const { deleteRsvpQuestion, entity } = this.props;
+    let question = entity.questions.find((q) => q.id === rsvpQuestionId);
 
-    handleDeleteQuestion(rsvpQuestionId) {
-        const {deleteRsvpQuestion, entity} = this.props;
-        let question = entity.questions.find(q => q.id === rsvpQuestionId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text:
+        T.translate("edit_rsvp_template.remove_question_warning") +
+        " " +
+        question.name,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteRsvpQuestion(entity.id, rsvpQuestionId);
+      }
+    });
+  }
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("edit_rsvp_template.remove_question_warning") + ' ' + question.name,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deleteRsvpQuestion(entity.id, rsvpQuestionId);
-            }
-        });
-    }
+  handleReorderQuestion(questions, questionId, newOrder) {
+    const { updateQuestionsOrder, entity } = this.props;
 
-    handleReorderQuestion(questions, questionId, newOrder) {
-        const {updateQuestionsOrder, entity} = this.props;
+    entity.questions = [...questions];
 
-        entity.questions = [...questions];
+    this.setState({ entity });
+    updateQuestionsOrder(questions, entity.id, questionId, newOrder);
+  }
 
-        this.setState({entity});
-        updateQuestionsOrder(questions, entity.id, questionId, newOrder);
-    }
+  render() {
+    const { currentSummit, entity, errors } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
 
-    render(){
-        const {currentSummit, entity, errors} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
+    let sortedQuestions = [...entity.questions];
+    sortedQuestions.sort((a, b) =>
+      a.order > b.order ? 1 : a.order < b.order ? -1 : 0
+    );
 
-        let sortedQuestions = [...entity.questions];
-        sortedQuestions.sort(
-            (a, b) => (a.order > b.order ? 1 : (a.order < b.order ? -1 : 0))
-        );
+    return (
+      <div className="container">
+        <h3>
+          {title} {T.translate("edit_rsvp_template.rsvp_template")}
+          <button
+            className="btn btn-default pull-right"
+            onClick={() => {
+              this.setState({ showModal: true });
+            }}
+          >
+            Preview
+          </button>
+        </h3>
+        <hr />
+        {currentSummit && (
+          <RsvpTemplateForm
+            history={this.props.history}
+            currentSummit={currentSummit}
+            entity={entity}
+            errors={errors}
+            onQuestionReorder={this.handleReorderQuestion}
+            onQuestionDelete={this.handleDeleteQuestion}
+            onSubmit={this.props.saveRsvpTemplate}
+          />
+        )}
 
-        return(
-            <div className="container">
-                <h3>
-                    {title} {T.translate("edit_rsvp_template.rsvp_template")}
-                    <button className="btn btn-default pull-right" onClick={() => {this.setState({showModal: true})}}>
-                        Preview
-                    </button>
-                </h3>
-                <hr/>
-                {currentSummit &&
-                <RsvpTemplateForm
-                    history={this.props.history}
-                    currentSummit={currentSummit}
-                    entity={entity}
-                    errors={errors}
-                    onQuestionReorder={this.handleReorderQuestion}
-                    onQuestionDelete={this.handleDeleteQuestion}
-                    onSubmit={this.props.saveRsvpTemplate}
-                />
-                }
-
-                <Modal show={this.state.showModal} onHide={() => {this.setState({showModal: false})}} >
-                    <Modal.Header closeButton>
-                        <Modal.Title>Preview - {entity.title}</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <RsvpForm questions={sortedQuestions}/>
-                    </Modal.Body>
-                </Modal>
-            </div>
-        )
-    }
+        <Modal
+          show={this.state.showModal}
+          onHide={() => {
+            this.setState({ showModal: false });
+          }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Preview - {entity.title}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <RsvpForm questions={sortedQuestions} />
+          </Modal.Body>
+        </Modal>
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState, currentRsvpTemplateState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentRsvpTemplateState
-})
+  currentSummit: currentSummitState.currentSummit,
+  ...currentRsvpTemplateState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getRsvpTemplate,
-        resetRsvpTemplateForm,
-        saveRsvpTemplate,
-        updateQuestionsOrder,
-        deleteRsvpQuestion
-    }
-)(EditRsvpTemplatePage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getRsvpTemplate,
+  resetRsvpTemplateForm,
+  saveRsvpTemplate,
+  updateQuestionsOrder,
+  deleteRsvpQuestion
+})(EditRsvpTemplatePage);

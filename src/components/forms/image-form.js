@@ -11,145 +11,152 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import T from 'i18n-react/dist/i18n-react'
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { Input, TextEditor, UploadInput } from 'openstack-uicore-foundation/lib/components'
-import {isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
-
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import {
+  Input,
+  TextEditor,
+  UploadInput
+} from "openstack-uicore-foundation/lib/components";
+import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class ImageForm extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            entity: {...props.entity},
-            file: null,
-            errors: props.errors
-        };
+    this.state = {
+      entity: { ...props.entity },
+      file: null,
+      errors: props.errors
+    };
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleUploadFile = this.handleUploadFile.bind(this);
-        this.handleRemoveFile = this.handleRemoveFile.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleUploadFile = this.handleUploadFile.bind(this);
+    this.handleRemoveFile = this.handleRemoveFile.bind(this);
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const state = {};
+    scrollToError(this.props.errors);
+
+    if (!shallowEqual(prevProps.entity, this.props.entity)) {
+      state.entity = { ...this.props.entity };
+      state.errors = {};
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        scrollToError(this.props.errors);
-
-        if(!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = {...this.props.entity};
-            state.errors = {};
-        }
-
-        if (!shallowEqual(prevProps.errors, this.props.errors)) {
-            state.errors = {...this.props.errors};
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({...this.state, ...state})
-        }
+    if (!shallowEqual(prevProps.errors, this.props.errors)) {
+      state.errors = { ...this.props.errors };
     }
 
-    handleChange(ev) {
-        let entity = {...this.state.entity};
-        let errors = {...this.state.errors};
-        let {value, id} = ev.target;
+    if (!isEmpty(state)) {
+      this.setState({ ...this.state, ...state });
+    }
+  }
 
-        errors[id] = '';
-        entity[id] = value;
-        this.setState({entity: entity, errors: errors});
+  handleChange(ev) {
+    let entity = { ...this.state.entity };
+    let errors = { ...this.state.errors };
+    let { value, id } = ev.target;
+
+    errors[id] = "";
+    entity[id] = value;
+    this.setState({ entity: entity, errors: errors });
+  }
+
+  handleSubmit(ev) {
+    const { entity, file } = this.state;
+    let { locationId } = this.props;
+
+    ev.preventDefault();
+
+    this.props.onSubmit(locationId, entity, file);
+  }
+
+  hasErrors(field) {
+    let { errors } = this.state;
+    if (field in errors) {
+      return errors[field];
     }
 
-    handleSubmit(ev) {
-        const {entity, file} = this.state;
-        let {locationId} = this.props;
+    return "";
+  }
 
-        ev.preventDefault();
+  handleUploadFile(file) {
+    let entity = { ...this.state.entity };
+    let { valueField } = this.props;
 
-        this.props.onSubmit(locationId, entity, file);
-    }
+    entity[valueField] = file.preview;
 
-    hasErrors(field) {
-        let {errors} = this.state;
-        if(field in errors) {
-            return errors[field];
-        }
+    this.setState({ file: file, entity: entity });
+  }
 
-        return '';
-    }
+  handleRemoveFile(ev) {
+    let entity = { ...this.state.entity };
+    let { valueField } = this.props;
 
-    handleUploadFile(file) {
-        let entity = {...this.state.entity};
-        let {valueField} = this.props;
+    entity[valueField] = "";
+    this.setState({ entity: entity });
+  }
 
-        entity[valueField] = file.preview;
+  render() {
+    const { entity } = this.state;
+    let { valueField } = this.props;
 
-        this.setState({file: file, entity:entity});
-    }
+    return (
+      <form className="image-form">
+        <input type="hidden" id="id" value={entity.id} />
+        <div className="row form-group">
+          <div className="col-md-4">
+            <label> {T.translate("general.name")} *</label>
+            <Input
+              id="name"
+              value={entity.name}
+              onChange={this.handleChange}
+              className="form-control"
+              error={this.hasErrors("name")}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-12">
+            <label> {T.translate("general.description")} </label>
+            <TextEditor
+              id="description"
+              value={entity.description}
+              onChange={this.handleChange}
+              error={this.hasErrors("description")}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-12">
+            <label> {T.translate("general.file")} </label>
+            <UploadInput
+              value={entity[valueField]}
+              handleUpload={this.handleUploadFile}
+              handleRemove={this.handleRemoveFile}
+              className="dropzone col-md-6"
+              multiple={false}
+              accept="image/*"
+            />
+          </div>
+        </div>
 
-    handleRemoveFile(ev) {
-        let entity = {...this.state.entity};
-        let {valueField} = this.props;
-
-        entity[valueField] = '';
-        this.setState({entity:entity});
-    }
-
-    render() {
-        const {entity} = this.state;
-        let {valueField} = this.props;
-
-        return (
-            <form className="image-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("general.name")} *</label>
-                        <Input
-                            id="name"
-                            value={entity.name}
-                            onChange={this.handleChange}
-                            className="form-control"
-                            error={this.hasErrors('name')}
-                        />
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <label> {T.translate("general.description")} </label>
-                        <TextEditor
-                            id="description"
-                            value={entity.description}
-                            onChange={this.handleChange}
-                            error={this.hasErrors('description')}
-                        />
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <label> {T.translate("general.file")} </label>
-                        <UploadInput
-                            value={entity[valueField]}
-                            handleUpload={this.handleUploadFile}
-                            handleRemove={this.handleRemoveFile}
-                            className="dropzone col-md-6"
-                            multiple={false}
-                            accept="image/*"
-                        />
-                    </div>
-                </div>
-
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                               className="btn btn-primary pull-right" value={T.translate("general.save")}/>
-                    </div>
-                </div>
-            </form>
-        );
-    }
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <input
+              type="button"
+              onClick={this.handleSubmit}
+              className="btn btn-primary pull-right"
+              value={T.translate("general.save")}
+            />
+          </div>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default ImageForm;

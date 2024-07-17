@@ -11,36 +11,50 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {Switch, Route} from 'react-router-dom';
+import React from "react";
+import { Switch, Route } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 import NoMatchPage from "../pages/no-match-page";
 import ScheduleSettingsListPage from "../pages/schedule_settings/schedule-settings-list-page";
 import EditScheduleSettingsPage from "../pages/schedule_settings/edit-schedule-settings-page";
 
 class ScheduleSettingsLayout extends React.Component {
+  render() {
+    const { match } = this.props;
 
-    render(){
-        const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("edit_schedule_settings.schedule_settings"),
+            pathname: match.url
+          }}
+        />
 
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("edit_schedule_settings.schedule_settings"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={match.url} component={ScheduleSettingsListPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditScheduleSettingsPage}/>
-                    <Route path={`${match.url}/:schedule_settings_id(\\d+)`} component={EditScheduleSettingsPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={ScheduleSettingsListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditScheduleSettingsPage}
+          />
+          <Route
+            path={`${match.url}/:schedule_settings_id(\\d+)`}
+            component={EditScheduleSettingsPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(ScheduleSettingsLayout, 'admin-access');
-
-
+export default Restrict(ScheduleSettingsLayout, "admin-access");

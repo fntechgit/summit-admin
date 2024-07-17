@@ -11,52 +11,63 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import T from 'i18n-react/dist/i18n-react'
-
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
 
 export default class AuthButton extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      showLogOut: false
+    };
 
-        this.state = {
-            showLogOut: false,
-        };
+    this.toggleLogOut = this.toggleLogOut.bind(this);
+  }
 
-        this.toggleLogOut = this.toggleLogOut.bind(this);
+  toggleLogOut(ev) {
+    this.setState({ showLogOut: !this.state.showLogOut });
+  }
+
+  render() {
+    let { isLoggedUser, doLogin, initLogOut, picture } = this.props;
+    let { showLogOut } = this.state;
+
+    if (isLoggedUser) {
+      return (
+        <div className="user-menu" onClick={this.toggleLogOut}>
+          <div
+            className="profile-pic"
+            style={{ backgroundImage: `url(${picture})` }}
+          />
+          {showLogOut && (
+            <button
+              className="btn btn-default logout"
+              onClick={() => {
+                initLogOut();
+              }}
+            >
+              {T.translate("landing.sign_out")}
+            </button>
+          )}
+        </div>
+      );
+    } else {
+      return (
+        <div className="login">
+          {T.translate("landing.not_logged_in")}
+          <br />
+          <br />
+          <button
+            className="btn btn-primary btn-lg"
+            onClick={() => {
+              doLogin();
+            }}
+          >
+            {T.translate("landing.log_in")}
+          </button>
+        </div>
+      );
     }
-
-    toggleLogOut(ev) {
-        this.setState({showLogOut: !this.state.showLogOut});
-    }
-
-    render() {
-        let {isLoggedUser, doLogin, initLogOut, picture} = this.props;
-        let {showLogOut} = this.state;
-
-        if (isLoggedUser) {
-            return (
-                <div className="user-menu" onClick={this.toggleLogOut}>
-                    <div className="profile-pic" style={{backgroundImage: `url(${picture})`}} />
-                    {showLogOut &&
-                    <button className="btn btn-default logout" onClick={() => { initLogOut(); }}>
-                        {T.translate("landing.sign_out")}
-                    </button>
-                    }
-                </div>
-            );
-        } else {
-            return (
-                <div className="login">
-                    {T.translate("landing.not_logged_in")}
-                    <br/><br/>
-                    <button className="btn btn-primary btn-lg" onClick={() => { doLogin(); }}>
-                        {T.translate("landing.log_in")}
-                    </button>
-                </div>
-            );
-        }
-
-    }
+  }
 }

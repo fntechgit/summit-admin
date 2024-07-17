@@ -11,38 +11,44 @@
  * limitations under the License.
  **/
 
-import { RECEIVE_BADGE_SETTINGS } from '../../actions/badge-actions'
+import { RECEIVE_BADGE_SETTINGS } from "../../actions/badge-actions";
 
 const DEFAULT_BADGE_SETTINGS = {
-    BADGE_TEMPLATE_BACKGROUND_IMG: { id: 0, value: '', type: 'FILE', file_preview: '', file: null },
-    BADGE_TEMPLATE_FIRST_NAME_COLOR: { id: 0, value: '', type: 'HEX_COLOR' },
-    BADGE_TEMPLATE_LAST_NAME_COLOR: { id: 0, value: '', type: 'HEX_COLOR' },
-    BADGE_TEMPLATE_COMPANY_COLOR: { id: 0, value: '', type: 'HEX_COLOR' },
+  BADGE_TEMPLATE_BACKGROUND_IMG: {
+    id: 0,
+    value: "",
+    type: "FILE",
+    file_preview: "",
+    file: null
+  },
+  BADGE_TEMPLATE_FIRST_NAME_COLOR: { id: 0, value: "", type: "HEX_COLOR" },
+  BADGE_TEMPLATE_LAST_NAME_COLOR: { id: 0, value: "", type: "HEX_COLOR" },
+  BADGE_TEMPLATE_COMPANY_COLOR: { id: 0, value: "", type: "HEX_COLOR" }
 };
 
 const DEFAULT_STATE = {
-    badge_settings: DEFAULT_BADGE_SETTINGS,
-    errors: {}
+  badge_settings: DEFAULT_BADGE_SETTINGS,
+  errors: {}
 };
 
 const badgeSettingsReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case RECEIVE_BADGE_SETTINGS: {
-            let reducerSettings = { ...DEFAULT_BADGE_SETTINGS,};
-            if (payload.response.data.length > 0) {
-                payload.response.data.forEach(apiValue => {
-                    const key = apiValue.key;
-                    if (reducerSettings[key]) {
-                        reducerSettings[key] = apiValue;
-                    }
-                });
-            }
-            return { ...state, badge_settings: { ...reducerSettings } }
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case RECEIVE_BADGE_SETTINGS: {
+      let reducerSettings = { ...DEFAULT_BADGE_SETTINGS };
+      if (payload.response.data.length > 0) {
+        payload.response.data.forEach((apiValue) => {
+          const key = apiValue.key;
+          if (reducerSettings[key]) {
+            reducerSettings[key] = apiValue;
+          }
+        });
+      }
+      return { ...state, badge_settings: { ...reducerSettings } };
     }
+    default:
+      return state;
+  }
 };
 
 export default badgeSettingsReducer;

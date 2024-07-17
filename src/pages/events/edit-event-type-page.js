@@ -11,94 +11,101 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import EventTypeForm from '../../components/forms/event-type-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getEventType, resetEventTypeForm, saveEventType } from "../../actions/event-type-actions";
-import '../../styles/edit-event-type-page.less';
-import {queryMediaUploads, linkToPresentationType, unlinkFromPresentationType} from "../../actions/media-upload-actions";
+import { Breadcrumb } from "react-breadcrumbs";
+import EventTypeForm from "../../components/forms/event-type-form";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getEventType,
+  resetEventTypeForm,
+  saveEventType
+} from "../../actions/event-type-actions";
+import "../../styles/edit-event-type-page.less";
+import {
+  queryMediaUploads,
+  linkToPresentationType,
+  unlinkFromPresentationType
+} from "../../actions/media-upload-actions";
 
 class EditEventTypePage extends React.Component {
+  constructor(props) {
+    const eventTypeId = props.match.params.event_type_id;
+    super(props);
 
-    constructor(props) {
-        const eventTypeId = props.match.params.event_type_id;
-        super(props);
-
-        if (!eventTypeId) {
-            props.resetEventTypeForm();
-        } else {
-            props.getEventType(eventTypeId);
-        }
-
-        this.getMediaUploads = this.getMediaUploads.bind(this);
+    if (!eventTypeId) {
+      props.resetEventTypeForm();
+    } else {
+      props.getEventType(eventTypeId);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.event_type_id;
-        const newId = this.props.match.params.event_type_id;
+    this.getMediaUploads = this.getMediaUploads.bind(this);
+  }
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetEventTypeForm();
-            } else {
-                this.props.getEventType(newId);
-            }
-        }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.event_type_id;
+    const newId = this.props.match.params.event_type_id;
+
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetEventTypeForm();
+      } else {
+        this.props.getEventType(newId);
+      }
+    }
+  }
+
+  getMediaUploads(input, callback) {
+    const { currentSummit } = this.props;
+
+    if (!input) {
+      return Promise.resolve({ options: [] });
     }
 
-    getMediaUploads (input, callback) {
-        const { currentSummit } = this.props;
+    queryMediaUploads(currentSummit.id, input, callback);
+  }
 
-        if (!input) {
-            return Promise.resolve({ options: [] });
-        }
+  render() {
+    const { currentSummit, entity, errors, match } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-        queryMediaUploads(currentSummit.id, input, callback);
-    }
-
-    render(){
-        const {currentSummit, entity, errors, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
-
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_event_type.event_type")}</h3>
-                <hr/>
-                {currentSummit &&
-                <EventTypeForm
-                    currentSummit={currentSummit}
-                    entity={entity}
-                    errors={errors}
-                    onSubmit={this.props.saveEventType}
-                    getMediaUploads={this.getMediaUploads}
-                    onMediaUploadLink={this.props.linkToPresentationType}
-                    onMediaUploadUnLink={this.props.unlinkFromPresentationType}
-                />
-                }
-            </div>
-
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("edit_event_type.event_type")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <EventTypeForm
+            currentSummit={currentSummit}
+            entity={entity}
+            errors={errors}
+            onSubmit={this.props.saveEventType}
+            getMediaUploads={this.getMediaUploads}
+            onMediaUploadLink={this.props.linkToPresentationType}
+            onMediaUploadUnLink={this.props.unlinkFromPresentationType}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState, currentEventTypeState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentEventTypeState
+  currentSummit: currentSummitState.currentSummit,
+  ...currentEventTypeState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getEventType,
-        resetEventTypeForm,
-        saveEventType,
-        linkToPresentationType,
-        unlinkFromPresentationType
-    }
-)(EditEventTypePage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getEventType,
+  resetEventTypeForm,
+  saveEventType,
+  linkToPresentationType,
+  unlinkFromPresentationType
+})(EditEventTypePage);

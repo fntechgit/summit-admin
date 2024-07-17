@@ -11,11 +11,11 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import EventCategoryForm from '../../components/forms/event-category-form';
-import { getSummitById }  from '../../actions/summit-actions';
+import EventCategoryForm from "../../components/forms/event-category-form";
+import { getSummitById } from "../../actions/summit-actions";
 import {
   getEventCategory,
   resetEventCategoryForm,
@@ -26,57 +26,60 @@ import {
   unlinkSubCategory,
   updateSubCategoryOrder
 } from "../../actions/event-category-actions";
-import '../../styles/edit-event-category-page.less';
+import "../../styles/edit-event-category-page.less";
 
 class EditEventCategoryPage extends React.Component {
+  constructor(props) {
+    super(props);
+  }
 
-    constructor(props) {
-        super(props);
-    }
+  render() {
+    const { currentSummit, entity, errors, match, history } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
 
-    render(){
-        const {currentSummit, entity, errors, match, history} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-
-        return(
-            <div className="container">
-                <h3>{title} {T.translate("edit_event_category.event_category")}</h3>
-                <hr/>
-                {currentSummit &&
-                <EventCategoryForm
-                    history={history}
-                    currentSummit={currentSummit}
-                    entity={entity}
-                    errors={errors}
-                    onSubmit={this.props.saveEventCategory}
-                    onUploadImage={this.props.uploadImage}
-                    onRemoveImage={this.props.removeImage}
-                    onLinkSubCategory={this.props.linkSubCategory}
-                    onUnlinkSubCategory={this.props.unlinkSubCategory}
-                    onUpdateSubCategoryOrder={this.props.updateSubCategoryOrder}
-                />
-                }
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <h3>
+          {title} {T.translate("edit_event_category.event_category")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <EventCategoryForm
+            history={history}
+            currentSummit={currentSummit}
+            entity={entity}
+            errors={errors}
+            onSubmit={this.props.saveEventCategory}
+            onUploadImage={this.props.uploadImage}
+            onRemoveImage={this.props.removeImage}
+            onLinkSubCategory={this.props.linkSubCategory}
+            onUnlinkSubCategory={this.props.unlinkSubCategory}
+            onUpdateSubCategoryOrder={this.props.updateSubCategoryOrder}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentEventCategoryState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentEventCategoryState
-})
+const mapStateToProps = ({
+  currentSummitState,
+  currentEventCategoryState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentEventCategoryState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-      getSummitById,
-      getEventCategory,
-      resetEventCategoryForm,
-      saveEventCategory,
-      uploadImage,
-      removeImage,
-      linkSubCategory,
-      unlinkSubCategory,
-      updateSubCategoryOrder
-    }
-)(EditEventCategoryPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getEventCategory,
+  resetEventCategoryForm,
+  saveEventCategory,
+  uploadImage,
+  removeImage,
+  linkSubCategory,
+  unlinkSubCategory,
+  updateSubCategoryOrder
+})(EditEventCategoryPage);

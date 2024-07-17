@@ -11,12 +11,18 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import PropTypes from 'prop-types';
-import { Input } from 'openstack-uicore-foundation/lib/components'
+import React from "react";
+import PropTypes from "prop-types";
+import { Input } from "openstack-uicore-foundation/lib/components";
 
-const TextInputWithCounter = ({ className, maxLength, id, value, onChange, ...rest }) => {
-
+const TextInputWithCounter = ({
+  className,
+  maxLength,
+  id,
+  value,
+  onChange,
+  ...rest
+}) => {
   return (
     <>
       <Input
@@ -27,16 +33,16 @@ const TextInputWithCounter = ({ className, maxLength, id, value, onChange, ...re
         onChange={onChange}
         {...rest}
       />
-      <span className='character-counter'>{`${value?.length}/${maxLength}`}</span>
+      <span className="character-counter">{`${value?.length}/${maxLength}`}</span>
     </>
   );
-}
+};
 
 TextInputWithCounter.propTypes = {
-    className: PropTypes.string,
-    maxLength: PropTypes.number.isRequired,
-    id: PropTypes.string,
-    onChange: PropTypes.func.isRequired
-}
+  className: PropTypes.string,
+  maxLength: PropTypes.number.isRequired,
+  id: PropTypes.string,
+  onChange: PropTypes.func.isRequired
+};
 
 export default TextInputWithCounter;

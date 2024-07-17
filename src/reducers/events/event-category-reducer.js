@@ -11,101 +11,106 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_EVENT_CATEGORY,
-    RESET_EVENT_CATEGORY_FORM,
-    EVENT_CATEGORY_ADDED,
-    UPDATE_EVENT_CATEGORY,
-    EVENT_CATEGORY_IMAGE_ATTACHED,
-    EVENT_CATEGORY_IMAGE_DELETED,
-    SUBTRACK_UPDATED,
-    UNLINK_SUBTRACK,
-} from '../../actions/event-category-actions';
+import {
+  RECEIVE_EVENT_CATEGORY,
+  RESET_EVENT_CATEGORY_FORM,
+  EVENT_CATEGORY_ADDED,
+  UPDATE_EVENT_CATEGORY,
+  EVENT_CATEGORY_IMAGE_ATTACHED,
+  EVENT_CATEGORY_IMAGE_DELETED,
+  SUBTRACK_UPDATED,
+  UNLINK_SUBTRACK
+} from "../../actions/event-category-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id                          : 0,
-    name                        : '',
-    code                        : '',
-    color                       : '#DADADA',
-    text_color                  : '#000000',
-    description                 : '',
-    session_count               : 0,
-    alternate_count             : 0,
-    lightning_count             : 0,
-    lightning_alternate_count   : 0,
-    voting_visible              : false,
-    chair_visible               : false,
-    allowed_tags                : [],
-    track_groups                : [],
-    extra_questions             : [],
-    icon_url                    : null,
-    allowed_access_levels       : [],
-    proposed_schedule_transition_time: null,
-    subtracks                   : []
+  id: 0,
+  name: "",
+  code: "",
+  color: "#DADADA",
+  text_color: "#000000",
+  description: "",
+  session_count: 0,
+  alternate_count: 0,
+  lightning_count: 0,
+  lightning_alternate_count: 0,
+  voting_visible: false,
+  chair_visible: false,
+  allowed_tags: [],
+  track_groups: [],
+  extra_questions: [],
+  icon_url: null,
+  allowed_access_levels: [],
+  proposed_schedule_transition_time: null,
+  subtracks: []
 };
 
 const DEFAULT_STATE = {
-    entity      : DEFAULT_ENTITY,
-    allClasses  : [],
-    errors      : {}
+  entity: DEFAULT_ENTITY,
+  allClasses: [],
+  errors: {}
 };
 
 const eventCategoryReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-            }
-        }
-        case SET_CURRENT_SUMMIT:
-        case RESET_EVENT_CATEGORY_FORM: {
-            return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        case UPDATE_EVENT_CATEGORY: {
-            return {...state,  entity: {...payload}, errors: {} };
-        }
-        case EVENT_CATEGORY_ADDED:
-        case RECEIVE_EVENT_CATEGORY: {
-            let entity = {...payload.response};
-
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
-
-            return {...state, errors: {}, entity: {...DEFAULT_ENTITY, ...entity} };
-        }
-        case EVENT_CATEGORY_IMAGE_ATTACHED: {
-            let image = {...payload.response};
-            return {...state, entity: {...state.entity, icon_url: image.url} };
-        }
-        case EVENT_CATEGORY_IMAGE_DELETED: {
-            return {...state, entity: {...state.entity, icon_url: null} };
-        }
-        case SUBTRACK_UPDATED: {
-            const {response} = payload
-            return {...state, entity: response};
-        }
-        case UNLINK_SUBTRACK: {
-            const {subTrackId} = payload;
-            return {...state, entity: {...state.entity, subtracks: state.entity.subtracks.filter(st => st.id !== subTrackId)} };
-        }
-        case VALIDATE: {
-            return {...state,  errors: payload.errors };
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
+      } else {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
     }
+    case SET_CURRENT_SUMMIT:
+    case RESET_EVENT_CATEGORY_FORM: {
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case UPDATE_EVENT_CATEGORY: {
+      return { ...state, entity: { ...payload }, errors: {} };
+    }
+    case EVENT_CATEGORY_ADDED:
+    case RECEIVE_EVENT_CATEGORY: {
+      let entity = { ...payload.response };
+
+      for (var key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
+        }
+      }
+
+      return { ...state, errors: {}, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case EVENT_CATEGORY_IMAGE_ATTACHED: {
+      let image = { ...payload.response };
+      return { ...state, entity: { ...state.entity, icon_url: image.url } };
+    }
+    case EVENT_CATEGORY_IMAGE_DELETED: {
+      return { ...state, entity: { ...state.entity, icon_url: null } };
+    }
+    case SUBTRACK_UPDATED: {
+      const { response } = payload;
+      return { ...state, entity: response };
+    }
+    case UNLINK_SUBTRACK: {
+      const { subTrackId } = payload;
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          subtracks: state.entity.subtracks.filter((st) => st.id !== subTrackId)
+        }
+      };
+    }
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
+    default:
+      return state;
+  }
 };
 
 export default eventCategoryReducer;

@@ -11,42 +11,43 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import Select from 'react-select'
+import React from "react";
+import Select from "react-select";
 
 export default class RoomFilter extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
+  }
 
+  handleFilterChange(value) {
+    let theValue = this.props.isMulti ? value.map((v) => v.value) : value.value;
+    this.props.onChange(theValue);
+  }
+
+  render() {
+    let { rooms, value, onChange, ...rest } = this.props;
+    let theValue = null;
+    let options = rooms.map((t) => ({ value: t.id, label: t.name }));
+
+    if (value) {
+      theValue = this.props.isMulti
+        ? options.filter((op) => value.includes(op.value))
+        : options.find((op) => op.value === value);
     }
 
-    handleFilterChange(value) {
-        let theValue = this.props.isMulti ? value.map(v => v.value) : value.value;
-        this.props.onChange(theValue);
-    }
-
-    render() {
-        let {rooms, value, onChange, ...rest} = this.props;
-        let theValue = null;
-        let options = rooms.map(t => ({value: t.id, label: t.name}));
-
-        if (value) {
-            theValue = this.props.isMulti ? options.filter(op => value.includes(op.value)) : options.find(op => op.value === value);
-        }
-
-        return (
-            <div className="room-filter">
-                <label>Filter by Room</label>
-                <Select
-                    value={theValue}
-                    id="room-filter"
-                    options={options}
-                    onChange={this.handleFilterChange}
-                    {...rest}
-                />
-            </div>
-        );
-    }
+    return (
+      <div className="room-filter">
+        <label>Filter by Room</label>
+        <Select
+          value={theValue}
+          id="room-filter"
+          options={options}
+          onChange={this.handleFilterChange}
+          {...rest}
+        />
+      </div>
+    );
+  }
 }

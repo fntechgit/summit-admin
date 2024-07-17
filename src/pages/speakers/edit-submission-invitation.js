@@ -11,99 +11,103 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import { getSummitById }  from '../../actions/summit-actions';
-import { getInvitation ,
-    resetInvitationForm,
-    saveInvitation } from "../../actions/submission-invitation-actions";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getInvitation,
+  resetInvitationForm,
+  saveInvitation
+} from "../../actions/submission-invitation-actions";
 import SubmissionInvitationForm from "../../components/forms/submission-invitation-form";
-import {getSentEmailsByTemplatesAndEmail} from '../../actions/email-actions';
+import { getSentEmailsByTemplatesAndEmail } from "../../actions/email-actions";
 import EmailActivity from "../../components/forms/email-activity";
 
 class EditSubmissionInvitationPage extends React.Component {
+  componentDidMount() {
+    const { getSentEmailsByTemplatesAndEmail } = this.props;
+    let invitationId = this.props.match.params.invitation_id;
 
-    componentDidMount () {
-        const {getSentEmailsByTemplatesAndEmail} = this.props;
-        let invitationId = this.props.match.params.invitation_id;
+    if (!invitationId) {
+      this.props.resetInvitationForm();
+      return;
+    }
 
-        if (!invitationId) {
-            this.props.resetInvitationForm();
-            return;
-        }
+    this.props.getInvitation(invitationId).then((payload) => {
+      getSentEmailsByTemplatesAndEmail(
+        [
+          "SUMMIT_SUBMISSION_INVITE_REGISTRATION",
+          "SUMMIT_SUBMISSION_REINVITE_REGISTRATION"
+        ],
+        payload.email
+      );
+    });
+  }
 
-        this.props.getInvitation(invitationId).then((payload) => {
-            getSentEmailsByTemplatesAndEmail(
-                [
-                    'SUMMIT_SUBMISSION_INVITE_REGISTRATION',
-                    'SUMMIT_SUBMISSION_REINVITE_REGISTRATION'
-                ],
-                payload.email
-            )
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.invitation_id;
+    const newId = this.props.match.params.invitation_id;
+
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetInvitationForm();
+      } else {
+        this.props.getInvitation(newId).then((payload) => {
+          getSentEmailsByTemplatesAndEmail(
+            [
+              "SUMMIT_SUBMISSION_INVITE_REGISTRATION",
+              "SUMMIT_SUBMISSION_REINVITE_REGISTRATION"
+            ],
+            payload.email
+          );
         });
+      }
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.invitation_id;
-        const newId = this.props.match.params.invitation_id;
+  render() {
+    const { currentSummit, entity, errors, match, emailActivity } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.id : T.translate("general.new");
 
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetInvitationForm();
-            } else {
-                this.props.getInvitation(newId).then((payload) => {
-                    getSentEmailsByTemplatesAndEmail(
-                        [
-                            'SUMMIT_SUBMISSION_INVITE_REGISTRATION',
-                            'SUMMIT_SUBMISSION_REINVITE_REGISTRATION'
-                        ],
-                        payload.email
-                    )
-                });
-            }
-        }
-    }
-
-    render(){
-        const {currentSummit, entity, errors, match, emailActivity} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.id : T.translate("general.new");
-
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_submission_invitation.submission_invitation")}</h3>
-                <hr/>
-                {currentSummit &&
-                    <SubmissionInvitationForm
-                        entity={entity}
-                        errors={errors}
-                        currentSummit={currentSummit}
-                        onSubmit={this.props.saveInvitation}
-                    />
-                }
-                <EmailActivity
-                        emailActivity={emailActivity}
-                />
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title}{" "}
+          {T.translate("edit_submission_invitation.submission_invitation")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <SubmissionInvitationForm
+            entity={entity}
+            errors={errors}
+            currentSummit={currentSummit}
+            onSubmit={this.props.saveInvitation}
+          />
+        )}
+        <EmailActivity emailActivity={emailActivity} />
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSubmissionInvitationState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentSubmissionInvitationState
+const mapStateToProps = ({
+  currentSummitState,
+  currentSubmissionInvitationState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentSubmissionInvitationState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getInvitation,
-        saveInvitation,
-        resetInvitationForm,
-        getSentEmailsByTemplatesAndEmail,
-    }
-)(EditSubmissionInvitationPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getInvitation,
+  saveInvitation,
+  resetInvitationForm,
+  getSentEmailsByTemplatesAndEmail
+})(EditSubmissionInvitationPage);

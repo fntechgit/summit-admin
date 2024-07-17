@@ -11,42 +11,64 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-
-import ScheduleBuilderPage from '../pages/events/schedule-builder-page';
-import SummitEventListPage from '../pages/events/summit-event-list-page';
-import EventIdLayout from './event-id-layout';
-import SummitEventsBulkActionsPage from '../pages/events/summit-events-bulk-actions-page';
+import ScheduleBuilderPage from "../pages/events/schedule-builder-page";
+import SummitEventListPage from "../pages/events/summit-event-list-page";
+import EventIdLayout from "./event-id-layout";
+import SummitEventsBulkActionsPage from "../pages/events/summit-events-bulk-actions-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class EventLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("event_list.events"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("event_list.events"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={match.url} component={SummitEventListPage}/>
-                    <Route strict exact path={`${match.url}/schedule`} component={ScheduleBuilderPage}/>
-                    <Route strict exact path={`${match.url}/bulk-actions`} component={SummitEventsBulkActionsPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EventIdLayout}/>
-                    <Route path={`${match.url}/:event_id(\\d+)`} component={EventIdLayout}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            component={SummitEventListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/schedule`}
+            component={ScheduleBuilderPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/bulk-actions`}
+            component={SummitEventsBulkActionsPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EventIdLayout}
+          />
+          <Route
+            path={`${match.url}/:event_id(\\d+)`}
+            component={EventIdLayout}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(EventLayout), 'events');
-
-
+export default Restrict(withRouter(EventLayout), "events");

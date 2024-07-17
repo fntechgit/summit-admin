@@ -11,126 +11,131 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Table } from 'openstack-uicore-foundation/lib/components';
-import { getSummitById }  from '../../actions/summit-actions';
+import { Table } from "openstack-uicore-foundation/lib/components";
+import { getSummitById } from "../../actions/summit-actions";
 import { getTaxTypes, deleteTaxType } from "../../actions/tax-actions";
 
 class TaxTypeListPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.handleNewTaxType = this.handleNewTaxType.bind(this);
 
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
-        this.handleSort = this.handleSort.bind(this);
-        this.handleNewTaxType = this.handleNewTaxType.bind(this);
+    this.state = {};
+  }
 
-        this.state = {}
-
+  componentDidMount() {
+    const { currentSummit } = this.props;
+    if (currentSummit) {
+      this.props.getTaxTypes();
     }
+  }
 
-    componentDidMount() {
-        const {currentSummit} = this.props;
-        if(currentSummit) {
-            this.props.getTaxTypes();
-        }
-    }
+  handleEdit(tax_type_id) {
+    const { currentSummit, history } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/tax-types/${tax_type_id}`);
+  }
 
-    handleEdit(tax_type_id) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/tax-types/${tax_type_id}`);
-    }
+  handleDelete(taxTypeId) {
+    const { deleteTaxType, taxTypes } = this.props;
+    let taxType = taxTypes.find((t) => t.id === taxTypeId);
 
-    handleDelete(taxTypeId) {
-        const {deleteTaxType, taxTypes} = this.props;
-        let taxType = taxTypes.find(t => t.id === taxTypeId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("tax_type_list.remove_warning") + " " + taxType.name,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteTaxType(taxTypeId);
+      }
+    });
+  }
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("tax_type_list.remove_warning") + ' ' + taxType.name,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deleteTaxType(taxTypeId);
-            }
-        });
-    }
+  handleSort(index, key, dir, func) {
+    this.props.getTaxTypes(key, dir);
+  }
 
-    handleSort(index, key, dir, func) {
-        this.props.getTaxTypes(key, dir);
-    }
+  handleNewTaxType(ev) {
+    const { currentSummit, history } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/tax-types/new`);
+  }
 
-    handleNewTaxType(ev) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/tax-types/new`);
-    }
+  render() {
+    const { currentSummit, taxTypes, order, orderDir, totalTaxTypes } =
+      this.props;
 
-    render(){
-        const {currentSummit, taxTypes, order, orderDir, totalTaxTypes} = this.props;
+    const columns = [
+      {
+        columnKey: "name",
+        value: T.translate("tax_type_list.name"),
+        sortable: true
+      },
+      { columnKey: "rate", value: T.translate("tax_type_list.rate") },
+      { columnKey: "tax_id", value: T.translate("tax_type_list.tax_id") }
+    ];
 
-        const columns = [
-            { columnKey: 'name', value: T.translate("tax_type_list.name"), sortable: true },
-            { columnKey: 'rate', value: T.translate("tax_type_list.rate") },
-            { columnKey: 'tax_id', value: T.translate("tax_type_list.tax_id") }
-        ];
+    const table_options = {
+      sortCol: order,
+      sortDir: orderDir,
+      actions: {
+        edit: { onClick: this.handleEdit },
+        delete: { onClick: this.handleDelete }
+      }
+    };
 
-        const table_options = {
-            sortCol: order,
-            sortDir: orderDir,
-            actions: {
-                edit: { onClick: this.handleEdit },
-                delete: { onClick: this.handleDelete }
-            }
-        }
+    if (!currentSummit.id) return <div />;
 
-        if(!currentSummit.id) return (<div />);
+    return (
+      <div className="container">
+        <h3>
+          {" "}
+          {T.translate("tax_type_list.tax_type_list")} ({totalTaxTypes})
+        </h3>
+        <div className={"row"}>
+          <div className="col-md-6 text-right col-md-offset-6">
+            <button
+              className="btn btn-primary right-space"
+              onClick={this.handleNewTaxType}
+            >
+              {T.translate("tax_type_list.add_tax_type")}
+            </button>
+          </div>
+        </div>
 
-        return(
-            <div className="container">
-                <h3> {T.translate("tax_type_list.tax_type_list")} ({totalTaxTypes})</h3>
-                <div className={'row'}>
-                    <div className="col-md-6 text-right col-md-offset-6">
-                        <button className="btn btn-primary right-space" onClick={this.handleNewTaxType}>
-                            {T.translate("tax_type_list.add_tax_type")}
-                        </button>
-                    </div>
-                </div>
+        {taxTypes.length === 0 && (
+          <div>{T.translate("tax_type_list.no_tax_types")}</div>
+        )}
 
-                {taxTypes.length === 0 &&
-                <div>{T.translate("tax_type_list.no_tax_types")}</div>
-                }
-
-                {taxTypes.length > 0 &&
-                    <Table
-                        options={table_options}
-                        data={taxTypes}
-                        columns={columns}
-                        onSort={this.handleSort}
-                    />
-                }
-
-            </div>
-        )
-    }
+        {taxTypes.length > 0 && (
+          <Table
+            options={table_options}
+            data={taxTypes}
+            columns={columns}
+            onSort={this.handleSort}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ currentSummitState, currentTaxTypeListState }) => ({
-    currentSummit   : currentSummitState.currentSummit,
-    ...currentTaxTypeListState
-})
+  currentSummit: currentSummitState.currentSummit,
+  ...currentTaxTypeListState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getTaxTypes,
-        deleteTaxType
-    }
-)(TaxTypeListPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getTaxTypes,
+  deleteTaxType
+})(TaxTypeListPage);

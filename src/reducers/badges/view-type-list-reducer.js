@@ -11,57 +11,70 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_VIEW_TYPES,
-    REQUEST_VIEW_TYPES,
-    VIEW_TYPE_DELETED, 
-} from '../../actions/badge-actions';
+import {
+  RECEIVE_VIEW_TYPES,
+  REQUEST_VIEW_TYPES,
+  VIEW_TYPE_DELETED
+} from "../../actions/badge-actions";
 
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    viewTypes           : [],
-    term                : null,
-    order               : 'name',
-    orderDir            : 1,
-    currentPage         : 1,
-    lastPage            : 1,
-    perPage             : 10,
-    totalViewTypes      : 0
+  viewTypes: [],
+  term: null,
+  order: "name",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalViewTypes: 0
 };
 
 const viewTypeListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        break;
-        case REQUEST_VIEW_TYPES: {
-            let {order, orderDir, term} = payload;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER:
+      {
+        return DEFAULT_STATE;
+      }
+      break;
+    case REQUEST_VIEW_TYPES:
+      {
+        let { order, orderDir, term } = payload;
 
-            return {...state, order, orderDir, term }
-        }
-        break;
-        case RECEIVE_VIEW_TYPES: {
-            let { total, current_page, last_page } = payload.response;
-            let viewTypes = payload.response.data;
+        return { ...state, order, orderDir, term };
+      }
+      break;
+    case RECEIVE_VIEW_TYPES:
+      {
+        let { total, current_page, last_page } = payload.response;
+        let viewTypes = payload.response.data;
 
-            return {...state, viewTypes, totalViewTypes: total, currentPage: current_page, lastPage: last_page };
-        }
-        break;
-        case VIEW_TYPE_DELETED: {
-            let {viewTypeId} = payload;
-            return {...state, viewTypes: state.viewTypes.filter(t => t.id !== viewTypeId), totalViewTypes: (state.totalViewTypes - 1)};
-        }
-        break;
-        default:
-            return state;
-    }
+        return {
+          ...state,
+          viewTypes,
+          totalViewTypes: total,
+          currentPage: current_page,
+          lastPage: last_page
+        };
+      }
+      break;
+    case VIEW_TYPE_DELETED:
+      {
+        let { viewTypeId } = payload;
+        return {
+          ...state,
+          viewTypes: state.viewTypes.filter((t) => t.id !== viewTypeId),
+          totalViewTypes: state.totalViewTypes - 1
+        };
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default viewTypeListReducer;

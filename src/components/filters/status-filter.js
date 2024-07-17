@@ -11,44 +11,51 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import {ButtonToolbar, ToggleButtonGroup, ToggleButton} from 'react-bootstrap'
+import React from "react";
+import {
+  ButtonToolbar,
+  ToggleButtonGroup,
+  ToggleButton
+} from "react-bootstrap";
 
 export default class StatusFilter extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
+  }
 
+  handleFilterChange(value) {
+    let status = null;
+
+    if (value.length === 1) {
+      if (value.includes("received")) {
+        status = "received";
+      } else if (value.includes("not-received")) {
+        status = "null";
+      }
     }
 
-    handleFilterChange(value) {
-        let status = null;
+    this.props.onChange(status);
+  }
 
-        if (value.length === 1) {
-            if ( value.includes('received')) {
-                status = "received";
-            } else if ( value.includes('not-received')){
-                status = "null";
-            }
-        }
+  render() {
+    let { value, onChange, ...rest } = this.props;
 
-        this.props.onChange(status);
-    }
-
-    render() {
-        let {value, onChange, ...rest} = this.props;
-
-        return (
-            <div className="received-filter">
-                <label>Filter by Status</label>
-                <ButtonToolbar>
-                    <ToggleButtonGroup type="checkbox" defaultValue={["received", "not-received"]} onChange={this.handleFilterChange}>
-                        <ToggleButton value="received">Received</ToggleButton>
-                        <ToggleButton value="not-received">Not Received</ToggleButton>
-                    </ToggleButtonGroup>
-                </ButtonToolbar>
-            </div>
-        );
-    }
+    return (
+      <div className="received-filter">
+        <label>Filter by Status</label>
+        <ButtonToolbar>
+          <ToggleButtonGroup
+            type="checkbox"
+            defaultValue={["received", "not-received"]}
+            onChange={this.handleFilterChange}
+          >
+            <ToggleButton value="received">Received</ToggleButton>
+            <ToggleButton value="not-received">Not Received</ToggleButton>
+          </ToggleButtonGroup>
+        </ButtonToolbar>
+      </div>
+    );
+  }
 }

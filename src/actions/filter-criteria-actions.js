@@ -13,126 +13,128 @@
 
 import T from "i18n-react/dist/i18n-react";
 import {
-    getRequest,
-    putRequest,
-    postRequest,
-    deleteRequest,
-    createAction,
-    stopLoading,
-    startLoading,
-    authErrorHandler,
-    escapeFilterValue,
-    fetchResponseHandler,
-    fetchErrorHandler
+  getRequest,
+  putRequest,
+  postRequest,
+  deleteRequest,
+  createAction,
+  stopLoading,
+  startLoading,
+  authErrorHandler,
+  escapeFilterValue,
+  fetchResponseHandler,
+  fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from '../utils/methods';
+import { getAccessTokenSafely } from "../utils/methods";
 import URI from "urijs";
 import Swal from "sweetalert2";
 
-export const FILTER_CRITERIA_ADDED = 'FILTER_CRITERIA_ADDED';
-export const FILTER_CRITERIA_DELETED = 'FILTER_CRITERIA_DELETED';
+export const FILTER_CRITERIA_ADDED = "FILTER_CRITERIA_ADDED";
+export const FILTER_CRITERIA_DELETED = "FILTER_CRITERIA_DELETED";
 
-export const saveFilterCriteria = (filterCriteria) => async (dispatch, getState) => {
-
+export const saveFilterCriteria =
+  (filterCriteria) => async (dispatch, getState) => {
     const accessToken = await getAccessTokenSafely();
 
     const params = {
-        access_token: accessToken
+      access_token: accessToken
     };
 
     dispatch(startLoading());
 
     return postRequest(
-        null,
-        createAction(FILTER_CRITERIA_ADDED),
-        `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
-        filterCriteria,
-        customErrorHandler
-    )(params)(dispatch)
-        .then(() => {
-            dispatch(stopLoading());
-        });
-}
+      null,
+      createAction(FILTER_CRITERIA_ADDED),
+      `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
+      filterCriteria,
+      customErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
 
-export const deleteFilterCriteria = (filterCriteriaId) => async (dispatch, getState) => {
-
+export const deleteFilterCriteria =
+  (filterCriteriaId) => async (dispatch, getState) => {
     const accessToken = await getAccessTokenSafely();
 
     const params = {
-        access_token: accessToken
+      access_token: accessToken
     };
 
     dispatch(startLoading());
 
     return deleteRequest(
-        null,
-        createAction(FILTER_CRITERIA_DELETED)({ filterCriteriaId }),
-        `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias/${filterCriteriaId}`,
-        null,
-        authErrorHandler
+      null,
+      createAction(FILTER_CRITERIA_DELETED)({ filterCriteriaId }),
+      `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias/${filterCriteriaId}`,
+      null,
+      authErrorHandler
     )(params)(dispatch).then(() => {
-        dispatch(stopLoading());
-    }
-    );
-}
+      dispatch(stopLoading());
+    });
+  };
 
-export const queryFilterCriterias = _.debounce(async (summitId, context, input, callback) => {
-
+export const queryFilterCriterias = _.debounce(
+  async (summitId, context, input, callback) => {
     const accessToken = await getAccessTokenSafely();
 
-    let apiUrl = URI(`${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`);
-    apiUrl.addQuery('access_token', accessToken);
-    apiUrl.addQuery('order', '+name');
-    apiUrl.addQuery('order', '+id');
-    apiUrl.addQuery('per_page', 10);
-    apiUrl.addQuery('show_id', `${summitId}`);
-    apiUrl.addQuery('context', `${context}`);
+    let apiUrl = URI(
+      `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`
+    );
+    apiUrl.addQuery("access_token", accessToken);
+    apiUrl.addQuery("order", "+name");
+    apiUrl.addQuery("order", "+id");
+    apiUrl.addQuery("per_page", 10);
+    apiUrl.addQuery("show_id", `${summitId}`);
+    apiUrl.addQuery("context", `${context}`);
 
     input = escapeFilterValue(input);
-    apiUrl.addQuery('name__contains', `${input}`);
+    apiUrl.addQuery("name__contains", `${input}`);
 
     fetch(apiUrl.toString())
-        .then(fetchResponseHandler)
-        .then((json) => {
-            const options = [...json.data];
-            callback(options);
-        })
-        .catch(fetchErrorHandler);
-}, 500);
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  500
+);
 
 export const customErrorHandler = (err, res) => (dispatch, state) => {
-    const code = err.status;
-    let msg = '';
+  const code = err.status;
+  let msg = "";
 
-    dispatch(stopLoading());
+  dispatch(stopLoading());
 
-    switch (code) {
-        case 412:
-            if (Array.isArray(err.response.body)) {
-                err.response.body.forEach(er => {
-                    msg += er + '<br>';
-                });
-            } else {
-                for (var [key, value] of Object.entries(err.response.body)) {
-                    if (isNaN(key)) {
-                        msg += key + ': ';
-                    }
+  switch (code) {
+    case 412:
+      if (Array.isArray(err.response.body)) {
+        err.response.body.forEach((er) => {
+          msg += er + "<br>";
+        });
+      } else {
+        for (var [key, value] of Object.entries(err.response.body)) {
+          if (isNaN(key)) {
+            msg += key + ": ";
+          }
 
-                    msg += value + '<br>';
-                }
-            }
+          msg += value + "<br>";
+        }
+      }
 
-            Swal.fire("Validation error", msg, "warning");
+      Swal.fire("Validation error", msg, "warning");
 
-            if (err.response.body.errors) {
-                dispatch({
-                    type: VALIDATE,
-                    payload: { errors: err.response.body }
-                });
-            }
+      if (err.response.body.errors) {
+        dispatch({
+          type: VALIDATE,
+          payload: { errors: err.response.body }
+        });
+      }
 
-            break;
-        default:
-            dispatch(authErrorHandler(err, res));
-    }
-}
+      break;
+    default:
+      dispatch(authErrorHandler(err, res));
+  }
+};

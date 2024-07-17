@@ -11,87 +11,88 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import AsyncSelect from 'react-select/lib/Async';
-import { queryBadgeFeatures } from '../../actions/badge-actions';
+import React from "react";
+import AsyncSelect from "react-select/lib/Async";
+import { queryBadgeFeatures } from "../../actions/badge-actions";
 import { shallowEqual } from "../../utils/methods";
 
 export default class BadgeFeatureInput extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.getTemplates = this.getTemplates.bind(this);
+    this.getOptionValue = this.getOptionValue.bind(this);
+    this.getOptionLabel = this.getOptionLabel.bind(this);
+  }
 
-        this.handleChange = this.handleChange.bind(this);
-        this.getTemplates = this.getTemplates.bind(this);
-        this.getOptionValue = this.getOptionValue.bind(this);
-        this.getOptionLabel = this.getOptionLabel.bind(this);
+  getOptionValue(badgeFeature) {
+    if (this.props.hasOwnProperty("getOptionValue")) {
+      return this.props.getOptionValue(badgeFeature);
+    }
+    //default
+    return badgeFeature.id;
+  }
+
+  getOptionLabel(badgeFeature) {
+    if (this.props.hasOwnProperty("getOptionLabel")) {
+      return this.props.getOptionLabel(badgeFeature);
+    }
+    //default
+    return `${badgeFeature.name}`;
+  }
+
+  handleChange(value) {
+    const ev = {
+      target: {
+        id: this.props.id,
+        value: value,
+        type: "badgefeatureinput"
+      }
+    };
+    this.props.onChange(ev);
+  }
+
+  getTemplates(input, callback) {
+    const { summitId } = this.props;
+
+    if (!input) {
+      return Promise.resolve({ options: [] });
     }
 
-    getOptionValue(badgeFeature){
-        if(this.props.hasOwnProperty("getOptionValue")){
-            return this.props.getOptionValue(badgeFeature);
-        }
-        //default
-        return badgeFeature.id;
-    }
+    // we need to map into value/label because of a bug in react-select 2
+    // https://github.com/JedWatson/react-select/issues/2998
 
-    getOptionLabel(badgeFeature){
-        if(this.props.hasOwnProperty("getOptionLabel")){
-            return this.props.getOptionLabel(badgeFeature);
-        }
-        //default
-        return `${badgeFeature.name}`;
-    }
+    const translateOptions = (options) => {
+      const newOptions = options.map((c) => ({
+        id: c.id,
+        name: c.name,
+        value: c.id,
+        label: c.name
+      }));
+      callback(newOptions);
+    };
 
-    handleChange(value) {
-        const ev = {
-            target: {
-                id: this.props.id,
-                value: value,
-                type: 'badgefeatureinput'
-            }
-        };
-        this.props.onChange(ev);
-    }
+    queryBadgeFeatures(summitId, input, translateOptions);
+  }
 
-    getTemplates(input, callback) {
-        const { summitId } = this.props;
+  render() {
+    const { error, value, onChange, id, ...rest } = this.props;
+    const has_error = this.props.hasOwnProperty("error") && error !== "";
 
-        if (!input) {
-            return Promise.resolve({ options: [] });
-        }
-
-        // we need to map into value/label because of a bug in react-select 2
-        // https://github.com/JedWatson/react-select/issues/2998
-
-        const translateOptions = (options) => {
-            const newOptions = options.map(c => ({ id: c.id, name: c.name, value: c.id, label: c.name }));
-            callback(newOptions);
-        };
-
-        queryBadgeFeatures(summitId, input, translateOptions);
-    }
-
-    render() {
-        const { error, value, onChange, id, ...rest } = this.props;
-        const has_error = (this.props.hasOwnProperty('error') && error !== '');
-
-        return (
-            <div>
-                <AsyncSelect
-                    value={value}
-                    onChange={this.handleChange}
-                    loadOptions={this.getTemplates}
-                    getOptionValue={m => this.getOptionValue(m)}
-                    getOptionLabel={m => this.getOptionLabel(m)}                    
-                    isMulti
-                    {...rest}
-                />
-                {has_error &&
-                    <p className="error-label">{error}</p>
-                }
-            </div>
-        );
-
-    }
+    return (
+      <div>
+        <AsyncSelect
+          value={value}
+          onChange={this.handleChange}
+          loadOptions={this.getTemplates}
+          getOptionValue={(m) => this.getOptionValue(m)}
+          getOptionLabel={(m) => this.getOptionLabel(m)}
+          isMulti
+          {...rest}
+        />
+        {has_error && <p className="error-label">{error}</p>}
+      </div>
+    );
+  }
 }

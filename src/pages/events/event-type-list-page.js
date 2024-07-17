@@ -11,129 +11,136 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Table } from 'openstack-uicore-foundation/lib/components';
-import { getEventTypes, deleteEventType, seedEventTypes } from "../../actions/event-type-actions";
+import { Table } from "openstack-uicore-foundation/lib/components";
+import {
+  getEventTypes,
+  deleteEventType,
+  seedEventTypes
+} from "../../actions/event-type-actions";
 
 class EventTypeListPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+    props.getEventTypes();
 
-    constructor(props) {
-        super(props);
-        this.state = {};
-        props.getEventTypes();
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handleNew = this.handleNew.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
+    this.isNotDefault = this.isNotDefault.bind(this);
+  }
 
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handleNew = this.handleNew.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
-        this.isNotDefault = this.isNotDefault.bind(this);
+  componentDidMount() {
+    const { currentSummit } = this.props;
+    if (currentSummit) {
+      this.props.getEventTypes();
     }
+  }
 
-    componentDidMount() {
-        const {currentSummit} = this.props;
-        if(currentSummit) {
-            this.props.getEventTypes();
-        }
-    }
+  handleEdit(eventTypeId) {
+    const { currentSummit, history } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/event-types/${eventTypeId}`);
+  }
 
-    handleEdit(eventTypeId) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/event-types/${eventTypeId}`);
-    }
+  handleNew(ev) {
+    const { currentSummit, history } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/event-types/new`);
+  }
 
-    handleNew(ev) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/event-types/new`);
-    }
+  handleDelete(eventTypeId) {
+    const { deleteEventType, eventTypes } = this.props;
+    let eventType = eventTypes.find((e) => e.id === eventTypeId);
 
-    handleDelete(eventTypeId) {
-        const {deleteEventType, eventTypes} = this.props;
-        let eventType = eventTypes.find(e => e.id === eventTypeId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text:
+        T.translate("event_type_list.remove_warning") + " " + eventType.name,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteEventType(eventTypeId);
+      }
+    });
+  }
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("event_type_list.remove_warning") + ' ' + eventType.name,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deleteEventType(eventTypeId);
-            }
-        });
-    }
+  isNotDefault(eventTypeId) {
+    const { eventTypes } = this.props;
+    let eventType = eventTypes.find((e) => e.id === eventTypeId);
 
-    isNotDefault(eventTypeId) {
-        const {eventTypes} = this.props;
-        let eventType = eventTypes.find(e => e.id === eventTypeId);
+    return !eventType.is_default;
+  }
 
-        return !eventType.is_default;
-    }
+  render() {
+    const { currentSummit, eventTypes } = this.props;
 
-    render(){
-        const {currentSummit, eventTypes} = this.props;
+    const columns = [
+      { columnKey: "name", value: T.translate("event_type_list.name") },
+      { columnKey: "class_name", value: T.translate("event_type_list.class") }
+    ];
 
-        const columns = [
-            { columnKey: 'name', value: T.translate("event_type_list.name") },
-            { columnKey: 'class_name', value: T.translate("event_type_list.class") }
-        ];
+    const table_options = {
+      actions: {
+        edit: { onClick: this.handleEdit },
+        delete: { onClick: this.handleDelete, display: this.isNotDefault }
+      }
+    };
 
-        const table_options = {
-            actions: {
-                edit: {onClick: this.handleEdit},
-                delete: { onClick: this.handleDelete, display: this.isNotDefault }
-            }
-        }
+    if (!currentSummit.id) return <div />;
 
-        if(!currentSummit.id) return(<div/>);
+    return (
+      <div className="container">
+        <h3> {T.translate("event_type_list.event_type_list")} </h3>
+        <div className="row">
+          <div className="col-md-6 col-md-offset-6 text-right">
+            <button
+              className="btn btn-default right-space"
+              onClick={this.props.seedEventTypes}
+            >
+              {T.translate("event_type_list.seed_event_types")}
+            </button>
+            <button className="btn btn-primary" onClick={this.handleNew}>
+              {T.translate("event_type_list.add_event_type")}
+            </button>
+          </div>
+        </div>
 
-        return(
-            <div className="container">
+        {eventTypes.length === 0 && (
+          <div className="no-items">
+            {T.translate("event_type_list.no_items")}
+          </div>
+        )}
 
-                <h3> {T.translate("event_type_list.event_type_list")} </h3>
-                <div className="row">
-                    <div className="col-md-6 col-md-offset-6 text-right">
-                        <button className="btn btn-default right-space" onClick={this.props.seedEventTypes}>
-                            {T.translate("event_type_list.seed_event_types")}
-                        </button>
-                        <button className="btn btn-primary" onClick={this.handleNew}>
-                            {T.translate("event_type_list.add_event_type")}
-                        </button>
-                    </div>
-                </div>
-
-                {eventTypes.length === 0 &&
-                <div className="no-items">{T.translate("event_type_list.no_items")}</div>
-                }
-
-                {eventTypes.length > 0 &&
-                <div>
-                    <Table
-                        options={table_options}
-                        data={eventTypes}
-                        columns={columns}
-                    />
-                </div>
-                }
-
-            </div>
-        )
-    }
+        {eventTypes.length > 0 && (
+          <div>
+            <Table
+              options={table_options}
+              data={eventTypes}
+              columns={columns}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentEventTypeListState }) => ({
-    currentSummit   : currentSummitState.currentSummit,
-    ...currentEventTypeListState
+const mapStateToProps = ({
+  currentSummitState,
+  currentEventTypeListState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentEventTypeListState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getEventTypes,
-        deleteEventType,
-        seedEventTypes
-    }
-)(EventTypeListPage);
+export default connect(mapStateToProps, {
+  getEventTypes,
+  deleteEventType,
+  seedEventTypes
+})(EventTypeListPage);

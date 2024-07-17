@@ -11,52 +11,56 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_EVENT_TYPES,
-    REQUEST_EVENT_TYPES,
-    EVENT_TYPE_DELETED,
-    EVENT_TYPES_SEEDED
-} from '../../actions/event-type-actions';
+import {
+  RECEIVE_EVENT_TYPES,
+  REQUEST_EVENT_TYPES,
+  EVENT_TYPE_DELETED,
+  EVENT_TYPES_SEEDED
+} from "../../actions/event-type-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    eventTypes      : []
+  eventTypes: []
 };
 
 const eventTypeListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_EVENT_TYPES: {
-
-            return {...state }
-        }
-        case RECEIVE_EVENT_TYPES: {
-            let eventTypes = [...payload.response.data];
-
-            return {...state, eventTypes };
-        }
-        case EVENT_TYPE_DELETED: {
-            let {eventTypeId} = payload;
-            return {...state, eventTypes: state.eventTypes.filter(e => e.id !== eventTypeId)};
-        }
-        case EVENT_TYPES_SEEDED: {
-            let eventTypesAdded = payload.response.data;
-            if (eventTypesAdded.length > 0) {
-                return {...state, eventTypes: [...state.eventTypes, ...eventTypesAdded]};
-            } else {
-                return state;
-            }
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_EVENT_TYPES: {
+      return { ...state };
+    }
+    case RECEIVE_EVENT_TYPES: {
+      let eventTypes = [...payload.response.data];
+
+      return { ...state, eventTypes };
+    }
+    case EVENT_TYPE_DELETED: {
+      let { eventTypeId } = payload;
+      return {
+        ...state,
+        eventTypes: state.eventTypes.filter((e) => e.id !== eventTypeId)
+      };
+    }
+    case EVENT_TYPES_SEEDED: {
+      let eventTypesAdded = payload.response.data;
+      if (eventTypesAdded.length > 0) {
+        return {
+          ...state,
+          eventTypes: [...state.eventTypes, ...eventTypesAdded]
+        };
+      } else {
+        return state;
+      }
+    }
+    default:
+      return state;
+  }
 };
 
 export default eventTypeListReducer;

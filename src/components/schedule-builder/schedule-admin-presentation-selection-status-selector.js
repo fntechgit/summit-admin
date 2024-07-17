@@ -10,37 +10,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react';
-import Select from 'react-select';
+import React from "react";
+import Select from "react-select";
 import T from "i18n-react/dist/i18n-react";
 
 class ScheduleAdminPresentationSelectionStatusSelector extends React.Component {
+  constructor(props) {
+    super(props);
+    this.onChange = this.onChange.bind(this);
+  }
 
-    constructor(props){
-        super(props);
-        this.onChange = this.onChange.bind(this);
-    }
+  onChange(selectedOption) {
+    this.props.onPresentationSelectionStatusChanged(
+      selectedOption ? selectedOption.value : null
+    );
+  }
 
-    onChange(selectedOption){
-        this.props.onPresentationSelectionStatusChanged(selectedOption ? selectedOption.value : null);
-    }
+  render() {
+    let { presentationSelectionStatus, currentValue } = this.props;
+    let theValue = presentationSelectionStatus.find(
+      (op) => op.value === currentValue
+    );
 
-    render(){
-        let { presentationSelectionStatus, currentValue } = this.props;
-        let theValue = presentationSelectionStatus.find(op => op.value === currentValue);
-
-        return (
-            <Select
-                placeholder={T.translate("schedule.placeholders.select_presentation_selection_status")}
-                className="presentation-selection-status-selector"
-                name="form-field-name"
-                value={theValue}
-                onChange={this.onChange}
-                options={presentationSelectionStatus}
-                isClearable={true}
-            />
-        )
-    }
+    return (
+      <Select
+        placeholder={T.translate(
+          "schedule.placeholders.select_presentation_selection_status"
+        )}
+        className="presentation-selection-status-selector"
+        name="form-field-name"
+        value={theValue}
+        onChange={this.onChange}
+        options={presentationSelectionStatus}
+        isClearable={true}
+      />
+    );
+  }
 }
 
 export default ScheduleAdminPresentationSelectionStatusSelector;

@@ -11,247 +11,300 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import T from 'i18n-react/dist/i18n-react';
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css';
-import {Dropdown, Input, SimpleLinkList} from 'openstack-uicore-foundation/lib/components';
-import {isEmpty, scrollToError, shallowEqual, hasErrors} from "../../../utils/methods";
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import {
+  Dropdown,
+  Input,
+  SimpleLinkList
+} from "openstack-uicore-foundation/lib/components";
+import {
+  isEmpty,
+  scrollToError,
+  shallowEqual,
+  hasErrors
+} from "../../../utils/methods";
 import Switch from "react-switch";
 import EditLabelSlider from "../../inputs/edit-label-slider";
 import PreFilterInput from "./pre-filter-input";
-import { SortableTable } from 'openstack-uicore-foundation/lib/components';
+import { SortableTable } from "openstack-uicore-foundation/lib/components";
 
 class ScheduleSettingsForm extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      entity: { ...props.entity },
+      errors: props.errors
+    };
+  }
 
-        this.state = {
-            entity: {...props.entity},
-            errors: props.errors
-        };
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const state = {};
+    scrollToError(this.props.errors);
+
+    if (!shallowEqual(prevProps.entity, this.props.entity)) {
+      state.entity = { ...this.props.entity };
+      state.errors = {};
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        scrollToError(this.props.errors);
-
-        if(!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = {...this.props.entity};
-            state.errors = {};
-        }
-
-        if (!shallowEqual(prevProps.errors, this.props.errors)) {
-            state.errors = {...this.props.errors};
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({...this.state, ...state})
-        }
+    if (!shallowEqual(prevProps.errors, this.props.errors)) {
+      state.errors = { ...this.props.errors };
     }
 
-    handleChange = ev => {
-        const entity = {...this.state.entity};
-        const errors = {...this.state.errors};
+    if (!isEmpty(state)) {
+      this.setState({ ...this.state, ...state });
+    }
+  }
 
-        let {value, id} = ev.target;
+  handleChange = (ev) => {
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
 
-        if (ev.target.type === 'checkbox') {
-            value = ev.target.checked;
+    let { value, id } = ev.target;
+
+    if (ev.target.type === "checkbox") {
+      value = ev.target.checked;
+    }
+
+    errors[id] = "";
+    entity[id] = value;
+    this.setState({ entity: entity, errors: errors });
+  };
+
+  updateFilterOrder = (filters, filterId, newOrder) => {
+    console.log(`updateFilterOrder`, filters, filterId, newOrder);
+  };
+
+  onSwitchChange = (id, val) => {
+    const entity = { ...this.state.entity };
+    entity[id] = val;
+    this.setState({ entity });
+  };
+
+  onPreFilterChange = (ev) => {
+    const entity = { ...this.state.entity };
+    const { value, id } = ev.target;
+
+    entity.pre_filters.forEach((pf) => {
+      if (pf.type === id) {
+        pf.values = value;
+      }
+    });
+
+    this.setState({ entity });
+  };
+
+  onFilterChange = (id, enabled, label) => {
+    const entity = { ...this.state.entity };
+
+    entity.filters.forEach((f) => {
+      if (f.type === id) {
+        f.is_enabled = enabled;
+        f.label = label;
+      }
+    });
+
+    this.setState({ entity });
+  };
+
+  handleSubmit = (ev) => {
+    ev.preventDefault();
+    this.props.onSubmit(this.state.entity);
+  };
+
+  render() {
+    const { entity } = this.state;
+    const { summit } = this.props;
+    const disabledPreFilters = ["CUSTOM_ORDER", "ABSTRACT", "DATE"];
+    const enabledPreFilters = entity.pre_filters.filter(
+      (pf) => !disabledPreFilters.includes(pf.type)
+    );
+
+    const color_source_ddl = [
+      { label: "Category", value: "TRACK" },
+      { label: "Category Groups", value: "TRACK_GROUP" },
+      { label: "Activity Type", value: "EVENT_TYPES" }
+    ];
+
+    const time_format_ddl = [
+      { label: "12h", value: "12h" },
+      { label: "24h", value: "24h" }
+    ];
+
+    const columns = [
+      {
+        columnKey: "type",
+        render: (filter) => {
+          return (
+            <EditLabelSlider
+              checked={filter.is_enabled}
+              id={filter.type}
+              value={filter.label}
+              onChange={this.onFilterChange}
+              disabled={!entity.is_enabled}
+            />
+          );
         }
+      }
+    ];
 
-        errors[id] = '';
-        entity[id] = value;
-        this.setState({entity: entity, errors: errors});
-    }
-
-    updateFilterOrder = (filters, filterId, newOrder) => {
-        console.log(`updateFilterOrder`, filters, filterId, newOrder);
-    }
-
-    onSwitchChange = (id, val) => {
-        const entity = {...this.state.entity};
-        entity[id] = val;
-        this.setState({entity});
+    const table_options = {
+      actions: {}
     };
 
-    onPreFilterChange = ev => {
-        const entity = {...this.state.entity};
-        const {value, id} = ev.target;
-
-        entity.pre_filters.forEach(pf => {
-            if (pf.type === id) {
-                pf.values = value;
-            }
-        });
-
-        this.setState({entity});
-    }
-
-    onFilterChange = (id, enabled, label) => {
-        const entity = {...this.state.entity};
-
-        entity.filters.forEach(f => {
-            if (f.type === id) {
-                f.is_enabled = enabled;
-                f.label = label;
-            }
-        });
-
-        this.setState({entity});
-    };
-
-    handleSubmit = ev => {
-        ev.preventDefault();
-        this.props.onSubmit(this.state.entity);
-    }
-
-    render() {
-        const {entity} = this.state;
-        const {summit} = this.props;
-        const disabledPreFilters = ['CUSTOM_ORDER', 'ABSTRACT', 'DATE'];
-        const enabledPreFilters = entity.pre_filters.filter(pf => !disabledPreFilters.includes(pf.type));
-
-        const color_source_ddl = [
-            {label: 'Category', value: 'TRACK'},
-            {label: 'Category Groups', value: 'TRACK_GROUP'},
-            {label: 'Activity Type', value: 'EVENT_TYPES'},
-        ];
-
-        const time_format_ddl = [
-            {label: '12h', value: '12h'},
-            {label: '24h', value: '24h'}
-        ];
-
-        const columns = [
-            { columnKey: 'type', render: (filter) => {
-                return (
-                    <EditLabelSlider
-                        checked={filter.is_enabled}
-                        id={filter.type}
-                        value={filter.label}
-                        onChange={this.onFilterChange}
-                        disabled={!entity.is_enabled}
-                    />
-                )
-                }}
-        ];
-
-        const table_options = {
-            actions: {
-            }
-        };
-
-        return (
-            <form className="schedule-settings-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_schedule_settings.key")}</label>
-                        <Input
-                            id="key"
-                            className="form-control"
-                            value={entity.key}
-                            disabled
-                        />
-                    </div>
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_schedule_settings.enabled")}</label><br/>
-                        <Switch
-                            checked={entity.is_enabled}
-                            onChange={val => {this.onSwitchChange('is_enabled', val)}}
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                            className="react-switch"
-                        />
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_schedule_settings.color_source")} *</label>
-                        <Dropdown
-                            id="color_source"
-                            value={entity.color_source}
-                            options={color_source_ddl}
-                            onChange={this.handleChange}
-                            disabled={!entity.is_enabled}
-                        />
-                    </div>
-                    <div className="col-md-2">
-                        <label>{T.translate("edit_schedule_settings.is_my_schedule")}</label><br/>
-                        <Switch
-                            checked={entity.is_my_schedule}
-                            onChange={val => {this.onSwitchChange('is_my_schedule', val)}}
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                            className="react-switch"
-                            disabled={!entity.is_enabled}
-                        />
-                    </div>
-                    <div className="col-md-3">
-                        <label> {T.translate("edit_schedule_settings.access_levels_only")}</label><br/>
-                        <Switch
-                            checked={entity.only_events_with_attendee_access}
-                            onChange={val => {this.onSwitchChange('only_events_with_attendee_access', val)}}
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                            className="react-switch"
-                            disabled={!entity.is_enabled}
-                        />
-                    </div>
-                    <div className="col-md-3">
-                        <label> {T.translate("edit_schedule_settings.hide_past_permanent")}</label><br/>
-                        <Switch
-                          checked={entity.hide_past_events_with_show_always_on_schedule}
-                          onChange={val => {this.onSwitchChange('hide_past_events_with_show_always_on_schedule', val)}}
-                          uncheckedIcon={false}
-                          checkedIcon={false}
-                          className="react-switch"
-                          disabled={!entity.is_enabled}
-                        />
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-4">
-                        <label> {T.translate("edit_schedule_settings.time_format")} *</label>
-                        <Dropdown
-                          id="time_format"
-                          value={entity.time_format}
-                          options={time_format_ddl}
-                          onChange={this.handleChange}
-                          disabled={!entity.is_enabled}
-                        />
-                    </div>
-                </div>
-                <br/><br/>
-                <legend>Filters</legend>
-                <div className="row form-group">
-                    <SortableTable
-                        options={table_options}
-                        data={entity.filters}
-                        columns={columns}
-                        dropCallback={this.updateFilterOrder}
-                        orderField="order"
-                    />
-                </div>
-                <br/><br/>
-                <legend>Pre Filters</legend>
-                <div className="row form-group pre-filters">
-                    {enabledPreFilters.map(pf =>
-                        <div className="col-md-6" key={pf.type}>
-                            <PreFilterInput type={pf.type} values={pf.values} onChange={this.onPreFilterChange} summit={summit} disabled={!entity.is_enabled} />
-                        </div>
-                    )}
-                </div>
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                               className="btn btn-primary pull-right" value={T.translate("general.save")}/>
-                    </div>
-                </div>
-            </form>
-        );
-    }
+    return (
+      <form className="schedule-settings-form">
+        <input type="hidden" id="id" value={entity.id} />
+        <div className="row form-group">
+          <div className="col-md-4">
+            <label> {T.translate("edit_schedule_settings.key")}</label>
+            <Input
+              id="key"
+              className="form-control"
+              value={entity.key}
+              disabled
+            />
+          </div>
+          <div className="col-md-4">
+            <label> {T.translate("edit_schedule_settings.enabled")}</label>
+            <br />
+            <Switch
+              checked={entity.is_enabled}
+              onChange={(val) => {
+                this.onSwitchChange("is_enabled", val);
+              }}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              className="react-switch"
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-4">
+            <label>
+              {" "}
+              {T.translate("edit_schedule_settings.color_source")} *
+            </label>
+            <Dropdown
+              id="color_source"
+              value={entity.color_source}
+              options={color_source_ddl}
+              onChange={this.handleChange}
+              disabled={!entity.is_enabled}
+            />
+          </div>
+          <div className="col-md-2">
+            <label>
+              {T.translate("edit_schedule_settings.is_my_schedule")}
+            </label>
+            <br />
+            <Switch
+              checked={entity.is_my_schedule}
+              onChange={(val) => {
+                this.onSwitchChange("is_my_schedule", val);
+              }}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              className="react-switch"
+              disabled={!entity.is_enabled}
+            />
+          </div>
+          <div className="col-md-3">
+            <label>
+              {" "}
+              {T.translate("edit_schedule_settings.access_levels_only")}
+            </label>
+            <br />
+            <Switch
+              checked={entity.only_events_with_attendee_access}
+              onChange={(val) => {
+                this.onSwitchChange("only_events_with_attendee_access", val);
+              }}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              className="react-switch"
+              disabled={!entity.is_enabled}
+            />
+          </div>
+          <div className="col-md-3">
+            <label>
+              {" "}
+              {T.translate("edit_schedule_settings.hide_past_permanent")}
+            </label>
+            <br />
+            <Switch
+              checked={entity.hide_past_events_with_show_always_on_schedule}
+              onChange={(val) => {
+                this.onSwitchChange(
+                  "hide_past_events_with_show_always_on_schedule",
+                  val
+                );
+              }}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              className="react-switch"
+              disabled={!entity.is_enabled}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-4">
+            <label>
+              {" "}
+              {T.translate("edit_schedule_settings.time_format")} *
+            </label>
+            <Dropdown
+              id="time_format"
+              value={entity.time_format}
+              options={time_format_ddl}
+              onChange={this.handleChange}
+              disabled={!entity.is_enabled}
+            />
+          </div>
+        </div>
+        <br />
+        <br />
+        <legend>Filters</legend>
+        <div className="row form-group">
+          <SortableTable
+            options={table_options}
+            data={entity.filters}
+            columns={columns}
+            dropCallback={this.updateFilterOrder}
+            orderField="order"
+          />
+        </div>
+        <br />
+        <br />
+        <legend>Pre Filters</legend>
+        <div className="row form-group pre-filters">
+          {enabledPreFilters.map((pf) => (
+            <div className="col-md-6" key={pf.type}>
+              <PreFilterInput
+                type={pf.type}
+                values={pf.values}
+                onChange={this.onPreFilterChange}
+                summit={summit}
+                disabled={!entity.is_enabled}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <input
+              type="button"
+              onClick={this.handleSubmit}
+              className="btn btn-primary pull-right"
+              value={T.translate("general.save")}
+            />
+          </div>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default ScheduleSettingsForm;

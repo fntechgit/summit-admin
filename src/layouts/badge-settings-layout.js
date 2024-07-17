@@ -11,34 +11,34 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import BadgeSettingsPage from '../pages/badges/badge-settings-page';
+import BadgeSettingsPage from "../pages/badges/badge-settings-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class BadgeSettingsLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("badge_settings.badge_settings"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>                
-                <Breadcrumb data={{ title: T.translate("badge_settings.badge_settings"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={BadgeSettingsPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route strict exact path={match.url} component={BadgeSettingsPage} />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(BadgeSettingsLayout), 'badge-settings');
-
-
+export default Restrict(withRouter(BadgeSettingsLayout), "badge-settings");

@@ -11,85 +11,86 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-const Query = require('graphql-query-builder');
-import wrapReport from './report-wrapper';
+import React from "react";
+const Query = require("graphql-query-builder");
+import wrapReport from "./report-wrapper";
 import history from "../../history";
 
-
 class RsvpReport extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = { };
+    this.state = {};
 
-        this.buildReportQuery = this.buildReportQuery.bind(this);
+    this.buildReportQuery = this.buildReportQuery.bind(this);
+  }
 
-    }
+  buildReportQuery(filters, listFilters, sortKey, sortDir) {
+    const { currentSummit } = this.props;
 
-    buildReportQuery(filters, listFilters, sortKey, sortDir) {
-        const {currentSummit} = this.props;
+    listFilters.isRsvp = true;
+    listFilters.summitId = currentSummit.id;
 
-        listFilters.isRsvp = true;
-        listFilters.summitId = currentSummit.id;
+    let query = new Query("presentations", listFilters);
 
+    let question = new Query("question");
+    question.find(["id"]);
+    let answers = new Query("answers");
+    answers.find(["value", { question: question }]);
+    let rsvps = new Query("rsvps");
+    rsvps.find(["id", { answers: answers }]);
+    let values = new Query("values");
+    values.find(["id", "value"]);
+    let rsvpquestionmulti = new Query("rsvpquestionmulti");
+    rsvpquestionmulti.find([{ values: values }]);
+    let questions = new Query("questions");
+    questions.find(["label", { rsvpquestionmulti: rsvpquestionmulti }]);
+    let rsvpTemplate = new Query("rsvpTemplate");
+    rsvpTemplate.find(["id", { questions: questions }]);
 
-        let query = new Query("presentations", listFilters);
+    let results = new Query("results", filters);
+    results.find(["id", "title", "startDate", "endDate", "rsvpCount"]);
 
-        let question = new Query("question");
-        question.find(["id"]);
-        let answers = new Query("answers");
-        answers.find(["value", {"question": question}]);
-        let rsvps = new Query("rsvps");
-        rsvps.find(["id", {"answers": answers}]);
-        let values = new Query("values");
-        values.find(["id", "value"]);
-        let rsvpquestionmulti = new Query("rsvpquestionmulti");
-        rsvpquestionmulti.find([{"values": values}]);
-        let questions = new Query("questions");
-        questions.find(["label", {"rsvpquestionmulti": rsvpquestionmulti}]);
-        let rsvpTemplate = new Query("rsvpTemplate");
-        rsvpTemplate.find(["id", {"questions": questions}]);
+    query.find([{ results: results }, "totalCount"]);
 
-        let results = new Query("results", filters);
-        results.find(["id", "title", "startDate", "endDate", "rsvpCount"])
+    return query;
+  }
 
-        query.find([{"results": results}, "totalCount"]);
+  getName() {
+    return "RSVP Report";
+  }
 
-        return query;
-    }
+  render() {
+    let { data } = this.props;
+    let storedDataName = this.props.name;
 
-    getName() {
-        return 'RSVP Report';
-    }
+    if (!data || storedDataName !== this.getName()) return <div />;
 
-    render() {
-        let {data} = this.props;
-        let storedDataName = this.props.name;
+    let reportData = data.map((it) => {
+      return {
+        id: it.id,
+        title: it.title,
+        start_date: it.startDate,
+        end_date: it.endDate
+      };
+    });
 
-        if (!data || storedDataName !== this.getName()) return (<div />)
-
-        let reportData = data.map(it => {
-
-            return ({
-                id: it.id,
-                title: it.title,
-                start_date: it.startDate,
-                end_date: it.endDate,
-            });
-        });
-
-        return (
-            <div className="list-group">
-                {reportData.map(it =>
-                <a key={"room_pres_" + it.id} onClick={() => {history.push(`rsvp_report/${it.id}`, {name: it.title})}} className="list-group-item">
-                    {it.title}
-                </a>
-                )}
-            </div>
-        );
-    }
+    return (
+      <div className="list-group">
+        {reportData.map((it) => (
+          <a
+            key={"room_pres_" + it.id}
+            onClick={() => {
+              history.push(`rsvp_report/${it.id}`, { name: it.title });
+            }}
+            className="list-group-item"
+          >
+            {it.title}
+          </a>
+        ))}
+      </div>
+    );
+  }
 }
 
-
-export default wrapReport(RsvpReport, {pagination: true});
+export default wrapReport(RsvpReport, { pagination: true });

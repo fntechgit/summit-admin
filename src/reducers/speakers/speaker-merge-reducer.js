@@ -11,69 +11,73 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_SPEAKER,
-    REQUEST_SPEAKER,
-    RESET_SPEAKER_FORM,
-    MERGE_SPEAKERS,
-    SPEAKER_MERGED
-} from '../../actions/speaker-actions';
+import {
+  RECEIVE_SPEAKER,
+  REQUEST_SPEAKER,
+  RESET_SPEAKER_FORM,
+  MERGE_SPEAKERS,
+  SPEAKER_MERGED
+} from "../../actions/speaker-actions";
 
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
-    speakerCol: '',
-    speakers: [null, null],
-    selectedFields: {
-        title: 1,
-        first_name: 1,
-        last_name: 1,
-        reg_email: 1,
-        twitter: 1,
-        irc: 1,
-        bio: 1,
-        pic: 1
-    }
+  speakerCol: "",
+  speakers: [null, null],
+  selectedFields: {
+    title: 1,
+    first_name: 1,
+    last_name: 1,
+    reg_email: 1,
+    twitter: 1,
+    irc: 1,
+    bio: 1,
+    pic: 1
+  }
 };
 
 const speakerMergeReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
+  const { type, payload } = action;
 
-    switch (type) {
-        case LOGOUT_USER: {
-            return { ...DEFAULT_STATE };
-        }
-        break;
-        case SET_CURRENT_SUMMIT:
-        case RESET_SPEAKER_FORM: {
-            return DEFAULT_STATE;
-        }
-        break;
-        case RECEIVE_SPEAKER: {
-            let entity = {...payload.response};
-            let speakers = [...state.speakers];
+  switch (type) {
+    case LOGOUT_USER:
+      {
+        return { ...DEFAULT_STATE };
+      }
+      break;
+    case SET_CURRENT_SUMMIT:
+    case RESET_SPEAKER_FORM:
+      {
+        return DEFAULT_STATE;
+      }
+      break;
+    case RECEIVE_SPEAKER:
+      {
+        let entity = { ...payload.response };
+        let speakers = [...state.speakers];
 
-            speakers[state.speakerCol] = entity;
+        speakers[state.speakerCol] = entity;
 
-            return {...state, speakers};
-        }
-        break;
-        case REQUEST_SPEAKER: {
-            return { ...state, speakerCol: payload.speakerCol };
-        }
-        break;
-        case MERGE_SPEAKERS: {
-            return state;
-        }
-        case SPEAKER_MERGED: {
-            return state;
-        }
-        break;
-        default:
-            return state;
+        return { ...state, speakers };
+      }
+      break;
+    case REQUEST_SPEAKER:
+      {
+        return { ...state, speakerCol: payload.speakerCol };
+      }
+      break;
+    case MERGE_SPEAKERS: {
+      return state;
     }
+    case SPEAKER_MERGED:
+      {
+        return state;
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default speakerMergeReducer;

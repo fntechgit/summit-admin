@@ -11,84 +11,88 @@
  * limitations under the License.
  **/
 
- import React from 'react';
- import AsyncSelect from 'react-select/lib/Async';
- import { querySummitSponsorships } from '../../actions/sponsor-actions';
- 
- export default class SummitSponsorshipTypeInput extends React.Component {
- 
-     constructor(props) {
-         super(props);
- 
-         this.handleChange = this.handleChange.bind(this);
-         this.getTemplates = this.getTemplates.bind(this);
-     }
- 
-     handleChange(value, { action }) {
-         const { plainValue } = this.props;
-         let theValue = null;
- 
-         if (action === 'clear') {
-             theValue = plainValue ? '' : { id: '', name: '' };
-         } else {
-             theValue = plainValue ? value.label : { id: parseInt(value.value), name: value.label };
-         }
- 
-         const ev = {
-             target: {
-                 id: this.props.id,
-                 value: theValue,
-                 type: 'summitsponsorshipinput'
-             }
-         };
- 
-         this.props.onChange(ev);
-     }
- 
-     getTemplates(input, callback) {
-         const { summitId } = this.props;
- 
-         if (!input) {
-             return Promise.resolve({ options: [] });
-         }
- 
-         // we need to map into value/label because of a bug in react-select 2
-         // https://github.com/JedWatson/react-select/issues/2998
- 
-         const translateOptions = (options) => {
-             const newOptions = options.map(c => ({ value: c.id.toString(), label: c.type?.name }));
-             callback(newOptions);
-         };
- 
-         querySummitSponsorships(summitId, input, translateOptions);
-     }
- 
-     render() {
-         const { error, value, onChange, id, multi, plainValue, ...rest } = this.props;
-         const has_error = (this.props.hasOwnProperty('error') && error !== '');
- 
-         // we need to map into value/label because of a bug in react-select 2
-         // https://github.com/JedWatson/react-select/issues/2998
-         let theValue = null;
- 
-         if (value) {
-             theValue = plainValue ? { value: value, label: value } : { value: value.id?.toString(), label: value.name }
-         }
- 
-         return (
-             <div>
-                 <AsyncSelect
-                     value={theValue}
-                     onChange={this.handleChange}
-                     loadOptions={this.getTemplates}                    
-                     isMulti={false}
-                     {...rest}
-                 />
-                 {has_error &&
-                     <p className="error-label">{error}</p>
-                 }
-             </div>
-         );
- 
-     }
- }
+import React from "react";
+import AsyncSelect from "react-select/lib/Async";
+import { querySummitSponsorships } from "../../actions/sponsor-actions";
+
+export default class SummitSponsorshipTypeInput extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.handleChange = this.handleChange.bind(this);
+    this.getTemplates = this.getTemplates.bind(this);
+  }
+
+  handleChange(value, { action }) {
+    const { plainValue } = this.props;
+    let theValue = null;
+
+    if (action === "clear") {
+      theValue = plainValue ? "" : { id: "", name: "" };
+    } else {
+      theValue = plainValue
+        ? value.label
+        : { id: parseInt(value.value), name: value.label };
+    }
+
+    const ev = {
+      target: {
+        id: this.props.id,
+        value: theValue,
+        type: "summitsponsorshipinput"
+      }
+    };
+
+    this.props.onChange(ev);
+  }
+
+  getTemplates(input, callback) {
+    const { summitId } = this.props;
+
+    if (!input) {
+      return Promise.resolve({ options: [] });
+    }
+
+    // we need to map into value/label because of a bug in react-select 2
+    // https://github.com/JedWatson/react-select/issues/2998
+
+    const translateOptions = (options) => {
+      const newOptions = options.map((c) => ({
+        value: c.id.toString(),
+        label: c.type?.name
+      }));
+      callback(newOptions);
+    };
+
+    querySummitSponsorships(summitId, input, translateOptions);
+  }
+
+  render() {
+    const { error, value, onChange, id, multi, plainValue, ...rest } =
+      this.props;
+    const has_error = this.props.hasOwnProperty("error") && error !== "";
+
+    // we need to map into value/label because of a bug in react-select 2
+    // https://github.com/JedWatson/react-select/issues/2998
+    let theValue = null;
+
+    if (value) {
+      theValue = plainValue
+        ? { value: value, label: value }
+        : { value: value.id?.toString(), label: value.name };
+    }
+
+    return (
+      <div>
+        <AsyncSelect
+          value={theValue}
+          onChange={this.handleChange}
+          loadOptions={this.getTemplates}
+          isMulti={false}
+          {...rest}
+        />
+        {has_error && <p className="error-label">{error}</p>}
+      </div>
+    );
+  }
+}

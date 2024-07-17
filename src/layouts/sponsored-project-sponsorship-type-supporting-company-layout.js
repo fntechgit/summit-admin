@@ -11,80 +11,89 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Switch, Route } from 'react-router-dom';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Switch, Route } from "react-router-dom";
+import { Breadcrumb } from "react-breadcrumbs";
 import NoMatchPage from "../pages/no-match-page";
 import EditSponsoredProjectSponsorshipTypeSupportingCompanyPage from "../pages/sponsored_projects/edit-sponsored-project-sponsorship-type-supporting-company-page";
 import {
-    getSupportingCompany,
-    resetSupportingCompanyForm
+  getSupportingCompany,
+  resetSupportingCompanyForm
 } from "../actions/sponsored-project-actions";
 import T from "i18n-react";
 
 class SponsoredProjectSponsorshipTypeSupportingCompanyLayout extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    const supporting_company_id = props.match.params.supporting_company_id;
 
-        const supporting_company_id = props.match.params.supporting_company_id;
+    const { currentSponsoredProject, currentSponsorshipType } = this.props;
 
-        const {currentSponsoredProject, currentSponsorshipType} = this.props;
-
-        if (!supporting_company_id || !currentSponsoredProject) {
-            props.resetSupportingCompanyForm();
-        } else {
-            props.getSupportingCompany(currentSponsoredProject.id, currentSponsorshipType.id, supporting_company_id);
-        }
+    if (!supporting_company_id || !currentSponsoredProject) {
+      props.resetSupportingCompanyForm();
+    } else {
+      props.getSupportingCompany(
+        currentSponsoredProject.id,
+        currentSponsorshipType.id,
+        supporting_company_id
+      );
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.supporting_company_id;
-        const newId = this.props.match.params.supporting_company_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.supporting_company_id;
+    const newId = this.props.match.params.supporting_company_id;
 
-        if (oldId !== newId) {
-            if (!newId) {
-                props.resetSupportingCompanyForm();
-            } else {
-                const {currentSponsoredProject, currentSponsorshipType} = this.props;
-                props.getSupportingCompany(currentSponsoredProject.id, currentSponsorshipType.id, newId);
-            }
-        }
-    }
-
-    render() {
-        let {match, currentSupportingCompany} = this.props;
-        let breadcrumb = currentSupportingCompany.id ? currentSupportingCompany.name : T.translate("general.new");
-        return (
-            <div>
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <Switch>
-                    <Route strict exact path={match.url} component={EditSponsoredProjectSponsorshipTypeSupportingCompanyPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
+    if (oldId !== newId) {
+      if (!newId) {
+        props.resetSupportingCompanyForm();
+      } else {
+        const { currentSponsoredProject, currentSponsorshipType } = this.props;
+        props.getSupportingCompany(
+          currentSponsoredProject.id,
+          currentSponsorshipType.id,
+          newId
         );
+      }
     }
+  }
+
+  render() {
+    let { match, currentSupportingCompany } = this.props;
+    let breadcrumb = currentSupportingCompany.id
+      ? currentSupportingCompany.name
+      : T.translate("general.new");
+    return (
+      <div>
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <Switch>
+          <Route
+            strict
+            exact
+            path={match.url}
+            component={EditSponsoredProjectSponsorshipTypeSupportingCompanyPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({   sponsoredProjectState,
-                             sponsoredProjectSponsorshipTypeState,
-                             sponsoredProjectSponsorshipTypeSupportingCompanyState}) => ({
-    currentSponsoredProject : sponsoredProjectState.entity,
-    currentSponsorshipType : sponsoredProjectSponsorshipTypeState.entity,
-    currentSupportingCompany: sponsoredProjectSponsorshipTypeSupportingCompanyState.entity
+const mapStateToProps = ({
+  sponsoredProjectState,
+  sponsoredProjectSponsorshipTypeState,
+  sponsoredProjectSponsorshipTypeSupportingCompanyState
+}) => ({
+  currentSponsoredProject: sponsoredProjectState.entity,
+  currentSponsorshipType: sponsoredProjectSponsorshipTypeState.entity,
+  currentSupportingCompany:
+    sponsoredProjectSponsorshipTypeSupportingCompanyState.entity
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSupportingCompany,
-        resetSupportingCompanyForm
-    }
-)(SponsoredProjectSponsorshipTypeSupportingCompanyLayout);
-
-
-
-
-
+export default connect(mapStateToProps, {
+  getSupportingCompany,
+  resetSupportingCompanyForm
+})(SponsoredProjectSponsorshipTypeSupportingCompanyLayout);

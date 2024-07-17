@@ -10,66 +10,83 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react';
-import UnScheduleEvent from './unschedule-event';
-import { Pagination } from 'react-bootstrap';
+import React from "react";
+import UnScheduleEvent from "./unschedule-event";
+import { Pagination } from "react-bootstrap";
 import T from "i18n-react/dist/i18n-react";
 
 class UnScheduleEventList extends React.Component {
+  isSelected = (event) => {
+    const {
+      selectedUnPublishedEvents,
+      excludedUnPublishedEvents,
+      selectedAllUnPublished
+    } = this.props;
+    return (
+      (selectedAllUnPublished &&
+        !excludedUnPublishedEvents.includes(event.id)) ||
+      (!selectedAllUnPublished && selectedUnPublishedEvents.includes(event.id))
+    );
+  };
 
-    isSelected = (event) => {
-        const {selectedUnPublishedEvents, excludedUnPublishedEvents, selectedAllUnPublished} = this.props;
-        return (selectedAllUnPublished && !excludedUnPublishedEvents.includes(event.id)) || (!selectedAllUnPublished && selectedUnPublishedEvents.includes(event.id));
-    }
+  render() {
+    const {
+      events,
+      currentPage,
+      lastPage,
+      onPageChange,
+      onEditEvent,
+      onClickSelected,
+      totalUnPublished,
+      selectedAllUnPublished,
+      selectedUnPublishedEvents,
+      excludedUnPublishedEvents
+    } = this.props;
 
-    render(){
-        const {
-            events, currentPage, lastPage, onPageChange, onEditEvent, onClickSelected, totalUnPublished,
-            selectedAllUnPublished, selectedUnPublishedEvents, excludedUnPublishedEvents
-        } = this.props;
+    const selectedCounter = selectedAllUnPublished
+      ? totalUnPublished - excludedUnPublishedEvents?.length
+      : selectedUnPublishedEvents?.length;
 
-        const selectedCounter = selectedAllUnPublished ? totalUnPublished - excludedUnPublishedEvents?.length : selectedUnPublishedEvents?.length;
-
-        return (
-            <div>
-                <p className="event-count">{selectedCounter} activities selected</p>
-                { events.length === 0 &&
-                    <p className="empty-list-message">{T.translate("errors.empty_list")}</p>
-                }
-                {   events.length > 0 &&
-                    <ul className="unschedule-list">
-                        {
-                            events.map((event, index) => (
-                                <li key={index}>
-                                    <UnScheduleEvent
-                                        event={event}
-                                        onEditEvent={onEditEvent}
-                                        isSelected={this.isSelected(event)}
-                                        onClickSelected={onClickSelected}
-                                    />
-                                </li>
-                            ))
-                        }
-                    </ul>
-                }
-                {   events.length > 0 &&
-                    <Pagination
-                        bsSize="medium"
-                        prev
-                        next
-                        first
-                        last
-                        ellipsis
-                        boundaryLinks
-                        maxButtons={10}
-                        items={lastPage}
-                        activePage={currentPage}
-                        onSelect={onPageChange}
-                    />
-                }
-            </div>
-        );
-    }
+    return (
+      <div>
+        <p className="event-count">{selectedCounter} activities selected</p>
+        {events.length === 0 && (
+          <p className="empty-list-message">
+            {T.translate("errors.empty_list")}
+          </p>
+        )}
+        {events.length > 0 && (
+          <ul className="unschedule-list">
+            {events.map((event, index) => (
+              <li key={index}>
+                <UnScheduleEvent
+                  event={event}
+                  onEditEvent={onEditEvent}
+                  isSelected={this.isSelected(event)}
+                  onClickSelected={onClickSelected}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+        {events.length > 0 && (
+          <Pagination
+            bsSize="medium"
+            prev
+            next
+            first
+            last
+            ellipsis
+            boundaryLinks
+            maxButtons={10}
+            items={lastPage}
+            activePage={currentPage}
+            onSelect={onPageChange}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
 export default UnScheduleEventList;

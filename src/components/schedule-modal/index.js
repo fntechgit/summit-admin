@@ -11,86 +11,89 @@
  * limitations under the License.
  **/
 
-import React from 'react';
-import T from 'i18n-react/dist/i18n-react';
-import moment from 'moment-timezone';
-import { Modal } from 'react-bootstrap';
-import './schedule-modal.less';
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import moment from "moment-timezone";
+import { Modal } from "react-bootstrap";
+import "./schedule-modal.less";
 
 export default class ScheduleModal extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.getFormatedSchedule = this.getFormatedSchedule.bind(this);
+  }
 
-        this.getFormatedSchedule = this.getFormatedSchedule.bind(this);
+  getFormattedTime(atime) {
+    atime = atime * 1000;
+    return moment(atime).tz(this.props.summit.time_zone.name).format("h:mm a");
+  }
+
+  getFormattedDay(atime) {
+    atime = atime * 1000;
+    return moment(atime).tz(this.props.summit.time_zone.name).format("dddd D");
+  }
+
+  getFormattedLocation(location_id) {
+    let venue = this.props.summit.locations.find(
+      (l) => l.id === location_id
+    ).name;
+    return venue;
+  }
+
+  getFormatedSchedule() {
+    let groupedSchedule = {};
+    let sortedSchedule = this.props.schedule.sort((a, b) =>
+      a.start_date > b.start_date ? 1 : a.start_date < b.start_date ? -1 : 0
+    );
+
+    for (var i in sortedSchedule) {
+      let day = this.getFormattedDay(sortedSchedule[i].start_date);
+      if (!groupedSchedule.hasOwnProperty(day)) groupedSchedule[day] = [];
+      groupedSchedule[day].push(sortedSchedule[i]);
     }
 
-    getFormattedTime(atime) {
-        atime = atime * 1000;
-        return moment(atime).tz(this.props.summit.time_zone.name).format('h:mm a');
-    }
+    return Object.keys(groupedSchedule).map((day) => (
+      <div key={groupedSchedule[day][0].start_date}>
+        <h3>{day}</h3>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Place</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groupedSchedule[day].map((e) => (
+              <tr key={e.id}>
+                <td style={{ width: "60%" }}>{e.title}</td>
+                <td style={{ width: "20%" }}>
+                  {this.getFormattedLocation(e.location_id)}
+                </td>
+                <td style={{ width: "20%" }}>
+                  {this.getFormattedTime(e.start_date)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ));
+  }
 
-    getFormattedDay(atime) {
-        atime = atime * 1000;
-        return moment(atime).tz(this.props.summit.time_zone.name).format('dddd D');
-    }
+  render() {
+    let { show, title, onClose, schedule } = this.props;
 
-    getFormattedLocation(location_id) {
-        let venue = this.props.summit.locations.find(l => l.id === location_id).name;
-        return venue;
-    }
-
-    getFormatedSchedule() {
-        let groupedSchedule = {};
-        let sortedSchedule = this.props.schedule.sort(
-            (a, b) => (a.start_date > b.start_date ? 1 : (a.start_date < b.start_date ? -1 : 0))
-        );
-
-        for (var i in sortedSchedule) {
-            let day = this.getFormattedDay(sortedSchedule[i].start_date);
-            if (!groupedSchedule.hasOwnProperty(day)) groupedSchedule[day] = [];
-            groupedSchedule[day].push(sortedSchedule[i]);
-        }
-
-        return Object.keys(groupedSchedule).map((day) =>
-            <div key={groupedSchedule[day][0].start_date}>
-                <h3>{day}</h3>
-                <table className="table">
-                    <thead>
-                    <tr>
-                        <th>Event</th>
-                        <th>Place</th>
-                        <th>Time</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {groupedSchedule[day].map(e =>
-                        <tr key={e.id}>
-                            <td style={{width: '60%'}}>{e.title}</td>
-                            <td style={{width: '20%'}}>{this.getFormattedLocation(e.location_id)}</td>
-                            <td style={{width: '20%'}}>{this.getFormattedTime(e.start_date)}</td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
-            </div>
-        );
-    }
-
-    render() {
-        let {show, title, onClose, schedule} = this.props;
-
-        return (
-            <Modal show={show} onHide={onClose} dialogClassName="schedule-modal">
-                <Modal.Header closeButton>
-                    <Modal.Title>{title} {T.translate("attendee_list.schedule")} ({schedule.length})</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {this.getFormatedSchedule()}
-                </Modal.Body>
-            </Modal>
-        );
-
-    }
+    return (
+      <Modal show={show} onHide={onClose} dialogClassName="schedule-modal">
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {title} {T.translate("attendee_list.schedule")} ({schedule.length})
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{this.getFormatedSchedule()}</Modal.Body>
+      </Modal>
+    );
+  }
 }
-

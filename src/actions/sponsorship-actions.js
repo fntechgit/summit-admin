@@ -12,184 +12,178 @@
  **/
 
 import T from "i18n-react/dist/i18n-react";
-import history from '../history'
+import history from "../history";
 import {
-    getRequest,
-    putRequest,
-    postRequest,
-    deleteRequest,
-    createAction,
-    stopLoading,
-    startLoading,
-    showMessage,
-    showSuccessMessage,
-    authErrorHandler,    
-    escapeFilterValue,
-    fetchResponseHandler,
-    fetchErrorHandler
-} from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessTokenSafely} from '../utils/methods';
+  getRequest,
+  putRequest,
+  postRequest,
+  deleteRequest,
+  createAction,
+  stopLoading,
+  startLoading,
+  showMessage,
+  showSuccessMessage,
+  authErrorHandler,
+  escapeFilterValue,
+  fetchResponseHandler,
+  fetchErrorHandler
+} from "openstack-uicore-foundation/lib/utils/actions";
+import { getAccessTokenSafely } from "../utils/methods";
 
-export const REQUEST_SPONSORSHIPS       = 'REQUEST_SPONSORSHIPS';
-export const RECEIVE_SPONSORSHIPS       = 'RECEIVE_SPONSORSHIPS';
-export const RECEIVE_SPONSORSHIP        = 'RECEIVE_SPONSORSHIP';
-export const RESET_SPONSORSHIP_FORM     = 'RESET_SPONSORSHIP_FORM';
-export const UPDATE_SPONSORSHIP         = 'UPDATE_SPONSORSHIP';
-export const SPONSORSHIP_UPDATED        = 'SPONSORSHIP_UPDATED';
-export const SPONSORSHIP_ADDED          = 'SPONSORSHIP_ADDED';
-export const SPONSORSHIP_DELETED        = 'SPONSORSHIP_DELETED';
+export const REQUEST_SPONSORSHIPS = "REQUEST_SPONSORSHIPS";
+export const RECEIVE_SPONSORSHIPS = "RECEIVE_SPONSORSHIPS";
+export const RECEIVE_SPONSORSHIP = "RECEIVE_SPONSORSHIP";
+export const RESET_SPONSORSHIP_FORM = "RESET_SPONSORSHIP_FORM";
+export const UPDATE_SPONSORSHIP = "UPDATE_SPONSORSHIP";
+export const SPONSORSHIP_UPDATED = "SPONSORSHIP_UPDATED";
+export const SPONSORSHIP_ADDED = "SPONSORSHIP_ADDED";
+export const SPONSORSHIP_DELETED = "SPONSORSHIP_DELETED";
 
 /******************  SPONSORS ****************************************/
 
-export const getSponsorships = ( page = 1, perPage = 10, order = 'name', orderDir = 1 ) => async (dispatch, getState) => {
-
-    const accessToken = await getAccessTokenSafely();    
+export const getSponsorships =
+  (page = 1, perPage = 10, order = "name", orderDir = 1) =>
+  async (dispatch, getState) => {
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
     const params = {
-        page         : page,
-        per_page     : perPage,
-        access_token : accessToken,
+      page: page,
+      per_page: perPage,
+      access_token: accessToken
     };
 
     // order
-    if(order != null && orderDir != null){
-        const orderDirSign = (orderDir === 1) ? '+' : '-';
-        params['order']= `${orderDirSign}${order}`;
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "+" : "-";
+      params["order"] = `${orderDirSign}${order}`;
     }
 
-
     return getRequest(
-        createAction(REQUEST_SPONSORSHIPS),
-        createAction(RECEIVE_SPONSORSHIPS),
-        `${window.API_BASE_URL}/api/v1/sponsorship-types`,
-        authErrorHandler,
-        {order, orderDir, page}
+      createAction(REQUEST_SPONSORSHIPS),
+      createAction(RECEIVE_SPONSORSHIPS),
+      `${window.API_BASE_URL}/api/v1/sponsorship-types`,
+      authErrorHandler,
+      { order, orderDir, page }
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
+      dispatch(stopLoading());
+    });
+  };
 
 export const getSponsorship = (sponsorshipId) => async (dispatch, getState) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const accessToken = await getAccessTokenSafely();
+  dispatch(startLoading());
 
-    dispatch(startLoading());
+  const params = {
+    access_token: accessToken
+  };
 
-    const params = {
-        access_token : accessToken,
-    };
-
-    return getRequest(
-        null,
-        createAction(RECEIVE_SPONSORSHIP),
-        `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
-        authErrorHandler
-    )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
+  return getRequest(
+    null,
+    createAction(RECEIVE_SPONSORSHIP),
+    `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
 };
 
 export const resetSponsorshipForm = () => (dispatch, getState) => {
-    dispatch(createAction(RESET_SPONSORSHIP_FORM)({}));
+  dispatch(createAction(RESET_SPONSORSHIP_FORM)({}));
 };
 
 export const saveSponsorship = (entity) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
 
-    const params = {
-        access_token : accessToken,
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  const normalizedEntity = normalizeSponsorship(entity);
+
+  if (entity.id) {
+    putRequest(
+      createAction(UPDATE_SPONSORSHIP),
+      createAction(SPONSORSHIP_UPDATED),
+      `${window.API_BASE_URL}/api/v1/sponsorship-types/${entity.id}`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(
+        showSuccessMessage(T.translate("edit_sponsorship.sponsorship_saved"))
+      );
+    });
+  } else {
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_sponsorship.sponsorship_created"),
+      type: "success"
     };
 
-    dispatch(startLoading());
+    postRequest(
+      createAction(UPDATE_SPONSORSHIP),
+      createAction(SPONSORSHIP_ADDED),
+      `${window.API_BASE_URL}/api/v1/sponsorship-types`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(
+        showMessage(success_message, () => {
+          history.push(`/app/sponsorship-types/${payload.response.id}`);
+        })
+      );
+    });
+  }
+};
 
-    const normalizedEntity = normalizeSponsorship(entity);
-
-    if (entity.id) {
-
-        putRequest(
-            createAction(UPDATE_SPONSORSHIP),
-            createAction(SPONSORSHIP_UPDATED),
-            `${window.API_BASE_URL}/api/v1/sponsorship-types/${entity.id}`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(showSuccessMessage(T.translate("edit_sponsorship.sponsorship_saved")));
-            });
-
-    } else {
-        const success_message = {
-            title: T.translate("general.done"),
-            html: T.translate("edit_sponsorship.sponsorship_created"),
-            type: 'success'
-        };
-
-        postRequest(
-            createAction(UPDATE_SPONSORSHIP),
-            createAction(SPONSORSHIP_ADDED),
-            `${window.API_BASE_URL}/api/v1/sponsorship-types`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(showMessage(
-                    success_message,
-                    () => { history.push(`/app/sponsorship-types/${payload.response.id}`) }
-                ));
-            });
-    }
-}
-
-export const deleteSponsorship = (sponsorshipId) => async (dispatch, getState) => {
-
+export const deleteSponsorship =
+  (sponsorshipId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+    const { currentSummit } = currentSummitState;
 
     const params = {
-        access_token : accessToken
+      access_token: accessToken
     };
 
     return deleteRequest(
-        null,
-        createAction(SPONSORSHIP_DELETED)({sponsorshipId}),
-        `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
-        null,
-        authErrorHandler
+      null,
+      createAction(SPONSORSHIP_DELETED)({ sponsorshipId }),
+      `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
+      null,
+      authErrorHandler
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
-
+      dispatch(stopLoading());
+    });
+  };
 
 const normalizeSponsorship = (entity) => {
-    const normalizedEntity = {...entity};
+  const normalizedEntity = { ...entity };
 
-    return normalizedEntity;
-
-}
+  return normalizedEntity;
+};
 
 export const querySponsorships = _.debounce(async (input, callback) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const accessToken = await getAccessTokenSafely();
+  input = escapeFilterValue(input);
 
-    input = escapeFilterValue(input);
+  fetch(
+    `${window.API_BASE_URL}/api/v1/sponsorship-types?filter=name=@${input}&access_token=${accessToken}`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data];
 
-    fetch(`${window.API_BASE_URL}/api/v1/sponsorship-types?filter=name=@${input}&access_token=${accessToken}`)
-        .then(fetchResponseHandler)
-        .then((json) => {
-            const options = [...json.data];
-
-            callback(options);
-        })
-        .catch(fetchErrorHandler);
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
 }, 500);

@@ -11,131 +11,191 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Switch, Route } from 'react-router-dom';
-import { Breadcrumb } from 'react-breadcrumbs';
+import { Switch, Route } from "react-router-dom";
+import { Breadcrumb } from "react-breadcrumbs";
 
-import { getLocation, resetLocationForm, getLocationMeta }  from '../actions/location-actions';
+import {
+  getLocation,
+  resetLocationForm,
+  getLocationMeta
+} from "../actions/location-actions";
 
-import EditLocationPage from '../pages/locations/edit-location-page'
-import EditFloorPage from '../pages/locations/edit-floor-page';
-import EditRoomPage from '../pages/locations/edit-room-page';
-import EditLocationImagePage from '../pages/locations/edit-location-image-page';
-import EditLocationMapPage from '../pages/locations/edit-location-map-page';
+import EditLocationPage from "../pages/locations/edit-location-page";
+import EditFloorPage from "../pages/locations/edit-floor-page";
+import EditRoomPage from "../pages/locations/edit-room-page";
+import EditLocationImagePage from "../pages/locations/edit-location-image-page";
+import EditLocationMapPage from "../pages/locations/edit-location-map-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class LocationIdLayout extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    const locationId = props.match.params.location_id;
 
-        const locationId = props.match.params.location_id;
-
-        if (!locationId) {
-            props.resetLocationForm();
-        } else {
-            props.getLocation(locationId);
-        }
-
-        props.getLocationMeta();
+    if (!locationId) {
+      props.resetLocationForm();
+    } else {
+      props.getLocation(locationId);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.location_id;
-        const newId = this.props.match.params.location_id;
+    props.getLocationMeta();
+  }
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetLocationForm();
-            } else {
-                this.props.getLocation(newId);
-            }
-        }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.location_id;
+    const newId = this.props.match.params.location_id;
+
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetLocationForm();
+      } else {
+        this.props.getLocation(newId);
+      }
     }
+  }
 
-    render(){
-        const { match, entity, allClasses } = this.props;
-        let locationId = match.params.location_id;
-        let breadcrumb = entity.id ? entity.name : T.translate("general.new");
+  render() {
+    const { match, entity, allClasses } = this.props;
+    let locationId = match.params.location_id;
+    let breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-        if (!allClasses.length) return (<div />);
-        if (locationId && !entity.id) return (<div />);
+    if (!allClasses.length) return <div />;
+    if (locationId && !entity.id) return <div />;
 
-        return(
-            <div>
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+    return (
+      <div>
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <Switch>
+          <Route exact strict path={match.url} component={EditLocationPage} />
+          <Route
+            path={`${match.url}/floors`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_floor.floors"),
+                    pathname: match.url
+                  }}
+                />
                 <Switch>
-                    <Route exact strict path={match.url} component={EditLocationPage}/>
-                    <Route path={`${match.url}/floors`} render={
-                        props => (
-                            <div>
-                                <Breadcrumb data={{ title: T.translate("edit_floor.floors"), pathname: match.url }} />
-                                <Switch>
-                                    <Route strict exact path={`${props.match.url}/new`} component={EditFloorPage} />
-                                    <Route strict exact path={`${props.match.url}/:floor_id(\\d+)`} component={EditFloorPage} />
-                                    <Route component={NoMatchPage}/>
-                                </Switch>
-                            </div>
-                        )}
-                    />
-                    <Route path={`${match.url}/rooms`} render={
-                        props => (
-                            <div>
-                                <Breadcrumb data={{ title: T.translate("edit_room.rooms"), pathname: match.url }} />
-                                <Switch>
-                                    <Route strict exact path={`${props.match.url}/new`} component={EditRoomPage} />
-                                    <Route strict exact path={`${props.match.url}/:room_id`} component={EditRoomPage} />
-                                    <Route component={NoMatchPage}/>
-                                </Switch>
-                            </div>
-                        )}
-                    />
-                    <Route path={`${match.url}/images`} render={
-                        props => (
-                            <div>
-                                <Breadcrumb data={{ title: T.translate("edit_location_image.images"), pathname: match.url }} />
-                                <Switch>
-                                    <Route strict exact path={`${props.match.url}/new`} component={EditLocationImagePage} />
-                                    <Route strict exact path={`${props.match.url}/:image_id`} component={EditLocationImagePage} />
-                                    <Route component={NoMatchPage}/>
-                                </Switch>
-                            </div>
-                        )}
-                    />
-                    <Route path={`${match.url}/maps`} render={
-                        props => (
-                            <div>
-                                <Breadcrumb data={{ title: T.translate("edit_location_map.maps"), pathname: match.url }} />
-                                <Switch>
-                                    <Route strict exact path={`${props.match.url}/new`} component={EditLocationMapPage} />
-                                    <Route strict exact path={`${props.match.url}/:map_id`} component={EditLocationMapPage} />
-                                    <Route component={NoMatchPage}/>
-                                </Switch>
-                            </div>
-                        )}
-                    />
-                    <Route component={NoMatchPage}/>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditFloorPage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:floor_id(\\d+)`}
+                    component={EditFloorPage}
+                  />
+                  <Route component={NoMatchPage} />
                 </Switch>
-            </div>
-        );
-    }
-
+              </div>
+            )}
+          />
+          <Route
+            path={`${match.url}/rooms`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_room.rooms"),
+                    pathname: match.url
+                  }}
+                />
+                <Switch>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditRoomPage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:room_id`}
+                    component={EditRoomPage}
+                  />
+                  <Route component={NoMatchPage} />
+                </Switch>
+              </div>
+            )}
+          />
+          <Route
+            path={`${match.url}/images`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_location_image.images"),
+                    pathname: match.url
+                  }}
+                />
+                <Switch>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditLocationImagePage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:image_id`}
+                    component={EditLocationImagePage}
+                  />
+                  <Route component={NoMatchPage} />
+                </Switch>
+              </div>
+            )}
+          />
+          <Route
+            path={`${match.url}/maps`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_location_map.maps"),
+                    pathname: match.url
+                  }}
+                />
+                <Switch>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditLocationMapPage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:map_id`}
+                    component={EditLocationMapPage}
+                  />
+                  <Route component={NoMatchPage} />
+                </Switch>
+              </div>
+            )}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-
 const mapStateToProps = ({ currentLocationState }) => ({
-    ...currentLocationState
-})
+  ...currentLocationState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getLocation,
-        resetLocationForm,
-        getLocationMeta
-    }
-)(LocationIdLayout);
-
+export default connect(mapStateToProps, {
+  getLocation,
+  resetLocationForm,
+  getLocationMeta
+})(LocationIdLayout);

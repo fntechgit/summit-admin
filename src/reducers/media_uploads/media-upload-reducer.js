@@ -11,96 +11,105 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_MEDIA_UPLOAD,
-    RESET_MEDIA_UPLOAD_FORM,
-    UPDATE_MEDIA_UPLOAD,
-    MEDIA_UPLOAD_ADDED,
-} from '../../actions/media-upload-actions';
+import {
+  RECEIVE_MEDIA_UPLOAD,
+  RESET_MEDIA_UPLOAD_FORM,
+  UPDATE_MEDIA_UPLOAD,
+  MEDIA_UPLOAD_ADDED
+} from "../../actions/media-upload-actions";
 
-import {RECEIVE_ALL_MEDIA_FILE_TYPES} from "../../actions/media-file-type-actions";
+import { RECEIVE_ALL_MEDIA_FILE_TYPES } from "../../actions/media-file-type-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
-import { SET_CURRENT_SUMMIT } from '../../actions/summit-actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
-    id                  : 0,
-    name                : '',
-    description         : '',
-    type_id             : 0,
-    max_size            : 0,
-    min_uploads_qty     : 0,
-    max_uploads_qty     : 0, //0: unrestricted
-    is_mandatory        : false,
-    is_editable         : true,
-    private_storage_type: 'None',
-    public_storage_type : 'None',
-    presentation_types  : [],
-    use_temporary_links_on_public_storage: false,
-    temporary_links_public_storage_ttl:0,
+  id: 0,
+  name: "",
+  description: "",
+  type_id: 0,
+  max_size: 0,
+  min_uploads_qty: 0,
+  max_uploads_qty: 0, //0: unrestricted
+  is_mandatory: false,
+  is_editable: true,
+  private_storage_type: "None",
+  public_storage_type: "None",
+  presentation_types: [],
+  use_temporary_links_on_public_storage: false,
+  temporary_links_public_storage_ttl: 0
 };
 
 const DEFAULT_STATE = {
-    entity          : DEFAULT_ENTITY,
-    media_file_types: [],
-    errors          : {},
+  entity: DEFAULT_ENTITY,
+  media_file_types: [],
+  errors: {}
 };
 
 const mediaUploadReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-            }
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER:
+      {
+        // we need this in case the token expired while editing the form
+        if (payload.hasOwnProperty("persistStore")) {
+          return state;
+        } else {
+          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
         }
-        break;
-        case SET_CURRENT_SUMMIT:
-        case RESET_MEDIA_UPLOAD_FORM: {
-            return {...state,  entity: {...DEFAULT_ENTITY}, errors: {} };
-        }
-        break;
-        case RECEIVE_ALL_MEDIA_FILE_TYPES: {
-            let {data} = payload.response;
-            let media_file_types = data.map(mft => {
-                return {
-                    value: mft.id,
-                    label: mft.name,
-                };
-            });
+      }
+      break;
+    case SET_CURRENT_SUMMIT:
+    case RESET_MEDIA_UPLOAD_FORM:
+      {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
+      break;
+    case RECEIVE_ALL_MEDIA_FILE_TYPES:
+      {
+        let { data } = payload.response;
+        let media_file_types = data.map((mft) => {
+          return {
+            value: mft.id,
+            label: mft.name
+          };
+        });
 
-            return {...state,  media_file_types };
-        }
-        break;
-        case UPDATE_MEDIA_UPLOAD: {
-            return {...state,  entity: {...payload}, errors: {} };
-        }
-        break;
-        case MEDIA_UPLOAD_ADDED:
-        case RECEIVE_MEDIA_UPLOAD: {
-            let entity = {...payload.response};
+        return { ...state, media_file_types };
+      }
+      break;
+    case UPDATE_MEDIA_UPLOAD:
+      {
+        return { ...state, entity: { ...payload }, errors: {} };
+      }
+      break;
+    case MEDIA_UPLOAD_ADDED:
+    case RECEIVE_MEDIA_UPLOAD:
+      {
+        let entity = { ...payload.response };
 
-            for(var key in entity) {
-                if(entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key] ;
-                }
-            }
+        for (var key in entity) {
+          if (entity.hasOwnProperty(key)) {
+            entity[key] = entity[key] == null ? "" : entity[key];
+          }
+        }
 
-            return {...state, entity: {...DEFAULT_ENTITY, ...entity}, preview: null };
-        }
-        break;
-        case VALIDATE: {
-            return {...state,  errors: payload.errors };
-        }
-        break;
-        default:
-            return state;
-    }
+        return {
+          ...state,
+          entity: { ...DEFAULT_ENTITY, ...entity },
+          preview: null
+        };
+      }
+      break;
+    case VALIDATE:
+      {
+        return { ...state, errors: payload.errors };
+      }
+      break;
+    default:
+      return state;
+  }
 };
 
 export default mediaUploadReducer;

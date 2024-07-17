@@ -13,113 +13,129 @@
 
 import React from "react";
 import T from "i18n-react";
-import { Input, TextEditor, UploadInput } from "openstack-uicore-foundation/lib/components";
-import { hasErrors, isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import {
+  Input,
+  TextEditor,
+  UploadInput
+} from "openstack-uicore-foundation/lib/components";
+import {
+  hasErrors,
+  isEmpty,
+  scrollToError,
+  shallowEqual
+} from "../../utils/methods";
 
 class ViewTypeForm extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      entity: { ...props.entity },
+      errors: props.errors
+    };
 
-        this.state = {
-            entity: { ...props.entity },
-            errors: props.errors
-        };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const state = {};
+    scrollToError(this.props.errors);
+
+    if (!shallowEqual(prevProps.entity, this.props.entity)) {
+      state.entity = { ...this.props.entity };
+      state.errors = {};
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        scrollToError(this.props.errors);
-
-        if (!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = { ...this.props.entity };
-            state.errors = {};
-        }
-
-        if (!shallowEqual(prevProps.errors, this.props.errors)) {
-            state.errors = { ...this.props.errors };
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({ ...this.state, ...state })
-        }
+    if (!shallowEqual(prevProps.errors, this.props.errors)) {
+      state.errors = { ...this.props.errors };
     }
 
-    handleChange(ev) {
-        const entity = { ...this.state.entity };
-        const errors = { ...this.state.errors };
-        let { value, id } = ev.target;
+    if (!isEmpty(state)) {
+      this.setState({ ...this.state, ...state });
+    }
+  }
 
-        if (ev.target.type === 'checkbox') {
-            value = ev.target.checked;
-        }
+  handleChange(ev) {
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
+    let { value, id } = ev.target;
 
-        errors[id] = '';
-        entity[id] = value;
-        this.setState({ entity: entity, errors: errors });
+    if (ev.target.type === "checkbox") {
+      value = ev.target.checked;
     }
 
-    handleSubmit(ev) {
-        ev.preventDefault();
-        this.props.onSubmit(this.state.entity);
-    }
+    errors[id] = "";
+    entity[id] = value;
+    this.setState({ entity: entity, errors: errors });
+  }
 
-    render() {
-        const { entity, errors } = this.state;
+  handleSubmit(ev) {
+    ev.preventDefault();
+    this.props.onSubmit(this.state.entity);
+  }
 
-        return (
-            <form className="badge-feature-type-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <label> {T.translate("edit_view_type.name")} *</label>
-                        <Input
-                            id="name"
-                            className="form-control"
-                            error={hasErrors('name', errors)}
-                            onChange={this.handleChange}
-                            value={entity.name}
-                        />
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <label> {T.translate("edit_view_type.description")}</label>
-                        <TextEditor
-                            id="description"
-                            value={entity.description}
-                            onChange={this.handleChange}
-                            error={hasErrors('description', errors)}
-                        />
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <div className="form-check abc-checkbox">
-                            <input type="checkbox" id="is_default" checked={entity.is_default}
-                                onChange={this.handleChange} className="form-check-input" />
-                            <label className="form-check-label" htmlFor="is_default">
-                                {T.translate("edit_view_type.is_default")}
-                            </label>
-                        </div>
+  render() {
+    const { entity, errors } = this.state;
 
-                    </div>
-                </div>
+    return (
+      <form className="badge-feature-type-form">
+        <input type="hidden" id="id" value={entity.id} />
+        <div className="row form-group">
+          <div className="col-md-12">
+            <label> {T.translate("edit_view_type.name")} *</label>
+            <Input
+              id="name"
+              className="form-control"
+              error={hasErrors("name", errors)}
+              onChange={this.handleChange}
+              value={entity.name}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-12">
+            <label> {T.translate("edit_view_type.description")}</label>
+            <TextEditor
+              id="description"
+              value={entity.description}
+              onChange={this.handleChange}
+              error={hasErrors("description", errors)}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-12">
+            <div className="form-check abc-checkbox">
+              <input
+                type="checkbox"
+                id="is_default"
+                checked={entity.is_default}
+                onChange={this.handleChange}
+                className="form-check-input"
+              />
+              <label className="form-check-label" htmlFor="is_default">
+                {T.translate("edit_view_type.is_default")}
+              </label>
+            </div>
+          </div>
+        </div>
 
-                <hr />
+        <hr />
 
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                            className="btn btn-primary pull-right" value={T.translate("general.save")} />
-                    </div>
-                </div>
-            </form>
-        );
-    }
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <input
+              type="button"
+              onClick={this.handleSubmit}
+              className="btn btn-primary pull-right"
+              value={T.translate("general.save")}
+            />
+          </div>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default ViewTypeForm;

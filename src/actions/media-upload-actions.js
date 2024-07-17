@@ -11,282 +11,287 @@
  * limitations under the License.
  **/
 import T from "i18n-react/dist/i18n-react";
-import history from '../history'
+import history from "../history";
 import {
-    getRequest,
-    putRequest,
-    postRequest,
-    deleteRequest,
-    createAction,
-    stopLoading,
-    startLoading,
-    showMessage,
-    showSuccessMessage,
-    authErrorHandler,
-    escapeFilterValue,
-    fetchResponseHandler,
-    fetchErrorHandler
-} from 'openstack-uicore-foundation/lib/utils/actions';
-import {getAccessTokenSafely} from '../utils/methods';
+  getRequest,
+  putRequest,
+  postRequest,
+  deleteRequest,
+  createAction,
+  stopLoading,
+  startLoading,
+  showMessage,
+  showSuccessMessage,
+  authErrorHandler,
+  escapeFilterValue,
+  fetchResponseHandler,
+  fetchErrorHandler
+} from "openstack-uicore-foundation/lib/utils/actions";
+import { getAccessTokenSafely } from "../utils/methods";
 import URI from "urijs";
 
-export const REQUEST_MEDIA_UPLOADS      = 'REQUEST_MEDIA_UPLOADS';
-export const RECEIVE_MEDIA_UPLOADS      = 'RECEIVE_MEDIA_UPLOADS';
-export const RECEIVE_MEDIA_UPLOAD        = 'RECEIVE_MEDIA_UPLOAD';
-export const RESET_MEDIA_UPLOAD_FORM     = 'RESET_MEDIA_UPLOAD_FORM';
-export const UPDATE_MEDIA_UPLOAD         = 'UPDATE_MEDIA_UPLOAD';
-export const MEDIA_UPLOAD_UPDATED        = 'MEDIA_UPLOAD_UPDATED';
-export const MEDIA_UPLOAD_ADDED          = 'MEDIA_UPLOAD_ADDED';
-export const MEDIA_UPLOAD_DELETED        = 'MEDIA_UPLOAD_DELETED';
-export const MEDIA_UPLOADS_COPIED        = 'MEDIA_UPLOADS_COPIED';
-export const MEDIA_UPLOAD_LINKED         = 'MEDIA_UPLOAD_LINKED';
-export const MEDIA_UPLOAD_UNLINKED       = 'MEDIA_UPLOAD_UNLINKED';
+export const REQUEST_MEDIA_UPLOADS = "REQUEST_MEDIA_UPLOADS";
+export const RECEIVE_MEDIA_UPLOADS = "RECEIVE_MEDIA_UPLOADS";
+export const RECEIVE_MEDIA_UPLOAD = "RECEIVE_MEDIA_UPLOAD";
+export const RESET_MEDIA_UPLOAD_FORM = "RESET_MEDIA_UPLOAD_FORM";
+export const UPDATE_MEDIA_UPLOAD = "UPDATE_MEDIA_UPLOAD";
+export const MEDIA_UPLOAD_UPDATED = "MEDIA_UPLOAD_UPDATED";
+export const MEDIA_UPLOAD_ADDED = "MEDIA_UPLOAD_ADDED";
+export const MEDIA_UPLOAD_DELETED = "MEDIA_UPLOAD_DELETED";
+export const MEDIA_UPLOADS_COPIED = "MEDIA_UPLOADS_COPIED";
+export const MEDIA_UPLOAD_LINKED = "MEDIA_UPLOAD_LINKED";
+export const MEDIA_UPLOAD_UNLINKED = "MEDIA_UPLOAD_UNLINKED";
 
-
-export const getMediaUploads = (term = null, page = 1, perPage = 10, order = 'id', orderDir = 1 ) => async (dispatch, getState) => {
+export const getMediaUploads =
+  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+    const { currentSummit } = currentSummitState;
     const filter = [];
 
     dispatch(startLoading());
 
     const params = {
-        page         : page,
-        per_page     : perPage,
-        access_token : accessToken
+      page: page,
+      per_page: perPage,
+      access_token: accessToken
     };
 
-    if(term){
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`name=@${escapedTerm}`);
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm}`);
     }
 
-    if(filter.length > 0){
-        params['filter[]']= filter;
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
     }
 
     // order
-    if(order != null && orderDir != null){
-        const orderDirSign = (orderDir === 1) ? '' : '-';
-        params['order']= `${orderDirSign}${order}`;
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params["order"] = `${orderDirSign}${order}`;
     }
 
     return getRequest(
-        createAction(REQUEST_MEDIA_UPLOADS),
-        createAction(RECEIVE_MEDIA_UPLOADS),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types`,
-        authErrorHandler,
-        {order, orderDir, term}
+      createAction(REQUEST_MEDIA_UPLOADS),
+      createAction(RECEIVE_MEDIA_UPLOADS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types`,
+      authErrorHandler,
+      { order, orderDir, term }
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
+      dispatch(stopLoading());
+    });
+  };
 
 export const getMediaUpload = (mediaUploadId) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const params = {
-        access_token : accessToken,
-    };
+  const params = {
+    access_token: accessToken
+  };
 
-    return getRequest(
-        null,
-        createAction(RECEIVE_MEDIA_UPLOAD),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}`,
-        authErrorHandler
-    )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
+  return getRequest(
+    null,
+    createAction(RECEIVE_MEDIA_UPLOAD),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
 };
 
-export const queryMediaUploads = _.debounce(async (summitId, input, callback) => {
-
+export const queryMediaUploads = _.debounce(
+  async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
 
-    let apiUrl = URI(`${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types`);
-    apiUrl.addQuery('access_token', accessToken);
-    apiUrl.addQuery('order','name');
-    apiUrl.addQuery('expand','type');
-    apiUrl.addQuery('per_page', 10);
+    let apiUrl = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types`
+    );
+    apiUrl.addQuery("access_token", accessToken);
+    apiUrl.addQuery("order", "name");
+    apiUrl.addQuery("expand", "type");
+    apiUrl.addQuery("per_page", 10);
 
-    if(input) {
-        input = escapeFilterValue(input);
-        apiUrl.addQuery('filter[]', `name=@${input}`);
+    if (input) {
+      input = escapeFilterValue(input);
+      apiUrl.addQuery("filter[]", `name=@${input}`);
     }
 
     fetch(apiUrl.toString())
-        .then(fetchResponseHandler)
-        .then((json) => {
-            const options = [...json.data];
-            callback(options);
-        })
-        .catch(fetchErrorHandler);
-}, 500);
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  500
+);
 
 export const resetMediaUploadForm = () => (dispatch, getState) => {
-    dispatch(createAction(RESET_MEDIA_UPLOAD_FORM)({}));
+  dispatch(createAction(RESET_MEDIA_UPLOAD_FORM)({}));
 };
 
-export const saveMediaUpload = (entity, noAlert = false) => async (dispatch, getState) => {
+export const saveMediaUpload =
+  (entity, noAlert = false) =>
+  async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+    const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
 
     const normalizedEntity = normalizeEntity(entity);
-    const params = { access_token : accessToken };
+    const params = { access_token: accessToken };
 
     if (entity.id) {
-
-        putRequest(
-            createAction(UPDATE_MEDIA_UPLOAD),
-            createAction(MEDIA_UPLOAD_UPDATED),
-            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${entity.id}`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                if (!noAlert)
-                    dispatch(showSuccessMessage(T.translate("media_upload.saved")));
-                else
-                    dispatch(stopLoading());
-            });
-
+      putRequest(
+        createAction(UPDATE_MEDIA_UPLOAD),
+        createAction(MEDIA_UPLOAD_UPDATED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${entity.id}`,
+        normalizedEntity,
+        authErrorHandler,
+        entity
+      )(params)(dispatch).then((payload) => {
+        if (!noAlert)
+          dispatch(showSuccessMessage(T.translate("media_upload.saved")));
+        else dispatch(stopLoading());
+      });
     } else {
+      const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("media_upload.created"),
+        type: "success"
+      };
 
-        const success_message = {
-            title: T.translate("general.done"),
-            html: T.translate("media_upload.created"),
-            type: 'success'
-        };
-
-        postRequest(
-            createAction(UPDATE_MEDIA_UPLOAD),
-            createAction(MEDIA_UPLOAD_ADDED),
-            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )(params)(dispatch)
-            .then((payload) => {
-                dispatch(showMessage(
-                    success_message,
-                    () => { history.push(`/app/summits/${currentSummit.id}/media-uploads/${payload.response.id}`) }
-                ));
-            });
+      postRequest(
+        createAction(UPDATE_MEDIA_UPLOAD),
+        createAction(MEDIA_UPLOAD_ADDED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types`,
+        normalizedEntity,
+        authErrorHandler,
+        entity
+      )(params)(dispatch).then((payload) => {
+        dispatch(
+          showMessage(success_message, () => {
+            history.push(
+              `/app/summits/${currentSummit.id}/media-uploads/${payload.response.id}`
+            );
+          })
+        );
+      });
     }
-};
+  };
 
-export const linkToPresentationType = (mediaUpload, presentationTypeId) => async (dispatch, getState) => {
+export const linkToPresentationType =
+  (mediaUpload, presentationTypeId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+    const { currentSummit } = currentSummitState;
 
-    const params = { access_token : accessToken };
+    const params = { access_token: accessToken };
 
     dispatch(startLoading());
 
     putRequest(
-        null,
-        createAction(MEDIA_UPLOAD_LINKED)({mediaUpload}),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUpload.id}/presentation-types/${presentationTypeId}`,
-        null,
-        authErrorHandler
-    )(params)(dispatch)
-        .then((payload) => {
-            dispatch(stopLoading());
-        });
-};
+      null,
+      createAction(MEDIA_UPLOAD_LINKED)({ mediaUpload }),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUpload.id}/presentation-types/${presentationTypeId}`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then((payload) => {
+      dispatch(stopLoading());
+    });
+  };
 
-export const unlinkFromPresentationType = (mediaUploadId, presentationTypeId) => async (dispatch, getState) => {
+export const unlinkFromPresentationType =
+  (mediaUploadId, presentationTypeId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+    const { currentSummit } = currentSummitState;
 
-    const params = { access_token : accessToken };
+    const params = { access_token: accessToken };
 
     dispatch(startLoading());
 
     deleteRequest(
-        null,
-        createAction(MEDIA_UPLOAD_UNLINKED)({mediaUploadId}),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}/presentation-types/${presentationTypeId}`,
-        null,
-        authErrorHandler
-    )(params)(dispatch)
-        .then((payload) => {
-            dispatch(stopLoading());
-        });
-};
+      null,
+      createAction(MEDIA_UPLOAD_UNLINKED)({ mediaUploadId }),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}/presentation-types/${presentationTypeId}`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then((payload) => {
+      dispatch(stopLoading());
+    });
+  };
 
-export const deleteMediaUpload = (mediaUploadId) => async (dispatch, getState) => {
+export const deleteMediaUpload =
+  (mediaUploadId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+    const { currentSummit } = currentSummitState;
 
     const params = {
-        access_token : accessToken
+      access_token: accessToken
     };
 
     return deleteRequest(
-        null,
-        createAction(MEDIA_UPLOAD_DELETED)({mediaUploadId}),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}`,
-        null,
-        authErrorHandler
+      null,
+      createAction(MEDIA_UPLOAD_DELETED)({ mediaUploadId }),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}`,
+      null,
+      authErrorHandler
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
+      dispatch(stopLoading());
+    });
+  };
 
 export const copyMediaUploads = (summitId) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const params = { access_token : accessToken };
+  const params = { access_token: accessToken };
 
-    postRequest(
-        null,
-        createAction(MEDIA_UPLOADS_COPIED),
-        `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types/all/clone/${currentSummit.id}`,
-        null,
-        authErrorHandler
-    )(params)(dispatch)
-        .then((payload) => {
-            dispatch(stopLoading());
-            dispatch(getMediaUploads());
-        });
+  postRequest(
+    null,
+    createAction(MEDIA_UPLOADS_COPIED),
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types/all/clone/${currentSummit.id}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then((payload) => {
+    dispatch(stopLoading());
+    dispatch(getMediaUploads());
+  });
 };
 
-
 const normalizeEntity = (entity) => {
-    const normalizedEntity = {...entity};
+  const normalizedEntity = { ...entity };
 
-    delete(normalizedEntity['id']);
-    delete(normalizedEntity['created']);
-    delete(normalizedEntity['modified']);
+  delete normalizedEntity["id"];
+  delete normalizedEntity["created"];
+  delete normalizedEntity["modified"];
 
-    if(normalizedEntity.hasOwnProperty("temporary_links_public_storage_ttl") && normalizedEntity.temporary_links_public_storage_ttl == ''){
-        normalizedEntity.temporary_links_public_storage_ttl = 0;
-    }
+  if (
+    normalizedEntity.hasOwnProperty("temporary_links_public_storage_ttl") &&
+    normalizedEntity.temporary_links_public_storage_ttl == ""
+  ) {
+    normalizedEntity.temporary_links_public_storage_ttl = 0;
+  }
 
-    if(normalizedEntity.hasOwnProperty("min_uploads_qty") && normalizedEntity.min_uploads_qty > 0){
-        normalizedEntity.is_mandatory = true;
-    }
+  if (
+    normalizedEntity.hasOwnProperty("min_uploads_qty") &&
+    normalizedEntity.min_uploads_qty > 0
+  ) {
+    normalizedEntity.is_mandatory = true;
+  }
 
-    return normalizedEntity;
-
+  return normalizedEntity;
 };

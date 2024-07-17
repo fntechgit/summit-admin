@@ -11,81 +11,95 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import { SimpleForm } from 'openstack-uicore-foundation/lib/components';
-import { getMediaFileType, resetMediaFileTypeForm, saveMediaFileType } from "../../actions/media-file-type-actions";
+import { Breadcrumb } from "react-breadcrumbs";
+import { SimpleForm } from "openstack-uicore-foundation/lib/components";
+import {
+  getMediaFileType,
+  resetMediaFileTypeForm,
+  saveMediaFileType
+} from "../../actions/media-file-type-actions";
 
 //import '../../styles/edit-media-file-type-page.less';
 
-
 class EditMediaFileTypePage extends React.Component {
+  constructor(props) {
+    const mediaFileTypeId = props.match.params.media_file_type_id;
+    super(props);
 
-    constructor(props) {
-        const mediaFileTypeId = props.match.params.media_file_type_id;
-        super(props);
+    this.state = {};
 
-        this.state = {};
-
-        if (!mediaFileTypeId) {
-            props.resetMediaFileTypeForm();
-        } else {
-            props.getMediaFileType(mediaFileTypeId);
-        }
+    if (!mediaFileTypeId) {
+      props.resetMediaFileTypeForm();
+    } else {
+      props.getMediaFileType(mediaFileTypeId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.media_file_type_id;
-        const newId = this.props.match.params.media_file_type_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.media_file_type_id;
+    const newId = this.props.match.params.media_file_type_id;
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetMediaFileTypeForm();
-            } else {
-                this.props.getMediaFileType(newId);
-            }
-        }
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetMediaFileTypeForm();
+      } else {
+        this.props.getMediaFileType(newId);
+      }
     }
+  }
 
-    render(){
-        const {entity, errors, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+  render() {
+    const { entity, errors, match } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-        const fields = [
-            {type: 'text', name: 'name', label: T.translate("media_file_type.name")},
-            {type: 'textarea', name: 'description', label: T.translate("media_file_type.description")},
-            {type: 'textarea', name: 'allowed_extensions', label: T.translate("media_file_type.allowed_extensions_input")},
-        ];
+    const fields = [
+      {
+        type: "text",
+        name: "name",
+        label: T.translate("media_file_type.name")
+      },
+      {
+        type: "textarea",
+        name: "description",
+        label: T.translate("media_file_type.description")
+      },
+      {
+        type: "textarea",
+        name: "allowed_extensions",
+        label: T.translate("media_file_type.allowed_extensions_input")
+      }
+    ];
 
-        return(
-            <div className="container edit-media-file-types-page">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("media_file_type.media_file_type")}</h3>
-                <hr/>
-                <SimpleForm
-                    entity={entity}
-                    errors={errors}
-                    fields={fields}
-                    onSubmit={this.props.saveMediaFileType}
-                />
-            </div>
-
-        )
-    }
+    return (
+      <div className="container edit-media-file-types-page">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("media_file_type.media_file_type")}
+        </h3>
+        <hr />
+        <SimpleForm
+          entity={entity}
+          errors={errors}
+          fields={fields}
+          onSubmit={this.props.saveMediaFileType}
+        />
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = ({ mediaFileTypeState }) => ({
-    ...mediaFileTypeState
+  ...mediaFileTypeState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getMediaFileType,
-        resetMediaFileTypeForm,
-        saveMediaFileType
-    }
-)(EditMediaFileTypePage);
+export default connect(mapStateToProps, {
+  getMediaFileType,
+  resetMediaFileTypeForm,
+  saveMediaFileType
+})(EditMediaFileTypePage);

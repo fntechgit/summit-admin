@@ -11,84 +11,87 @@
  * limitations under the License.
  **/
 
- import React from 'react';
- import AsyncSelect from 'react-select/lib/Async';
- import { querySponsorships } from '../../actions/sponsorship-actions';
+import React from "react";
+import AsyncSelect from "react-select/lib/Async";
+import { querySponsorships } from "../../actions/sponsorship-actions";
 
- export default class SponsorshipTypeInput extends React.Component {
+export default class SponsorshipTypeInput extends React.Component {
+  constructor(props) {
+    super(props);
 
-     constructor(props) {
-         super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.getTemplates = this.getTemplates.bind(this);
+  }
 
-         this.handleChange = this.handleChange.bind(this);
-         this.getTemplates = this.getTemplates.bind(this);
-     }
+  handleChange(value, { action }) {
+    const { plainValue } = this.props;
+    let theValue = null;
 
-     handleChange(value, { action }) {
-         const { plainValue } = this.props;
-         let theValue = null;
+    if (action === "clear") {
+      theValue = plainValue ? "" : { id: "", name: "" };
+    } else {
+      theValue = plainValue
+        ? value.label
+        : { id: parseInt(value.value), name: value.label };
+    }
 
-         if (action === 'clear') {
-             theValue = plainValue ? '' : { id: '', name: '' };
-         } else {
-             theValue = plainValue ? value.label : { id: parseInt(value.value), name: value.label };
-         }
+    const ev = {
+      target: {
+        id: this.props.id,
+        value: theValue,
+        type: "sponsorshipinput"
+      }
+    };
 
-         const ev = {
-             target: {
-                 id: this.props.id,
-                 value: theValue,
-                 type: 'sponsorshipinput'
-             }
-         };
+    this.props.onChange(ev);
+  }
 
-         this.props.onChange(ev);
-     }
+  getTemplates(input, callback) {
+    if (!input) {
+      return Promise.resolve({ options: [] });
+    }
 
-     getTemplates(input, callback) {         
+    // we need to map into value/label because of a bug in react-select 2
+    // https://github.com/JedWatson/react-select/issues/2998
 
-         if (!input) {
-             return Promise.resolve({ options: [] });
-         }
+    const translateOptions = (options) => {
+      const newOptions = options.map((c) => ({
+        value: c.id.toString(),
+        label: c.name
+      }));
+      console.log("new options...", newOptions);
+      callback(newOptions);
+    };
 
-         // we need to map into value/label because of a bug in react-select 2
-         // https://github.com/JedWatson/react-select/issues/2998
+    querySponsorships(input, translateOptions);
+  }
 
-         const translateOptions = (options) => {
-             const newOptions = options.map(c => ({ value: c.id.toString(), label: c.name }));
-             console.log('new options...', newOptions);
-             callback(newOptions);
-         };
+  render() {
+    const { error, value, onChange, id, multi, plainValue, ...rest } =
+      this.props;
+    const has_error = this.props.hasOwnProperty("error") && error !== "";
 
-         querySponsorships(input, translateOptions);
-     }
+    // we need to map into value/label because of a bug in react-select 2
+    // https://github.com/JedWatson/react-select/issues/2998
+    let theValue = null;
 
-     render() {
-         const { error, value, onChange, id, multi, plainValue, ...rest } = this.props;
-         const has_error = (this.props.hasOwnProperty('error') && error !== '');
+    if (value) {
+      theValue = plainValue
+        ? { value: value, label: value }
+        : { value: value.id?.toString(), label: value.name };
+    }
 
-         // we need to map into value/label because of a bug in react-select 2
-         // https://github.com/JedWatson/react-select/issues/2998
-         let theValue = null;
-
-         if (value) {
-             theValue = plainValue ? { value: value, label: value } : { value: value.id?.toString(), label: value.name }
-         }
-
-         return (
-             <div>
-                 <AsyncSelect
-                     value={theValue}
-                     onChange={this.handleChange}
-                     loadOptions={this.getTemplates}                    
-                     isMulti={false}
-                     {...rest}
-                 />
-                 {has_error &&
-                     <p className="error-label">{error}</p>
-                 }
-             </div>
-         );
-
-     }
- }
+    return (
+      <div>
+        <AsyncSelect
+          value={theValue}
+          onChange={this.handleChange}
+          loadOptions={this.getTemplates}
+          isMulti={false}
+          {...rest}
+        />
+        {has_error && <p className="error-label">{error}</p>}
+      </div>
+    );
+  }
+}

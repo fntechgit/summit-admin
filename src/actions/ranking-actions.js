@@ -12,191 +12,184 @@
  **/
 
 import T from "i18n-react/dist/i18n-react";
-import history from '../history'
+import history from "../history";
 import {
-    getRequest,
-    putRequest,
-    postRequest,
-    deleteRequest,
-    createAction,
-    stopLoading,
-    startLoading,
-    showMessage,
-    authErrorHandler
-} from 'openstack-uicore-foundation/lib/utils/actions';
-import { 
-    SELECTION_PLAN_RATING_TYPE_ADDED, 
-    SELECTION_PLAN_RATING_TYPE_UPDATED 
-} from './selection-plan-actions';
-import {getAccessTokenSafely} from "../utils/methods";
+  getRequest,
+  putRequest,
+  postRequest,
+  deleteRequest,
+  createAction,
+  stopLoading,
+  startLoading,
+  showMessage,
+  authErrorHandler
+} from "openstack-uicore-foundation/lib/utils/actions";
+import {
+  SELECTION_PLAN_RATING_TYPE_ADDED,
+  SELECTION_PLAN_RATING_TYPE_UPDATED
+} from "./selection-plan-actions";
+import { getAccessTokenSafely } from "../utils/methods";
 
 //Rating Types
 
-export const RECEIVE_RATING_TYPE = 'RECEIVE_RATING_TYPE';
-export const RESET_RATING_TYPE_FORM = 'RESET_RATING_TYPE_FORM';
-export const RATING_TYPE_SCORE_TYPE_REMOVED = 'RATING_TYPE_SCORE_TYPE_REMOVED';
-export const RATING_TYPE_SCORE_TYPE_ADDED = 'RATING_TYPE_SCORE_TYPE_ADDED';
-export const RATING_TYPE_SCORE_TYPE_ORDER_UPDATED = 'RATING_TYPE_SCORE_TYPE_ORDER_UPDATED';
+export const RECEIVE_RATING_TYPE = "RECEIVE_RATING_TYPE";
+export const RESET_RATING_TYPE_FORM = "RESET_RATING_TYPE_FORM";
+export const RATING_TYPE_SCORE_TYPE_REMOVED = "RATING_TYPE_SCORE_TYPE_REMOVED";
+export const RATING_TYPE_SCORE_TYPE_ADDED = "RATING_TYPE_SCORE_TYPE_ADDED";
+export const RATING_TYPE_SCORE_TYPE_ORDER_UPDATED =
+  "RATING_TYPE_SCORE_TYPE_ORDER_UPDATED";
 
 export const getRatingType = (ratingTypeId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSelectionPlanState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const { entity: currentSelectionPlan } = currentSelectionPlanState;
 
-    const {currentSummitState, currentSelectionPlanState} = getState();
-    const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
-    const {entity: currentSelectionPlan} = currentSelectionPlanState;
+  dispatch(startLoading());
 
-    dispatch(startLoading());
+  const params = {
+    access_token: accessToken,
+    order: "+order",
+    expand: "score_types,selection_plan"
+  };
 
-    const params = {
-        access_token: accessToken,
-        order: '+order',
-        expand: 'score_types,selection_plan'
-    };
-
-    return getRequest(
-        null,
-        createAction(RECEIVE_RATING_TYPE),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}`,
-        authErrorHandler
-    )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
+  return getRequest(
+    null,
+    createAction(RECEIVE_RATING_TYPE),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
 };
 
 export const resetRatingTypeForm = () => (dispatch, getState) => {
-    dispatch(createAction(RESET_RATING_TYPE_FORM)({}));
+  dispatch(createAction(RESET_RATING_TYPE_FORM)({}));
 };
 
 export const saveRatingType = (entity) => async (dispatch, getState) => {
+  const { currentSummitState, currentSelectionPlanState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const { entity: currentSelectionPlan } = currentSelectionPlanState;
 
-    const {currentSummitState, currentSelectionPlanState} = getState();
-    const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
-    const {entity: currentSelectionPlan} = currentSelectionPlanState;
+  dispatch(startLoading());
 
-    dispatch(startLoading());
+  const normalizedEntity = normalizeEntity(entity);
 
-    const normalizedEntity = normalizeEntity(entity);
-
-    if (entity.id) {
-        
-        const success_message = {
-            title: T.translate("general.done"),
-            html: T.translate("edit_rating_type.rating_type_saved"),
-            type: 'success'
-        };
-
-        return putRequest(
-            null,
-            createAction(SELECTION_PLAN_RATING_TYPE_UPDATED),
-            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${entity.id}?access_token=${accessToken}`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )({})(dispatch)
-            .then((payload) => {
-                dispatch(showMessage(
-                    success_message,
-                    () => {
-                        history.push(`/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}`)
-                    }
-                ));
-            });
-    } 
-
+  if (entity.id) {
     const success_message = {
-        title: T.translate("general.done"),
-        html: T.translate("edit_rating_type.rating_type_created"),
-        type: 'success'
+      title: T.translate("general.done"),
+      html: T.translate("edit_rating_type.rating_type_saved"),
+      type: "success"
     };
 
-    return postRequest(
-        null,
-        createAction(SELECTION_PLAN_RATING_TYPE_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types?access_token=${accessToken}`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-    )({})(dispatch)
-        .then((payload) => {
-            dispatch(showMessage(
-                success_message,
-                () => {
-                    history.push(`/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}`)
-                }
-            ));
-        });
-    
-}
+    return putRequest(
+      null,
+      createAction(SELECTION_PLAN_RATING_TYPE_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${entity.id}?access_token=${accessToken}`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )({})(dispatch).then((payload) => {
+      dispatch(
+        showMessage(success_message, () => {
+          history.push(
+            `/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}`
+          );
+        })
+      );
+    });
+  }
+
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_rating_type.rating_type_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    null,
+    createAction(SELECTION_PLAN_RATING_TYPE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types?access_token=${accessToken}`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )({})(dispatch).then((payload) => {
+    dispatch(
+      showMessage(success_message, () => {
+        history.push(
+          `/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}`
+        );
+      })
+    );
+  });
+};
 
 //Score Types
 
-export const RECEIVE_SCORE_TYPE = 'RECEIVE_SCORE_TYPE';
-export const RECEIVE_SCORE_TYPES = 'RECEIVE_SCORE_TYPES';
-export const RESET_SCORE_TYPE_FORM = 'RESET_SCORE_TYPE_FORM';
-export const SCORE_TYPE_UPDATED = 'SCORE_TYPE_UPDATED';
+export const RECEIVE_SCORE_TYPE = "RECEIVE_SCORE_TYPE";
+export const RECEIVE_SCORE_TYPES = "RECEIVE_SCORE_TYPES";
+export const RESET_SCORE_TYPE_FORM = "RESET_SCORE_TYPE_FORM";
+export const SCORE_TYPE_UPDATED = "SCORE_TYPE_UPDATED";
 
-export const getScoreType = (ratingTypeId, scoreTypeId) => async (dispatch, getState) => {
-
-    const {currentSummitState, currentSelectionPlanState} = getState();
+export const getScoreType =
+  (ratingTypeId, scoreTypeId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSelectionPlanState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
     const currentSelectionPlan = currentSelectionPlanState.entity;
 
     dispatch(startLoading());
 
     const params = {
-        access_token: accessToken,
+      access_token: accessToken
     };
 
     return getRequest(
-        null,
-        createAction(RECEIVE_SCORE_TYPE),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types/${scoreTypeId}`,
-        authErrorHandler
+      null,
+      createAction(RECEIVE_SCORE_TYPE),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types/${scoreTypeId}`,
+      authErrorHandler
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading());
-        }
-    );
-};
+      dispatch(stopLoading());
+    });
+  };
 
 export const getScoreTypes = (ratingTypeId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSelectionPlanState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const currentSelectionPlan = currentSelectionPlanState.entity;
 
-    const {currentSummitState, currentSelectionPlanState} = getState();
-    const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
-    const currentSelectionPlan = currentSelectionPlanState.entity;
+  dispatch(startLoading());
 
-    dispatch(startLoading());
+  const params = {
+    access_token: accessToken,
+    order: "+score",
+    page: 1,
+    per_page: 100
+  };
 
-    const params = {
-        access_token: accessToken,
-        order       : '+score',
-        page        : 1,
-        per_page    : 100,
-    };
-
-    return getRequest(
-        null,
-        createAction(RECEIVE_SCORE_TYPES),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types`,
-        authErrorHandler
-    )(params)(dispatch).then((res) => {
-            dispatch(stopLoading());
-        }
-    );
+  return getRequest(
+    null,
+    createAction(RECEIVE_SCORE_TYPES),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types`,
+    authErrorHandler
+  )(params)(dispatch).then((res) => {
+    dispatch(stopLoading());
+  });
 };
 
 export const resetScoreTypeForm = () => (dispatch, getState) => {
-    dispatch(createAction(RESET_SCORE_TYPE_FORM)({}));
+  dispatch(createAction(RESET_SCORE_TYPE_FORM)({}));
 };
 
-export const saveScoreType = (entity, ratingTypeId) => async (dispatch, getState) => {
-
-    const {currentSummitState, currentSelectionPlanState} = getState();
+export const saveScoreType =
+  (entity, ratingTypeId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSelectionPlanState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
     const currentSelectionPlan = currentSelectionPlanState.entity;
 
     dispatch(startLoading());
@@ -204,112 +197,110 @@ export const saveScoreType = (entity, ratingTypeId) => async (dispatch, getState
     const normalizedEntity = normalizeEntity(entity);
 
     if (entity.id) {
-        
-        const success_message = {
-            title: T.translate("general.done"),
-            html: T.translate("edit_score_type.score_type_saved"),
-            type: 'success'
-        };
-
-        return putRequest(
-            null,
-            createAction(SCORE_TYPE_UPDATED),
-            `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types/${entity.id}?access_token=${accessToken}`,
-            normalizedEntity,
-            authErrorHandler,
-            entity
-        )({})(dispatch)
-            .then(() => {
-                dispatch(showMessage(
-                    success_message,
-                    () => {
-                        history.push(`/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/rating-types/${ratingTypeId}`)
-                    }
-                ));
-            });
-    }
-    
-    const success_message = {
+      const success_message = {
         title: T.translate("general.done"),
-        html: T.translate("edit_score_type.score_type_created"),
-        type: 'success'
-    };
+        html: T.translate("edit_score_type.score_type_saved"),
+        type: "success"
+      };
 
-    return postRequest(
+      return putRequest(
         null,
-        createAction(RATING_TYPE_SCORE_TYPE_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types?access_token=${accessToken}`,
+        createAction(SCORE_TYPE_UPDATED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types/${entity.id}?access_token=${accessToken}`,
         normalizedEntity,
         authErrorHandler,
         entity
-    )({})(dispatch)
-        .then(() => {
-            dispatch(showMessage(
-                success_message,
-                () => {
-                    history.push(`/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/rating-types/${ratingTypeId}`)
-                }
-            ));
-        });
-}
+      )({})(dispatch).then(() => {
+        dispatch(
+          showMessage(success_message, () => {
+            history.push(
+              `/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/rating-types/${ratingTypeId}`
+            );
+          })
+        );
+      });
+    }
 
-export const updateScoreTypeOrder = (ratingTypeId, scoreTypes, scoreTypeId, newOrder) => async (dispatch, getState) => {
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_score_type.score_type_created"),
+      type: "success"
+    };
 
-    const {currentSummitState, currentSelectionPlanState} = getState();
+    return postRequest(
+      null,
+      createAction(RATING_TYPE_SCORE_TYPE_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types?access_token=${accessToken}`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )({})(dispatch).then(() => {
+      dispatch(
+        showMessage(success_message, () => {
+          history.push(
+            `/app/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/rating-types/${ratingTypeId}`
+          );
+        })
+      );
+    });
+  };
+
+export const updateScoreTypeOrder =
+  (ratingTypeId, scoreTypes, scoreTypeId, newOrder) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSelectionPlanState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
     const currentSelectionPlan = currentSelectionPlanState.entity;
 
     const params = {
-        access_token: accessToken
+      access_token: accessToken
     };
     dispatch(startLoading());
-    const scoreType = scoreTypes.find(r => r.id === scoreTypeId);
+    const scoreType = scoreTypes.find((r) => r.id === scoreTypeId);
     scoreType.score = newOrder;
 
     return putRequest(
-        null,
-        createAction(RATING_TYPE_SCORE_TYPE_ORDER_UPDATED)(scoreTypes),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types/${scoreTypeId}?access_token=${accessToken}`,
-        scoreType,
-        authErrorHandler
+      null,
+      createAction(RATING_TYPE_SCORE_TYPE_ORDER_UPDATED)(scoreTypes),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types/${scoreTypeId}?access_token=${accessToken}`,
+      scoreType,
+      authErrorHandler
     )(params)(dispatch).then(() => {
-            dispatch(stopLoading())
-            dispatch(getScoreTypes(ratingTypeId));
-        }
-    );
-}
+      dispatch(stopLoading());
+      dispatch(getScoreTypes(ratingTypeId));
+    });
+  };
 
-export const deleteScoreType = (ratingTypeId, scoreTypeId) => async (dispatch, getState) => {
-
-    const {currentSummitState, currentSelectionPlanState} = getState();
+export const deleteScoreType =
+  (ratingTypeId, scoreTypeId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSelectionPlanState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const {currentSummit} = currentSummitState;
+    const { currentSummit } = currentSummitState;
     const currentSelectionPlan = currentSelectionPlanState.entity;
 
     const params = {
-        access_token: accessToken
+      access_token: accessToken
     };
 
     return deleteRequest(
-        null,
-        createAction(RATING_TYPE_SCORE_TYPE_REMOVED)({scoreTypeId}),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types/${scoreTypeId}`,
-        null,
-        authErrorHandler
+      null,
+      createAction(RATING_TYPE_SCORE_TYPE_REMOVED)({ scoreTypeId }),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${currentSelectionPlan.id}/track-chair-rating-types/${ratingTypeId}/score-types/${scoreTypeId}`,
+      null,
+      authErrorHandler
     )(params)(dispatch).then(() => {
-            dispatch(getScoreTypes(ratingTypeId));
-        }
-    );
-};
+      dispatch(getScoreTypes(ratingTypeId));
+    });
+  };
 
 //common
 const normalizeEntity = (entity) => {
-    const normalizedEntity = {...entity};
+  const normalizedEntity = { ...entity };
 
-    delete(normalizedEntity['id']);
-    delete(normalizedEntity['created']);
-    delete(normalizedEntity['modified']);
+  delete normalizedEntity["id"];
+  delete normalizedEntity["created"];
+  delete normalizedEntity["modified"];
 
-    return normalizedEntity;
+  return normalizedEntity;
 };

@@ -11,72 +11,79 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import SponsorMaterialForm from '../../components/forms/sponsor-material-form';
-import { getSponsorMaterial, saveSponsorMaterial, resetSponsorMaterialForm } from "../../actions/sponsor-actions";
+import SponsorMaterialForm from "../../components/forms/sponsor-material-form";
+import {
+  getSponsorMaterial,
+  saveSponsorMaterial,
+  resetSponsorMaterialForm
+} from "../../actions/sponsor-actions";
 
 class EditMaterialSponsorPage extends React.Component {
+  constructor(props) {
+    const materialId = props.match.params.material_id;
+    super(props);
 
-    constructor(props) {
-        const materialId = props.match.params.material_id;
-        super(props);
-
-        if (!materialId) {
-            props.resetSponsorMaterialForm();
-        } else {
-            props.getSponsorMaterial(materialId);
-        }
+    if (!materialId) {
+      props.resetSponsorMaterialForm();
+    } else {
+      props.getSponsorMaterial(materialId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.material_id;
-        const newId = this.props.match.params.material_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.material_id;
+    const newId = this.props.match.params.material_id;
 
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetSponsorMaterialForm();
-            } else {
-                this.props.getSponsorMaterial(newId);
-            }
-        }
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetSponsorMaterialForm();
+      } else {
+        this.props.getSponsorMaterial(newId);
+      }
     }
+  }
 
-    render() {
-        const { currentSummit, entity, errors, match } = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+  render() {
+    const { currentSummit, entity, errors, match } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-        return (
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_sponsor.material")}</h3>
-                <hr />
-                {currentSummit &&
-                    <SponsorMaterialForm
-                        entity={entity}
-                        currentSummit={currentSummit}
-                        errors={errors}
-                        onSubmit={this.props.saveSponsorMaterial}
-                    />
-                }
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("edit_sponsor.material")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <SponsorMaterialForm
+            entity={entity}
+            currentSummit={currentSummit}
+            errors={errors}
+            onSubmit={this.props.saveSponsorMaterial}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSponsorMaterialState }) => ({
-    currentSummit: currentSummitState.currentSummit,
-    ...currentSponsorMaterialState
+const mapStateToProps = ({
+  currentSummitState,
+  currentSponsorMaterialState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentSponsorMaterialState
 });
 
-export default connect(
-    mapStateToProps,
-    {
-        resetSponsorMaterialForm,
-        getSponsorMaterial,
-        saveSponsorMaterial,
-    }
-)(EditMaterialSponsorPage);
+export default connect(mapStateToProps, {
+  resetSponsorMaterialForm,
+  getSponsorMaterial,
+  saveSponsorMaterial
+})(EditMaterialSponsorPage);

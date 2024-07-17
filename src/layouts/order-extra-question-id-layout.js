@@ -11,85 +11,102 @@
  * limitations under the License.
  **/
 
-import React from 'react'
+import React from "react";
 import { connect } from "react-redux";
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 import NoMatchPage from "../pages/no-match-page";
-import EditOrderExtraQuestionPage from '../pages/orders/edit-order-extra-question-page';
-import EditOrderExtraQuestionSubRulesPage from '../pages/orders/edit-order-extra-question-sub-rule-page';
+import EditOrderExtraQuestionPage from "../pages/orders/edit-order-extra-question-page";
+import EditOrderExtraQuestionSubRulesPage from "../pages/orders/edit-order-extra-question-sub-rule-page";
 
-import { resetOrderExtraQuestionForm, getOrderExtraQuestion } from "../actions/order-actions";
+import {
+  resetOrderExtraQuestionForm,
+  getOrderExtraQuestion
+} from "../actions/order-actions";
 
 class OrderExtraQuestionIdLayout extends React.Component {
+  constructor(props) {
+    const orderExtraQuestionId = props.match.params.order_extra_question_id;
+    super(props);
 
-    constructor(props) {
-        const orderExtraQuestionId = props.match.params.order_extra_question_id;
-        super(props);
-
-        if (!orderExtraQuestionId) {
-            props.resetOrderExtraQuestionForm();
-        } else {
-            props.getOrderExtraQuestion(orderExtraQuestionId);
-        }
-
+    if (!orderExtraQuestionId) {
+      props.resetOrderExtraQuestionForm();
+    } else {
+      props.getOrderExtraQuestion(orderExtraQuestionId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.order_extra_question_id;
-        const newId = this.props.match.params.order_extra_question_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.order_extra_question_id;
+    const newId = this.props.match.params.order_extra_question_id;
 
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetOrderExtraQuestionForm();
-            } else {
-                this.props.getOrderExtraQuestion(newId);
-            }
-        }
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetOrderExtraQuestionForm();
+      } else {
+        this.props.getOrderExtraQuestion(newId);
+      }
     }
+  }
 
-    render() {
-        let { match, currentExtraQuestion } = this.props;
-        const breadcrumb = (currentExtraQuestion.id) ? currentExtraQuestion.name : T.translate("general.new");        
+  render() {
+    let { match, currentExtraQuestion } = this.props;
+    const breadcrumb = currentExtraQuestion.id
+      ? currentExtraQuestion.name
+      : T.translate("general.new");
 
-        return (
-            <div>
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+    return (
+      <div>
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <Switch>
+          <Route
+            path={`${match.url}/sub-rule`}
+            render={(props) => (
+              <div>
                 <Switch>
-                    <Route path={`${match.url}/sub-rule`} render={
-                        props => (
-                            <div>
-                            <Switch>
-                            <Route strict exact path={`${props.match.url}/new`} component={EditOrderExtraQuestionSubRulesPage} />
-                            <Route strict exact path={`${props.match.url}/:sub_rule_id(\\d+)`} component={EditOrderExtraQuestionSubRulesPage} />
-                            <Route component={NoMatchPage} />
-                            </Switch>
-                            </div>
-                            )}
-                        />
-                    <Route strict exact path={match.url} component={EditOrderExtraQuestionPage} />
-                    <Route component={NoMatchPage} />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditOrderExtraQuestionSubRulesPage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:sub_rule_id(\\d+)`}
+                    component={EditOrderExtraQuestionSubRulesPage}
+                  />
+                  <Route component={NoMatchPage} />
                 </Switch>
-            </div>
-        );
-    }
-
+              </div>
+            )}
+          />
+          <Route
+            strict
+            exact
+            path={match.url}
+            component={EditOrderExtraQuestionPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentOrderExtraQuestionState }) => ({
-    currentSummit: currentSummitState.currentSummit,
-    currentExtraQuestion: currentOrderExtraQuestionState.entity,
+const mapStateToProps = ({
+  currentSummitState,
+  currentOrderExtraQuestionState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  currentExtraQuestion: currentOrderExtraQuestionState.entity
 });
 
-export default Restrict(connect(
-    mapStateToProps,
-    {
-        resetOrderExtraQuestionForm,
-        getOrderExtraQuestion
-    }
-)(OrderExtraQuestionIdLayout));
-
-
-
+export default Restrict(
+  connect(mapStateToProps, {
+    resetOrderExtraQuestionForm,
+    getOrderExtraQuestion
+  })(OrderExtraQuestionIdLayout)
+);

@@ -1,5 +1,3 @@
-import AffiliationsTable from './AffiliationsTable';
+import AffiliationsTable from "./AffiliationsTable";
 
-export {
-	AffiliationsTable
-};
+export { AffiliationsTable };

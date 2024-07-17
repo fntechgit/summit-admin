@@ -1,11 +1,11 @@
 import React from "react";
 
-import GenericBasePCForm from './generic-base-pc-form'
-import SpeakerBasePCForm from './speaker-base-pc-form'
-import MemberBasePCForm from './member-base-pc-form'
-import SponsorBasePCForm from './sponsor-base-pc-form'
-import DiscountBasePCForm from './discount-base-pc-form'
-import SpeakersBasePCForm from './speakers-base-pc-form'
+import GenericBasePCForm from "./generic-base-pc-form";
+import SpeakerBasePCForm from "./speaker-base-pc-form";
+import MemberBasePCForm from "./member-base-pc-form";
+import SponsorBasePCForm from "./sponsor-base-pc-form";
+import DiscountBasePCForm from "./discount-base-pc-form";
+import SpeakersBasePCForm from "./speakers-base-pc-form";
 
 export const MemberPCForm = (props) => (
   <>

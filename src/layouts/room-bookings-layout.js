@@ -11,37 +11,52 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import RoomBookingListPage from '../pages/room_bookings/room-booking-list-page'
-import EditRoomBookingPage from '../pages/room_bookings/edit-room-booking-page'
+import RoomBookingListPage from "../pages/room_bookings/room-booking-list-page";
+import EditRoomBookingPage from "../pages/room_bookings/edit-room-booking-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class RoomBookingsLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("room_bookings.room_bookings"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("room_bookings.room_bookings"), pathname: match.url }} />
-
-                <Switch>
-                    <Route strict exact path={match.url} component={RoomBookingListPage}/>
-                    <Route strict exact path={`${match.url}/:room_booking_id(\\d+)`} component={EditRoomBookingPage}/>
-                    <Route strict exact path={`${match.url}/new`} component={EditRoomBookingPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route
+            strict
+            exact
+            path={match.url}
+            component={RoomBookingListPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:room_booking_id(\\d+)`}
+            component={EditRoomBookingPage}
+          />
+          <Route
+            strict
+            exact
+            path={`${match.url}/new`}
+            component={EditRoomBookingPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(RoomBookingsLayout), 'room_bookings');
-
-
+export default Restrict(withRouter(RoomBookingsLayout), "room_bookings");

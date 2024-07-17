@@ -11,126 +11,149 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
+import React from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Table } from 'openstack-uicore-foundation/lib/components';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getAccessLevels, deleteAccessLevel } from "../../actions/badge-actions";
+import { Table } from "openstack-uicore-foundation/lib/components";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getAccessLevels,
+  deleteAccessLevel
+} from "../../actions/badge-actions";
 
 class AccessLevelListPage extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.handleNewAccessLevel = this.handleNewAccessLevel.bind(this);
 
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
-        this.handleSort = this.handleSort.bind(this);
-        this.handleNewAccessLevel = this.handleNewAccessLevel.bind(this);
+    this.state = {};
+  }
 
-        this.state = {}
-
+  componentDidMount() {
+    const { currentSummit } = this.props;
+    if (currentSummit) {
+      this.props.getAccessLevels();
     }
+  }
 
-    componentDidMount() {
-        const {currentSummit} = this.props;
-        if(currentSummit) {
-            this.props.getAccessLevels();
-        }
-    }
+  handleEdit(access_level_id) {
+    const { currentSummit, history } = this.props;
+    history.push(
+      `/app/summits/${currentSummit.id}/access-levels/${access_level_id}`
+    );
+  }
 
-    handleEdit(access_level_id) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/access-levels/${access_level_id}`);
-    }
+  handleDelete(accessLevelId) {
+    const { deleteAccessLevel, accessLevels } = this.props;
+    let accessLevel = accessLevels.find((t) => t.id === accessLevelId);
 
-    handleDelete(accessLevelId) {
-        const {deleteAccessLevel, accessLevels} = this.props;
-        let accessLevel = accessLevels.find(t => t.id === accessLevelId);
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text:
+        T.translate("access_level_list.remove_warning") +
+        " " +
+        accessLevel.name,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then(function (result) {
+      if (result.value) {
+        deleteAccessLevel(accessLevelId);
+      }
+    });
+  }
 
-        Swal.fire({
-            title: T.translate("general.are_you_sure"),
-            text: T.translate("access_level_list.remove_warning") + ' ' + accessLevel.name,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: T.translate("general.yes_delete")
-        }).then(function(result){
-            if (result.value) {
-                deleteAccessLevel(accessLevelId);
-            }
-        });
-    }
+  handleSort(index, key, dir, func) {
+    this.props.getAccessLevels(key, dir);
+  }
 
-    handleSort(index, key, dir, func) {
-        this.props.getAccessLevels(key, dir);
-    }
+  handleNewAccessLevel(ev) {
+    const { currentSummit, history } = this.props;
+    history.push(`/app/summits/${currentSummit.id}/access-levels/new`);
+  }
 
-    handleNewAccessLevel(ev) {
-        const {currentSummit, history} = this.props;
-        history.push(`/app/summits/${currentSummit.id}/access-levels/new`);
-    }
+  render() {
+    const { currentSummit, accessLevels, order, orderDir, totalAccessLevels } =
+      this.props;
 
-    render(){
-        const {currentSummit, accessLevels, order, orderDir, totalAccessLevels} = this.props;
+    const columns = [
+      {
+        columnKey: "name",
+        value: T.translate("access_level_list.name"),
+        sortable: true
+      },
+      {
+        columnKey: "description",
+        value: T.translate("access_level_list.description")
+      },
+      {
+        columnKey: "is_default",
+        value: T.translate("access_level_list.is_default")
+      }
+    ];
 
-        const columns = [
-            { columnKey: 'name', value: T.translate("access_level_list.name"), sortable: true },
-            { columnKey: 'description', value: T.translate("access_level_list.description") },
-            { columnKey: 'is_default', value: T.translate("access_level_list.is_default") }
-        ];
+    const table_options = {
+      sortCol: order,
+      sortDir: orderDir,
+      actions: {
+        edit: { onClick: this.handleEdit },
+        delete: { onClick: this.handleDelete }
+      }
+    };
 
-        const table_options = {
-            sortCol: order,
-            sortDir: orderDir,
-            actions: {
-                edit: { onClick: this.handleEdit },
-                delete: { onClick: this.handleDelete }
-            }
-        }
+    if (!currentSummit.id) return <div />;
 
-        if(!currentSummit.id) return (<div/>);
+    return (
+      <div className="container">
+        <h3>
+          {" "}
+          {T.translate("access_level_list.access_level_list")} (
+          {totalAccessLevels})
+        </h3>
+        <div className={"row"}>
+          <div className="col-md-6 text-right col-md-offset-6">
+            <button
+              className="btn btn-primary right-space"
+              onClick={this.handleNewAccessLevel}
+            >
+              {T.translate("access_level_list.add_access_level")}
+            </button>
+          </div>
+        </div>
 
-        return(
-            <div className="container">
-                <h3> {T.translate("access_level_list.access_level_list")} ({totalAccessLevels})</h3>
-                <div className={'row'}>
-                    <div className="col-md-6 text-right col-md-offset-6">
-                        <button className="btn btn-primary right-space" onClick={this.handleNewAccessLevel}>
-                            {T.translate("access_level_list.add_access_level")}
-                        </button>
-                    </div>
-                </div>
+        {accessLevels.length === 0 && (
+          <div>{T.translate("access_level_list.no_access_levels")}</div>
+        )}
 
-                {accessLevels.length === 0 &&
-                <div>{T.translate("access_level_list.no_access_levels")}</div>
-                }
-
-                {accessLevels.length > 0 &&
-                    <Table
-                        options={table_options}
-                        data={accessLevels}
-                        columns={columns}
-                        onSort={this.handleSort}
-                    />
-                }
-
-            </div>
-        )
-    }
+        {accessLevels.length > 0 && (
+          <Table
+            options={table_options}
+            data={accessLevels}
+            columns={columns}
+            onSort={this.handleSort}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentAccessLevelListState }) => ({
-    currentSummit   : currentSummitState.currentSummit,
-    ...currentAccessLevelListState
-})
+const mapStateToProps = ({
+  currentSummitState,
+  currentAccessLevelListState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentAccessLevelListState
+});
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getAccessLevels,
-        deleteAccessLevel
-    }
-)(AccessLevelListPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getAccessLevels,
+  deleteAccessLevel
+})(AccessLevelListPage);

@@ -11,36 +11,41 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import React from "react";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import Restrict from '../routes/restrict';
+import { Breadcrumb } from "react-breadcrumbs";
+import Restrict from "../routes/restrict";
 
-import RoomOccupancyPage from '../pages/room_occupancy/room-occupancy-page'
+import RoomOccupancyPage from "../pages/room_occupancy/room-occupancy-page";
 import CurrentEventOccupancyPage from "../pages/room_occupancy/current-event-occupancy-page";
 import NoMatchPage from "../pages/no-match-page";
 
-
 class RoomOccupancyLayout extends React.Component {
+  render() {
+    const { match } = this.props;
+    return (
+      <div>
+        <Breadcrumb
+          data={{
+            title: T.translate("room_occupancy.room_occupancy"),
+            pathname: match.url
+          }}
+        />
 
-    render(){
-        const { match } = this.props;
-        return(
-            <div>
-                <Breadcrumb data={{ title: T.translate("room_occupancy.room_occupancy"), pathname: match.url }} />
-
-                <Switch>
-                    <Route exact strict path={match.url} component={RoomOccupancyPage}/>
-                    <Route strict exact path={`${match.url}/:room_id(\\d+)`} component={CurrentEventOccupancyPage}/>
-                    <Route component={NoMatchPage}/>
-                </Switch>
-            </div>
-        );
-    }
-
+        <Switch>
+          <Route exact strict path={match.url} component={RoomOccupancyPage} />
+          <Route
+            strict
+            exact
+            path={`${match.url}/:room_id(\\d+)`}
+            component={CurrentEventOccupancyPage}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
-export default Restrict(withRouter(RoomOccupancyLayout), 'room-occupancy');
-
-
+export default Restrict(withRouter(RoomOccupancyLayout), "room-occupancy");

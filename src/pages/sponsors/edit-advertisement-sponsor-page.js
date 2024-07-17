@@ -11,81 +11,85 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import SponsorAdvertisementForm from '../../components/forms/sponsor-advertisement-form';
-import { 
-    getSponsorAdvertisement,
-    saveSponsorAdvertisement,
-    resetSponsorAdvertisementForm,
-    submitSponsorAdvertisementImage,
-    removeSponsorAdvertisementImage } from "../../actions/sponsor-actions";
+import SponsorAdvertisementForm from "../../components/forms/sponsor-advertisement-form";
+import {
+  getSponsorAdvertisement,
+  saveSponsorAdvertisement,
+  resetSponsorAdvertisementForm,
+  submitSponsorAdvertisementImage,
+  removeSponsorAdvertisementImage
+} from "../../actions/sponsor-actions";
 
 class EditAdvertisementSponsorPage extends React.Component {
+  constructor(props) {
+    const advertisementId = props.match.params.advertisement_id;
+    super(props);
 
-    constructor(props) {
-        const advertisementId = props.match.params.advertisement_id;
-        super(props);
-
-        if (!advertisementId) {
-            props.resetSponsorAdvertisementForm();
-        } else {
-            props.getSponsorAdvertisement(advertisementId);
-        }
+    if (!advertisementId) {
+      props.resetSponsorAdvertisementForm();
+    } else {
+      props.getSponsorAdvertisement(advertisementId);
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.advertisement_id;
-        const newId = this.props.match.params.advertisement_id;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.advertisement_id;
+    const newId = this.props.match.params.advertisement_id;
 
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetSponsorAdvertisementForm();
-            } else {
-                this.props.getSponsorAdvertisement(newId);
-            }
-        }
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetSponsorAdvertisementForm();
+      } else {
+        this.props.getSponsorAdvertisement(newId);
+      }
     }
+  }
 
-    render() {
-        const { currentSummit, entity, errors, match } = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        const breadcrumb = (entity.id) ? entity.name : T.translate("general.new");
+  render() {
+    const { currentSummit, entity, errors, match } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-        return (
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_sponsor.advertisement")}</h3>
-                <hr />
-                {currentSummit &&
-                    <SponsorAdvertisementForm
-                        entity={entity}
-                        currentSummit={currentSummit}
-                        errors={errors}
-                        onAttach={this.props.submitSponsorAdvertisementImage}
-                        onRemove={this.props.removeSponsorAdvertisementImage}
-                        onSubmit={this.props.saveSponsorAdvertisement}
-                    />
-                }
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("edit_sponsor.advertisement")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <SponsorAdvertisementForm
+            entity={entity}
+            currentSummit={currentSummit}
+            errors={errors}
+            onAttach={this.props.submitSponsorAdvertisementImage}
+            onRemove={this.props.removeSponsorAdvertisementImage}
+            onSubmit={this.props.saveSponsorAdvertisement}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSponsorAdvertisementState }) => ({
-    currentSummit: currentSummitState.currentSummit,
-    ...currentSponsorAdvertisementState
+const mapStateToProps = ({
+  currentSummitState,
+  currentSponsorAdvertisementState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentSponsorAdvertisementState
 });
 
-export default connect(
-    mapStateToProps,
-    {
-        resetSponsorAdvertisementForm,
-        getSponsorAdvertisement,
-        saveSponsorAdvertisement,
-        submitSponsorAdvertisementImage,
-        removeSponsorAdvertisementImage
-    }
-)(EditAdvertisementSponsorPage);
+export default connect(mapStateToProps, {
+  resetSponsorAdvertisementForm,
+  getSponsorAdvertisement,
+  saveSponsorAdvertisement,
+  submitSponsorAdvertisementImage,
+  removeSponsorAdvertisementImage
+})(EditAdvertisementSponsorPage);

@@ -11,56 +11,63 @@
  * limitations under the License.
  **/
 
-import
-{
-    REQUEST_SPONSORED_PROJECTS,
-    RECEIVE_SPONSORED_PROJECTS,
-    SPONSORED_PROJECT_DELETED
-} from '../../actions/sponsored-project-actions';
+import {
+  REQUEST_SPONSORED_PROJECTS,
+  RECEIVE_SPONSORED_PROJECTS,
+  SPONSORED_PROJECT_DELETED
+} from "../../actions/sponsored-project-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    sponsoredProjects : [],
-    term            : '',
-    order           : 'id',
-    orderDir        : 1,
-    currentPage     : 1,
-    lastPage        : 1,
-    perPage         : 10,
-    totalSponsoredProjects   : 0
+  sponsoredProjects: [],
+  term: "",
+  order: "id",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalSponsoredProjects: 0
 };
 
 const sponsoredProjectListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_SPONSORED_PROJECTS: {
-            let {order, orderDir, term, page} = payload;
-            return {...state, order, orderDir, term, currentPage: page};
-        }
-        case RECEIVE_SPONSORED_PROJECTS: {
-            let {current_page, total, last_page} = payload.response;
-            let sponsoredProjects = payload.response.data.map(c => ({
-                ...c
-            }));
-
-            return {...state,
-                sponsoredProjects: sponsoredProjects,
-                currentPage: current_page,
-                totalSponsoredProjects: total, lastPage: last_page };
-        }
-        case SPONSORED_PROJECT_DELETED: {
-            let {sponsoredProjectId} = payload;
-            return {...state, sponsoredProjects: state.sponsoredProjects.filter(s => s.id !== sponsoredProjectId)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_SPONSORED_PROJECTS: {
+      let { order, orderDir, term, page } = payload;
+      return { ...state, order, orderDir, term, currentPage: page };
+    }
+    case RECEIVE_SPONSORED_PROJECTS: {
+      let { current_page, total, last_page } = payload.response;
+      let sponsoredProjects = payload.response.data.map((c) => ({
+        ...c
+      }));
+
+      return {
+        ...state,
+        sponsoredProjects: sponsoredProjects,
+        currentPage: current_page,
+        totalSponsoredProjects: total,
+        lastPage: last_page
+      };
+    }
+    case SPONSORED_PROJECT_DELETED: {
+      let { sponsoredProjectId } = payload;
+      return {
+        ...state,
+        sponsoredProjects: state.sponsoredProjects.filter(
+          (s) => s.id !== sponsoredProjectId
+        )
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default sponsoredProjectListReducer;

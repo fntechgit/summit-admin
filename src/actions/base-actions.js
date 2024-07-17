@@ -11,23 +11,22 @@
  * limitations under the License.
  **/
 import {
-    getRequest,
-    createAction,
-    authErrorHandler
-} from 'openstack-uicore-foundation/lib/utils/actions';
+  getRequest,
+  createAction,
+  authErrorHandler
+} from "openstack-uicore-foundation/lib/utils/actions";
 
-export const REQUEST_TIMEZONES       = 'REQUEST_TIMEZONES';
-export const RECEIVE_TIMEZONES       = 'RECEIVE_TIMEZONES';
+export const REQUEST_TIMEZONES = "REQUEST_TIMEZONES";
+export const RECEIVE_TIMEZONES = "RECEIVE_TIMEZONES";
 
 export const getTimezones = () => (dispatch, getState) => {
-    const {baseState} = getState();
-    if (baseState.timezones.length > 0) return;
+  const { baseState } = getState();
+  if (baseState.timezones.length > 0) return;
 
-    return getRequest(
-        createAction(REQUEST_TIMEZONES),
-        createAction(RECEIVE_TIMEZONES),
-        `${window.API_BASE_URL}/api/public/v1/timezones`,
-        authErrorHandler
-    )({})(dispatch);
+  return getRequest(
+    createAction(REQUEST_TIMEZONES),
+    createAction(RECEIVE_TIMEZONES),
+    `${window.API_BASE_URL}/api/public/v1/timezones`,
+    authErrorHandler
+  )({})(dispatch);
 };
-

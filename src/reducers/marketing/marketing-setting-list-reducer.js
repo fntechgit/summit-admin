@@ -11,60 +11,68 @@
  * limitations under the License.
  **/
 
-import
-{
-    RECEIVE_SETTINGS,
-    REQUEST_SETTINGS,
-    SETTING_DELETED,
-} from '../../actions/marketing-actions';
+import {
+  RECEIVE_SETTINGS,
+  REQUEST_SETTINGS,
+  SETTING_DELETED
+} from "../../actions/marketing-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    settings        : [],
-    term            : null,
-    order           : 'id',
-    orderDir        : 1,
-    currentPage     : 1,
-    lastPage        : 1,
-    perPage         : 10,
-    totalSettings   : 0,
+  settings: [],
+  term: null,
+  order: "id",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalSettings: 0
 };
 
 const marketingSettingListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_SETTINGS: {
-            let {order, orderDir, term} = payload;
-
-            return {...state, order, orderDir, term }
-        }
-        case RECEIVE_SETTINGS: {
-            let {total, last_page, current_page} = payload.response;
-            let settings = payload.response.data.map(s => {
-                return {
-                    id: s.id,
-                    key: s.key,
-                    type: s.type,
-                    value: s.value,
-                    selection_plan_id: s.selection_plan_id ? s.selection_plan_id : "N/A"
-                };
-            });
-
-            return {...state, settings: settings, currentPage: current_page, totalSettings: total, lastPage: last_page };
-        }
-        case SETTING_DELETED: {
-            let {settingId} = payload;
-            return {...state, settings: state.settings.filter(s => s.id !== settingId)};
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_SETTINGS: {
+      let { order, orderDir, term } = payload;
+
+      return { ...state, order, orderDir, term };
+    }
+    case RECEIVE_SETTINGS: {
+      let { total, last_page, current_page } = payload.response;
+      let settings = payload.response.data.map((s) => {
+        return {
+          id: s.id,
+          key: s.key,
+          type: s.type,
+          value: s.value,
+          selection_plan_id: s.selection_plan_id ? s.selection_plan_id : "N/A"
+        };
+      });
+
+      return {
+        ...state,
+        settings: settings,
+        currentPage: current_page,
+        totalSettings: total,
+        lastPage: last_page
+      };
+    }
+    case SETTING_DELETED: {
+      let { settingId } = payload;
+      return {
+        ...state,
+        settings: state.settings.filter((s) => s.id !== settingId)
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default marketingSettingListReducer;

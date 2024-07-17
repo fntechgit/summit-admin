@@ -12,55 +12,64 @@
  **/
 
 import {
-    REQUEST_REGISTRATION_COMPANIES,
-    RECEIVE_REGISTRATION_COMPANIES,
-    REGISTRATION_COMPANY_ADDED,
-    REGISTRATION_COMPANY_DELETED
-} from '../../actions/registration-companies-actions';
+  REQUEST_REGISTRATION_COMPANIES,
+  RECEIVE_REGISTRATION_COMPANIES,
+  REGISTRATION_COMPANY_ADDED,
+  REGISTRATION_COMPANY_DELETED
+} from "../../actions/registration-companies-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
-    companies: [],
-    term: null,
-    order: 'id',
-    orderDir: 1,
-    currentPage: 1,
-    lastPage: 1,
-    perPage: 10,
-    totalCompanies: 0
+  companies: [],
+  term: null,
+  order: "id",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalCompanies: 0
 };
 
 const registrationCompanyListReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case SET_CURRENT_SUMMIT:
-        case LOGOUT_USER: {
-            return DEFAULT_STATE;
-        }
-        case REQUEST_REGISTRATION_COMPANIES: {
-            let { order, orderDir, term, page } = payload;
-            return { ...state, order, orderDir, term, currentPage: page };
-        }
-        case RECEIVE_REGISTRATION_COMPANIES: {
-            let { current_page, total, last_page } = payload.response;
-            let companies = payload.response.data.map(c => ({
-                ...c
-            }));
-
-            return { ...state, companies: companies, currentPage: current_page, totalCompanies: total, lastPage: last_page };
-        }
-        case REGISTRATION_COMPANY_ADDED: {
-            return { ...state, companies: [...state.companies, payload.entity] }
-        }
-        case REGISTRATION_COMPANY_DELETED: {
-            let { companyId } = payload;
-            return { ...state, companies: state.companies.filter(s => s.id !== companyId) };
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
     }
+    case REQUEST_REGISTRATION_COMPANIES: {
+      let { order, orderDir, term, page } = payload;
+      return { ...state, order, orderDir, term, currentPage: page };
+    }
+    case RECEIVE_REGISTRATION_COMPANIES: {
+      let { current_page, total, last_page } = payload.response;
+      let companies = payload.response.data.map((c) => ({
+        ...c
+      }));
+
+      return {
+        ...state,
+        companies: companies,
+        currentPage: current_page,
+        totalCompanies: total,
+        lastPage: last_page
+      };
+    }
+    case REGISTRATION_COMPANY_ADDED: {
+      return { ...state, companies: [...state.companies, payload.entity] };
+    }
+    case REGISTRATION_COMPANY_DELETED: {
+      let { companyId } = payload;
+      return {
+        ...state,
+        companies: state.companies.filter((s) => s.id !== companyId)
+      };
+    }
+    default:
+      return state;
+  }
 };
 
 export default registrationCompanyListReducer;

@@ -12,49 +12,54 @@
  **/
 
 import React from "react";
-import AsyncSelect from 'react-select/lib/Async';
-import {queryMediaUploads} from "../../actions/media-upload-actions";
-import T from 'i18n-react/dist/i18n-react';
+import AsyncSelect from "react-select/lib/Async";
+import { queryMediaUploads } from "../../actions/media-upload-actions";
+import T from "i18n-react/dist/i18n-react";
 
 const MediaUploadTypeInput = ({ summitId, id, value, onChange, ...rest }) => {
-    
-    const handleChange = (ev) => {
-        if (onChange) onChange({target: {value: ev, type: 'media_upload_type_filter', id}});  
-    }
-    
-    const getOptionValue = (mediaUploadType) => {
-        return mediaUploadType.id;
-    }
+  const handleChange = (ev) => {
+    if (onChange)
+      onChange({ target: { value: ev, type: "media_upload_type_filter", id } });
+  };
 
-    const getOptionLabel = (mediaUploadType) => {
-        return `${mediaUploadType.name}`;
-    }
+  const getOptionValue = (mediaUploadType) => {
+    return mediaUploadType.id;
+  };
 
-    const getTypes = (input, callback) => {
-        // we need to map into value/label because of a bug in react-select 2
-        // https://github.com/JedWatson/react-select/issues/2998
+  const getOptionLabel = (mediaUploadType) => {
+    return `${mediaUploadType.name}`;
+  };
 
-        const translateOptions = (options) => {
-            const newOptions = options.map(c => ({ id: c.id, name: c.name, value: c.id, label: c.name }));
-            callback(newOptions);
-        };
+  const getTypes = (input, callback) => {
+    // we need to map into value/label because of a bug in react-select 2
+    // https://github.com/JedWatson/react-select/issues/2998
 
-        queryMediaUploads(summitId, input, translateOptions);
-    }
+    const translateOptions = (options) => {
+      const newOptions = options.map((c) => ({
+        id: c.id,
+        name: c.name,
+        value: c.id,
+        label: c.name
+      }));
+      callback(newOptions);
+    };
 
-    return (
-        <AsyncSelect
-            value={value}
-            onChange={handleChange}
-            loadOptions={getTypes}
-            getOptionValue={m => getOptionValue(m)}
-            getOptionLabel={m => getOptionLabel(m)}    
-            isMulti={true}
-            cacheOptions
-            defaultOptions
-            {...rest}
-        />
-    );
+    queryMediaUploads(summitId, input, translateOptions);
+  };
+
+  return (
+    <AsyncSelect
+      value={value}
+      onChange={handleChange}
+      loadOptions={getTypes}
+      getOptionValue={(m) => getOptionValue(m)}
+      getOptionLabel={(m) => getOptionLabel(m)}
+      isMulti={true}
+      cacheOptions
+      defaultOptions
+      {...rest}
+    />
+  );
 };
 
 export default MediaUploadTypeInput;

@@ -11,94 +11,96 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import T from 'i18n-react/dist/i18n-react'
-import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
-import { Input } from 'openstack-uicore-foundation/lib/components';
+import React from "react";
+import T from "i18n-react/dist/i18n-react";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import { Input } from "openstack-uicore-foundation/lib/components";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class RegFeedMetadataForm extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            entity: { ...props.entity },
-            errors: props.errors
-        };
+    this.state = {
+      entity: { ...props.entity },
+      errors: props.errors
+    };
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const state = {};
+
+    if (!shallowEqual(prevProps.entity, this.props.entity)) {
+      state.entity = { ...this.props.entity };
+      state.errors = {};
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-
-        if (!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = { ...this.props.entity };
-            state.errors = {};
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({ ...this.state, ...state })
-        }
+    if (!isEmpty(state)) {
+      this.setState({ ...this.state, ...state });
     }
+  }
 
-    handleChange(ev) {
+  handleChange(ev) {
+    let entity = { ...this.state.entity };
+    let errors = { ...this.state.errors };
+    let { value, id } = ev.target;
 
-        let entity = { ...this.state.entity };
-        let errors = { ...this.state.errors };
-        let { value, id } = ev.target;
+    errors[id] = "";
+    entity[id] = value;
 
-        errors[id] = '';
-        entity[id] = value;
+    this.setState({ entity: entity, errors: errors });
+  }
 
-        this.setState({ entity: entity, errors: errors });
-    }
+  handleSubmit(ev) {
+    let entity = { ...this.state.entity };
+    ev.preventDefault();
 
-    handleSubmit(ev) {
-        let entity = { ...this.state.entity };
-        ev.preventDefault();
+    this.props.onSubmit(this.state.entity);
+  }
 
-        this.props.onSubmit(this.state.entity);
-    }
+  render() {
+    const { entity, errors } = this.state;
 
-    render() {
-        const { entity, errors } = this.state;
+    return (
+      <form className="reg-feed-metadata-form">
+        <input type="hidden" id="id" value={entity.id} />
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label> {T.translate("edit_reg_feed_metadata.key")} *</label>
+            <Input
+              id="key"
+              className="form-control"
+              onChange={this.handleChange}
+              value={entity.key}
+            />
+          </div>
+          <div className="col-md-6">
+            <label> {T.translate("edit_reg_feed_metadata.value")} *</label>
+            <Input
+              id="value"
+              className="form-control"
+              onChange={this.handleChange}
+              value={entity.value}
+            />
+          </div>
+        </div>
 
-        return (
-            <form className="reg-feed-metadata-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="row form-group">
-                    <div className="col-md-6">
-                        <label> {T.translate("edit_reg_feed_metadata.key")} *</label>
-                        <Input
-                            id="key"
-                            className="form-control"
-                            onChange={this.handleChange}
-                            value={entity.key}
-                        />
-                    </div>
-                    <div className="col-md-6">
-                        <label> {T.translate("edit_reg_feed_metadata.value")} *</label>
-                        <Input
-                            id="value"
-                            className="form-control"
-                            onChange={this.handleChange}
-                            value={entity.value}
-                        />
-                    </div>
-                </div>
-
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                            className="btn btn-primary pull-right" value={T.translate("general.save")} />
-                    </div>
-                </div>
-
-            </form>
-        );
-    }
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <input
+              type="button"
+              onClick={this.handleSubmit}
+              className="btn btn-primary pull-right"
+              value={T.translate("general.save")}
+            />
+          </div>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default RegFeedMetadataForm;

@@ -11,129 +11,128 @@
  */
 
 table.affiliationsTable {
-    clear: both;
-    margin-top: 6px !important;
-    margin-bottom: 6px !important;
-    max-width: none !important
+  clear: both;
+  margin-top: 6px !important;
+  margin-bottom: 6px !important;
+  max-width: none !important;
 }
 table.affiliationsTable td,
 table.affiliationsTable th {
-    -webkit-box-sizing: content-box;
-    -moz-box-sizing: content-box;
-    box-sizing: content-box
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
 }
 table.affiliationsTable td.affiliationsTables_empty,
 table.affiliationsTable th.affiliationsTables_empty {
-    text-align: center
+  text-align: center;
 }
 table.affiliationsTable.nowrap th,
 table.affiliationsTable.nowrap td {
-    white-space: nowrap
+  white-space: nowrap;
 }
 
-table.affiliationsTable thead>tr>th.sorting_asc,
-table.affiliationsTable thead>tr>th.sorting_desc,
-table.affiliationsTable thead>tr>th.sorting,
-table.affiliationsTable thead>tr>td.sorting_asc,
-table.affiliationsTable thead>tr>td.sorting_desc,
-table.affiliationsTable thead>tr>td.sorting {
-    padding-right: 30px
+table.affiliationsTable thead > tr > th.sorting_asc,
+table.affiliationsTable thead > tr > th.sorting_desc,
+table.affiliationsTable thead > tr > th.sorting,
+table.affiliationsTable thead > tr > td.sorting_asc,
+table.affiliationsTable thead > tr > td.sorting_desc,
+table.affiliationsTable thead > tr > td.sorting {
+  padding-right: 30px;
 }
-table.affiliationsTable thead>tr>th:active,
-table.affiliationsTable thead>tr>td:active {
-    outline: none
+table.affiliationsTable thead > tr > th:active,
+table.affiliationsTable thead > tr > td:active {
+  outline: none;
 }
 table.affiliationsTable thead .sorting,
 table.affiliationsTable thead .sorting_asc,
 table.affiliationsTable thead .sorting_desc,
 table.affiliationsTable thead .sorting_asc_disabled,
 table.affiliationsTable thead .sorting_desc_disabled {
-    cursor: pointer;
-    position: relative
+  cursor: pointer;
+  position: relative;
 }
 table.affiliationsTable thead .sorting:after,
 table.affiliationsTable thead .sorting_asc:after,
 table.affiliationsTable thead .sorting_desc:after,
 table.affiliationsTable thead .sorting_asc_disabled:after,
 table.affiliationsTable thead .sorting_desc_disabled:after {
-    position: relative;
-    left: 8px;
-    top: 2px;
-    display: inline-block;
-    font-family: 'Glyphicons Halflings';
-    opacity: 0.5;
+  position: relative;
+  left: 8px;
+  top: 2px;
+  display: inline-block;
+  font-family: "Glyphicons Halflings";
+  opacity: 0.5;
 }
 table.affiliationsTable thead .sorting:after {
-    opacity: 0.2;
-    content: "\e150"
+  opacity: 0.2;
+  content: "\e150";
 }
 table.affiliationsTable thead .sorting_asc:after {
-    content: "\e155"
+  content: "\e155";
 }
 table.affiliationsTable thead .sorting_desc:after {
-    content: "\e156"
+  content: "\e156";
 }
 table.affiliationsTable thead .sorting_asc_disabled:after,
 table.affiliationsTable thead .sorting_desc_disabled:after {
-    color: #eee
+  color: #eee;
 }
 
 table.table-bordered.affiliationsTable {
-    border-collapse: separate !important
+  border-collapse: separate !important;
 }
 table.table-bordered.affiliationsTable th,
 table.table-bordered.affiliationsTable td {
-    border-left-width: 0
+  border-left-width: 0;
 }
 table.table-bordered.affiliationsTable th:last-child,
 table.table-bordered.affiliationsTable th:last-child,
 table.table-bordered.affiliationsTable td:last-child,
 table.table-bordered.affiliationsTable td:last-child {
-    border-right-width: 0
+  border-right-width: 0;
 }
 table.table-bordered.affiliationsTable tbody th,
 table.table-bordered.affiliationsTable tbody td {
-    border-bottom-width: 0
+  border-bottom-width: 0;
 }
 
-table.affiliationsTable>tbody>tr.child {
-    padding: 0.5em 1em
+table.affiliationsTable > tbody > tr.child {
+  padding: 0.5em 1em;
 }
-table.affiliationsTable>tbody>tr.child:hover {
-    background: transparent !important
+table.affiliationsTable > tbody > tr.child:hover {
+  background: transparent !important;
 }
-table.affiliationsTable>tbody>tr.child ul {
-    display: inline-block;
-    list-style-type: none;
-    margin: 0;
-    padding: 0
+table.affiliationsTable > tbody > tr.child ul {
+  display: inline-block;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
-table.affiliationsTable>tbody>tr.child ul li {
-    border-bottom: 1px solid #efefef;
-    padding: 0.5em 0
+table.affiliationsTable > tbody > tr.child ul li {
+  border-bottom: 1px solid #efefef;
+  padding: 0.5em 0;
 }
-table.affiliationsTable>tbody>tr.child ul li:first-child {
-    padding-top: 0
+table.affiliationsTable > tbody > tr.child ul li:first-child {
+  padding-top: 0;
 }
-table.affiliationsTable>tbody>tr.child ul li:last-child {
-    border-bottom: none
+table.affiliationsTable > tbody > tr.child ul li:last-child {
+  border-bottom: none;
 }
 
-table.affiliationsTable>tbody>tr.can-edit {
-    cursor:pointer
+table.affiliationsTable > tbody > tr.can-edit {
+  cursor: pointer;
 }
 
 table.affiliationsTable .actions {
-    width: 70px;
+  width: 70px;
 }
 table.affiliationsTable .actions a {
-    margin-left: 10px;
+  margin-left: 10px;
 }
 table.affiliationsTable .actions a .delete-icon:hover {
-    color: #da0000 !important;
+  color: #da0000 !important;
 }
 
 table.affiliationsTable .actions a .fa:hover {
-    color: #024c85;
+  color: #024c85;
 }
-

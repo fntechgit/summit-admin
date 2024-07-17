@@ -11,37 +11,49 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Route, Redirect } from 'react-router-dom'
+import React from "react";
+import { Route, Redirect } from "react-router-dom";
 
 class AuthorizedRoute extends React.Component {
+  render() {
+    let {
+      component: Component,
+      isLoggedUser,
+      backUrl,
+      currentSummit,
+      ...rest
+    } = this.props;
+    return (
+      <Route
+        {...rest}
+        render={(props) => {
+          let { location } = this.props;
+          let currentBackUrl = backUrl == null ? location.pathname : backUrl;
 
-    render() {
-        let { component: Component, isLoggedUser, backUrl, currentSummit, ...rest } = this.props;
-        return (
-            <Route {...rest} render={props => {
-                let { location } = this.props;
-                let currentBackUrl =  backUrl == null ? location.pathname :  backUrl ;
+          if (location.search != null && location.search != null) {
+            currentBackUrl += location.search;
+          }
 
-                if(location.search != null && location.search != null){
-                    currentBackUrl += location.search
-                }
+          if (location.hash != null && location.hash != null) {
+            currentBackUrl += location.hash;
+          }
 
-                if(location.hash != null && location.hash != null){
-                    currentBackUrl += location.hash
-                }
-
-                if (isLoggedUser) {
-                    return (<Component currentSummit={currentSummit} {...props} />);
-                } else {
-                    return (<Redirect to={{pathname: `/?BackUrl=${encodeURIComponent(currentBackUrl)}`, state: { from: location }}} />);
-                }
-
-            }} />
-        )
-    }
+          if (isLoggedUser) {
+            return <Component currentSummit={currentSummit} {...props} />;
+          } else {
+            return (
+              <Redirect
+                to={{
+                  pathname: `/?BackUrl=${encodeURIComponent(currentBackUrl)}`,
+                  state: { from: location }
+                }}
+              />
+            );
+          }
+        }}
+      />
+    );
+  }
 }
 
 export default AuthorizedRoute;
-
-

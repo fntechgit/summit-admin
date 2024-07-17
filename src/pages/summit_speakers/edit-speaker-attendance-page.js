@@ -11,86 +11,94 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
+import React from "react";
+import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from 'react-breadcrumbs';
-import SpeakerAttendanceForm from '../../components/forms/speaker-attendance-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import { getAttendance, resetAttendanceForm, sendAttendanceEmail, saveAttendance } from "../../actions/speaker-actions";
-import '../../styles/edit-speaker-attendance-page.less';
+import { Breadcrumb } from "react-breadcrumbs";
+import SpeakerAttendanceForm from "../../components/forms/speaker-attendance-form";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getAttendance,
+  resetAttendanceForm,
+  sendAttendanceEmail,
+  saveAttendance
+} from "../../actions/speaker-actions";
+import "../../styles/edit-speaker-attendance-page.less";
 
 class EditSpeakerAttendancePage extends React.Component {
+  constructor(props) {
+    const attendanceId = props.match.params.attendance_id;
+    super(props);
 
-    constructor(props) {
-        const attendanceId = props.match.params.attendance_id;
-        super(props);
+    if (!attendanceId) {
+      props.resetAttendanceForm();
+    } else {
+      props.getAttendance(attendanceId);
+    }
+  }
 
-        if (!attendanceId) {
-            props.resetAttendanceForm();
-        } else {
-            props.getAttendance(attendanceId);
-        }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.attendance_id;
+    const newId = this.props.match.params.attendance_id;
+
+    if (newId !== oldId) {
+      if (!newId) {
+        this.props.resetAttendanceForm();
+      } else {
+        this.props.getAttendance(newId);
+      }
+    }
+  }
+
+  render() {
+    const { currentSummit, entity, errors, match } = this.props;
+    const title = entity.id
+      ? T.translate("general.edit")
+      : T.translate("general.add");
+    let breadcrumb = T.translate("general.new");
+
+    if (entity.id) {
+      breadcrumb = entity.id;
+
+      if (entity.speaker) {
+        breadcrumb = `${entity.speaker.first_name} ${entity.speaker.last_name}`;
+      }
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.attendance_id;
-        const newId = this.props.match.params.attendance_id;
-
-        if (newId !== oldId) {
-            if (!newId) {
-                this.props.resetAttendanceForm();
-            } else {
-                this.props.getAttendance(newId);
-            }
-        }
-    }
-
-    render(){
-        const {currentSummit, entity, errors, match} = this.props;
-        const title = (entity.id) ? T.translate("general.edit") : T.translate("general.add");
-        let breadcrumb = T.translate("general.new");
-
-        if(entity.id) {
-            breadcrumb = entity.id;
-
-            if (entity.speaker) {
-                breadcrumb = `${entity.speaker.first_name} ${entity.speaker.last_name}`;
-            }
-        }
-
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {T.translate("edit_speaker_attendance.speaker_attendance")}</h3>
-                <hr/>
-                {currentSummit &&
-                <SpeakerAttendanceForm
-                    history={this.props.history}
-                    currentSummit={currentSummit}
-                    entity={entity}
-                    errors={errors}
-                    onSendEmail={this.props.sendAttendanceEmail}
-                    onSubmit={this.props.saveAttendance}
-                />
-                }
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {T.translate("edit_speaker_attendance.speaker_attendance")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <SpeakerAttendanceForm
+            history={this.props.history}
+            currentSummit={currentSummit}
+            entity={entity}
+            errors={errors}
+            onSendEmail={this.props.sendAttendanceEmail}
+            onSubmit={this.props.saveAttendance}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, currentSpeakerAttendanceState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    ...currentSpeakerAttendanceState
+const mapStateToProps = ({
+  currentSummitState,
+  currentSpeakerAttendanceState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  ...currentSpeakerAttendanceState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getAttendance,
-        resetAttendanceForm,
-        sendAttendanceEmail,
-        saveAttendance,
-    }
-)(EditSpeakerAttendancePage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getAttendance,
+  resetAttendanceForm,
+  sendAttendanceEmail,
+  saveAttendance
+})(EditSpeakerAttendancePage);

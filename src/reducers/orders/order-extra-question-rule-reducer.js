@@ -12,66 +12,66 @@
  **/
 
 import {
-    RESET_ORDER_EXTRA_QUESTION_SUB_QUESTION_FORM,
-    UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION,
-    RECEIVE_ORDER_EXTRA_QUESTION_SUB_QUESTION,
-    ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED
-} from '../../actions/order-actions';
+  RESET_ORDER_EXTRA_QUESTION_SUB_QUESTION_FORM,
+  UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION,
+  RECEIVE_ORDER_EXTRA_QUESTION_SUB_QUESTION,
+  ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED
+} from "../../actions/order-actions";
 
-import { VALIDATE } from 'openstack-uicore-foundation/lib/utils/actions';
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 export const DEFAULT_ENTITY = {
-    id: 0,
-    visibility: 'Visible',
-    visibility_condition: "Equal",
-    answer_values: [],
-    answer_values_operator: 'And',
-    sub_question_id: null
-}
+  id: 0,
+  visibility: "Visible",
+  visibility_condition: "Equal",
+  answer_values: [],
+  answer_values_operator: "And",
+  sub_question_id: null
+};
 
 const DEFAULT_STATE = {
-    entity: { ...DEFAULT_ENTITY},
-    errors: {},
+  entity: { ...DEFAULT_ENTITY },
+  errors: {}
 };
 
 const orderExtraQuestionRuleReducer = (state = DEFAULT_STATE, action) => {
-    const { type, payload } = action
-    switch (type) {
-        case LOGOUT_USER: {
-            // we need this in case the token expired while editing the form
-            if (payload.hasOwnProperty('persistStore')) {
-                return state;
-            } else {
-                return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-            }
-        }
-        case RESET_ORDER_EXTRA_QUESTION_SUB_QUESTION_FORM: {
-            return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
-        case UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION: {
-            return { ...state, entity: { ...payload }, errors: {} };
-        }
-        case RECEIVE_ORDER_EXTRA_QUESTION_SUB_QUESTION: {
-            let entity = { ...payload.response };
-
-            for (var key in entity) {
-                if (entity.hasOwnProperty(key)) {
-                    entity[key] = (entity[key] == null) ? '' : entity[key];
-                }
-            }
-
-            return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-        }
-        case ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED: {
-            return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
-        case VALIDATE: {
-            return { ...state, errors: payload.errors };
-        }
-        default:
-            return state;
+  const { type, payload } = action;
+  switch (type) {
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
+      } else {
+        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      }
     }
+    case RESET_ORDER_EXTRA_QUESTION_SUB_QUESTION_FORM: {
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case UPDATE_ORDER_EXTRA_QUESTION_SUB_QUESTION: {
+      return { ...state, entity: { ...payload }, errors: {} };
+    }
+    case RECEIVE_ORDER_EXTRA_QUESTION_SUB_QUESTION: {
+      let entity = { ...payload.response };
+
+      for (var key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
+        }
+      }
+
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case ORDER_EXTRA_QUESTION_SUB_QUESTION_ADDED: {
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
+    default:
+      return state;
+  }
 };
 
 export default orderExtraQuestionRuleReducer;

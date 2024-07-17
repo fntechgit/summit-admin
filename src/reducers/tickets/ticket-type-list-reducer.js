@@ -11,73 +11,94 @@
  * limitations under the License.
  **/
 
-import
-{
+import {
   RECEIVE_TICKET_TYPES,
   REQUEST_TICKET_TYPES,
   TICKET_TYPE_DELETED,
   TICKET_TYPES_SEEDED
-} from '../../actions/ticket-actions';
+} from "../../actions/ticket-actions";
 
-import {SET_CURRENT_SUMMIT} from "../../actions/summit-actions";
-import { LOGOUT_USER } from 'openstack-uicore-foundation/lib/security/actions';
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   ticketTypes: [],
-  order: 'name',
+  order: "name",
   orderDir: 1,
   totalTicketTypes: 0,
   audienceFilter: [],
   currentPage: 1,
   lastPage: 1,
-  perPage: 10,
+  perPage: 10
 };
 
 const ticketTypeListReducer = (state = DEFAULT_STATE, action) => {
-  const {type, payload} = action
+  const { type, payload } = action;
   switch (type) {
     case SET_CURRENT_SUMMIT:
     case LOGOUT_USER: {
       return DEFAULT_STATE;
     }
     case REQUEST_TICKET_TYPES: {
-      let {order, orderDir, currentPage, perPage, audienceFilter} = payload;
-      return {...state, order, orderDir, currentPage, perPage, audienceFilter}
+      let { order, orderDir, currentPage, perPage, audienceFilter } = payload;
+      return {
+        ...state,
+        order,
+        orderDir,
+        currentPage,
+        perPage,
+        audienceFilter
+      };
     }
     case RECEIVE_TICKET_TYPES: {
-      let {total, last_page} = payload.response;
-      let ticketTypes = payload.response.data.map(t => {
-
+      let { total, last_page } = payload.response;
+      let ticketTypes = payload.response.data.map((t) => {
         return {
           id: t.id,
           name: t.name,
           audience: t.audience,
           external_id: t.external_id,
-          badge_type_name: t.hasOwnProperty("badge_type") ? t.badge_type.name : 'TBD',
-          cost: t?.cost,
+          badge_type_name: t.hasOwnProperty("badge_type")
+            ? t.badge_type.name
+            : "TBD",
+          cost: t?.cost
         };
-      })
+      });
 
-      return {...state, ticketTypes: ticketTypes, totalTicketTypes: total, lastPage: last_page};
+      return {
+        ...state,
+        ticketTypes: ticketTypes,
+        totalTicketTypes: total,
+        lastPage: last_page
+      };
     }
     case TICKET_TYPES_SEEDED: {
-      let {total, last_page} = payload.response;
-      let ticketTypes = payload.response.data.map(t => {
-
+      let { total, last_page } = payload.response;
+      let ticketTypes = payload.response.data.map((t) => {
         return {
           id: t.id,
           name: t.name,
           external_id: t.external_id,
-          badge_type_name: t.hasOwnProperty("badge_type") ? t.badge_type.name : 'TBD',
-          cost: t?.cost,
+          badge_type_name: t.hasOwnProperty("badge_type")
+            ? t.badge_type.name
+            : "TBD",
+          cost: t?.cost
         };
-      })
+      });
 
-      return {...state, ticketTypes: [...state.ticketTypes, ticketTypes], totalTicketTypes: total, lastPage: last_page};
+      return {
+        ...state,
+        ticketTypes: [...state.ticketTypes, ticketTypes],
+        totalTicketTypes: total,
+        lastPage: last_page
+      };
     }
     case TICKET_TYPE_DELETED: {
-      let {ticketTypeId} = payload;
-      return {...state, ticketTypes: state.ticketTypes.filter(t => t.id !== ticketTypeId)};
+      let { ticketTypeId } = payload;
+      return {
+        ...state,
+        ticketTypes: state.ticketTypes.filter((t) => t.id !== ticketTypeId)
+      };
     }
     default:
       return state;

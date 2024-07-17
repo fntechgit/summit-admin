@@ -13,108 +13,115 @@
 
 import React, { Component } from "react";
 import Switch from "react-switch";
-import styles from '../../styles/edit-label-slider.module.less';
+import styles from "../../styles/edit-label-slider.module.less";
 
 class EditNameInput extends Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      editing: false,
+      value: props.value
+    };
+    this.handleChange = this.handleChange.bind(this);
+    this.onSave = this.onSave.bind(this);
+    this.onCancel = this.onCancel.bind(this);
+    this.onEdit = this.onEdit.bind(this);
+  }
 
-        this.state = {
-            editing: false,
-            value: props.value,
-        }
-        this.handleChange = this.handleChange.bind(this);
-        this.onSave = this.onSave.bind(this);
-        this.onCancel = this.onCancel.bind(this);
-        this.onEdit = this.onEdit.bind(this);
-    }
+  handleChange(ev) {
+    let { value, id } = ev.target;
+    this.setState({ ...this.state, value: value });
+  }
 
-    handleChange(ev){
-        let {value, id} = ev.target;
-        this.setState({...this.state, value: value});
-    }
+  onEdit(ev) {
+    ev.preventDefault();
+    this.setState({ ...this.state, editing: true });
+  }
 
-    onEdit(ev){
-        ev.preventDefault();
-        this.setState({...this.state, editing: true});
-    }
+  onSave(ev) {
+    ev.preventDefault();
+    this.setState({ ...this.state, editing: false });
+    // send event
+    this.props.onSave(this.state.value);
+  }
 
-    onSave(ev){
-        ev.preventDefault();
-        this.setState({...this.state, editing: false});
-        // send event
-        this.props.onSave(this.state.value);
-    }
+  onCancel(ev) {
+    ev.preventDefault();
+    this.setState({ ...this.state, editing: false });
+  }
 
-    onCancel(ev){
-        ev.preventDefault();
-        this.setState({...this.state, editing: false});
-    }
-
-    render(){
-        let { editing, value} = this.state;
-        let { id, disabled } = this.props;
-        return (
-            <>
-            {
-                !editing && !disabled &&
-                <a className={styles.action_link} href="#" onClick={this.onEdit}>Edit Name</a>
-            }
-            {
-                editing &&
-                <span>
-                    <input
-                        className={styles.input_text}
-                        type="text"
-                        id={id}
-                        name={id}
-                        value={value}
-                        onChange={this.handleChange}
-                    />
-                    <a className={styles.action_link} href="#" onClick={this.onSave}>Save</a>
-                    <a className={styles.action_link} href="#" onClick={this.onCancel}>Cancel</a>
-                </span>
-            }
-            </>
-        );
-    }
+  render() {
+    let { editing, value } = this.state;
+    let { id, disabled } = this.props;
+    return (
+      <>
+        {!editing && !disabled && (
+          <a className={styles.action_link} href="#" onClick={this.onEdit}>
+            Edit Name
+          </a>
+        )}
+        {editing && (
+          <span>
+            <input
+              className={styles.input_text}
+              type="text"
+              id={id}
+              name={id}
+              value={value}
+              onChange={this.handleChange}
+            />
+            <a className={styles.action_link} href="#" onClick={this.onSave}>
+              Save
+            </a>
+            <a className={styles.action_link} href="#" onClick={this.onCancel}>
+              Cancel
+            </a>
+          </span>
+        )}
+      </>
+    );
+  }
 }
 
 export default class EditLabelSlider extends Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.onSave = this.onSave.bind(this);
+  }
 
-    constructor(props) {
-        super(props);
-        this.handleChange = this.handleChange.bind(this);
-        this.onSave = this.onSave.bind(this);
-    }
+  handleChange(checked) {
+    const { id, value } = this.props;
+    this.props.onChange(id, checked, value);
+  }
 
-    handleChange(checked) {
-        const {id, value} = this.props;
-        this.props.onChange(id, checked, value);
-    }
+  onSave(value) {
+    const { id, checked } = this.props;
+    this.props.onChange(id, checked, value);
+  }
 
-    onSave(value){
-        const {id, checked} = this.props;
-        this.props.onChange(id, checked, value);
-    }
-
-    render() {
-        let {value, id, checked, disabled} = this.props;
-        return (
-                <label htmlFor="material-switch" className={styles.editLabelSlider}>
-                    <Switch
-                        checked={checked}
-                        onChange={this.handleChange}
-                        uncheckedIcon={false}
-                        checkedIcon={false}
-                        className="react-switch"
-                        id={id}
-                        disabled={disabled}
-                    />
-                    <span className={styles.label}>{value}</span>
-                    <EditNameInput value={value} id={id} onSave={this.onSave} disabled={disabled} />
-                </label>
-        )
-    }
+  render() {
+    let { value, id, checked, disabled } = this.props;
+    return (
+      <label htmlFor="material-switch" className={styles.editLabelSlider}>
+        <Switch
+          checked={checked}
+          onChange={this.handleChange}
+          uncheckedIcon={false}
+          checkedIcon={false}
+          className="react-switch"
+          id={id}
+          disabled={disabled}
+        />
+        <span className={styles.label}>{value}</span>
+        <EditNameInput
+          value={value}
+          id={id}
+          onSave={this.onSave}
+          disabled={disabled}
+        />
+      </label>
+    );
+  }
 }

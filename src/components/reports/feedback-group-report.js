@@ -11,150 +11,164 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { Table } from 'openstack-uicore-foundation/lib/components'
-import StarRatings from 'react-star-ratings';
-const Query = require('graphql-query-builder');
-import wrapReport from './report-wrapper';
-import {flattenData} from "../../actions/report-actions";
-
-
+import React from "react";
+import { Table } from "openstack-uicore-foundation/lib/components";
+import StarRatings from "react-star-ratings";
+const Query = require("graphql-query-builder");
+import wrapReport from "./report-wrapper";
+import { flattenData } from "../../actions/report-actions";
 
 class FeedbackGroupReport extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        let reportName = props.location.state ? props.location.state.name : `${props.match.params.group} ${props.match.params.group_id}`;
+    let reportName = props.location.state
+      ? props.location.state.name
+      : `${props.match.params.group} ${props.match.params.group_id}`;
 
-        this.state = {
-            reportName: reportName
-        };
+    this.state = {
+      reportName: reportName
+    };
 
-        this.buildReportQuery = this.buildReportQuery.bind(this);
-        this.preProcessData = this.preProcessData.bind(this);
-        this.getName = this.getName.bind(this);
+    this.buildReportQuery = this.buildReportQuery.bind(this);
+    this.preProcessData = this.preProcessData.bind(this);
+    this.getName = this.getName.bind(this);
+  }
 
-    }
+  buildReportQuery(filters, listFilters, sortKey, sortDir) {
+    const { currentSummit, match } = this.props;
+    listFilters.summitId = currentSummit.id;
+    filters.ordering = filters.ordering ? filters.ordering : "rate";
+    let { group, group_id } = match.params;
+    let query = null;
 
-    buildReportQuery(filters, listFilters, sortKey, sortDir) {
-        const {currentSummit, match} = this.props;
-        listFilters.summitId = currentSummit.id;
-        filters.ordering = filters.ordering ? filters.ordering : 'rate';
-        let {group, group_id} = match.params;
-        let query = null;
-
-        switch (group) {
-            case 'presentation': {
-                listFilters.eventId = parseInt(group_id);
-            }
-            break;
-            case 'track': {
-                listFilters.categoryId = parseInt(group_id);
-            }
-            break;
-            case 'speaker': {
-                listFilters.speakerId = parseInt(group_id);
-            }
-            break;
+    switch (group) {
+      case "presentation":
+        {
+          listFilters.eventId = parseInt(group_id);
         }
-
-        if (sortKey) {
-            let querySortKey = this.translateSortKey(sortKey);
-            let order = (sortDir == 1) ? '' : '-';
-            filters.ordering = order + '' + querySortKey;
+        break;
+      case "track":
+        {
+          listFilters.categoryId = parseInt(group_id);
         }
-
-        query = new Query("feedbacks", listFilters);
-        let presentation = new Query("presentation");
-        presentation.find(["id", "speakerNames"]);
-        let event = new Query("event");
-        event.find(["id", "title", {"presentation": presentation}]);
-        let owner = new Query("owner");
-        owner.find(["id", "firstName", "lastName"]);
-        let results = new Query("results", filters);
-        results.find(["id", "rate", "note", {"event": event}, {"owner": owner}])
-
-        query.find([{"results": results}, "totalCount", {"extraStat":"avgRate"}]);
-
-        return query;
+        break;
+      case "speaker":
+        {
+          listFilters.speakerId = parseInt(group_id);
+        }
+        break;
     }
 
-    translateSortKey(key) {
-        let sortKey = key;
-
-        return sortKey;
+    if (sortKey) {
+      let querySortKey = this.translateSortKey(sortKey);
+      let order = sortDir == 1 ? "" : "-";
+      filters.ordering = order + "" + querySortKey;
     }
 
-    getName() {
-        return this.state.reportName;
-    }
+    query = new Query("feedbacks", listFilters);
+    let presentation = new Query("presentation");
+    presentation.find(["id", "speakerNames"]);
+    let event = new Query("event");
+    event.find(["id", "title", { presentation: presentation }]);
+    let owner = new Query("owner");
+    owner.find(["id", "firstName", "lastName"]);
+    let results = new Query("results", filters);
+    results.find(["id", "rate", "note", { event: event }, { owner: owner }]);
 
+    query.find([{ results: results }, "totalCount", { extraStat: "avgRate" }]);
 
-    preProcessData(data, extraData, forExport=false) {
+    return query;
+  }
 
-        let processedData = flattenData(data).map(it => {
-            let rate = forExport ? it.rate : <StarRatings rating={it.rate} starRatedColor="gold" starDimension="10px" starSpacing="1px" isSelectable={false}/>
-            return ({
-                rate: rate,
-                presentation: it.event_title,
-                speakers: it.event_presentation_speakerNames,
-                critic: it.owner_firstName + ' ' + it.owner_lastName,
-                note: it.note,
-            });
-        });
+  translateSortKey(key) {
+    let sortKey = key;
 
-        let columns = [
-            { columnKey: 'rate', value: 'Rate', sortable: true },
-            { columnKey: 'presentation', value: 'Presentation' },
-            { columnKey: 'speakers', value: 'Speakers' },
-            { columnKey: 'critic', value: 'Critic' },
-            { columnKey: 'note', value: 'Note' },
-        ];
+    return sortKey;
+  }
 
-        return {reportData: processedData, tableColumns: columns};
-    }
+  getName() {
+    return this.state.reportName;
+  }
 
+  preProcessData(data, extraData, forExport = false) {
+    let processedData = flattenData(data).map((it) => {
+      let rate = forExport ? (
+        it.rate
+      ) : (
+        <StarRatings
+          rating={it.rate}
+          starRatedColor="gold"
+          starDimension="10px"
+          starSpacing="1px"
+          isSelectable={false}
+        />
+      );
+      return {
+        rate: rate,
+        presentation: it.event_title,
+        speakers: it.event_presentation_speakerNames,
+        critic: it.owner_firstName + " " + it.owner_lastName,
+        note: it.note
+      };
+    });
 
-    render() {
-        let {data, extraData, totalCount, extraStat, sortKey, sortDir, location} = this.props;
-        let {reportName} = this.state;
-        let storedDataName = this.props.name;
+    let columns = [
+      { columnKey: "rate", value: "Rate", sortable: true },
+      { columnKey: "presentation", value: "Presentation" },
+      { columnKey: "speakers", value: "Speakers" },
+      { columnKey: "critic", value: "Critic" },
+      { columnKey: "note", value: "Note" }
+    ];
 
-        if (!data || storedDataName !== this.getName()) return (<div />)
+    return { reportData: processedData, tableColumns: columns };
+  }
 
-        let avgRate = extraStat ? extraStat : 0;
+  render() {
+    let { data, extraData, totalCount, extraStat, sortKey, sortDir, location } =
+      this.props;
+    let { reportName } = this.state;
+    let storedDataName = this.props.name;
 
-        let {reportData, tableColumns} = this.preProcessData(data, extraData);
+    if (!data || storedDataName !== this.getName()) return <div />;
 
-        let table_options = {
-            sortCol: sortKey,
-            sortDir: sortDir,
-            actions: {}
-        };
+    let avgRate = extraStat ? extraStat : 0;
 
-        return (
-            <div>
-                <div className="panel panel-default">
-                    <div className="panel-heading">
-                        {reportName} &nbsp;-&nbsp;
-                        <StarRatings rating={avgRate} starRatedColor="gold" starDimension="20px" starSpacing="3px"
-                                     isSelectable={false}/>
-                        &nbsp; of {totalCount} feedbacks
-                    </div>
+    let { reportData, tableColumns } = this.preProcessData(data, extraData);
 
-                    <div className="table-responsive">
-                        <Table
-                            options={table_options}
-                            data={reportData}
-                            columns={tableColumns}
-                            onSort={this.props.onSort}
-                        />
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    let table_options = {
+      sortCol: sortKey,
+      sortDir: sortDir,
+      actions: {}
+    };
+
+    return (
+      <div>
+        <div className="panel panel-default">
+          <div className="panel-heading">
+            {reportName} &nbsp;-&nbsp;
+            <StarRatings
+              rating={avgRate}
+              starRatedColor="gold"
+              starDimension="20px"
+              starSpacing="3px"
+              isSelectable={false}
+            />
+            &nbsp; of {totalCount} feedbacks
+          </div>
+
+          <div className="table-responsive">
+            <Table
+              options={table_options}
+              data={reportData}
+              columns={tableColumns}
+              onSort={this.props.onSort}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
-
-export default wrapReport(FeedbackGroupReport, {pagination: true});
+export default wrapReport(FeedbackGroupReport, { pagination: true });

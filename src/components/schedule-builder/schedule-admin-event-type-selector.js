@@ -10,36 +10,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react';
-import Select from 'react-select';
+import React from "react";
+import Select from "react-select";
 import T from "i18n-react/dist/i18n-react";
 
 class ScheduleAdminEventTypeSelector extends React.Component {
+  constructor(props) {
+    super(props);
+    this.onChange = this.onChange.bind(this);
+  }
 
-    constructor(props){
-        super(props);
-        this.onChange = this.onChange.bind(this);
-    }
+  onChange(selectedOption) {
+    this.props.onEventTypeChanged(selectedOption ? selectedOption.value : null);
+  }
 
-    onChange(selectedOption){
-        this.props.onEventTypeChanged(selectedOption ? selectedOption.value : null);
-    }
+  render() {
+    let { eventTypes, currentValue } = this.props;
 
-    render(){
-        let { eventTypes, currentValue } = this.props;
-
-        return (
-            <Select
-                placeholder={T.translate("schedule.placeholders.select_event_type")}
-                className="event-type-selector"
-                name="form-field-name"
-                value={currentValue}
-                onChange={this.onChange}
-                options={eventTypes}
-                isClearable={true}
-            />
-        )
-    }
+    return (
+      <Select
+        placeholder={T.translate("schedule.placeholders.select_event_type")}
+        className="event-type-selector"
+        name="form-field-name"
+        value={currentValue}
+        onChange={this.onChange}
+        options={eventTypes}
+        isClearable={true}
+      />
+    );
+  }
 }
 
 export default ScheduleAdminEventTypeSelector;

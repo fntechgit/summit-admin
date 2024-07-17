@@ -10,35 +10,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React from 'react';
-import Select from 'react-select';
+import React from "react";
+import Select from "react-select";
 import T from "i18n-react/dist/i18n-react";
 
 class ScheduleAdminOrderSelector extends React.Component {
+  onChange(selectedOption) {
+    this.props.onOrderByChanged(selectedOption ? selectedOption.value : null);
+  }
 
-    onChange(selectedOption){
-        this.props.onOrderByChanged(selectedOption ? selectedOption.value : null);
+  render() {
+    let { sortOptions, currentValue, disableTrackOrder } = this.props;
+    if (disableTrackOrder) {
+      sortOptions = sortOptions.filter((op) => op.value !== "trackchairsel");
     }
 
-    render(){
-        let { sortOptions, currentValue, disableTrackOrder } = this.props;
-        if (disableTrackOrder) {
-            sortOptions = sortOptions.filter(op => op.value !== 'trackchairsel')
-        }
+    let theValue = sortOptions.find((op) => op.value === currentValue);
 
-        let theValue = sortOptions.find(op => op.value === currentValue);
-
-        return (
-            <Select
-                placeholder={T.translate("schedule.placeholders.select_order_by")}
-                className="order-by-selector"
-                name="form-field-name"
-                value={theValue}
-                onChange={this.onChange.bind(this)}
-                options={sortOptions}
-            />
-        )
-    }
+    return (
+      <Select
+        placeholder={T.translate("schedule.placeholders.select_order_by")}
+        className="order-by-selector"
+        name="form-field-name"
+        value={theValue}
+        onChange={this.onChange.bind(this)}
+        options={sortOptions}
+      />
+    );
+  }
 }
 
 export default ScheduleAdminOrderSelector;

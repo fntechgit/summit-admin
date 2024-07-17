@@ -11,30 +11,36 @@
  * limitations under the License.
  **/
 
-import React, {useEffect} from 'react'
-import {connect} from 'react-redux';
-import T from 'i18n-react/dist/i18n-react';
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
+import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import {Pagination} from 'react-bootstrap';
-import {FreeTextSearch, Table} from 'openstack-uicore-foundation/lib/components';
-import {getSummitById} from '../../actions/summit-actions';
-import {getEmailTemplates, deleteEmailTemplate} from "../../actions/email-actions";
+import { Pagination } from "react-bootstrap";
+import {
+  FreeTextSearch,
+  Table
+} from "openstack-uicore-foundation/lib/components";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getEmailTemplates,
+  deleteEmailTemplate
+} from "../../actions/email-actions";
 
 const EmailTemplateListPage = ({
-                                 templates,
-                                 lastPage,
-                                 currentPage,
-                                 perPage,
-                                 term,
-                                 order,
-                                 orderDir,
-                                 totalTemplates,
-                                 history,
-                                 ...props
-                               }) => {
+  templates,
+  lastPage,
+  currentPage,
+  perPage,
+  term,
+  order,
+  orderDir,
+  totalTemplates,
+  history,
+  ...props
+}) => {
   useEffect(() => {
     props.getEmailTemplates(term, currentPage, perPage, order, orderDir);
-  }, [])
+  }, []);
 
   const handleEdit = (template_id) => {
     history.push(`/app/emails/templates/${template_id}`);
@@ -58,11 +64,14 @@ const EmailTemplateListPage = ({
   };
 
   const handleDeleteEmailTemplate = (templateId) => {
-    const template = templates.find(t => t.id === templateId);
+    const template = templates.find((t) => t.id === templateId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("emails.delete_template_warning") + ' ' + template.identifier,
+      text:
+        T.translate("emails.delete_template_warning") +
+        " " +
+        template.identifier,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -72,29 +81,37 @@ const EmailTemplateListPage = ({
         props.deleteEmailTemplate(templateId);
       }
     });
-  }
+  };
 
   const columns = [
-    {columnKey: 'id', value: T.translate("general.id"), sortable: true},
-    {columnKey: 'identifier', value: T.translate("emails.name"), styles: {wordBreak: 'break-all'}, sortable: true},
-    {columnKey: 'subject', value: T.translate("emails.subject")},
-    {columnKey: 'from_email', value: T.translate("emails.from_email")},
+    { columnKey: "id", value: T.translate("general.id"), sortable: true },
+    {
+      columnKey: "identifier",
+      value: T.translate("emails.name"),
+      styles: { wordBreak: "break-all" },
+      sortable: true
+    },
+    { columnKey: "subject", value: T.translate("emails.subject") },
+    { columnKey: "from_email", value: T.translate("emails.from_email") }
   ];
 
   const table_options = {
     sortCol: order,
     sortDir: orderDir,
     actions: {
-      edit: {onClick: handleEdit},
-      delete: {onClick: handleDeleteEmailTemplate}
+      edit: { onClick: handleEdit },
+      delete: { onClick: handleDeleteEmailTemplate }
     }
-  }
+  };
 
   return (
     <div className="container">
-      <h3> {T.translate("emails.template_list")} ({totalTemplates})</h3>
-      <div className={'row'}>
-        <div className={'col-md-6'}>
+      <h3>
+        {" "}
+        {T.translate("emails.template_list")} ({totalTemplates})
+      </h3>
+      <div className={"row"}>
+        <div className={"col-md-6"}>
           <FreeTextSearch
             value={term}
             placeholder={T.translate("emails.placeholders.search_templates")}
@@ -102,17 +119,20 @@ const EmailTemplateListPage = ({
           />
         </div>
         <div className="col-md-6 text-right">
-          <button className="btn btn-primary right-space" onClick={handleNewEmailTemplate}>
+          <button
+            className="btn btn-primary right-space"
+            onClick={handleNewEmailTemplate}
+          >
             {T.translate("emails.add_template")}
           </button>
         </div>
       </div>
 
-      {templates.length === 0 &&
+      {templates.length === 0 && (
         <div>{T.translate("emails.no_templates")}</div>
-      }
+      )}
 
-      {templates.length > 0 &&
+      {templates.length > 0 && (
         <div>
           <Table
             options={table_options}
@@ -134,22 +154,18 @@ const EmailTemplateListPage = ({
             onSelect={handlePageChange}
           />
         </div>
-      }
-
+      )}
     </div>
-  )
-}
+  );
+};
 
-const mapStateToProps = ({directoryState, emailTemplateListState}) => ({
+const mapStateToProps = ({ directoryState, emailTemplateListState }) => ({
   summits: directoryState.summits,
   ...emailTemplateListState
-})
+});
 
-export default connect(
-  mapStateToProps,
-  {
-    getSummitById,
-    getEmailTemplates,
-    deleteEmailTemplate
-  }
-)(EmailTemplateListPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getEmailTemplates,
+  deleteEmailTemplate
+})(EmailTemplateListPage);

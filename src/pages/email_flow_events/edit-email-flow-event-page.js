@@ -11,73 +11,82 @@
  * limitations under the License.
  **/
 
-import React from 'react'
-import { connect } from 'react-redux';
-import { Breadcrumb } from 'react-breadcrumbs';
+import React from "react";
+import { connect } from "react-redux";
+import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import EmailFlowEventForm from '../../components/forms/email-flow-event-form';
-import { getSummitById }  from '../../actions/summit-actions';
-import {getEmailFlowEvent, resetEmailFlowEventForm, saveEmailFlowEvent} from '../../actions/email-flows-events-actions';
-import '../../styles/edit-email-flow-event-page.less';
+import EmailFlowEventForm from "../../components/forms/email-flow-event-form";
+import { getSummitById } from "../../actions/summit-actions";
+import {
+  getEmailFlowEvent,
+  resetEmailFlowEventForm,
+  saveEmailFlowEvent
+} from "../../actions/email-flows-events-actions";
+import "../../styles/edit-email-flow-event-page.less";
 
 class EditEmailFlowEventPage extends React.Component {
+  constructor(props) {
+    const { match } = props;
+    const eventId = match.params.event_id;
+    super(props);
 
-    constructor(props) {
-        const { match } = props;
-        const eventId = match.params.event_id;
-        super(props);
+    props.getEmailFlowEvent(eventId);
+  }
 
-        props.getEmailFlowEvent(eventId);
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const oldId = prevProps.match.params.event_id;
+    const newId = this.props.match.params.event_id;
+
+    if (oldId !== newId) {
+      if (!newId) {
+        this.props.resetEmailFlowEventForm();
+      } else {
+        this.props.getEmailFlowEvent(newId);
+      }
     }
+  }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const oldId = prevProps.match.params.event_id;
-        const newId = this.props.match.params.event_id;
+  render() {
+    const { currentSummit, entity, errors, match, history } = this.props;
+    const title = T.translate("general.edit");
+    const breadcrumb = entity.id
+      ? entity.flow_name
+      : T.translate("general.new");
 
-        if (oldId !== newId) {
-            if (!newId) {
-                this.props.resetEmailFlowEventForm();
-            } else {
-                this.props.getEmailFlowEvent(newId);
-            }
-        }
-    }
-
-    render(){
-        const {currentSummit, entity, errors, match, history} = this.props;
-        const title = T.translate("general.edit")
-        const breadcrumb = (entity.id) ? entity.flow_name : T.translate("general.new");
-
-        return(
-            <div className="container">
-                <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-                <h3>{title} {entity.flow_name} {T.translate("edit_email_flow_event.email_flow_event")}</h3>
-                <hr/>
-                {currentSummit &&
-                <EmailFlowEventForm
-                    entity={entity}
-                    currentSummit={currentSummit}
-                    errors={errors}
-                    onSubmit={this.props.saveEmailFlowEvent}
-                />
-                }
-            </div>
-        )
-    }
+    return (
+      <div className="container">
+        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        <h3>
+          {title} {entity.flow_name}{" "}
+          {T.translate("edit_email_flow_event.email_flow_event")}
+        </h3>
+        <hr />
+        {currentSummit && (
+          <EmailFlowEventForm
+            entity={entity}
+            currentSummit={currentSummit}
+            errors={errors}
+            onSubmit={this.props.saveEmailFlowEvent}
+          />
+        )}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = ({ currentSummitState, emailFLowEventState, baseState }) => ({
-    currentSummit : currentSummitState.currentSummit,
-    loading: baseState.loading,
-    ...emailFLowEventState
+const mapStateToProps = ({
+  currentSummitState,
+  emailFLowEventState,
+  baseState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  loading: baseState.loading,
+  ...emailFLowEventState
 });
 
-export default connect (
-    mapStateToProps,
-    {
-        getSummitById,
-        getEmailFlowEvent,
-        resetEmailFlowEventForm,
-        saveEmailFlowEvent
-    }
-)(EditEmailFlowEventPage);
+export default connect(mapStateToProps, {
+  getSummitById,
+  getEmailFlowEvent,
+  resetEmailFlowEventForm,
+  saveEmailFlowEvent
+})(EditEmailFlowEventPage);

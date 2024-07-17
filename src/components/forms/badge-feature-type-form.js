@@ -13,151 +13,166 @@
 
 import React from "react";
 import T from "i18n-react";
-import {Input, TextEditor, UploadInput} from "openstack-uicore-foundation/lib/components";
-import {hasErrors, isEmpty, scrollToError, shallowEqual} from "../../utils/methods";
+import {
+  Input,
+  TextEditor,
+  UploadInput
+} from "openstack-uicore-foundation/lib/components";
+import {
+  hasErrors,
+  isEmpty,
+  scrollToError,
+  shallowEqual
+} from "../../utils/methods";
 
 class BadgeFeatureTypeForm extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.state = {
+      entity: { ...props.entity },
+      errors: props.errors
+    };
 
-        this.state = {
-            entity: {...props.entity},
-            errors: props.errors
-        };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleUploadImage = this.handleUploadImage.bind(this);
+    this.handleRemoveFile = this.handleRemoveFile.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleUploadImage = this.handleUploadImage.bind(this);
-        this.handleRemoveFile = this.handleRemoveFile.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const state = {};
+    scrollToError(this.props.errors);
+
+    if (!shallowEqual(prevProps.entity, this.props.entity)) {
+      state.entity = { ...this.props.entity };
+      state.errors = {};
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const state = {};
-        scrollToError(this.props.errors);
-
-        if(!shallowEqual(prevProps.entity, this.props.entity)) {
-            state.entity = {...this.props.entity};
-            state.errors = {};
-        }
-
-        if (!shallowEqual(prevProps.errors, this.props.errors)) {
-            state.errors = {...this.props.errors};
-        }
-
-        if (!isEmpty(state)) {
-            this.setState({...this.state, ...state})
-        }
+    if (!shallowEqual(prevProps.errors, this.props.errors)) {
+      state.errors = { ...this.props.errors };
     }
 
-    handleChange(ev) {
-        const entity = {...this.state.entity};
-        const errors = {...this.state.errors};
-        let {value, id} = ev.target;
+    if (!isEmpty(state)) {
+      this.setState({ ...this.state, ...state });
+    }
+  }
 
-        if (ev.target.type === 'checkbox') {
-            value = ev.target.checked;
-        }
+  handleChange(ev) {
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
+    let { value, id } = ev.target;
 
-        errors[id] = '';
-        entity[id] = value;
-        this.setState({entity: entity, errors: errors});
+    if (ev.target.type === "checkbox") {
+      value = ev.target.checked;
     }
 
-    handleSubmit(ev) {
-        ev.preventDefault();
-        this.props.onSubmit(this.state.entity);
+    errors[id] = "";
+    entity[id] = value;
+    this.setState({ entity: entity, errors: errors });
+  }
+
+  handleSubmit(ev) {
+    ev.preventDefault();
+    this.props.onSubmit(this.state.entity);
+  }
+
+  handleUploadImage(file) {
+    const entity = { ...this.state.entity };
+
+    entity.image = file.preview;
+    this.setState({ entity: entity });
+
+    const formData = new FormData();
+    formData.append("file", file);
+    this.props.onUploadImage(this.state.entity, formData, "profile");
+  }
+
+  handleRemoveFile(attr) {
+    const entity = { ...this.state.entity };
+
+    entity[attr] = "";
+
+    if (attr === "image") {
+      this.props.onRemoveImage(entity.id);
     }
 
-    handleUploadImage(file) {
-        const entity = {...this.state.entity};
+    this.setState({ entity: entity });
+  }
 
-        entity.image = file.preview;
-        this.setState({entity:entity});
+  render() {
+    const { entity, errors } = this.state;
 
-        const formData = new FormData();
-        formData.append('file', file);
-        this.props.onUploadImage(this.state.entity, formData, 'profile')
-    }
+    return (
+      <form className="badge-feature-type-form">
+        <input type="hidden" id="id" value={entity.id} />
+        <div className="row form-group">
+          <div className="col-md-12">
+            <label> {T.translate("edit_badge_feature.name")} *</label>
+            <Input
+              id="name"
+              className="form-control"
+              error={hasErrors("name", errors)}
+              onChange={this.handleChange}
+              value={entity.name}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-12">
+            <label> {T.translate("edit_badge_feature.description")} *</label>
+            <TextEditor
+              id="description"
+              value={entity.description}
+              onChange={this.handleChange}
+              error={hasErrors("description", errors)}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-12">
+            <label>
+              {" "}
+              {T.translate("edit_badge_feature.template_content")} *
+            </label>
+            <TextEditor
+              id="template_content"
+              value={entity.template_content}
+              onChange={this.handleChange}
+              error={hasErrors("template_content", errors)}
+            />
+          </div>
+        </div>
+        {entity.id !== 0 && (
+          <div className="row form-group">
+            <div className="col-md-12">
+              <label> {T.translate("edit_badge_feature.image")} </label>
+              <UploadInput
+                value={entity.image}
+                handleUpload={this.handleUploadImage}
+                handleRemove={(ev) => this.handleRemoveFile("image")}
+                className="dropzone col-md-6"
+                multiple={false}
+                accept="image/*"
+              />
+            </div>
+          </div>
+        )}
+        <hr />
 
-    handleRemoveFile(attr) {
-        const entity = {...this.state.entity};
-
-        entity[attr] = '';
-
-        if (attr === 'image') {
-            this.props.onRemoveImage(entity.id);
-        }
-
-        this.setState({entity:entity});
-    }
-
-    render(){
-        const {entity, errors} = this.state;
-
-        return(
-            <form className="badge-feature-type-form">
-                <input type="hidden" id="id" value={entity.id} />
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <label> {T.translate("edit_badge_feature.name")} *</label>
-                        <Input
-                            id="name"
-                            className="form-control"
-                            error={hasErrors('name', errors)}
-                            onChange={this.handleChange}
-                            value={entity.name}
-                        />
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <label> {T.translate("edit_badge_feature.description")} *</label>
-                        <TextEditor
-                            id="description"
-                            value={entity.description}
-                            onChange={this.handleChange}
-                            error={hasErrors('description', errors)}
-                        />
-                    </div>
-                </div>
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <label> {T.translate("edit_badge_feature.template_content")} *</label>
-                        <TextEditor
-                            id="template_content"
-                            value={entity.template_content}
-                            onChange={this.handleChange}
-                            error={hasErrors('template_content', errors)}
-                        />
-                    </div>
-                </div>
-                {entity.id !== 0 &&
-                <div className="row form-group">
-                    <div className="col-md-12">
-                        <label> {T.translate("edit_badge_feature.image")} </label>
-                        <UploadInput
-                            value={entity.image}
-                            handleUpload={this.handleUploadImage}
-                            handleRemove={ev => this.handleRemoveFile('image')}
-                            className="dropzone col-md-6"
-                            multiple={false}
-                            accept="image/*"
-                        />
-                    </div>
-                </div>
-                }
-                <hr />
-
-                <div className="row">
-                    <div className="col-md-12 submit-buttons">
-                        <input type="button" onClick={this.handleSubmit}
-                               className="btn btn-primary pull-right" value={T.translate("general.save")}/>
-                    </div>
-                </div>
-            </form>
-        );
-    }
+        <div className="row">
+          <div className="col-md-12 submit-buttons">
+            <input
+              type="button"
+              onClick={this.handleSubmit}
+              className="btn btn-primary pull-right"
+              value={T.translate("general.save")}
+            />
+          </div>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default BadgeFeatureTypeForm;
