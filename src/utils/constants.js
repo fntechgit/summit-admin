@@ -53,4 +53,27 @@ export const REG_LITE_BOOLEAN_SETTINGS = [
     'REG_LITE_SHOW_COMPANY_INPUT_DEFAULT_OPTIONS'    
 ];
 
-export const DUMMY_ACTION = 'DUMMY_ACTION';
+export const DUMMY_ACTION = "DUMMY_ACTION";
+
+export const RADIX_10 = 10;
+export const DEFAULT_CURRENT_PAGE = 1;
+export const DEFAULT_PER_PAGE = 10;
+
+export const DEFAULT_ORDER_DIR = 1;
+
+export const ELLIPSIS_LENGTH = 3;
+
+export const DAY_IN_SECONDS = 86400; // 86400 seconds per day
+
+export const DEFAULT_EXPORT_PAGE_SIZE = 500;
+
+export const ERROR_CODE_403 = 403;
+export const ERROR_CODE_401 = 401;
+export const ERROR_CODE_412 = 412;
+export const ERROR_CODE_500 = 500;
+
+export const MILLISECONDS_TO_SECONDS = 1000;
+
+export const HEX_RADIX = 16;
+
+export const DATE_FILTER_ARRAY_SIZE = 2;
