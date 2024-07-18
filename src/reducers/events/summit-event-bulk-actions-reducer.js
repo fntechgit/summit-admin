@@ -9,8 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { SummitEvent } from "openstack-uicore-foundation/lib/models";
 import {
   REQUEST_SELECTED_EVENTS,
   RECEIVE_SELECTED_EVENTS,
@@ -33,16 +35,11 @@ import {
   UPDATE_ETHERPAD_URL_BULK
 } from "../../actions/summit-event-bulk-actions";
 
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { SummitEvent } from "openstack-uicore-foundation/lib/models";
-
 import {
   CLEAR_PUBLISHED_EVENTS,
   CLEAR_UNPUBLISHED_EVENTS,
   RECEIVE_UNSCHEDULE_EVENTS_PAGE,
-  REQUEST_UNSCHEDULE_EVENTS_PAGE,
-  REQUEST_SCHEDULE_EVENTS_PAGE,
-  RECEIVE_SCHEDULE_EVENTS_PAGE
+  REQUEST_UNSCHEDULE_EVENTS_PAGE
 } from "../../actions/summit-builder-actions";
 
 const DEFAULT_STATE = {
@@ -75,7 +72,7 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, unPublishedFilter };
     }
     case RECEIVE_UNSCHEDULE_EVENTS_PAGE: {
-      let { total } = payload.response;
+      const { total } = payload.response;
       return { ...state, totalUnPublished: total };
     }
     case UPDATE_VALIDATION_STATE: {
@@ -83,7 +80,7 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
       let { eventOnBulkEdition } = state;
 
       eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        let model = new SummitEvent(event, currentSummit);
+        const model = new SummitEvent(event, currentSummit);
         return { ...event, is_valid: model.isValid() };
       });
 
@@ -105,9 +102,9 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
     case UPDATE_LOCAL_EVENT: {
       const { eventId, mutator } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return event.id === eventId ? mutator(event) : event;
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) =>
+        event.id === eventId ? mutator(event) : event
+      );
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_EVENT_SELECTED_STATE: {
@@ -140,103 +137,116 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         selectedUnPublishedEvents: [],
+        excludedUnPublishedEvents: [],
         selectedAllUnPublished: selectedState
       };
     }
     case UPDATE_LOCATION_BULK: {
-      let { location } = payload;
+      const { location } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, location_id: location.id };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        location_id: location.id
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_SELECTION_PLAN_BULK: {
-      let { selectionPlan } = payload;
+      const { selectionPlan } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, selection_plan_id: selectionPlan.id };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        selection_plan_id: selectionPlan.id
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_TYPE_BULK: {
-      let { eventType } = payload;
+      const { eventType } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, type_id: eventType.id };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        type_id: eventType.id
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_START_DATE_BULK: {
-      let { start_date } = payload;
+      const { start_date } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, start_date: start_date };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        start_date
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_END_DATE_BULK: {
-      let { end_date } = payload;
+      const { end_date } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, end_date };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        end_date
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_ACTIVITY_TYPE_BULK: {
-      let { activityType } = payload;
+      const { activityType } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, type_id: activityType };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        type_id: activityType
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_ACTIVITY_CATEGORY_BULK: {
-      let { activityCategory } = payload;
+      const { activityCategory } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, track_id: activityCategory };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        track_id: activityCategory
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_DURATION_BULK: {
-      let { duration } = payload;
+      const { duration } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, duration };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        duration
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_STREAMING_URL_BULK: {
-      let { streamingURL } = payload;
+      const { streamingURL } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, streaming_url: streamingURL };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        streaming_url: streamingURL
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_STREAMING_TYPE_BULK: {
-      let { streamingType } = payload;
+      const { streamingType } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, streaming_type: streamingType };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        streaming_type: streamingType
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_MEETING_URL_BULK: {
-      let { meetingURL } = payload;
+      const { meetingURL } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, meeting_url: meetingURL };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        meeting_url: meetingURL
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case UPDATE_ETHERPAD_URL_BULK: {
-      let { etherpadURL } = payload;
+      const { etherpadURL } = payload;
       let { eventOnBulkEdition } = state;
-      eventOnBulkEdition = eventOnBulkEdition.map((event) => {
-        return { ...event, etherpad_link: etherpadURL };
-      });
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        etherpad_link: etherpadURL
+      }));
       return { ...state, eventOnBulkEdition };
     }
     case LOGOUT_USER: {
