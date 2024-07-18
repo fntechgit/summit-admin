@@ -1,35 +1,48 @@
 import React, { useState, useEffect } from "react";
-import EditableTableHeading from "./EditableTableHeading";
-import EditableTableRow from "./EditableTableRow";
 import ReactTooltip from "react-tooltip";
 import T from "i18n-react/dist/i18n-react";
+import EditableTableHeading from "./EditableTableHeading";
+import EditableTableRow from "./EditableTableRow";
+import {
+  INDEX_NOT_FOUND,
+  SORT_ASCENDING,
+  SORT_DESCENDING
+} from "../../../utils/constants";
 
 const defaults = {
-  sortFunc: (a, b) => (a < b ? -1 : a > b ? 1 : 0),
+  sortFunc: (a, b) => {
+    if (a < b) {
+      return SORT_DESCENDING;
+    }
+    if (a > b) {
+      return SORT_ASCENDING;
+    }
+    return 0;
+  },
   sortable: false,
   sortCol: 0,
   sortDir: 1,
-  colWidth: "",
+  colWidth: ""
 };
 
-const EditableTable = (props) => {
-  const { 
-    options, 
-    columns, 
+function EditableTable(props) {
+  const {
+    options,
+    columns,
     currentSummit,
     page,
     data,
     handleSort,
     updateData,
     handleDeleteRow,
-    resetData,
+    resetData
   } = props;
   let tableClass = options.hasOwnProperty("className") ? options.className : "";
   const [editButton, setEditButton] = useState(false);
   const [editEnabled, setEditEnabled] = useState(false);
   const [selected, setSelected] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  tableClass += options.actions?.edit ? " table-hover" : "";  
+  tableClass += options.actions?.edit ? " table-hover" : "";
 
   const getSortDir = (columnKey, columnIndex, sortCol, sortDir) => {
     if (columnKey && columnKey === sortCol) {
@@ -54,7 +67,7 @@ const EditableTable = (props) => {
     resetState();
   }, [page]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (selected.length > 0) {
       setEditButton(true);
     } else {
@@ -73,15 +86,15 @@ const EditableTable = (props) => {
     }
   }, [selectAll]);
 
-  const updateSelected = (row, checked) => { 
-    let selectedRow = row;
+  const updateSelected = (row, checked) => {
+    const selectedRow = row;
     const rowIndex = selected.findIndex((s) => s.id === selectedRow.id);
-    let exists = rowIndex !== -1;
+    const exists = rowIndex !== INDEX_NOT_FOUND;
 
     if (checked) {
       if (exists) {
         // if already on selected list, replace with new data
-        const updatedSelected = Object.assign({}, selectedRow);
+        const updatedSelected = { ...selectedRow };
         const newSelected = selected.slice();
         newSelected[rowIndex] = updatedSelected;
         setSelected(newSelected);
@@ -109,14 +122,16 @@ const EditableTable = (props) => {
           {editEnabled ? (
             <>
               <button
-                className={`btn btn-primary right-space save-publish-button`}
+                className="btn btn-primary right-space save-publish-button"
                 onClick={onUpdateEvents}
+                type="button"
               >
                 {T.translate("bulk_actions_page.btn_apply_changes")}
               </button>
               <button
-                className={`btn btn-secondary right-space cancel-button`}
+                className="btn btn-secondary right-space cancel-button"
                 onClick={resetState}
+                type="button"
               >
                 {T.translate("general.cancel")}
               </button>
@@ -127,16 +142,19 @@ const EditableTable = (props) => {
                 editButton ? "" : "disabled"
               }`}
               onClick={() => setEditEnabled(!editEnabled)}
+              type="button"
             >
               {T.translate("event_list.edit_selected")}
             </button>
           )}
         </div>
       </div>
-      <table className={"table table-striped selectableTable events-editable-table " + tableClass}>
+      <table
+        className={`table table-striped selectableTable events-editable-table ${tableClass}`}
+      >
         <thead>
           <tr>
-            <th>
+            <th aria-label="Checkbox Columns">
               <input
                 type="checkbox"
                 id="select_all"
@@ -146,24 +164,26 @@ const EditableTable = (props) => {
               />
             </th>
             {columns.map((col, i) => {
-              let sortCol =
-                typeof options.sortCol != "undefined"
+              const sortCol =
+                typeof options.sortCol !== "undefined"
                   ? options.sortCol
                   : defaults.sortCol;
-              let sortDir =
-                typeof options.sortDir != "undefined"
+              const sortDir =
+                typeof options.sortDir !== "undefined"
                   ? options.sortDir
                   : defaults.sortDir;
-              let sortFunc =
-                typeof options.sortFunc != "undefined"
+              const sortFunc =
+                typeof options.sortFunc !== "undefined"
                   ? options.sortFunc
                   : defaults.sortFunc;
-              let sortable =
-                typeof col.sortable != "undefined"
+              const sortable =
+                typeof col.sortable !== "undefined"
                   ? col.sortable
                   : defaults.sortable;
-              let colWidth =
-                typeof col.width != "undefined" ? col.width : defaults.colWidth;
+              const colWidth =
+                typeof col.width !== "undefined"
+                  ? col.width
+                  : defaults.colWidth;
 
               return (
                 <EditableTableHeading
@@ -175,7 +195,7 @@ const EditableTable = (props) => {
                   columnIndex={i}
                   columnKey={col.columnKey}
                   width={colWidth}
-                  key={"heading_" + i}
+                  key={`heading_${col.columnKey}_${col.value}`}
                 >
                   {col.value}
                 </EditableTableHeading>
@@ -195,11 +215,11 @@ const EditableTable = (props) => {
                 console.warn(
                   `Data at row ${i} is ${row.length}. It should be ${columns.length}.`
                 );
-                return <tr key={"row_" + i} />;
+                return <tr key={`row_${row.id}`} />;
               }
 
               return (
-                <tr role="row" key={`row_${row["id"]}`}>
+                <tr role="row" key={`row_${row.id}`}>
                   <EditableTableRow
                     row={row}
                     currentSummit={currentSummit}
@@ -219,6 +239,6 @@ const EditableTable = (props) => {
       <ReactTooltip delayShow={10} />
     </div>
   );
-};
+}
 
 export default EditableTable;

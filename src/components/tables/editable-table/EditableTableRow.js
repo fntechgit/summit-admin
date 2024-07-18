@@ -3,7 +3,7 @@ import { Input } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react/dist/i18n-react";
 import history from "../../../history";
 
-const EditableTableRow = (props) => {
+function EditableTableRow(props) {
   const {
     row,
     columns,
@@ -12,11 +12,11 @@ const EditableTableRow = (props) => {
     updateSelected,
     deleteRow,
     selectAll,
-    currentSummit,    
-    actions,
+    currentSummit,
+    actions
   } = props;
-  const [checked, setChecked] = useState(false);  
-  const [editData, setEditData] = useState(row);  
+  const [checked, setChecked] = useState(false);
+  const [editData, setEditData] = useState(row);
 
   useEffect(() => {
     updateSelected(editData, checked);
@@ -28,34 +28,33 @@ const EditableTableRow = (props) => {
     if (selected.length === 0) {
       setChecked(false);
     }
-  }, [selected]);  
+  }, [selected]);
   useEffect(() => {
     updateSelected(editData, checked);
-  }, [editData])
-  useEffect(() => {    
+  }, [editData]);
+  useEffect(() => {
     if (!editEnabled) {
       setEditData(row);
     }
   }, [editEnabled]);
 
   const onRowChange = (ev) => {
-    const {value, id, type} = ev.target;    
-    if(type === 'speakerinput') {
-      const newSpeakers = {...editData, [id]: [...row[id], value]};
+    const { value, id, type } = ev.target;
+    if (type === "speakerinput") {
+      const newSpeakers = { ...editData, [id]: [...row[id], value] };
       setEditData(newSpeakers);
     } else {
-      const newEventData = {...editData, [id]: value };
+      const newEventData = { ...editData, [id]: value };
       setEditData(newEventData);
     }
-
   };
 
-  const onRemoveOption = (rowId, id) => {    
-    const newOptions = row[id].filter(s => s.id !== rowId);
-    const newEventData = {...editData, [id]: newOptions};
+  const onRemoveOption = (rowId, id) => {
+    const newOptions = row[id].filter((s) => s.id !== rowId);
+    const newEventData = { ...editData, [id]: newOptions };
     setEditData(newEventData);
-  };  
-  
+  };
+
   return (
     <>
       <td className="bulk-edit-col-checkbox">
@@ -69,13 +68,16 @@ const EditableTableRow = (props) => {
       {selected.find((s) => s.id === row.id) && editEnabled && checked ? (
         <>
           {columns.map((col, index) => {
-            if(col.columnKey === "id") {
-              return;
+            if (col.columnKey === "id") {
+              return null;
             }
-            else if(col.editableField === true) {
+            if (col.editableField === true) {
               // Default field as text
               return (
-                <td key={`row-edit-${col.columnKey}-${index}`} className="bulk-edit-col">                  
+                <td
+                  key={`row-edit-${col.columnKey}-${col.id}`}
+                  className="bulk-edit-col"
+                >
                   <Input
                     type="text"
                     id={col.columnKey}
@@ -84,38 +86,78 @@ const EditableTableRow = (props) => {
                     )}
                     onChange={onRowChange}
                     value={row[col.columnKey]}
-                  />                    
+                  />
                 </td>
-            )}
-            else if (col.editableField) {
+              );
+            }
+            if (col.editableField) {
               return (
-                <td key={`row-edit-${col.columnKey}-${index}`} className="bulk-edit-col">
-                  {col.editableField({value: "", placeholder: row[col.columnKey].name, onChange: onRowChange, rowData: editData[col.columnKey], onRemoveOption: onRemoveOption})}
+                <td
+                  key={`row-edit-${col.columnKey}-${col.id}`}
+                  className="bulk-edit-col"
+                >
+                  {col.editableField({
+                    value: "",
+                    placeholder: row[col.columnKey].name,
+                    onChange: onRowChange,
+                    rowData: editData[col.columnKey],
+                    onRemoveOption
+                  })}
                 </td>
-              )
-            }          
-            else {return (<td key={`row-edit-${col.columnKey}-${index}`} className="bulk-edit-col">{row[col.columnKey]}</td>)}
-          })}         
+              );
+            }
+            return (
+              <td
+                key={`row-edit-${col.columnKey}-${row.id}`}
+                className="bulk-edit-col"
+              >
+                {row[col.columnKey]}
+              </td>
+            );
+          })}
         </>
-      ) : columns.map((col, i) => 
-            col.columnKey !== "id" && <td key={`${row.id}${i}`}>{col.render ? col.render(row[col.columnKey]) : row[col.columnKey]}</td>)
-      }
+      ) : (
+        columns.map(
+          (col, i) =>
+            col.columnKey !== "id" && (
+              <td key={`${row.id}_${col.columnKey}`}>
+                {col.render
+                  ? col.render(row[col.columnKey])
+                  : row[col.columnKey]}
+              </td>
+            )
+        )
+      )}
       {(actions.edit || actions.delete) && (
         <td className="action-display-tc">
           {actions.edit && (
-            <span onClick={() => history.push(`/app/summits/${currentSummit.id}/events/${row.id}`)}>
-              <i className="fa fa-pencil-square-o edit-icon"></i>
-            </span>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() =>
+                history.push(
+                  `/app/summits/${currentSummit.id}/events/${row.id}`
+                )
+              }
+              aria-label={`Edit event ${row.id}`} // Provide an appropriate aria-label
+            >
+              <i className="fa fa-pencil-square-o edit-icon" />
+            </button>
           )}
           {actions.delete && (
-            <span onClick={() => deleteRow(row.id)}>
-              <i className="fa fa-trash-o delete-icon"></i>
-            </span>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => deleteRow(row.id)}
+              aria-label={`Delete event ${row.id}`} // Provide an appropriate aria-label
+            >
+              <i className="fa fa-trash-o delete-icon" />
+            </button>
           )}
         </td>
       )}
     </>
   );
-};
+}
 
 export default EditableTableRow;

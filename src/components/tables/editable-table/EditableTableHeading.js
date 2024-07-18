@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { SORT_ASCENDING, SORT_DESCENDING } from "../../../utils/constants";
 
-const EditableTableHeading = (props) => {
+function EditableTableHeading(props) {
   const {
     editEnabled,
     sortable,
@@ -11,16 +12,16 @@ const EditableTableHeading = (props) => {
     columnKey,
     sortFunc,
     width,
-    children,
+    children
   } = props;
   const getSortClass = () => {
     // disable sorting if on edit mode
     if (!sortable || editEnabled) return null;
 
     switch (sortDir) {
-      case 1:
+      case SORT_ASCENDING:
         return "sorting_asc";
-      case -1:
+      case SORT_DESCENDING:
         return "sorting_desc";
       default:
         return sortable ? "sorting" : null;
@@ -29,9 +30,15 @@ const EditableTableHeading = (props) => {
 
   const handleSort = (e) => {
     e.preventDefault();
-    if (!props.hasOwnProperty("onSort") || !sortable) return;
 
-    onSort(columnIndex, columnKey, sortDir ? sortDir * -1 : 1, sortFunc);
+    if (!onSort || !sortable) return;
+
+    onSort(
+      columnIndex,
+      columnKey,
+      sortDir ? sortDir * SORT_DESCENDING : SORT_ASCENDING,
+      sortFunc
+    );
   };
 
   return (
@@ -39,7 +46,7 @@ const EditableTableHeading = (props) => {
       {children}
     </th>
   );
-};
+}
 
 EditableTableHeading.propTypes = {
   onSort: PropTypes.func,
@@ -47,7 +54,7 @@ EditableTableHeading.propTypes = {
   columnIndex: PropTypes.number,
   columnKey: PropTypes.any,
   sortable: PropTypes.bool,
-  sortFunc: PropTypes.func,
+  sortFunc: PropTypes.func
 };
 
 export default EditableTableHeading;

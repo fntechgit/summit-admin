@@ -9,11 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
+import _ from "lodash";
 import {
   getRequest,
   putRequest,
@@ -32,6 +32,7 @@ import {
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import history from "../history";
 import {
   checkOrFilter,
   getAccessTokenSafely,
@@ -40,6 +41,15 @@ import {
 } from "../utils/methods";
 import { getQAUsersBySummitEvent } from "./user-chat-roles-actions";
 import { getAuditLog } from "./audit-log-actions";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE,
+  FIFTEEN_MINUTES,
+  HOUR_AND_HALF,
+  SECONDS_TO_MINUTES
+} from "../utils/constants";
 
 export const REQUEST_EVENTS = "REQUEST_EVENTS";
 export const RECEIVE_EVENTS = "RECEIVE_EVENTS";
@@ -78,6 +88,8 @@ export const ATTENDING_MEDIA = "attending_media";
 export const LEVEL = "level";
 export const SOCIAL_DESCRIPTION = "social_description";
 
+const UPDATED_REMOTE_EVENTS = "UPDATED_REMOTE_EVENTS";
+
 const fieldsBoundToQuestions = [
   ATTENDEES_EXPECTED_LEARNT,
   ATTENDING_MEDIA,
@@ -88,10 +100,10 @@ const fieldsBoundToQuestions = [
 export const getEvents =
   (
     term = null,
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = 1,
+    orderDir = DEFAULT_ORDER_DIR,
     filters = {},
     extraColumns = []
   ) =>
@@ -112,7 +124,7 @@ export const getEvents =
         "speakers.none,selection_plan.none,track.none,type.none,created_by.none,location.none,media_uploads.media_upload_type.none",
       fields:
         "location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,media_uploads.id,media_uploads.created,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id",
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -123,8 +135,8 @@ export const getEvents =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] =
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order =
         order === "created_by_fullname"
           ? `${orderDirSign}${order},${orderDirSign}created_by_email`
           : `${orderDirSign}${order}`;
@@ -139,50 +151,57 @@ export const getEvents =
     )(params)(dispatch).then((data) => {
       dispatch(stopLoading());
       return data.response;
-    });  
-};
+    });
+  };
 
-export const bulkUpdateEvents = (summitId, events) =>  async (dispatch, getState) => {
-
+export const bulkUpdateEvents =
+  (summitId, events) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
-    const { currentSummit }   = currentSummitState;
+    const { currentSummit } = currentSummitState;
     dispatch(startLoading());
 
-    const normalizedEvents = normalizeBulkEvents(events.map((event) => normalizeEvent(event, currentSummit.event_types.find(et => et.id === event.type_id))))  
+    const normalizedEvents = normalizeBulkEvents(
+      events.map((event) =>
+        normalizeEvent(
+          event,
+          currentSummit.event_types.find((et) => et.id === event.type_id)
+        )
+      )
+    );
 
     putRequest(
-        null,
-        createAction(UPDATED_REMOTE_EVENTS)({}),
-        `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,
-        {
-            events: normalizedEvents
-        },
-        authErrorHandler
+      null,
+      createAction(UPDATED_REMOTE_EVENTS)({}),
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,
+      {
+        events: normalizedEvents
+      },
+      authErrorHandler
     )({})(dispatch)
-        .then(
-            () => {
-                dispatch(stopLoading());
-                dispatch(showSuccessMessage(T.translate("bulk_actions_page.messages.update_success"),
-                () => 
-                    history.push(`/app/summits/${currentSummit.id}/events/`)
-                ))
-            }
-        )
-        .catch(()=> {
-            console.log("ERROR");
-        });
-}
+      .then(() => {
+        dispatch(stopLoading());
+        dispatch(
+          showSuccessMessage(
+            T.translate("bulk_actions_page.messages.update_success"),
+            () => history.push(`/app/summits/${currentSummit.id}/events/`)
+          )
+        );
+      })
+      .catch(() => {
+        console.log("ERROR");
+      });
+  };
 
 export const getEventsForOccupancy =
   (
     term = null,
     roomId = null,
     currentEvents = false,
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "start_date",
-    orderDir = 1
+    orderDir = DEFAULT_ORDER_DIR
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -208,15 +227,15 @@ export const getEventsForOccupancy =
     // only current events
     if (currentEvents) {
       const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
-      const from_date = now - 900; // minus 15min
-      const to_date = now + 900; // plus 15min
+      const from_date = now - FIFTEEN_MINUTES; // minus 15min
+      const to_date = now + FIFTEEN_MINUTES; // plus 15min
       filter.push(`start_date<=${to_date}`);
       filter.push(`end_date>=${from_date}`);
     }
 
     const params = {
       expand: "speakers, location, track",
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -227,8 +246,8 @@ export const getEventsForOccupancy =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -248,7 +267,7 @@ export const getEventsForOccupancyCSV =
     roomId = null,
     currentEvents = false,
     order = "start_date",
-    orderDir = 1
+    orderDir = DEFAULT_ORDER_DIR
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -259,7 +278,7 @@ export const getEventsForOccupancyCSV =
 
     dispatch(startLoading());
 
-    filter.push(`published==1`);
+    filter.push("published==1");
 
     // search
     if (term) {
@@ -275,8 +294,8 @@ export const getEventsForOccupancyCSV =
     // only current events
     if (currentEvents) {
       const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
-      const from_date = now - 900; // minus 15min
-      const to_date = now + 900; // plus 15min
+      const from_date = now - FIFTEEN_MINUTES; // minus 15min
+      const to_date = now + FIFTEEN_MINUTES; // plus 15min
       filter.push(`start_date<=${to_date}`);
       filter.push(`end_date>=${from_date}`);
     }
@@ -291,11 +310,11 @@ export const getEventsForOccupancyCSV =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
-    params["fields"] =
+    params.fields =
       "start_date,title,track,occupancy,location_name,speaker_fullnames";
 
     const filename = `summit-${currentSummit.slug}-rooms-occupancy.csv`;
@@ -329,9 +348,9 @@ export const getCurrentEventForOccupancy =
     };
 
     if (eventId) {
-      endPoint = endPoint + `/events/${eventId}`;
+      endPoint += `/events/${eventId}`;
     } else {
-      endPoint = endPoint + `/locations/${roomId}/events/published`;
+      endPoint += `/locations/${roomId}/events/published`;
 
       // only current events
       const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
@@ -422,6 +441,7 @@ export const getEvent = (eventId) => async (dispatch, getState) => {
   };
 
   dispatch(startLoading());
+  // eslint-disable-next-line consistent-return
   return getRequest(
     null,
     createAction(RECEIVE_EVENT),
@@ -463,14 +483,12 @@ export const resetEventForm = () => (dispatch, getState) => {
   dispatch(createAction(RESET_EVENT_FORM)({}));
 };
 
-
-
 export const saveEvent = (entity, publish) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
   const { type_id } = entity;
-  const type = currentSummit.event_types.find((e) => e.id == type_id);
+  const type = currentSummit.event_types.find((e) => e.id === type_id);
 
   dispatch(startLoading());
 
@@ -498,10 +516,10 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
       }
       dispatch(
         getAuditLog(
-          [`event_id==${entity.id}`, `class_name==SummitEventAuditLog`],
+          [`event_id==${entity.id}`, "class_name==SummitEventAuditLog"],
           null,
-          1,
-          10
+          DEFAULT_CURRENT_PAGE,
+          DEFAULT_PER_PAGE
         )
       );
     });
@@ -601,7 +619,7 @@ const publishEvent =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const { type_id } = entity;
-    const type = currentSummit.event_types.find((e) => e.id == type_id);
+    const type = currentSummit.event_types.find((e) => e.id === type_id);
 
     const params = {
       access_token: accessToken
@@ -659,13 +677,13 @@ export const checkProximityEvents =
       return;
     }
 
-    let speaker_ids = event.speakers.map((s) => `speaker_id==${s}`);
+    const speaker_ids = event.speakers.map((s) => `speaker_id==${s}`);
     if (event.moderator_speaker_id) {
       speaker_ids.push(`speaker_id==${event.moderator_speaker_id}`);
     }
 
-    const from_date = event.start_date - 5400; // minus 1.5hrs
-    const to_date = event.end_date + 5400; // plus 1.5hrs
+    const from_date = event.start_date - HOUR_AND_HALF; // minus 1.5hrs
+    const to_date = event.end_date + HOUR_AND_HALF; // plus 1.5hrs
 
     const params = {
       page: 1,
@@ -679,6 +697,7 @@ export const checkProximityEvents =
       ]
     };
 
+    // eslint-disable-next-line consistent-return
     return getRequest(
       null,
       createAction(RECEIVE_PROXIMITY_EVENTS),
@@ -696,8 +715,7 @@ export const checkProximityEvents =
           "edit_event.proximity_alert"
         )}</strong><br/>`;
 
-        for (var i in proximity_events) {
-          const prox_event = proximity_events[i];
+        Object.entries(proximity_events).forEach(([key, prox_event]) => {
           const event_date = epochToMomentTimeZone(
             prox_event.start_date,
             currentSummit.time_zone_id
@@ -706,7 +724,7 @@ export const checkProximityEvents =
             ? prox_event.location.name
             : "TBD";
           success_message.html += `<small><i>"${prox_event.title}"</i> at ${event_date} in ${locationName}</small><br/>`;
-        }
+        });
         dispatch(showMessage(success_message, cb));
       } else if (showSuccessMessage) {
         dispatch(showMessage(success_message, cb));
@@ -732,18 +750,17 @@ export const attachFile =
 
     if (entity.id) {
       return dispatch(uploadFile(entity, file));
-    } else {
-      return postRequest(
-        createAction(UPDATE_EVENT),
-        createAction(EVENT_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
-        dispatch(uploadFile(payload.response, file));
-      });
     }
+    return postRequest(
+      createAction(UPDATE_EVENT),
+      createAction(EVENT_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(uploadFile(payload.response, file));
+    });
   };
 
 const uploadFile = (entity, file) => async (dispatch, getState) => {
@@ -824,19 +841,18 @@ const normalizePresentationAllowedQuestionFields = (entity, summit) => {
 
 export const normalizeEvent = (entity, eventTypeConfig, summit) => {
   const normalizedEntity = { ...entity };
-  if (!normalizedEntity.start_date) delete normalizedEntity["start_date"];
-  if (!normalizedEntity.end_date) delete normalizedEntity["end_date"];
-  if (!normalizedEntity.rsvp_link) delete normalizedEntity["rsvp_link"];
+  if (!normalizedEntity.start_date) delete normalizedEntity.start_date;
+  if (!normalizedEntity.end_date) delete normalizedEntity.end_date;
+  if (!normalizedEntity.rsvp_link) delete normalizedEntity.rsvp_link;
   if (!normalizedEntity.rsvp_template_id)
-    delete normalizedEntity["rsvp_template_id"];
+    delete normalizedEntity.rsvp_template_id;
 
-  if (normalizedEntity.hasOwnProperty("links"))
-    delete normalizedEntity["links"];
+  if (normalizedEntity.hasOwnProperty("links")) delete normalizedEntity.links;
 
   if (normalizedEntity.hasOwnProperty("tags"))
     normalizedEntity.tags = normalizedEntity.tags.map((t) => {
       if (typeof t === "string") return t;
-      else return t.tag;
+      return t.tag;
     });
 
   if (normalizedEntity.hasOwnProperty("sponsors"))
@@ -905,38 +921,42 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
   }
 
   return normalizedEntity;
-}
+};
 
 export const normalizeBulkEvents = (entity) => {
-    const normalizedEntity = entity.map(e => {
-        const normalizedEvent = {
-            id: e.id,
-            title: e.title,
-            selection_plan_id: e.selection_plan_id,
-            location_id: e.location?.id || e.location_id,
-            start_date: e.start_date,
-            speakers: e.speakers,
-            end_date: e.end_date,
-            type_id: e.type_id,
-            track_id: e.track_id,
-            duration: e.duration,
-            streaming_url: e.streaming_url,
-            streaming_type: e.streaming_type,
-            meeting_url: e.meeting_url,
-            etherpad_link: e.etherpad_link,
-        }
-        for (let property in normalizedEvent) {
-            if (normalizedEvent[property] === undefined || normalizedEvent[property] === null || normalizedEvent[property] === "") {
-                delete normalizedEvent[property];
-            }
-        }
-        return normalizedEvent;
+  const normalizedEntity = entity.map((e) => {
+    const normalizedEvent = {
+      id: e.id,
+      title: e.title,
+      selection_plan_id: e.selection_plan_id,
+      location_id: e.location?.id || e.location_id,
+      start_date: e.start_date,
+      speakers: e.speakers,
+      end_date: e.end_date,
+      type_id: e.type_id,
+      track_id: e.track_id,
+      duration: e.duration,
+      streaming_url: e.streaming_url,
+      streaming_type: e.streaming_type,
+      meeting_url: e.meeting_url,
+      etherpad_link: e.etherpad_link
+    };
+    Object.keys(normalizedEvent).forEach((property) => {
+      if (
+        normalizedEvent[property] === undefined ||
+        normalizedEvent[property] === null ||
+        normalizedEvent[property] === ""
+      ) {
+        delete normalizedEvent[property];
+      }
     });
-    return normalizedEntity;
-}
+    return normalizedEvent;
+  });
+  return normalizedEntity;
+};
 
 export const deleteEvent = (eventId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();z
+  const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
 
@@ -959,7 +979,7 @@ export const exportEvents =
   (
     term = null,
     order = "id",
-    orderDir = 1,
+    orderDir = DEFAULT_ORDER_DIR,
     extraFilters = {},
     extraColumns = []
   ) =>
@@ -967,7 +987,7 @@ export const exportEvents =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filename = currentSummit.name + "-Activities.csv";
+    const filename = `${currentSummit.name}-Activities.csv`;
     const params = {
       access_token: accessToken
     };
@@ -980,8 +1000,8 @@ export const exportEvents =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] =
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order =
         order === "created_by_fullname"
           ? `${orderDirSign}${order},${orderDirSign}created_by_email`
           : `${orderDirSign}${order}`;
@@ -1047,7 +1067,7 @@ export const importEventsCSV =
       createAction(EVENTS_IMPORTED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
       file,
-      { send_speaker_email: send_speaker_email },
+      { send_speaker_email },
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -1195,14 +1215,14 @@ const parseFilters = (filters, term = null) => {
     if (Array.isArray(filters.duration_filter)) {
       // between
       filter.push(
-        `duration[]${filters.duration_filter[0] * 60}&&${
-          filters.duration_filter[1] * 60
+        `duration[]${filters.duration_filter[0] * SECONDS_TO_MINUTES}&&${
+          filters.duration_filter[1] * SECONDS_TO_MINUTES
         }`
       );
     } else {
       filter.push(
         `duration${filters.duration_filter.replace(/\d/g, "")}${
-          filters.duration_filter.replace(/\D/g, "") * 60
+          filters.duration_filter.replace(/\D/g, "") * SECONDS_TO_MINUTES
         }`
       );
     }
@@ -1310,11 +1330,11 @@ const parseFilters = (filters, term = null) => {
   }
 
   if (filters.is_public) {
-    filter.push(`is_public==1`);
+    filter.push("is_public==1");
   }
 
   if (filters.is_activity) {
-    filter.push(`is_activity==1`);
+    filter.push("is_activity==1");
   }
 
   if (
@@ -1338,10 +1358,11 @@ const parseFilters = (filters, term = null) => {
         ? "||"
         : "&&";
     filter.push(
-      `${filters.media_upload_with_type.operator}` +
-        filters.media_upload_with_type.value
-          .map((v) => v.id)
-          .join(concatOperator)
+      `${
+        filters.media_upload_with_type.operator
+      }${filters.media_upload_with_type.value
+        .map((v) => v.id)
+        .join(concatOperator)}`
     );
   }
 
@@ -1366,10 +1387,10 @@ export const getEventFeedback =
   (
     eventId,
     term = null,
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "created",
-    orderDir = 1
+    orderDir = DEFAULT_ORDER_DIR
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -1383,14 +1404,13 @@ export const getEventFeedback =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      let searchString =
-        `note=@${escapedTerm},` + `owner_full_name=@${escapedTerm},`;
+      const searchString = `note=@${escapedTerm},owner_full_name=@${escapedTerm},`;
 
       filter.push(searchString);
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "owner"
@@ -1402,8 +1422,8 @@ export const getEventFeedback =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -1419,7 +1439,7 @@ export const getEventFeedback =
   };
 
 export const getEventFeedbackCSV =
-  (eventId, term = null, order = "created", orderDir = 1) =>
+  (eventId, term = null, order = "created", orderDir = DEFAULT_ORDER_DIR) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -1431,8 +1451,7 @@ export const getEventFeedbackCSV =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      let searchString =
-        `note=@${escapedTerm},` + `owner_full_name=@${escapedTerm},`;
+      const searchString = `note=@${escapedTerm},owner_full_name=@${escapedTerm},`;
 
       filter.push(searchString);
     }
@@ -1449,11 +1468,11 @@ export const getEventFeedbackCSV =
     // order
     if (order != null && orderDir != null) {
       if (order === "created_date") order = "created";
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
-    const filename = currentSummit.name + "-event-feedback.csv";
+    const filename = `${currentSummit.name}-event-feedback.csv`;
 
     dispatch(
       getCSV(
@@ -1491,10 +1510,10 @@ export const getEventComments =
   (
     eventId,
     term = null,
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = 1,
+    orderDir = DEFAULT_ORDER_DIR,
     filters = {}
   ) =>
   async (dispatch, getState) => {
@@ -1509,8 +1528,7 @@ export const getEventComments =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      let searchString =
-        `body=@${escapedTerm},` + `creator_id==${escapedTerm},`;
+      const searchString = `body=@${escapedTerm},creator_id==${escapedTerm},`;
       filter.push(searchString);
     }
 
@@ -1518,7 +1536,7 @@ export const getEventComments =
     // `is_activity==${escapedTerm},`;
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "creator"
@@ -1530,8 +1548,8 @@ export const getEventComments =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${
         order === "owner_full_name" ? "creator_id" : order
       }`;
     }
@@ -1563,7 +1581,7 @@ export const queryEvents = _.debounce(async (summitId, input, callback) => {
       callback(options);
     })
     .catch(fetchErrorHandler);
-}, 500);
+}, DEBOUNCE_WAIT);
 
 export const changeEventListSearchTerm = (term) => (dispatch, getState) => {
   dispatch(createAction(CHANGE_SEARCH_TERM)({ term }));

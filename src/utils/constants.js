@@ -73,3 +73,18 @@ export const DEFAULT_CURRENT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;
 
 export const DEFAULT_ORDER_DIR = 1;
+
+export const ONE_MINUTE = 60;
+export const FIFTEEN_MINUTES = 900;
+export const HOUR_AND_HALF = 5400;
+export const SECONDS_TO_MINUTES = 60;
+export const MILLISECONDS_IN_SECOND = 1000;
+
+export const DATE_FILTER_ARRAY_SIZE = 2;
+
+export const DEBOUNCE_WAIT = 500;
+
+export const SORT_ASCENDING = 1;
+export const SORT_DESCENDING = -1;
+
+export const INDEX_NOT_FOUND = -1;
