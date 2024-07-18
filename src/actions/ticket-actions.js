@@ -327,7 +327,7 @@ const parseTicketTypeFilters = (filters, term = null) => {
     Array.isArray(filters.badge_type_filter) &&
     filters.badge_type_filter.length > 0
   ) {
-    filter.push(`badge_type==${filters.badge_type_filter.join("||")}`);
+    filter.push(`badge_type_id==${filters.badge_type_filter.join("||")}`);
   }
 
   if (
@@ -358,7 +358,7 @@ const parseTicketTypeFilters = (filters, term = null) => {
 
   if (term) {
     const escapedTerm = escapeFilterValue(term);
-    let searchString = `name=@${escapedTerm},description=@${escapedTerm}`;
+    let searchString = `name@@${escapedTerm},description@@${escapedTerm}`;
 
     if (isNumericString(term)) {
       searchString += `,id==${term}`;

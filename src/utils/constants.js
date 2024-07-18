@@ -80,4 +80,6 @@ export const ERROR_CODE_500 = 500;
 
 export const MILLISECONDS_TO_SECONDS = 1000;
 
+export const HEX_RADIX = 16;
+
 export const DATE_FILTER_ARRAY_SIZE = 2;

@@ -27,6 +27,7 @@ import {
   ERROR_CODE_403,
   ERROR_CODE_412,
   ERROR_CODE_500,
+  HEX_RADIX,
   MILLISECONDS_TO_SECONDS,
   OR_FILTER
 } from "./constants";
@@ -188,21 +189,18 @@ export const adjustEventDuration = (evt, entity) => {
         adjustedEntity.start_date = value - adjustedEntity.duration;
       }
     }
-  } else {
-    // updating duration unless is empty
-    // check if the value is a valid number
-    // eslint-disable-next-line no-lonely-if
-    if (value !== "") {
-      // eslint-disable-next-line no-magic-numbers
-      const parsedValue = parseInt(value * 60, 10);
-      if (!Number.isNaN(parsedValue)) {
-        if (adjustedEntity.start_date) {
-          // if we have start date, update end date
-          adjustedEntity.end_date = adjustedEntity.start_date + parsedValue;
-        } else if (adjustedEntity.end_date) {
-          // if we only have end date, update start date
-          adjustedEntity.start_date = adjustedEntity.end_date - parsedValue;
-        }
+  } // updating duration unless is empty
+  // check if the value is a valid number
+  else if (value !== "") {
+    // eslint-disable-next-line no-magic-numbers
+    const parsedValue = parseInt(value * 60, 10);
+    if (!Number.isNaN(parsedValue)) {
+      if (adjustedEntity.start_date) {
+        // if we have start date, update end date
+        adjustedEntity.end_date = adjustedEntity.start_date + parsedValue;
+      } else if (adjustedEntity.end_date) {
+        // if we only have end date, update start date
+        adjustedEntity.start_date = adjustedEntity.end_date - parsedValue;
       }
     }
   }
@@ -213,17 +211,15 @@ export const adjustEventDuration = (evt, entity) => {
 };
 
 /* eslint no-bitwise: "warn" */
-export const uuidv4 = () => {
-  const HEX_RADIX = 16;
+export const uuidv4 = () =>
   // eslint-disable-next-line no-magic-numbers
-  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+  ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
     (
       c ^
       // eslint-disable-next-line no-magic-numbers
       (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
     ).toString(HEX_RADIX)
   );
-};
 
 export const getSummitDays = (summit) => {
   const days = [];
@@ -463,6 +459,5 @@ export const parseDateRangeFilter = (
   }
 };
 
-export const handleDDLSortByLabel = (ddlArray) => {
+export const handleDDLSortByLabel = (ddlArray) =>
   ddlArray.sort((a, b) => a.label.localeCompare(b.label));
-};
