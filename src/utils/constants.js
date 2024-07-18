@@ -73,3 +73,5 @@ export const DEFAULT_CURRENT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;
 
 export const DEFAULT_ORDER_DIR = 1;
+
+export const DATE_FILTER_ARRAY_SIZE = 2;
