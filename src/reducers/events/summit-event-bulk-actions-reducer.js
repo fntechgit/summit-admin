@@ -10,9 +10,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
+
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SummitEvent } from "openstack-uicore-foundation/lib/models";
-
 import {
   REQUEST_SELECTED_EVENTS,
   RECEIVE_SELECTED_EVENTS,
@@ -39,9 +39,7 @@ import {
   CLEAR_PUBLISHED_EVENTS,
   CLEAR_UNPUBLISHED_EVENTS,
   RECEIVE_UNSCHEDULE_EVENTS_PAGE,
-  REQUEST_UNSCHEDULE_EVENTS_PAGE,
-  REQUEST_SCHEDULE_EVENTS_PAGE,
-  RECEIVE_SCHEDULE_EVENTS_PAGE
+  REQUEST_UNSCHEDULE_EVENTS_PAGE
 } from "../../actions/summit-builder-actions";
 
 const DEFAULT_STATE = {
@@ -140,6 +138,7 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         selectedUnPublishedEvents: [],
+        excludedUnPublishedEvents: [],
         selectedAllUnPublished: selectedState
       };
     }
