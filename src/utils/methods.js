@@ -9,28 +9,42 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ */
 
 import moment from "moment-timezone";
 import {
   findElementPos,
   epochToMomentTimeZone
 } from "openstack-uicore-foundation/lib/utils/methods";
-import { getAccessToken } from "openstack-uicore-foundation/lib/security/methods";
-import { initLogOut } from "openstack-uicore-foundation/lib/security/methods";
+import {
+  getAccessToken,
+  initLogOut
+} from "openstack-uicore-foundation/lib/security/methods";
 import Swal from "sweetalert2";
-import { OR_FILTER } from "./constants";
+import T from "i18n-react/dist/i18n-react";
+import {
+  ERROR_CODE_401,
+  ERROR_CODE_403,
+  ERROR_CODE_412,
+  ERROR_CODE_500,
+  HEX_RADIX,
+  MILLISECONDS_TO_SECONDS,
+  OR_FILTER
+} from "./constants";
 
 import emailTemplateDefaultValues from "../data/email_template_variables_sample.json";
 
-export const trim = (string, length) => {
-  return string.length > length
-    ? string.substring(0, length - 3) + "..."
+const DAY_IN_SECONDS = 86400; // 86400 seconds per day
+const ELLIPSIS = 3;
+
+export const trim = (string, length) =>
+  string.length > length
+    ? `${string.substring(0, length - ELLIPSIS)}...`
     : string;
-};
-export const groupByDate = function (array, prop, sortBy) {
-  let grouped_unordered = array.reduce(function (groups, item) {
-    var val = item[prop];
+
+export const groupByDate = (array, prop, sortBy) => {
+  const grouped_unordered = array.reduce((groups, item) => {
+    const val = item[prop];
     groups[val] = groups[val] || [];
     groups[val].push(item);
     return groups;
@@ -39,11 +53,19 @@ export const groupByDate = function (array, prop, sortBy) {
   const grouped_ordered = {};
   Object.keys(grouped_unordered)
     .sort((a, b) => {
-      let compare_a = grouped_unordered[a][0][sortBy];
-      let compare_b = grouped_unordered[b][0][sortBy];
-      return compare_a > compare_b ? 1 : compare_a < compare_b ? -1 : 0;
+      const compare_a = grouped_unordered[a][0][sortBy];
+      const compare_b = grouped_unordered[b][0][sortBy];
+      const ONE = 1;
+      const MINUS_ONE = 1;
+      if (compare_a > compare_b) {
+        return ONE;
+      }
+      if (compare_a < compare_b) {
+        return MINUS_ONE;
+      }
+      return 0;
     })
-    .forEach(function (key) {
+    .forEach((key) => {
       grouped_ordered[key] = grouped_unordered[key];
     });
 
@@ -73,30 +95,17 @@ export const shallowEqual = (object1, object2) => {
     return false;
   }
 
-  for (let key of keys1) {
-    if (object1[key] !== object2[key]) {
-      return false;
-    }
-  }
-
-  return true;
+  // Check if all keys in object1 have the same value in object2
+  return keys1.every((key) => object1[key] === object2[key]);
 };
 
-export const isEmpty = (obj) => {
-  return Object.keys(obj).length === 0;
-};
+export const isEmpty = (obj) => Object.keys(obj).length === 0;
 
-export const isEmptyString = (str) => {
-  return !str || str.trim().length === 0;
-};
+export const isEmptyString = (str) => !str || str.trim().length === 0;
 
-export const stripTags = (s) => {
-  return s?.replace(/(<([^>]+)>)/gi, "") || "";
-};
+export const stripTags = (s) => s?.replace(/(<([^>]+)>)/gi, "") || "";
 
-export const boolToStr = (boolean) => {
-  return boolean ? "Yes" : "No";
-};
+export const boolToStr = (boolean) => (boolean ? "Yes" : "No");
 
 export const parseAndFormat = (
   dateString,
@@ -114,7 +123,7 @@ export const getAccessTokenSafely = async () => {
     return await getAccessToken();
   } catch (e) {
     console.log("log out: ", e);
-    initLogOut();
+    return initLogOut();
   }
 };
 
@@ -133,31 +142,36 @@ export const fetchResponseHandler = (response) => {
 };
 
 export const fetchErrorHandler = (response) => {
-  let code = response.status;
-  let msg = response.statusText;
+  const code = response.status;
+  const msg = response.statusText;
 
   switch (code) {
-    case 403:
+    case ERROR_CODE_403:
       Swal.fire("ERROR", T.translate("errors.user_not_authz"), "warning");
       break;
-    case 401:
+    case ERROR_CODE_401:
       Swal.fire("ERROR", T.translate("errors.session_expired"), "error");
       break;
-    case 412:
+    case ERROR_CODE_412:
       Swal.fire("ERROR", msg, "warning");
-    case 500:
+      break;
+    case ERROR_CODE_500:
       Swal.fire("ERROR", T.translate("errors.server_error"), "error");
+      break;
+    default:
+      break;
   }
 };
 
 export const adjustEventDuration = (evt, entity) => {
-  let adjustedEntity = { ...entity };
-  let { value, id, type } = evt.target;
+  const adjustedEntity = { ...entity };
+  const { id, type } = evt.target;
+  let { value } = evt.target;
 
   if (type === "datetime") {
     const empty = moment(0);
     if (value.valueOf() === empty.valueOf()) value = null;
-    if (value !== null) value = value.valueOf() / 1000;
+    if (value !== null) value = value.valueOf() / MILLISECONDS_TO_SECONDS;
     // if we have both dates, update duration
     if (id === "start_date" && adjustedEntity.end_date) {
       adjustedEntity.duration =
@@ -175,19 +189,18 @@ export const adjustEventDuration = (evt, entity) => {
         adjustedEntity.start_date = value - adjustedEntity.duration;
       }
     }
-  } else {
-    // updating duration unless is empty
-    // check if the value is a valid number
-    if (value !== "") {
-      value = parseInt(value * 60);
-      if (!Number.isNaN(value)) {
-        if (adjustedEntity.start_date) {
-          // if we have start date, update end date
-          adjustedEntity.end_date = adjustedEntity.start_date + value;
-        } else if (adjustedEntity.end_date) {
-          // if we only have end date, update start date
-          adjustedEntity.start_date = adjustedEntity.end_date - value;
-        }
+  } // updating duration unless is empty
+  // check if the value is a valid number
+  else if (value !== "") {
+    // eslint-disable-next-line no-magic-numbers
+    const parsedValue = parseInt(value * 60, 10);
+    if (!Number.isNaN(parsedValue)) {
+      if (adjustedEntity.start_date) {
+        // if we have start date, update end date
+        adjustedEntity.end_date = adjustedEntity.start_date + parsedValue;
+      } else if (adjustedEntity.end_date) {
+        // if we only have end date, update start date
+        adjustedEntity.start_date = adjustedEntity.end_date - parsedValue;
       }
     }
   }
@@ -197,14 +210,16 @@ export const adjustEventDuration = (evt, entity) => {
   return adjustedEntity;
 };
 
-export const uuidv4 = () => {
-  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+/* eslint no-bitwise: "warn" */
+export const uuidv4 = () =>
+  // eslint-disable-next-line no-magic-numbers
+  ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
     (
       c ^
+      // eslint-disable-next-line no-magic-numbers
       (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-    ).toString(16)
+    ).toString(HEX_RADIX)
   );
-};
 
 export const getSummitDays = (summit) => {
   const days = [];
@@ -220,22 +235,21 @@ export const getSummitDays = (summit) => {
 
   do {
     const option = {
-      value: currentAuxDay.valueOf() / 1000,
+      value: currentAuxDay.valueOf() / MILLISECONDS_TO_SECONDS,
       label: currentAuxDay.format("MMM Do YYYY")
     };
 
     days.push(option);
 
     currentAuxDay = currentAuxDay.clone();
-    currentAuxDay.add(1, "day");
+    const ONE_DAY = 1;
+    currentAuxDay.add(ONE_DAY, "day");
   } while (!currentAuxDay.isAfter(summitLocalEndDate));
 
   return days;
 };
 
-export const isNumericString = (value) => {
-  return /^[0-9]*$/.test(value);
-};
+export const isNumericString = (value) => /^[0-9]*$/.test(value);
 
 export const checkOrFilter = (filters, filter) => {
   // check if filter is OR to return the correct fitler
@@ -248,17 +262,17 @@ export const checkOrFilter = (filters, filter) => {
   return filter;
 };
 
-export const validateEmail = (email) => {
-  return String(email)
+export const validateEmail = (email) =>
+  String(email)
     .toLowerCase()
     .match(
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     );
-};
 
 const nestedLookup = (json, key) => {
   const keys = key.split(".");
   let nestedValue = json;
+  // eslint-disable-next-line
   for (const nestedKey of keys) {
     if (nestedValue.hasOwnProperty(nestedKey)) {
       nestedValue = nestedValue[nestedKey];
@@ -273,19 +287,23 @@ export const parseSpeakerAuditLog = (logString) => {
   const logEntries = logString.split("|");
   const userChanges = {};
   const emailRegExp =
-    /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
+    /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
+  // eslint-disable-next-line
   for (const entry of logEntries) {
     const emailMatch = entry.match(emailRegExp);
     if (!emailMatch) continue;
     const email = emailMatch[0];
     if (entry.includes("added")) {
+      // eslint-disable-next-line no-magic-numbers
       userChanges[email] = (userChanges[email] || 0) + 1;
     } else if (entry.includes("removed")) {
+      // eslint-disable-next-line no-magic-numbers
       userChanges[email] = (userChanges[email] || 0) - 1;
     }
   }
 
   const relevantChanges = [];
+  // eslint-disable-next-line
   for (const [email, changeCount] of Object.entries(userChanges)) {
     if (changeCount !== 0) {
       relevantChanges.push(
@@ -319,8 +337,9 @@ export const formatAuditLog = (logString) => {
 export const formatInitialJson = (template) => {
   const regex = /{{(.*?)}}/g;
   const matches = template.match(regex) || [];
+  // eslint-disable-next-line no-magic-numbers
   const json_keys = matches.map((match) => match.slice(2, -2).trim());
-  let default_json = {};
+  const default_json = {};
   json_keys.forEach((key) => {
     // Search on the first level of the JSON file
     if (emailTemplateDefaultValues.hasOwnProperty(key)) {
@@ -339,17 +358,20 @@ export const formatInitialJson = (template) => {
 };
 
 export const getAvailableBookingDates = (summit) => {
-  let { begin_allow_booking_date, end_allow_booking_date, time_zone_id } =
+  const { begin_allow_booking_date, end_allow_booking_date, time_zone_id } =
     summit;
-  let bookStartDate = epochToMomentTimeZone(
+  const bookStartDate = epochToMomentTimeZone(
     begin_allow_booking_date,
     time_zone_id
   );
-  let bookEndDate = epochToMomentTimeZone(end_allow_booking_date, time_zone_id);
-  let isValidStartDate = new Date(begin_allow_booking_date).getTime() > 0;
-  let isValidEndDate = new Date(end_allow_booking_date).getTime() > 0;
-  let now = moment().tz(time_zone_id);
-  let dates = [];
+  const bookEndDate = epochToMomentTimeZone(
+    end_allow_booking_date,
+    time_zone_id
+  );
+  const isValidStartDate = new Date(begin_allow_booking_date).getTime() > 0;
+  const isValidEndDate = new Date(end_allow_booking_date).getTime() > 0;
+  const now = moment().tz(time_zone_id);
+  const dates = [];
 
   if (!isValidStartDate || !isValidEndDate) return dates;
 
@@ -358,14 +380,15 @@ export const getAvailableBookingDates = (summit) => {
       const tmp = bookStartDate.clone();
       dates.push({ str: tmp.format("Y-M-D"), epoch: tmp.unix() });
     }
-    bookStartDate.add(1, "days");
+    const ONE_DAY = 1;
+    bookStartDate.add(ONE_DAY, "days");
   }
   return dates;
 };
 
 const isEntityWithinDay = (dayValue, entity) => {
   const startOfDay = dayValue;
-  const endOfDay = dayValue + 86400; // 86400 seconds per day
+  const endOfDay = dayValue + DAY_IN_SECONDS;
 
   return entity.start_datetime >= startOfDay && entity.end_datetime <= endOfDay;
 };
@@ -387,9 +410,10 @@ export const joinCVSChunks = (chunks) => {
   // if we get result try to get first the header
   const header = chunks[0].split("\n")[0];
   // and rebuild all the chunks using reduce
-  let csv = chunks.reduce((final, currentCvs) => {
-    let lines = currentCvs.split("\n");
+  const csv = chunks.reduce((final, currentCvs) => {
+    const lines = currentCvs.split("\n");
     // remove one line, starting at the first position
+    // eslint-disable-next-line no-magic-numbers
     lines.splice(0, 1);
     const rawContent = lines.join("\n");
     return final === "" ? rawContent : `${final}${rawContent}`;
@@ -398,20 +422,23 @@ export const joinCVSChunks = (chunks) => {
   return `${header}\n${csv}`;
 };
 
-export const htmlToString = (html) => {
-  return new DOMParser().parseFromString(html, "text/html").documentElement
+export const htmlToString = (html) =>
+  new DOMParser().parseFromString(html, "text/html").documentElement
     .textContent;
-};
 
-export const capitalize = (string) =>
-  string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
+export const capitalize = (string) => {
+  const ONE_LETTER = 1;
+  return string
+    ? string.charAt(0).toUpperCase() + string.slice(ONE_LETTER)
+    : "";
+};
 
 export const parseDateRangeFilter = (
   filterObject,
   filterToParse,
   filterName
 ) => {
-  if (filterToParse && filterToParse.some((e) => e !== null)) {
+  if (filterToParse && filterToParse.some((e) => e !== null && e !== 0)) {
     if (filterToParse.every((e) => e !== null && e !== 0)) {
       filterObject.push(
         `${filterName}[]${filterToParse[0]}&&${filterToParse[1]}`
@@ -421,11 +448,11 @@ export const parseDateRangeFilter = (
         `${
           filterToParse[0] !== null && filterToParse[0] !== 0
             ? `${filterName}>=${filterToParse[0]}`
-            : ``
+            : ""
         }${
           filterToParse[1] !== null && filterToParse[1] !== 0
             ? `${filterName}<=${filterToParse[1]}`
-            : ``
+            : ""
         }`
       );
     }
