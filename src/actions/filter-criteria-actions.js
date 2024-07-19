@@ -9,10 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
 import {
+  VALIDATE,
   getRequest,
   putRequest,
   postRequest,
@@ -25,9 +26,16 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
 import URI from "urijs";
 import Swal from "sweetalert2";
+import _ from "lodash";
+
+import { getAccessTokenSafely } from "../utils/methods";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_PER_PAGE,
+  ERROR_CODE_412
+} from "../utils/constants";
 
 export const FILTER_CRITERIA_ADDED = "FILTER_CRITERIA_ADDED";
 export const FILTER_CRITERIA_DELETED = "FILTER_CRITERIA_DELETED";
@@ -78,13 +86,13 @@ export const queryFilterCriterias = _.debounce(
   async (summitId, context, input, callback) => {
     const accessToken = await getAccessTokenSafely();
 
-    let apiUrl = URI(
+    const apiUrl = URI(
       `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`
     );
     apiUrl.addQuery("access_token", accessToken);
     apiUrl.addQuery("order", "+name");
     apiUrl.addQuery("order", "+id");
-    apiUrl.addQuery("per_page", 10);
+    apiUrl.addQuery("per_page", DEFAULT_PER_PAGE);
     apiUrl.addQuery("show_id", `${summitId}`);
     apiUrl.addQuery("context", `${context}`);
 
@@ -99,7 +107,7 @@ export const queryFilterCriterias = _.debounce(
       })
       .catch(fetchErrorHandler);
   },
-  500
+  DEBOUNCE_WAIT
 );
 
 export const customErrorHandler = (err, res) => (dispatch, state) => {
@@ -109,19 +117,19 @@ export const customErrorHandler = (err, res) => (dispatch, state) => {
   dispatch(stopLoading());
 
   switch (code) {
-    case 412:
+    case ERROR_CODE_412:
       if (Array.isArray(err.response.body)) {
         err.response.body.forEach((er) => {
-          msg += er + "<br>";
+          msg += `${er}<br>`;
         });
       } else {
-        for (var [key, value] of Object.entries(err.response.body)) {
-          if (isNaN(key)) {
-            msg += key + ": ";
+        Object.keys(err.response.body).forEach((key) => {
+          if (Number.isNaN(key)) {
+            msg += `${key}: "`;
           }
 
-          msg += value + "<br>";
-        }
+          msg += `${err.response.body[key]}<br>`;
+        });
       }
 
       Swal.fire("Validation error", msg, "warning");
