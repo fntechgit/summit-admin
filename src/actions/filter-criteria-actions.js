@@ -124,10 +124,6 @@ export const customErrorHandler = (err, res) => (dispatch, state) => {
         });
       } else {
         Object.keys(err.response.body).forEach((key) => {
-          if (Number.isNaN(key)) {
-            msg += `${key}: "`;
-          }
-
           msg += `${err.response.body[key]}<br>`;
         });
       }
