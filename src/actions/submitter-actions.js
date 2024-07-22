@@ -208,6 +208,11 @@ export const sendSubmitterEmails =
       // we don't need the filter criteria, we have the ids
       filter.push(`id==${selectedItems.join("||")}`);
       const originalFilters = parseFilters(filters);
+
+      if (source && source === sources.submitters_no_speakers) {
+        originalFilters.push("is_speaker==false");
+      }
+
       if (term) {
         const filterTerm = buildTermFilter(term);
         originalFilters.push(filterTerm.join(","));

@@ -1687,17 +1687,28 @@
     "add_ticket_type": "Add Ticket Type",
     "id": "#",
     "name": "Name",
+    "description": "Description",
     "audience": "Audience",
     "badge_type_name": "Badge Type",
     "external_id": "External Id",
+    "cost": "Cost",
+    "quantity_2_sell": "Quantity to Sell",
+    "sales_start_date": "Sale Start",
+    "sales_end_date": "Sale End",
     "seed_tickets": "Seed Tickets from Eventbrite",
     "apply": "Apply",
+    "apply_filters": "Apply Filters",
     "remove_warning": "Are you sure you want to delete ticket type ",
     "change_currency_warning": "Are you sure you want to change all ticket types currency to ",
     "currency_updated": "Currency updated successfully",
     "yes_change": "Yes, change.",
+    "select_fields": "Show Columns",
     "placeholders": {
-      "select_currency": "Select currency"
+      "search_ticket_types": "Search by Name, Description or ID",
+      "select_currency": "Select currency",
+      "select_fields": "Select data to display",
+      "sale_period_from": "Filter Sale Period from",
+      "sale_period_to": "Filter Sale Period to"
     }
   },
   "edit_ticket_type": {

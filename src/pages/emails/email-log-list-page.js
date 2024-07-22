@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
@@ -26,8 +26,12 @@ import { SegmentedControl } from "segmented-control";
 import { getSentEmails } from "../../actions/email-actions";
 import "../../styles/email-logs-page.less";
 import EmailTemplateInput from "../../components/inputs/email-template-input";
+import {
+  DATE_FILTER_ARRAY_SIZE,
+  DEFAULT_CURRENT_PAGE
+} from "../../utils/constants";
 
-const SentEmailListPage = ({
+const SentEmailListPage = function ({
   emails,
   lastPage,
   currentPage,
@@ -38,15 +42,16 @@ const SentEmailListPage = ({
   match,
   perPage,
   filters,
+  getSentEmails,
   ...props
-}) => {
+}) {
   useEffect(() => {
-    props.getSentEmails(term, currentPage, perPage, order, orderDir, filters);
+    getSentEmails(term, currentPage, perPage, order, orderDir, filters);
   }, []);
 
   const defaultFilters = {
     is_sent_filter: null,
-    sent_date_filter: Array(2).fill(null),
+    sent_date_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null),
     template_filter: ""
   };
 
@@ -64,20 +69,26 @@ const SentEmailListPage = ({
   const [selectedColumns, setSelectedColumns] = useState([]);
 
   const handlePageChange = (newPage) => {
-    props.getSentEmails(term, newPage, perPage, order, orderDir, emailFilters);
+    getSentEmails(term, newPage, perPage, order, orderDir, emailFilters);
   };
 
   const handleSort = (index, key, dir, func) => {
-    props.getSentEmails(term, currentPage, perPage, key, dir, emailFilters);
+    getSentEmails(term, currentPage, perPage, key, dir, emailFilters);
   };
 
   const handleSearch = (newTerm) => {
-    props.getSentEmails(newTerm, 1, perPage, order, orderDir, emailFilters);
+    getSentEmails(
+      newTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      emailFilters
+    );
   };
 
-  const handleDDLSortByLabel = (ddlArray) => {
-    return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
-  };
+  const handleDDLSortByLabel = (ddlArray) =>
+    ddlArray.sort((a, b) => a.label.localeCompare(b.label));
 
   const handleFiltersChange = (ev) => {
     const { value } = ev.target;
@@ -92,7 +103,7 @@ const SentEmailListPage = ({
         const defaultValue = Array.isArray(emailFilters[removedFilter])
           ? []
           : "";
-        let newEventFilters = {
+        const newEventFilters = {
           ...emailFilters,
           [removedFilter]: defaultValue
         };
@@ -117,7 +128,8 @@ const SentEmailListPage = ({
   };
 
   const handleEmailFilterChange = (ev) => {
-    let { value, type, id } = ev.target;
+    const { type, id } = ev.target;
+    let { value } = ev.target;
     if (type === "operatorinput") {
       value = Array.isArray(value)
         ? value
@@ -139,7 +151,7 @@ const SentEmailListPage = ({
 
   const handleColumnsChange = (ev) => {
     const { value } = ev.target;
-    let newColumns = value;
+    const newColumns = value;
 
     setSelectedColumns(newColumns);
   };
@@ -149,9 +161,9 @@ const SentEmailListPage = ({
   };
 
   const handleApplyEmailFilters = () => {
-    props.getSentEmails(
+    getSentEmails(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
@@ -168,7 +180,7 @@ const SentEmailListPage = ({
     }
   ];
 
-  let showColumns = fieldNames
+  const showColumns = fieldNames
     .filter((f) => selectedColumns.includes(f.columnKey))
     .map((f2) => {
       let c = {
@@ -230,8 +242,8 @@ const SentEmailListPage = ({
         {" "}
         {T.translate("email_logs.email_list")} ({totalEmails})
       </h3>
-      <div className={"row"}>
-        <div className={"col-md-6"}>
+      <div className="row">
+        <div className="col-md-6">
           <FreeTextSearch
             value={term}
             placeholder={T.translate("emails.placeholders.search_emails")}
@@ -240,22 +252,23 @@ const SentEmailListPage = ({
         </div>
       </div>
       <hr />
-      <div className={"row"}>
-        <div className={"col-md-6"}>
+      <div className="row">
+        <div className="col-md-6">
           <Dropdown
             id="enabled_filters"
-            placeholder={"Enabled Filters"}
+            placeholder="Enabled Filters"
             value={enabledFilters}
             onChange={handleFiltersChange}
             options={handleDDLSortByLabel(filters_ddl)}
-            isClearable={true}
-            isMulti={true}
+            isClearable
+            isMulti
           />
         </div>
-        <div className={"col-md-6"}>
+        <div className="col-md-6">
           <button
             className="btn btn-primary right-space"
             onClick={handleApplyEmailFilters}
+            type="button"
           >
             {T.translate("email_logs.apply_filters")}
           </button>
@@ -263,7 +276,7 @@ const SentEmailListPage = ({
       </div>
       <div className="filters-row">
         {enabledFilters.includes("is_sent_filter") && (
-          <div className={"col-md-6"}>
+          <div className="col-md-6">
             <SegmentedControl
               name="is_sent_filter"
               options={[
@@ -295,7 +308,7 @@ const SentEmailListPage = ({
         )}
         {enabledFilters.includes("sent_date_filter") && (
           <>
-            <div className={"col-md-3"}>
+            <div className="col-md-3">
               <DateTimePicker
                 id="sent_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -305,15 +318,15 @@ const SentEmailListPage = ({
                   )
                 }}
                 onChange={(ev) => handleChangeDateFilter(ev, false)}
-                timezone={"UTC"}
+                timezone="UTC"
                 value={epochToMomentTimeZone(
                   emailFilters.sent_date_filter[0],
                   "UTC"
                 )}
-                className={"event-list-date-picker"}
+                className="event-list-date-picker"
               />
             </div>
-            <div className={"col-md-3"}>
+            <div className="col-md-3">
               <DateTimePicker
                 id="sent_date_filter"
                 format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -323,24 +336,24 @@ const SentEmailListPage = ({
                   )
                 }}
                 onChange={(ev) => handleChangeDateFilter(ev, true)}
-                timezone={"UTC"}
+                timezone="UTC"
                 value={epochToMomentTimeZone(
                   emailFilters.sent_date_filter[1],
                   "UTC"
                 )}
-                className={"event-list-date-picker"}
+                className="event-list-date-picker"
               />
             </div>
           </>
         )}
         {enabledFilters.includes("template_filter") && (
-          <div className={"col-md-6"}>
+          <div className="col-md-6">
             <EmailTemplateInput
               id="template_filter"
               value={emailFilters.template_filter}
               placeholder={T.translate("email_logs.placeholders.template")}
               onChange={handleEmailFilterChange}
-              isClearable={true}
+              isClearable
               cacheOptions
               defaultOptions
               plainValue
@@ -348,17 +361,19 @@ const SentEmailListPage = ({
           </div>
         )}
       </div>
-      <div className={"row"} style={{ marginBottom: 15 }}>
-        <div className={"col-md-12"}>
-          <label>{T.translate("email_logs.select_fields")}</label>
+      <div className="row" style={{ marginBottom: 15 }}>
+        <div className="col-md-12">
+          <label htmlFor="select_fields">
+            {T.translate("email_logs.select_fields")}
+          </label>
           <Dropdown
             id="select_fields"
             placeholder={T.translate("email_logs.placeholders.select_fields")}
             value={selectedColumns}
             onChange={handleColumnsChange}
             options={handleDDLSortByLabel(ddl_columns)}
-            isClearable={true}
-            isMulti={true}
+            isClearable
+            isMulti
           />
         </div>
       </div>

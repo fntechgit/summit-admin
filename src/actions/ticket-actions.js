@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   authErrorHandler,
   createAction,
@@ -26,9 +25,10 @@ import {
   showMessage,
   showSuccessMessage,
   startLoading,
-  stopLoading,
-  VALIDATE
+  stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
+import URI from "urijs";
+import Swal from "sweetalert2";
 
 import {
   getAccessTokenSafely,
@@ -37,8 +37,14 @@ import {
   joinCVSChunks
 } from "../utils/methods";
 
-import URI from "urijs";
-import Swal from "sweetalert2";
+import history from "../history";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_PER_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_EXPORT_PAGE_SIZE,
+  ERROR_CODE_412
+} from "../utils/constants";
 
 export const REQUEST_TICKETS = "REQUEST_TICKETS";
 export const RECEIVE_TICKETS = "RECEIVE_TICKETS";
@@ -88,7 +94,281 @@ export const CLEAR_ALL_SELECTED_TICKETS = "CLEAR_ALL_SELECTED_TICKETS";
 export const SET_SELECTED_ALL_TICKETS = "SET_SELECTED_ALL_TICKETS";
 export const PRINT_TICKETS = "PRINT_TICKETS";
 
-/**************************   TICKETS   ******************************************/
+export const customErrorHandler = (ticketId, err, res) => (dispatch) => {
+  const code = err.status;
+
+  dispatch(stopLoading());
+
+  switch (code) {
+    case ERROR_CODE_412:
+      Swal.fire(
+        "Validation error",
+        `Ticket number ${ticketId} not found.`,
+        "warning"
+      );
+      break;
+    default:
+      dispatch(authErrorHandler(err, res));
+  }
+};
+
+const normalizeTicket = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  // if no owner then we are assigning the tix to someone
+  if (!normalizedEntity.owner && normalizedEntity.attendee) {
+    normalizedEntity.attendee_first_name = normalizedEntity.attendee.first_name;
+    normalizedEntity.attendee_last_name = normalizedEntity.attendee.last_name;
+    normalizedEntity.attendee_email = normalizedEntity.attendee.email;
+  }
+
+  if (normalizedEntity.hasOwnProperty("ticket_type")) {
+    normalizedEntity.ticket_type_id = normalizedEntity.ticket_type?.id;
+    delete normalizedEntity.ticket_type;
+  }
+
+  delete normalizedEntity.id;
+  delete normalizedEntity.badge;
+  delete normalizedEntity.attendee;
+  delete normalizedEntity.owner;
+  delete normalizedEntity.owner_id;
+  delete normalizedEntity.owner_full_name;
+  delete normalizedEntity.created;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.promocode;
+  delete normalizedEntity.promocode_id;
+  delete normalizedEntity.promocode_name;
+
+  return normalizedEntity;
+};
+
+const normalizeEntity = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  if (!normalizedEntity.external_id) delete normalizedEntity.external_id;
+
+  if (!normalizedEntity.badge_type_id) delete normalizedEntity.badge_type_id;
+
+  // clear dates
+  if (entity.sales_start_date === 0) {
+    normalizedEntity.sales_start_date = "";
+  }
+
+  if (entity.sales_end_date === 0) {
+    normalizedEntity.sales_end_date = "";
+  }
+
+  delete normalizedEntity.id;
+
+  return normalizedEntity;
+};
+
+// **************************   TICKETS   ******************************************/
+
+const parseFilters = (filters, term = null) => {
+  const filter = [];
+
+  if (filters?.showOnlyPendingRefundRequests) {
+    filter.push("has_requested_refund_requests==1");
+  }
+
+  if (filters?.showOnlyPrintable) {
+    filter.push("is_printable==1");
+  }
+
+  if (filters?.hasOwnerFilter) {
+    if (filters.hasOwnerFilter === "HAS_OWNER") filter.push("has_owner==1");
+    if (filters.hasOwnerFilter === "HAS_NO_OWNER") filter.push("has_owner==0");
+  }
+
+  if (filters?.hasBadgeFilter) {
+    if (filters.hasBadgeFilter === "HAS_BADGE") filter.push("has_badge==1");
+    if (filters.hasBadgeFilter === "HAS_NO_BADGE") filter.push("has_badge==0");
+  }
+
+  if (filters?.ticketTypesFilter?.length > 0) {
+    filter.push(
+      filters.ticketTypesFilter.reduce(
+        (accumulator, tt) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}ticket_type_id==${
+            tt.value
+          }`,
+        ""
+      )
+    );
+  }
+
+  if (filters?.badgeTypesFilter?.length > 0) {
+    filter.push(
+      filters.badgeTypesFilter.reduce(
+        (accumulator, tt) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}badge_type_id==${
+            tt.value
+          }`,
+        ""
+      )
+    );
+  }
+
+  if (filters?.viewTypesFilter?.length > 0) {
+    filter.push(
+      filters.viewTypesFilter.reduce(
+        (accumulator, tt) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}view_type_id==${
+            tt.value
+          }`,
+        ""
+      )
+    );
+  }
+
+  if (filters.promocodesFilter?.length > 0) {
+    filter.push(
+      filters.promocodesFilter.reduce(
+        (accumulator, tt) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}promo_code_id==${
+            tt.id
+          }`,
+        ""
+      )
+    );
+  }
+
+  if (filters?.completedFilter) {
+    filter.push(`owner_status==${filters.completedFilter}`);
+  }
+
+  if (filters?.amountFilter) {
+    if (filters.amountFilter === "Paid") filter.push("final_amount>0");
+    if (filters.amountFilter === "Free") filter.push("final_amount==0");
+  }
+
+  if (filters.ownerFullNameStartWithFilter?.length > 0) {
+    filter.push(
+      filters.ownerFullNameStartWithFilter.reduce(
+        (accumulator, alpha) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}owner_first_name==${
+            alpha.value
+          }`,
+        ""
+      )
+    );
+  }
+
+  if (filters?.ownerCompany?.length > 0) {
+    const nonTBD = filters?.ownerCompany.filter((of) => of.id !== "NULL");
+    const ownerCompany = [];
+
+    // has tbd
+    if (nonTBD.length < filters?.ownerCompany?.length) {
+      ownerCompany.push("has_owner_company==0");
+    }
+
+    if (nonTBD.length > 0) {
+      ownerCompany.push(
+        `owner_company==${nonTBD
+          .map((of) => encodeURIComponent(of.name))
+          .join("||")}`
+      );
+    }
+
+    filter.push(ownerCompany.join(","));
+  }
+
+  if (filters.audienceFilter?.length > 0) {
+    filter.push(
+      filters.audienceFilter.reduce(
+        (accumulator, aud) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}audience==${aud}`,
+        ""
+      )
+    );
+  }
+
+  if (filters.promocodeTagsFilter?.length > 0) {
+    filter.push(
+      filters.promocodeTagsFilter.reduce(
+        (accumulator, t) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}promo_code_tag==${
+            t.tag
+          }`,
+        ""
+      )
+    );
+  }
+
+  if (term) {
+    const escapedTerm = escapeFilterValue(term);
+    let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm},promo_code_tag=@${escapedTerm}`;
+    searchString = isNumericString(escapedTerm)
+      ? `${searchString},promo_code_tag_id==${escapedTerm}`
+      : searchString;
+    filter.push(searchString);
+  }
+
+  return checkOrFilter(filters, filter);
+};
+
+const parseTicketTypeFilters = (filters, term = null) => {
+  const filter = [];
+
+  if (filters.audience_filter?.length > 0) {
+    filter.push(
+      filters.audience_filter.reduce(
+        (accumulator, aud) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}audience==${aud}`,
+        ""
+      )
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("badge_type_filter") &&
+    Array.isArray(filters.badge_type_filter) &&
+    filters.badge_type_filter.length > 0
+  ) {
+    filter.push(`badge_type_id==${filters.badge_type_filter.join("||")}`);
+  }
+
+  if (
+    filters.sale_period_filter &&
+    filters.sale_period_filter.some((e) => e !== null)
+  ) {
+    if (filters.sale_period_filter.every((e) => e !== null)) {
+      filter.push(
+        `sales_start_date>=${filters.sale_period_filter[0]}`,
+        `sales_end_date<=${filters.sale_period_filter[1]}`
+      );
+    } else {
+      filter.push(
+        `${
+          filters.sale_period_filter[0] !== null &&
+          filters.sale_period_filter[0] !== 0
+            ? `sales_start_date>=${filters.sale_period_filter[0]}`
+            : ""
+        }${
+          filters.sale_period_filter[1] !== null &&
+          filters.sale_period_filter[1] !== 0
+            ? `sales_end_date<=${filters.sale_period_filter[1]}`
+            : ""
+        }`
+      );
+    }
+  }
+
+  if (term) {
+    const escapedTerm = escapeFilterValue(term);
+    let searchString = `name@@${escapedTerm},description@@${escapedTerm}`;
+
+    if (isNumericString(term)) {
+      searchString += `,id==${term}`;
+    }
+
+    filter.push(searchString);
+  }
+
+  return checkOrFilter(filters, filter);
+};
 
 export const selectTicket = (ticketId) => (dispatch) => {
   dispatch(createAction(SELECT_TICKET)(ticketId));
@@ -105,27 +385,26 @@ export const setSelectedAll = (value) => (dispatch) => {
   dispatch(createAction(SET_SELECTED_ALL_TICKETS)(value));
 };
 
-export const reSendTicketEmail =
-  (orderId, ticketId) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+export const reSendTicketEmail = (orderId, ticketId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const params = {
-      access_token: accessToken
-    };
-
-    dispatch(startLoading());
-
-    return putRequest(
-      null,
-      createAction(TICKET_EMAIL_SENT)({ ticketId }),
-      `${window.API_BASE_URL}/api/v1/summits/all/orders/${orderId}/tickets/${ticketId}/attendee/reinvite`,
-      {},
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      dispatch(showSuccessMessage(T.translate("edit_ticket.email_resent")));
-    });
+  const params = {
+    access_token: accessToken
   };
+
+  dispatch(startLoading());
+
+  return putRequest(
+    null,
+    createAction(TICKET_EMAIL_SENT)({ ticketId }),
+    `${window.API_BASE_URL}/api/v1/summits/all/orders/${orderId}/tickets/${ticketId}/attendee/reinvite`,
+    {},
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+    dispatch(showSuccessMessage(T.translate("edit_ticket.email_resent")));
+  });
+};
 
 export const printTickets =
   (filters, doAttendeeCheckinOnPrint = true, selectedViewType = null) =>
@@ -144,7 +423,7 @@ export const printTickets =
     };
 
     if (!selectedAll && selectedIds.length > 0) {
-      // we don't need the filter criteria, we have the ids
+      // we don"t need the filter criteria, we have the ids
       filter.push(`id==${selectedIds.join("||")}`);
     } else {
       filter = parseFilters(filters, term);
@@ -158,175 +437,32 @@ export const printTickets =
       params["filter[]"] = filter;
     }
 
-    params["check_in"] = doAttendeeCheckinOnPrint;
+    params.check_in = doAttendeeCheckinOnPrint;
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     if (selectedViewType) {
-      params["view_type"] = selectedViewType;
+      params.view_type = selectedViewType;
     }
 
-    let url = URI(
-      `${process.env["PRINT_APP_URL"]}/check-in/${currentSummit.slug}/tickets`
+    const url = URI(
+      `${process.env.PRINT_APP_URL}/check-in/${currentSummit.slug}/tickets`
     );
 
     window.open(url.query(params).toString(), "_blank");
   };
 
-const parseFilters = (filters, term = null) => {
-  const filter = [];
-
-  if (filters?.showOnlyPendingRefundRequests) {
-    filter.push("has_requested_refund_requests==1");
-  }
-
-  if (filters?.showOnlyPrintable) {
-    filter.push("is_printable==1");
-  }
-
-  if (filters?.hasOwnerFilter) {
-    if (filters.hasOwnerFilter === "HAS_OWNER") filter.push(`has_owner==1`);
-    if (filters.hasOwnerFilter === "HAS_NO_OWNER") filter.push(`has_owner==0`);
-  }
-
-  if (filters?.hasBadgeFilter) {
-    if (filters.hasBadgeFilter === "HAS_BADGE") filter.push(`has_badge==1`);
-    if (filters.hasBadgeFilter === "HAS_NO_BADGE") filter.push(`has_badge==0`);
-  }
-
-  if (filters?.ticketTypesFilter?.length > 0) {
-    filter.push(
-      filters.ticketTypesFilter.reduce(
-        (accumulator, tt) =>
-          accumulator +
-          (accumulator !== "" ? "," : "") +
-          `ticket_type_id==${tt.value}`,
-        ""
-      )
-    );
-  }
-
-  if (filters?.badgeTypesFilter?.length > 0) {
-    filter.push(
-      filters.badgeTypesFilter.reduce(
-        (accumulator, tt) =>
-          accumulator +
-          (accumulator !== "" ? "," : "") +
-          `badge_type_id==${tt.value}`,
-        ""
-      )
-    );
-  }
-
-  if (filters?.viewTypesFilter?.length > 0) {
-    filter.push(
-      filters.viewTypesFilter.reduce(
-        (accumulator, tt) =>
-          accumulator +
-          (accumulator !== "" ? "," : "") +
-          `view_type_id==${tt.value}`,
-        ""
-      )
-    );
-  }
-
-  if (filters.promocodesFilter?.length > 0) {
-    filter.push(
-      filters.promocodesFilter.reduce(
-        (accumulator, tt) =>
-          accumulator +
-          (accumulator !== "" ? "," : "") +
-          `promo_code_id==${tt.id}`,
-        ""
-      )
-    );
-  }
-
-  if (filters?.completedFilter) {
-    filter.push(`owner_status==${filters.completedFilter}`);
-  }
-
-  if (filters?.amountFilter) {
-    if (filters.amountFilter === "Paid") filter.push(`final_amount>0`);
-    if (filters.amountFilter === "Free") filter.push(`final_amount==0`);
-  }
-
-  if (filters.ownerFullNameStartWithFilter?.length > 0) {
-    filter.push(
-      filters.ownerFullNameStartWithFilter.reduce(
-        (accumulator, alpha) =>
-          accumulator +
-          (accumulator !== "" ? "," : "") +
-          `owner_first_name@@${alpha.value}`,
-        ""
-      )
-    );
-  }
-
-  if (filters?.ownerCompany?.length > 0) {
-    const nonTBD = filters?.ownerCompany.filter((of) => of.id !== "NULL");
-    let ownerCompany = [];
-
-    // has tbd
-    if (nonTBD.length < filters?.ownerCompany?.length) {
-      ownerCompany.push("has_owner_company==0");
-    }
-
-    if (nonTBD.length > 0) {
-      ownerCompany.push(
-        "owner_company==" +
-          nonTBD.map((of) => encodeURIComponent(of.name)).join("||")
-      );
-    }
-
-    filter.push(ownerCompany.join(","));
-  }
-
-  if (filters.audienceFilter?.length > 0) {
-    filter.push(
-      filters.audienceFilter.reduce(
-        (accumulator, aud) =>
-          accumulator + (accumulator !== "" ? "," : "") + `audience==${aud}`,
-        ""
-      )
-    );
-  }
-
-  if (filters.promocodeTagsFilter?.length > 0) {
-    filter.push(
-      filters.promocodeTagsFilter.reduce(
-        (accumulator, t) =>
-          accumulator +
-          (accumulator !== "" ? "," : "") +
-          `promo_code_tag==${t.tag}`,
-        ""
-      )
-    );
-  }
-
-  if (term) {
-    const escapedTerm = escapeFilterValue(term);
-    let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm},promo_code_tag=@${escapedTerm}`;
-    searchString = isNumericString(escapedTerm)
-      ? `${searchString},promo_code_tag_id==${escapedTerm}`
-      : searchString;
-    filter.push(searchString);
-  }
-
-  return checkOrFilter(filters, filter);
-};
-
 export const getTickets =
   (
     term = "",
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = 1,
+    orderDir = DEFAULT_ORDER_DIR,
     filters = {},
     extraColumns = []
   ) =>
@@ -338,7 +474,7 @@ export const getTickets =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand:
@@ -354,9 +490,9 @@ export const getTickets =
     // order
     if (order != null && orderDir != null) {
       let auxOrder = order;
-      const orderDirSign = orderDir === 1 ? "+" : "-";
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
       if (auxOrder === "badge_type_id") auxOrder = "badge_type";
-      params["order"] = `${orderDirSign}${auxOrder}`;
+      params.order = `${orderDirSign}${auxOrder}`;
     }
 
     return getRequest(
@@ -425,11 +561,10 @@ export const importTicketsCSV = (file) => async (dispatch, getState) => {
 export const exportTicketsCSV =
   (
     term = "",
-    pageSize = 500,
+    pageSize = DEFAULT_EXPORT_PAGE_SIZE,
     order = "id",
-    orderDir = 1,
-    filters = {},
-    extraColumns = []
+    orderDir = DEFAULT_ORDER_DIR,
+    filters = {}
   ) =>
   async (dispatch, getState) => {
     dispatch(startLoading());
@@ -439,7 +574,7 @@ export const exportTicketsCSV =
     const { currentSummit } = currentSummitState;
     const { totalTickets } = currentTicketListState;
 
-    const filename = currentSummit.name + "-Tickets.csv";
+    const filename = `${currentSummit.name}-Tickets.csv`;
     const totalPages = Math.ceil(totalTickets / pageSize);
 
     const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets/csv`;
@@ -448,9 +583,9 @@ export const exportTicketsCSV =
 
     const filter = parseFilters(filters, term);
 
-    let params = Array.from({ length: totalPages }, (_, i) => {
-      let res = {
-        page: i + 1,
+    const params = Array.from({ length: totalPages }, (_, i) => {
+      const res = {
+        page: i + DEFAULT_CURRENT_PAGE,
         access_token: accessToken,
         per_page: pageSize
       };
@@ -461,8 +596,8 @@ export const exportTicketsCSV =
 
       // order
       if (order != null && orderDir != null) {
-        const orderDirSign = orderDir === 1 ? "+" : "-";
-        res["order"] = `${orderDirSign}${order}`;
+        const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+        res.order = `${orderDirSign}${order}`;
       }
 
       return res;
@@ -478,7 +613,7 @@ export const exportTicketsCSV =
         }
         dispatch(stopLoading());
       })
-      .catch((err) => {
+      .catch(() => {
         dispatch(stopLoading());
       });
   };
@@ -606,7 +741,7 @@ export const reassignTicket =
     });
   };
 
-/** TICKET REFUNDS **/
+// ** TICKET REFUNDS ** /
 
 export const cancelRefundTicket =
   (orderId, ticketId, refundNotes = "") =>
@@ -690,69 +825,24 @@ export const addBadgeToTicket = (ticketId) => async (dispatch, getState) => {
   });
 };
 
-const normalizeTicket = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  // if no owner then we are assigning the tix to someone
-  if (!normalizedEntity.owner && normalizedEntity.attendee) {
-    normalizedEntity.attendee_first_name = normalizedEntity.attendee.first_name;
-    normalizedEntity.attendee_last_name = normalizedEntity.attendee.last_name;
-    normalizedEntity.attendee_email = normalizedEntity.attendee.email;
-  }
-
-  if (normalizedEntity.hasOwnProperty("ticket_type")) {
-    normalizedEntity.ticket_type_id = normalizedEntity.ticket_type?.id;
-    delete normalizedEntity.ticket_type;
-  }
-
-  delete normalizedEntity.id;
-  delete normalizedEntity.badge;
-  delete normalizedEntity.attendee;
-  delete normalizedEntity.owner;
-  delete normalizedEntity.owner_id;
-  delete normalizedEntity.owner_full_name;
-  delete normalizedEntity.created;
-  delete normalizedEntity.last_edited;
-  delete normalizedEntity.promocode;
-  delete normalizedEntity.promocode_id;
-  delete normalizedEntity.promocode_name;
-
-  return normalizedEntity;
-};
-
-export const customErrorHandler = (ticketId, err, res) => (dispatch, state) => {
-  const code = err.status;
-
-  dispatch(stopLoading());
-
-  switch (code) {
-    case 412:
-      Swal.fire(
-        "Validation error",
-        `Ticket number ${ticketId} not found.`,
-        "warning"
-      );
-      break;
-    default:
-      dispatch(authErrorHandler(err, res));
-  }
-};
-
-/**************************   TICKET TYPES   ******************************************/
+// **************************   TICKET TYPES   ******************************************/
 
 export const getTicketTypes =
   (
     summit,
+    term,
     order = "name",
-    orderDir = 1,
-    currentPage = 1,
-    perPage = 10,
+    orderDir = DEFAULT_ORDER_DIR,
+    currentPage = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     filters = {}
   ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
+
+    const summitTZ = summit.time_zone.name;
 
     const params = {
       page: currentPage,
@@ -761,7 +851,7 @@ export const getTicketTypes =
       expand: "badge_type"
     };
 
-    const filter = parseFilters(filters);
+    const filter = parseTicketTypeFilters(filters, term);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -769,8 +859,8 @@ export const getTicketTypes =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -778,7 +868,7 @@ export const getTicketTypes =
       createAction(RECEIVE_TICKET_TYPES),
       `${window.API_BASE_URL}/api/v2/summits/${summit.id}/ticket-types`,
       authErrorHandler,
-      { order, orderDir, currentPage, perPage, ...filters }
+      { term, order, orderDir, currentPage, perPage, filters, summitTZ }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -931,28 +1021,7 @@ export const seedTicketTypes = () => async (dispatch, getState) => {
   });
 };
 
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  if (!normalizedEntity.external_id) delete normalizedEntity.external_id;
-
-  if (!normalizedEntity.badge_type_id) delete normalizedEntity.badge_type_id;
-
-  // clear dates
-  if (entity.sales_start_date === 0) {
-    normalizedEntity.sales_start_date = "";
-  }
-
-  if (entity.sales_end_date === 0) {
-    normalizedEntity.sales_end_date = "";
-  }
-
-  delete normalizedEntity.id;
-
-  return normalizedEntity;
-};
-
-/***************************   REFUND POLICIES   ******************************/
+// ***************************   REFUND POLICIES   ******************************/
 
 export const getRefundPolicies = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -1029,10 +1098,15 @@ export const deleteRefundPolicy =
     });
   };
 
-/***************************   PAYMENT PROFILES   ******************************/
+// ***************************   PAYMENT PROFILES   ******************************/
 
 export const getPaymentProfiles =
-  (page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -1041,15 +1115,15 @@ export const getPaymentProfiles =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
