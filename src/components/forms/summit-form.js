@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -24,7 +24,9 @@ import {
   Table,
   UploadInput,
   TextEditor,
-  MemberInput
+  MemberInput,
+  Exclusive,
+  FreeMultiTextInput
 } from "openstack-uicore-foundation/lib/components";
 import { Pagination } from "react-bootstrap";
 import Switch from "react-switch";
@@ -32,10 +34,6 @@ import history from "../../history";
 
 import TextAreaInputWithCounter from "../inputs/text-area-input-with-counter";
 import TextInputWithCounter from "../inputs/text-input-with-counter";
-import {
-  Exclusive,
-  FreeMultiTextInput
-} from "openstack-uicore-foundation/lib/components";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class SummitForm extends React.Component {
@@ -61,93 +59,99 @@ class SummitForm extends React.Component {
     this.handleNewAttributeType = this.handleNewAttributeType.bind(this);
     this.getHelpUsersOptionLabel = this.getHelpUsersOptionLabel.bind(this);
     this.handleSampleNumber = this.handleSampleNumber.bind(this);
+    this.toggleSection = this.toggleSection.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     const state = {};
-    scrollToError(this.props.errors);
+    const {
+      errors,
+      entity,
+      regLiteMarketingSettings,
+      printAppMarketingSettings,
+      regFeedMetadataListSettings
+    } = this.props;
+    scrollToError(errors);
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
+    if (!shallowEqual(prevProps.entity, entity)) {
+      state.entity = { ...entity };
       state.errors = {};
     }
     if (
       !shallowEqual(
         prevProps.regLiteMarketingSettings,
-        this.props.regLiteMarketingSettings
+        regLiteMarketingSettings
       )
     ) {
       state.regLiteMarketingSettings = {
-        ...this.props.regLiteMarketingSettings
+        ...regLiteMarketingSettings
       };
     }
 
     if (
       !shallowEqual(
         prevProps.printAppMarketingSettings,
-        this.props.printAppMarketingSettings
+        printAppMarketingSettings
       )
     ) {
       state.printAppMarketingSettings = {
-        ...this.props.printAppMarketingSettings
+        ...printAppMarketingSettings
       };
     }
 
     if (
       !shallowEqual(
         prevProps.regFeedMetadataListSettings,
-        this.props.regFeedMetadataListSettings
+        regFeedMetadataListSettings
       )
     ) {
       state.regFeedMetadataListSettings = {
-        ...this.props.regFeedMetadataListSettings
+        ...regFeedMetadataListSettings
       };
     }
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
+    if (!shallowEqual(prevProps.errors, errors)) {
+      state.errors = { ...errors };
     }
 
     if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
+      this.setState((prevState) => ({ ...prevState, ...state }));
     }
-  }
-
-  getHelpUsersOptionLabel(member) {
-    if (member.hasOwnProperty("full_name")) {
-      return member.full_name;
-    }
-    //default
-    return `${member.first_name} ${member.last_name} (${member.id})`;
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let regLiteMarketingSettings = { ...this.state.regLiteMarketingSettings };
-    let printAppMarketingSettings = { ...this.state.printAppMarketingSettings };
+    const {
+      entity,
+      errors,
+      regLiteMarketingSettings,
+      printAppMarketingSettings
+    } = this.state;
+    const newEntity = { ...entity };
+    const newErrors = { ...errors };
+    const newRegLiteMarketingSettings = { ...regLiteMarketingSettings };
+    const newPrintAppMarketingSettings = { ...printAppMarketingSettings };
 
-    let { onAddHelpMember, onDeleteHelpMember } = this.props;
-    let { errors } = this.state;
+    const { onAddHelpMember, onDeleteHelpMember } = this.props;
     let { value, id } = ev.target;
     let currentError = "";
 
-    if (errors.hasOwnProperty(id)) delete errors[id];
+    if (newErrors.hasOwnProperty(id)) delete newErrors[id];
 
     // logic for summit help users ( chat roles )
     if (ev.target.type === "memberinput") {
-      let oldHelpUsers = entity[id];
-      let currentOldOnes = [];
+      const oldHelpUsers = entity[id];
+      const currentOldOnes = [];
       try {
         // remap to chat api payload format
-        let newHelpUsers = value.map((member) => {
+        const newHelpUsers = value.map((member) => {
           if (member.hasOwnProperty("email")) {
             // if has email property then its cames from main api
             // we need to remap but first only users with idp id set
             // are valid
             if (!member.user_external_id) {
-              throw "Invalid user";
+              throw new Error("Invalid user");
             }
-            let newMember = {
+            const newMember = {
               member_id: member.id,
               idp_user_id: member.user_external_id,
               full_name: `${member.first_name} ${member.last_name}`,
@@ -162,13 +166,13 @@ class SummitForm extends React.Component {
         });
 
         // check if we delete something
-        if (oldHelpUsers.length != currentOldOnes.length) {
+        if (oldHelpUsers.length !== currentOldOnes.length) {
           // get missing one
-          let missingOne = oldHelpUsers.filter((oldOne) => {
-            let matches = currentOldOnes.filter((newOne) => {
-              return newOne.member_id == oldOne.member_id;
-            });
-            return matches.length == 0;
+          const missingOne = oldHelpUsers.filter((oldOne) => {
+            const matches = currentOldOnes.filter(
+              (newOne) => newOne.member_id === oldOne.member_id
+            );
+            return matches.length === 0;
           });
           if (missingOne.length > 0) {
             // remove it
@@ -186,6 +190,7 @@ class SummitForm extends React.Component {
 
     if (ev.target.type === "radio") {
       id = ev.target.name;
+      // eslint-disable-next-line no-magic-numbers
       value = ev.target.value === 1;
     }
 
@@ -194,6 +199,7 @@ class SummitForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
+      // eslint-disable-next-line no-magic-numbers
       value = value.valueOf() / 1000;
     }
 
@@ -208,81 +214,68 @@ class SummitForm extends React.Component {
       regLiteMarketingSettings[id].value = value;
     } else {
       if (currentError !== "") {
-        errors[id] = currentError;
+        newErrors[id] = currentError;
       }
       entity[id] = value;
     }
     this.setState({
-      entity: entity,
-      errors: errors,
-      regLiteMarketingSettings: regLiteMarketingSettings,
-      printAppMarketingSettings: printAppMarketingSettings
+      entity: newEntity,
+      errors: newErrors,
+      regLiteMarketingSettings: newRegLiteMarketingSettings,
+      printAppMarketingSettings: newPrintAppMarketingSettings
     });
   }
 
   handleUploadLogo = (file, secondary = false) => {
-    let formData = new FormData();
+    const { onLogoAttach } = this.props;
+    const { entity } = this.state;
+    const formData = new FormData();
     formData.append("file", file);
-    this.props.onLogoAttach(this.state.entity, formData, secondary);
+    onLogoAttach(entity, formData, secondary);
   };
 
   handleRemoveLogo = (ev, secondary = false) => {
-    let entity = { ...this.state.entity };
+    const { onLogoDelete } = this.props;
+    const { entity } = this.state;
+    const newEntity = { ...entity };
 
     if (secondary) {
-      entity.secondary_logo = "";
+      newEntity.secondary_logo = "";
     } else {
-      entity.logo = "";
+      newEntity.logo = "";
     }
 
-    this.setState({ entity: entity });
-    this.props.onLogoDelete(secondary);
-  };
-
-  validateForm = (entity) => {
-    if (!entity.time_zone_label) {
-      entity.time_zone_label = entity.time_zone_id;
-    }
-    return true;
+    this.setState({ entity: newEntity });
+    onLogoDelete(secondary);
   };
 
   handleSubmit(ev) {
     const { entity, regLiteMarketingSettings, printAppMarketingSettings } =
       this.state;
 
+    const {
+      onSubmit,
+      saveRegistrationLiteMarketingSettings,
+      savePrintAppMarketingSettings
+    } = this.props;
+
     ev.preventDefault();
 
     if (this.validateForm(entity)) {
-      this.props.onSubmit(entity).then((payload) => {
-        this.props
-          .saveRegistrationLiteMarketingSettings(regLiteMarketingSettings)
-          .then(() => {
-            this.props
-              .savePrintAppMarketingSettings(printAppMarketingSettings)
-              .then(() => {
+      onSubmit(entity).then((payload) => {
+        saveRegistrationLiteMarketingSettings(regLiteMarketingSettings).then(
+          () => {
+            savePrintAppMarketingSettings(printAppMarketingSettings).then(
+              () => {
                 if (payload.response.id) {
                   history.push(`/app/summits/${payload.response.id}`);
                 }
-              });
-          });
+              }
+            );
+          }
+        );
       });
     }
-  }
-
-  hasErrors(field) {
-    let { errors } = this.state;
-    if (field in errors) {
-      return errors[field];
-    }
-    return "";
-  }
-
-  toggleSection(section, ev) {
-    let { showSection } = this.state;
-    let newShowSection = showSection === section ? "main" : section;
-    ev.preventDefault();
-
-    this.setState({ showSection: newShowSection });
   }
 
   handleSPlanEdit(selectionPlanId) {
@@ -326,25 +319,26 @@ class SummitForm extends React.Component {
   }
 
   handleOnSwitchChange(setting, value) {
-    let printAppMarketingSettings = { ...this.state.printAppMarketingSettings };
-    let errors = { ...this.state.errors };
+    const { printAppMarketingSettings, errors } = this.state;
+    const newPrintAppMarketingSettings = { ...printAppMarketingSettings };
 
-    if (!printAppMarketingSettings.hasOwnProperty(setting)) {
-      printAppMarketingSettings[setting] = { value: "" };
+    if (!newPrintAppMarketingSettings.hasOwnProperty(setting)) {
+      newPrintAppMarketingSettings[setting] = { value: "" };
     }
 
-    printAppMarketingSettings[setting].value = value;
+    newPrintAppMarketingSettings[setting].value = value;
 
-    this.setState({
-      ...this.state,
-      printAppMarketingSettings: printAppMarketingSettings,
-      errors: errors
-    });
+    this.setState((prevState) => ({
+      ...prevState,
+      printAppMarketingSettings: newPrintAppMarketingSettings,
+      errors
+    }));
   }
 
   handleGenerateEncryptionKey = (ev) => {
+    const { generateEncryptionKey } = this.props;
     ev.preventDefault();
-    this.props.generateEncryptionKey();
+    generateEncryptionKey();
   };
 
   handleSampleNumber(type) {
@@ -352,6 +346,37 @@ class SummitForm extends React.Component {
     return `${type}_${entity.registration_slug_prefix.trim()}_662A968F26820246192380`
       .toUpperCase()
       .replace(/\s/g, "_");
+  }
+
+  getHelpUsersOptionLabel(member) {
+    if (member.hasOwnProperty("full_name")) {
+      return member.full_name;
+    }
+    // default
+    return `${member.first_name} ${member.last_name} (${member.id})`;
+  }
+
+  validateForm = (entity) => {
+    if (!entity.time_zone_label) {
+      entity.time_zone_label = entity.time_zone_id;
+    }
+    return true;
+  };
+
+  hasErrors(field) {
+    const { errors } = this.state;
+    if (field in errors) {
+      return errors[field];
+    }
+    return "";
+  }
+
+  toggleSection(section, ev) {
+    const { showSection } = this.state;
+    const newShowSection = showSection === section ? "main" : section;
+    ev.preventDefault();
+
+    this.setState({ showSection: newShowSection });
   }
 
   render() {
@@ -422,13 +447,11 @@ class SummitForm extends React.Component {
     };
 
     const attributes = entity.meeting_booking_room_allowed_attributes.map(
-      (at) => {
-        return {
-          id: at.id,
-          type: at.type,
-          values: at.values.map((v) => v.value).join(", ")
-        };
-      }
+      (at) => ({
+        id: at.id,
+        type: at.type,
+        values: at.values.map((v) => v.value).join(", ")
+      })
     );
 
     const room_booking_start = entity.meeting_room_booking_start_time
@@ -447,7 +470,7 @@ class SummitForm extends React.Component {
         <input type="hidden" id="id" value={entity.id} />
         <div className="row form-group">
           <div className="col-md-4">
-            <label> {T.translate("edit_summit.name")} *</label>
+            <label htmlFor="name"> {T.translate("edit_summit.name")} *</label>
             <Input
               className="form-control"
               error={this.hasErrors("name")}
@@ -457,7 +480,7 @@ class SummitForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("edit_summit.slug")}</label>
+            <label htmlFor="slug"> {T.translate("edit_summit.slug")} *</label>
             <Input
               className="form-control"
               error={this.hasErrors("slug")}
@@ -468,7 +491,10 @@ class SummitForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("edit_summit.registration_slug")} *</label>
+            <label htmlFor="registration_slug_prefix">
+              {" "}
+              {T.translate("edit_summit.registration_slug")} *
+            </label>
             <Input
               className="form-control"
               error={this.hasErrors("registration_slug_prefix")}
@@ -482,26 +508,32 @@ class SummitForm extends React.Component {
         {entity.registration_slug_prefix && (
           <div className="row form-group">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="sample_order_qr_prefix">
                 {" "}
                 {T.translate("edit_summit.sample_order_qr_prefix")}
               </label>
               <br />
-              <span> {this.handleSampleNumber("order")}</span>
+              <span id="sample_order_qr_prefix">
+                {" "}
+                {this.handleSampleNumber("order")}
+              </span>
             </div>
             <div className="col-md-6">
-              <label>
+              <label htmlFor="sample_ticket_qr_prefix">
                 {" "}
                 {T.translate("edit_summit.sample_ticket_qr_prefix")}
               </label>
               <br />
-              <span> {this.handleSampleNumber("ticket")}</span>
+              <span id="sample_ticket_qr_prefix">
+                {" "}
+                {this.handleSampleNumber("ticket")}
+              </span>
             </div>
           </div>
         )}
         <div className="row form-group">
           <div className="col-md-4">
-            <label> {T.translate("edit_summit.link")}</label>
+            <label htmlFor="link"> {T.translate("edit_summit.link")}</label>
             <Input
               className="form-control"
               error={this.hasErrors("link")}
@@ -512,7 +544,10 @@ class SummitForm extends React.Component {
           </div>
 
           <div className="col-md-4">
-            <label> {T.translate("edit_summit.dates_label")}</label>
+            <label htmlFor="dates_label">
+              {" "}
+              {T.translate("edit_summit.dates_label")}
+            </label>
             <Input
               className="form-control"
               error={this.hasErrors("dates_label")}
@@ -524,7 +559,10 @@ class SummitForm extends React.Component {
         </div>
         <div className="row form-group">
           <div className="col-md-4">
-            <label> {T.translate("edit_summit.registration_link")}</label>
+            <label htmlFor="registration_link">
+              {" "}
+              {T.translate("edit_summit.registration_link")}
+            </label>
             <Input
               className="form-control"
               error={this.hasErrors("registration_link")}
@@ -534,7 +572,7 @@ class SummitForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label>
+            <label htmlFor="secondary_registration_link">
               {" "}
               {T.translate("edit_summit.secondary_registration_link")}
             </label>
@@ -547,7 +585,7 @@ class SummitForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label>
+            <label htmlFor="secondary_registration_label">
               {" "}
               {T.translate("edit_summit.secondary_registration_label")}
             </label>
@@ -609,7 +647,10 @@ class SummitForm extends React.Component {
         </div>
         <div className="row form-group">
           <div className="col-md-6">
-            <label> {T.translate("edit_summit.support_email")}</label>
+            <label htmlFor="support_email">
+              {" "}
+              {T.translate("edit_summit.support_email")}
+            </label>
             <Input
               className="form-control"
               error={this.hasErrors("support_email")}
@@ -619,7 +660,10 @@ class SummitForm extends React.Component {
             />
           </div>
           <div className="col-md-6">
-            <label> {T.translate("edit_summit.speakers_support_email")}</label>
+            <label htmlFor="speakers_support_email">
+              {" "}
+              {T.translate("edit_summit.speakers_support_email")}
+            </label>
             <Input
               className="form-control"
               error={this.hasErrors("speakers_support_email")}
@@ -632,7 +676,7 @@ class SummitForm extends React.Component {
         {entity.id > 0 && (
           <div className="row form-group">
             <div className="col-md-12">
-              <label>
+              <label htmlFor="help_users">
                 {" "}
                 {T.translate("edit_summit.help_users")}{" "}
                 <i
@@ -646,25 +690,26 @@ class SummitForm extends React.Component {
                 onChange={this.handleChange}
                 error={this.hasErrors("help_users")}
                 getOptionLabel={this.getHelpUsersOptionLabel}
-                multi={true}
+                isMulti
               />
             </div>
           </div>
         )}
         <div className="row form-group">
           <div className="col-md-12">
-            <label>
+            <label htmlFor="registration_disclaimer_content">
               {" "}
               {T.translate("edit_summit.registration_disclaimer_content")}{" "}
             </label>
-            {/*<textarea
-                            id="registration_disclaimer_content"
-                            value={entity.registration_disclaimer_content}
-                            onChange={this.handleChange}
-                            className="form-control"
-                        />*/}
+            {/* <textarea
+                  id="registration_disclaimer_content"
+                  value={entity.registration_disclaimer_content}
+                  onChange={this.handleChange}
+                  className="form-control"
+            /> */}
             <TextEditor
               id="registration_disclaimer_content"
+              className="registration_disclaimer_input"
               value={entity.registration_disclaimer_content}
               onChange={this.handleChange}
             />
@@ -672,8 +717,9 @@ class SummitForm extends React.Component {
         </div>
         <div className="row form-group">
           <div className="col-md-6">
-            <label> {T.translate("general.logo")} </label>
+            <label htmlFor="logo_upload"> {T.translate("general.logo")} </label>
             <UploadInput
+              id="logo_upload"
               value={entity.logo}
               handleUpload={(file) => this.handleUploadLogo(file)}
               handleRemove={(ev) => this.handleRemoveLogo(ev)}
@@ -683,8 +729,12 @@ class SummitForm extends React.Component {
             />
           </div>
           <div className="col-md-6">
-            <label> {T.translate("general.secondary_logo")} </label>
+            <label htmlFor="secondary_logo_upload">
+              {" "}
+              {T.translate("general.secondary_logo")}{" "}
+            </label>
             <UploadInput
+              id="secondary_logo_upload"
               value={entity.secondary_logo}
               handleUpload={(file) => this.handleUploadLogo(file, true)}
               handleRemove={(ev) => this.handleRemoveLogo(ev, true)}
@@ -698,11 +748,14 @@ class SummitForm extends React.Component {
         <Panel
           show={showSection === "dates"}
           title={T.translate("edit_summit.dates")}
-          handleClick={this.toggleSection.bind(this, "dates")}
+          handleClick={(ev) => this.toggleSection("dates", ev)}
         >
           <div className="row form-group">
             <div className="col-md-6">
-              <label> {T.translate("edit_summit.time_zone")} *</label>
+              <label htmlFor="time_zone_id">
+                {" "}
+                {T.translate("edit_summit.time_zone")} *
+              </label>
               <Dropdown
                 id="time_zone_id"
                 value={entity.time_zone_id}
@@ -711,7 +764,10 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label> {T.translate("edit_summit.time_zone_label")} *</label>
+              <label htmlFor="time_zone_label">
+                {" "}
+                {T.translate("edit_summit.time_zone_label")} *
+              </label>
               <Input
                 className="form-control"
                 id="time_zone_label"
@@ -723,7 +779,10 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label> {T.translate("edit_summit.start_date")} </label>
+              <label htmlFor="start_date">
+                {" "}
+                {T.translate("edit_summit.start_date")}{" "}
+              </label>
               <DateTimePicker
                 id="start_date"
                 disabled={!dates_enabled}
@@ -738,7 +797,10 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label> {T.translate("edit_summit.end_date")} </label>
+              <label htmlFor="end_date">
+                {" "}
+                {T.translate("edit_summit.end_date")}{" "}
+              </label>
               <DateTimePicker
                 id="end_date"
                 disabled={!dates_enabled}
@@ -755,7 +817,7 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="registration_begin_date">
                 {" "}
                 {T.translate("edit_summit.registration_begin_date")}{" "}
               </label>
@@ -773,7 +835,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label>
+              <label htmlFor="registration_end_date">
                 {" "}
                 {T.translate("edit_summit.registration_end_date")}{" "}
               </label>
@@ -793,7 +855,10 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label> {T.translate("edit_summit.schedule_start_date")} </label>
+              <label htmlFor="schedule_start_date">
+                {" "}
+                {T.translate("edit_summit.schedule_start_date")}{" "}
+              </label>
               <DateTimePicker
                 id="schedule_start_date"
                 disabled={!dates_enabled}
@@ -808,7 +873,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label>
+              <label htmlFor="start_showing_venues_date">
                 {" "}
                 {T.translate("edit_summit.start_showing_venues_date")}{" "}
               </label>
@@ -837,13 +902,11 @@ class SummitForm extends React.Component {
               />
               <Table
                 options={splan_table_options}
-                data={entity.selection_plans.map((sl) => {
-                  return {
-                    id: sl.id,
-                    name: sl.name,
-                    is_enabled: sl.is_enabled ? "True" : "False"
-                  };
-                })}
+                data={entity.selection_plans.map((sl) => ({
+                  id: sl.id,
+                  name: sl.name,
+                  is_enabled: sl.is_enabled ? "True" : "False"
+                }))}
                 columns={splan_columns}
               />
             </div>
@@ -853,11 +916,11 @@ class SummitForm extends React.Component {
         <Panel
           show={showSection === "reg-email-settings"}
           title={T.translate("edit_summit.reg_email_settings")}
-          handleClick={this.toggleSection.bind(this, "reg-email-settings")}
+          handleClick={(ev) => this.toggleSection("reg-email-settings", ev)}
         >
           <div className="row form-group">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="reassign_ticket_till_date">
                 {" "}
                 {T.translate("edit_summit.reassign_ticket_till_date")}{" "}
               </label>
@@ -875,7 +938,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label>
+              <label htmlFor="registration_allowed_refund_request_till_date">
                 {" "}
                 {T.translate(
                   "edit_summit.registration_allowed_refund_request_till_date"
@@ -1023,7 +1086,7 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="registration_reminder_email_days_interval">
                 {" "}
                 {T.translate(
                   "edit_summit.registration_reminder_email_days_interval"
@@ -1042,7 +1105,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label>
+              <label htmlFor="speaker_confirmation_default_page_url">
                 {T.translate(
                   "edit_summit.speaker_confirmation_default_page_url"
                 )}{" "}
@@ -1066,15 +1129,17 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="registration_encryption_key_btn">
                 {" "}
                 {T.translate("edit_summit.registration_encryption_key")}
               </label>
               <br />
               <div className="pull-left">{entity.qr_codes_enc_key}</div>
               <button
+                id="registration_encryption_key_btn"
                 className="btn btn-primary btn-xs pull-left left-space"
                 onClick={this.handleGenerateEncryptionKey}
+                type="button"
               >
                 {T.translate("edit_summit.generate_encryption_key")}
               </button>
@@ -1082,11 +1147,13 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-12">
-              <label>{T.translate("edit_summit.reg_lite_settings")}</label>
+              <label htmlFor="reg_lite_settings">
+                {T.translate("edit_summit.reg_lite_settings")}
+              </label>
               <hr />
             </div>
           </div>
-          <div className="row form-group">
+          <div className="row form-group" id="reg_lite_settings">
             <div className="col-md-4 checkboxes-div">
               <div className="form-check abc-checkbox">
                 <input
@@ -1107,7 +1174,7 @@ class SummitForm extends React.Component {
               </div>
             </div>
             <div className="col-md-4">
-              <label>
+              <label htmlFor="REG_LITE_COMPANY_DDL_PLACEHOLDER">
                 {T.translate("edit_summit.reg_lite_company_ddl_placeholder")}{" "}
                 &nbsp;
                 <i
@@ -1174,7 +1241,7 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="REG_LITE_INITIAL_ORDER_COMPLETE_STEP_1ST_PARAGRAPH">
                 {T.translate(
                   "edit_summit.reg_lite_initial_order_complete_step_1st_paragraph"
                 )}
@@ -1200,7 +1267,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label>
+              <label htmlFor="REG_LITE_INITIAL_ORDER_COMPLETE_STEP_2ND_PARAGRAPH">
                 {T.translate(
                   "edit_summit.reg_lite_initial_order_complete_step_2nd_paragraph"
                 )}
@@ -1228,7 +1295,7 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="REG_LITE_INITIAL_ORDER_COMPLETE_BTN_LABEL">
                 {T.translate(
                   "edit_summit.reg_lite_initial_order_complete_btn_label"
                 )}
@@ -1255,7 +1322,7 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="REG_LITE_ORDER_COMPLETE_STEP_1ST_PARAGRAPH">
                 {T.translate(
                   "edit_summit.reg_lite_order_complete_step_1st_paragraph"
                 )}
@@ -1281,7 +1348,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label>
+              <label htmlFor="REG_LITE_ORDER_COMPLETE_STEP_2ND_PARAGRAPH">
                 {T.translate(
                   "edit_summit.reg_lite_order_complete_step_2nd_paragraph"
                 )}
@@ -1309,7 +1376,7 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="REG_LITE_ORDER_COMPLETE_BTN_LABEL">
                 {T.translate("edit_summit.reg_lite_order_complete_btn_label")}
               </label>
               &nbsp;
@@ -1334,7 +1401,7 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-12">
-              <label>
+              <label htmlFor="REG_LITE_NO_ALLOWED_TICKETS_MESSAGE">
                 {T.translate("edit_summit.reg_lite_no_allowed_tickets_message")}
               </label>
               &nbsp;
@@ -1357,13 +1424,15 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-12">
-              <label>{T.translate("edit_summit.check_in_settings")}</label>
+              <label htmlFor="check_in_settings">
+                {T.translate("edit_summit.check_in_settings")}
+              </label>
               <hr />
             </div>
           </div>
-          <div className="row form-group">
+          <div className="row form-group" id="check_in_settings">
             <div className="col-md-6">
-              <label>
+              <label htmlFor="PRINT_APP_HIDE_FIND_TICKET_BY_FULLNAME">
                 {" "}
                 {T.translate(
                   "edit_summit.print_app_hide_find_ticket_by_fullname"
@@ -1372,6 +1441,7 @@ class SummitForm extends React.Component {
               </label>{" "}
               <br />
               <Switch
+                id="PRINT_APP_HIDE_FIND_TICKET_BY_FULLNAME"
                 checked={
                   printAppMarketingSettings
                     ?.PRINT_APP_HIDE_FIND_TICKET_BY_FULLNAME?.value || false
@@ -1388,13 +1458,14 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label>
+              <label htmlFor="PRINT_APP_HIDE_FIND_TICKET_BY_EMAIL">
                 {" "}
                 {T.translate("edit_summit.print_app_hide_find_ticket_by_email")}
                 &nbsp;
               </label>{" "}
               <br />
               <Switch
+                id="PRINT_APP_HIDE_FIND_TICKET_BY_EMAIL"
                 checked={
                   printAppMarketingSettings?.PRINT_APP_HIDE_FIND_TICKET_BY_EMAIL
                     ?.value || false
@@ -1416,11 +1487,14 @@ class SummitForm extends React.Component {
         <Panel
           show={showSection === "calendar"}
           title={T.translate("edit_summit.calendar_sync")}
-          handleClick={this.toggleSection.bind(this, "calendar")}
+          handleClick={(ev) => this.toggleSection("calendar", ev)}
         >
           <div className="row form-group">
             <div className="col-md-6">
-              <label> {T.translate("edit_summit.calendar_sync_name")}</label>
+              <label htmlFor="calendar_sync_name">
+                {" "}
+                {T.translate("edit_summit.calendar_sync_name")}
+              </label>
               <Input
                 className="form-control"
                 error={this.hasErrors("calendar_sync_name")}
@@ -1430,7 +1504,10 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label> {T.translate("edit_summit.calendar_sync_desc")}</label>
+              <label htmlFor="calendar_sync_desc">
+                {" "}
+                {T.translate("edit_summit.calendar_sync_desc")}
+              </label>
               <Input
                 className="form-control"
                 error={this.hasErrors("calendar_sync_desc")}
@@ -1445,11 +1522,14 @@ class SummitForm extends React.Component {
         <Panel
           show={showSection === "virtual_event"}
           title={T.translate("edit_summit.virtual_event")}
-          handleClick={this.toggleSection.bind(this, "virtual_event")}
+          handleClick={(ev) => this.toggleSection("virtual_event", ev)}
         >
           <div className="row form-group">
             <div className="col-md-4">
-              <label> {T.translate("edit_summit.marketing_site_url")}</label>
+              <label htmlFor="marketing_site_url">
+                {" "}
+                {T.translate("edit_summit.marketing_site_url")}
+              </label>
               &nbsp;
               <i
                 className="fa fa-info-circle"
@@ -1465,7 +1545,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-4">
-              <label>
+              <label htmlFor="marketing_site_oauth2_client_idz">
                 {" "}
                 {T.translate("edit_summit.marketing_site_oauth2_client_id")}
               </label>
@@ -1478,7 +1558,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-4">
-              <label>
+              <label htmlFor="marketing_site_oauth2_client_scopes">
                 {" "}
                 {T.translate("edit_summit.marketing_site_oauth2_client_scopes")}
               </label>
@@ -1492,7 +1572,10 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-6">
-              <label> {T.translate("edit_summit.virtual_site_url")}</label>
+              <label htmlFor="virtual_site_url">
+                {" "}
+                {T.translate("edit_summit.virtual_site_url")}
+              </label>
               &nbsp;
               <i
                 className="fa fa-info-circle"
@@ -1508,7 +1591,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-6">
-              <label>
+              <label htmlFor="virtual_site_oauth2_client_id">
                 {" "}
                 {T.translate("edit_summit.virtual_site_oauth2_client_id")}
               </label>
@@ -1527,11 +1610,14 @@ class SummitForm extends React.Component {
           <Panel
             show={showSection === "room-booking"}
             title={T.translate("edit_summit.room-booking")}
-            handleClick={this.toggleSection.bind(this, "room-booking")}
+            handleClick={(ev) => this.toggleSection("room-booking", ev)}
           >
             <div className="row form-group">
               <div className="col-md-4">
-                <label> {T.translate("edit_summit.booking_begin_date")} </label>
+                <label htmlFor="begin_allow_booking_date">
+                  {" "}
+                  {T.translate("edit_summit.booking_begin_date")}{" "}
+                </label>
                 <DateTimePicker
                   id="begin_allow_booking_date"
                   onChange={this.handleChange}
@@ -1548,7 +1634,10 @@ class SummitForm extends React.Component {
                 />
               </div>
               <div className="col-md-4">
-                <label> {T.translate("edit_summit.booking_end_date")} </label>
+                <label htmlFor="end_allow_booking_date">
+                  {" "}
+                  {T.translate("edit_summit.booking_end_date")}{" "}
+                </label>
                 <DateTimePicker
                   id="end_allow_booking_date"
                   onChange={this.handleChange}
@@ -1567,7 +1656,7 @@ class SummitForm extends React.Component {
             </div>
             <div className="row form-group">
               <div className="col-md-4">
-                <label>
+                <label htmlFor="meeting_room_booking_start_time">
                   {" "}
                   {T.translate(
                     "room_bookings.meeting_room_booking_start_time"
@@ -1579,12 +1668,12 @@ class SummitForm extends React.Component {
                   onChange={this.handleChange}
                   format={{ date: false, time: "HH:mm" }}
                   defaultValue={0}
-                  utc={true}
+                  utc
                   value={room_booking_start}
                 />
               </div>
               <div className="col-md-4">
-                <label>
+                <label htmlFor="meeting_room_booking_end_time">
                   {" "}
                   {T.translate("room_bookings.meeting_room_booking_end_time")} *
                 </label>
@@ -1593,14 +1682,14 @@ class SummitForm extends React.Component {
                   onChange={this.handleChange}
                   format={{ date: false, time: "HH:mm" }}
                   defaultValue={0}
-                  utc={true}
+                  utc
                   value={room_booking_end}
                 />
               </div>
             </div>
             <div className="row form-group">
               <div className="col-md-4">
-                <label>
+                <label htmlFor="meeting_room_booking_slot_length">
                   {" "}
                   {T.translate(
                     "room_bookings.meeting_room_booking_slot_length"
@@ -1616,7 +1705,7 @@ class SummitForm extends React.Component {
                 />
               </div>
               <div className="col-md-4">
-                <label>
+                <label htmlFor="meeting_room_booking_max_allowed">
                   {" "}
                   {T.translate(
                     "room_bookings.meeting_room_booking_max_allowed"
@@ -1638,6 +1727,7 @@ class SummitForm extends React.Component {
                 <button
                   className="btn btn-primary pull-right left-space"
                   onClick={this.handleNewAttributeType}
+                  type="button"
                 >
                   {T.translate("room_bookings.add_attribute")}
                 </button>
@@ -1654,11 +1744,14 @@ class SummitForm extends React.Component {
         <Panel
           show={showSection === "third_party"}
           title={T.translate("edit_summit.third_party")}
-          handleClick={this.toggleSection.bind(this, "third_party")}
+          handleClick={(ev) => this.toggleSection("third_party", ev)}
         >
           <div className="row form-group">
             <div className="col-md-4">
-              <label> {T.translate("edit_summit.api_feed_type")}</label>
+              <label htmlFor="api_feed_type">
+                {" "}
+                {T.translate("edit_summit.api_feed_type")}
+              </label>
               <Dropdown
                 id="api_feed_type"
                 value={entity.api_feed_type}
@@ -1670,7 +1763,10 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-4">
-              <label> {T.translate("edit_summit.api_feed_key")}</label>
+              <label htmlFor="api_feed_key">
+                {" "}
+                {T.translate("edit_summit.api_feed_key")}
+              </label>
               <Input
                 className="form-control"
                 error={this.hasErrors("api_feed_key")}
@@ -1680,7 +1776,10 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-4">
-              <label> {T.translate("edit_summit.api_feed_url")}</label>
+              <label htmlFor="api_feed_url">
+                {" "}
+                {T.translate("edit_summit.api_feed_url")}
+              </label>
               <Input
                 className="form-control"
                 error={this.hasErrors("api_feed_url")}
@@ -1692,7 +1791,7 @@ class SummitForm extends React.Component {
           </div>
           <div className="row form-group">
             <div className="col-md-4">
-              <label>
+              <label htmlFor="external_registration_feed_type">
                 {" "}
                 {T.translate("edit_summit.external_registration_feed_type")}
               </label>
@@ -1707,7 +1806,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-4">
-              <label>
+              <label htmlFor="external_registration_feed_api_key">
                 {" "}
                 {T.translate("edit_summit.external_registration_feed_api_key")}
               </label>
@@ -1720,7 +1819,7 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-4">
-              <label>
+              <label htmlFor="external_summit_id">
                 {" "}
                 {T.translate("edit_summit.external_registration_id")}
               </label>
@@ -1735,12 +1834,13 @@ class SummitForm extends React.Component {
           </div>
           {entity.id !== 0 && (
             <div className="form-group">
-              <label>
+              <label htmlFor="add_registration_feed_metadata">
                 {" "}
                 {T.translate("edit_summit.registration_feed_metadata")}
               </label>
               <input
                 type="button"
+                id="add_registration_feed_metadata"
                 onClick={this.handleRegFeedMetadataAdd}
                 className="btn btn-primary pull-right"
                 value={T.translate(
@@ -1778,7 +1878,10 @@ class SummitForm extends React.Component {
           )}
           <div className="row form-group">
             <div className="col-md-4">
-              <label> {T.translate("edit_summit.mux_token_id")}</label>
+              <label htmlFor="mux_token_id">
+                {" "}
+                {T.translate("edit_summit.mux_token_id")}
+              </label>
               <Input
                 className="form-control"
                 error={this.hasErrors("mux_token_id")}
@@ -1788,7 +1891,10 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-4">
-              <label> {T.translate("edit_summit.mux_token_secret")}</label>
+              <label htmlFor="mux_token_secret">
+                {" "}
+                {T.translate("edit_summit.mux_token_secret")}
+              </label>
               <Input
                 className="form-control"
                 error={this.hasErrors("mux_token_secret")}
@@ -1798,7 +1904,10 @@ class SummitForm extends React.Component {
               />
             </div>
             <div className="col-md-4">
-              <label> {T.translate("edit_summit.mux_allowed_domains")}</label>
+              <label htmlFor="mux_allowed_domains">
+                {" "}
+                {T.translate("edit_summit.mux_allowed_domains")}
+              </label>
               <FreeMultiTextInput
                 isClearable
                 isMulti
