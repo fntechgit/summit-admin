@@ -51,6 +51,7 @@ const DEFAULT_STATE = {
   totalUnPublished: 0
 };
 
+// eslint-disable-next-line default-param-last
 const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
 
