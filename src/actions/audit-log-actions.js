@@ -32,6 +32,39 @@ export const RECEIVE_LOG = "RECEIVE_LOG";
 
 const DEFAULT_PER_PAGE_AUDIT_LOG = 100;
 
+const parseFilters = (filters, term = null) => {
+  const filter = [];
+
+  if (filters.created_date_filter) {
+    parseDateRangeFilter(filter, filters.created_date_filter, "created");
+  }
+
+  if (
+    filters.hasOwnProperty("user_id_filter") &&
+    Array.isArray(filters.user_id_filter) &&
+    filters.user_id_filter.length > 0
+  ) {
+    filter.push(
+      `user_id==${filters.user_id_filter.map((t) => t.id).join("||")}`
+    );
+  }
+
+  if (term) {
+    const escapedTerm = escapeFilterValue(term);
+    let searchString = "";
+
+    if (isNumericString(term)) {
+      searchString += `entity_id==${term}`;
+    } else {
+      searchString += `action@@${escapedTerm}`;
+    }
+
+    filter.push(searchString);
+  }
+
+  return filter;
+};
+
 export const getAuditLog =
   (
     entityFilter = [],
@@ -83,39 +116,6 @@ export const getAuditLog =
     });
   };
 
-const parseFilters = (filters, term = null) => {
-  const filter = [];
-
-  if (filters.created_date_filter) {
-    parseDateRangeFilter(filter, filters.created_date_filter, "created");
-  }
-
-  if (
-    filters.hasOwnProperty("user_id_filter") &&
-    Array.isArray(filters.user_id_filter) &&
-    filters.user_id_filter.length > 0
-  ) {
-    filter.push(
-      `user_id==${filters.user_id_filter.map((t) => t.id).join("||")}`
-    );
-  }
-
-  if (term) {
-    const escapedTerm = escapeFilterValue(term);
-    let searchString = "";
-
-    if (isNumericString(term)) {
-      searchString += `entity_id==${term}`;
-    } else {
-      searchString += `action@@${escapedTerm}`;
-    }
-
-    filter.push(searchString);
-  }
-
-  return filter;
-};
-
-export const clearAuditLogParams = () => async (dispatch, getState) => {
+export const clearAuditLogParams = () => async (dispatch) => {
   dispatch(createAction(CLEAR_LOG_PARAMS)());
 };
