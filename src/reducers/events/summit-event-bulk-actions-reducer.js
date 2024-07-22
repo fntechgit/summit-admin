@@ -39,9 +39,7 @@ import {
   CLEAR_PUBLISHED_EVENTS,
   CLEAR_UNPUBLISHED_EVENTS,
   RECEIVE_UNSCHEDULE_EVENTS_PAGE,
-  REQUEST_UNSCHEDULE_EVENTS_PAGE,
-  REQUEST_SCHEDULE_EVENTS_PAGE,
-  RECEIVE_SCHEDULE_EVENTS_PAGE
+  REQUEST_UNSCHEDULE_EVENTS_PAGE
 } from "../../actions/summit-builder-actions";
 
 const DEFAULT_STATE = {
@@ -140,6 +138,7 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         selectedUnPublishedEvents: [],
+        excludedUnPublishedEvents: [],
         selectedAllUnPublished: selectedState
       };
     }

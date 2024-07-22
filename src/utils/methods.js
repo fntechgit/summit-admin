@@ -438,7 +438,7 @@ export const parseDateRangeFilter = (
   filterToParse,
   filterName
 ) => {
-  if (filterToParse && filterToParse.some((e) => e !== null)) {
+  if (filterToParse && filterToParse.some((e) => e !== null && e !== 0)) {
     if (filterToParse.every((e) => e !== null && e !== 0)) {
       filterObject.push(
         `${filterName}[]${filterToParse[0]}&&${filterToParse[1]}`
