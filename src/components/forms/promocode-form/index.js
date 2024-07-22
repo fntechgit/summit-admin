@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -39,6 +39,11 @@ import {
 } from "../../../utils/methods";
 import { DEFAULT_ENTITY } from "../../../reducers/promocodes/promocode-reducer";
 import FragmentParser from "../../../utils/fragmen-parser";
+import TextAreaInputWithCounter from "../../inputs/text-area-input-with-counter";
+import {
+  INDEX_NOT_FOUND,
+  MILLISECONDS_TO_SECONDS
+} from "../../../utils/constants";
 
 class PromocodeForm extends React.Component {
   constructor(props) {
@@ -65,73 +70,114 @@ class PromocodeForm extends React.Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     const state = {};
-    scrollToError(this.props.errors);
+    const { errors, entity } = this.props;
+    scrollToError(errors);
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      state.entity = { ...this.props.entity };
+    if (!shallowEqual(prevProps.entity, entity)) {
+      state.entity = { ...entity };
       state.errors = {};
     }
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      state.errors = { ...this.props.errors };
+    if (!shallowEqual(prevProps.errors, errors)) {
+      state.errors = { ...errors };
     }
 
     if (!isEmpty(state)) {
-      this.setState({ ...this.state, ...state });
+      this.setState((prevState) => ({ ...prevState, ...state }));
     }
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+    const { entity, errors } = this.state;
+    const newEntity = { ...entity };
+    const newErrors = { ...errors };
+    const { id } = ev.target;
+    let { value } = ev.target;
 
     if (ev.target.type === "checkbox") {
       value = ev.target.checked;
     }
 
     if (id === "apply_to_all_tix" && value === false) {
-      entity.amount = 0;
-      entity.rate = 0;
+      newEntity.amount = 0;
+      newEntity.rate = 0;
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
     }
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    newErrors[id] = "";
+    newEntity[id] = value;
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleClassChange(ev) {
-    let entity = { ...this.state.entity };
-    let { value, id } = ev.target;
+    const { entity } = this.state;
+    let newEntity = { ...entity };
+    const { value } = ev.target;
 
-    entity = { ...DEFAULT_ENTITY };
+    newEntity = { ...DEFAULT_ENTITY };
     entity.class_name = value;
 
-    this.setState({ entity: entity });
+    this.setState({ entity: newEntity });
   }
 
   handleSendEmail(ev) {
+    const { onSendEmail } = this.props;
     const { entity } = this.state;
     ev.preventDefault();
 
-    this.props.onSendEmail(entity.id);
+    onSendEmail(entity.id);
   }
 
   handleSubmit(ev) {
     ev.preventDefault();
+    const { onSubmit } = this.props;
+    const { entity } = this.state;
     const typeScope = this.fragmentParser.getParam("type");
 
     if (this.validate()) {
-      this.props.onSubmit(this.state.entity, typeScope === "sponsor");
+      onSubmit(entity, typeScope === "sponsor");
     }
   }
 
+  handleBadgeFeatureLink(valueId) {
+    const { entity } = this.state;
+    const { onBadgeFeatureLink } = this.props;
+    onBadgeFeatureLink(entity.id, valueId);
+  }
+
+  handleBadgeFeatureUnLink(valueId) {
+    const { entity } = this.state;
+    const { onBadgeFeatureUnLink } = this.props;
+    onBadgeFeatureUnLink(entity.id, valueId);
+  }
+
+  handleNewTag(newTag) {
+    this.setState((prevState) => ({
+      ...prevState,
+      entity: {
+        ...prevState.entity,
+        tags: [...prevState.entity.tags, { tag: newTag }]
+      }
+    }));
+  }
+
+  queryBadgeFeatures(input, callback) {
+    const { currentSummit } = this.props;
+    let badgeFeatures = [];
+
+    badgeFeatures = currentSummit.badge_features.filter(
+      (f) =>
+        f.name.toLowerCase().indexOf(input.toLowerCase()) !== INDEX_NOT_FOUND
+    );
+
+    callback(badgeFeatures);
+  }
+
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -152,40 +198,17 @@ class PromocodeForm extends React.Component {
     return true;
   }
 
-  handleBadgeFeatureLink(valueId) {
-    const { entity } = this.state;
-    this.props.onBadgeFeatureLink(entity.id, valueId);
-  }
-
-  handleBadgeFeatureUnLink(valueId) {
-    const { entity } = this.state;
-    this.props.onBadgeFeatureUnLink(entity.id, valueId);
-  }
-
-  queryBadgeFeatures(input, callback) {
-    const { currentSummit } = this.props;
-    let badgeFeatures = [];
-
-    badgeFeatures = currentSummit.badge_features.filter(
-      (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
-    );
-
-    callback(badgeFeatures);
-  }
-
-  handleNewTag(newTag) {
-    this.setState({
-      ...this.state,
-      entity: {
-        ...this.state.entity,
-        tags: [...this.state.entity.tags, { tag: newTag }]
-      }
-    });
-  }
-
   render() {
     const { entity } = this.state;
-    const { currentSummit, allClasses } = this.props;
+    const {
+      currentSummit,
+      allClasses,
+      onCreateCompany,
+      assignSpeaker,
+      getAssignedSpeakers,
+      unAssignSpeaker,
+      resetPromocodeForm
+    } = this.props;
     const typeScope = this.fragmentParser.getParam("type");
 
     let promocode_class_ddl = allClasses.map((c) => ({
@@ -201,7 +224,7 @@ class PromocodeForm extends React.Component {
     }
 
     if (entity.class_name) {
-      let classTypes = allClasses.find(
+      const classTypes = allClasses.find(
         (c) => c.class_name === entity.class_name
       ).type;
 
@@ -210,7 +233,7 @@ class PromocodeForm extends React.Component {
       }
     }
 
-    let badgeFeatureColumns = [
+    const badgeFeatureColumns = [
       { columnKey: "name", value: T.translate("edit_promocode.name") },
       {
         columnKey: "description",
@@ -218,7 +241,7 @@ class PromocodeForm extends React.Component {
       }
     ];
 
-    let badgeFeatureOptions = {
+    const badgeFeatureOptions = {
       title: T.translate("edit_promocode.badge_features"),
       valueKey: "name",
       labelKey: "name",
@@ -234,9 +257,12 @@ class PromocodeForm extends React.Component {
         <input type="hidden" id="id" value={entity.id} />
         <div className="row form-group">
           <div className="col-md-3">
-            <label> {T.translate("edit_promocode.class_name")} *</label>
+            <label htmlFor="class_name">
+              {" "}
+              {T.translate("edit_promocode.class_name")} *
+            </label>
             <Dropdown
-              id="type"
+              id="class_name"
               value={entity.class_name}
               placeholder={T.translate(
                 "edit_promocode.placeholders.select_class_name"
@@ -248,7 +274,10 @@ class PromocodeForm extends React.Component {
           </div>
           {promocode_types_ddl.length > 0 && (
             <div className="col-md-3">
-              <label> {T.translate("edit_promocode.type")} *</label>
+              <label htmlFor="type">
+                {" "}
+                {T.translate("edit_promocode.type")} *
+              </label>
               <Dropdown
                 id="type"
                 value={entity.type}
@@ -262,7 +291,10 @@ class PromocodeForm extends React.Component {
             </div>
           )}
           <div className="col-md-3">
-            <label> {T.translate("edit_promocode.code")} *</label>
+            <label htmlFor="code">
+              {" "}
+              {T.translate("edit_promocode.code")} *
+            </label>
             <Input
               id="code"
               value={entity.code}
@@ -272,7 +304,7 @@ class PromocodeForm extends React.Component {
             />
           </div>
           <div className="col-md-3">
-            <label> {T.translate("edit_promocode.tags")}</label>
+            <label htmlFor="tags"> {T.translate("edit_promocode.tags")}</label>
             <TagInput
               id="tags"
               clearable
@@ -289,13 +321,17 @@ class PromocodeForm extends React.Component {
         </div>
         <div className="row form-group">
           <div className="col-md-12">
-            <label> {T.translate("edit_promocode.description")}</label>
-            <textarea
+            <label htmlFor="description">
+              {" "}
+              {T.translate("edit_promocode.description")}
+            </label>
+            <TextAreaInputWithCounter
+              className="form-control"
+              rows={4}
+              maxLength={255}
               id="description"
               value={entity.description}
               onChange={this.handleChange}
-              maxLength="255"
-              className="form-control"
               error={this.hasErrors("description")}
             />
           </div>
@@ -319,7 +355,7 @@ class PromocodeForm extends React.Component {
             summit={currentSummit}
             handleChange={this.handleChange}
             handleSendEmail={this.handleSendEmail}
-            onCreateCompany={this.props.onCreateCompany}
+            onCreateCompany={onCreateCompany}
             badgeFeatureColumns={badgeFeatureColumns}
             badgeFeatureOptions={badgeFeatureOptions}
             hasErrors={this.hasErrors}
@@ -358,7 +394,7 @@ class PromocodeForm extends React.Component {
             handleSendEmail={this.handleSendEmail}
             badgeFeatureColumns={badgeFeatureColumns}
             badgeFeatureOptions={badgeFeatureOptions}
-            onCreateCompany={this.props.onCreateCompany}
+            onCreateCompany={onCreateCompany}
             hasErrors={this.hasErrors}
           />
         )}
@@ -410,10 +446,10 @@ class PromocodeForm extends React.Component {
             badgeFeatureColumns={badgeFeatureColumns}
             badgeFeatureOptions={badgeFeatureOptions}
             hasErrors={this.hasErrors}
-            assignSpeaker={this.props.assignSpeaker}
-            getAssignedSpeakers={this.props.getAssignedSpeakers}
-            unAssignSpeaker={this.props.unAssignSpeaker}
-            resetPromocodeForm={this.props.resetPromocodeForm}
+            assignSpeaker={assignSpeaker}
+            getAssignedSpeakers={getAssignedSpeakers}
+            unAssignSpeaker={unAssignSpeaker}
+            resetPromocodeForm={resetPromocodeForm}
           />
         )}
 
@@ -426,10 +462,10 @@ class PromocodeForm extends React.Component {
             badgeFeatureColumns={badgeFeatureColumns}
             badgeFeatureOptions={badgeFeatureOptions}
             hasErrors={this.hasErrors}
-            assignSpeaker={this.props.assignSpeaker}
-            getAssignedSpeakers={this.props.getAssignedSpeakers}
-            unAssignSpeaker={this.props.unAssignSpeaker}
-            resetPromocodeForm={this.props.resetPromocodeForm}
+            assignSpeaker={assignSpeaker}
+            getAssignedSpeakers={getAssignedSpeakers}
+            unAssignSpeaker={unAssignSpeaker}
+            resetPromocodeForm={resetPromocodeForm}
           />
         )}
 
