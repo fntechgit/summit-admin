@@ -74,4 +74,17 @@ export const DEFAULT_PER_PAGE = 10;
 
 export const DEFAULT_ORDER_DIR = 1;
 
+
 export const DATE_FILTER_ARRAY_SIZE = 2;
+
+
+export const MILLISECONDS_TO_SECONDS = 1000;
+
+export const INDEX_NOT_FOUND = -1;
+
+export const ERROR_CODE_403 = 403;
+export const ERROR_CODE_401 = 401;
+export const ERROR_CODE_412 = 412;
+export const ERROR_CODE_500 = 500;
+
+export const HEX_RADIX = 16;
