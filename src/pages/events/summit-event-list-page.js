@@ -49,7 +49,11 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE
 } from "../../utils/constants";
-import { defaultColumns, editableColumns } from "../../utils/summitUtils";
+import {
+  defaultColumns,
+  editableColumns,
+  formatEventData
+} from "../../utils/summitUtils";
 import SaveFilterCriteria from "../../components/filters/save-filter-criteria";
 import SelectFilterCriteria from "../../components/filters/select-filter-criteria";
 import {
@@ -74,7 +78,6 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
             `${speaker.first_name} ${speaker.last_name} (${speaker.email})`
           }
           // eslint-disable-next-line react/jsx-props-no-spreading
-          // eslint-disable-next-line react/jsx-props-no-spreading
           {...extraProps}
         />
         <div className="speakers-list">
@@ -94,11 +97,7 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
             ))}
         </div>
       </>
-    ),
-    render: (field) =>
-      Array.isArray(field) && field.length > 0
-        ? field.map((s) => `${s.first_name} ${s.last_name}`).join(", ")
-        : "N/A"
+    )
   },
   { columnKey: "created_by_fullname", value: "created_by", sortable: true },
   { columnKey: "published_date", value: "published", sortable: true },
@@ -117,8 +116,7 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...extraProps}
       />
-    ),
-    render: (field) => field?.name
+    )
   },
   { columnKey: "start_date", value: "start_date", sortable: true },
   { columnKey: "end_date", value: "end_date", sortable: true },
@@ -142,8 +140,7 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...extraProps}
       />
-    ),
-    render: (field) => field?.name
+    )
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
@@ -806,7 +803,8 @@ class SummitEventListPage extends React.Component {
       totalEvents,
       term,
       extraColumns,
-      filters
+      filters,
+      bulkUpdateEvents
     } = this.props;
     const {
       enabledFilters,
@@ -838,8 +836,7 @@ class SummitEventListPage extends React.Component {
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...extraProps}
           />
-        ),
-        render: (field) => field?.name
+        )
       },
       {
         columnKey: "title",
@@ -1785,6 +1782,7 @@ class SummitEventListPage extends React.Component {
                 updateData={bulkUpdateEvents}
                 handleDeleteRow={this.handleDeleteEvent}
                 resetData={this.handleResetData}
+                formattingFunction={formatEventData}
               />
             </div>
             <Pagination

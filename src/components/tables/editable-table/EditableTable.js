@@ -35,7 +35,8 @@ function EditableTable(props) {
     handleSort,
     updateData,
     handleDeleteRow,
-    resetData
+    resetData,
+    formattingFunction
   } = props;
   let tableClass = options.hasOwnProperty("className") ? options.className : "";
   const [editButton, setEditButton] = useState(false);
@@ -230,6 +231,7 @@ function EditableTable(props) {
                     deleteRow={handleDeleteRow}
                     columns={columns}
                     actions={options.actions}
+                    formattingFunction={formattingFunction}
                   />
                 </tr>
               );

@@ -13,10 +13,13 @@ function EditableTableRow(props) {
     deleteRow,
     selectAll,
     currentSummit,
-    actions
+    actions,
+    formattingFunction
   } = props;
   const [checked, setChecked] = useState(false);
   const [editData, setEditData] = useState(row);
+
+  const formattedData = formattingFunction(row, currentSummit);
 
   useEffect(() => {
     updateSelected(editData, checked);
@@ -98,7 +101,7 @@ function EditableTableRow(props) {
                 >
                   {col.editableField({
                     value: "",
-                    placeholder: row[col.columnKey].name,
+                    placeholder: row[col.columnKey]?.name,
                     onChange: onRowChange,
                     rowData: editData[col.columnKey],
                     onRemoveOption
@@ -111,7 +114,9 @@ function EditableTableRow(props) {
                 key={`row-edit-${col.columnKey}-${row.id}`}
                 className="bulk-edit-col"
               >
-                {row[col.columnKey]}
+                {col.render
+                  ? col.render(row[col.columnKey])
+                  : formattedData[col.columnKey]}
               </td>
             );
           })}
@@ -123,7 +128,7 @@ function EditableTableRow(props) {
               <td key={`${row.id}_${col.columnKey}`}>
                 {col.render
                   ? col.render(row[col.columnKey])
-                  : row[col.columnKey]}
+                  : formattedData[col.columnKey]}
               </td>
             )
         )

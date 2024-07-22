@@ -97,6 +97,430 @@ const fieldsBoundToQuestions = [
   SOCIAL_DESCRIPTION
 ];
 
+const parseFilters = (filters, term = null) => {
+  const filter = [];
+
+  if (
+    filters.hasOwnProperty("event_type_capacity_filter") &&
+    Array.isArray(filters.event_type_capacity_filter) &&
+    filters.event_type_capacity_filter.length > 0
+  ) {
+    if (
+      filters.event_type_capacity_filter.includes("allows_attendee_vote_filter")
+    ) {
+      filter.push("type_allows_attendee_vote==1");
+    }
+    if (filters.event_type_capacity_filter.includes("allows_location_filter")) {
+      filter.push("type_allows_location==1");
+    }
+    if (
+      filters.event_type_capacity_filter.includes(
+        "allows_publishing_dates_filter"
+      )
+    ) {
+      filter.push("type_allows_publishing_dates==1");
+    }
+  }
+
+  if (
+    filters.hasOwnProperty("selection_plan_id_filter") &&
+    Array.isArray(filters.selection_plan_id_filter) &&
+    filters.selection_plan_id_filter.length > 0
+  ) {
+    filter.push(
+      `selection_plan_id==${filters.selection_plan_id_filter.join("||")}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("location_id_filter") &&
+    Array.isArray(filters.location_id_filter) &&
+    filters.location_id_filter.length > 0
+  ) {
+    filter.push(`location_id==${filters.location_id_filter.join("||")}`);
+  }
+
+  if (
+    filters.hasOwnProperty("selection_status_filter") &&
+    Array.isArray(filters.selection_status_filter) &&
+    filters.selection_status_filter.length > 0
+  ) {
+    filter.push(
+      `selection_status==${filters.selection_status_filter.join("||")}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("review_status_filter") &&
+    Array.isArray(filters.review_status_filter) &&
+    filters.review_status_filter.length > 0
+  ) {
+    filter.push(`review_status==${filters.review_status_filter.join("||")}`);
+  }
+
+  if (filters?.progress_flag?.length > 0) {
+    filter.push(
+      filters.progress_flag
+        .map((pf) => `actions==type_id==${pf}&&is_completed==1`)
+        .join(",")
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("track_id_filter") &&
+    Array.isArray(filters.track_id_filter) &&
+    filters.track_id_filter.length > 0
+  ) {
+    filter.push(`track_id==${filters.track_id_filter.join("||")}`);
+  }
+
+  if (
+    filters.hasOwnProperty("event_type_id_filter") &&
+    Array.isArray(filters.event_type_id_filter) &&
+    filters.event_type_id_filter.length > 0
+  ) {
+    filter.push(`event_type_id==${filters.event_type_id_filter.join("||")}`);
+  }
+
+  if (
+    filters.hasOwnProperty("speaker_id_filter") &&
+    Array.isArray(filters.speaker_id_filter) &&
+    filters.speaker_id_filter.length > 0
+  ) {
+    filter.push(
+      `speaker_id==${filters.speaker_id_filter
+        .map((speaker) => speaker.id)
+        .join("||")}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("level_filter") &&
+    Array.isArray(filters.level_filter) &&
+    filters.level_filter.length > 0
+  ) {
+    filter.push(`level==${filters.level_filter.join("||")}`);
+  }
+
+  if (
+    filters.hasOwnProperty("tags_filter") &&
+    Array.isArray(filters.tags_filter) &&
+    filters.tags_filter.length > 0
+  ) {
+    filter.push(`tags==${filters.tags_filter.map((t) => t.tag).join("||")}`);
+  }
+
+  if (filters.published_filter) {
+    filter.push(
+      `published==${filters.published_filter === "published" ? "1" : "0"}`
+    );
+  }
+
+  if (filters.start_date_filter) {
+    parseDateRangeFilter(filter, filters.start_date_filter, "start_date");
+  }
+
+  if (filters.end_date_filter) {
+    parseDateRangeFilter(filter, filters.end_date_filter, "end_date");
+  }
+
+  if (filters.created_filter) {
+    parseDateRangeFilter(filter, filters.created_filter, "created");
+  }
+
+  if (filters.modified_filter) {
+    parseDateRangeFilter(filter, filters.modified_filter, "last_edited");
+  }
+
+  if (filters.duration_filter) {
+    // multiply values to send the minutes in seconds
+    if (Array.isArray(filters.duration_filter)) {
+      // between
+      filter.push(
+        `duration[]${filters.duration_filter[0] * SECONDS_TO_MINUTES}&&${
+          filters.duration_filter[1] * SECONDS_TO_MINUTES
+        }`
+      );
+    } else {
+      filter.push(
+        `duration${filters.duration_filter.replace(/\d/g, "")}${
+          filters.duration_filter.replace(/\D/g, "") * SECONDS_TO_MINUTES
+        }`
+      );
+    }
+  }
+
+  if (filters.speakers_count_filter) {
+    if (Array.isArray(filters.speakers_count_filter)) {
+      // between
+      filter.push(
+        `speakers_count[]]${filters.speakers_count_filter[0]}&&${filters.speakers_count_filter[1]}`
+      );
+    } else {
+      filter.push(`speakers_count${filters.speakers_count_filter}`);
+    }
+  }
+
+  if (
+    filters.hasOwnProperty("submitters") &&
+    Array.isArray(filters.submitters) &&
+    filters.submitters.length > 0
+  ) {
+    // created by fullname | created_by_email
+    filter.push(
+      filters.submitters.map((tt) => {
+        const escapedFullName = escapeFilterValue(
+          `${tt.first_name} ${tt.last_name}`
+        );
+        const escapedEmail = escapeFilterValue(tt.email);
+        const fullNameFilter = `created_by_fullname==${escapedFullName}`;
+        const emailFilter = `created_by_email==${escapedEmail}`;
+        return [fullNameFilter, emailFilter];
+      }, "")
+    );
+  }
+
+  if (filters.hasOwnProperty("streaming_url") && filters.streaming_url) {
+    const searchString = escapeFilterValue(filters.streaming_url);
+    filter.push(`streaming_url@@${searchString}`);
+  }
+  if (filters.hasOwnProperty("meeting_url") && filters.meeting_url) {
+    const searchString = escapeFilterValue(filters.meeting_url);
+    filter.push(`meeting_url@@${searchString}`);
+  }
+  if (filters.hasOwnProperty("etherpad_link") && filters.etherpad_link) {
+    const searchString = escapeFilterValue(filters.etherpad_link);
+    filter.push(`etherpad_link@@${searchString}`);
+  }
+
+  if (filters.hasOwnProperty("streaming_type") && filters.streaming_type) {
+    filter.push(`streaming_type==${filters.streaming_type}`);
+  }
+
+  if (
+    filters.hasOwnProperty("submission_source_filter") &&
+    filters.submission_source_filter
+  ) {
+    filter.push(`submission_source==${filters.submission_source_filter}`);
+  }
+
+  if (
+    filters.hasOwnProperty("speaker_company") &&
+    Array.isArray(filters.speaker_company) &&
+    filters.speaker_company.length > 0
+  ) {
+    filter.push(
+      `speaker_company==${filters.speaker_company
+        .map((c) => escapeFilterValue(c.name))
+        .join("||")}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("submitter_company") &&
+    Array.isArray(filters.submitter_company) &&
+    filters.submitter_company.length > 0
+  ) {
+    filter.push(
+      `created_by_company==${filters.submitter_company
+        .map((c) => escapeFilterValue(c.name))
+        .join("||")}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("sponsor") &&
+    Array.isArray(filters.sponsor) &&
+    filters.sponsor.length > 0
+  ) {
+    filter.push(
+      `sponsor==${filters.sponsor.map((sponsor) => sponsor.name).join("||")}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("all_companies") &&
+    Array.isArray(filters.all_companies) &&
+    filters.all_companies.length > 0
+  ) {
+    const companies = filters.all_companies
+      .map((c) => escapeFilterValue(c.name))
+      .join("||");
+    filter.push(
+      `speaker_company==${companies},created_by_company==${companies},sponsor==${companies}`
+    );
+  }
+
+  if (filters.is_public) {
+    filter.push("is_public==1");
+  }
+
+  if (filters.is_activity) {
+    filter.push("is_activity==1");
+  }
+
+  if (
+    filters.hasOwnProperty("submission_status_filter") &&
+    Array.isArray(filters.submission_status_filter) &&
+    filters.submission_status_filter.length > 0
+  ) {
+    filter.push(
+      `submission_status==${filters.submission_status_filter.join("||")}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("media_upload_with_type") &&
+    filters.media_upload_with_type.operator !== null &&
+    Array.isArray(filters.media_upload_with_type.value) &&
+    filters.media_upload_with_type.value.length > 0
+  ) {
+    const concatOperator =
+      filters.media_upload_with_type.operator === "has_media_upload_with_type=="
+        ? "||"
+        : "&&";
+    filter.push(
+      `${
+        filters.media_upload_with_type.operator
+      }${filters.media_upload_with_type.value
+        .map((v) => v.id)
+        .join(concatOperator)}`
+    );
+  }
+
+  if (term) {
+    const escapedTerm = escapeFilterValue(term);
+    let searchString =
+      `title=@${escapedTerm},` +
+      `abstract=@${escapedTerm},` +
+      `speaker_title=@${escapedTerm}`;
+
+    if (isNumericString(term)) {
+      searchString += `,id==${term}`;
+    }
+
+    filter.push(searchString);
+  }
+
+  return checkOrFilter(filters, filter);
+};
+
+export const normalizeEvent = (entity, eventTypeConfig, summit) => {
+  const normalizedEntity = { ...entity };
+  if (!normalizedEntity.start_date) delete normalizedEntity.start_date;
+  if (!normalizedEntity.end_date) delete normalizedEntity.end_date;
+  if (!normalizedEntity.rsvp_link) delete normalizedEntity.rsvp_link;
+  if (!normalizedEntity.rsvp_template_id)
+    delete normalizedEntity.rsvp_template_id;
+
+  if (normalizedEntity.hasOwnProperty("links")) delete normalizedEntity.links;
+
+  if (normalizedEntity.hasOwnProperty("tags"))
+    normalizedEntity.tags = normalizedEntity.tags.map((t) => {
+      if (typeof t === "string") return t;
+      return t.tag;
+    });
+
+  if (normalizedEntity.hasOwnProperty("sponsors"))
+    normalizedEntity.sponsors = normalizedEntity.sponsors.map((s) => s.id);
+
+  if (normalizedEntity.hasOwnProperty("speakers"))
+    normalizedEntity.speakers = normalizedEntity.speakers.map((s) => s.id);
+
+  if (
+    normalizedEntity.hasOwnProperty("moderator") &&
+    normalizedEntity.moderator
+  )
+    normalizedEntity.moderator_speaker_id = normalizedEntity.moderator.id;
+  else {
+    delete normalizedEntity.moderator;
+    normalizedEntity.moderator_speaker_id = 0;
+  }
+
+  if (normalizedEntity.hasOwnProperty("created_by")) {
+    normalizedEntity.created_by_id = normalizedEntity.created_by?.id;
+  }
+
+  // if selection plan is null set is as 0 and remove the current selection plan
+  if (
+    normalizedEntity.hasOwnProperty("selection_plan_id") &&
+    normalizedEntity.selection_plan_id == null
+  ) {
+    normalizedEntity.selection_plan_id = 0;
+    delete normalizedEntity.selection_plan;
+  }
+
+  if (eventTypeConfig) {
+    if (!eventTypeConfig.use_speakers) {
+      delete normalizedEntity.speakers;
+    }
+    if (!eventTypeConfig.use_sponsors) {
+      delete normalizedEntity.sponsors;
+    }
+    if (!eventTypeConfig.use_moderator) {
+      delete normalizedEntity.moderator;
+      delete normalizedEntity.moderator_speaker_id;
+    }
+    // if allows custom ordering in event type is false then remove custom_order
+    if (!eventTypeConfig.allow_custom_ordering) {
+      delete normalizedEntity.custom_order;
+    }
+    // if allows location in event type is false then remove location_id
+    if (!eventTypeConfig.allows_location) {
+      delete normalizedEntity.location_id;
+    }
+    // if allows publishing dates in event type is false then remove those dates
+    if (!eventTypeConfig.allows_publishing_dates) {
+      delete normalizedEntity.start_date;
+      delete normalizedEntity.end_date;
+      delete normalizedEntity.duration;
+    }
+  }
+
+  if (summit)
+    normalizePresentationAllowedQuestionFields(normalizedEntity, summit);
+
+  if (normalizedEntity.hasOwnProperty("extra_questions")) {
+    normalizedEntity.extra_questions = normalizedEntity.extra_questions.map(
+      (q) => ({ question_id: q.question_id, answer: q.value })
+    );
+  }
+
+  return normalizedEntity;
+};
+
+export const normalizeBulkEvents = (entity) => {
+  const normalizedEntity = entity.map((e) => {
+    const normalizedEvent = {
+      id: e.id,
+      title: e.title,
+      selection_plan_id: e.selection_plan_id,
+      location_id: e.location?.id || e.location_id,
+      start_date: e.start_date,
+      speakers: e.speakers,
+      end_date: e.end_date,
+      type_id: e.type_id,
+      track_id: e.track_id,
+      duration: e.duration,
+      streaming_url: e.streaming_url,
+      streaming_type: e.streaming_type,
+      meeting_url: e.meeting_url,
+      etherpad_link: e.etherpad_link
+    };
+    Object.keys(normalizedEvent).forEach((property) => {
+      if (
+        normalizedEvent[property] === undefined ||
+        normalizedEvent[property] === null ||
+        normalizedEvent[property] === ""
+      ) {
+        delete normalizedEvent[property];
+      }
+    });
+    return normalizedEvent;
+  });
+  return normalizedEntity;
+};
+
 export const getEvents =
   (
     term = null,
@@ -411,7 +835,7 @@ export const changeFlag =
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/presentations/${eventId}/actions/${typeId}/complete`,
         {},
         authErrorHandler
-      )(params)(dispatch).then((res) => {
+      )(params)(dispatch).then(() => {
         dispatch(stopLoading());
       });
     } else {
@@ -447,7 +871,7 @@ export const getEvent = (eventId) => async (dispatch, getState) => {
     createAction(RECEIVE_EVENT),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}`,
     authErrorHandler
-  )(params)(dispatch).then(({ response }) => {
+  )(params)(dispatch).then(() => {
     getQAUsersBySummitEvent(currentSummit.id, eventId)(dispatch, getState);
     dispatch(stopLoading());
   });
@@ -479,9 +903,49 @@ export const fetchExtraQuestionsAnswers = async (
     .catch(fetchErrorHandler);
 };
 
-export const resetEventForm = () => (dispatch, getState) => {
+export const resetEventForm = () => (dispatch) => {
   dispatch(createAction(RESET_EVENT_FORM)({}));
 };
+
+const publishEvent =
+  (entity, cb = null) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const { type_id } = entity;
+    const type = currentSummit.event_types.find((e) => e.id === type_id);
+
+    const params = {
+      access_token: accessToken
+    };
+
+    putRequest(
+      null,
+      createAction(EVENT_PUBLISHED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/publish`,
+      {
+        location_id: entity.location_id,
+        start_date: entity.start_date,
+        end_date: entity.end_date
+      },
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      if (
+        type.hasOwnProperty("allows_publishing_dates") &&
+        type.allows_publishing_dates
+      ) {
+        dispatch(checkProximityEvents(entity, true, cb));
+      } else {
+        const success_message = {
+          title: T.translate("general.done"),
+          html: T.translate("edit_event.saved_and_published"),
+          type: "success"
+        };
+        dispatch(showMessage(success_message, cb));
+      }
+    });
+  };
 
 export const saveEvent = (entity, publish) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -508,7 +972,7 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       if (publish) {
         dispatch(publishEvent(normalizedEntity));
       } else {
@@ -559,7 +1023,7 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
   });
 };
 
-export const cloneEvent = (entity, publish) => async (dispatch, getState) => {
+export const cloneEvent = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
@@ -611,46 +1075,6 @@ export const saveOccupancy = (entity) => async (dispatch, getState) => {
     entity
   )(params)(dispatch);
 };
-
-const publishEvent =
-  (entity, cb = null) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const { type_id } = entity;
-    const type = currentSummit.event_types.find((e) => e.id === type_id);
-
-    const params = {
-      access_token: accessToken
-    };
-
-    putRequest(
-      null,
-      createAction(EVENT_PUBLISHED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/publish`,
-      {
-        location_id: entity.location_id,
-        start_date: entity.start_date,
-        end_date: entity.end_date
-      },
-      authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      if (
-        type.hasOwnProperty("allows_publishing_dates") &&
-        type.allows_publishing_dates
-      ) {
-        dispatch(checkProximityEvents(entity, true, cb));
-      } else {
-        const success_message = {
-          title: T.translate("general.done"),
-          html: T.translate("edit_event.saved_and_published"),
-          type: "success"
-        };
-        dispatch(showMessage(success_message, cb));
-      }
-    });
-  };
 
 export const checkProximityEvents =
   (event, showSuccessMessage = true, cb = null) =>
@@ -839,122 +1263,6 @@ const normalizePresentationAllowedQuestionFields = (entity, summit) => {
   });
 };
 
-export const normalizeEvent = (entity, eventTypeConfig, summit) => {
-  const normalizedEntity = { ...entity };
-  if (!normalizedEntity.start_date) delete normalizedEntity.start_date;
-  if (!normalizedEntity.end_date) delete normalizedEntity.end_date;
-  if (!normalizedEntity.rsvp_link) delete normalizedEntity.rsvp_link;
-  if (!normalizedEntity.rsvp_template_id)
-    delete normalizedEntity.rsvp_template_id;
-
-  if (normalizedEntity.hasOwnProperty("links")) delete normalizedEntity.links;
-
-  if (normalizedEntity.hasOwnProperty("tags"))
-    normalizedEntity.tags = normalizedEntity.tags.map((t) => {
-      if (typeof t === "string") return t;
-      return t.tag;
-    });
-
-  if (normalizedEntity.hasOwnProperty("sponsors"))
-    normalizedEntity.sponsors = normalizedEntity.sponsors.map((s) => s.id);
-
-  if (normalizedEntity.hasOwnProperty("speakers"))
-    normalizedEntity.speakers = normalizedEntity.speakers.map((s) => s.id);
-
-  if (
-    normalizedEntity.hasOwnProperty("moderator") &&
-    normalizedEntity.moderator
-  )
-    normalizedEntity.moderator_speaker_id = normalizedEntity.moderator.id;
-  else {
-    delete normalizedEntity.moderator;
-    normalizedEntity.moderator_speaker_id = 0;
-  }
-
-  if (normalizedEntity.hasOwnProperty("created_by")) {
-    normalizedEntity.created_by_id = normalizedEntity.created_by?.id;
-  }
-
-  // if selection plan is null set is as 0 and remove the current selection plan
-  if (
-    normalizedEntity.hasOwnProperty("selection_plan_id") &&
-    normalizedEntity.selection_plan_id == null
-  ) {
-    normalizedEntity.selection_plan_id = 0;
-    delete normalizedEntity.selection_plan;
-  }
-
-  if (eventTypeConfig) {
-    if (!eventTypeConfig.use_speakers) {
-      delete normalizedEntity.speakers;
-    }
-    if (!eventTypeConfig.use_sponsors) {
-      delete normalizedEntity.sponsors;
-    }
-    if (!eventTypeConfig.use_moderator) {
-      delete normalizedEntity.moderator;
-      delete normalizedEntity.moderator_speaker_id;
-    }
-    // if allows custom ordering in event type is false then remove custom_order
-    if (!eventTypeConfig.allow_custom_ordering) {
-      delete normalizedEntity.custom_order;
-    }
-    // if allows location in event type is false then remove location_id
-    if (!eventTypeConfig.allows_location) {
-      delete normalizedEntity.location_id;
-    }
-    // if allows publishing dates in event type is false then remove those dates
-    if (!eventTypeConfig.allows_publishing_dates) {
-      delete normalizedEntity.start_date;
-      delete normalizedEntity.end_date;
-      delete normalizedEntity.duration;
-    }
-  }
-
-  if (summit)
-    normalizePresentationAllowedQuestionFields(normalizedEntity, summit);
-
-  if (normalizedEntity.hasOwnProperty("extra_questions")) {
-    normalizedEntity.extra_questions = normalizedEntity.extra_questions.map(
-      (q) => ({ question_id: q.question_id, answer: q.value })
-    );
-  }
-
-  return normalizedEntity;
-};
-
-export const normalizeBulkEvents = (entity) => {
-  const normalizedEntity = entity.map((e) => {
-    const normalizedEvent = {
-      id: e.id,
-      title: e.title,
-      selection_plan_id: e.selection_plan_id,
-      location_id: e.location?.id || e.location_id,
-      start_date: e.start_date,
-      speakers: e.speakers,
-      end_date: e.end_date,
-      type_id: e.type_id,
-      track_id: e.track_id,
-      duration: e.duration,
-      streaming_url: e.streaming_url,
-      streaming_type: e.streaming_type,
-      meeting_url: e.meeting_url,
-      etherpad_link: e.etherpad_link
-    };
-    Object.keys(normalizedEvent).forEach((property) => {
-      if (
-        normalizedEvent[property] === undefined ||
-        normalizedEvent[property] === null ||
-        normalizedEvent[property] === ""
-      ) {
-        delete normalizedEvent[property];
-      }
-    });
-    return normalizedEvent;
-  });
-  return normalizedEntity;
-};
-
 export const deleteEvent = (eventId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -980,8 +1288,7 @@ export const exportEvents =
     term = null,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    extraFilters = {},
-    extraColumns = []
+    extraFilters = {}
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -1074,314 +1381,6 @@ export const importEventsCSV =
       window.location.reload();
     });
   };
-
-const parseFilters = (filters, term = null) => {
-  const filter = [];
-
-  if (
-    filters.hasOwnProperty("event_type_capacity_filter") &&
-    Array.isArray(filters.event_type_capacity_filter) &&
-    filters.event_type_capacity_filter.length > 0
-  ) {
-    if (
-      filters.event_type_capacity_filter.includes("allows_attendee_vote_filter")
-    ) {
-      filter.push("type_allows_attendee_vote==1");
-    }
-    if (filters.event_type_capacity_filter.includes("allows_location_filter")) {
-      filter.push("type_allows_location==1");
-    }
-    if (
-      filters.event_type_capacity_filter.includes(
-        "allows_publishing_dates_filter"
-      )
-    ) {
-      filter.push("type_allows_publishing_dates==1");
-    }
-  }
-
-  if (
-    filters.hasOwnProperty("selection_plan_id_filter") &&
-    Array.isArray(filters.selection_plan_id_filter) &&
-    filters.selection_plan_id_filter.length > 0
-  ) {
-    filter.push(
-      `selection_plan_id==${filters.selection_plan_id_filter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("location_id_filter") &&
-    Array.isArray(filters.location_id_filter) &&
-    filters.location_id_filter.length > 0
-  ) {
-    filter.push(`location_id==${filters.location_id_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("selection_status_filter") &&
-    Array.isArray(filters.selection_status_filter) &&
-    filters.selection_status_filter.length > 0
-  ) {
-    filter.push(
-      `selection_status==${filters.selection_status_filter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("review_status_filter") &&
-    Array.isArray(filters.review_status_filter) &&
-    filters.review_status_filter.length > 0
-  ) {
-    filter.push(`review_status==${filters.review_status_filter.join("||")}`);
-  }
-
-  if (filters?.progress_flag?.length > 0) {
-    filter.push(
-      filters.progress_flag
-        .map((pf) => `actions==type_id==${pf}&&is_completed==1`)
-        .join(",")
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("track_id_filter") &&
-    Array.isArray(filters.track_id_filter) &&
-    filters.track_id_filter.length > 0
-  ) {
-    filter.push(`track_id==${filters.track_id_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("event_type_id_filter") &&
-    Array.isArray(filters.event_type_id_filter) &&
-    filters.event_type_id_filter.length > 0
-  ) {
-    filter.push(`event_type_id==${filters.event_type_id_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("speaker_id_filter") &&
-    Array.isArray(filters.speaker_id_filter) &&
-    filters.speaker_id_filter.length > 0
-  ) {
-    filter.push(
-      `speaker_id==${filters.speaker_id_filter
-        .map((speaker) => speaker.id)
-        .join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("level_filter") &&
-    Array.isArray(filters.level_filter) &&
-    filters.level_filter.length > 0
-  ) {
-    filter.push(`level==${filters.level_filter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("tags_filter") &&
-    Array.isArray(filters.tags_filter) &&
-    filters.tags_filter.length > 0
-  ) {
-    filter.push(`tags==${filters.tags_filter.map((t) => t.tag).join("||")}`);
-  }
-
-  if (filters.published_filter) {
-    filter.push(
-      `published==${filters.published_filter === "published" ? "1" : "0"}`
-    );
-  }
-
-  if (filters.start_date_filter) {
-    parseDateRangeFilter(filter, filters.start_date_filter, "start_date");
-  }
-
-  if (filters.end_date_filter) {
-    parseDateRangeFilter(filter, filters.end_date_filter, "end_date");
-  }
-
-  if (filters.created_filter) {
-    parseDateRangeFilter(filter, filters.created_filter, "created");
-  }
-
-  if (filters.modified_filter) {
-    parseDateRangeFilter(filter, filters.modified_filter, "last_edited");
-  }
-
-  if (filters.duration_filter) {
-    // multiply values to send the minutes in seconds
-    if (Array.isArray(filters.duration_filter)) {
-      // between
-      filter.push(
-        `duration[]${filters.duration_filter[0] * SECONDS_TO_MINUTES}&&${
-          filters.duration_filter[1] * SECONDS_TO_MINUTES
-        }`
-      );
-    } else {
-      filter.push(
-        `duration${filters.duration_filter.replace(/\d/g, "")}${
-          filters.duration_filter.replace(/\D/g, "") * SECONDS_TO_MINUTES
-        }`
-      );
-    }
-  }
-
-  if (filters.speakers_count_filter) {
-    if (Array.isArray(filters.speakers_count_filter)) {
-      // between
-      filter.push(
-        `speakers_count[]]${filters.speakers_count_filter[0]}&&${filters.speakers_count_filter[1]}`
-      );
-    } else {
-      filter.push(`speakers_count${filters.speakers_count_filter}`);
-    }
-  }
-
-  if (
-    filters.hasOwnProperty("submitters") &&
-    Array.isArray(filters.submitters) &&
-    filters.submitters.length > 0
-  ) {
-    // created by fullname | created_by_email
-    filter.push(
-      filters.submitters.map((tt) => {
-        const escapedFullName = escapeFilterValue(
-          `${tt.first_name} ${tt.last_name}`
-        );
-        const escapedEmail = escapeFilterValue(tt.email);
-        const fullNameFilter = `created_by_fullname==${escapedFullName}`;
-        const emailFilter = `created_by_email==${escapedEmail}`;
-        return [fullNameFilter, emailFilter];
-      }, "")
-    );
-  }
-
-  if (filters.hasOwnProperty("streaming_url") && filters.streaming_url) {
-    const searchString = escapeFilterValue(filters.streaming_url);
-    filter.push(`streaming_url@@${searchString}`);
-  }
-  if (filters.hasOwnProperty("meeting_url") && filters.meeting_url) {
-    const searchString = escapeFilterValue(filters.meeting_url);
-    filter.push(`meeting_url@@${searchString}`);
-  }
-  if (filters.hasOwnProperty("etherpad_link") && filters.etherpad_link) {
-    const searchString = escapeFilterValue(filters.etherpad_link);
-    filter.push(`etherpad_link@@${searchString}`);
-  }
-
-  if (filters.hasOwnProperty("streaming_type") && filters.streaming_type) {
-    filter.push(`streaming_type==${filters.streaming_type}`);
-  }
-
-  if (
-    filters.hasOwnProperty("submission_source_filter") &&
-    filters.submission_source_filter
-  ) {
-    filter.push(`submission_source==${filters.submission_source_filter}`);
-  }
-
-  if (
-    filters.hasOwnProperty("speaker_company") &&
-    Array.isArray(filters.speaker_company) &&
-    filters.speaker_company.length > 0
-  ) {
-    filter.push(
-      `speaker_company==${filters.speaker_company
-        .map((c) => escapeFilterValue(c.name))
-        .join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("submitter_company") &&
-    Array.isArray(filters.submitter_company) &&
-    filters.submitter_company.length > 0
-  ) {
-    filter.push(
-      `created_by_company==${filters.submitter_company
-        .map((c) => escapeFilterValue(c.name))
-        .join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("sponsor") &&
-    Array.isArray(filters.sponsor) &&
-    filters.sponsor.length > 0
-  ) {
-    filter.push(
-      `sponsor==${filters.sponsor.map((sponsor) => sponsor.name).join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("all_companies") &&
-    Array.isArray(filters.all_companies) &&
-    filters.all_companies.length > 0
-  ) {
-    const companies = filters.all_companies
-      .map((c) => escapeFilterValue(c.name))
-      .join("||");
-    filter.push(
-      `speaker_company==${companies},created_by_company==${companies},sponsor==${companies}`
-    );
-  }
-
-  if (filters.is_public) {
-    filter.push("is_public==1");
-  }
-
-  if (filters.is_activity) {
-    filter.push("is_activity==1");
-  }
-
-  if (
-    filters.hasOwnProperty("submission_status_filter") &&
-    Array.isArray(filters.submission_status_filter) &&
-    filters.submission_status_filter.length > 0
-  ) {
-    filter.push(
-      `submission_status==${filters.submission_status_filter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("media_upload_with_type") &&
-    filters.media_upload_with_type.operator !== null &&
-    Array.isArray(filters.media_upload_with_type.value) &&
-    filters.media_upload_with_type.value.length > 0
-  ) {
-    const concatOperator =
-      filters.media_upload_with_type.operator === "has_media_upload_with_type=="
-        ? "||"
-        : "&&";
-    filter.push(
-      `${
-        filters.media_upload_with_type.operator
-      }${filters.media_upload_with_type.value
-        .map((v) => v.id)
-        .join(concatOperator)}`
-    );
-  }
-
-  if (term) {
-    const escapedTerm = escapeFilterValue(term);
-    let searchString =
-      `title=@${escapedTerm},` +
-      `abstract=@${escapedTerm},` +
-      `speaker_title=@${escapedTerm}`;
-
-    if (isNumericString(term)) {
-      searchString += `,id==${term}`;
-    }
-
-    filter.push(searchString);
-  }
-
-  return checkOrFilter(filters, filter);
-};
 
 export const getEventFeedback =
   (
@@ -1583,6 +1582,6 @@ export const queryEvents = _.debounce(async (summitId, input, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
-export const changeEventListSearchTerm = (term) => (dispatch, getState) => {
+export const changeEventListSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_SEARCH_TERM)({ term }));
 };
