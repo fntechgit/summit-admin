@@ -9,7 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
 import {
   RECEIVE_PURCHASE_ORDERS,
@@ -17,8 +20,6 @@ import {
 } from "../../actions/order-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
 const DEFAULT_STATE = {
   purchaseOrders: {},
@@ -29,9 +30,11 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalPurchaseOrders: 0,
-  summitTZ: ""
+  summitTZ: "",
+  filters: {}
 };
 
+// eslint-disable-next-line default-param-last
 const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
@@ -40,15 +43,15 @@ const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_PURCHASE_ORDERS: {
-      let { order, orderDir, term, summitTZ } = payload;
+      const { order, orderDir, term, summitTZ, filters } = payload;
 
-      return { ...state, order, orderDir, term, summitTZ };
+      return { ...state, order, orderDir, term, summitTZ, filters };
     }
     case RECEIVE_PURCHASE_ORDERS: {
-      let { current_page, total, last_page } = payload.response;
+      const { current_page, total, last_page } = payload.response;
 
-      let purchaseOrders = payload.response.data.map((a) => {
-        let bought_date = epochToMomentTimeZone(
+      const purchaseOrders = payload.response.data.map((a) => {
+        const bought_date = epochToMomentTimeZone(
           a.created,
           state.summitTZ
         ).format("MMMM Do YYYY, h:mm:ss a");
@@ -57,10 +60,10 @@ const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
           id: a.id,
           number: a.number,
           owner_id: a.owner_id,
-          owner_name: a.owner_first_name + " " + a.owner_last_name,
+          owner_name: `${a.owner_first_name} ${a.owner_last_name}`,
           owner_email: a.owner_email,
           company: a.owner_company,
-          bought_date: bought_date,
+          bought_date,
           amount: `${a.currency_symbol}${a.amount}`,
           payment_method: a.payment_method,
           status: a.status
@@ -69,7 +72,7 @@ const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
-        purchaseOrders: purchaseOrders,
+        purchaseOrders,
         currentPage: current_page,
         totalPurchaseOrders: total,
         lastPage: last_page

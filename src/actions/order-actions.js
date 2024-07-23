@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -26,9 +25,21 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
-
 import URI from "urijs";
+
+import history from "../history";
+import {
+  checkOrFilter,
+  getAccessTokenSafely,
+  parseDateRangeFilter
+} from "../utils/methods";
+
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_EXTRA_QUESTIONS_PER_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE
+} from "../utils/constants";
 
 export const REQUEST_ORDER_EXTRA_QUESTIONS = "REQUEST_ORDER_EXTRA_QUESTIONS";
 export const RECEIVE_ORDER_EXTRA_QUESTIONS = "RECEIVE_ORDER_EXTRA_QUESTIONS";
@@ -84,7 +95,7 @@ export const ORDER_EXTRA_QUESTION_SUB_QUESTION_DELETED =
 export const ORDER_EXTRA_QUESTION_SUB_QUESTION_ORDER_UPDATED =
   "ORDER_EXTRA_QUESTION_SUB_QUESTION_ORDER_UPDATED";
 
-/***********************  ORDER EXTRA QUESTIONS  *******************************************/
+/** *********************  ORDER EXTRA QUESTIONS  ****************************************** */
 
 export const getOrderExtraQuestionMeta = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -137,7 +148,7 @@ export const getMainOrderExtraQuestions = () => async (dispatch, getState) => {
 
   dispatch(startLoading());
 
-  let apiUrl = URI(
+  const apiUrl = URI(
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/order-extra-questions`
   );
   apiUrl.addQuery("filter[]", "class==MainQuestion");
@@ -145,8 +156,8 @@ export const getMainOrderExtraQuestions = () => async (dispatch, getState) => {
   apiUrl.addQuery("expand", "*sub_question_rules,*sub_question,*values");
   apiUrl.addQuery("access_token", accessToken);
   apiUrl.addQuery("order", "order");
-  apiUrl.addQuery("page", 1);
-  apiUrl.addQuery("per_page", 100);
+  apiUrl.addQuery("page", DEFAULT_CURRENT_PAGE);
+  apiUrl.addQuery("per_page", DEFAULT_EXTRA_QUESTIONS_PER_PAGE);
 
   return getRequest(
     null,
@@ -400,32 +411,79 @@ const normalizeQuestion = (entity) => {
   return normalizedEntity;
 };
 
-/***************************  PURCHASE ORDERS  ******************************/
+const parsePurchaseOrdersFilters = (filters, term = null) => {
+  const filter = [];
+
+  if (filters.amount_paid_filter) {
+    filter.push(
+      `amount${filters.amount_paid_filter === "free" ? "==0" : ">0"}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("company_filter") &&
+    Array.isArray(filters.company_filter) &&
+    filters.company_filter.length > 0
+  ) {
+    filter.push(
+      `owner_company==${filters.company_filter
+        .map((c) => escapeFilterValue(c.name))
+        .join("||")}`
+    );
+  }
+
+  if (filters.purchase_date_filter) {
+    parseDateRangeFilter(filter, filters.purchase_date_filter, "created");
+  }
+
+  if (filters.payment_method_filter) {
+    filter.push(`payment_method==${filters.payment_method_filter}`);
+  }
+
+  if (term) {
+    const escapedTerm = escapeFilterValue(term);
+
+    const searchString =
+      `ticket_number=@${escapedTerm},` +
+      `ticket_owner_email=@${escapedTerm},` +
+      `ticket_owner_name=@${escapedTerm},` +
+      `number=@${escapedTerm},` +
+      `owner_name=@${escapedTerm},` +
+      `owner_email=@${escapedTerm},`;
+
+    filter.push(searchString);
+  }
+
+  return checkOrFilter(filters, filter);
+};
+
+/** ************************  PURCHASE ORDERS  ***************************** */
 
 export const getPurchaseOrders =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    filters = {}
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filter = [];
     const summitTZ = currentSummit.time_zone.name;
 
     dispatch(startLoading());
 
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(
-        `ticket_number=@${escapedTerm},ticket_owner_email=@${escapedTerm},ticket_owner_name=@${escapedTerm},number=@${escapedTerm},owner_name=@${escapedTerm},owner_email=@${escapedTerm},owner_company=@${escapedTerm}`
-      );
-    }
-
     const params = {
       expand: "tickets",
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
+
+    const filter = parsePurchaseOrdersFilters(filters, term);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -433,11 +491,11 @@ export const getPurchaseOrders =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
       let tempOrder = order;
       // order translation
       if (tempOrder === "bought_date") tempOrder = "created";
-      params["order"] = `${orderDirSign}${tempOrder}`;
+      params.order = `${orderDirSign}${tempOrder}`;
     }
 
     return getRequest(
@@ -550,7 +608,7 @@ export const addTicketsToOrder =
         "extra_questions, tickets, tickets.owner, tickets.owner.member, tickets.ticket_type"
     };
 
-    let payload = {
+    const payload = {
       ticket_type_id: typeId,
       ticket_qty: qty
     };
@@ -691,12 +749,12 @@ const normalizePurchaseOrder = (entity) => {
   return normalizedEntity;
 };
 
-/***************************  Sub Questions Rules ******************************/
+/** *************************  Sub Questions Rules ***************************** */
 
 const normalizeSubRule = (entity) => {
   const normalizedEntity = { ...entity };
 
-  if (entity.id === 0) delete normalizedEntity["id"];
+  if (entity.id === 0) delete normalizedEntity.id;
 
   return normalizedEntity;
 };

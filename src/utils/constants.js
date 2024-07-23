@@ -72,6 +72,8 @@ export const DEFAULT_CURRENT_PAGE = 1;
 
 export const DEFAULT_PER_PAGE = 10;
 
+export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
+
 export const DEFAULT_ORDER_DIR = 1;
 
 export const DEFAULT_EXPORT_PAGE_SIZE = 500;
