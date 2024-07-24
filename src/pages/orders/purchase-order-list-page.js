@@ -281,8 +281,6 @@ class PurchaseOrderListPage extends React.Component {
       { label: "Offline", value: "Offline" }
     ];
 
-    console.log("FILTERS", purchaseOrderFilters);
-
     if (!currentSummit.id) return <div />;
 
     return (
@@ -313,7 +311,9 @@ class PurchaseOrderListPage extends React.Component {
                 }))
               }
             >
-              {T.translate("purchase_order_list.scan_qr")}
+              {scanQr
+                ? T.translate("purchase_order_list.close_scan_qr")
+                : T.translate("purchase_order_list.scan_qr")}
             </button>
           </div>
           <div className="col-md-4 text-right">

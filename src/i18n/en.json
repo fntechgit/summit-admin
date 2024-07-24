@@ -2036,6 +2036,7 @@
     "wrong_qr_text": "Wrong format on QR code.",
     "apply_filters": "Apply Filters",
     "scan_qr": "Scan QR",
+    "close_scan_qr": "Close Scanner",
     "placeholders": {
       "search_orders": "Search by Order #, Buyer, Attendee ",
       "company_filter": "Filter by Company",
