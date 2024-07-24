@@ -9,13 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Swal from "sweetalert2";
-import QrReader from "modern-react-qr-reader";
 import { Modal } from "react-bootstrap";
+import QrReader from "../qr-reader";
 
 export default class QrReaderInput extends React.Component {
   constructor(props) {
@@ -30,9 +30,10 @@ export default class QrReaderInput extends React.Component {
   }
 
   handleScan(data) {
+    const { onScan } = this.props;
     if (data) {
       this.setState({ showModal: false });
-      this.props.onScan(data);
+      onScan(data);
     }
   }
 
@@ -47,12 +48,13 @@ export default class QrReaderInput extends React.Component {
   }
 
   render() {
-    let { showModal } = this.state;
+    const { showModal } = this.state;
 
     return (
       <div>
         <button
           className="btn btn-default"
+          type="button"
           onClick={() => {
             this.setState({ showModal: true });
           }}
@@ -70,12 +72,7 @@ export default class QrReaderInput extends React.Component {
             <Modal.Title>Scan QR</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <QrReader
-              delay={300}
-              onError={this.handleError}
-              onScan={this.handleScan}
-              style={{ width: "100%" }}
-            />
+            <QrReader onError={this.handleError} onScan={this.handleScan} />
           </Modal.Body>
         </Modal>
       </div>

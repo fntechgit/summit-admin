@@ -503,7 +503,7 @@ export const getPurchaseOrders =
       createAction(RECEIVE_PURCHASE_ORDERS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/orders`,
       authErrorHandler,
-      { page, perPage, order, orderDir, summitTZ, term }
+      { page, perPage, order, orderDir, summitTZ, term, filters }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

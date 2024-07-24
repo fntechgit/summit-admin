@@ -25,7 +25,6 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import { SegmentedControl } from "segmented-control";
 import { getPurchaseOrders } from "../../actions/order-actions";
 import QrReaderInput from "../../components/inputs/qr-reader-input";
-import QrReader from "../../components/qr-reader";
 import { getTicket } from "../../actions/ticket-actions";
 import { handleDDLSortByLabel } from "../../utils/methods";
 import { DATE_FILTER_ARRAY_SIZE } from "../../utils/constants";
@@ -55,8 +54,7 @@ class PurchaseOrderListPage extends React.Component {
 
     this.state = {
       enabledFilters: [],
-      purchaseOrderFilters: defaultFilters,
-      scanQr: false
+      purchaseOrderFilters: defaultFilters
     };
   }
 
@@ -78,12 +76,11 @@ class PurchaseOrderListPage extends React.Component {
 
   handleQRScan(qrCode) {
     const { currentSummit, history, getTicket } = this.props;
-    console.log("CHECK QR CODE...", qrCode);
-    // getTicket(btoa(qrCode)).then((data) => {
-    //   history.push(
-    //     `/app/summits/${currentSummit.id}/purchase-orders/${data.order_id}/tickets/${data.id}`
-    //   );
-    // });
+    getTicket(btoa(qrCode)).then((data) => {
+      history.push(
+        `/app/summits/${currentSummit.id}/purchase-orders/${data.order_id}/tickets/${data.id}`
+      );
+    });
   }
 
   handleEdit(purchaseOrderId) {
@@ -211,7 +208,7 @@ class PurchaseOrderListPage extends React.Component {
       totalPurchaseOrders
     } = this.props;
 
-    const { enabledFilters, purchaseOrderFilters, scanQr } = this.state;
+    const { enabledFilters, purchaseOrderFilters } = this.state;
 
     const columns = [
       {
@@ -301,20 +298,7 @@ class PurchaseOrderListPage extends React.Component {
             />
           </div>
           <div className="col-md-2">
-            <button
-              className="btn btn-default"
-              type="button"
-              onClick={() =>
-                this.setState((prevState) => ({
-                  ...prevState,
-                  scanQr: !prevState.scanQr
-                }))
-              }
-            >
-              {scanQr
-                ? T.translate("purchase_order_list.close_scan_qr")
-                : T.translate("purchase_order_list.scan_qr")}
-            </button>
+            <QrReaderInput onScan={this.handleQRScan} />
           </div>
           <div className="col-md-4 text-right">
             <button
@@ -326,11 +310,6 @@ class PurchaseOrderListPage extends React.Component {
             </button>
           </div>
         </div>
-        {scanQr && (
-          <div className="row">
-            <QrReader onScan={this.handleQRScan} />
-          </div>
-        )}
         <hr />
         <div className="row">
           <div className="col-md-6">

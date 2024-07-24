@@ -1493,6 +1493,8 @@
     "owner_company": "Owner Company",
     "company": "Company",
     "bought_date": "Purchase Date",
+    "close_scan_qr": "Close Scanner",
+    "scan_qr": "Scan QR",
     "price": "Price",
     "payment_method": "Payment Method",
     "promo_code": "Promo Code",

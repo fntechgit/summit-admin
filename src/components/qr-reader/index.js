@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import QrScanner from "qr-scanner";
 import styles from "./index.module.less";
 
-const QrReader = function ({ onError, onScan }) {
+const QrReader = function ({ onError, onScan, style }) {
   // QR States
   const scanner = useRef(null);
   const videoEl = useRef(null);
@@ -47,8 +47,10 @@ const QrReader = function ({ onError, onScan }) {
     // 🧹 Clean up on unmount.
     // 🚨 This removes the QR Scanner from rendering and using camera when it is closed or removed from the UI.
     return () => {
-      if (!videoEl?.current) {
-        scanner?.current?.stop();
+      if (scanner.current) {
+        scanner.current?.stop();
+        scanner.current?.destroy();
+        scanner.current = null;
       }
     };
   }, []);
@@ -61,7 +63,7 @@ const QrReader = function ({ onError, onScan }) {
   }, [qrOn]);
 
   return (
-    <div className={styles.qrReader}>
+    <div className={styles.qrReader} style={style}>
       {/* QR */}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video ref={videoEl} />
