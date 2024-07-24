@@ -27,7 +27,11 @@ import { getPurchaseOrders } from "../../actions/order-actions";
 import QrReaderInput from "../../components/inputs/qr-reader-input";
 import { getTicket } from "../../actions/ticket-actions";
 import { handleDDLSortByLabel } from "../../utils/methods";
-import { DATE_FILTER_ARRAY_SIZE } from "../../utils/constants";
+import {
+  DATE_FILTER_ARRAY_SIZE,
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_PER_PAGE
+} from "../../utils/constants";
 
 const defaultFilters = {
   amount_paid_filter: null,
@@ -59,18 +63,28 @@ class PurchaseOrderListPage extends React.Component {
   }
 
   componentDidMount() {
-    const {
-      currentSummit,
-      term,
-      currentPage,
-      perPage,
-      order,
-      orderDir,
-      filters,
-      getPurchaseOrders
-    } = this.props;
+    const { currentSummit, term, order, orderDir, filters, getPurchaseOrders } =
+      this.props;
     if (currentSummit) {
-      getPurchaseOrders(term, currentPage, perPage, order, orderDir, filters);
+      const { purchaseOrderFilters } = this.state;
+      const enabledFilters = Object.keys(filters).filter((e) =>
+        Array.isArray(filters[e])
+          ? filters[e]?.some((e) => e !== null && e !== 0)
+          : filters[e]?.length > 0
+      );
+      this.setState((prevState) => ({
+        ...prevState,
+        enabledFilters,
+        purchaseOrderFilters: { ...purchaseOrderFilters, ...filters }
+      }));
+      getPurchaseOrders(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        DEFAULT_PER_PAGE,
+        order,
+        orderDir,
+        filters
+      );
     }
   }
 
