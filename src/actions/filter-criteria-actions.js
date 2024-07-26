@@ -11,11 +11,8 @@
  * limitations under the License.
  * */
 
-import T from "i18n-react/dist/i18n-react";
 import {
   VALIDATE,
-  getRequest,
-  putRequest,
   postRequest,
   deleteRequest,
   createAction,
@@ -39,6 +36,39 @@ import {
 
 export const FILTER_CRITERIA_ADDED = "FILTER_CRITERIA_ADDED";
 export const FILTER_CRITERIA_DELETED = "FILTER_CRITERIA_DELETED";
+
+const customErrorHandler = (err, res) => (dispatch, state) => {
+  const code = err.status;
+  let msg = "";
+
+  dispatch(stopLoading());
+
+  switch (code) {
+    case ERROR_CODE_412:
+      if (Array.isArray(err.response.body)) {
+        err.response.body.forEach((er) => {
+          msg += `${er}<br>`;
+        });
+      } else {
+        Object.keys(err.response.body).forEach((key) => {
+          msg += `${err.response.body[key]}<br>`;
+        });
+      }
+
+      Swal.fire("Validation error", msg, "warning");
+
+      if (err.response.body.errors) {
+        dispatch({
+          type: VALIDATE,
+          payload: { errors: err.response.body }
+        });
+      }
+
+      break;
+    default:
+      dispatch(authErrorHandler(err, res));
+  }
+};
 
 export const saveFilterCriteria =
   (filterCriteria) => async (dispatch, getState) => {
@@ -109,36 +139,3 @@ export const queryFilterCriterias = _.debounce(
   },
   DEBOUNCE_WAIT
 );
-
-export const customErrorHandler = (err, res) => (dispatch, state) => {
-  const code = err.status;
-  let msg = "";
-
-  dispatch(stopLoading());
-
-  switch (code) {
-    case ERROR_CODE_412:
-      if (Array.isArray(err.response.body)) {
-        err.response.body.forEach((er) => {
-          msg += `${er}<br>`;
-        });
-      } else {
-        Object.keys(err.response.body).forEach((key) => {
-          msg += `${err.response.body[key]}<br>`;
-        });
-      }
-
-      Swal.fire("Validation error", msg, "warning");
-
-      if (err.response.body.errors) {
-        dispatch({
-          type: VALIDATE,
-          payload: { errors: err.response.body }
-        });
-      }
-
-      break;
-    default:
-      dispatch(authErrorHandler(err, res));
-  }
-};
