@@ -37,7 +37,7 @@ import {
 export const FILTER_CRITERIA_ADDED = "FILTER_CRITERIA_ADDED";
 export const FILTER_CRITERIA_DELETED = "FILTER_CRITERIA_DELETED";
 
-const customErrorHandler = (err, res) => (dispatch, state) => {
+const customErrorHandler = (err, res) => (dispatch) => {
   const code = err.status;
   let msg = "";
 
@@ -70,47 +70,45 @@ const customErrorHandler = (err, res) => (dispatch, state) => {
   }
 };
 
-export const saveFilterCriteria =
-  (filterCriteria) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+export const saveFilterCriteria = (filterCriteria) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const params = {
-      access_token: accessToken
-    };
-
-    dispatch(startLoading());
-
-    return postRequest(
-      null,
-      createAction(FILTER_CRITERIA_ADDED),
-      `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
-      filterCriteria,
-      customErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken
   };
 
-export const deleteFilterCriteria =
-  (filterCriteriaId) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+  dispatch(startLoading());
 
-    const params = {
-      access_token: accessToken
-    };
+  return postRequest(
+    null,
+    createAction(FILTER_CRITERIA_ADDED),
+    `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
+    filterCriteria,
+    customErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
-    dispatch(startLoading());
+export const deleteFilterCriteria = (filterCriteriaId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    return deleteRequest(
-      null,
-      createAction(FILTER_CRITERIA_DELETED)({ filterCriteriaId }),
-      `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias/${filterCriteriaId}`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken
   };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(FILTER_CRITERIA_DELETED)({ filterCriteriaId }),
+    `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias/${filterCriteriaId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
 export const queryFilterCriterias = _.debounce(
   async (summitId, context, input, callback) => {
