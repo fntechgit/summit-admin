@@ -2836,12 +2836,16 @@
     "sponsorship_type": "Tier",
     "no_log_entries": "No log entries found for current search criteria.",
     "action": "Action",
-    "date": "Date",
+    "date": "Created",
     "user": "User",
     "event": "Event",
     "order": "Order",
+    "apply_filters": "Apply Filters",
     "placeholders": {
-      "search_log": "Search By Action / User Full Name"
+      "search_log": "Search By Action / Entity Id",
+      "user_id": "Filter by User",
+      "created_date_from": "Filter by Created Date From",
+      "created_date_to": "Filter by Created Date To"
     }
   },
   "signage": {
