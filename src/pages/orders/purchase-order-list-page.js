@@ -23,7 +23,11 @@ import {
 } from "openstack-uicore-foundation/lib/components";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SegmentedControl } from "segmented-control";
-import { getPurchaseOrders } from "../../actions/order-actions";
+import Swal from "sweetalert2";
+import {
+  getPurchaseOrders,
+  deletePurchaseOrder
+} from "../../actions/order-actions";
 import QrReaderInput from "../../components/inputs/qr-reader-input";
 import { getTicket } from "../../actions/ticket-actions";
 import { handleDDLSortByLabel } from "../../utils/methods";
@@ -55,6 +59,7 @@ class PurchaseOrderListPage extends React.Component {
     this.handleExtraFilterChange = this.handleExtraFilterChange.bind(this);
     this.handleChangeDateFilter = this.handleChangeDateFilter.bind(this);
     this.handleSetAmountFilter = this.handleSetAmountFilter.bind(this);
+    this.handlePurchaseOrderDelete = this.handlePurchaseOrderDelete.bind(this);
 
     this.state = {
       enabledFilters: [],
@@ -210,6 +215,26 @@ class PurchaseOrderListPage extends React.Component {
     }));
   }
 
+  handlePurchaseOrderDelete(purchaseOrderId) {
+    const { purchaseOrders, deletePurchaseOrder } = this.props;
+    const order = purchaseOrders.find((m) => m.id === purchaseOrderId);
+
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("purchase_order_list.remove_warning")} ${
+        order.number
+      }?`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then((result) => {
+      if (result.value) {
+        deletePurchaseOrder(purchaseOrderId);
+      }
+    });
+  }
+
   render() {
     const {
       currentSummit,
@@ -276,7 +301,8 @@ class PurchaseOrderListPage extends React.Component {
       sortCol: order === "last_name" ? "name" : order,
       sortDir: orderDir,
       actions: {
-        edit: { onClick: this.handleEdit }
+        edit: { onClick: this.handleEdit },
+        delete: { onClick: this.handlePurchaseOrderDelete }
       }
     };
 
@@ -492,5 +518,6 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getPurchaseOrders,
+  deletePurchaseOrder,
   getTicket
 })(PurchaseOrderListPage);

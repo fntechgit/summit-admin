@@ -2039,6 +2039,7 @@
     "apply_filters": "Apply Filters",
     "scan_qr": "Scan QR",
     "close_scan_qr": "Close Scanner",
+    "remove_warning": "Are you sure you want to delete purchase order",
     "placeholders": {
       "search_orders": "Search by Order #, Buyer, Attendee ",
       "company_filter": "Filter by Company",

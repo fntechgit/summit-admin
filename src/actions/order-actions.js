@@ -97,6 +97,16 @@ export const ORDER_EXTRA_QUESTION_SUB_QUESTION_ORDER_UPDATED =
 
 /** *********************  ORDER EXTRA QUESTIONS  ****************************************** */
 
+const normalizeQuestion = (entity) => {
+  const normalizedEntity = { ...entity };
+  if (normalizedEntity.max_selected_values) {
+    normalizedEntity.max_selected_values = parseInt(
+      normalizedEntity.max_selected_values
+    );
+  }
+  return normalizedEntity;
+};
+
 export const getOrderExtraQuestionMeta = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -280,7 +290,7 @@ export const deleteOrderExtraQuestion =
   };
 
 export const updateOrderExtraQuestionOrder =
-  (questions, questionId, newOrder) => async (dispatch, getState) => {
+  (questions, questionId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -401,16 +411,6 @@ export const deleteOrderExtraQuestionValue =
     });
   };
 
-const normalizeQuestion = (entity) => {
-  const normalizedEntity = { ...entity };
-  if (normalizedEntity.max_selected_values) {
-    normalizedEntity.max_selected_values = parseInt(
-      normalizedEntity.max_selected_values
-    );
-  }
-  return normalizedEntity;
-};
-
 const parsePurchaseOrdersFilters = (filters, term = null) => {
   const filter = [];
 
@@ -458,6 +458,45 @@ const parsePurchaseOrdersFilters = (filters, term = null) => {
 };
 
 /** ************************  PURCHASE ORDERS  ***************************** */
+
+const normalizePurchaseOrder = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  delete normalizedEntity.amount;
+  delete normalizedEntity.created;
+  delete normalizedEntity.discount_amount;
+  delete normalizedEntity.extra_question_answers;
+  delete normalizedEntity.hash_creation_date;
+  delete normalizedEntity.hash;
+  delete normalizedEntity.id;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.payment_gateway_cart_id;
+  delete normalizedEntity.payment_gateway_client_token;
+  delete normalizedEntity.payment_method;
+  delete normalizedEntity.raw_amount;
+  delete normalizedEntity.status;
+  delete normalizedEntity.taxes_amount;
+  delete normalizedEntity.owner_id;
+
+  if (normalizedEntity.owner != null) {
+    normalizedEntity.owner_email = normalizedEntity.owner.email;
+    normalizedEntity.owner_first_name = normalizedEntity.owner.first_name;
+    normalizedEntity.owner_last_name = normalizedEntity.owner.last_name;
+    delete normalizedEntity.owner;
+  }
+
+  if (normalizedEntity.promo_code != null) {
+    normalizedEntity.promo_code = normalizedEntity.promo_code.code;
+  }
+
+  if (!normalizedEntity.owner_company_id) {
+    delete normalizedEntity.owner_company_id;
+  }
+
+  delete normalizedEntity.extra_questions;
+
+  return normalizedEntity;
+};
 
 export const getPurchaseOrders =
   (
@@ -709,45 +748,6 @@ export const getPurchaseOrderRefunds =
       dispatch(stopLoading());
     });
   };
-
-const normalizePurchaseOrder = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  delete normalizedEntity.amount;
-  delete normalizedEntity.created;
-  delete normalizedEntity.discount_amount;
-  delete normalizedEntity.extra_question_answers;
-  delete normalizedEntity.hash_creation_date;
-  delete normalizedEntity.hash;
-  delete normalizedEntity.id;
-  delete normalizedEntity.last_edited;
-  delete normalizedEntity.payment_gateway_cart_id;
-  delete normalizedEntity.payment_gateway_client_token;
-  delete normalizedEntity.payment_method;
-  delete normalizedEntity.raw_amount;
-  delete normalizedEntity.status;
-  delete normalizedEntity.taxes_amount;
-  delete normalizedEntity.owner_id;
-
-  if (normalizedEntity.owner != null) {
-    normalizedEntity.owner_email = normalizedEntity.owner.email;
-    normalizedEntity.owner_first_name = normalizedEntity.owner.first_name;
-    normalizedEntity.owner_last_name = normalizedEntity.owner.last_name;
-    delete normalizedEntity.owner;
-  }
-
-  if (normalizedEntity.promo_code != null) {
-    normalizedEntity.promo_code = normalizedEntity.promo_code.code;
-  }
-
-  if (!normalizedEntity.owner_company_id) {
-    delete normalizedEntity.owner_company_id;
-  }
-
-  delete normalizedEntity.extra_questions;
-
-  return normalizedEntity;
-};
 
 /** *************************  Sub Questions Rules ***************************** */
 

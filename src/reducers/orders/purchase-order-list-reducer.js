@@ -16,7 +16,8 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 
 import {
   RECEIVE_PURCHASE_ORDERS,
-  REQUEST_PURCHASE_ORDERS
+  REQUEST_PURCHASE_ORDERS,
+  PURCHASE_ORDER_DELETED
 } from "../../actions/order-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -76,6 +77,15 @@ const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
         currentPage: current_page,
         totalPurchaseOrders: total,
         lastPage: last_page
+      };
+    }
+    case PURCHASE_ORDER_DELETED: {
+      const { orderId } = payload;
+      return {
+        ...state,
+        purchaseOrders: state.purchaseOrders.filter(
+          (order) => order.id !== orderId
+        )
       };
     }
     default:
