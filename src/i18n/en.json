@@ -1493,6 +1493,8 @@
     "owner_company": "Owner Company",
     "company": "Company",
     "bought_date": "Purchase Date",
+    "close_scan_qr": "Close Scanner",
+    "scan_qr": "Scan QR",
     "price": "Price",
     "payment_method": "Payment Method",
     "promo_code": "Promo Code",
@@ -2026,7 +2028,7 @@
     "owner_id": "Owner Id",
     "company": "Company",
     "bought_date": "Purchase Date",
-    "price": "Price",
+    "price": "Amount Paid",
     "payment_method": "Payment Method",
     "status": "Status",
     "tickets": "Tickets",
@@ -2034,8 +2036,16 @@
     "no_purchase_orders": "No purchase orders found.",
     "wrong_qr_title": "QR Code Error",
     "wrong_qr_text": "Wrong format on QR code.",
+    "apply_filters": "Apply Filters",
+    "scan_qr": "Scan QR",
+    "close_scan_qr": "Close Scanner",
+    "remove_warning": "Are you sure you want to delete purchase order",
     "placeholders": {
-      "search_orders": "Search by Order #, Buyer, Attendee "
+      "search_orders": "Search by Order #, Buyer, Attendee ",
+      "company_filter": "Filter by Company",
+      "payment_method_filter": "Filter by Payment Method",
+      "purchased_from": "Filter Purchased Date from",
+      "purchased_to": "Filter Purchased Date to"
     }
   },
   "edit_purchase_order": {
