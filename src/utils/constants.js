@@ -91,3 +91,5 @@ export const ERROR_CODE_412 = 412;
 export const ERROR_CODE_500 = 500;
 
 export const HEX_RADIX = 16;
+
+export const DEBOUNCE_WAIT = 500;
