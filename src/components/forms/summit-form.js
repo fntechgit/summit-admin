@@ -216,8 +216,9 @@ class SummitForm extends React.Component {
       if (currentError !== "") {
         newErrors[id] = currentError;
       }
-      entity[id] = value;
+      newEntity[id] = value;
     }
+
     this.setState({
       entity: newEntity,
       errors: newErrors,
