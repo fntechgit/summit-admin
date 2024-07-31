@@ -67,37 +67,46 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
   {
     columnKey: "speakers",
     value: "speakers",
-    editableField: (extraProps) => (
-      <>
-        <SpeakerInput
-          id="speakers"
-          value={extraProps.value}
-          isClearable
-          placeholder={T.translate("edit_event.search_speakers")}
-          getOptionLabel={(speaker) =>
-            `${speaker.first_name} ${speaker.last_name} (${speaker.email})`
-          }
-          // eslint-disable-next-line react/jsx-props-no-spreading
-          {...extraProps}
-        />
-        <div className="speakers-list">
-          {extraProps.rowData?.length > 0 &&
-            extraProps.rowData.map((sp) => (
-              <div className="speaker-list-pill" title={sp?.email} key={sp?.id}>
-                {`${sp?.first_name} ${sp?.last_name}`}
-                <button
-                  type="button"
-                  className="text-link-button"
-                  onClick={() => extraProps.onRemoveOption(sp.id, "speakers")}
-                  aria-label={`Remove Speaker ${sp?.first_name} ${sp?.last_name}`}
+    editableField: (extraProps) => {
+      const useSpeakers = extraProps.row.type?.use_speakers;
+      return useSpeakers ? (
+        <>
+          <SpeakerInput
+            id="speakers"
+            value={extraProps.value}
+            isClearable
+            placeholder={T.translate("edit_event.search_speakers")}
+            getOptionLabel={(speaker) =>
+              `${speaker.first_name} ${speaker.last_name} (${speaker.email})`
+            }
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {...extraProps}
+          />
+          <div className="speakers-list">
+            {extraProps.rowData?.length > 0 &&
+              extraProps.rowData.map((sp) => (
+                <div
+                  className="speaker-list-pill"
+                  title={sp?.email}
+                  key={sp?.id}
                 >
-                  <i className="fa fa-remove" />
-                </button>
-              </div>
-            ))}
-        </div>
-      </>
-    )
+                  {`${sp?.first_name} ${sp?.last_name}`}
+                  <button
+                    type="button"
+                    className="text-link-button"
+                    onClick={() => extraProps.onRemoveOption(sp.id, "speakers")}
+                    aria-label={`Remove Speaker ${sp?.first_name} ${sp?.last_name}`}
+                  >
+                    <i className="fa fa-remove" />
+                  </button>
+                </div>
+              ))}
+          </div>
+        </>
+      ) : (
+        false
+      );
+    }
   },
   { columnKey: "created_by_fullname", value: "created_by", sortable: true },
   { columnKey: "published_date", value: "published", sortable: true },

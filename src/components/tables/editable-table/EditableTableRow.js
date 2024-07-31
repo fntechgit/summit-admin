@@ -44,7 +44,15 @@ function EditableTableRow(props) {
   const onRowChange = (ev) => {
     const { value, id, type } = ev.target;
     if (type === "speakerinput") {
-      const newSpeakers = { ...editData, [id]: [...row[id], value] };
+      const currentRow = selected.find((r) => r.id === row.id);
+      const hasSpeakers =
+        currentRow[id] &&
+        Array.isArray(currentRow[id]) &&
+        currentRow[id].length > 0;
+      const newSpeakers = {
+        ...editData,
+        [id]: hasSpeakers ? [...currentRow[id], value] : [value]
+      };
       setEditData(newSpeakers);
     } else {
       const newEventData = { ...editData, [id]: value };
@@ -53,7 +61,8 @@ function EditableTableRow(props) {
   };
 
   const onRemoveOption = (rowId, id) => {
-    const newOptions = row[id].filter((s) => s.id !== rowId);
+    const currentRow = selected.find((r) => r.id === row.id);
+    const newOptions = currentRow[id].filter((s) => s.id !== rowId);
     const newEventData = { ...editData, [id]: newOptions };
     setEditData(newEventData);
   };
@@ -103,6 +112,7 @@ function EditableTableRow(props) {
                     value: "",
                     placeholder: row[col.columnKey]?.name,
                     onChange: onRowChange,
+                    row,
                     rowData: editData[col.columnKey],
                     onRemoveOption
                   })}

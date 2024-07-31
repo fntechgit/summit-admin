@@ -13,10 +13,7 @@
 
 import T from "i18n-react/dist/i18n-react";
 import URI from "urijs";
-import {
-  BulkActionEdit,
-  BulkActionUnPublish
-} from "openstack-uicore-foundation/lib/components/schedule-builder-constants";
+
 import {
   getRequest,
   putRequest,
