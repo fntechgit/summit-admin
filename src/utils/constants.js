@@ -72,6 +72,8 @@ export const DEFAULT_CURRENT_PAGE = 1;
 
 export const DEFAULT_PER_PAGE = 10;
 
+export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
+
 export const DEFAULT_ORDER_DIR = 1;
 
 export const ONE_MINUTE = 60;
@@ -102,3 +104,5 @@ export const ERROR_CODE_412 = 412;
 export const ERROR_CODE_500 = 500;
 
 export const HEX_RADIX = 16;
+
+export const DEBOUNCE_WAIT = 500;

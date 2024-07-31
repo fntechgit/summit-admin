@@ -9,12 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import T from "i18n-react/dist/i18n-react";
 import {
-  getRequest,
-  putRequest,
+  VALIDATE,
   postRequest,
   deleteRequest,
   createAction,
@@ -25,103 +23,36 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
 import URI from "urijs";
 import Swal from "sweetalert2";
+import _ from "lodash";
+
+import { getAccessTokenSafely } from "../utils/methods";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_PER_PAGE,
+  ERROR_CODE_412
+} from "../utils/constants";
 
 export const FILTER_CRITERIA_ADDED = "FILTER_CRITERIA_ADDED";
 export const FILTER_CRITERIA_DELETED = "FILTER_CRITERIA_DELETED";
 
-export const saveFilterCriteria =
-  (filterCriteria) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
-
-    const params = {
-      access_token: accessToken
-    };
-
-    dispatch(startLoading());
-
-    return postRequest(
-      null,
-      createAction(FILTER_CRITERIA_ADDED),
-      `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
-      filterCriteria,
-      customErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
-
-export const deleteFilterCriteria =
-  (filterCriteriaId) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
-
-    const params = {
-      access_token: accessToken
-    };
-
-    dispatch(startLoading());
-
-    return deleteRequest(
-      null,
-      createAction(FILTER_CRITERIA_DELETED)({ filterCriteriaId }),
-      `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias/${filterCriteriaId}`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
-
-export const queryFilterCriterias = _.debounce(
-  async (summitId, context, input, callback) => {
-    const accessToken = await getAccessTokenSafely();
-
-    let apiUrl = URI(
-      `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`
-    );
-    apiUrl.addQuery("access_token", accessToken);
-    apiUrl.addQuery("order", "+name");
-    apiUrl.addQuery("order", "+id");
-    apiUrl.addQuery("per_page", 10);
-    apiUrl.addQuery("show_id", `${summitId}`);
-    apiUrl.addQuery("context", `${context}`);
-
-    input = escapeFilterValue(input);
-    apiUrl.addQuery("name__contains", `${input}`);
-
-    fetch(apiUrl.toString())
-      .then(fetchResponseHandler)
-      .then((json) => {
-        const options = [...json.data];
-        callback(options);
-      })
-      .catch(fetchErrorHandler);
-  },
-  500
-);
-
-export const customErrorHandler = (err, res) => (dispatch, state) => {
+const customErrorHandler = (err, res) => (dispatch) => {
   const code = err.status;
   let msg = "";
 
   dispatch(stopLoading());
 
   switch (code) {
-    case 412:
+    case ERROR_CODE_412:
       if (Array.isArray(err.response.body)) {
         err.response.body.forEach((er) => {
-          msg += er + "<br>";
+          msg += `${er}<br>`;
         });
       } else {
-        for (var [key, value] of Object.entries(err.response.body)) {
-          if (isNaN(key)) {
-            msg += key + ": ";
-          }
-
-          msg += value + "<br>";
-        }
+        Object.keys(err.response.body).forEach((key) => {
+          msg += `${err.response.body[key]}<br>`;
+        });
       }
 
       Swal.fire("Validation error", msg, "warning");
@@ -138,3 +69,71 @@ export const customErrorHandler = (err, res) => (dispatch, state) => {
       dispatch(authErrorHandler(err, res));
   }
 };
+
+export const saveFilterCriteria = (filterCriteria) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  return postRequest(
+    null,
+    createAction(FILTER_CRITERIA_ADDED),
+    `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`,
+    filterCriteria,
+    customErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const deleteFilterCriteria = (filterCriteriaId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(FILTER_CRITERIA_DELETED)({ filterCriteriaId }),
+    `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias/${filterCriteriaId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const queryFilterCriterias = _.debounce(
+  async (summitId, context, input, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    const apiUrl = URI(
+      `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias`
+    );
+    apiUrl.addQuery("access_token", accessToken);
+    apiUrl.addQuery("order", "+name");
+    apiUrl.addQuery("order", "+id");
+    apiUrl.addQuery("per_page", DEFAULT_PER_PAGE);
+    apiUrl.addQuery("show_id", `${summitId}`);
+    apiUrl.addQuery("context", `${context}`);
+
+    input = escapeFilterValue(input);
+    apiUrl.addQuery("name__contains", `${input}`);
+
+    fetch(apiUrl.toString())
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);

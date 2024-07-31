@@ -9,30 +9,34 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import moment from "moment-timezone";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   CLEAR_LOG_PARAMS,
   REQUEST_LOG,
   RECEIVE_LOG
 } from "../../actions/audit-log-actions";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { formatAuditLog, parseSpeakerAuditLog } from "../../utils/methods";
 
 const DEFAULT_STATE = {
+  term: "",
   logEntries: [],
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
   order: "created",
   orderDir: 1,
-  totalLogEntries: 0
+  totalLogEntries: 0,
+  summitTZ: "",
+  filters: {}
 };
 
+// eslint-disable-next-line default-param-last
 const auditLogReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
@@ -42,13 +46,13 @@ const auditLogReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_LOG: {
-      let { order, orderDir } = payload;
-      return { ...state, order, orderDir };
+      const { term, order, orderDir, summitTZ } = payload;
+      return { ...state, term, order, orderDir, summitTZ };
     }
     case RECEIVE_LOG: {
-      let { current_page, total, last_page } = payload.response;
+      const { current_page, total, last_page } = payload.response;
 
-      let logEntries = payload.response.data.map((e) => {
+      const logEntries = payload.response.data.map((e) => {
         const logEntryAction = e.action.startsWith("Speaker")
           ? parseSpeakerAuditLog(e.action)
           : e.action;
@@ -66,7 +70,7 @@ const auditLogReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
-        logEntries: logEntries,
+        logEntries,
         totalLogEntries: total,
         currentPage: current_page,
         lastPage: last_page

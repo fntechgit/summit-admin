@@ -12,7 +12,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["react"],
+  "plugins": ["react", "unused-imports"],
   "rules": {
     "quotes": ["error", "double"],
     "react/jsx-filename-extension": ["warn", { "extensions": [".js", ".jsx"] }],
@@ -40,7 +40,17 @@
     "no-prototype-builtins": "warn",
     "no-use-before-define": "warn",
     "radix": "warn",
-    "no-unused-vars": "warn"
+    "no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
+    ]
   },
   "ignorePatterns": ["src/__mocks__"]
 }
