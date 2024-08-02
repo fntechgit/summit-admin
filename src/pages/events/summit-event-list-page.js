@@ -67,42 +67,22 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
   {
     columnKey: "speakers",
     value: "speakers",
+    customStyle: { minWidth: "350px" },
     editableField: (extraProps) => {
       const useSpeakers = extraProps.row.type?.use_speakers;
       return useSpeakers ? (
-        <>
-          <SpeakerInput
-            id="speakers"
-            value={extraProps.value}
-            isClearable
-            placeholder={T.translate("edit_event.search_speakers")}
-            getOptionLabel={(speaker) =>
-              `${speaker.first_name} ${speaker.last_name} (${speaker.email})`
-            }
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            {...extraProps}
-          />
-          <div className="speakers-list">
-            {extraProps.rowData?.length > 0 &&
-              extraProps.rowData.map((sp) => (
-                <div
-                  className="speaker-list-pill"
-                  title={sp?.email}
-                  key={sp?.id}
-                >
-                  {`${sp?.first_name} ${sp?.last_name}`}
-                  <button
-                    type="button"
-                    className="text-link-button"
-                    onClick={() => extraProps.onRemoveOption(sp.id, "speakers")}
-                    aria-label={`Remove Speaker ${sp?.first_name} ${sp?.last_name}`}
-                  >
-                    <i className="fa fa-remove" />
-                  </button>
-                </div>
-              ))}
-          </div>
-        </>
+        <SpeakerInput
+          id="speakers"
+          value={extraProps.rowData}
+          isClearable
+          isMulti
+          placeholder={T.translate("edit_event.search_speakers")}
+          getOptionLabel={(speaker) =>
+            `${speaker.first_name} ${speaker.last_name} (${speaker.email})`
+          }
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...extraProps}
+        />
       ) : (
         false
       );
@@ -145,11 +125,12 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
       <Dropdown
         id="selection_plan_id"
         options={selection_plans_ddl}
-        value={extraProps.value}
+        value={extraProps.value.name}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...extraProps}
       />
-    )
+    ),
+    render: (e, field) => (e?.name ? e.name : "N/A")
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
@@ -294,7 +275,6 @@ class SummitEventListPage extends React.Component {
       this.handleFilterCriteriaChange.bind(this);
     this.handleFilterCriteriaDelete =
       this.handleFilterCriteriaDelete.bind(this);
-    this.handleResetData = this.handleResetData.bind(this);
 
     this.state = {
       showImportModal: false,
@@ -330,6 +310,8 @@ class SummitEventListPage extends React.Component {
       filters,
       extraColumns,
       term,
+      page,
+      perPage,
       order,
       orderDir
     } = this.props;
@@ -348,15 +330,7 @@ class SummitEventListPage extends React.Component {
     }));
 
     if (currentSummit) {
-      getEvents(
-        term,
-        DEFAULT_CURRENT_PAGE,
-        DEFAULT_PER_PAGE,
-        order,
-        orderDir,
-        filters,
-        extraColumns
-      );
+      getEvents(term, page, perPage, order, orderDir, filters, extraColumns);
     }
   }
 
@@ -449,7 +423,7 @@ class SummitEventListPage extends React.Component {
   }
 
   handleSort(index, key, dir, func) {
-    const { currentPage, perPage, term, getEvents } = this.props;
+    const { term, getEvents } = this.props;
     const { eventFilters, selectedColumns } = this.state;
 
     switch (key) {
@@ -468,8 +442,8 @@ class SummitEventListPage extends React.Component {
 
     getEvents(
       term,
-      currentPage,
-      perPage,
+      DEFAULT_CURRENT_PAGE,
+      DEFAULT_PER_PAGE,
       key,
       dir,
       eventFilters,
@@ -478,12 +452,12 @@ class SummitEventListPage extends React.Component {
   }
 
   handleSearch(term) {
-    const { order, orderDir, currentPage, perPage, getEvents } = this.props;
+    const { order, orderDir, getEvents } = this.props;
     const { eventFilters, selectedColumns } = this.state;
     getEvents(
       term,
-      currentPage,
-      perPage,
+      DEFAULT_CURRENT_PAGE,
+      DEFAULT_PER_PAGE,
       order,
       orderDir,
       eventFilters,
@@ -520,13 +494,12 @@ class SummitEventListPage extends React.Component {
   }
 
   handleApplyEventFilters() {
-    const { order, orderDir, currentPage, perPage, term, getEvents } =
-      this.props;
+    const { order, orderDir, term, getEvents } = this.props;
     const { eventFilters, selectedColumns } = this.state;
     getEvents(
       term,
-      currentPage,
-      perPage,
+      DEFAULT_CURRENT_PAGE,
+      DEFAULT_PER_PAGE,
       order,
       orderDir,
       eventFilters,
@@ -771,21 +744,6 @@ class SummitEventListPage extends React.Component {
     );
   }
 
-  handleResetData() {
-    const { order, orderDir, currentPage, perPage, term, getEvents } =
-      this.props;
-    const { eventFilters, selectedColumns } = this.state;
-    getEvents(
-      term,
-      currentPage,
-      perPage,
-      order,
-      orderDir,
-      eventFilters,
-      selectedColumns
-    );
-  }
-
   translateSortKey = (key) => {
     switch (key) {
       case "last_name":
@@ -831,7 +789,7 @@ class SummitEventListPage extends React.Component {
     let columns = [
       { columnKey: "id", value: T.translate("general.id"), sortable: true },
       {
-        columnKey: "event_type",
+        columnKey: "type",
         value: T.translate("event_list.type"),
         sortable: true,
         // eslint-disable-next-line react/no-unstable-nested-components
@@ -840,12 +798,13 @@ class SummitEventListPage extends React.Component {
             id="type_id"
             placeholder={T.translate("event_list.placeholders.event_type")}
             options={event_type_ddl}
-            isClearable
             value={extraProps.value}
+            getOptionValue={(s) => s.id}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...extraProps}
           />
-        )
+        ),
+        render: (e, field) => e.name
       },
       {
         columnKey: "title",
@@ -1093,7 +1052,8 @@ class SummitEventListPage extends React.Component {
           columnKey: f2.columnKey,
           value: T.translate(`event_list.${f2.value}`),
           sortable: f2.sortable,
-          editable: !!editableColumns.includes(f2.editable)
+          editable: !!editableColumns.includes(f2.editable),
+          customStyle: f2.customStyle
         };
         // optional fields
         if (f2.hasOwnProperty("title")) c = { ...c, title: f2.title };
@@ -1790,7 +1750,6 @@ class SummitEventListPage extends React.Component {
                 handleSort={this.handleSort}
                 updateData={bulkUpdateEvents}
                 handleDeleteRow={this.handleDeleteEvent}
-                resetData={this.handleResetData}
                 formattingFunction={formatEventData}
               />
             </div>

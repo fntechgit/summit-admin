@@ -61,7 +61,7 @@ export const formatEventData = (e, summit) => {
 
   return {
     id: e.id,
-    event_type: e.type?.name,
+    type: e.type,
     summit_id: e.summit_id,
     title: e.title,
     status: e.status ?? "Not Submitted",
@@ -108,7 +108,7 @@ export const formatEventData = (e, summit) => {
             ""
           )
         : "N/A",
-    selection_plan: e.selection_plan?.name ? e.selection_plan?.name : "N/A",
+    selection_plan: e.selection_plan ? e.selection_plan : "N/A",
     location: e.location?.name ? e.location?.name : "N/A",
     streaming_url: e.streaming_url ? e.streaming_url : "N/A",
     meeting_url: e.meeting_url ? e.meeting_url : "N/A",

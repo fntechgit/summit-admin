@@ -35,7 +35,6 @@ function EditableTable(props) {
     handleSort,
     updateData,
     handleDeleteRow,
-    resetData,
     formattingFunction
   } = props;
   let tableClass = options.hasOwnProperty("className") ? options.className : "";
@@ -60,7 +59,6 @@ function EditableTable(props) {
     setEditButton(false);
     setEditEnabled(false);
     setSelected([]);
-    resetData();
   };
 
   // reseting states on data changes/pagination

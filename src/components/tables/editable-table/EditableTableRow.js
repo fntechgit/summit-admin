@@ -43,21 +43,8 @@ function EditableTableRow(props) {
 
   const onRowChange = (ev) => {
     const { value, id, type } = ev.target;
-    if (type === "speakerinput") {
-      const currentRow = selected.find((r) => r.id === row.id);
-      const hasSpeakers =
-        currentRow[id] &&
-        Array.isArray(currentRow[id]) &&
-        currentRow[id].length > 0;
-      const newSpeakers = {
-        ...editData,
-        [id]: hasSpeakers ? [...currentRow[id], value] : [value]
-      };
-      setEditData(newSpeakers);
-    } else {
-      const newEventData = { ...editData, [id]: value };
-      setEditData(newEventData);
-    }
+    const newEventData = { ...editData, [id]: value };
+    setEditData(newEventData);
   };
 
   const onRemoveOption = (rowId, id) => {
@@ -107,10 +94,11 @@ function EditableTableRow(props) {
                 <td
                   key={`row-edit-${col.columnKey}-${col.id}`}
                   className="bulk-edit-col"
+                  style={col.customStyle}
                 >
                   {col.editableField({
-                    value: "",
-                    placeholder: row[col.columnKey]?.name,
+                    value:
+                      editData[col.columnKey]?.id || editData[col.columnKey],
                     onChange: onRowChange,
                     row,
                     rowData: editData[col.columnKey],
