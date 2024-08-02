@@ -56,13 +56,13 @@ const auditLogReducer = (state = DEFAULT_STATE, action) => {
         const logEntryAction = e.action.startsWith("Speaker")
           ? parseSpeakerAuditLog(e.action)
           : e.action;
-        const userTimeZone = moment.tz.guess();
+
         return {
           ...e,
           event: e.event_id,
           user: `${e.user.first_name} ${e.user.last_name} (${e.user.id})`,
           created: moment(
-            epochToMomentTimeZone(e.created, userTimeZone)
+            epochToMomentTimeZone(e.created, state.summitTZ)
           ).format("MMMM Do YYYY, h:mm a"),
           action: formatAuditLog(logEntryAction)
         };
