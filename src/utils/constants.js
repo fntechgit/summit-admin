@@ -95,3 +95,5 @@ export const ERROR_CODE_500 = 500;
 export const HEX_RADIX = 16;
 
 export const DEBOUNCE_WAIT = 500;
+
+export const DECIMAL_DIGITS = 2;
