@@ -1524,6 +1524,7 @@
     "print_modal_body": "You are about to send all selected tickets to print",
     "show_printable": "Show Printable Tickets",
     "show_printable_info": "Must be an active ticket with the access level of IN_PERSON.",
+    "exclude_free_unassigned": "Exclude Unassigned Free Tickets?",
     "items_qty": "Selected {qty} Tickets",
     "select_view_2_print": "Select a View Type to Print",
     "select_fields": "Show Columns",
