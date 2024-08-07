@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -23,7 +23,11 @@ import {
   TagInput,
   CompanyInput
 } from "openstack-uicore-foundation/lib/components";
-import { getSummitById } from "../../actions/summit-actions";
+import { Modal, Pagination } from "react-bootstrap";
+import { Breadcrumb } from "react-breadcrumbs";
+import { SegmentedControl } from "segmented-control";
+import Select from "react-select";
+import Swal from "sweetalert2";
 import {
   getTickets,
   ingestExternalTickets,
@@ -36,15 +40,18 @@ import {
   printTickets,
   getTicket
 } from "../../actions/ticket-actions";
-import { Modal, Pagination } from "react-bootstrap";
-import { Breadcrumb } from "react-breadcrumbs";
-import { SegmentedControl } from "segmented-control";
-import Select from "react-select";
-import Swal from "sweetalert2";
+import { getSummitById } from "../../actions/summit-actions";
 import QrReaderInput from "../../components/inputs/qr-reader-input";
 import "../../styles/ticket-list-page.less";
 import OrAndFilter from "../../components/filters/or-and-filter";
-import { ALL_FILTER } from "../../utils/constants";
+import {
+  ALL_FILTER,
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_EXPORT_PAGE_SIZE,
+  DEFAULT_PER_PAGE,
+  LETTERS_IN_ALPHABET,
+  UPPERCASE_A_IN_ASCII
+} from "../../utils/constants";
 import { getBadgeTypes } from "../../actions/badge-actions";
 import SelectFilterCriteria from "../../components/filters/select-filter-criteria";
 import SaveFilterCriteria from "../../components/filters/save-filter-criteria";
@@ -53,6 +60,7 @@ import {
   saveFilterCriteria,
   deleteFilterCriteria
 } from "../../actions/filter-criteria-actions";
+import { handleDDLSortByLabel } from "../../utils/methods";
 
 const BatchSize = 25;
 
@@ -65,12 +73,11 @@ const fieldNames = [
       const hasRequested = item.refund_requests.some(
         (r) => r.status === "Requested"
       );
-      return (
-        `${val}` +
-        (hasRequested
-          ? '&nbsp;<span class="label label-danger">Refund Requested</span>'
-          : "")
-      );
+      return `${val}${
+        hasRequested
+          ? "&nbsp;<span class=\"label label-danger\">Refund Requested</span>"
+          : ""
+      }`;
     }
   },
   { columnKey: "promo_code", value: "promo_code", sortable: true, title: true },
@@ -103,6 +110,7 @@ const defaultFilters = {
   amountFilter: null,
   hasBadgeFilter: null,
   showOnlyPrintable: false,
+  excludeFreeUnassigned: false,
   promocodesFilter: [],
   promocodeTagsFilter: [],
   orAndFilter: ALL_FILTER
@@ -126,7 +134,6 @@ class TicketListPage extends React.Component {
     this.handleScanQR = this.handleScanQR.bind(this);
     this.handleColumnsChange = this.handleColumnsChange.bind(this);
     this.handleFiltersChange = this.handleFiltersChange.bind(this);
-    this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
     this.handleFilterCriteriaSave = this.handleFilterCriteriaSave.bind(this);
     this.handleFilterCriteriaChange =
       this.handleFilterCriteriaChange.bind(this);
@@ -154,22 +161,31 @@ class TicketListPage extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.currentSummit) {
+    const {
+      currentSummit,
+      term,
+      order,
+      orderDir,
+      filters,
+      extraColumns,
+      getTickets
+    } = this.props;
+
+    if (currentSummit) {
       const { ticketFilters } = this.state;
-      const { term, order, orderDir, filters, extraColumns } = this.props;
       const enabledFilters = Object.keys(filters).filter(
         (e) => filters[e]?.length > 0
       );
-      this.setState({
-        ...this.state,
+      this.setState((prevState) => ({
+        ...prevState,
         selectedColumns: extraColumns,
-        enabledFilters: enabledFilters,
+        enabledFilters,
         ticketFilters: { ...ticketFilters, ...filters }
-      });
-      this.props.getTickets(
+      }));
+      getTickets(
         term,
-        1,
-        10,
+        DEFAULT_CURRENT_PAGE,
+        DEFAULT_PER_PAGE,
         order,
         orderDir,
         filters,
@@ -179,29 +195,31 @@ class TicketListPage extends React.Component {
   }
 
   handleSelected(attendee_id, isSelected) {
+    const { selectTicket, unSelectTicket } = this.props;
     if (isSelected) {
-      this.props.selectTicket(attendee_id);
+      selectTicket(attendee_id);
       return;
     }
-    this.props.unSelectTicket(attendee_id);
+    unSelectTicket(attendee_id);
   }
 
   handleSelectedAll(ev) {
-    let selectedAll = ev.target.checked;
-    this.props.setSelectedAll(selectedAll);
+    const selectedAll = ev.target.checked;
+    const { setSelectedAll, clearAllSelectedTicket } = this.props;
+    setSelectedAll(selectedAll);
     if (!selectedAll) {
-      //clear all selected
-      this.props.clearAllSelectedTicket();
+      // clear all selected
+      clearAllSelectedTicket();
     }
   }
 
   handleSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
+    const { order, orderDir, getTickets } = this.props;
     const { selectedColumns, ticketFilters } = this.state;
-    this.props.getTickets(
+    getTickets(
       term,
-      page,
-      perPage,
+      DEFAULT_CURRENT_PAGE,
+      DEFAULT_PER_PAGE,
       order,
       orderDir,
       ticketFilters,
@@ -211,30 +229,22 @@ class TicketListPage extends React.Component {
 
   handleEdit(ticket_id) {
     const { currentSummit, history, tickets } = this.props;
-    let ticket = tickets.find((t) => t.id === ticket_id);
+    const ticket = tickets.find((t) => t.id === ticket_id);
     history.push(
       `/app/summits/${currentSummit.id}/purchase-orders/${ticket.order_id}/tickets/${ticket_id}`
     );
   }
 
   handleSort(index, key, dir, func) {
-    const { term, page, perPage } = this.props;
+    const { term, page, perPage, getTickets } = this.props;
     const { selectedColumns, ticketFilters } = this.state;
-    this.props.getTickets(
-      term,
-      page,
-      perPage,
-      key,
-      dir,
-      ticketFilters,
-      selectedColumns
-    );
+    getTickets(term, page, perPage, key, dir, ticketFilters, selectedColumns);
   }
 
   handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
+    const { term, order, orderDir, perPage, getTickets } = this.props;
     const { selectedColumns, ticketFilters } = this.state;
-    this.props.getTickets(
+    getTickets(
       term,
       page,
       perPage,
@@ -246,27 +256,30 @@ class TicketListPage extends React.Component {
   }
 
   handleIngestTickets() {
-    let email = this.ingestEmailRef.value;
+    const { ingestExternalTickets } = this.props;
+    const email = this.ingestEmailRef.value;
     this.setState({ showIngestModal: false });
-    this.props.ingestExternalTickets(email);
+    ingestExternalTickets(email);
   }
 
   handleImportTickets() {
+    const { importTicketsCSV } = this.props;
+    const { importFile } = this.state;
     this.setState({ showImportModal: false });
-    let formData = new FormData();
-    if (this.state.importFile) {
-      formData.append("file", this.state.importFile);
-      this.props.importTicketsCSV(formData);
+    const formData = new FormData();
+    if (importFile) {
+      formData.append("file", importFile);
+      importTicketsCSV(formData);
     }
   }
 
   handleExportTickets() {
-    const { term, order, orderDir } = this.props;
+    const { term, order, orderDir, exportTicketsCSV } = this.props;
     const { selectedColumns, ticketFilters } = this.state;
 
-    this.props.exportTicketsCSV(
+    exportTicketsCSV(
       term,
-      500,
+      DEFAULT_EXPORT_PAGE_SIZE,
       order,
       orderDir,
       ticketFilters,
@@ -275,34 +288,37 @@ class TicketListPage extends React.Component {
   }
 
   handleFilterChange(key, value) {
-    const { term, order, orderDir, perPage } = this.props;
+    const { term, order, orderDir, getTickets } = this.props;
     const { selectedColumns } = this.state;
     this.setState(
-      {
-        ...this.state,
-        ticketFilters: { ...this.state.ticketFilters, [key]: value }
-      },
+      (prevState) => ({
+        ...prevState,
+        ticketFilters: { ...prevState.ticketFilters, [key]: value }
+      }),
       () => {
-        this.props.getTickets(
+        const { ticketFilters } = this.state;
+        getTickets(
           term,
-          1,
-          perPage,
+          DEFAULT_CURRENT_PAGE,
+          DEFAULT_PER_PAGE,
           order,
           orderDir,
-          this.state.ticketFilters,
+          ticketFilters,
           selectedColumns
         );
       }
     );
   }
 
+  // eslint-disable-next-line consistent-return
   handleSendTickets2Print(ev) {
     ev.stopPropagation();
     ev.preventDefault();
 
     const { selectedIds, selectedAll } = this.props;
+    const { selectedViewType } = this.state;
 
-    if (this.state.selectedViewType == null) {
+    if (selectedViewType == null) {
       Swal.fire(
         "Validation error",
         T.translate("ticket_list.select_view_2_print"),
@@ -328,19 +344,20 @@ class TicketListPage extends React.Component {
       return false;
     }
 
-    this.setState({ ...this.state, showPrintModal: true });
+    this.setState((prevState) => ({ ...prevState, showPrintModal: true }));
   }
 
   handleDoPrinting(ev) {
     ev.stopPropagation();
     ev.preventDefault();
+    const { printTickets } = this.props;
     const { ticketFilters, doCheckIn, selectedViewType } = this.state;
-    this.props.printTickets(ticketFilters, doCheckIn, selectedViewType);
+    printTickets(ticketFilters, doCheckIn, selectedViewType);
   }
 
   handleScanQR(qrCode) {
-    const { currentSummit, history } = this.props;
-    this.props.getTicket(btoa(qrCode)).then((data) => {
+    const { currentSummit, history, getTicket } = this.props;
+    getTicket(btoa(qrCode)).then((data) => {
       history.push(
         `/app/summits/${currentSummit.id}/purchase-orders/${data.order_id}/tickets/${data.id}`
       );
@@ -349,13 +366,14 @@ class TicketListPage extends React.Component {
 
   handleColumnsChange(ev) {
     const { value } = ev.target;
-    this.setState({ ...this.state, selectedColumns: value });
+    this.setState((prevState) => ({ ...prevState, selectedColumns: value }));
   }
 
   handleFiltersChange(ev) {
     const { value } = ev.target;
-    const { term, perPage, order, orderDir } = this.props;
-    if (value.length < this.state.enabledFilters.length) {
+    const { enabledFilters, ticketFilters } = this.state;
+    const { term, order, orderDir, getTickets } = this.props;
+    if (value.length < enabledFilters.length) {
       if (value.length === 0) {
         const resetFilters = {
           showOnlyPendingRefundRequests: false,
@@ -368,70 +386,75 @@ class TicketListPage extends React.Component {
           amountFilter: null,
           hasBadgeFilter: null,
           showOnlyPrintable: false,
+          excludeFreeUnassigned: false,
           promocodesFilter: [],
           promocodeTagsFilter: [],
           badgeTypesFilter: [],
-          orAndFilter: this.state.ticketFilters.orAndFilter
+          orAndFilter: ticketFilters.orAndFilter
         };
         this.setState(
-          { ...this.state, enabledFilters: value, ticketFilters: resetFilters },
+          (prevState) => ({
+            ...prevState,
+            enabledFilters: value,
+            ticketFilters: resetFilters
+          }),
           () => {
-            this.props.getTickets(
+            const { ticketFilters, selectedColumns } = this.state;
+            getTickets(
               term,
-              1,
-              perPage,
+              DEFAULT_CURRENT_PAGE,
+              DEFAULT_PER_PAGE,
               order,
               orderDir,
-              this.state.ticketFilters,
-              this.state.selectedColumns
+              ticketFilters,
+              selectedColumns
             );
           }
         );
       } else {
-        const removedFilter = this.state.enabledFilters.filter(
+        const removedFilter = enabledFilters.filter(
           (e) => !value.includes(e)
         )[0];
-        const defaultValue =
-          removedFilter === "published_filter"
-            ? null
-            : Array.isArray(this.state.ticketFilters[removedFilter])
-            ? []
-            : "";
-        let newEventFilters = {
-          ...this.state.ticketFilters,
+        let defaultValue;
+        if (removedFilter === "published_filter") {
+          defaultValue = null;
+        } else if (Array.isArray(ticketFilters[removedFilter])) {
+          defaultValue = [];
+        } else {
+          defaultValue = "";
+        }
+        const newEventFilters = {
+          ...ticketFilters,
           [removedFilter]: defaultValue
         };
         this.setState(
-          {
-            ...this.state,
+          (prevState) => ({
+            ...prevState,
             enabledFilters: value,
             ticketFilters: newEventFilters
-          },
+          }),
           () => {
-            this.props.getTickets(
+            const { ticketFilters, selectedColumns } = this.state;
+            getTickets(
               term,
-              1,
-              perPage,
+              DEFAULT_CURRENT_PAGE,
+              DEFAULT_PER_PAGE,
               order,
               orderDir,
-              this.state.ticketFilters,
-              this.state.selectedColumns
+              ticketFilters,
+              selectedColumns
             );
           }
         );
       }
     } else {
-      this.setState({ ...this.state, enabledFilters: value });
+      this.setState((prevState) => ({ ...prevState, enabledFilters: value }));
     }
-  }
-
-  handleDDLSortByLabel(ddlArray) {
-    return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
   }
 
   handleFilterCriteriaSave(filterData) {
     const { enabledFilters, ticketFilters } = this.state;
-    const { currentSummit } = this.props;
+    const { currentSummit, saveFilterCriteria } = this.props;
     const filterToSave = {
       id: filterData.id,
       show_id: currentSummit.id,
@@ -446,58 +469,63 @@ class TicketListPage extends React.Component {
       context: CONTEXT_TICKETS,
       visibility: filterData.visibility
     };
-    this.props.saveFilterCriteria(filterToSave);
+    saveFilterCriteria(filterToSave);
   }
 
   handleFilterCriteriaChange(filterCriteria) {
-    const { term, order, orderDir } = this.props;
+    const { term, order, orderDir, getTickets } = this.props;
     let newEventFilters = {};
     if (filterCriteria) {
-      Object.entries(filterCriteria.criteria).map(([key, values]) => {
+      Object.entries(filterCriteria.criteria).forEach(([key, values]) => {
         newEventFilters = { ...newEventFilters, [key]: values };
       });
     }
 
     this.setState(
-      {
-        ...this.state,
+      (prevState) => ({
+        ...prevState,
         ticketFilters: { ...defaultFilters, ...newEventFilters },
         enabledFilters: filterCriteria ? filterCriteria.enabled_filters : [],
         selectedFilterCriteria: filterCriteria || null
-      },
-      () =>
-        this.props.getTickets(
+      }),
+      () => {
+        const { ticketFilters, selectedColumns } = this.state;
+        getTickets(
           term,
-          1,
-          10,
+          DEFAULT_CURRENT_PAGE,
+          DEFAULT_PER_PAGE,
           order,
           orderDir,
-          this.state.ticketFilters,
-          this.state.selectedColumns
-        )
+          ticketFilters,
+          selectedColumns
+        );
+      }
     );
   }
 
   handleFilterCriteriaDelete(filterCriteriaId) {
-    const { term, order, orderDir } = this.props;
-    this.props.deleteFilterCriteria(filterCriteriaId).then(() =>
+    const { term, order, orderDir, deleteFilterCriteria, getTickets } =
+      this.props;
+    deleteFilterCriteria(filterCriteriaId).then(() =>
       this.setState(
-        {
-          ...this.state,
+        (prevState) => ({
+          ...prevState,
           ticketFilters: { ...defaultFilters },
           enabledFilters: [],
           selectedFilterCriteria: null
-        },
-        () =>
-          this.props.getTickets(
+        }),
+        () => {
+          const { ticketFilters, selectedColumns } = this.state;
+          getTickets(
             term,
-            1,
-            10,
+            DEFAULT_CURRENT_PAGE,
+            DEFAULT_PER_PAGE,
             order,
             orderDir,
-            this.state.ticketFilters,
-            this.state.selectedColumns
-          )
+            ticketFilters,
+            selectedColumns
+          );
+        }
       )
     );
   }
@@ -526,6 +554,7 @@ class TicketListPage extends React.Component {
       selectedViewType,
       enabledFilters,
       ticketFilters,
+      selectedColumns,
       selectedFilterCriteria
     } = this.state;
 
@@ -558,16 +587,18 @@ class TicketListPage extends React.Component {
           onSelectedAll: this.handleSelectedAll
         }
       },
-      selectedAll: selectedAll
+      selectedAll
     };
 
     if (!currentSummit.id) return <div />;
 
-    let ticketTypesOptions = [
+    const ticketTypesOptions = [
       ...currentSummit.ticket_types.map((t) => ({ label: t.name, value: t.id }))
     ];
 
-    const alpha = Array.from(Array(26)).map((e, i) => i + 65);
+    const alpha = Array.from(Array(LETTERS_IN_ALPHABET)).map(
+      (e, i) => i + UPPERCASE_A_IN_ASCII
+    );
     const alphabet = alpha.map((x) => ({
       label: String.fromCharCode(x),
       value: String.fromCharCode(x)
@@ -589,7 +620,7 @@ class TicketListPage extends React.Component {
       }))
     ];
 
-    let badgeTypesOptions = [
+    const badgeTypesOptions = [
       ...(currentSummit.badge_types?.map((t) => ({
         label: t.name,
         value: t.id
@@ -638,11 +669,15 @@ class TicketListPage extends React.Component {
       { label: "Promo Code Tags", value: "promocodeTagsFilter" },
       { label: "Refund Requested", value: "show_refund_request_pending" },
       { label: "Printable", value: "show_printable" },
+      {
+        label: "Exclude Free Unassigned Tickets",
+        value: "exclude_free_unassigned"
+      },
       { label: "Badge Type", value: "badgeTypesFilter" }
     ];
 
-    let showColumns = fieldNames
-      .filter((f) => this.state.selectedColumns.includes(f.columnKey))
+    const showColumns = fieldNames
+      .filter((f) => selectedColumns.includes(f.columnKey))
       .map((f2) => ({
         columnKey: f2.columnKey,
         value: T.translate(`ticket_list.${f2.value}`),
@@ -665,7 +700,7 @@ class TicketListPage extends React.Component {
             {" "}
             {T.translate("ticket_list.ticket_list")} ({totalTickets})
           </h3>
-          <div className={"row"}>
+          <div className="row">
             <div className="col-md-6 search-section">
               <FreeTextSearch
                 value={term}
@@ -686,10 +721,10 @@ class TicketListPage extends React.Component {
                     )}
                     value={selectedViewType}
                     onChange={(ev) =>
-                      this.setState({
-                        ...this.state,
+                      this.setState((prevState) => ({
+                        ...prevState,
                         selectedViewType: ev.target.value
-                      })
+                      }))
                     }
                     options={badge_view_type_ddl}
                   />
@@ -698,13 +733,14 @@ class TicketListPage extends React.Component {
                   <button
                     className="btn btn-primary right-space"
                     onClick={this.handleSendTickets2Print}
+                    type="button"
                   >
                     {T.translate("ticket_list.print")}
                   </button>
                 </div>
               </div>
               <br />
-              <div className="row"></div>
+              <div className="row" />
             </div>
           </div>
           <div className="row">
@@ -712,18 +748,21 @@ class TicketListPage extends React.Component {
               <button
                 className="btn btn-primary"
                 onClick={() => this.setState({ showIngestModal: true })}
+                type="button"
               >
                 {T.translate("ticket_list.ingest")}
               </button>
               <button
                 className="btn btn-default"
                 onClick={() => this.setState({ showImportModal: true })}
+                type="button"
               >
                 {T.translate("ticket_list.import")}
               </button>
               <button
                 className="btn btn-default"
                 onClick={this.handleExportTickets}
+                type="button"
               >
                 {T.translate("ticket_list.export")}
               </button>
@@ -734,7 +773,7 @@ class TicketListPage extends React.Component {
             <div className="col-md-6">
               <OrAndFilter
                 value={ticketFilters.orAndFilter}
-                entity={"tickets"}
+                entity="tickets"
                 onChange={(filter) =>
                   this.handleFilterChange("orAndFilter", filter)
                 }
@@ -754,12 +793,12 @@ class TicketListPage extends React.Component {
             <div className="col-md-6">
               <Dropdown
                 id="enabled_filters"
-                placeholder={"Enabled Filters"}
+                placeholder="Enabled Filters"
                 value={enabledFilters}
                 onChange={this.handleFiltersChange}
-                options={this.handleDDLSortByLabel(filters_ddl)}
-                isClearable={true}
-                isMulti={true}
+                options={handleDDLSortByLabel(filters_ddl)}
+                isClearable
+                isMulti
               />
             </div>
           </div>
@@ -881,7 +920,7 @@ class TicketListPage extends React.Component {
               </div>
             )}
             {enabledFilters.includes("ownerFullNameStartWithFilter") && (
-              <div className={"col-md-6"}>
+              <div className="col-md-6">
                 <Select
                   placeholder={T.translate(
                     "ticket_list.placeholders.owner_first_name"
@@ -892,14 +931,14 @@ class TicketListPage extends React.Component {
                     this.handleFilterChange("ownerFullNameStartWithFilter", val)
                   }
                   options={alphabet}
-                  isClearable={true}
+                  isClearable
                   isMulti
                   className="dropdownFilter"
                 />
               </div>
             )}
             {enabledFilters.includes("ownerCompany") && (
-              <div className={"col-md-6"}>
+              <div className="col-md-6">
                 <CompanyInput
                   id="ownerCompany"
                   className="dropdownFilter"
@@ -916,7 +955,7 @@ class TicketListPage extends React.Component {
               </div>
             )}
             {enabledFilters.includes("viewTypesFilter") && (
-              <div className={"col-md-6"}>
+              <div className="col-md-6">
                 <Select
                   placeholder={T.translate(
                     "ticket_list.placeholders.view_types"
@@ -927,7 +966,7 @@ class TicketListPage extends React.Component {
                     this.handleFilterChange("viewTypesFilter", val)
                   }
                   options={viewTypesOptions}
-                  isClearable={true}
+                  isClearable
                   isMulti
                   className="dropdownFilter"
                 />
@@ -945,7 +984,7 @@ class TicketListPage extends React.Component {
                     this.handleFilterChange("ticketTypesFilter", val)
                   }
                   options={ticketTypesOptions}
-                  isClearable={true}
+                  isClearable
                   isMulti
                   className="dropdownFilter"
                 />
@@ -990,7 +1029,7 @@ class TicketListPage extends React.Component {
               </div>
             )}
             {enabledFilters.includes("show_refund_request_pending") && (
-              <div className={"col-md-6"}>
+              <div className="col-md-6">
                 <div className="form-check abc-checkbox">
                   <input
                     type="checkbox"
@@ -1014,7 +1053,7 @@ class TicketListPage extends React.Component {
               </div>
             )}
             {enabledFilters.includes("show_printable") && (
-              <div className={"col-md-6"}>
+              <div className="col-md-6">
                 <div className="form-check abc-checkbox">
                   <input
                     type="checkbox"
@@ -1039,6 +1078,30 @@ class TicketListPage extends React.Component {
                 </div>
               </div>
             )}
+            {enabledFilters.includes("exclude_free_unassigned") && (
+              <div className="col-md-6">
+                <div className="form-check abc-checkbox">
+                  <input
+                    type="checkbox"
+                    id="exclude_free_unassigned"
+                    checked={ticketFilters.excludeFreeUnassigned}
+                    onChange={(ev) =>
+                      this.handleFilterChange(
+                        "excludeFreeUnassigned",
+                        ev.target.checked
+                      )
+                    }
+                    className="form-check-input"
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="exclude_free_unassigned"
+                  >
+                    {T.translate("ticket_list.exclude_free_unassigned")} &nbsp;
+                  </label>
+                </div>
+              </div>
+            )}
             {enabledFilters.includes("badgeTypesFilter") && (
               <div className="col-md-6">
                 <Select
@@ -1051,7 +1114,7 @@ class TicketListPage extends React.Component {
                     this.handleFilterChange("badgeTypesFilter", val)
                   }
                   options={badgeTypesOptions}
-                  isClearable={true}
+                  isClearable
                   isMulti
                   className="dropdownFilter"
                 />
@@ -1060,19 +1123,21 @@ class TicketListPage extends React.Component {
           </div>
           <hr />
 
-          <div className={"row"} style={{ marginBottom: 15 }}>
-            <div className={"col-md-12"}>
-              <label>{T.translate("ticket_list.select_fields")}</label>
+          <div className="row" style={{ marginBottom: 15 }}>
+            <div className="col-md-12">
+              <label htmlFor="select_fields">
+                {T.translate("ticket_list.select_fields")}
+              </label>
               <Dropdown
                 id="select_fields"
                 placeholder={T.translate(
                   "ticket_list.placeholders.select_fields"
                 )}
-                value={this.state.selectedColumns}
+                value={selectedColumns}
                 onChange={this.handleColumnsChange}
-                options={this.handleDDLSortByLabel(ddl_columns)}
-                isClearable={true}
-                isMulti={true}
+                options={handleDDLSortByLabel(ddl_columns)}
+                isClearable
+                isMulti
               />
             </div>
           </div>
@@ -1120,7 +1185,10 @@ class TicketListPage extends React.Component {
           className="modal_ingest"
           show={showIngestModal}
           onHide={() =>
-            this.setState({ ...this.state, showIngestModal: false })
+            this.setState((prevState) => ({
+              ...prevState,
+              showIngestModal: false
+            }))
           }
         >
           <Modal.Header closeButton>
@@ -1141,12 +1209,16 @@ class TicketListPage extends React.Component {
               <br />
               <br />
               <div className="col-md-12 ticket-ingest-email-wrapper">
-                <label>{T.translate("ticket_list.send_email")}</label>
+                <label htmlFor="ingest_email">
+                  {T.translate("ticket_list.send_email")}
+                </label>
                 <br />
                 <input
                   id="ingest_email"
                   className="form-control"
-                  ref={(node) => (this.ingestEmailRef = node)}
+                  ref={(node) => {
+                    this.ingestEmailRef = node;
+                  }}
                 />
               </div>
             </div>
@@ -1155,6 +1227,7 @@ class TicketListPage extends React.Component {
             <button
               className="btn btn-primary"
               onClick={this.handleIngestTickets}
+              type="button"
             >
               {T.translate("ticket_list.ingest")}
             </button>
@@ -1164,7 +1237,10 @@ class TicketListPage extends React.Component {
         <Modal
           show={showImportModal}
           onHide={() =>
-            this.setState({ ...this.state, showImportModal: false })
+            this.setState((prevState) => ({
+              ...prevState,
+              showImportModal: false
+            }))
           }
         >
           <Modal.Header closeButton>
@@ -1276,9 +1352,10 @@ class TicketListPage extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <button
-              disabled={!this.state.importFile}
+              disabled={!importFile}
               className="btn btn-primary"
               onClick={this.handleImportTickets}
+              type="button"
             >
               {T.translate("ticket_list.ingest")}
             </button>
@@ -1287,7 +1364,12 @@ class TicketListPage extends React.Component {
 
         <Modal
           show={showPrintModal}
-          onHide={() => this.setState({ ...this.state, showPrintModal: false })}
+          onHide={() =>
+            this.setState((prevState) => ({
+              ...prevState,
+              showPrintModal: false
+            }))
+          }
         >
           <Modal.Header closeButton>
             <Modal.Title>
@@ -1308,10 +1390,10 @@ class TicketListPage extends React.Component {
                   id="check_in"
                   checked={doCheckIn}
                   onChange={(ev) => {
-                    this.setState({
-                      ...this.state,
+                    this.setState((prevState) => ({
+                      ...prevState,
                       doCheckIn: ev.target.checked
-                    });
+                    }));
                   }}
                   className="form-check-input"
                 />
@@ -1322,7 +1404,11 @@ class TicketListPage extends React.Component {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <button className="btn btn-primary" onClick={this.handleDoPrinting}>
+            <button
+              className="btn btn-primary"
+              onClick={this.handleDoPrinting}
+              type="button"
+            >
               {T.translate("ticket_list.print")}
             </button>
           </Modal.Footer>
