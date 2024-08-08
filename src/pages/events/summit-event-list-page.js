@@ -130,7 +130,7 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
         {...extraProps}
       />
     ),
-    render: (e, field) => (e?.label ? e.label : "N/A")
+    render: (e, field) => (e?.name ? e.name : "N/A")
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },

@@ -537,7 +537,6 @@ export const getEvents =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const summitTZ = currentSummit.time_zone.name;
-    const selectionPlans = currentSummit.selection_plans;
 
     dispatch(startLoading());
 
@@ -549,7 +548,7 @@ export const getEvents =
       relations:
         "speakers.none,selection_plan.none,track.none,type.none,created_by.none,location.none,media_uploads.media_upload_type.none",
       fields:
-        "location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,media_uploads.id,media_uploads.created,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id",
+        "location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,selection_plan.id,media_uploads.id,media_uploads.created,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id",
       page,
       per_page: perPage,
       access_token: accessToken
@@ -573,7 +572,7 @@ export const getEvents =
       createAction(RECEIVE_EVENTS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
       authErrorHandler,
-      { order, orderDir, term, summitTZ, filters, extraColumns, selectionPlans }
+      { order, orderDir, term, summitTZ, filters, extraColumns }
     )(params)(dispatch).then((data) => {
       dispatch(stopLoading());
       return data.response;

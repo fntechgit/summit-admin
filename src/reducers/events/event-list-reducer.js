@@ -50,20 +50,8 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EVENTS: {
-      const {
-        order,
-        orderDir,
-        term,
-        summitTZ,
-        filters,
-        extraColumns,
-        selectionPlans
-      } = payload;
-
-      const selection_plans = selectionPlans.map((sp) => ({
-        label: sp.name,
-        value: sp.id
-      }));
+      const { order, orderDir, term, summitTZ, filters, extraColumns } =
+        payload;
 
       return {
         ...state,
@@ -72,25 +60,15 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
         term,
         summitTZ,
         filters,
-        extraColumns,
-        selectionPlans: selection_plans
+        extraColumns
       };
     }
     case RECEIVE_EVENTS: {
       const { data, current_page, total, last_page } = payload.response;
 
-      const events = data.map((e) => ({
-        ...e,
-        selection_plan: e.selection_plan
-          ? state.selectionPlans.find(
-              (sp) => sp.label === e.selection_plan.name
-            )
-          : null
-      }));
-
       return {
         ...state,
-        events,
+        events: data,
         currentPage: current_page,
         totalEvents: total,
         lastPage: last_page
