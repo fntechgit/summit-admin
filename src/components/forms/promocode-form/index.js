@@ -118,7 +118,7 @@ class PromocodeForm extends React.Component {
     const { value } = ev.target;
 
     newEntity = { ...DEFAULT_ENTITY };
-    entity.class_name = value;
+    newEntity.class_name = value;
 
     this.setState({ entity: newEntity });
   }

@@ -9,8 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React from "react";
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+
+import _ from "lodash";
+
 import history from "../../history";
 import {
   RECEIVE_PURCHASE_ORDER,
@@ -21,11 +26,9 @@ import {
   RECEIVE_PURCHASE_ORDER_REFUNDS
 } from "../../actions/order-actions";
 
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
-import _ from "lodash";
+import { DECIMAL_DIGITS } from "../../utils/constants";
 
 export const DEFAULT_ENTITY = {
   id: 0,
@@ -60,23 +63,23 @@ const DEFAULT_STATE = {
   errors: {}
 };
 
-const assembleTicketsState = (tickets, currencySymbol) => {
-  return tickets.map((t) => {
+const assembleTicketsState = (tickets, currencySymbol, summitId) =>
+  tickets.map((t) => {
     let owner_full_name = "N/A";
     let owner_email = "N/A";
     let owner_link = "N/A";
     let email_link = "N/A";
-    let ticket_type_name = t.ticket_type ? t.ticket_type.name : "N/A";
+    const ticket_type_name = t.ticket_type ? t.ticket_type.name : "N/A";
 
     const final_amount_formatted = `${currencySymbol}${t.final_amount.toFixed(
-      2
+      DECIMAL_DIGITS
     )}`;
     const refunded_amount_formatted = `${currencySymbol}${t.refunded_amount.toFixed(
-      2
+      DECIMAL_DIGITS
     )}`;
     const final_amount_adjusted_formatted = `${currencySymbol}${(
       t.final_amount - t.refunded_amount
-    ).toFixed(2)}`;
+    ).toFixed(DECIMAL_DIGITS)}`;
 
     if (t.owner) {
       owner_email = t.owner.email;
@@ -88,29 +91,28 @@ const assembleTicketsState = (tickets, currencySymbol) => {
       }
 
       owner_link = (
-        <a
-          href=""
+        <button
+          type="button"
+          className="text-table-link"
           onClick={(ev) => {
             ev.stopPropagation();
-            history.push(
-              `/app/summits/${entity.summit_id}/attendees/${t.owner.id}`
-            );
+            history.push(`/app/summits/${summitId}/attendees/${t.owner.id}`);
           }}
         >
           {owner_full_name}
-        </a>
+        </button>
       );
       email_link = (
-        <a
-          href=""
+        <button
+          type="button"
+          className="text-table-link"
           onClick={(ev) => {
             ev.stopPropagation();
             window.open(`mailto:${owner_email}`, "_blank");
           }}
-          target="_blank"
         >
           {owner_email}
-        </a>
+        </button>
       );
     }
 
@@ -126,72 +128,103 @@ const assembleTicketsState = (tickets, currencySymbol) => {
       final_amount_adjusted_formatted
     };
   });
-};
 
+// eslint-disable-next-line default-param-last
 const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
       }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case SET_CURRENT_SUMMIT:
     case RESET_PURCHASE_ORDER_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case RECEIVE_PURCHASE_ORDER:
-      {
-        let entity = { ...payload.response };
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    case RECEIVE_PURCHASE_ORDER: {
+      const entity = { ...payload.response };
 
-        const final_amount_formatted = `${
-          entity.currency_symbol
-        }${entity.amount.toFixed(2)}`;
-        const refunded_amount_formatted = `${
-          entity.currency_symbol
-        }${entity.total_refunded_amount.toFixed(2)}`;
-        const final_amount_adjusted_formatted = `${entity.currency_symbol}${(
-          entity.amount - entity.total_refunded_amount
-        ).toFixed(2)}`;
+      const final_amount_formatted = `${
+        entity.currency_symbol
+      }${entity.amount.toFixed(DECIMAL_DIGITS)}`;
+      const refunded_amount_formatted = `${
+        entity.currency_symbol
+      }${entity.total_refunded_amount.toFixed(DECIMAL_DIGITS)}`;
+      const final_amount_adjusted_formatted = `${entity.currency_symbol}${(
+        entity.amount - entity.total_refunded_amount
+      ).toFixed(DECIMAL_DIGITS)}`;
 
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
-        }
+      Object.entries(entity).forEach(([key, value]) => {
+        entity[key] = value == null ? "" : value;
+      });
 
-        entity.owner = {
-          email: entity.owner_email,
-          first_name: entity.owner_first_name,
-          last_name: entity.owner_last_name
-        };
+      entity.owner = {
+        email: entity.owner_email,
+        first_name: entity.owner_first_name,
+        last_name: entity.owner_last_name
+      };
 
-        entity.tickets = assembleTicketsState(
-          entity.tickets,
-          entity.currency_symbol
-        );
+      entity.tickets = assembleTicketsState(
+        entity.tickets,
+        entity.currency_symbol,
+        entity.summit_id
+      );
 
-        return {
-          ...state,
-          entity: {
-            ...entity,
-            final_amount_formatted,
-            refunded_amount_formatted,
-            final_amount_adjusted_formatted
-          },
-          errors: {}
-        };
-      }
-      break;
+      return {
+        ...state,
+        entity: {
+          ...entity,
+          final_amount_formatted,
+          refunded_amount_formatted,
+          final_amount_adjusted_formatted
+        },
+        errors: {}
+      };
+    }
     case UPDATE_PURCHASE_ORDER: {
       return { ...state, entity: { ...payload }, errors: {} };
+    }
+    case PURCHASE_ORDER_UPDATED: {
+      const updatedPurchaseOrder = payload.response;
+
+      updatedPurchaseOrder.tickets = assembleTicketsState(
+        updatedPurchaseOrder.tickets,
+        updatedPurchaseOrder.currency_symbol,
+        updatedPurchaseOrder.summit_id
+      );
+
+      const newRawCost = updatedPurchaseOrder.tickets?.reduce(
+        (sum, ticket) => sum + ticket.raw_cost,
+        0
+      );
+
+      const amount = newRawCost;
+      const raw_amount = newRawCost;
+      const final_amount_formatted = `${
+        updatedPurchaseOrder.currency_symbol
+      }${newRawCost.toFixed(DECIMAL_DIGITS)}`;
+      const final_amount_adjusted_formatted = `${
+        updatedPurchaseOrder.currency_symbol
+      }${(newRawCost - state.entity.total_refunded_amount).toFixed(
+        DECIMAL_DIGITS
+      )}`;
+      const adjusted_total_order_purchase_price =
+        newRawCost - state.entity.total_refunded_amount;
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          amount,
+          raw_amount,
+          final_amount_formatted,
+          final_amount_adjusted_formatted,
+          adjusted_total_order_purchase_price,
+          ...updatedPurchaseOrder
+        },
+        errors: {}
+      };
     }
     case RECEIVE_PURCHASE_ORDER_REFUNDS: {
       const approved_refunds = payload.response.data;
@@ -203,36 +236,38 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
         purchaseOrder.raw_amount - purchaseOrder.discount_amount;
       let adjusted_total_order_purchase_price = 0;
       // use deep copy to avoid mutations on elements of the array
-      let adjusted_applied_taxes = _.cloneDeep(purchaseOrder.applied_taxes);
+      const adjusted_applied_taxes = _.cloneDeep(purchaseOrder.applied_taxes);
       approved_refunds.forEach((refund) => {
         refund.ticket_id = refund.ticket.id;
         refund.refunded_amount_formatted = `${currencySymbol}${refund.refunded_amount.toFixed(
-          2
+          DECIMAL_DIGITS
         )}`;
         refund.total_refunded_amount_formatted = `${currencySymbol}${refund.total_refunded_amount.toFixed(
-          2
+          DECIMAL_DIGITS
         )}`;
         adjusted_total_order_purchase_price += refund.total_refunded_amount;
         adjusted_net_price -= refund.refunded_amount;
         refund.adjusted_net_price_formatted = `${currencySymbol}${adjusted_net_price.toFixed(
-          2
+          DECIMAL_DIGITS
         )}`;
         adjusted_order_price -= refund.total_refunded_amount;
         refund.adjusted_order_price_formatted = `${currencySymbol}${adjusted_order_price.toFixed(
-          2
+          DECIMAL_DIGITS
         )}`;
         refund.refunded_taxes.forEach((rt) => {
           // field for the tax column of that refund
           refund[
             `tax_${rt.tax.id}_refunded_amount`
-          ] = `${currencySymbol}${rt.refunded_amount.toFixed(2)}`;
+          ] = `${currencySymbol}${rt.refunded_amount.toFixed(DECIMAL_DIGITS)}`;
           adjusted_applied_taxes.forEach((t) => {
             if (t.id === rt.tax.id) {
               t.amount -= rt.refunded_amount;
               // prevent -0 values
               refund[
                 `tax_${rt.tax.id}_adjusted_refunded_amount`
-              ] = `${currencySymbol}${Math.abs(t.amount).toFixed(2)}`;
+              ] = `${currencySymbol}${Math.abs(t.amount).toFixed(
+                DECIMAL_DIGITS
+              )}`;
             }
           });
           // add tax type to array
@@ -242,9 +277,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
       adjusted_total_order_purchase_price =
         purchaseOrder.amount - adjusted_total_order_purchase_price;
       const unique_approved_refunds_taxes = approved_refunds_taxes.filter(
-        (tax, idx, arr) => {
-          return idx === arr.findIndex((obj) => obj.id === tax.id);
-        }
+        (tax, idx, arr) => idx === arr.findIndex((obj) => obj.id === tax.id)
       );
       return {
         ...state,
@@ -259,12 +292,10 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
     case VALIDATE: {
       return { ...state, errors: payload.errors };
     }
-    case PURCHASE_ORDER_CANCEL_REFUND:
-      {
-        const { entity } = state;
-        return { ...state, entity: { ...entity, status: "Paid" } };
-      }
-      break;
+    case PURCHASE_ORDER_CANCEL_REFUND: {
+      const { entity } = state;
+      return { ...state, entity: { ...entity, status: "Paid" } };
+    }
     default:
       return state;
   }
