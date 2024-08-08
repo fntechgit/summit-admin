@@ -98,7 +98,9 @@ function EditableTableRow(props) {
                 >
                   {col.editableField({
                     value:
-                      editData[col.columnKey]?.id || editData[col.columnKey],
+                      editData[col.columnKey]?.id ||
+                      editData[col.columnKey]?.value ||
+                      editData[col.columnKey],
                     onChange: onRowChange,
                     row,
                     rowData: editData[col.columnKey],

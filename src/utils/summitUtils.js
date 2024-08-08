@@ -154,3 +154,10 @@ export const formatEventData = (e, summit) => {
     review_status: e.review_status ?? "N/A"
   };
 };
+
+export const getIdValue = (prop) => {
+  if (prop && typeof prop === "number") {
+    return prop;
+  }
+  return prop?.id;
+};

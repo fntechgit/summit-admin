@@ -37,7 +37,8 @@ const DEFAULT_STATE = {
   totalEvents: 0,
   summitTZ: "",
   filters: {},
-  extraColumns: []
+  extraColumns: [],
+  selectionPlans: []
 };
 
 // eslint-disable-next-line default-param-last
@@ -49,8 +50,20 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EVENTS: {
-      const { order, orderDir, term, summitTZ, filters, extraColumns } =
-        payload;
+      const {
+        order,
+        orderDir,
+        term,
+        summitTZ,
+        filters,
+        extraColumns,
+        selectionPlans
+      } = payload;
+
+      const selection_plans = selectionPlans.map((sp) => ({
+        label: sp.name,
+        value: sp.id
+      }));
 
       return {
         ...state,
@@ -59,14 +72,25 @@ const eventListReducer = (state = DEFAULT_STATE, action) => {
         term,
         summitTZ,
         filters,
-        extraColumns
+        extraColumns,
+        selectionPlans: selection_plans
       };
     }
     case RECEIVE_EVENTS: {
-      const { current_page, total, last_page } = payload.response;
+      const { data, current_page, total, last_page } = payload.response;
+
+      const events = data.map((e) => ({
+        ...e,
+        selection_plan: e.selection_plan
+          ? state.selectionPlans.find(
+              (sp) => sp.label === e.selection_plan.name
+            )
+          : null
+      }));
+
       return {
         ...state,
-        events: payload.response.data,
+        events,
         currentPage: current_page,
         totalEvents: total,
         lastPage: last_page

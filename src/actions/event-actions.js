@@ -50,6 +50,7 @@ import {
   HOUR_AND_HALF,
   SECONDS_TO_MINUTES
 } from "../utils/constants";
+import { getIdValue } from "../utils/summitUtils";
 
 export const REQUEST_EVENTS = "REQUEST_EVENTS";
 export const RECEIVE_EVENTS = "RECEIVE_EVENTS";
@@ -494,13 +495,13 @@ export const normalizeBulkEvents = (entity) => {
     const normalizedEvent = {
       id: e.id,
       title: e.title,
-      selection_plan_id: e.selection_plan_id,
+      selection_plan_id: getIdValue(e.selection_plan) || e.selection_plan_id,
       location_id: e.location?.id || e.location_id,
       start_date: e.start_date,
       speakers: e.speakers,
       end_date: e.end_date,
-      type_id: e.type_id,
-      track_id: e.track_id,
+      type_id: getIdValue(e.type) || e.type_id,
+      track_id: getIdValue(e.track) || e.track_id,
       duration: e.duration,
       streaming_url: e.streaming_url,
       streaming_type: e.streaming_type,
@@ -536,6 +537,7 @@ export const getEvents =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const summitTZ = currentSummit.time_zone.name;
+    const selectionPlans = currentSummit.selection_plans;
 
     dispatch(startLoading());
 
@@ -571,7 +573,7 @@ export const getEvents =
       createAction(RECEIVE_EVENTS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
       authErrorHandler,
-      { order, orderDir, term, summitTZ, filters, extraColumns }
+      { order, orderDir, term, summitTZ, filters, extraColumns, selectionPlans }
     )(params)(dispatch).then((data) => {
       dispatch(stopLoading());
       return data.response;
@@ -610,6 +612,20 @@ export const bulkUpdateEvents =
             T.translate("bulk_actions_page.messages.update_success"),
             () => history.push(`/app/summits/${currentSummit.id}/events/`)
           )
+        );
+        const {
+          currentEventListState: {
+            term,
+            page,
+            perPage,
+            order,
+            orderDir,
+            filters,
+            extraColumns
+          }
+        } = getState();
+        dispatch(
+          getEvents(term, page, perPage, order, orderDir, filters, extraColumns)
         );
       })
       .catch(() => {

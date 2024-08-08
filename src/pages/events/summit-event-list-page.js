@@ -39,7 +39,7 @@ import {
   changeEventListSearchTerm,
   bulkUpdateEvents
 } from "../../actions/event-actions";
-import { hasErrors, uuidv4 } from "../../utils/methods";
+import { handleDDLSortByLabel, hasErrors, uuidv4 } from "../../utils/methods";
 import "../../styles/summit-event-list-page.less";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import MediaTypeFilter from "../../components/filters/media-type-filter";
@@ -99,7 +99,7 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
     sortable: true,
     editableField: (extraProps) => (
       <Dropdown
-        id="track_id"
+        id="track"
         value={extraProps.value}
         options={track_ddl}
         // eslint-disable-next-line react/jsx-props-no-spreading
@@ -123,14 +123,14 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
     sortable: true,
     editableField: (extraProps) => (
       <Dropdown
-        id="selection_plan_id"
+        id="selection_plan"
         options={selection_plans_ddl}
-        value={extraProps.value.name}
+        value={extraProps.value || ""}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...extraProps}
       />
     ),
-    render: (e, field) => (e?.name ? e.name : "N/A")
+    render: (e, field) => (e?.label ? e.label : "N/A")
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
@@ -267,7 +267,6 @@ class SummitEventListPage extends React.Component {
     this.handleApplyEventFilters = this.handleApplyEventFilters.bind(this);
     this.handleFiltersChange = this.handleFiltersChange.bind(this);
     this.handleColumnsChange = this.handleColumnsChange.bind(this);
-    this.handleDDLSortByLabel = this.handleDDLSortByLabel.bind(this);
     this.handleTermChange = this.handleTermChange.bind(this);
     this.handleOrAndFilter = this.handleOrAndFilter.bind(this);
     this.handleFilterCriteriaSave = this.handleFilterCriteriaSave.bind(this);
@@ -678,10 +677,6 @@ class SummitEventListPage extends React.Component {
     }));
   }
 
-  handleDDLSortByLabel(ddlArray) {
-    return ddlArray.sort((a, b) => a.label.localeCompare(b.label));
-  }
-
   handleFilterCriteriaChange(filterCriteria) {
     const { extraColumns, term, order, orderDir, getEvents } = this.props;
     const { eventFilters } = this.state;
@@ -795,7 +790,7 @@ class SummitEventListPage extends React.Component {
         // eslint-disable-next-line react/no-unstable-nested-components
         editableField: (extraProps) => (
           <Dropdown
-            id="type_id"
+            id="type"
             placeholder={T.translate("event_list.placeholders.event_type")}
             options={event_type_ddl}
             value={extraProps.value}
@@ -1143,7 +1138,7 @@ class SummitEventListPage extends React.Component {
               placeholder="Enabled Filters"
               value={enabledFilters}
               onChange={this.handleFiltersChange}
-              options={this.handleDDLSortByLabel(filters_ddl)}
+              options={handleDDLSortByLabel(filters_ddl)}
               isClearable
               isMulti
             />
@@ -1727,7 +1722,7 @@ class SummitEventListPage extends React.Component {
               placeholder={T.translate("event_list.placeholders.select_fields")}
               value={selectedColumns}
               onChange={this.handleColumnsChange}
-              options={this.handleDDLSortByLabel(ddl_columns)}
+              options={handleDDLSortByLabel(ddl_columns)}
               isClearable
               isMulti
             />
