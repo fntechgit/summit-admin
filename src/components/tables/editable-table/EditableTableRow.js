@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Input } from "openstack-uicore-foundation/lib/components";
+import { TextArea } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react/dist/i18n-react";
 import history from "../../../history";
+
+import styles from "./index.module.less";
 
 function EditableTableRow(props) {
   const {
@@ -56,14 +58,14 @@ function EditableTableRow(props) {
 
   return (
     <>
-      <td className="bulk-edit-col-checkbox">
+      <td className={styles.colCheckbox}>
         <input
           type="checkbox"
           onChange={() => setChecked(!checked)}
           checked={checked}
         />
       </td>
-      <td className="bulk-edit-col-id">{row.id}</td>
+      <td className={styles.colId}>{row.id}</td>
       {selected.find((s) => s.id === row.id) && editEnabled && checked ? (
         <>
           {columns.map((col, index) => {
@@ -75,14 +77,15 @@ function EditableTableRow(props) {
               return (
                 <td
                   key={`row-edit-${col.columnKey}-${col.id}`}
-                  className="bulk-edit-col"
+                  className={styles.bulkEditCol}
                 >
-                  <Input
+                  <TextArea
                     type="text"
                     id={col.columnKey}
                     placeholder={T.translate(
                       `bulk_actions_page.placeholders.${col.columnKey}`
                     )}
+                    rows={2}
                     onChange={onRowChange}
                     value={row[col.columnKey]}
                   />
@@ -93,7 +96,7 @@ function EditableTableRow(props) {
               return (
                 <td
                   key={`row-edit-${col.columnKey}-${col.id}`}
-                  className="bulk-edit-col"
+                  className={styles.bulkEditCol}
                   style={col.customStyle}
                 >
                   {col.editableField({
@@ -112,7 +115,7 @@ function EditableTableRow(props) {
             return (
               <td
                 key={`row-edit-${col.columnKey}-${row.id}`}
-                className="bulk-edit-col"
+                className={styles.bulkEditCol}
               >
                 {col.render
                   ? col.render(row[col.columnKey])
@@ -134,8 +137,8 @@ function EditableTableRow(props) {
         )
       )}
       {(actions.edit || actions.delete) && (
-        <td className="action-display-tc">
-          <div className="edit-button-wrapper">
+        <td className={styles.actionColumn}>
+          <div className={styles.editButtonWrapper}>
             {actions.edit && (
               <button
                 type="button"

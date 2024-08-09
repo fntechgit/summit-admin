@@ -9,6 +9,8 @@ import {
   SORT_DESCENDING
 } from "../../../utils/constants";
 
+import styles from "./index.module.less";
+
 const defaults = {
   sortFunc: (a, b) => {
     if (a < b) {
@@ -114,9 +116,9 @@ function EditableTable(props) {
   };
 
   return (
-    <div>
+    <div className={styles.editableTableWrapper}>
       <hr />
-      <div className="list-actions">
+      <div className={styles.listActions}>
         <div>
           {editEnabled ? (
             <>
@@ -148,10 +150,8 @@ function EditableTable(props) {
           )}
         </div>
       </div>
-      <div className="table-wrapper">
-        <table
-          className={`table table-striped selectableTable events-editable-table ${tableClass}`}
-        >
+      <div className={styles.tableWrapper}>
+        <table className={`table table-striped ${tableClass}`}>
           <thead>
             <tr>
               <th aria-label="Checkbox Columns">
