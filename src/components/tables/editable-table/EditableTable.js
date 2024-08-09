@@ -116,7 +116,7 @@ function EditableTable(props) {
   return (
     <div>
       <hr />
-      <div className="events-list-actions">
+      <div className="list-actions">
         <div>
           {editEnabled ? (
             <>
@@ -148,94 +148,96 @@ function EditableTable(props) {
           )}
         </div>
       </div>
-      <table
-        className={`table table-striped selectableTable events-editable-table ${tableClass}`}
-      >
-        <thead>
-          <tr>
-            <th aria-label="Checkbox Columns">
-              <input
-                type="checkbox"
-                id="select_all"
-                name="select_all"
-                onChange={() => setSelectAll(!selectAll)}
-                checked={selectAll}
-              />
-            </th>
-            {columns.map((col, i) => {
-              const sortCol =
-                typeof options.sortCol !== "undefined"
-                  ? options.sortCol
-                  : defaults.sortCol;
-              const sortDir =
-                typeof options.sortDir !== "undefined"
-                  ? options.sortDir
-                  : defaults.sortDir;
-              const sortFunc =
-                typeof options.sortFunc !== "undefined"
-                  ? options.sortFunc
-                  : defaults.sortFunc;
-              const sortable =
-                typeof col.sortable !== "undefined"
-                  ? col.sortable
-                  : defaults.sortable;
-              const colWidth =
-                typeof col.width !== "undefined"
-                  ? col.width
-                  : defaults.colWidth;
+      <div className="table-wrapper">
+        <table
+          className={`table table-striped selectableTable events-editable-table ${tableClass}`}
+        >
+          <thead>
+            <tr>
+              <th aria-label="Checkbox Columns">
+                <input
+                  type="checkbox"
+                  id="select_all"
+                  name="select_all"
+                  onChange={() => setSelectAll(!selectAll)}
+                  checked={selectAll}
+                />
+              </th>
+              {columns.map((col, i) => {
+                const sortCol =
+                  typeof options.sortCol !== "undefined"
+                    ? options.sortCol
+                    : defaults.sortCol;
+                const sortDir =
+                  typeof options.sortDir !== "undefined"
+                    ? options.sortDir
+                    : defaults.sortDir;
+                const sortFunc =
+                  typeof options.sortFunc !== "undefined"
+                    ? options.sortFunc
+                    : defaults.sortFunc;
+                const sortable =
+                  typeof col.sortable !== "undefined"
+                    ? col.sortable
+                    : defaults.sortable;
+                const colWidth =
+                  typeof col.width !== "undefined"
+                    ? col.width
+                    : defaults.colWidth;
 
-              return (
-                <EditableTableHeading
-                  editEnabled={editEnabled}
-                  onSort={handleSort}
-                  sortDir={getSortDir(col.columnKey, i, sortCol, sortDir)}
-                  sortable={sortable}
-                  sortFunc={sortFunc}
-                  columnIndex={i}
-                  columnKey={col.columnKey}
-                  width={colWidth}
-                  key={`heading_${col.columnKey}_${col.value}`}
-                >
-                  {col.value}
-                </EditableTableHeading>
-              );
-            })}
-            {options.actions && (
-              <EditableTableHeading key="actions_heading">
-                {options.actionsHeader || " "}
-              </EditableTableHeading>
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {columns.length > 0 &&
-            data.map((row, i) => {
-              if (Array.isArray(row) && row.length !== columns.length) {
-                console.warn(
-                  `Data at row ${i} is ${row.length}. It should be ${columns.length}.`
-                );
-                return <tr key={`row_${row.id}`} />;
-              }
-
-              return (
-                <tr role="row" key={`row_${row.id}`}>
-                  <EditableTableRow
-                    row={row}
-                    currentSummit={currentSummit}
+                return (
+                  <EditableTableHeading
                     editEnabled={editEnabled}
-                    selected={selected}
-                    updateSelected={updateSelected}
-                    selectAll={selectAll}
-                    deleteRow={handleDeleteRow}
-                    columns={columns}
-                    actions={options.actions}
-                    formattingFunction={formattingFunction}
-                  />
-                </tr>
-              );
-            })}
-        </tbody>
-      </table>
+                    onSort={handleSort}
+                    sortDir={getSortDir(col.columnKey, i, sortCol, sortDir)}
+                    sortable={sortable}
+                    sortFunc={sortFunc}
+                    columnIndex={i}
+                    columnKey={col.columnKey}
+                    width={colWidth}
+                    key={`heading_${col.columnKey}_${col.value}`}
+                  >
+                    {col.value}
+                  </EditableTableHeading>
+                );
+              })}
+              {options.actions && (
+                <EditableTableHeading key="actions_heading">
+                  {options.actionsHeader || " "}
+                </EditableTableHeading>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {columns.length > 0 &&
+              data.map((row, i) => {
+                if (Array.isArray(row) && row.length !== columns.length) {
+                  console.warn(
+                    `Data at row ${i} is ${row.length}. It should be ${columns.length}.`
+                  );
+                  return <tr key={`row_${row.id}`} />;
+                }
+
+                return (
+                  <tr role="row" key={`row_${row.id}`}>
+                    <EditableTableRow
+                      row={row}
+                      currentSummit={currentSummit}
+                      editEnabled={editEnabled}
+                      selected={selected}
+                      updateSelected={updateSelected}
+                      selectAll={selectAll}
+                      deleteRow={handleDeleteRow}
+                      columns={columns}
+                      actions={options.actions}
+                      formattingFunction={formattingFunction}
+                    />
+                  </tr>
+                );
+              })}
+          </tbody>
+        </table>
+      </div>
       <ReactTooltip delayShow={10} />
     </div>
   );

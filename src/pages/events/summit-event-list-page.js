@@ -47,7 +47,8 @@ import {
   ALL_FILTER,
   DATE_FILTER_ARRAY_SIZE,
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  INDEX_NOT_FOUND
 } from "../../utils/constants";
 import {
   defaultColumns,
@@ -63,7 +64,7 @@ import {
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
 
-const fieldNames = (selection_plans_ddl, track_ddl) => [
+const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
   {
     columnKey: "speakers",
     value: "speakers",
@@ -77,6 +78,8 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
           isClearable
           isMulti
           placeholder={T.translate("edit_event.search_speakers")}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
           getOptionLabel={(speaker) =>
             `${speaker.first_name} ${speaker.last_name} (${speaker.email})`
           }
@@ -102,6 +105,8 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
         id="track"
         value={extraProps.value}
         options={track_ddl}
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...extraProps}
       />
@@ -121,15 +126,30 @@ const fieldNames = (selection_plans_ddl, track_ddl) => [
     columnKey: "selection_plan",
     value: "selection_plan",
     sortable: true,
-    editableField: (extraProps) => (
-      <Dropdown
-        id="selection_plan"
-        options={selection_plans_ddl}
-        value={extraProps.value || ""}
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        {...extraProps}
-      />
-    ),
+    editableField: (extraProps) => {
+      if (!extraProps.row.type?.id) return false;
+      const event_type = event_types.find(
+        (t) => t.id === extraProps.row.type?.id
+      );
+
+      const allowSelectionPlanEdit =
+        ["PresentationType"].indexOf(event_type.class_name) !==
+          INDEX_NOT_FOUND ||
+        ["PresentationType"].indexOf(event_type.name) !== INDEX_NOT_FOUND;
+      return allowSelectionPlanEdit ? (
+        <Dropdown
+          id="selection_plan"
+          options={selection_plans_ddl}
+          value={extraProps.value || ""}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...extraProps}
+        />
+      ) : (
+        false
+      );
+    },
     render: (e, field) => (e?.name ? e.name : "N/A")
   },
   { columnKey: "location", value: "location", sortable: true },
@@ -794,7 +814,8 @@ class SummitEventListPage extends React.Component {
             placeholder={T.translate("event_list.placeholders.event_type")}
             options={event_type_ddl}
             value={extraProps.value}
-            getOptionValue={(s) => s.id}
+            menuPortalTarget={document.body}
+            menuPosition="fixed"
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...extraProps}
           />
@@ -1036,7 +1057,11 @@ class SummitEventListPage extends React.Component {
       (pf) => ({ value: pf.id, label: pf.label })
     );
 
-    const showColumns = fieldNames(selection_plans_ddl, track_ddl)
+    const showColumns = fieldNames(
+      selection_plans_ddl,
+      track_ddl,
+      currentSummit.event_types
+    )
       .filter(
         (f) =>
           selectedColumns.includes(f.columnKey) &&

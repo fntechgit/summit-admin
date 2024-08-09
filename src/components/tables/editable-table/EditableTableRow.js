@@ -135,30 +135,32 @@ function EditableTableRow(props) {
       )}
       {(actions.edit || actions.delete) && (
         <td className="action-display-tc">
-          {actions.edit && (
-            <button
-              type="button"
-              className="text-button"
-              onClick={() =>
-                history.push(
-                  `/app/summits/${currentSummit.id}/events/${row.id}`
-                )
-              }
-              aria-label={`Edit event ${row.id}`} // Provide an appropriate aria-label
-            >
-              <i className="fa fa-pencil-square-o edit-icon" />
-            </button>
-          )}
-          {actions.delete && (
-            <button
-              type="button"
-              className="text-button"
-              onClick={() => deleteRow(row.id)}
-              aria-label={`Delete event ${row.id}`} // Provide an appropriate aria-label
-            >
-              <i className="fa fa-trash-o delete-icon" />
-            </button>
-          )}
+          <div className="edit-button-wrapper">
+            {actions.edit && (
+              <button
+                type="button"
+                className="text-button"
+                onClick={() =>
+                  history.push(
+                    `/app/summits/${currentSummit.id}/events/${row.id}`
+                  )
+                }
+                aria-label={`Edit event ${row.id}`} // Provide an appropriate aria-label
+              >
+                <i className="fa fa-pencil-square-o edit-icon" />
+              </button>
+            )}
+            {actions.delete && (
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => deleteRow(row.id)}
+                aria-label={`Delete event ${row.id}`} // Provide an appropriate aria-label
+              >
+                <i className="fa fa-trash-o delete-icon" />
+              </button>
+            )}
+          </div>
         </td>
       )}
     </>

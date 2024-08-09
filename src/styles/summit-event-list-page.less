@@ -18,9 +18,12 @@
 
 .summit-event-list-table-wrapper {
   width: 100%;
-  overflow-x: auto;
 
-  .events-list-actions {
+  tbody > tr:nth-of-type(even) {
+    background-color: #ffffff;
+  }
+
+  .list-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -61,24 +64,38 @@
     margin-bottom: 0px;
   }
 
-  .summit-event-list-table {
-    clear: both;
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    position: relative;
 
-    td {
-      max-width: 150px;
-      text-overflow: ellipsis;
-      vertical-align: middle;
-    }
+    .summit-event-list-table {
+      clear: both;
 
-    .action-display-tc {
-      display: table-cell;
-      padding: 0 20px;
-      text-align: right;
+      td {
+        max-width: 150px;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+      }
 
-      i {
-        padding: 0 10px;
-        display: inline;
-        cursor: pointer;
+      .action-display-tc {
+        display: table-cell;
+        padding: 0 20px;
+        text-align: right;
+        position: sticky;
+        z-index: 5;
+        right: 0;
+        background-color: inherit;
+
+        .edit-button-wrapper {
+          display: flex;
+        }
+
+        i {
+          padding: 0 10px;
+          display: inline;
+          cursor: pointer;
+        }
       }
     }
   }
