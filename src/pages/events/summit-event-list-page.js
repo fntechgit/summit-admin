@@ -48,6 +48,8 @@ import {
   DATE_FILTER_ARRAY_SIZE,
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
+  DEFAULT_Z_INDEX,
+  HIGH_Z_INDEX,
   INDEX_NOT_FOUND
 } from "../../utils/constants";
 import {
@@ -80,6 +82,13 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
           placeholder={T.translate("edit_event.search_speakers")}
           menuPortalTarget={document.body}
           menuPosition="fixed"
+          styles={{
+            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+            control: (base, state) => ({
+              ...base,
+              zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+            })
+          }}
           getOptionLabel={(speaker) =>
             `${speaker.first_name} ${speaker.last_name} (${speaker.email})`
           }
@@ -107,6 +116,13 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
         options={track_ddl}
         menuPortalTarget={document.body}
         menuPosition="fixed"
+        styles={{
+          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          control: (base, state) => ({
+            ...base,
+            zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+          })
+        }}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...extraProps}
       />
@@ -143,6 +159,13 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
           value={extraProps.value || ""}
           menuPortalTarget={document.body}
           menuPosition="fixed"
+          styles={{
+            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+            control: (base, state) => ({
+              ...base,
+              zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+            })
+          }}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...extraProps}
         />
@@ -816,6 +839,13 @@ class SummitEventListPage extends React.Component {
             value={extraProps.value}
             menuPortalTarget={document.body}
             menuPosition="fixed"
+            styles={{
+              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+              control: (base, state) => ({
+                ...base,
+                zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+              })
+            }}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...extraProps}
           />
