@@ -65,6 +65,7 @@
     "email_sent": "Email sent successfully.",
     "drag_and_drop": "Drag and Drop to sort items.",
     "remove_warning": "Are you sure you want to delete this?",
+    "edit_selected": "Edit Selected",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
@@ -550,6 +551,7 @@
     "speaker_company": "Company",
     "speaker_email": "Email",
     "select_speaker": "Search a speaker to associate ...",
+    "search_speakers": "Search speaker(s)",
     "assign_speaker": "Add speaker",
     "unassign_speaker": "Are you sure you want to unassign speaker ",
     "no_speakers": "There are no speakers associated with this activity so far",
@@ -1045,6 +1047,8 @@
     "media_upload_type": "Media Upload Type",
     "media_uploads": "Media Uploads",
     "media_upload_with_type": "Media Upload Types",
+    "edit_selected": "Edit Selected",
+    "delete_selected": "Delete Selected",
     "placeholders": {
       "search_events": "Search by Id, Title, Abstract, Speaker Title",
       "event_type_capacity": "Filter by Activity Type Capacity",

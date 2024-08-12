@@ -9,16 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
 import URI from "urijs";
-import history from "../history";
-import {
-  BulkActionEdit,
-  BulkActionUnPublish
-} from "openstack-uicore-foundation/lib/components/schedule-builder-constants";
-import { getPublishedEventsBySummitDayLocation } from "./summit-builder-actions";
+
 import {
   getRequest,
   putRequest,
@@ -29,6 +24,8 @@ import {
   showSuccessMessage,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
+import { getPublishedEventsBySummitDayLocation } from "./summit-builder-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import { normalizeEvent } from "./event-actions";
 
@@ -95,7 +92,7 @@ export const getSummitEventsByFilters = () => async (dispatch, getState) => {
   dispatch(startLoading());
 
   let lastPage = Math.ceil(totalUnPublished / pageSize);
-  const filter = [...unPublishedFilter, `published==0`];
+  const filter = [...unPublishedFilter, "published==0"];
 
   if (!selectedAllUnPublished && selectedUnPublishedEvents.length > 0) {
     // we don't need the filter criteria, we have the ids
@@ -139,7 +136,7 @@ export const getSummitEventsByFilters = () => async (dispatch, getState) => {
 
 export const updateEventLocationLocal =
   (event, location, isValid) => (dispatch) => {
-    let mutator = (location, isValid) => (event) => ({
+    const mutator = (location, isValid) => (event) => ({
       ...event,
       location_id: location.id,
       is_valid: isValid
@@ -155,7 +152,7 @@ export const updateEventLocationLocal =
 
 export const updateEventSelectionPlanLocal =
   (event, selectionPlan, isValid) => (dispatch) => {
-    let mutator = (selectionPlan, isValid) => (event) => ({
+    const mutator = (selectionPlan, isValid) => (event) => ({
       ...event,
       selection_plan_id: selectionPlan.id,
       is_valid: isValid
@@ -171,7 +168,7 @@ export const updateEventSelectionPlanLocal =
 
 export const updateEventStartDateLocal =
   (event, startDate, isValid) => (dispatch) => {
-    let mutator = (startDate, isValid) => (event) => ({
+    const mutator = (startDate, isValid) => (event) => ({
       ...event,
       start_date: startDate,
       is_valid: isValid
@@ -187,7 +184,7 @@ export const updateEventStartDateLocal =
 
 export const updateEventEndDateLocal =
   (event, endDate, isValid) => (dispatch) => {
-    let mutator = (endDate, isValid) => (event) => ({
+    const mutator = (endDate, isValid) => (event) => ({
       ...event,
       end_date: endDate,
       is_valid: isValid
@@ -202,9 +199,9 @@ export const updateEventEndDateLocal =
   };
 
 export const updateEventTitleLocal = (event, title, isValid) => (dispatch) => {
-  let mutator = (title, isValid) => (event) => ({
+  const mutator = (title, isValid) => (event) => ({
     ...event,
-    title: title,
+    title,
     is_valid: isValid
   });
 
@@ -218,7 +215,7 @@ export const updateEventTitleLocal = (event, title, isValid) => (dispatch) => {
 
 export const updateEventActivityTypeLocal =
   (event, activityType, isValid) => (dispatch) => {
-    let mutator = (activityType, isValid) => (event) => ({
+    const mutator = (activityType, isValid) => (event) => ({
       ...event,
       type_id: activityType,
       is_valid: isValid
@@ -233,7 +230,7 @@ export const updateEventActivityTypeLocal =
   };
 export const updateEventActivityCategoryLocal =
   (event, activityCategory, isValid) => (dispatch) => {
-    let mutator = (activityCategory, isValid) => (event) => ({
+    const mutator = (activityCategory, isValid) => (event) => ({
       ...event,
       track_id: activityCategory,
       is_valid: isValid
@@ -248,9 +245,9 @@ export const updateEventActivityCategoryLocal =
   };
 export const updateEventDurationLocal =
   (event, duration, isValid) => (dispatch) => {
-    let mutator = (duration, isValid) => (event) => ({
+    const mutator = (duration, isValid) => (event) => ({
       ...event,
-      duration: duration,
+      duration,
       is_valid: isValid
     });
 
@@ -263,7 +260,7 @@ export const updateEventDurationLocal =
   };
 export const updateEventStreamingURLLocal =
   (event, streamingURL, isValid) => (dispatch) => {
-    let mutator = (streamingURL, isValid) => (event) => ({
+    const mutator = (streamingURL, isValid) => (event) => ({
       ...event,
       streaming_url: streamingURL,
       is_valid: isValid
@@ -278,7 +275,7 @@ export const updateEventStreamingURLLocal =
   };
 export const updateEventStreamingTypeLocal =
   (event, streamingType, isValid) => (dispatch) => {
-    let mutator = (streamingType, isValid) => (event) => ({
+    const mutator = (streamingType, isValid) => (event) => ({
       ...event,
       streaming_type: streamingType,
       is_valid: isValid
@@ -293,7 +290,7 @@ export const updateEventStreamingTypeLocal =
   };
 export const updateEventMeetingURLLocal =
   (event, meetingURL, isValid) => (dispatch) => {
-    let mutator = (meetingURL, isValid) => (event) => ({
+    const mutator = (meetingURL, isValid) => (event) => ({
       ...event,
       meeting_url: meetingURL,
       is_valid: isValid
@@ -308,7 +305,7 @@ export const updateEventMeetingURLLocal =
   };
 export const updateEventEtherpadURLLocal =
   (event, etherpadURL, isValid) => (dispatch) => {
-    let mutator = (etherpadURL, isValid) => (event) => ({
+    const mutator = (etherpadURL, isValid) => (event) => ({
       ...event,
       etherpad_link: etherpadURL,
       is_valid: isValid
@@ -513,14 +510,15 @@ const normalizeBulkEvents = (entity) => {
       meeting_url: e.meeting_url,
       etherpad_link: e.etherpad_link
     };
-    for (let property in normalizedEvent) {
+    Object.keys(normalizedEvent).forEach((property) => {
       if (
         normalizedEvent[property] === undefined ||
-        normalizedEvent[property] === null
+        normalizedEvent[property] === null ||
+        normalizedEvent[property] === ""
       ) {
         delete normalizedEvent[property];
       }
-    }
+    });
     return normalizedEvent;
   });
   return normalizedEntity;

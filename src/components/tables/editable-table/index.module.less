@@ -1,0 +1,70 @@
+.editableTableWrapper {
+  width: 100%;
+
+  tbody > tr:nth-of-type(even) {
+    background-color: #ffffff;
+  }
+
+  .tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+    position: relative;
+
+    td {
+      max-width: 150px;
+      text-overflow: ellipsis;
+      vertical-align: middle;
+
+      &.checkColumn {
+        display: table-cell;
+        text-align: center;
+        position: sticky;
+        z-index: 5;
+        left: 0;
+        background-color: inherit;
+        min-width: auto;
+      }
+      &.idColumn {
+        min-width: auto;
+      }
+
+      &:not([class]) {
+        min-width: 225px;
+        align-self: flex-start;
+      }
+    }
+
+    .bulkEditRow {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0 30px;
+      align-items: baseline;
+      padding-bottom: 10px;
+    }
+
+    .bulkEditCol {
+      min-width: 250px;
+      align-self: flex-start;
+    }
+
+    .actionColumn {
+      display: table-cell;
+      padding: 0 20px;
+      text-align: right;
+      position: sticky;
+      z-index: 5;
+      right: 0;
+      background-color: inherit;
+
+      .editButtonWrapper {
+        display: flex;
+      }
+
+      i {
+        padding: 0 10px;
+        display: inline;
+        cursor: pointer;
+      }
+    }
+  }
+}

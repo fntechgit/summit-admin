@@ -9,11 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
+import _ from "lodash";
 import {
   getRequest,
   putRequest,
@@ -32,6 +32,7 @@ import {
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import history from "../history";
 import {
   checkOrFilter,
   getAccessTokenSafely,
@@ -40,6 +41,16 @@ import {
 } from "../utils/methods";
 import { getQAUsersBySummitEvent } from "./user-chat-roles-actions";
 import { getAuditLog } from "./audit-log-actions";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE,
+  FIFTEEN_MINUTES,
+  HOUR_AND_HALF,
+  SECONDS_TO_MINUTES
+} from "../utils/constants";
+import { getIdValue } from "../utils/summitUtils";
 
 export const REQUEST_EVENTS = "REQUEST_EVENTS";
 export const RECEIVE_EVENTS = "RECEIVE_EVENTS";
@@ -78,920 +89,14 @@ export const ATTENDING_MEDIA = "attending_media";
 export const LEVEL = "level";
 export const SOCIAL_DESCRIPTION = "social_description";
 
+const UPDATED_REMOTE_EVENTS = "UPDATED_REMOTE_EVENTS";
+
 const fieldsBoundToQuestions = [
   ATTENDEES_EXPECTED_LEARNT,
   ATTENDING_MEDIA,
   LEVEL,
   SOCIAL_DESCRIPTION
 ];
-
-export const getEvents =
-  (
-    term = null,
-    page = 1,
-    perPage = 10,
-    order = "id",
-    orderDir = 1,
-    filters = {},
-    extraColumns = []
-  ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const summitTZ = currentSummit.time_zone.name;
-
-    dispatch(startLoading());
-
-    const filter = parseFilters(filters, term);
-
-    const params = {
-      expand:
-        "speakers,type,created_by,track,sponsors,selection_plan,location,tags,media_uploads,media_uploads.media_upload_type,actions,actions.type",
-      relations:
-        "speakers.none,selection_plan.none,track.none,type.none,created_by.none,location.none,media_uploads.media_upload_type.none",
-      fields:
-        "location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,media_uploads.id,media_uploads.created,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id",
-      page: page,
-      per_page: perPage,
-      access_token: accessToken
-    };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] =
-        order === "created_by_fullname"
-          ? `${orderDirSign}${order},${orderDirSign}created_by_email`
-          : `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_EVENTS),
-      createAction(RECEIVE_EVENTS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
-      authErrorHandler,
-      { order, orderDir, term, summitTZ, filters, extraColumns }
-    )(params)(dispatch).then((data) => {
-      dispatch(stopLoading());
-      return data.response;
-    });
-  };
-
-export const getEventsForOccupancy =
-  (
-    term = null,
-    roomId = null,
-    currentEvents = false,
-    page = 1,
-    perPage = 10,
-    order = "start_date",
-    orderDir = 1
-  ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
-    const summitTZ = currentSummit.time_zone.name;
-    let endPoint = "events/published";
-
-    dispatch(startLoading());
-
-    // search
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(`title=@${escapedTerm},speaker=@${escapedTerm}`);
-    }
-
-    // room filter
-    if (roomId != null) {
-      endPoint = `locations/${roomId}/${endPoint}`;
-    }
-
-    // only current events
-    if (currentEvents) {
-      const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
-      const from_date = now - 900; // minus 15min
-      const to_date = now + 900; // plus 15min
-      filter.push(`start_date<=${to_date}`);
-      filter.push(`end_date>=${from_date}`);
-    }
-
-    const params = {
-      expand: "speakers, location, track",
-      page: page,
-      per_page: perPage,
-      access_token: accessToken
-    };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_EVENTS_FOR_OCCUPANCY),
-      createAction(RECEIVE_EVENTS_FOR_OCCUPANCY),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/${endPoint}`,
-      authErrorHandler,
-      { order, orderDir, term, roomId, currentEvents, summitTZ }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
-
-export const getEventsForOccupancyCSV =
-  (
-    term = null,
-    roomId = null,
-    currentEvents = false,
-    order = "start_date",
-    orderDir = 1
-  ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
-    const summitTZ = currentSummit.time_zone.name;
-
-    dispatch(startLoading());
-
-    filter.push(`published==1`);
-
-    // search
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(`title=@${escapedTerm},speaker=@${escapedTerm}`);
-    }
-
-    // room filter
-    if (roomId != null) {
-      filter.push(`location_id==${roomId}`);
-    }
-
-    // only current events
-    if (currentEvents) {
-      const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
-      const from_date = now - 900; // minus 15min
-      const to_date = now + 900; // plus 15min
-      filter.push(`start_date<=${to_date}`);
-      filter.push(`end_date>=${from_date}`);
-    }
-
-    const params = {
-      access_token: accessToken
-    };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    params["fields"] =
-      "start_date,title,track,occupancy,location_name,speaker_fullnames";
-
-    const filename = `summit-${currentSummit.slug}-rooms-occupancy.csv`;
-
-    dispatch(
-      getCSV(
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
-        params,
-        filename
-      )
-    );
-  };
-
-export const getCurrentEventForOccupancy =
-  (roomId, eventId = null) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
-    const summitTZ = currentSummit.time_zone.name;
-    let endPoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}`;
-
-    dispatch(startLoading());
-
-    const params = {
-      expand: "speakers, location",
-      page: 1,
-      per_page: 100,
-      access_token: accessToken
-    };
-
-    if (eventId) {
-      endPoint = endPoint + `/events/${eventId}`;
-    } else {
-      endPoint = endPoint + `/locations/${roomId}/events/published`;
-
-      // only current events
-      const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
-      filter.push(`start_date<=${now}`);
-      filter.push(`end_date>=${now}`);
-      params["filter[]"] = filter;
-    }
-
-    return getRequest(
-      createAction(REQUEST_CURRENT_EVENT_FOR_OCCUPANCY),
-      createAction(RECEIVE_CURRENT_EVENT_FOR_OCCUPANCY),
-      endPoint,
-      authErrorHandler,
-      { summitTZ }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
-
-export const getActionTypes =
-  (selectionPlanId) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const { currentSummit } = currentSummitState;
-    const accessToken = await getAccessTokenSafely();
-
-    const params = {
-      per_page: 100,
-      page: 1,
-      order: "+order",
-      access_token: accessToken
-    };
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_ACTION_TYPES),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-presentation-action-types`,
-      authErrorHandler
-    )(params)(dispatch);
-  };
-
-export const changeFlag =
-  (isCompleted, eventId, typeId, selectionPlanId) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const { currentSummit } = currentSummitState;
-    const accessToken = await getAccessTokenSafely();
-
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken
-    };
-
-    if (isCompleted) {
-      putRequest(
-        null,
-        createAction(FLAG_CHANGED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/presentations/${eventId}/actions/${typeId}/complete`,
-        {},
-        authErrorHandler
-      )(params)(dispatch).then((res) => {
-        dispatch(stopLoading());
-      });
-    } else {
-      deleteRequest(
-        null,
-        createAction(FLAG_CHANGED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/presentations/${eventId}/actions/${typeId}/incomplete`,
-        {},
-        authErrorHandler
-      )(params)(dispatch).then(() => {
-        dispatch(stopLoading());
-      });
-    }
-  };
-
-export const getEvent = (eventId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-
-  if (!currentSummit.id) return;
-
-  const params = {
-    access_token: accessToken,
-    expand:
-      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.extra_questions, selection_plan.extra_questions.values,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,created_by,track_chair_scores_avg.ranking_type,actions"
-  };
-
-  dispatch(startLoading());
-  return getRequest(
-    null,
-    createAction(RECEIVE_EVENT),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}`,
-    authErrorHandler
-  )(params)(dispatch).then(({ response }) => {
-    getQAUsersBySummitEvent(currentSummit.id, eventId)(dispatch, getState);
-    dispatch(stopLoading());
-  });
-};
-
-export const fetchExtraQuestions = async (summitId, selectionPlanId) => {
-  const accessToken = await getAccessTokenSafely();
-
-  return fetch(
-    `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plans/${selectionPlanId}/extra-questions?access_token=${accessToken}&expand=values`
-  )
-    .then(fetchResponseHandler)
-    .then((json) => json.data)
-    .catch(fetchErrorHandler);
-};
-
-export const fetchExtraQuestionsAnswers = async (
-  summitId,
-  selectionPlanId,
-  eventId
-) => {
-  const accessToken = await getAccessTokenSafely();
-
-  return fetch(
-    `${window.API_BASE_URL}/api/v1/summits/${summitId}/presentations/${eventId}/extra-questions?access_token=${accessToken}&filter=selection_plan_id==${selectionPlanId}`
-  )
-    .then(fetchResponseHandler)
-    .then((json) => json.data)
-    .catch(fetchErrorHandler);
-};
-
-export const resetEventForm = () => (dispatch, getState) => {
-  dispatch(createAction(RESET_EVENT_FORM)({}));
-};
-
-export const saveEvent = (entity, publish) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-  const { type_id } = entity;
-  const type = currentSummit.event_types.find((e) => e.id == type_id);
-
-  dispatch(startLoading());
-
-  const normalizedEntity = normalizeEvent(entity, type, currentSummit);
-
-  const params = {
-    access_token: accessToken,
-    expand:
-      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions"
-  };
-
-  if (entity.id) {
-    return putRequest(
-      createAction(UPDATE_EVENT),
-      createAction(EVENT_UPDATED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
-      if (publish) {
-        dispatch(publishEvent(normalizedEntity));
-      } else {
-        dispatch(showSuccessMessage(T.translate("edit_event.event_saved")));
-      }
-      dispatch(
-        getAuditLog(
-          [`event_id==${entity.id}`, `class_name==SummitEventAuditLog`],
-          null,
-          1,
-          10
-        )
-      );
-    });
-  }
-
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_event.event_created"),
-    type: "success"
-  };
-
-  return postRequest(
-    createAction(UPDATE_EVENT),
-    createAction(EVENT_ADDED),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
-    normalizedEntity,
-    authErrorHandler,
-    entity
-  )(params)(dispatch).then((payload) => {
-    if (publish) {
-      normalizedEntity.id = payload.response.id;
-      dispatch(
-        publishEvent(normalizedEntity, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/events/${payload.response.id}`
-          );
-        })
-      );
-    } else
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/events/${payload.response.id}`
-          );
-        })
-      );
-  });
-};
-
-export const cloneEvent = (entity, publish) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-
-  dispatch(startLoading());
-
-  const params = {
-    access_token: accessToken
-  };
-
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_event.event_cloned"),
-    type: "success"
-  };
-
-  return postRequest(
-    null,
-    createAction(EVENT_CLONED),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/clone`,
-    null,
-    authErrorHandler
-  )(params)(dispatch).then((payload) => {
-    dispatch(
-      showMessage(success_message, () => {
-        history.push(
-          `/app/summits/${currentSummit.id}/events/${payload.response.id}`
-        );
-      })
-    );
-  });
-};
-
-export const saveOccupancy = (entity) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-
-  const params = {
-    access_token: accessToken
-  };
-
-  putRequest(
-    createAction(UPDATE_EVENT),
-    createAction(EVENT_UPDATED),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}`,
-    { id: entity.id, occupancy: entity.occupancy },
-    authErrorHandler,
-    entity
-  )(params)(dispatch);
-};
-
-const publishEvent =
-  (entity, cb = null) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const { type_id } = entity;
-    const type = currentSummit.event_types.find((e) => e.id == type_id);
-
-    const params = {
-      access_token: accessToken
-    };
-
-    putRequest(
-      null,
-      createAction(EVENT_PUBLISHED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/publish`,
-      {
-        location_id: entity.location_id,
-        start_date: entity.start_date,
-        end_date: entity.end_date
-      },
-      authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      if (
-        type.hasOwnProperty("allows_publishing_dates") &&
-        type.allows_publishing_dates
-      ) {
-        dispatch(checkProximityEvents(entity, true, cb));
-      } else {
-        const success_message = {
-          title: T.translate("general.done"),
-          html: T.translate("edit_event.saved_and_published"),
-          type: "success"
-        };
-        dispatch(showMessage(success_message, cb));
-      }
-    });
-  };
-
-export const checkProximityEvents =
-  (event, showSuccessMessage = true, cb = null) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_event.saved_and_published"),
-      type: "success"
-    };
-
-    if (
-      !event.hasOwnProperty("speakers") ||
-      (event.speakers.length === 0 && !event.moderator_speaker_id)
-    ) {
-      if (showSuccessMessage) {
-        dispatch(showMessage(success_message, cb));
-      } else {
-        dispatch(stopLoading());
-      }
-      return;
-    }
-
-    let speaker_ids = event.speakers.map((s) => `speaker_id==${s}`);
-    if (event.moderator_speaker_id) {
-      speaker_ids.push(`speaker_id==${event.moderator_speaker_id}`);
-    }
-
-    const from_date = event.start_date - 5400; // minus 1.5hrs
-    const to_date = event.end_date + 5400; // plus 1.5hrs
-
-    const params = {
-      page: 1,
-      per_page: 100,
-      access_token: accessToken,
-      expand: "location",
-      "filter[]": [
-        speaker_ids.join(","),
-        `end_date>=${from_date}`,
-        `start_date<=${to_date}`
-      ]
-    };
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_PROXIMITY_EVENTS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/published`,
-      authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      const proximity_events = payload.response.data.filter(
-        (e) => e.id !== event.id
-      );
-
-      if (proximity_events.length > 0) {
-        success_message.width = null;
-        success_message.type = "warning";
-        success_message.html += `<br/><br/><strong>${T.translate(
-          "edit_event.proximity_alert"
-        )}</strong><br/>`;
-
-        for (var i in proximity_events) {
-          const prox_event = proximity_events[i];
-          const event_date = epochToMomentTimeZone(
-            prox_event.start_date,
-            currentSummit.time_zone_id
-          ).format("M/D h:mm a");
-          const locationName = prox_event.location
-            ? prox_event.location.name
-            : "TBD";
-          success_message.html += `<small><i>"${prox_event.title}"</i> at ${event_date} in ${locationName}</small><br/>`;
-        }
-        dispatch(showMessage(success_message, cb));
-      } else if (showSuccessMessage) {
-        dispatch(showMessage(success_message, cb));
-      } else {
-        dispatch(stopLoading());
-      }
-    });
-  };
-
-export const attachFile =
-  (entity, file, attr) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-
-    const normalizedEntity = normalizeEvent(entity);
-
-    const params = {
-      access_token: accessToken
-    };
-
-    const uploadFile = attr === "file" ? uploadFile : uploadImage;
-
-    if (entity.id) {
-      return dispatch(uploadFile(entity, file));
-    } else {
-      return postRequest(
-        createAction(UPDATE_EVENT),
-        createAction(EVENT_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
-        dispatch(uploadFile(payload.response, file));
-      });
-    }
-  };
-
-const uploadFile = (entity, file) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-
-  const params = {
-    access_token: accessToken
-  };
-
-  postRequest(
-    null,
-    createAction(FILE_ATTACHED),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/attachment`,
-    file,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    history.push(`/app/summits/${currentSummit.id}/events/${entity.id}`);
-    dispatch(stopLoading());
-  });
-};
-
-const uploadImage = (entity, file) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-
-  const params = {
-    access_token: accessToken
-  };
-
-  postRequest(
-    null,
-    createAction(IMAGE_ATTACHED),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/image`,
-    file,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    history.push(`/app/summits/${currentSummit.id}/events/${entity.id}`);
-    dispatch(stopLoading());
-  });
-};
-
-export const removeImage = (eventId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-
-  const params = {
-    access_token: accessToken
-  };
-
-  return deleteRequest(
-    null,
-    createAction(IMAGE_DELETED)({}),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/image`,
-    null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
-
-const normalizePresentationAllowedQuestionFields = (entity, summit) => {
-  if (!entity.selection_plan_id) return;
-
-  const selectionPlan = summit.selection_plans.find(
-    (sp) => sp.id === entity.selection_plan_id
-  );
-
-  fieldsBoundToQuestions.forEach((item) => {
-    if (!selectionPlan.allowed_presentation_questions.includes(item)) {
-      delete entity[item];
-    }
-  });
-};
-
-export const normalizeEvent = (entity, eventTypeConfig, summit) => {
-  const normalizedEntity = { ...entity };
-  if (!normalizedEntity.start_date) delete normalizedEntity["start_date"];
-  if (!normalizedEntity.end_date) delete normalizedEntity["end_date"];
-  if (!normalizedEntity.rsvp_link) delete normalizedEntity["rsvp_link"];
-  if (!normalizedEntity.rsvp_template_id)
-    delete normalizedEntity["rsvp_template_id"];
-
-  if (normalizedEntity.hasOwnProperty("links"))
-    delete normalizedEntity["links"];
-
-  if (normalizedEntity.hasOwnProperty("tags"))
-    normalizedEntity.tags = normalizedEntity.tags.map((t) => {
-      if (typeof t === "string") return t;
-      else return t.tag;
-    });
-
-  if (normalizedEntity.hasOwnProperty("sponsors"))
-    normalizedEntity.sponsors = normalizedEntity.sponsors.map((s) => s.id);
-
-  if (normalizedEntity.hasOwnProperty("speakers"))
-    normalizedEntity.speakers = normalizedEntity.speakers.map((s) => s.id);
-
-  if (
-    normalizedEntity.hasOwnProperty("moderator") &&
-    normalizedEntity.moderator
-  )
-    normalizedEntity.moderator_speaker_id = normalizedEntity.moderator.id;
-  else {
-    delete normalizedEntity.moderator;
-    normalizedEntity.moderator_speaker_id = 0;
-  }
-
-  if (normalizedEntity.hasOwnProperty("created_by")) {
-    normalizedEntity.created_by_id = normalizedEntity.created_by?.id;
-  }
-
-  // if selection plan is null set is as 0 and remove the current selection plan
-  if (
-    normalizedEntity.hasOwnProperty("selection_plan_id") &&
-    normalizedEntity.selection_plan_id == null
-  ) {
-    normalizedEntity.selection_plan_id = 0;
-    delete normalizedEntity.selection_plan;
-  }
-
-  if (eventTypeConfig) {
-    if (!eventTypeConfig.use_speakers) {
-      delete normalizedEntity.speakers;
-    }
-    if (!eventTypeConfig.use_sponsors) {
-      delete normalizedEntity.sponsors;
-    }
-    if (!eventTypeConfig.use_moderator) {
-      delete normalizedEntity.moderator;
-      delete normalizedEntity.moderator_speaker_id;
-    }
-    // if allows custom ordering in event type is false then remove custom_order
-    if (!eventTypeConfig.allow_custom_ordering) {
-      delete normalizedEntity.custom_order;
-    }
-    // if allows location in event type is false then remove location_id
-    if (!eventTypeConfig.allows_location) {
-      delete normalizedEntity.location_id;
-    }
-    // if allows publishing dates in event type is false then remove those dates
-    if (!eventTypeConfig.allows_publishing_dates) {
-      delete normalizedEntity.start_date;
-      delete normalizedEntity.end_date;
-      delete normalizedEntity.duration;
-    }
-  }
-
-  if (summit)
-    normalizePresentationAllowedQuestionFields(normalizedEntity, summit);
-
-  if (normalizedEntity.hasOwnProperty("extra_questions")) {
-    normalizedEntity.extra_questions = normalizedEntity.extra_questions.map(
-      (q) => ({ question_id: q.question_id, answer: q.value })
-    );
-  }
-
-  return normalizedEntity;
-};
-
-export const deleteEvent = (eventId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-
-  const params = {
-    access_token: accessToken
-  };
-
-  return deleteRequest(
-    null,
-    createAction(EVENT_DELETED)({ eventId }),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}`,
-    null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
-
-export const exportEvents =
-  (
-    term = null,
-    order = "id",
-    orderDir = 1,
-    extraFilters = {},
-    extraColumns = []
-  ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filename = currentSummit.name + "-Activities.csv";
-    const params = {
-      access_token: accessToken
-    };
-
-    const filter = parseFilters(extraFilters, term);
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] =
-        order === "created_by_fullname"
-          ? `${orderDirSign}${order},${orderDirSign}created_by_email`
-          : `${orderDirSign}${order}`;
-    }
-
-    dispatch(
-      getCSV(
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
-        params,
-        filename
-      )
-    );
-  };
-
-export const importMP4AssetsFromMUX =
-  (MUXTokenId, MUXTokenSecret, emailTo) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const params = {
-      access_token: accessToken
-    };
-
-    dispatch(startLoading());
-    return postRequest(
-      null,
-      createAction(IMPORT_FROM_MUX),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/all/import/mux`,
-      {
-        mux_token_id: MUXTokenId,
-        mux_token_secret: MUXTokenSecret,
-        email_to: emailTo
-      },
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      const success_message = {
-        title: T.translate("general.done"),
-        html: T.translate("event_list.mux_import_done"),
-        type: "success"
-      };
-
-      dispatch(stopLoading());
-      dispatch(
-        showMessage(success_message, () => {
-          window.location.reload();
-        })
-      );
-    });
-  };
-
-export const importEventsCSV =
-  (file, send_speaker_email) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-
-    const params = {
-      access_token: accessToken
-    };
-
-    postFile(
-      null,
-      createAction(EVENTS_IMPORTED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
-      file,
-      { send_speaker_email: send_speaker_email },
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      window.location.reload();
-    });
-  };
 
 const parseFilters = (filters, term = null) => {
   const filter = [];
@@ -1133,14 +238,14 @@ const parseFilters = (filters, term = null) => {
     if (Array.isArray(filters.duration_filter)) {
       // between
       filter.push(
-        `duration[]${filters.duration_filter[0] * 60}&&${
-          filters.duration_filter[1] * 60
+        `duration[]${filters.duration_filter[0] * SECONDS_TO_MINUTES}&&${
+          filters.duration_filter[1] * SECONDS_TO_MINUTES
         }`
       );
     } else {
       filter.push(
         `duration${filters.duration_filter.replace(/\d/g, "")}${
-          filters.duration_filter.replace(/\D/g, "") * 60
+          filters.duration_filter.replace(/\D/g, "") * SECONDS_TO_MINUTES
         }`
       );
     }
@@ -1248,11 +353,11 @@ const parseFilters = (filters, term = null) => {
   }
 
   if (filters.is_public) {
-    filter.push(`is_public==1`);
+    filter.push("is_public==1");
   }
 
   if (filters.is_activity) {
-    filter.push(`is_activity==1`);
+    filter.push("is_activity==1");
   }
 
   if (
@@ -1276,10 +381,11 @@ const parseFilters = (filters, term = null) => {
         ? "||"
         : "&&";
     filter.push(
-      `${filters.media_upload_with_type.operator}` +
-        filters.media_upload_with_type.value
-          .map((v) => v.id)
-          .join(concatOperator)
+      `${
+        filters.media_upload_with_type.operator
+      }${filters.media_upload_with_type.value
+        .map((v) => v.id)
+        .join(concatOperator)}`
     );
   }
 
@@ -1300,14 +406,1005 @@ const parseFilters = (filters, term = null) => {
   return checkOrFilter(filters, filter);
 };
 
+export const normalizeEvent = (entity, eventTypeConfig, summit) => {
+  const normalizedEntity = { ...entity };
+  if (!normalizedEntity.start_date) delete normalizedEntity.start_date;
+  if (!normalizedEntity.end_date) delete normalizedEntity.end_date;
+  if (!normalizedEntity.rsvp_link) delete normalizedEntity.rsvp_link;
+  if (!normalizedEntity.rsvp_template_id)
+    delete normalizedEntity.rsvp_template_id;
+
+  if (normalizedEntity.hasOwnProperty("links")) delete normalizedEntity.links;
+
+  if (normalizedEntity.hasOwnProperty("tags"))
+    normalizedEntity.tags = normalizedEntity.tags.map((t) => {
+      if (typeof t === "string") return t;
+      return t.tag;
+    });
+
+  if (normalizedEntity.hasOwnProperty("sponsors"))
+    normalizedEntity.sponsors = normalizedEntity.sponsors.map((s) => s.id);
+
+  if (normalizedEntity.hasOwnProperty("speakers"))
+    normalizedEntity.speakers = normalizedEntity.speakers.map((s) => s.id);
+
+  if (
+    normalizedEntity.hasOwnProperty("moderator") &&
+    normalizedEntity.moderator
+  )
+    normalizedEntity.moderator_speaker_id = normalizedEntity.moderator.id;
+  else {
+    delete normalizedEntity.moderator;
+    normalizedEntity.moderator_speaker_id = 0;
+  }
+
+  if (normalizedEntity.hasOwnProperty("created_by")) {
+    normalizedEntity.created_by_id = normalizedEntity.created_by?.id;
+  }
+
+  // if selection plan is null set is as 0 and remove the current selection plan
+  if (
+    normalizedEntity.hasOwnProperty("selection_plan_id") &&
+    normalizedEntity.selection_plan_id == null
+  ) {
+    normalizedEntity.selection_plan_id = 0;
+    delete normalizedEntity.selection_plan;
+  }
+
+  if (eventTypeConfig) {
+    if (!eventTypeConfig.use_speakers) {
+      delete normalizedEntity.speakers;
+    }
+    if (!eventTypeConfig.use_sponsors) {
+      delete normalizedEntity.sponsors;
+    }
+    if (!eventTypeConfig.use_moderator) {
+      delete normalizedEntity.moderator;
+      delete normalizedEntity.moderator_speaker_id;
+    }
+    // if allows custom ordering in event type is false then remove custom_order
+    if (!eventTypeConfig.allow_custom_ordering) {
+      delete normalizedEntity.custom_order;
+    }
+    // if allows location in event type is false then remove location_id
+    if (!eventTypeConfig.allows_location) {
+      delete normalizedEntity.location_id;
+    }
+    // if allows publishing dates in event type is false then remove those dates
+    if (!eventTypeConfig.allows_publishing_dates) {
+      delete normalizedEntity.start_date;
+      delete normalizedEntity.end_date;
+      delete normalizedEntity.duration;
+    }
+  }
+
+  if (summit)
+    normalizePresentationAllowedQuestionFields(normalizedEntity, summit);
+
+  if (normalizedEntity.hasOwnProperty("extra_questions")) {
+    normalizedEntity.extra_questions = normalizedEntity.extra_questions.map(
+      (q) => ({ question_id: q.question_id, answer: q.value })
+    );
+  }
+
+  return normalizedEntity;
+};
+
+export const normalizeBulkEvents = (entity) => {
+  const normalizedEntity = entity.map((e) => {
+    const normalizedEvent = {
+      id: e.id,
+      title: e.title,
+      selection_plan_id: getIdValue(e.selection_plan) || e.selection_plan_id,
+      location_id: e.location?.id || e.location_id,
+      start_date: e.start_date,
+      speakers: e.speakers,
+      end_date: e.end_date,
+      type_id: getIdValue(e.type) || e.type_id,
+      track_id: getIdValue(e.track) || e.track_id,
+      duration: e.duration,
+      streaming_url: e.streaming_url,
+      streaming_type: e.streaming_type,
+      meeting_url: e.meeting_url,
+      etherpad_link: e.etherpad_link
+    };
+    Object.keys(normalizedEvent).forEach((property) => {
+      if (
+        normalizedEvent[property] === undefined ||
+        normalizedEvent[property] === null ||
+        normalizedEvent[property] === ""
+      ) {
+        delete normalizedEvent[property];
+      }
+    });
+    return normalizedEvent;
+  });
+  return normalizedEntity;
+};
+
+export const getEvents =
+  (
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    filters = {},
+    extraColumns = []
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const summitTZ = currentSummit.time_zone.name;
+
+    dispatch(startLoading());
+
+    const filter = parseFilters(filters, term);
+
+    const params = {
+      expand:
+        "speakers,type,created_by,track,sponsors,selection_plan,location,tags,media_uploads,media_uploads.media_upload_type,actions,actions.type",
+      relations:
+        "speakers.none,selection_plan.none,track.none,type.none,created_by.none,location.none,media_uploads.media_upload_type.none",
+      fields:
+        "location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,selection_plan.id,media_uploads.id,media_uploads.created,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id",
+      page,
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order =
+        order === "created_by_fullname"
+          ? `${orderDirSign}${order},${orderDirSign}created_by_email`
+          : `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_EVENTS),
+      createAction(RECEIVE_EVENTS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
+      authErrorHandler,
+      { order, orderDir, term, summitTZ, filters, extraColumns }
+    )(params)(dispatch).then((data) => {
+      dispatch(stopLoading());
+      return data.response;
+    });
+  };
+
+export const bulkUpdateEvents =
+  (summitId, events) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    dispatch(startLoading());
+
+    const normalizedEvents = normalizeBulkEvents(
+      events.map((event) =>
+        normalizeEvent(
+          event,
+          currentSummit.event_types.find((et) => et.id === event.type_id)
+        )
+      )
+    );
+
+    putRequest(
+      null,
+      createAction(UPDATED_REMOTE_EVENTS)({}),
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,
+      {
+        events: normalizedEvents
+      },
+      authErrorHandler
+    )({})(dispatch)
+      .then(() => {
+        dispatch(stopLoading());
+        dispatch(
+          showSuccessMessage(
+            T.translate("bulk_actions_page.messages.update_success"),
+            () => history.push(`/app/summits/${currentSummit.id}/events/`)
+          )
+        );
+        const {
+          currentEventListState: {
+            term,
+            page,
+            perPage,
+            order,
+            orderDir,
+            filters,
+            extraColumns
+          }
+        } = getState();
+        dispatch(
+          getEvents(term, page, perPage, order, orderDir, filters, extraColumns)
+        );
+      })
+      .catch(() => {
+        console.log("ERROR");
+      });
+  };
+
+export const getEventsForOccupancy =
+  (
+    term = null,
+    roomId = null,
+    currentEvents = false,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "start_date",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filter = [];
+    const summitTZ = currentSummit.time_zone.name;
+    let endPoint = "events/published";
+
+    dispatch(startLoading());
+
+    // search
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`title=@${escapedTerm},speaker=@${escapedTerm}`);
+    }
+
+    // room filter
+    if (roomId != null) {
+      endPoint = `locations/${roomId}/${endPoint}`;
+    }
+
+    // only current events
+    if (currentEvents) {
+      const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
+      const from_date = now - FIFTEEN_MINUTES; // minus 15min
+      const to_date = now + FIFTEEN_MINUTES; // plus 15min
+      filter.push(`start_date<=${to_date}`);
+      filter.push(`end_date>=${from_date}`);
+    }
+
+    const params = {
+      expand: "speakers, location, track",
+      page,
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_EVENTS_FOR_OCCUPANCY),
+      createAction(RECEIVE_EVENTS_FOR_OCCUPANCY),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/${endPoint}`,
+      authErrorHandler,
+      { order, orderDir, term, roomId, currentEvents, summitTZ }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const getEventsForOccupancyCSV =
+  (
+    term = null,
+    roomId = null,
+    currentEvents = false,
+    order = "start_date",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filter = [];
+    const summitTZ = currentSummit.time_zone.name;
+
+    dispatch(startLoading());
+
+    filter.push("published==1");
+
+    // search
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`title=@${escapedTerm},speaker=@${escapedTerm}`);
+    }
+
+    // room filter
+    if (roomId != null) {
+      filter.push(`location_id==${roomId}`);
+    }
+
+    // only current events
+    if (currentEvents) {
+      const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
+      const from_date = now - FIFTEEN_MINUTES; // minus 15min
+      const to_date = now + FIFTEEN_MINUTES; // plus 15min
+      filter.push(`start_date<=${to_date}`);
+      filter.push(`end_date>=${from_date}`);
+    }
+
+    const params = {
+      access_token: accessToken
+    };
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    params.fields =
+      "start_date,title,track,occupancy,location_name,speaker_fullnames";
+
+    const filename = `summit-${currentSummit.slug}-rooms-occupancy.csv`;
+
+    dispatch(
+      getCSV(
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
+        params,
+        filename
+      )
+    );
+  };
+
+export const getCurrentEventForOccupancy =
+  (roomId, eventId = null) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filter = [];
+    const summitTZ = currentSummit.time_zone.name;
+    let endPoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}`;
+
+    dispatch(startLoading());
+
+    const params = {
+      expand: "speakers, location",
+      page: 1,
+      per_page: 100,
+      access_token: accessToken
+    };
+
+    if (eventId) {
+      endPoint += `/events/${eventId}`;
+    } else {
+      endPoint += `/locations/${roomId}/events/published`;
+
+      // only current events
+      const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
+      filter.push(`start_date<=${now}`);
+      filter.push(`end_date>=${now}`);
+      params["filter[]"] = filter;
+    }
+
+    return getRequest(
+      createAction(REQUEST_CURRENT_EVENT_FOR_OCCUPANCY),
+      createAction(RECEIVE_CURRENT_EVENT_FOR_OCCUPANCY),
+      endPoint,
+      authErrorHandler,
+      { summitTZ }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const getActionTypes =
+  (selectionPlanId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      per_page: 100,
+      page: 1,
+      order: "+order",
+      access_token: accessToken
+    };
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_ACTION_TYPES),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-presentation-action-types`,
+      authErrorHandler
+    )(params)(dispatch);
+  };
+
+export const changeFlag =
+  (isCompleted, eventId, typeId, selectionPlanId) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    if (isCompleted) {
+      putRequest(
+        null,
+        createAction(FLAG_CHANGED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/presentations/${eventId}/actions/${typeId}/complete`,
+        {},
+        authErrorHandler
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
+    } else {
+      deleteRequest(
+        null,
+        createAction(FLAG_CHANGED),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/presentations/${eventId}/actions/${typeId}/incomplete`,
+        {},
+        authErrorHandler
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
+    }
+  };
+
+export const getEvent = (eventId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  if (!currentSummit.id) return;
+
+  const params = {
+    access_token: accessToken,
+    expand:
+      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.extra_questions, selection_plan.extra_questions.values,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,created_by,track_chair_scores_avg.ranking_type,actions"
+  };
+
+  dispatch(startLoading());
+  // eslint-disable-next-line consistent-return
+  return getRequest(
+    null,
+    createAction(RECEIVE_EVENT),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    getQAUsersBySummitEvent(currentSummit.id, eventId)(dispatch, getState);
+    dispatch(stopLoading());
+  });
+};
+
+export const fetchExtraQuestions = async (summitId, selectionPlanId) => {
+  const accessToken = await getAccessTokenSafely();
+
+  return fetch(
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plans/${selectionPlanId}/extra-questions?access_token=${accessToken}&expand=values`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => json.data)
+    .catch(fetchErrorHandler);
+};
+
+export const fetchExtraQuestionsAnswers = async (
+  summitId,
+  selectionPlanId,
+  eventId
+) => {
+  const accessToken = await getAccessTokenSafely();
+
+  return fetch(
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/presentations/${eventId}/extra-questions?access_token=${accessToken}&filter=selection_plan_id==${selectionPlanId}`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => json.data)
+    .catch(fetchErrorHandler);
+};
+
+export const resetEventForm = () => (dispatch) => {
+  dispatch(createAction(RESET_EVENT_FORM)({}));
+};
+
+const publishEvent =
+  (entity, cb = null) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const { type_id } = entity;
+    const type = currentSummit.event_types.find((e) => e.id === type_id);
+
+    const params = {
+      access_token: accessToken
+    };
+
+    putRequest(
+      null,
+      createAction(EVENT_PUBLISHED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/publish`,
+      {
+        location_id: entity.location_id,
+        start_date: entity.start_date,
+        end_date: entity.end_date
+      },
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      if (
+        type.hasOwnProperty("allows_publishing_dates") &&
+        type.allows_publishing_dates
+      ) {
+        dispatch(checkProximityEvents(entity, true, cb));
+      } else {
+        const success_message = {
+          title: T.translate("general.done"),
+          html: T.translate("edit_event.saved_and_published"),
+          type: "success"
+        };
+        dispatch(showMessage(success_message, cb));
+      }
+    });
+  };
+
+export const saveEvent = (entity, publish) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const { type_id } = entity;
+  const type = currentSummit.event_types.find((e) => e.id === type_id);
+
+  dispatch(startLoading());
+
+  const normalizedEntity = normalizeEvent(entity, type, currentSummit);
+
+  const params = {
+    access_token: accessToken,
+    expand:
+      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions"
+  };
+
+  if (entity.id) {
+    return putRequest(
+      createAction(UPDATE_EVENT),
+      createAction(EVENT_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then(() => {
+      if (publish) {
+        dispatch(publishEvent(normalizedEntity));
+      } else {
+        dispatch(showSuccessMessage(T.translate("edit_event.event_saved")));
+      }
+      dispatch(
+        getAuditLog(
+          [`event_id==${entity.id}`, "class_name==SummitEventAuditLog"],
+          null,
+          DEFAULT_CURRENT_PAGE,
+          DEFAULT_PER_PAGE
+        )
+      );
+    });
+  }
+
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_event.event_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(UPDATE_EVENT),
+    createAction(EVENT_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then((payload) => {
+    if (publish) {
+      normalizedEntity.id = payload.response.id;
+      dispatch(
+        publishEvent(normalizedEntity, () => {
+          history.push(
+            `/app/summits/${currentSummit.id}/events/${payload.response.id}`
+          );
+        })
+      );
+    } else
+      dispatch(
+        showMessage(success_message, () => {
+          history.push(
+            `/app/summits/${currentSummit.id}/events/${payload.response.id}`
+          );
+        })
+      );
+  });
+};
+
+export const cloneEvent = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_event.event_cloned"),
+    type: "success"
+  };
+
+  return postRequest(
+    null,
+    createAction(EVENT_CLONED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/clone`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then((payload) => {
+    dispatch(
+      showMessage(success_message, () => {
+        history.push(
+          `/app/summits/${currentSummit.id}/events/${payload.response.id}`
+        );
+      })
+    );
+  });
+};
+
+export const saveOccupancy = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  putRequest(
+    createAction(UPDATE_EVENT),
+    createAction(EVENT_UPDATED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}`,
+    { id: entity.id, occupancy: entity.occupancy },
+    authErrorHandler,
+    entity
+  )(params)(dispatch);
+};
+
+export const checkProximityEvents =
+  (event, showSuccessMessage = true, cb = null) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_event.saved_and_published"),
+      type: "success"
+    };
+
+    if (
+      !event.hasOwnProperty("speakers") ||
+      (event.speakers.length === 0 && !event.moderator_speaker_id)
+    ) {
+      if (showSuccessMessage) {
+        dispatch(showMessage(success_message, cb));
+      } else {
+        dispatch(stopLoading());
+      }
+      return;
+    }
+
+    const speaker_ids = event.speakers.map((s) => `speaker_id==${s}`);
+    if (event.moderator_speaker_id) {
+      speaker_ids.push(`speaker_id==${event.moderator_speaker_id}`);
+    }
+
+    const from_date = event.start_date - HOUR_AND_HALF; // minus 1.5hrs
+    const to_date = event.end_date + HOUR_AND_HALF; // plus 1.5hrs
+
+    const params = {
+      page: 1,
+      per_page: 100,
+      access_token: accessToken,
+      expand: "location",
+      "filter[]": [
+        speaker_ids.join(","),
+        `end_date>=${from_date}`,
+        `start_date<=${to_date}`
+      ]
+    };
+
+    // eslint-disable-next-line consistent-return
+    return getRequest(
+      null,
+      createAction(RECEIVE_PROXIMITY_EVENTS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/published`,
+      authErrorHandler
+    )(params)(dispatch).then((payload) => {
+      const proximity_events = payload.response.data.filter(
+        (e) => e.id !== event.id
+      );
+
+      if (proximity_events.length > 0) {
+        success_message.width = null;
+        success_message.type = "warning";
+        success_message.html += `<br/><br/><strong>${T.translate(
+          "edit_event.proximity_alert"
+        )}</strong><br/>`;
+
+        Object.entries(proximity_events).forEach(([key, prox_event]) => {
+          const event_date = epochToMomentTimeZone(
+            prox_event.start_date,
+            currentSummit.time_zone_id
+          ).format("M/D h:mm a");
+          const locationName = prox_event.location
+            ? prox_event.location.name
+            : "TBD";
+          success_message.html += `<small><i>"${prox_event.title}"</i> at ${event_date} in ${locationName}</small><br/>`;
+        });
+        dispatch(showMessage(success_message, cb));
+      } else if (showSuccessMessage) {
+        dispatch(showMessage(success_message, cb));
+      } else {
+        dispatch(stopLoading());
+      }
+    });
+  };
+
+export const attachFile =
+  (entity, file, attr) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const normalizedEntity = normalizeEvent(entity);
+
+    const params = {
+      access_token: accessToken
+    };
+
+    const uploadFile = attr === "file" ? uploadFile : uploadImage;
+
+    if (entity.id) {
+      return dispatch(uploadFile(entity, file));
+    }
+    return postRequest(
+      createAction(UPDATE_EVENT),
+      createAction(EVENT_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(uploadFile(payload.response, file));
+    });
+  };
+
+const uploadFile = (entity, file) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  postRequest(
+    null,
+    createAction(FILE_ATTACHED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/attachment`,
+    file,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    history.push(`/app/summits/${currentSummit.id}/events/${entity.id}`);
+    dispatch(stopLoading());
+  });
+};
+
+const uploadImage = (entity, file) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  postRequest(
+    null,
+    createAction(IMAGE_ATTACHED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/image`,
+    file,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    history.push(`/app/summits/${currentSummit.id}/events/${entity.id}`);
+    dispatch(stopLoading());
+  });
+};
+
+export const removeImage = (eventId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return deleteRequest(
+    null,
+    createAction(IMAGE_DELETED)({}),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/image`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+const normalizePresentationAllowedQuestionFields = (entity, summit) => {
+  if (!entity.selection_plan_id) return;
+
+  const selectionPlan = summit.selection_plans.find(
+    (sp) => sp.id === entity.selection_plan_id
+  );
+
+  fieldsBoundToQuestions.forEach((item) => {
+    if (!selectionPlan.allowed_presentation_questions.includes(item)) {
+      delete entity[item];
+    }
+  });
+};
+
+export const deleteEvent = (eventId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return deleteRequest(
+    null,
+    createAction(EVENT_DELETED)({ eventId }),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const exportEvents =
+  (
+    term = null,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    extraFilters = {}
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filename = `${currentSummit.name}-Activities.csv`;
+    const params = {
+      access_token: accessToken
+    };
+
+    const filter = parseFilters(extraFilters, term);
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order =
+        order === "created_by_fullname"
+          ? `${orderDirSign}${order},${orderDirSign}created_by_email`
+          : `${orderDirSign}${order}`;
+    }
+
+    dispatch(
+      getCSV(
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
+        params,
+        filename
+      )
+    );
+  };
+
+export const importMP4AssetsFromMUX =
+  (MUXTokenId, MUXTokenSecret, emailTo) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+    return postRequest(
+      null,
+      createAction(IMPORT_FROM_MUX),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/presentations/all/import/mux`,
+      {
+        mux_token_id: MUXTokenId,
+        mux_token_secret: MUXTokenSecret,
+        email_to: emailTo
+      },
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("event_list.mux_import_done"),
+        type: "success"
+      };
+
+      dispatch(stopLoading());
+      dispatch(
+        showMessage(success_message, () => {
+          window.location.reload();
+        })
+      );
+    });
+  };
+
+export const importEventsCSV =
+  (file, send_speaker_email) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = {
+      access_token: accessToken
+    };
+
+    postFile(
+      null,
+      createAction(EVENTS_IMPORTED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
+      file,
+      { send_speaker_email },
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+      window.location.reload();
+    });
+  };
+
 export const getEventFeedback =
   (
     eventId,
     term = null,
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "created",
-    orderDir = 1
+    orderDir = DEFAULT_ORDER_DIR
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -1321,14 +1418,13 @@ export const getEventFeedback =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      let searchString =
-        `note=@${escapedTerm},` + `owner_full_name=@${escapedTerm},`;
+      const searchString = `note=@${escapedTerm},owner_full_name=@${escapedTerm},`;
 
       filter.push(searchString);
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "owner"
@@ -1340,8 +1436,8 @@ export const getEventFeedback =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -1357,7 +1453,7 @@ export const getEventFeedback =
   };
 
 export const getEventFeedbackCSV =
-  (eventId, term = null, order = "created", orderDir = 1) =>
+  (eventId, term = null, order = "created", orderDir = DEFAULT_ORDER_DIR) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -1369,8 +1465,7 @@ export const getEventFeedbackCSV =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      let searchString =
-        `note=@${escapedTerm},` + `owner_full_name=@${escapedTerm},`;
+      const searchString = `note=@${escapedTerm},owner_full_name=@${escapedTerm},`;
 
       filter.push(searchString);
     }
@@ -1387,11 +1482,11 @@ export const getEventFeedbackCSV =
     // order
     if (order != null && orderDir != null) {
       if (order === "created_date") order = "created";
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
     }
 
-    const filename = currentSummit.name + "-event-feedback.csv";
+    const filename = `${currentSummit.name}-event-feedback.csv`;
 
     dispatch(
       getCSV(
@@ -1429,10 +1524,10 @@ export const getEventComments =
   (
     eventId,
     term = null,
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = 1,
+    orderDir = DEFAULT_ORDER_DIR,
     filters = {}
   ) =>
   async (dispatch, getState) => {
@@ -1447,8 +1542,7 @@ export const getEventComments =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      let searchString =
-        `body=@${escapedTerm},` + `creator_id==${escapedTerm},`;
+      const searchString = `body=@${escapedTerm},creator_id==${escapedTerm},`;
       filter.push(searchString);
     }
 
@@ -1456,7 +1550,7 @@ export const getEventComments =
     // `is_activity==${escapedTerm},`;
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "creator"
@@ -1468,8 +1562,8 @@ export const getEventComments =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${
         order === "owner_full_name" ? "creator_id" : order
       }`;
     }
@@ -1501,8 +1595,8 @@ export const queryEvents = _.debounce(async (summitId, input, callback) => {
       callback(options);
     })
     .catch(fetchErrorHandler);
-}, 500);
+}, DEBOUNCE_WAIT);
 
-export const changeEventListSearchTerm = (term) => (dispatch, getState) => {
+export const changeEventListSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_SEARCH_TERM)({ term }));
 };
