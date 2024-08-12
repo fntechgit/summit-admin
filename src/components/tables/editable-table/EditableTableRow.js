@@ -58,14 +58,14 @@ function EditableTableRow(props) {
 
   return (
     <>
-      <td className={styles.colCheckbox}>
+      <td className={styles.checkColumn}>
         <input
           type="checkbox"
           onChange={() => setChecked(!checked)}
           checked={checked}
         />
       </td>
-      <td className={styles.colId}>{row.id}</td>
+      <td className={styles.idColumn}>{row.id}</td>
       {selected.find((s) => s.id === row.id) && editEnabled && checked ? (
         <>
           {columns.map((col, index) => {

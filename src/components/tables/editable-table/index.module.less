@@ -15,8 +15,16 @@
       text-overflow: ellipsis;
       vertical-align: middle;
 
-      .colCheckbox,
-      .colId {
+      &.checkColumn {
+        display: table-cell;
+        text-align: center;
+        position: sticky;
+        z-index: 5;
+        left: 0;
+        background-color: inherit;
+        min-width: auto;
+      }
+      &.idColumn {
         min-width: auto;
       }
 
