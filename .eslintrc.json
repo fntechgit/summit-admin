@@ -68,7 +68,11 @@
     "no-throw-literal": "warn",
     "prefer-const": "warn",
     "no-nested-ternary": "warn",
-    "default-case": "warn"
+    "default-case": "warn",
+    "consistent-return": "warn",
+    "no-undef": "warn",
+    "no-restricted-syntax": "warn",
+    "guard-for-in": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }

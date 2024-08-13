@@ -9,11 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -32,6 +31,7 @@ import {
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import history from "../history";
 import {
   checkOrFilter,
   getAccessTokenSafely,
@@ -112,7 +112,7 @@ export const getEvents =
         "speakers.none,selection_plan.none,track.none,type.none,created_by.none,location.none,media_uploads.media_upload_type.none",
       fields:
         "location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,media_uploads.id,media_uploads.created,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id",
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -124,7 +124,7 @@ export const getEvents =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] =
+      params.order =
         order === "created_by_fullname"
           ? `${orderDirSign}${order},${orderDirSign}created_by_email`
           : `${orderDirSign}${order}`;
@@ -184,7 +184,7 @@ export const getEventsForOccupancy =
 
     const params = {
       expand: "speakers, location, track",
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -196,7 +196,7 @@ export const getEventsForOccupancy =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -227,7 +227,7 @@ export const getEventsForOccupancyCSV =
 
     dispatch(startLoading());
 
-    filter.push(`published==1`);
+    filter.push("published==1");
 
     // search
     if (term) {
@@ -260,10 +260,10 @@ export const getEventsForOccupancyCSV =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
-    params["fields"] =
+    params.fields =
       "start_date,title,track,occupancy,location_name,speaker_fullnames";
 
     const filename = `summit-${currentSummit.slug}-rooms-occupancy.csv`;
@@ -297,9 +297,9 @@ export const getCurrentEventForOccupancy =
     };
 
     if (eventId) {
-      endPoint = endPoint + `/events/${eventId}`;
+      endPoint += `/events/${eventId}`;
     } else {
-      endPoint = endPoint + `/locations/${roomId}/events/published`;
+      endPoint += `/locations/${roomId}/events/published`;
 
       // only current events
       const now = moment().tz(summitTZ).unix(); // now in summit timezone converted to epoch
@@ -464,7 +464,7 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
       }
       dispatch(
         getAuditLog(
-          [`event_id==${entity.id}`, `class_name==SummitEventAuditLog`],
+          [`event_id==${entity.id}`, "class_name==SummitEventAuditLog"],
           null,
           1,
           10
@@ -625,7 +625,7 @@ export const checkProximityEvents =
       return;
     }
 
-    let speaker_ids = event.speakers.map((s) => `speaker_id==${s}`);
+    const speaker_ids = event.speakers.map((s) => `speaker_id==${s}`);
     if (event.moderator_speaker_id) {
       speaker_ids.push(`speaker_id==${event.moderator_speaker_id}`);
     }
@@ -662,7 +662,7 @@ export const checkProximityEvents =
           "edit_event.proximity_alert"
         )}</strong><br/>`;
 
-        for (var i in proximity_events) {
+        for (const i in proximity_events) {
           const prox_event = proximity_events[i];
           const event_date = epochToMomentTimeZone(
             prox_event.start_date,
@@ -698,18 +698,17 @@ export const attachFile =
 
     if (entity.id) {
       return dispatch(uploadFile(entity, file));
-    } else {
-      return postRequest(
-        createAction(UPDATE_EVENT),
-        createAction(EVENT_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
-        dispatch(uploadFile(payload.response, file));
-      });
     }
+    return postRequest(
+      createAction(UPDATE_EVENT),
+      createAction(EVENT_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(uploadFile(payload.response, file));
+    });
   };
 
 const uploadFile = (entity, file) => async (dispatch, getState) => {
@@ -790,19 +789,21 @@ const normalizePresentationAllowedQuestionFields = (entity, summit) => {
 
 export const normalizeEvent = (entity, eventTypeConfig, summit) => {
   const normalizedEntity = { ...entity };
-  if (!normalizedEntity.start_date) delete normalizedEntity["start_date"];
-  if (!normalizedEntity.end_date) delete normalizedEntity["end_date"];
-  if (!normalizedEntity.rsvp_link) delete normalizedEntity["rsvp_link"];
+  if (!normalizedEntity.start_date) delete normalizedEntity.start_date;
+  if (!normalizedEntity.end_date) delete normalizedEntity.end_date;
+  if (!normalizedEntity.rsvp_link) delete normalizedEntity.rsvp_link;
   if (!normalizedEntity.rsvp_template_id)
-    delete normalizedEntity["rsvp_template_id"];
+    delete normalizedEntity.rsvp_template_id;
 
-  if (normalizedEntity.hasOwnProperty("links"))
-    delete normalizedEntity["links"];
+  if (normalizedEntity.hasOwnProperty("links")) delete normalizedEntity.links;
+
+  if (normalizedEntity.hasOwnProperty("level") && normalizedEntity.level === "")
+    delete normalizedEntity.level;
 
   if (normalizedEntity.hasOwnProperty("tags"))
     normalizedEntity.tags = normalizedEntity.tags.map((t) => {
       if (typeof t === "string") return t;
-      else return t.tag;
+      return t.tag;
     });
 
   if (normalizedEntity.hasOwnProperty("sponsors"))
@@ -905,7 +906,7 @@ export const exportEvents =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filename = currentSummit.name + "-Activities.csv";
+    const filename = `${currentSummit.name}-Activities.csv`;
     const params = {
       access_token: accessToken
     };
@@ -919,7 +920,7 @@ export const exportEvents =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] =
+      params.order =
         order === "created_by_fullname"
           ? `${orderDirSign}${order},${orderDirSign}created_by_email`
           : `${orderDirSign}${order}`;
@@ -985,7 +986,7 @@ export const importEventsCSV =
       createAction(EVENTS_IMPORTED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
       file,
-      { send_speaker_email: send_speaker_email },
+      { send_speaker_email },
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -1248,11 +1249,11 @@ const parseFilters = (filters, term = null) => {
   }
 
   if (filters.is_public) {
-    filter.push(`is_public==1`);
+    filter.push("is_public==1");
   }
 
   if (filters.is_activity) {
-    filter.push(`is_activity==1`);
+    filter.push("is_activity==1");
   }
 
   if (
@@ -1276,10 +1277,11 @@ const parseFilters = (filters, term = null) => {
         ? "||"
         : "&&";
     filter.push(
-      `${filters.media_upload_with_type.operator}` +
-        filters.media_upload_with_type.value
-          .map((v) => v.id)
-          .join(concatOperator)
+      `${
+        filters.media_upload_with_type.operator
+      }${filters.media_upload_with_type.value
+        .map((v) => v.id)
+        .join(concatOperator)}`
     );
   }
 
@@ -1321,14 +1323,14 @@ export const getEventFeedback =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      let searchString =
+      const searchString =
         `note=@${escapedTerm},` + `owner_full_name=@${escapedTerm},`;
 
       filter.push(searchString);
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "owner"
@@ -1341,7 +1343,7 @@ export const getEventFeedback =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -1369,7 +1371,7 @@ export const getEventFeedbackCSV =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      let searchString =
+      const searchString =
         `note=@${escapedTerm},` + `owner_full_name=@${escapedTerm},`;
 
       filter.push(searchString);
@@ -1388,10 +1390,10 @@ export const getEventFeedbackCSV =
     if (order != null && orderDir != null) {
       if (order === "created_date") order = "created";
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
-    const filename = currentSummit.name + "-event-feedback.csv";
+    const filename = `${currentSummit.name}-event-feedback.csv`;
 
     dispatch(
       getCSV(
@@ -1447,7 +1449,7 @@ export const getEventComments =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      let searchString =
+      const searchString =
         `body=@${escapedTerm},` + `creator_id==${escapedTerm},`;
       filter.push(searchString);
     }
@@ -1456,7 +1458,7 @@ export const getEventComments =
     // `is_activity==${escapedTerm},`;
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "creator"
@@ -1469,7 +1471,7 @@ export const getEventComments =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${
+      params.order = `${orderDirSign}${
         order === "owner_full_name" ? "creator_id" : order
       }`;
     }
