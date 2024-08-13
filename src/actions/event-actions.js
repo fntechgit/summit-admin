@@ -990,9 +990,18 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
       entity
     )(params)(dispatch).then(() => {
       if (publish) {
-        dispatch(publishEvent(normalizedEntity));
+        dispatch(publishEvent(normalizedEntity, () => location.reload()));
       } else {
-        dispatch(showSuccessMessage(T.translate("edit_event.event_saved")));
+        const success_message = {
+          title: T.translate("general.done"),
+          html: T.translate("edit_event.event_saved"),
+          type: "success"
+        };
+        dispatch(
+          showMessage(success_message, () => {
+            location.reload();
+          })
+        );
       }
       dispatch(
         getAuditLog(

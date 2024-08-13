@@ -114,3 +114,5 @@ export const DECIMAL_DIGITS = 2;
 export const DEFAULT_Z_INDEX = 1;
 
 export const HIGH_Z_INDEX = 9999;
+
+export const DELTA_SECS = 300;
