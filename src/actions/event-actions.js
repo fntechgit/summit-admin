@@ -415,7 +415,8 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
     delete normalizedEntity.rsvp_template_id;
 
   if (normalizedEntity.hasOwnProperty("links")) delete normalizedEntity.links;
-
+  if (normalizedEntity.hasOwnProperty("level") && normalizedEntity.level === "")
+    delete normalizedEntity.level;
   if (normalizedEntity.hasOwnProperty("tags"))
     normalizedEntity.tags = normalizedEntity.tags.map((t) => {
       if (typeof t === "string") return t;
