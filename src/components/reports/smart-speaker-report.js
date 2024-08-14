@@ -69,7 +69,7 @@ const fieldNames = [
   },
   { label: "Phone #", key: "attendances_phonenumber", sortable: true },
   { label: "Presentations", key: "presentationtitles", sortable: true },
-  { label: "Submission Plan", key: "submissionplan", sortable: false },
+  { label: "Selection Plan", key: "selectionplan", sortable: false },
   { label: "Submission Status", key: "submissionstatus", sortable: false },
   { label: "Selection Status", key: "selectionstatus", sortable: false }
 ];
@@ -150,9 +150,9 @@ class SmartSpeakerReport extends React.Component {
       );
     }
 
-    if (showFields.includes("submissionplan")) {
+    if (showFields.includes("selectionplan")) {
       reportData.push(
-        `submissionplan: submissionPlan (summitId:${currentSummit.id})`
+        `selectionplan: selectionPlan (summitId:${currentSummit.id})`
       );
     }
 
@@ -199,7 +199,7 @@ class SmartSpeakerReport extends React.Component {
   }
 
   translateFilters = (reportQueryFilters) => {
-    const { selection_status, submission_status, submission_plan } =
+    const { selection_status, submission_status, selection_plan } =
       reportQueryFilters;
     const newFilters = prepareReportFilters(reportQueryFilters);
 
@@ -211,9 +211,9 @@ class SmartSpeakerReport extends React.Component {
       newFilters.submissionStatus = submission_status;
     }
 
-    if (submission_plan) {
-      delete newFilters.submission_plan;
-      newFilters.submissionPlan = submission_plan;
+    if (selection_plan) {
+      delete newFilters.selection_plan;
+      newFilters.selectionPlanIdIn = selection_plan;
     }
 
     return newFilters;
@@ -399,6 +399,6 @@ export default wrapReport(SmartSpeakerReport, {
     "published_in",
     "selection_status",
     "submission_status",
-    "submission_plan"
+    "selection_plan"
   ]
 });

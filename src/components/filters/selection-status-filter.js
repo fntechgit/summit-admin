@@ -13,6 +13,7 @@
 
 import React from "react";
 import Select from "react-select";
+import T from "i18n-react/dist/i18n-react";
 
 export default class SelectionStatusFilter extends React.Component {
   constructor(props) {
@@ -36,12 +37,34 @@ export default class SelectionStatusFilter extends React.Component {
     const { value, onChange, ...rest } = this.props;
 
     const options = [
-      { value: "selected", label: "selected" },
-      { value: "accepted", label: "accepted" },
-      { value: "rejected", label: "rejected" },
-      { value: "alternate", label: "alternate" },
-      { value: "lightning-accepted", label: "lightning-accepted" },
-      { value: "lightning-alternate", label: "lightning-alternate" }
+      {
+        value: "selected",
+        label: T.translate("filters.selection_status_filter.options.selected")
+      },
+      {
+        value: "accepted",
+        label: T.translate("filters.selection_status_filter.options.accepted")
+      },
+      {
+        value: "rejected",
+        label: T.translate("filters.selection_status_filter.options.rejected")
+      },
+      {
+        value: "alternate",
+        label: T.translate("filters.selection_status_filter.options.alternate")
+      },
+      {
+        value: "lightning-accepted",
+        label: T.translate(
+          "filters.selection_status_filter.options.lightning-accepted"
+        )
+      },
+      {
+        value: "lightning-alternate",
+        label: T.translate(
+          "filters.selection_status_filter.options.lightning-alternate"
+        )
+      }
     ];
 
     let theValue = null;
@@ -54,7 +77,7 @@ export default class SelectionStatusFilter extends React.Component {
 
     return (
       <div className="selection-status-filter">
-        <label>Filter by Selection Status</label>
+        <label>{T.translate("filters.selection_status_filter.title")}</label>
         <Select
           value={theValue}
           id="selection-status-filter"

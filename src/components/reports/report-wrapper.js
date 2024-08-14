@@ -5,6 +5,7 @@ import { Breadcrumb } from "react-breadcrumbs";
 import { Pagination } from "react-bootstrap";
 import {
   AjaxLoader,
+  Dropdown,
   FreeTextSearch
 } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react/dist/i18n-react";
@@ -308,18 +309,29 @@ const wrapReport = (ReportComponent, specs) => {
         );
       }
 
-      if (specs.filters.includes("submission_plan")) {
-        const filterValue = filters.hasOwnProperty("submission_plan")
-          ? filters.submission_plan
-          : null;
+      if (specs.filters.includes("selection_plan")) {
+        const filterValue = filters.hasOwnProperty("selection_plan")
+          ? filters.selection_plan
+          : [];
+
+        const selection_plans_ddl = currentSummit.selection_plans.map((et) => ({
+          value: et.id,
+          label: et.name
+        }));
+
         filterHtml.push(
-          <div className="col-md-3" key="submission-plan-filter">
-            <label>Filter by Submission Plan</label>
-            <FreeTextSearch
-              value={filterValue ?? ""}
-              onSearch={(value) =>
-                this.handleFilterChange("submission_plan", value)
+          <div className="col-md-3" key="selection-plan-filter">
+            <label>{T.translate("reports.selection_plan_filter")}</label>
+            <Dropdown
+              id="selection_plan_id_filter"
+              placeholder={T.translate("reports.placeholders.selection_plan")}
+              value={filterValue}
+              onChange={({ target: { value } }) =>
+                this.handleFilterChange("selection_plan", value, true)
               }
+              options={selection_plans_ddl}
+              isClearable
+              isMulti
             />
           </div>
         );
@@ -327,12 +339,13 @@ const wrapReport = (ReportComponent, specs) => {
 
       if (specs.filters.includes("selection_status")) {
         const filterValue = filters.hasOwnProperty("selection_status")
-          ? filters.selection_status
-          : null;
+          ? filters.selection_status?.split(",") ?? []
+          : [];
         filterHtml.push(
           <div className="col-md-3" key="selection-status-filter">
             <SelectionStatusFilter
               value={filterValue}
+              isMulti
               onChange={(value) => {
                 this.handleFilterChange("selection_status", value);
               }}
@@ -343,12 +356,13 @@ const wrapReport = (ReportComponent, specs) => {
 
       if (specs.filters.includes("submission_status")) {
         const filterValue = filters.hasOwnProperty("submission_status")
-          ? filters.submission_status
-          : null;
+          ? filters.submission_status?.split(",") ?? []
+          : [];
         filterHtml.push(
           <div className="col-md-3" key="submission-status-filter">
             <SubmissionStatusFilter
               value={filterValue}
+              isMulti
               onChange={(value) => {
                 this.handleFilterChange("submission_status", value);
               }}
