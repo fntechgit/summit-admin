@@ -116,3 +116,9 @@ export const DEFAULT_Z_INDEX = 1;
 export const HIGH_Z_INDEX = 9999;
 
 export const DELTA_SECS = 300;
+
+export const EVENT_TYPE_PRESENTATION = "PresentationType";
+
+export const EVENT_TYPE_FISHBOWL = "Fishbowl";
+
+export const EVENT_TYPE_GROUP_EVENTS = "Groups Events";
