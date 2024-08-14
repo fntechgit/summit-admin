@@ -12,7 +12,7 @@
     "test": "yarn jest",
     "prepare": "husky",
     "lint": "eslint src",
-    "precommit": "yarn lint-staged --diff=origin/master --verbose"
+    "precommit": "yarn lint-staged --diff=origin/production --verbose"
   },
   "lint-staged": {
     "*.{js,jsx}": "eslint --fix",

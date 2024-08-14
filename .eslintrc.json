@@ -50,7 +50,9 @@
         "args": "after-used",
         "argsIgnorePattern": "^_"
       }
-    ]
+    ],
+    "default-param-last": "warn",
+    "default-case": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }

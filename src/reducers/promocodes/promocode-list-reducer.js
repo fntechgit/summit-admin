@@ -9,8 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_PROMOCODES,
   RECEIVE_PROMOCODE_META,
@@ -21,7 +22,6 @@ import {
 import { ALL_FILTER } from "../../utils/constants";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const FILTERS_DEFAULT_STATE = {
   assigneeFilter: null,
@@ -60,13 +60,13 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_PROMOCODES: {
-      let { order, orderDir, term, filters, extraColumns } = payload;
+      const { order, orderDir, term, filters, extraColumns } = payload;
 
       return { ...state, order, orderDir, term, filters, extraColumns };
     }
     case RECEIVE_PROMOCODE_META: {
       let types = [...DEFAULT_STATE.allTypes];
-      let allClasses = [...DEFAULT_STATE.allClasses, ...payload.response];
+      const allClasses = [...DEFAULT_STATE.allClasses, ...payload.response];
 
       payload.response
         .filter((t) => t.hasOwnProperty("type"))
@@ -74,26 +74,26 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           types = types.concat(t.type);
         });
 
-      let unique_types = [...new Set(types)];
+      const unique_types = [...new Set(types)];
 
-      return { ...state, allTypes: unique_types, allClasses: allClasses };
+      return { ...state, allTypes: unique_types, allClasses };
     }
     case RECEIVE_PROMOCODES: {
-      let { current_page, total, last_page } = payload.response;
-      let promocodes = payload.response.data.map((p) => {
-        let owner = "",
-          owner_email = "";
+      const { current_page, total, last_page } = payload.response;
+      const promocodes = payload.response.data.map((p) => {
+        let owner = "";
+        let owner_email = "";
 
         switch (p.class_name) {
           case "MEMBER_DISCOUNT_CODE":
           case "MEMBER_PROMO_CODE":
             if (p.owner) {
-              owner = p.owner.first_name + " " + p.owner.last_name;
+              owner = `${p.owner.first_name} ${p.owner.last_name}`;
               owner_email = p.owner.email;
             } else {
               owner =
                 p.first_name && p.last_name
-                  ? p.first_name + " " + p.last_name
+                  ? `${p.first_name} ${p.last_name}`
                   : "";
               owner_email = p.email ? p.email : "";
             }
@@ -101,7 +101,7 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           case "SPEAKER_DISCOUNT_CODE":
           case "SPEAKER_PROMO_CODE":
             if (p.speaker) {
-              owner = p.speaker.first_name + " " + p.speaker.last_name;
+              owner = `${p.speaker.first_name} ${p.speaker.last_name}`;
               owner_email = p.speaker.email;
             }
             break;
@@ -132,8 +132,8 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
                   ""
                 )
               : "N/A",
-          owner: owner,
-          owner_email: owner_email,
+          owner: owner || "",
+          owner_email: owner_email || "",
           email_sent: p.email_sent ? "Yes" : "No",
           redeemed: p.redeemed ? "Yes" : "No",
           creator: p.hasOwnProperty("creator")
@@ -144,14 +144,14 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
-        promocodes: promocodes,
+        promocodes,
         currentPage: current_page,
         totalPromocodes: total,
         lastPage: last_page
       };
     }
     case PROMOCODE_DELETED: {
-      let { promocodeId } = payload;
+      const { promocodeId } = payload;
       return {
         ...state,
         promocodes: state.promocodes.filter((p) => p.id !== promocodeId)
