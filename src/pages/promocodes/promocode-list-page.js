@@ -537,7 +537,6 @@ class PromocodeListPage extends React.Component {
 
         {promocodes.length > 0 && (
           <div>
-            {console.log("check.,.", promocodes)}
             <Table
               options={table_options}
               data={promocodes.map((p) => ({
