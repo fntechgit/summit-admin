@@ -24,8 +24,8 @@
     "camelcase": "warn",
     "react/forbid-prop-types": "warn",
     "no-magic-numbers": [
-      "error",
-      { "ignoreArrayIndexes": true, "ignore": [0] }
+      "warn",
+      { "ignoreArrayIndexes": true, "ignore": [0, 1, -1] }
     ],
     "import/no-dynamic-require": "warn",
     "no-shadow": "warn",
@@ -51,7 +51,23 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    "default-param-last": "warn",
+    "no-restricted-globals": "warn",
+    "jsx-a11y/label-has-associated-control": "warn",
+    "react/jsx-no-bind": "warn",
+    "react/destructuring-assignment": "warn",
+    "jsx-a11y/anchor-is-valid": "warn",
+    "eqeqeq": "warn",
+    "react/button-has-type": "warn",
+    "jsx-a11y/click-events-have-key-events": "warn",
+    "jsx-a11y/no-static-element-interactions": "warn",
+    "react/no-access-state-in-setstate": "warn",
+    "no-useless-concat": "warn",
+    "react/no-unstable-nested-components": "warn",
+    "react/sort-comp": "warn",
+    "array-callback-return": "warn",
+    "no-throw-literal": "warn",
+    "prefer-const": "warn",
+    "no-nested-ternary": "warn",
     "default-case": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]

@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -140,7 +140,7 @@ const fieldNames = [
               >
                 {m.media_upload_type.name} - {m.created}
               </a>
-              <br></br>
+              <br />
             </React.Fragment>
           ))}
         </>
@@ -250,13 +250,13 @@ class SummitEventListPage extends React.Component {
   handleChangeMUXModal(ev) {
     const errors = { ...this.state.errors };
     const muxModalState = { ...this.state.muxModalState };
-    let { value, id } = ev.target;
+    const { value, id } = ev.target;
     errors[id] = "";
     muxModalState[id] = value;
     this.setState({
       ...this.state,
-      muxModalState: muxModalState,
-      errors: errors
+      muxModalState,
+      errors
     });
   }
 
@@ -313,7 +313,7 @@ class SummitEventListPage extends React.Component {
     this.setState({
       ...this.state,
       selectedColumns: extraColumns,
-      enabledFilters: enabledFilters,
+      enabledFilters,
       eventFilters: { ...eventFilters, ...filters }
     });
 
@@ -415,16 +415,16 @@ class SummitEventListPage extends React.Component {
 
   handleDeleteEvent(eventId) {
     const { deleteEvent, events } = this.props;
-    let event = events.find((e) => e.id === eventId);
+    const event = events.find((e) => e.id === eventId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("event_list.delete_event_warning") + " " + event.title,
+      text: `${T.translate("event_list.delete_event_warning")} ${event.title}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteEvent(eventId);
       }
@@ -483,7 +483,7 @@ class SummitEventListPage extends React.Component {
   }
 
   handleTagOrSpeakerFilterChange(ev) {
-    let { value, id } = ev.target;
+    const { value, id } = ev.target;
     this.setState({
       ...this.state,
       eventFilters: { ...this.state.eventFilters, [id]: value }
@@ -518,7 +518,7 @@ class SummitEventListPage extends React.Component {
             : Array.isArray(this.state.eventFilters[removedFilter])
             ? []
             : "";
-        let newEventFilters = {
+        const newEventFilters = {
           ...this.state.eventFilters,
           [removedFilter]: defaultValue
         };
@@ -627,7 +627,7 @@ class SummitEventListPage extends React.Component {
         ...this.state,
         eventFilters: { ...defaultFilters, ...newEventFilters },
         enabledFilters: filterCriteria ? filterCriteria.enabled_filters : [],
-        selectedFilterCriteria: filterCriteria ? filterCriteria : null
+        selectedFilterCriteria: filterCriteria || null
       },
       () =>
         this.props.getEvents(
@@ -719,7 +719,7 @@ class SummitEventListPage extends React.Component {
       .map((l) => ({ label: l.name, value: l.id }));
 
     const selection_status_ddl = [
-      { label: "Accepted", value: "selected" },
+      { label: "Accepted", value: "accepted" },
       { label: "Rejected", value: "rejected" },
       { label: "Alternate", value: "alternate" }
     ];
@@ -922,7 +922,7 @@ class SummitEventListPage extends React.Component {
       (pf) => ({ value: pf.id, label: pf.label })
     );
 
-    let showColumns = fieldNames
+    const showColumns = fieldNames
       .filter((f) => this.state.selectedColumns.includes(f.columnKey))
       .map((f2) => {
         let c = {
@@ -948,8 +948,8 @@ class SummitEventListPage extends React.Component {
           {" "}
           {T.translate("event_list.event_list")} ({totalEvents})
         </h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <FreeTextSearch
               value={term ?? ""}
               placeholder={T.translate("event_list.placeholders.search_events")}
@@ -990,7 +990,7 @@ class SummitEventListPage extends React.Component {
           <div className="col-md-6">
             <OrAndFilter
               value={eventFilters.orAndFilter}
-              entity={"events"}
+              entity="events"
               onChange={(filter) => this.handleOrAndFilter(filter)}
             />
           </div>
@@ -1004,19 +1004,19 @@ class SummitEventListPage extends React.Component {
             />
           </div>
         </div>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <Dropdown
               id="enabled_filters"
-              placeholder={"Enabled Filters"}
+              placeholder="Enabled Filters"
               value={enabledFilters}
               onChange={this.handleFiltersChange}
               options={this.handleDDLSortByLabel(filters_ddl)}
-              isClearable={true}
-              isMulti={true}
+              isClearable
+              isMulti
             />
           </div>
-          <div className={"col-md-6"}>
+          <div className="col-md-6">
             <button
               className="btn btn-primary right-space"
               onClick={this.handleApplyEventFilters}
@@ -1029,9 +1029,9 @@ class SummitEventListPage extends React.Component {
           onSave={this.handleFilterCriteriaSave}
           selectedFilterCriteria={selectedFilterCriteria}
         />
-        <div className={"filters-row"}>
+        <div className="filters-row">
           {enabledFilters.includes("event_type_capacity_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="event_type_capacity_filter"
                 placeholder={T.translate(
@@ -1040,13 +1040,13 @@ class SummitEventListPage extends React.Component {
                 value={eventFilters.event_type_capacity_filter}
                 onChange={this.handleExtraFilterChange}
                 options={ddl_filterByEventTypeCapacity}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("selection_plan_id_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="selection_plan_id_filter"
                 placeholder={T.translate(
@@ -1055,26 +1055,26 @@ class SummitEventListPage extends React.Component {
                 value={eventFilters.selection_plan_id_filter}
                 onChange={this.handleExtraFilterChange}
                 options={selection_plans_ddl}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("location_id_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="location_id_filter"
                 placeholder={T.translate("event_list.placeholders.location")}
                 value={eventFilters.location_id_filter}
                 onChange={this.handleExtraFilterChange}
                 options={location_ddl}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("selection_status_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="selection_status_filter"
                 placeholder={T.translate(
@@ -1083,13 +1083,13 @@ class SummitEventListPage extends React.Component {
                 value={eventFilters.selection_status_filter}
                 onChange={this.handleExtraFilterChange}
                 options={selection_status_ddl}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("published_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <SegmentedControl
                 name="published_filter"
                 options={[
@@ -1120,7 +1120,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("progress_flag") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="progress_flag"
                 placeholder={T.translate(
@@ -1129,52 +1129,52 @@ class SummitEventListPage extends React.Component {
                 value={eventFilters.progress_flag}
                 onChange={this.handleExtraFilterChange}
                 options={progress_flag_ddl}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("track_id_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="track_id_filter"
                 placeholder={T.translate("event_list.placeholders.track")}
                 value={eventFilters.track_id_filter}
                 onChange={this.handleExtraFilterChange}
                 options={track_ddl}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("event_type_id_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="event_type_id_filter"
                 placeholder={T.translate("event_list.placeholders.event_type")}
                 value={eventFilters.event_type_id_filter}
                 onChange={this.handleExtraFilterChange}
                 options={event_type_ddl}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("speaker_id_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <SpeakerInput
                 id="speaker_id_filter"
                 placeholder={T.translate("event_list.placeholders.speaker")}
                 value={eventFilters.speaker_id_filter}
                 onChange={this.handleTagOrSpeakerFilterChange}
                 summitId={currentSummit.id}
-                isMulti={true}
-                isClearable={true}
+                isMulti
+                isClearable
               />
             </div>
           )}
           {enabledFilters.includes("speaker_company") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <CompanyInput
                 id="speaker_company"
                 value={eventFilters.speaker_company}
@@ -1187,33 +1187,33 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("level_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="level_filter"
                 placeholder={T.translate("event_list.placeholders.level")}
                 value={eventFilters.level_filter}
                 onChange={this.handleExtraFilterChange}
                 options={level_ddl}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("tags_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <TagInput
                 id="tags_filter"
                 placeholder={T.translate("event_list.placeholders.tags")}
                 value={eventFilters.tags_filter}
                 onChange={this.handleTagOrSpeakerFilterChange}
                 summitId={currentSummit.id}
-                isMulti={true}
-                isClearable={true}
+                isMulti
+                isClearable
               />
             </div>
           )}
           {enabledFilters.includes("sponsor") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <CompanyInput
                 id="sponsor"
                 value={eventFilters.sponsor}
@@ -1224,7 +1224,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("all_companies") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <CompanyInput
                 id="all_companies"
                 value={eventFilters.all_companies}
@@ -1233,11 +1233,9 @@ class SummitEventListPage extends React.Component {
                 )}
                 onChange={this.handleExtraFilterChange}
                 multi
-                allowCreate={true}
-                allowCreateWhileLoading={true}
-                formatCreateLabel={(input) => {
-                  return `${input}`;
-                }}
+                allowCreate
+                allowCreateWhileLoading
+                formatCreateLabel={(input) => `${input}`}
                 onCreate={(newCompanyName) => {
                   const id = "all_companies";
                   const currFilter = this.state.eventFilters[id];
@@ -1256,7 +1254,7 @@ class SummitEventListPage extends React.Component {
           )}
           {enabledFilters.includes("start_date_filter") && (
             <>
-              <div className={"col-md-3"}>
+              <div className="col-md-3">
                 <DateTimePicker
                   id="start_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -1271,10 +1269,10 @@ class SummitEventListPage extends React.Component {
                     eventFilters.start_date_filter[0],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
-              <div className={"col-md-3"}>
+              <div className="col-md-3">
                 <DateTimePicker
                   id="start_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -1289,14 +1287,14 @@ class SummitEventListPage extends React.Component {
                     eventFilters.start_date_filter[1],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
             </>
           )}
           {enabledFilters.includes("end_date_filter") && (
             <>
-              <div className={"col-md-3"}>
+              <div className="col-md-3">
                 <DateTimePicker
                   id="end_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -1311,10 +1309,10 @@ class SummitEventListPage extends React.Component {
                     eventFilters.end_date_filter[0],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
-              <div className={"col-md-3"}>
+              <div className="col-md-3">
                 <DateTimePicker
                   id="end_date_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -1329,14 +1327,14 @@ class SummitEventListPage extends React.Component {
                     eventFilters.end_date_filter[1],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
             </>
           )}
           {enabledFilters.includes("created_filter") && (
             <>
-              <div className={"col-md-3"}>
+              <div className="col-md-3">
                 <DateTimePicker
                   id="created_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -1351,10 +1349,10 @@ class SummitEventListPage extends React.Component {
                     eventFilters.created_filter[0],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
-              <div className={"col-md-3"}>
+              <div className="col-md-3">
                 <DateTimePicker
                   id="created_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -1369,14 +1367,14 @@ class SummitEventListPage extends React.Component {
                     eventFilters.created_filter[1],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
             </>
           )}
           {enabledFilters.includes("modified_filter") && (
             <>
-              <div className={"col-md-3"}>
+              <div className="col-md-3">
                 <DateTimePicker
                   id="modified_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -1391,10 +1389,10 @@ class SummitEventListPage extends React.Component {
                     eventFilters.modified_filter[0],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
-              <div className={"col-md-3"}>
+              <div className="col-md-3">
                 <DateTimePicker
                   id="modified_filter"
                   format={{ date: "YYYY-MM-DD", time: "HH:mm" }}
@@ -1409,29 +1407,29 @@ class SummitEventListPage extends React.Component {
                     eventFilters.modified_filter[1],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
             </>
           )}
           {enabledFilters.includes("submitters") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <MemberInput
                 id="submitters"
                 value={eventFilters.submitters}
                 onChange={this.handleExtraFilterChange}
-                multi={true}
+                multi
                 placeholder={T.translate("event_list.placeholders.submitters")}
-                getOptionLabel={(member) => {
-                  return member.hasOwnProperty("email")
+                getOptionLabel={(member) =>
+                  member.hasOwnProperty("email")
                     ? `${member.first_name} ${member.last_name} (${member.email})`
-                    : `${member.first_name} ${member.last_name} (${member.id})`;
-                }}
+                    : `${member.first_name} ${member.last_name} (${member.id})`
+                }
               />
             </div>
           )}
           {enabledFilters.includes("submitter_company") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <CompanyInput
                 id="submitter_company"
                 value={eventFilters.submitter_company}
@@ -1440,11 +1438,9 @@ class SummitEventListPage extends React.Component {
                 )}
                 onChange={this.handleExtraFilterChange}
                 multi
-                allowCreate={true}
-                allowCreateWhileLoading={true}
-                formatCreateLabel={(input) => {
-                  return `${input}`;
-                }}
+                allowCreate
+                allowCreateWhileLoading
+                formatCreateLabel={(input) => `${input}`}
                 onCreate={(newCompanyName) => {
                   const id = "submitter_company";
                   const currFilter = this.state.eventFilters[id];
@@ -1462,7 +1458,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("streaming_url") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Input
                 id="streaming_url"
                 value={eventFilters.streaming_url}
@@ -1474,7 +1470,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("meeting_url") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Input
                 id="meeting_url"
                 value={eventFilters.meeting_url}
@@ -1484,7 +1480,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("etherpad_link") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Input
                 id="etherpad_link"
                 value={eventFilters.etherpad_link}
@@ -1496,7 +1492,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("streaming_type") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="streaming_type"
                 value={eventFilters.streaming_type}
@@ -1509,7 +1505,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("submission_source_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="submission_source_filter"
                 value={eventFilters.submission_source_filter}
@@ -1522,7 +1518,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("duration_filter") && (
-            <div className={"col-md-10 col-md-offset-1"}>
+            <div className="col-md-10 col-md-offset-1">
               <OperatorInput
                 id="duration_filter"
                 label={T.translate("event_list.duration")}
@@ -1532,7 +1528,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("speakers_count_filter") && (
-            <div className={"col-md-10 col-md-offset-1"}>
+            <div className="col-md-10 col-md-offset-1">
               <OperatorInput
                 id="speakers_count_filter"
                 label={T.translate("event_list.speakers_count")}
@@ -1542,7 +1538,7 @@ class SummitEventListPage extends React.Component {
             </div>
           )}
           {enabledFilters.includes("submission_status_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="submission_status_filter"
                 placeholder={T.translate(
@@ -1551,13 +1547,13 @@ class SummitEventListPage extends React.Component {
                 value={eventFilters.submission_status_filter}
                 onChange={this.handleExtraFilterChange}
                 options={submission_status_ddl}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("review_status_filter") && (
-            <div className={"col-md-6"}>
+            <div className="col-md-6">
               <Dropdown
                 id="review_status_filter"
                 placeholder={T.translate(
@@ -1566,15 +1562,15 @@ class SummitEventListPage extends React.Component {
                 value={eventFilters.review_status_filter}
                 onChange={this.handleExtraFilterChange}
                 options={review_status_ddl}
-                isClearable={true}
-                isMulti={true}
+                isClearable
+                isMulti
               />
             </div>
           )}
           {enabledFilters.includes("media_upload_with_type") && (
-            <div className={"col-md-12"}>
+            <div className="col-md-12">
               <MediaTypeFilter
-                id={"media_upload_with_type"}
+                id="media_upload_with_type"
                 operatorInitialValue={
                   eventFilters.media_upload_with_type.operator
                 }
@@ -1588,8 +1584,8 @@ class SummitEventListPage extends React.Component {
 
         <hr />
 
-        <div className={"row"} style={{ marginBottom: 15 }}>
-          <div className={"col-md-12"}>
+        <div className="row" style={{ marginBottom: 15 }}>
+          <div className="col-md-12">
             <label>{T.translate("event_list.select_fields")}</label>
             <Dropdown
               id="select_fields"
@@ -1597,8 +1593,8 @@ class SummitEventListPage extends React.Component {
               value={this.state.selectedColumns}
               onChange={this.handleColumnsChange}
               options={this.handleDDLSortByLabel(ddl_columns)}
-              isClearable={true}
-              isMulti={true}
+              isClearable
+              isMulti
             />
           </div>
         </div>
