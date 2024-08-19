@@ -320,7 +320,7 @@ class PromocodeForm extends React.Component {
           </div>
         </div>
         <div className="row form-group">
-          <div className="col-md-12">
+          <div className="col-md-8">
             <label htmlFor="description">
               {" "}
               {T.translate("edit_promocode.description")}
@@ -334,6 +334,25 @@ class PromocodeForm extends React.Component {
               onChange={this.handleChange}
               error={this.hasErrors("description")}
             />
+          </div>
+          <div className="col-md-4 checkboxes-div">
+            <div className="form-check abc-checkbox" data-tip="SANTI">
+              <input
+                type="checkbox"
+                id="allows_to_delegate"
+                checked={entity.allows_to_delegate}
+                onChange={this.handleChange}
+                className="form-check-input"
+              />
+              <label className="form-check-label" htmlFor="allows_to_delegate">
+                {T.translate("edit_promocode.allows_to_delegate")}&nbsp;
+                <i
+                  className="fa fa-info-circle"
+                  aria-hidden="true"
+                  title={T.translate("edit_promocode.allows_to_delegate_info")}
+                />
+              </label>
+            </div>
           </div>
         </div>
 
