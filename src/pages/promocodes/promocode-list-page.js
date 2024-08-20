@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -34,6 +34,10 @@ import {
 import { trim } from "../../utils/methods";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import ImportPromocodesBtn from "../../components/import-promocodes";
+import {
+  TRIM_TEXT_LENGTH_40,
+  TRIM_TEXT_LENGTH_50
+} from "../../utils/constants";
 
 const fieldNames = [
   { columnKey: "class_name", value: "type" },
@@ -41,15 +45,14 @@ const fieldNames = [
     columnKey: "description",
     value: "description",
     title: true,
-    render: (row) => {
-      return row.description?.length > 50 ? (
+    render: (row) =>
+      row.description?.length > TRIM_TEXT_LENGTH_50 ? (
         <span title={row.description}>
-          {`${row.description.slice(0, 50)}...`}
+          {`${row.description.slice(0, TRIM_TEXT_LENGTH_50)}...`}
         </span>
       ) : (
         row.description
-      );
-    }
+      )
   },
   { columnKey: "tags", value: "tags" },
   { columnKey: "owner_email", value: "owner_email" },
@@ -127,19 +130,18 @@ class PromocodeListPage extends React.Component {
 
   handleDelete(promocodeId) {
     const { deletePromocode, promocodes } = this.props;
-    let promocode = promocodes.find((p) => p.id === promocodeId);
+    const promocode = promocodes.find((p) => p.id === promocodeId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("promocode_list.remove_promocode_warning") +
-        " " +
-        promocode.owner,
+      text: `${T.translate("promocode_list.remove_promocode_warning")} ${
+        promocode.owner
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deletePromocode(promocodeId);
       }
@@ -148,7 +150,7 @@ class PromocodeListPage extends React.Component {
 
   isNotRedeemed(promocodeId) {
     const { promocodes } = this.props;
-    let promocode = promocodes.find((a) => a.id === promocodeId);
+    const promocode = promocodes.find((a) => a.id === promocodeId);
 
     return promocode.redeemed === "No";
   }
@@ -357,7 +359,7 @@ class PromocodeListPage extends React.Component {
       }
     };
 
-    let showColumns = fieldNames
+    const showColumns = fieldNames
       .filter((f) => this.state.selectedColumns.includes(f.columnKey))
       .map((f2) => {
         let c = {
@@ -377,9 +379,9 @@ class PromocodeListPage extends React.Component {
 
     if (!currentSummit.id) return <div />;
 
-    let promocode_types_ddl = allTypes.map((t) => ({ label: t, value: t }));
+    const promocode_types_ddl = allTypes.map((t) => ({ label: t, value: t }));
 
-    let promocode_classes_ddl = allClasses.map((c) => ({
+    const promocode_classes_ddl = allClasses.map((c) => ({
       label: c.class_name,
       value: c.class_name
     }));
@@ -394,12 +396,12 @@ class PromocodeListPage extends React.Component {
         <OrAndFilter
           style={{ marginTop: 15 }}
           value={filters.orAndFilter}
-          entity={"promocodes"}
+          entity="promocodes"
           onChange={(filter) => this.handleOrAndFilter(filter)}
         />
 
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <FreeTextSearch
               value={term ?? ""}
               placeholder={T.translate(
@@ -422,8 +424,8 @@ class PromocodeListPage extends React.Component {
           </div>
         </div>
 
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <TagInput
               id="tags_filter"
               placeholder={T.translate(
@@ -431,11 +433,11 @@ class PromocodeListPage extends React.Component {
               )}
               value={filters.tagsFilter}
               onChange={this.handleTagsChange}
-              isMulti={true}
-              isClearable={true}
+              isMulti
+              isClearable
             />
           </div>
-          <div className={"col-md-6"}>
+          <div className="col-md-6">
             <Dropdown
               id="promo_class_name"
               className="right-space"
@@ -445,14 +447,14 @@ class PromocodeListPage extends React.Component {
               )}
               options={promocode_classes_ddl}
               onChange={this.handleClassNameChange}
-              isMulti={true}
-              isClearable={true}
+              isMulti
+              isClearable
             />
           </div>
         </div>
 
-        <div className={"row"} style={{ marginTop: 10 }}>
-          <div className={"col-md-6"}>
+        <div className="row" style={{ marginTop: 10 }}>
+          <div className="col-md-6">
             <MemberInput
               id="creator"
               value={filters.creatorFilter}
@@ -468,10 +470,10 @@ class PromocodeListPage extends React.Component {
                   : `${fullName} (${member.id})`;
               }}
               onChange={this.handleCreatorChange}
-              isClearable={true}
+              isClearable
             />
           </div>
-          <div className={"col-md-6"}>
+          <div className="col-md-6">
             <MemberInput
               id="assignee"
               className="right-space"
@@ -488,13 +490,13 @@ class PromocodeListPage extends React.Component {
                   : `${fullName} (${member.id})`;
               }}
               onChange={this.handleAssigneeChange}
-              isClearable={true}
+              isClearable
             />
           </div>
         </div>
         <br />
-        <div className={"row"}>
-          <div className={"col-md-6"}></div>
+        <div className="row">
+          <div className="col-md-6" />
           <div className="col-md-6 text-right">
             <button
               className="btn btn-primary right-space"
@@ -514,8 +516,8 @@ class PromocodeListPage extends React.Component {
 
         <hr />
 
-        <div className={"row"} style={{ marginBottom: 15 }}>
-          <div className={"col-md-12"}>
+        <div className="row" style={{ marginBottom: 15 }}>
+          <div className="col-md-12">
             <label>{T.translate("event_list.select_fields")}</label>
             <Dropdown
               id="select_fields"
@@ -523,8 +525,8 @@ class PromocodeListPage extends React.Component {
               value={this.state.selectedColumns}
               onChange={this.handleColumnsChange}
               options={this.handleDDLSortByLabel(ddl_columns)}
-              isClearable={true}
-              isMulti={true}
+              isClearable
+              isMulti
             />
           </div>
         </div>
@@ -537,14 +539,14 @@ class PromocodeListPage extends React.Component {
           <div>
             <Table
               options={table_options}
-              data={promocodes.map((p) => {
-                return {
-                  ...p,
-                  owner_email: (
-                    <abbr title={p.owner_email}>{trim(p.owner_email, 40)}</abbr>
-                  )
-                };
-              })}
+              data={promocodes.map((p) => ({
+                ...p,
+                owner_email: (
+                  <abbr title={p.owner_email}>
+                    {trim(p?.owner_email, TRIM_TEXT_LENGTH_40)}
+                  </abbr>
+                )
+              }))}
               columns={columns}
               onSort={this.handleSort}
             />
