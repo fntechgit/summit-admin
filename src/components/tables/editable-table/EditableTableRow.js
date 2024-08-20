@@ -87,7 +87,7 @@ function EditableTableRow(props) {
                     )}
                     rows={2}
                     onChange={onRowChange}
-                    value={editData[col.columnKey]}
+                    value={editData[col.columnKey] || ""}
                   />
                 </td>
               );

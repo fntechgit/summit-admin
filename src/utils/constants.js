@@ -122,3 +122,7 @@ export const EVENT_TYPE_PRESENTATION = "PresentationType";
 export const EVENT_TYPE_FISHBOWL = "Fishbowl";
 
 export const EVENT_TYPE_GROUP_EVENTS = "Groups Events";
+
+export const TRIM_TEXT_LENGTH_50 = 50;
+
+export const TRIM_TEXT_LENGTH_40 = 50;
