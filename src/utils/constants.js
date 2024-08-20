@@ -76,6 +76,16 @@ export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
 
 export const DEFAULT_ORDER_DIR = 1;
 
+export const INT_BASE = 10;
+export const ONE_MINUTE = 60;
+export const FIFTEEN_MINUTES = 900;
+export const HOUR_AND_HALF = 5400;
+export const SECONDS_TO_MINUTES = 60;
+export const MILLISECONDS_IN_SECOND = 1000;
+
+export const SORT_ASCENDING = 1;
+export const SORT_DESCENDING = -1;
+
 export const DEFAULT_EXPORT_PAGE_SIZE = 500;
 
 export const DATE_FILTER_ARRAY_SIZE = 2;
@@ -101,3 +111,20 @@ export const LETTERS_IN_ALPHABET = 26;
 export const UPPERCASE_A_IN_ASCII = 65;
 
 export const DECIMAL_DIGITS = 2;
+export const TWO = 2;
+
+export const DEFAULT_Z_INDEX = 1;
+
+export const HIGH_Z_INDEX = 9999;
+
+export const DELTA_SECS = 300;
+
+export const EVENT_TYPE_PRESENTATION = "PresentationType";
+
+export const EVENT_TYPE_FISHBOWL = "Fishbowl";
+
+export const EVENT_TYPE_GROUP_EVENTS = "Groups Events";
+
+export const TRIM_TEXT_LENGTH_50 = 50;
+
+export const TRIM_TEXT_LENGTH_40 = 50;

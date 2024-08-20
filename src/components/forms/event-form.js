@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -34,6 +34,9 @@ import {
   FreeTextSearch,
   SortableTable
 } from "openstack-uicore-foundation/lib/components";
+import { Pagination } from "react-bootstrap";
+import ExtraQuestionsForm from "openstack-uicore-foundation/lib/components/extra-questions";
+import QuestionsSet from "openstack-uicore-foundation/lib/utils/questions-set";
 import {
   isEmpty,
   scrollToError,
@@ -41,9 +44,6 @@ import {
   hasErrors,
   adjustEventDuration
 } from "../../utils/methods";
-import { Pagination } from "react-bootstrap";
-import ExtraQuestionsForm from "openstack-uicore-foundation/lib/components/extra-questions";
-import QuestionsSet from "openstack-uicore-foundation/lib/utils/questions-set";
 import ProgressFlags from "../inputs/ProgressFlags";
 import {
   ATTENDEES_EXPECTED_LEARNT,
@@ -52,6 +52,15 @@ import {
   SOCIAL_DESCRIPTION
 } from "../../actions/event-actions";
 import AuditLogs from "../audit-logs";
+import {
+  DECIMAL_DIGITS,
+  DELTA_SECS,
+  EVENT_TYPE_FISHBOWL,
+  EVENT_TYPE_GROUP_EVENTS,
+  EVENT_TYPE_PRESENTATION,
+  MILLISECONDS_TO_SECONDS,
+  ONE_MINUTE
+} from "../../utils/constants";
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -108,37 +117,58 @@ class EventForm extends React.Component {
     this.handleSpeakerEdit = this.handleSpeakerEdit.bind(this);
     this.handleSpeakersReordering = this.handleSpeakersReordering.bind(this);
     this.handleCloneEvent = this.handleCloneEvent.bind(this);
+    this.handleEventTypeChange = this.handleEventTypeChange.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const newState = {};
-    scrollToError(this.props.errors);
+  componentDidMount() {
+    const { entity } = this.state;
+    const { feedbackState, commentState, getEventFeedback, getEventComments } =
+      this.props;
+    if (entity.id > 0) {
+      if (entity.allow_feedback) {
+        getEventFeedback(
+          entity.id,
+          feedbackState.term,
+          feedbackState.page,
+          feedbackState.perPage,
+          feedbackState.order,
+          feedbackState.orderDir
+        );
+      }
+      getEventComments(
+        entity.id,
+        commentState.term,
+        commentState.page,
+        commentState.perPage,
+        commentState.order,
+        commentState.orderDir
+      );
+    }
+  }
 
-    if (!shallowEqual(prevProps.entity, this.props.entity)) {
-      newState.entity = { ...this.props.entity };
+  componentDidUpdate(prevProps) {
+    const { errors, entity } = this.props;
+    const newState = {};
+    scrollToError(errors);
+
+    if (!shallowEqual(prevProps.entity, entity)) {
+      newState.entity = { ...entity };
       newState.errors = {};
     }
 
-    if (!shallowEqual(prevProps.errors, this.props.errors)) {
-      newState.errors = { ...this.props.errors };
+    if (!shallowEqual(prevProps.errors, errors)) {
+      newState.errors = { ...errors };
     }
 
     if (!isEmpty(newState)) {
-      this.setState({ ...this.state, ...newState });
+      this.setState((prevState) => ({ ...prevState, ...newState }));
     }
-  }
-
-  getQAUsersOptionLabel(member) {
-    if (member.hasOwnProperty("full_name")) {
-      return member.full_name;
-    }
-    //default
-    return `${member.first_name} ${member.last_name} (${member.id})`;
   }
 
   handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const { errors } = this.state;
+    const { entity, errors } = this.state;
+    const newEntity = { ...entity };
+    const newErrors = { ...errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "radio") {
@@ -151,40 +181,43 @@ class EventForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
     }
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity: entity });
+    newErrors[id] = "";
+    newEntity[id] = value;
+    this.setState({ entity: newEntity }, () => {
+      if (id === "type_id") this.handleEventTypeChange(entity, newEntity);
+    });
   }
 
-  handleQAuserChange() {
-    const entity = { ...this.state.entity };
-    let { onAddQAMember, onDeleteQAMember, currentSummit } = this.props;
-    const { errors } = this.state;
+  handleQAuserChange(ev) {
+    const { errors, entity } = this.state;
+    const newEntity = { ...entity };
+    const newErrors = { ...errors };
+    const { onAddQAMember, onDeleteQAMember, currentSummit } = this.props;
     let { value, id } = ev.target;
     let currentError = "";
-    let oldHelpUsers = entity[id];
-    let currentOldOnes = [];
+    const oldHelpUsers = newEntity[id];
+    const currentOldOnes = [];
     try {
       // remap to chat api payload format
-      let newHelpUsers = value.map((member) => {
+      const newHelpUsers = value.map((member) => {
         if (member.hasOwnProperty("email")) {
           // if has email property then its cames from main api
           // we need to remap but first only users with idp id set
           // are valid
           if (!member.user_external_id) {
-            throw "Invalid user";
+            throw new Error("Invalid user");
           }
-          let newMember = {
+          const newMember = {
             member_id: member.id,
             idp_user_id: member.user_external_id,
             full_name: `${member.first_name} ${member.last_name}`,
-            summit_event_id: entity.id,
+            summit_event_id: newEntity.id,
             summit_id: currentSummit.id
           };
-          onAddQAMember(newMember, entity.id);
+          onAddQAMember(newMember, newEntity.id);
           return newMember;
         }
         currentOldOnes.push(member);
@@ -194,15 +227,15 @@ class EventForm extends React.Component {
       // check if we delete something
       if (oldHelpUsers.length !== currentOldOnes.length) {
         // get missing one
-        let missingOne = oldHelpUsers.filter((oldOne) => {
-          let matches = currentOldOnes.filter((newOne) => {
-            return newOne.member_id === oldOne.member_id;
-          });
+        const missingOne = oldHelpUsers.filter((oldOne) => {
+          const matches = currentOldOnes.filter(
+            (newOne) => newOne.member_id === oldOne.member_id
+          );
           return matches.length === 0;
         });
         if (missingOne.length > 0) {
           // remove it
-          onDeleteQAMember(missingOne[0], entity.id);
+          onDeleteQAMember(missingOne[0], newEntity.id);
         }
       }
 
@@ -213,75 +246,61 @@ class EventForm extends React.Component {
       currentError = e;
     }
 
-    errors[id] = currentError;
-    entity[id] = value;
-    this.setState({ entity: entity });
+    newErrors[id] = currentError;
+    newEntity[id] = value;
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleTimeChange(ev) {
-    let entity = { ...this.state.entity };
-    const { errors } = this.state;
-    let { id } = ev.target;
-    errors[id] = "";
-    entity = adjustEventDuration(ev, entity);
-    this.setState({ entity: entity });
+    const { errors, entity } = this.state;
+    const { id } = ev.target;
+
+    let newEntity = { ...entity };
+    const newErrors = { ...errors };
+    newErrors[id] = "";
+    newEntity = adjustEventDuration(ev, entity);
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleUploadFile(file) {
-    const entity = { ...this.state.entity };
+    const { onAttach } = this.props;
+    const { entity } = this.state;
+    const newEntity = { ...entity };
 
-    entity.attachment = file.preview;
-    this.setState({ entity: entity });
+    newEntity.attachment = file.preview;
+    this.setState({ entity: newEntity });
 
     const formData = new FormData();
     formData.append("file", file);
 
-    this.props.onAttach(entity, formData, "file");
+    onAttach(newEntity, formData, "file");
   }
 
   handleRemoveFile(attr) {
-    const entity = { ...this.state.entity };
+    const { onRemoveImage } = this.props;
+    const { entity } = this.state;
+    const newEntity = { ...entity };
 
-    entity[attr] = "";
+    newEntity[attr] = "";
 
     if (attr === "image") {
-      this.props.onRemoveImage(entity.id);
+      onRemoveImage(newEntity.id);
     }
 
-    this.setState({ entity: entity });
-  }
-
-  triggerFormSubmit(ev, publish = false) {
-    ev.preventDefault();
-    // do regular submit
-    const entity = { ...this.state.entity };
-    // check current ( could not be rendered)
-    if (this.formRef.current) {
-      this.setState({ ...this.state, publish }, () => {
-        this.formRef.current.doSubmit();
-      });
-      return;
-    }
-
-    // if we did not changed the extra questions , then dont send them
-    if (entity.extra_questions) {
-      delete entity.extra_questions;
-    }
-
-    this.props.onSubmit(entity, publish);
+    this.setState({ entity: newEntity });
   }
 
   handleCloneEvent(ev) {
     ev.preventDefault();
-    const entity = { ...this.state.entity };
+    const { entity } = this.state;
     const { onClone } = this.props;
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("edit_event.clone_event") + " " + `"${entity.title}"`,
+      text: `${T.translate("edit_event.clone_event")} "${entity.title}"`,
       type: "warning",
       showCancelButton: true,
       confirmButtonText: T.translate("general.yes")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         onClone(entity);
       }
@@ -289,46 +308,48 @@ class EventForm extends React.Component {
   }
 
   async handleChangeSelectionPlan(ev) {
-    const entity = { ...this.state.entity };
-    const { currentSummit, selectionPlansOpts } = this.props;
-    const { errors } = this.state;
-    let { value, id } = ev.target;
+    const {
+      currentSummit,
+      selectionPlansOpts,
+      fetchExtraQuestions,
+      fetchExtraQuestionsAnswers
+    } = this.props;
+    const { errors, entity } = this.state;
+    const newEntity = { ...entity };
+    const { value, id } = ev.target;
     let extraQuestions = [];
     let extraQuestionsAnswers = [];
     let newSelectionPlan = null;
 
     if (value) {
-      extraQuestions = await this.props.fetchExtraQuestions(
-        currentSummit.id,
-        value
-      );
+      extraQuestions = await fetchExtraQuestions(currentSummit.id, value);
       newSelectionPlan = selectionPlansOpts.find((sp) => sp.id === value);
       newSelectionPlan.extra_questions = extraQuestions;
 
-      if (entity?.id) {
-        extraQuestionsAnswers = await this.props.fetchExtraQuestionsAnswers(
+      if (newEntity?.id) {
+        extraQuestionsAnswers = await fetchExtraQuestionsAnswers(
           currentSummit.id,
           value,
-          entity.id
+          newEntity.id
         );
       }
     }
 
     errors[id] = "";
-    entity.selection_plan_id = value;
-    entity.selection_plan = newSelectionPlan;
-    entity.extra_questions = extraQuestionsAnswers;
-    this.setState({ entity: entity });
+    newEntity.selection_plan_id = value;
+    newEntity.selection_plan = newSelectionPlan;
+    newEntity.extra_questions = extraQuestionsAnswers;
+    this.setState({ entity: newEntity });
   }
 
   handleChangeExtraQuestion(formValues) {
-    const qs = new QuestionsSet(
-      this.state.entity?.selection_plan?.extra_questions || {}
-    );
+    const { entity } = this.state;
+    const { onSubmit } = this.props;
+    const qs = new QuestionsSet(entity?.selection_plan?.extra_questions || {});
     const formattedAnswers = [];
 
     Object.keys(formValues).map((name) => {
-      let question = qs.getQuestionByName(name);
+      const question = qs.getQuestionByName(name);
       const newQuestion = {
         question_id: question.id,
         value: `${formValues[name]}`
@@ -336,22 +357,24 @@ class EventForm extends React.Component {
       formattedAnswers.push(newQuestion);
     });
 
-    let { publish } = this.state;
+    const { publish } = this.state;
     this.setState(
-      {
-        ...this.state,
-        entity: { ...this.state.entity, extra_questions: formattedAnswers },
+      (prevState) => ({
+        ...prevState,
+        entity: { ...prevState.entity, extra_questions: formattedAnswers },
         publish: false
-      },
+      }),
       () => {
-        this.props.onSubmit(this.state.entity, publish);
+        onSubmit(entity, publish);
       }
     );
   }
 
   handleUnpublish(ev) {
+    const { onUnpublish } = this.props;
+    const { entity } = this.state;
     ev.preventDefault();
-    this.props.onUnpublish(this.state.entity);
+    onUnpublish(entity);
   }
 
   handleScheduleLink(ev) {
@@ -364,7 +387,7 @@ class EventForm extends React.Component {
       entity.start_date,
       currentSummit.time_zone_id
     ).format("YYYY-MM-DD");
-    const location_id = entity.location_id;
+    const { location_id } = entity;
     const event_id = entity.id;
 
     history.push(
@@ -378,54 +401,13 @@ class EventForm extends React.Component {
     ev.preventDefault();
 
     const eventStart = epochToMomentTimeZone(
-      entity.start_date + 300,
+      entity.start_date + DELTA_SECS,
       currentSummit.time_zone_id
     ).format("YYYY-MM-DD,HH:mm:ss");
 
     const event_detail_url = `${currentSummit.virtual_site_url}event/${entity.id}#now=${eventStart}`;
 
     window.open(event_detail_url, "_blank");
-  }
-
-  isEventType(types) {
-    const { entity } = this.state;
-    if (!entity.type_id) return false;
-    const entity_type = this.props.typeOpts.find(
-      (t) => t.id === entity.type_id
-    );
-
-    types = Array.isArray(types) ? types : [types];
-    return (
-      types.indexOf(entity_type.class_name) !== -1 ||
-      types.indexOf(entity_type.name) !== -1
-    );
-  }
-
-  isQuestionAllowed(question_id) {
-    const { entity } = this.state;
-    if (!entity.selection_plan_id) return false;
-    const selectionPlan = this.props.selectionPlansOpts.find(
-      (sp) => sp.id === entity.selection_plan_id
-    );
-    return selectionPlan.allowed_presentation_questions.includes(question_id);
-  }
-
-  shouldShowField(flag) {
-    const { entity } = this.state;
-    if (!entity.type_id) return false;
-    const entity_type = this.props.typeOpts.find(
-      (t) => t.id === entity.type_id
-    );
-
-    return entity_type[flag];
-  }
-
-  toggleSection(section, ev) {
-    const { showSection } = this.state;
-    const newShowSection = showSection === section ? "main" : section;
-    ev.preventDefault();
-
-    this.setState({ showSection: newShowSection });
   }
 
   handleMaterialEdit(materialId) {
@@ -445,14 +427,16 @@ class EventForm extends React.Component {
   }
 
   handleUploadPic(file) {
-    const entity = { ...this.state.entity };
+    const { entity } = this.state;
+    const { onAttach } = this.props;
+    const newEntity = { ...entity };
 
-    entity.image = file.preview;
-    this.setState({ entity: entity });
+    newEntity.image = file.preview;
+    this.setState({ entity: newEntity });
 
     const formData = new FormData();
     formData.append("file", file);
-    this.props.onAttach(this.state.entity, formData, "profile");
+    onAttach(newEntity, formData, "profile");
   }
 
   handleMaterialDownload(materialId) {
@@ -467,12 +451,12 @@ class EventForm extends React.Component {
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("edit_event.delete_material") + " " + material.filename,
+      text: `${T.translate("edit_event.delete_material")} ${material.filename}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         onMaterialDelete(materialId);
       }
@@ -482,8 +466,8 @@ class EventForm extends React.Component {
   handleFeedbackExport(ev) {
     ev.preventDefault();
     const { entity } = this.state;
-    const { feedbackState } = this.props;
-    this.props.getEventFeedbackCSV(
+    const { feedbackState, getEventFeedbackCSV } = this.props;
+    getEventFeedbackCSV(
       entity.id,
       feedbackState.term,
       feedbackState.order,
@@ -493,8 +477,8 @@ class EventForm extends React.Component {
 
   handleFeedbackSearch(term) {
     const { entity } = this.state;
-    const { feedbackState } = this.props;
-    this.props.getEventFeedback(
+    const { feedbackState, getEventFeedback } = this.props;
+    getEventFeedback(
       entity.id,
       term,
       feedbackState.page,
@@ -506,8 +490,8 @@ class EventForm extends React.Component {
 
   handleFeedbackPageChange(page) {
     const { entity } = this.state;
-    const { feedbackState } = this.props;
-    this.props.getEventFeedback(
+    const { feedbackState, getEventFeedback } = this.props;
+    getEventFeedback(
       entity.id,
       feedbackState.term,
       page,
@@ -518,9 +502,9 @@ class EventForm extends React.Component {
   }
 
   handleFeedbackSort(index, key, dir) {
-    const { feedbackState } = this.props;
+    const { feedbackState, getEventFeedback } = this.props;
     const { entity } = this.state;
-    this.props.getEventFeedback(
+    getEventFeedback(
       entity.id,
       feedbackState.term,
       feedbackState.page,
@@ -528,31 +512,6 @@ class EventForm extends React.Component {
       key,
       dir
     );
-  }
-
-  componentDidMount() {
-    const { entity } = this.state;
-    const { feedbackState, commentState } = this.props;
-    if (entity.id > 0) {
-      if (entity.allow_feedback) {
-        this.props.getEventFeedback(
-          entity.id,
-          feedbackState.term,
-          feedbackState.page,
-          feedbackState.perPage,
-          feedbackState.order,
-          feedbackState.orderDir
-        );
-      }
-      this.props.getEventComments(
-        entity.id,
-        commentState.term,
-        commentState.page,
-        commentState.perPage,
-        commentState.order,
-        commentState.orderDir
-      );
-    }
   }
 
   handleDeleteEventFeedback(id) {
@@ -565,30 +524,11 @@ class EventForm extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteEventFeedback(entity.id, id);
       }
     });
-  }
-
-  getPopupScores(score_id) {
-    const { entity } = this.state;
-    let res = "";
-    const rating_type = entity?.selection_plan?.track_chair_rating_types.find(
-      (st) => st.id === parseInt(score_id)
-    );
-    if (rating_type) {
-      rating_type.score_types.forEach((st) => {
-        if (res !== "") res = res + "<br>";
-        res =
-          res +
-          `${
-            st.score
-          }. <b>${st.name.trim()}</b> <p>${st.description?.trim()}</p>`;
-      });
-    }
-    return res;
   }
 
   handleTrackChairCommentEdit(commentId) {
@@ -605,12 +545,12 @@ class EventForm extends React.Component {
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text:
-        T.translate("edit_event.delete_comment") + " " + `"${comment.body}"`,
+        `${T.translate("edit_event.delete_comment")} ` + `"${comment.body}"`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         onCommentDelete(commentId);
       }
@@ -619,7 +559,7 @@ class EventForm extends React.Component {
 
   handleSelectSpeakerToAdd(ev) {
     const { value } = ev.target;
-    this.setState({ ...this.state, speakerToAdd: value });
+    this.setState((prevState) => ({ ...prevState, speakerToAdd: value }));
   }
 
   handleSpeakerAssign() {
@@ -627,11 +567,11 @@ class EventForm extends React.Component {
     if (speakerToAdd) {
       if (entity.speakers.some((s) => s.id === speakerToAdd.id)) return;
       const speakers = [...entity.speakers, speakerToAdd];
-      this.setState({
-        ...this.state,
+      this.setState((prevState) => ({
+        ...prevState,
         speakerToAdd: null,
-        entity: { ...entity, speakers: speakers }
-      });
+        entity: { ...entity, speakers }
+      }));
     }
   }
 
@@ -642,8 +582,7 @@ class EventForm extends React.Component {
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text:
-        T.translate("edit_event.unassign_speaker") +
-        " " +
+        `${T.translate("edit_event.unassign_speaker")} ` +
         `${speaker.first_name} ${speaker.last_name}?`,
       type: "warning",
       showCancelButton: true,
@@ -651,22 +590,23 @@ class EventForm extends React.Component {
       confirmButtonText: T.translate("general.yes_delete")
     }).then((result) => {
       if (result.value) {
-        this.setState({
-          ...this.state,
+        this.setState((prevState) => ({
+          ...prevState,
           entity: {
             ...entity,
-            speakers: this.state.entity.speakers.filter(
-              (e) => e.id !== speaker.id
-            )
+            speakers: entity.speakers.filter((e) => e.id !== speaker.id)
           }
-        });
+        }));
       }
     });
   }
 
-  handleSpeakersReordering(speakers, speakerId, newOrder) {
+  handleSpeakersReordering(speakers) {
     const { entity } = this.state;
-    this.setState({ ...this.state, entity: { ...entity, speakers: speakers } });
+    this.setState((prevState) => ({
+      ...prevState,
+      entity: { ...entity, speakers }
+    }));
   }
 
   handleSpeakerEdit(speakerId) {
@@ -676,8 +616,8 @@ class EventForm extends React.Component {
 
   handleTrackChairCommentSearch(term) {
     const { entity } = this.state;
-    const { commentState } = this.props;
-    this.props.getEventComments(
+    const { commentState, getEventComments } = this.props;
+    getEventComments(
       entity.id,
       term,
       commentState.page,
@@ -689,8 +629,8 @@ class EventForm extends React.Component {
 
   handleTrackChairCommentPageChange(page) {
     const { entity } = this.state;
-    const { commentState } = this.props;
-    this.props.getEventComments(
+    const { commentState, getEventComments } = this.props;
+    getEventComments(
       entity.id,
       commentState.term,
       page,
@@ -701,9 +641,9 @@ class EventForm extends React.Component {
   }
 
   handleTrackChairCommentSort(index, key, dir) {
-    const { commentState } = this.props;
+    const { commentState, getEventComments } = this.props;
     const { entity } = this.state;
-    this.props.getEventComments(
+    getEventComments(
       entity.id,
       commentState.term,
       commentState.page,
@@ -714,28 +654,170 @@ class EventForm extends React.Component {
   }
 
   handleTrackChairFilterChange(ev) {
-    const { entity } = this.state;
-    const { commentState } = this.props;
+    const { entity, commentFilters } = this.state;
+    const { commentState, getEventComments } = this.props;
     this.setState(
-      {
-        ...this.state,
+      (prevState) => ({
+        ...prevState,
         commentFilters: {
-          ...this.state.commentFilters,
+          ...commentFilters,
           [ev.target.id]: ev.target.checked
         }
-      },
+      }),
       () => {
-        this.props.getEventComments(
+        getEventComments(
           entity.id,
           commentState.term,
           commentState.page,
           commentState.perPage,
           commentState.order,
           commentState.orderDir,
-          this.state.commentFilters
+          commentFilters
         );
       }
     );
+  }
+
+  handleEventTypeChange(oldEntity, newEntity) {
+    const isEventUpgrade =
+      !this.isEventType(EVENT_TYPE_PRESENTATION, oldEntity) &&
+      this.isEventType(EVENT_TYPE_PRESENTATION, newEntity);
+    const isEventDowngrade =
+      this.isEventType(EVENT_TYPE_PRESENTATION, oldEntity) &&
+      !this.isEventType(EVENT_TYPE_PRESENTATION, newEntity);
+
+    if (isEventUpgrade) {
+      Swal.fire({
+        title: T.translate("general.attention"),
+        html: `${T.translate("edit_event.upgrade_message")}<br>${T.translate(
+          "edit_event.upgrade_message_2"
+        )}`,
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: T.translate("general.save")
+      }).then((result) => {
+        if (result.value) {
+          const { onEventUpgrade } = this.props;
+          onEventUpgrade(newEntity);
+        }
+        if (result.dismiss) {
+          this.setState((prevState) => ({
+            ...prevState,
+            entity: oldEntity
+          }));
+        }
+      });
+    }
+
+    if (isEventDowngrade) {
+      Swal.fire({
+        title: T.translate("general.attention"),
+        text: T.translate("edit_event.downgrade_message"),
+        type: "warning",
+        showCancelButton: false,
+        confirmButtonColor: "#DD6B55"
+        // confirmButtonText: T.translate("general.yes_delete")
+      }).then((result) => {
+        if (result.value) {
+          this.setState((prevState) => ({
+            ...prevState,
+            entity: oldEntity
+          }));
+        }
+      });
+    }
+  }
+
+  getPopupScores(score_id) {
+    const { entity } = this.state;
+    let res = "";
+    const rating_type = entity?.selection_plan?.track_chair_rating_types.find(
+      (st) => st.id === parseInt(score_id)
+    );
+    if (rating_type) {
+      rating_type.score_types.forEach((st) => {
+        if (res !== "") res += "<br>";
+        res += `${
+          st.score
+        }. <b>${st.name.trim()}</b> <p>${st.description?.trim()}</p>`;
+      });
+    }
+    return res;
+  }
+
+  getQAUsersOptionLabel(member) {
+    if (member.hasOwnProperty("full_name")) {
+      return member.full_name;
+    }
+    // default
+    return `${member.first_name} ${member.last_name} (${member.id})`;
+  }
+
+  triggerFormSubmit(ev, publish = false) {
+    ev.preventDefault();
+    const { onSubmit } = this.props;
+    const { entity } = this.state;
+    // do regular submit
+    const newEntity = { ...entity };
+    // check current ( could not be rendered)
+    if (this.formRef.current) {
+      this.setState(
+        (prevState) => ({ ...prevState, publish }),
+        () => {
+          this.formRef.current.doSubmit();
+        }
+      );
+      return;
+    }
+
+    // if we did not changed the extra questions , then dont send them
+    if (newEntity.extra_questions) {
+      delete newEntity.extra_questions;
+    }
+
+    onSubmit(newEntity, publish);
+  }
+
+  isEventType(types, checkEntity = null) {
+    const { entity } = this.state;
+    const { typeOpts } = this.props;
+    const entityToCheck = checkEntity || entity;
+    if (!entityToCheck.type_id) return false;
+    const entity_type = typeOpts.find((t) => t.id === entityToCheck.type_id);
+
+    types = Array.isArray(types) ? types : [types];
+    return (
+      types.indexOf(entity_type.class_name) !== -1 ||
+      types.indexOf(entity_type.name) !== -1
+    );
+  }
+
+  isQuestionAllowed(question_id) {
+    const { entity } = this.state;
+    const { selectionPlansOpts } = this.props;
+    if (!entity.selection_plan_id) return false;
+    const selectionPlan = selectionPlansOpts.find(
+      (sp) => sp.id === entity.selection_plan_id
+    );
+    return selectionPlan.allowed_presentation_questions.includes(question_id);
+  }
+
+  shouldShowField(flag) {
+    const { entity } = this.state;
+    const { typeOpts } = this.props;
+    if (!entity.type_id) return false;
+    const entity_type = typeOpts.find((t) => t.id === entity.type_id);
+
+    return entity_type[flag];
+  }
+
+  toggleSection(section, ev) {
+    const { showSection } = this.state;
+    const newShowSection = showSection === section ? "main" : section;
+    ev.preventDefault();
+
+    this.setState({ showSection: newShowSection });
   }
 
   render() {
@@ -756,16 +838,16 @@ class EventForm extends React.Component {
     } = this.props;
 
     const event_types_ddl = typeOpts.map((t) => {
-      let disabled = entity.id ? !this.isEventType(t.class_name) : false;
+      const disabled = entity.id ? !this.isEventType(t.class_name) : false;
       return {
         label: t.name,
         value: t.id,
         type: t.class_name,
-        disabled: disabled
+        disabled
       };
     });
 
-    let feedback_columns = [
+    const feedback_columns = [
       { columnKey: "created", value: "Created Date", sortable: true },
       { columnKey: "owner_full_name", value: "Author", sortable: true },
       { columnKey: "rate", value: "Rate", sortable: true },
@@ -793,7 +875,7 @@ class EventForm extends React.Component {
         if (l.rooms) {
           options = l.rooms.map((r) => ({ label: r.name, value: r.id }));
         }
-        return { label: l.name, value: l.id, options: options };
+        return { label: l.name, value: l.id, options };
       });
 
     const locations_ddl = [{ label: "TBD", value: 0 }, ...venues];
@@ -811,9 +893,10 @@ class EventForm extends React.Component {
         .map((sp) => ({ label: sp.name, value: sp.id }));
     }
 
-    const rsvp_templates_ddl = rsvpTemplateOpts.map((t) => {
-      return { label: t.title, value: t.id };
-    });
+    const rsvp_templates_ddl = rsvpTemplateOpts.map((t) => ({
+      label: t.title,
+      value: t.id
+    }));
 
     const material_columns = [
       { columnKey: "class_name", value: T.translate("edit_event.type") },
@@ -928,15 +1011,15 @@ class EventForm extends React.Component {
               <MemberInput
                 id="created_by"
                 value={entity.created_by}
-                getOptionLabel={(member) => {
-                  return member.hasOwnProperty("email")
+                getOptionLabel={(member) =>
+                  member.hasOwnProperty("email")
                     ? `${member.first_name} ${member.last_name} ${
                         member.company ? `- ${member.company}` : ""
                       } (${member.email})`
                     : `${member.first_name} ${member.last_name} ${
                         member.company ? `- ${member.company}` : ""
-                      } (${member.id})`;
-                }}
+                      } (${member.id})`
+                }
                 onChange={this.handleChange}
                 error={hasErrors("created_by_id", errors)}
                 placeholder={T.translate(
@@ -973,9 +1056,9 @@ class EventForm extends React.Component {
             <label> {T.translate("edit_event.published")} </label>
             <div>
               <i
-                className={
-                  "fa fa-2x " + (entity.is_published ? "fa-check" : "fa-times")
-                }
+                className={`fa fa-2x ${
+                  entity.is_published ? "fa-check" : "fa-times"
+                }`}
               />
             </div>
           </div>
@@ -1004,7 +1087,7 @@ class EventForm extends React.Component {
             </div>
           </div>
         )}
-        {this.isEventType("PresentationType") &&
+        {this.isEventType(EVENT_TYPE_PRESENTATION) &&
           this.isQuestionAllowed(ATTENDEES_EXPECTED_LEARNT) && (
             <div className="row form-group">
               <div className="col-md-12">
@@ -1077,7 +1160,9 @@ class EventForm extends React.Component {
                 <input
                   className="form-control"
                   id="duration"
-                  value={entity.duration !== "" ? entity.duration / 60 : ""}
+                  value={
+                    entity.duration !== "" ? entity.duration / ONE_MINUTE : ""
+                  }
                   onChange={this.handleTimeChange}
                   type="number"
                   min="0"
@@ -1132,7 +1217,7 @@ class EventForm extends React.Component {
           )}
         </div>
         <div className="row form-group">
-          {this.isEventType("PresentationType") && (
+          {this.isEventType(EVENT_TYPE_PRESENTATION) && (
             <div className="col-md-4">
               <label> {T.translate("edit_event.selection_plan")} </label>
               <Dropdown
@@ -1142,7 +1227,7 @@ class EventForm extends React.Component {
                 placeholder={T.translate(
                   "edit_event.placeholders.select_selection_plan"
                 )}
-                isClearable={true}
+                isClearable
                 options={selection_plans_ddl}
               />
             </div>
@@ -1158,7 +1243,7 @@ class EventForm extends React.Component {
               error={hasErrors("track_id", errors)}
             />
           </div>
-          {this.isEventType("PresentationType") &&
+          {this.isEventType(EVENT_TYPE_PRESENTATION) &&
             this.shouldShowField("allow_custom_ordering") && (
               <div className="col-md-4">
                 <label> {T.translate("edit_event.custom_order")} </label>
@@ -1190,7 +1275,7 @@ class EventForm extends React.Component {
               </label>
             </div>
           </div>
-          {this.isEventType("PresentationType") && (
+          {this.isEventType(EVENT_TYPE_PRESENTATION) && (
             <div className="col-md-3">
               <div className="form-check abc-checkbox">
                 <input
@@ -1207,7 +1292,7 @@ class EventForm extends React.Component {
               </div>
             </div>
           )}
-          {this.isEventType("PresentationType") &&
+          {this.isEventType(EVENT_TYPE_PRESENTATION) &&
             this.isQuestionAllowed(ATTENDING_MEDIA) && (
               <div className="col-md-3">
                 <div className="form-check abc-checkbox">
@@ -1225,7 +1310,7 @@ class EventForm extends React.Component {
                 </div>
               </div>
             )}
-          {this.isEventType("PresentationType") && (
+          {this.isEventType(EVENT_TYPE_PRESENTATION) && (
             <div className="col-md-3">
               <div className="form-check abc-checkbox">
                 <input
@@ -1259,7 +1344,7 @@ class EventForm extends React.Component {
             />
           </div>
         </div>
-        {this.isEventType("PresentationType") && entity.id > 0 && (
+        {this.isEventType(EVENT_TYPE_PRESENTATION) && entity.id > 0 && (
           <div className="row form-group">
             <div className="col-md-12">
               <label>
@@ -1276,7 +1361,7 @@ class EventForm extends React.Component {
                 onChange={this.handleQAuserChange}
                 error={hasErrors("qa_users", errors)}
                 getOptionLabel={this.getQAUsersOptionLabel}
-                multi={true}
+                multi
               />
             </div>
           </div>
@@ -1322,7 +1407,7 @@ class EventForm extends React.Component {
                   id="speaker"
                   value={speakerToAdd}
                   onChange={this.handleSelectSpeakerToAdd}
-                  isClearable={true}
+                  isClearable
                   placeholder={T.translate("edit_event.select_speaker")}
                   getOptionLabel={(speaker) =>
                     `${speaker.first_name} ${speaker.last_name} (${speaker.email})`
@@ -1340,10 +1425,10 @@ class EventForm extends React.Component {
             </div>
             <div className="row">
               <div className="col-md-12">
-                {entity.speakers.length > 0 ? (
+                {entity?.speakers?.length > 0 ? (
                   <SortableTable
                     options={speakers_options}
-                    data={entity.speakers}
+                    data={entity?.speakers}
                     columns={speakers_columns}
                     dropCallback={this.handleSpeakersReordering}
                     orderField="order"
@@ -1362,10 +1447,10 @@ class EventForm extends React.Component {
               <label> {T.translate("edit_event.moderator")} </label>
               <SpeakerInput
                 id="moderator"
-                value={entity.moderator}
+                value={entity?.moderator}
                 onChange={this.handleChange}
                 history={history}
-                isClearable={true}
+                isClearable
                 getOptionLabel={(speaker) =>
                   `${speaker.first_name} ${speaker.last_name} (${speaker.email})`
                 }
@@ -1373,7 +1458,7 @@ class EventForm extends React.Component {
             </div>
           </div>
         )}
-        {this.isEventType("Fishbowl") && (
+        {this.isEventType(EVENT_TYPE_FISHBOWL) && (
           <div className="row form-group">
             <div className="col-md-12">
               <label> {T.translate("edit_event.discussion_leader")} </label>
@@ -1382,12 +1467,12 @@ class EventForm extends React.Component {
                 value={entity.moderator}
                 onChange={this.handleChange}
                 history={history}
-                isClearable={true}
+                isClearable
               />
             </div>
           </div>
         )}
-        {this.isEventType("Groups Events") && (
+        {this.isEventType(EVENT_TYPE_GROUP_EVENTS) && (
           <div className="row form-group">
             <div className="col-md-12">
               <label> {T.translate("edit_event.groups")} </label>
@@ -1396,7 +1481,7 @@ class EventForm extends React.Component {
                 value={entity.groups}
                 onChange={this.handleChange}
                 summitId={currentSummit.id}
-                multi={true}
+                multi
               />
             </div>
           </div>
@@ -1588,7 +1673,7 @@ class EventForm extends React.Component {
             </div>
           </div>
         </Panel>
-        {entity.id != 0 && this.isEventType("PresentationType") && (
+        {entity.id != 0 && this.isEventType(EVENT_TYPE_PRESENTATION) && (
           <Panel
             show={showSection === "materials"}
             title={T.translate("edit_event.materials")}
@@ -1633,8 +1718,8 @@ class EventForm extends React.Component {
             title={T.translate("edit_event.feedback")}
             handleClick={this.toggleSection.bind(this, "feedback")}
           >
-            <div className={"row"}>
-              <div className={"col-md-6"}>
+            <div className="row">
+              <div className="col-md-6">
                 <FreeTextSearch
                   value={feedbackState.term ?? ""}
                   placeholder={T.translate(
@@ -1642,7 +1727,7 @@ class EventForm extends React.Component {
                   )}
                   title={T.translate("edit_event.placeholders.search_feedback")}
                   onSearch={this.handleFeedbackSearch}
-                  preventEvents={true}
+                  preventEvents
                 />
               </div>
               <div className="col-md-6 text-right">
@@ -1654,8 +1739,8 @@ class EventForm extends React.Component {
                 </button>
               </div>
             </div>
-            <div className={"row"}>
-              <div className={"col-md-12"}>
+            <div className="row">
+              <div className="col-md-12">
                 <Table
                   options={feedback_table_options}
                   data={feedbackState.items}
@@ -1688,7 +1773,7 @@ class EventForm extends React.Component {
           <AuditLogs
             entityFilter={[
               `event_id==${entity.id}`,
-              `class_name==SummitEventAuditLog`
+              "class_name==SummitEventAuditLog"
             ]}
           />
         </Panel>
@@ -1757,16 +1842,16 @@ class EventForm extends React.Component {
                                 data-tip={this.getPopupScores(
                                   score.ranking_type_id
                                 )}
-                                data-for={"help"}
+                                data-for="help"
                               >
                                 <ReactTooltip
-                                  id={"help"}
-                                  place={"bottom"}
-                                  type={"light"}
-                                  effect={"solid"}
-                                  multiline={true}
-                                  clickable={true}
-                                  border={true}
+                                  id="help"
+                                  place="bottom"
+                                  type="light"
+                                  effect="solid"
+                                  multiline
+                                  clickable
+                                  border
                                   getContent={(dataTip) => (
                                     <div
                                       className="tooltip-popover"
@@ -1783,7 +1868,7 @@ class EventForm extends React.Component {
                           )}
                           {rating_type?.name}:
                         </label>{" "}
-                        {parseFloat(score.avg_score).toFixed(2)}
+                        {parseFloat(score.avg_score).toFixed(DECIMAL_DIGITS)}
                       </p>
                     );
                   })}
@@ -1794,7 +1879,7 @@ class EventForm extends React.Component {
                   </label>
                   &nbsp;
                   {entity.vote_average
-                    ? entity.vote_average.toFixed(2)
+                    ? entity.vote_average.toFixed(DECIMAL_DIGITS)
                     : "0.00"}
                 </p>
               </div>
@@ -1808,7 +1893,7 @@ class EventForm extends React.Component {
             handleClick={this.toggleSection.bind(this, "track_chair_comments")}
           >
             <div className="row">
-              <div className={"col-md-8"}>
+              <div className="col-md-8">
                 <FreeTextSearch
                   value={commentState.term ?? ""}
                   placeholder={T.translate(
