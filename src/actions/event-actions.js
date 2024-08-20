@@ -990,7 +990,7 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
       entity
     )(params)(dispatch).then(() => {
       if (publish) {
-        dispatch(publishEvent(normalizedEntity, () => location.reload()));
+        dispatch(publishEvent(normalizedEntity));
       } else {
         const success_message = {
           title: T.translate("general.done"),
@@ -1045,6 +1045,39 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
           );
         })
       );
+  });
+};
+
+export const upgradeEvent = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const { type_id } = entity;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return putRequest(
+    createAction(UPDATE_EVENT),
+    createAction(EVENT_UPDATED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/type/${type_id}/upgrade`,
+    {},
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_event.event_saved"),
+      type: "success"
+    };
+    dispatch(
+      showMessage(success_message, () => {
+        location.reload();
+      })
+    );
   });
 };
 

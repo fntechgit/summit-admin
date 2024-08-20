@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
@@ -28,7 +28,8 @@ import {
   getEventComments,
   fetchExtraQuestions,
   fetchExtraQuestionsAnswers,
-  cloneEvent
+  cloneEvent,
+  upgradeEvent
 } from "../../actions/event-actions";
 import { unPublishEvent } from "../../actions/summit-builder-actions";
 import { deleteEventMaterial } from "../../actions/event-material-actions";
@@ -41,12 +42,70 @@ import {
 import "../../styles/edit-summit-event-page.less";
 import "../../components/form-validation/validate.less";
 
-const EditSummitEventPage = (props) => {
+function EditSummitEventPage(props) {
   useEffect(() => {
     if (props.entity.id && props.entity.selection_plan_id) {
       props.getActionTypes(props.entity.selection_plan_id);
     }
   }, [props.entity.id, props.entity.selection_plan_id]);
+
+  const getEventNextFromList = async (data, current_page, last_page) => {
+    const { entity, getEvents } = props;
+    const listLength = data.length;
+    const idx = data.findIndex((ev) => ev.id === entity.id);
+
+    if (idx === -1) {
+      // not found , return first
+      return data[0];
+    }
+
+    if (idx === -1 || idx === listLength - 1) {
+      // last on page
+      if (last_page > current_page) {
+        // there are more pages
+        return getEvents(null, current_page + 1).then(
+          (newData) => newData.data[0]
+        );
+      }
+      // last of last page
+      if (last_page > 1) {
+        // there is more than one page
+        return getEvents(null, 1).then((newData) => newData.data[0]);
+      }
+      // only one page, return first
+      return data[0];
+    }
+    return data[idx + 1];
+  };
+
+  const getEventPrevFromList = async (data, current_page, last_page) => {
+    const { entity, getEvents } = props;
+    const idx = data.findIndex((ev) => ev.id === entity.id);
+
+    if (idx === -1) {
+      // not found , return first
+      return data[0];
+    }
+    if (idx === 0) {
+      // first on page
+      if (current_page > 1) {
+        // there are more pages
+        return getEvents(null, current_page - 1).then(
+          (newData) => newData.data[newData.data.length - 1]
+        );
+      }
+      // first of first page
+      if (last_page > 1) {
+        // there is more than one page
+        return getEvents(null, last_page).then(
+          (newData) => newData.data[newData.data.length - 1]
+        ); // return last event of last page
+      }
+      // only one page, return last
+      return data[data.length - 1];
+    }
+    return data[idx - 1];
+  };
 
   const goToEvent = async (next = true) => {
     const { currentSummit, history } = props;
@@ -57,8 +116,8 @@ const EditSummitEventPage = (props) => {
       event = await props.getEvents().then(async (data) => {
         const { data: allEvents, current_page, last_page } = data;
         return next
-          ? await getEventNextFromList(allEvents, current_page, last_page)
-          : await getEventPrevFromList(allEvents, current_page, last_page);
+          ? getEventNextFromList(allEvents, current_page, last_page)
+          : getEventPrevFromList(allEvents, current_page, last_page);
       });
     } else {
       event = next
@@ -68,75 +127,6 @@ const EditSummitEventPage = (props) => {
 
     if (event) {
       history.push(`/app/summits/${currentSummit.id}/events/${event.id}`);
-    }
-  };
-
-  const getEventNextFromList = async (data, current_page, last_page) => {
-    const { entity } = props;
-    const listLength = data.length;
-    const idx = data.findIndex((ev) => ev.id === entity.id);
-
-    if (idx === -1) {
-      // not found , return first
-      return data[0];
-    } else if (idx === -1 || idx === listLength - 1) {
-      // last on page
-      if (last_page > current_page) {
-        // there are more pages
-        return await props
-          .getEvents(null, current_page + 1)
-          .then(async (newData) => {
-            return newData.data[0];
-          });
-      } else {
-        // last of last page
-        if (last_page > 1) {
-          // there is more than one page
-          return await props.getEvents(null, 1).then(async (newData) => {
-            return newData.data[0]; // return first event of first page
-          });
-        } else {
-          // only one page, return first
-          return data[0];
-        }
-      }
-    } else {
-      return data[idx + 1];
-    }
-  };
-
-  const getEventPrevFromList = async (data, current_page, last_page) => {
-    const { entity } = props;
-    const idx = data.findIndex((ev) => ev.id === entity.id);
-
-    if (idx === -1) {
-      // not found , return first
-      return data[0];
-    } else if (idx === 0) {
-      // first on page
-      if (current_page > 1) {
-        // there are more pages
-        return await props
-          .getEvents(null, current_page - 1)
-          .then(async (newData) => {
-            return newData.data[newData.data.length - 1];
-          });
-      } else {
-        // first of first page
-        if (last_page > 1) {
-          // there is more than one page
-          return await props
-            .getEvents(null, last_page)
-            .then(async (newData) => {
-              return newData.data[newData.data.length - 1]; // return last event of last page
-            });
-        } else {
-          // only one page, return last
-          return data[data.length - 1];
-        }
-      }
-    } else {
-      return data[idx - 1];
     }
   };
 
@@ -150,7 +140,25 @@ const EditSummitEventPage = (props) => {
     commentState,
     actionTypes,
     auditLogState,
-    loading
+    loading,
+    history,
+    saveEvent,
+    attachFile,
+    unPublishEvent,
+    deleteEventMaterial,
+    removeImage,
+    addQAMember,
+    removeQAMember,
+    getEventFeedback,
+    getEventComments,
+    deleteEventComment,
+    deleteEventFeedback,
+    getEventFeedbackCSV,
+    changeFlag,
+    cloneEvent,
+    upgradeEvent,
+    fetchExtraQuestions,
+    fetchExtraQuestionsAnswers
   } = props;
 
   if (loading) return null;
@@ -167,15 +175,17 @@ const EditSummitEventPage = (props) => {
           <div className="next">
             <button
               className="btn btn-default prev"
-              onClick={(ev) => goToEvent(false)}
+              type="button"
+              onClick={() => goToEvent(false)}
             >
-              {`<< Prev Event`}
+              {"<< Prev Event"}
             </button>
             <button
               className="btn btn-default next"
-              onClick={(ev) => goToEvent(true)}
+              type="button"
+              onClick={() => goToEvent(true)}
             >
-              {`Next Event >>`}
+              {"Next Event >>"}
             </button>
           </div>
         )}
@@ -183,7 +193,7 @@ const EditSummitEventPage = (props) => {
       <hr />
       {currentSummit && (
         <EventForm
-          history={props.history}
+          history={history}
           currentSummit={currentSummit}
           levelOpts={levelOptions}
           trackOpts={currentSummit.tracks}
@@ -194,29 +204,30 @@ const EditSummitEventPage = (props) => {
           actionTypes={actionTypes}
           entity={entity}
           errors={errors}
-          onSubmit={props.saveEvent}
-          onAttach={props.attachFile}
-          onUnpublish={props.unPublishEvent}
-          onMaterialDelete={props.deleteEventMaterial}
-          onRemoveImage={props.removeImage}
-          onAddQAMember={props.addQAMember}
-          onDeleteQAMember={props.removeQAMember}
+          onSubmit={saveEvent}
+          onEventUpgrade={upgradeEvent}
+          onAttach={attachFile}
+          onUnpublish={unPublishEvent}
+          onMaterialDelete={deleteEventMaterial}
+          onRemoveImage={removeImage}
+          onAddQAMember={addQAMember}
+          onDeleteQAMember={removeQAMember}
           feedbackState={feedbackState}
-          getEventFeedback={props.getEventFeedback}
+          getEventFeedback={getEventFeedback}
           fetchExtraQuestions={fetchExtraQuestions}
           fetchExtraQuestionsAnswers={fetchExtraQuestionsAnswers}
           commentState={commentState}
-          getEventComments={props.getEventComments}
-          onCommentDelete={props.deleteEventComment}
-          deleteEventFeedback={props.deleteEventFeedback}
-          getEventFeedbackCSV={props.getEventFeedbackCSV}
-          onFlagChange={props.changeFlag}
-          onClone={props.cloneEvent}
+          getEventComments={getEventComments}
+          onCommentDelete={deleteEventComment}
+          deleteEventFeedback={deleteEventFeedback}
+          getEventFeedbackCSV={getEventFeedbackCSV}
+          onFlagChange={changeFlag}
+          onClone={cloneEvent}
         />
       )}
     </div>
   );
-};
+}
 
 const mapStateToProps = ({
   currentSummitState,
@@ -233,7 +244,7 @@ const mapStateToProps = ({
   errors: currentSummitEventState.errors,
   feedbackState: currentSummitEventState.feedbackState,
   commentState: currentSummitEventState.commentState,
-  auditLogState: auditLogState,
+  auditLogState,
   actionTypes: currentSummitEventState.actionTypes,
   allEventsData: currentEventListState
 });
@@ -254,5 +265,8 @@ export default connect(mapStateToProps, {
   getActionTypes,
   getEventComments,
   deleteEventComment,
-  cloneEvent
+  cloneEvent,
+  upgradeEvent,
+  fetchExtraQuestions,
+  fetchExtraQuestionsAnswers
 })(EditSummitEventPage);
