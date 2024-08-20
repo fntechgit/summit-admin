@@ -560,7 +560,7 @@
     "allowed_ticket_types": "Allowed ticket types",
     "upgrade_message": "You are about to Upgrade activity from SummitEvent to Presentation Type.",
     "upgrade_message_2": "In order continue, please do save the Activity, and perform all Presentation Type related changes after that.",
-    "downgrade_message": "You cannot change a Presentation Type to SummitEvent Type",
+    "downgrade_message": "You can not change from Presentation Type to SummitEvent Type.",
     "placeholders": {
       "select_venue": "Select an Activity Venue ...",
       "start_date": "Start Date",
