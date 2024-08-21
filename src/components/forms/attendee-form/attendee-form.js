@@ -9,25 +9,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   MemberInput,
+  AttendeeInput,
   Input,
   Panel,
   TagInput
 } from "openstack-uicore-foundation/lib/components";
 import ExtraQuestionsForm from "openstack-uicore-foundation/lib/components/extra-questions";
+import QuestionsSet from "openstack-uicore-foundation/lib/utils/questions-set";
 import TicketComponent from "./ticket-component";
 import OrderComponent from "./order-component";
 import RsvpComponent from "./rsvp-component";
 import { AffiliationsTable } from "../../tables/affiliationstable";
 import { isEmpty, scrollToError, shallowEqual } from "../../../utils/methods";
-import QuestionsSet from "openstack-uicore-foundation/lib/utils/questions-set";
 import Notes from "../../notes";
+import { MILLISECONDS_IN_SECOND } from "../../../utils/constants";
 
 class AttendeeForm extends React.Component {
   constructor(props) {
@@ -68,26 +70,16 @@ class AttendeeForm extends React.Component {
   }
 
   toggleSection(section, ev) {
-    let { showSection } = this.state;
-    let newShowSection = showSection === section ? "main" : section;
+    const { showSection } = this.state;
+    const newShowSection = showSection === section ? "main" : section;
     ev.preventDefault();
 
     this.setState({ showSection: newShowSection });
   }
 
-  handleNewTag = (newTag) => {
-    this.setState({
-      ...this.state,
-      entity: {
-        ...this.state.entity,
-        tags: [...this.state.entity.tags, { tag: newTag }]
-      }
-    });
-  };
-
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -99,12 +91,12 @@ class AttendeeForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   removeUnchangedFields(entity, originalEntity) {
@@ -137,7 +129,7 @@ class AttendeeForm extends React.Component {
 
     // do regular submit
 
-    let { originalEntity, entity } = this.state;
+    const { originalEntity, entity } = this.state;
 
     if (entity.extra_questions) {
       entity.extra_questions = entity.extra_questions.map((q) => ({
@@ -154,7 +146,7 @@ class AttendeeForm extends React.Component {
     const formattedAnswers = [];
 
     Object.keys(formValues).map((name) => {
-      let question = qs.getQuestionByName(name);
+      const question = qs.getQuestionByName(name);
       const newQuestion = {
         question_id: question.id,
         answer: `${formValues[name]}`
@@ -168,19 +160,10 @@ class AttendeeForm extends React.Component {
         entity: { ...this.state.entity, extra_questions: formattedAnswers }
       },
       () => {
-        let { originalEntity, entity } = this.state;
+        const { originalEntity, entity } = this.state;
         this.props.onSubmit(this.removeUnchangedFields(entity, originalEntity));
       }
     );
-  }
-
-  handlePresentationLink(event_id, ev) {
-    const { currentSummit } = this.props;
-    ev.preventDefault();
-    let event_detail_url = currentSummit.schedule_event_detail_url
-      .replace(":event_id", event_id)
-      .replace(":event_title", "");
-    window.open(event_detail_url, "_blank");
   }
 
   handleSpeakerLink(speaker_id, ev) {
@@ -191,7 +174,7 @@ class AttendeeForm extends React.Component {
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -215,30 +198,36 @@ class AttendeeForm extends React.Component {
 
     return (
       <>
-        {/* First Form ( Main Attendee Form )*/}
+        {/* First Form ( Main Attendee Form ) */}
         <form className="summit-attendee-form">
           <input type="hidden" id="id" value={entity.id} />
           <div className="row form-group">
-            <div className="col-md-6">
+            <div className="col-md-4">
               <label> {T.translate("general.member")} *</label>
               <MemberInput
                 id="member"
                 value={entity.member}
-                getOptionLabel={(member) => {
-                  return member.hasOwnProperty("email")
-                    ? `${
-                        member.first_name && member.last_name
-                          ? `${member.first_name} ${member.last_name} (${member.email})`
-                          : `${member.email}`
-                      }`
-                    : `${
-                        member.first_name && member.last_name
-                          ? `${member.first_name} ${member.last_name}`
-                          : ""
-                      } (${member.id})`;
-                }}
+                getOptionLabel={(member) =>
+                  `${member.first_name || ""} ${member.last_name || ""} (${
+                    member.email || member.id
+                  })`
+                }
                 onChange={this.handleChange}
                 disabled
+              />
+            </div>
+            <div className="col-md-4">
+              <label> {T.translate("edit_attendee.manager")}</label>
+              <AttendeeInput
+                id="manager"
+                summitId={currentSummit.id}
+                value={entity.manager}
+                getOptionLabel={(attendee) =>
+                  `${attendee.first_name || ""} ${attendee.last_name || ""} (${
+                    attendee.email || attendee.id
+                  })`
+                }
+                onChange={this.handleChange}
               />
             </div>
             {entity.speaker != null && (
@@ -388,42 +377,38 @@ class AttendeeForm extends React.Component {
                 onSave={this.props.onSaveTicket}
               />
             )}
-            {entity.orders && entity.orders.length > 0 && (
+            {entity.orders?.length > 0 && (
               <OrderComponent
                 orders={entity.orders}
                 summitId={entity.summit_id}
               />
             )}
 
-            {entity.member != null &&
-              entity.member.hasOwnProperty("rsvp") &&
-              entity.member.rsvp.length > 0 && (
-                <RsvpComponent
-                  member={entity.member}
-                  onDelete={this.props.onDeleteRsvp}
-                />
-              )}
+            {entity.member?.rsvp?.length > 0 && (
+              <RsvpComponent
+                member={entity.member}
+                onDelete={this.props.onDeleteRsvp}
+              />
+            )}
           </div>
         </form>
-        {/* Second Form ( Extra Questions )*/}
-        {entity.id !== 0 &&
-          entity.allowed_extra_questions &&
-          entity.allowed_extra_questions.length > 0 && (
-            <Panel
-              show={showSection === "extra_questions"}
-              title={T.translate("edit_attendee.extra_questions")}
-              handleClick={this.toggleSection.bind(this, "extra_questions")}
-            >
-              <ExtraQuestionsForm
-                readOnly={this.props.ExtraQuestionsFormReadOnly}
-                extraQuestions={entity.allowed_extra_questions}
-                userAnswers={entity.extra_questions}
-                onAnswerChanges={this.handleSubmit}
-                ref={this.formRef}
-                className="extra-questions"
-              />
-            </Panel>
-          )}
+        {/* Second Form ( Extra Questions ) */}
+        {entity.id !== 0 && entity.allowed_extra_questions?.length > 0 && (
+          <Panel
+            show={showSection === "extra_questions"}
+            title={T.translate("edit_attendee.extra_questions")}
+            handleClick={this.toggleSection.bind(this, "extra_questions")}
+          >
+            <ExtraQuestionsForm
+              readOnly={this.props.ExtraQuestionsFormReadOnly}
+              extraQuestions={entity.allowed_extra_questions}
+              userAnswers={entity.extra_questions}
+              onAnswerChanges={this.handleSubmit}
+              ref={this.formRef}
+              className="extra-questions"
+            />
+          </Panel>
+        )}
         {entity.id !== 0 && (
           <Panel
             show={showSection === "admin_notes"}

@@ -9,8 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_ATTENDEE,
   CHANGE_MEMBER,
@@ -28,13 +30,13 @@ import {
   AFFILIATION_DELETED
 } from "../../actions/member-actions";
 
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { canonicalizeObject } from "../../utils/methods";
 
 export const DEFAULT_ENTITY = {
   id: 0,
   member: null,
+  manager: null,
   first_name: "",
   last_name: "",
   email: "",
@@ -56,16 +58,15 @@ const DEFAULT_STATE = {
   errors: {}
 };
 
-const attendeeReducer = (state = DEFAULT_STATE, action) => {
+const attendeeReducer = (state = DEFAULT_STATE, action = {}) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER: {
       // we need this in case the token expired while editing the form
       if (payload.hasOwnProperty("persistStore")) {
         return state;
-      } else {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
       }
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     }
     case SET_CURRENT_SUMMIT:
     case RESET_ATTENDEE_FORM: {
@@ -73,13 +74,9 @@ const attendeeReducer = (state = DEFAULT_STATE, action) => {
     }
     case ATTENDEE_UPDATED:
     case RECEIVE_ATTENDEE: {
-      let entity = { ...payload.response };
+      const entity = { ...payload.response };
 
-      for (var key in entity) {
-        if (entity.hasOwnProperty(key)) {
-          entity[key] = entity[key] == null ? "" : entity[key];
-        }
-      }
+      canonicalizeObject(entity);
 
       if (entity.extra_questions) {
         entity.extra_questions = entity.extra_questions.map((q) => ({
@@ -94,14 +91,11 @@ const attendeeReducer = (state = DEFAULT_STATE, action) => {
       const { data } = payload.response;
       return { ...state, entity: { ...state.entity, orders: data } };
     }
-    case ATTENDEE_UPDATED: {
-      return state;
-    }
     case CHANGE_MEMBER: {
       return { ...state };
     }
     case TICKET_ADDED: {
-      let newTicket = payload.response;
+      const newTicket = payload.response;
       return {
         ...state,
         entity: {
@@ -111,7 +105,7 @@ const attendeeReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case TICKET_DELETED: {
-      let { ticketId } = payload;
+      const { ticketId } = payload;
       return {
         ...state,
         entity: {
@@ -121,7 +115,7 @@ const attendeeReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RSVP_DELETED: {
-      let { rsvpId } = payload;
+      const { rsvpId } = payload;
 
       return {
         ...state,
@@ -135,7 +129,7 @@ const attendeeReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case AFFILIATION_ADDED: {
-      let affiliation = { ...payload.response };
+      const affiliation = { ...payload.response };
 
       if (
         state.entity.member &&
@@ -151,17 +145,16 @@ const attendeeReducer = (state = DEFAULT_STATE, action) => {
             }
           }
         };
-      } else {
-        return state;
       }
+      return state;
     }
     case AFFILIATION_DELETED: {
-      let { affiliationId } = payload;
+      const { affiliationId } = payload;
       if (
         state.entity.member &&
         state.entity.member.hasOwnProperty("affiliations")
       ) {
-        let affiliations = state.entity.member.affiliations.filter(
+        const affiliations = state.entity.member.affiliations.filter(
           (a) => a.id !== affiliationId
         );
 
@@ -171,13 +164,12 @@ const attendeeReducer = (state = DEFAULT_STATE, action) => {
             ...state.entity,
             member: {
               ...state.entity.member,
-              affiliations: affiliations
+              affiliations
             }
           }
         };
-      } else {
-        return state;
       }
+      return state;
     }
     case VALIDATE: {
       return { ...state, errors: payload.errors };

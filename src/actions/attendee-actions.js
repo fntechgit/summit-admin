@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -27,12 +26,14 @@ import {
   escapeFilterValue,
   getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import {
   checkOrFilter,
   getAccessTokenSafely,
   isNumericString,
   parseDateRangeFilter
 } from "../utils/methods";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_ATTENDEES = "REQUEST_ATTENDEES";
 export const RECEIVE_ATTENDEES = "RECEIVE_ATTENDEES";
@@ -90,48 +91,48 @@ const parseFilters = (filters, term = null) => {
   }
 
   if (filters.memberFilter) {
-    if (filters.memberFilter === "HAS_MEMBER") filter.push(`has_member==true`);
+    if (filters.memberFilter === "HAS_MEMBER") filter.push("has_member==true");
     if (filters.memberFilter === "HAS_NO_MEMBER")
-      filter.push(`has_member==false`);
+      filter.push("has_member==false");
   }
 
   if (filters.ticketsFilter) {
     if (filters.ticketsFilter === "HAS_TICKETS")
-      filter.push(`has_tickets==true`);
+      filter.push("has_tickets==true");
     if (filters.ticketsFilter === "HAS_NO_TICKETS")
-      filter.push(`has_tickets==false`);
+      filter.push("has_tickets==false");
   }
 
   if (filters.virtualCheckInFilter) {
     if (filters.virtualCheckInFilter === "HAS_VIRTUAL_CHECKIN")
-      filter.push(`has_virtual_checkin==true`);
+      filter.push("has_virtual_checkin==true");
     if (filters.virtualCheckInFilter === "HAS_NO_VIRTUAL_CHECKIN")
-      filter.push(`has_virtual_checkin==false`);
+      filter.push("has_virtual_checkin==false");
   }
 
   if (filters.checkedInFilter) {
     if (filters.checkedInFilter === "CHECKED_IN")
-      filter.push(`has_checkin==true`);
+      filter.push("has_checkin==true");
     if (filters.checkedInFilter === "NO_CHECKED_IN")
-      filter.push(`has_checkin==false`);
+      filter.push("has_checkin==false");
   }
 
   if (filters.hasNotesFilter) {
-    if (filters.hasNotesFilter === "HAS_NOTES") filter.push(`has_notes==true`);
+    if (filters.hasNotesFilter === "HAS_NOTES") filter.push("has_notes==true");
     if (filters.hasNotesFilter === "HAS_NO_NOTES")
-      filter.push(`has_notes==false`);
+      filter.push("has_notes==false");
   }
 
   if (
     Array.isArray(filters.ticketTypeFilter) &&
     filters.ticketTypeFilter.length > 0
   ) {
-    filter.push("ticket_type_id==" + filters.ticketTypeFilter.join("||"));
+    filter.push(`ticket_type_id==${filters.ticketTypeFilter.join("||")}`);
   }
 
   if (filters?.companyFilter?.length > 0) {
     const nonTBD = filters?.companyFilter.filter((cf) => cf.id !== "NULL");
-    let companyFilter = [];
+    const companyFilter = [];
 
     // has tbd
     if (nonTBD.length < filters?.companyFilter?.length) {
@@ -140,7 +141,7 @@ const parseFilters = (filters, term = null) => {
 
     if (nonTBD.length > 0) {
       companyFilter.push(
-        "company==" + nonTBD.map((cf) => encodeURIComponent(cf.name)).join("||")
+        `company==${nonTBD.map((cf) => encodeURIComponent(cf.name)).join("||")}`
       );
     }
 
@@ -151,14 +152,14 @@ const parseFilters = (filters, term = null) => {
     Array.isArray(filters.featuresFilter) &&
     filters.featuresFilter.length > 0
   ) {
-    filter.push("features_id==" + filters.featuresFilter.join("||"));
+    filter.push(`features_id==${filters.featuresFilter.join("||")}`);
   }
 
   if (
     Array.isArray(filters.badgeTypeFilter) &&
     filters.badgeTypeFilter.length > 0
   ) {
-    filter.push("badge_type_id==" + filters.badgeTypeFilter.join("||"));
+    filter.push(`badge_type_id==${filters.badgeTypeFilter.join("||")}`);
   }
 
   if (filters.checkinDateFilter) {
@@ -199,7 +200,7 @@ export const getAttendees =
   (
     term = null,
     page = 1,
-    perPage = 10,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = 1,
     filters = {},
@@ -214,7 +215,7 @@ export const getAttendees =
 
     const params = {
       expand: "tags,notes",
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -228,7 +229,7 @@ export const getAttendees =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -248,7 +249,7 @@ export const exportAttendees =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filename = currentSummit.name + "-Attendees.csv";
+    const filename = `${currentSummit.name}-Attendees.csv`;
 
     const params = {
       expand: "",
@@ -264,7 +265,7 @@ export const exportAttendees =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     dispatch(
@@ -338,9 +339,9 @@ export const getAllowedExtraQuestions =
       page: 1,
       per_page: 100,
       access_token: accessToken,
-      "filter[]":
-        "tickets_exclude_inactives==" +
-        (tickets_exclude_inactives ? "true" : "false")
+      "filter[]": `tickets_exclude_inactives==${
+        tickets_exclude_inactives ? "true" : "false"
+      }`
     };
 
     return getRequest(
@@ -417,30 +418,29 @@ export const saveAttendee = (entity) => async (dispatch, getState) => {
     )(params)(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("edit_attendee.attendee_saved")));
     });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_attendee.attendee_created"),
-      type: "success"
-    };
-
-    return postRequest(
-      createAction(UPDATE_ATTENDEE),
-      createAction(ATTENDEE_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/attendees/${payload.response.id}`
-          );
-        })
-      );
-    });
   }
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_attendee.attendee_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(UPDATE_ATTENDEE),
+    createAction(ATTENDEE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then((payload) => {
+    dispatch(
+      showMessage(success_message, () => {
+        history.push(
+          `/app/summits/${currentSummit.id}/attendees/${payload.response.id}`
+        );
+      })
+    );
+  });
 };
 
 export const deleteAttendee = (attendeeId) => async (dispatch, getState) => {
@@ -558,11 +558,11 @@ export const sendEmails =
     };
 
     if (recipientEmail) {
-      payload["test_email_recipient"] = recipientEmail;
+      payload.test_email_recipient = recipientEmail;
     }
 
     if (excerptRecipient) {
-      payload["outcome_email_recipient"] = excerptRecipient;
+      payload.outcome_email_recipient = excerptRecipient;
     }
 
     dispatch(startLoading());
@@ -592,13 +592,18 @@ const normalizeEntity = (entity) => {
   normalizedEntity.member_id =
     normalizedEntity.member != null ? normalizedEntity.member.id : 0;
 
-  delete normalizedEntity["summit_hall_checked_in_date"];
-  delete normalizedEntity["member"];
-  delete normalizedEntity["tickets"];
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["last_edited"];
-  delete normalizedEntity["allowed_extra_questions"];
+  normalizedEntity.manager_id = normalizedEntity.manager
+    ? normalizedEntity.manager.id
+    : 0;
+
+  delete normalizedEntity.summit_hall_checked_in_date;
+  delete normalizedEntity.member;
+  delete normalizedEntity.manager;
+  delete normalizedEntity.tickets;
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.allowed_extra_questions;
 
   if (!normalizedEntity.company_id) {
     delete normalizedEntity.company_id;
