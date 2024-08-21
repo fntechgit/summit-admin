@@ -217,6 +217,27 @@ class TicketTypeForm extends React.Component {
               error={this.hasErrors("currency")}
             />
           </div>
+          <div className="col-md-4 checkboxes-div">
+            <div className="form-check abc-checkbox" data-tip="SANTI">
+              <input
+                type="checkbox"
+                id="allows_to_delegate"
+                checked={entity.allows_to_delegate}
+                onChange={this.handleChange}
+                className="form-check-input"
+              />
+              <label className="form-check-label" htmlFor="allows_to_delegate">
+                {T.translate("edit_ticket_type.allows_to_delegate")}&nbsp;
+                <i
+                  className="fa fa-info-circle"
+                  aria-hidden="true"
+                  title={T.translate(
+                    "edit_ticket_type.allows_to_delegate_info"
+                  )}
+                />
+              </label>
+            </div>
+          </div>
         </div>
         <div className="row form-group">
           <div className="col-md-4">
