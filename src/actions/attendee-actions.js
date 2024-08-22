@@ -123,6 +123,13 @@ const parseFilters = (filters, term = null) => {
       filter.push("has_notes==false");
   }
 
+  if (filters.hasManagerFilter) {
+    if (filters.hasManagerFilter === "HAS_MANAGER")
+      filter.push("has_manager==true");
+    if (filters.hasManagerFilter === "HAS_NO_MANAGER")
+      filter.push("has_manager==false");
+  }
+
   if (
     Array.isArray(filters.ticketTypeFilter) &&
     filters.ticketTypeFilter.length > 0
@@ -214,7 +221,7 @@ export const getAttendees =
     dispatch(startLoading());
 
     const params = {
-      expand: "tags,notes",
+      expand: "tags,notes,manager",
       page,
       per_page: perPage,
       access_token: accessToken

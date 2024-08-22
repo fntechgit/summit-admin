@@ -770,6 +770,7 @@
     "schedule": "Schedule",
     "schedule_count": "Scheduled",
     "company": "Company",
+    "manager": "Manager",
     "status": "Status",
     "tags": "Tags",
     "has_notes": "Notes",

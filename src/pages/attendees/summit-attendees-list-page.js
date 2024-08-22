@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -26,8 +26,8 @@ import {
   CompanyInput
 } from "openstack-uicore-foundation/lib/components";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import ScheduleModal from "../../components/schedule-modal/index";
 import { SegmentedControl } from "segmented-control";
+import ScheduleModal from "../../components/schedule-modal/index";
 import {
   getAttendees,
   deleteAttendee,
@@ -42,16 +42,23 @@ import {
 } from "../../actions/attendee-actions";
 
 import { getBadgeFeatures, getBadgeTypes } from "../../actions/badge-actions";
-import { ALL_FILTER, HAS_NO_TICKETS, HAS_TICKETS } from "../../utils/constants";
+import {
+  ALL_FILTER,
+  DEFAULT_PER_PAGE,
+  HAS_NO_TICKETS,
+  HAS_TICKETS,
+  TWO
+} from "../../utils/constants";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import { validateEmail } from "../../utils/methods";
-import SendEmailModal from "../../components/send-email-modal/index.jsx";
+import SendEmailModal from "../../components/send-email-modal/index";
 
 const fieldNames = [
   { columnKey: "member_id", value: "member_id", sortable: true },
   { columnKey: "tickets_count", value: "tickets_count", sortable: true },
   { columnKey: "company", value: "company", sortable: true },
   { columnKey: "tags", value: "tags" },
+  { columnKey: "manager", value: "manager" },
   {
     columnKey: "summit_hall_checked_in_date",
     value: "summit_hall_checked_in_date",
@@ -84,9 +91,10 @@ const FILTERS_DEFAULT_STATE = {
   companyFilter: [],
   badgeTypeFilter: [],
   featuresFilter: [],
-  checkinDateFilter: Array(2).fill(null),
+  checkinDateFilter: Array(TWO).fill(null),
   tags: [],
   hasNotesFilter: null,
+  hasManagerFilter: null,
   notes: "",
   orAndFilter: ALL_FILTER
 };
@@ -191,6 +199,8 @@ class SummitAttendeeListPage extends React.Component {
     }
 
     this.setState({ showEmailModal: true });
+
+    return true;
   }
 
   handleSendEmails = (excerpt) => {
@@ -208,10 +218,10 @@ class SummitAttendeeListPage extends React.Component {
   }
 
   handleSelectedAll(ev) {
-    let selectedAll = ev.target.checked;
+    const selectedAll = ev.target.checked;
     this.props.setSelectedAll(selectedAll);
     if (!selectedAll) {
-      //clear all selected
+      // clear all selected
       this.props.clearAllSelectedAttendees();
     }
   }
@@ -229,7 +239,7 @@ class SummitAttendeeListPage extends React.Component {
     this.setState({
       ...this.state,
       selectedColumns: extraColumns,
-      enabledFilters: enabledFilters,
+      enabledFilters,
       attendeeFilters: { ...attendeeFilters, ...filters }
     });
 
@@ -239,7 +249,7 @@ class SummitAttendeeListPage extends React.Component {
       this.props.getAttendees(
         term,
         1,
-        10,
+        DEFAULT_PER_PAGE,
         order,
         orderDir,
         filters,
@@ -255,7 +265,7 @@ class SummitAttendeeListPage extends React.Component {
 
   handleViewSchedule(attendee_id) {
     const { attendees } = this.props;
-    let attendee = attendees.find((a) => a.id === attendee_id);
+    const attendee = attendees.find((a) => a.id === attendee_id);
 
     this.setState({
       showModal: true,
@@ -266,7 +276,7 @@ class SummitAttendeeListPage extends React.Component {
 
   hasSchedule(attendee_id) {
     const { attendees } = this.props;
-    let attendee = attendees.find((a) => a.id === attendee_id);
+    const attendee = attendees.find((a) => a.id === attendee_id);
     return attendee.schedule_count > 0;
   }
 
@@ -324,19 +334,18 @@ class SummitAttendeeListPage extends React.Component {
 
   handleDeleteAttendee(attendeeId) {
     const { deleteAttendee, attendees } = this.props;
-    let attendee = attendees.find((a) => a.id === attendeeId);
+    const attendee = attendees.find((a) => a.id === attendeeId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("attendee_list.delete_attendee_warning") +
-        " " +
-        attendee.name,
+      text: `${T.translate("attendee_list.delete_attendee_warning")} ${
+        attendee.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteAttendee(attendeeId);
       }
@@ -380,7 +389,7 @@ class SummitAttendeeListPage extends React.Component {
         )
           ? []
           : null;
-        let newEventFilters = {
+        const newEventFilters = {
           ...this.state.attendeeFilters,
           [removedFilter]: defaultValue
         };
@@ -397,7 +406,7 @@ class SummitAttendeeListPage extends React.Component {
 
   handleColumnsChange(ev) {
     const { value } = ev.target;
-    let newColumns = value;
+    const newColumns = value;
     this.setState({ ...this.state, selectedColumns: newColumns });
   }
 
@@ -497,6 +506,7 @@ class SummitAttendeeListPage extends React.Component {
 
     const filters_ddl = [
       { label: "Member", value: "memberFilter" },
+      { label: "Has Manager?", value: "hasManagerFilter" },
       { label: "Status", value: "statusFilter" },
       { label: "Ticket", value: "ticketsFilter" },
       { label: "Virtual Checkin", value: "virtualCheckInFilter" },
@@ -537,6 +547,7 @@ class SummitAttendeeListPage extends React.Component {
         label: T.translate("attendee_list.tickets_count")
       },
       { value: "company", label: T.translate("attendee_list.company") },
+      { value: "manager", label: T.translate("attendee_list.manager") },
       {
         value: "summit_hall_checked_in_date",
         label: T.translate("attendee_list.summit_hall_checked_in_date")
@@ -565,12 +576,12 @@ class SummitAttendeeListPage extends React.Component {
           }
         ]
       },
-      selectedAll: selectedAll
+      selectedAll
     };
 
     if (!currentSummit.id) return <div />;
 
-    let flowEventsDDL = [
+    const flowEventsDDL = [
       { label: "-- SELECT EMAIL EVENT --", value: "" },
       {
         label: "SUMMIT_REGISTRATION__ATTENDEE_TICKET_REGENERATE_HASH",
@@ -606,7 +617,7 @@ class SummitAttendeeListPage extends React.Component {
       ...badgeTypes.map((bt) => ({ label: bt.name, value: bt.id }))
     ];
 
-    let showColumns = fieldNames
+    const showColumns = fieldNames
       .filter((f) => this.state.selectedColumns.includes(f.columnKey))
       .map((f2) => ({
         columnKey: f2.columnKey,
@@ -624,8 +635,8 @@ class SummitAttendeeListPage extends React.Component {
           {" "}
           {T.translate("attendee_list.attendee_list")} ({totalRealAttendees})
         </h3>
-        <div className={"row"}>
-          <div className={"col-md-8"}>
+        <div className="row">
+          <div className="col-md-8">
             <FreeTextSearch
               value={term ?? ""}
               placeholder={T.translate(
@@ -650,22 +661,22 @@ class SummitAttendeeListPage extends React.Component {
         <OrAndFilter
           style={{ marginTop: 15 }}
           value={attendeeFilters.orAndFilter}
-          entity={"attendees"}
+          entity="attendees"
           onChange={(filter) => this.handleOrAndFilter(filter)}
         />
         <div className="row" style={{ marginBottom: 15 }}>
-          <div className={"col-md-6"}>
+          <div className="col-md-6">
             <Dropdown
               id="enabled_filters"
-              placeholder={"Enabled Filters"}
+              placeholder="Enabled Filters"
               value={enabledFilters}
               onChange={this.handleFiltersChange}
               options={this.handleDDLSortByLabel(filters_ddl)}
-              isClearable={true}
-              isMulti={true}
+              isClearable
+              isMulti
             />
           </div>
-          <div className={"col-md-6"}>
+          <div className="col-md-6">
             <button
               className="btn btn-primary right-space"
               onClick={this.handleApplyEventFilters}
@@ -916,7 +927,7 @@ class SummitAttendeeListPage extends React.Component {
                 value={attendeeFilters.ticketTypeFilter}
                 onChange={this.handleExtraFilterChange}
                 options={ticketTypesDDL}
-                isClearable={true}
+                isClearable
                 placeholder={T.translate(
                   "attendee_list.placeholders.ticket_type"
                 )}
@@ -950,7 +961,7 @@ class SummitAttendeeListPage extends React.Component {
                 value={attendeeFilters.badgeTypeFilter}
                 onChange={this.handleExtraFilterChange}
                 options={badgeTypesDDL}
-                isClearable={true}
+                isClearable
                 placeholder={T.translate(
                   "attendee_list.placeholders.badge_type"
                 )}
@@ -968,7 +979,7 @@ class SummitAttendeeListPage extends React.Component {
                 value={attendeeFilters.featuresFilter}
                 onChange={this.handleExtraFilterChange}
                 options={featuresTypesDDL}
-                isClearable={true}
+                isClearable
                 placeholder={T.translate(
                   "attendee_list.placeholders.badge_feature"
                 )}
@@ -979,7 +990,7 @@ class SummitAttendeeListPage extends React.Component {
           {enabledFilters.includes("checkinDateFilter") && (
             <>
               <div
-                className={"col-md-3"}
+                className="col-md-3"
                 style={{ minHeight: "61px", paddingTop: "8px" }}
               >
                 <DateTimePicker
@@ -996,11 +1007,11 @@ class SummitAttendeeListPage extends React.Component {
                     attendeeFilters.checkinDateFilter[0],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
               <div
-                className={"col-md-3"}
+                className="col-md-3"
                 style={{ minHeight: "61px", paddingTop: "8px" }}
               >
                 <DateTimePicker
@@ -1017,7 +1028,7 @@ class SummitAttendeeListPage extends React.Component {
                     attendeeFilters.checkinDateFilter[1],
                     currentSummit.time_zone_id
                   )}
-                  className={"event-list-date-picker"}
+                  className="event-list-date-picker"
                 />
               </div>
             </>
@@ -1037,13 +1048,53 @@ class SummitAttendeeListPage extends React.Component {
               />
             </div>
           )}
+          {enabledFilters.includes("hasManagerFilter") && (
+            <div
+              className="col-md-6"
+              style={{ minHeight: "61px", paddingTop: "8px" }}
+            >
+              <SegmentedControl
+                name="hasManagerFilter"
+                options={[
+                  {
+                    label: "All",
+                    value: null,
+                    default: attendeeFilters.hasManagerFilter === null
+                  },
+                  {
+                    label: "Has manager",
+                    value: "HAS_MANAGER",
+                    default: attendeeFilters.hasManagerFilter === "HAS_MANAGER"
+                  },
+                  {
+                    label: "Has no manager",
+                    value: "HAS_NO_MANAGER",
+                    default:
+                      attendeeFilters.hasManagerFilter === "HAS_NO_MANAGER"
+                  }
+                ]}
+                setValue={(newValue) =>
+                  this.handleSegmentedControlFilterChange(
+                    newValue,
+                    "hasManagerFilter"
+                  )
+                }
+                style={{
+                  width: "100%",
+                  height: 40,
+                  color: "#337ab7",
+                  fontSize: "10px"
+                }}
+              />
+            </div>
+          )}
         </div>
         {attendees.length === 0 && (
           <div>{T.translate("attendee_list.no_attendees")}</div>
         )}
 
-        <div className={"row"} style={{ marginBottom: 15, marginTop: 15 }}>
-          <div className={"col-md-6"}>
+        <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
+          <div className="col-md-6">
             <Dropdown
               id="flow_event"
               value={currentFlowEvent}
@@ -1051,7 +1102,7 @@ class SummitAttendeeListPage extends React.Component {
               options={flowEventsDDL}
             />
           </div>
-          <div className={"col-md-5"}>
+          <div className="col-md-5">
             <Input
               id="testRecipient"
               value={testRecipient}
@@ -1064,7 +1115,7 @@ class SummitAttendeeListPage extends React.Component {
               className="form-control"
             />
           </div>
-          <div className={"col-md-1"}>
+          <div className="col-md-1">
             <button
               className="btn btn-default right-space"
               onClick={this.handleSendClick}
@@ -1083,8 +1134,8 @@ class SummitAttendeeListPage extends React.Component {
           />
         </div>
 
-        <div className={"row"} style={{ marginBottom: 15, marginTop: 15 }}>
-          <div className={"col-md-12"}>
+        <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
+          <div className="col-md-12">
             <label>{T.translate("event_list.select_fields")}</label>
             <Dropdown
               id="select_fields"
@@ -1092,8 +1143,8 @@ class SummitAttendeeListPage extends React.Component {
               value={this.state.selectedColumns}
               onChange={this.handleColumnsChange}
               options={this.handleDDLSortByLabel(ddl_columns)}
-              isClearable={true}
-              isMulti={true}
+              isClearable
+              isMulti
             />
           </div>
         </div>
