@@ -29,6 +29,8 @@ import {
   ERROR_CODE_500,
   HEX_RADIX,
   MILLISECONDS_TO_SECONDS,
+  ONE_MINUTE,
+  INT_BASE,
   OR_FILTER
 } from "./constants";
 
@@ -189,11 +191,10 @@ export const adjustEventDuration = (evt, entity) => {
         adjustedEntity.start_date = value - adjustedEntity.duration;
       }
     }
-  } // updating duration unless is empty
-  // check if the value is a valid number
-  else if (value !== "") {
-    // eslint-disable-next-line no-magic-numbers
-    const parsedValue = parseInt(value * 60, 10);
+    adjustedEntity[id] = value;
+  } else if (value !== "") {
+    // updating duration unless is empty
+    const parsedValue = parseInt(value, INT_BASE) * ONE_MINUTE;
     if (!Number.isNaN(parsedValue)) {
       if (adjustedEntity.start_date) {
         // if we have start date, update end date
@@ -202,10 +203,9 @@ export const adjustEventDuration = (evt, entity) => {
         // if we only have end date, update start date
         adjustedEntity.start_date = adjustedEntity.end_date - parsedValue;
       }
+      adjustedEntity[id] = parsedValue;
     }
   }
-
-  adjustedEntity[id] = value;
 
   return adjustedEntity;
 };

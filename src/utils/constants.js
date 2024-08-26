@@ -76,6 +76,7 @@ export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
 
 export const DEFAULT_ORDER_DIR = 1;
 
+export const INT_BASE = 10;
 export const ONE_MINUTE = 60;
 export const FIFTEEN_MINUTES = 900;
 export const HOUR_AND_HALF = 5400;

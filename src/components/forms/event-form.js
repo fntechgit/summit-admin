@@ -253,9 +253,10 @@ class EventForm extends React.Component {
 
   handleTimeChange(ev) {
     const { errors, entity } = this.state;
+    const { id } = ev.target;
+
     let newEntity = { ...entity };
     const newErrors = { ...errors };
-    const { id } = ev.target;
     newErrors[id] = "";
     newEntity = adjustEventDuration(ev, entity);
     this.setState({ entity: newEntity, errors: newErrors });
