@@ -22,6 +22,7 @@
     "import/no-unresolved": "warn",
     "no-underscore-dangle": "warn",
     "camelcase": "warn",
+    "prefer-const": "warn",
     "react/forbid-prop-types": "warn",
     "no-magic-numbers": [
       "error",
@@ -30,10 +31,15 @@
     "import/no-dynamic-require": "warn",
     "no-shadow": "warn",
     "global-require": "warn",
+    "default-param-last": "warn",
     "no-param-reassign": "warn",
+    "react/destructuring-assignment": "warn",
     "react/require-default-props": "warn",
     "react/prop-types": "warn",
+    "react/jsx-props-no-spreading": "warn",
     "react/jsx-no-useless-fragment": "warn",
+    "react/sort-comp": "warn",
+    "react/no-string-refs": "warn",
     "import/prefer-default-export": "warn",
     "no-plusplus": "off",
     "no-continue": "off",
@@ -54,7 +60,6 @@
     "no-restricted-globals": "warn",
     "jsx-a11y/label-has-associated-control": "warn",
     "react/jsx-no-bind": "warn",
-    "react/destructuring-assignment": "warn",
     "jsx-a11y/anchor-is-valid": "warn",
     "eqeqeq": "warn",
     "react/button-has-type": "warn",
@@ -63,10 +68,8 @@
     "react/no-access-state-in-setstate": "warn",
     "no-useless-concat": "warn",
     "react/no-unstable-nested-components": "warn",
-    "react/sort-comp": "warn",
     "array-callback-return": "warn",
-    "no-throw-literal": "warn",
-    "prefer-const": "warn"
+    "no-throw-literal": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }

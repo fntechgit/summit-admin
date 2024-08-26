@@ -9,15 +9,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { Table } from "openstack-uicore-foundation/lib/components";
 import Select from "react-select";
-const Query = require("graphql-query-builder");
 import wrapReport from "./report-wrapper";
 import { flattenData } from "../../actions/report-actions";
+import { prepareReportFilters } from "../../models/speakers-report";
+
+const Query = require("graphql-query-builder");
 
 const fieldNames = [
   { label: "Emails", key: "emails", simple: true, sortable: true },
@@ -66,7 +68,10 @@ const fieldNames = [
     sortable: true
   },
   { label: "Phone #", key: "attendances_phonenumber", sortable: true },
-  { label: "Presentations", key: "presentationtitles", sortable: true }
+  { label: "Presentations", key: "presentationtitles", sortable: true },
+  { label: "Selection Plan", key: "selectionplan", sortable: false },
+  { label: "Submission Status", key: "submissionstatus", sortable: false },
+  { label: "Selection Status", key: "selectionstatus", sortable: false }
 ];
 
 class SmartSpeakerReport extends React.Component {
@@ -84,14 +89,14 @@ class SmartSpeakerReport extends React.Component {
 
   buildReportQuery(filters, listFilters, sortKey, sortDir) {
     const { currentSummit } = this.props;
-    let { showFields } = this.state;
+    const { showFields } = this.state;
 
     if (!filters.published_in) {
       listFilters.summitId = currentSummit.id;
     }
 
-    let query = new Query("speakers", listFilters);
-    let reportData = [
+    const query = new Query("speakers", listFilters);
+    const reportData = [
       "id",
       "title",
       "fullname: fullName",
@@ -100,32 +105,34 @@ class SmartSpeakerReport extends React.Component {
     ];
 
     if (sortKey) {
-      let querySortKey = this.translateSortKey(sortKey);
-      let order = sortDir == 1 ? "" : "-";
-      filters.ordering = order + "" + querySortKey;
+      const querySortKey = this.translateSortKey(sortKey);
+      const order = sortDir === 1 ? "" : "-";
+      filters.ordering = `${order}${querySortKey}`;
     }
 
     if (showFields.includes("member_id")) {
-      let member = new Query("member");
+      const member = new Query("member");
       member.find(["id"]);
-      reportData.push({ member: member });
+      reportData.push({ member });
     }
 
-    let promoCodesFields = ["promocodes_code", "promocodes_type"];
+    const promoCodesFields = ["promocodes_code", "promocodes_type"];
     if (showFields.filter((f) => promoCodesFields.includes(f)).length > 0) {
-      let promoCodes = new Query("promoCodes", { summit_Id: currentSummit.id });
+      const promoCodes = new Query("promoCodes", {
+        summit_Id: currentSummit.id
+      });
       promoCodes.find(["code", "type"]);
       reportData.push({ promocodes: promoCodes });
     }
 
-    let attendancesFields = [
+    const attendancesFields = [
       "attendances_confirmed",
       "attendances_registered",
       "attendances_checkedin",
       "attendances_phonenumber"
     ];
     if (showFields.filter((f) => attendancesFields.includes(f)).length > 0) {
-      let attendances = new Query("attendances", {
+      const attendances = new Query("attendances", {
         summit_Id: currentSummit.id
       });
       attendances.find([
@@ -134,7 +141,7 @@ class SmartSpeakerReport extends React.Component {
         "checkedin: checkedIn",
         "phonenumber: phoneNumber"
       ]);
-      reportData.push({ attendances: attendances });
+      reportData.push({ attendances });
     }
 
     if (showFields.includes("presentationtitles")) {
@@ -143,14 +150,42 @@ class SmartSpeakerReport extends React.Component {
       );
     }
 
-    let simpleFields = fieldNames
+    if (showFields.includes("selectionplan")) {
+      reportData.push(
+        `selectionplan: selectionPlan (summitId:${currentSummit.id})`
+      );
+    }
+
+    if (showFields.includes("submissionstatus")) {
+      reportData.push(
+        `submissionstatus: submissionStatus (summitId:${currentSummit.id}){
+          presentationId
+          status
+          trackId
+          track
+        }`
+      );
+    }
+
+    if (showFields.includes("selectionstatus")) {
+      reportData.push(
+        `selectionstatus: selectionStatus (summitId:${currentSummit.id}){
+          presentationId
+          status
+          trackId
+          track
+        }`
+      );
+    }
+
+    const simpleFields = fieldNames
       .filter((f) => f.simple && showFields.includes(f.key))
       .map((f) => (f.queryKey ? `${f.key}: ${f.queryKey}` : f.key));
 
-    let results = new Query("results", filters);
+    const results = new Query("results", filters);
     results.find([...reportData, ...simpleFields]);
 
-    query.find([{ results: results }, "totalCount"]);
+    query.find([{ results }, "totalCount"]);
 
     return query;
   }
@@ -158,6 +193,31 @@ class SmartSpeakerReport extends React.Component {
   handleFilterChange(value) {
     this.setState({ showFields: value.map((v) => v.value) });
   }
+
+  getName() {
+    return "Speaker Report";
+  }
+
+  translateFilters = (reportQueryFilters) => {
+    const { selection_status, submission_status, selection_plan } =
+      reportQueryFilters;
+    const newFilters = prepareReportFilters(reportQueryFilters);
+
+    if (selection_status) {
+      newFilters.selectionStatus = selection_status;
+    }
+
+    if (submission_status) {
+      newFilters.submissionStatus = submission_status;
+    }
+
+    if (selection_plan) {
+      delete newFilters.selection_plan;
+      newFilters.selectionPlanIdIn = selection_plan;
+    }
+
+    return newFilters;
+  };
 
   translateSortKey(key) {
     let sortKey = key;
@@ -214,19 +274,27 @@ class SmartSpeakerReport extends React.Component {
       case "paidtickets":
         sortKey = "paid_tickets";
         break;
+      default:
+        break;
     }
 
     return sortKey;
   }
 
-  getName() {
-    return "Speaker Report";
-  }
-
   preProcessData(data, extraData, forExport = false) {
-    let { showFields } = this.state;
+    const { showFields } = this.state;
 
-    let flatData = flattenData(data);
+    const transformedData = data.map((entry) => ({
+      ...entry,
+      submissionstatus: entry.submissionstatus
+        ?.map((s) => `${s.status} (${s.presentationId})`)
+        .join("||"),
+      selectionstatus: entry.selectionstatus
+        ?.map((s) => `${s.status} (${s.presentationId})`)
+        .join("||")
+    }));
+
+    const flatData = flattenData(transformedData);
 
     let columns = [
       { columnKey: "id", value: "Id", sortable: true },
@@ -239,7 +307,7 @@ class SmartSpeakerReport extends React.Component {
       }
     ];
 
-    let showColumns = fieldNames
+    const showColumns = fieldNames
       .filter((f) => showFields.includes(f.key))
       .map((f2) => ({
         columnKey: f2.key,
@@ -253,25 +321,26 @@ class SmartSpeakerReport extends React.Component {
   }
 
   render() {
-    let { data, totalCount, sortKey, sortDir } = this.props;
-    let { showFields } = this.state;
-    let storedDataName = this.props.name;
+    const { data, name, totalCount, sortKey, sortDir, onReload, onSort } =
+      this.props;
+    const { showFields } = this.state;
+    const storedDataName = name;
 
     if (!data || storedDataName !== this.getName()) return <div />;
 
-    let report_options = {
+    const report_options = {
       sortCol: sortKey,
-      sortDir: sortDir,
+      sortDir,
       actions: {}
     };
 
-    let { reportData, tableColumns } = this.preProcessData(data, null);
+    const { reportData, tableColumns } = this.preProcessData(data, null);
 
-    let showFieldOptions = fieldNames.map((f) => ({
+    const showFieldOptions = fieldNames.map((f) => ({
       label: f.label,
       value: f.key
     }));
-    let showFieldSelection = fieldNames
+    const showFieldSelection = fieldNames
       .filter((f) => showFields.includes(f.key))
       .map((f2) => ({ label: f2.label, value: f2.key }));
 
@@ -296,7 +365,8 @@ class SmartSpeakerReport extends React.Component {
             <div className="col-md-12">
               <button
                 className="btn btn-primary pull-right"
-                onClick={this.props.onReload}
+                type="button"
+                onClick={onReload}
               >
                 {" "}
                 Go{" "}
@@ -311,7 +381,7 @@ class SmartSpeakerReport extends React.Component {
               options={report_options}
               data={reportData}
               columns={tableColumns}
-              onSort={this.props.onSort}
+              onSort={onSort}
             />
           </div>
         </div>
@@ -322,5 +392,13 @@ class SmartSpeakerReport extends React.Component {
 
 export default wrapReport(SmartSpeakerReport, {
   pagination: true,
-  filters: ["track", "attendance", "media", "published_in"]
+  filters: [
+    "track",
+    "attendance",
+    "media",
+    "published_in",
+    "selection_status",
+    "submission_status",
+    "selection_plan"
+  ]
 });

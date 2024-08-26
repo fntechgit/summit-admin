@@ -1913,11 +1913,13 @@
     "tag_report": "Tag Report",
     "metrics_report": "Metrics Report",
     "attendee_report": "Attendee Report",
+    "selection_plan_filter": "Filter by Selection Plan",
     "export": "Export",
     "placeholders": {
       "search": "Search by Title, Abstract, Speaker LastName, Member Email ",
       "select_fields": "Select data to display",
-      "select_questions": "Select questions to display"
+      "select_questions": "Select questions to display",
+      "selection_plan": "Filter by Selection Plan"
     }
   },
   "badge_type_list": {
@@ -3027,5 +3029,26 @@
     "test_warning": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
     "send_emails": "Send",
     "excerpt_email": "Excerpt Recipient"
+  },
+  "filters": {
+    "selection_status_filter": {
+      "title": "Filter by Selection Status",
+      "options": {
+        "selected": "selected",
+        "accepted": "accepted",
+        "rejected": "rejected",
+        "alternate": "alternate",
+        "lightning-accepted": "lightning-accepted",
+        "lightning-alternate": "lightning-alternate"
+      }
+    },
+    "submission_status_filter": {
+      "title": "Filter by Submission Status",
+      "options": {
+        "accepted": "Accepted",
+        "received": "Received",
+        "non_received": "Non Received"
+      }
+    }
   }
 }

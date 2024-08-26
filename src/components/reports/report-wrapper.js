@@ -5,14 +5,15 @@ import { Breadcrumb } from "react-breadcrumbs";
 import { Pagination } from "react-bootstrap";
 import {
   AjaxLoader,
+  Dropdown,
   FreeTextSearch
 } from "openstack-uicore-foundation/lib/components";
+import T from "i18n-react/dist/i18n-react";
 import {
   exportReport,
   getReport,
   getMetricRaw
 } from "../../actions/report-actions";
-import T from "i18n-react/dist/i18n-react";
 import FragmentParser from "../../utils/fragmen-parser";
 import { getMembersForEventCSV } from "../../actions/member-actions";
 import {
@@ -22,6 +23,8 @@ import {
   PublishedFilter,
   PublishedInFilter,
   StatusFilter,
+  SelectionStatusFilter,
+  SubmissionStatusFilter,
   AttendanceFilter,
   MediaFilter
 } from "../filters";
@@ -56,20 +59,20 @@ const wrapReport = (ReportComponent, specs) => {
     }
 
     buildFiltersForQuery(filters, summitId) {
-      let { exclude_attendance, only_media, published_in, ...otherFilters } =
+      const { exclude_attendance, only_media, published_in, ...otherFilters } =
         filters;
 
       if (exclude_attendance) {
-        let filterQS = exclude_attendance + "ForSummit";
+        const filterQS = `${exclude_attendance}ForSummit`;
         otherFilters[filterQS] = `${summitId},true`;
       }
 
       if (only_media) {
-        otherFilters["attendingMediaForSummit"] = `${summitId},true`;
+        otherFilters.attendingMediaForSummit = `${summitId},true`;
       }
 
       if (published_in) {
-        otherFilters["publishedIn"] = summitId;
+        otherFilters.publishedIn = summitId;
       }
 
       if (this.refs.childCmp.translateFilters) {
@@ -81,7 +84,7 @@ const wrapReport = (ReportComponent, specs) => {
 
     buildQuery(page, perPageOverride = null) {
       let { perPage, currentSummit } = this.props;
-      let { sort, sortdir, search, ...filters } =
+      const { sort, sortdir, search, ...filters } =
         this.fragmentParser.getParams();
       let queryFilters = {};
       let listFilters = {};
@@ -99,18 +102,21 @@ const wrapReport = (ReportComponent, specs) => {
       }
 
       if (filters) {
-        let queryFilters = this.buildFiltersForQuery(filters, currentSummit.id);
+        const queryFilters = this.buildFiltersForQuery(
+          filters,
+          currentSummit.id
+        );
         listFilters = { ...listFilters, ...queryFilters };
       }
 
-      let query = this.refs.childCmp.buildReportQuery(
+      const query = this.refs.childCmp.buildReportQuery(
         queryFilters,
         listFilters,
         sort,
         sortdir
       );
 
-      return "{ reportData: " + query + " }";
+      return `{ reportData: ${query} }`;
     }
 
     handleReload() {
@@ -137,8 +143,8 @@ const wrapReport = (ReportComponent, specs) => {
 
     handleExportReport(ev) {
       ev.preventDefault();
-      let grouped = specs.hasOwnProperty("grouped");
-      let name = this.refs.childCmp.getName();
+      const grouped = specs.hasOwnProperty("grouped");
+      const name = this.refs.childCmp.getName();
       this.props.exportReport(
         this.buildQuery,
         name,
@@ -148,8 +154,8 @@ const wrapReport = (ReportComponent, specs) => {
     }
 
     handleGetReport(page) {
-      let query = this.buildQuery(page);
-      let name = this.refs.childCmp.getName();
+      const query = this.buildQuery(page);
+      const name = this.refs.childCmp.getName();
       this.props.getReport(query, name, page);
     }
 
@@ -163,12 +169,12 @@ const wrapReport = (ReportComponent, specs) => {
 
     renderFilters() {
       const { currentSummit } = this.props;
-      let filterHtml = [];
-      let { sort, sortdir, search, ...filters } =
+      const filterHtml = [];
+      const { sort, sortdir, search, ...filters } =
         this.fragmentParser.getParams();
 
       if (specs.filters.includes("track")) {
-        let filterValue = filters.hasOwnProperty("track")
+        const filterValue = filters.hasOwnProperty("track")
           ? filters.track
           : null;
         filterHtml.push(
@@ -186,7 +192,9 @@ const wrapReport = (ReportComponent, specs) => {
       }
 
       if (specs.filters.includes("type")) {
-        let filterValue = filters.hasOwnProperty("type") ? filters.type : null;
+        const filterValue = filters.hasOwnProperty("type")
+          ? filters.type
+          : null;
         filterHtml.push(
           <div className="col-md-3" key="type-filter">
             <TypeFilter
@@ -202,7 +210,9 @@ const wrapReport = (ReportComponent, specs) => {
       }
 
       if (specs.filters.includes("room")) {
-        let filterValue = filters.hasOwnProperty("room") ? filters.room : null;
+        const filterValue = filters.hasOwnProperty("room")
+          ? filters.room
+          : null;
         filterHtml.push(
           <div className="col-md-3" key="room-filter">
             <RoomFilter
@@ -220,7 +230,7 @@ const wrapReport = (ReportComponent, specs) => {
       }
 
       if (specs.filters.includes("published")) {
-        let filterValue = filters.hasOwnProperty("published")
+        const filterValue = filters.hasOwnProperty("published")
           ? filters.published
           : null;
         filterHtml.push(
@@ -236,7 +246,7 @@ const wrapReport = (ReportComponent, specs) => {
       }
 
       if (specs.filters.includes("published_in")) {
-        let filterValue = filters.hasOwnProperty("published_in")
+        const filterValue = filters.hasOwnProperty("published_in")
           ? filters.published_in
           : null;
         filterHtml.push(
@@ -252,7 +262,7 @@ const wrapReport = (ReportComponent, specs) => {
       }
 
       if (specs.filters.includes("status")) {
-        let filterValue = filters.hasOwnProperty("status")
+        const filterValue = filters.hasOwnProperty("status")
           ? filters.status
           : null;
         filterHtml.push(
@@ -268,7 +278,7 @@ const wrapReport = (ReportComponent, specs) => {
       }
 
       if (specs.filters.includes("attendance")) {
-        let filterValue = filters.hasOwnProperty("exclude_attendance")
+        const filterValue = filters.hasOwnProperty("exclude_attendance")
           ? filters.exclude_attendance
           : null;
         filterHtml.push(
@@ -284,7 +294,7 @@ const wrapReport = (ReportComponent, specs) => {
       }
 
       if (specs.filters.includes("media")) {
-        let filterValue = filters.hasOwnProperty("only_media")
+        const filterValue = filters.hasOwnProperty("only_media")
           ? filters.only_media
           : null;
         filterHtml.push(
@@ -299,7 +309,80 @@ const wrapReport = (ReportComponent, specs) => {
         );
       }
 
-      return filterHtml;
+      if (specs.filters.includes("selection_plan")) {
+        const filterValue = filters.hasOwnProperty("selection_plan")
+          ? filters.selection_plan
+          : [];
+
+        const selection_plans_ddl = currentSummit.selection_plans.map((et) => ({
+          value: et.id,
+          label: et.name
+        }));
+
+        filterHtml.push(
+          <div className="col-md-3" key="selection-plan-filter">
+            <label>{T.translate("reports.selection_plan_filter")}</label>
+            <Dropdown
+              id="selection_plan_id_filter"
+              placeholder={T.translate("reports.placeholders.selection_plan")}
+              value={filterValue}
+              onChange={({ target: { value } }) =>
+                this.handleFilterChange("selection_plan", value, true)
+              }
+              options={selection_plans_ddl}
+              isClearable
+              isMulti
+            />
+          </div>
+        );
+      }
+
+      if (specs.filters.includes("selection_status")) {
+        const filterValue = filters.hasOwnProperty("selection_status")
+          ? filters.selection_status?.split(",") ?? []
+          : [];
+        filterHtml.push(
+          <div className="col-md-3" key="selection-status-filter">
+            <SelectionStatusFilter
+              value={filterValue}
+              isMulti
+              onChange={(value) => {
+                this.handleFilterChange("selection_status", value);
+              }}
+            />
+          </div>
+        );
+      }
+
+      if (specs.filters.includes("submission_status")) {
+        const filterValue = filters.hasOwnProperty("submission_status")
+          ? filters.submission_status?.split(",") ?? []
+          : [];
+        filterHtml.push(
+          <div className="col-md-3" key="submission-status-filter">
+            <SubmissionStatusFilter
+              value={filterValue}
+              isMulti
+              onChange={(value) => {
+                this.handleFilterChange("submission_status", value);
+              }}
+            />
+          </div>
+        );
+      }
+
+      const wrappedFilters = [];
+      const step = 4;
+      for (let i = 0; i < filterHtml.length; i += step) {
+        const rowElements = filterHtml.slice(i, i + step);
+        wrappedFilters.push(
+          <div className="row" key={`row-${i / step}`}>
+            {rowElements}
+          </div>
+        );
+      }
+
+      return wrappedFilters;
     }
 
     render() {
@@ -312,17 +395,19 @@ const wrapReport = (ReportComponent, specs) => {
         exportingReport,
         exportProgress
       } = this.props;
-      let { sort, sortdir, search, ...filters } =
+      const { sort, sortdir, search, ...filters } =
         this.fragmentParser.getParams();
-      let pageCount = Math.ceil(totalCount / perPage);
-      let reportName = this.refs.childCmp
+      const pageCount = Math.ceil(totalCount / perPage);
+      const reportName = this.refs.childCmp
         ? this.refs.childCmp.getName()
         : "report";
-      let grouped = specs.hasOwnProperty("grouped");
-      let searchPlaceholder =
+      const grouped = specs.hasOwnProperty("grouped");
+      const searchPlaceholder =
         this.refs.childCmp && this.refs.childCmp.getSearchPlaceholder
           ? this.refs.childCmp.getSearchPlaceholder()
           : T.translate("reports.placeholders.search");
+
+      const childCmpRef = "childCmp";
 
       return (
         <div className="container large">
@@ -338,8 +423,8 @@ const wrapReport = (ReportComponent, specs) => {
             </div>
           </div>
           <hr />
-          <div className={"row"}>
-            <div className={"col-md-6"}>
+          <div className="row">
+            <div className="col-md-6">
               <FreeTextSearch
                 value={search || ""}
                 placeholder={searchPlaceholder}
@@ -349,6 +434,7 @@ const wrapReport = (ReportComponent, specs) => {
             <div className="col-md-6 text-right">
               <button
                 className="btn btn-primary right-space"
+                type="button"
                 onClick={this.handleExportReport}
               >
                 {T.translate("reports.export")}
@@ -374,7 +460,7 @@ const wrapReport = (ReportComponent, specs) => {
 
           <div className="report-container">
             <ReportComponent
-              ref="childCmp"
+              ref={childCmpRef}
               sortKey={sort}
               sortDir={parseInt(sortdir)}
               onSort={this.handleSort}

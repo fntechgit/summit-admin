@@ -155,6 +155,7 @@ export const getMainOrderExtraQuestions = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
+  const perPage = 100;
 
   dispatch(startLoading());
 
