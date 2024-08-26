@@ -293,7 +293,7 @@ export const getAttendee = (attendeeId) => async (dispatch, getState) => {
 
   const params = {
     expand:
-      "member, speaker, tickets, rsvp, schedule_summit_events, all_affiliations, extra_questions, tickets.badge, tickets.badge.type, tickets.promo_code, tags",
+      "member, speaker, tickets, rsvp, schedule_summit_events, all_affiliations, extra_questions, tickets.badge, tickets.badge.type, tickets.promo_code, tags, manager",
     access_token: accessToken
   };
 
@@ -411,7 +411,7 @@ export const saveAttendee = (entity) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "member, speaker, tickets, rsvp, schedule_summit_events, all_affiliations, extra_questions, tickets.badge, tickets.badge.type, tickets.promo_code, tags"
+      "member, speaker, tickets, rsvp, schedule_summit_events, all_affiliations, extra_questions, tickets.badge, tickets.badge.type, tickets.promo_code, tags, manager"
   };
 
   if (entity.id) {

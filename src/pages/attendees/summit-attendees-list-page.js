@@ -27,7 +27,7 @@ import {
 } from "openstack-uicore-foundation/lib/components";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SegmentedControl } from "segmented-control";
-import ScheduleModal from "../../components/schedule-modal/index";
+import ScheduleModal from "../../components/schedule-modal";
 import {
   getAttendees,
   deleteAttendee,
@@ -51,14 +51,14 @@ import {
 } from "../../utils/constants";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import { validateEmail } from "../../utils/methods";
-import SendEmailModal from "../../components/send-email-modal/index";
+import SendEmailModal from "../../components/send-email-modal/index.jsx";
 
 const fieldNames = [
   { columnKey: "member_id", value: "member_id", sortable: true },
   { columnKey: "tickets_count", value: "tickets_count", sortable: true },
   { columnKey: "company", value: "company", sortable: true },
   { columnKey: "tags", value: "tags" },
-  { columnKey: "manager", value: "manager" },
+  { columnKey: "manager_name", value: "manager" },
   {
     columnKey: "summit_hall_checked_in_date",
     value: "summit_hall_checked_in_date",
@@ -547,7 +547,7 @@ class SummitAttendeeListPage extends React.Component {
         label: T.translate("attendee_list.tickets_count")
       },
       { value: "company", label: T.translate("attendee_list.company") },
-      { value: "manager", label: T.translate("attendee_list.manager") },
+      { value: "manager_name", label: T.translate("attendee_list.manager") },
       {
         value: "summit_hall_checked_in_date",
         label: T.translate("attendee_list.summit_hall_checked_in_date")
