@@ -85,7 +85,8 @@ const wrapReport = (ReportComponent, specs) => {
 
     buildQuery(page, perPageOverride = null) {
       let { perPage, currentSummit } = this.props;
-      const { sort, sortdir, search, ...filters } = this.fragmentParser.getParams();
+      const { sort, sortdir, search, ...filters } =
+        this.fragmentParser.getParams();
       let queryFilters = {};
       let listFilters = {};
       perPage = perPageOverride || perPage;
@@ -395,7 +396,8 @@ const wrapReport = (ReportComponent, specs) => {
         exportingReport,
         exportProgress
       } = this.props;
-      const { sort, sortdir, search, ...filters } = this.fragmentParser.getParams();
+      const { sort, sortdir, search, ...filters } =
+        this.fragmentParser.getParams();
       const pageCount = Math.ceil(totalCount / perPage);
 
       const reportName = this.reportRef ? this.reportRef.getName() : "report";

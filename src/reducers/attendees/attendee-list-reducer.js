@@ -111,7 +111,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action = {}) => {
           status: a.status,
           manager_name: a.manager
             ? `${a.manager.first_name} ${a.manager.last_name}`
-            : "",
+            : "TBD",
           tags: a.tags.map((t) => t.tag).join(", "),
           checked: selectedAll
             ? !excludedIds.includes(a.id)

@@ -228,6 +228,7 @@ class AttendeeForm extends React.Component {
                   })`
                 }
                 onChange={this.handleChange}
+                isClearable
               />
             </div>
             {entity.speaker != null && (
