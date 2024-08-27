@@ -21,6 +21,8 @@ import { prepareReportFilters } from "../../models/speakers-report";
 
 const Query = require("graphql-query-builder");
 
+const Query = require("graphql-query-builder");
+
 const fieldNames = [
   { label: "Emails", key: "emails", simple: true, sortable: true },
   { label: "Title", key: "title", simple: true, sortable: true },
@@ -275,6 +277,7 @@ class SmartSpeakerReport extends React.Component {
         sortKey = "paid_tickets";
         break;
       default:
+        sortKey = "member__email";
         break;
     }
 
@@ -321,8 +324,7 @@ class SmartSpeakerReport extends React.Component {
   }
 
   render() {
-    const { data, name, totalCount, sortKey, sortDir, onReload, onSort } =
-      this.props;
+    const { data, name, totalCount, sortKey, sortDir, onReload, onSort } = this.props;
     const { showFields } = this.state;
     const storedDataName = name;
 

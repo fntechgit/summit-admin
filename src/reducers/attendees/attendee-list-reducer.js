@@ -13,6 +13,7 @@
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import moment from "moment-timezone";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 import {
   RECEIVE_ATTENDEES,
   REQUEST_ATTENDEES,
@@ -47,7 +48,7 @@ const DEFAULT_STATE = {
   summitTz: ""
 };
 
-const attendeeListReducer = (state = DEFAULT_STATE, action) => {
+const attendeeListReducer = (state = DEFAULT_STATE, action = {}) => {
   const { type, payload } = action;
   switch (type) {
     case SET_CURRENT_SUMMIT:
@@ -118,7 +119,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
           tickets_count: a.tickets.length.toString(),
           has_notes: a.notes,
           summit_hall_checked_in_date: a.summit_hall_checked_in_date
-            ? moment(a.summit_hall_checked_in_date * 1000)
+            ? moment(a.summit_hall_checked_in_date * MILLISECONDS_IN_SECOND)
                 .tz(state.summitTZ)
                 .format("MMMM Do YYYY, h:mm a")
             : "TBD"

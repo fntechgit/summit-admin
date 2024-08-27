@@ -51,7 +51,7 @@ import {
 } from "../../utils/constants";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import { validateEmail } from "../../utils/methods";
-import SendEmailModal from "../../components/send-email-modal/index.jsx";
+import SendEmailModal from "../../components/send-email-modal";
 
 const fieldNames = [
   { columnKey: "member_id", value: "member_id", sortable: true },
