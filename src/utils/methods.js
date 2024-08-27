@@ -44,6 +44,12 @@ export const trim = (string, length) =>
     ? `${string.substring(0, length - ELLIPSIS)}...`
     : string;
 
+export const canonicalizeObject = (entity) => {
+  Object.entries(entity).forEach(([key, value]) => {
+    entity[key] = value == null ? "" : value;
+  });
+};
+
 export const groupByDate = (array, prop, sortBy) => {
   const grouped_unordered = array.reduce((groups, item) => {
     const val = item[prop];

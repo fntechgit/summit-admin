@@ -275,6 +275,7 @@ class SmartSpeakerReport extends React.Component {
         sortKey = "paid_tickets";
         break;
       default:
+        sortKey = "member__email";
         break;
     }
 

@@ -9,8 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import moment from "moment-timezone";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 import {
   RECEIVE_ATTENDEES,
   REQUEST_ATTENDEES,
@@ -25,9 +28,6 @@ import {
 } from "../../actions/attendee-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-
-import moment from "moment-timezone";
 
 const DEFAULT_STATE = {
   attendees: {},
@@ -48,7 +48,7 @@ const DEFAULT_STATE = {
   summitTz: ""
 };
 
-const attendeeListReducer = (state = DEFAULT_STATE, action) => {
+const attendeeListReducer = (state = DEFAULT_STATE, action = {}) => {
   const { type, payload } = action;
   switch (type) {
     case SET_CURRENT_SUMMIT:
@@ -56,7 +56,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_ATTENDEES: {
-      let { order, orderDir, page, ...rest } = payload;
+      const { order, orderDir, page, ...rest } = payload;
 
       if (
         order !== state.order ||
@@ -90,7 +90,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
       const { current_page, total, last_page } = payload.response;
       const { selectedAll, selectedIds, excludedIds } = state;
 
-      let attendees = payload.response.data.map((a) => {
+      const attendees = payload.response.data.map((a) => {
         let name = "N/A";
         let email = "N/A";
 
@@ -105,10 +105,13 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
         return {
           id: a.id,
           member_id: a.member_id ? a.member_id : "N/A",
-          name: name,
-          email: email,
+          name,
+          email,
           company: a.company ? a.company : "TBD",
           status: a.status,
+          manager_name: a.manager
+            ? `${a.manager.first_name} ${a.manager.last_name}`
+            : "TBD",
           tags: a.tags.map((t) => t.tag).join(", "),
           checked: selectedAll
             ? !excludedIds.includes(a.id)
@@ -116,7 +119,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
           tickets_count: a.tickets.length.toString(),
           has_notes: a.notes,
           summit_hall_checked_in_date: a.summit_hall_checked_in_date
-            ? moment(a.summit_hall_checked_in_date * 1000)
+            ? moment(a.summit_hall_checked_in_date * MILLISECONDS_IN_SECOND)
                 .tz(state.summitTZ)
                 .format("MMMM Do YYYY, h:mm a")
             : "TBD"
@@ -132,7 +135,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case ATTENDEE_DELETED: {
-      let { attendeeId } = payload;
+      const { attendeeId } = payload;
       return {
         ...state,
         attendees: state.attendees.filter((a) => a.id !== attendeeId)
@@ -243,7 +246,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action) => {
       return { ...newState };
     }
     case CHANGE_ATTENDEE_SEARCH_TERM: {
-      let { term } = payload;
+      const { term } = payload;
       return { ...state, term };
     }
     default:

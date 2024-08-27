@@ -770,6 +770,7 @@
     "schedule": "Schedule",
     "schedule_count": "Scheduled",
     "company": "Company",
+    "manager": "Manager",
     "status": "Status",
     "tags": "Tags",
     "has_notes": "Notes",
@@ -798,6 +799,7 @@
     }
   },
   "edit_attendee": {
+    "manager": "Manager",
     "affiliations": "Affiliations",
     "start_date": "Start Date",
     "end_date": "End Date",

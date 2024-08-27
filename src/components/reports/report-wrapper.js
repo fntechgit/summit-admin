@@ -39,6 +39,7 @@ const wrapReport = (ReportComponent, specs) => {
 
       this.state = {};
 
+      this.reportRef = React.createRef();
       this.fragmentParser = new FragmentParser();
       this.buildQuery = this.buildQuery.bind(this);
       this.handleSort = this.handleSort.bind(this);
@@ -75,8 +76,8 @@ const wrapReport = (ReportComponent, specs) => {
         otherFilters.publishedIn = summitId;
       }
 
-      if (this.refs.childCmp.translateFilters) {
-        return this.refs.childCmp.translateFilters(otherFilters);
+      if (this.reportRef.translateFilters) {
+        return this.reportRef.translateFilters(otherFilters);
       }
 
       return otherFilters;
@@ -109,7 +110,7 @@ const wrapReport = (ReportComponent, specs) => {
         listFilters = { ...listFilters, ...queryFilters };
       }
 
-      const query = this.refs.childCmp.buildReportQuery(
+      const query = this.reportRef.buildReportQuery(
         queryFilters,
         listFilters,
         sort,
@@ -144,18 +145,18 @@ const wrapReport = (ReportComponent, specs) => {
     handleExportReport(ev) {
       ev.preventDefault();
       const grouped = specs.hasOwnProperty("grouped");
-      const name = this.refs.childCmp.getName();
+      const name = this.reportRef.getName();
       this.props.exportReport(
         this.buildQuery,
         name,
         grouped,
-        this.refs.childCmp.preProcessData.bind(this.refs.childCmp)
+        this.reportRef.preProcessData.bind(this.reportRef)
       );
     }
 
     handleGetReport(page) {
       const query = this.buildQuery(page);
-      const name = this.refs.childCmp.getName();
+      const name = this.reportRef.getName();
       this.props.getReport(query, name, page);
     }
 
@@ -398,16 +399,13 @@ const wrapReport = (ReportComponent, specs) => {
       const { sort, sortdir, search, ...filters } =
         this.fragmentParser.getParams();
       const pageCount = Math.ceil(totalCount / perPage);
-      const reportName = this.refs.childCmp
-        ? this.refs.childCmp.getName()
-        : "report";
+
+      const reportName = this.reportRef ? this.reportRef.getName() : "report";
       const grouped = specs.hasOwnProperty("grouped");
       const searchPlaceholder =
-        this.refs.childCmp && this.refs.childCmp.getSearchPlaceholder
-          ? this.refs.childCmp.getSearchPlaceholder()
+        this.reportRef && this.reportRef.getSearchPlaceholder
+          ? this.reportRef.getSearchPlaceholder()
           : T.translate("reports.placeholders.search");
-
-      const childCmpRef = "childCmp";
 
       return (
         <div className="container large">
@@ -460,7 +458,7 @@ const wrapReport = (ReportComponent, specs) => {
 
           <div className="report-container">
             <ReportComponent
-              ref={childCmpRef}
+              ref={this.reportRef}
               sortKey={sort}
               sortDir={parseInt(sortdir)}
               onSort={this.handleSort}
