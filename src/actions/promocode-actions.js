@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -28,11 +27,9 @@ import {
   escapeFilterValue,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
-import {
-  checkOrFilter,
-  getAccessTokenSafely,
-  isNumericString
-} from "../utils/methods";
+import history from "../history";
+import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const EXISTING_SPEAKERS_PROMO_CODE = 1;
 export const EXISTING_SPEAKERS_DISCOUNT_CODE = 2;
@@ -92,7 +89,7 @@ const parseFilters = (filters, term = null) => {
 
   if (term) {
     const escapedTerm = escapeFilterValue(term);
-    let searchString =
+    const searchString =
       `code=@${escapedTerm},` +
       `creator=@${escapedTerm},` +
       `creator_email=@${escapedTerm},` +
@@ -132,7 +129,7 @@ export const getPromocodes =
   (
     term = null,
     page = 1,
-    perPage = 10,
+    perPage = DEFAULT_PER_PAGE,
     order = "code",
     orderDir = 1,
     filters = {},
@@ -147,15 +144,15 @@ export const getPromocodes =
 
     const filter = parseFilters(filters, term);
 
-    let expand = "speaker,owner,sponsor,creator,tags,owners,owners.speaker";
-    let relations = "owners.speaker.none";
-    let fields = "owners.speaker.email";
+    const expand = "speaker,owner,sponsor,creator,tags,owners,owners.speaker";
+    const relations = "owners.speaker.none";
+    const fields = "owners.speaker.email";
 
     const params = {
-      expand: expand,
-      relations: relations,
-      fields: fields,
-      page: page,
+      expand,
+      relations,
+      fields,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -167,7 +164,7 @@ export const getPromocodes =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -237,32 +234,31 @@ export const savePromocode =
           showSuccessMessage(T.translate("edit_promocode.promocode_saved"))
         );
       });
-    } else {
-      const success_message = {
-        title: T.translate("general.done"),
-        html: T.translate("edit_promocode.promocode_created"),
-        type: "success"
-      };
-
-      return postRequest(
-        createAction(UPDATE_PROMOCODE),
-        createAction(PROMOCODE_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
-        dispatch(
-          showMessage(success_message, () => {
-            history.push(
-              `/app/summits/${currentSummit.id}${
-                isSponsor ? "/sponsors" : ""
-              }/promocodes/${payload.response.id}`
-            );
-          })
-        );
-      });
     }
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_promocode.promocode_created"),
+      type: "success"
+    };
+
+    return postRequest(
+      createAction(UPDATE_PROMOCODE),
+      createAction(PROMOCODE_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(
+        showMessage(success_message, () => {
+          history.push(
+            `/app/summits/${currentSummit.id}${
+              isSponsor ? "/sponsors" : ""
+            }/promocodes/${payload.response.id}`
+          );
+        })
+      );
+    });
   };
 
 export const deletePromocode = (promocodeId) => async (dispatch, getState) => {
@@ -318,7 +314,7 @@ export const exportPromocodes =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filename = currentSummit.name + "-Promocodes.csv";
+    const filename = `${currentSummit.name}-Promocodes.csv`;
 
     const params = {
       access_token: accessToken,
@@ -336,7 +332,7 @@ export const exportPromocodes =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     dispatch(
@@ -351,29 +347,28 @@ export const exportPromocodes =
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  if (entity.class_name.indexOf("MEMBER_") === 0) {
+  if (entity.class_name?.indexOf("MEMBER_") === 0) {
     if (entity.owner != null) {
       normalizedEntity.first_name = entity.owner.first_name;
       normalizedEntity.last_name = entity.owner.last_name;
       normalizedEntity.email = entity.owner.email;
     }
-  } else if (entity.class_name.indexOf("SPEAKER_") === 0) {
+  } else if (entity.class_name?.indexOf("SPEAKER_") === 0) {
     if (entity.speaker != null) normalizedEntity.speaker_id = entity.speaker.id;
-  } else if (entity.class_name.indexOf("SPEAKERS_") === 0) {
+  } else if (entity.class_name?.indexOf("SPEAKERS_") === 0) {
     if (entity.speakers != null && entity.speakers.speakers_list.length > 0) {
       normalizedEntity.speaker_ids = entity.speakers.speakers_list.map(
         (s) => s.id
       );
     }
-    delete normalizedEntity["speakers"];
-  } else if (entity.class_name.indexOf("SPONSOR_") === 0) {
+    delete normalizedEntity.speakers;
+  } else if (entity.class_name?.indexOf("SPONSOR_") === 0) {
     if (entity.sponsor != null) normalizedEntity.sponsor_id = entity.sponsor.id;
     if (entity.owner != null) {
       normalizedEntity.first_name = entity.owner.first_name;
       normalizedEntity.last_name = entity.owner.last_name;
       normalizedEntity.email = entity.owner.email;
     }
-  } else if (entity.class_name.indexOf("SUMMIT_") === 0) {
   }
 
   // clear dates
@@ -390,16 +385,16 @@ const normalizeEntity = (entity) => {
     normalizedEntity.tags = entity.tags.map((e) => e.tag);
   }
 
-  delete normalizedEntity["owner"];
-  delete normalizedEntity["owner_id"];
-  delete normalizedEntity["speaker"];
-  delete normalizedEntity["sponsor"];
-  delete normalizedEntity["apply_to_all_tix"];
+  delete normalizedEntity.owner;
+  delete normalizedEntity.owner_id;
+  delete normalizedEntity.speaker;
+  delete normalizedEntity.sponsor;
+  delete normalizedEntity.apply_to_all_tix;
 
   return normalizedEntity;
 };
 
-/************************  BADGE FEATURES **********************************/
+/** **********************  BADGE FEATURES ********************************* */
 
 export const addBadgeFeatureToPromocode =
   (promocodeId, badgeFeature) => async (dispatch, getState) => {
@@ -447,7 +442,7 @@ export const removeBadgeFeatureFromPromocode =
     });
   };
 
-/************************  DICOUNT PROMOCODES **********************************/
+/** **********************  DICOUNT PROMOCODES ********************************* */
 
 export const addDiscountTicket = (ticket) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -513,10 +508,17 @@ export const importPromoCodesCSV = (file) => async (dispatch, getState) => {
   });
 };
 
-/************************  PROMOCODE SPEAKERS **********************************/
+/** **********************  PROMOCODE SPEAKERS ********************************* */
 
 export const getAssignedSpeakers =
-  (entity, term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    entity,
+    term = null,
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
   async (dispatch, getState) => {
     if (entity.id === 0)
       return dispatch(
@@ -538,7 +540,7 @@ export const getAssignedSpeakers =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       expand: "speaker",
       access_token: accessToken
@@ -556,7 +558,7 @@ export const getAssignedSpeakers =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     const promoCodeRoute =
