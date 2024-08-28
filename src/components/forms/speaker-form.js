@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -71,8 +71,8 @@ class SpeakerForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -107,26 +107,26 @@ class SpeakerForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleUploadPic(file) {
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append("file", file);
     this.props.onAttach(this.state.entity, formData, "profile");
   }
 
   handleUploadBigPic(file) {
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append("file", file);
     this.props.onAttach(this.state.entity, formData, "big");
   }
 
   handleRemoveFile(picAttr) {
-    let entity = { ...this.state.entity };
+    const entity = { ...this.state.entity };
 
     entity[picAttr] = "";
-    this.setState({ entity: entity });
+    this.setState({ entity });
   }
 
   handleSubmit(publish, ev) {
@@ -137,14 +137,14 @@ class SpeakerForm extends React.Component {
 
   handlePresentationLink(summit, event_id, ev) {
     ev.preventDefault();
-    let event_detail_url = summit.schedule_event_detail_url
+    const event_detail_url = summit.schedule_event_detail_url
       .replace(":event_id", event_id)
       .replace(":event_title", "");
     window.open(event_detail_url, "_blank");
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -153,14 +153,14 @@ class SpeakerForm extends React.Component {
   }
 
   getPresentations(summitId) {
-    let presentations = this.state.entity.all_presentations.filter(
+    const presentations = this.state.entity.all_presentations.filter(
       (p) => p.summit_id === summitId
     );
-    let speakerId = this.state.entity.id;
+    const speakerId = this.state.entity.id;
     const { history } = this.props;
 
     return (
-      <div>
+      <div className="summit-data-section">
         Presentations:
         {presentations.map((p) => {
           let participation = "";
@@ -173,7 +173,7 @@ class SpeakerForm extends React.Component {
           }
 
           return (
-            <li key={"pres" + p.id}>
+            <li key={`pres${p.id}`}>
               <a
                 href=""
                 onClick={() => {
@@ -186,22 +186,20 @@ class SpeakerForm extends React.Component {
             </li>
           );
         })}
-        <li>
-          <a
-            href=""
-            onClick={() => {
-              history.push(`/app/summits/${summitId}/events/new`);
-            }}
-          >
-            Add new
-          </a>
-        </li>
+        <button
+          className="btn btn-xs btn-default"
+          onClick={() => {
+            history.push(`/app/summits/${summitId}/events/new`);
+          }}
+        >
+          Add new presentation
+        </button>
       </div>
     );
   }
 
   getAttendance(summitId) {
-    let assistances = this.state.entity.summit_assistances.filter(
+    const assistances = this.state.entity.summit_assistances.filter(
       (a) => a.summit_id === summitId
     );
     const { history } = this.props;
@@ -209,10 +207,10 @@ class SpeakerForm extends React.Component {
     if (assistances.length === 0) return <div />;
 
     return (
-      <div>
+      <div className="summit-data-section">
         Attendance:
         {assistances.map((a) => (
-          <li key={"ass" + a.id}>
+          <li key={`ass${a.id}`}>
             <a
               href=""
               onClick={() => {
@@ -228,31 +226,29 @@ class SpeakerForm extends React.Component {
             </a>
           </li>
         ))}
-        <li>
-          <a
-            href=""
-            onClick={() => {
-              history.push(`/app/summits/${summitId}/speaker-attendances/new`);
-            }}
-          >
-            Add new
-          </a>
-        </li>
+        <button
+          className="btn btn-xs btn-default"
+          onClick={() => {
+            history.push(`/app/summits/${summitId}/speaker-attendances/new`);
+          }}
+        >
+          Add new attendance
+        </button>
       </div>
     );
   }
 
   getPromocodes(summitId) {
-    let promocodes = this.state.entity.registration_codes.filter(
+    const promocodes = this.state.entity.registration_codes.filter(
       (r) => r.summit_id === summitId
     );
     const { history, summits } = this.props;
 
     return (
-      <div>
+      <div className="summit-data-section">
         Promocodes:
         {promocodes.map((p) => (
-          <li key={"prom" + p.id}>
+          <li key={`prom${p.id}`}>
             <a
               href=""
               onClick={() => {
@@ -265,23 +261,21 @@ class SpeakerForm extends React.Component {
             {p.redeemed ? <i> - Redeemed </i> : ""}
           </li>
         ))}
-        <li>
-          <a
-            href=""
-            onClick={() => {
-              history.push(`/app/summits/${summitId}/promocodes/new`);
-            }}
-          >
-            Add new
-          </a>
-        </li>
+        <button
+          className="btn btn-xs btn-default"
+          onClick={() => {
+            history.push(`/app/summits/${summitId}/promocodes/new`);
+          }}
+        >
+          Add new promocode
+        </button>
       </div>
     );
   }
 
   toggleSummit(summitId, ev) {
-    let { showSummit } = this.state;
-    let newShowSummit = showSummit === summitId ? null : summitId;
+    const { showSummit } = this.state;
+    const newShowSummit = showSummit === summitId ? null : summitId;
     ev.preventDefault();
 
     this.setState({ showSummit: newShowSummit });
@@ -289,17 +283,16 @@ class SpeakerForm extends React.Component {
 
   render() {
     const { entity, showSummit } = this.state;
-    let { summits } = this.props;
-    let allPresentations = entity.all_presentations;
+    const { summits } = this.props;
+    const allPresentations = entity.all_presentations;
+    const lastThree = -3;
 
-    let lastSummits = summits
+    const lastSummits = summits
       .filter(
         (s) => allPresentations.filter((p) => p.summit_id === s.id).length > 0
       )
-      .sort((a, b) =>
-        a.start_date > b.start_date ? 1 : a.start_date < b.start_date ? -1 : 0
-      )
-      .slice(-3);
+      .sort((a, b) => a.start_date - b.start_date)
+      .slice(lastThree);
 
     return (
       <form className="summit-speaker-form">
@@ -310,11 +303,11 @@ class SpeakerForm extends React.Component {
             <MemberInput
               id="member"
               value={entity.member}
-              getOptionLabel={(member) => {
-                return `${member.first_name} ${member.last_name} (${member.email})`;
-              }}
+              getOptionLabel={(member) =>
+                `${member.first_name} ${member.last_name} (${member.email})`
+              }
               onChange={this.handleChange}
-              isClearable={true}
+              isClearable
             />
           </div>
           <div className="col-md-4">
@@ -464,7 +457,7 @@ class SpeakerForm extends React.Component {
         {entity.id !== 0 &&
           lastSummits.map((s) => (
             <Panel
-              key={"last-summits-" + s.id}
+              key={`last-summits-${s.id}`}
               className="summit-data"
               show={showSummit === s.id}
               title={s.name}
