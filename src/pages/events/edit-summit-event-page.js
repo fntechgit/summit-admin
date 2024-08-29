@@ -172,7 +172,7 @@ function EditSummitEventPage(props) {
       <h3>
         <div className="title">{header}</div>
         {!!entity.id && (
-          <div className="next">
+          <div>
             <button
               className="btn btn-default prev"
               type="button"
@@ -187,6 +187,9 @@ function EditSummitEventPage(props) {
             >
               {"Next Event >>"}
             </button>
+            <a href="new" className="btn btn-default pull-right">
+              Add new
+            </a>
           </div>
         )}
       </h3>

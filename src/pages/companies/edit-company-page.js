@@ -9,12 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import Swal from "sweetalert2";
 import CompanyForm from "../../components/forms/company-form";
 import {
   getCompany,
@@ -28,11 +29,11 @@ import {
   deleteSupportingCompany
 } from "../../actions/sponsored-project-actions";
 import "../../styles/edit-company-page.less";
-import Swal from "sweetalert2";
 
 class EditCompanyPage extends React.Component {
   constructor(props) {
     const companyId = props.match.params.company_id;
+    const perPage = 100;
     super(props);
 
     if (!companyId) {
@@ -41,7 +42,7 @@ class EditCompanyPage extends React.Component {
       props.getCompany(companyId);
     }
     if (window.APP_CLIENT_NAME == "openstack")
-      props.getSponsoredProjects("", 1, 100);
+      props.getSponsoredProjects("", 1, perPage);
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -81,6 +82,11 @@ class EditCompanyPage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_company.company")}
+          {entity.id && (
+            <a href="new" className="btn btn-default pull-right">
+              Add new
+            </a>
+          )}
         </h3>
         <hr />
         <CompanyForm
@@ -92,11 +98,11 @@ class EditCompanyPage extends React.Component {
           onAttach={attachLogo}
           sponsoredProjects={sponsoredProjects}
           onDeleteSponsorship={(id) => {
-            let sponsorship = entity.project_sponsorships.find(
+            const sponsorship = entity.project_sponsorships.find(
               (ps) => ps.id == id
             );
             if (!sponsorship) return;
-            let supportingCompany = sponsorship.supporting_companies.find(
+            const supportingCompany = sponsorship.supporting_companies.find(
               (sc) => sc.company_id == entity.id
             );
             if (!supportingCompany) return;

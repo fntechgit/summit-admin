@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -23,7 +23,7 @@ import {
   saveEventMaterialWithFile
 } from "../../actions/event-material-actions";
 
-//import '../../styles/edit-event-material-page.less';
+// import '../../styles/edit-event-material-page.less';
 
 class EditEventMaterialPage extends React.Component {
   constructor(props) {
@@ -69,6 +69,11 @@ class EditEventMaterialPage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_event_material.material")}
+          {entity.id && (
+            <a href="new" className="btn btn-default pull-right">
+              Add new
+            </a>
+          )}
         </h3>
         <hr />
         {currentSummit && (

@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -88,7 +88,7 @@ class EditSummitAttendeePage extends React.Component {
   }
 
   handleOnSubmit(entity) {
-    let { saveAttendee, getAllowedExtraQuestions } = this.props;
+    const { saveAttendee, getAllowedExtraQuestions } = this.props;
     this.setState({ ...this.state, ExtraQuestionsFormReadOnly: false });
     saveAttendee(entity).then(() =>
       getAllowedExtraQuestions(entity.id).then((payload) => {
@@ -110,11 +110,18 @@ class EditSummitAttendeePage extends React.Component {
       : T.translate("general.add");
     const breadcrumb = entity.id ? entity.email : T.translate("general.new");
 
+    console.log(match);
+
     return (
       <div className="container">
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("general.attendee")}
+          {entity.id && (
+            <a href="new" className="btn btn-default pull-right">
+              Add new
+            </a>
+          )}
         </h3>
         <hr />
         {currentSummit && (

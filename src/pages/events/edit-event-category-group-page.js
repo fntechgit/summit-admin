@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -27,16 +27,12 @@ import {
   getEventCategoryGroupMeta
 } from "../../actions/event-category-actions";
 
-//import '../../styles/edit-summit-attendee-page.less';
+// import '../../styles/edit-summit-attendee-page.less';
 
 class EditEventCategoryGroupPage extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   componentDidMount() {
     const { allClasses } = this.props;
-    let groupId = this.props.match.params.group_id;
+    const groupId = this.props.match.params.group_id;
 
     if (!groupId) {
       this.props.resetEventCategoryGroupForm();
@@ -77,6 +73,11 @@ class EditEventCategoryGroupPage extends React.Component {
         <h3>
           {title}{" "}
           {T.translate("edit_event_category_group.event_category_group")}
+          {entity.id && (
+            <a href="new" className="btn btn-default pull-right">
+              Add new
+            </a>
+          )}
         </h3>
         <hr />
         {currentSummit && (

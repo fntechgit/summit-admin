@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -63,7 +63,7 @@ class EditEventTypePage extends React.Component {
       return Promise.resolve({ options: [] });
     }
 
-    queryMediaUploads(currentSummit.id, input, callback);
+    return queryMediaUploads(currentSummit.id, input, callback);
   }
 
   render() {
@@ -78,6 +78,11 @@ class EditEventTypePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_event_type.event_type")}
+          {entity.id && (
+            <a href="new" className="btn btn-default pull-right">
+              Add new
+            </a>
+          )}
         </h3>
         <hr />
         {currentSummit && (
