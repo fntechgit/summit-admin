@@ -105,6 +105,7 @@ const defaultFilters = {
   ticketTypesFilter: [],
   ownerFullNameStartWithFilter: [],
   viewTypesFilter: [],
+  ownerCompany: [],
   hasOwnerFilter: null,
   completedFilter: null,
   amountFilter: null,
@@ -327,7 +328,7 @@ class TicketListPage extends React.Component {
       return false;
     }
 
-    if (!selectedAll && selectedIds.length === 0) {
+    if (!selectedAll && selectedIds?.length === 0) {
       Swal.fire(
         "Validation error",
         T.translate("ticket_list.select_items"),
@@ -335,7 +336,8 @@ class TicketListPage extends React.Component {
       );
       return false;
     }
-    if (!selectedAll && selectedIds.length > BatchSize) {
+
+    if (!selectedAll && selectedIds?.length > BatchSize) {
       Swal.fire(
         "Validation error",
         `You can not select more than ${BatchSize} Tickets To print.`,
@@ -373,8 +375,8 @@ class TicketListPage extends React.Component {
     const { value } = ev.target;
     const { enabledFilters, ticketFilters } = this.state;
     const { term, order, orderDir, getTickets } = this.props;
-    if (value.length < enabledFilters.length) {
-      if (value.length === 0) {
+    if (value?.length < enabledFilters?.length) {
+      if (value?.length === 0) {
         const resetFilters = {
           showOnlyPendingRefundRequests: false,
           ticketTypesFilter: [],
@@ -1144,11 +1146,11 @@ class TicketListPage extends React.Component {
 
           <hr />
 
-          {tickets.length === 0 && (
+          {tickets?.length === 0 && (
             <div>{T.translate("ticket_list.no_tickets")}</div>
           )}
 
-          {tickets.length > 0 && (
+          {tickets?.length > 0 && (
             <div className="ticket-list-table">
               {selectedCount > 0 && (
                 <span>
