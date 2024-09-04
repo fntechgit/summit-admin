@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -28,6 +28,7 @@ import {
   scrollToError,
   shallowEqual
 } from "../../utils/methods";
+import { DECIMAL_DIGITS } from "../../utils/constants";
 
 class PurchaseOrderForm extends React.Component {
   constructor(props) {
@@ -69,25 +70,25 @@ class PurchaseOrderForm extends React.Component {
   };
 
   handleChange = (ev) => {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "number") {
       value = parseInt(ev.target.value);
     }
 
-    /*if (ev.target.type == 'ownerinput') {
+    /* if (ev.target.type == 'ownerinput') {
             value =
-        }*/
+        } */
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   };
 
   handleSubmit = (ev) => {
-    let entity = { ...this.state.entity };
+    const entity = { ...this.state.entity };
     ev.preventDefault();
     this.props.onSubmit(entity);
   };
@@ -95,7 +96,7 @@ class PurchaseOrderForm extends React.Component {
   handleAddTickets = (ev) => {
     ev.preventDefault();
 
-    let { addTicketTypeId, addTicketQty, addPromoCode, entity } = this.state;
+    const { addTicketTypeId, addTicketQty, addPromoCode, entity } = this.state;
     if (!entity || !addTicketTypeId || !addTicketQty) return;
 
     this.props
@@ -110,7 +111,7 @@ class PurchaseOrderForm extends React.Component {
   };
 
   hasErrors = (field) => {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -119,8 +120,8 @@ class PurchaseOrderForm extends React.Component {
   };
 
   toggleSection = (section, ev) => {
-    let { showSection } = this.state;
-    let newShowSection = showSection === section ? "main" : section;
+    const { showSection } = this.state;
+    const newShowSection = showSection === section ? "main" : section;
     ev.preventDefault();
 
     this.setState({ showSection: newShowSection });
@@ -140,7 +141,7 @@ class PurchaseOrderForm extends React.Component {
     const { entity, errors, showSection } = this.state;
     const { currentSummit } = this.props;
 
-    let ticket_columns = [
+    const ticket_columns = [
       {
         columnKey: "number",
         value: T.translate("edit_purchase_order.ticket_number")
@@ -171,46 +172,38 @@ class PurchaseOrderForm extends React.Component {
       }
     ];
 
-    let ticket_options = {
+    const ticket_options = {
       actions: {
         edit: { onClick: this.handleTicketEdit }
       }
     };
 
-    let ticket_type_ddl = currentSummit.ticket_types.map((tt) => ({
+    const ticket_type_ddl = currentSummit.ticket_types.map((tt) => ({
       label: tt.name,
       value: tt.id
     }));
 
     const tax_columns = [
-      ...(entity.approved_refunds_taxes?.map((tax) => {
-        return {
-          columnKey: `tax_${tax.id}_refunded_amount`,
-          value: T.translate("edit_purchase_order.refunded_tax", {
-            tax_name: tax.name
-          }),
-          render: (row, val) => {
-            return val ? val : "$0.00";
-          }
-        };
-      }) || [])
+      ...(entity.approved_refunds_taxes?.map((tax) => ({
+        columnKey: `tax_${tax.id}_refunded_amount`,
+        value: T.translate("edit_purchase_order.refunded_tax", {
+          tax_name: tax.name
+        }),
+        render: (row, val) => val || "$0.00"
+      })) || [])
     ];
 
     const adjusted_tax_columns = [
-      ...(entity.approved_refunds_taxes?.map((tax) => {
-        return {
-          columnKey: `tax_${tax.id}_adjusted_refunded_amount`,
-          value: T.translate("edit_purchase_order.adjusted_tax_price", {
-            tax_name: tax.name
-          }),
-          render: (row, val) => {
-            return val ? val : "$0.00";
-          }
-        };
-      }) || [])
+      ...(entity.approved_refunds_taxes?.map((tax) => ({
+        columnKey: `tax_${tax.id}_adjusted_refunded_amount`,
+        value: T.translate("edit_purchase_order.adjusted_tax_price", {
+          tax_name: tax.name
+        }),
+        render: (row, val) => val || "$0.00"
+      })) || [])
     ];
 
-    let refunds_columns = [
+    const refunds_columns = [
       {
         columnKey: "ticket_id",
         value: T.translate("edit_purchase_order.refunded_ticket")
@@ -235,7 +228,7 @@ class PurchaseOrderForm extends React.Component {
       }
     ];
 
-    let refunds_options = {
+    const refunds_options = {
       actions: {
         edit: { onClick: this.handleRefundTicketClick }
       }
@@ -344,7 +337,7 @@ class PurchaseOrderForm extends React.Component {
                 value={entity.promo_code}
                 summitId={currentSummit.id}
                 onChange={this.handleChange}
-                isClearable={true}
+                isClearable
                 error={hasErrors("promo_code", errors)}
               />
             </div>
@@ -376,7 +369,7 @@ class PurchaseOrderForm extends React.Component {
             />
           </div>
           <div className="col-md-3">
-            <label> {T.translate("edit_purchase_order.owner_company")}</label>
+            <label> {T.translate("edit_purchase_order.owner_company")} *</label>
             <Input
               id="owner_company"
               value={entity.owner_company}
@@ -477,7 +470,7 @@ class PurchaseOrderForm extends React.Component {
           </div>
         </Panel>
 
-        {/*{entity.id != 0 && currentSummit.order_only_extra_questions && currentSummit.order_only_extra_questions.length > 0 &&
+        {/* {entity.id != 0 && currentSummit.order_only_extra_questions && currentSummit.order_only_extra_questions.length > 0 &&
                 <Panel show={showSection == 'extra_questions'}
                        title={T.translate("edit_purchase_order.extra_questions")}
                        handleClick={() => this.toggleSection('extra_questions')}>
@@ -488,7 +481,7 @@ class PurchaseOrderForm extends React.Component {
                         onChange={this.handleChange}
                     />
                 </Panel>
-                }*/}
+                } */}
 
         {entity.id !== 0 && (
           <>
@@ -505,7 +498,7 @@ class PurchaseOrderForm extends React.Component {
                     {T.translate("edit_purchase_order.ticket_type")}
                   </label>
                   <Dropdown
-                    clearable={true}
+                    clearable
                     options={ticket_type_ddl}
                     value={this.state.addTicketTypeId}
                     onChange={(ev) => {
@@ -531,7 +524,7 @@ class PurchaseOrderForm extends React.Component {
                         addPromoCode: ev.target.value
                       });
                     }}
-                    isClearable={true}
+                    isClearable
                     error={hasErrors("promo_code_edit", errors)}
                   />
                 </div>
@@ -589,28 +582,26 @@ class PurchaseOrderForm extends React.Component {
                   {`${entity.discount_rate}% (${entity.currency_symbol}${entity.discount_amount})`}
                 </div>
               </div>
-              {entity?.applied_taxes.map((tax, i) => {
-                return (
-                  <div className="row" key={i}>
-                    <div className="col-md-6">
-                      <label>
-                        {T.translate("edit_purchase_order.tax_name_rate", {
-                          tax_name: tax.name
-                        })}
-                      </label>
-                      {` ${tax.rate}%`}
-                    </div>
-                    <div className="col-md-6">
-                      <label>
-                        {T.translate("edit_purchase_order.tax_name_price", {
-                          tax_name: tax.name
-                        })}
-                      </label>
-                      {` ${entity.currency_symbol}${tax.amount}`}
-                    </div>
+              {entity?.applied_taxes.map((tax) => (
+                <div className="row" key={`applied-tax-${tax.id}`}>
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate("edit_purchase_order.tax_name_rate", {
+                        tax_name: tax.name
+                      })}
+                    </label>
+                    {` ${tax.rate}%`}
                   </div>
-                );
-              })}
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate("edit_purchase_order.tax_name_price", {
+                        tax_name: tax.name
+                      })}
+                    </label>
+                    {` ${entity.currency_symbol}${tax.amount}`}
+                  </div>
+                </div>
+              ))}
               <div className="row">
                 <div className="col-md-6 col-md-offset-6">
                   <label>
@@ -639,7 +630,9 @@ class PurchaseOrderForm extends React.Component {
                   </label>{" "}
                   {`${
                     entity.currency_symbol
-                  }${entity.adjusted_total_order_purchase_price?.toFixed(2)}`}
+                  }${entity.adjusted_total_order_purchase_price?.toFixed(
+                    DECIMAL_DIGITS
+                  )}`}
                 </div>
               </div>
             </Panel>

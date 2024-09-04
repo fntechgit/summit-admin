@@ -90,7 +90,7 @@ export default class OwnerInput extends React.Component {
       <div className="row">
         <div className="col-md-4">
           <label>
-            {T.translate("edit_purchase_order.owner_email")} &nbsp;
+            {T.translate("edit_purchase_order.owner_email")} *&nbsp;
             <i
               className="copy-button fa fa-clipboard"
               onClick={() => {
@@ -117,7 +117,10 @@ export default class OwnerInput extends React.Component {
           {errors.email && <p className="error-label">{errors.email}</p>}
         </div>
         <div className="col-md-4">
-          <label> {T.translate("edit_purchase_order.owner_first_name")}</label>
+          <label>
+            {" "}
+            {T.translate("edit_purchase_order.owner_first_name")} *
+          </label>
           <Input
             id="first_name"
             value={owner ? owner.first_name : ""}
@@ -127,7 +130,7 @@ export default class OwnerInput extends React.Component {
           />
         </div>
         <div className="col-md-4">
-          <label> {T.translate("edit_purchase_order.owner_last_name")}</label>
+          <label> {T.translate("edit_purchase_order.owner_last_name")} *</label>
           <Input
             id="last_name"
             value={owner ? owner.last_name : ""}
