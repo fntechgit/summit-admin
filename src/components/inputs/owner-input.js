@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import AsyncCreatableSelect from "react-select/lib/AsyncCreatable";
@@ -34,7 +34,7 @@ export default class OwnerInput extends React.Component {
       theValue = { ...theValue, first_name, last_name };
     }
 
-    let ev = {
+    const ev = {
       target: {
         id: this.props.id,
         value: theValue,
@@ -46,9 +46,9 @@ export default class OwnerInput extends React.Component {
   }
 
   handleChange(ev) {
-    let { value, id } = ev.target;
+    const { value, id } = ev.target;
 
-    let newEv = {
+    const newEv = {
       target: {
         id: this.props.id,
         value: this.props.owner,
@@ -63,14 +63,14 @@ export default class OwnerInput extends React.Component {
 
   getMembers(input, callback) {
     if (!input) {
-      return Promise.resolve({ options: [] });
+      Promise.resolve({ options: [] });
     }
 
     // we need to map into value/label because of a bug in react-select 2
     // https://github.com/JedWatson/react-select/issues/2998
 
     const translateOptions = (options) => {
-      let newOptions = options.map((m) => ({
+      const newOptions = options.map((m) => ({
         value: m.email,
         label: m.email,
         member: m
@@ -78,13 +78,13 @@ export default class OwnerInput extends React.Component {
       callback(newOptions);
     };
 
-    queryMembers(input, translateOptions);
+    queryMembers(encodeURIComponent(input), translateOptions);
   }
 
   render() {
-    let { owner, errors, onChange, id, multi, ...rest } = this.props;
+    const { owner, errors, onChange, id, multi, ...rest } = this.props;
 
-    let theValue = owner ? { value: owner.email, label: owner.email } : null;
+    const theValue = owner ? { value: owner.email, label: owner.email } : null;
 
     return (
       <div className="row">
