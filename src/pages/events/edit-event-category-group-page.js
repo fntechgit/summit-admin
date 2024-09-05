@@ -26,6 +26,7 @@ import {
   removeAllowedGroupFromGroup,
   getEventCategoryGroupMeta
 } from "../../actions/event-category-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 // import '../../styles/edit-summit-attendee-page.less';
 
@@ -73,11 +74,7 @@ class EditEventCategoryGroupPage extends React.Component {
         <h3>
           {title}{" "}
           {T.translate("edit_event_category_group.event_category_group")}
-          {entity.id && (
-            <a href="new" className="btn btn-default pull-right">
-              Add new
-            </a>
-          )}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

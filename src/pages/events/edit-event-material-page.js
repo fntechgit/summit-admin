@@ -22,6 +22,7 @@ import {
   saveEventMaterial,
   saveEventMaterialWithFile
 } from "../../actions/event-material-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 // import '../../styles/edit-event-material-page.less';
 
@@ -69,11 +70,7 @@ class EditEventMaterialPage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_event_material.material")}
-          {entity.id && (
-            <a href="new" className="btn btn-default pull-right">
-              Add new
-            </a>
-          )}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

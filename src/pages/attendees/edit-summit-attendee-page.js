@@ -28,6 +28,7 @@ import {
   getAllowedExtraQuestions
 } from "../../actions/attendee-actions";
 import "../../styles/edit-summit-attendee-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSummitAttendeePage extends React.Component {
   constructor(props) {
@@ -110,18 +111,12 @@ class EditSummitAttendeePage extends React.Component {
       : T.translate("general.add");
     const breadcrumb = entity.id ? entity.email : T.translate("general.new");
 
-    console.log(match);
-
     return (
       <div className="container">
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("general.attendee")}
-          {entity.id && (
-            <a href="new" className="btn btn-default pull-right">
-              Add new
-            </a>
-          )}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

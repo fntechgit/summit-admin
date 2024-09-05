@@ -23,6 +23,7 @@ import {
   saveEmailFlowEvent
 } from "../../actions/email-flows-events-actions";
 import "../../styles/edit-email-flow-event-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditEmailFlowEventPage extends React.Component {
   constructor(props) {
@@ -59,11 +60,7 @@ class EditEmailFlowEventPage extends React.Component {
         <h3>
           {title} {entity.flow_name}{" "}
           {T.translate("edit_email_flow_event.email_flow_event")}
-          {entity.id && (
-            <a href="new" className="btn btn-default pull-right">
-              Add new
-            </a>
-          )}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

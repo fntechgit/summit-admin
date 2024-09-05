@@ -29,6 +29,7 @@ import {
   deleteSupportingCompany
 } from "../../actions/sponsored-project-actions";
 import "../../styles/edit-company-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditCompanyPage extends React.Component {
   constructor(props) {
@@ -82,11 +83,7 @@ class EditCompanyPage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_company.company")}
-          {entity.id && (
-            <a href="new" className="btn btn-default pull-right">
-              Add new
-            </a>
-          )}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         <CompanyForm

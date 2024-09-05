@@ -28,6 +28,7 @@ import {
   linkToPresentationType,
   unlinkFromPresentationType
 } from "../../actions/media-upload-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditEventTypePage extends React.Component {
   constructor(props) {
@@ -78,11 +79,7 @@ class EditEventTypePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_event_type.event_type")}
-          {entity.id && (
-            <a href="new" className="btn btn-default pull-right">
-              Add new
-            </a>
-          )}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (
