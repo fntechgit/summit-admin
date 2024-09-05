@@ -9,11 +9,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import SponsoredProjectForm from "../../components/forms/sponsored-project-form";
 import {
   getAsParentProject,
@@ -26,8 +27,8 @@ import {
   removeLogo
 } from "../../actions/sponsored-project-actions";
 import "../../styles/edit-company-page.less";
-import Swal from "sweetalert2";
 import FragmentParser from "../../utils/fragmen-parser";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSponsoredProjectPage extends React.Component {
   constructor(props) {
@@ -39,10 +40,10 @@ class EditSponsoredProjectPage extends React.Component {
     this.handleDeleteSubproject = this.handleDeleteSubproject.bind(this);
 
     this.fragmentParser = new FragmentParser();
-    let parentProjectId = this.fragmentParser.getParam("parent_project_id");
+    const parentProjectId = this.fragmentParser.getParam("parent_project_id");
 
     this.state = {
-      parentProjectId: parentProjectId
+      parentProjectId
     };
   }
 
@@ -61,19 +62,18 @@ class EditSponsoredProjectPage extends React.Component {
 
   handleDeleteSponsorshipType(id) {
     const { deleteSponsorshipType, entity } = this.props;
-    let sponsorshipType = entity.sponsorship_types.find((q) => q.id === id);
+    const sponsorshipType = entity.sponsorship_types.find((q) => q.id === id);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_sponsored_project.remove_sponsorship_type_warning") +
-        " " +
-        sponsorshipType.name,
+      text: `${T.translate(
+        "edit_sponsored_project.remove_sponsorship_type_warning"
+      )} ${sponsorshipType.name}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSponsorshipType(entity.id, id);
       }
@@ -85,12 +85,11 @@ class EditSponsoredProjectPage extends React.Component {
 
     entity.sponsorship_types = [...sponsorshipTypes];
 
-    this.setState({ entity });
     updateSponsorShipTypeOrder(sponsorshipTypes, entity.id, id, newOrder);
   }
 
   handleDeleteSubproject(subprojectId) {
-    const { entity, deleteSubProject } = this.props;
+    const { deleteSubProject } = this.props;
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
@@ -99,7 +98,7 @@ class EditSponsoredProjectPage extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSubProject(subprojectId);
       }
@@ -127,6 +126,7 @@ class EditSponsoredProjectPage extends React.Component {
       <div className="container">
         <h3>
           {title} {T.translate("edit_sponsored_project.sponsored_project")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         <SponsoredProjectForm

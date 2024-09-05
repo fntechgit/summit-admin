@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react";
@@ -17,6 +17,7 @@ import SponsoredProjectSponsorshipTypeSupportingCompanyForm from "../../componen
 import history from "../../history";
 
 import { saveSupportingCompany } from "../../actions/sponsored-project-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSponsoredProjectSponsorshipTypeSupportingCompanyPage extends React.Component {
   constructor(props) {
@@ -50,6 +51,7 @@ class EditSponsoredProjectSponsorshipTypeSupportingCompanyPage extends React.Com
           {T.translate(
             "edit_sponsored_project_sponsorship_type_supporting_company.supporting_company"
           )}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         <SponsoredProjectSponsorshipTypeSupportingCompanyForm

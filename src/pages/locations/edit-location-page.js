@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -30,6 +30,7 @@ import {
 } from "../../actions/location-actions";
 
 import "../../styles/edit-location-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditLocationPage extends React.Component {
   constructor(props) {
@@ -43,17 +44,18 @@ class EditLocationPage extends React.Component {
 
   handleFloorDelete(floorId) {
     const { deleteFloor, entity } = this.props;
-    let floor = entity.floors.find((f) => f.id === floorId);
+    const floor = entity.floors.find((f) => f.id === floorId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_location.remove_floor_warning") + " " + floor.name,
+      text: `${T.translate("edit_location.remove_floor_warning")} ${
+        floor.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteFloor(entity.id, floorId);
       }
@@ -62,16 +64,16 @@ class EditLocationPage extends React.Component {
 
   handleRoomDelete(roomId) {
     const { deleteRoom, entity } = this.props;
-    let room = entity.rooms.find((r) => r.id === roomId);
+    const room = entity.rooms.find((r) => r.id === roomId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("edit_location.remove_room_warning") + " " + room.name,
+      text: `${T.translate("edit_location.remove_room_warning")} ${room.name}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteRoom(entity.id, roomId);
       }
@@ -80,17 +82,18 @@ class EditLocationPage extends React.Component {
 
   handleImageDelete(imageId) {
     const { deleteLocationImage, entity } = this.props;
-    let image = entity.images.find((i) => i.id === imageId);
+    const image = entity.images.find((i) => i.id === imageId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_location.remove_image_warning") + " " + image.name,
+      text: `${T.translate("edit_location.remove_image_warning")} ${
+        image.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteLocationImage(entity.id, imageId);
       }
@@ -99,16 +102,16 @@ class EditLocationPage extends React.Component {
 
   handleMapDelete(mapId) {
     const { deleteLocationMap, entity } = this.props;
-    let map = entity.maps.find((m) => m.id === mapId);
+    const map = entity.maps.find((m) => m.id === mapId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("edit_location.remove_map_warning") + " " + map.name,
+      text: `${T.translate("edit_location.remove_map_warning")} ${map.name}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteLocationMap(entity.id, mapId);
       }
@@ -126,6 +129,7 @@ class EditLocationPage extends React.Component {
       <div className="container">
         <h3>
           {title} {T.translate("edit_location.location")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

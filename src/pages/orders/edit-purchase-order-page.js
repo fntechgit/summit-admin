@@ -9,11 +9,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import { getSummitById } from "../../actions/summit-actions";
 
 import {
@@ -25,7 +26,6 @@ import {
 } from "../../actions/order-actions";
 
 import PurchaseOrderForm from "../../components/forms/purchase-order-form";
-import Swal from "sweetalert2";
 
 import "../../styles/edit-purchase-order-page.less";
 
@@ -49,7 +49,7 @@ class EditPurchaseOrderPage extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deletePurchaseOrder(order.id);
       }
@@ -82,6 +82,9 @@ class EditPurchaseOrderPage extends React.Component {
                   {T.translate("edit_purchase_order.resend_order_email")}
                 </button>
               )}
+              <a href="new" className="btn btn-default pull-right">
+                Add new
+              </a>
             </div>
           )}
         </h3>

@@ -9,11 +9,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import ExtraQuestionForm from "../../components/forms/extra-question-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -28,7 +29,7 @@ import {
   updateOrderExtraQuestionValueOrder
 } from "../../actions/order-actions";
 import { getBadgeFeatures } from "../../actions/badge-actions";
-import Swal from "sweetalert2";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditOrderExtraQuestionPage extends React.Component {
   constructor(props) {
@@ -44,19 +45,18 @@ class EditOrderExtraQuestionPage extends React.Component {
 
   handleValueDelete(valueId) {
     const { deleteOrderExtraQuestionValue, currentSummit, entity } = this.props;
-    let value = entity.values.find((v) => v.id === valueId);
+    const value = entity.values.find((v) => v.id === valueId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_order_extra_question.remove_value_warning") +
-        " " +
-        value.value,
+      text: `${T.translate("edit_order_extra_question.remove_value_warning")} ${
+        value.value
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteOrderExtraQuestionValue(entity.id, valueId);
       }
@@ -65,7 +65,7 @@ class EditOrderExtraQuestionPage extends React.Component {
 
   handleRuleDelete(valueId) {
     const { deleteOrderExtraQuestionsSubQuestionsRule, entity } = this.props;
-    let value = entity.sub_question_rules.find((v) => v.id === valueId);
+    const value = entity.sub_question_rules.find((v) => v.id === valueId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
@@ -76,7 +76,7 @@ class EditOrderExtraQuestionPage extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteOrderExtraQuestionsSubQuestionsRule(entity.id, valueId);
       }
@@ -106,6 +106,7 @@ class EditOrderExtraQuestionPage extends React.Component {
         <h3>
           {title}{" "}
           {T.translate("edit_order_extra_question.order_extra_question")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (
@@ -114,9 +115,9 @@ class EditOrderExtraQuestionPage extends React.Component {
             questionClasses={allClasses}
             entity={entity}
             errors={errors}
-            shouldAllowSubRules={true}
-            shouldShowUsage={true}
-            shouldShowPrintable={true}
+            shouldAllowSubRules
+            shouldShowUsage
+            shouldShowPrintable
             summitExtraQuestions={currentSummit.order_extra_questions}
             onValueDelete={this.handleValueDelete}
             onValueSave={this.handleValueSave}

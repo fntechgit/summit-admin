@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -24,6 +24,7 @@ import {
 } from "../../actions/speaker-actions";
 import { loadSummits } from "../../actions/summit-actions";
 import "../../styles/edit-summit-speaker-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSummitSpeakerPage extends React.Component {
   constructor(props) {
@@ -69,7 +70,7 @@ class EditSummitSpeakerPage extends React.Component {
       ? T.translate("general.edit")
       : T.translate("general.add");
     const breadcrumb = entity.id
-      ? entity.first_name + " " + entity.last_name
+      ? `${entity.first_name} ${entity.last_name}`
       : T.translate("general.new");
 
     if (summits.length === 0) return <div> Hold on...</div>;
@@ -79,6 +80,7 @@ class EditSummitSpeakerPage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("general.speaker")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         <SpeakerForm

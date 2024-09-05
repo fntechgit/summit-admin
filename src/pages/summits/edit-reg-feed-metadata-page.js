@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
@@ -19,12 +19,13 @@ import {
   getRegFeedMetadata,
   saveRegFeedMetadata
 } from "../../actions/reg-feed-metadata-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditRegFeedMetadataPage extends React.Component {
   constructor(props) {
     super(props);
 
-    let regFeedMetadataId = this.props.match.params.reg_feed_metadata_id;
+    const regFeedMetadataId = this.props.match.params.reg_feed_metadata_id;
 
     if (!regFeedMetadataId) {
       this.props.resetRegFeedMetadataForm();
@@ -56,6 +57,7 @@ class EditRegFeedMetadataPage extends React.Component {
       <div className="container">
         <h3>
           {title} {T.translate("edit_reg_feed_metadata.reg_feed_metadata")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         <RegFeedMetadataForm

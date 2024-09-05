@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -24,6 +24,7 @@ import {
   addTicketToTaxType,
   removeTicketFromTaxType
 } from "../../actions/tax-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditTaxTypePage extends React.Component {
   constructor(props) {
@@ -62,6 +63,7 @@ class EditTaxTypePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_tax_type.tax_type")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

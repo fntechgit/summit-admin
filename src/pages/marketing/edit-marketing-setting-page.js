@@ -9,12 +9,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import {
+  showMessage,
+  showSuccessMessage
+} from "openstack-uicore-foundation/lib/utils/actions";
 import MarketingSettingForm from "../../components/forms/marketing-setting-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -23,10 +27,7 @@ import {
   saveMarketingSetting
 } from "../../actions/marketing-actions";
 import "../../styles/edit-marketing-setting-page.less";
-import {
-  showMessage,
-  showSuccessMessage
-} from "openstack-uicore-foundation/lib/utils/actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditMarketingSettingPage extends React.Component {
   constructor(props) {
@@ -65,6 +66,7 @@ class EditMarketingSettingPage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("marketing.marketing_setting")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

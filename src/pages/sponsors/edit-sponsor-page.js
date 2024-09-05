@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -37,6 +37,7 @@ import {
   upsertSponsorLeadReportSettings
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSponsorPage extends React.Component {
   componentDidMount() {
@@ -81,6 +82,7 @@ class EditSponsorPage extends React.Component {
       <div className="container">
         <h3>
           {title} {T.translate("edit_sponsor.sponsor")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

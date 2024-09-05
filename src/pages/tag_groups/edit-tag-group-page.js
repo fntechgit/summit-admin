@@ -9,12 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import { ActionDropdown } from "openstack-uicore-foundation/lib/components";
 import TagGroupForm from "../../components/forms/tag-group-form";
 import {
   getTagGroup,
@@ -26,9 +27,9 @@ import {
   copyAllTagsToCategory,
   createTag
 } from "../../actions/tag-actions";
-import { ActionDropdown } from "openstack-uicore-foundation/lib/components";
+import AddNewButton from "../../components/buttons/add-new-button";
 
-//import '../../styles/edit-tag-group-page.less';
+// import '../../styles/edit-tag-group-page.less';
 
 class EditTagGroupPage extends React.Component {
   constructor(props) {
@@ -81,6 +82,7 @@ class EditTagGroupPage extends React.Component {
           <div className="col-md-8">
             <h3>
               {title} {T.translate("edit_tag_group.tag_group")}
+              <AddNewButton entity={entity} />
             </h3>
           </div>
           {entity.id > 0 && entity.allowed_tags.length > 0 && (

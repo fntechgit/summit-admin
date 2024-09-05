@@ -9,12 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
+import { Modal } from "react-bootstrap";
 import RsvpTemplateForm from "../../components/forms/rsvp-template-form";
 import RsvpForm from "../../components/forms/rsvp-form";
 import { getSummitById } from "../../actions/summit-actions";
@@ -25,9 +26,9 @@ import {
   updateQuestionsOrder,
   deleteRsvpQuestion
 } from "../../actions/rsvp-template-actions";
-import { Modal } from "react-bootstrap";
+import AddNewButton from "../../components/buttons/add-new-button";
 
-//import '../../styles/edit-rsvp-template-page.less';
+// import '../../styles/edit-rsvp-template-page.less';
 
 class EditRsvpTemplatePage extends React.Component {
   constructor(props) {
@@ -43,19 +44,18 @@ class EditRsvpTemplatePage extends React.Component {
 
   handleDeleteQuestion(rsvpQuestionId) {
     const { deleteRsvpQuestion, entity } = this.props;
-    let question = entity.questions.find((q) => q.id === rsvpQuestionId);
+    const question = entity.questions.find((q) => q.id === rsvpQuestionId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_rsvp_template.remove_question_warning") +
-        " " +
-        question.name,
+      text: `${T.translate("edit_rsvp_template.remove_question_warning")} ${
+        question.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteRsvpQuestion(entity.id, rsvpQuestionId);
       }
@@ -67,7 +67,6 @@ class EditRsvpTemplatePage extends React.Component {
 
     entity.questions = [...questions];
 
-    this.setState({ entity });
     updateQuestionsOrder(questions, entity.id, questionId, newOrder);
   }
 
@@ -77,10 +76,8 @@ class EditRsvpTemplatePage extends React.Component {
       ? T.translate("general.edit")
       : T.translate("general.add");
 
-    let sortedQuestions = [...entity.questions];
-    sortedQuestions.sort((a, b) =>
-      a.order > b.order ? 1 : a.order < b.order ? -1 : 0
-    );
+    const sortedQuestions = [...entity.questions];
+    sortedQuestions.sort((a, b) => a.order - b.order);
 
     return (
       <div className="container">
@@ -94,6 +91,7 @@ class EditRsvpTemplatePage extends React.Component {
           >
             Preview
           </button>
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

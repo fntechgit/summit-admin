@@ -27,6 +27,7 @@ import {
   updateSubCategoryOrder
 } from "../../actions/event-category-actions";
 import "../../styles/edit-event-category-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 function EditEventCategoryPage({
   currentSummit,
@@ -43,11 +44,7 @@ function EditEventCategoryPage({
     <div className="container">
       <h3>
         {title} {T.translate("edit_event_category.event_category")}
-        {entity.id && (
-          <a href="new" className="btn btn-default pull-right">
-            Add new
-          </a>
-        )}
+        <AddNewButton entity={entity} />
       </h3>
       <hr />
       {currentSummit && (

@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -25,6 +25,7 @@ import {
   removeBadgeFeatureImage,
   uploadBadgeFeatureImage
 } from "../../actions/badge-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditBadgeFeaturePage extends React.Component {
   constructor(props) {
@@ -70,7 +71,7 @@ class EditBadgeFeaturePage extends React.Component {
         name: "name",
         label: T.translate("edit_badge_feature.name")
       },
-      /*{type: 'text', name: 'tag_name', label: T.translate("edit_badge_feature.tag_name")},*/
+      /* {type: 'text', name: 'tag_name', label: T.translate("edit_badge_feature.tag_name")}, */
       {
         type: "textarea",
         name: "description",
@@ -88,6 +89,7 @@ class EditBadgeFeaturePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_badge_feature.badge_feature")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

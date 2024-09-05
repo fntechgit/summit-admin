@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -24,11 +24,12 @@ import {
 import SubmissionInvitationForm from "../../components/forms/submission-invitation-form";
 import { getSentEmailsByTemplatesAndEmail } from "../../actions/email-actions";
 import EmailActivity from "../../components/forms/email-activity";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSubmissionInvitationPage extends React.Component {
   componentDidMount() {
     const { getSentEmailsByTemplatesAndEmail } = this.props;
-    let invitationId = this.props.match.params.invitation_id;
+    const invitationId = this.props.match.params.invitation_id;
 
     if (!invitationId) {
       this.props.resetInvitationForm();
@@ -80,6 +81,7 @@ class EditSubmissionInvitationPage extends React.Component {
         <h3>
           {title}{" "}
           {T.translate("edit_submission_invitation.submission_invitation")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

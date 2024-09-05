@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -23,6 +23,7 @@ import {
   getBookingRoomAvailability
 } from "../../actions/room-booking-actions";
 import RoomBookingForm from "../../components/forms/room-booking-form";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditRoomBookingPage extends React.Component {
   constructor(props) {
@@ -62,6 +63,7 @@ class EditRoomBookingPage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_room_booking.room_booking")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (
