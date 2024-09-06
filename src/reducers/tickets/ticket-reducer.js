@@ -9,11 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   RECEIVE_TICKET,
   UPDATE_TICKET,
+  TICKET_SAVED,
   TICKET_UPDATED,
   TICKET_MEMBER_REASSIGNED,
   BADGE_ADDED_TO_TICKET,
@@ -27,16 +30,11 @@ import {
   FEATURE_BADGE_ADDED,
   FEATURE_BADGE_REMOVED
 } from "../../actions/badge-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import {
-  epochToMoment,
-  epochToMomentTimeZone
-} from "openstack-uicore-foundation/lib/utils/methods";
-import moment from "moment-timezone";
 import {
   RECEIVE_SUMMIT,
   SET_CURRENT_SUMMIT
 } from "../../actions/summit-actions";
+import { DECIMAL_DIGITS } from "../../utils/constants";
 
 export const DEFAULT_ENTITY = {
   id: 28,
@@ -83,18 +81,18 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
       // we need this in case the token expired while editing the form
       if (payload.hasOwnProperty("persistStore")) {
         return state;
-      } else {
-        return { ...state, entity: { ...DEFAULT_ENTITY } };
       }
+      return { ...state, entity: { ...DEFAULT_ENTITY } };
     }
     case UPDATE_TICKET: {
       return { ...state, entity: { ...payload } };
     }
     case TICKET_REFUNDED:
     case TICKET_CANCEL_REFUND:
+    case TICKET_SAVED:
     case RECEIVE_TICKET: {
-      let entity = { ...payload.response };
-      let bought_date = entity.bought_date
+      const entity = { ...payload.response };
+      const bought_date = entity.bought_date
         ? epochToMomentTimeZone(entity.bought_date, state.summitTZ).format(
             "MMMM Do YYYY, h:mm:ss a"
           )
@@ -105,18 +103,19 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
       let attendee_email = null;
       const final_amount_formatted = `${
         entity.currency_symbol
-      }${entity.final_amount.toFixed(2)}`;
+      }${entity.final_amount.toFixed(DECIMAL_DIGITS)}`;
       const refunded_amount_formatted = `${
         entity.currency_symbol
-      }${entity.total_refunded_amount.toFixed(2)}`;
+      }${entity.total_refunded_amount.toFixed(DECIMAL_DIGITS)}`;
       const adjusted_total_ticket_purchase_price_formatted = `${
         entity.currency_symbol
-      }${(entity.final_amount - entity.total_refunded_amount).toFixed(2)}`;
-      for (var key in entity) {
-        if (entity.hasOwnProperty(key)) {
-          entity[key] = entity[key] == null ? "" : entity[key];
-        }
-      }
+      }${(entity.final_amount - entity.total_refunded_amount).toFixed(
+        DECIMAL_DIGITS
+      )}`;
+
+      Object.entries(entity).forEach(([key, value]) => {
+        entity[key] = value == null ? "" : value;
+      });
 
       if (entity.promo_code) {
         promocode_name = entity.promo_code.code;
@@ -143,7 +142,7 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
             // field for the tax column of that refund
             r[`tax_${t.tax.id}_refunded_amount`] = `${
               entity.currency_symbol
-            }${t.refunded_amount.toFixed(2)}`;
+            }${t.refunded_amount.toFixed(DECIMAL_DIGITS)}`;
             // add tax type to array
             approved_refunds_taxes.push(t);
           });
@@ -158,18 +157,16 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
               : "TBD",
             refunded_amount_formatted: `${
               entity.currency_symbol
-            }${r.refunded_amount.toFixed(2)}`,
+            }${r.refunded_amount.toFixed(DECIMAL_DIGITS)}`,
             total_refunded_amount_formatted: `${
               entity.currency_symbol
-            }${r.total_refunded_amount.toFixed(2)}`
+            }${r.total_refunded_amount.toFixed(DECIMAL_DIGITS)}`
           };
         });
       }
 
       const unique_approved_refunds_taxes = approved_refunds_taxes.filter(
-        (tax, idx, arr) => {
-          return idx === arr.findIndex((obj) => obj.id === tax.id);
-        }
+        (tax, idx, arr) => idx === arr.findIndex((obj) => obj.id === tax.id)
       );
 
       return {
@@ -183,7 +180,7 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
           final_amount_formatted,
           refunded_amount_formatted,
           ticket_type_id: entity?.ticket_type?.id,
-          attendee_email: attendee_email,
+          attendee_email,
           attendee_company,
           adjusted_total_ticket_purchase_price_formatted,
           refund_requests_taxes: unique_approved_refunds_taxes
@@ -191,7 +188,7 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case TICKET_UPDATED: {
-      let entity = { ...payload.response };
+      const entity = { ...payload.response };
       return {
         ...state,
         entity: {
@@ -205,14 +202,14 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
       return state;
     }
     case BADGE_ADDED_TO_TICKET: {
-      let entity = { ...payload.response };
+      const entity = { ...payload.response };
       return { ...state, entity: { ...state.entity, badge: { ...entity } } };
     }
     case BADGE_DELETED: {
       return { ...state, entity: { ...state.entity, badge: null } };
     }
     case BADGE_TYPE_CHANGED: {
-      let { newBadgeType } = payload;
+      const { newBadgeType } = payload;
       return {
         ...state,
         entity: {
@@ -222,8 +219,8 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case FEATURE_BADGE_REMOVED: {
-      let { featureId } = payload;
-      let badgeFeatures = state.entity.badge.features.filter(
+      const { featureId } = payload;
+      const badgeFeatures = state.entity.badge.features.filter(
         (f) => f.id !== featureId
       );
       return {
@@ -235,8 +232,8 @@ const ticketReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case FEATURE_BADGE_ADDED: {
-      let newBadgeFeature = { ...payload.feature };
-      let badgeFeatures = [...state.entity.badge.features, newBadgeFeature];
+      const newBadgeFeature = { ...payload.feature };
+      const badgeFeatures = [...state.entity.badge.features, newBadgeFeature];
 
       return {
         ...state,

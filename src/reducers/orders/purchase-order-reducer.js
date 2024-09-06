@@ -29,6 +29,10 @@ import {
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 import { DECIMAL_DIGITS } from "../../utils/constants";
+import {
+  TICKET_MEMBER_REASSIGNED,
+  TICKET_SAVED
+} from "../../actions/ticket-actions";
 
 export const DEFAULT_ENTITY = {
   id: 0,
@@ -295,6 +299,21 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
     case PURCHASE_ORDER_CANCEL_REFUND: {
       const { entity } = state;
       return { ...state, entity: { ...entity, status: "Paid" } };
+    }
+    case TICKET_SAVED:
+    case TICKET_MEMBER_REASSIGNED: {
+      const savedTicket = payload.response;
+      const _tickets = state.entity.tickets.map((t) => {
+        if (t.id === savedTicket.id) return savedTicket;
+        return t;
+      });
+      const tickets = assembleTicketsState(
+        _tickets,
+        state.entity.currency_symbol,
+        state.entity.summit_id
+      );
+
+      return { ...state, entity: { ...state.entity, tickets } };
     }
     default:
       return state;

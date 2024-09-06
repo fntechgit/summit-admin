@@ -53,6 +53,7 @@ export const TICKETS_IMPORTED = "TICKETS_IMPORTED";
 export const RECEIVE_TICKET = "RECEIVE_TICKET";
 export const UPDATE_TICKET = "UPDATE_TICKET";
 export const TICKET_UPDATED = "TICKET_UPDATED";
+export const TICKET_SAVED = "TICKET_SAVED";
 export const TICKET_REFUNDED = "TICKET_REFUNDED";
 export const TICKET_CANCEL_REFUND = "TICKET_CANCEL_REFUND";
 export const TICKET_MEMBER_REASSIGNED = "TICKET_MEMBER_REASSIGNED";
@@ -663,7 +664,7 @@ export const saveTicket = (orderId, ticket) => async (dispatch, getState) => {
 
   return putRequest(
     null,
-    createAction(RECEIVE_TICKET),
+    createAction(TICKET_SAVED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/orders/${orderId}/tickets/${ticket.id}`,
     normalizedEntity,
     authErrorHandler
