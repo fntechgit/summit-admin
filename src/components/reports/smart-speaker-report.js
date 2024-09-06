@@ -199,21 +199,40 @@ class SmartSpeakerReport extends React.Component {
   }
 
   translateFilters = (reportQueryFilters) => {
-    const { selection_status, submission_status, selection_plan } =
-      reportQueryFilters;
+    const {
+      has_bio,
+      has_photo,
+      selection_status,
+      submission_status,
+      selection_plan
+    } = reportQueryFilters;
     const newFilters = prepareReportFilters(reportQueryFilters);
 
+    console.log("selection_status", selection_status);
+
     if (selection_status) {
+      delete newFilters.selection_status;
       newFilters.selectionStatus = selection_status;
     }
 
     if (submission_status) {
+      delete newFilters.submission_status;
       newFilters.submissionStatus = submission_status;
     }
 
     if (selection_plan) {
       delete newFilters.selection_plan;
       newFilters.selectionPlanIdIn = selection_plan;
+    }
+
+    if (has_bio != null) {
+      delete newFilters.has_bio;
+      newFilters.hasBio = has_bio;
+    }
+
+    if (has_photo != null) {
+      delete newFilters.has_photo;
+      newFilters.hasPhoto = has_photo;
     }
 
     return newFilters;
@@ -400,6 +419,8 @@ export default wrapReport(SmartSpeakerReport, {
     "published_in",
     "selection_status",
     "submission_status",
-    "selection_plan"
+    "selection_plan",
+    "has_bio",
+    "has_photo"
   ]
 });

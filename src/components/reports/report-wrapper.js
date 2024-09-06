@@ -76,8 +76,8 @@ const wrapReport = (ReportComponent, specs) => {
         otherFilters.publishedIn = summitId;
       }
 
-      if (this.reportRef.translateFilters) {
-        return this.reportRef.translateFilters(otherFilters);
+      if (this.reportRef.current.translateFilters) {
+        return this.reportRef.current.translateFilters(otherFilters);
       }
 
       return otherFilters;
@@ -110,7 +110,7 @@ const wrapReport = (ReportComponent, specs) => {
         listFilters = { ...listFilters, ...queryFilters };
       }
 
-      const query = this.reportRef.buildReportQuery(
+      const query = this.reportRef.current.buildReportQuery(
         queryFilters,
         listFilters,
         sort,
@@ -145,24 +145,23 @@ const wrapReport = (ReportComponent, specs) => {
     handleExportReport(ev) {
       ev.preventDefault();
       const grouped = specs.hasOwnProperty("grouped");
-      const name = this.reportRef.getName();
+      const name = this.reportRef.current.getName();
       this.props.exportReport(
         this.buildQuery,
         name,
         grouped,
-        this.reportRef.preProcessData.bind(this.reportRef)
+        this.reportRef.current.preProcessData.bind(this.reportRef.current)
       );
     }
 
     handleGetReport(page) {
       const query = this.buildQuery(page);
-      const name = this.reportRef.getName();
+      const name = this.reportRef.current.getName();
       this.props.getReport(query, name, page);
     }
 
     handleFilterChange = (filter, value, isMulti = false) => {
       const theValue = isMulti ? value.join(",") : value;
-
       this.fragmentParser.setParam(filter, theValue);
       window.location.hash = this.fragmentParser.serialize();
       this.handleReload();
@@ -321,7 +320,7 @@ const wrapReport = (ReportComponent, specs) => {
         }));
 
         filterHtml.push(
-          <div className="col-md-3" key="selection-plan-filter">
+          <div className="col-md-4" key="selection-plan-filter">
             <label>{T.translate("reports.selection_plan_filter")}</label>
             <Dropdown
               id="selection_plan_id_filter"
@@ -343,7 +342,7 @@ const wrapReport = (ReportComponent, specs) => {
           ? filters.selection_status?.split(",") ?? []
           : [];
         filterHtml.push(
-          <div className="col-md-3" key="selection-status-filter">
+          <div className="col-md-4" key="selection-status-filter">
             <SelectionStatusFilter
               value={filterValue}
               isMulti
@@ -360,7 +359,7 @@ const wrapReport = (ReportComponent, specs) => {
           ? filters.submission_status?.split(",") ?? []
           : [];
         filterHtml.push(
-          <div className="col-md-3" key="submission-status-filter">
+          <div className="col-md-4" key="submission-status-filter">
             <SubmissionStatusFilter
               value={filterValue}
               isMulti
@@ -368,6 +367,50 @@ const wrapReport = (ReportComponent, specs) => {
                 this.handleFilterChange("submission_status", value);
               }}
             />
+          </div>
+        );
+      }
+
+      if (specs.filters.includes("has_bio")) {
+        const filterValue = filters.hasOwnProperty("has_bio")
+          ? filters.has_bio
+          : false;
+        filterHtml.push(
+          <div className="col-md-3" key="has-bio-filter">
+            <input
+              type="checkbox"
+              id="has_bio"
+              checked={filterValue}
+              onChange={(ev) => {
+                this.handleFilterChange("has_bio", ev.target.checked);
+              }}
+              className="form-check-input"
+            />
+            <label className="form-check-label" htmlFor="has_bio">
+              Has bio
+            </label>
+          </div>
+        );
+      }
+
+      if (specs.filters.includes("has_photo")) {
+        const filterValue = filters.hasOwnProperty("has_photo")
+          ? filters.has_photo
+          : false;
+        filterHtml.push(
+          <div className="col-md-3" key="has-photo-filter">
+            <input
+              type="checkbox"
+              id="has_bio"
+              checked={filterValue}
+              onChange={(ev) => {
+                this.handleFilterChange("has_photo", ev.target.checked);
+              }}
+              className="form-check-input"
+            />
+            <label className="form-check-label" htmlFor="has_photo">
+              Has photo
+            </label>
           </div>
         );
       }
@@ -400,11 +443,13 @@ const wrapReport = (ReportComponent, specs) => {
         this.fragmentParser.getParams();
       const pageCount = Math.ceil(totalCount / perPage);
 
-      const reportName = this.reportRef ? this.reportRef.getName() : "report";
+      const reportName = this.reportRef.current
+        ? this.reportRef.current.getName()
+        : "report";
       const grouped = specs.hasOwnProperty("grouped");
       const searchPlaceholder =
-        this.reportRef && this.reportRef.getSearchPlaceholder
-          ? this.reportRef.getSearchPlaceholder()
+        this.reportRef.current && this.reportRef.current.getSearchPlaceholder
+          ? this.reportRef.current.getSearchPlaceholder()
           : T.translate("reports.placeholders.search");
 
       return (
