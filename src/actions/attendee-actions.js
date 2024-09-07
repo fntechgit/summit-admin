@@ -33,7 +33,11 @@ import {
   isNumericString,
   parseDateRangeFilter
 } from "../utils/methods";
-import { DEFAULT_PER_PAGE } from "../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE
+} from "../utils/constants";
 
 export const REQUEST_ATTENDEES = "REQUEST_ATTENDEES";
 export const RECEIVE_ATTENDEES = "RECEIVE_ATTENDEES";
@@ -206,10 +210,10 @@ const parseFilters = (filters, term = null) => {
 export const getAttendees =
   (
     term = null,
-    page = 1,
+    page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = 1,
+    orderDir = DEFAULT_ORDER_DIR,
     filters = {},
     extraColumns = []
   ) =>
@@ -342,24 +346,73 @@ export const getAllowedExtraQuestions =
     const { currentSummit } = currentSummitState;
 
     const params = {
-      expand: "*sub_question_rules,*sub_question,*values",
       page: 1,
-      per_page: 100,
+      per_page: 5,
+      expand: "*sub_question_rules,*sub_question,*values",
       access_token: accessToken,
       "filter[]": `tickets_exclude_inactives==${
         tickets_exclude_inactives ? "true" : "false"
       }`
     };
 
+    const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/allowed-extra-questions`;
+
     return getRequest(
-      null,
-      createAction(RECEIVE_ALLOWED_EXTRA_QUESTIONS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/allowed-extra-questions`,
+      createAction("DUMMY"),
+      createAction("DUMMY"),
+      endpoint,
       authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      dispatch(stopLoading());
-      return payload;
-    });
+    )(params)(dispatch)
+      .then((payload) => {
+        const { response } = payload;
+        const { total, per_page, data: initial_data } = response;
+        // then do a promise all to get remaining ones
+        const totalPages = Math.ceil(total / per_page);
+        if (totalPages === 1) {
+          // we have only one page ...
+          dispatch(createAction(RECEIVE_ALLOWED_EXTRA_QUESTIONS)(initial_data));
+          dispatch(stopLoading());
+          return initial_data;
+        }
+        // only continue if totalPages > 1
+        const params = Array.from({ length: totalPages }, (_, i) => ({
+          page: i + 1,
+          per_page,
+          expand: "*sub_question_rules,*sub_question,*values",
+          access_token: accessToken,
+          "filter[]": `tickets_exclude_inactives==${
+            tickets_exclude_inactives ? "true" : "false"
+          }`
+        }));
+
+        // get remaining ones
+        return Promise.all(
+          params.map((p) =>
+            getRequest(
+              createAction("DUMMY"),
+              createAction("DUMMY"),
+              endpoint,
+              authErrorHandler
+            )(p)(dispatch)
+          )
+        )
+          .then((responses) => {
+            let data = [];
+            responses?.forEach((e) => data.push(...e.response.data));
+            data = [...initial_data, ...data];
+            dispatch(createAction(RECEIVE_ALLOWED_EXTRA_QUESTIONS)(data));
+            dispatch(stopLoading());
+            return data;
+          })
+          .catch((err) => {
+            dispatch(stopLoading());
+            return Promise.reject(e);
+          });
+      })
+      .catch((e) => {
+        dispatch(stopLoading());
+        return Promise.reject(e);
+      });
   };
 
 export const resetAttendeeForm = () => (dispatch) => {

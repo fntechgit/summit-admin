@@ -175,7 +175,7 @@ const attendeeReducer = (state = DEFAULT_STATE, action = {}) => {
       return { ...state, errors: payload.errors };
     }
     case RECEIVE_ALLOWED_EXTRA_QUESTIONS: {
-      const mainExtraQuestions = payload.response.data;
+      const mainExtraQuestions = payload;
       return {
         ...state,
         entity: { ...state.entity, allowed_extra_questions: mainExtraQuestions }

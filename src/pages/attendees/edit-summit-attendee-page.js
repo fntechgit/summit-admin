@@ -48,7 +48,7 @@ class EditSummitAttendeePage extends React.Component {
       this.setState({ ...this.state, ExtraQuestionsFormReadOnly: false });
       this.props.getAttendee(new_attendee_id).then(() => {
         this.props.getAllowedExtraQuestions(new_attendee_id).then((payload) => {
-          if (!payload.response.total) {
+          if (!payload.length) {
             // we dont have any available extra questions, check if we have some related to
             // deactivated tickets
             this.props.getAllowedExtraQuestions(new_attendee_id, false);
