@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -18,9 +18,9 @@ import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
 import {
   FreeTextSearch,
-  SummitDropdown,
   Table
 } from "openstack-uicore-foundation/lib/components";
+import SummitDropdown from "../../components/summit-dropdown";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getMarketingSettings,
@@ -79,16 +79,16 @@ class MarketingSettingListPage extends React.Component {
 
   handleDeleteSetting(settingId) {
     const { deleteSetting, settings } = this.props;
-    let setting = settings.find((s) => s.id === settingId);
+    const setting = settings.find((s) => s.id === settingId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("marketing.delete_setting_warning") + " " + setting.key,
+      text: `${T.translate("marketing.delete_setting_warning")} ${setting.key}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSetting(settingId);
       }
@@ -105,7 +105,7 @@ class MarketingSettingListPage extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("marketing.yes_clone")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         cloneMarketingSettings(summitId);
       }
@@ -115,7 +115,6 @@ class MarketingSettingListPage extends React.Component {
   render() {
     const {
       currentSummit,
-      allSummits,
       settings,
       lastPage,
       currentPage,
@@ -124,7 +123,6 @@ class MarketingSettingListPage extends React.Component {
       orderDir,
       totalSettings
     } = this.props;
-    const summits = allSummits.filter((s) => s.id !== currentSummit.id);
 
     const columns = [
       { columnKey: "id", value: T.translate("general.id"), sortable: true },
@@ -160,8 +158,8 @@ class MarketingSettingListPage extends React.Component {
           {" "}
           {T.translate("marketing.setting_list")} ({totalSettings})
         </h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <FreeTextSearch
               value={term}
               placeholder={T.translate(
@@ -180,7 +178,6 @@ class MarketingSettingListPage extends React.Component {
           </div>
           <div className="col-md-4 text-right">
             <SummitDropdown
-              summits={summits}
               onClick={this.handleCloneSettings}
               actionLabel={T.translate("marketing.clone_settings")}
             />
@@ -221,11 +218,9 @@ class MarketingSettingListPage extends React.Component {
 
 const mapStateToProps = ({
   currentSummitState,
-  directoryState,
   marketingSettingListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  allSummits: directoryState.allSummits,
   ...marketingSettingListState
 });
 

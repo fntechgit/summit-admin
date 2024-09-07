@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -17,11 +17,7 @@ import { Switch, Route } from "react-router-dom";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 
-import {
-  getSummitById,
-  resetSummitForm,
-  getAllSummits
-} from "../actions/summit-actions";
+import { getSummitById, resetSummitForm } from "../actions/summit-actions";
 import { getUserRolesBySummit } from "../actions/user-chat-roles-actions";
 
 import SummitDashboardPage from "../pages/summits/summit-dashboard-page";
@@ -83,7 +79,7 @@ import { getRegFeedMetadataBySummit } from "../actions/reg-feed-metadata-actions
 
 class SummitIdLayout extends React.Component {
   componentDidMount() {
-    let summitId = this.props.match.params.summit_id;
+    const summitId = this.props.match.params.summit_id;
 
     if (!summitId) {
       this.props.resetSummitForm();
@@ -94,8 +90,6 @@ class SummitIdLayout extends React.Component {
         this.props.getUserRolesBySummit();
         this.props.getRegFeedMetadataBySummit();
       });
-      // this is needed for summit dropdown, runs on background
-      this.props.getAllSummits();
     }
   }
 
@@ -114,8 +108,8 @@ class SummitIdLayout extends React.Component {
 
   render() {
     const { match, currentSummit, loading } = this.props;
-    let summitId = this.props.match.params.summit_id;
-    let breadcrumb = currentSummit.id
+    const summitId = this.props.match.params.summit_id;
+    const breadcrumb = currentSummit.id
       ? currentSummit.name
       : T.translate("general.new_summit");
 
@@ -302,7 +296,6 @@ const mapStateToProps = ({ currentSummitState }) => ({
 export default connect(mapStateToProps, {
   getSummitById,
   resetSummitForm,
-  getAllSummits,
   getUserRolesBySummit,
   getMarketingSettingsForRegLite,
   getMarketingSettingsForPrintApp,

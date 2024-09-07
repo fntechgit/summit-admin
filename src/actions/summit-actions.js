@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -24,9 +23,10 @@ import {
   showSuccessMessage,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import Swal from "sweetalert2";
+import history from "../history";
 import { DUMMY_ACTION } from "../utils/constants";
 import { getAccessTokenSafely } from "../utils/methods";
-import Swal from "sweetalert2";
 import { saveMarketingSetting } from "./marketing-actions";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
 
@@ -34,8 +34,6 @@ export const REQUEST_SUMMIT = "REQUEST_SUMMIT";
 export const RECEIVE_SUMMIT = "RECEIVE_SUMMIT";
 export const REQUEST_SUMMITS = "REQUEST_SUMMITS";
 export const RECEIVE_SUMMITS = "RECEIVE_SUMMITS";
-export const REQUEST_ALL_SUMMITS = "REQUEST_ALL_SUMMITS";
-export const RECEIVE_ALL_SUMMITS = "RECEIVE_ALL_SUMMITS";
 export const SET_CURRENT_SUMMIT = "SET_CURRENT_SUMMIT";
 export const RESET_SUMMIT_FORM = "RESET_SUMMIT_FORM";
 export const UPDATE_SUMMIT = "UPDATE_SUMMIT";
@@ -68,7 +66,7 @@ export const getSummitById = (summitId) => async (dispatch, getState) => {
     createAction(RECEIVE_SUMMIT),
     `${window.API_BASE_URL}/api/v2/summits/${summitId}`,
     (err, res) => (dispatch, state) => {
-      let code = err.status;
+      const code = err.status;
       let msg = "";
       dispatch(stopLoading());
       switch (code) {
@@ -113,9 +111,8 @@ export const setCurrentSummit = (summit) => async (dispatch, getState) => {
 
       if (summit) history.push(`/app/summits/${summit.id}/dashboard`);
     });
-  } else {
-    dispatch(createAction(RESET_SUMMIT_FORM)({}));
   }
+  dispatch(createAction(RESET_SUMMIT_FORM)({}));
 };
 
 export const loadSummits =
@@ -129,7 +126,7 @@ export const loadSummits =
       access_token: accessToken,
       expand: "none",
       relations: "none",
-      page: page,
+      page,
       per_page: perPage,
       order: "-start_date"
     };
@@ -143,26 +140,6 @@ export const loadSummits =
       dispatch(stopLoading());
     });
   };
-
-export const getAllSummits = () => async (dispatch, getState) => {
-  const accessToken = await getAccessTokenSafely();
-
-  const params = {
-    access_token: accessToken,
-    expand: "none",
-    relations: "none",
-    page: 1,
-    per_page: 100,
-    order: "-start_date"
-  };
-
-  getRequest(
-    createAction(REQUEST_ALL_SUMMITS),
-    createAction(RECEIVE_ALL_SUMMITS),
-    `${window.API_BASE_URL}/api/v1/summits/all`,
-    authErrorHandler
-  )(params)(dispatch, getState);
-};
 
 export const resetSummitForm = () => (dispatch, getState) => {
   dispatch(createAction(RESET_SUMMIT_FORM)({}));
@@ -191,25 +168,24 @@ export const saveSummit = (entity) => async (dispatch, getState) => {
       dispatch(showSuccessMessage(T.translate("edit_summit.summit_saved")));
       return payload;
     });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_summit.summit_created"),
-      type: "success"
-    };
-
-    return postRequest(
-      createAction(UPDATE_SUMMIT),
-      createAction(SUMMIT_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(showSuccessMessage(T.translate("edit_summit.summit_created")));
-      return payload;
-    });
   }
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_summit.summit_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(UPDATE_SUMMIT),
+    createAction(SUMMIT_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then((payload) => {
+    dispatch(showSuccessMessage(T.translate("edit_summit.summit_created")));
+    return payload;
+  });
 };
 
 export const deleteSummit = (summitId) => async (dispatch, getState) => {
@@ -315,13 +291,13 @@ export const deleteLogo = (secondary) => async (dispatch, getState) => {
  * @returns {function(*, *): Promise<unknown[]>}
  */
 export const saveRegistrationLiteMarketingSettings =
-  (regLiteMarketingSettings) => async (dispatch) => {
-    return Promise.all(
+  (regLiteMarketingSettings) => async (dispatch) =>
+    Promise.all(
       Object.keys(regLiteMarketingSettings).map((m) => {
         const setting_type = "TEXT";
         let value = regLiteMarketingSettings[m].value ?? "";
 
-        if (typeof value == "boolean") {
+        if (typeof value === "boolean") {
           value = value ? "1" : "0";
         }
 
@@ -329,26 +305,25 @@ export const saveRegistrationLiteMarketingSettings =
           id: regLiteMarketingSettings[m].id,
           type: setting_type,
           key: m.toUpperCase(),
-          value: value
+          value
         };
 
         return dispatch(saveMarketingSetting(mkt_setting));
       })
     );
-  };
 
 /**
  * @param regLiteMarketingSettings
  * @returns {function(*, *): Promise<unknown[]>}
  */
 export const savePrintAppMarketingSettings =
-  (printAppMarketingSettings) => async (dispatch) => {
-    return Promise.all(
+  (printAppMarketingSettings) => async (dispatch) =>
+    Promise.all(
       Object.keys(printAppMarketingSettings).map((m) => {
         const setting_type = "TEXT";
         let value = printAppMarketingSettings[m].value ?? "";
 
-        if (typeof value == "boolean") {
+        if (typeof value === "boolean") {
           value = value ? "1" : "0";
         }
 
@@ -356,13 +331,12 @@ export const savePrintAppMarketingSettings =
           id: printAppMarketingSettings[m].id,
           type: setting_type,
           key: m.toUpperCase(),
-          value: value
+          value
         };
 
         return dispatch(saveMarketingSetting(mkt_setting));
       })
     );
-  };
 
 /**
  * @returns {function(*, *): Promise<unknown[]>}
@@ -389,7 +363,7 @@ export const generateEncryptionKey = () => async (dispatch, getState) => {
   });
 };
 
-/******************  LEAD REPORT SETTINGS  ****************************************/
+/** ****************  LEAD REPORT SETTINGS  *************************************** */
 
 export const getLeadReportSettingsMeta = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -440,68 +414,63 @@ export const upsertLeadReportSettings =
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["last_edited"];
-  delete normalizedEntity["logo"];
-  delete normalizedEntity["attendees_count"];
-  delete normalizedEntity["event_types"];
-  delete normalizedEntity["locations"];
-  delete normalizedEntity["max_submission_allowed_per_user"];
-  delete normalizedEntity["page_url"];
-  delete normalizedEntity["presentation_voters_count"];
-  delete normalizedEntity["presentation_votes_count"];
-  delete normalizedEntity["presentations_submitted_count"];
-  delete normalizedEntity["published_events_count"];
-  delete normalizedEntity["schedule_event_detail_url"];
-  delete normalizedEntity["schedule_page_url"];
-  delete normalizedEntity[
-    "speaker_announcement_email_accepted_alternate_count"
-  ];
-  delete normalizedEntity["speaker_announcement_email_accepted_count"];
-  delete normalizedEntity["speaker_announcement_email_accepted_rejected_count"];
-  delete normalizedEntity["speaker_announcement_email_alternate_count"];
-  delete normalizedEntity[
-    "speaker_announcement_email_alternate_rejected_count"
-  ];
-  delete normalizedEntity["speaker_announcement_email_rejected_count"];
-  delete normalizedEntity["speakers_count"];
-  delete normalizedEntity["ticket_types"];
-  delete normalizedEntity["time_zone"];
-  delete normalizedEntity["timestamp"];
-  delete normalizedEntity["tracks"];
-  delete normalizedEntity["wifi_connections"];
-  delete normalizedEntity["qr_codes_enc_key"];
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.logo;
+  delete normalizedEntity.attendees_count;
+  delete normalizedEntity.event_types;
+  delete normalizedEntity.locations;
+  delete normalizedEntity.max_submission_allowed_per_user;
+  delete normalizedEntity.page_url;
+  delete normalizedEntity.presentation_voters_count;
+  delete normalizedEntity.presentation_votes_count;
+  delete normalizedEntity.presentations_submitted_count;
+  delete normalizedEntity.published_events_count;
+  delete normalizedEntity.schedule_event_detail_url;
+  delete normalizedEntity.schedule_page_url;
+  delete normalizedEntity.speaker_announcement_email_accepted_alternate_count;
+  delete normalizedEntity.speaker_announcement_email_accepted_count;
+  delete normalizedEntity.speaker_announcement_email_accepted_rejected_count;
+  delete normalizedEntity.speaker_announcement_email_alternate_count;
+  delete normalizedEntity.speaker_announcement_email_alternate_rejected_count;
+  delete normalizedEntity.speaker_announcement_email_rejected_count;
+  delete normalizedEntity.speakers_count;
+  delete normalizedEntity.ticket_types;
+  delete normalizedEntity.time_zone;
+  delete normalizedEntity.timestamp;
+  delete normalizedEntity.tracks;
+  delete normalizedEntity.wifi_connections;
+  delete normalizedEntity.qr_codes_enc_key;
 
-  if (!normalizedEntity["registration_allowed_refund_request_till_date"])
-    normalizedEntity["registration_allowed_refund_request_till_date"] = null;
-  if (!normalizedEntity["registration_begin_date"])
-    normalizedEntity["registration_begin_date"] = null;
-  if (!normalizedEntity["registration_end_date"])
-    normalizedEntity["registration_end_date"] = null;
-  if (!normalizedEntity["schedule_start_date"])
-    normalizedEntity["schedule_start_date"] = null;
-  if (!normalizedEntity["start_showing_venues_date"])
-    normalizedEntity["start_showing_venues_date"] = null;
-  if (!normalizedEntity["start_date"]) normalizedEntity["start_date"] = null;
-  if (!normalizedEntity["end_date"]) normalizedEntity["end_date"] = null;
+  if (!normalizedEntity.registration_allowed_refund_request_till_date)
+    normalizedEntity.registration_allowed_refund_request_till_date = null;
+  if (!normalizedEntity.registration_begin_date)
+    normalizedEntity.registration_begin_date = null;
+  if (!normalizedEntity.registration_end_date)
+    normalizedEntity.registration_end_date = null;
+  if (!normalizedEntity.schedule_start_date)
+    normalizedEntity.schedule_start_date = null;
+  if (!normalizedEntity.start_showing_venues_date)
+    normalizedEntity.start_showing_venues_date = null;
+  if (!normalizedEntity.start_date) normalizedEntity.start_date = null;
+  if (!normalizedEntity.end_date) normalizedEntity.end_date = null;
 
-  if (!normalizedEntity["meeting_room_booking_max_allowed"])
-    delete normalizedEntity["meeting_room_booking_max_allowed"];
+  if (!normalizedEntity.meeting_room_booking_max_allowed)
+    delete normalizedEntity.meeting_room_booking_max_allowed;
 
-  if (!normalizedEntity["meeting_room_booking_slot_length"])
-    delete normalizedEntity["meeting_room_booking_slot_length"];
+  if (!normalizedEntity.meeting_room_booking_slot_length)
+    delete normalizedEntity.meeting_room_booking_slot_length;
 
-  if (normalizedEntity["api_feed_type"] === "none")
-    normalizedEntity["api_feed_type"] = "";
+  if (normalizedEntity.api_feed_type === "none")
+    normalizedEntity.api_feed_type = "";
 
-  if (normalizedEntity["external_registration_feed_type"] === "none")
-    normalizedEntity["external_registration_feed_type"] = "";
+  if (normalizedEntity.external_registration_feed_type === "none")
+    normalizedEntity.external_registration_feed_type = "";
 
-  if (normalizedEntity["mux_allowed_domains"]) {
-    normalizedEntity["mux_allowed_domains"] = normalizedEntity[
-      "mux_allowed_domains"
-    ].map((e) => e.value);
+  if (normalizedEntity.mux_allowed_domains) {
+    normalizedEntity.mux_allowed_domains =
+      normalizedEntity.mux_allowed_domains.map((e) => e.value);
   }
   return normalizedEntity;
 };

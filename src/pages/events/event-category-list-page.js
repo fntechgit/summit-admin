@@ -9,14 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { SummitDropdown } from "openstack-uicore-foundation/lib/components";
 import { SortableTable } from "openstack-uicore-foundation/lib/components";
+import SummitDropdown from "../../components/summit-dropdown";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getEventCategories,
@@ -62,17 +62,18 @@ class EventCategoryListPage extends React.Component {
 
   handleDelete(categoryId) {
     const { deleteEventCategory, eventCategories } = this.props;
-    let category = eventCategories.find((c) => c.id === categoryId);
+    const category = eventCategories.find((c) => c.id === categoryId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("event_category_list.delete_warning") + " " + category.name,
+      text: `${T.translate("event_category_list.delete_warning")} ${
+        category.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteEventCategory(categoryId);
       }
@@ -80,8 +81,7 @@ class EventCategoryListPage extends React.Component {
   }
 
   render() {
-    const { currentSummit, eventCategories, allSummits } = this.props;
-    const summits = allSummits.filter((s) => s.id !== currentSummit.id);
+    const { currentSummit, eventCategories } = this.props;
 
     const columns = [
       { columnKey: "id", value: T.translate("general.id") },
@@ -102,7 +102,7 @@ class EventCategoryListPage extends React.Component {
     return (
       <div className="container">
         <h3> {T.translate("event_category_list.event_category_list")} </h3>
-        <div className={"row"}>
+        <div className="row">
           <div className="col-md-6 col-md-offset-6 text-right">
             <button
               className="btn btn-primary right-space"
@@ -111,7 +111,6 @@ class EventCategoryListPage extends React.Component {
               {T.translate("event_category_list.add_category")}
             </button>
             <SummitDropdown
-              summits={summits}
               onClick={this.handleCopyCategories}
               actionLabel={T.translate("event_category_list.copy_categories")}
             />
@@ -141,12 +140,10 @@ class EventCategoryListPage extends React.Component {
 }
 
 const mapStateToProps = ({
-  directoryState,
   currentSummitState,
   currentEventCategoryListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  allSummits: directoryState.allSummits,
   ...currentEventCategoryListState
 });
 
