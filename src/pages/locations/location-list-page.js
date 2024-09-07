@@ -9,16 +9,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import {
-  SortableTable,
-  SummitDropdown
-} from "openstack-uicore-foundation/lib/components";
+import { SortableTable } from "openstack-uicore-foundation/lib/components";
+import SummitDropdown from "../../components/summit-dropdown";
+
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getLocations,
@@ -28,16 +27,13 @@ import {
   copyLocations
 } from "../../actions/location-actions";
 
-const LocationListPage = ({
+function LocationListPage({
   currentSummit,
   history,
   locations,
   totalLocations,
-  allSummits,
   ...props
-}) => {
-  const summits = allSummits.filter((s) => s.id !== currentSummit.id);
-
+}) {
   useEffect(() => {
     if (currentSummit) {
       props.getLocations();
@@ -55,12 +51,12 @@ const LocationListPage = ({
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("location_list.remove_warning") + " " + location.name,
+      text: `${T.translate("location_list.remove_warning")} ${location.name}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         props.deleteLocation(locationId);
       }
@@ -95,7 +91,7 @@ const LocationListPage = ({
         {" "}
         {T.translate("location_list.location_list")} ({totalLocations})
       </h3>
-      <div className={"row"}>
+      <div className="row">
         <div className="col-md-6 col-md-offset-6 text-right">
           <button
             className="btn btn-primary right-space"
@@ -104,7 +100,6 @@ const LocationListPage = ({
             {T.translate("location_list.add_location")}
           </button>
           <SummitDropdown
-            summits={summits}
             onClick={handleCopyLocations}
             actionLabel={T.translate("location_list.copy_locations")}
           />
@@ -128,15 +123,10 @@ const LocationListPage = ({
       )}
     </div>
   );
-};
+}
 
-const mapStateToProps = ({
-  currentSummitState,
-  currentLocationListState,
-  directoryState
-}) => ({
+const mapStateToProps = ({ currentSummitState, currentLocationListState }) => ({
   currentSummit: currentSummitState.currentSummit,
-  allSummits: directoryState.allSummits,
   ...currentLocationListState
 });
 

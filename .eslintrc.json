@@ -69,7 +69,13 @@
     "no-useless-concat": "warn",
     "react/no-unstable-nested-components": "warn",
     "array-callback-return": "warn",
-    "no-throw-literal": "warn"
+    "no-throw-literal": "warn",
+    "no-nested-ternary": "warn",
+    "default-case": "warn",
+    "consistent-return": "warn",
+    "no-undef": "warn",
+    "no-restricted-syntax": "warn",
+    "guard-for-in": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }
