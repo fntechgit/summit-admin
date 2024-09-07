@@ -55,7 +55,7 @@ export const getSummitById = (summitId) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "event_types,tracks,track_groups,values,locations,locations.rooms,locations.attributes.type,locations.floor,meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.values,lead_report_settings"
+      "event_types,tracks,track_groups,values,locations,locations.rooms,locations.attributes.type,locations.floor,meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.values,lead_report_settings,badge_types,badge_types.access_levels"
   };
 
   // set id
@@ -98,7 +98,8 @@ export const setCurrentSummit = (summit) => async (dispatch, getState) => {
 
     const params = {
       access_token: accessToken,
-      expand: "event_types,tracks,locations,locations.rooms,registration_stats"
+      expand:
+        "event_types,tracks,locations,locations.rooms,registration_stats,badge_types"
     };
 
     return getRequest(
