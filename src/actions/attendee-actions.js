@@ -31,7 +31,8 @@ import {
   checkOrFilter,
   getAccessTokenSafely,
   isNumericString,
-  parseDateRangeFilter
+  parseDateRangeFilter,
+  range
 } from "../utils/methods";
 
 export const REQUEST_ATTENDEES = "REQUEST_ATTENDEES";
@@ -324,10 +325,11 @@ export const getAttendeeOrders = (attendee) => async (dispatch) => {
  *
  * @param attendeeId
  * @param tickets_exclude_inactives
+ * @param perPage
  * @returns {function(*, *): Promise<*>}
  */
 export const getAllowedExtraQuestions =
-  (attendeeId, tickets_exclude_inactives = true) =>
+  (attendeeId, tickets_exclude_inactives = true, perPage = 5) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -335,7 +337,7 @@ export const getAllowedExtraQuestions =
 
     const params = {
       page: 1,
-      per_page: 5,
+      per_page: perPage,
       expand: "*sub_question_rules,*sub_question,*values",
       access_token: accessToken,
       "filter[]": `tickets_exclude_inactives==${
@@ -363,8 +365,8 @@ export const getAllowedExtraQuestions =
           return initial_data;
         }
         // only continue if totalPages > 1
-        const params = Array.from({ length: totalPages }, (_, i) => ({
-          page: i + 1,
+        const params = range(2, totalPages, 1).map((i) => ({
+          page: i,
           per_page,
           expand: "*sub_question_rules,*sub_question,*values",
           access_token: accessToken,
