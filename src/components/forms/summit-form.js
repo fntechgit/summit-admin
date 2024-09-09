@@ -35,6 +35,7 @@ import history from "../../history";
 import TextAreaInputWithCounter from "../inputs/text-area-input-with-counter";
 import TextInputWithCounter from "../inputs/text-input-with-counter";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import UrlInput from "../inputs/url-input";
 
 class SummitForm extends React.Component {
   constructor(props) {
@@ -534,17 +535,6 @@ class SummitForm extends React.Component {
         )}
         <div className="row form-group">
           <div className="col-md-4">
-            <label htmlFor="link"> {T.translate("edit_summit.link")}</label>
-            <Input
-              className="form-control"
-              error={this.hasErrors("link")}
-              id="link"
-              value={entity.link}
-              onChange={this.handleChange}
-            />
-          </div>
-
-          <div className="col-md-4">
             <label htmlFor="dates_label">
               {" "}
               {T.translate("edit_summit.dates_label")}
@@ -557,49 +547,6 @@ class SummitForm extends React.Component {
               onChange={this.handleChange}
             />
           </div>
-        </div>
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label htmlFor="registration_link">
-              {" "}
-              {T.translate("edit_summit.registration_link")}
-            </label>
-            <Input
-              className="form-control"
-              error={this.hasErrors("registration_link")}
-              id="registration_link"
-              value={entity.registration_link}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="secondary_registration_link">
-              {" "}
-              {T.translate("edit_summit.secondary_registration_link")}
-            </label>
-            <Input
-              className="form-control"
-              error={this.hasErrors("secondary_registration_link")}
-              id="secondary_registration_link"
-              value={entity.secondary_registration_link}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="secondary_registration_label">
-              {" "}
-              {T.translate("edit_summit.secondary_registration_label")}
-            </label>
-            <Input
-              className="form-control"
-              error={this.hasErrors("secondary_registration_label")}
-              id="secondary_registration_label"
-              value={entity.secondary_registration_label}
-              onChange={this.handleChange}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
           <div className="col-md-4 checkboxes-div">
             <div className="form-check abc-checkbox">
               <input
@@ -614,34 +561,6 @@ class SummitForm extends React.Component {
                 htmlFor="registration_disclaimer_mandatory"
               >
                 {T.translate("edit_summit.registration_disclaimer_mandatory")}
-              </label>
-            </div>
-          </div>
-          <div className="col-md-4 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="active"
-                checked={entity.active}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="active">
-                {T.translate("edit_summit.active")}
-              </label>
-            </div>
-          </div>
-          <div className="col-md-4 checkboxes-div">
-            <div className="form-check abc-checkbox">
-              <input
-                type="checkbox"
-                id="available_on_api"
-                checked={entity.available_on_api}
-                onChange={this.handleChange}
-                className="form-check-input"
-              />
-              <label className="form-check-label" htmlFor="available_on_api">
-                {T.translate("edit_summit.available_on_api")}
               </label>
             </div>
           </div>
@@ -1526,6 +1445,13 @@ class SummitForm extends React.Component {
           handleClick={(ev) => this.toggleSection("virtual_event", ev)}
         >
           <div className="row form-group">
+            <div className="col-md-12">
+              <span className="note">
+                {T.translate("edit_summit.virtual_event_note")}
+              </span>
+            </div>
+          </div>
+          <div className="row form-group">
             <div className="col-md-4">
               <label htmlFor="marketing_site_url">
                 {" "}
@@ -1537,7 +1463,7 @@ class SummitForm extends React.Component {
                 aria-hidden="true"
                 title={T.translate("edit_summit.url_registered_idp")}
               />
-              <Input
+              <UrlInput
                 className="form-control"
                 error={this.hasErrors("marketing_site_url")}
                 id="marketing_site_url"
@@ -1583,7 +1509,7 @@ class SummitForm extends React.Component {
                 aria-hidden="true"
                 title={T.translate("edit_summit.url_registered_idp")}
               />
-              <Input
+              <UrlInput
                 className="form-control"
                 error={this.hasErrors("virtual_site_url")}
                 id="virtual_site_url"
