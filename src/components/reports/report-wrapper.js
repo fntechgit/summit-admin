@@ -371,45 +371,45 @@ const wrapReport = (ReportComponent, specs) => {
         );
       }
 
-      if (specs.filters.includes("has_bio")) {
-        const filterValue = filters.hasOwnProperty("has_bio")
-          ? filters.has_bio
+      if (specs.filters.includes("empty_bio")) {
+        const filterValue = filters.hasOwnProperty("empty_bio")
+          ? filters.empty_bio
           : false;
         filterHtml.push(
-          <div className="col-md-3" key="has-bio-filter">
+          <div className="col-md-3" key="empty-bio-filter">
             <input
               type="checkbox"
-              id="has_bio"
+              id="empty_bio"
               checked={filterValue}
               onChange={(ev) => {
-                this.handleFilterChange("has_bio", ev.target.checked);
+                this.handleFilterChange("empty_bio", ev.target.checked);
               }}
               className="form-check-input"
             />
-            <label className="form-check-label" htmlFor="has_bio">
-              Has bio
+            <label className="form-check-label" htmlFor="empty_bio">
+              {T.translate("reports.speaker_empty_bio_filter")}
             </label>
           </div>
         );
       }
 
-      if (specs.filters.includes("has_photo")) {
-        const filterValue = filters.hasOwnProperty("has_photo")
-          ? filters.has_photo
+      if (specs.filters.includes("empty_photo")) {
+        const filterValue = filters.hasOwnProperty("empty_photo")
+          ? filters.empty_photo
           : false;
         filterHtml.push(
-          <div className="col-md-3" key="has-photo-filter">
+          <div className="col-md-3" key="empty-photo-filter">
             <input
               type="checkbox"
-              id="has_bio"
+              id="empty_photo"
               checked={filterValue}
               onChange={(ev) => {
-                this.handleFilterChange("has_photo", ev.target.checked);
+                this.handleFilterChange("empty_photo", ev.target.checked);
               }}
               className="form-check-input"
             />
             <label className="form-check-label" htmlFor="has_photo">
-              Has photo
+              {T.translate("reports.speaker_empty_photo_filter")}
             </label>
           </div>
         );

@@ -1916,6 +1916,8 @@
     "metrics_report": "Metrics Report",
     "attendee_report": "Attendee Report",
     "selection_plan_filter": "Filter by Selection Plan",
+    "speaker_empty_bio_filter": "Show only speakers whith empty bio",
+    "speaker_empty_photo_filter": "Show only speakers whith empty photo",
     "export": "Export",
     "placeholders": {
       "search": "Search by Title, Abstract, Speaker LastName, Member Email ",
