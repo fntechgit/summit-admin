@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -88,19 +88,21 @@ class EditSummitAttendeePage extends React.Component {
   }
 
   handleOnSubmit(entity) {
-    let { saveAttendee, getAllowedExtraQuestions } = this.props;
+    const { saveAttendee, getAllowedExtraQuestions } = this.props;
     this.setState({ ...this.state, ExtraQuestionsFormReadOnly: false });
-    saveAttendee(entity).then(() =>
-      getAllowedExtraQuestions(entity.id).then((payload) => {
-        if (!payload.response.total) {
-          // we dont have any available extra questions, check if we have some related to
-          // deactivated tickets
-          this.props.getAllowedExtraQuestions(entity.id, false);
-          // and mark extra question form as read only
-          this.setState({ ...this.state, ExtraQuestionsFormReadOnly: true });
-        }
-      })
-    );
+    saveAttendee(entity).then(() => {
+      if (entity.id) {
+        getAllowedExtraQuestions(entity.id).then((payload) => {
+          if (!payload.response.total) {
+            // we dont have any available extra questions, check if we have some related to
+            // deactivated tickets
+            this.props.getAllowedExtraQuestions(entity.id, false);
+            // and mark extra question form as read only
+            this.setState({ ...this.state, ExtraQuestionsFormReadOnly: true });
+          }
+        });
+      }
+    });
   }
 
   render() {

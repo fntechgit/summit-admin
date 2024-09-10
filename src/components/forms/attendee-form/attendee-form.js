@@ -94,7 +94,7 @@ class AttendeeForm extends React.Component {
       value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
-    errors[id] = "";
+    delete errors[id];
     entity[id] = value;
     this.setState({ entity, errors });
   }
@@ -121,10 +121,12 @@ class AttendeeForm extends React.Component {
   }
 
   triggerFormSubmit() {
+    if (!this.validate()) return false;
+
     // check current ( could not be rendered)
     if (this.formRef.current) {
       this.formRef.current.doSubmit();
-      return;
+      return true;
     }
 
     // do regular submit
@@ -139,6 +141,8 @@ class AttendeeForm extends React.Component {
     }
 
     this.props.onSubmit(this.removeUnchangedFields(entity, originalEntity));
+
+    return true;
   }
 
   handleSubmit(formValues) {
@@ -191,6 +195,24 @@ class AttendeeForm extends React.Component {
       }
     });
   }
+
+  validate = () => {
+    const { entity, errors } = this.state;
+    const required = ["first_name", "last_name", "email"];
+
+    required.forEach((fieldId) => {
+      if (!entity[fieldId]) {
+        errors[fieldId] = "This field is required";
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      this.setState({ errors });
+      return false;
+    }
+
+    return true;
+  };
 
   render() {
     const { entity, showSection } = this.state;
