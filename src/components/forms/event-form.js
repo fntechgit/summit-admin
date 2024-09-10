@@ -187,7 +187,8 @@ class EventForm extends React.Component {
     newErrors[id] = "";
     newEntity[id] = value;
     this.setState({ entity: newEntity }, () => {
-      if (id === "type_id") this.handleEventTypeChange(entity, newEntity);
+      if (id === "type_id" && entity.id)
+        this.handleEventTypeChange(entity, newEntity);
     });
   }
 
