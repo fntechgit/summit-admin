@@ -73,7 +73,7 @@ class EditSummitAttendeePage extends React.Component {
         this.setState({ ...this.state, ExtraQuestionsFormReadOnly: false });
         this.props.getAttendee(newId).then(() => {
           this.props.getAllowedExtraQuestions(newId).then((payload) => {
-            if (!payload.response.total) {
+            if (!payload?.response?.total) {
               // we dont have any available extra questions, check if we have some related to
               // deactivated tickets
               this.props.getAllowedExtraQuestions(newId, false);
@@ -95,7 +95,7 @@ class EditSummitAttendeePage extends React.Component {
     saveAttendee(entity).then(() => {
       if (entity.id) {
         getAllowedExtraQuestions(entity.id).then((payload) => {
-          if (!payload.response.total) {
+          if (!payload?.response?.total) {
             // we dont have any available extra questions, check if we have some related to
             // deactivated tickets
             this.props.getAllowedExtraQuestions(entity.id, false);

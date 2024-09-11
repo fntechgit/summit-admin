@@ -94,9 +94,14 @@ class AttendeeForm extends React.Component {
       value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
-    delete errors[id];
+    if (id === "member") {
+      entity.email = value?.email || "";
+      entity.first_name = entity?.first_name || value?.first_name || "";
+      entity.last_name = entity?.last_name || value?.last_name || "";
+    }
+
     entity[id] = value;
-    this.setState({ entity, errors });
+    this.setState({ entity, errors: {} });
   }
 
   removeUnchangedFields(entity, originalEntity) {
@@ -200,11 +205,13 @@ class AttendeeForm extends React.Component {
     const { entity, errors } = this.state;
     const required = ["first_name", "last_name", "email"];
 
-    required.forEach((fieldId) => {
-      if (!entity[fieldId]) {
-        errors[fieldId] = "This field is required";
-      }
-    });
+    if (!entity.member) {
+      required.forEach((fieldId) => {
+        if (!entity[fieldId]) {
+          errors[fieldId] = "This field is required";
+        }
+      });
+    }
 
     if (Object.keys(errors).length > 0) {
       this.setState({ errors });
@@ -217,6 +224,7 @@ class AttendeeForm extends React.Component {
   render() {
     const { entity, showSection } = this.state;
     const { currentSummit } = this.props;
+    const disableMemberInput = !entity.member && entity.email;
 
     return (
       <>
@@ -235,7 +243,8 @@ class AttendeeForm extends React.Component {
                   })`
                 }
                 onChange={this.handleChange}
-                disabled
+                isClearable
+                isDisabled={disableMemberInput}
               />
             </div>
             <div className="col-md-4">
@@ -296,6 +305,7 @@ class AttendeeForm extends React.Component {
                 onChange={this.handleChange}
                 className="form-control"
                 error={this.hasErrors("email")}
+                disabled={!!entity.member}
               />
             </div>
           </div>

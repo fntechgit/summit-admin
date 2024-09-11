@@ -37,7 +37,8 @@ import {
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  FIVE_PER_PAGE
 } from "../utils/constants";
 
 export const REQUEST_ATTENDEES = "REQUEST_ATTENDEES";
@@ -341,11 +342,12 @@ export const getAttendeeOrders = (attendee) => async (dispatch) => {
  * @returns {function(*, *): Promise<*>}
  */
 export const getAllowedExtraQuestions =
-  (attendeeId, tickets_exclude_inactives = true, perPage = 5) =>
+  (attendeeId, tickets_exclude_inactives = true, perPage = FIVE_PER_PAGE) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
+    const two = 2;
 
     const params = {
       page: 1,
@@ -377,7 +379,7 @@ export const getAllowedExtraQuestions =
           return initial_data;
         }
         // only continue if totalPages > 1
-        const params = range(2, totalPages, 1).map((i) => ({
+        const params = range(two, totalPages, 1).map((i) => ({
           page: i,
           per_page,
           expand: "*sub_question_rules,*sub_question,*values",
@@ -657,6 +659,10 @@ const normalizeEntity = (entity) => {
   normalizedEntity.manager_id = normalizedEntity.manager
     ? normalizedEntity.manager.id
     : 0;
+
+  if (normalizedEntity.member_id) {
+    delete normalizedEntity.email;
+  }
 
   delete normalizedEntity.summit_hall_checked_in_date;
   delete normalizedEntity.member;
