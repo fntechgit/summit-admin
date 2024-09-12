@@ -79,7 +79,6 @@ class AttendeeForm extends React.Component {
 
   handleChange(ev) {
     const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -96,8 +95,8 @@ class AttendeeForm extends React.Component {
 
     if (id === "member") {
       entity.email = value?.email || "";
-      entity.first_name = entity?.first_name || value?.first_name || "";
-      entity.last_name = entity?.last_name || value?.last_name || "";
+      entity.first_name = value?.first_name || "";
+      entity.last_name = value?.last_name || "";
     }
 
     entity[id] = value;
@@ -231,6 +230,20 @@ class AttendeeForm extends React.Component {
         {/* First Form ( Main Attendee Form ) */}
         <form className="summit-attendee-form">
           <input type="hidden" id="id" value={entity.id} />
+          {entity.speaker != null && (
+            <div className="row form-group">
+              <div className="col-md-4">
+                <label> {T.translate("general.speaker")} </label>
+                <br />
+                <a
+                  href=""
+                  onClick={this.handleSpeakerLink.bind(this, entity.speaker.id)}
+                >
+                  {entity.speaker.first_name} {entity.speaker.last_name}
+                </a>
+              </div>
+            </div>
+          )}
           <div className="row form-group">
             <div className="col-md-4">
               <label> {T.translate("general.member")} *</label>
@@ -247,33 +260,28 @@ class AttendeeForm extends React.Component {
                 isDisabled={disableMemberInput}
               />
             </div>
+            <div className="col-md-1" style={{ marginTop: 20 }}>
+              -- OR --
+            </div>
             <div className="col-md-4">
-              <label> {T.translate("edit_attendee.manager")}</label>
-              <AttendeeInput
-                id="manager"
-                summitId={currentSummit.id}
-                value={entity.manager}
-                getOptionLabel={(attendee) =>
-                  `${attendee.first_name || ""} ${attendee.last_name || ""} (${
-                    attendee.email || attendee.id
-                  })`
-                }
+              <label>
+                {T.translate("edit_attendee.email")}
+                {"  "}
+                <i
+                  className="fa fa-info-circle"
+                  aria-hidden="true"
+                  title={T.translate("edit_attendee.email_disclaimer")}
+                />
+              </label>
+              <Input
+                id="email"
+                value={entity.email}
                 onChange={this.handleChange}
-                isClearable
+                className="form-control"
+                error={this.hasErrors("email")}
+                disabled={!!entity.member}
               />
             </div>
-            {entity.speaker != null && (
-              <div className="col-md-4">
-                <label> {T.translate("general.speaker")} </label>
-                <br />
-                <a
-                  href=""
-                  onClick={this.handleSpeakerLink.bind(this, entity.speaker.id)}
-                >
-                  {entity.speaker.first_name} {entity.speaker.last_name}
-                </a>
-              </div>
-            )}
           </div>
 
           <div className="row form-group">
@@ -298,14 +306,18 @@ class AttendeeForm extends React.Component {
               />
             </div>
             <div className="col-md-4">
-              <label> {T.translate("edit_attendee.email")}</label>
-              <Input
-                id="email"
-                value={entity.email}
+              <label> {T.translate("edit_attendee.manager")}</label>
+              <AttendeeInput
+                id="manager"
+                summitId={currentSummit.id}
+                value={entity.manager}
+                getOptionLabel={(attendee) =>
+                  `${attendee.first_name || ""} ${attendee.last_name || ""} (${
+                    attendee.email || attendee.id
+                  })`
+                }
                 onChange={this.handleChange}
-                className="form-control"
-                error={this.hasErrors("email")}
-                disabled={!!entity.member}
+                isClearable
               />
             </div>
           </div>

@@ -806,6 +806,7 @@
     "first_name": "First Name",
     "last_name": "Last Name",
     "email": "Email",
+    "email_disclaimer": "Creating a new attendee by email address requires entering first name and last name as well",
     "affiliation_title": "Title",
     "company": "Company",
     "tags": "Tags",
