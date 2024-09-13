@@ -120,7 +120,7 @@ table.occupancyTable > tbody > tr.child ul li:last-child {
 }
 
 table.occupancyTable > tbody > tr > td.actions {
-  width: 185px;
+  width: 200px;
 }
 
 @media only screen and (max-width: 768px) {
