@@ -104,6 +104,8 @@ class AttendeeForm extends React.Component {
   }
 
   removeUnchangedFields(entity, originalEntity) {
+    const copyOfEntity = { ...entity };
+
     const fields = [
       "summit_hall_checked_in",
       "disclaimer_accepted",
@@ -115,13 +117,15 @@ class AttendeeForm extends React.Component {
       "admin_notes",
       "email"
     ];
+
     fields.forEach((f) => {
-      if (entity[f] === originalEntity[f]) {
+      if (copyOfEntity[f] === originalEntity[f]) {
         // field dint change , so remove it from submit
-        delete entity[f];
+        delete copyOfEntity[f];
       }
     });
-    return entity;
+
+    return copyOfEntity;
   }
 
   triggerFormSubmit() {
@@ -326,7 +330,7 @@ class AttendeeForm extends React.Component {
               <label> {T.translate("edit_attendee.company")}</label>
               <Input
                 id="company"
-                value={entity.company}
+                value={entity?.company}
                 onChange={this.handleChange}
                 className="form-control"
                 error={this.hasErrors("company")}
