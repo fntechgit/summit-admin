@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -18,7 +18,6 @@ import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
 import {
   FreeTextSearch,
-  SummitDropdown,
   Table
 } from "openstack-uicore-foundation/lib/components";
 import { getSummitById } from "../../actions/summit-actions";
@@ -27,6 +26,7 @@ import {
   deleteMediaUpload,
   copyMediaUploads
 } from "../../actions/media-upload-actions";
+import SummitDropdown from "../../components/summit-dropdown";
 
 class MediaUploadListPage extends React.Component {
   constructor(props) {
@@ -78,17 +78,18 @@ class MediaUploadListPage extends React.Component {
 
   handleDelete(mediaUploadId) {
     const { deleteMediaUpload, media_uploads } = this.props;
-    let media_upload = media_uploads.find((t) => t.id === mediaUploadId);
+    const media_upload = media_uploads.find((t) => t.id === mediaUploadId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("media_upload.delete_warning") + " " + media_upload.name,
+      text: `${T.translate("media_upload.delete_warning")} ${
+        media_upload.name
+      }}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteMediaUpload(mediaUploadId);
       }
@@ -105,14 +106,12 @@ class MediaUploadListPage extends React.Component {
     const {
       currentSummit,
       media_uploads,
-      allSummits,
       lastPage,
       currentPage,
       term,
       order,
       orderDir
     } = this.props;
-    const summits = allSummits.filter((s) => s.id !== currentSummit.id);
 
     const columns = [
       { columnKey: "id", value: T.translate("general.id"), sortable: true },
@@ -139,8 +138,8 @@ class MediaUploadListPage extends React.Component {
     return (
       <div className="container">
         <h3> {T.translate("media_upload.media_upload_list")}</h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <FreeTextSearch
               value={term}
               placeholder={T.translate("media_upload.placeholders.search")}
@@ -155,7 +154,6 @@ class MediaUploadListPage extends React.Component {
               {T.translate("media_upload.add")}
             </button>
             <SummitDropdown
-              summits={summits}
               onClick={this.handleCopyMediaUploads}
               actionLabel={T.translate("media_upload.copy_media_uploads")}
             />
@@ -200,7 +198,6 @@ const mapStateToProps = ({
   mediaUploadListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  allSummits: directoryState.allSummits,
   ...mediaUploadListState
 });
 
