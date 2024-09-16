@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -45,7 +45,7 @@ class EditBadgeTypePage extends React.Component {
     }
 
     if (!currentSummit.badge_features) props.getBadgeFeatures();
-    if (!currentSummit.access_level_types) props.getAccessLevels();
+    if (!currentSummit.badge_access_level_types) props.getAccessLevels();
     if (!currentSummit.view_types) props.getViewTypes();
   }
 
@@ -78,7 +78,7 @@ class EditBadgeTypePage extends React.Component {
         <hr />
         {currentSummit &&
           currentSummit.badge_features &&
-          currentSummit.access_level_types && (
+          currentSummit.badge_access_level_types && (
             <BadgeTypeForm
               entity={entity}
               currentSummit={currentSummit}

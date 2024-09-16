@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -73,7 +73,7 @@ class BadgeForm extends React.Component {
     const { value, id } = ev.target;
 
     entity[id] = value;
-    this.setState({ entity: entity });
+    this.setState({ entity });
     this.props.onTypeChange(entity);
   }
 
@@ -113,7 +113,7 @@ class BadgeForm extends React.Component {
   }
 
   handleBadgePrintFilterChange(ev) {
-    let { value, id } = ev.target;
+    const { value, id } = ev.target;
     const newFilters = { ...this.state.printFilters, [id]: value };
     this.setState({ ...this.state, printFilters: newFilters });
     const { term, order, orderDir, page, perPage } = this.props;
@@ -191,7 +191,7 @@ class BadgeForm extends React.Component {
       cancelButtonColor: "#d33",
       confirmButtonColor: "#3085d6",
       confirmButtonText: T.translate("general.clear")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         clearBadgePrints(entity.ticket_id);
       }
@@ -236,7 +236,7 @@ class BadgeForm extends React.Component {
     const badgeType = currentSummit.badge_types.find(
       (bt) => bt.id === entity.type_id
     );
-    const access_levels = badgeType.access_levels
+    const access_levels = currentSummit.badge_access_level_types
       .map((al) => al.name)
       .join(", ");
 
@@ -262,10 +262,15 @@ class BadgeForm extends React.Component {
     }));
 
     // adds 'All' option to the print type dropdown
+    const currBadgeType = currentSummit.badge_types.find(
+      (bt) => bt.id === entity.type_id
+    );
     const badge_view_type_ddl = [
-      ...currentSummit.badge_types
-        .find((bt) => bt.id === entity.type_id)
-        .allowed_view_types.map((vt) => ({ label: vt.name, value: vt.id }))
+      ...currBadgeType.allowed_view_types
+        .map((id) =>
+          currentSummit.badge_view_types.find((bvt) => bvt.id === id)
+        )
+        .map((r) => ({ label: r.name, value: r.id }))
     ];
 
     const badge_print_columns = [
@@ -306,7 +311,7 @@ class BadgeForm extends React.Component {
       return (
         <div className="badge-print-datepicker">
           <input {...props} />
-          <i onClick={clear} className="fa fa-times"></i>
+          <i onClick={clear} className="fa fa-times" />
         </div>
       );
     };
@@ -331,8 +336,8 @@ class BadgeForm extends React.Component {
             {access_levels}
           </div>
         </div>
-        {badgeType.access_levels.some((al) =>
-          al.name.includes("IN_PERSON")
+        {currentSummit.badge_access_level_types.some((al) =>
+          al.name?.includes("IN_PERSON")
         ) && (
           <div className="row form-group">
             <div
@@ -355,7 +360,7 @@ class BadgeForm extends React.Component {
                             placeholder={T.translate(
                               "edit_ticket.placeholders.search_badge_prints"
                             )}
-                            preventEvents={true}
+                            preventEvents
                             onSearch={this.handleBadgePrintSearch}
                           />
                         </div>
@@ -405,7 +410,7 @@ class BadgeForm extends React.Component {
                               printDateFilter[0],
                               userTimeZone
                             )}
-                            className={"badge-print-date-picker"}
+                            className="badge-print-date-picker"
                             renderInput={renderInput}
                           />
                           <DateTimePicker
@@ -424,7 +429,7 @@ class BadgeForm extends React.Component {
                               printDateFilter[1],
                               userTimeZone
                             )}
-                            className={"badge-print-date-picker"}
+                            className="badge-print-date-picker"
                             renderInput={renderInput}
                           />
                           <button
@@ -472,11 +477,11 @@ class BadgeForm extends React.Component {
                       </thead>
                       <tbody>
                         {Object.keys(entity.print_excerpt).map((row, i) => {
-                          let rowClass = i % 2 === 0 ? "even" : "odd";
+                          const rowClass = i % 2 === 0 ? "even" : "odd";
                           return (
                             <tr
                               id={row}
-                              key={"row_" + row}
+                              key={`row_${row}`}
                               role="row"
                               className={rowClass}
                             >

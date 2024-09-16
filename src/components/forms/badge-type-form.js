@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -76,7 +76,7 @@ class BadgeTypeForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
@@ -96,7 +96,7 @@ class BadgeTypeForm extends React.Component {
 
   queryAccessLevels(input, callback) {
     const { currentSummit } = this.props;
-    const accessLevels = currentSummit.access_level_types.filter(
+    const accessLevels = currentSummit.badge_access_level_types.filter(
       (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
     );
     callback(accessLevels);
