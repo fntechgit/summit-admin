@@ -535,6 +535,16 @@ class SummitForm extends React.Component {
         )}
         <div className="row form-group">
           <div className="col-md-4">
+            <label htmlFor="link"> {T.translate("edit_summit.link")}</label>
+            <Input
+              className="form-control"
+              error={this.hasErrors("link")}
+              id="link"
+              value={entity.link}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-4">
             <label htmlFor="dates_label">
               {" "}
               {T.translate("edit_summit.dates_label")}
@@ -547,6 +557,49 @@ class SummitForm extends React.Component {
               onChange={this.handleChange}
             />
           </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-4">
+            <label htmlFor="registration_link">
+              {" "}
+              {T.translate("edit_summit.registration_link")}
+            </label>
+            <Input
+              className="form-control"
+              error={this.hasErrors("registration_link")}
+              id="registration_link"
+              value={entity.registration_link}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-4">
+            <label htmlFor="secondary_registration_link">
+              {" "}
+              {T.translate("edit_summit.secondary_registration_link")}
+            </label>
+            <Input
+              className="form-control"
+              error={this.hasErrors("secondary_registration_link")}
+              id="secondary_registration_link"
+              value={entity.secondary_registration_link}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-4">
+            <label htmlFor="secondary_registration_label">
+              {" "}
+              {T.translate("edit_summit.secondary_registration_label")}
+            </label>
+            <Input
+              className="form-control"
+              error={this.hasErrors("secondary_registration_label")}
+              id="secondary_registration_label"
+              value={entity.secondary_registration_label}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
           <div className="col-md-4 checkboxes-div">
             <div className="form-check abc-checkbox">
               <input
@@ -563,6 +616,34 @@ class SummitForm extends React.Component {
                 {T.translate("edit_summit.registration_disclaimer_mandatory")}
               </label>
             </div>
+          </div>
+        </div>
+        <div className="col-md-4 checkboxes-div">
+          <div className="form-check abc-checkbox">
+            <input
+              type="checkbox"
+              id="active"
+              checked={entity.active}
+              onChange={this.handleChange}
+              className="form-check-input"
+            />
+            <label className="form-check-label" htmlFor="active">
+              {T.translate("edit_summit.active")}
+            </label>
+          </div>
+        </div>
+        <div className="col-md-4 checkboxes-div">
+          <div className="form-check abc-checkbox">
+            <input
+              type="checkbox"
+              id="available_on_api"
+              checked={entity.available_on_api}
+              onChange={this.handleChange}
+              className="form-check-input"
+            />
+            <label className="form-check-label" htmlFor="available_on_api">
+              {T.translate("edit_summit.available_on_api")}
+            </label>
           </div>
         </div>
         <div className="row form-group">
