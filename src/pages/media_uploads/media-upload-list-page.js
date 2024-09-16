@@ -18,7 +18,6 @@ import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
 import {
   FreeTextSearch,
-  SummitDropdown,
   Table
 } from "openstack-uicore-foundation/lib/components";
 import { getSummitById } from "../../actions/summit-actions";
@@ -27,6 +26,7 @@ import {
   deleteMediaUpload,
   copyMediaUploads
 } from "../../actions/media-upload-actions";
+import SummitDropdown from "../../components/summit-dropdown";
 
 class MediaUploadListPage extends React.Component {
   constructor(props) {
@@ -106,14 +106,12 @@ class MediaUploadListPage extends React.Component {
     const {
       currentSummit,
       media_uploads,
-      allSummits,
       lastPage,
       currentPage,
       term,
       order,
       orderDir
     } = this.props;
-    const summits = allSummits.filter((s) => s.id !== currentSummit.id);
 
     const columns = [
       { columnKey: "id", value: T.translate("general.id"), sortable: true },
@@ -156,7 +154,6 @@ class MediaUploadListPage extends React.Component {
               {T.translate("media_upload.add")}
             </button>
             <SummitDropdown
-              summits={summits}
               onClick={this.handleCopyMediaUploads}
               actionLabel={T.translate("media_upload.copy_media_uploads")}
             />
@@ -201,7 +198,6 @@ const mapStateToProps = ({
   mediaUploadListState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
-  allSummits: directoryState.summits,
   ...mediaUploadListState
 });
 
