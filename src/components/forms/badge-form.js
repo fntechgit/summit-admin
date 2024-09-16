@@ -13,6 +13,7 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import moment from "moment-timezone";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
@@ -23,11 +24,10 @@ import {
   DateTimePicker
 } from "openstack-uicore-foundation/lib/components";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import { shallowEqual } from "../../utils/methods";
 import { Pagination } from "react-bootstrap";
-
+import { shallowEqual } from "../../utils/methods";
 import "./badge-form.less";
-import Swal from "sweetalert2";
+import { TWO } from "../../utils/constants";
 
 class BadgeForm extends React.Component {
   constructor(props) {
@@ -38,7 +38,7 @@ class BadgeForm extends React.Component {
       printExcerptDetails: false,
       printFilters: {
         viewTypeFilter: [],
-        printDateFilter: Array(2).fill(0)
+        printDateFilter: Array(TWO).fill(0)
       }
     };
 
@@ -331,7 +331,7 @@ class BadgeForm extends React.Component {
           </div>
         </div>
         <div className="row form-group">
-          <div className="col-md-12">
+          <div className="col-md-1TWO">
             <label> {T.translate("edit_ticket.access_levels")}:&nbsp;</label>
             {access_levels}
           </div>
@@ -477,7 +477,7 @@ class BadgeForm extends React.Component {
                       </thead>
                       <tbody>
                         {Object.keys(entity.print_excerpt).map((row, i) => {
-                          const rowClass = i % 2 === 0 ? "even" : "odd";
+                          const rowClass = i % TWO === 0 ? "even" : "odd";
                           return (
                             <tr
                               id={row}

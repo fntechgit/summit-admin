@@ -60,7 +60,7 @@ import {
   RECEIVE_VIEW_TYPES
 } from "../../actions/badge-actions";
 
-import { RECEIVE_USER_ROLES_BY_SUMMIT } from "../../actions/user-chat-roles-actions.js";
+import { RECEIVE_USER_ROLES_BY_SUMMIT } from "../../actions/user-chat-roles-actions";
 
 import {
   RECEIVE_REFUND_POLICIES,
@@ -75,7 +75,7 @@ import {
   RECEIVE_PRINT_APP_SETTINGS,
   RECEIVE_REG_LITE_SETTINGS
 } from "../../actions/marketing-actions";
-import { REG_LITE_BOOLEAN_SETTINGS } from "../../utils/constants.js";
+import { REG_LITE_BOOLEAN_SETTINGS } from "../../utils/constants";
 import {
   denormalizeLeadReportSettings,
   renderOptions,

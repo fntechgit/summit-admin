@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
-
+import Swal from "sweetalert2";
 import T from "i18n-react/dist/i18n-react";
 import {
   getRequest,
@@ -23,7 +23,6 @@ import {
   showSuccessMessage,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import Swal from "sweetalert2";
 import history from "../history";
 import {
   DEFAULT_CURRENT_PAGE,
