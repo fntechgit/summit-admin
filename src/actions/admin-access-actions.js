@@ -9,9 +9,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -25,7 +24,9 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_ADMIN_ACCESSES = "REQUEST_ADMIN_ACCESSES";
 export const RECEIVE_ADMIN_ACCESSES = "RECEIVE_ADMIN_ACCESSES";
@@ -37,7 +38,13 @@ export const ADMIN_ACCESS_ADDED = "ADMIN_ACCESS_ADDED";
 export const ADMIN_ACCESS_DELETED = "ADMIN_ACCESS_DELETED";
 
 export const getAdminAccesses =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    term = null,
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
   async (dispatch, getState) => {
     const accessToken = await getAccessTokenSafely();
     const filter = [];
@@ -45,9 +52,11 @@ export const getAdminAccesses =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       expand: "members,summits",
+      relations: "summits.none, members.none",
+      fields: "summits.name, members.first_name, members.last_name",
       access_token: accessToken
     };
 
@@ -65,7 +74,7 @@ export const getAdminAccesses =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -172,9 +181,9 @@ export const deleteAdminAccess =
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["modified"];
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.modified;
 
   normalizedEntity.members = entity.members.map((m) => m.id);
   normalizedEntity.summits = entity.summits.map((s) => s.id);
