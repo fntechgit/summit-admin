@@ -113,7 +113,7 @@ class MediaUploadListPage extends React.Component {
       order,
       orderDir
     } = this.props;
-    const summits = allSummits?.filter((s) => s.id !== currentSummit.id);
+    const summits = allSummits.filter((s) => s.id !== currentSummit.id);
 
     const columns = [
       { columnKey: "id", value: T.translate("general.id"), sortable: true },
