@@ -617,33 +617,33 @@ class SummitForm extends React.Component {
               </label>
             </div>
           </div>
-        </div>
-        <div className="col-md-4 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="active"
-              checked={entity.active}
-              onChange={this.handleChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label" htmlFor="active">
-              {T.translate("edit_summit.active")}
-            </label>
+          <div className="col-md-4 checkboxes-div">
+            <div className="form-check abc-checkbox">
+              <input
+                type="checkbox"
+                id="active"
+                checked={entity.active}
+                onChange={this.handleChange}
+                className="form-check-input"
+              />
+              <label className="form-check-label" htmlFor="active">
+                {T.translate("edit_summit.active")}
+              </label>
+            </div>
           </div>
-        </div>
-        <div className="col-md-4 checkboxes-div">
-          <div className="form-check abc-checkbox">
-            <input
-              type="checkbox"
-              id="available_on_api"
-              checked={entity.available_on_api}
-              onChange={this.handleChange}
-              className="form-check-input"
-            />
-            <label className="form-check-label" htmlFor="available_on_api">
-              {T.translate("edit_summit.available_on_api")}
-            </label>
+          <div className="col-md-4 checkboxes-div">
+            <div className="form-check abc-checkbox">
+              <input
+                type="checkbox"
+                id="available_on_api"
+                checked={entity.available_on_api}
+                onChange={this.handleChange}
+                className="form-check-input"
+              />
+              <label className="form-check-label" htmlFor="available_on_api">
+                {T.translate("edit_summit.available_on_api")}
+              </label>
+            </div>
           </div>
         </div>
         <div className="row form-group">
