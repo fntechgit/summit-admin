@@ -236,7 +236,10 @@ class BadgeForm extends React.Component {
     const badgeType = currentSummit.badge_types.find(
       (bt) => bt.id === entity.type_id
     );
-    const access_levels = currentSummit.badge_access_level_types
+    const access_levels = badgeType.access_levels
+      .map((id) =>
+        currentSummit.badge_access_level_types.find((bal) => bal.id === id)
+      )
       .map((al) => al.name)
       .join(", ");
 
@@ -336,9 +339,7 @@ class BadgeForm extends React.Component {
             {access_levels}
           </div>
         </div>
-        {currentSummit.badge_access_level_types.some((al) =>
-          al.name?.includes("IN_PERSON")
-        ) && (
+        {access_levels.includes("IN_PERSON") && (
           <div className="row form-group">
             <div
               className={`badge-print-wrapper ${
