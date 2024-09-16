@@ -95,7 +95,10 @@ export const getAdminAccess = (adminAccessId) => async (dispatch, getState) => {
 
   const params = {
     access_token: accessToken,
-    expand: "members,summits"
+    expand: "members,summits",
+    relations: "summits.none, members.none",
+    fields:
+      "summits.name, summits.id, members.first_name, members.last_name, members.email, members.id"
   };
 
   return getRequest(
