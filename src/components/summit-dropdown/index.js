@@ -54,7 +54,7 @@ export default class SummitDropdown extends React.Component {
         />
         <button
           type="button"
-          className={`${styles.btn} btn-default ${actionClass}`}
+          className={`${styles.btn} btn btn-default ${actionClass}`}
           onClick={this.handleClick}
         >
           {actionLabel}
