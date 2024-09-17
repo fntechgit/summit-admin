@@ -334,7 +334,7 @@ class BadgeForm extends React.Component {
           </div>
         </div>
         <div className="row form-group">
-          <div className="col-md-1TWO">
+          <div className="col-md-12">
             <label> {T.translate("edit_ticket.access_levels")}:&nbsp;</label>
             {access_levels}
           </div>
