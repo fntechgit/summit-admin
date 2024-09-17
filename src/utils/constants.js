@@ -115,6 +115,7 @@ export const LETTERS_IN_ALPHABET = 26;
 export const UPPERCASE_A_IN_ASCII = 65;
 
 export const DECIMAL_DIGITS = 2;
+
 export const TWO = 2;
 
 export const DEFAULT_Z_INDEX = 1;

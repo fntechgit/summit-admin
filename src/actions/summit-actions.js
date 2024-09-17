@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
-
+import Swal from "sweetalert2";
 import T from "i18n-react/dist/i18n-react";
 import {
   getRequest,
@@ -23,7 +23,6 @@ import {
   showSuccessMessage,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import Swal from "sweetalert2";
 import history from "../history";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -59,7 +58,7 @@ export const getSummitById = (summitId) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "event_types,tracks,track_groups,values,locations,locations.rooms,locations.attributes.type,locations.floor,meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.values,lead_report_settings,badge_types,badge_types.access_levels,badge_types.allowed_view_types"
+      "event_types,tracks,track_groups,values,locations,locations.rooms,locations.attributes.type,locations.floor,meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.values,lead_report_settings"
   };
 
   // set id

@@ -60,7 +60,7 @@ import {
   RECEIVE_VIEW_TYPES
 } from "../../actions/badge-actions";
 
-import { RECEIVE_USER_ROLES_BY_SUMMIT } from "../../actions/user-chat-roles-actions.js";
+import { RECEIVE_USER_ROLES_BY_SUMMIT } from "../../actions/user-chat-roles-actions";
 
 import {
   RECEIVE_REFUND_POLICIES,
@@ -75,7 +75,7 @@ import {
   RECEIVE_PRINT_APP_SETTINGS,
   RECEIVE_REG_LITE_SETTINGS
 } from "../../actions/marketing-actions";
-import { REG_LITE_BOOLEAN_SETTINGS } from "../../utils/constants.js";
+import { REG_LITE_BOOLEAN_SETTINGS } from "../../utils/constants";
 import {
   denormalizeLeadReportSettings,
   renderOptions,
@@ -145,7 +145,7 @@ export const DEFAULT_ENTITY = {
   api_feed_url: "",
   api_feed_key: "",
   refund_policies: [],
-  access_level_types: null,
+  badge_access_level_types: null,
   badge_types: null,
   badge_features: null,
   badge_view_types: null,
@@ -183,12 +183,12 @@ const DEFAULT_REG_LITE_MARKETING_SETTINGS = {
   REG_LITE_INITIAL_ORDER_COMPLETE_STEP_1ST_PARAGRAPH: {
     id: 0,
     value:
-      'A ticket has been assigned to you. To complete your additional ticket details, please click the "{button}" button.'
+      "A ticket has been assigned to you. To complete your additional ticket details, please click the \"{button}\" button."
   },
   REG_LITE_INITIAL_ORDER_COMPLETE_STEP_2ND_PARAGRAPH: {
     id: 0,
     value:
-      'If you wish to transfer your assigned ticket, close this window and visit the "My Orders/Tickets" tab in the top navigation bar. '
+      "If you wish to transfer your assigned ticket, close this window and visit the \"My Orders/Tickets\" tab in the top navigation bar. "
   },
   REG_LITE_INITIAL_ORDER_COMPLETE_BTN_LABEL: { id: 0, value: "Finish Now" },
   REG_LITE_ORDER_COMPLETE_STEP_1ST_PARAGRAPH: {
@@ -201,7 +201,8 @@ const DEFAULT_REG_LITE_MARKETING_SETTINGS = {
   REG_LITE_ORDER_COMPLETE_BTN_LABEL: { id: 0, value: "" },
   REG_LITE_NO_ALLOWED_TICKETS_MESSAGE: {
     id: 0,
-    value: `<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span><a href="/a/my-tickets">Visit the my orders / my tickets page</a> to review your existing tickets.</span>`
+    value:
+      "<span>You already have purchased all available tickets for this event and/or there are no tickets available for you to purchase.</span><br/><span><a href=\"/a/my-tickets\">Visit the my orders / my tickets page</a> to review your existing tickets.</span>"
   }
 };
 
@@ -236,7 +237,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       if (id !== currentSummit.id) {
         currentSummit = { ...DEFAULT_ENTITY, id: payload.id };
       }
-      return { ...DEFAULT_STATE, loading: true, currentSummit: currentSummit };
+      return { ...DEFAULT_STATE, loading: true, currentSummit };
     }
     case CLEAR_SUMMIT: {
       return DEFAULT_STATE;
@@ -244,9 +245,9 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
     case SUMMIT_ADDED:
     case SUMMIT_UPDATED:
     case RECEIVE_SUMMIT: {
-      let entity = { ...payload.response };
+      const entity = { ...payload.response };
 
-      for (var key in entity) {
+      for (const key in entity) {
         if (entity.hasOwnProperty(key)) {
           entity[key] = entity[key] == null ? "" : entity[key];
         }
@@ -293,8 +294,8 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_TYPE_UPDATED: {
-      let { response } = payload;
-      let eventTypes = state.currentSummit.event_types.filter(
+      const { response } = payload;
+      const eventTypes = state.currentSummit.event_types.filter(
         (e) => e.id !== response.id
       );
       return {
@@ -306,7 +307,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_TYPE_ADDED: {
-      let { response } = payload;
+      const { response } = payload;
       return {
         ...state,
         currentSummit: {
@@ -316,8 +317,8 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_TYPE_DELETED: {
-      let { eventTypeId } = payload;
-      let eventTypes = state.currentSummit.event_types.filter(
+      const { eventTypeId } = payload;
+      const eventTypes = state.currentSummit.event_types.filter(
         (e) => e.id !== eventTypeId
       );
       return {
@@ -326,7 +327,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_TYPES_SEEDED: {
-      let eventTypesAdded = payload.response.data;
+      const eventTypesAdded = payload.response.data;
 
       if (eventTypesAdded.length > 0) {
         return {
@@ -339,13 +340,12 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
             ]
           }
         };
-      } else {
-        return state;
       }
+      return state;
     }
     case EVENT_CATEGORY_UPDATED: {
-      let { response } = payload;
-      let tracks = state.currentSummit.tracks.filter(
+      const { response } = payload;
+      const tracks = state.currentSummit.tracks.filter(
         (t) => t.id !== response.id
       );
       return {
@@ -354,7 +354,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_CATEGORY_ADDED: {
-      let { response } = payload;
+      const { response } = payload;
       return {
         ...state,
         currentSummit: {
@@ -364,7 +364,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_CATEGORIES_SEEDED: {
-      let eventCategoriesAdded = payload.response.data;
+      const eventCategoriesAdded = payload.response.data;
 
       if (eventCategoriesAdded.length > 0) {
         return {
@@ -374,16 +374,15 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
             tracks: [...state.currentSummit.tracks, ...eventCategoriesAdded]
           }
         };
-      } else {
-        return state;
       }
+      return state;
     }
     case EVENT_CATEGORY_DELETED: {
-      let { trackId } = payload;
-      let tracks = state.currentSummit.tracks.filter((t) => t.id !== trackId);
+      const { trackId } = payload;
+      const tracks = state.currentSummit.tracks.filter((t) => t.id !== trackId);
       return {
         ...state,
-        currentSummit: { ...state.currentSummit, tracks: tracks }
+        currentSummit: { ...state.currentSummit, tracks }
       };
     }
     case UNLINK_SUBTRACK: {
@@ -394,8 +393,8 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, currentSummit: { ...state.currentSummit, tracks } };
     }
     case LOCATION_UPDATED: {
-      let { response } = payload;
-      let locations = state.currentSummit.locations.filter(
+      const { response } = payload;
+      const locations = state.currentSummit.locations.filter(
         (l) => l.id !== response.id
       );
       return {
@@ -408,7 +407,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
     }
     case ROOM_ADDED:
     case LOCATION_ADDED: {
-      let { response } = payload;
+      const { response } = payload;
       return {
         ...state,
         currentSummit: {
@@ -418,27 +417,27 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case LOCATION_DELETED: {
-      let { locationId } = payload;
-      let locations = state.currentSummit.locations.filter(
+      const { locationId } = payload;
+      const locations = state.currentSummit.locations.filter(
         (l) => l.id !== locationId
       );
       return {
         ...state,
-        currentSummit: { ...state.currentSummit, locations: locations }
+        currentSummit: { ...state.currentSummit, locations }
       };
     }
     case ROOM_DELETED: {
-      let { roomId } = payload;
-      let locations = state.currentSummit.locations.filter(
+      const { roomId } = payload;
+      const locations = state.currentSummit.locations.filter(
         (l) => l.id !== roomId
       );
       return {
         ...state,
-        currentSummit: { ...state.currentSummit, locations: locations }
+        currentSummit: { ...state.currentSummit, locations }
       };
     }
     case SELECTION_PLAN_ADDED: {
-      let { response } = payload;
+      const { response } = payload;
       return {
         ...state,
         currentSummit: {
@@ -448,8 +447,8 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_UPDATED: {
-      let { response } = payload;
-      let selection_plans = state.currentSummit.selection_plans.filter(
+      const { response } = payload;
+      const selection_plans = state.currentSummit.selection_plans.filter(
         (sp) => sp.id !== response.id
       );
       return {
@@ -463,29 +462,29 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_DELETED: {
-      let { selectionPlanId } = payload;
-      let selection_plans = state.currentSummit.selection_plans.filter(
+      const { selectionPlanId } = payload;
+      const selection_plans = state.currentSummit.selection_plans.filter(
         (sp) => sp.id !== selectionPlanId
       );
       return {
         ...state,
         currentSummit: {
           ...state.currentSummit,
-          selection_plans: selection_plans
+          selection_plans
         }
       };
     }
     case ROOM_BOOKING_ATTRIBUTE_TYPE_UPDATED:
     case ROOM_BOOKING_ATTRIBUTE_TYPE_ADDED: {
-      let { response } = payload;
-      let attributeType =
+      const { response } = payload;
+      const attributeType =
         state.currentSummit.meeting_booking_room_allowed_attributes.find(
           (b) => b.id === response.id
         );
       if (attributeType) {
         response.values = attributeType.values;
       }
-      let attributeTypes =
+      const attributeTypes =
         state.currentSummit.meeting_booking_room_allowed_attributes.filter(
           (b) => b.id !== response.id
         );
@@ -498,8 +497,8 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case ROOM_BOOKING_ATTRIBUTE_TYPE_DELETED: {
-      let { attributeTypeId } = payload;
-      let attributeTypes =
+      const { attributeTypeId } = payload;
+      const attributeTypes =
         state.currentSummit.meeting_booking_room_allowed_attributes.filter(
           (a) => a.id !== attributeTypeId
         );
@@ -513,8 +512,8 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
     }
     case ROOM_BOOKING_ATTRIBUTE_UPDATED:
     case ROOM_BOOKING_ATTRIBUTE_ADDED: {
-      let { response } = payload;
-      let attributeTypes =
+      const { response } = payload;
+      const attributeTypes =
         state.currentSummit.meeting_booking_room_allowed_attributes.filter(
           (b) => b.id !== response.type_id
         );
@@ -524,7 +523,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         );
       let values = attributeType.values.filter((v) => v.id !== response.id);
       values = [...values, response];
-      attributeType = { ...attributeType, values: values };
+      attributeType = { ...attributeType, values };
       return {
         ...state,
         currentSummit: {
@@ -537,8 +536,8 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case ROOM_BOOKING_ATTRIBUTE_DELETED: {
-      let { attributeTypeId, attributeValueId } = payload;
-      let attributeTypes =
+      const { attributeTypeId, attributeValueId } = payload;
+      const attributeTypes =
         state.currentSummit.meeting_booking_room_allowed_attributes.filter(
           (a) => a.id !== attributeTypeId
         );
@@ -546,10 +545,10 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         state.currentSummit.meeting_booking_room_allowed_attributes.find(
           (a) => a.id === attributeTypeId
         );
-      let values = attributeType.values.filter(
+      const values = attributeType.values.filter(
         (v) => v.id !== attributeValueId
       );
-      attributeType = { ...attributeType, values: values };
+      attributeType = { ...attributeType, values };
       return {
         ...state,
         currentSummit: {
@@ -562,7 +561,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_BADGE_TYPES: {
-      let badgeTypes = payload.response.data;
+      const badgeTypes = payload.response.data;
 
       return {
         ...state,
@@ -580,7 +579,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case BADGE_TYPE_DELETED: {
-      let { badgeTypeId } = payload;
+      const { badgeTypeId } = payload;
       return {
         ...state,
         currentSummit: {
@@ -594,7 +593,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_REFUND_POLICIES: {
-      let refundPolicies = payload.response.data;
+      const refundPolicies = payload.response.data;
 
       return {
         ...state,
@@ -605,18 +604,18 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_ACCESS_LEVELS: {
-      let accessLevels = payload.response.data;
+      const accessLevels = payload.response.data;
 
       return {
         ...state,
         currentSummit: {
           ...state.currentSummit,
-          access_level_types: accessLevels
+          badge_access_level_types: accessLevels
         }
       };
     }
     case RECEIVE_BADGE_FEATURES: {
-      let badgeFeatures = payload.response.data;
+      const badgeFeatures = payload.response.data;
 
       return {
         ...state,
@@ -624,7 +623,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_VIEW_TYPES: {
-      let viewTypes = payload.response.data;
+      const viewTypes = payload.response.data;
 
       return {
         ...state,
@@ -632,12 +631,12 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_ORDER_EXTRA_QUESTIONS: {
-      let allExtraQuestions = payload.response.data;
+      const allExtraQuestions = payload.response.data;
 
-      let order_only_extra_questions = allExtraQuestions.filter(
+      const order_only_extra_questions = allExtraQuestions.filter(
         (eq) => eq.usage === "Both" || eq.usage === "Order"
       );
-      let attendee_extra_questions = allExtraQuestions.filter(
+      const attendee_extra_questions = allExtraQuestions.filter(
         (eq) => eq.usage === "Both" || eq.usage === "Ticket"
       );
 
@@ -654,7 +653,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, errors: payload.errors };
     }
     case RECEIVE_USER_ROLES_BY_SUMMIT: {
-      let helpUsers = payload.response;
+      const helpUsers = payload.response;
       return {
         ...state,
         currentSummit: { ...state.currentSummit, help_users: helpUsers }
@@ -684,17 +683,17 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_REG_LITE_SETTINGS: {
-      let { data } = payload.response;
-      let reg_lite_marketing_settings = {};
+      const { data } = payload.response;
+      const reg_lite_marketing_settings = {};
 
       data.forEach((setting) => {
-        let value = setting.value;
+        let { value } = setting;
         if (REG_LITE_BOOLEAN_SETTINGS.includes(setting.key)) {
           value = value === "1";
         }
         reg_lite_marketing_settings[setting.key] = {
           id: setting.id,
-          value: value
+          value
         };
       });
 
@@ -706,11 +705,11 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, reg_lite_marketing_settings: newMarketingSettings };
     }
     case RECEIVE_PRINT_APP_SETTINGS: {
-      let { data } = payload.response;
-      let print_app_marketing_settings = {};
+      const { data } = payload.response;
+      const print_app_marketing_settings = {};
 
       data.forEach((setting) => {
-        let value = setting.value;
+        let { value } = setting;
         if (
           setting.key === "PRINT_APP_HIDE_FIND_TICKET_BY_EMAIL" ||
           setting.key === "PRINT_APP_HIDE_FIND_TICKET_BY_FULLNAME"
@@ -719,7 +718,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         }
         print_app_marketing_settings[setting.key] = {
           id: setting.id,
-          value: value
+          value
         };
       });
 
