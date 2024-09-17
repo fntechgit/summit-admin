@@ -156,9 +156,7 @@ function EditSummitEventPage(props) {
     getEventFeedbackCSV,
     changeFlag,
     cloneEvent,
-    upgradeEvent,
-    fetchExtraQuestions,
-    fetchExtraQuestionsAnswers
+    upgradeEvent
   } = props;
 
   if (loading) return null;
@@ -266,7 +264,5 @@ export default connect(mapStateToProps, {
   getEventComments,
   deleteEventComment,
   cloneEvent,
-  upgradeEvent,
-  fetchExtraQuestions,
-  fetchExtraQuestionsAnswers
+  upgradeEvent
 })(EditSummitEventPage);

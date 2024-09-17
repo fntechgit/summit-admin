@@ -73,7 +73,9 @@
     "no-undef": "warn",
     "no-restricted-syntax": "warn",
     "guard-for-in": "warn",
-    "default-param-last": "warn"
+    "default-param-last": "warn",
+    "no-lone-blocks": "warn",
+    "no-unreachable": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }
