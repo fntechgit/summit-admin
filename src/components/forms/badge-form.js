@@ -269,11 +269,11 @@ class BadgeForm extends React.Component {
       (bt) => bt.id === entity.type_id
     );
     const badge_view_type_ddl = [
-      ...currBadgeType.allowed_view_types
-        .map((id) =>
-          currentSummit.badge_view_types.find((bvt) => bvt.id === id)
+      ...(currBadgeType.allowed_view_types
+        ?.map((id) =>
+          currentSummit.badge_view_types?.find((bvt) => bvt.id === id)
         )
-        .map((r) => ({ label: r.name, value: r.id }))
+        ?.map((r) => ({ label: r.name, value: r.id })) || {})
     ];
 
     const badge_print_columns = [
