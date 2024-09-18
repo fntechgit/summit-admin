@@ -76,7 +76,8 @@
     "no-undef": "warn",
     "no-restricted-syntax": "warn",
     "guard-for-in": "warn",
-    "prefer-destructuring": "warn"
+    "prefer-destructuring": "warn",
+    "react/function-component-definition": "off"
   },
   "ignorePatterns": ["src/__mocks__"]
 }

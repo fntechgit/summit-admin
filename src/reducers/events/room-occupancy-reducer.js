@@ -14,6 +14,8 @@
 import moment from "moment-timezone";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
+  EVENT_OVERFLOW_DELETED,
+  EVENT_OVERFLOW_UPDATED,
   RECEIVE_CURRENT_EVENT_FOR_OCCUPANCY,
   RECEIVE_EVENTS_FOR_OCCUPANCY,
   REQUEST_CURRENT_EVENT_FOR_OCCUPANCY,
@@ -79,7 +81,7 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
           ? e.speakers.map((s) => `${s.first_name} ${s.last_name}`).join(",")
           : "",
         track: e.track?.name || "N/A",
-        overflow_streamming_url: e.overflow_streamming_url,
+        overflow_streaming_url: e.overflow_streaming_url,
         overflow_stream_is_secure: e.overflow_stream_is_secure
       }));
 
@@ -140,6 +142,28 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
       }
 
       return { ...state, events: [...events], currentEvent };
+    }
+    case EVENT_OVERFLOW_DELETED:
+    case EVENT_OVERFLOW_UPDATED: {
+      const updatedEvent = payload.response;
+      const { events } = state;
+
+      const newEvents = events.map((ev) => {
+        if (ev.id === updatedEvent.id) {
+          return {
+            ...ev,
+            occupancy: updatedEvent.occupancy || "EMPTY",
+            overflow_stream_is_secure: updatedEvent.overflow_stream_is_secure,
+            overflow_streaming_url: updatedEvent.overflow_streaming_url
+          };
+        }
+
+        return ev;
+      });
+
+      console.log(updatedEvent, newEvents);
+
+      return { ...state, events: newEvents };
     }
     default:
       return state;

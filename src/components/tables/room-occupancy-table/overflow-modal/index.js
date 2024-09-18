@@ -1,15 +1,18 @@
 import { Modal } from "react-bootstrap";
 import T from "i18n-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 
-function OverflowModal({ room, show, onHide, onSave, onDelete }) {
-  const [streamUrl, setStreamUrl] = useState(
-    room?.overflow_streamming_url || ""
-  );
-  const [isSecure, setIsSecure] = useState(
-    room?.overflow_stream_is_secure || false
-  );
+function OverflowModal({ event, show, onHide, onSave, onDelete }) {
+  const [streamUrl, setStreamUrl] = useState("");
+  const [isSecure, setIsSecure] = useState(false);
+
+  useEffect(() => {
+    if (event) {
+      setIsSecure(event.overflow_stream_is_secure || false);
+      setStreamUrl(event.overflow_streaming_url || "");
+    }
+  }, [event]);
 
   return (
     <Modal show={show} onHide={onHide}>
@@ -46,14 +49,14 @@ function OverflowModal({ room, show, onHide, onSave, onDelete }) {
         </div>
       </Modal.Body>
       <Modal.Footer>
-        {room?.overflow_streamming_url && (
-          <button className="btn btn-danger" onClick={() => onDelete(room)}>
+        {event?.overflow_streaming_url && (
+          <button className="btn btn-danger" onClick={() => onDelete(event.id)}>
             {T.translate("general.remove")}
           </button>
         )}
         <button
           className="btn btn-primary"
-          onClick={() => onSave(room, isSecure, streamUrl)}
+          onClick={() => onSave(event.id, streamUrl, isSecure)}
         >
           {T.translate("general.save")}
         </button>
@@ -63,7 +66,7 @@ function OverflowModal({ room, show, onHide, onSave, onDelete }) {
 }
 
 OverflowModal.propTypes = {
-  room: PropTypes.object,
+  event: PropTypes.object,
   show: PropTypes.bool,
   onHide: PropTypes.func,
   onSave: PropTypes.func,

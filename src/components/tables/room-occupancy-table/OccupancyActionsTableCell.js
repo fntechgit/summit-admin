@@ -13,12 +13,12 @@ function OccupancyActionsTableCell({ row, actions, id, value }) {
   const moreDisable = value === "OVERFLOW";
 
   const state = () => {
-    if (value === "OVERFLOW" && actions.setOverflowStream) {
+    if (value === "OVERFLOW" && actions.onOverflow) {
       return (
         <button
           className="btn btn-danger"
           style={{ margin: "0 10px" }}
-          onClick={() => actions.setOverflowStream(row)}
+          onClick={() => actions.onOverflow(row)}
         >
           OVERFLOW
         </button>
@@ -29,8 +29,8 @@ function OccupancyActionsTableCell({ row, actions, id, value }) {
   };
 
   const handleMore = () => {
-    if (value === "FULL" && actions.setOverflowStream) {
-      actions.setOverflowStream(row);
+    if (value === "FULL" && actions.onOverflow) {
+      actions.onOverflow(row);
     } else {
       actions.onMore(id);
     }
@@ -40,7 +40,7 @@ function OccupancyActionsTableCell({ row, actions, id, value }) {
     <td className="actions" key="actions">
       <button
         className="btn btn-default"
-        onClick={actions.onLess.bind(this, id)}
+        onClick={() => actions.onLess(id)}
         disabled={lessDisable}
       >
         <i className="fa fa-minus" />
