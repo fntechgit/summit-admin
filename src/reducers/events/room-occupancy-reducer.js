@@ -161,8 +161,6 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
         return ev;
       });
 
-      console.log(updatedEvent, newEvents);
-
       return { ...state, events: newEvents };
     }
     default:

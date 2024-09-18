@@ -242,8 +242,6 @@ class RoomOccupancyPage extends React.Component {
       .filter((v) => v.class_name === "SummitVenueRoom")
       .map((r) => ({ label: r.name, value: r.id }));
 
-    console.log("PARENT: ", events);
-
     return (
       <div className="occupancyWrapper">
         <div className="container">
