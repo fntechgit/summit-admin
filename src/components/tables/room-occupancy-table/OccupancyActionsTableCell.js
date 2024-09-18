@@ -1,6 +1,6 @@
 import React from "react";
 
-function OccupancyActionsTableCell({ actions, id, value }) {
+function OccupancyActionsTableCell({ row, actions, id, value }) {
   const style = {
     marginLeft: "10px",
     marginRight: "10px",
@@ -18,7 +18,7 @@ function OccupancyActionsTableCell({ actions, id, value }) {
         <button
           className="btn btn-danger"
           style={{ margin: "0 10px" }}
-          onClick={actions.setOverflowStream}
+          onClick={() => actions.setOverflowStream(row)}
         >
           OVERFLOW
         </button>
@@ -26,6 +26,14 @@ function OccupancyActionsTableCell({ actions, id, value }) {
     }
 
     return <span style={style}>{value}</span>;
+  };
+
+  const handleMore = () => {
+    if (value === "FULL" && actions.setOverflowStream) {
+      actions.setOverflowStream(row);
+    } else {
+      actions.onMore(id);
+    }
   };
 
   return (
@@ -40,7 +48,7 @@ function OccupancyActionsTableCell({ actions, id, value }) {
       {state()}
       <button
         className="btn btn-default"
-        onClick={actions.onMore.bind(this, id)}
+        onClick={handleMore}
         disabled={moreDisable}
       >
         <i className="fa fa-plus" />

@@ -37,6 +37,19 @@ export const ADMIN_ACCESS_UPDATED = "ADMIN_ACCESS_UPDATED";
 export const ADMIN_ACCESS_ADDED = "ADMIN_ACCESS_ADDED";
 export const ADMIN_ACCESS_DELETED = "ADMIN_ACCESS_DELETED";
 
+const normalizeEntity = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.modified;
+
+  normalizedEntity.members = entity.members.map((m) => m.id);
+  normalizedEntity.summits = entity.summits.map((s) => s.id);
+
+  return normalizedEntity;
+};
+
 export const getAdminAccesses =
   (
     term = null,
@@ -45,7 +58,7 @@ export const getAdminAccesses =
     order = "id",
     orderDir = 1
   ) =>
-  async (dispatch, getState) => {
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 
@@ -88,7 +101,7 @@ export const getAdminAccesses =
     });
   };
 
-export const getAdminAccess = (adminAccessId) => async (dispatch, getState) => {
+export const getAdminAccess = (adminAccessId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -111,13 +124,13 @@ export const getAdminAccess = (adminAccessId) => async (dispatch, getState) => {
   });
 };
 
-export const resetAdminAccessForm = () => (dispatch, getState) => {
+export const resetAdminAccessForm = () => (dispatch) => {
   dispatch(createAction(RESET_ADMIN_ACCESS_FORM)({}));
 };
 
 export const saveAdminAccess =
   (entity, noAlert = false) =>
-  async (dispatch, getState) => {
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
@@ -133,13 +146,13 @@ export const saveAdminAccess =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         if (!noAlert)
           dispatch(showSuccessMessage(T.translate("admin_access.saved")));
         else dispatch(stopLoading());
       });
     } else {
-      const success_message = {
+      const successMessage = {
         title: T.translate("general.done"),
         html: T.translate("admin_access.created"),
         type: "success"
@@ -154,7 +167,7 @@ export const saveAdminAccess =
         entity
       )(params)(dispatch).then((payload) => {
         dispatch(
-          showMessage(success_message, () => {
+          showMessage(successMessage, () => {
             history.push(`/app/admin-access/${payload.response.id}`);
           })
         );
@@ -162,34 +175,20 @@ export const saveAdminAccess =
     }
   };
 
-export const deleteAdminAccess =
-  (adminAccessId) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+export const deleteAdminAccess = (adminAccessId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(ADMIN_ACCESS_DELETED)({ adminAccessId }),
-      `${window.API_BASE_URL}/api/v1/summit-administrator-groups/${adminAccessId}`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken
   };
 
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  delete normalizedEntity.id;
-  delete normalizedEntity.created;
-  delete normalizedEntity.modified;
-
-  normalizedEntity.members = entity.members.map((m) => m.id);
-  normalizedEntity.summits = entity.summits.map((s) => s.id);
-
-  return normalizedEntity;
+  return deleteRequest(
+    null,
+    createAction(ADMIN_ACCESS_DELETED)({ adminAccessId }),
+    `${window.API_BASE_URL}/api/v1/summit-administrator-groups/${adminAccessId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
 };

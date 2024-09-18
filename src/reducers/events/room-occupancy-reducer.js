@@ -9,9 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import moment from "moment-timezone";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_CURRENT_EVENT_FOR_OCCUPANCY,
   RECEIVE_EVENTS_FOR_OCCUPANCY,
@@ -21,7 +22,7 @@ import {
 } from "../../actions/event-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   events: [],
@@ -46,7 +47,8 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EVENTS_FOR_OCCUPANCY: {
-      let { order, orderDir, term, roomId, currentEvents, summitTZ } = payload;
+      const { order, orderDir, term, roomId, currentEvents, summitTZ } =
+        payload;
 
       return {
         ...state,
@@ -59,31 +61,31 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case REQUEST_CURRENT_EVENT_FOR_OCCUPANCY: {
-      let { summitTZ } = payload;
+      const { summitTZ } = payload;
 
       return { ...state, summitTZ };
     }
     case RECEIVE_EVENTS_FOR_OCCUPANCY: {
-      let { current_page, total, last_page } = payload.response;
-      let events = payload.response.data.map((e) => {
-        return {
-          id: e.id,
-          title: e.title,
-          start_date: moment(e.start_date * 1000)
-            .tz(state.summitTZ)
-            .format("ddd h:mm a"),
-          room: e.location ? e.location.name : "",
-          occupancy: e.occupancy || "EMPTY",
-          speakers: e.speakers
-            ? e.speakers.map((s) => s.first_name + " " + s.last_name).join(",")
-            : "",
-          track: e.track?.name || "N/A"
-        };
-      });
+      const { current_page, total, last_page } = payload.response;
+      const events = payload.response.data.map((e) => ({
+        id: e.id,
+        title: e.title,
+        start_date: moment(e.start_date * MILLISECONDS_TO_SECONDS)
+          .tz(state.summitTZ)
+          .format("ddd h:mm a"),
+        room: e.location ? e.location.name : "",
+        occupancy: e.occupancy || "EMPTY",
+        speakers: e.speakers
+          ? e.speakers.map((s) => `${s.first_name} ${s.last_name}`).join(",")
+          : "",
+        track: e.track?.name || "N/A",
+        overflow_streamming_url: e.overflow_streamming_url,
+        overflow_stream_is_secure: e.overflow_stream_is_secure
+      }));
 
       return {
         ...state,
-        events: events,
+        events,
         currentPage: current_page,
         totalEvents: total,
         lastPage: last_page
@@ -106,38 +108,38 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
         currentEvent = {
           id: payloadEvent.id,
           title: payloadEvent.title,
-          start_date: moment(payloadEvent.start_date * 1000)
+          start_date: moment(payloadEvent.start_date * MILLISECONDS_TO_SECONDS)
             .tz(state.summitTZ)
             .format("ddd h:mm a"),
-          end_date: moment(payloadEvent.end_date * 1000)
+          end_date: moment(payloadEvent.end_date * MILLISECONDS_TO_SECONDS)
             .tz(state.summitTZ)
             .format("ddd h:mm a"),
           room: payloadEvent.location ? payloadEvent.location.name : "",
           occupancy: payloadEvent.occupancy || "EMPTY",
           speakers: payloadEvent.speakers
             ? payloadEvent.speakers
-                .map((s) => s.first_name + " " + s.last_name)
+                .map((s) => `${s.first_name} ${s.last_name}`)
                 .join(",")
             : ""
         };
       }
 
-      return { ...state, currentEvent: currentEvent };
+      return { ...state, currentEvent };
     }
     case UPDATE_EVENT: {
-      let updatedEvent = payload;
-      let currentEvent = state.currentEvent;
+      const updatedEvent = payload;
+      let { currentEvent } = state;
 
-      let events = state.events.map((e) => {
+      const events = state.events.map((e) => {
         if (e.id === updatedEvent.id) return updatedEvent;
-        else return e;
+        return e;
       });
 
       if (currentEvent.id === updatedEvent.id) {
         currentEvent = { ...updatedEvent };
       }
 
-      return { ...state, events: [...events], currentEvent: currentEvent };
+      return { ...state, events: [...events], currentEvent };
     }
     default:
       return state;
