@@ -483,7 +483,9 @@ export const getTickets =
       per_page: perPage,
       access_token: accessToken,
       expand:
-        "owner,order,ticket_type,badge,badge.type,promo_code,promo_code.tags,refund_requests,refund_requests.refunded_taxes"
+        "owner,ticket_type,badge,badge.type,promo_code,promo_code.tags,refund_requests,refund_requests.refunded_taxes",
+      fields:
+        "owner.first_name,owner.last_name,owner.company,owner.email,badge.type.name,ticket_type.name,promo_code.code,promo_code.status"
     };
 
     const filter = parseFilters(filters, term);
