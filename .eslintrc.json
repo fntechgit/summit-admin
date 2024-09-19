@@ -46,7 +46,6 @@
     "no-prototype-builtins": "warn",
     "no-use-before-define": "warn",
     "radix": "warn",
-    "no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": [
       "warn",
@@ -59,6 +58,7 @@
     ],
     "no-restricted-globals": "warn",
     "jsx-a11y/label-has-associated-control": "warn",
+    "jsx-a11y/control-has-associated-label": "off",
     "react/jsx-no-bind": "warn",
     "jsx-a11y/anchor-is-valid": "warn",
     "eqeqeq": "warn",
@@ -75,7 +75,9 @@
     "consistent-return": "warn",
     "no-undef": "warn",
     "no-restricted-syntax": "warn",
-    "guard-for-in": "warn"
+    "guard-for-in": "warn",
+    "prefer-destructuring": "warn",
+    "react/function-component-definition": "off"
   },
   "ignorePatterns": ["src/__mocks__"]
 }

@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -23,7 +23,9 @@ import { getSummitById } from "../../actions/summit-actions";
 import {
   getEventsForOccupancy,
   getEventsForOccupancyCSV,
-  saveOccupancy
+  saveOccupancy,
+  deleteOverflowOccupancy,
+  saveOverflowOccupancy
 } from "../../actions/event-actions";
 import OccupancyTable from "../../components/tables/room-occupancy-table/OccupancyTable";
 import FragmentParser from "../../utils/fragmen-parser";
@@ -46,15 +48,15 @@ class RoomOccupancyPage extends React.Component {
 
   componentDidMount() {
     const { currentSummit } = this.props;
-    let roomIdHash = this.fragmentParser.getParam("room");
-    let currentHash = this.fragmentParser.getParam("current") === "true";
+    const roomIdHash = this.fragmentParser.getParam("room");
+    const currentHash = this.fragmentParser.getParam("current") === "true";
 
     if (currentSummit) {
       this.props.getEventsForOccupancy(null, roomIdHash, currentHash);
     }
   }
 
-  handleExport(ev) {
+  handleExport() {
     const { term, order, orderDir, roomId, currentEvents } = this.props;
     this.props.getEventsForOccupancyCSV(
       term,
@@ -79,7 +81,7 @@ class RoomOccupancyPage extends React.Component {
     );
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage, roomId, currentEvents } = this.props;
     key = key === "name" ? "last_name" : key;
     this.props.getEventsForOccupancy(
@@ -109,7 +111,7 @@ class RoomOccupancyPage extends React.Component {
 
   handleRoomFilter(ev) {
     const { term, order, orderDir, page, perPage, currentEvents } = this.props;
-    let roomId = ev.target.value;
+    const roomId = ev.target.value;
 
     this.fragmentParser.setParam("room", roomId);
     window.location.hash = this.fragmentParser.serialize();
@@ -127,7 +129,7 @@ class RoomOccupancyPage extends React.Component {
 
   handleChangeCurrentEvents(ev) {
     const { term, roomId, order, orderDir, page, perPage } = this.props;
-    let value = ev.target.checked;
+    const value = ev.target.checked;
 
     this.fragmentParser.setParam("current", value);
     window.location.hash = this.fragmentParser.serialize();
@@ -143,25 +145,35 @@ class RoomOccupancyPage extends React.Component {
     );
   }
 
-  changeOccupancy(eventId, add, ev) {
-    let values = ["EMPTY", "25%", "50%", "75%", "FULL", "OVERFLOW"];
+  changeOccupancy(eventId, add) {
+    const values = ["EMPTY", "25%", "50%", "75%", "FULL", "OVERFLOW"];
     const { events } = this.props;
-    let event = events.find((e) => e.id === eventId);
+    const event = events.find((e) => e.id === eventId);
 
-    let key = values.indexOf(event.occupancy);
-
-    ev.preventDefault();
+    const key = values.indexOf(event.occupancy);
 
     if (add) {
       if (event.occupancy === "OVERFLOW") return;
       event.occupancy = values[key + 1];
     } else {
       if (event.occupancy === "EMPTY") return;
+      if (event.occupancy === "OVERFLOW") {
+        // if it was in overflow we delete overflow and set new occupancy
+        this.deleteOverflow(event.id, values[key - 1]);
+      }
       event.occupancy = values[key - 1];
     }
 
     this.props.saveOccupancy(event);
   }
+
+  saveOverflow = (eventId, streamUrl, isSecure) => {
+    this.props.saveOverflowOccupancy(eventId, streamUrl, isSecure);
+  };
+
+  deleteOverflow = (eventId, newOccupancy) => {
+    this.props.deleteOverflowOccupancy(eventId, newOccupancy);
+  };
 
   handleEventViewClick(ev) {
     const { roomId, history, currentSummit } = this.props;
@@ -183,7 +195,7 @@ class RoomOccupancyPage extends React.Component {
       roomId,
       currentEvents
     } = this.props;
-    let that = this;
+    const that = this;
 
     const columns = [
       { columnKey: "room", value: T.translate("room_occupancy.room") },
@@ -215,22 +227,20 @@ class RoomOccupancyPage extends React.Component {
       sortDir: orderDir,
       actions: {
         valueRow: "occupancy",
-        onMore: function (eventId, ev) {
-          that.changeOccupancy(eventId, true, ev);
+        onMore(eventId) {
+          that.changeOccupancy(eventId, true);
         },
-        onLess: function (eventId, ev) {
-          that.changeOccupancy(eventId, false, ev);
+        onLess(eventId) {
+          that.changeOccupancy(eventId, false);
         }
       }
     };
 
     if (!currentSummit.id) return <div />;
 
-    let room_ddl = currentSummit.locations
+    const room_ddl = currentSummit.locations
       .filter((v) => v.class_name === "SummitVenueRoom")
-      .map((r) => {
-        return { label: r.name, value: r.id };
-      });
+      .map((r) => ({ label: r.name, value: r.id }));
 
     return (
       <div className="occupancyWrapper">
@@ -304,6 +314,8 @@ class RoomOccupancyPage extends React.Component {
                 data={events}
                 columns={columns}
                 onSort={this.handleSort}
+                onSaveOverflow={this.saveOverflow}
+                onDeleteOverflow={this.deleteOverflow}
               />
               <Pagination
                 bsSize="medium"
@@ -338,5 +350,7 @@ export default connect(mapStateToProps, {
   getSummitById,
   getEventsForOccupancy,
   saveOccupancy,
+  deleteOverflowOccupancy,
+  saveOverflowOccupancy,
   getEventsForOccupancyCSV
 })(RoomOccupancyPage);
