@@ -1,11 +1,10 @@
 import React from "react";
 
-function OccupancyActionsTableCell(props) {
-  const { actions, id, value } = props;
+function OccupancyActionsTableCell({ row, actions, id, value }) {
   const style = {
     marginLeft: "10px",
     marginRight: "10px",
-    width: "90px",
+    width: "103px",
     display: "inline-block",
     textAlign: "center"
   };
@@ -13,22 +12,44 @@ function OccupancyActionsTableCell(props) {
   const lessDisable = value === "EMPTY";
   const moreDisable = value === "OVERFLOW";
 
+  const state = () => {
+    if (value === "OVERFLOW" && actions.onOverflow) {
+      return (
+        <button
+          className="btn btn-danger"
+          style={{ margin: "0 10px" }}
+          onClick={() => actions.onOverflow(row)}
+        >
+          OVERFLOW
+        </button>
+      );
+    }
+
+    return <span style={style}>{value}</span>;
+  };
+
+  const handleMore = () => {
+    if (value === "FULL" && actions.onOverflow) {
+      actions.onOverflow(row);
+    } else {
+      actions.onMore(id);
+    }
+  };
+
   return (
     <td className="actions" key="actions">
       <button
         className="btn btn-default"
-        onClick={actions.onLess.bind(this, id)}
+        onClick={() => actions.onLess(id)}
         disabled={lessDisable}
-        aria-label="lessDisable"
       >
         <i className="fa fa-minus" />
       </button>
-      <span style={style}>{value}</span>
+      {state()}
       <button
         className="btn btn-default"
-        onClick={actions.onMore.bind(this, id)}
+        onClick={handleMore}
         disabled={moreDisable}
-        aria-label="moreDisable"
       >
         <i className="fa fa-plus" />
       </button>

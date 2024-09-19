@@ -14,6 +14,8 @@
 import moment from "moment-timezone";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
+  EVENT_OVERFLOW_DELETED,
+  EVENT_OVERFLOW_UPDATED,
   RECEIVE_CURRENT_EVENT_FOR_OCCUPANCY,
   RECEIVE_EVENTS_FOR_OCCUPANCY,
   REQUEST_CURRENT_EVENT_FOR_OCCUPANCY,
@@ -22,7 +24,7 @@ import {
 } from "../../actions/event-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { THOUSAND } from "../../utils/constants";
+import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   events: [],
@@ -70,7 +72,7 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
       const events = payload.response.data.map((e) => ({
         id: e.id,
         title: e.title,
-        start_date: moment(e.start_date * THOUSAND)
+        start_date: moment(e.start_date * MILLISECONDS_TO_SECONDS)
           .tz(state.summitTZ)
           .format("ddd h:mm a"),
         room: e.location ? e.location.name : "",
@@ -78,7 +80,9 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
         speakers: e.speakers
           ? e.speakers.map((s) => `${s.first_name} ${s.last_name}`).join(",")
           : "",
-        track: e.track?.name || "N/A"
+        track: e.track?.name || "N/A",
+        overflow_streaming_url: e.overflow_streaming_url,
+        overflow_stream_is_secure: e.overflow_stream_is_secure
       }));
 
       return {
@@ -108,10 +112,10 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
         currentEvent = {
           id: payloadEvent.id,
           title: payloadEvent.title,
-          start_date: moment(payloadEvent.start_date * THOUSAND)
+          start_date: moment(payloadEvent.start_date * MILLISECONDS_TO_SECONDS)
             .tz(state.summitTZ)
             .format("ddd h:mm a"),
-          end_date: moment(payloadEvent.end_date * THOUSAND)
+          end_date: moment(payloadEvent.end_date * MILLISECONDS_TO_SECONDS)
             .tz(state.summitTZ)
             .format("ddd h:mm a"),
           room: payloadEvent.location ? payloadEvent.location.name : "",
@@ -140,6 +144,26 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
       }
 
       return { ...state, events: [...events], currentEvent };
+    }
+    case EVENT_OVERFLOW_DELETED:
+    case EVENT_OVERFLOW_UPDATED: {
+      const updatedEvent = payload.response;
+      const { events } = state;
+
+      const newEvents = events.map((ev) => {
+        if (ev.id === updatedEvent.id) {
+          return {
+            ...ev,
+            occupancy: updatedEvent.occupancy || "EMPTY",
+            overflow_stream_is_secure: updatedEvent.overflow_stream_is_secure,
+            overflow_streaming_url: updatedEvent.overflow_streaming_url
+          };
+        }
+
+        return ev;
+      });
+
+      return { ...state, events: newEvents };
     }
     default:
       return state;

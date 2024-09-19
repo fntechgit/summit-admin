@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import PropTypes from "prop-types";
 import OccupancyTableHeading from "./OccupancyTableHeading";
 import OccupancyTableCell from "./OccupancyTableCell";
 import OccupancyTableRow from "./OccupancyTableRow";
@@ -6,6 +7,7 @@ import OccupancyActionsTableCell from "./OccupancyActionsTableCell";
 import { TWO } from "../../../utils/constants";
 
 import "./occupancy-table.css";
+import OverflowModal from "./overflow-modal";
 
 const defaults = {
   sortFunc: (a, b) => (a < b ? -1 : a > b ? 1 : 0),
@@ -16,12 +18,14 @@ const defaults = {
 };
 
 const createRow = (row, columns, actions) => {
-  const action_buttons = "";
-  const cells = columns.map((col, i) => {
+  const cells = columns.map((col) => {
     const colClass = col.hasOwnProperty("className") ? col.className : "";
 
     return (
-      <OccupancyTableCell key={`cell_${row + i}`} className={colClass}>
+      <OccupancyTableCell
+        key={`cell_${col.columnKey}_${row.id}`}
+        className={colClass}
+      >
         {row[col.columnKey]}
       </OccupancyTableCell>
     );
@@ -30,10 +34,11 @@ const createRow = (row, columns, actions) => {
   if (actions) {
     cells.push(
       <OccupancyActionsTableCell
-        key="actions_cell"
+        key={`actions_cell_${row.id}`}
         id={row.id}
         value={row[actions.valueRow]}
         actions={actions}
+        row={row}
       />
     );
   }
@@ -51,8 +56,28 @@ const getSortDir = (columnKey, columnIndex, sortCol, sortDir) => {
   return null;
 };
 
-function OccupancyTable(props) {
-  const { options, columns } = props;
+const OccupancyTable = ({
+  options,
+  columns,
+  data,
+  onSort,
+  onSaveOverflow,
+  onDeleteOverflow
+}) => {
+  const [overflowEvent, setOverflowEvent] = useState(null);
+  const sortCol = options?.sortCol || defaults.sortCol;
+  const sortDir = options?.sortDir || defaults.sortDir;
+  const sortFunc = options?.sortFunc || defaults.sortFunc;
+
+  const handleSaveOverflow = (eventId, streamUrl, isSecure) => {
+    onSaveOverflow(eventId, streamUrl, isSecure);
+    setOverflowEvent(null);
+  };
+
+  const handleDeleteOverflow = (eventId) => {
+    onDeleteOverflow(eventId);
+    setOverflowEvent(null);
+  };
 
   return (
     <div className="occupancyTableWrapper">
@@ -60,36 +85,21 @@ function OccupancyTable(props) {
         <thead>
           <tr>
             {columns.map((col, i) => {
-              const sortCol = options.hasOwnProperty("sortCol")
-                ? options.sortCol
-                : defaults.sortCol;
-              const sortDir = options.hasOwnProperty("sortDir")
-                ? options.sortDir
-                : defaults.sortDir;
-              const sortFunc = options.hasOwnProperty("sortFunc")
-                ? options.sortFunc
-                : defaults.sortFunc;
-              const sortable = col.hasOwnProperty("sortable")
-                ? col.sortable
-                : defaults.sortable;
-              const colWidth = col.hasOwnProperty("width")
-                ? col.width
-                : defaults.colWidth;
-              const colClass = col.hasOwnProperty("className")
-                ? col.className
-                : "";
+              const sortable = col?.sortable || defaults.sortable;
+              const colWidth = col?.width || defaults.colWidth;
+              const colClass = col?.className || "";
 
               return (
                 <OccupancyTableHeading
                   className={colClass}
-                  onSort={props.onSort}
+                  onSort={onSort}
                   sortDir={getSortDir(col.columnKey, i, sortCol, sortDir)}
                   sortable={sortable}
                   sortFunc={sortFunc}
                   columnIndex={i}
                   columnKey={col.columnKey}
                   width={colWidth}
-                  key={`heading_${row + i}`}
+                  key={`heading_${col.columnKey}`}
                 >
                   {col.value}
                 </OccupancyTableHeading>
@@ -104,24 +114,43 @@ function OccupancyTable(props) {
         </thead>
         <tbody>
           {columns.length > 0 &&
-            props.data.map((row, i) => {
+            data.map((row, i) => {
               if (Array.isArray(row) && row.length !== columns.length) {
                 console.warn(
                   `Data at row ${i} is ${row.length}. It should be ${columns.length}.`
                 );
-                return <tr key={`row_${row + i}`} />;
+                return <tr key={`row_${row.id}`} />;
               }
 
               return (
-                <OccupancyTableRow even={i % TWO === 0} key={`row_${row + i}`}>
-                  {createRow(row, columns, options.actions)}
+                <OccupancyTableRow even={i % TWO === 0} key={`row_${row.id}`}>
+                  {createRow(row, columns, {
+                    ...options.actions,
+                    onOverflow: setOverflowEvent
+                  })}
                 </OccupancyTableRow>
               );
             })}
         </tbody>
       </table>
+      <OverflowModal
+        event={overflowEvent}
+        show={!!overflowEvent}
+        onHide={() => setOverflowEvent(null)}
+        onSave={handleSaveOverflow}
+        onDelete={handleDeleteOverflow}
+      />
     </div>
   );
-}
+};
+
+OccupancyTable.propTypes = {
+  options: PropTypes.object,
+  columns: PropTypes.array,
+  data: PropTypes.array,
+  onSort: PropTypes.func,
+  onSaveOverflow: PropTypes.func,
+  onDeleteOverflow: PropTypes.func
+};
 
 export default OccupancyTable;

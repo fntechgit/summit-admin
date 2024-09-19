@@ -67,6 +67,8 @@ export const EVENT_UPDATED = "EVENT_UPDATED";
 export const EVENT_ADDED = "EVENT_ADDED";
 export const EVENT_PUBLISHED = "EVENT_PUBLISHED";
 export const EVENT_DELETED = "EVENT_DELETED";
+export const EVENT_OVERFLOW_UPDATED = "EVENT_OVERFLOW_UPDATED";
+export const EVENT_OVERFLOW_DELETED = "EVENT_OVERFLOW_DELETED";
 export const EVENT_CLONED = "EVENT_CLONED";
 export const FILE_ATTACHED = "FILE_ATTACHED";
 export const IMAGE_ATTACHED = "IMAGE_ATTACHED";
@@ -810,6 +812,71 @@ export const getCurrentEventForOccupancy =
     });
   };
 
+export const saveOccupancy = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  putRequest(
+    createAction(UPDATE_EVENT),
+    createAction(EVENT_UPDATED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}`,
+    { id: entity.id, occupancy: entity.occupancy },
+    authErrorHandler,
+    entity
+  )(params)(dispatch);
+};
+
+export const saveOverflowOccupancy =
+  (eventId, streamUrl, isSecure) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = {
+      access_token: accessToken
+    };
+
+    const payload = {
+      overflow_streaming_url: streamUrl,
+      overflow_stream_is_secure: isSecure
+    };
+
+    putRequest(
+      null,
+      createAction(EVENT_OVERFLOW_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/overflow`,
+      payload,
+      authErrorHandler
+    )(params)(dispatch);
+  };
+
+export const deleteOverflowOccupancy =
+  (eventId, newOccupancy = "EMPTY") =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return deleteRequest(
+      null,
+      createAction(EVENT_OVERFLOW_DELETED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/overflow`,
+      { occupancy: newOccupancy },
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
 export const getActionTypes =
   (selectionPlanId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -1115,25 +1182,6 @@ export const cloneEvent = (entity) => async (dispatch, getState) => {
   });
 };
 
-export const saveOccupancy = (entity) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-
-  const params = {
-    access_token: accessToken
-  };
-
-  putRequest(
-    createAction(UPDATE_EVENT),
-    createAction(EVENT_UPDATED),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}`,
-    { id: entity.id, occupancy: entity.occupancy },
-    authErrorHandler,
-    entity
-  )(params)(dispatch);
-};
-
 export const checkProximityEvents =
   (event, showSuccessMessage = true, cb = null) =>
   async (dispatch, getState) => {
@@ -1197,7 +1245,7 @@ export const checkProximityEvents =
           "edit_event.proximity_alert"
         )}</strong><br/>`;
 
-        Object.entries(proximity_events).forEach(([key, prox_event]) => {
+        Object.values(proximity_events).forEach((prox_event) => {
           const event_date = epochToMomentTimeZone(
             prox_event.start_date,
             currentSummit.time_zone_id
@@ -1244,27 +1292,6 @@ export const attachFile =
       dispatch(uploadFile(payload.response, file));
     });
   };
-
-const uploadFile = (entity, file) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-
-  const params = {
-    access_token: accessToken
-  };
-
-  postRequest(
-    null,
-    createAction(FILE_ATTACHED),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}/attachment`,
-    file,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    history.push(`/app/summits/${currentSummit.id}/events/${entity.id}`);
-    dispatch(stopLoading());
-  });
-};
 
 const uploadImage = (entity, file) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
