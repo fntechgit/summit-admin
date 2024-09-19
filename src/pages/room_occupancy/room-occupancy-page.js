@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -46,8 +46,8 @@ class RoomOccupancyPage extends React.Component {
 
   componentDidMount() {
     const { currentSummit } = this.props;
-    let roomIdHash = this.fragmentParser.getParam("room");
-    let currentHash = this.fragmentParser.getParam("current") === "true";
+    const roomIdHash = this.fragmentParser.getParam("room");
+    const currentHash = this.fragmentParser.getParam("current") === "true";
 
     if (currentSummit) {
       this.props.getEventsForOccupancy(null, roomIdHash, currentHash);
@@ -109,7 +109,7 @@ class RoomOccupancyPage extends React.Component {
 
   handleRoomFilter(ev) {
     const { term, order, orderDir, page, perPage, currentEvents } = this.props;
-    let roomId = ev.target.value;
+    const roomId = ev.target.value;
 
     this.fragmentParser.setParam("room", roomId);
     window.location.hash = this.fragmentParser.serialize();
@@ -127,7 +127,7 @@ class RoomOccupancyPage extends React.Component {
 
   handleChangeCurrentEvents(ev) {
     const { term, roomId, order, orderDir, page, perPage } = this.props;
-    let value = ev.target.checked;
+    const value = ev.target.checked;
 
     this.fragmentParser.setParam("current", value);
     window.location.hash = this.fragmentParser.serialize();
@@ -144,11 +144,11 @@ class RoomOccupancyPage extends React.Component {
   }
 
   changeOccupancy(eventId, add, ev) {
-    let values = ["EMPTY", "25%", "50%", "75%", "FULL", "OVERFLOW"];
+    const values = ["EMPTY", "25%", "50%", "75%", "FULL", "OVERFLOW"];
     const { events } = this.props;
-    let event = events.find((e) => e.id === eventId);
+    const event = events.find((e) => e.id === eventId);
 
-    let key = values.indexOf(event.occupancy);
+    const key = values.indexOf(event.occupancy);
 
     ev.preventDefault();
 
@@ -183,7 +183,7 @@ class RoomOccupancyPage extends React.Component {
       roomId,
       currentEvents
     } = this.props;
-    let that = this;
+    const that = this;
 
     const columns = [
       { columnKey: "room", value: T.translate("room_occupancy.room") },
@@ -215,10 +215,10 @@ class RoomOccupancyPage extends React.Component {
       sortDir: orderDir,
       actions: {
         valueRow: "occupancy",
-        onMore: function (eventId, ev) {
+        onMore(eventId, ev) {
           that.changeOccupancy(eventId, true, ev);
         },
-        onLess: function (eventId, ev) {
+        onLess(eventId, ev) {
           that.changeOccupancy(eventId, false, ev);
         }
       }
@@ -226,11 +226,9 @@ class RoomOccupancyPage extends React.Component {
 
     if (!currentSummit.id) return <div />;
 
-    let room_ddl = currentSummit.locations
+    const room_ddl = currentSummit.locations
       .filter((v) => v.class_name === "SummitVenueRoom")
-      .map((r) => {
-        return { label: r.name, value: r.id };
-      });
+      .map((r) => ({ label: r.name, value: r.id }));
 
     return (
       <div className="occupancyWrapper">

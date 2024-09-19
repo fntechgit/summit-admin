@@ -3,6 +3,7 @@ import OccupancyTableHeading from "./OccupancyTableHeading";
 import OccupancyTableCell from "./OccupancyTableCell";
 import OccupancyTableRow from "./OccupancyTableRow";
 import OccupancyActionsTableCell from "./OccupancyActionsTableCell";
+import { TWO } from "../../../utils/constants";
 
 import "./occupancy-table.css";
 
@@ -15,12 +16,12 @@ const defaults = {
 };
 
 const createRow = (row, columns, actions) => {
-  var action_buttons = "";
-  var cells = columns.map((col, i) => {
-    let colClass = col.hasOwnProperty("className") ? col.className : "";
+  const action_buttons = "";
+  const cells = columns.map((col, i) => {
+    const colClass = col.hasOwnProperty("className") ? col.className : "";
 
     return (
-      <OccupancyTableCell key={"cell_" + i} className={colClass}>
+      <OccupancyTableCell key={`cell_${row + i}`} className={colClass}>
         {row[col.columnKey]}
       </OccupancyTableCell>
     );
@@ -30,7 +31,7 @@ const createRow = (row, columns, actions) => {
     cells.push(
       <OccupancyActionsTableCell
         key="actions_cell"
-        id={row["id"]}
+        id={row.id}
         value={row[actions.valueRow]}
         actions={actions}
       />
@@ -50,31 +51,31 @@ const getSortDir = (columnKey, columnIndex, sortCol, sortDir) => {
   return null;
 };
 
-const OccupancyTable = (props) => {
-  let { options, columns } = props;
+function OccupancyTable(props) {
+  const { options, columns } = props;
 
   return (
     <div className="occupancyTableWrapper">
-      <table className={"table table-striped table-hover occupancyTable"}>
+      <table className="table table-striped table-hover occupancyTable">
         <thead>
           <tr>
             {columns.map((col, i) => {
-              let sortCol = options.hasOwnProperty("sortCol")
+              const sortCol = options.hasOwnProperty("sortCol")
                 ? options.sortCol
                 : defaults.sortCol;
-              let sortDir = options.hasOwnProperty("sortDir")
+              const sortDir = options.hasOwnProperty("sortDir")
                 ? options.sortDir
                 : defaults.sortDir;
-              let sortFunc = options.hasOwnProperty("sortFunc")
+              const sortFunc = options.hasOwnProperty("sortFunc")
                 ? options.sortFunc
                 : defaults.sortFunc;
-              let sortable = col.hasOwnProperty("sortable")
+              const sortable = col.hasOwnProperty("sortable")
                 ? col.sortable
                 : defaults.sortable;
-              let colWidth = col.hasOwnProperty("width")
+              const colWidth = col.hasOwnProperty("width")
                 ? col.width
                 : defaults.colWidth;
-              let colClass = col.hasOwnProperty("className")
+              const colClass = col.hasOwnProperty("className")
                 ? col.className
                 : "";
 
@@ -88,7 +89,7 @@ const OccupancyTable = (props) => {
                   columnIndex={i}
                   columnKey={col.columnKey}
                   width={colWidth}
-                  key={"heading_" + i}
+                  key={`heading_${row + i}`}
                 >
                   {col.value}
                 </OccupancyTableHeading>
@@ -108,11 +109,11 @@ const OccupancyTable = (props) => {
                 console.warn(
                   `Data at row ${i} is ${row.length}. It should be ${columns.length}.`
                 );
-                return <tr key={"row_" + i} />;
+                return <tr key={`row_${row + i}`} />;
               }
 
               return (
-                <OccupancyTableRow even={i % 2 === 0} key={"row_" + i}>
+                <OccupancyTableRow even={i % TWO === 0} key={`row_${row + i}`}>
                   {createRow(row, columns, options.actions)}
                 </OccupancyTableRow>
               );
@@ -121,6 +122,6 @@ const OccupancyTable = (props) => {
       </table>
     </div>
   );
-};
+}
 
 export default OccupancyTable;
