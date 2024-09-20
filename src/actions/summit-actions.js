@@ -174,11 +174,6 @@ export const saveSummit = (entity) => async (dispatch) => {
       return payload;
     });
   }
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_summit.summit_created"),
-    type: "success"
-  };
 
   return postRequest(
     createAction(UPDATE_SUMMIT),
