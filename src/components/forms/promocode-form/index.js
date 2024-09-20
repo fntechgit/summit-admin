@@ -270,6 +270,7 @@ class PromocodeForm extends React.Component {
               options={promocode_class_ddl}
               onChange={this.handleClassChange}
               disabled={entity.id !== 0}
+              error={this.hasErrors("class_name")}
             />
           </div>
           {promocode_types_ddl.length > 0 && (
@@ -287,6 +288,7 @@ class PromocodeForm extends React.Component {
                 options={promocode_types_ddl}
                 onChange={this.handleChange}
                 disabled={entity.id !== 0}
+                error={this.hasErrors("type")}
               />
             </div>
           )}
