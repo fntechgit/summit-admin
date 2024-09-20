@@ -80,10 +80,9 @@ class EditSummitPage extends React.Component {
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        `${T.translate("edit_summit.remove_reg_feed_metadata_warning") 
-        } ${ 
-        feedMetadata.key}`,
+      text: `${T.translate("edit_summit.remove_reg_feed_metadata_warning")} ${
+        feedMetadata.key
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -104,8 +103,9 @@ class EditSummitPage extends React.Component {
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        `${T.translate("edit_summit.remove_sp_warning")  } ${  selectionPlan.name}`,
+      text: `${T.translate("edit_summit.remove_sp_warning")} ${
+        selectionPlan.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -126,10 +126,9 @@ class EditSummitPage extends React.Component {
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        `${T.translate("room_bookings.delete_booking_attribute_warning") 
-        } ${ 
-        roomBookingType.type}`,
+      text: `${T.translate("room_bookings.delete_booking_attribute_warning")} ${
+        roomBookingType.type
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",

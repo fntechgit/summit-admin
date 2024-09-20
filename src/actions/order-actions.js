@@ -155,7 +155,6 @@ export const getMainOrderExtraQuestions = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-  const perPage = 100;
 
   dispatch(startLoading());
 
@@ -669,7 +668,7 @@ export const addTicketsToOrder =
       .then(() => {
         dispatch(stopLoading());
       })
-      .catch((_) => dispatch(stopLoading()));
+      .catch(() => dispatch(stopLoading()));
   };
 
 export const deletePurchaseOrder = (orderId) => async (dispatch, getState) => {

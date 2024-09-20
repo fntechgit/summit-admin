@@ -99,7 +99,7 @@ class SummitIdLayout extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.summit_id;
     const newId = this.props.match.params.summit_id;
 
