@@ -78,7 +78,7 @@ export const formatEventData = (e, summit) => {
       : "N/A",
     speakers:
       Array.isArray(e.speakers) && e.speakers.length > 0
-        ? e.speakers.map((s) => `${s.first_name} ${s.last_name}`).join(",")
+        ? e.speakers.map((s) => `${s.first_name} ${s.last_name}`).join(", ")
         : "N/A",
     speaker_company:
       speakers_companies.length > 0
