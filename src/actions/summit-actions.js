@@ -27,7 +27,8 @@ import history from "../history";
 import {
   DEFAULT_CURRENT_PAGE,
   DUMMY_ACTION,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  ERROR_CODE_404
 } from "../utils/constants";
 import { getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";

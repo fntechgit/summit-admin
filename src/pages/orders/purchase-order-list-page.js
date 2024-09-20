@@ -70,6 +70,7 @@ class PurchaseOrderListPage extends React.Component {
   componentDidMount() {
     const { currentSummit, term, order, orderDir, filters, getPurchaseOrders } =
       this.props;
+
     if (currentSummit) {
       const { purchaseOrderFilters } = this.state;
       const enabledFilters = Object.keys(filters).filter((e) =>

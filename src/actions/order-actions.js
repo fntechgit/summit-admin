@@ -517,7 +517,9 @@ export const getPurchaseOrders =
     dispatch(startLoading());
 
     const params = {
-      expand: "tickets",
+      expand: "",
+      fields:
+        "id,created,number,owner_id,owner_first_name,owner_last_name,owner_email,owner_company,currency_symbol,amount,payment_method,status",
       page,
       per_page: perPage,
       access_token: accessToken

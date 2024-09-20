@@ -78,6 +78,13 @@ import {
 import { getRegFeedMetadataBySummit } from "../actions/reg-feed-metadata-actions";
 
 class SummitIdLayout extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      isLoading: true
+    };
+  }
+
   componentDidMount() {
     const summitId = this.props.match.params.summit_id;
 
@@ -85,10 +92,9 @@ class SummitIdLayout extends React.Component {
       this.props.resetSummitForm();
     } else {
       this.props.getSummitById(summitId).then(() => {
-        this.props.getMarketingSettingsForRegLite();
-        this.props.getMarketingSettingsForPrintApp();
-        this.props.getUserRolesBySummit();
-        this.props.getRegFeedMetadataBySummit();
+        this.props.getUserRolesBySummit().then(() => {
+          this.setState({ isLoading: false });
+        });
       });
     }
   }
@@ -108,12 +114,18 @@ class SummitIdLayout extends React.Component {
 
   render() {
     const { match, currentSummit, loading } = this.props;
+    const { isLoading } = this.state;
     const summitId = this.props.match.params.summit_id;
     const breadcrumb = currentSummit.id
       ? currentSummit.name
       : T.translate("general.new_summit");
 
-    if (!currentSummit.id || parseInt(summitId) !== currentSummit.id || loading)
+    if (
+      !currentSummit.id ||
+      parseInt(summitId) !== currentSummit.id ||
+      loading ||
+      isLoading
+    )
       return <div />;
 
     return (
