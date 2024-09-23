@@ -155,7 +155,6 @@ export const getMainOrderExtraQuestions = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-  const perPage = 100;
 
   dispatch(startLoading());
 
@@ -517,7 +516,9 @@ export const getPurchaseOrders =
     dispatch(startLoading());
 
     const params = {
-      expand: "tickets",
+      expand: "",
+      fields:
+        "id,created,number,owner_id,owner_first_name,owner_last_name,owner_email,owner_company,currency_symbol,amount,payment_method,status",
       page,
       per_page: perPage,
       access_token: accessToken
@@ -667,7 +668,7 @@ export const addTicketsToOrder =
       .then(() => {
         dispatch(stopLoading());
       })
-      .catch((_) => dispatch(stopLoading()));
+      .catch(() => dispatch(stopLoading()));
   };
 
 export const deletePurchaseOrder = (orderId) => async (dispatch, getState) => {

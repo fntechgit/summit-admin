@@ -70,6 +70,7 @@ class PurchaseOrderListPage extends React.Component {
   componentDidMount() {
     const { currentSummit, term, order, orderDir, filters, getPurchaseOrders } =
       this.props;
+
     if (currentSummit) {
       const { purchaseOrderFilters } = this.state;
       const enabledFilters = Object.keys(filters).filter((e) =>
@@ -115,7 +116,7 @@ class PurchaseOrderListPage extends React.Component {
     getPurchaseOrders(term, page, perPage, order, orderDir, filters);
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage, filters, getPurchaseOrders } = this.props;
     if (key === "name") key = "last_name";
     if (key === "company") key = "owner_company";
@@ -127,7 +128,7 @@ class PurchaseOrderListPage extends React.Component {
     getPurchaseOrders(term, page, perPage, order, orderDir);
   }
 
-  handleNewOrder(ev) {
+  handleNewOrder() {
     const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/purchase-orders/new`);
   }

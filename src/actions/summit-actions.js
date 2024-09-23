@@ -27,7 +27,8 @@ import history from "../history";
 import {
   DEFAULT_CURRENT_PAGE,
   DUMMY_ACTION,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  ERROR_CODE_404
 } from "../utils/constants";
 import { getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
@@ -51,7 +52,7 @@ export const RECEIVE_LEAD_REPORT_SETTINGS_META =
   "RECEIVE_LEAD_REPORT_SETTINGS_META";
 export const LEAD_REPORT_SETTINGS_UPDATED = "LEAD_REPORT_SETTINGS_UPDATED";
 
-export const getSummitById = (summitId) => async (dispatch, getState) => {
+export const getSummitById = (summitId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
   dispatch(startLoading());
 
@@ -93,7 +94,7 @@ export const getSummitById = (summitId) => async (dispatch, getState) => {
   });
 };
 
-export const setCurrentSummit = (summit) => async (dispatch, getState) => {
+export const setCurrentSummit = (summit) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   if (summit) {
@@ -145,11 +146,11 @@ export const loadSummits =
     });
   };
 
-export const resetSummitForm = () => (dispatch, getState) => {
+export const resetSummitForm = () => (dispatch) => {
   dispatch(createAction(RESET_SUMMIT_FORM)({}));
 };
 
-export const saveSummit = (entity) => async (dispatch, getState) => {
+export const saveSummit = (entity) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -173,11 +174,6 @@ export const saveSummit = (entity) => async (dispatch, getState) => {
       return payload;
     });
   }
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_summit.summit_created"),
-    type: "success"
-  };
 
   return postRequest(
     createAction(UPDATE_SUMMIT),
@@ -192,7 +188,7 @@ export const saveSummit = (entity) => async (dispatch, getState) => {
   });
 };
 
-export const deleteSummit = (summitId) => async (dispatch, getState) => {
+export const deleteSummit = (summitId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   const params = {
@@ -212,7 +208,7 @@ export const deleteSummit = (summitId) => async (dispatch, getState) => {
 
 export const attachLogo =
   (entity, file, secondary = false) =>
-  async (dispatch, getState) => {
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());

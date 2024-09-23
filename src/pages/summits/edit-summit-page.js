@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -34,11 +34,19 @@ import {
 import { deleteRoomBookingAttributeType } from "../../actions/room-booking-actions";
 import {
   addHelpMember,
-  removeHelpMember
+  removeHelpMember,
+  getUserRolesBySummit
 } from "../../actions/user-chat-roles-actions";
+import {
+  deleteRegFeedMetadata,
+  getRegFeedMetadataBySummit
+} from "../../actions/reg-feed-metadata-actions";
+import {
+  getMarketingSettingsForPrintApp,
+  getMarketingSettingsForRegLite
+} from "../../actions/marketing-actions";
 import "../../styles/edit-summit-page.less";
 import "../../components/form-validation/validate.less";
-import { deleteRegFeedMetadata } from "../../actions/reg-feed-metadata-actions";
 
 class EditSummitPage extends React.Component {
   constructor(props) {
@@ -52,26 +60,36 @@ class EditSummitPage extends React.Component {
     this.props.resetSelectionPlanForm();
   }
 
+  componentDidMount() {
+    const { currentSummit } = this.props;
+
+    if (currentSummit?.id) {
+      this.props.getUserRolesBySummit();
+      this.props.getMarketingSettingsForRegLite();
+      this.props.getMarketingSettingsForPrintApp();
+      this.props.getRegFeedMetadataBySummit();
+    }
+  }
+
   handleRegFeedMetadataDelete(regFeedMetadataId) {
     const {
       currentRegFeedMetadataListSettings: { regFeedMetadata },
       deleteRegFeedMetadata
     } = this.props;
-    let feedMetadata = regFeedMetadata.find(
+    const feedMetadata = regFeedMetadata.find(
       (sp) => sp.id === regFeedMetadataId
     );
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_summit.remove_reg_feed_metadata_warning") +
-        " " +
-        feedMetadata.key,
+      text: `${T.translate("edit_summit.remove_reg_feed_metadata_warning")} ${
+        feedMetadata.key
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         console.log("key delete", regFeedMetadataId);
         deleteRegFeedMetadata(regFeedMetadataId);
@@ -81,19 +99,20 @@ class EditSummitPage extends React.Component {
 
   handleSPlanDelete(selectionPlanId) {
     const { currentSummit, deleteSelectionPlan } = this.props;
-    let selectionPlan = currentSummit.selection_plans.find(
+    const selectionPlan = currentSummit.selection_plans.find(
       (sp) => sp.id === selectionPlanId
     );
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_summit.remove_sp_warning") + " " + selectionPlan.name,
+      text: `${T.translate("edit_summit.remove_sp_warning")} ${
+        selectionPlan.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSelectionPlan(selectionPlanId);
       }
@@ -102,22 +121,21 @@ class EditSummitPage extends React.Component {
 
   handleAttributeTypeDelete(attributeTypeId) {
     const { deleteRoomBookingAttributeType, currentSummit } = this.props;
-    let roomBookingType =
+    const roomBookingType =
       currentSummit.meeting_booking_room_allowed_attributes.find(
         (rb) => rb.id === attributeTypeId
       );
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("room_bookings.delete_booking_attribute_warning") +
-        " " +
-        roomBookingType.type,
+      text: `${T.translate("room_bookings.delete_booking_attribute_warning")} ${
+        roomBookingType.type
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteRoomBookingAttributeType(attributeTypeId);
       }
@@ -200,7 +218,11 @@ export default Restrict(
     resetSelectionPlanForm,
     saveRegistrationLiteMarketingSettings,
     savePrintAppMarketingSettings,
-    generateEncryptionKey
+    generateEncryptionKey,
+    getMarketingSettingsForRegLite,
+    getMarketingSettingsForPrintApp,
+    getRegFeedMetadataBySummit,
+    getUserRolesBySummit
   })(EditSummitPage),
   "summit-edit"
 );

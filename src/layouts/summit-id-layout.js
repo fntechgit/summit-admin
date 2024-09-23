@@ -84,16 +84,11 @@ class SummitIdLayout extends React.Component {
     if (!summitId) {
       this.props.resetSummitForm();
     } else {
-      this.props.getSummitById(summitId).then(() => {
-        this.props.getMarketingSettingsForRegLite();
-        this.props.getMarketingSettingsForPrintApp();
-        this.props.getUserRolesBySummit();
-        this.props.getRegFeedMetadataBySummit();
-      });
+      this.props.getSummitById(summitId);
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.summit_id;
     const newId = this.props.match.params.summit_id;
 
