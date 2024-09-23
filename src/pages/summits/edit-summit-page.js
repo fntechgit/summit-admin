@@ -34,7 +34,8 @@ import {
 import { deleteRoomBookingAttributeType } from "../../actions/room-booking-actions";
 import {
   addHelpMember,
-  removeHelpMember
+  removeHelpMember,
+  getUserRolesBySummit
 } from "../../actions/user-chat-roles-actions";
 import {
   deleteRegFeedMetadata,
@@ -63,6 +64,7 @@ class EditSummitPage extends React.Component {
     const { currentSummit } = this.props;
 
     if (currentSummit?.id) {
+      this.props.getUserRolesBySummit();
       this.props.getMarketingSettingsForRegLite();
       this.props.getMarketingSettingsForPrintApp();
       this.props.getRegFeedMetadataBySummit();
@@ -219,7 +221,8 @@ export default Restrict(
     generateEncryptionKey,
     getMarketingSettingsForRegLite,
     getMarketingSettingsForPrintApp,
-    getRegFeedMetadataBySummit
+    getRegFeedMetadataBySummit,
+    getUserRolesBySummit
   })(EditSummitPage),
   "summit-edit"
 );
