@@ -9,11 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import Swal from "sweetalert2";
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -31,8 +30,8 @@ import {
   geoCodeLatLng,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
-import { EVENT_CATEGORIES_SEEDED } from "./event-category-actions";
 
 export const REQUEST_LOCATIONS = "REQUEST_LOCATIONS";
 export const RECEIVE_LOCATIONS = "RECEIVE_LOCATIONS";
@@ -112,6 +111,8 @@ export const getLocations = () => async (dispatch, getState) => {
 
   const params = {
     expand: "",
+    relations: "none",
+    fields: "id,name,class_name,order",
     page: 1,
     per_page: 100,
     access_token: accessToken
@@ -170,7 +171,7 @@ export const getLocation = (locationId) => async (dispatch, getState) => {
   });
 };
 
-export const resetLocationForm = () => (dispatch, getState) => {
+export const resetLocationForm = () => (dispatch) => {
   dispatch(createAction(RESET_LOCATION_FORM)({}));
 };
 
@@ -187,7 +188,6 @@ export const saveLocation =
     };
 
     const normalizedEntity = normalizeEntity(entity, allClasses);
-    const class_name = entity.class_name.toLowerCase();
 
     if (entity.id) {
       putRequest(
@@ -197,7 +197,7 @@ export const saveLocation =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_location.location_saved"))
         );
@@ -252,7 +252,7 @@ export const exportLocations = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-  const filename = currentSummit.name + "-Locations.csv";
+  const filename = `${currentSummit.name}-Locations.csv`;
   const params = {
     access_token: accessToken
   };
@@ -267,7 +267,7 @@ export const exportLocations = () => async (dispatch, getState) => {
 };
 
 export const updateLocationOrder =
-  (locations, locationId, newOrder) => async (dispatch, getState) => {
+  (locations, locationId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -290,24 +290,15 @@ export const updateLocationOrder =
   };
 
 export const updateLocationMap = (location) => (dispatch) => {
-  const address =
-    location.address_1 +
-    "," +
-    location.address_2 +
-    "," +
-    location.city +
-    "," +
-    location.state +
-    "," +
-    location.country;
+  const address = `${location.address_1},${location.address_2},${location.city},${location.state},${location.country}`;
 
   dispatch(createAction(UPDATE_LOCATION)(location));
 
   geoCodeAddress(address)
-    .then(function (results) {
+    .then((results) => {
       dispatch(createAction(LOCATION_GMAP_UPDATED)(results));
     })
-    .catch(function (status) {
+    .catch(() => {
       Swal.fire(
         T.translate("edit_location.no_address_title"),
         T.translate("edit_location.no_address_body"),
@@ -320,10 +311,10 @@ export const updateAddress = (location) => (dispatch) => {
   dispatch(createAction(UPDATE_LOCATION)(location));
 
   geoCodeLatLng(location.lat, location.lng)
-    .then(function (results) {
+    .then((results) => {
       dispatch(createAction(LOCATION_ADDRESS_UPDATED)(results));
     })
-    .catch(function (status) {
+    .catch(() => {
       Swal.fire(
         T.translate("edit_location.no_address_title"),
         T.translate("edit_location.no_address_body"),
@@ -338,7 +329,7 @@ const normalizeEntity = (entity, allClasses) => {
     (c) => c.class_name === entity.class_name
   );
 
-  for (var field in locationClass) {
+  for (const field in locationClass) {
     normalizedEntity[field] = entity[field];
   }
 
@@ -352,7 +343,7 @@ const normalizeEntity = (entity, allClasses) => {
   return normalizedEntity;
 };
 
-/**************************************** FLOORS *********************************************/
+/** ************************************** FLOORS ******************************************** */
 
 export const getFloor = (locationId, floorId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -376,7 +367,7 @@ export const getFloor = (locationId, floorId) => async (dispatch, getState) => {
   });
 };
 
-export const resetFloorForm = () => (dispatch, getState) => {
+export const resetFloorForm = () => (dispatch) => {
   dispatch(createAction(RESET_FLOOR_FORM)({}));
 };
 
@@ -402,7 +393,7 @@ export const saveFloor =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(showSuccessMessage(T.translate("edit_floor.floor_saved")));
       });
     } else {
@@ -531,7 +522,7 @@ const normalizeFloorEntity = (entity) => {
   return normalizedEntity;
 };
 
-/**************************************** ROOMS *********************************************/
+/** ************************************** ROOMS ******************************************** */
 
 export const getRoom = (locationId, roomId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -554,7 +545,7 @@ export const getRoom = (locationId, roomId) => async (dispatch, getState) => {
   });
 };
 
-export const resetRoomForm = () => (dispatch, getState) => {
+export const resetRoomForm = () => (dispatch) => {
   dispatch(createAction(RESET_ROOM_FORM)({}));
 };
 
@@ -576,7 +567,7 @@ export const saveRoom =
       url += `/floors/${entity.floor_id}`;
     }
     url +=
-      entity.class_name === "SummitVenueRoom" ? `/rooms` : `/bookable-rooms`;
+      entity.class_name === "SummitVenueRoom" ? "/rooms" : "/bookable-rooms";
 
     if (entity.id) {
       putRequest(
@@ -586,7 +577,7 @@ export const saveRoom =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(showSuccessMessage(T.translate("edit_room.room_saved")));
       });
     } else {
@@ -652,7 +643,7 @@ export const attachRoomImage =
 
     let url = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/venues/${locationId}`;
     url +=
-      entity.class_name === "SummitVenueRoom" ? `/rooms` : `/bookable-rooms`;
+      entity.class_name === "SummitVenueRoom" ? "/rooms" : "/bookable-rooms";
 
     if (entity.id) {
       dispatch(uploadRoomFile(locationId, entity, file));
@@ -716,7 +707,7 @@ const normalizeRoomEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
   if (normalizedEntity.order === 0) {
-    delete normalizedEntity["order"];
+    delete normalizedEntity.order;
   }
 
   if (!normalizedEntity.floor_id) {
@@ -734,7 +725,7 @@ const normalizeRoomEntity = (entity) => {
   return normalizedEntity;
 };
 
-/**********************  BOOKABLE ROOMS    ***************************************************/
+/** ********************  BOOKABLE ROOMS    ************************************************** */
 
 export const addAttributeToRoom =
   (locationId, roomId, attribute) => async (dispatch, getState) => {
@@ -782,7 +773,7 @@ export const removeAttributeFromRoom =
     });
   };
 
-/**************************************** IMAGES *********************************************/
+/** ************************************** IMAGES ******************************************** */
 
 export const getLocationImage =
   (locationId, imageId) => async (dispatch, getState) => {
@@ -806,7 +797,7 @@ export const getLocationImage =
     });
   };
 
-export const resetLocationImageForm = () => (dispatch, getState) => {
+export const resetLocationImageForm = () => (dispatch) => {
   dispatch(createAction(RESET_LOCATION_IMAGE_FORM)({}));
 };
 
@@ -833,7 +824,7 @@ export const saveLocationImage =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_location_image.image_saved"))
         );
@@ -889,19 +880,19 @@ export const deleteLocationImage =
 const normalizeImageEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["location_id"];
-  delete normalizedEntity["image_url"];
-  delete normalizedEntity["last_edited"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["class_name"];
-  delete normalizedEntity["order"];
-  delete normalizedEntity["id"];
-  delete normalizedEntity["file"];
+  delete normalizedEntity.location_id;
+  delete normalizedEntity.image_url;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.created;
+  delete normalizedEntity.class_name;
+  delete normalizedEntity.order;
+  delete normalizedEntity.id;
+  delete normalizedEntity.file;
 
   return normalizedEntity;
 };
 
-/**************************************** MAPS *********************************************/
+/** ************************************** MAPS ******************************************** */
 
 export const getLocationMap =
   (locationId, mapId) => async (dispatch, getState) => {
@@ -925,7 +916,7 @@ export const getLocationMap =
     });
   };
 
-export const resetLocationMapForm = () => (dispatch, getState) => {
+export const resetLocationMapForm = () => (dispatch) => {
   dispatch(createAction(RESET_LOCATION_MAP_FORM)({}));
 };
 
@@ -952,7 +943,7 @@ export const saveLocationMap =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_location_map.map_saved"))
         );
@@ -1008,14 +999,14 @@ export const deleteLocationMap =
 const normalizeMapEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["location_id"];
-  delete normalizedEntity["image_url"];
-  delete normalizedEntity["last_edited"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["class_name"];
-  delete normalizedEntity["order"];
-  delete normalizedEntity["id"];
-  delete normalizedEntity["file"];
+  delete normalizedEntity.location_id;
+  delete normalizedEntity.image_url;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.created;
+  delete normalizedEntity.class_name;
+  delete normalizedEntity.order;
+  delete normalizedEntity.id;
+  delete normalizedEntity.file;
 
   return normalizedEntity;
 };
