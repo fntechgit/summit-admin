@@ -228,6 +228,9 @@ export const getAttendees =
 
     const params = {
       expand: "tags,notes,manager",
+      relations: "member,manager,tags,tickets,notes",
+      fields:
+        "id,email,first_name,last_name,company,status,summit_hall_checked_in_date",
       page,
       per_page: perPage,
       access_token: accessToken
@@ -408,7 +411,7 @@ export const getAllowedExtraQuestions =
             dispatch(stopLoading());
             return data;
           })
-          .catch((err) => {
+          .catch(() => {
             dispatch(stopLoading());
             return Promise.reject(e);
           });
@@ -682,6 +685,6 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const changeAttendeeListSearchTerm = (term) => (dispatch, getState) => {
+export const changeAttendeeListSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_ATTENDEE_SEARCH_TERM)({ term }));
 };
