@@ -24,6 +24,9 @@ function EditableTableRow(props) {
   const formattedData = formattingFunction(row, currentSummit);
 
   useEffect(() => {
+    setEditData(row);
+  }, [row]);
+  useEffect(() => {
     updateSelected(editData, checked);
   }, [checked, row]);
   useEffect(() => {
@@ -44,7 +47,7 @@ function EditableTableRow(props) {
   }, [editEnabled]);
 
   const onRowChange = (ev) => {
-    const { value, id, type } = ev.target;
+    const { value, id } = ev.target;
     const newEventData = { ...editData, [id]: value };
     setEditData(newEventData);
   };
@@ -68,7 +71,7 @@ function EditableTableRow(props) {
       <td className={styles.idColumn}>{row.id}</td>
       {selected.find((s) => s.id === row.id) && editEnabled && checked ? (
         <>
-          {columns.map((col, index) => {
+          {columns.map((col) => {
             if (col.columnKey === "id") {
               return null;
             }
@@ -126,7 +129,7 @@ function EditableTableRow(props) {
         </>
       ) : (
         columns.map(
-          (col, i) =>
+          (col) =>
             col.columnKey !== "id" && (
               <td key={`${row.id}_${col.columnKey}`}>
                 {col.render
