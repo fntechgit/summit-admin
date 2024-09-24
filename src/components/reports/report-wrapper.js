@@ -76,8 +76,8 @@ const wrapReport = (ReportComponent, specs) => {
         otherFilters.publishedIn = summitId;
       }
 
-      if (this.reportRef.translateFilters) {
-        return this.reportRef.translateFilters(otherFilters);
+      if (this.reportRef.current.translateFilters) {
+        return this.reportRef.current.translateFilters(otherFilters);
       }
 
       return otherFilters;
@@ -110,7 +110,7 @@ const wrapReport = (ReportComponent, specs) => {
         listFilters = { ...listFilters, ...queryFilters };
       }
 
-      const query = this.reportRef.buildReportQuery(
+      const query = this.reportRef.current.buildReportQuery(
         queryFilters,
         listFilters,
         sort,
@@ -134,7 +134,7 @@ const wrapReport = (ReportComponent, specs) => {
       this.handleGetReport(1);
     }
 
-    handleSort(index, key, dir, func) {
+    handleSort(index, key, dir) {
       this.fragmentParser.setParam("sort", key);
       this.fragmentParser.setParam("sortdir", dir);
       window.location.hash = this.fragmentParser.serialize();
@@ -145,18 +145,18 @@ const wrapReport = (ReportComponent, specs) => {
     handleExportReport(ev) {
       ev.preventDefault();
       const grouped = specs.hasOwnProperty("grouped");
-      const name = this.reportRef.getName();
+      const name = this.reportRef.current.getName();
       this.props.exportReport(
         this.buildQuery,
         name,
         grouped,
-        this.reportRef.preProcessData.bind(this.reportRef)
+        this.reportRef.current.preProcessData.bind(this.reportRef.current)
       );
     }
 
     handleGetReport(page) {
       const query = this.buildQuery(page);
-      const name = this.reportRef.getName();
+      const name = this.reportRef.current.getName();
       this.props.getReport(query, name, page);
     }
 
@@ -400,11 +400,13 @@ const wrapReport = (ReportComponent, specs) => {
         this.fragmentParser.getParams();
       const pageCount = Math.ceil(totalCount / perPage);
 
-      const reportName = this.reportRef ? this.reportRef.getName() : "report";
+      const reportName = this.reportRef.current
+        ? this.reportRef.current.getName()
+        : "report";
       const grouped = specs.hasOwnProperty("grouped");
       const searchPlaceholder =
-        this.reportRef && this.reportRef.getSearchPlaceholder
-          ? this.reportRef.getSearchPlaceholder()
+        this.reportRef.current && this.reportRef.current.getSearchPlaceholder
+          ? this.reportRef.current.getSearchPlaceholder()
           : T.translate("reports.placeholders.search");
 
       return (
