@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -26,7 +25,13 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE
+} from "../utils/constants";
 
 export const REQUEST_COMPANIES = "REQUEST_COMPANIES";
 export const RECEIVE_COMPANIES = "RECEIVE_COMPANIES";
@@ -40,8 +45,14 @@ export const LOGO_ATTACHED = "LOGO_ATTACHED";
 export const BIG_LOGO_ATTACHED = "BIG_LOGO_ATTACHED";
 
 export const getCompanies =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
-  async (dispatch, getState) => {
+  (
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 
@@ -53,7 +64,9 @@ export const getCompanies =
     }
 
     const params = {
-      page: page,
+      page,
+      fields: "id,name,contact_email,member_level",
+      relations: "none",
       per_page: perPage,
       access_token: accessToken
     };
@@ -65,7 +78,7 @@ export const getCompanies =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -79,7 +92,7 @@ export const getCompanies =
     });
   };
 
-export const getCompany = (companyId) => async (dispatch, getState) => {
+export const getCompany = (companyId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -100,7 +113,7 @@ export const getCompany = (companyId) => async (dispatch, getState) => {
   });
 };
 
-export const deleteCompany = (companyId) => async (dispatch, getState) => {
+export const deleteCompany = (companyId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -124,7 +137,7 @@ export const resetCompanyForm = () => (dispatch) => {
   dispatch(createAction(RESET_COMPANY_FORM)({}));
 };
 
-export const saveCompany = (entity) => async (dispatch, getState) => {
+export const saveCompany = (entity) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
   dispatch(startLoading());
 
@@ -162,44 +175,43 @@ export const saveCompany = (entity) => async (dispatch, getState) => {
     )(params)(dispatch).then(() => {
       dispatch(
         showMessage(success_message, () => {
-          history.push(`/app/companies`);
+          history.push("/app/companies");
         })
       );
     });
   }
 };
 
-export const attachLogo =
-  (entity, file, picAttr) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+export const attachLogo = (entity, file, picAttr) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const params = {
-      access_token: accessToken
-    };
-
-    const normalizedEntity = normalizeEntity(entity);
-
-    const uploadFile = picAttr === "logo" ? uploadLogo : uploadBigLogo;
-
-    if (entity.id) {
-      dispatch(uploadFile(entity, file));
-    } else {
-      return postRequest(
-        createAction(UPDATE_COMPANY),
-        createAction(COMPANY_ADDED),
-        `${window.API_BASE_URL}/api/v1/companies`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
-        dispatch(uploadFile(payload.response, file));
-      });
-    }
+  const params = {
+    access_token: accessToken
   };
 
-const uploadLogo = (entity, file) => async (dispatch, getState) => {
+  const normalizedEntity = normalizeEntity(entity);
+
+  const uploadFile = picAttr === "logo" ? uploadLogo : uploadBigLogo;
+
+  if (entity.id) {
+    dispatch(uploadFile(entity, file));
+  } else {
+    return postRequest(
+      createAction(UPDATE_COMPANY),
+      createAction(COMPANY_ADDED),
+      `${window.API_BASE_URL}/api/v1/companies`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(uploadFile(payload.response, file));
+    });
+  }
+};
+
+const uploadLogo = (entity, file) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   const params = {
@@ -219,7 +231,7 @@ const uploadLogo = (entity, file) => async (dispatch, getState) => {
   });
 };
 
-const uploadBigLogo = (entity, file) => async (dispatch, getState) => {
+const uploadBigLogo = (entity, file) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   const params = {
@@ -242,11 +254,11 @@ const uploadBigLogo = (entity, file) => async (dispatch, getState) => {
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  //remove # from color hexa
-  normalizedEntity["color"] = normalizedEntity["color"].substr(1);
+  // remove # from color hexa
+  normalizedEntity.color = normalizedEntity.color.substr(1);
 
-  delete normalizedEntity["logo"];
-  delete normalizedEntity["big_logo"];
+  delete normalizedEntity.logo;
+  delete normalizedEntity.big_logo;
 
   return normalizedEntity;
 };
