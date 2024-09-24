@@ -134,7 +134,7 @@ const wrapReport = (ReportComponent, specs) => {
       this.handleGetReport(1);
     }
 
-    handleSort(index, key, dir, func) {
+    handleSort(index, key, dir) {
       this.fragmentParser.setParam("sort", key);
       this.fragmentParser.setParam("sortdir", dir);
       window.location.hash = this.fragmentParser.serialize();
