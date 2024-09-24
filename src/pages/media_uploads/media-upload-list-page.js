@@ -59,7 +59,7 @@ class MediaUploadListPage extends React.Component {
     this.props.getMediaUploads(term, page, perPage, order, orderDir);
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage } = this.props;
     this.props.getMediaUploads(term, page, perPage, key, dir);
   }
@@ -103,15 +103,8 @@ class MediaUploadListPage extends React.Component {
   canEdit = (item) => !item.is_system_defined;
 
   render() {
-    const {
-      currentSummit,
-      media_uploads,
-      lastPage,
-      currentPage,
-      term,
-      order,
-      orderDir
-    } = this.props;
+    const { media_uploads, lastPage, currentPage, term, order, orderDir } =
+      this.props;
 
     const columns = [
       { columnKey: "id", value: T.translate("general.id"), sortable: true },
@@ -192,11 +185,7 @@ class MediaUploadListPage extends React.Component {
   }
 }
 
-const mapStateToProps = ({
-  directoryState,
-  currentSummitState,
-  mediaUploadListState
-}) => ({
+const mapStateToProps = ({ currentSummitState, mediaUploadListState }) => ({
   currentSummit: currentSummitState.currentSummit,
   ...mediaUploadListState
 });

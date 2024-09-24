@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -54,7 +54,7 @@ class MediaFileTypeListPage extends React.Component {
     this.props.getMediaFileTypes(term, page, perPage, order, orderDir);
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage } = this.props;
     this.props.getMediaFileTypes(term, page, perPage, key, dir);
   }
@@ -68,24 +68,23 @@ class MediaFileTypeListPage extends React.Component {
     const { history } = this.props;
     ev.preventDefault();
 
-    history.push(`/app/media-file-types/new`);
+    history.push("/app/media-file-types/new");
   }
 
   handleDelete(typeId) {
     const { deleteMediaFileType, media_file_types } = this.props;
-    let media_file_type = media_file_types.find((t) => t.id === typeId);
+    const media_file_type = media_file_types.find((t) => t.id === typeId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("media_file_type.delete_warning") +
-        " " +
-        media_file_type.name,
+      text: `${T.translate("media_file_type.delete_warning")} ${
+        media_file_type.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteMediaFileType(accessId);
       }
@@ -127,8 +126,8 @@ class MediaFileTypeListPage extends React.Component {
     return (
       <div className="container">
         <h3> {T.translate("media_file_type.media_file_type_list")}</h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <FreeTextSearch
               value={term}
               placeholder={T.translate("media_file_type.placeholders.search")}
@@ -177,8 +176,7 @@ class MediaFileTypeListPage extends React.Component {
   }
 }
 
-const mapStateToProps = ({ directoryState, mediaFileTypeListState }) => ({
-  summits: directoryState.summits,
+const mapStateToProps = ({ mediaFileTypeListState }) => ({
   ...mediaFileTypeListState
 });
 

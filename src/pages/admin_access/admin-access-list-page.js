@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -54,7 +54,7 @@ class AdminAccessListPage extends React.Component {
     this.props.getAdminAccesses(term, page, perPage, order, orderDir);
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage } = this.props;
     this.props.getAdminAccesses(term, page, perPage, key, dir);
   }
@@ -68,22 +68,23 @@ class AdminAccessListPage extends React.Component {
     const { history } = this.props;
     ev.preventDefault();
 
-    history.push(`/app/admin-access/new`);
+    history.push("/app/admin-access/new");
   }
 
   handleDeleteAdminAccess(accessId) {
     const { deleteAdminAccess, admin_accesses } = this.props;
-    let admin_access = admin_accesses.find((t) => t.id === accessId);
+    const admin_access = admin_accesses.find((t) => t.id === accessId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("admin_access.delete_warning") + " " + admin_access.title,
+      text: `${T.translate("admin_access.delete_warning")} ${
+        admin_access.title
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteAdminAccess(accessId);
       }
@@ -117,8 +118,8 @@ class AdminAccessListPage extends React.Component {
     return (
       <div className="container">
         <h3> {T.translate("admin_access.admin_access_list")}</h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <FreeTextSearch
               value={term}
               placeholder={T.translate("admin_access.placeholders.search")}
@@ -167,8 +168,7 @@ class AdminAccessListPage extends React.Component {
   }
 }
 
-const mapStateToProps = ({ directoryState, adminAccessListState }) => ({
-  summits: directoryState.summits,
+const mapStateToProps = ({ adminAccessListState }) => ({
   ...adminAccessListState
 });
 
