@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
@@ -50,7 +50,7 @@ const EmailTemplateListPage = ({
     props.getEmailTemplates(term, newPage, perPage, order, orderDir);
   };
 
-  const handleSort = (index, key, dir, func) => {
+  const handleSort = (index, key, dir) => {
     props.getEmailTemplates(term, currentPage, perPage, key, dir);
   };
 
@@ -60,7 +60,7 @@ const EmailTemplateListPage = ({
 
   const handleNewEmailTemplate = (ev) => {
     ev.preventDefault();
-    history.push(`/app/emails/templates/new`);
+    history.push("/app/emails/templates/new");
   };
 
   const handleDeleteEmailTemplate = (templateId) => {
@@ -68,15 +68,14 @@ const EmailTemplateListPage = ({
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("emails.delete_template_warning") +
-        " " +
-        template.identifier,
+      text: `${T.translate("emails.delete_template_warning")} ${
+        template.identifier
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         props.deleteEmailTemplate(templateId);
       }
@@ -110,8 +109,8 @@ const EmailTemplateListPage = ({
         {" "}
         {T.translate("emails.template_list")} ({totalTemplates})
       </h3>
-      <div className={"row"}>
-        <div className={"col-md-6"}>
+      <div className="row">
+        <div className="col-md-6">
           <FreeTextSearch
             value={term}
             placeholder={T.translate("emails.placeholders.search_templates")}
@@ -159,8 +158,7 @@ const EmailTemplateListPage = ({
   );
 };
 
-const mapStateToProps = ({ directoryState, emailTemplateListState }) => ({
-  summits: directoryState.summits,
+const mapStateToProps = ({ emailTemplateListState }) => ({
   ...emailTemplateListState
 });
 

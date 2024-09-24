@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -44,26 +44,25 @@ class EventCategoryGroupListPage extends React.Component {
     );
   }
 
-  handleNew(ev) {
+  handleNew() {
     const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/event-category-groups/new`);
   }
 
   handleDelete(groupId) {
     const { deleteEventCategoryGroup, eventCategoryGroups } = this.props;
-    let group = eventCategoryGroups.find((g) => g.id === groupId);
+    const group = eventCategoryGroups.find((g) => g.id === groupId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("event_category_group_list.delete_warning") +
-        " " +
-        group.name,
+      text: `${T.translate("event_category_group_list.delete_warning")} ${
+        group.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteEventCategoryGroup(groupId);
       }
@@ -71,7 +70,7 @@ class EventCategoryGroupListPage extends React.Component {
   }
 
   render() {
-    const { currentSummit, eventCategoryGroups, summits } = this.props;
+    const { currentSummit, eventCategoryGroups } = this.props;
 
     const columns = [
       { columnKey: "id", value: T.translate("general.id") },
@@ -105,7 +104,7 @@ class EventCategoryGroupListPage extends React.Component {
     return (
       <div className="container">
         <h3> {T.translate("event_category_list.event_category_list")} </h3>
-        <div className={"row"}>
+        <div className="row">
           <div className="col-md-6 col-md-offset-6 text-right">
             <button
               className="btn btn-primary right-space"
@@ -137,7 +136,6 @@ class EventCategoryGroupListPage extends React.Component {
 }
 
 const mapStateToProps = ({
-  directoryState,
   currentSummitState,
   currentEventCategoryGroupListState
 }) => ({

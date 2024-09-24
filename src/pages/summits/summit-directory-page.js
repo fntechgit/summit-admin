@@ -9,20 +9,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
+import { formatEpoch } from "openstack-uicore-foundation/lib/utils/methods";
+import { Pagination } from "react-bootstrap";
 import {
   loadSummits,
   setCurrentSummit,
   deleteSummit
 } from "../../actions/summit-actions";
-import { formatEpoch } from "openstack-uicore-foundation/lib/utils/methods";
 import Member from "../../models/member";
-import { Pagination } from "react-bootstrap";
 
 import "../../styles/summit-directory-page.less";
 
@@ -58,7 +58,7 @@ class SummitDirectoryPage extends React.Component {
     const { history } = this.props;
     ev.preventDefault();
 
-    history.push(`/app/summits/new`);
+    history.push("/app/summits/new");
   }
 
   onDeleteSummit(summit, ev) {
@@ -68,12 +68,12 @@ class SummitDirectoryPage extends React.Component {
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("directory.remove_warning") + " " + summit.name,
+      text: `${T.translate("directory.remove_warning")} ${summit.name}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSummit(summit.id);
       }
@@ -95,7 +95,7 @@ class SummitDirectoryPage extends React.Component {
           {T.translate("directory.summits")} ({totalSummits})
         </h3>
         {canAddSummits && (
-          <div className={"row"}>
+          <div className="row">
             <div className="col-md-6 col-md-offset-6 text-right">
               <button
                 className="btn btn-primary right-space"
@@ -110,8 +110,8 @@ class SummitDirectoryPage extends React.Component {
           <table className="table" id="summit_table">
             <tbody>
               {summits &&
-                summits.map((summit, i) => (
-                  <tr key={"summit_" + summit.id}>
+                summits.map((summit) => (
+                  <tr key={`summit_${summit.id}`}>
                     <td className="summit_id"> {summit.id} </td>
                     <td className="summit_name"> {summit.name} </td>
                     <td> {formatEpoch(summit.start_date, "MMMM Do YYYY")} </td>
@@ -127,9 +127,7 @@ class SummitDirectoryPage extends React.Component {
                     <td className="center_text actions">
                       <a
                         href=""
-                        onClick={(e) => {
-                          return this.onSelectedSummit(e, summit);
-                        }}
+                        onClick={(e) => this.onSelectedSummit(e, summit)}
                         className="btn btn-default btn-sm"
                       >
                         {T.translate("directory.select")}

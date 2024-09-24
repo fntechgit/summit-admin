@@ -129,6 +129,7 @@ export const loadSummits =
 
     const params = {
       access_token: accessToken,
+      fields: "id,name,start_date,end_date,invite_only_registration",
       expand: "none",
       relations: "none",
       page,
