@@ -482,12 +482,10 @@ export const getTickets =
       page,
       per_page: perPage,
       access_token: accessToken,
-      expand:
-        "owner,ticket_type,badge,badge.type,promo_code,promo_code.tags,refund_requests",
+      expand: "owner,badge,promo_code,promo_code.tags,refund_requests",
       fields:
-        "owner.first_name,owner.last_name,owner.company,owner.email,badge.type,badge.type.name,ticket_type.name,promo_code.code,refund_requests.status",
-      relations:
-        "owner.none,badge.none,badge.type.none,promo_code.tags,refund_requests.none"
+        "owner.first_name,owner.last_name,owner.company,owner.email,badge.type_id,promo_code.code,refund_requests.status",
+      relations: "owner.none,badge.none,promo_code.tags,refund_requests.none"
     };
 
     const filter = parseFilters(filters, term);

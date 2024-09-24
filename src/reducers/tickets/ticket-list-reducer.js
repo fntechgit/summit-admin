@@ -118,7 +118,7 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
           id: t.id,
           number,
           order_id: t.order_id,
-          ticket_type: t.ticket_type ? t.ticket_type.name : "N/A",
+          ticket_type: t.ticket_type_id,
           bought_date,
           owner_name:
             t.owner && t.owner.first_name && t.owner.last_name
@@ -136,7 +136,7 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
           final_amount_adjusted: final_amount_adjusted_formatted,
           refund_requests: [...t.refund_requests],
           promo_code_tags,
-          badge_type_id: t.badge && t.badge.type ? t.badge.type.name : "N/A",
+          badge_type_id: t.badge?.type_id,
           badge_prints_count:
             t.hasOwnProperty("badge_prints_count") && t.badge_prints_count > 0
               ? t.badge_prints_count.toString()

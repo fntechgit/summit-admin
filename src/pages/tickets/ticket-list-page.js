@@ -64,7 +64,7 @@ import { handleDDLSortByLabel } from "../../utils/methods";
 
 const BatchSize = 25;
 
-const fieldNames = [
+const fieldNames = (badge_types) => [
   {
     columnKey: "number",
     value: "number",
@@ -92,7 +92,13 @@ const fieldNames = [
     sortable: true
   },
   { columnKey: "promo_code_tags", value: "promo_code_tags" },
-  { columnKey: "badge_type_id", value: "badge_type", sortable: true },
+  {
+    columnKey: "badge_type_id",
+    value: "badge_type",
+    sortable: true,
+    render: (row) =>
+      badge_types.find((bt) => bt.id === row.badge_type_id)?.name || "N/A"
+  },
   {
     columnKey: "badge_prints_count",
     value: "badge_prints_count",
@@ -236,7 +242,7 @@ class TicketListPage extends React.Component {
     );
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage, getTickets } = this.props;
     const { selectedColumns, ticketFilters } = this.state;
     getTickets(term, page, perPage, key, dir, ticketFilters, selectedColumns);
@@ -560,12 +566,17 @@ class TicketListPage extends React.Component {
       selectedFilterCriteria
     } = this.state;
 
+    const { ticket_types } = currentSummit;
+    const { badge_types } = currentSummit;
+
     let columns = [
       { columnKey: "id", value: T.translate("ticket_list.id"), sortable: true },
       {
         columnKey: "ticket_type",
         value: T.translate("ticket_list.ticket_type"),
-        sortable: true
+        sortable: true,
+        render: (row) =>
+          ticket_types.find((tt) => tt.id === row.ticket_type)?.name || "N/A"
       },
       {
         columnKey: "owner_name",
@@ -678,7 +689,7 @@ class TicketListPage extends React.Component {
       { label: "Badge Type", value: "badgeTypesFilter" }
     ];
 
-    const showColumns = fieldNames
+    const showColumns = fieldNames(badge_types)
       .filter((f) => selectedColumns.includes(f.columnKey))
       .map((f2) => ({
         columnKey: f2.columnKey,
