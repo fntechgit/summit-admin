@@ -9,8 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_BADGE_FEATURES,
   REQUEST_BADGE_FEATURES,
@@ -18,7 +19,6 @@ import {
 } from "../../actions/badge-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   badgeFeatures: [],
@@ -35,22 +35,22 @@ const badgeFeatureListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_BADGE_FEATURES: {
-      let { order, orderDir } = payload;
+      const { order, orderDir } = payload;
 
       return { ...state, order, orderDir };
     }
     case RECEIVE_BADGE_FEATURES: {
-      let { total } = payload.response;
-      let badgeFeatures = payload.response.data;
+      const { total } = payload.response;
+      const badgeFeatures = payload.response.data;
 
       return {
         ...state,
-        badgeFeatures: badgeFeatures,
+        badgeFeatures,
         totalBadgeFeatures: total
       };
     }
     case BADGE_FEATURE_DELETED: {
-      let { badgeFeatureId } = payload;
+      const { badgeFeatureId } = payload;
       return {
         ...state,
         badgeFeatures: state.badgeFeatures.filter(
