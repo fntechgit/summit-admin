@@ -17,9 +17,10 @@ import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { formatEpoch } from "openstack-uicore-foundation/lib/utils/methods";
 import { Pagination } from "react-bootstrap";
+import history from "../../history";
 import {
   loadSummits,
-  setCurrentSummit,
+  clearCurrentSummit,
   deleteSummit
 } from "../../actions/summit-actions";
 import Member from "../../models/member";
@@ -30,7 +31,7 @@ class SummitDirectoryPage extends React.Component {
   constructor(props) {
     super(props);
 
-    props.setCurrentSummit(null);
+    props.clearCurrentSummit();
     props.loadSummits();
 
     this.handlePageChange = this.handlePageChange.bind(this);
@@ -43,7 +44,7 @@ class SummitDirectoryPage extends React.Component {
 
   onSelectedSummit(event, summit) {
     event.preventDefault();
-    this.props.setCurrentSummit(summit);
+    history.push(`/app/summits/${summit.id}/dashboard`);
     return false;
   }
 
@@ -181,6 +182,6 @@ const mapStateToProps = ({ directoryState, loggedUserState }) => ({
 
 export default connect(mapStateToProps, {
   loadSummits,
-  setCurrentSummit,
+  clearCurrentSummit,
   deleteSummit
 })(SummitDirectoryPage);

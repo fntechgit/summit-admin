@@ -23,7 +23,6 @@ import {
   showSuccessMessage,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import history from "../history";
 import {
   DEFAULT_CURRENT_PAGE,
   DUMMY_ACTION,
@@ -94,29 +93,7 @@ export const getSummitById = (summitId) => async (dispatch) => {
   });
 };
 
-export const setCurrentSummit = (summit) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-
-  if (summit) {
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken,
-      expand:
-        "event_types,tracks,locations,locations.rooms,registration_stats,badge_types"
-    };
-
-    return getRequest(
-      null,
-      createAction(SET_CURRENT_SUMMIT),
-      `${window.API_BASE_URL}/api/v1/summits/${summit.id}`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-
-      if (summit) history.push(`/app/summits/${summit.id}/dashboard`);
-    });
-  }
+export const clearCurrentSummit = () => (dispatch) => {
   dispatch(createAction(RESET_SUMMIT_FORM)({}));
 };
 
