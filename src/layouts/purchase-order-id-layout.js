@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -24,16 +24,14 @@ import EditTicketPage from "../pages/orders/edit-ticket-page";
 import {
   resetPurchaseOrderForm,
   getPurchaseOrder,
-  getOrderExtraQuestions,
   getPurchaseOrderRefunds
 } from "../actions/order-actions";
 
 class PurchaseOrderIdLayout extends React.Component {
   constructor(props) {
-    super(props);
-
-    const { currentSummit } = props;
     const orderId = props.match.params.purchase_order_id;
+
+    super(props);
 
     if (!orderId) {
       props.resetPurchaseOrderForm();
@@ -42,13 +40,9 @@ class PurchaseOrderIdLayout extends React.Component {
         .getPurchaseOrder(orderId)
         .then(() => props.getPurchaseOrderRefunds(orderId));
     }
-
-    if (!currentSummit.order_only_extra_questions) {
-      props.getOrderExtraQuestions();
-    }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.purchase_order_id;
     const newId = this.props.match.params.purchase_order_id;
 
@@ -64,10 +58,11 @@ class PurchaseOrderIdLayout extends React.Component {
   }
 
   render() {
-    let { match, currentPurchaseOrder } = this.props;
-    let orderId = match.params.purchase_order_id;
-    let breadcrumb = currentPurchaseOrder.id
-      ? `...${currentPurchaseOrder.number.slice(-20)}`
+    const { match, currentPurchaseOrder } = this.props;
+    const orderId = match.params.purchase_order_id;
+    const last20chars = -20;
+    const breadcrumb = currentPurchaseOrder.id
+      ? `...${currentPurchaseOrder.number.slice(last20chars)}`
       : T.translate("general.new");
 
     if (orderId && !currentPurchaseOrder.id) return <div />;
@@ -117,7 +112,6 @@ export default Restrict(
   connect(mapStateToProps, {
     getPurchaseOrder,
     resetPurchaseOrderForm,
-    getOrderExtraQuestions,
     getPurchaseOrderRefunds
   })(PurchaseOrderIdLayout),
   "orders"

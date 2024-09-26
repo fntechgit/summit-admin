@@ -45,24 +45,22 @@ class EditSummitAttendeePage extends React.Component {
     if (!new_attendee_id) {
       this.props.resetAttendeeForm();
     } else {
-      this.setState({ ...this.state, ExtraQuestionsFormReadOnly: false });
+      this.setState({ ExtraQuestionsFormReadOnly: false });
       this.props.getAttendee(new_attendee_id).then(() => {
-        console.log("getAllowedExtraQuestions 1");
         this.props.getAllowedExtraQuestions(new_attendee_id).then((payload) => {
           if (!payload.length) {
             // we dont have any available extra questions, check if we have some related to
             // deactivated tickets
-            console.log("getAllowedExtraQuestions 2");
             this.props.getAllowedExtraQuestions(new_attendee_id, false);
             // and mark extra question form as read only
-            this.setState({ ...this.state, ExtraQuestionsFormReadOnly: true });
+            this.setState({ ExtraQuestionsFormReadOnly: true });
           }
         });
       });
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.attendee_id;
     const newId = this.props.match.params.attendee_id;
 
