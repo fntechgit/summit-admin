@@ -78,9 +78,9 @@ class PurchaseOrderForm extends React.Component {
       value = parseInt(ev.target.value);
     }
 
-    /* if (ev.target.type == 'ownerinput') {
-            value =
-        } */
+    if (ev.target.type === "ownerinput") {
+      entity.owner_company = ev.target.value?.company || "";
+    }
 
     errors[id] = "";
     entity[id] = value;

@@ -30,8 +30,8 @@ export default class OwnerInput extends React.Component {
     let theValue = { email: value.label, first_name: "", last_name: "" };
 
     if (value.member) {
-      const { first_name, last_name } = value.member;
-      theValue = { ...theValue, first_name, last_name };
+      const { first_name, last_name, company } = value.member;
+      theValue = { ...theValue, first_name, last_name, company };
     }
 
     const ev = {
@@ -83,7 +83,6 @@ export default class OwnerInput extends React.Component {
 
   render() {
     const { owner, errors, onChange, id, multi, ...rest } = this.props;
-
     const theValue = owner ? { value: owner.email, label: owner.email } : null;
 
     return (
