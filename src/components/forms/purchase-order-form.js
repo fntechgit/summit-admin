@@ -44,7 +44,7 @@ class PurchaseOrderForm extends React.Component {
     };
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -469,20 +469,6 @@ class PurchaseOrderForm extends React.Component {
             </div>
           </div>
         </Panel>
-
-        {/* {entity.id != 0 && currentSummit.order_only_extra_questions && currentSummit.order_only_extra_questions.length > 0 &&
-                <Panel show={showSection == 'extra_questions'}
-                       title={T.translate("edit_purchase_order.extra_questions")}
-                       handleClick={() => this.toggleSection('extra_questions')}>
-                    <QuestionAnswersInput
-                        id="extra_questions"
-                        answers={entity.extra_questions}
-                        questions={currentSummit.order_only_extra_questions}
-                        onChange={this.handleChange}
-                    />
-                </Panel>
-                } */}
-
         {entity.id !== 0 && (
           <>
             <div>
