@@ -78,7 +78,7 @@ export default class OwnerInput extends React.Component {
       callback(newOptions);
     };
 
-    queryMembers(encodeURIComponent(input), translateOptions);
+    queryMembers(input, translateOptions);
   }
 
   render() {
