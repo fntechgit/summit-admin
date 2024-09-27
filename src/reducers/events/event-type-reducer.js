@@ -9,8 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_EVENT_TYPE,
   RESET_EVENT_TYPE_FORM,
@@ -23,8 +25,6 @@ import {
   MEDIA_UPLOAD_LINKED
 } from "../../actions/media-upload-actions";
 
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
@@ -51,8 +51,10 @@ export const DEFAULT_ENTITY = {
   max_moderators: 0,
   allows_attachment: false,
   allowed_media_upload_types: [],
+  allowed_ticket_types: [],
   allows_location_timeframe_collision: false,
   allows_speaker_event_collision: false,
+  show_always_on_schedule: false,
   min_duration: 0,
   max_duration: 0
 };
@@ -65,96 +67,81 @@ const DEFAULT_STATE = {
 const eventTypeReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
-    case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
       }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
     case SET_CURRENT_SUMMIT:
-    case RESET_EVENT_TYPE_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case UPDATE_EVENT_TYPE:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
+    case RESET_EVENT_TYPE_FORM: {
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case UPDATE_EVENT_TYPE: {
+      return { ...state, entity: { ...payload }, errors: {} };
+    }
     case EVENT_TYPE_ADDED:
-    case RECEIVE_EVENT_TYPE:
-      {
-        let entity = { ...payload.response };
+    case RECEIVE_EVENT_TYPE: {
+      const entity = { ...payload.response };
 
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
         }
+      }
 
-        switch (entity.class_name) {
-          case "SummitEventType":
-            entity.class_name = "EVENT_TYPE";
-            break;
-          case "PresentationType":
-            entity.class_name = "PRESENTATION_TYPE";
-            entity.allowed_media_upload_types =
-              entity.allowed_media_upload_types.map((mu) => ({
-                ...mu,
-                mandatory_text: mu.is_mandatory ? "Yes" : "No",
-                type_name: mu.type.name
-              }));
-            break;
+      switch (entity.class_name) {
+        case "SummitEventType":
+          entity.class_name = "EVENT_TYPE";
+          break;
+        case "PresentationType":
+          entity.class_name = "PRESENTATION_TYPE";
+          entity.allowed_media_upload_types =
+            entity.allowed_media_upload_types.map((mu) => ({
+              ...mu,
+              mandatory_text: mu.is_mandatory ? "Yes" : "No",
+              type_name: mu.type.name
+            }));
+          break;
+      }
+
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case MEDIA_UPLOAD_LINKED: {
+      const { mediaUpload } = payload;
+
+      mediaUpload.mandatory_text = mediaUpload.is_mandatory ? "Yes" : "No";
+      mediaUpload.type_name = mediaUpload.type.name;
+
+      const newMediaUploads = [
+        ...state.entity.allowed_media_upload_types,
+        mediaUpload
+      ];
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          allowed_media_upload_types: newMediaUploads
         }
-
-        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-      }
-      break;
-    case MEDIA_UPLOAD_LINKED:
-      {
-        let { mediaUpload } = payload;
-
-        mediaUpload.mandatory_text = mediaUpload.is_mandatory ? "Yes" : "No";
-        mediaUpload.type_name = mediaUpload.type.name;
-
-        const newMediaUploads = [
-          ...state.entity.allowed_media_upload_types,
-          mediaUpload
-        ];
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            allowed_media_upload_types: newMediaUploads
-          }
-        };
-      }
-      break;
-    case MEDIA_UPLOAD_UNLINKED:
-      {
-        let { mediaUploadId } = payload;
-        const newMediaUploads = state.entity.allowed_media_upload_types.filter(
-          (mu) => mu.id !== mediaUploadId
-        );
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            allowed_media_upload_types: newMediaUploads
-          }
-        };
-      }
-      break;
-    case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+      };
+    }
+    case MEDIA_UPLOAD_UNLINKED: {
+      const { mediaUploadId } = payload;
+      const newMediaUploads = state.entity.allowed_media_upload_types.filter(
+        (mu) => mu.id !== mediaUploadId
+      );
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          allowed_media_upload_types: newMediaUploads
+        }
+      };
+    }
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
     default:
       return state;
   }
