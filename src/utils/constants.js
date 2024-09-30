@@ -133,3 +133,5 @@ export const EVENT_TYPE_GROUP_EVENTS = "Groups Events";
 export const TRIM_TEXT_LENGTH_50 = 50;
 
 export const TRIM_TEXT_LENGTH_40 = 50;
+
+export const LANGUAGE_CODE_LENGTH = 2;
