@@ -60,7 +60,7 @@ class BadgeForm extends React.Component {
     this.handleApplyPrintFilters = this.handleApplyPrintFilters.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (!shallowEqual(prevProps.entity, this.props.entity)) {
       this.setState({
         entity: { ...this.props.entity }
@@ -78,7 +78,7 @@ class BadgeForm extends React.Component {
   }
 
   handleChangePrintType(ev) {
-    const { value, id } = ev.target;
+    const { value } = ev.target;
     this.props.onSelectPrintType(value);
   }
 
@@ -102,7 +102,7 @@ class BadgeForm extends React.Component {
     this.props.onBadgePrintQuery(term, page, perPage, order, orderDir);
   }
 
-  handleBadgePrintSort(index, key, dir, func) {
+  handleBadgePrintSort(index, key, dir) {
     const { term, page, perPage } = this.props;
     this.props.onBadgePrintQuery(term, page, perPage, key, dir);
   }
@@ -216,16 +216,7 @@ class BadgeForm extends React.Component {
       currentSummit,
       selectedPrintType,
       canPrint,
-      badgePrints: {
-        badgePrints,
-        order,
-        orderDir,
-        totalBadgePrints,
-        term,
-        currentPage,
-        lastPage,
-        perPage
-      }
+      badgePrints: { badgePrints, order, orderDir, term, currentPage, lastPage }
     } = this.props;
 
     const userTimeZone = moment.tz.guess();
@@ -236,11 +227,18 @@ class BadgeForm extends React.Component {
     const badgeType = currentSummit.badge_types.find(
       (bt) => bt.id === entity.type_id
     );
+    //  badgeType.access_levels could be an array of ids or full objects
     const access_levels = badgeType.access_levels
-      .map((id) =>
-        currentSummit.badge_access_level_types.find((bal) => bal.id === id)
-      )
-      .map((al) => al.name)
+      .map((al) => {
+        // TODO:
+        // this is a fallback bc there are some call that are overwriting this data with expanded objects instead of ids
+        // so we do need a bigger refactor
+        const id = Number.isInteger(al) ? al : al?.id;
+        return currentSummit.badge_access_level_types.find(
+          (bal) => bal.id === id
+        );
+      })
+      .map((al) => al?.name)
       .join(", ");
 
     const featuresColumns = [
@@ -269,11 +267,16 @@ class BadgeForm extends React.Component {
       (bt) => bt.id === entity.type_id
     );
     const badge_view_type_ddl = [
-      ...(currBadgeType.allowed_view_types
-        ?.map((id) =>
-          currentSummit.badge_view_types?.find((bvt) => bvt.id === id)
-        )
-        ?.map((r) => ({ label: r.name, value: r.id })) || {})
+      // currBadgeType.allowed_view_types could be an array of ids or full objects
+      ...currBadgeType.allowed_view_types
+        ?.map((vt) => {
+          // TODO:
+          // this is a fallback bc there are some call that are overwriting this data with expanded objects instead of ids
+          // so we do need a bigger refactor
+          const id = Number.isInteger(vt) ? vt : vt?.id;
+          return currentSummit.badge_view_types?.find((bvt) => bvt.id === id);
+        })
+        ?.map((r) => ({ label: r?.name || r, value: r?.id || r }))
     ];
 
     const badge_print_columns = [
@@ -306,7 +309,7 @@ class BadgeForm extends React.Component {
       }
     };
 
-    const renderInput = (props, openCalendar, closeCalendar) => {
+    const renderInput = (props) => {
       function clear(ev) {
         ev.preventDefault();
         props.onChange({ target: { value: "" } });

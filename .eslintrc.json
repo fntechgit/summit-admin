@@ -77,7 +77,8 @@
     "no-restricted-syntax": "warn",
     "guard-for-in": "warn",
     "prefer-destructuring": "warn",
-    "react/function-component-definition": "off"
+    "react/function-component-definition": "off",
+    "no-unsafe-optional-chaining": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }
