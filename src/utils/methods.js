@@ -369,11 +369,11 @@ export const getAvailableBookingDates = (summit) => {
   const bookStartDate = epochToMomentTimeZone(
     begin_allow_booking_date,
     time_zone_id
-  );
+  ).startOf("day");
   const bookEndDate = epochToMomentTimeZone(
     end_allow_booking_date,
     time_zone_id
-  );
+  ).startOf("day");
   const isValidStartDate = new Date(begin_allow_booking_date).getTime() > 0;
   const isValidEndDate = new Date(end_allow_booking_date).getTime() > 0;
   const now = moment().tz(time_zone_id);
@@ -384,7 +384,7 @@ export const getAvailableBookingDates = (summit) => {
   while (bookStartDate <= bookEndDate) {
     if (bookStartDate >= now) {
       const tmp = bookStartDate.clone();
-      dates.push({ str: tmp.format("Y-M-D"), epoch: tmp.unix() });
+      dates.push({ str: tmp.format("MMM Do YYYY"), epoch: tmp.unix() });
     }
     const ONE_DAY = 1;
     bookStartDate.add(ONE_DAY, "days");

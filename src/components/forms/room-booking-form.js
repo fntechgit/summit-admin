@@ -9,32 +9,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
-  Input,
   Dropdown,
-  MemberInput,
-  DateTimePicker
+  MemberInput
 } from "openstack-uicore-foundation/lib/components";
+import Swal from "sweetalert2";
 import {
   getAvailableBookingDates,
   getDayFromReservation,
-  isEmpty,
-  scrollToError,
   shallowEqual
 } from "../../utils/methods";
-
-import Swal from "sweetalert2";
 
 import "../../styles/booking-room.less";
 
 const RoomBookingForm = ({
-  history,
   entity,
   currentSummit,
   errors,
@@ -76,7 +70,7 @@ const RoomBookingForm = ({
   };
 
   const handleRoomChange = (ev) => {
-    let { value, id } = ev.target;
+    const { value } = ev.target;
     const currentRoom = currentSummit.locations.find(
       (l) => l.id === parseInt(value)
     );
@@ -84,7 +78,7 @@ const RoomBookingForm = ({
   };
 
   const handleBookingDateChange = (ev) => {
-    let { value } = ev.target;
+    const { value } = ev.target;
 
     getAvailableSlots(currentRoom.id, value);
 
@@ -93,12 +87,12 @@ const RoomBookingForm = ({
   };
 
   const handleTimeSlotChange = (ev) => {
-    let { value } = ev.target;
+    const { value } = ev.target;
     setTimeSlot(value);
   };
 
   const handleChange = (ev) => {
-    let entity = { ...stateEntity };
+    const entity = { ...stateEntity };
     let { value, id } = ev.target;
 
     if (ev.target.type === "number") {
@@ -129,7 +123,7 @@ const RoomBookingForm = ({
       (e) => e.start_date === timeSlot
     );
 
-    let normalizedEntity = {
+    const normalizedEntity = {
       id: stateEntity.id || null,
       room_id: currentRoom.id,
       start_datetime: start_date,
@@ -150,11 +144,9 @@ const RoomBookingForm = ({
     return "";
   };
 
-  let rooms_ddl = currentSummit.locations
+  const rooms_ddl = currentSummit.locations
     .filter((v) => v.class_name === "SummitBookableVenueRoom")
-    .map((l) => {
-      return { label: l.name, value: l.id };
-    });
+    .map((l) => ({ label: l.name, value: l.id }));
 
   const available_booking_dates_ddl = getAvailableBookingDates(
     currentSummit
@@ -200,7 +192,12 @@ const RoomBookingForm = ({
             <div className="col-md-12">
               <div className="meeting-room">
                 <div className="meeting-room-image">
-                  <img src={currentRoom.image?.url} />
+                  {currentRoom.image?.url && (
+                    <img
+                      src={currentRoom.image?.url}
+                      alt="an empty room for booking"
+                    />
+                  )}
                 </div>
                 <div className="meeting-room-body">
                   <div className="meeting-room-header row">
@@ -279,11 +276,11 @@ const RoomBookingForm = ({
                 id="owner"
                 value={stateEntity.owner}
                 onChange={handleChange}
-                getOptionLabel={(member) => {
-                  return member.hasOwnProperty("email")
-                    ? `${member.first_name} ${member.last_name} (${member.email})`
-                    : `${member.first_name} ${member.last_name} (${member.id})`;
-                }}
+                getOptionLabel={(member) =>
+                  `${member.first_name} ${member.last_name} (${
+                    member.email || member.id
+                  })`
+                }
                 isDisabled={stateEntity.id}
               />
             </div>
