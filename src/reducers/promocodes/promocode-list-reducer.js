@@ -139,8 +139,8 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           owner_email: owner_email || "",
           email_sent: p.email_sent ? "Yes" : "No",
           redeemed: p.redeemed ? "Yes" : "No",
-          creator: p.hasOwnProperty("creator")
-            ? `${p?.creator?.first_name} ${p?.creator?.last_name}`
+          creator: p?.creator
+            ? `${p.creator.first_name} ${p.creator.last_name}`
             : "TBD"
         };
       });

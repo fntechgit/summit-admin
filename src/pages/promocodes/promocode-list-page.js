@@ -56,6 +56,7 @@ const fieldNames = [
   },
   { columnKey: "tags", value: "tags" },
   { columnKey: "owner_email", value: "owner_email" },
+  { columnKey: "owner", value: "owner" },
   { columnKey: "email_sent", value: "emailed" },
   { columnKey: "creator", value: "creator" }
 ];
@@ -244,7 +245,7 @@ class PromocodeListPage extends React.Component {
     );
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage, filters } = this.props;
     key = key === "name" ? "last_name" : key;
     const { selectedColumns } = this.state;
@@ -273,7 +274,7 @@ class PromocodeListPage extends React.Component {
     );
   }
 
-  handleNewPromocode(ev) {
+  handleNewPromocode() {
     const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/promocodes/new`);
   }
@@ -340,6 +341,10 @@ class PromocodeListPage extends React.Component {
       {
         value: "description",
         label: T.translate("promocode_list.description")
+      },
+      {
+        value: "owner",
+        label: T.translate("promocode_list.owner")
       },
       {
         value: "owner_email",

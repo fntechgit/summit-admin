@@ -144,9 +144,12 @@ export const getPromocodes =
 
     const filter = parseFilters(filters, term);
 
-    const expand = "speaker,owner,sponsor,creator,tags,owners,owners.speaker";
-    const relations = "owners.speaker.none";
-    const fields = "owners.speaker.email";
+    const expand =
+      "speaker,owner,sponsor,sponsor.company,creator,tags,owners,owners.speaker";
+    const relations =
+      "creator,sponsor,tags,speaker,owner,owners,owners.speaker.none,creator.none,sponsor.company,sponsor.company.none";
+    const fields =
+      "owners.speaker.email,creator.first_name,creator.last_name,sponsor.first_name,sponsor.last_name,sponsor.company.name";
 
     const params = {
       expand,
@@ -201,7 +204,7 @@ export const getPromocode = (promocodeId) => async (dispatch, getState) => {
   });
 };
 
-export const resetPromocodeForm = () => (dispatch, getState) => {
+export const resetPromocodeForm = () => (dispatch) => {
   dispatch(createAction(RESET_PROMOCODE_FORM)({}));
 };
 
@@ -229,7 +232,7 @@ export const savePromocode =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_promocode.promocode_saved"))
         );
@@ -296,7 +299,7 @@ export const sendEmail = (promocodeId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${promocodeId}/mail`,
     null,
     authErrorHandler
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(stopLoading());
     dispatch(
       showMessage(
@@ -460,7 +463,7 @@ export const addDiscountTicket = (ticket) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${ticket.owner_id}/ticket-types/${ticket.ticket_type_id}`,
     ticket,
     authErrorHandler
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
 };
