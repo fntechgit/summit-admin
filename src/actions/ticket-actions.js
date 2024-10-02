@@ -853,7 +853,9 @@ export const getTicketTypes =
       page: currentPage,
       per_page: perPage,
       access_token: accessToken,
-      expand: "badge_type"
+      expand: "badge_type",
+      relations: "badge_type,badge_type.none",
+      fields: "badge_type.name,badge_type.id"
     };
 
     const filter = parseTicketTypeFilters(filters, term);
