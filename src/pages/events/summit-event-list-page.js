@@ -173,7 +173,7 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
         false
       );
     },
-    render: (e, field) => (e?.name ? e.name : "N/A")
+    render: (e) => (e?.name ? e.name : "N/A")
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
@@ -223,7 +223,7 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
     columnKey: "media_uploads",
     value: "media_uploads",
     sortable: false,
-    render: (e, field) => {
+    render: (e) => {
       if (!e?.length) return "N/A";
       return (
         <>
@@ -352,7 +352,7 @@ class SummitEventListPage extends React.Component {
       filters,
       extraColumns,
       term,
-      page,
+      currentPage,
       perPage,
       order,
       orderDir
@@ -372,7 +372,15 @@ class SummitEventListPage extends React.Component {
     }));
 
     if (currentSummit) {
-      getEvents(term, page, perPage, order, orderDir, filters, extraColumns);
+      getEvents(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        filters,
+        extraColumns
+      );
     }
   }
 
@@ -464,7 +472,7 @@ class SummitEventListPage extends React.Component {
     );
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, getEvents } = this.props;
     const { eventFilters, selectedColumns } = this.state;
 
@@ -507,7 +515,7 @@ class SummitEventListPage extends React.Component {
     );
   }
 
-  handleNewEvent(ev) {
+  handleNewEvent() {
     const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/events/new`);
   }
@@ -807,8 +815,6 @@ class SummitEventListPage extends React.Component {
       orderDir,
       totalEvents,
       term,
-      extraColumns,
-      filters,
       bulkUpdateEvents
     } = this.props;
     const {
@@ -850,7 +856,7 @@ class SummitEventListPage extends React.Component {
             {...extraProps}
           />
         ),
-        render: (e, field) => e.name
+        render: (e) => e.name
       },
       {
         columnKey: "title",

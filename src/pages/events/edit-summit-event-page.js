@@ -49,7 +49,16 @@ function EditSummitEventPage(props) {
     }
   }, [props.entity.id, props.entity.selection_plan_id]);
 
-  const getEventNextFromList = async (data, current_page, last_page) => {
+  const getEventNextFromList = async (
+    data,
+    currentPage,
+    lastPage,
+    term,
+    perPage,
+    order,
+    orderDir,
+    filters
+  ) => {
     const { entity, getEvents } = props;
     const listLength = data.length;
     const idx = data.findIndex((ev) => ev.id === entity.id);
@@ -61,16 +70,23 @@ function EditSummitEventPage(props) {
 
     if (idx === -1 || idx === listLength - 1) {
       // last on page
-      if (last_page > current_page) {
+      if (lastPage > currentPage) {
         // there are more pages
-        return getEvents(null, current_page + 1).then(
-          (newData) => newData.data[0]
-        );
+        return getEvents(
+          term,
+          currentPage + 1,
+          perPage,
+          order,
+          orderDir,
+          filters
+        ).then((newData) => newData.data[0]);
       }
       // last of last page
-      if (last_page > 1) {
+      if (lastPage > 1) {
         // there is more than one page
-        return getEvents(null, 1).then((newData) => newData.data[0]);
+        return getEvents(term, 1, perPage, order, orderDir, filters).then(
+          (newData) => newData.data[0]
+        );
       }
       // only one page, return first
       return data[0];
@@ -78,7 +94,16 @@ function EditSummitEventPage(props) {
     return data[idx + 1];
   };
 
-  const getEventPrevFromList = async (data, current_page, last_page) => {
+  const getEventPrevFromList = async (
+    data,
+    currentPage,
+    lastPage,
+    term,
+    perPage,
+    order,
+    orderDir,
+    filters
+  ) => {
     const { entity, getEvents } = props;
     const idx = data.findIndex((ev) => ev.id === entity.id);
 
@@ -88,18 +113,28 @@ function EditSummitEventPage(props) {
     }
     if (idx === 0) {
       // first on page
-      if (current_page > 1) {
+      if (currentPage > 1) {
         // there are more pages
-        return getEvents(null, current_page - 1).then(
-          (newData) => newData.data[newData.data.length - 1]
-        );
+        return getEvents(
+          term,
+          currentPage - 1,
+          perPage,
+          order,
+          orderDir,
+          filters
+        ).then((newData) => newData.data[newData.data.length - 1]);
       }
       // first of first page
-      if (last_page > 1) {
+      if (lastPage > 1) {
         // there is more than one page
-        return getEvents(null, last_page).then(
-          (newData) => newData.data[newData.data.length - 1]
-        ); // return last event of last page
+        return getEvents(
+          term,
+          lastPage,
+          perPage,
+          order,
+          orderDir,
+          filters
+        ).then((newData) => newData.data[newData.data.length - 1]); // return last event of last page
       }
       // only one page, return last
       return data[data.length - 1];
@@ -109,20 +144,67 @@ function EditSummitEventPage(props) {
 
   const goToEvent = async (next = true) => {
     const { currentSummit, history } = props;
-    const { events, currentPage, lastPage } = props.allEventsData;
+    const {
+      events,
+      currentPage,
+      lastPage,
+      filters,
+      term,
+      order,
+      orderDir,
+      perPage
+    } = props.allEventsData;
     let event = null;
 
     if (events.length === 0) {
-      event = await props.getEvents().then(async (data) => {
-        const { data: allEvents, current_page, last_page } = data;
-        return next
-          ? getEventNextFromList(allEvents, current_page, last_page)
-          : getEventPrevFromList(allEvents, current_page, last_page);
-      });
+      event = await props
+        .getEvents(term, 1, perPage, order, orderDir, filters)
+        .then(async (data) => {
+          const { data: allEvents, current_page, last_page } = data;
+          return next
+            ? getEventNextFromList(
+                allEvents,
+                current_page,
+                last_page,
+                term,
+                perPage,
+                order,
+                orderDir,
+                filters
+              )
+            : getEventPrevFromList(
+                allEvents,
+                current_page,
+                last_page,
+                term,
+                perPage,
+                order,
+                orderDir,
+                filters
+              );
+        });
     } else {
       event = next
-        ? await getEventNextFromList(events, currentPage, lastPage)
-        : await getEventPrevFromList(events, currentPage, lastPage);
+        ? await getEventNextFromList(
+            events,
+            currentPage,
+            lastPage,
+            term,
+            perPage,
+            order,
+            orderDir,
+            filters
+          )
+        : await getEventPrevFromList(
+            events,
+            currentPage,
+            lastPage,
+            term,
+            perPage,
+            order,
+            orderDir,
+            filters
+          );
     }
 
     if (event) {
@@ -139,7 +221,6 @@ function EditSummitEventPage(props) {
     feedbackState,
     commentState,
     actionTypes,
-    auditLogState,
     loading,
     history,
     saveEvent,
