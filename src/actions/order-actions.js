@@ -558,7 +558,8 @@ export const getPurchaseOrder = (orderId) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    expand: "tickets, tickets.owner, tickets.owner.member, tickets.ticket_type",
+    expand:
+      "tickets, tickets.owner, tickets.owner.member, tickets.ticket_type, tickets.promo_code",
     access_token: accessToken
   };
 
