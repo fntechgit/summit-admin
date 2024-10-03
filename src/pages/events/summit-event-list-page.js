@@ -249,6 +249,40 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
         </>
       );
     }
+  },
+  {
+    columnKey: "media_uploads_display",
+    value: "media_uploads_display",
+    sortable: false,
+    render: (e, row) => {
+      const media_uploads = row?.media_uploads || [];
+      if (!media_uploads.length) return "N/A";
+      return (
+        <>
+          {media_uploads.map((m) => (
+            <React.Fragment key={m.id}>
+              {`"${m.media_upload_type.name}" : `}
+              <b>{`${m.display_on_site ? "Yes" : "No"}`}</b>
+              <br />
+            </React.Fragment>
+          ))}
+        </>
+      );
+    }
+  },
+  {
+    columnKey: "allow_feedback",
+    value: "allow_feedback",
+    sortable: false,
+    render: (field) =>
+      field === undefined ? "N/A" : field === true ? "Yes" : "No"
+  },
+  {
+    columnKey: "to_record",
+    value: "to_record",
+    sortable: false,
+    render: (field) =>
+      field === undefined ? "N/A" : field === true ? "Yes" : "No"
   }
 ];
 
@@ -699,6 +733,18 @@ class SummitEventListPage extends React.Component {
     let newColumns = value;
     const all_companies = ["submitter_company", "speaker_company", "sponsor"];
 
+    const mediaUploadsSelected = newColumns.includes("media_uploads");
+
+    // Ensure 'media_uploads_display' is included if 'media_uploads' is selected
+    if (mediaUploadsSelected && !newColumns.includes("media_uploads_display")) {
+      newColumns = [...newColumns, "media_uploads_display"];
+    }
+
+    // Remove 'media_uploads_display' if 'media_uploads' is deselected
+    if (!mediaUploadsSelected && newColumns.includes("media_uploads_display")) {
+      newColumns = newColumns.filter((col) => col !== "media_uploads_display");
+    }
+
     if (
       selectedColumns.includes("all_companies") &&
       !newColumns.includes("all_companies")
@@ -1029,7 +1075,15 @@ class SummitEventListPage extends React.Component {
         label: T.translate("event_list.review_status")
       },
       { value: "created", label: T.translate("event_list.created") },
-      { value: "modified", label: T.translate("event_list.modified") }
+      { value: "modified", label: T.translate("event_list.modified") },
+      {
+        value: "allow_feedback",
+        label: T.translate("event_list.allow_feedback")
+      },
+      {
+        value: "to_record",
+        label: T.translate("event_list.to_record")
+      }
     ];
 
     const ddl_filterByEventTypeCapacity = [
