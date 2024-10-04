@@ -52,7 +52,7 @@ class SpeakerForm extends React.Component {
     this.toggleSummit = this.toggleSummit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -242,7 +242,7 @@ class SpeakerForm extends React.Component {
     const promocodes = this.state.entity.registration_codes.filter(
       (r) => r.summit_id === summitId
     );
-    const { history, summits } = this.props;
+    const { history } = this.props;
 
     return (
       <div className="summit-data-section">
@@ -420,7 +420,7 @@ class SpeakerForm extends React.Component {
             <UploadInput
               value={entity.pic}
               handleUpload={this.handleUploadPic}
-              handleRemove={(ev) => this.handleRemoveFile("pic")}
+              handleRemove={() => this.handleRemoveFile("pic")}
               className="dropzone col-md-6"
               multiple={false}
               accept="image/*"
@@ -438,7 +438,7 @@ class SpeakerForm extends React.Component {
             <UploadInput
               value={entity.big_pic}
               handleUpload={this.handleUploadBigPic}
-              handleRemove={(ev) => this.handleRemoveFile("big_pic")}
+              handleRemove={() => this.handleRemoveFile("big_pic")}
               className="dropzone col-md-6"
               multiple={false}
               accept="image/*"
