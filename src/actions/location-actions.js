@@ -158,6 +158,8 @@ export const getLocation = (locationId) => async (dispatch, getState) => {
 
   const params = {
     expand: "rooms,floors,images,maps",
+    fields:
+      "rooms.id,rooms.name,rooms.capacity,rooms.floor_id,floors.id,floors.name,floors.number,maps.id,maps.name,images.id,images.name",
     access_token: accessToken
   };
 
