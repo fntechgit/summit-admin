@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -26,6 +26,7 @@ import {
   attachFloorImage,
   deleteFloorImage
 } from "../../actions/location-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditFloorPage extends React.Component {
   constructor(props) {
@@ -54,16 +55,16 @@ class EditFloorPage extends React.Component {
 
   handleRoomDelete(roomId) {
     const { deleteRoom, entity, currentLocation } = this.props;
-    let room = entity.rooms.find((r) => r.id === roomId);
+    const room = entity.rooms.find((r) => r.id === roomId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate("edit_location.remove_room_warning") + " " + room.name,
+      text: `${T.translate("edit_location.remove_room_warning")} ${room.name}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteRoom(currentLocation.id, roomId);
       }
@@ -90,6 +91,7 @@ class EditFloorPage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_floor.floor")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

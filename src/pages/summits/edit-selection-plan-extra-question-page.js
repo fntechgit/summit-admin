@@ -9,12 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import ExtraQuestionForm from "../../components/forms/extra-question-form";
 
 import {
@@ -28,7 +29,7 @@ import {
   deleteSelectionPlanExtraQuestionValue,
   updateSelectionPlanExtraQuestionValueOrder
 } from "../../actions/selection-plan-actions";
-import Swal from "sweetalert2";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSelectionPlanExtraQuestionPage extends React.Component {
   constructor(props) {
@@ -75,19 +76,18 @@ class EditSelectionPlanExtraQuestionPage extends React.Component {
       currentSelectionPlan
     } = this.props;
 
-    let value = entity.values.find((v) => v.id === valueId);
+    const value = entity.values.find((v) => v.id === valueId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_order_extra_question.remove_value_warning") +
-        " " +
-        value.value,
+      text: `${T.translate("edit_order_extra_question.remove_value_warning")} ${
+        value.value
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSelectionPlanExtraQuestionValue(
           currentSelectionPlan.id,
@@ -127,6 +127,7 @@ class EditSelectionPlanExtraQuestionPage extends React.Component {
         <h3>
           {title}{" "}
           {T.translate("edit_order_extra_question.order_extra_question")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (
@@ -140,7 +141,7 @@ class EditSelectionPlanExtraQuestionPage extends React.Component {
             onValueDelete={this.handleValueDelete}
             onValueSave={this.handleValueSave}
             onSubmit={this.onSaveSelectionPlanExtraQuestion}
-            shouldShowEditable={true}
+            shouldShowEditable
             updateQuestionValueOrder={
               updateSelectionPlanExtraQuestionValueOrder
             }

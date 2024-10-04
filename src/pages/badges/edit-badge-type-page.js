@@ -31,6 +31,7 @@ import {
   addViewTypeToBadgeType,
   removeViewTypeFromBadgeType
 } from "../../actions/badge-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditBadgeTypePage extends React.Component {
   constructor(props) {
@@ -74,6 +75,7 @@ class EditBadgeTypePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_badge_type.badge_type")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit &&

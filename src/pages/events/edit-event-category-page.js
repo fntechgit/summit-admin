@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -27,41 +27,42 @@ import {
   updateSubCategoryOrder
 } from "../../actions/event-category-actions";
 import "../../styles/edit-event-category-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
-class EditEventCategoryPage extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+function EditEventCategoryPage({
+  currentSummit,
+  entity,
+  errors,
+  history,
+  ...rest
+}) {
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
 
-  render() {
-    const { currentSummit, entity, errors, match, history } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-
-    return (
-      <div className="container">
-        <h3>
-          {title} {T.translate("edit_event_category.event_category")}
-        </h3>
-        <hr />
-        {currentSummit && (
-          <EventCategoryForm
-            history={history}
-            currentSummit={currentSummit}
-            entity={entity}
-            errors={errors}
-            onSubmit={this.props.saveEventCategory}
-            onUploadImage={this.props.uploadImage}
-            onRemoveImage={this.props.removeImage}
-            onLinkSubCategory={this.props.linkSubCategory}
-            onUnlinkSubCategory={this.props.unlinkSubCategory}
-            onUpdateSubCategoryOrder={this.props.updateSubCategoryOrder}
-          />
-        )}
-      </div>
-    );
-  }
+  return (
+    <div className="container">
+      <h3>
+        {title} {T.translate("edit_event_category.event_category")}
+        <AddNewButton entity={entity} />
+      </h3>
+      <hr />
+      {currentSummit && (
+        <EventCategoryForm
+          history={history}
+          currentSummit={currentSummit}
+          entity={entity}
+          errors={errors}
+          onSubmit={rest.saveEventCategory}
+          onUploadImage={rest.uploadImage}
+          onRemoveImage={rest.removeImage}
+          onLinkSubCategory={rest.linkSubCategory}
+          onUnlinkSubCategory={rest.unlinkSubCategory}
+          onUpdateSubCategoryOrder={rest.updateSubCategoryOrder}
+        />
+      )}
+    </div>
+  );
 }
 
 const mapStateToProps = ({

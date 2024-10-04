@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -25,6 +25,7 @@ import {
 } from "../../actions/order-actions";
 
 import "../../styles/edit-order-extra-questions-rule.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditOrderExtraQuestionSubRulesPage extends React.Component {
   constructor(props) {
@@ -89,6 +90,7 @@ class EditOrderExtraQuestionSubRulesPage extends React.Component {
           {T.translate(
             "edit_order_extra_question_sub_rule.order_extra_question_sub_rule"
           )}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

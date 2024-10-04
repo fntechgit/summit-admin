@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
@@ -23,15 +23,16 @@ import {
 } from "../../actions/schedule-settings-actions";
 
 import "../../styles/edit-schedule-settings-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
-const EditScheduleSettingsPage = ({
+function EditScheduleSettingsPage({
   currentSummit,
   match,
   scheduleSettings,
   entity,
   errors,
   ...props
-}) => {
+}) {
   const scheduleSettingsId = match.params.schedule_settings_id;
   const title = entity.id
     ? T.translate("general.edit")
@@ -66,6 +67,7 @@ const EditScheduleSettingsPage = ({
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <h3>
         {title} {T.translate("edit_schedule_settings.schedule_settings")}
+        <AddNewButton entity={entity} />
       </h3>
       <hr />
       {currentSummit && (
@@ -78,7 +80,7 @@ const EditScheduleSettingsPage = ({
       )}
     </div>
   );
-};
+}
 
 const mapStateToProps = ({
   currentSummitState,

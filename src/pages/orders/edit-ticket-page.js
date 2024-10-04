@@ -9,13 +9,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { Modal } from "react-bootstrap";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import Swal from "sweetalert2";
+import { Table, Panel } from "openstack-uicore-foundation/lib/components";
+import moment from "moment-timezone";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getTicket,
@@ -43,12 +46,10 @@ import {
   exportBadgePrints,
   clearBadgePrints
 } from "../../actions/badge-actions";
-import Swal from "sweetalert2";
-import { Table, Panel } from "openstack-uicore-foundation/lib/components";
-import moment from "moment-timezone";
 import AuditLogs from "../../components/audit-logs";
 import Notes from "../../components/notes";
 import { deleteTicket } from "../../actions/attendee-actions";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
 class EditTicketPage extends React.Component {
   constructor(props) {
@@ -98,7 +99,7 @@ class EditTicketPage extends React.Component {
   }
 
   handleRefundChange(ev) {
-    let val = ev.target.value;
+    const val = ev.target.value;
     if (val != "") {
       if (!/^\d*(\.\d{0,2})?$/.test(val)) return;
     }
@@ -154,7 +155,7 @@ class EditTicketPage extends React.Component {
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         confirmButtonText: T.translate("general.yes_send")
-      }).then(function (result) {
+      }).then((result) => {
         if (result.value) {
           reSendTicketEmail(ticket.order_id, ticket.id);
         }
@@ -164,8 +165,8 @@ class EditTicketPage extends React.Component {
 
   handleActivateDeactivate(ticket, ev) {
     ev.preventDefault();
-    let activate = !ticket.is_active;
-    let { activateTicket, currentOrder } = this.props;
+    const activate = !ticket.is_active;
+    const { activateTicket, currentOrder } = this.props;
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: activate
@@ -177,7 +178,7 @@ class EditTicketPage extends React.Component {
       confirmButtonText: activate
         ? T.translate("edit_ticket.activate_yes")
         : T.translate("edit_ticket.deactivate_yes")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         activateTicket(currentOrder.id, ticket.id, activate);
       }
@@ -194,7 +195,7 @@ class EditTicketPage extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteBadge(ticketId);
       }
@@ -223,7 +224,7 @@ class EditTicketPage extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("edit_ticket.yes_cancel_refund")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         cancelRefundTicket(currentOrder.id, entity.id, refundRejectNotes);
       }
@@ -258,7 +259,7 @@ class EditTicketPage extends React.Component {
         showCancelButton: true,
         confirmButtonColor: "#DD6B55",
         confirmButtonText: T.translate("edit_ticket.yes_refund")
-      }).then(function (result) {
+      }).then((result) => {
         if (result.value) {
           refundTicket(entity.id, parseFloat(refundAmount), refundNotes);
         }
@@ -285,8 +286,9 @@ class EditTicketPage extends React.Component {
       match
     } = this.props;
     const { showSection, refundAmountError } = this.state;
+    const twentychars = -20;
 
-    const breadcrumb = `...${entity.number.slice(-20)}`;
+    const breadcrumb = `...${entity.number.slice(twentychars)}`;
 
     if (!entity || !entity.id) return <div />;
     if (entity.order_id !== currentOrder.id) return <div />;
@@ -297,9 +299,9 @@ class EditTicketPage extends React.Component {
       const columnKey = `tax_${t.tax.id}_refunded_amount`;
       if (!taxColumnsMap.has(columnKey)) {
         taxColumnsMap.set(columnKey, {
-          columnKey: columnKey,
+          columnKey,
           value: t.tax.name,
-          render: (row, val) => (val ? val : "0")
+          render: (row, val) => val || "0"
         });
       }
     });
@@ -321,7 +323,7 @@ class EditTicketPage extends React.Component {
         value: T.translate("edit_ticket.refund_request_action_date"),
         render: (c) =>
           c.action_date
-            ? moment(c.action_date * 1000)
+            ? moment(c.action_date * MILLISECONDS_IN_SECOND)
                 .tz(currentSummit.time_zone_id)
                 .format("MMMM Do YYYY, h:mm a (z)")
             : "TBD"
@@ -384,10 +386,9 @@ class EditTicketPage extends React.Component {
                 </button>
               )}
               <button
-                className={
-                  "btn btn-sm left-space " +
-                  (entity.is_active ? "btn-danger" : "btn-primary")
-                }
+                className={`btn btn-sm left-space ${
+                  entity.is_active ? "btn-danger" : "btn-primary"
+                }`}
                 onClick={(ev) => {
                   this.handleActivateDeactivate(entity, ev);
                 }}
@@ -396,6 +397,9 @@ class EditTicketPage extends React.Component {
                   ? T.translate("edit_ticket.deactivate")
                   : T.translate("edit_ticket.activate")}
               </button>
+              <a href="new" className="btn btn-default pull-right">
+                Add new
+              </a>
             </div>
           )}
         </h3>
@@ -437,28 +441,26 @@ class EditTicketPage extends React.Component {
                   {`${entity.discount_rate}% (${entity.currency_symbol}${entity.discount})`}
                 </div>
               </div>
-              {entity?.applied_taxes.map((at, i) => {
-                return (
-                  <div className="row" key={i}>
-                    <div className="col-md-6">
-                      <label>
-                        {T.translate("edit_ticket.tax_name_rate", {
-                          tax_name: at.tax.name
-                        })}
-                      </label>
-                      {` ${at.tax.rate}%`}
-                    </div>
-                    <div className="col-md-6">
-                      <label>
-                        {T.translate("edit_ticket.tax_name_price", {
-                          tax_name: at.tax.name
-                        })}
-                      </label>
-                      {` ${entity.currency_symbol}${at.amount}`}
-                    </div>
+              {entity?.applied_taxes.map((at) => (
+                <div className="row" key={`applied-taxes-${at.id}`}>
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate("edit_ticket.tax_name_rate", {
+                        tax_name: at.tax.name
+                      })}
+                    </label>
+                    {` ${at.tax.rate}%`}
                   </div>
-                );
-              })}
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate("edit_ticket.tax_name_price", {
+                        tax_name: at.tax.name
+                      })}
+                    </label>
+                    {` ${entity.currency_symbol}${at.amount}`}
+                  </div>
+                </div>
+              ))}
               <div className="row">
                 <div className="col-md-6 col-md-offset-6">
                   <label>
@@ -551,7 +553,7 @@ class EditTicketPage extends React.Component {
             <AuditLogs
               entityFilter={[
                 `event_id==${entity.badge.id}`,
-                `class_name==SummitAttendeeBadgeAuditLog`
+                "class_name==SummitAttendeeBadgeAuditLog"
               ]}
               columns={["created", "action", "user"]}
             />

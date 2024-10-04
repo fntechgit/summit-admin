@@ -9,12 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import {
   getSponsorExtraQuestion,
   saveSponsorExtraQuestion,
@@ -25,16 +26,16 @@ import {
   updateSponsorExtraQuestionValueOrder
 } from "../../actions/sponsor-actions";
 import ExtraQuestionForm from "../../components/forms/extra-question-form";
-import Swal from "sweetalert2";
+import AddNewButton from "../../components/buttons/add-new-button";
 
-const EditSponsorExtraQuestionPage = ({
+function EditSponsorExtraQuestionPage({
   currentSummit,
   entity,
   errors,
   match,
   allClasses,
   ...props
-}) => {
+}) {
   const extraQuestionId = match.params.extra_question_id;
   const title = entity.id
     ? T.translate("general.edit")
@@ -58,13 +59,14 @@ const EditSponsorExtraQuestionPage = ({
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_sponsor.remove_value_warning") + " " + value.value,
+      text: `${T.translate("edit_sponsor.remove_value_warning")} ${
+        value.value
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         props.deleteSponsorExtraQuestionValue(entity.id, valueId);
       }
@@ -80,6 +82,7 @@ const EditSponsorExtraQuestionPage = ({
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
       <h3>
         {title} {T.translate("edit_sponsor.extra_question")}
+        <AddNewButton entity={entity} />
       </h3>
       <hr />
       {currentSummit && (
@@ -95,12 +98,12 @@ const EditSponsorExtraQuestionPage = ({
           onValueSave={handleValueSave}
           onSubmit={props.saveSponsorExtraQuestion}
           updateQuestionValueOrder={props.updateSponsorExtraQuestionValueOrder}
-          shouldHideMandatory={true}
+          shouldHideMandatory
         />
       )}
     </div>
   );
-};
+}
 
 const mapStateToProps = ({
   currentSummitState,

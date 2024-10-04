@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -26,6 +26,7 @@ import {
   deleteRsvpQuestionValue,
   updateQuestionValuesOrder
 } from "../../actions/rsvp-template-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditRsvpQuestionPage extends React.Component {
   constructor(props) {
@@ -38,19 +39,18 @@ class EditRsvpQuestionPage extends React.Component {
 
   handleValueDelete(valueId) {
     const { deleteRsvpQuestionValue, currentTemplate, entity } = this.props;
-    let value = entity.values.find((v) => v.id === valueId);
+    const value = entity.values.find((v) => v.id === valueId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_rsvp_question.remove_value_warning") +
-        "  " +
-        value.value,
+      text: `${T.translate("edit_rsvp_question.remove_value_warning")}  ${
+        value.value
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteRsvpQuestionValue(currentTemplate.id, entity.id, valueId);
       }
@@ -95,6 +95,7 @@ class EditRsvpQuestionPage extends React.Component {
         <div className="container">
           <h3>
             {title} {T.translate("edit_rsvp_question.rsvp_question")}
+            <AddNewButton entity={entity} />
           </h3>
           <hr />
           {currentSummit && (

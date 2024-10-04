@@ -9,14 +9,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import EmailTemplateForm from "../../components/forms/email-template-form";
+import { Modal } from "react-bootstrap";
+import CodeMirror from "@uiw/react-codemirror";
+import { json } from "@codemirror/lang-json";
+import { sublimeInit } from "@uiw/codemirror-theme-sublime";
 import { getSummitById } from "../../actions/summit-actions";
+import EmailTemplateForm from "../../components/forms/email-template-form";
+import AddNewButton from "../../components/buttons/add-new-button";
+import { DECIMAL_DIGITS } from "../../utils/constants";
 import {
   getEmailTemplate,
   resetTemplateForm,
@@ -25,12 +31,8 @@ import {
   renderEmailTemplate,
   updateTemplateJsonData
 } from "../../actions/email-actions";
-import { Modal } from "react-bootstrap";
 
 import "../../styles/edit-email-template-page.less";
-import CodeMirror from "@uiw/react-codemirror";
-import { sublimeInit } from "@uiw/codemirror-theme-sublime";
-import { json } from "@codemirror/lang-json";
 
 class EditEmailTemplatePage extends React.Component {
   constructor(props) {
@@ -40,7 +42,7 @@ class EditEmailTemplatePage extends React.Component {
 
     this.state = {
       showModal: false,
-      json_data: json_data,
+      json_data,
       json_preview: json_data
     };
 
@@ -94,7 +96,7 @@ class EditEmailTemplatePage extends React.Component {
     this.setState({
       ...this.state,
       showModal: true,
-      json_preview: JSON.stringify(json_data, null, 2)
+      json_preview: JSON.stringify(json_data, null, DECIMAL_DIGITS)
     });
   }
 
@@ -129,6 +131,7 @@ class EditEmailTemplatePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("emails.email_template")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         <EmailTemplateForm
@@ -170,6 +173,7 @@ class EditEmailTemplatePage extends React.Component {
                   <a
                     href="https://jsonformatter.curiousconcept.com/"
                     target="_blank"
+                    rel="noreferrer"
                   >
                     format
                   </a>

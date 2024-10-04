@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -22,6 +22,7 @@ import {
   resetPaymentProfileForm,
   savePaymentProfile
 } from "../../actions/ticket-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditPaymentProfilePage extends React.Component {
   constructor(props) {
@@ -60,6 +61,7 @@ class EditPaymentProfilePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_payment_profile.payment_profile")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

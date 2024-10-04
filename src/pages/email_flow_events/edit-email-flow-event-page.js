@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -23,6 +23,7 @@ import {
   saveEmailFlowEvent
 } from "../../actions/email-flows-events-actions";
 import "../../styles/edit-email-flow-event-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditEmailFlowEventPage extends React.Component {
   constructor(props) {
@@ -59,6 +60,7 @@ class EditEmailFlowEventPage extends React.Component {
         <h3>
           {title} {entity.flow_name}{" "}
           {T.translate("edit_email_flow_event.email_flow_event")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -23,6 +23,7 @@ import {
   saveTicketType
 } from "../../actions/ticket-actions";
 import { getBadgeTypes } from "../../actions/badge-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditTicketTypePage extends React.Component {
   constructor(props) {
@@ -70,6 +71,7 @@ class EditTicketTypePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_ticket_type.ticket_type")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

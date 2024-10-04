@@ -79,6 +79,9 @@ class EditPurchaseOrderPage extends React.Component {
                   {T.translate("edit_purchase_order.resend_order_email")}
                 </button>
               )}
+              <a href="new" className="btn btn-default pull-right">
+                Add new
+              </a>
             </div>
           )}
         </h3>

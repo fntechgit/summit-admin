@@ -9,10 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import SelectionPlanForm from "../../components/forms/selection-plan-form";
 import {
   saveSelectionPlan,
@@ -34,7 +35,7 @@ import {
   importAllowedMembersCSV,
   saveSelectionPlanSettings
 } from "../../actions/selection-plan-actions";
-import Swal from "sweetalert2";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSelectionPlanPage extends React.Component {
   constructor(props) {
@@ -56,18 +57,19 @@ class EditSelectionPlanPage extends React.Component {
 
   onDeleteExtraQuestion(questionId) {
     const { deleteSelectionPlanExtraQuestion, entity } = this.props;
-    let extraQuestion = entity.extra_questions.find((t) => t.id === questionId);
+    const extraQuestion = entity.extra_questions.find(
+      (t) => t.id === questionId
+    );
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_selection_plan.extra_question_remove_warning") +
-        " " +
-        extraQuestion.name,
+      text: `${T.translate(
+        "edit_selection_plan.extra_question_remove_warning"
+      )} ${extraQuestion.name}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSelectionPlanExtraQuestion(entity.id, questionId);
       }
@@ -124,20 +126,19 @@ class EditSelectionPlanPage extends React.Component {
 
   onDeleteRatingType(ratingTypeId) {
     const { deleteRatingType, entity } = this.props;
-    let ratingType = entity.track_chair_rating_types.find(
+    const ratingType = entity.track_chair_rating_types.find(
       (t) => t.id === ratingTypeId
     );
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("edit_selection_plan.rating_type_remove_warning") +
-        " " +
-        ratingType.name,
+      text: `${T.translate("edit_selection_plan.rating_type_remove_warning")} ${
+        ratingType.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteRatingType(entity.id, ratingTypeId);
       }
@@ -168,22 +169,19 @@ class EditSelectionPlanPage extends React.Component {
 
   onUnassignProgressFlag(progressFlagId) {
     const { unassignProgressFlagFromSelectionPlan, entity } = this.props;
-    let ratingType = entity.allowed_presentation_action_types.find(
+    const ratingType = entity.allowed_presentation_action_types.find(
       (t) => t.id === progressFlagId
     );
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate(
-          "edit_selection_plan.presentation_action_type_remove_warning"
-        ) +
-        " " +
-        ratingType.label,
+      text: `${T.translate(
+        "edit_selection_plan.presentation_action_type_remove_warning"
+      )} ${ratingType.label}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         unassignProgressFlagFromSelectionPlan(entity.id, progressFlagId);
       }
@@ -208,6 +206,7 @@ class EditSelectionPlanPage extends React.Component {
       <div className="container">
         <h3>
           {title} {T.translate("edit_selection_plan.selection_plan")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         <SelectionPlanForm

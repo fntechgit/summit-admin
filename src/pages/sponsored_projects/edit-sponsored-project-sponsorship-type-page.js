@@ -9,18 +9,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react";
-import SponsoredProjectSponsorshipTypeForm from "../../components/forms/sponsored-project-sponsorship-type-form";
 import Swal from "sweetalert2";
+import SponsoredProjectSponsorshipTypeForm from "../../components/forms/sponsored-project-sponsorship-type-form";
 
 import {
   saveSponsorshipType,
   updateSupportingCompanyOrder,
   deleteSupportingCompany
 } from "../../actions/sponsored-project-actions";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSponsoredProjectSponsorshipTypePage extends React.Component {
   constructor(props) {
@@ -35,23 +36,20 @@ class EditSponsoredProjectSponsorshipTypePage extends React.Component {
   handleDeleteSupportingCompany(id) {
     const { deleteSupportingCompany, entity, currentSponsoredProject } =
       this.props;
-    let supportingCompany = entity.supporting_companies.find(
+    const supportingCompany = entity.supporting_companies.find(
       (q) => q.id === id
     );
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate(
-          "edit_sponsored_project_sponsorship_type.remove_supporting_company_warning"
-        ) +
-        " " +
-        supportingCompany.company_name,
+      text: `${T.translate(
+        "edit_sponsored_project_sponsorship_type.remove_supporting_company_warning"
+      )} ${supportingCompany.company_name}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSupportingCompany(currentSponsoredProject.id, entity.id, id);
       }
@@ -62,7 +60,7 @@ class EditSponsoredProjectSponsorshipTypePage extends React.Component {
     const { updateSupportingCompanyOrder, entity, currentSponsoredProject } =
       this.props;
     entity.supportingCompanies = [...supportingCompanies];
-    this.setState({ entity });
+
     updateSupportingCompanyOrder(
       supportingCompanies,
       currentSponsoredProject.id,
@@ -91,6 +89,7 @@ class EditSponsoredProjectSponsorshipTypePage extends React.Component {
           {T.translate(
             "edit_sponsored_project_sponsorship_type.sponsorship_type"
           )}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         <SponsoredProjectSponsorshipTypeForm

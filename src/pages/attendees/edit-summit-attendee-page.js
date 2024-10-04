@@ -28,6 +28,7 @@ import {
   getAllowedExtraQuestions
 } from "../../actions/attendee-actions";
 import "../../styles/edit-summit-attendee-page.less";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditSummitAttendeePage extends React.Component {
   constructor(props) {
@@ -117,6 +118,7 @@ class EditSummitAttendeePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("general.attendee")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (

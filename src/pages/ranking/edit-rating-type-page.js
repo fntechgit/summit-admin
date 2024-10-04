@@ -9,12 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import RatingTypeForm from "../../components/forms/rating-type-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -24,7 +25,7 @@ import {
   deleteScoreType,
   updateScoreTypeOrder
 } from "../../actions/ranking-actions";
-import Swal from "sweetalert2";
+import AddNewButton from "../../components/buttons/add-new-button";
 
 class EditRatingTypePage extends React.Component {
   constructor(props) {
@@ -60,7 +61,7 @@ class EditRatingTypePage extends React.Component {
 
   handleDeleteScoreType(scoreTypeId) {
     const { entity, deleteScoreType } = this.props;
-    let value = entity.score_types.find((v) => v.id === scoreTypeId);
+    const value = entity.score_types.find((v) => v.id === scoreTypeId);
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("edit_rating_type.remove_score_type_warning")} "${
@@ -70,7 +71,7 @@ class EditRatingTypePage extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteScoreType(entity.id, scoreTypeId);
       }
@@ -99,6 +100,7 @@ class EditRatingTypePage extends React.Component {
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
         <h3>
           {title} {T.translate("edit_rating_type.rating_type")}
+          <AddNewButton entity={entity} />
         </h3>
         <hr />
         {currentSummit && (
