@@ -75,7 +75,7 @@ export const DEFAULT_PER_PAGE = 10;
 export const FIVE_PER_PAGE = 5;
 
 export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
-
+export const DEFAULT_PER_PAGE_100 = 100;
 export const DEFAULT_ORDER_DIR = 1;
 
 export const INT_BASE = 10;
@@ -131,5 +131,7 @@ export const EVENT_TYPE_FISHBOWL = "Fishbowl";
 export const EVENT_TYPE_GROUP_EVENTS = "Groups Events";
 
 export const TRIM_TEXT_LENGTH_50 = 50;
+
+export const DELAY_500 = 500;
 
 export const TRIM_TEXT_LENGTH_40 = 50;
