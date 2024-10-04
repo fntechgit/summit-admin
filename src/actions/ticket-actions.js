@@ -484,7 +484,7 @@ export const getTickets =
       access_token: accessToken,
       expand: "owner,badge,promo_code,promo_code.tags,refund_requests",
       fields:
-        "owner.first_name,owner.last_name,owner.company,owner.email,badge.type_id,promo_code.code,refund_requests.status",
+        "owner.first_name,owner.last_name,owner.company,owner.email,badge.type_id,promo_code.code,refund_requests.status,badge_prints_count,bought_date,currency,currency_symbol,discount,external_order_id,final_amount,id,number,refunded_amount,status,ticket_type_id,",
       relations: "owner.none,badge.none,promo_code.tags,refund_requests.none"
     };
 
