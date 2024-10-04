@@ -565,7 +565,13 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
-        currentSummit: { ...state.currentSummit, badge_types: badgeTypes }
+        currentSummit: {
+          ...state.currentSummit,
+          badge_types: badgeTypes.map((bt) => ({
+            ...bt,
+            access_levels: bt.access_levels.map((al) => al.id)
+          }))
+        }
       };
     }
     case BADGE_TYPE_ADDED: {
@@ -574,7 +580,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         currentSummit: {
           ...state.currentSummit,
-          badge_types: [...state.currentSummit.badge_types, newBadgeType]
+          badge_types: [...state.currentSummit.badge_types, { ...newBadgeType }]
         }
       };
     }
