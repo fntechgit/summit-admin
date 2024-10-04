@@ -14,6 +14,7 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { slide as Menu } from "react-burger-menu";
+import { isMobile } from "react-device-detect";
 import { withRouter } from "react-router-dom";
 import SubMenuItem from "./sub-menu-item";
 import MenuItem from "./menu-item";
@@ -81,8 +82,10 @@ class NavMenu extends React.Component {
     const { history } = this.props;
 
     event.preventDefault();
-    // keep menu open
-    // this.setState({ menuOpen: false });
+    // keep menu open on desktop
+    if (isMobile) {
+      this.setState({ menuOpen: false });
+    }
     history.push(`/app/${url}`);
   }
 
