@@ -135,3 +135,5 @@ export const TRIM_TEXT_LENGTH_50 = 50;
 export const TRIM_TEXT_LENGTH_40 = 50;
 
 export const LANGUAGE_CODE_LENGTH = 2;
+
+export const SLICE_TICKET_NUMBER = -15;

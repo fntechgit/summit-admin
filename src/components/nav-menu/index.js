@@ -9,11 +9,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { slide as Menu } from "react-burger-menu";
+import { isMobile } from "react-device-detect";
 import { withRouter } from "react-router-dom";
 import SubMenuItem from "./sub-menu-item";
 import MenuItem from "./menu-item";
@@ -24,7 +25,7 @@ class NavMenu extends React.Component {
     super(props);
 
     this.state = {
-      subMenuOpen: "",
+      subMenuOpen: [],
       menuOpen: false
     };
 
@@ -62,17 +63,29 @@ class NavMenu extends React.Component {
 
   toggleSubMenu(event, submenu) {
     event.preventDefault();
+    const { subMenuOpen } = this.state;
+    let newSubMenuOpen = [];
+
+    if (subMenuOpen.includes(submenu)) {
+      newSubMenuOpen = subMenuOpen.filter((sm) => sm !== submenu);
+    } else {
+      newSubMenuOpen = [...subMenuOpen, submenu];
+    }
+
     this.setState({
-      subMenuOpen: submenu,
+      subMenuOpen: newSubMenuOpen,
       menuOpen: true
     });
   }
 
   onMenuItemClick(event, url) {
-    let { history } = this.props;
+    const { history } = this.props;
 
     event.preventDefault();
-    this.setState({ menuOpen: false });
+    // keep menu open on desktop
+    if (isMobile) {
+      this.setState({ menuOpen: false });
+    }
     history.push(`/app/${url}`);
   }
 
@@ -88,8 +101,8 @@ class NavMenu extends React.Component {
   }
 
   drawMenuItem(item, show, memberObj) {
-    let { subMenuOpen } = this.state;
-    let hasAccess =
+    const { subMenuOpen } = this.state;
+    const hasAccess =
       !item.hasOwnProperty("accessRoute") ||
       memberObj.hasAccess(item.accessRoute);
 
@@ -98,31 +111,31 @@ class NavMenu extends React.Component {
         return (
           <SubMenuItem
             key={item.name}
-            subMenuOpen={subMenuOpen}
+            isOpen={subMenuOpen.includes(item.name)}
             {...item}
             memberObj={memberObj}
             onClick={(e) => this.toggleSubMenu(e, item.name)}
             onItemClick={this.onMenuItemClick.bind(this)}
           />
         );
-      } else {
-        return (
-          <MenuItem
-            key={item.name}
-            {...item}
-            onClick={(e) => this.onMenuItemClick(e, item.linkUrl)}
-          />
-        );
       }
+      return (
+        <MenuItem
+          key={item.name}
+          {...item}
+          onClick={(e) => this.onMenuItemClick(e, item.linkUrl)}
+        />
+      );
     }
+    return null;
   }
 
   render() {
-    let { menuOpen } = this.state;
+    const { menuOpen } = this.state;
     const { currentSummit, member } = this.props;
-    let memberObj = new Member(member);
-    let summit_id = currentSummit.id;
-    let canEditSummit = memberObj.canEditSummit();
+    const memberObj = new Member(member);
+    const summit_id = currentSummit.id;
+    const canEditSummit = memberObj.canEditSummit();
 
     const globalItems = [
       {
@@ -137,12 +150,12 @@ class NavMenu extends React.Component {
         childs: [
           {
             name: "speaker_list",
-            linkUrl: `speakers`,
+            linkUrl: "speakers",
             accessRoute: "speaker-list"
           },
           {
             name: "merge_speakers",
-            linkUrl: `speakers/merge`,
+            linkUrl: "speakers/merge",
             accessRoute: "speakers-merge"
           }
         ]
@@ -177,8 +190,8 @@ class NavMenu extends React.Component {
         iconClass: "fa-envelope-o",
         accessRoute: "emails",
         childs: [
-          { name: "email_templates", linkUrl: `emails/templates` },
-          { name: "email_logs", linkUrl: `emails/log` }
+          { name: "email_templates", linkUrl: "emails/templates" },
+          { name: "email_logs", linkUrl: "emails/log" }
         ]
       },
       {
@@ -505,31 +518,34 @@ class NavMenu extends React.Component {
         onStateChange={this.isMenuOpen}
         noOverlay
         width={300}
-        pageWrapId={"page-wrap"}
+        pageWrapId="page-wrap"
       >
         <div className="separator">{T.translate("menu.general")}</div>
-        {globalItems.map((it) => {
-          return this.drawMenuItem(it, true, memberObj);
-        })}
+        {globalItems.map((it) => this.drawMenuItem(it, true, memberObj))}
 
         {currentSummit.id !== 0 && (
           <div className="separator">
             {currentSummit.name}
             {canEditSummit && (
-              <a
-                href=""
-                className="edit-summit"
-                onClick={(e) => this.onMenuItemClick(e, `summits/${summit_id}`)}
-              >
-                <i className="fa fa-pencil-square-o" />
-              </a>
+              <>
+                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                <a
+                  href=""
+                  className="edit-summit"
+                  onClick={(e) =>
+                    this.onMenuItemClick(e, `summits/${summit_id}`)
+                  }
+                >
+                  <i className="fa fa-pencil-square-o" />
+                </a>
+              </>
             )}
           </div>
         )}
 
-        {summitItems.map((it) => {
-          return this.drawMenuItem(it, this.showMenu(it), memberObj);
-        })}
+        {summitItems.map((it) =>
+          this.drawMenuItem(it, this.showMenu(it), memberObj)
+        )}
       </Menu>
     );
   }
