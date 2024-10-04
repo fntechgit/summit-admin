@@ -162,7 +162,6 @@ const wrapReport = (ReportComponent, specs) => {
 
     handleFilterChange = (filter, value, isMulti = false) => {
       const theValue = isMulti ? value.join(",") : value;
-
       this.fragmentParser.setParam(filter, theValue);
       window.location.hash = this.fragmentParser.serialize();
       this.handleReload();
@@ -321,7 +320,7 @@ const wrapReport = (ReportComponent, specs) => {
         }));
 
         filterHtml.push(
-          <div className="col-md-3" key="selection-plan-filter">
+          <div className="col-md-4" key="selection-plan-filter">
             <label>{T.translate("reports.selection_plan_filter")}</label>
             <Dropdown
               id="selection_plan_id_filter"
@@ -343,7 +342,7 @@ const wrapReport = (ReportComponent, specs) => {
           ? filters.selection_status?.split(",") ?? []
           : [];
         filterHtml.push(
-          <div className="col-md-3" key="selection-status-filter">
+          <div className="col-md-4" key="selection-status-filter">
             <SelectionStatusFilter
               value={filterValue}
               isMulti
@@ -360,7 +359,7 @@ const wrapReport = (ReportComponent, specs) => {
           ? filters.submission_status?.split(",") ?? []
           : [];
         filterHtml.push(
-          <div className="col-md-3" key="submission-status-filter">
+          <div className="col-md-4" key="submission-status-filter">
             <SubmissionStatusFilter
               value={filterValue}
               isMulti
@@ -368,6 +367,50 @@ const wrapReport = (ReportComponent, specs) => {
                 this.handleFilterChange("submission_status", value);
               }}
             />
+          </div>
+        );
+      }
+
+      if (specs.filters.includes("empty_bio")) {
+        const filterValue = filters.hasOwnProperty("empty_bio")
+          ? filters.empty_bio
+          : false;
+        filterHtml.push(
+          <div className="col-md-3" key="empty-bio-filter">
+            <input
+              type="checkbox"
+              id="empty_bio"
+              checked={filterValue}
+              onChange={(ev) => {
+                this.handleFilterChange("empty_bio", ev.target.checked);
+              }}
+              className="form-check-input"
+            />
+            <label className="form-check-label" htmlFor="empty_bio">
+              {T.translate("reports.speaker_empty_bio_filter")}
+            </label>
+          </div>
+        );
+      }
+
+      if (specs.filters.includes("empty_photo")) {
+        const filterValue = filters.hasOwnProperty("empty_photo")
+          ? filters.empty_photo
+          : false;
+        filterHtml.push(
+          <div className="col-md-3" key="empty-photo-filter">
+            <input
+              type="checkbox"
+              id="empty_photo"
+              checked={filterValue}
+              onChange={(ev) => {
+                this.handleFilterChange("empty_photo", ev.target.checked);
+              }}
+              className="form-check-input"
+            />
+            <label className="form-check-label" htmlFor="has_photo">
+              {T.translate("reports.speaker_empty_photo_filter")}
+            </label>
           </div>
         );
       }
