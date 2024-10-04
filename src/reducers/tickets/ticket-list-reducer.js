@@ -9,7 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
 import {
   CLEAR_ALL_SELECTED_TICKETS,
@@ -19,16 +22,11 @@ import {
   SET_SELECTED_ALL_TICKETS,
   UNSELECT_TICKET
 } from "../../actions/ticket-actions";
-
 import {
   RECEIVE_SUMMIT,
   SET_CURRENT_SUMMIT
 } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import {
-  epochToMoment,
-  epochToMomentTimeZone
-} from "openstack-uicore-foundation/lib/utils/methods";
+import { DECIMAL_DIGITS, SLICE_TICKET_NUMBER } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   tickets: [],
@@ -61,7 +59,7 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_TICKETS: {
-      let { order, orderDir, page, ...rest } = payload;
+      const { order, orderDir, page, ...rest } = payload;
 
       if (
         order !== state.order ||
@@ -100,16 +98,17 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
               "MMMM Do YYYY, h:mm:ss a"
             )
           : "";
-        const number = t.external_order_id || `...${t.number.slice(-15)}`;
+        const number =
+          t.external_order_id || `...${t.number.slice(SLICE_TICKET_NUMBER)}`;
         const final_amount_formatted = `${
           t.currency_symbol
-        }${t.final_amount.toFixed(2)}`;
+        }${t.final_amount.toFixed(DECIMAL_DIGITS)}`;
         const refunded_amount_formatted = `${
           t.currency_symbol
-        }${t.refunded_amount.toFixed(2)}`;
+        }${t.refunded_amount.toFixed(DECIMAL_DIGITS)}`;
         const final_amount_adjusted_formatted = `${t.currency_symbol}${(
           t.final_amount - t.refunded_amount
-        ).toFixed(2)}`;
+        ).toFixed(DECIMAL_DIGITS)}`;
         const promo_code_tags =
           t.promo_code?.tags.length > 0
             ? t.promo_code.tags.map((t) => t.tag)
@@ -117,13 +116,13 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
 
         return {
           id: t.id,
-          number: number,
-          order_id: t.order.id,
-          ticket_type: t.ticket_type ? t.ticket_type.name : "N/A",
-          bought_date: bought_date,
+          number,
+          order_id: t.order_id,
+          ticket_type: t.ticket_type_id,
+          bought_date,
           owner_name:
             t.owner && t.owner.first_name && t.owner.last_name
-              ? t.owner.first_name + " " + t.owner.last_name
+              ? `${t.owner.first_name} ${t.owner.last_name}`
               : "N/A",
           owner_email: t.owner ? t.owner.email : "N/A",
           owner_company: t.owner?.company || "TBD",
@@ -137,7 +136,7 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
           final_amount_adjusted: final_amount_adjusted_formatted,
           refund_requests: [...t.refund_requests],
           promo_code_tags,
-          badge_type_id: t.badge && t.badge.type ? t.badge.type.name : "N/A",
+          badge_type_id: t.badge?.type_id,
           badge_prints_count:
             t.hasOwnProperty("badge_prints_count") && t.badge_prints_count > 0
               ? t.badge_prints_count.toString()

@@ -478,12 +478,41 @@ export const getTickets =
 
     dispatch(startLoading());
 
+    const first_level_fields = [
+      "id",
+      "number",
+      "refunded_amount",
+      "status",
+      "ticket_type_id",
+      "badge_prints_count",
+      "bought_date",
+      "currency",
+      "currency_symbol",
+      "discount",
+      "external_order_id",
+      "final_amount"
+    ];
+
+    const second_level_fields = [
+      "owner.first_name",
+      "owner.last_name",
+      "owner.company",
+      "owner.email",
+      "badge.type_id",
+      "promo_code.code",
+      "refund_requests.status",
+      "promo_code.tags.tag"
+    ];
+
     const params = {
       page,
       per_page: perPage,
       access_token: accessToken,
-      expand:
-        "owner,order,ticket_type,badge,badge.type,promo_code,promo_code.tags,refund_requests,refund_requests.refunded_taxes"
+      expand: "owner,badge,promo_code,promo_code.tags,refund_requests",
+      fields: `${first_level_fields.join(",")},${second_level_fields.join(
+        ","
+      )}`,
+      relations: "owner.none,badge.none,promo_code.tags,refund_requests.none"
     };
 
     const filter = parseFilters(filters, term);
