@@ -82,6 +82,9 @@ window.APP_CLIENT_NAME = process.env.APP_CLIENT_NAME;
 window.OAUTH2_FLOW = process.env.OAUTH2_FLOW || "token id_token";
 window.PERSIST_FILTER_CRITERIA_API = process.env.PERSIST_FILTER_CRITERIA_API;
 window.SENTRY_DSN = process.env.SENTRY_DSN;
+window.SENTRY_TRACE_SAMPLE_RATE = process.env.SENTRY_TRACE_SAMPLE_RATE;
+window.SENTRY_TRACE_PROPAGATION_TARGETS =
+  process.env.SENTRY_TRACE_PROPAGATION_TARGETS;
 
 if (exclusiveSections.hasOwnProperty(process.env.APP_CLIENT_NAME)) {
   window.EXCLUSIVE_SECTIONS = exclusiveSections[process.env.APP_CLIENT_NAME];
@@ -98,9 +101,9 @@ if (window.SENTRY_DSN && window.SENTRY_DSN !== "") {
       Sentry.replayIntegration()
     ],
     // Tracing
-    tracesSampleRate: 1.0, //  Capture 100% of the transactions
+    tracesSampleRate: window.SENTRY_TRACE_SAMPLE_RATE, //  Capture 100% of the transactions
     // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-    tracePropagationTargets: ["localhost"],
+    tracePropagationTargets: [window.SENTRY_TRACE_PROPAGATION_TARGETS],
     // Set profilesSampleRate to 1.0 to profile every transaction.
     // Since profilesSampleRate is relative to tracesSampleRate,
     // the final profiling rate can be computed as tracesSampleRate * profilesSampleRate
