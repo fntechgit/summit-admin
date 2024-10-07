@@ -70,7 +70,7 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
       const allClasses = [...DEFAULT_STATE.allClasses, ...payload.response];
 
       payload.response
-        .filter((t) => t.hasOwnProperty("type"))
+        .filter((t) => t?.type)
         .forEach((t) => {
           types = types.concat(t.type);
         });
@@ -80,7 +80,11 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, allTypes: uniqueTypes, allClasses };
     }
     case RECEIVE_PROMOCODES: {
-      const { current_page, total, last_page } = payload.response;
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
       const promocodes = payload.response.data.map((p) => {
         let owner = "";
         let ownerEmail = "";
@@ -145,9 +149,9 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         promocodes,
-        currentPage: current_page,
+        currentPage,
         totalPromocodes: total,
-        lastPage: last_page
+        lastPage
       };
     }
     case PROMOCODE_DELETED: {
