@@ -78,7 +78,7 @@ export const getTrackChairs =
       expand: "member,categories",
       relations: "member.none,categories.none",
       fields:
-        "categories.id,categories.name,member.first_name,member.last_name,member.email"
+        "id,categories.id,categories.name,member.first_name,member.last_name,member.email"
     };
 
     if (filter.length > 0) {
