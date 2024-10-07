@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   INIT_SPEAKERS_LIST_PARAMS,
   REQUEST_SPEAKERS_BY_SUMMIT,
@@ -21,8 +23,6 @@ import {
   SEND_SPEAKERS_EMAILS,
   SET_SPEAKERS_CURRENT_FLOW_EVENT
 } from "../../actions/speaker-actions";
-
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   REQUEST_SUMMIT,
   SET_CURRENT_SUMMIT
@@ -51,7 +51,15 @@ const DEFAULT_STATE = {
   currentSummitId: null
 };
 
-const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
+const markCheckedItems = (data, state) =>
+  data.map((it) => ({
+    ...it,
+    checked: state.selectedAll
+      ? !state.excludedItems.includes(it.id)
+      : state.selectedItems.includes(it.id)
+  }));
+
+const summitSpeakersListReducer = (state = DEFAULT_STATE, action = {}) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
@@ -61,7 +69,7 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPEAKERS_BY_SUMMIT: {
-      let { order, orderDir, page, ...rest } = payload;
+      const { order, orderDir, page, ...rest } = payload;
 
       if (
         order !== state.order ||
@@ -92,16 +100,20 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_SPEAKERS_BY_SUMMIT: {
-      let { current_page, total, last_page } = payload.response;
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
 
       const items = buildSpeakersSubmittersList(state, payload.response.data);
 
       return {
         ...state,
         items: markCheckedItems(items, state),
-        currentPage: current_page,
+        currentPage,
         totalItems: total,
-        lastPage: last_page
+        lastPage
       };
     }
     case SELECT_SUMMIT_SPEAKER: {
@@ -195,18 +207,6 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
     default:
       return state;
   }
-};
-
-const markCheckedItems = (data, state) => {
-  return data.map((it) => {
-    if (state.selectedAll) {
-      it.checked = !state.excludedItems.includes(it.id);
-    } else {
-      it.checked = state.selectedItems.includes(it.id);
-    }
-
-    return it;
-  });
 };
 
 export default summitSpeakersListReducer;
