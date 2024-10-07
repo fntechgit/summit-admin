@@ -106,6 +106,56 @@ const parseFilters = (filters, term = null) => {
   return checkOrFilter(filters, filter);
 };
 
+const normalizeEntity = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  if (entity.class_name?.indexOf("MEMBER_") === 0) {
+    if (entity.owner != null) {
+      normalizedEntity.first_name = entity.owner.first_name;
+      normalizedEntity.last_name = entity.owner.last_name;
+      normalizedEntity.email = entity.owner.email;
+    }
+  } else if (entity.class_name?.indexOf("SPEAKER_") === 0) {
+    if (entity.speaker != null) normalizedEntity.speaker_id = entity.speaker.id;
+  } else if (entity.class_name?.indexOf("SPEAKERS_") === 0) {
+    if (entity.speakers != null && entity.speakers.speakers_list.length > 0) {
+      normalizedEntity.speaker_ids = entity.speakers.speakers_list.map(
+        (s) => s.id
+      );
+    }
+    delete normalizedEntity.speakers;
+  } else if (entity.class_name?.indexOf("SPONSOR_") === 0) {
+    if (entity.sponsor != null) normalizedEntity.sponsor_id = entity.sponsor.id;
+    if (entity.owner != null) {
+      normalizedEntity.first_name = entity.owner.first_name;
+      normalizedEntity.last_name = entity.owner.last_name;
+      normalizedEntity.email = entity.owner.email;
+    }
+  }
+
+  // clear dates
+
+  if (entity.valid_since_date === 0) {
+    normalizedEntity.valid_since_date = "";
+  }
+
+  if (entity.valid_until_date === 0) {
+    normalizedEntity.valid_until_date = "";
+  }
+
+  if (entity.tags.length > 0) {
+    normalizedEntity.tags = entity.tags.map((e) => e.tag);
+  }
+
+  delete normalizedEntity.owner;
+  delete normalizedEntity.owner_id;
+  delete normalizedEntity.speaker;
+  delete normalizedEntity.sponsor;
+  delete normalizedEntity.apply_to_all_tix;
+
+  return normalizedEntity;
+};
+
 export const getPromocodeMeta = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -238,7 +288,7 @@ export const savePromocode =
         );
       });
     }
-    const success_message = {
+    const successMessage = {
       title: T.translate("general.done"),
       html: T.translate("edit_promocode.promocode_created"),
       type: "success"
@@ -253,7 +303,7 @@ export const savePromocode =
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(
-        showMessage(success_message, () => {
+        showMessage(successMessage, () => {
           history.push(
             `/app/summits/${currentSummit.id}${
               isSponsor ? "/sponsors" : ""
@@ -346,56 +396,6 @@ export const exportPromocodes =
       )
     );
   };
-
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  if (entity.class_name?.indexOf("MEMBER_") === 0) {
-    if (entity.owner != null) {
-      normalizedEntity.first_name = entity.owner.first_name;
-      normalizedEntity.last_name = entity.owner.last_name;
-      normalizedEntity.email = entity.owner.email;
-    }
-  } else if (entity.class_name?.indexOf("SPEAKER_") === 0) {
-    if (entity.speaker != null) normalizedEntity.speaker_id = entity.speaker.id;
-  } else if (entity.class_name?.indexOf("SPEAKERS_") === 0) {
-    if (entity.speakers != null && entity.speakers.speakers_list.length > 0) {
-      normalizedEntity.speaker_ids = entity.speakers.speakers_list.map(
-        (s) => s.id
-      );
-    }
-    delete normalizedEntity.speakers;
-  } else if (entity.class_name?.indexOf("SPONSOR_") === 0) {
-    if (entity.sponsor != null) normalizedEntity.sponsor_id = entity.sponsor.id;
-    if (entity.owner != null) {
-      normalizedEntity.first_name = entity.owner.first_name;
-      normalizedEntity.last_name = entity.owner.last_name;
-      normalizedEntity.email = entity.owner.email;
-    }
-  }
-
-  // clear dates
-
-  if (entity.valid_since_date === 0) {
-    normalizedEntity.valid_since_date = "";
-  }
-
-  if (entity.valid_until_date === 0) {
-    normalizedEntity.valid_until_date = "";
-  }
-
-  if (entity.tags.length > 0) {
-    normalizedEntity.tags = entity.tags.map((e) => e.tag);
-  }
-
-  delete normalizedEntity.owner;
-  delete normalizedEntity.owner_id;
-  delete normalizedEntity.speaker;
-  delete normalizedEntity.sponsor;
-  delete normalizedEntity.apply_to_all_tix;
-
-  return normalizedEntity;
-};
 
 /** **********************  BADGE FEATURES ********************************* */
 

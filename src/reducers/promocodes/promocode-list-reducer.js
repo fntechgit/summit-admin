@@ -75,41 +75,41 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           types = types.concat(t.type);
         });
 
-      const unique_types = [...new Set(types)];
+      const uniqueTypes = [...new Set(types)];
 
-      return { ...state, allTypes: unique_types, allClasses };
+      return { ...state, allTypes: uniqueTypes, allClasses };
     }
     case RECEIVE_PROMOCODES: {
       const { current_page, total, last_page } = payload.response;
       const promocodes = payload.response.data.map((p) => {
         let owner = "";
-        let owner_email = "";
+        let ownerEmail = "";
 
         switch (p.class_name) {
           case "MEMBER_DISCOUNT_CODE":
           case "MEMBER_PROMO_CODE":
             if (p.owner) {
               owner = `${p.owner.first_name} ${p.owner.last_name}`;
-              owner_email = p.owner.email;
+              ownerEmail = p.owner.email;
             } else {
               owner =
                 p.first_name && p.last_name
                   ? `${p.first_name} ${p.last_name}`
                   : "";
-              owner_email = p.email ? p.email : "";
+              ownerEmail = p.email ? p.email : "";
             }
             break;
           case "SPEAKER_DISCOUNT_CODE":
           case "SPEAKER_PROMO_CODE":
             if (p.speaker) {
               owner = `${p.speaker.first_name} ${p.speaker.last_name}`;
-              owner_email = p.speaker.email;
+              ownerEmail = p.speaker.email;
             }
             break;
           case "SPEAKERS_DISCOUNT_CODE":
           case "SPEAKERS_PROMO_CODE":
             if (p.owners?.length > 0) {
-              owner_email = p.owners.map((o) => o.speaker.email).join(", ");
+              ownerEmail = p.owners.map((o) => o.speaker.email).join(", ");
               owner = p.owners.map(
                 (o) => `${o.speaker.first_name} ${o.speaker.last_name}`
               );
@@ -118,7 +118,7 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           case "SPONSOR_DISCOUNT_CODE":
           case "SPONSOR_PROMO_CODE":
             owner = p.sponsor?.company?.name || "";
-            owner_email = p.contact_email || "";
+            ownerEmail = p.contact_email || "";
             break;
           default:
             break;
@@ -133,7 +133,7 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           tags:
             p.tags?.length > 0 ? p.tags.map((t) => t.tag).join(", ") : "N/A",
           owner,
-          owner_email: owner_email || "",
+          owner_email: ownerEmail || "",
           email_sent: p.email_sent ? "Yes" : "No",
           redeemed: p.redeemed ? "Yes" : "No",
           creator: p?.creator
