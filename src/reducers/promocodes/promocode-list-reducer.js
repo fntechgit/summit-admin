@@ -110,6 +110,9 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           case "SPEAKERS_PROMO_CODE":
             if (p.owners?.length > 0) {
               owner_email = p.owners.map((o) => o.speaker.email).join(", ");
+              owner = p.owners.map(
+                (o) => `${o.speaker.first_name} ${o.speaker.last_name}`
+              );
             }
             break;
           case "SPONSOR_DISCOUNT_CODE":
@@ -128,13 +131,7 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           code: p.code,
           type: p.type,
           tags:
-            p.tags && p.tags.length > 0
-              ? p.tags.reduce(
-                  (accumulator, t) =>
-                    accumulator + (accumulator !== "" ? ", " : "") + t.tag,
-                  ""
-                )
-              : "N/A",
+            p.tags?.length > 0 ? p.tags.map((t) => t.tag).join(", ") : "N/A",
           owner,
           owner_email: owner_email || "",
           email_sent: p.email_sent ? "Yes" : "No",
