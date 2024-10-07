@@ -559,7 +559,11 @@ export const getPurchaseOrder = (orderId) => async (dispatch, getState) => {
 
   const params = {
     expand:
-      "tickets, tickets.owner, tickets.owner.member, tickets.ticket_type, tickets.promo_code",
+      "tickets,tickets.owner,tickets.owner.member,tickets.ticket_type,tickets.promo_code",
+    relations:
+      "tickets.none,tickets.ticket_type.none,tickets.promo_code.none,tickets.owner.none,tickets.owner.member.none",
+    fields:
+      "id,created,number,status,payment_method,owner_first_name,owner_last_name,owner_email,owner_company,credit_card_type,credit_card_4number,amount,currency_symbol,total_refunded_amount,billing_address_1,billing_address_2,billing_address_zip_code,billing_address_city,billing_address_state,tickets.id,tickets.number,tickets.ticket_type.name,tickets.ticket_type.id,tickets.promo_code.code,tickets.final_amount,tickets.total_refunded_amount,tickets.refunded_amount,tickets.currency_symbol,tickets.owner.first_name,tickets.owner.last_name,tickets.owner.email,tickets.owner.member.id,tickets.owner.member.first_name,tickets.owner.member.last_name,tickets.owner.member.company",
     access_token: accessToken
   };
 
