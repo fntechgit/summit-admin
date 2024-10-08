@@ -509,7 +509,9 @@ export const normalizeBulkEvents = (entity) => {
       streaming_url: e.streaming_url,
       streaming_type: e.streaming_type,
       meeting_url: e.meeting_url,
-      etherpad_link: e.etherpad_link
+      etherpad_link: e.etherpad_link,
+      allow_feedback: e.allow_feedback,
+      to_record: e.to_record
     };
     Object.keys(normalizedEvent).forEach((property) => {
       if (
@@ -598,7 +600,7 @@ export const bulkUpdateEvents =
       )
     );
 
-    putRequest(
+    return putRequest(
       null,
       createAction(UPDATED_REMOTE_EVENTS)({}),
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,

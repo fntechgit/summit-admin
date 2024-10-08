@@ -48,8 +48,25 @@ function EditableTableRow(props) {
 
   const onRowChange = (ev) => {
     const { value, id } = ev.target;
-    const newEventData = { ...editData, [id]: value };
-    setEditData(newEventData);
+    if (id.includes("___")) {
+      const parts = id.split("___"); // ['array property', '<element Id>', 'element property']
+      const arrayProp = parts[0];
+      const elementId = parseInt(parts[1], 10);
+      const prop = parts[2];
+
+      const arrayToChange = editData[arrayProp].map((elem) => {
+        if (elem.id === elementId) {
+          return { ...elem, [prop]: value };
+        }
+        return elem;
+      });
+
+      const newEventData = { ...editData, [arrayProp]: arrayToChange };
+      setEditData(newEventData);
+    } else {
+      const newEventData = { ...editData, [id]: value };
+      setEditData(newEventData);
+    }
   };
 
   const onRemoveOption = (rowId, id) => {

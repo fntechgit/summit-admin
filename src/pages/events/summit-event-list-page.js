@@ -65,6 +65,7 @@ import {
 } from "../../actions/filter-criteria-actions";
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
+import { saveMediaUpload } from "../../actions/media-upload-actions";
 
 const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
   {
@@ -268,6 +269,38 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
           ))}
         </>
       );
+    },
+    editableField: (extraProps) => {
+      const media_uploads = extraProps.row?.media_uploads || [];
+      if (!media_uploads.length) return false;
+      return (
+        <>
+          {media_uploads.map((m) => (
+            <div key={m.id}>
+              {`"${m.media_upload_type.name}": `}
+              <Dropdown
+                id={`media_uploads___${m.id}___display_on_site`}
+                value={m.display_on_site || null}
+                options={[
+                  { label: "Yes", value: true },
+                  { label: "No", value: false }
+                ]}
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+                styles={{
+                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  control: (base, state) => ({
+                    ...base,
+                    zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+                  })
+                }}
+                // eslint-disable-next-line react/jsx-props-no-spreading
+                {...extraProps}
+              />
+            </div>
+          ))}
+        </>
+      );
     }
   },
   {
@@ -275,14 +308,56 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
     value: "allow_feedback",
     sortable: false,
     render: (field) =>
-      field === undefined ? "N/A" : field === true ? "Yes" : "No"
+      field === undefined ? "N/A" : field === true ? "Yes" : "No",
+    editableField: (extraProps) => (
+      <Dropdown
+        id="allow_feedback"
+        value={extraProps}
+        options={[
+          { label: "Yes", value: true },
+          { label: "No", value: false }
+        ]}
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
+        styles={{
+          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          control: (base, state) => ({
+            ...base,
+            zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+          })
+        }}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...extraProps}
+      />
+    )
   },
   {
     columnKey: "to_record",
     value: "to_record",
     sortable: false,
     render: (field) =>
-      field === undefined ? "N/A" : field === true ? "Yes" : "No"
+      field === undefined ? "N/A" : field === true ? "Yes" : "No",
+    editableField: (extraProps) => (
+      <Dropdown
+        id="to_record"
+        value={extraProps}
+        options={[
+          { label: "Yes", value: true },
+          { label: "No", value: false }
+        ]}
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
+        styles={{
+          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          control: (base, state) => ({
+            ...base,
+            zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+          })
+        }}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...extraProps}
+      />
+    )
   }
 ];
 
@@ -861,7 +936,8 @@ class SummitEventListPage extends React.Component {
       orderDir,
       totalEvents,
       term,
-      bulkUpdateEvents
+      bulkUpdateEvents,
+      saveMediaUpload
     } = this.props;
     const {
       enabledFilters,
@@ -1859,6 +1935,12 @@ class SummitEventListPage extends React.Component {
                 columns={columns}
                 handleSort={this.handleSort}
                 updateData={bulkUpdateEvents}
+                afterUpdate={[
+                  {
+                    action: (data) => saveMediaUpload(data),
+                    propertyName: "media_uploads"
+                  }
+                ]}
                 handleDeleteRow={this.handleDeleteEvent}
                 formattingFunction={formatEventData}
               />
@@ -2048,5 +2130,6 @@ export default connect(mapStateToProps, {
   changeEventListSearchTerm,
   saveFilterCriteria,
   deleteFilterCriteria,
-  bulkUpdateEvents
+  bulkUpdateEvents,
+  saveMediaUpload
 })(SummitEventListPage);
