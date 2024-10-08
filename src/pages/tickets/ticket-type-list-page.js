@@ -71,7 +71,6 @@ const TicketTypeListPage = function ({
   useEffect(() => {
     if (currentSummit) {
       props.getTicketTypes(
-        currentSummit,
         term,
         order,
         orderDir,
@@ -87,7 +86,6 @@ const TicketTypeListPage = function ({
 
   const handlePageChange = (page) => {
     props.getTicketTypes(
-      currentSummit,
       term,
       order,
       orderDir,
@@ -129,7 +127,6 @@ const TicketTypeListPage = function ({
 
   const handleSort = (index, key, dir) => {
     props.getTicketTypes(
-      currentSummit,
       term,
       key,
       dir,
@@ -145,7 +142,6 @@ const TicketTypeListPage = function ({
 
   const handleSearch = (newTerm) => {
     props.getTicketTypes(
-      currentSummit,
       newTerm,
       order,
       orderDir,
@@ -199,7 +195,6 @@ const TicketTypeListPage = function ({
 
   const handleApplyTicketTypeFilters = () => {
     props.getTicketTypes(
-      currentSummit,
       term,
       order,
       orderDir,
