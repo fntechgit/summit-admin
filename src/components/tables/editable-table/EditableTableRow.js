@@ -125,7 +125,7 @@ function EditableTableRow(props) {
                       editData[col.columnKey]?.value ||
                       editData[col.columnKey],
                     onChange: onRowChange,
-                    row,
+                    row: editData,
                     rowData: editData[col.columnKey],
                     onRemoveOption
                   })}

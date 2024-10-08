@@ -280,7 +280,9 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
               {`"${m.media_upload_type.name}": `}
               <Dropdown
                 id={`media_uploads___${m.id}___display_on_site`}
-                value={m.display_on_site || null}
+                // eslint-disable-next-line react/jsx-props-no-spreading
+                {...extraProps}
+                value={m.display_on_site}
                 options={[
                   { label: "Yes", value: true },
                   { label: "No", value: false }
@@ -294,8 +296,6 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
                     zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
                   })
                 }}
-                // eslint-disable-next-line react/jsx-props-no-spreading
-                {...extraProps}
               />
             </div>
           ))}
