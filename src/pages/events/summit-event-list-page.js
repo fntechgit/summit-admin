@@ -65,7 +65,7 @@ import {
 } from "../../actions/filter-criteria-actions";
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
-import { saveMediaUpload } from "../../actions/media-upload-actions";
+import { saveEventMaterial } from "../../actions/event-material-actions";
 
 const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
   {
@@ -937,7 +937,7 @@ class SummitEventListPage extends React.Component {
       totalEvents,
       term,
       bulkUpdateEvents,
-      saveMediaUpload
+      saveEventMaterial
     } = this.props;
     const {
       enabledFilters,
@@ -1937,7 +1937,7 @@ class SummitEventListPage extends React.Component {
                 updateData={bulkUpdateEvents}
                 afterUpdate={[
                   {
-                    action: (data) => saveMediaUpload(data),
+                    action: (data) => saveEventMaterial(data),
                     propertyName: "media_uploads"
                   }
                 ]}
@@ -2131,5 +2131,5 @@ export default connect(mapStateToProps, {
   saveFilterCriteria,
   deleteFilterCriteria,
   bulkUpdateEvents,
-  saveMediaUpload
+  saveEventMaterial
 })(SummitEventListPage);
