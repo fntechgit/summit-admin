@@ -490,7 +490,8 @@ export const getTickets =
       "currency_symbol",
       "discount",
       "external_order_id",
-      "final_amount"
+      "final_amount",
+      "order_id"
     ];
 
     const second_level_fields = [
