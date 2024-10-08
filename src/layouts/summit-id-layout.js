@@ -109,7 +109,7 @@ class SummitIdLayout extends React.Component {
       : T.translate("general.new_summit");
 
     if (!currentSummit.id || parseInt(summitId) !== currentSummit.id || loading)
-      return <div />;
+      return null;
 
     return (
       <div>

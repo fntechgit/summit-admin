@@ -9,18 +9,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import Swal from "sweetalert2";
 import {
   Input,
   TicketTypesInput
 } from "openstack-uicore-foundation/lib/components";
 import OwnerInput from "../inputs/owner-input";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
-import Swal from "sweetalert2";
+
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 
 class TicketForm extends React.Component {
   constructor(props) {
@@ -43,7 +44,7 @@ class TicketForm extends React.Component {
     this.handleUnassign = this.handleUnassign.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -73,7 +74,7 @@ class TicketForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
+    const entity = { ...this.state.entity };
     let { value, id } = ev.target;
 
     if (ev.target.type === "number") {
@@ -83,16 +84,16 @@ class TicketForm extends React.Component {
     if (ev.target.type === "checkbox") {
       value = ev.target.checked;
     }
-    let shouldShowSave = this.state.shouldShowSave;
+    let {shouldShowSave} = this.state;
     if (id === "ticket_type") {
-      shouldShowSave = value == null ? false : true;
+      shouldShowSave = !(value == null);
     }
 
     entity[id] = value;
     this.setState({
       ...this.state,
-      entity: entity,
-      shouldShowSave: shouldShowSave
+      entity,
+      shouldShowSave
     });
   }
 
@@ -104,8 +105,8 @@ class TicketForm extends React.Component {
   handleUnassign(ev) {
     ev.preventDefault();
     const { entity } = this.state;
-    let { owner: prevOwner } = this.props.entity;
-    let { onUnAssign } = this.props;
+    const { owner: prevOwner } = this.props.entity;
+    const { onUnAssign } = this.props;
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: T.translate("edit_ticket.unassign_warning"),
@@ -113,7 +114,7 @@ class TicketForm extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("edit_ticket.unassign_yes")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         onUnAssign(prevOwner.id, entity.id).then(() =>
           window.location.reload()
@@ -124,7 +125,7 @@ class TicketForm extends React.Component {
 
   handleAssign(ev) {
     const { entity, canReassign } = this.state;
-    let { owner: prevOwner } = this.props.entity;
+    const { owner: prevOwner } = this.props.entity;
     ev.preventDefault();
 
     if (canReassign) {
@@ -170,7 +171,7 @@ class TicketForm extends React.Component {
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -199,7 +200,11 @@ class TicketForm extends React.Component {
             </div>
             <div className="col-md-3">
               <label> {T.translate("edit_ticket.email")}:&nbsp;</label>
-              <a href={`mailto:${entity.owner.email}`} target="_blank">
+              <a
+                href={`mailto:${entity.owner.email}`}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {entity.owner.email}
               </a>
             </div>
@@ -267,7 +272,7 @@ class TicketForm extends React.Component {
               placeholder={T.translate(
                 "edit_ticket.placeholders.select_ticket_type"
               )}
-              isClearable={true}
+              isClearable
               optionsLimit={25}
               cacheOptions
               defaultOptions
