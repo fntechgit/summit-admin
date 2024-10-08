@@ -35,8 +35,8 @@ import {
 } from "../utils/methods";
 
 import {
+  DEFAULT_100_PER_PAGE,
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_EXTRA_QUESTIONS_PER_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
@@ -167,7 +167,7 @@ export const getMainOrderExtraQuestions = () => async (dispatch, getState) => {
   apiUrl.addQuery("access_token", accessToken);
   apiUrl.addQuery("order", "order");
   apiUrl.addQuery("page", DEFAULT_CURRENT_PAGE);
-  apiUrl.addQuery("per_page", DEFAULT_EXTRA_QUESTIONS_PER_PAGE);
+  apiUrl.addQuery("per_page", DEFAULT_100_PER_PAGE);
 
   return getRequest(
     null,
