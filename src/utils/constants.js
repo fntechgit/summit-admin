@@ -86,6 +86,8 @@ export const FIFTEEN_MINUTES = 900;
 export const HOUR_AND_HALF = 5400;
 export const SECONDS_TO_MINUTES = 60;
 export const MILLISECONDS_IN_SECOND = 1000;
+export const ONE_HUNDRED = 100;
+export const FIVE_HUNDRED = 500;
 
 export const SORT_ASCENDING = 1;
 export const SORT_DESCENDING = -1;
