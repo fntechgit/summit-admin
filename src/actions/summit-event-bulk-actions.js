@@ -288,6 +288,21 @@ export const updateEventStreamingTypeLocal =
       })
     );
   };
+export const updateEventStreamIsSecureLocal =
+  (event, streamingIsSecure, isValid) => (dispatch) => {
+    const mutator = (streamingIsSecure, isValid) => (event) => ({
+      ...event,
+      stream_is_secure: streamingIsSecure,
+      is_valid: isValid
+    });
+
+    dispatch(
+      createAction(UPDATE_LOCAL_EVENT)({
+        eventId: event.id,
+        mutator: mutator(streamingIsSecure, isValid)
+      })
+    );
+  };
 export const updateEventMeetingURLLocal =
   (event, meetingURL, isValid) => (dispatch) => {
     const mutator = (meetingURL, isValid) => (event) => ({

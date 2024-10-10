@@ -193,6 +193,7 @@
     "event_duration_label": "Duration",
     "event_streaming_url_label": "Streaming URL",
     "event_streaming_type_label": "Streaming Type",
+    "event_stream_is_secure_label": "Stream Is Secure",
     "event_meeting_url_label": "Meeting URL",
     "event_etherpad_link_label": "Etherpad URL",
     "btn_apply_changes": "Apply Changes",
@@ -212,6 +213,7 @@
       "duration": "Enter Duration",
       "streaming_url": "Enter Streaming URL",
       "streaming_type": "Select a Streaming Type",
+      "stream_is_secure": "Select Stream is Secure",
       "meeting_url": "Enter Meeting URL",
       "etherpad_link": "Enter Etherpad URL"
     },

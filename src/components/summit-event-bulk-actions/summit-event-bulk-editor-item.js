@@ -9,20 +9,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React from "react";
 import { FormGroup, FormControl } from "react-bootstrap";
 import {
   DateTimePicker,
   SummitVenuesSelect,
-  Dropdown,
-  Input
+  Dropdown
 } from "openstack-uicore-foundation/lib/components";
 import { SummitEvent } from "openstack-uicore-foundation/lib/models";
 import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";
 import Select from "react-select";
 import { adjustEventDuration } from "../../utils/methods";
+import {
+  MILLISECONDS_IN_SECOND,
+  SECONDS_TO_MINUTES,
+  TIME_23,
+  TIME_59
+} from "../../utils/constants";
 
 class SummitEventBulkEditorItem extends React.Component {
   constructor(props) {
@@ -39,6 +44,8 @@ class SummitEventBulkEditorItem extends React.Component {
       this.onStreamingURLLocalChanged.bind(this);
     this.onStreamingTypeLocalChanged =
       this.onStreamingTypeLocalChanged.bind(this);
+    this.onStreamIsSecureLocalChanged =
+      this.onStreamIsSecureLocalChanged.bind(this);
     this.onMeetingURLLocalChanged = this.onMeetingURLLocalChanged.bind(this);
     this.onEtherpadURLLocalChanged = this.onEtherpadURLLocalChanged.bind(this);
     this.onTimeLocalChanged = this.onTimeLocalChanged.bind(this);
@@ -53,14 +60,14 @@ class SummitEventBulkEditorItem extends React.Component {
   getFormattedTime(atime) {
     if (atime == null) return "";
     if (!atime) return atime;
-    atime = atime * 1000;
+    atime *= MILLISECONDS_IN_SECOND;
     return moment(atime).tz(this.props.currentSummit.time_zone.name);
   }
 
   getValidationEventTitle() {
-    let { event, currentSummit } = this.props;
-    let eventModel = new SummitEvent(event, currentSummit);
-    let isValid = eventModel.isValidTitle(event.title);
+    const { event, currentSummit } = this.props;
+    const eventModel = new SummitEvent(event, currentSummit);
+    const isValid = eventModel.isValidTitle(event.title);
     return isValid ? "success" : "warning";
   }
 
@@ -73,23 +80,23 @@ class SummitEventBulkEditorItem extends React.Component {
   }
 
   getValidationStartDate() {
-    let { event, currentSummit } = this.props;
-    let eventModel = new SummitEvent(event, currentSummit);
-    let isValid = eventModel.isValidStartDate(event.start_date);
+    const { event, currentSummit } = this.props;
+    const eventModel = new SummitEvent(event, currentSummit);
+    const isValid = eventModel.isValidStartDate(event.start_date);
     return isValid ? "success" : "warning";
   }
 
   getValidationEndDate() {
-    let { event, currentSummit } = this.props;
-    let eventModel = new SummitEvent(event, currentSummit);
-    let isValid = eventModel.isValidEndDate(event.end_date);
+    const { event, currentSummit } = this.props;
+    const eventModel = new SummitEvent(event, currentSummit);
+    const isValid = eventModel.isValidEndDate(event.end_date);
     return isValid ? "success" : "warning";
   }
 
   onTitleChanged(ev) {
-    let title = ev.target.value.trim();
-    let { event, currentSummit } = this.props;
-    let eventModel = new SummitEvent(event, currentSummit);
+    const title = ev.target.value.trim();
+    const { event, currentSummit } = this.props;
+    const eventModel = new SummitEvent(event, currentSummit);
     this.props.onTitleChanged(
       this.props.index,
       title,
@@ -98,38 +105,40 @@ class SummitEventBulkEditorItem extends React.Component {
   }
 
   onLocationChanged(location) {
-    let isValid = location == null ? false : true;
+    const isValid = location != null;
     this.props.onLocationChanged(this.props.index, location, isValid);
   }
 
   onSelectionPlanChanged(option) {
-    let selectionPlan = option.value;
-    let isValid = selectionPlan == null ? false : true;
+    const selectionPlan = option.value;
+    const isValid = selectionPlan != null;
     this.props.onSelectionPlanChanged(this.props.index, selectionPlan, isValid);
   }
 
   onActivityTypeLocalChanged(ev) {
-    let activityType = ev.target.value;
-    let isValid = activityType == null ? false : true;
+    const activityType = ev.target.value;
+    const isValid = activityType != null;
     this.props.onActivityTypeLocalChanged(
       this.props.index,
       activityType,
       isValid
     );
   }
+
   onActivityCategoryLocalChanged(ev) {
-    let activityCategory = ev.target.value;
-    let isValid = activityCategory == null ? false : true;
+    const activityCategory = ev.target.value;
+    const isValid = activityCategory != null;
     this.props.onActivityCategoryLocalChanged(
       this.props.index,
       activityCategory,
       isValid
     );
   }
+
   onTimeLocalChanged(ev) {
     let { event, currentSummit } = this.props;
     event = adjustEventDuration(ev, event);
-    let eventModel = new SummitEvent(event, currentSummit);
+    const eventModel = new SummitEvent(event, currentSummit);
 
     if (event.start_date)
       this.props.onStartDateChanged(
@@ -144,7 +153,7 @@ class SummitEventBulkEditorItem extends React.Component {
         eventModel.isValidStartDate(event.end_date)
       );
     if (event.duration) {
-      let isValid = typeof event.duration == "number" ? true : false;
+      const isValid = typeof event.duration === "number";
       this.props.onDurationLocalChanged(
         this.props.index,
         event.duration,
@@ -152,35 +161,50 @@ class SummitEventBulkEditorItem extends React.Component {
       );
     }
   }
+
   onStreamingURLLocalChanged(ev) {
-    let streamingURL = ev.target.value;
-    let isValid = streamingURL == null ? false : true;
+    const streamingURL = ev.target.value;
+    const isValid = streamingURL != null;
     this.props.onStreamingURLLocalChanged(
       this.props.index,
       streamingURL,
       isValid
     );
   }
+
   onStreamingTypeLocalChanged(ev) {
     const { streamingTypeOptions } = this.props;
-    let streamingType = ev.target.value;
-    let isValid = streamingTypeOptions.some((st) => streamingType === st.value)
-      ? true
-      : false;
+    const streamingType = ev.target.value;
+    const isValid = streamingTypeOptions.some((st) => streamingType === st.value);
     this.props.onStreamingTypeLocalChanged(
       this.props.index,
       streamingType,
       isValid
     );
   }
+
+  onStreamIsSecureLocalChanged(ev) {
+    const { streamIsSecureOptions } = this.props;
+    const streamIsSecure = ev.target.value;
+    const isValid = streamIsSecureOptions.some(
+      (st) => streamIsSecure === st.value
+    );
+    this.props.onStreamIsSecureLocalChanged(
+      this.props.index,
+      streamIsSecure,
+      isValid
+    );
+  }
+
   onMeetingURLLocalChanged(ev) {
-    let meetingURL = ev.target.value;
-    let isValid = meetingURL == null ? false : true;
+    const meetingURL = ev.target.value;
+    const isValid = meetingURL != null;
     this.props.onMeetingURLLocalChanged(this.props.index, meetingURL, isValid);
   }
+
   onEtherpadURLLocalChanged(ev) {
-    let etherpadURL = ev.target.value;
-    let isValid = etherpadURL == null ? false : true;
+    const etherpadURL = ev.target.value;
+    const isValid = etherpadURL != null;
     this.props.onEtherpadURLLocalChanged(
       this.props.index,
       etherpadURL,
@@ -189,29 +213,36 @@ class SummitEventBulkEditorItem extends React.Component {
   }
 
   render() {
-    let {
+    const {
       event,
       currentSummit,
       venuesOptions,
       selectionPlanOptions,
       activityTypeOptions,
       activtyCategoryOptions,
-      streamingTypeOptions
+      streamingTypeOptions,
+      streamIsSecureOptions
     } = this.props;
-    let currentLocation = venuesOptions
+    const currentLocation = venuesOptions
       .filter((option) => option.value.id === event.location_id)
       .shift()?.value;
-    let currentSummitStartDate = moment
-      .tz(currentSummit.start_date * 1000, currentSummit.time_zone.name)
+    const currentSummitStartDate = moment
+      .tz(
+        currentSummit.start_date * MILLISECONDS_IN_SECOND,
+        currentSummit.time_zone.name
+      )
       .hour(0)
       .minute(0)
       .second(0);
-    let currentSummitEndDate = moment
-      .tz(currentSummit.end_date * 1000, currentSummit.time_zone.name)
-      .hour(23)
-      .minute(59)
-      .second(59);
-    let currentSelectionPlan = selectionPlanOptions
+    const currentSummitEndDate = moment
+      .tz(
+        currentSummit.end_date * MILLISECONDS_IN_SECOND,
+        currentSummit.time_zone.name
+      )
+      .hour(TIME_23)
+      .minute(TIME_59)
+      .second(TIME_59);
+    const currentSelectionPlan = selectionPlanOptions
       .filter((option) => option.value.id === event.selection_plan_id)
       .shift();
 
@@ -285,8 +316,9 @@ class SummitEventBulkEditorItem extends React.Component {
               timezone={currentSummit.time_zone.name}
               timeConstraints={{ hours: { min: 7, max: 22 } }}
               validation={{
-                after: currentSummitStartDate.valueOf() / 1000,
-                before: currentSummitEndDate.valueOf() / 1000
+                after:
+                  currentSummitStartDate.valueOf() / MILLISECONDS_IN_SECOND,
+                before: currentSummitEndDate.valueOf() / MILLISECONDS_IN_SECOND
               }}
               onChange={this.onTimeLocalChanged}
               value={this.getFormattedTime(event.start_date)}
@@ -308,8 +340,9 @@ class SummitEventBulkEditorItem extends React.Component {
               }}
               timezone={currentSummit.time_zone.name}
               validation={{
-                after: currentSummitStartDate.valueOf() / 1000,
-                before: currentSummitEndDate.valueOf() / 1000
+                after:
+                  currentSummitStartDate.valueOf() / MILLISECONDS_IN_SECOND,
+                before: currentSummitEndDate.valueOf() / MILLISECONDS_IN_SECOND
               }}
               onChange={this.onTimeLocalChanged}
               value={this.getFormattedTime(event.end_date)}
@@ -354,7 +387,9 @@ class SummitEventBulkEditorItem extends React.Component {
               )}
               onChange={this.onTimeLocalChanged}
               value={
-                event.duration === 0 ? "" : (event.duration / 60).toString()
+                event.duration === 0
+                  ? ""
+                  : (event.duration / SECONDS_TO_MINUTES).toString()
               }
               min="0"
               step="1"
@@ -386,6 +421,20 @@ class SummitEventBulkEditorItem extends React.Component {
                 "bulk_actions_page.placeholders.streaming_type"
               )}
               options={streamingTypeOptions}
+            />
+            <FormControl.Feedback />
+          </FormGroup>
+        </div>
+        <div className="bulk-edit-col">
+          <FormGroup>
+            <Dropdown
+              id="streaming_type"
+              value={event.stream_is_secure}
+              onChange={this.onStreamIsSecureLocalChanged}
+              placeholder={T.translate(
+                "bulk_actions_page.placeholders.stream_is_secure"
+              )}
+              options={streamIsSecureOptions}
             />
             <FormControl.Feedback />
           </FormGroup>

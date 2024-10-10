@@ -9,11 +9,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React from "react";
 import { connect } from "react-redux";
 import URI from "urijs";
 import { Breadcrumb } from "react-breadcrumbs";
+import T from "i18n-react/dist/i18n-react";
 import SummitEventBulkEditorForm from "../../components/summit-event-bulk-actions/summit-event-bulk-editor-form";
 import {
   getSummitEventsById,
@@ -35,6 +36,7 @@ import {
   updateEventDurationLocal,
   updateEventStreamingURLLocal,
   updateEventStreamingTypeLocal,
+  updateEventStreamIsSecureLocal,
   updateEventMeetingURLLocal,
   updateEventEtherpadURLLocal,
   updateEventsActivityTypeLocal,
@@ -46,7 +48,6 @@ import {
   updateEventsEtherpadURLLocal
 } from "../../actions/summit-event-bulk-actions";
 import { getSummitById } from "../../actions/summit-actions";
-import T from "i18n-react/dist/i18n-react";
 
 class SummitEventsBulkActionsPage extends React.Component {
   componentDidMount() {
@@ -83,6 +84,7 @@ class SummitEventsBulkActionsPage extends React.Component {
       updateEventDurationLocal,
       updateEventStreamingURLLocal,
       updateEventStreamingTypeLocal,
+      updateEventStreamIsSecureLocal,
       updateEventMeetingURLLocal,
       updateEventEtherpadURLLocal,
       updateEventsActivityTypeLocal,
@@ -127,6 +129,7 @@ class SummitEventsBulkActionsPage extends React.Component {
             updateEventDurationLocal={updateEventDurationLocal}
             updateEventStreamingURLLocal={updateEventStreamingURLLocal}
             updateEventStreamingTypeLocal={updateEventStreamingTypeLocal}
+            updateEventStreamIsSecureLocal={updateEventStreamIsSecureLocal}
             updateEventMeetingURLLocal={updateEventMeetingURLLocal}
             updateEventEtherpadURLLocal={updateEventEtherpadURLLocal}
             updateEventsActivityTypeLocal={updateEventsActivityTypeLocal}
@@ -175,6 +178,7 @@ export default connect(mapStateToProps, {
   updateEventDurationLocal,
   updateEventStreamingURLLocal,
   updateEventStreamingTypeLocal,
+  updateEventStreamIsSecureLocal,
   updateEventMeetingURLLocal,
   updateEventEtherpadURLLocal,
   updateEventsActivityTypeLocal,
