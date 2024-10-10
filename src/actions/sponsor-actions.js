@@ -32,7 +32,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
-import { ONE_HUNDRED, FIVE_HUNDRED } from "../utils/constants";
+import { DEFAULT_100_PER_PAGE, DEBOUNCE_WAIT } from "../utils/constants";
 
 export const REQUEST_SPONSORS = "REQUEST_SPONSORS";
 export const RECEIVE_SPONSORS = "RECEIVE_SPONSORS";
@@ -148,7 +148,7 @@ export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
 /******************  SPONSORS ****************************************/
 
 export const getSponsors =
-  (term = null, page = 1, perPage = ONE_HUNDRED, order = "order", orderDir = 1) =>
+  (term = null, page = 1, perPage = DEFAULT_100_PER_PAGE, order = "order", orderDir = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -1875,7 +1875,7 @@ export const querySummitSponsorships = _.debounce(
       })
       .catch(fetchErrorHandler);
   },
-  FIVE_HUNDRED
+  DEBOUNCE_WAIT
 );
 
 /******************  SPONSOR PROMOCODES  ****************************************/
@@ -1905,7 +1905,7 @@ export const changeSearchTerm = (term) => (dispatch, getState) => {
 };
 
 export const getSponsorPromocodes =
-  (term = null, page = 1, perPage = ONE_HUNDRED, order = "order", orderDir = 1) =>
+  (term = null, page = 1, perPage = DEFAULT_100_PER_PAGE, order = "order", orderDir = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
