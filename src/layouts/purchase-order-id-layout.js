@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Switch, Route } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
@@ -27,78 +27,59 @@ import {
   getPurchaseOrderRefunds
 } from "../actions/order-actions";
 
-class PurchaseOrderIdLayout extends React.Component {
-  constructor(props) {
-    const orderId = props.match.params.purchase_order_id;
+const PurchaseOrderIdLayout = ({ currentPurchaseOrder, match, ...props }) => {
+  const orderId = match.params.purchase_order_id;
+  const [loading, setLoading] = useState(!!orderId);
+  const last20chars = -20;
+  const breadcrumb = currentPurchaseOrder.id
+    ? `...${currentPurchaseOrder.number.slice(last20chars)}`
+    : T.translate("general.new");
 
-    super(props);
-
+  useEffect(() => {
     if (!orderId) {
       props.resetPurchaseOrderForm();
     } else {
       props
         .getPurchaseOrder(orderId)
-        .then(() => props.getPurchaseOrderRefunds(orderId));
+        .then(() =>
+          props.getPurchaseOrderRefunds(orderId).then(() => setLoading(false))
+        );
     }
-  }
+  }, [orderId]);
 
-  componentDidUpdate(prevProps) {
-    const oldId = prevProps.match.params.purchase_order_id;
-    const newId = this.props.match.params.purchase_order_id;
+  if ((orderId && !currentPurchaseOrder.id) || loading) return null;
 
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetPurchaseOrderForm();
-      } else {
-        this.props
-          .getPurchaseOrder(newId)
-          .then(() => this.props.getPurchaseOrderRefunds(newId));
-      }
-    }
-  }
-
-  render() {
-    const { match, currentPurchaseOrder } = this.props;
-    const orderId = match.params.purchase_order_id;
-    const last20chars = -20;
-    const breadcrumb = currentPurchaseOrder.id
-      ? `...${currentPurchaseOrder.number.slice(last20chars)}`
-      : T.translate("general.new");
-
-    if (orderId && !currentPurchaseOrder.id) return <div />;
-
-    return (
-      <div>
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <Switch>
-          <Route
-            strict
-            exact
-            path={`${match.url}/tickets/:ticket_id(\\d+)`}
-            render={(props) => (
-              <div>
-                <Breadcrumb
-                  data={{
-                    title: T.translate("purchase_order_list.tickets"),
-                    pathname: match.url
-                  }}
-                />
-                <EditTicketPage {...props} />
-              </div>
-            )}
-          />
-          <Route
-            strict
-            exact
-            path={match.url}
-            component={EditPurchaseOrderPage}
-          />
-          <Route component={NoMatchPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <Switch>
+        <Route
+          strict
+          exact
+          path={`${match.url}/tickets/:ticket_id(\\d+)`}
+          render={(props) => (
+            <div>
+              <Breadcrumb
+                data={{
+                  title: T.translate("purchase_order_list.tickets"),
+                  pathname: match.url
+                }}
+              />
+              <EditTicketPage {...props} />
+            </div>
+          )}
+        />
+        <Route
+          strict
+          exact
+          path={match.url}
+          component={EditPurchaseOrderPage}
+        />
+        <Route component={NoMatchPage} />
+      </Switch>
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
