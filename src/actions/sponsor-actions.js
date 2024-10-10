@@ -32,6 +32,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
+import { DEFAULT_100_PER_PAGE, DEBOUNCE_WAIT } from "../utils/constants";
 
 export const REQUEST_SPONSORS = "REQUEST_SPONSORS";
 export const RECEIVE_SPONSORS = "RECEIVE_SPONSORS";
@@ -147,7 +148,7 @@ export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
 /******************  SPONSORS ****************************************/
 
 export const getSponsors =
-  (term = null, page = 1, perPage = 100, order = "order", orderDir = 1) =>
+  (term = null, page = 1, perPage = DEFAULT_100_PER_PAGE, order = "order", orderDir = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -167,6 +168,8 @@ export const getSponsors =
       page: page,
       per_page: perPage,
       expand: "company,sponsorship,sponsorship.type",
+      relations: "company.none,sponsorship.none,sponsorship.type.none,none",
+      fields: "id,company.name,company.id,sponsorship.id,sponsorship.type.name",
       access_token: accessToken
     };
 
@@ -195,7 +198,6 @@ export const getSponsorsWithBadgeScans = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-  const filter = [];
 
   dispatch(startLoading());
 
@@ -242,7 +244,7 @@ export const getSponsor = (sponsorId) => async (dispatch, getState) => {
   });
 };
 
-export const resetSponsorForm = () => (dispatch, getState) => {
+export const resetSponsorForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSOR_FORM)({}));
 };
 
@@ -267,7 +269,7 @@ export const saveSponsor = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("edit_sponsor.sponsor_saved")));
     });
   } else {
@@ -314,7 +316,7 @@ export const addMemberToSponsor =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/users/${member.id}`,
       {},
       authErrorHandler
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -402,7 +404,7 @@ const normalizeSponsor = (entity) => {
 };
 
 export const createCompany =
-  (company, callback) => async (dispatch, getState) => {
+  (company, callback) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     const params = {
@@ -520,7 +522,7 @@ export const saveSponsorExtraQuestion =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_sponsor.extra_question_saved"))
         );
@@ -577,7 +579,7 @@ export const getSponsorExtraQuestion =
     });
   };
 
-export const resetSponsorExtraQuestionForm = () => (dispatch, getState) => {
+export const resetSponsorExtraQuestionForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSOR_EXTRA_QUESTION_FORM)({}));
 };
 
@@ -604,7 +606,7 @@ export const saveSponsorExtraQuestionValue =
         entity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(stopLoading());
       });
     }
@@ -616,7 +618,7 @@ export const saveSponsorExtraQuestionValue =
       entity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -656,7 +658,7 @@ export const updateSponsorExtraQuestionValueOrder =
       { order: newOrder },
       authErrorHandler,
       { order: newOrder, id: valueId }
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -769,7 +771,7 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(
         showSuccessMessage(T.translate("edit_sponsorship.sponsorship_saved"))
       );
@@ -823,7 +825,7 @@ export const uploadSponsorshipBadgeImage =
       file,
       authErrorHandler,
       { pic: entity.pic }
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
       history.push(
         `/app/summits/${currentSummit.id}/sponsorships/${entity.id}`
@@ -1064,7 +1066,7 @@ export const saveBadgeScan = (entity) => async (dispatch, getState) => {
     normalizedEntity,
     authErrorHandler,
     entity
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(
       showSuccessMessage(T.translate("edit_badge_scan.badge_scan_saved"))
     );
@@ -1220,7 +1222,7 @@ const uploadCarouselImage = (entity, file) => async (dispatch, getState) => {
 };
 
 export const removeSponsorImage =
-  (entity, picAttr) => async (dispatch, getState) => {
+  (entity, picAttr) => async (dispatch) => {
     dispatch(startLoading());
 
     const removeFile =
@@ -1370,7 +1372,7 @@ export const saveSponsorAdvertisement =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_sponsor.advertisement_saved"))
         );
@@ -1614,7 +1616,7 @@ export const saveSponsorMaterial = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("edit_sponsor.material_saved")));
     });
   } else {
@@ -1772,7 +1774,7 @@ export const saveSponsorSocialNetwork =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_sponsor.social_network_saved"))
         );
@@ -1873,7 +1875,7 @@ export const querySummitSponsorships = _.debounce(
       })
       .catch(fetchErrorHandler);
   },
-  500
+  DEBOUNCE_WAIT
 );
 
 /******************  SPONSOR PROMOCODES  ****************************************/
@@ -1903,7 +1905,7 @@ export const changeSearchTerm = (term) => (dispatch, getState) => {
 };
 
 export const getSponsorPromocodes =
-  (term = null, page = 1, perPage = 100, order = "order", orderDir = 1) =>
+  (term = null, page = 1, perPage = DEFAULT_100_PER_PAGE, order = "order", orderDir = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
