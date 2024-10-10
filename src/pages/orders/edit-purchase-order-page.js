@@ -26,19 +26,22 @@ import PurchaseOrderForm from "../../components/forms/purchase-order-form";
 
 import "../../styles/edit-purchase-order-page.less";
 
-class EditPurchaseOrderPage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleDeleteOrder = this.handleDeleteOrder.bind(this);
-    this.handleResendEmail = this.handleResendEmail.bind(this);
-  }
+const EditPurchaseOrderPage = ({
+  entity,
+  errors,
+  currentSummit,
+  history,
+  ...props
+}) => {
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
 
-  handleResendEmail(order) {
-    this.props.reSendOrderEmail(order.id);
-  }
+  const handleResendEmail = () => {
+    props.reSendOrderEmail(entity.id);
+  };
 
-  handleDeleteOrder(order) {
-    const { deletePurchaseOrder } = this.props;
+  const handleDeleteOrder = () => {
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: T.translate("edit_purchase_order.remove_warning"),
@@ -48,57 +51,53 @@ class EditPurchaseOrderPage extends React.Component {
       confirmButtonText: T.translate("general.yes_delete")
     }).then((result) => {
       if (result.value) {
-        deletePurchaseOrder(order.id);
+        props.deletePurchaseOrder(entity.id);
       }
     });
-  }
+  };
 
-  render() {
-    const { currentSummit, entity, errors } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-
-    return (
-      <div className="container">
-        <h3>
-          {title} {T.translate("edit_purchase_order.purchase_order")}
-          {entity.id !== 0 && (
-            <div className="pull-right form-inline">
+  return (
+    <div className="container">
+      <h3>
+        {title} {T.translate("edit_purchase_order.purchase_order")}
+        {entity.id !== 0 && (
+          <div className="pull-right form-inline">
+            <button
+              className="btn btn-sm btn-danger"
+              onClick={() => handleDeleteOrder()}
+            >
+              {T.translate("edit_purchase_order.delete_order")}
+            </button>
+            {entity.status === "Paid" && (
               <button
-                className="btn btn-sm btn-danger"
-                onClick={this.handleDeleteOrder.bind(this, entity)}
+                className="btn btn-sm btn-primary left-space"
+                onClick={() => handleResendEmail()}
               >
-                {T.translate("edit_purchase_order.delete_order")}
+                {T.translate("edit_purchase_order.resend_order_email")}
               </button>
-              {entity.status === "Paid" && (
-                <button
-                  className="btn btn-sm btn-primary left-space"
-                  onClick={this.handleResendEmail.bind(this, entity)}
-                >
-                  {T.translate("edit_purchase_order.resend_order_email")}
-                </button>
-              )}
-              <a href="new" className="btn btn-default pull-right">
-                Add new
-              </a>
-            </div>
-          )}
-        </h3>
-        <hr />
+            )}
+            <a
+              href="new"
+              className="btn btn-default pull-right btn-sm left-space"
+            >
+              Add new
+            </a>
+          </div>
+        )}
+      </h3>
+      <hr />
 
-        <PurchaseOrderForm
-          history={this.props.history}
-          currentSummit={currentSummit}
-          entity={entity}
-          errors={errors}
-          onSubmit={this.props.savePurchaseOrder}
-          addTickets={this.props.addTicketsToOrder}
-        />
-      </div>
-    );
-  }
-}
+      <PurchaseOrderForm
+        history={history}
+        currentSummit={currentSummit}
+        entity={entity}
+        errors={errors}
+        onSubmit={props.savePurchaseOrder}
+        addTickets={props.addTicketsToOrder}
+      />
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
