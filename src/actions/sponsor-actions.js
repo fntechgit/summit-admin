@@ -33,7 +33,7 @@ import { getAccessTokenSafely } from "../utils/methods";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
 import history from "../history";
 import {
-  DEBOUNCE_WAIT, DEFAULT_ORDER_DIR,
+  DEBOUNCE_WAIT,
   DEFAULT_PER_PAGE,
   HUNDRED_PER_PAGE
 } from "../utils/constants";
@@ -157,7 +157,7 @@ export const getSponsors =
     page = 1,
     perPage = HUNDRED_PER_PAGE,
     order = "order",
-    orderDir = DEFAULT_ORDER_DIR
+    orderDir = 1
   ) =>
     async (dispatch, getState) => {
       const { currentSummitState } = getState();
