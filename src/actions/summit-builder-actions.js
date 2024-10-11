@@ -73,6 +73,36 @@ export const PROPOSED_EVENTS_PUBLISHED = "PROPOSED_EVENTS_PUBLISHED";
 export const RECEIVE_PROPOSED_SCHED_LOCKS = "RECEIVE_PROPOSED_SCHED_LOCKS";
 export const UNLOCK_PROPOSED_SCHED = "UNLOCK_PROPOSED_SCHED";
 
+export const getProposedScheduleLocks = () => async (dispatch, getState) => {
+  const { currentSummitState, currentScheduleBuilderState } = getState();
+  const { currentSummit } = currentSummitState;
+  const { proposedSchedTrack } = currentScheduleBuilderState;
+  const accessToken = await getAccessTokenSafely();
+
+  const params = {
+    expand: "created_by,created_by.member",
+    page: 1,
+    perPage: 100,
+    access_token: accessToken,
+    "filter[]": [`track_id==${proposedSchedTrack?.id}`]
+  };
+
+  if (proposedSchedTrack) {
+    dispatch(startLoading());
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_PROPOSED_SCHED_LOCKS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/proposed-schedules/track-chairs/locks`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  }
+
+  return Promise.resolve();
+};
+
 export const getUnScheduleEventsPage =
   (
     summitId,
@@ -324,14 +354,13 @@ export const getProposedEvents =
   (summit, proposedSchedDay, proposedSchedLocation, proposedSchedTrack) =>
   async (dispatch) => {
     if (!summit || !proposedSchedDay || !proposedSchedLocation) {
-      dispatch(
+      return dispatch(
         createAction(CLEAR_PROPOSED_EVENTS)({
           proposedSchedDay,
           proposedSchedLocation,
           proposedSchedTrack
         })
       );
-      return;
     }
 
     const accessToken = await getAccessTokenSafely();
@@ -401,34 +430,6 @@ export const publishAllProposed = (eventIds) => async (dispatch, getState) => {
   )(params)(dispatch).then(() => {
     dispatch(refreshPublishedList());
   });
-};
-
-export const getProposedScheduleLocks = () => async (dispatch, getState) => {
-  const { currentSummitState, currentScheduleBuilderState } = getState();
-  const { currentSummit } = currentSummitState;
-  const { proposedSchedTrack } = currentScheduleBuilderState;
-  const accessToken = await getAccessTokenSafely();
-
-  const params = {
-    expand: "created_by,created_by.member",
-    page: 1,
-    perPage: 100,
-    access_token: accessToken,
-    "filter[]": [`track_id==${proposedSchedTrack?.id}`]
-  };
-
-  if (proposedSchedTrack) {
-    dispatch(startLoading());
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_PROPOSED_SCHED_LOCKS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/proposed-schedules/track-chairs/locks`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  }
 };
 
 export const unlockProposedSchedule =
