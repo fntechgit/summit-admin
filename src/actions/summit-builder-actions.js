@@ -82,7 +82,7 @@ export const getProposedScheduleLocks = () => async (dispatch, getState) => {
   const params = {
     expand: "created_by,created_by.member",
     page: 1,
-    perPage: 100,
+    per_page: 100,
     access_token: accessToken,
     "filter[]": [`track_id==${proposedSchedTrack?.id}`]
   };
@@ -165,7 +165,7 @@ export const getUnScheduleEventsPage =
 
     const params = {
       page,
-      perPage,
+      per_page: perPage,
       access_token: accessToken,
       expand: "speakers",
       relations: "speakers,speakers.none",
@@ -205,7 +205,7 @@ export const publishEvent =
     const { currentLocation } = currentScheduleBuilderState;
 
     const eventModel = new SummitEvent(event, currentSummit);
-    eventModel.tmpEvent.duration = minutes * ONE_MINUTE;
+    eventModel._event.duration = minutes * ONE_MINUTE;
     const [eventStarDateTime, eventEndDateTime] = eventModel.calculateNewDates(
       day,
       startTime,
@@ -228,7 +228,7 @@ export const publishEvent =
         location_id: currentLocation.id,
         start_date: eventStarDateTime.valueOf() / MILLISECONDS_IN_SECOND,
         end_date: eventEndDateTime.valueOf() / MILLISECONDS_IN_SECOND,
-        duration: eventModel.tmpEvent.duration
+        duration: eventModel._event.duration
       },
       authErrorHandler
     )({})(dispatch)
@@ -287,7 +287,7 @@ export const getPublishedEventsBySummitDayLocation =
 
     const params = {
       page: 1,
-      perPage: 100,
+      per_page: 100,
       access_token: accessToken,
       "filter[]": filter
     };
@@ -331,7 +331,7 @@ export const getShowAlwaysEvents =
         .valueOf() / MILLISECONDS_IN_SECOND;
     const params = {
       page: 1,
-      perPage: 100,
+      per_page: 100,
       access_token: accessToken,
       "filter[]": [
         `start_date>=${startDate}`,
@@ -382,7 +382,7 @@ export const getProposedEvents =
     const params = {
       expand: "summit_event",
       page: 1,
-      perPage: 100,
+      per_page: 100,
       access_token: accessToken
     };
 
@@ -562,7 +562,7 @@ export const searchScheduleEvents = (term) => async (dispatch, getState) => {
 
   const params = {
     page: 1,
-    perPage: ScheduleEventsSearchResultMaxPage,
+    per_page: ScheduleEventsSearchResultMaxPage,
     access_token: accessToken,
     order: "+title,+id"
   };
