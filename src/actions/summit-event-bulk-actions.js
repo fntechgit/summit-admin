@@ -47,6 +47,7 @@ export const UPDATE_ACTIVITY_CATEGORY_BULK = "UPDATE_ACTIVITY_CATEGORY_BULK";
 export const UPDATE_DURATION_BULK = "UPDATE_DURATION_BULK";
 export const UPDATE_STREAMING_URL_BULK = "UPDATE_STREAMING_URL_BULK";
 export const UPDATE_STREAMING_TYPE_BULK = "UPDATE_STREAMING_TYPE_BULK";
+export const UPDATE_STREAM_IS_SECURE_BULK = "UPDATE_STREAM_IS_SECURE_BULK";
 export const UPDATE_MEETING_URL_BULK = "UPDATE_MEETING_URL_BULK";
 export const UPDATE_ETHERPAD_URL_BULK = "UPDATE_ETHERPAD_URL_BULK";
 
@@ -501,6 +502,10 @@ export const updateEventsStreamingURLLocal = (streamingURL) => (dispatch) => {
 export const updateEventsStreamingTypeLocal = (streamingType) => (dispatch) => {
   dispatch(createAction(UPDATE_STREAMING_TYPE_BULK)({ streamingType }));
 };
+export const updateEventsStreamIsSecureLocal =
+  (streamIsSecure) => (dispatch) => {
+    dispatch(createAction(UPDATE_STREAM_IS_SECURE_BULK)({ streamIsSecure }));
+  };
 export const updateEventsMeetingURLLocal = (meetingURL) => (dispatch) => {
   dispatch(createAction(UPDATE_MEETING_URL_BULK)({ meetingURL }));
 };
@@ -522,6 +527,7 @@ const normalizeBulkEvents = (entity) => {
       duration: e.duration,
       streaming_url: e.streaming_url,
       streaming_type: e.streaming_type,
+      stream_is_secure: e.stream_is_secure,
       meeting_url: e.meeting_url,
       etherpad_link: e.etherpad_link
     };
