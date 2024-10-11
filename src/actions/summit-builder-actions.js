@@ -126,8 +126,8 @@ export const getUnScheduleEventsPage =
       const escapedTerm = escapeFilterValue(term);
       let searchString = `title=@${escapedTerm},abstract=@${escapedTerm},tags=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm}`;
 
-      if (parseInt(term)) {
-        searchString += `,id==${parseInt(term)}`;
+      if (parseInt(term, 10)) {
+        searchString += `,id==${parseInt(term, 10)}`;
       }
 
       filter.push(searchString);
@@ -175,7 +175,7 @@ export const publishEvent =
     const { currentLocation } = currentScheduleBuilderState;
 
     const eventModel = new SummitEvent(event, currentSummit);
-    eventModel._event.duration = minutes * ONE_MINUTE;
+    eventModel.tmpEvent.duration = minutes * ONE_MINUTE;
     const [eventStarDateTime, eventEndDateTime] = eventModel.calculateNewDates(
       day,
       startTime,
@@ -198,7 +198,7 @@ export const publishEvent =
         location_id: currentLocation.id,
         start_date: eventStarDateTime.valueOf() / MILLISECONDS_IN_SECOND,
         end_date: eventEndDateTime.valueOf() / MILLISECONDS_IN_SECOND,
-        duration: eventModel._event.duration
+        duration: eventModel.tmpEvent.duration
       },
       authErrorHandler
     )({})(dispatch)
@@ -552,8 +552,8 @@ export const searchScheduleEvents = (term) => async (dispatch, getState) => {
     const escapedTerm = escapeFilterValue(term);
     let searchString = `title=@${escapedTerm},abstract=@${escapedTerm},social_summary=@${term},tags=@${escapedTerm},speaker=@${escapedTerm},speaker_email=@${escapedTerm}`;
 
-    if (parseInt(term)) {
-      searchString += `,id==${parseInt(term)}`;
+    if (parseInt(term, 10)) {
+      searchString += `,id==${parseInt(term, 10)}`;
     }
 
     filter.push(searchString);
