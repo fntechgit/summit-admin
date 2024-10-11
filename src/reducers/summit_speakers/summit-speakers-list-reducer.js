@@ -10,7 +10,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
-
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   INIT_SPEAKERS_LIST_PARAMS,
