@@ -896,6 +896,7 @@ export const sendSpeakerEmails =
     testRecipient = "",
     excerptRecipient = "",
     shouldSendCopy2Submitter = false,
+    // eslint-disable-next-line no-unused-vars
     source = null,
     promoCodeStrategy = null,
     promocodeSpecification = null
@@ -1061,6 +1062,16 @@ const parseFilters = (filters) => {
     filters.trackFilter.length > 0
   ) {
     filter.push(`presentations_track_id==${filters.trackFilter.join("||")}`);
+  }
+
+  if (
+    filters.hasOwnProperty("trackGroupFilter") &&
+    Array.isArray(filters.trackGroupFilter) &&
+    filters.trackGroupFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_track_group_id==${filters.trackGroupFilter.join("||")}`
+    );
   }
 
   if (
