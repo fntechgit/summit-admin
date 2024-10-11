@@ -9,11 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import moment from "moment-timezone";
-import { ScheduleEventsSearchResultMaxPage } from "../utils/constants";
-import { checkProximityEvents } from "./event-actions";
 import {
   createAction,
   getRequest,
@@ -25,8 +23,16 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { SummitEvent } from "openstack-uicore-foundation/lib/models";
+import {
+  FIFTY_NINE,
+  MILLISECONDS_IN_SECOND,
+  ONE_MINUTE,
+  ScheduleEventsSearchResultMaxPage,
+  TWENTY_PER_PAGE,
+  TWENTYTHREE_HOURS
+} from "../utils/constants";
+import { checkProximityEvents } from "./event-actions";
 import { getAccessTokenSafely } from "../utils/methods";
-import { VIEW_TYPE_DELETED } from "./badge-actions";
 
 export const REQUEST_UNSCHEDULE_EVENTS_PAGE = "REQUEST_UNSCHEDULE_EVENTS_PAGE";
 export const RECEIVE_UNSCHEDULE_EVENTS_PAGE = "RECEIVE_UNSCHEDULE_EVENTS_PAGE";
@@ -71,7 +77,7 @@ export const getUnScheduleEventsPage =
   (
     summitId,
     page = 1,
-    per_page = 20,
+    per_page = TWENTY_PER_PAGE,
     event_type_id = null,
     track_id = null,
     selection_status = null,
@@ -81,7 +87,7 @@ export const getUnScheduleEventsPage =
     duration = null,
     resetSelected = true
   ) =>
-  async (dispatch, getState) => {
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     // filters
@@ -105,12 +111,12 @@ export const getUnScheduleEventsPage =
 
     if (duration != null) {
       if (Array.isArray(duration)) {
-        filter.push(`duration>=${duration[0] * 60}`);
-        filter.push(`duration<=${duration[1] * 60}`);
+        filter.push(`duration>=${duration[0] * ONE_MINUTE}`);
+        filter.push(`duration<=${duration[1] * ONE_MINUTE}`);
       } else {
         filter.push(
           `duration${duration.replace(/\d/g, "")}${
-            duration.replace(/\D/g, "") * 60
+            duration.replace(/\D/g, "") * ONE_MINUTE
           }`
         );
       }
@@ -128,10 +134,13 @@ export const getUnScheduleEventsPage =
     }
 
     const params = {
-      page: page,
-      per_page: per_page,
+      page,
+      per_page,
       access_token: accessToken,
-      expand: "speakers"
+      expand: "speakers",
+      relations: "speakers,speakers.none",
+      fields:
+        "id,class_name,description,duration,end_date,start_date,is_published,title,track_id,type_id,speakers.id,speakers.first_name,speakers.last_name"
     };
 
     if (filter.length > 0) {
@@ -140,7 +149,7 @@ export const getUnScheduleEventsPage =
 
     // order
     if (order != null) {
-      params["order"] = `+${order}`;
+      params.order = `+${order}`;
     }
 
     if (resetSelected) {
@@ -166,7 +175,7 @@ export const publishEvent =
     const { currentLocation } = currentScheduleBuilderState;
 
     const eventModel = new SummitEvent(event, currentSummit);
-    eventModel._event.duration = minutes * 60;
+    eventModel._event.duration = minutes * ONE_MINUTE;
     const [eventStarDateTime, eventEndDateTime] = eventModel.calculateNewDates(
       day,
       startTime,
@@ -187,8 +196,8 @@ export const publishEvent =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${event.id}/publish?access_token=${accessToken}`,
       {
         location_id: currentLocation.id,
-        start_date: eventStarDateTime.valueOf() / 1000,
-        end_date: eventEndDateTime.valueOf() / 1000,
+        start_date: eventStarDateTime.valueOf() / MILLISECONDS_IN_SECOND,
+        end_date: eventEndDateTime.valueOf() / MILLISECONDS_IN_SECOND,
         duration: eventModel._event.duration
       },
       authErrorHandler
@@ -203,17 +212,16 @@ export const publishEvent =
       });
   };
 
-export const changeCurrentSelectedDay =
-  (currentSelectedDay) => (dispatch, getState) => {
-    dispatch(
-      createAction(CHANGE_CURRENT_DAY)({
-        day: currentSelectedDay
-      })
-    );
-  };
+export const changeCurrentSelectedDay = (currentSelectedDay) => (dispatch) => {
+  dispatch(
+    createAction(CHANGE_CURRENT_DAY)({
+      day: currentSelectedDay
+    })
+  );
+};
 
 export const changeCurrentSelectedLocation =
-  (currentSelectedLocation) => (dispatch, getState) => {
+  (currentSelectedLocation) => (dispatch) => {
     dispatch(
       createAction(CHANGE_CURRENT_LOCATION)({
         location: currentSelectedLocation
@@ -230,14 +238,19 @@ export const changeSource = (selectedSource) => (dispatch) => {
 };
 
 export const getPublishedEventsBySummitDayLocation =
-  (currentSummit, currentDay, currentLocation) =>
-  async (dispatch, getState) => {
+  (currentSummit, currentDay, currentLocation) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     currentDay = moment.tz(currentDay, currentSummit.time_zone.name);
     const startDate =
-      currentDay.clone().hours(0).minutes(0).seconds(0).valueOf() / 1000;
+      currentDay.clone().hours(0).minutes(0).seconds(0).valueOf() /
+      MILLISECONDS_IN_SECOND;
     const endDate =
-      currentDay.clone().hours(23).minutes(59).seconds(59).valueOf() / 1000;
+      currentDay
+        .clone()
+        .hours(TWENTYTHREE_HOURS)
+        .minutes(FIFTY_NINE)
+        .seconds(FIFTY_NINE)
+        .valueOf() / MILLISECONDS_IN_SECOND;
     const filter = [`start_date>=${startDate}`, `end_date<=${endDate}`];
 
     dispatch(startLoading());
@@ -270,8 +283,7 @@ const refreshPublishedList = () => async (dispatch, getState) => {
 };
 
 export const getShowAlwaysEvents =
-  (summit, proposedSchedDay, proposedSchedLocation) =>
-  async (dispatch, getState) => {
+  (summit, proposedSchedDay, proposedSchedLocation) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const proposedSchedDayMoment = moment.tz(
       proposedSchedDay,
@@ -279,14 +291,14 @@ export const getShowAlwaysEvents =
     );
     const startDate =
       proposedSchedDayMoment.clone().hours(0).minutes(0).seconds(0).valueOf() /
-      1000;
+      MILLISECONDS_IN_SECOND;
     const endDate =
       proposedSchedDayMoment
         .clone()
-        .hours(23)
-        .minutes(59)
-        .seconds(59)
-        .valueOf() / 1000;
+        .hours(TWENTYTHREE_HOURS)
+        .minutes(FIFTY_NINE)
+        .seconds(FIFTY_NINE)
+        .valueOf() / MILLISECONDS_IN_SECOND;
     const params = {
       page: 1,
       per_page: 100,
@@ -294,7 +306,7 @@ export const getShowAlwaysEvents =
       "filter[]": [
         `start_date>=${startDate}`,
         `end_date<=${endDate}`,
-        `type_show_always_on_schedule==true`
+        "type_show_always_on_schedule==true"
       ]
     };
 
@@ -310,7 +322,7 @@ export const getShowAlwaysEvents =
 
 export const getProposedEvents =
   (summit, proposedSchedDay, proposedSchedLocation, proposedSchedTrack) =>
-  async (dispatch, getState) => {
+  async (dispatch) => {
     if (!summit || !proposedSchedDay || !proposedSchedLocation) {
       dispatch(
         createAction(CLEAR_PROPOSED_EVENTS)({
@@ -329,14 +341,14 @@ export const getProposedEvents =
     );
     const startDate =
       proposedSchedDayMoment.clone().hours(0).minutes(0).seconds(0).valueOf() /
-      1000;
+      MILLISECONDS_IN_SECOND;
     const endDate =
       proposedSchedDayMoment
         .clone()
-        .hours(23)
-        .minutes(59)
-        .seconds(59)
-        .valueOf() / 1000;
+        .hours(TWENTYTHREE_HOURS)
+        .minutes(FIFTY_NINE)
+        .seconds(FIFTY_NINE)
+        .valueOf() / MILLISECONDS_IN_SECOND;
     const filter = [];
     const params = {
       expand: "summit_event",
@@ -443,16 +455,15 @@ export const unlockProposedSchedule =
     });
   };
 
-export const changeCurrentEventType =
-  (currentEventType) => (dispatch, getState) => {
-    dispatch(
-      createAction(CHANGE_CURRENT_EVENT_TYPE)({
-        eventType: currentEventType
-      })
-    );
-  };
+export const changeCurrentEventType = (currentEventType) => (dispatch) => {
+  dispatch(
+    createAction(CHANGE_CURRENT_EVENT_TYPE)({
+      eventType: currentEventType
+    })
+  );
+};
 
-export const changeCurrentTrack = (currentTrack) => (dispatch, getState) => {
+export const changeCurrentTrack = (currentTrack) => (dispatch) => {
   dispatch(
     createAction(CHANGE_CURRENT_TRACK)({
       track: currentTrack
@@ -460,17 +471,16 @@ export const changeCurrentTrack = (currentTrack) => (dispatch, getState) => {
   );
 };
 
-export const changeCurrentDuration =
-  (currentDuration) => (dispatch, getState) => {
-    dispatch(
-      createAction(CHANGE_CURRENT_DURATION)({
-        duration: currentDuration
-      })
-    );
-  };
+export const changeCurrentDuration = (currentDuration) => (dispatch) => {
+  dispatch(
+    createAction(CHANGE_CURRENT_DURATION)({
+      duration: currentDuration
+    })
+  );
+};
 
 export const changeCurrentPresentationSelectionStatus =
-  (currentPresentationSelectionStatus) => (dispatch, getState) => {
+  (currentPresentationSelectionStatus) => (dispatch) => {
     dispatch(
       createAction(CHANGE_CURRENT_PRESENTATION_SELECTION_STATUS)({
         presentationSelectionStatus: currentPresentationSelectionStatus
@@ -479,7 +489,7 @@ export const changeCurrentPresentationSelectionStatus =
   };
 
 export const changeCurrentPresentationSelectionPlan =
-  (currentPresentationSelectionPlan) => (dispatch, getState) => {
+  (currentPresentationSelectionPlan) => (dispatch) => {
     dispatch(
       createAction(CHANGE_CURRENT_PRESENTATION_SELECTION_PLAN)({
         presentationSelectionPlan: currentPresentationSelectionPlan
@@ -487,32 +497,29 @@ export const changeCurrentPresentationSelectionPlan =
     );
   };
 
-export const changeCurrentUnScheduleOrderBy =
-  (orderBy) => (dispatch, getState) => {
-    dispatch(
-      createAction(CHANGE_CURRENT_ORDER_BY)({
-        orderBy: orderBy
-      })
-    );
-  };
+export const changeCurrentUnScheduleOrderBy = (orderBy) => (dispatch) => {
+  dispatch(
+    createAction(CHANGE_CURRENT_ORDER_BY)({
+      orderBy
+    })
+  );
+};
 
-export const changeCurrentUnscheduleSearchTerm =
-  (term) => (dispatch, getState) => {
-    dispatch(
-      createAction(CHANGE_CURRENT_UNSCHEDULE_SEARCH_TERM)({
-        term
-      })
-    );
-  };
+export const changeCurrentUnscheduleSearchTerm = (term) => (dispatch) => {
+  dispatch(
+    createAction(CHANGE_CURRENT_UNSCHEDULE_SEARCH_TERM)({
+      term
+    })
+  );
+};
 
-export const changeCurrentScheduleSearchTerm =
-  (term) => (dispatch, getState) => {
-    dispatch(
-      createAction(CHANGE_CURRENT_SCHEDULE_SEARCH_TERM)({
-        term
-      })
-    );
-  };
+export const changeCurrentScheduleSearchTerm = (term) => (dispatch) => {
+  dispatch(
+    createAction(CHANGE_CURRENT_SCHEDULE_SEARCH_TERM)({
+      term
+    })
+  );
+};
 
 export const unPublishEvent = (event) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -597,14 +604,14 @@ export const getEmptySpots =
     )(params)(dispatch).then(() => dispatch(stopLoading()));
   };
 
-export const clearEmptySpots = () => (dispatch, getState) => {
+export const clearEmptySpots = () => (dispatch) => {
   dispatch(createAction(CLEAR_EMPTY_SPOTS)());
 };
 
-export const clearPublishedEvents = () => (dispatch, getState) => {
+export const clearPublishedEvents = () => (dispatch) => {
   dispatch(createAction(CLEAR_PUBLISHED_EVENTS)());
 };
 
-export const changeSummitBuilderFilters = (filters) => (dispatch, getState) => {
+export const changeSummitBuilderFilters = (filters) => (dispatch) => {
   dispatch(createAction(CHANGE_SUMMIT_BUILDER_FILTERS)(filters));
 };
