@@ -44,6 +44,7 @@ import {
   updateEventsDurationLocal,
   updateEventsStreamingURLLocal,
   updateEventsStreamingTypeLocal,
+  updateEventsStreamIsSecureLocal,
   updateEventsMeetingURLLocal,
   updateEventsEtherpadURLLocal
 } from "../../actions/summit-event-bulk-actions";
@@ -92,6 +93,7 @@ class SummitEventsBulkActionsPage extends React.Component {
       updateEventsDurationLocal,
       updateEventsStreamingURLLocal,
       updateEventsStreamingTypeLocal,
+      updateEventsStreamIsSecureLocal,
       updateEventsMeetingURLLocal,
       updateEventsEtherpadURLLocal
     } = this.props;
@@ -139,6 +141,7 @@ class SummitEventsBulkActionsPage extends React.Component {
             updateEventsDurationLocal={updateEventsDurationLocal}
             updateEventsStreamingURLLocal={updateEventsStreamingURLLocal}
             updateEventsStreamingTypeLocal={updateEventsStreamingTypeLocal}
+            updateEventsStreamIsSecureLocal={updateEventsStreamIsSecureLocal}
             updateEventsMeetingURLLocal={updateEventsMeetingURLLocal}
             updateEventsEtherpadURLLocal={updateEventsEtherpadURLLocal}
             history={this.props.history}
@@ -186,6 +189,7 @@ export default connect(mapStateToProps, {
   updateEventsDurationLocal,
   updateEventsStreamingURLLocal,
   updateEventsStreamingTypeLocal,
+  updateEventsStreamIsSecureLocal,
   updateEventsMeetingURLLocal,
   updateEventsEtherpadURLLocal
 })(SummitEventsBulkActionsPage);

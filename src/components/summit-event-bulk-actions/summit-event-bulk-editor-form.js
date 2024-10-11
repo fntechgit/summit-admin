@@ -323,7 +323,7 @@ class SummitEventBulkEditorForm extends React.Component {
   onBulkStreamIsSecure(ev) {
     const { value } = ev.target;
     this.setState({ ...this.state, currentBulkStreamIsSecure: value });
-    this.props.updateEventStreamIsSecureLocal(value);
+    this.props.updateEventsStreamIsSecureLocal(value);
   }
 
   onBulkMeetingURL(ev) {
