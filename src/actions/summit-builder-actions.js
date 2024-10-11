@@ -77,11 +77,11 @@ export const getUnScheduleEventsPage =
   (
     summitId,
     page = 1,
-    per_page = TWENTY_PER_PAGE,
-    event_type_id = null,
-    track_id = null,
-    selection_status = null,
-    selection_plan = null,
+    perPage = TWENTY_PER_PAGE,
+    eventTypeId = null,
+    trackId = null,
+    selectionStatus = null,
+    selectionPlan = null,
     term = null,
     order = null,
     duration = null,
@@ -93,20 +93,20 @@ export const getUnScheduleEventsPage =
     // filters
     const filter = [];
 
-    if (event_type_id != null) {
-      filter.push(`event_type_id==${event_type_id}`);
+    if (eventTypeId != null) {
+      filter.push(`event_type_id==${eventTypeId}`);
     }
 
-    if (track_id != null) {
-      filter.push(`track_id==${track_id}`);
+    if (trackId != null) {
+      filter.push(`track_id==${trackId}`);
     }
 
-    if (selection_status != null) {
-      filter.push(`selection_status==${selection_status}`);
+    if (selectionStatus != null) {
+      filter.push(`selection_status==${selectionStatus}`);
     }
 
-    if (selection_plan != null) {
-      filter.push(`selection_plan_id==${selection_plan}`);
+    if (selectionPlan != null) {
+      filter.push(`selection_plan_id==${selectionPlan}`);
     }
 
     if (duration != null) {
@@ -135,7 +135,7 @@ export const getUnScheduleEventsPage =
 
     const params = {
       page,
-      per_page,
+      perPage,
       access_token: accessToken,
       expand: "speakers",
       relations: "speakers,speakers.none",
@@ -257,7 +257,7 @@ export const getPublishedEventsBySummitDayLocation =
 
     const params = {
       page: 1,
-      per_page: 100,
+      perPage: 100,
       access_token: accessToken,
       "filter[]": filter
     };
@@ -301,7 +301,7 @@ export const getShowAlwaysEvents =
         .valueOf() / MILLISECONDS_IN_SECOND;
     const params = {
       page: 1,
-      per_page: 100,
+      perPage: 100,
       access_token: accessToken,
       "filter[]": [
         `start_date>=${startDate}`,
@@ -353,7 +353,7 @@ export const getProposedEvents =
     const params = {
       expand: "summit_event",
       page: 1,
-      per_page: 100,
+      perPage: 100,
       access_token: accessToken
     };
 
@@ -412,7 +412,7 @@ export const getProposedScheduleLocks = () => async (dispatch, getState) => {
   const params = {
     expand: "created_by,created_by.member",
     page: 1,
-    per_page: 100,
+    perPage: 100,
     access_token: accessToken,
     "filter[]": [`track_id==${proposedSchedTrack?.id}`]
   };
@@ -561,7 +561,7 @@ export const searchScheduleEvents = (term) => async (dispatch, getState) => {
 
   const params = {
     page: 1,
-    per_page: ScheduleEventsSearchResultMaxPage,
+    perPage: ScheduleEventsSearchResultMaxPage,
     access_token: accessToken,
     order: "+title,+id"
   };
