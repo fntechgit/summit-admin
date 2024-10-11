@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -57,7 +57,6 @@ import {
 } from "../../actions/promocode-actions";
 
 import { ALL_FILTER, SpeakersSources as sources } from "../../utils/constants";
-import OrAndFilter from "../../components/filters/or-and-filter";
 import { validateEmail } from "../../utils/methods";
 import MediaTypeFilter from "../../components/filters/media-type-filter";
 
@@ -82,6 +81,8 @@ class SummitSpeakersListPage extends React.Component {
     this.handleChangeSelectionPlanFilter =
       this.handleChangeSelectionPlanFilter.bind(this);
     this.handleChangeTrackFilter = this.handleChangeTrackFilter.bind(this);
+    this.handleChangeTrackGroupFilter =
+      this.handleChangeTrackGroupFilter.bind(this);
     this.handleChangeActivityTypeFilter =
       this.handleChangeActivityTypeFilter.bind(this);
     this.handleChangeSelectionStatusFilter =
@@ -120,6 +121,7 @@ class SummitSpeakersListPage extends React.Component {
         perPage,
         selectionPlanFilter,
         trackFilter,
+        trackGroupFilter,
         activityTypeFilter,
         selectionStatusFilter,
         mediaUploadTypeFilter
@@ -130,6 +132,7 @@ class SummitSpeakersListPage extends React.Component {
       this.getBySummit(term, page, perPage, order, orderDir, {
         selectionPlanFilter,
         trackFilter,
+        trackGroupFilter,
         activityTypeFilter,
         selectionStatusFilter,
         orAndFilter,
@@ -137,8 +140,6 @@ class SummitSpeakersListPage extends React.Component {
       });
     }
   }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {}
 
   getSubjectProps() {
     const { source } = this.state;
@@ -174,6 +175,7 @@ class SummitSpeakersListPage extends React.Component {
       perPage,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
@@ -188,6 +190,7 @@ class SummitSpeakersListPage extends React.Component {
       this.getBySummit(term, 1, perPage, order, orderDir, {
         selectionPlanFilter,
         trackFilter,
+        trackGroupFilter,
         activityTypeFilter,
         selectionStatusFilter,
         orAndFilter,
@@ -211,6 +214,7 @@ class SummitSpeakersListPage extends React.Component {
       perPage,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
@@ -221,6 +225,7 @@ class SummitSpeakersListPage extends React.Component {
     this.getBySummit(term, page, perPage, order, orderDir, {
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       orAndFilter,
@@ -228,13 +233,14 @@ class SummitSpeakersListPage extends React.Component {
     });
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const {
       term,
       page,
       perPage,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
@@ -245,6 +251,7 @@ class SummitSpeakersListPage extends React.Component {
     this.getBySummit(term, page, perPage, key, dir, {
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       orAndFilter,
@@ -260,6 +267,7 @@ class SummitSpeakersListPage extends React.Component {
       perPage,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
@@ -270,6 +278,7 @@ class SummitSpeakersListPage extends React.Component {
     this.getBySummit(term, page, perPage, order, orderDir, {
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       orAndFilter,
@@ -286,6 +295,7 @@ class SummitSpeakersListPage extends React.Component {
       orderDir,
       perPage,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
@@ -296,6 +306,7 @@ class SummitSpeakersListPage extends React.Component {
     this.getBySummit(term, page, perPage, order, orderDir, {
       selectionPlanFilter: newSelectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       orAndFilter,
@@ -322,6 +333,35 @@ class SummitSpeakersListPage extends React.Component {
     this.getBySummit(term, page, perPage, order, orderDir, {
       selectionPlanFilter,
       trackFilter: newTrackFilter,
+      trackGroupFilter,
+      activityTypeFilter,
+      selectionStatusFilter,
+      orAndFilter,
+      mediaUploadTypeFilter
+    });
+  }
+
+  handleChangeTrackGroupFilter(ev) {
+    const { value: newTrackGroupFilter } = ev.target;
+    const {
+      term,
+      order,
+      page,
+      orderDir,
+      perPage,
+      selectionPlanFilter,
+      trackFilter,
+      activityTypeFilter,
+      selectionStatusFilter,
+      mediaUploadTypeFilter
+    } = this.getSubjectProps();
+    const {
+      speakerFilters: { orAndFilter }
+    } = this.state;
+    this.getBySummit(term, page, perPage, order, orderDir, {
+      selectionPlanFilter,
+      trackFilter,
+      trackGroupFilter: newTrackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       orAndFilter,
@@ -339,6 +379,7 @@ class SummitSpeakersListPage extends React.Component {
       perPage,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
     } = this.getSubjectProps();
@@ -348,6 +389,7 @@ class SummitSpeakersListPage extends React.Component {
     this.getBySummit(term, page, perPage, order, orderDir, {
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter: newActivityTypeFilter,
       selectionStatusFilter,
       orAndFilter,
@@ -366,6 +408,7 @@ class SummitSpeakersListPage extends React.Component {
       activityTypeFilter,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
     } = this.getSubjectProps();
@@ -376,6 +419,7 @@ class SummitSpeakersListPage extends React.Component {
       this.getBySummit(term, page, perPage, order, orderDir, {
         selectionPlanFilter,
         trackFilter,
+        trackGroupFilter,
         activityTypeFilter,
         selectionStatusFilter,
         orAndFilter,
@@ -386,6 +430,7 @@ class SummitSpeakersListPage extends React.Component {
       this.getBySummit(term, page, perPage, order, orderDir, {
         selectionPlanFilter,
         trackFilter,
+        trackGroupFilter,
         activityTypeFilter,
         selectionStatusFilter,
         orAndFilter,
@@ -419,6 +464,7 @@ class SummitSpeakersListPage extends React.Component {
       perPage,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       mediaUploadTypeFilter
     } = this.getSubjectProps();
@@ -428,6 +474,7 @@ class SummitSpeakersListPage extends React.Component {
     this.getBySummit(term, page, perPage, order, orderDir, {
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       orAndFilter,
       selectionStatusFilter: newSelectionStatusFilter,
@@ -436,11 +483,13 @@ class SummitSpeakersListPage extends React.Component {
   }
 
   handleChangeFlowEvent(ev) {
-    const { value, id } = ev.target;
+    const { value } = ev.target;
     const { source } = this.state;
-    source === sources.speakers
-      ? this.props.setCurrentFlowEvent(value)
-      : this.props.setCurrentSubmitterFlowEvent(value);
+    if (source === sources.speakers) {
+      this.props.setCurrentFlowEvent(value);
+    } else {
+      this.props.setCurrentSubmitterFlowEvent(value);
+    }
   }
 
   handleSendEmails(ev) {
@@ -449,15 +498,14 @@ class SummitSpeakersListPage extends React.Component {
     const { currentPromocodeSpecification } = this.props;
     const { promoCodeStrategy, testRecipient, source } = this.state;
     const isSpeakerMode = source === sources.speakers;
-    let excerptRecipient = this.ingestEmailRef.value;
-    let shouldSendCopy2Submitter =
+    const excerptRecipient = this.ingestEmailRef.value;
+    const shouldSendCopy2Submitter =
       isSpeakerMode && this.shouldSendCopy2SubmitterRef.checked;
     const {
       term,
-      order,
-      orderDir,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
@@ -487,6 +535,7 @@ class SummitSpeakersListPage extends React.Component {
           {
             selectionPlanFilter,
             trackFilter,
+            trackGroupFilter,
             activityTypeFilter,
             selectionStatusFilter,
             orAndFilter,
@@ -557,6 +606,7 @@ class SummitSpeakersListPage extends React.Component {
       orderDir,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
@@ -568,6 +618,7 @@ class SummitSpeakersListPage extends React.Component {
     this.export(term, order, orderDir, {
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       orAndFilter,
@@ -578,27 +629,35 @@ class SummitSpeakersListPage extends React.Component {
   handleSelected(item_id, isSelected) {
     const { source } = this.state;
     if (isSelected) {
-      source === sources.speakers
-        ? this.props.selectSummitSpeaker(item_id)
-        : this.props.selectSummitSubmitter(item_id);
+      if (source === sources.speakers) {
+        this.props.selectSummitSpeaker(item_id);
+      } else {
+        this.props.selectSummitSubmitter(item_id);
+      }
       return;
     }
-    source === sources.speakers
-      ? this.props.unselectSummitSpeaker(item_id)
-      : this.props.unselectSummitSubmitter(item_id);
+    if (source === sources.speakers) {
+      this.props.unselectSummitSpeaker(item_id);
+    } else {
+      this.props.unselectSummitSubmitter(item_id);
+    }
   }
 
   handleSelectedAll(ev) {
-    let selectedAll = ev.target.checked;
+    const selectedAll = ev.target.checked;
     const { source } = this.state;
-    source === sources.speakers
-      ? this.props.selectAllSummitSpeakers()
-      : this.props.selectAllSummitSubmitters();
+    if (source === sources.speakers) {
+      this.props.selectAllSummitSpeakers();
+    } else {
+      this.props.selectAllSummitSubmitters();
+    }
     if (!selectedAll) {
-      //clear all selected
-      source === sources.speakers
-        ? this.props.unselectAllSummitSpeakers()
-        : this.props.unselectAllSummitSubmitters();
+      // clear all selected
+      if (source === sources.speakers) {
+        this.props.unselectAllSummitSpeakers();
+      } else {
+        this.props.unselectAllSummitSubmitters();
+      }
     }
   }
 
@@ -610,6 +669,7 @@ class SummitSpeakersListPage extends React.Component {
       orderDir,
       perPage,
       trackFilter,
+      trackGroupFilter,
       selectionPlanFilter,
       activityTypeFilter,
       selectionStatusFilter,
@@ -622,6 +682,7 @@ class SummitSpeakersListPage extends React.Component {
     this.getBySummit(term, page, perPage, order, orderDir, {
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       mediaUploadTypeFilter,
       selectionStatusFilter,
@@ -646,6 +707,7 @@ class SummitSpeakersListPage extends React.Component {
       selectedAll,
       selectionPlanFilter,
       trackFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter,
@@ -687,6 +749,10 @@ class SummitSpeakersListPage extends React.Component {
       label: track.name,
       value: track.id
     }));
+    const trackGroupsDDL = currentSummit.track_groups.map((trackGroup) => ({
+      label: trackGroup.name,
+      value: trackGroup.id
+    }));
     const activityTypesDDL = currentSummit.event_types.map((type) => ({
       label: type.name,
       value: type.id
@@ -719,7 +785,7 @@ class SummitSpeakersListPage extends React.Component {
       }
     ];
 
-    let emailFlowDDL =
+    const emailFlowDDL =
       this.state.source === sources.speakers
         ? [
             { label: "-- SELECT EMAIL EVENT --", value: "" },
@@ -787,7 +853,7 @@ class SummitSpeakersListPage extends React.Component {
             }
           ];
 
-    let promoCodeStrategiesDDL = [
+    const promoCodeStrategiesDDL = [
       {
         label: T.translate("summit_speakers_list.select_promo_code_strategy"),
         value: 0
@@ -824,7 +890,7 @@ class SummitSpeakersListPage extends React.Component {
           onSelectedAll: this.handleSelectedAll
         }
       },
-      selectedAll: selectedAll
+      selectedAll
     };
 
     if (!currentSummit.id) return <div />;
@@ -838,8 +904,8 @@ class SummitSpeakersListPage extends React.Component {
             : T.translate("summit_submitters_list.summit_submitters_list")}{" "}
           ({totalItems})
         </h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <FreeTextSearch
               value={term ?? ""}
               placeholder={T.translate(
@@ -855,7 +921,7 @@ class SummitSpeakersListPage extends React.Component {
               onChange={this.handleSpeakerSubmitterSourceChange}
               options={speakerSubmitterSourceSelectorDDL}
               isClearable={false}
-              placeholder={"Select a source"}
+              placeholder="Select a source"
             />
           </div>
           <div className="col-md-3 text-right">
@@ -874,8 +940,8 @@ class SummitSpeakersListPage extends React.Component {
               value={selectionPlanFilter}
               onChange={this.handleChangeSelectionPlanFilter}
               options={selectionPlansDDL}
-              isClearable={true}
-              placeholder={"Filter By Selection Plan"}
+              isClearable
+              placeholder="Filter By Selection Plan"
               isMulti
             />
           </div>
@@ -885,8 +951,8 @@ class SummitSpeakersListPage extends React.Component {
               value={trackFilter}
               onChange={this.handleChangeTrackFilter}
               options={tracksDDL}
-              isClearable={true}
-              placeholder={"Filter By Track"}
+              isClearable
+              placeholder="Filter By Track"
               isMulti
             />
           </div>
@@ -896,8 +962,8 @@ class SummitSpeakersListPage extends React.Component {
               value={activityTypeFilter}
               onChange={this.handleChangeActivityTypeFilter}
               options={activityTypesDDL}
-              isClearable={true}
-              placeholder={"Filter By Activity Type"}
+              isClearable
+              placeholder="Filter By Activity Type"
               isMulti
             />
           </div>
@@ -907,17 +973,27 @@ class SummitSpeakersListPage extends React.Component {
               value={selectionStatusFilter}
               onChange={this.handleChangeSelectionStatusFilter}
               options={selectionStatusDDL}
-              isClearable={true}
-              placeholder={"Filter By Selection Status"}
+              isClearable
+              placeholder="Filter By Selection Status"
               isMulti
             />
           </div>
         </div>
-
         <div className="row">
-          <div className={"col-md-12 speaker-list-filter-col"}>
+          <div className="col-md-3 speaker-list-filter-col">
+            <Dropdown
+              id="trackGroupFilter"
+              value={trackGroupFilter}
+              onChange={this.handleChangeTrackGroupFilter}
+              options={trackGroupsDDL}
+              isClearable
+              placeholder="Filter By Track Group"
+              isMulti
+            />
+          </div>
+          <div className="col-md-9 speaker-list-filter-col">
             <MediaTypeFilter
-              id={"media_upload_with_type"}
+              id="media_upload_with_type"
               operatorInitialValue={mediaUploadTypeFilter.operator}
               filterInitialValue={mediaUploadTypeFilter.value}
               summitId={currentSummit.id}
@@ -933,7 +1009,7 @@ class SummitSpeakersListPage extends React.Component {
               value={currentFlowEvent}
               onChange={this.handleChangeFlowEvent}
               options={emailFlowDDL}
-              isClearable={true}
+              isClearable
             />
           </div>
           <div className="col-md-4 speaker-list-email-col">
@@ -1036,7 +1112,7 @@ class SummitSpeakersListPage extends React.Component {
                       value={promoCodeStrategy}
                       onChange={this.handleChangePromoCodeStrategy}
                       options={promoCodeStrategiesDDL}
-                      isClearable={true}
+                      isClearable
                     />
                   </div>
                   <div className="col-md-12">
@@ -1058,7 +1134,9 @@ class SummitSpeakersListPage extends React.Component {
                     <input
                       id="ingest_email"
                       className="form-control"
-                      ref={(node) => (this.ingestEmailRef = node)}
+                      ref={(node) => {
+                        this.ingestEmailRef = node;
+                      }}
                     />
                   </div>
                   {this.state.source === sources.speakers && (
@@ -1071,9 +1149,9 @@ class SummitSpeakersListPage extends React.Component {
                           id="should_send_copy_2_submitter"
                           className="form-check-input"
                           type="checkbox"
-                          ref={(node) =>
-                            (this.shouldSendCopy2SubmitterRef = node)
-                          }
+                          ref={(node) => {
+                            this.shouldSendCopy2SubmitterRef = node;
+                          }}
                         />
                         <label
                           className="form-check-label"

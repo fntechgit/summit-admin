@@ -9,12 +9,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import MediaUploadTypeInput from "../../inputs/media-upload-type-input";
 import Select from "react-select";
+import MediaUploadTypeInput from "../../inputs/media-upload-type-input";
 
 import styles from "./index.module.less";
 
@@ -42,14 +42,14 @@ const MediaTypeFilter = ({
       : null
   );
   const [filterValue, setFilterValue] = useState(
-    filterInitialValue ? filterInitialValue : null
+    filterInitialValue || null
   );
 
   const onChangeOperator = (newOperatorValue) => {
     setOperatorValue(newOperatorValue);
-    let ev = {
+    const ev = {
       target: {
-        id: id,
+        id,
         value: filterValue,
         type: "mediatypeinput",
         operator: newOperatorValue.value
@@ -61,10 +61,10 @@ const MediaTypeFilter = ({
   const onChangeFilterValue = (newFilterValue) => {
     const { value } = newFilterValue.target;
     setFilterValue(value);
-    let ev = {
+    const ev = {
       target: {
-        id: id,
-        value: value,
+        id,
+        value,
         type: "mediatypeinput",
         operator: operatorValue.value
       }
@@ -74,10 +74,10 @@ const MediaTypeFilter = ({
 
   return (
     <div className={`${styles.mediaTypeFilterWrapper} row`} id={id}>
-      <div className="col-xs-3">
+      <div className="col-xs-4">
         {T.translate("media_upload_type_filter.media_type")}
       </div>
-      <div className="col-xs-3">
+      <div className="col-xs-4">
         <Select
           id={`${id}_operator`}
           value={operatorValue}
@@ -88,7 +88,7 @@ const MediaTypeFilter = ({
           onChange={onChangeOperator}
         />
       </div>
-      <div className="col-xs-6">
+      <div className="col-xs-4">
         <MediaUploadTypeInput
           id={`${id}_value`}
           value={filterValue}

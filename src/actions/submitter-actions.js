@@ -178,6 +178,7 @@ export const exportSummitSubmitters =
  */
 export const sendSubmitterEmails =
   (
+    /* eslint-disable */
     term = null,
     filters = {},
     testRecipient = "",
@@ -187,6 +188,7 @@ export const sendSubmitterEmails =
     source = null,
     promoCodeStrategy = null,
     promocodeSpecification = null
+    /* eslint-enable */
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentSummitSubmittersListState } = getState();
@@ -314,6 +316,20 @@ const parseFilters = (filters) => {
   ) {
     filter.push(
       `presentations_track_id==${filters.trackFilter.reduce(
+        (accumulator, t) =>
+          `${accumulator + (accumulator !== "" ? "||" : "")}${t}`,
+        ""
+      )}`
+    );
+  }
+
+  if (
+    filters.hasOwnProperty("trackGroupFilter") &&
+    Array.isArray(filters.trackGroupFilter) &&
+    filters.trackGroupFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_track_group_id==${filters.trackGroupFilter.reduce(
         (accumulator, t) =>
           `${accumulator + (accumulator !== "" ? "||" : "")}${t}`,
         ""
