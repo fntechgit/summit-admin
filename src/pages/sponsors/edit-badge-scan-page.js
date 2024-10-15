@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
@@ -23,59 +23,50 @@ import {
 } from "../../actions/sponsor-actions";
 import AddNewButton from "../../components/buttons/add-new-button";
 
-class EditBadgeScanPage extends React.Component {
-  constructor(props) {
-    const badgeScanId = props.match.params.badge_scan_id;
-    super(props);
+const EditBadgeScanPage = ({
+  currentSummit,
+  entity,
+  errors,
+  match,
+  history,
+  ...props
+}) => {
+  const badgeScanId = match.params.badge_scan_id;
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
+  const breadcrumb = entity.id
+    ? entity.attendee_full_name
+    : T.translate("general.new");
 
+  useEffect(() => {
     if (!badgeScanId) {
       props.resetBadgeScanForm();
     } else {
       props.getBadgeScan(badgeScanId);
     }
-  }
+  }, [badgeScanId]);
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.match.params.badge_scan_id;
-    const newId = this.props.match.params.badge_scan_id;
-
-    if (newId !== oldId) {
-      if (!newId) {
-        this.props.resetBadgeScanForm();
-      } else {
-        this.props.getBadgeScan(newId);
-      }
-    }
-  }
-
-  render() {
-    const { currentSummit, entity, errors, match, history } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const breadcrumb = entity.id ? entity.name : T.translate("general.new");
-
-    return (
-      <div className="container">
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <h3>
-          {title} {T.translate("edit_badge_scan.badge_scan")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        {currentSummit && (
-          <BadgeScanForm
-            entity={entity}
-            currentSummit={currentSummit}
-            errors={errors}
-            history={history}
-            onSubmit={this.props.saveBadgeScan}
-          />
-        )}
-      </div>
-    );
-  }
-}
+  return (
+    <div className="container">
+      <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+      <h3>
+        {title} {T.translate("edit_badge_scan.badge_scan")}
+        <AddNewButton entity={entity} />
+      </h3>
+      <hr />
+      {currentSummit && (
+        <BadgeScanForm
+          entity={entity}
+          currentSummit={currentSummit}
+          errors={errors}
+          history={history}
+          onSubmit={props.saveBadgeScan}
+        />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, currentBadgeScanState }) => ({
   currentSummit: currentSummitState.currentSummit,

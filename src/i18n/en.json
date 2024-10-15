@@ -2302,6 +2302,7 @@
   "badge_scan_list": {
     "badge_scans": "Badge Scans",
     "badge_scan_list": "Badge Scan List",
+    "select_sponsor": "Please select a sponsor from the dropdown.",
     "no_badge_scans": "No badges were scanned for by this sponsor.",
     "id": "Id",
     "created": "Scanned",
@@ -2309,6 +2310,7 @@
     "last_name": "Last Name",
     "email": "Email",
     "company_name": "Company",
+    "scanned_by": "Scanned by",
     "placeholders": {
       "select_sponsor": "Select Sponsor"
     }
@@ -2317,6 +2319,7 @@
     "badge_scan": "Badge Scan",
     "attendee_name": "Attendee Full Name",
     "attendee_company": "Attendee Company",
+    "scanned_by": "Scanned by",
     "notes": "Notes",
     "extra_questions": "Extra Questions",
     "badge_scan_saved": "Badge Scan saved successfully"
