@@ -72,6 +72,8 @@ export const DEFAULT_CURRENT_PAGE = 1;
 
 export const DEFAULT_PER_PAGE = 10;
 
+export const HUNDRED_PER_PAGE = 100;
+
 export const FIVE_PER_PAGE = 5;
 
 export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;

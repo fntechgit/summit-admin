@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -51,7 +51,7 @@ class BadgeScanForm extends React.Component {
     this.props.onSubmit(this.state.entity);
   }
 
-  handleCancel(ev) {
+  handleCancel() {
     const { history, currentSummit } = this.props;
     history.push(`/app/summits/${currentSummit.id}/badge-scans`);
   }
@@ -76,7 +76,7 @@ class BadgeScanForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleChangeExtraQuestion(formValues) {
@@ -86,7 +86,7 @@ class BadgeScanForm extends React.Component {
     const formattedAnswers = [];
 
     Object.keys(formValues).map((name) => {
-      let question = qs.getQuestionByName(name);
+      const question = qs.getQuestionByName(name);
       const newQuestion = {
         question_id: question.id,
         answer: `${formValues[name]}`
@@ -104,12 +104,23 @@ class BadgeScanForm extends React.Component {
   }
 
   render() {
-    const { entity, errors } = this.state;
+    const { entity } = this.state;
 
     return (
       <form className="material-form">
         <input type="hidden" id="id" value={entity.id} />
         <div className="sponsor-material-form form-group">
+          <div className="row form-group">
+            <div className="col-md-6">
+              <label> {T.translate("edit_badge_scan.scanned_by")} </label>
+              <Input
+                className="form-control"
+                value={entity.scanned_by}
+                disabled
+              />
+            </div>
+          </div>
+
           <div className="row form-group">
             <div className="col-md-6">
               <label> {T.translate("edit_badge_scan.attendee_name")} </label>
