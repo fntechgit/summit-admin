@@ -514,8 +514,7 @@ export const normalizeBulkEvents = (entity) => {
     Object.keys(normalizedEvent).forEach((property) => {
       if (
         normalizedEvent[property] === undefined ||
-        normalizedEvent[property] === null ||
-        normalizedEvent[property] === ""
+        normalizedEvent[property] === null
       ) {
         delete normalizedEvent[property];
       }
