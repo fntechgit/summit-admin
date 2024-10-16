@@ -617,7 +617,7 @@ export const bulkUpdateEvents =
         const {
           currentEventListState: {
             term,
-            page,
+            currentPage,
             perPage,
             order,
             orderDir,
@@ -626,7 +626,15 @@ export const bulkUpdateEvents =
           }
         } = getState();
         dispatch(
-          getEvents(term, page, perPage, order, orderDir, filters, extraColumns)
+          getEvents(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            filters,
+            extraColumns
+          )
         );
       })
       .catch(() => {
