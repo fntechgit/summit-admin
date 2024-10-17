@@ -31,7 +31,8 @@ import history from "../history";
 import {
   checkOrFilter,
   getAccessTokenSafely,
-  parseDateRangeFilter
+  parseDateRangeFilter,
+  range
 } from "../utils/methods";
 
 import {
@@ -69,6 +70,7 @@ export const RECEIVE_MAIN_ORDER_EXTRA_QUESTIONS =
 export const REQUEST_PURCHASE_ORDERS = "REQUEST_PURCHASE_ORDERS";
 export const RECEIVE_PURCHASE_ORDERS = "RECEIVE_PURCHASE_ORDERS";
 export const RECEIVE_PURCHASE_ORDER = "RECEIVE_PURCHASE_ORDER";
+export const RECEIVE_PURCHASE_ORDER_TICKETS = "RECEIVE_PURCHASE_ORDER_TICKETS";
 export const UPDATE_PURCHASE_ORDER = "UPDATE_PURCHASE_ORDER";
 export const PURCHASE_ORDER_UPDATED = "PURCHASE_ORDER_UPDATED";
 export const PURCHASE_ORDER_ADDED = "PURCHASE_ORDER_ADDED";
@@ -558,12 +560,9 @@ export const getPurchaseOrder = (orderId) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    expand: "tickets, tickets.owner, tickets.owner.member, tickets.ticket_type",
-    relations:
-      "tickets,applied_taxes,tickets.owner.member.none,tickets.ticket_type.none,tickets.owner.member",
-    fields:
-      "tickets.ticket_type.name,tickets.owner.id,tickets.owner.first_name,tickets.owner.last_name,tickets.owner.email,tickets.owner.member.id,tickets.owner.member.email,tickets.owner.member.first_name,tickets.owner.member.last_name",
-    access_token: accessToken
+    access_token: accessToken,
+    expand: "applied_taxes",
+    relations: "applied_taxes"
   };
 
   return getRequest(
@@ -572,7 +571,81 @@ export const getPurchaseOrder = (orderId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/orders/${orderId}`,
     authErrorHandler
   )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
+    // load tickets on separate request bc performance issues ( there are orders with over 100 tickets )
+    const orderTicketsPerPage = 10;
+    const pageTwo = 2;
+    const ticketsParams = {
+      page: 1,
+      per_page: orderTicketsPerPage,
+      access_token: accessToken,
+      expand: "owner,owner.member,ticket_type",
+      relations:
+        "applied_taxes,owner.member.none,ticket_type.none,owner.member",
+      fields:
+        "ticket_type.name,owner.id,owner.first_name,owner.last_name,owner.email,owner.member.id,owner.member.email,owner.member.first_name,owner.member.last_name",
+      "filter[]": `order_id==${orderId}`
+    };
+
+    const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets`;
+
+    return getRequest(
+      createAction("DUMMY"),
+      createAction("DUMMY"),
+      endpoint,
+      authErrorHandler
+    )(ticketsParams)(dispatch)
+      .then((payload) => {
+        const { response } = payload;
+        const { total, per_page, data: initial_data } = response;
+        // then do a promise all to get remaining ones
+        const totalPages = Math.ceil(total / per_page);
+        if (totalPages === 1) {
+          // we have only one page ...
+          dispatch(createAction(RECEIVE_PURCHASE_ORDER_TICKETS)(initial_data));
+          dispatch(stopLoading());
+          return initial_data;
+        }
+        // only continue if totalPages > 1
+        const ticketsParams = range(pageTwo, totalPages, 1).map((i) => ({
+          page: i,
+          per_page: orderTicketsPerPage,
+          access_token: accessToken,
+          expand: "owner,owner.member,ticket_type",
+          relations:
+            "applied_taxes,owner.member.none,ticket_type.none,owner.member",
+          fields:
+            "ticket_type.name,owner.id,owner.first_name,owner.last_name,owner.email,owner.member.id,owner.member.email,owner.member.first_name,owner.member.last_name",
+          "filter[]": `order_id==${orderId}`
+        }));
+
+        // get remaining ones
+        return Promise.all(
+          ticketsParams.map((p) =>
+            getRequest(
+              createAction("DUMMY"),
+              createAction("DUMMY"),
+              endpoint,
+              authErrorHandler
+            )(p)(dispatch)
+          )
+        )
+          .then((responses) => {
+            let data = [];
+            responses?.forEach((e) => data.push(...e.response.data));
+            data = [...initial_data, ...data];
+            dispatch(createAction(RECEIVE_PURCHASE_ORDER_TICKETS)(data));
+            dispatch(stopLoading());
+            return data;
+          })
+          .catch(() => {
+            dispatch(stopLoading());
+            return Promise.reject(e);
+          });
+      })
+      .catch((e) => {
+        dispatch(stopLoading());
+        return Promise.reject(e);
+      });
   });
 };
 
