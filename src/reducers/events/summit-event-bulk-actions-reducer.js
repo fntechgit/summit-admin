@@ -31,6 +31,7 @@ import {
   UPDATE_DURATION_BULK,
   UPDATE_STREAMING_URL_BULK,
   UPDATE_STREAMING_TYPE_BULK,
+  UPDATE_STREAM_IS_SECURE_BULK,
   UPDATE_MEETING_URL_BULK,
   UPDATE_ETHERPAD_URL_BULK
 } from "../../actions/summit-event-bulk-actions";
@@ -229,6 +230,15 @@ const summitEventBulkActionReducer = (state = DEFAULT_STATE, action) => {
       eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
         ...event,
         streaming_type: streamingType
+      }));
+      return { ...state, eventOnBulkEdition };
+    }
+    case UPDATE_STREAM_IS_SECURE_BULK: {
+      const { streamIsSecure } = payload;
+      let { eventOnBulkEdition } = state;
+      eventOnBulkEdition = eventOnBulkEdition.map((event) => ({
+        ...event,
+        stream_is_secure: streamIsSecure
       }));
       return { ...state, eventOnBulkEdition };
     }
