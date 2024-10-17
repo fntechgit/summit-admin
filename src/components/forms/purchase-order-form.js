@@ -178,13 +178,13 @@ class PurchaseOrderForm extends React.Component {
       }
     };
 
-    const ticket_type_ddl = currentSummit.ticket_types.map((tt) => ({
+    const ticket_type_ddl = currentSummit?.ticket_types?.map((tt) => ({
       label: tt.name,
       value: tt.id
     }));
 
     const tax_columns = [
-      ...(entity.approved_refunds_taxes?.map((tax) => ({
+      ...(entity?.approved_refunds_taxes?.map((tax) => ({
         columnKey: `tax_${tax.id}_refunded_amount`,
         value: T.translate("edit_purchase_order.refunded_tax", {
           tax_name: tax.name
@@ -194,7 +194,7 @@ class PurchaseOrderForm extends React.Component {
     ];
 
     const adjusted_tax_columns = [
-      ...(entity.approved_refunds_taxes?.map((tax) => ({
+      ...(entity?.approved_refunds_taxes?.map((tax) => ({
         columnKey: `tax_${tax.id}_adjusted_refunded_amount`,
         value: T.translate("edit_purchase_order.adjusted_tax_price", {
           tax_name: tax.name
@@ -474,7 +474,7 @@ class PurchaseOrderForm extends React.Component {
             <div>
               <Table
                 options={ticket_options}
-                data={entity.tickets}
+                data={entity?.tickets}
                 columns={ticket_columns}
               />
               <div className="row form-group add-tickets-wrapper">
@@ -568,7 +568,7 @@ class PurchaseOrderForm extends React.Component {
                   {`${entity.discount_rate}% (${entity.currency_symbol}${entity.discount_amount})`}
                 </div>
               </div>
-              {entity?.applied_taxes.map((tax) => (
+              {entity?.applied_taxes?.map((tax) => (
                 <div className="row" key={`applied-tax-${tax.id}`}>
                   <div className="col-md-6">
                     <label>
@@ -596,7 +596,6 @@ class PurchaseOrderForm extends React.Component {
                   {`${entity.currency_symbol}${entity.amount}`}
                 </div>
               </div>
-
               <div className="row">
                 <div className="col-md-12">
                   <label>{T.translate("edit_purchase_order.refunds")}</label>
