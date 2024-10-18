@@ -26,7 +26,10 @@
     "react/forbid-prop-types": "warn",
     "no-magic-numbers": [
       "error",
-      { "ignoreArrayIndexes": true, "ignore": [0, 1, -1] }
+      {
+        "ignoreArrayIndexes": true,
+        "ignore": [0, 1, -1]
+      }
     ],
     "import/no-dynamic-require": "warn",
     "no-shadow": "warn",
