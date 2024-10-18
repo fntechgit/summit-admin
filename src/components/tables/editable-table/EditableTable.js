@@ -37,7 +37,8 @@ function EditableTable(props) {
     handleSort,
     updateData,
     handleDeleteRow,
-    formattingFunction
+    formattingFunction,
+    afterUpdate = []
   } = props;
   let tableClass = options.hasOwnProperty("className") ? options.className : "";
   const [editButton, setEditButton] = useState(false);
@@ -108,11 +109,33 @@ function EditableTable(props) {
     }
   };
 
+  const handledAfterUpdateData = () => {
+    const actionsAfterUpdate = [];
+    if (afterUpdate.length > 0) {
+      afterUpdate.forEach(({ action, propertyName }) => {
+        selected.forEach((row) => {
+          if (Array.isArray(row[propertyName])) {
+            row[propertyName].forEach((e) => {
+              actionsAfterUpdate.push(action(e));
+            });
+          } else {
+            actionsAfterUpdate.push(action(row[propertyName]));
+          }
+        });
+      });
+    }
+    return Promise.all(actionsAfterUpdate);
+  };
+
   const onUpdateEvents = (evt) => {
     evt.stopPropagation();
     evt.preventDefault();
-    updateData(currentSummit.id, selected);
-    resetState();
+    updateData(currentSummit.id, selected)
+      .then(() => handledAfterUpdateData())
+      .then(() => resetState())
+      .catch((error) => {
+        console.error("Error updating events:", error);
+      });
   };
 
   return (
