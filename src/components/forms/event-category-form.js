@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -54,7 +54,7 @@ class EventCategoryForm extends React.Component {
       this.handleUpdateSubCategoryOrder.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -83,7 +83,7 @@ class EventCategoryForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
@@ -134,13 +134,12 @@ class EventCategoryForm extends React.Component {
     const { entity, errors, showSection } = this.state;
     const { currentSummit } = this.props;
 
-    const availableSubTracks = currentSummit.tracks.filter((t) => {
-      return (
+    const availableSubTracks = currentSummit.tracks.filter(
+      (t) =>
         !t.parent_id &&
         !entity.subtracks.map((t) => t.id).includes(t.id) &&
         t.id !== entity.id
-      );
-    });
+    );
 
     const table_options = {
       actions: {
@@ -330,7 +329,7 @@ class EventCategoryForm extends React.Component {
               value={entity.allowed_access_levels}
               summitId={currentSummit.id}
               onChange={this.handleChange}
-              isMulti={true}
+              isMulti
               error={hasErrors("allowed_access_levels", errors)}
             />
           </div>
@@ -343,7 +342,7 @@ class EventCategoryForm extends React.Component {
               <UploadInput
                 value={entity.icon_url}
                 handleUpload={this.handleUploadPic}
-                handleRemove={(ev) => this.handleRemovePic()}
+                handleRemove={() => this.handleRemovePic()}
                 className="dropzone col-md-6"
                 multiple={false}
                 accept="image/*"
