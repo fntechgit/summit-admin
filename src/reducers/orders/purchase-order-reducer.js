@@ -65,6 +65,9 @@ export const DEFAULT_ENTITY = {
 
 const DEFAULT_STATE = {
   entity: DEFAULT_ENTITY,
+  ticketsCurrentPage: 1,
+  ticketsTotal: 0,
+  ticketsLastPage: 1,
   errors: {}
 };
 
@@ -182,19 +185,26 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_PURCHASE_ORDER_TICKETS: {
-      const tickets = payload;
+      const {
+        current_page: ticketsCurrentPage,
+        total,
+        last_page: ticketsLastPage,
+        data
+      } = payload.response;
       const entity = { ...state.entity };
+
       entity.tickets = assembleTicketsState(
-        tickets,
+        data,
         entity.currency_symbol,
         entity.summit_id
       );
 
       return {
         ...state,
-        entity: {
-          ...entity
-        }
+        entity,
+        ticketsCurrentPage,
+        ticketsTotal: total,
+        ticketsLastPage
       };
     }
     case UPDATE_PURCHASE_ORDER: {
