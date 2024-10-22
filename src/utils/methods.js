@@ -21,6 +21,7 @@ import {
   initLogOut
 } from "openstack-uicore-foundation/lib/security/methods";
 import Swal from "sweetalert2";
+import * as Sentry from "@sentry/react";
 import T from "i18n-react/dist/i18n-react";
 import {
   ERROR_CODE_401,
@@ -33,8 +34,6 @@ import {
   INT_BASE,
   OR_FILTER
 } from "./constants";
-
-import emailTemplateDefaultValues from "../data/email_template_variables_sample.json";
 
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
 const ELLIPSIS = 3;
@@ -51,33 +50,33 @@ export const canonicalizeObject = (entity) => {
 };
 
 export const groupByDate = (array, prop, sortBy) => {
-  const grouped_unordered = array.reduce((groups, item) => {
+  const groupedUnordered = array.reduce((groups, item) => {
     const val = item[prop];
     groups[val] = groups[val] || [];
     groups[val].push(item);
     return groups;
   }, {});
 
-  const grouped_ordered = {};
-  Object.keys(grouped_unordered)
+  const groupedOrdered = {};
+  Object.keys(groupedUnordered)
     .sort((a, b) => {
-      const compare_a = grouped_unordered[a][0][sortBy];
-      const compare_b = grouped_unordered[b][0][sortBy];
+      const compareA = groupedUnordered[a][0][sortBy];
+      const compareB = groupedUnordered[b][0][sortBy];
       const ONE = 1;
       const MINUS_ONE = 1;
-      if (compare_a > compare_b) {
+      if (compareA > compareB) {
         return ONE;
       }
-      if (compare_a < compare_b) {
+      if (compareA < compareB) {
         return MINUS_ONE;
       }
       return 0;
     })
     .forEach((key) => {
-      grouped_ordered[key] = grouped_unordered[key];
+      groupedOrdered[key] = groupedUnordered[key];
     });
 
-  return grouped_ordered;
+  return groupedOrdered;
 };
 
 export const scrollToError = (errors) => {
@@ -130,7 +129,7 @@ export const getAccessTokenSafely = async () => {
   try {
     return await getAccessToken();
   } catch (e) {
-    console.log("log out: ", e);
+    Sentry.captureException(e);
     return initLogOut();
   }
 };
@@ -258,11 +257,8 @@ export const getSummitDays = (summit) => {
 export const isNumericString = (value) => /^[0-9]*$/.test(value);
 
 export const checkOrFilter = (filters, filter) => {
-  // check if filter is OR to return the correct fitler
-  if (
-    filters.hasOwnProperty("orAndFilter") &&
-    filters.orAndFilter === OR_FILTER
-  ) {
+  // check if filter is OR to return the correct filter
+  if (filters?.orAndFilter === OR_FILTER) {
     return filter.map((f) => `or(${f})`);
   }
   return filter;
@@ -274,20 +270,6 @@ export const validateEmail = (email) =>
     .match(
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     );
-
-const nestedLookup = (json, key) => {
-  const keys = key.split(".");
-  let nestedValue = json;
-  // eslint-disable-next-line
-  for (const nestedKey of keys) {
-    if (nestedValue.hasOwnProperty(nestedKey)) {
-      nestedValue = nestedValue[nestedKey];
-    } else {
-      return undefined;
-    }
-  }
-  return nestedValue;
-};
 
 export const parseSpeakerAuditLog = (logString) => {
   const logEntries = logString.split("|");
@@ -340,46 +322,22 @@ export const formatAuditLog = (logString) => {
   );
 };
 
-export const formatInitialJson = (template) => {
-  const regex = /{{(.*?)}}/g;
-  const matches = template.match(regex) || [];
-  // eslint-disable-next-line no-magic-numbers
-  const json_keys = matches.map((match) => match.slice(2, -2).trim());
-  const default_json = {};
-  json_keys.forEach((key) => {
-    // Search on the first level of the JSON file
-    if (emailTemplateDefaultValues.hasOwnProperty(key)) {
-      default_json[key] = emailTemplateDefaultValues[key];
-    }
-    // Search on each level if there's a match
-    else if (nestedLookup(emailTemplateDefaultValues, key) !== undefined) {
-      default_json[key] = nestedLookup(emailTemplateDefaultValues, key);
-    }
-    // Use a default value if there's no matchs
-    else {
-      default_json[key] = "test value";
-    }
-  });
-  return default_json;
-};
-
 export const getAvailableBookingDates = (summit) => {
-  const { begin_allow_booking_date, end_allow_booking_date, time_zone_id } =
-    summit;
-  const isValidStartDate = new Date(begin_allow_booking_date).getTime() > 0;
-  const isValidEndDate = new Date(end_allow_booking_date).getTime() > 0;
-  const now = moment().tz(time_zone_id).startOf("day");
+  const isValidStartDate =
+    new Date(summit.begin_allow_booking_date).getTime() > 0;
+  const isValidEndDate = new Date(summit.end_allow_booking_date).getTime() > 0;
+  const now = moment().tz(summit.time_zone_id).startOf("day");
   const dates = [];
 
   if (!isValidStartDate || !isValidEndDate) return dates;
 
   const bookStartDate = epochToMomentTimeZone(
-    begin_allow_booking_date,
-    time_zone_id
+    summit.begin_allow_booking_date,
+    summit.time_zone_id
   ).startOf("day");
   const bookEndDate = epochToMomentTimeZone(
-    end_allow_booking_date,
-    time_zone_id
+    summit.end_allow_booking_date,
+    summit.time_zone_id
   ).startOf("day");
 
   while (bookStartDate <= bookEndDate) {
@@ -399,8 +357,8 @@ const isEntityWithinDay = (dayValue, entity) => {
   return entity.start_datetime >= startOfDay && entity.end_datetime <= endOfDay;
 };
 
-export const getDayFromReservation = (entity, available_dates) => {
-  const matchingDay = available_dates.find((date) =>
+export const getDayFromReservation = (entity, availableDates) => {
+  const matchingDay = availableDates.find((date) =>
     isEntityWithinDay(date.epoch, entity)
   );
   return matchingDay?.epoch || null;

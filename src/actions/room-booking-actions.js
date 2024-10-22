@@ -35,7 +35,6 @@ export const REQUEST_ROOM_BOOKINGS = "REQUEST_ROOM_BOOKINGS";
 export const RECEIVE_ROOM_BOOKINGS = "RECEIVE_ROOM_BOOKINGS";
 export const RECEIVE_ROOM_BOOKING = "RECEIVE_ROOM_BOOKING";
 export const RESET_ROOM_BOOKING_FORM = "RESET_ROOM_BOOKING_FORM";
-export const UPDATE_ROOM_BOOKING = "UPDATE_ROOM_BOOKING";
 export const ROOM_BOOKING_UPDATED = "ROOM_BOOKING_UPDATED";
 export const ROOM_BOOKING_ADDED = "ROOM_BOOKING_ADDED";
 export const ROOM_BOOKING_DELETED = "ROOM_BOOKING_DELETED";
@@ -57,10 +56,10 @@ export const ROOM_BOOKING_ATTRIBUTE_ADDED = "ROOM_BOOKING_ATTRIBUTE_ADDED";
 export const ROOM_BOOKING_ATTRIBUTE_DELETED = "ROOM_BOOKING_ATTRIBUTE_DELETED";
 export const ROOM_BOOKING_REFUNDED = "ROOM_BOOKING_REFUNDED";
 
-export const ROOM_BOOKING_CANCELED = "ROOM_BOOKING_CANCELED";
-
 export const RECEIVE_ROOM_BOOKING_AVAILABILITY =
   "RECEIVE_ROOM_BOOKING_AVAILABILITY";
+
+const normalizeEntity = (entity) => ({ ...entity });
 
 const parseFilters = (filters, term) => {
   const filter = [];
@@ -69,15 +68,59 @@ const parseFilters = (filters, term) => {
     filter.push(`owner_name=@${escapedTerm},room_name=@${escapedTerm}`);
   }
 
-  if (filters.hasOwnProperty("email_filter")) {
-    const {email_filter} = filters;
-    if (email_filter.operator && email_filter.value)
+  if (filters?.email_filter) {
+    if (filters.email_filter.operator && filters.email_filter.value)
       filter.push(
-        `${email_filter.operator}${escapeFilterValue(email_filter.value)}`
+        `${filters.email_filter.operator}${escapeFilterValue(
+          filters.email_filter.value
+        )}`
       );
   }
 
   return filter;
+};
+
+export const customErrorHandler = (err, res) => (dispatch) => {
+  const code = err.status;
+  let msg = "";
+
+  dispatch(stopLoading());
+
+  switch (code) {
+    case ERROR_CODE_412:
+      if (Array.isArray(err.response.body)) {
+        err.response.body.forEach((er) => {
+          msg += `${er}<br>`;
+        });
+      } else {
+        Object.entries(err.response.body).forEach(([key, value]) => {
+          if (Number.isNaN(key)) {
+            msg += `${key}: `;
+
+            msg += `${value}<br>`;
+          }
+        });
+
+        Swal.fire("Validation error", msg, "warning");
+        /*
+            // what is this supposed to do ?
+            // https://github.com/fntechgit/summit-admin/commit/35d0dbc7e33e80aa048a81cbb509def818252a9f#diff-ae402a00f2844d1d704595a03ed7cbc6b53086fe03a43ffcdfa3706c17a41544R516
+            .then(() =>
+              dispatch(getOfflineBookingRoomAvailability(roomId, day))
+            );
+           */
+
+        if (err.response.body.errors) {
+          dispatch({
+            type: "VALIDATE",
+            payload: { errors: err.response.body }
+          });
+        }
+      }
+      break;
+    default:
+      dispatch(authErrorHandler(err, res));
+  }
 };
 
 export const getRoomBookings =
@@ -282,11 +325,6 @@ export const cancelRoomBooking =
     )(params)(dispatch).then(() => dispatch(stopLoading()));
   };
 
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-  return normalizedEntity;
-};
-
 /** ********************  ATTRIBUTE TYPE  **************************************************************** */
 
 export const getRoomBookingAttributeType =
@@ -486,45 +524,3 @@ export const getBookingRoomAvailability =
       dispatch(stopLoading());
     });
   };
-
-export const customErrorHandler = (err, res) => (dispatch) => {
-  const code = err.status;
-  let msg = "";
-
-  dispatch(stopLoading());
-
-  switch (code) {
-    case ERROR_CODE_412:
-      if (Array.isArray(err.response.body)) {
-        err.response.body.forEach((er) => {
-          msg += `${er}<br>`;
-        });
-      } else {
-        for (const [key, value] of Object.entries(err.response.body)) {
-          if (Number.isNaN(key)) {
-            msg += `${key}: `;
-
-            msg += `${value}<br>`;
-          }
-        }
-        Swal.fire("Validation error", msg, "warning");
-        /*
-            // what is this supposed to do ?
-            // https://github.com/fntechgit/summit-admin/commit/35d0dbc7e33e80aa048a81cbb509def818252a9f#diff-ae402a00f2844d1d704595a03ed7cbc6b53086fe03a43ffcdfa3706c17a41544R516
-            .then(() =>
-              dispatch(getOfflineBookingRoomAvailability(roomId, day))
-            );
-           */
-
-        if (err.response.body.errors) {
-          dispatch({
-            type: "VALIDATE",
-            payload: { errors: err.response.body }
-          });
-        }
-      }
-      break;
-    default:
-      dispatch(authErrorHandler(err, res));
-  }
-};
