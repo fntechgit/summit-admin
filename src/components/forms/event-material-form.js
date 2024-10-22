@@ -96,7 +96,10 @@ class EventMaterialForm extends React.Component {
     errors[id] = "";
     entity[id] = value;
 
-    if (entity.class_name === MATERIAL_TYPE.PRESENTATION_SLIDE) {
+    if (
+      entity.class_name === MATERIAL_TYPE.PRESENTATION_SLIDE ||
+      entity.class_name === MATERIAL_TYPE.PRESENTATION_MEDIA_UPLOAD
+    ) {
       const accessToken = await getAccessTokenSafely();
       this.setState({
         entity,
@@ -363,7 +366,7 @@ class EventMaterialForm extends React.Component {
                   onRemove={this.handleRemoveFile}
                   postUrl={fileUploadUrl}
                   error={hasErrors(media_type.name, errors)}
-                  djsConfig={{ withCredentials: false }}
+                  djsConfig={{ withCredentials: true }}
                   parallelChunkUploads
                 />
               </div>
