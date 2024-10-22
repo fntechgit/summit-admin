@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -27,7 +26,10 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
+import Swal from "sweetalert2";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
+import { DEFAULT_PER_PAGE, ERROR_CODE_412 } from "../utils/constants";
 
 export const REQUEST_ROOM_BOOKINGS = "REQUEST_ROOM_BOOKINGS";
 export const RECEIVE_ROOM_BOOKINGS = "RECEIVE_ROOM_BOOKINGS";
@@ -68,7 +70,7 @@ const parseFilters = (filters, term) => {
   }
 
   if (filters.hasOwnProperty("email_filter")) {
-    const email_filter = filters.email_filter;
+    const {email_filter} = filters;
     if (email_filter.operator && email_filter.value)
       filter.push(
         `${email_filter.operator}${escapeFilterValue(email_filter.value)}`
@@ -82,7 +84,7 @@ export const getRoomBookings =
   (
     term = null,
     page = 1,
-    perPage = 10,
+    perPage = DEFAULT_PER_PAGE,
     order = "start_datetime",
     orderDir = 1,
     filters = {}
@@ -96,7 +98,7 @@ export const getRoomBookings =
     const filter = parseFilters(filters, term);
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "owner, room"
@@ -111,7 +113,7 @@ export const getRoomBookings =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -131,7 +133,7 @@ export const exportRoomBookings =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filename = currentSummit.name + "-Room-Bookings.csv";
+    const filename = `${currentSummit.name}-Room-Bookings.csv`;
     const params = {
       access_token: accessToken
     };
@@ -147,7 +149,7 @@ export const exportRoomBookings =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     dispatch(
@@ -159,10 +161,8 @@ export const exportRoomBookings =
     );
   };
 
-export const getRoomBooking = (roomBookingId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
+export const getRoomBooking = (roomBookingId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
 
   dispatch(startLoading());
 
@@ -181,7 +181,7 @@ export const getRoomBooking = (roomBookingId) => async (dispatch, getState) => {
   });
 };
 
-export const resetRoomBookingForm = () => (dispatch, getState) => {
+export const resetRoomBookingForm = () => (dispatch) => {
   dispatch(createAction(RESET_ROOM_BOOKING_FORM)({}));
 };
 
@@ -206,35 +206,35 @@ export const saveRoomBooking = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(
         showSuccessMessage(T.translate("edit_room_booking.room_booking_saved"))
       );
     });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_room_booking.room_booking_created"),
-      type: "success"
-    };
-
-    return postRequest(
-      null,
-      createAction(ROOM_BOOKING_ADDED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${entity.room_id}/reservations/offline`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/room-bookings/${payload.response.id}`
-          );
-        })
-      );
-    });
   }
+
+  const successMessage = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_room_booking.room_booking_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    null,
+    createAction(ROOM_BOOKING_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${entity.room_id}/reservations/offline`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then((payload) => {
+    dispatch(
+      showMessage(successMessage, () => {
+        history.push(
+          `/app/summits/${currentSummit.id}/room-bookings/${payload.response.id}`
+        );
+      })
+    );
+  });
 };
 
 export const refundRoomBooking =
@@ -251,7 +251,7 @@ export const refundRoomBooking =
       null,
       createAction(ROOM_BOOKING_REFUNDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${roomId}/reservations/${roomBookingId}/refund`,
-      { amount: amount },
+      { amount },
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -279,9 +279,7 @@ export const cancelRoomBooking =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${roomId}/reservations/${roomBookingId}/cancel`,
       {},
       authErrorHandler
-    )(params)(dispatch).then(() => {
-      return dispatch(stopLoading());
-    });
+    )(params)(dispatch).then(() => dispatch(stopLoading()));
   };
 
 const normalizeEntity = (entity) => {
@@ -289,7 +287,7 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-/**********************  ATTRIBUTE TYPE  *****************************************************************/
+/** ********************  ATTRIBUTE TYPE  **************************************************************** */
 
 export const getRoomBookingAttributeType =
   (attributeId) => async (dispatch, getState) => {
@@ -314,7 +312,7 @@ export const getRoomBookingAttributeType =
     });
   };
 
-export const resetRoomBookingAttributeForm = () => (dispatch, getState) => {
+export const resetRoomBookingAttributeForm = () => (dispatch) => {
   dispatch(createAction(RESET_ROOM_BOOKING_ATTRIBUTE_TYPE_FORM)({}));
 };
 
@@ -340,7 +338,7 @@ export const saveRoomBookingAttributeType =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(
             T.translate("room_bookings.room_booking_attribute_type_saved")
@@ -348,7 +346,7 @@ export const saveRoomBookingAttributeType =
         );
       });
     } else {
-      const success_message = {
+      const successMessage = {
         title: T.translate("general.done"),
         html: T.translate("room_bookings.room_booking_attribute_type_created"),
         type: "success"
@@ -363,7 +361,7 @@ export const saveRoomBookingAttributeType =
         entity
       )(params)(dispatch).then((payload) => {
         dispatch(
-          showMessage(success_message, () => {
+          showMessage(successMessage, () => {
             history.push(
               `/app/summits/${currentSummit.id}/room-booking-attributes/${payload.response.id}`
             );
@@ -394,7 +392,7 @@ export const deleteRoomBookingAttributeType =
     });
   };
 
-/**********************  ATTRIBUTE  *****************************************************************/
+/** ********************  ATTRIBUTE  **************************************************************** */
 
 export const saveRoomBookingAttribute =
   (attributeTypeId, entity) => async (dispatch, getState) => {
@@ -418,7 +416,7 @@ export const saveRoomBookingAttribute =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(
             T.translate("room_bookings.room_booking_attribute_saved")
@@ -433,7 +431,7 @@ export const saveRoomBookingAttribute =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(
             T.translate("room_bookings.room_booking_attribute_created")
@@ -484,48 +482,49 @@ export const getBookingRoomAvailability =
       createAction(RECEIVE_ROOM_BOOKING_AVAILABILITY),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/locations/bookable-rooms/${roomId}/availability/${day}`,
       (err, res) => customErrorHandler(err, res, { roomId, day })
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
 
-export const customErrorHandler =
-  (err, res, { roomId, day }) =>
-  (dispatch, state) => {
-    const code = err.status;
-    let msg = "";
+export const customErrorHandler = (err, res) => (dispatch) => {
+  const code = err.status;
+  let msg = "";
 
-    dispatch(stopLoading());
+  dispatch(stopLoading());
 
-    switch (code) {
-      case 412:
-        {
-          if (Array.isArray(err.response.body)) {
-            err.response.body.forEach((er) => {
-              msg += er + "<br>";
-            });
-          } else {
-            for (var [key, value] of Object.entries(err.response.body)) {
-              if (isNaN(key)) {
-                msg += key + ": ";
+  switch (code) {
+    case ERROR_CODE_412:
+      if (Array.isArray(err.response.body)) {
+        err.response.body.forEach((er) => {
+          msg += `${er}<br>`;
+        });
+      } else {
+        for (const [key, value] of Object.entries(err.response.body)) {
+          if (Number.isNaN(key)) {
+            msg += `${key}: `;
 
-                msg += value + "<br>";
-              }
-            }
-            Swal.fire("Validation error", msg, "warning").then(() =>
-              dispatch(getOfflineBookingRoomAvailability(roomId, day))
-            );
-
-            if (err.response.body.errors) {
-              dispatch({
-                type: VALIDATE,
-                payload: { errors: err.response.body }
-              });
-            }
+            msg += `${value}<br>`;
           }
         }
-        break;
-      default:
-        dispatch(authErrorHandler(err, res));
-    }
-  };
+        Swal.fire("Validation error", msg, "warning");
+        /*
+            // what is this supposed to do ?
+            // https://github.com/fntechgit/summit-admin/commit/35d0dbc7e33e80aa048a81cbb509def818252a9f#diff-ae402a00f2844d1d704595a03ed7cbc6b53086fe03a43ffcdfa3706c17a41544R516
+            .then(() =>
+              dispatch(getOfflineBookingRoomAvailability(roomId, day))
+            );
+           */
+
+        if (err.response.body.errors) {
+          dispatch({
+            type: "VALIDATE",
+            payload: { errors: err.response.body }
+          });
+        }
+      }
+      break;
+    default:
+      dispatch(authErrorHandler(err, res));
+  }
+};
