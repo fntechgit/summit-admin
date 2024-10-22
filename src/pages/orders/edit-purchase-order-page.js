@@ -20,7 +20,8 @@ import {
   savePurchaseOrder,
   addTicketsToOrder,
   deletePurchaseOrder,
-  reSendOrderEmail
+  reSendOrderEmail,
+  getOrderTickets
 } from "../../actions/order-actions";
 import PurchaseOrderForm from "../../components/forms/purchase-order-form";
 
@@ -31,6 +32,9 @@ const EditPurchaseOrderPage = ({
   errors,
   currentSummit,
   history,
+  ticketsCurrentPage,
+  ticketsTotal,
+  ticketsLastPage,
   ...props
 }) => {
   const title = entity.id
@@ -92,8 +96,12 @@ const EditPurchaseOrderPage = ({
         currentSummit={currentSummit}
         entity={entity}
         errors={errors}
+        ticketsCurrentPage={ticketsCurrentPage}
+        ticketsTotal={ticketsTotal}
+        ticketsLastPage={ticketsLastPage}
         onSubmit={props.savePurchaseOrder}
         addTickets={props.addTicketsToOrder}
+        getTickets={props.getOrderTickets}
       />
     </div>
   );
@@ -112,5 +120,6 @@ export default connect(mapStateToProps, {
   savePurchaseOrder,
   addTicketsToOrder,
   deletePurchaseOrder,
-  reSendOrderEmail
+  reSendOrderEmail,
+  getOrderTickets
 })(EditPurchaseOrderPage);
