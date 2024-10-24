@@ -602,7 +602,7 @@ export const getBadgeTypes =
 
     const params = {
       page: 1,
-      per_page: 100,
+      per_page: HUNDRED_PER_PAGE,
       access_token: accessToken,
       expand: "access_levels,allowed_view_types"
     };
@@ -906,7 +906,7 @@ export const getBadgeFeatures =
     const params = {
       page: 1,
       fields: "name,id,description",
-      per_page: 100,
+      per_page: HUNDRED_PER_PAGE,
       access_token: accessToken
     };
 
@@ -1097,7 +1097,7 @@ export const getAccessLevels =
 
     const params = {
       page: 1,
-      per_page: 100,
+      per_page: HUNDRED_PER_PAGE,
       access_token: accessToken
     };
 
