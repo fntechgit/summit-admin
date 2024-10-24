@@ -159,48 +159,50 @@ export const getSponsors =
     order = "order",
     orderDir = 1
   ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(
-        `company_name=@${escapedTerm},sponsorship_name=@${escapedTerm},sponsorship_size=@${escapedTerm}`
-      );
-    }
+      if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(
+          `company_name=@${escapedTerm},sponsorship_name=@${escapedTerm},sponsorship_size=@${escapedTerm}`
+        );
+      }
 
-    const params = {
-      page,
-      per_page: perPage,
-      expand: "company,sponsorship,sponsorship.type",
-      access_token: accessToken
+      const params = {
+        page,
+        per_page: perPage,
+        expand: "company,sponsorship,sponsorship.type",
+        relations: "company.none,sponsorship.none,sponsorship.type.none,none",
+        fields: "id,company.name,company.id,sponsorship.id,sponsorship.type.name",
+        access_token: accessToken
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_SPONSORS),
+        createAction(RECEIVE_SPONSORS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
+        authErrorHandler,
+        { page, perPage, order, orderDir, term }
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_SPONSORS),
-      createAction(RECEIVE_SPONSORS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
-      authErrorHandler,
-      { page, perPage, order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const getSponsorsWithBadgeScans = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -455,25 +457,25 @@ export const getExtraQuestionMeta = () => async (dispatch, getState) => {
 
 export const updateExtraQuestionOrder =
   (extraQuestions, sponsorId, questionId, newOrder) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
 
-    const params = {
-      access_token: accessToken
+      const params = {
+        access_token: accessToken
+      };
+
+      putRequest(
+        null,
+        createAction(SPONSOR_EXTRA_QUESTION_ORDER_UPDATED)(extraQuestions),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}`,
+        { order: newOrder },
+        authErrorHandler
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    putRequest(
-      null,
-      createAction(SPONSOR_EXTRA_QUESTION_ORDER_UPDATED)(extraQuestions),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}`,
-      { order: newOrder },
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const deleteExtraQuestion =
   (sponsorId, questionId) => async (dispatch, getState) => {
@@ -697,36 +699,36 @@ export const deleteSponsorExtraQuestionValue =
 
 export const getSummitSponsorships =
   (order = "name", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    const params = {
-      page: 1,
-      per_page: 100,
-      access_token: accessToken,
-      expand: "type"
+      const params = {
+        page: 1,
+        per_page: 100,
+        access_token: accessToken,
+        expand: "type"
+      };
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_SUMMIT_SPONSORSHIPS),
+        createAction(RECEIVE_SUMMIT_SPONSORSHIPS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
+        authErrorHandler,
+        { order, orderDir }
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_SUMMIT_SPONSORSHIPS),
-      createAction(RECEIVE_SUMMIT_SPONSORSHIPS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
-      authErrorHandler,
-      { order, orderDir }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const getSummitSponsorship =
   (sponsorshipId) => async (dispatch, getState) => {
@@ -953,86 +955,86 @@ export const getBadgeScans =
     order = "attendee_last_name",
     orderDir = 1
   ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
-    const summitTZ = currentSummit.time_zone.name;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
+      const summitTZ = currentSummit.time_zone.name;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    if (sponsorId) {
-      filter.push(`sponsor_id==${sponsorId}`);
-    }
+      if (sponsorId) {
+        filter.push(`sponsor_id==${sponsorId}`);
+      }
 
-    const params = {
-      access_token: accessToken,
-      page,
-      per_page: perPage,
-      expand:
-        "badge,badge.ticket,badge.ticket.owner,badge.ticket.owner.member,scanned_by",
-      relations:
-        "scanned_by,badge,scanned_by.none,badge.none,badge.ticket.none,badge.ticket.owner.none,badge.ticket.owner.member.none",
-      fields:
-        "id,created,scan_date,attendee_first_name,attendee_last_name,attendee_email,attendee_company,scanned_by.email,scanned_by.first_name,scanned_by.last_name,badge.ticket,badge.ticket.owner,badge.ticket.owner.member.first_name,badge.ticket.owner.member.last_name,badge.ticket.owner.email,badge.ticket.owner.company,badge.ticket.owner.first_name,badge.ticket.owner.last_name"
+      const params = {
+        access_token: accessToken,
+        page,
+        per_page: perPage,
+        expand:
+          "badge,badge.ticket,badge.ticket.owner,badge.ticket.owner.member,scanned_by",
+        relations:
+          "scanned_by,badge,scanned_by.none,badge.none,badge.ticket.none,badge.ticket.owner.none,badge.ticket.owner.member.none",
+        fields:
+          "id,created,scan_date,attendee_first_name,attendee_last_name,attendee_email,attendee_company,scanned_by.email,scanned_by.first_name,scanned_by.last_name,badge.ticket,badge.ticket.owner,badge.ticket.owner.member.first_name,badge.ticket.owner.member.last_name,badge.ticket.owner.email,badge.ticket.owner.company,badge.ticket.owner.first_name,badge.ticket.owner.last_name"
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_BADGE_SCANS),
+        createAction(RECEIVE_BADGE_SCANS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans`,
+        authErrorHandler,
+        { page, perPage, order, orderDir, sponsorId, summitTZ }
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_BADGE_SCANS),
-      createAction(RECEIVE_BADGE_SCANS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans`,
-      authErrorHandler,
-      { page, perPage, order, orderDir, sponsorId, summitTZ }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const exportBadgeScans =
   (sponsor = null, order = "attendee_last_name", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
-    const filename = `${sponsor.company.name}-BadgeScans.csv`;
-    const params = {
-      access_token: accessToken,
-      columns:
-        "scan_date,scanned_by,attendee_first_name,attendee_last_name,attendee_email,attendee_company"
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
+      const filename = `${sponsor.company.name}-BadgeScans.csv`;
+      const params = {
+        access_token: accessToken,
+        columns:
+          "scan_date,scanned_by,attendee_first_name,attendee_last_name,attendee_email,attendee_company"
+      };
+
+      filter.push(`sponsor_id==${sponsor.id}`);
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      dispatch(
+        getCSV(
+          `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans/csv`,
+          params,
+          filename
+        )
+      );
     };
-
-    filter.push(`sponsor_id==${sponsor.id}`);
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
-
-    dispatch(
-      getCSV(
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans/csv`,
-        params,
-        filename
-      )
-    );
-  };
 
 export const getBadgeScan = (scanId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -1122,10 +1124,10 @@ export const attachSponsorImage =
       picAttr === "header_image"
         ? uploadHeaderImage
         : picAttr === "side_image"
-        ? uploadSideImage
-        : picAttr === "header_mobile_image"
-        ? uploadHeaderMobileImage
-        : uploadCarouselImage;
+          ? uploadSideImage
+          : picAttr === "header_mobile_image"
+            ? uploadHeaderMobileImage
+            : uploadCarouselImage;
 
     if (entity.id) {
       dispatch(uploadFile(entity, file));
@@ -1243,10 +1245,10 @@ export const removeSponsorImage = (entity, picAttr) => async (dispatch) => {
     picAttr === "header_image"
       ? removeHeaderImage
       : picAttr === "side_image"
-      ? removeSideImage
-      : picAttr === "header_mobile_image"
-      ? removeHeaderMobileImage
-      : removeCarouselImage;
+        ? removeSideImage
+        : picAttr === "header_mobile_image"
+          ? removeHeaderMobileImage
+          : removeCarouselImage;
 
   return dispatch(removeFile(entity));
 };
@@ -1334,32 +1336,32 @@ export const removeCarouselImage = (entity) => async (dispatch, getState) => {
 
 export const getSponsorAdvertisements =
   (sponsorId, order = "order", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    const params = {
-      access_token: accessToken
+      const params = {
+        access_token: accessToken
+      };
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_ADVERTISEMENTS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/ads`,
+        authErrorHandler
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_SPONSOR_ADVERTISEMENTS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/ads`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const saveSponsorAdvertisement =
   (entity) => async (dispatch, getState) => {
@@ -1579,32 +1581,32 @@ export const removeSponsorAdvertisementImage =
 
 export const getSponsorMaterials =
   (sponsorId, order = "order", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    const params = {
-      access_token: accessToken
+      const params = {
+        access_token: accessToken
+      };
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_MATERIALS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/materials`,
+        authErrorHandler
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_SPONSOR_MATERIALS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/materials`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const saveSponsorMaterial = (entity) => async (dispatch, getState) => {
   const { currentSummitState, currentSponsorState } = getState();
@@ -1926,91 +1928,91 @@ export const getSponsorPromocodes =
     order = "order",
     orderDir = 1
   ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(
-        `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
-      );
-    }
+      if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(
+          `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
+        );
+      }
 
-    const params = {
-      page,
-      per_page: perPage,
-      expand:
-        "sponsor,owner,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,badge_features,allowed_ticket_types,ticket_types_rules,ticket_types_rules.ticket_type",
-      access_token: accessToken
+      const params = {
+        page,
+        per_page: perPage,
+        expand:
+          "sponsor,owner,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,badge_features,allowed_ticket_types,ticket_types_rules,ticket_types_rules.ticket_type",
+        access_token: accessToken
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_SPONSOR_PROMOCODES),
+        createAction(RECEIVE_SPONSOR_PROMOCODES),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes`,
+        authErrorHandler,
+        { page, perPage, order, orderDir, term }
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_SPONSOR_PROMOCODES),
-      createAction(RECEIVE_SPONSOR_PROMOCODES),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes`,
-      authErrorHandler,
-      { page, perPage, order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const exportSponsorPromocodes =
   (term = null, order = "order", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
-    const filename = `${currentSummit.name}-SponsorPromocodes.csv`;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
+      const filename = `${currentSummit.name}-SponsorPromocodes.csv`;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(
-        `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
+      if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(
+          `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
+        );
+      }
+
+      const params = {
+        expand: "",
+        access_token: accessToken
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      dispatch(
+        getCSV(
+          `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes/csv`,
+          params,
+          filename
+        )
       );
-    }
-
-    const params = {
-      expand: "",
-      access_token: accessToken
     };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
-
-    dispatch(
-      getCSV(
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes/csv`,
-        params,
-        filename
-      )
-    );
-  };
 
 export const importSponsorPromocodesCSV =
   (file) => async (dispatch, getState) => {
@@ -2037,66 +2039,66 @@ export const importSponsorPromocodesCSV =
 
 export const sendEmails =
   (recipientEmail = null) =>
-  async (dispatch, getState) => {
-    const { currentSummitState, currentSponsorPromocodeListState } = getState();
-    const { term, currentFlowEvent, selectedAll, selectedIds, excludedIds } =
-      currentSponsorPromocodeListState;
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
+    async (dispatch, getState) => {
+      const { currentSummitState, currentSponsorPromocodeListState } = getState();
+      const { term, currentFlowEvent, selectedAll, selectedIds, excludedIds } =
+        currentSponsorPromocodeListState;
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
 
-    const params = {
-      access_token: accessToken
-    };
+      const params = {
+        access_token: accessToken
+      };
 
-    if (!selectedAll && selectedIds.length > 0) {
-      // we don't need the filter criteria, we have the ids
-      filter.push(`id==${selectedIds.join("||")}`);
-    } else {
-      if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(
-          `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
-        );
+      if (!selectedAll && selectedIds.length > 0) {
+        // we don't need the filter criteria, we have the ids
+        filter.push(`id==${selectedIds.join("||")}`);
+      } else {
+        if (term) {
+          const escapedTerm = escapeFilterValue(term);
+          filter.push(
+            `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
+          );
+        }
+
+        if (selectedAll && excludedIds.length > 0) {
+          filter.push(`not_id==${excludedIds.join("||")}`);
+        }
       }
 
-      if (selectedAll && excludedIds.length > 0) {
-        filter.push(`not_id==${excludedIds.join("||")}`);
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
       }
-    }
 
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
+      const payload = {
+        email_flow_event: currentFlowEvent
+      };
 
-    const payload = {
-      email_flow_event: currentFlowEvent
+      if (recipientEmail) {
+        payload.test_email_recipient = recipientEmail;
+      }
+
+      dispatch(startLoading());
+
+      const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("registration_invitation_list.resend_done"),
+        type: "success"
+      };
+
+      return putRequest(
+        null,
+        createAction(SEND_SPONSOR_PROMOCODES_EMAILS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/all/promo-codes/all/send`,
+        payload,
+        authErrorHandler
+      )(params)(dispatch).then((payload) => {
+        dispatch(showMessage(success_message));
+        dispatch(stopLoading());
+        return payload;
+      });
     };
-
-    if (recipientEmail) {
-      payload.test_email_recipient = recipientEmail;
-    }
-
-    dispatch(startLoading());
-
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("registration_invitation_list.resend_done"),
-      type: "success"
-    };
-
-    return putRequest(
-      null,
-      createAction(SEND_SPONSOR_PROMOCODES_EMAILS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/all/promo-codes/all/send`,
-      payload,
-      authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      dispatch(showMessage(success_message));
-      dispatch(stopLoading());
-      return payload;
-    });
-  };
 
 /** ****************  LEAD REPORT SETTINGS  *************************************** */
 
