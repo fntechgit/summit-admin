@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import {
   getRequest,
   deleteRequest,
@@ -27,6 +27,7 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "../utils/methods";
+import { DEFAULT_ORDER_DIR, DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_TRACK_CHAIRS = "REQUEST_TRACK_CHAIRS";
 export const RECEIVE_TRACK_CHAIRS = "RECEIVE_TRACK_CHAIRS";
@@ -40,16 +41,16 @@ export const PROGRESS_FLAG_ADDED = "PROGRESS_FLAG_ADDED";
 export const PROGRESS_FLAG_DELETED = "PROGRESS_FLAG_DELETED";
 export const PROGRESS_FLAG_REORDERED = "PROGRESS_FLAG_REORDERED";
 
-const callDelay = 500; //miliseconds
+const callDelay = 500; // miliseconds
 
 export const getTrackChairs =
   (
     trackId = null,
     term = "",
     page = 1,
-    perPage = 10,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = 1
+    orderDir = DEFAULT_ORDER_DIR
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -71,10 +72,13 @@ export const getTrackChairs =
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
-      expand: "member,categories"
+      expand: "member,categories",
+      relations: "member.none,categories.none",
+      fields:
+        "id,categories.id,categories.name,member.first_name,member.last_name,member.email"
     };
 
     if (filter.length > 0) {
@@ -97,7 +101,7 @@ export const getTrackChairs =
       }
 
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params["order"] = `${orderDirSign}${orderCol}`;
+      params.order = `${orderDirSign}${orderCol}`;
     }
 
     return getRequest(
@@ -186,7 +190,7 @@ export const exportTrackChairs = () => async (dispatch, getState) => {
   const { currentSummit } = currentSummitState;
   const { trackId, term, order, orderDir } = trackChairListState;
 
-  const filename = currentSummit.name + "-TrackChairs.csv";
+  const filename = `${currentSummit.name}-TrackChairs.csv`;
   const filter = [];
 
   if (term) {
@@ -224,7 +228,7 @@ export const exportTrackChairs = () => async (dispatch, getState) => {
     }
 
     const orderDirSign = orderDir === 1 ? "" : "-";
-    params["order"] = `${orderDirSign}${orderCol}`;
+    params.order = `${orderDirSign}${orderCol}`;
   }
 
   dispatch(
@@ -236,9 +240,9 @@ export const exportTrackChairs = () => async (dispatch, getState) => {
   );
 };
 
-/************************************************************************************************************/
+/** ********************************************************************************************************* */
 /*                          PROGRESS FLAGS                                                                  */
-/************************************************************************************************************/
+/** ********************************************************************************************************* */
 
 export const getProgressFlags = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -267,14 +271,14 @@ export const querySummitProgressFlags = _.debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
     input = escapeFilterValue(input);
-    let filters = encodeURIComponent(`label=@${input}`);
+    const filters = encodeURIComponent(`label=@${input}`);
 
     fetch(
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/presentation-action-types?filter=${filters}&&access_token=${accessToken}`
     )
       .then(fetchResponseHandler)
       .then((json) => {
-        let options = [...json.data.map((d) => ({ ...d, name: d.label }))];
+        const options = [...json.data.map((d) => ({ ...d, name: d.label }))];
 
         callback(options);
       })
