@@ -1,0 +1,146 @@
+.wrapper {
+  top: 0;
+  left: 0;
+  position: fixed;
+  height: 100vh;
+  z-index: 99999;
+
+  &.opened {
+    .burgerButton {
+      display: none;
+    }
+
+    .expandButton {
+      display: none;
+    }
+
+    .menuWrapper {
+      width: 220px;
+    }
+
+    .menuItemsWrapper {
+      visibility: visible;
+    }
+  }
+
+  &.closed {
+    overflow-y: hidden;
+
+    .burgerButton {
+      display: block;
+
+      @media (min-width: 768px) {
+        display: none;
+      }
+    }
+
+    .menuWrapper {
+      width: 0;
+
+      .expandButton {
+        display: none;
+      }
+
+      @media (min-width: 768px) {
+        width: 40px;
+
+        .menuItemsWrapper {
+          visibility: hidden;
+        }
+
+        .expandButton {
+          display: flex;
+        }
+      }
+    }
+  }
+
+  .menuWrapper {
+    background-color: rgba(0, 0, 0, 0.9);
+    cursor: pointer;
+    transition: width 200ms linear;
+    height: 100%;
+
+    .separator {
+      border-bottom: 1px solid #b8b7ad;
+      color: #b8b7ad;
+      padding: 15px 0 5px 10px;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+
+      button {
+        background: none;
+        border: none;
+      }
+    }
+
+    .expandButton {
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+
+      :global(.fa) {
+        font-size: 2em;
+        color: white;
+      }
+    }
+
+    .editSummitBtn {
+      font-size: 15px;
+      margin-left: 5px;
+      cursor: pointer;
+
+      &:hover {
+        color: #dfded8;
+        font-weight: bold;
+      }
+    }
+
+    .menuItemsWrapper {
+      padding-bottom: 20px;
+      transition: visibility 200ms linear 200ms;
+      overflow-y: auto;
+      height: 100%;
+
+      .menuItem {
+        display: flex;
+        margin: 8px 0 0 10px;
+
+        :hover {
+          font-weight: 600;
+        }
+
+        :global(.fa) {
+          padding-top: 3px;
+          margin-right: 10px;
+        }
+      }
+
+      .submenu {
+        .menuItem {
+          margin-left: 20px;
+
+          :global(.fa) {
+            margin-right: 5px;
+          }
+        }
+      }
+
+      a {
+        text-decoration: none;
+        color: white;
+        font-size: 1em;
+      }
+    }
+  }
+
+  .burgerButton {
+    padding: 5px 0 0 5px;
+
+    button {
+      border: none;
+      background: none;
+      font-size: 2.5em;
+    }
+  }
+}

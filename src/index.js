@@ -9,16 +9,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./app";
 import { Provider } from "react-redux";
-import store, { persistor } from "./store";
 import { PersistGate } from "redux-persist/es/integration/react";
+import App from "./app";
+import store, { persistor } from "./store";
 import "font-awesome/css/font-awesome.css";
-import "./styles/menu.less";
 import "./styles/landing.css";
 import "./styles/general.less";
 import "openstack-uicore-foundation/lib/css/components/index.css";
