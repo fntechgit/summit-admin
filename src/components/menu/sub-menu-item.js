@@ -14,6 +14,7 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import MenuItem from "./menu-item";
+import styles from "./menu.module.less";
 
 function SubMenuItem({
   name,
@@ -32,12 +33,12 @@ function SubMenuItem({
 
   return (
     <div>
-      <a id={`${name}-menu`} className="menu-item" onClick={onClick}>
+      <a id={`${name}-menu`} className={styles.menuItem} onClick={onClick}>
         <i className={`${iconClass} fa`} />
-        {T.translate(`menu.${name}`)}
+        <span>{T.translate(`menu.${name}`)}</span>
       </a>
       {isOpen && (
-        <div className="submenu">
+        <div className={styles.submenu}>
           {_childs.map((ch) => (
             <MenuItem
               key={ch.name}
