@@ -27,7 +27,7 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "../utils/methods";
-import { TEN } from "../utils/constants";
+import { DEFAULT_ORDER_DIR, DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_TRACK_CHAIRS = "REQUEST_TRACK_CHAIRS";
 export const RECEIVE_TRACK_CHAIRS = "RECEIVE_TRACK_CHAIRS";
@@ -48,9 +48,9 @@ export const getTrackChairs =
     trackId = null,
     term = "",
     page = 1,
-    perPage = TEN,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = 1
+    orderDir = DEFAULT_ORDER_DIR
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
