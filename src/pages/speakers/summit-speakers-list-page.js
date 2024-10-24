@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -49,13 +49,14 @@ class SummitSpeakerListPage extends React.Component {
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("speaker_list.delete_speaker_warning") + " " + speaker.name,
+      text: `${T.translate("speaker_list.delete_speaker_warning")} ${
+        speaker.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSpeaker(speakerId);
       }
@@ -67,7 +68,7 @@ class SummitSpeakerListPage extends React.Component {
     this.props.getSpeakers(term, page, perPage, order, orderDir);
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage } = this.props;
     key = key === "name" ? "last_name" : key;
     this.props.getSpeakers(term, page, perPage, key, dir);
@@ -78,9 +79,9 @@ class SummitSpeakerListPage extends React.Component {
     this.props.getSpeakers(term, page, perPage, order, orderDir);
   }
 
-  handleNewSpeaker(ev) {
+  handleNewSpeaker() {
     const { history } = this.props;
-    history.push(`/app/speakers/new`);
+    history.push("/app/speakers/new");
   }
 
   render() {
@@ -115,11 +116,11 @@ class SummitSpeakerListPage extends React.Component {
     const memberObj = new Member(member);
 
     if (memberObj.canDeleteSpeakers()) {
-      table_options.actions["delete"] = { onClick: this.handleDelete };
+      table_options.actions.delete = { onClick: this.handleDelete };
     }
 
     if (memberObj.canEditSpeakers()) {
-      table_options.actions["edit"] = { onClick: this.handleEdit };
+      table_options.actions.edit = { onClick: this.handleEdit };
     }
 
     return (
@@ -128,8 +129,8 @@ class SummitSpeakerListPage extends React.Component {
           {" "}
           {T.translate("speaker_list.speaker_list")} ({totalSpeakers}){" "}
         </h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <FreeTextSearch
               value={term ?? ""}
               placeholder={T.translate("general.placeholders.search_speakers")}

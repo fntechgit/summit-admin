@@ -9,15 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   REQUEST_SPEAKERS,
   RECEIVE_SPEAKERS,
   SPEAKER_DELETED
 } from "../../actions/speaker-actions";
-
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   speakers: {},
@@ -30,46 +29,42 @@ const DEFAULT_STATE = {
   totalSpeakers: 0
 };
 
-const speakerListReducer = (state = DEFAULT_STATE, action) => {
+const speakerListReducer = (state = DEFAULT_STATE, action = {}) => {
   const { type, payload } = action;
   switch (type) {
-    case LOGOUT_USER:
-      {
-        return state;
-      }
-      break;
-    case REQUEST_SPEAKERS:
-      {
-        let { order, orderDir, term, page } = payload;
-        return { ...state, order, orderDir, term, currentPage: page };
-      }
-      break;
-    case RECEIVE_SPEAKERS:
-      {
-        let { current_page, total, last_page } = payload.response;
-        let speakers = payload.response.data.map((s) => ({
-          ...s,
-          name: s.first_name + " " + s.last_name
-        }));
+    case LOGOUT_USER: {
+      return state;
+    }
+    case REQUEST_SPEAKERS: {
+      const { order, orderDir, term, page } = payload;
+      return { ...state, order, orderDir, term, currentPage: page };
+    }
+    case RECEIVE_SPEAKERS: {
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
+      const speakers = payload.response.data.map((s) => ({
+        ...s,
+        name: `${s.first_name} ${s.last_name}`
+      }));
 
-        return {
-          ...state,
-          speakers: speakers,
-          currentPage: current_page,
-          totalSpeakers: total,
-          lastPage: last_page
-        };
-      }
-      break;
-    case SPEAKER_DELETED:
-      {
-        let { speakerId } = payload;
-        return {
-          ...state,
-          speakers: state.speakers.filter((s) => s.id !== speakerId)
-        };
-      }
-      break;
+      return {
+        ...state,
+        speakers,
+        currentPage,
+        totalSpeakers: total,
+        lastPage
+      };
+    }
+    case SPEAKER_DELETED: {
+      const { speakerId } = payload;
+      return {
+        ...state,
+        speakers: state.speakers.filter((s) => s.id !== speakerId)
+      };
+    }
     default:
       return state;
   }

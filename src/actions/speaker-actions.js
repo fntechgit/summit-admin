@@ -91,6 +91,64 @@ export const SEND_SPEAKERS_EMAILS = "SEND_SPEAKERS_EMAILS";
 export const SET_SPEAKERS_CURRENT_FLOW_EVENT =
   "SET_SPEAKERS_CURRENT_FLOW_EVENT";
 
+const normalizeEntity = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  if (normalizedEntity.member != null) {
+    normalizedEntity.member_id = normalizedEntity.member.id;
+    delete normalizedEntity.email;
+  } else {
+    delete normalizedEntity.member_id;
+  }
+
+  delete normalizedEntity.presentations;
+  delete normalizedEntity.all_presentations;
+  delete normalizedEntity.moderated_presentations;
+  delete normalizedEntity.all_moderated_presentations;
+  delete normalizedEntity.other_presentation_links;
+  delete normalizedEntity.affiliations;
+  delete normalizedEntity.gender;
+  delete normalizedEntity.pic;
+  delete normalizedEntity.member;
+  delete normalizedEntity.summit_assistances;
+  delete normalizedEntity.code_redeemed;
+  delete normalizedEntity.active_involvements;
+  delete normalizedEntity.travel_preferences;
+  return normalizedEntity;
+};
+
+const uploadProfilePic = (entity, file) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  postRequest(
+    null,
+    createAction(PIC_ATTACHED),
+    `${window.API_BASE_URL}/api/v1/speakers/${entity.id}/photo?access_token=${accessToken}`,
+    file,
+    authErrorHandler,
+    { pic: entity.pic }
+  )({})(dispatch).then(() => {
+    dispatch(stopLoading());
+    history.push(`/app/speakers/${entity.id}`);
+  });
+};
+
+const uploadBigPic = (entity, file) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  postRequest(
+    null,
+    createAction(BIG_PIC_ATTACHED),
+    `${window.API_BASE_URL}/api/v1/speakers/${entity.id}/big-photo?access_token=${accessToken}`,
+    file,
+    authErrorHandler,
+    { pic: entity.pic }
+  )({})(dispatch).then(() => {
+    dispatch(stopLoading());
+    history.push(`/app/speakers/${entity.id}`);
+  });
+};
+
 export const initSpeakersList = () => async (dispatch) => {
   dispatch(createAction(INIT_SPEAKERS_LIST_PARAMS)());
 };
@@ -111,7 +169,7 @@ const buildTermFilter = (term, usePresentationFilters = true) => {
   }
 
   if (isNumericString(escapedTerm)) {
-    const filterTermId = parseInt(escapedTerm);
+    const filterTermId = parseInt(escapedTerm, 10);
     termFilter = [
       ...termFilter,
       ...[
@@ -148,7 +206,8 @@ export const getSpeakers =
     const params = {
       page,
       per_page: perPage,
-      access_token: accessToken
+      access_token: accessToken,
+      fields: "id,first_name,last_name,email,member_id"
     };
 
     if (filter.length > 0) {
@@ -235,7 +294,7 @@ export const mergeSpeakers =
 
     dispatch(startLoading());
 
-    const success_message = [
+    const successMessage = [
       T.translate("merge_speakers.merge_success"),
       T.translate("merge_speakers.merge_changes") + changedFields.join(", "),
       "success"
@@ -250,7 +309,7 @@ export const mergeSpeakers =
     )({})(dispatch).then(() => {
       dispatch(stopLoading());
       dispatch(
-        showMessage(success_message, () => {
+        showMessage(successMessage, () => {
           history.push(`/app/speakers/${speakers[1].id}`);
         })
       );
@@ -280,7 +339,7 @@ export const saveSpeaker = (entity) => async (dispatch) => {
       dispatch(showSuccessMessage(T.translate("edit_speaker.speaker_saved")));
     });
   } else {
-    const success_message = {
+    const successMessage = {
       title: T.translate("general.done"),
       html: T.translate("edit_speaker.speaker_created"),
       type: "success"
@@ -295,7 +354,7 @@ export const saveSpeaker = (entity) => async (dispatch) => {
       entity
     )({})(dispatch).then(() => {
       dispatch(
-        showMessage(success_message, () => {
+        showMessage(successMessage, () => {
           history.push("/app/speakers");
         })
       );
@@ -327,67 +386,20 @@ export const attachPicture = (entity, file, picAttr) => async (dispatch) => {
   });
 };
 
-const uploadProfilePic = (entity, file) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-
-  postRequest(
-    null,
-    createAction(PIC_ATTACHED),
-    `${window.API_BASE_URL}/api/v1/speakers/${entity.id}/photo?access_token=${accessToken}`,
-    file,
-    authErrorHandler,
-    { pic: entity.pic }
-  )({})(dispatch).then(() => {
-    dispatch(stopLoading());
-    history.push(`/app/speakers/${entity.id}`);
-  });
-};
-
-const uploadBigPic = (entity, file) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-
-  postRequest(
-    null,
-    createAction(BIG_PIC_ATTACHED),
-    `${window.API_BASE_URL}/api/v1/speakers/${entity.id}/big-photo?access_token=${accessToken}`,
-    file,
-    authErrorHandler,
-    { pic: entity.pic }
-  )({})(dispatch).then(() => {
-    dispatch(stopLoading());
-    history.push(`/app/speakers/${entity.id}`);
-  });
-};
-
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  if (normalizedEntity.member != null) {
-    normalizedEntity.member_id = normalizedEntity.member.id;
-    delete normalizedEntity.email;
-  } else {
-    delete normalizedEntity.member_id;
-  }
-
-  delete normalizedEntity.presentations;
-  delete normalizedEntity.all_presentations;
-  delete normalizedEntity.moderated_presentations;
-  delete normalizedEntity.all_moderated_presentations;
-  delete normalizedEntity.other_presentation_links;
-  delete normalizedEntity.affiliations;
-  delete normalizedEntity.gender;
-  delete normalizedEntity.pic;
-  delete normalizedEntity.member;
-  delete normalizedEntity.summit_assistances;
-  delete normalizedEntity.code_redeemed;
-  delete normalizedEntity.active_involvements;
-  delete normalizedEntity.travel_preferences;
-  return normalizedEntity;
-};
-
 /** ************************************************************************************************* */
 /* SPEAKER ATTENDANCE */
 /** ************************************************************************************************* */
+
+const normalizeAttendance = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  normalizedEntity.speaker_id =
+    normalizedEntity.speaker != null ? normalizedEntity.speaker.id : 0;
+
+  delete normalizedEntity.speaker;
+
+  return normalizedEntity;
+};
 
 export const getAttendances =
   (
@@ -413,9 +425,9 @@ export const getAttendances =
       );
     }
 
-    const req_params = {
+    const reqParams = {
       order,
-      orderDir: parseInt(orderDir),
+      orderDir: parseInt(orderDir, 10),
       term
     };
 
@@ -441,7 +453,7 @@ export const getAttendances =
       createAction(RECEIVE_ATTENDANCES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers-assistances`,
       authErrorHandler,
-      req_params
+      reqParams
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -525,7 +537,7 @@ export const saveAttendance = (entity) => async (dispatch, getState) => {
       );
     });
   } else {
-    const success_message = {
+    const successMessage = {
       title: T.translate("general.done"),
       html: T.translate("edit_speaker_attendance.attendance_created"),
       type: "success"
@@ -540,7 +552,7 @@ export const saveAttendance = (entity) => async (dispatch, getState) => {
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(
-        showMessage(success_message, () => {
+        showMessage(successMessage, () => {
           history.push(
             `/app/summits/${currentSummit.id}/speaker-attendances/${payload.response.id}`
           );
@@ -618,17 +630,6 @@ export const exportAttendances =
     );
   };
 
-const normalizeAttendance = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  normalizedEntity.speaker_id =
-    normalizedEntity.speaker != null ? normalizedEntity.speaker.id : 0;
-
-  delete normalizedEntity.speaker;
-
-  return normalizedEntity;
-};
-
 /** ************************************************************************************************* */
 /* FEATURED SPEAKERS */
 /** ************************************************************************************************* */
@@ -658,7 +659,7 @@ export const getFeaturedSpeakers =
       );
     }
 
-    const req_params = {
+    const reqParams = {
       term
     };
 
@@ -679,7 +680,7 @@ export const getFeaturedSpeakers =
       createAction(RECEIVE_FEATURED_SPEAKERS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/featured-speakers`,
       authErrorHandler,
-      req_params
+      reqParams
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -755,6 +756,106 @@ export const removeFeaturedSpeaker =
 /** ************************************************************************************************* */
 /* SPEAKERS BY SUMMIT */
 /** ************************************************************************************************* */
+
+const parseFilters = (filters) => {
+  const filter = [];
+
+  if (
+    filters?.selectionPlanFilter &&
+    Array.isArray(filters.selectionPlanFilter) &&
+    filters.selectionPlanFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_selection_plan_id==${filters.selectionPlanFilter.join(
+        "||"
+      )}`
+    );
+  }
+
+  if (
+    filters?.trackFilter &&
+    Array.isArray(filters.trackFilter) &&
+    filters.trackFilter.length > 0
+  ) {
+    filter.push(`presentations_track_id==${filters.trackFilter.join("||")}`);
+  }
+
+  if (
+    filters?.activityTypeFilter &&
+    Array.isArray(filters.activityTypeFilter) &&
+    filters.activityTypeFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_type_id==${filters.activityTypeFilter.join("||")}`
+    );
+  }
+
+  if (
+    filters?.selectionStatusFilter &&
+    Array.isArray(filters.selectionStatusFilter) &&
+    filters.selectionStatusFilter.length > 0
+  ) {
+    // exclusive filters
+    if (filters.selectionStatusFilter.includes("only_rejected")) {
+      filter.push("has_rejected_presentations==true");
+      filter.push("has_accepted_presentations==false");
+      filter.push("has_alternate_presentations==false");
+    } else if (filters.selectionStatusFilter.includes("only_accepted")) {
+      filter.push("has_rejected_presentations==false");
+      filter.push("has_accepted_presentations==true");
+      filter.push("has_alternate_presentations==false");
+    } else if (filters.selectionStatusFilter.includes("only_alternate")) {
+      filter.push("has_rejected_presentations==false");
+      filter.push("has_accepted_presentations==false");
+      filter.push("has_alternate_presentations==true");
+    } else if (filters.selectionStatusFilter.includes("accepted_alternate")) {
+      filter.push("has_rejected_presentations==false");
+      filter.push("has_accepted_presentations==true");
+      filter.push("has_alternate_presentations==true");
+    } else if (filters.selectionStatusFilter.includes("accepted_rejected")) {
+      filter.push("has_rejected_presentations==true");
+      filter.push("has_accepted_presentations==true");
+      filter.push("has_alternate_presentations==false");
+    } else if (filters.selectionStatusFilter.includes("alternate_rejected")) {
+      filter.push("has_rejected_presentations==true");
+      filter.push("has_accepted_presentations==false");
+      filter.push("has_alternate_presentations==true");
+    } else {
+      filter.push(
+        filters.selectionStatusFilter.reduce(
+          (accumulator, at) =>
+            `${
+              accumulator + (accumulator !== "" ? "," : "")
+            }has_${at}_presentations==true`,
+          ""
+        )
+      );
+    }
+  }
+
+  if (
+    filters?.mediaUploadTypeFilter &&
+    filters.mediaUploadTypeFilter.operator !== null &&
+    Array.isArray(filters.mediaUploadTypeFilter.value) &&
+    filters.mediaUploadTypeFilter.value.length > 0
+  ) {
+    filter.push(
+      `${
+        filters.mediaUploadTypeFilter.operator
+      }${filters.mediaUploadTypeFilter.value
+        .map((v) => v.id)
+        .join(
+          filters.mediaUploadTypeFilter.operator ===
+            "has_media_upload_with_type=="
+            ? "||"
+            : "&&"
+        )}`
+    );
+  }
+
+  // return checkOrFilter(filters, filter);
+  return filter;
+};
 
 export const getSpeakersBySummit =
   (
@@ -858,7 +959,6 @@ export const exportSummitSpeakers =
     }
 
     for (let i = 1; i <= totalPages; i++) {
-      console.log("page ", i);
       cvsFiles.push(getRawCSV(endpoint, { ...params, page: i }));
     }
 
@@ -896,7 +996,7 @@ export const sendSpeakerEmails =
     testRecipient = "",
     excerptRecipient = "",
     shouldSendCopy2Submitter = false,
-    source = null,
+    source,
     promoCodeStrategy = null,
     promocodeSpecification = null
   ) =>
@@ -1001,7 +1101,7 @@ export const sendSpeakerEmails =
 
     dispatch(startLoading());
 
-    const success_message = {
+    const successMessage = {
       title: T.translate("general.done"),
       html: T.translate("summit_speakers_list.resend_done"),
       type: "success"
@@ -1013,10 +1113,10 @@ export const sendSpeakerEmails =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers/all/send`,
       payload,
       authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      dispatch(showMessage(success_message));
+    )(params)(dispatch).then((_payload) => {
+      dispatch(showMessage(successMessage));
       dispatch(stopLoading());
-      return payload;
+      return _payload;
     });
   };
 
@@ -1038,104 +1138,4 @@ export const unselectAllSummitSpeakers = () => (dispatch) => {
 
 export const setCurrentFlowEvent = (value) => (dispatch) => {
   dispatch(createAction(SET_SPEAKERS_CURRENT_FLOW_EVENT)(value));
-};
-
-const parseFilters = (filters) => {
-  const filter = [];
-
-  if (
-    filters.hasOwnProperty("selectionPlanFilter") &&
-    Array.isArray(filters.selectionPlanFilter) &&
-    filters.selectionPlanFilter.length > 0
-  ) {
-    filter.push(
-      `presentations_selection_plan_id==${filters.selectionPlanFilter.join(
-        "||"
-      )}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("trackFilter") &&
-    Array.isArray(filters.trackFilter) &&
-    filters.trackFilter.length > 0
-  ) {
-    filter.push(`presentations_track_id==${filters.trackFilter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("activityTypeFilter") &&
-    Array.isArray(filters.activityTypeFilter) &&
-    filters.activityTypeFilter.length > 0
-  ) {
-    filter.push(
-      `presentations_type_id==${filters.activityTypeFilter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("selectionStatusFilter") &&
-    Array.isArray(filters.selectionStatusFilter) &&
-    filters.selectionStatusFilter.length > 0
-  ) {
-    // exclusive filters
-    if (filters.selectionStatusFilter.includes("only_rejected")) {
-      filter.push("has_rejected_presentations==true");
-      filter.push("has_accepted_presentations==false");
-      filter.push("has_alternate_presentations==false");
-    } else if (filters.selectionStatusFilter.includes("only_accepted")) {
-      filter.push("has_rejected_presentations==false");
-      filter.push("has_accepted_presentations==true");
-      filter.push("has_alternate_presentations==false");
-    } else if (filters.selectionStatusFilter.includes("only_alternate")) {
-      filter.push("has_rejected_presentations==false");
-      filter.push("has_accepted_presentations==false");
-      filter.push("has_alternate_presentations==true");
-    } else if (filters.selectionStatusFilter.includes("accepted_alternate")) {
-      filter.push("has_rejected_presentations==false");
-      filter.push("has_accepted_presentations==true");
-      filter.push("has_alternate_presentations==true");
-    } else if (filters.selectionStatusFilter.includes("accepted_rejected")) {
-      filter.push("has_rejected_presentations==true");
-      filter.push("has_accepted_presentations==true");
-      filter.push("has_alternate_presentations==false");
-    } else if (filters.selectionStatusFilter.includes("alternate_rejected")) {
-      filter.push("has_rejected_presentations==true");
-      filter.push("has_accepted_presentations==false");
-      filter.push("has_alternate_presentations==true");
-    } else {
-      filter.push(
-        filters.selectionStatusFilter.reduce(
-          (accumulator, at) =>
-            `${
-              accumulator + (accumulator !== "" ? "," : "")
-            }has_${at}_presentations==true`,
-          ""
-        )
-      );
-    }
-  }
-
-  if (
-    filters.hasOwnProperty("mediaUploadTypeFilter") &&
-    filters.mediaUploadTypeFilter.operator !== null &&
-    Array.isArray(filters.mediaUploadTypeFilter.value) &&
-    filters.mediaUploadTypeFilter.value.length > 0
-  ) {
-    filter.push(
-      `${
-        filters.mediaUploadTypeFilter.operator
-      }${filters.mediaUploadTypeFilter.value
-        .map((v) => v.id)
-        .join(
-          filters.mediaUploadTypeFilter.operator ===
-            "has_media_upload_with_type=="
-            ? "||"
-            : "&&"
-        )}`
-    );
-  }
-
-  // return checkOrFilter(filters, filter);
-  return filter;
 };
