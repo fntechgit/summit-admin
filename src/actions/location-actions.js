@@ -157,10 +157,11 @@ export const getLocation = (locationId) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
+    access_token: accessToken,
     expand: "rooms,floors,images,maps",
     fields:
       "rooms.id,rooms.name,rooms.capacity,rooms.floor_id,floors.id,floors.name,floors.number,maps.id,maps.name,images.id,images.name",
-    access_token: accessToken
+    relations: "rooms,floors,images,maps,rooms.none"
   };
 
   return getRequest(
