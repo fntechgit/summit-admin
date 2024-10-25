@@ -65,6 +65,7 @@ import {
 } from "../../actions/filter-criteria-actions";
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
+import { saveEventMaterial } from "../../actions/event-material-actions";
 
 const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
   {
@@ -249,6 +250,114 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
         </>
       );
     }
+  },
+  {
+    columnKey: "media_uploads_display",
+    value: "media_uploads_display",
+    sortable: false,
+    render: (e, row) => {
+      const media_uploads = row?.media_uploads || [];
+      if (!media_uploads.length) return "N/A";
+      return (
+        <>
+          {media_uploads.map((m) => (
+            <React.Fragment key={m.id}>
+              {`"${m.media_upload_type.name}" : `}
+              <b>{`${m.display_on_site ? "Yes" : "No"}`}</b>
+              <br />
+            </React.Fragment>
+          ))}
+        </>
+      );
+    },
+    editableField: (extraProps) => {
+      const media_uploads = extraProps.row?.media_uploads || [];
+      if (!media_uploads.length) return false;
+      return (
+        <>
+          {media_uploads.map((m) => (
+            <div key={m.id}>
+              {`"${m.media_upload_type.name}": `}
+              <Dropdown
+                id={`media_uploads___${m.id}___display_on_site`}
+                // eslint-disable-next-line react/jsx-props-no-spreading
+                {...extraProps}
+                value={m.display_on_site}
+                options={[
+                  { label: "Yes", value: true },
+                  { label: "No", value: false }
+                ]}
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+                styles={{
+                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  control: (base, state) => ({
+                    ...base,
+                    zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+                  })
+                }}
+              />
+            </div>
+          ))}
+        </>
+      );
+    }
+  },
+  {
+    columnKey: "allow_feedback",
+    value: "allow_feedback",
+    sortable: false,
+    render: (field) =>
+      field === undefined ? "N/A" : field === true ? "Yes" : "No",
+    editableField: (extraProps) => (
+      <Dropdown
+        id="allow_feedback"
+        value={extraProps}
+        options={[
+          { label: "Yes", value: true },
+          { label: "No", value: false }
+        ]}
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
+        styles={{
+          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          control: (base, state) => ({
+            ...base,
+            zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+          })
+        }}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...extraProps}
+      />
+    )
+  },
+  {
+    columnKey: "to_record",
+    value: "to_record",
+    sortable: false,
+    render: (field) =>
+      field === undefined ? "N/A" : field === true ? "Yes" : "No",
+    editableField: (extraProps) => (
+      <Dropdown
+        id="to_record"
+        value={extraProps}
+        options={[
+          { label: "Yes", value: true },
+          { label: "No", value: false }
+        ]}
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
+        styles={{
+          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          control: (base, state) => ({
+            ...base,
+            zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+          })
+        }}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...extraProps}
+      />
+    )
   }
 ];
 
@@ -699,6 +808,18 @@ class SummitEventListPage extends React.Component {
     let newColumns = value;
     const all_companies = ["submitter_company", "speaker_company", "sponsor"];
 
+    const mediaUploadsSelected = newColumns.includes("media_uploads");
+
+    // Ensure 'media_uploads_display' is included if 'media_uploads' is selected
+    if (mediaUploadsSelected && !newColumns.includes("media_uploads_display")) {
+      newColumns = [...newColumns, "media_uploads_display"];
+    }
+
+    // Remove 'media_uploads_display' if 'media_uploads' is deselected
+    if (!mediaUploadsSelected && newColumns.includes("media_uploads_display")) {
+      newColumns = newColumns.filter((col) => col !== "media_uploads_display");
+    }
+
     if (
       selectedColumns.includes("all_companies") &&
       !newColumns.includes("all_companies")
@@ -815,7 +936,8 @@ class SummitEventListPage extends React.Component {
       orderDir,
       totalEvents,
       term,
-      bulkUpdateEvents
+      bulkUpdateEvents,
+      saveEventMaterial
     } = this.props;
     const {
       enabledFilters,
@@ -1029,7 +1151,15 @@ class SummitEventListPage extends React.Component {
         label: T.translate("event_list.review_status")
       },
       { value: "created", label: T.translate("event_list.created") },
-      { value: "modified", label: T.translate("event_list.modified") }
+      { value: "modified", label: T.translate("event_list.modified") },
+      {
+        value: "allow_feedback",
+        label: T.translate("event_list.allow_feedback")
+      },
+      {
+        value: "to_record",
+        label: T.translate("event_list.to_record")
+      }
     ];
 
     const ddl_filterByEventTypeCapacity = [
@@ -1805,6 +1935,12 @@ class SummitEventListPage extends React.Component {
                 columns={columns}
                 handleSort={this.handleSort}
                 updateData={bulkUpdateEvents}
+                afterUpdate={[
+                  {
+                    action: (data) => saveEventMaterial(data),
+                    propertyName: "media_uploads"
+                  }
+                ]}
                 handleDeleteRow={this.handleDeleteEvent}
                 formattingFunction={formatEventData}
               />
@@ -1994,5 +2130,6 @@ export default connect(mapStateToProps, {
   changeEventListSearchTerm,
   saveFilterCriteria,
   deleteFilterCriteria,
-  bulkUpdateEvents
+  bulkUpdateEvents,
+  saveEventMaterial
 })(SummitEventListPage);
