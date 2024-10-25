@@ -207,7 +207,8 @@ export const getSpeakers =
       page,
       per_page: perPage,
       access_token: accessToken,
-      fields: "id,first_name,last_name,email,member_id"
+      fields: "id,first_name,last_name,email,member_id",
+      relations: "none"
     };
 
     if (filter.length > 0) {
