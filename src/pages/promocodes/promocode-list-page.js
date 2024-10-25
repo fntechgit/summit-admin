@@ -31,11 +31,9 @@ import {
   exportPromocodes,
   importPromoCodesCSV
 } from "../../actions/promocode-actions";
-import { trim } from "../../utils/methods";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import ImportPromocodesBtn from "../../components/import-promocodes";
 import {
-  TRIM_TEXT_LENGTH_40,
   TRIM_TEXT_LENGTH_50
 } from "../../utils/constants";
 
@@ -544,14 +542,7 @@ class PromocodeListPage extends React.Component {
           <div>
             <Table
               options={table_options}
-              data={promocodes.map((p) => ({
-                ...p,
-                owner_email: (
-                  <abbr title={p.owner_email}>
-                    {trim(p?.owner_email, TRIM_TEXT_LENGTH_40)}
-                  </abbr>
-                )
-              }))}
+              data={promocodes}
               columns={columns}
               onSort={this.handleSort}
             />

@@ -199,7 +199,7 @@ export const getPromocodes =
     const relations =
       "creator,sponsor,tags,speaker,owner,owners,owners.speaker.none,creator.none,sponsor.company,sponsor.company.none";
     const fields =
-      "id,code,redeemed,class_name,description,email_sent,first_name,last_name,email,contact_email,owners.speaker.email,creator.first_name,creator.last_name,sponsor.first_name,sponsor.last_name,sponsor.company.name,tags.tag,owner.first_name,owner.last_name,owner.email,speaker.first_name,speaker.last_name,speaker.email";
+      "id,code,redeemed,class_name,description,email_sent,first_name,last_name,email,contact_email,owners.speaker.email,owners.speaker.first_name,owners.speaker.last_name,creator.first_name,creator.last_name,sponsor.first_name,sponsor.last_name,sponsor.company.name,tags.tag,owner.first_name,owner.last_name,owner.email,speaker.first_name,speaker.last_name,speaker.email";
 
     const params = {
       expand,

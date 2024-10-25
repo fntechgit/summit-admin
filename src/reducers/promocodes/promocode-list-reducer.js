@@ -22,6 +22,7 @@ import {
 import { ALL_FILTER } from "../../utils/constants";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { trim } from "../../utils/methods";
 
 const FILTERS_DEFAULT_STATE = {
   assigneeFilter: null,
@@ -51,6 +52,8 @@ const DEFAULT_STATE = {
   allClasses: [],
   extraColumns: []
 };
+
+const VALUE_MAX_LENGTH = 40;
 
 // eslint-disable-next-line default-param-last
 const promocodeListReducer = (state = DEFAULT_STATE, action) => {
@@ -85,6 +88,7 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
         total,
         last_page: lastPage
       } = payload.response;
+
       const promocodes = payload.response.data.map((p) => {
         let owner = "";
         let ownerEmail = "";
@@ -114,9 +118,9 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           case "SPEAKERS_PROMO_CODE":
             if (p.owners?.length > 0) {
               ownerEmail = p.owners.map((o) => o.speaker.email).join(", ");
-              owner = p.owners.map(
-                (o) => `${o.speaker.first_name} ${o.speaker.last_name}`
-              );
+              owner = p.owners
+                .map((o) => `${o.speaker.first_name} ${o.speaker.last_name}`)
+                .join(", ");
             }
             break;
           case "SPONSOR_DISCOUNT_CODE":
@@ -136,8 +140,8 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           type: p.type,
           tags:
             p.tags?.length > 0 ? p.tags.map((t) => t.tag).join(", ") : "N/A",
-          owner,
-          owner_email: ownerEmail || "",
+          owner: trim(owner, VALUE_MAX_LENGTH),
+          owner_email: trim(ownerEmail, VALUE_MAX_LENGTH) || "",
           email_sent: p.email_sent ? "Yes" : "No",
           redeemed: p.redeemed ? "Yes" : "No",
           creator: p?.creator
