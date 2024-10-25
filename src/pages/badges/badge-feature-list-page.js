@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -50,30 +50,29 @@ class BadgeFeatureListPage extends React.Component {
 
   handleDelete(badgeFeatureId) {
     const { deleteBadgeFeature, badgeFeatures } = this.props;
-    let badgeFeature = badgeFeatures.find((t) => t.id === badgeFeatureId);
+    const badgeFeature = badgeFeatures.find((t) => t.id === badgeFeatureId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("badge_feature_list.remove_warning") +
-        " " +
-        badgeFeature.name,
+      text: `${T.translate("badge_feature_list.remove_warning")} ${
+        badgeFeature.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteBadgeFeature(badgeFeatureId);
       }
     });
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     this.props.getBadgeFeatures(key, dir);
   }
 
-  handleNewBadgeFeature(ev) {
+  handleNewBadgeFeature() {
     const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/badge-features/new`);
   }
@@ -96,10 +95,6 @@ class BadgeFeatureListPage extends React.Component {
       {
         columnKey: "description",
         value: T.translate("badge_feature_list.description")
-      },
-      {
-        columnKey: "tag_name",
-        value: T.translate("badge_feature_list.tag_name")
       }
     ];
 
@@ -121,7 +116,7 @@ class BadgeFeatureListPage extends React.Component {
           {T.translate("badge_feature_list.badge_feature_list")} (
           {totalBadgeFeatures})
         </h3>
-        <div className={"row"}>
+        <div className="row">
           <div className="col-md-6 text-right col-md-offset-6">
             <button
               className="btn btn-primary right-space"

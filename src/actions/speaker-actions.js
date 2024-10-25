@@ -206,7 +206,9 @@ export const getSpeakers =
     const params = {
       page,
       per_page: perPage,
-      access_token: accessToken
+      access_token: accessToken,
+      fields: "id,first_name,last_name,email,member_id",
+      relations: "none"
     };
 
     if (filter.length > 0) {
@@ -1113,10 +1115,10 @@ export const sendSpeakerEmails =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/speakers/all/send`,
       payload,
       authErrorHandler
-    )(params)(dispatch).then((tmpPayload) => {
+    )(params)(dispatch).then((_payload) => {
       dispatch(showMessage(successMessage));
       dispatch(stopLoading());
-      return tmpPayload;
+      return _payload;
     });
   };
 
