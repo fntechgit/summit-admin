@@ -22,7 +22,6 @@ import {
 import { ALL_FILTER } from "../../utils/constants";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { trim } from "../../utils/methods";
 
 const FILTERS_DEFAULT_STATE = {
   assigneeFilter: null,
@@ -52,8 +51,6 @@ const DEFAULT_STATE = {
   allClasses: [],
   extraColumns: []
 };
-
-const VALUE_MAX_LENGTH = 40;
 
 // eslint-disable-next-line default-param-last
 const promocodeListReducer = (state = DEFAULT_STATE, action) => {
@@ -140,8 +137,8 @@ const promocodeListReducer = (state = DEFAULT_STATE, action) => {
           type: p.type,
           tags:
             p.tags?.length > 0 ? p.tags.map((t) => t.tag).join(", ") : "N/A",
-          owner: trim(owner, VALUE_MAX_LENGTH),
-          owner_email: trim(ownerEmail, VALUE_MAX_LENGTH) || "",
+          owner,
+          owner_email: ownerEmail || "",
           email_sent: p.email_sent ? "Yes" : "No",
           redeemed: p.redeemed ? "Yes" : "No",
           creator: p?.creator

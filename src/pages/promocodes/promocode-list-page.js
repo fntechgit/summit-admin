@@ -34,8 +34,10 @@ import {
 import OrAndFilter from "../../components/filters/or-and-filter";
 import ImportPromocodesBtn from "../../components/import-promocodes";
 import {
-  TRIM_TEXT_LENGTH_50
+  TRIM_TEXT_LENGTH_50,
+  TRIM_TEXT_LENGTH_40
 } from "../../utils/constants";
+import { trim } from "../../utils/methods";
 
 const fieldNames = [
   { columnKey: "class_name", value: "type" },
@@ -389,6 +391,16 @@ class PromocodeListPage extends React.Component {
       value: c.class_name
     }));
 
+    const promocodesFormatted = promocodes.map((p) => ({
+      ...p,
+      owner_email: (
+        <abbr title={p.owner_email}>
+          {trim(p?.owner_email, TRIM_TEXT_LENGTH_40)}
+        </abbr>
+      ),
+      owner: <abbr title={p.owner}>{trim(p?.owner, TRIM_TEXT_LENGTH_40)}</abbr>
+    }));
+
     return (
       <div className="container">
         <h3>
@@ -542,7 +554,7 @@ class PromocodeListPage extends React.Component {
           <div>
             <Table
               options={table_options}
-              data={promocodes}
+              data={promocodesFormatted}
               columns={columns}
               onSort={this.handleSort}
             />
