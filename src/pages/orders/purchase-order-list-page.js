@@ -119,7 +119,6 @@ class PurchaseOrderListPage extends React.Component {
   handleSort(index, key, dir) {
     const { term, page, perPage, filters, getPurchaseOrders } = this.props;
     if (key === "name") key = "last_name";
-    if (key === "company") key = "owner_company";
     getPurchaseOrders(term, page, perPage, key, dir, filters);
   }
 
@@ -272,7 +271,7 @@ class PurchaseOrderListPage extends React.Component {
         sortable: true
       },
       {
-        columnKey: "company",
+        columnKey: "owner_company",
         value: T.translate("purchase_order_list.company"),
         sortable: true
       },
