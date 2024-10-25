@@ -12,6 +12,7 @@
  * */
 
 import React, { useState, useEffect } from "react";
+import T from "i18n-react/dist/i18n-react";
 import { Input } from "openstack-uicore-foundation/lib/components";
 
 const UrlInput = function ({ onChange, error, id, value: propValue, ...rest }) {
@@ -31,7 +32,7 @@ const UrlInput = function ({ onChange, error, id, value: propValue, ...rest }) {
     setStateValue(value);
 
     if (!urlPattern.test(value)) {
-      setInvalidUrl("URL must start with http:// or https://");
+      setInvalidUrl(T.translate("url_input.url_error"));
       return;
     }
 
