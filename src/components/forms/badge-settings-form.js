@@ -90,7 +90,7 @@ class BadgeSettingsForm extends React.Component {
   handleUploadFile(file, props) {
     const { id } = props;
 
-    const newEntity = { ...this.state.entity };
+    const newEntity = { ...this.state.entity, type: "FILE" };
 
     newEntity[id].file = file;
     newEntity[id].file_preview = file.preview;
@@ -122,8 +122,6 @@ class BadgeSettingsForm extends React.Component {
 
     newEntity[setting].value = value;
 
-    console.log("CHECK!", setting, value, newEntity[setting], newEntity);
-
     this.setState((prevState) => ({
       ...prevState,
       entity: newEntity,
@@ -144,9 +142,6 @@ class BadgeSettingsForm extends React.Component {
       )
     );
 
-    console.log("CHECKING...", settingsToSave);
-    console.log("CHECKING...", this.state.entity);
-
     this.props.onSubmit(settingsToSave).then(() => {
       const success_message = {
         title: T.translate("general.done"),
@@ -161,6 +156,22 @@ class BadgeSettingsForm extends React.Component {
   render() {
     const { entity, showSection } = this.state;
     const { currentSummit } = this.props;
+
+    const ddlAlignOptions = [
+      { label: "Left", value: "left" },
+      { label: "Right", value: "right" },
+      { label: "Justify", value: "justify" }
+    ];
+
+    const ddlFontCasing = [
+      { label: "Lowercase", value: "lowercase" },
+      { label: "Uppercase", value: "uppercase" }
+    ];
+
+    const ddlTextFitMode = [
+      { label: "Single", value: "single" },
+      { label: "Multi", value: "multi" }
+    ];
 
     return (
       <form className="badge-settings-form">
@@ -223,38 +234,22 @@ class BadgeSettingsForm extends React.Component {
 
         <div className="row form-group">
           <div className="col-md-6">
-            <label>
-              {T.translate("badge_settings.badge_template_first_name_top")}{" "}
-              &nbsp;{" "}
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("badge_settings.px_percentage_info")}
-              />
-            </label>
+            <label>{T.translate("badge_settings.badge_template_width")}</label>
             <br />
             <Input
               className="form-control"
-              id="BADGE_TEMPLATE_FIRST_NAME_TOP"
-              value={entity?.BADGE_TEMPLATE_FIRST_NAME_TOP?.value}
+              id="BADGE_TEMPLATE_WIDTH"
+              value={entity?.BADGE_TEMPLATE_WIDTH?.value}
               onChange={this.handleChange}
             />
           </div>
           <div className="col-md-6">
-            <label>
-              {T.translate("badge_settings.badge_template_first_name_left")}{" "}
-              &nbsp;{" "}
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("badge_settings.px_percentage_info")}
-              />
-            </label>
+            <label>{T.translate("badge_settings.badge_template_height")}</label>
             <br />
             <Input
               className="form-control"
-              id="BADGE_TEMPLATE_FIRST_NAME_LEFT"
-              value={entity?.BADGE_TEMPLATE_FIRST_NAME_LEFT?.value}
+              id="BADGE_TEMPLATE_HEIGHT"
+              value={entity?.BADGE_TEMPLATE_HEIGHT?.value}
               onChange={this.handleChange}
             />
           </div>
@@ -263,26 +258,19 @@ class BadgeSettingsForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-6">
             <label>
-              {T.translate("badge_settings.badge_template_last_name_top")}{" "}
-              &nbsp;{" "}
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("badge_settings.px_percentage_info")}
-              />
+              {T.translate("badge_settings.badge_template_background_color")}
             </label>
             <br />
-            <Input
-              className="form-control"
-              id="BADGE_TEMPLATE_LAST_NAME_TOP"
-              value={entity?.BADGE_TEMPLATE_LAST_NAME_TOP?.value}
+            <HexColorInput
               onChange={this.handleChange}
+              id="BADGE_TEMPLATE_BACKGROUND_COLOR"
+              value={entity?.BADGE_TEMPLATE_BACKGROUND_COLOR?.value}
+              className="form-control"
             />
           </div>
           <div className="col-md-6">
             <label>
-              {T.translate("badge_settings.badge_template_last_name_left")}{" "}
-              &nbsp;{" "}
+              {T.translate("badge_settings.badge_template_padding")} &nbsp;{" "}
               <i
                 className="fa fa-info-circle"
                 aria-hidden="true"
@@ -292,8 +280,8 @@ class BadgeSettingsForm extends React.Component {
             <br />
             <Input
               className="form-control"
-              id="BADGE_TEMPLATE_LAST_NAME_LEFT"
-              value={entity?.BADGE_TEMPLATE_LAST_NAME_LEFT?.value}
+              id="BADGE_TEMPLATE_PADDING"
+              value={entity?.BADGE_TEMPLATE_PADDING?.value}
               onChange={this.handleChange}
             />
           </div>
@@ -302,7 +290,8 @@ class BadgeSettingsForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-6">
             <label>
-              {T.translate("badge_settings.badge_template_company_top")} &nbsp;{" "}
+              {T.translate("badge_settings.badge_template_first_name_padding")}{" "}
+              &nbsp;{" "}
               <i
                 className="fa fa-info-circle"
                 aria-hidden="true"
@@ -312,14 +301,95 @@ class BadgeSettingsForm extends React.Component {
             <br />
             <Input
               className="form-control"
-              id="BADGE_TEMPLATE_COMPANY_TOP"
-              value={entity?.BADGE_TEMPLATE_COMPANY_TOP?.value}
+              id="BADGE_TEMPLATE_FIRST_NAME_PADDING"
+              value={entity?.BADGE_TEMPLATE_FIRST_NAME_PADDING?.value}
               onChange={this.handleChange}
             />
           </div>
           <div className="col-md-6">
             <label>
-              {T.translate("badge_settings.badge_template_company_left")} &nbsp;{" "}
+              {T.translate(
+                "badge_settings.badge_template_first_name_text_align"
+              )}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_FIRST_NAME_TEXT_ALIGN"
+              value={entity?.BADGE_TEMPLATE_FIRST_NAME_TEXT_ALIGN?.value}
+              onChange={this.handleChange}
+              options={ddlAlignOptions}
+              isClearable
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_first_name_font_casing"
+              )}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_FIRST_NAME_FONT_CASING"
+              value={entity?.BADGE_TEMPLATE_FIRST_NAME_FONT_CASING?.value}
+              onChange={this.handleChange}
+              options={ddlFontCasing}
+              isClearable
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_first_name_font_size_min"
+              )}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_FIRST_NAME_FONT_SIZE_MIN"
+              value={entity?.BADGE_TEMPLATE_FIRST_NAME_FONT_SIZE_MIN?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_first_name_font_size_max"
+              )}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_FIRST_NAME_FONT_SIZE_MAX"
+              value={entity?.BADGE_TEMPLATE_FIRST_NAME_FONT_SIZE_MAX?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_first_name_text_fit_mode"
+              )}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_FIRST_NAME_TEXT_FIT_MODE"
+              value={entity?.BADGE_TEMPLATE_FIRST_NAME_TEXT_FIT_MODE?.value}
+              onChange={this.handleChange}
+              options={ddlTextFitMode}
+              isClearable
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_last_name_padding")}{" "}
+              &nbsp;{" "}
               <i
                 className="fa fa-info-circle"
                 aria-hidden="true"
@@ -329,9 +399,180 @@ class BadgeSettingsForm extends React.Component {
             <br />
             <Input
               className="form-control"
-              id="BADGE_TEMPLATE_COMPANY_LEFT"
-              value={entity?.BADGE_TEMPLATE_COMPANY_LEFT?.value}
+              id="BADGE_TEMPLATE_LAST_NAME_PADDING"
+              value={entity?.BADGE_TEMPLATE_LAST_NAME_PADDING?.value}
               onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_last_name_text_align"
+              )}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_LAST_NAME_TEXT_ALIGN"
+              value={entity?.BADGE_TEMPLATE_LAST_NAME_TEXT_ALIGN?.value}
+              onChange={this.handleChange}
+              options={ddlAlignOptions}
+              isClearable
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_last_name_font_casing"
+              )}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_LAST_NAME_FONT_CASING"
+              value={entity?.BADGE_TEMPLATE_LAST_NAME_FONT_CASING?.value}
+              onChange={this.handleChange}
+              options={ddlFontCasing}
+              isClearable
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_last_name_font_size_min"
+              )}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_LAST_NAME_FONT_SIZE_MIN"
+              value={entity?.BADGE_TEMPLATE_LAST_NAME_FONT_SIZE_MIN?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_last_name_font_size_max"
+              )}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_LAST_NAME_FONT_SIZE_MAX"
+              value={entity?.BADGE_TEMPLATE_LAST_NAME_FONT_SIZE_MAX?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_last_name_text_fit_mode"
+              )}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_LAST_NAME_TEXT_FIT_MODE"
+              value={entity?.BADGE_TEMPLATE_LAST_NAME_TEXT_FIT_MODE?.value}
+              onChange={this.handleChange}
+              options={ddlTextFitMode}
+              isClearable
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_company_padding")}{" "}
+              &nbsp;{" "}
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("badge_settings.px_percentage_info")}
+              />
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_COMPANY_PADDING"
+              value={entity?.BADGE_TEMPLATE_COMPANY_PADDING?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_company_text_align")}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_COMPANY_TEXT_ALIGN"
+              value={entity?.BADGE_TEMPLATE_COMPANY_TEXT_ALIGN?.value}
+              onChange={this.handleChange}
+              options={ddlAlignOptions}
+              isClearable
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_company_font_casing")}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_COMPANY_FONT_CASING"
+              value={entity?.BADGE_TEMPLATE_COMPANY_FONT_CASING?.value}
+              onChange={this.handleChange}
+              options={ddlFontCasing}
+              isClearable
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_company_font_size_min"
+              )}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_COMPANY_FONT_SIZE_MIN"
+              value={entity?.BADGE_TEMPLATE_COMPANY_FONT_SIZE_MIN?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_company_font_size_max"
+              )}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_COMPANY_FONT_SIZE_MAX"
+              value={entity?.BADGE_TEMPLATE_COMPANY_FONT_SIZE_MAX?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_company_text_fit_mode"
+              )}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_COMPANY_TEXT_FIT_MODE"
+              value={entity?.BADGE_TEMPLATE_COMPANY_TEXT_FIT_MODE?.value}
+              onChange={this.handleChange}
+              options={ddlTextFitMode}
+              isClearable
             />
           </div>
         </div>
@@ -375,6 +616,23 @@ class BadgeSettingsForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-6">
             <label>
+              {T.translate("badge_settings.badge_template_qr_size")} &nbsp;{" "}
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("badge_settings.px_percentage_info")}
+              />
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_QR_SIZE"
+              value={entity?.BADGE_TEMPLATE_QR_SIZE?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
               {T.translate("badge_settings.badge_template_qr_top")} &nbsp;{" "}
               <i
                 className="fa fa-info-circle"
@@ -390,6 +648,9 @@ class BadgeSettingsForm extends React.Component {
               onChange={this.handleChange}
             />
           </div>
+        </div>
+
+        <div className="row form-group">
           <div className="col-md-6">
             <label>
               {T.translate("badge_settings.badge_template_qr_left")} &nbsp;{" "}
@@ -407,9 +668,6 @@ class BadgeSettingsForm extends React.Component {
               onChange={this.handleChange}
             />
           </div>
-        </div>
-
-        <div className="row form-group">
           <div className="col-md-6">
             <label>
               {T.translate("badge_settings.badge_template_text_fields_padding")}{" "}
@@ -428,6 +686,9 @@ class BadgeSettingsForm extends React.Component {
               onChange={this.handleChange}
             />
           </div>
+        </div>
+
+        <div className="row form-group">
           <div className="col-md-6">
             <label>
               {T.translate("badge_settings.badge_template_text_fields_color")}
@@ -481,6 +742,29 @@ class BadgeSettingsForm extends React.Component {
                   className="form-control"
                   id="BADGE_TEMPLATE_FEATURES_LEFT"
                   value={entity?.BADGE_TEMPLATE_FEATURES_LEFT?.value}
+                  onChange={this.handleChange}
+                />
+              </div>
+            </div>
+            <br />
+            <div className="row">
+              <div className="col-md-6">
+                <label>
+                  {T.translate(
+                    "badge_settings.badge_template_features_padding"
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.px_percentage_info")}
+                  />
+                </label>
+                <br />
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_FEATURES_PADDING"
+                  value={entity?.BADGE_TEMPLATE_FEATURES_PADDING?.value}
                   onChange={this.handleChange}
                 />
               </div>
@@ -644,13 +928,17 @@ class BadgeSettingsForm extends React.Component {
                           />
                         </label>
                         <br />
-                        <Input
-                          className="form-control"
+                        <UploadInput
                           id={badgeTemplateTypeBackgroundImg}
                           value={
-                            entity?.[badgeTemplateTypeBackgroundImg]?.value
+                            entity?.[badgeTemplateTypeBackgroundImg]
+                              ?.file_preview ||
+                            entity?.[badgeTemplateTypeBackgroundImg]?.file
                           }
-                          onChange={this.handleChange}
+                          handleUpload={this.handleUploadFile}
+                          handleRemove={this.handleRemoveFile}
+                          className="dropzone col-md-6"
+                          multiple={false}
                         />
                       </div>
                     </div>
