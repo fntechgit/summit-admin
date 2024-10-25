@@ -888,7 +888,9 @@ export const getSpeakersBySummit =
       expand:
         "accepted_presentations,alternate_presentations,rejected_presentations",
       relations:
-        "accepted_presentations,alternate_presentations,rejected_presentations"
+        "accepted_presentations,alternate_presentations,rejected_presentations,accepted_presentations.none,alternate_presentations.none,rejected_presentations.none",
+      fields:
+        "id,first_name,last_name,email,accepted_presentations.id,accepted_presentations.title,alternate_presentations.id,alternate_presentations.title,rejected_presentations.id,rejected_presentations.title"
     };
 
     if (filter.length > 0) {
@@ -972,8 +974,7 @@ export const exportSummitSpeakers =
         }
         dispatch(stopLoading());
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         dispatch(stopLoading());
       });
   };
