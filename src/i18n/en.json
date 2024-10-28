@@ -331,7 +331,8 @@
     "mux_token_id": "MUX Token ID",
     "mux_token_secret": "MUX Token Secret",
     "third_party": "Third Party Settings",
-    "virtual_event": "Virtual Event Settings",
+    "virtual_event": "Event Site Settings including Virtual",
+    "virtual_event_note": "Note: Do not include a slash at the end of the URL.",
     "virtual_site_url": "Virtual Event Site URL",
     "marketing_site_url": "Marketing Site URL",
     "marketing_site_oauth2_client_id": "Marketing Site OAUTH2 Client ID",
@@ -3102,5 +3103,8 @@
         "non_received": "Non Received"
       }
     }
+  },
+  "url_input": {
+    "url_error": "URL must start with http:// or https://"
   }
 }
