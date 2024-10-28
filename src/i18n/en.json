@@ -2511,7 +2511,7 @@
   },
   "edit_email_flow_event": {
     "email_template_identifier": "Email Template (Associated with Event)",
-    "email_flow_event": "Email Activity",
+    "email_flow_event": "Email Events",
     "flow_name": "eFlow Name",
     "event_type": "Activity Type",
     "saved": "Email template Flow saved successfully.",
@@ -2626,7 +2626,7 @@
     }
   },
   "mail_activity": {
-    "mail_activity": "Email Activity",
+    "mail_activity": "Email Events",
     "template_identifier": "Template",
     "subject": "Subject",
     "sent_date": "Sent Date"
