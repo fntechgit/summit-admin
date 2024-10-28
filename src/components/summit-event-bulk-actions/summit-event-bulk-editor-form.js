@@ -27,8 +27,9 @@ import {
   MILLISECONDS_IN_SECOND,
   SECONDS_TO_MINUTES,
   TBALocation,
-  TIME_23,
-  TIME_59
+  TIME_23_HOURS,
+  TIME_59_MINS,
+  TIME_59_SECS
 } from "../../utils/constants";
 
 import "../../styles/summit-event-bulk-editor.less";
@@ -351,9 +352,9 @@ class SummitEventBulkEditorForm extends React.Component {
         currentSummit.end_date * MILLISECONDS_IN_SECOND,
         currentSummit.time_zone.name
       )
-      .hour(TIME_23)
-      .minute(TIME_59)
-      .second(TIME_59);
+      .hour(TIME_23_HOURS)
+      .minute(TIME_59_MINS)
+      .second(TIME_59_SECS);
 
     if (!currentSummit) return null;
     const venuesOptions = [{ value: TBALocation, label: TBALocation.name }];
