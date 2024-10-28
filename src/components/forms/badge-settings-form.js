@@ -15,6 +15,7 @@ import T from "i18n-react/dist/i18n-react";
 import {
   UploadInput,
   Input,
+  TextArea,
   Panel,
   Dropdown
 } from "openstack-uicore-foundation/lib/components";
@@ -98,15 +99,15 @@ class BadgeSettingsForm extends React.Component {
     this.setState({ entity: newEntity });
   }
 
-  handleRemoveFile(ev, data) {
-    const { id } = data;
+  handleRemoveFile(attr) {
+    console.log("CHECK...", attr);
     const newEntity = { ...this.state.entity };
 
-    newEntity[id].file_preview = "";
+    newEntity[attr].file_preview = "";
 
-    if (newEntity[id].id) {
-      newEntity[id].file = "";
-      this.props.onDeleteImage(newEntity[id].id);
+    if (newEntity[attr].id) {
+      newEntity[attr].file = "";
+      this.props.onDeleteImage(newEntity[attr].id);
     }
 
     this.setState({ entity: newEntity });
@@ -158,19 +159,26 @@ class BadgeSettingsForm extends React.Component {
     const { currentSummit } = this.props;
 
     const ddlAlignOptions = [
-      { label: "Left", value: "left" },
-      { label: "Right", value: "right" },
-      { label: "Justify", value: "justify" }
+      { label: "Left", value: "LEFT" },
+      { label: "Right", value: "RIGHT" },
+      { label: "Justify", value: "JUSTIFY" }
     ];
 
     const ddlFontCasing = [
-      { label: "Lowercase", value: "lowercase" },
-      { label: "Uppercase", value: "uppercase" }
+      { label: "Lowercase", value: "LOWERCASE" },
+      { label: "Uppercase", value: "UPPERCASE" }
     ];
 
     const ddlTextFitMode = [
-      { label: "Single", value: "single" },
-      { label: "Multi", value: "multi" }
+      { label: "Single", value: "SINGLE" },
+      { label: "Multi", value: "MULTI" }
+    ];
+
+    const ddlNameDisplayMode = [
+      { label: "Full Name", value: "FULLNAME" },
+      { label: "Stacked", value: "STACKED" },
+      { label: "First Name Only", value: "FIRST_NAME_ONLY" },
+      { label: "Last Name Only", value: "LAST_NAME_ONLY" }
     ];
 
     return (
@@ -189,7 +197,9 @@ class BadgeSettingsForm extends React.Component {
                 entity?.BADGE_TEMPLATE_BACKGROUND_IMG?.file
               }
               handleUpload={this.handleUploadFile}
-              handleRemove={this.handleRemoveFile}
+              handleRemove={() =>
+                this.handleRemoveFile("BADGE_TEMPLATE_BACKGROUND_IMG")
+              }
               className="dropzone col-md-6"
               multiple={false}
             />
@@ -258,6 +268,18 @@ class BadgeSettingsForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-6">
             <label>
+              {T.translate("badge_settings.badge_template_background_img")}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_BACKGROUND_IMG"
+              value={entity?.BADGE_TEMPLATE_BACKGROUND_IMG?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
               {T.translate("badge_settings.badge_template_background_color")}
             </label>
             <br />
@@ -268,9 +290,24 @@ class BadgeSettingsForm extends React.Component {
               className="form-control"
             />
           </div>
+        </div>
+
+        <div className="row form-group">
           <div className="col-md-6">
             <label>
-              {T.translate("badge_settings.badge_template_padding")} &nbsp;{" "}
+              {T.translate("badge_settings.badge_template_back_background_img")}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_BACK_BACKGROUND_IMG"
+              value={entity?.BADGE_TEMPLATE_BACK_BACKGROUND_IMG?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_margin")} &nbsp;{" "}
               <i
                 className="fa fa-info-circle"
                 aria-hidden="true"
@@ -280,8 +317,168 @@ class BadgeSettingsForm extends React.Component {
             <br />
             <Input
               className="form-control"
-              id="BADGE_TEMPLATE_PADDING"
-              value={entity?.BADGE_TEMPLATE_PADDING?.value}
+              id="BADGE_TEMPLATE_MARGIN"
+              value={entity?.BADGE_TEMPLATE_MARGIN?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_font_face_inline_definition"
+              )}
+            </label>
+            <br />
+            <TextArea
+              className="form-control"
+              id="BADGE_TEMPLATE_FONT_FACE_INLINE_DEFINITION"
+              value={entity?.BADGE_TEMPLATE_FONT_FACE_INLINE_DEFINITION?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate(
+                "badge_settings.badge_template_text_fields_font_family"
+              )}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_TEXT_FIELDS_FONT_FAMILY"
+              value={entity?.BADGE_TEMPLATE_TEXT_FIELDS_FONT_FAMILY?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_name_display_mode")}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_NAME_DISPLAY_MODE"
+              value={entity?.BADGE_TEMPLATE_NAME_DISPLAY_MODE?.value}
+              onChange={this.handleChange}
+              options={ddlNameDisplayMode}
+              isClearable
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_title_padding")}{" "}
+              &nbsp;{" "}
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("badge_settings.px_percentage_info")}
+              />
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_TITLE_PADDING"
+              value={entity?.BADGE_TEMPLATE_TITLE_PADDING?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_title_text_align")}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_TITLE_TEXT_ALIGN"
+              value={entity?.BADGE_TEMPLATE_TITLE_TEXT_ALIGN?.value}
+              onChange={this.handleChange}
+              options={ddlAlignOptions}
+              isClearable
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_title_font_casing")}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_TITLE_FONT_CASE"
+              value={entity?.BADGE_TEMPLATE_TITLE_FONT_CASE?.value}
+              onChange={this.handleChange}
+              options={ddlFontCasing}
+              isClearable
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_title_font_size_min")}{" "}
+              &nbsp;{" "}
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("badge_settings.px_percentage_info")}
+              />
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_TITLE_FONT_SIZE_MIN"
+              value={entity?.BADGE_TEMPLATE_TITLE_FONT_SIZE_MIN?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_title_font_size_max")}{" "}
+              &nbsp;{" "}
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("badge_settings.px_percentage_info")}
+              />
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_TITLE_FONT_SIZE_MAX"
+              value={entity?.BADGE_TEMPLATE_TITLE_FONT_SIZE_MAX?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_title_text_fit_mode")}
+            </label>
+            <br />
+            <Dropdown
+              id="BADGE_TEMPLATE_TITLE_TEXT_FIT_MODE"
+              value={entity?.BADGE_TEMPLATE_TITLE_TEXT_FIT_MODE?.value}
+              onChange={this.handleChange}
+              options={ddlTextFitMode}
+              isClearable
+            />
+          </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_title_font_family")}
+            </label>
+            <br />
+            <Input
+              id="BADGE_TEMPLATE_TITLE_FONT_FAMILY"
+              value={entity?.BADGE_TEMPLATE_TITLE_FONT_FAMILY?.value}
               onChange={this.handleChange}
             />
           </div>
@@ -388,6 +585,23 @@ class BadgeSettingsForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-6">
             <label>
+              {T.translate(
+                "badge_settings.badge_template_first_name_font_family"
+              )}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_FIRST_NAME_FONT_FAMILY"
+              value={entity?.BADGE_TEMPLATE_FIRST_NAME_FONT_FAMILY?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
               {T.translate("badge_settings.badge_template_last_name_padding")}{" "}
               &nbsp;{" "}
               <i
@@ -486,6 +700,23 @@ class BadgeSettingsForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-6">
             <label>
+              {T.translate(
+                "badge_settings.badge_template_last_name_font_family"
+              )}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_LAST_NAME_FONT_FAMILY"
+              value={entity?.BADGE_TEMPLATE_LAST_NAME_FONT_FAMILY?.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
               {T.translate("badge_settings.badge_template_company_padding")}{" "}
               &nbsp;{" "}
               <i
@@ -573,6 +804,21 @@ class BadgeSettingsForm extends React.Component {
               onChange={this.handleChange}
               options={ddlTextFitMode}
               isClearable
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_company_font_family")}
+            </label>
+            <br />
+            <Input
+              className="form-control"
+              id="BADGE_TEMPLATE_COMPANY_FONT_FAMILY"
+              value={entity?.BADGE_TEMPLATE_COMPANY_FONT_FAMILY?.value}
+              onChange={this.handleChange}
             />
           </div>
         </div>
@@ -701,6 +947,18 @@ class BadgeSettingsForm extends React.Component {
               className="form-control"
             />
           </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_qr_color")}
+            </label>
+            <br />
+            <HexColorInput
+              onChange={this.handleChange}
+              id="BADGE_TEMPLATE_QR_COLOR"
+              value={entity?.BADGE_TEMPLATE_QR_COLOR?.value}
+              className="form-control"
+            />
+          </div>
         </div>
 
         <hr />
@@ -763,9 +1021,39 @@ class BadgeSettingsForm extends React.Component {
                 <br />
                 <Input
                   className="form-control"
-                  id="BADGE_TEMPLATE_FEATURES_PADDING"
-                  value={entity?.BADGE_TEMPLATE_FEATURES_PADDING?.value}
+                  id="BADGE_TEMPLATE_FEATURES_MARGIN"
+                  value={entity?.BADGE_TEMPLATE_FEATURES_MARGIN?.value}
                   onChange={this.handleChange}
+                />
+              </div>
+              <div className="col-md-6">
+                <label>
+                  {T.translate(
+                    "badge_settings.badge_template_features_font_family"
+                  )}
+                </label>
+                <br />
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_FEATURES_FONT_FAMILY"
+                  value={entity?.BADGE_TEMPLATE_FEATURES_FONT_FAMILY?.value}
+                  onChange={this.handleChange}
+                />
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-md-6">
+                <label>
+                  {T.translate(
+                    "badge_settings.badge_template_features_text_color"
+                  )}
+                </label>
+                <br />
+                <HexColorInput
+                  onChange={this.handleChange}
+                  id="BADGE_TEMPLATE_FEATURES_TEXT_COLOR"
+                  value={entity?.BADGE_TEMPLATE_FEATURES_TEXT_COLOR?.value}
+                  className="form-control"
                 />
               </div>
             </div>
@@ -773,11 +1061,13 @@ class BadgeSettingsForm extends React.Component {
           {currentSummit.badge_features_types.map((bf) => {
             const badgeTemplateFeatureTop = `BADGE_TEMPLATE_FEATURE_${bf.id}_TOP`;
             const badgeTemplateFeatureLeft = `BADGE_TEMPLATE_FEATURE_${bf.id}_LEFT`;
-            const badgeTemplateFeatureDisplayType = `BADGE_TEMPLATE_FEATURE_${bf.id}_DISPLAY_TYPE`;
+            const badgeTemplateFeatureDisplayMode = `BADGE_TEMPLATE_FEATURE_${bf.id}_DISPLAY_MODE`;
             const badgeTemplateFeatureTextColor = `BADGE_TEMPLATE_FEATURE_${bf.id}_TEXT_COLOR`;
+            const badgeTemplateFeatureFontSize = `BADGE_TEMPLATE_FEATURE_${bf.id}_FONT_SIZE`;
             const badgeTemplateFeatureDisplay = `BADGE_TEMPLATE_FEATURE_${bf.id}_DISPLAY`;
             return (
               <Panel
+                key={bf.name}
                 show={showSection === bf.name}
                 title={bf.name}
                 handleClick={this.toggleSection.bind(this, bf.name)}
@@ -839,8 +1129,8 @@ class BadgeSettingsForm extends React.Component {
                       </label>
                       <br />
                       <Dropdown
-                        id={badgeTemplateFeatureDisplayType}
-                        value={entity?.[badgeTemplateFeatureDisplayType]?.value}
+                        id={badgeTemplateFeatureDisplayMode}
+                        value={entity?.[badgeTemplateFeatureDisplayMode]?.value}
                         onChange={this.handleChange}
                         options={[
                           { label: "Text", value: "TEXT" },
@@ -873,11 +1163,27 @@ class BadgeSettingsForm extends React.Component {
                       />
                     </div>
                   </div>
-                  {entity?.[badgeTemplateFeatureDisplayType]?.value ===
+                  {entity?.[badgeTemplateFeatureDisplayMode]?.value ===
                     "TEXT" && (
                     <>
                       <br />
                       <div className="row">
+                        <div className="col-md-6">
+                          <label>
+                            {T.translate(
+                              "badge_settings.badge_template_feature_font_size"
+                            )}
+                          </label>
+                          <br />
+                          <Input
+                            id={badgeTemplateFeatureFontSize}
+                            value={
+                              entity?.[badgeTemplateFeatureFontSize]?.value
+                            }
+                            onChange={this.handleChange}
+                            className="form-control"
+                          />
+                        </div>
                         <div className="col-md-6">
                           <label>
                             {T.translate(
@@ -912,6 +1218,7 @@ class BadgeSettingsForm extends React.Component {
               const badgeTemplateTypeBackgroundImg = `BADGE_TEMPLATE_TYPE_${bt.id}_BACKGROUND_IMG`;
               return (
                 <Panel
+                  key={bt.name}
                   show={showSection === bt.name}
                   title={bt.name}
                   handleClick={this.toggleSection.bind(this, bt.name)}
@@ -936,7 +1243,11 @@ class BadgeSettingsForm extends React.Component {
                             entity?.[badgeTemplateTypeBackgroundImg]?.file
                           }
                           handleUpload={this.handleUploadFile}
-                          handleRemove={this.handleRemoveFile}
+                          handleRemove={() =>
+                            this.handleRemoveFile(
+                              badgeTemplateTypeBackgroundImg
+                            )
+                          }
                           className="dropzone col-md-6"
                           multiple={false}
                         />
