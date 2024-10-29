@@ -206,6 +206,28 @@ class BadgeSettingsForm extends React.Component {
               multiple={false}
             />
           </div>
+          <div className="col-md-6">
+            <label>
+              {T.translate("badge_settings.badge_template_back_background_img")}
+            </label>
+            <br />
+            <UploadInput
+              id="BADGE_TEMPLATE_BACK_BACKGROUND_IMG"
+              value={
+                entity?.BADGE_TEMPLATE_BACK_BACKGROUND_IMG?.file_preview ||
+                entity?.BADGE_TEMPLATE_BACK_BACKGROUND_IMG?.file
+              }
+              handleUpload={this.handleUploadFile}
+              handleRemove={() =>
+                this.handleRemoveFile("BADGE_TEMPLATE_BACK_BACKGROUND_IMG")
+              }
+              className="dropzone col-md-6"
+              multiple={false}
+            />
+          </div>
+        </div>
+
+        <div className="row form-group">
           <div className="col-md-6 form-group">
             <label>
               {T.translate("badge_settings.badge_template_first_name_color")}
@@ -239,6 +261,18 @@ class BadgeSettingsForm extends React.Component {
               onChange={this.handleChange}
               id="BADGE_TEMPLATE_COMPANY_COLOR"
               value={entity?.BADGE_TEMPLATE_COMPANY_COLOR?.value}
+              className="form-control"
+            />
+          </div>
+          <div className="col-md-6 form-group">
+            <label>
+              {T.translate("badge_settings.badge_template_background_color")}
+            </label>
+            <br />
+            <HexColorInput
+              onChange={this.handleChange}
+              id="BADGE_TEMPLATE_BACKGROUND_COLOR"
+              value={entity?.BADGE_TEMPLATE_BACKGROUND_COLOR?.value}
               className="form-control"
             />
           </div>
@@ -287,36 +321,19 @@ class BadgeSettingsForm extends React.Component {
           </div>
           <div className="col-md-6">
             <label>
-              {T.translate("badge_settings.badge_template_background_color")}
+              {T.translate("badge_settings.badge_template_font")} &nbsp;{" "}
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("badge_settings.url_info")}
+              />
             </label>
             <br />
-            <HexColorInput
-              onChange={this.handleChange}
-              id="BADGE_TEMPLATE_BACKGROUND_COLOR"
-              value={entity?.BADGE_TEMPLATE_BACKGROUND_COLOR?.value}
+            <Input
               className="form-control"
-            />
-          </div>
-        </div>
-
-        <div className="row form-group">
-          <div className="col-md-6">
-            <label>
-              {T.translate("badge_settings.badge_template_back_background_img")}
-            </label>
-            <br />
-            <UploadInput
-              id="BADGE_TEMPLATE_BACK_BACKGROUND_IMG"
-              value={
-                entity?.BADGE_TEMPLATE_BACK_BACKGROUND_IMG?.file_preview ||
-                entity?.BADGE_TEMPLATE_BACK_BACKGROUND_IMG?.file
-              }
-              handleUpload={this.handleUploadFile}
-              handleRemove={() =>
-                this.handleRemoveFile("BADGE_TEMPLATE_BACK_BACKGROUND_IMG")
-              }
-              className="dropzone col-md-6"
-              multiple={false}
+              id="BADGE_TEMPLATE_FONT"
+              value={entity?.BADGE_TEMPLATE_FONT?.value}
+              onChange={this.handleChange}
             />
           </div>
         </div>
@@ -821,23 +838,6 @@ class BadgeSettingsForm extends React.Component {
         </div>
 
         <div className="row form-group">
-          <div className="col-md-6">
-            <label>
-              {T.translate("badge_settings.badge_template_font")} &nbsp;{" "}
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("badge_settings.url_info")}
-              />
-            </label>
-            <br />
-            <Input
-              className="form-control"
-              id="BADGE_TEMPLATE_FONT"
-              value={entity?.BADGE_TEMPLATE_FONT?.value}
-              onChange={this.handleChange}
-            />
-          </div>
           <div className="col-md-6">
             <label>
               {T.translate("badge_settings.badge_template_qr_display")}
