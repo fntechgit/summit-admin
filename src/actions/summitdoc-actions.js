@@ -9,9 +9,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   deleteRequest,
@@ -27,6 +26,8 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely, wrapFormFile } from "../utils/methods";
+import history from "../history";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_SUMMITDOCS = "REQUEST_SUMMITDOCS";
 export const RECEIVE_SUMMITDOCS = "RECEIVE_SUMMITDOCS";
@@ -40,7 +41,13 @@ export const SUMMITDOC_FILE_ADDED = "SUMMITDOC_FILE_ADDED";
 export const SUMMITDOC_FILE_DELETED = "SUMMITDOC_FILE_DELETED";
 
 export const getSummitDocs =
-  (term = "", page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    term = "",
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -55,10 +62,12 @@ export const getSummitDocs =
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
-      expand: "event_types"
+      expand: "event_types",
+      relations: "event_types.none",
+      fields: "id,description,label,event_types.id,event_types.name"
     };
 
     if (filter.length > 0) {
@@ -68,7 +77,7 @@ export const getSummitDocs =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -103,7 +112,7 @@ export const getSummitDoc = (summitDocId) => async (dispatch, getState) => {
   });
 };
 
-export const resetSummitDocForm = () => (dispatch, getState) => {
+export const resetSummitDocForm = () => (dispatch) => {
   dispatch(createAction(RESET_SUMMITDOC_FORM)({}));
 };
 
@@ -173,7 +182,7 @@ export const saveSummitDoc = (entity, file) => async (dispatch, getState) => {
       dispatch(showSuccessMessage(T.translate("summitdoc.saved")));
     });
   } else {
-    const success_message = {
+    const successMessage = {
       title: T.translate("general.done"),
       html: T.translate("summitdoc.created"),
       type: "success"
@@ -189,7 +198,7 @@ export const saveSummitDoc = (entity, file) => async (dispatch, getState) => {
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(
-        showMessage(success_message, () => {
+        showMessage(successMessage, () => {
           history.push(
             `/app/summits/${currentSummit.id}/summitdocs/${payload.response.id}`
           );
@@ -222,24 +231,24 @@ export const deleteSummitDoc = (summitDocId) => async (dispatch, getState) => {
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["last_edited"];
-  delete normalizedEntity["file"];
-  delete normalizedEntity["file_link"];
-  delete normalizedEntity["has_file"];
-  delete normalizedEntity["event_types"];
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.file;
+  delete normalizedEntity.file_link;
+  delete normalizedEntity.has_file;
+  delete normalizedEntity.event_types;
 
   if (!entity.show_always && entity.event_types) {
-    normalizedEntity["event_types"] = entity.event_types;
+    normalizedEntity.event_types = entity.event_types;
   }
 
   if (!entity.selection_plan_id) {
-    normalizedEntity["selection_plan_id"] = 0;
+    normalizedEntity.selection_plan_id = 0;
   }
 
   if (!entity.web_link) {
-    delete normalizedEntity["web_link"];
+    delete normalizedEntity.web_link;
   }
 
   return normalizedEntity;
