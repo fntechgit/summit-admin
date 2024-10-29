@@ -782,6 +782,16 @@ const parseFilters = (filters) => {
   }
 
   if (
+    filters?.trackGroupFilter &&
+    Array.isArray(filters.trackGroupFilter) &&
+    filters.trackGroupFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_track_group_id==${filters.trackGroupFilter.join("||")}`
+    );
+  }
+
+  if (
     filters?.activityTypeFilter &&
     Array.isArray(filters.activityTypeFilter) &&
     filters.activityTypeFilter.length > 0
@@ -998,7 +1008,8 @@ export const sendSpeakerEmails =
     testRecipient = "",
     excerptRecipient = "",
     shouldSendCopy2Submitter = false,
-    source,
+    // eslint-disable-next-line no-unused-vars
+    source = null,
     promoCodeStrategy = null,
     promocodeSpecification = null
   ) =>

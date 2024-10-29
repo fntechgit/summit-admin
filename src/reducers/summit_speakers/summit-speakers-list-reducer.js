@@ -10,7 +10,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
-
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   INIT_SPEAKERS_LIST_PARAMS,
@@ -23,6 +22,7 @@ import {
   SEND_SPEAKERS_EMAILS,
   SET_SPEAKERS_CURRENT_FLOW_EVENT
 } from "../../actions/speaker-actions";
+
 import {
   REQUEST_SUMMIT,
   SET_CURRENT_SUMMIT
@@ -44,6 +44,7 @@ const DEFAULT_STATE = {
   selectedAll: false,
   selectionPlanFilter: [],
   trackFilter: [],
+  trackGroupFilter: [],
   activityTypeFilter: [],
   selectionStatusFilter: [],
   mediaUploadTypeFilter: { operator: null, value: [] },
