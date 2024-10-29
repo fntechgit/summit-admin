@@ -70,6 +70,7 @@ export const DUMMY_ACTION = "DUMMY_ACTION";
 
 export const DEFAULT_CURRENT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;
+export const DEFAULT_100_PER_PAGE = 100;
 
 export const TWENTY_PER_PAGE = 20;
 
@@ -87,7 +88,9 @@ export const FIFTEEN_MINUTES = 900;
 export const HOUR_AND_HALF = 5400;
 export const SECONDS_TO_MINUTES = 60;
 export const MILLISECONDS_IN_SECOND = 1000;
-export const DEFAULT_100_PER_PAGE = 100;
+export const TIME_23_HOURS = 23;
+export const TIME_59_MINS = 59;
+export const TIME_59_SECS = 59;
 
 export const SORT_ASCENDING = 1;
 export const SORT_DESCENDING = -1;
