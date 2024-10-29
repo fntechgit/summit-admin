@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import {
   getRequest,
   postRequest,
@@ -18,13 +18,16 @@ import {
   stopLoading,
   startLoading,
   authErrorHandler,
-  putFile,
   postFile,
   putRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
-
 import Swal from "sweetalert2";
+import { getAccessTokenSafely } from "../utils/methods";
+import {
+  DEFAULT_PER_PAGE,
+  ERROR_CODE_412,
+  HUNDRED_PER_PAGE
+} from "../utils/constants";
 
 export const REQUEST_SETTINGS = "REQUEST_SETTINGS";
 export const RECEIVE_SETTINGS = "RECEIVE_SETTINGS";
@@ -45,7 +48,13 @@ export const REQUEST_PRINT_APP_SETTINGS = "REQUEST_PRINT_APP_SETTINGS";
 export const RECEIVE_PRINT_APP_SETTINGS = "RECEIVE_PRINT_APP_SETTINGS";
 
 export const getMarketingSettings =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    term = null,
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
@@ -53,7 +62,7 @@ export const getMarketingSettings =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage
     };
 
@@ -64,7 +73,7 @@ export const getMarketingSettings =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -79,7 +88,7 @@ export const getMarketingSettings =
   };
 
 export const getMarketingSettingsForRegLite =
-  (page = 1, perPage = 100) =>
+  (page = 1, perPage = HUNDRED_PER_PAGE) =>
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
@@ -87,7 +96,7 @@ export const getMarketingSettingsForRegLite =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       key__contains: "REG_LITE"
     };
@@ -104,7 +113,7 @@ export const getMarketingSettingsForRegLite =
   };
 
 export const getMarketingSettingsForPrintApp =
-  (page = 1, perPage = 10) =>
+  (page = 1, perPage = DEFAULT_PER_PAGE) =>
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
@@ -112,7 +121,7 @@ export const getMarketingSettingsForPrintApp =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       key__contains: "PRINT_APP"
     };
@@ -133,7 +142,7 @@ export const getMarketingSettingsBySelectionPlan =
     selectionPlanId,
     term = null,
     page = 1,
-    perPage = 10,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = 1
   ) =>
@@ -144,7 +153,7 @@ export const getMarketingSettingsBySelectionPlan =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       selection_plan_id: selectionPlanId
     };
@@ -156,7 +165,7 @@ export const getMarketingSettingsBySelectionPlan =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -170,7 +179,7 @@ export const getMarketingSettingsBySelectionPlan =
     });
   };
 
-export const getMarketingSetting = (settingId) => (dispatch, getState) => {
+export const getMarketingSetting = (settingId) => (dispatch) => {
   dispatch(startLoading());
 
   const params = {};
@@ -185,7 +194,7 @@ export const getMarketingSetting = (settingId) => (dispatch, getState) => {
   });
 };
 
-export const resetSettingForm = () => (dispatch, getState) => {
+export const resetSettingForm = () => (dispatch) => {
   dispatch(createAction(RESET_SETTING_FORM)({}));
 };
 
@@ -211,7 +220,7 @@ export const saveMarketingSetting =
 
     if (entity.id) {
       if (file)
-        return putFile(
+        return putRequest(
           createAction(UPDATE_SETTING),
           createAction(SETTING_UPDATED),
           `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
@@ -264,7 +273,7 @@ export const saveMarketingSetting =
     });
   };
 
-export const deleteSetting = (settingId) => async (dispatch, getState) => {
+export const deleteSetting = (settingId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   const params = {
@@ -306,37 +315,37 @@ export const cloneMarketingSettings =
 
 const normalizeEntity = (entity, summitId) => {
   const normalizedEntity = { ...entity };
-  normalizedEntity["show_id"] = summitId;
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["modified"];
+  normalizedEntity.show_id = summitId;
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.modified;
   if (entity.type !== "FILE") {
-    delete normalizedEntity["file"];
+    delete normalizedEntity.file;
   }
 
-  delete normalizedEntity["file_preview"];
+  delete normalizedEntity.file_preview;
   return normalizedEntity;
 };
 
-export const customErrorHandler = (err, res) => (dispatch, state) => {
+export const customErrorHandler = (err, res) => (dispatch) => {
   const code = err.status;
   let msg = "";
 
   dispatch(stopLoading());
 
   switch (code) {
-    case 412:
+    case ERROR_CODE_412:
       if (Array.isArray(err.response.body)) {
         err.response.body.forEach((er) => {
-          msg += er + "<br>";
+          msg += `${er}<br>`;
         });
       } else {
-        for (var [key, value] of Object.entries(err.response.body)) {
+        for (const [key, value] of Object.entries(err.response.body)) {
           if (isNaN(key)) {
-            msg += key + ": ";
+            msg += `${key}: `;
           }
 
-          msg += value + "<br>";
+          msg += `${value}<br>`;
         }
       }
 
