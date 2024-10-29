@@ -71,12 +71,17 @@ export const DUMMY_ACTION = "DUMMY_ACTION";
 export const DEFAULT_CURRENT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;
 
+export const TWENTY_PER_PAGE = 20;
+
+export const TWENTYTHREE_HOURS = 23;
+
 export const FIVE_PER_PAGE = 5;
 export const HUNDRED_PER_PAGE = 100;
 export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
 export const DEFAULT_ORDER_DIR = 1;
 
 export const INT_BASE = 10;
+export const FIFTY_NINE = 59;
 export const ONE_MINUTE = 60;
 export const FIFTEEN_MINUTES = 900;
 export const HOUR_AND_HALF = 5400;
