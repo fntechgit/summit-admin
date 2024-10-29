@@ -93,9 +93,7 @@ const badgeSettingsReducer = (state = DEFAULT_STATE, action) => {
       if (payload.response.data.length > 0) {
         payload.response.data.forEach((apiValue) => {
           const { key } = apiValue;
-          if (reducerSettings[key]) {
-            reducerSettings[key] = apiValue;
-          }
+          reducerSettings[key] = apiValue;
         });
       }
       return { ...state, badge_settings: { ...reducerSettings } };
