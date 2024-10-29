@@ -161,6 +161,10 @@ class PurchaseOrderForm extends React.Component {
         value: T.translate("edit_purchase_order.owner_email")
       },
       {
+        columnKey: "promo_code",
+        value: T.translate("edit_purchase_order.promo_code")
+      },
+      {
         columnKey: "final_amount_formatted",
         value: T.translate("edit_purchase_order.paid_amount")
       },

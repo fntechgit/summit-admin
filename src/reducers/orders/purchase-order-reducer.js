@@ -77,6 +77,7 @@ const assembleTicketsState = (tickets, currencySymbol, summitId) =>
     let owner_email = "N/A";
     let owner_link = "N/A";
     let email_link = "N/A";
+    const promo_code = t.promo_code?.code || "N/A";
     const ticket_type_name = t.ticket_type ? t.ticket_type.name : "N/A";
 
     const final_amount_formatted = `${currencySymbol}${t.final_amount.toFixed(
@@ -131,6 +132,7 @@ const assembleTicketsState = (tickets, currencySymbol, summitId) =>
       owner_email,
       owner_link,
       email_link,
+      promo_code,
       final_amount_formatted,
       refunded_amount_formatted,
       final_amount_adjusted_formatted

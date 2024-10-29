@@ -588,11 +588,11 @@ export const getOrderTickets =
       page,
       per_page: DEFAULT_PER_PAGE,
       access_token: accessToken,
-      expand: "owner,owner.member,ticket_type",
+      expand: "owner,owner.member,ticket_type,promo_code",
       relations:
-        "applied_taxes,owner.member.none,ticket_type.none,owner.member",
+        "applied_taxes,owner.member.none,ticket_type.none,owner.member,promo_code.none",
       fields:
-        "ticket_type.name,owner.id,owner.first_name,owner.last_name,owner.email,owner.member.id,owner.member.email,owner.member.first_name,owner.member.last_name",
+        "ticket_type.name,owner.id,owner.first_name,owner.last_name,owner.email,owner.member.id,owner.member.email,owner.member.first_name,owner.member.last_name,promo_code.code",
       "filter[]": `order_id==${orderId}`
     };
 
