@@ -162,7 +162,8 @@ class BadgeSettingsForm extends React.Component {
     const ddlAlignOptions = [
       { label: "Left", value: "LEFT" },
       { label: "Right", value: "RIGHT" },
-      { label: "Justify", value: "JUSTIFY" }
+      { label: "Justify", value: "JUSTIFY" },
+      { label: "Center", value: "CENTER" }
     ];
 
     const ddlFontCasing = [
@@ -176,7 +177,7 @@ class BadgeSettingsForm extends React.Component {
     ];
 
     const ddlNameDisplayMode = [
-      { label: "Full Name", value: "FULLNAME" },
+      { label: "Full Name", value: "FULL_NAME" },
       { label: "Stacked", value: "STACKED" },
       { label: "First Name Only", value: "FIRST_NAME_ONLY" },
       { label: "Last Name Only", value: "LAST_NAME_ONLY" }
@@ -269,13 +270,18 @@ class BadgeSettingsForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-6">
             <label>
-              {T.translate("badge_settings.badge_template_background_img")}
+              {T.translate("badge_settings.badge_template_margin")} &nbsp;{" "}
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("badge_settings.px_percentage_info")}
+              />
             </label>
             <br />
             <Input
               className="form-control"
-              id="BADGE_TEMPLATE_BACKGROUND_IMG"
-              value={entity?.BADGE_TEMPLATE_BACKGROUND_IMG?.value}
+              id="BADGE_TEMPLATE_MARGIN"
+              value={entity?.BADGE_TEMPLATE_MARGIN?.value}
               onChange={this.handleChange}
             />
           </div>
@@ -299,28 +305,18 @@ class BadgeSettingsForm extends React.Component {
               {T.translate("badge_settings.badge_template_back_background_img")}
             </label>
             <br />
-            <Input
-              className="form-control"
+            <UploadInput
               id="BADGE_TEMPLATE_BACK_BACKGROUND_IMG"
-              value={entity?.BADGE_TEMPLATE_BACK_BACKGROUND_IMG?.value}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="col-md-6">
-            <label>
-              {T.translate("badge_settings.badge_template_margin")} &nbsp;{" "}
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("badge_settings.px_percentage_info")}
-              />
-            </label>
-            <br />
-            <Input
-              className="form-control"
-              id="BADGE_TEMPLATE_MARGIN"
-              value={entity?.BADGE_TEMPLATE_MARGIN?.value}
-              onChange={this.handleChange}
+              value={
+                entity?.BADGE_TEMPLATE_BACK_BACKGROUND_IMG?.file_preview ||
+                entity?.BADGE_TEMPLATE_BACK_BACKGROUND_IMG?.file
+              }
+              handleUpload={this.handleUploadFile}
+              handleRemove={() =>
+                this.handleRemoveFile("BADGE_TEMPLATE_BACK_BACKGROUND_IMG")
+              }
+              className="dropzone col-md-6"
+              multiple={false}
             />
           </div>
         </div>
@@ -917,7 +913,7 @@ class BadgeSettingsForm extends React.Component {
           </div>
           <div className="col-md-6">
             <label>
-              {T.translate("badge_settings.badge_template_text_fields_padding")}{" "}
+              {T.translate("badge_settings.badge_template_text_fields_margin")}{" "}
               &nbsp;{" "}
               <i
                 className="fa fa-info-circle"
@@ -928,8 +924,8 @@ class BadgeSettingsForm extends React.Component {
             <br />
             <Input
               className="form-control"
-              id="BADGE_TEMPLATE_TEXT_FIELDS_PADDING"
-              value={entity?.BADGE_TEMPLATE_TEXT_FIELDS_PADDING?.value}
+              id="BADGE_TEMPLATE_TEXT_FIELDS_MARGIN"
+              value={entity?.BADGE_TEMPLATE_TEXT_FIELDS_MARGIN?.value}
               onChange={this.handleChange}
             />
           </div>
@@ -1009,9 +1005,7 @@ class BadgeSettingsForm extends React.Component {
             <div className="row">
               <div className="col-md-6">
                 <label>
-                  {T.translate(
-                    "badge_settings.badge_template_features_padding"
-                  )}{" "}
+                  {T.translate("badge_settings.badge_template_features_margin")}{" "}
                   &nbsp;{" "}
                   <i
                     className="fa fa-info-circle"
@@ -1056,6 +1050,20 @@ class BadgeSettingsForm extends React.Component {
                   id="BADGE_TEMPLATE_FEATURES_TEXT_COLOR"
                   value={entity?.BADGE_TEMPLATE_FEATURES_TEXT_COLOR?.value}
                   className="form-control"
+                />
+              </div>
+              <div className="col-md-6">
+                <label>
+                  {T.translate(
+                    "badge_settings.badge_template_features_font_size"
+                  )}
+                </label>
+                <br />
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_FEATURES_FONT_SIZE"
+                  value={entity?.BADGE_TEMPLATE_FEATURES_FONT_SIZE?.value}
+                  onChange={this.handleChange}
                 />
               </div>
             </div>

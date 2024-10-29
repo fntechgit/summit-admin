@@ -70,13 +70,14 @@ const DEFAULT_BADGE_SETTINGS = {
   BADGE_TEMPLATE_QR_TOP: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_QR_LEFT: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_QR_COLOR: { id: 0, value: "", type: "HEX_COLOR" },
-  BADGE_TEMPLATE_TEXT_FIELDS_PADDING: { id: 0, value: "", type: "TEXT" },
+  BADGE_TEMPLATE_TEXT_FIELDS_MARGIN: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_TEXT_FIELDS_COLOR: { id: 0, value: "", type: "HEX_COLOR" },
   BADGE_TEMPLATE_FEATURES_TOP: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_FEATURES_LEFT: { id: 0, value: "", type: "TEXT" },
-  BADGE_TEMPLATE_FEATURES_PADDING: { id: 0, value: "", type: "TEXT" },
+  BADGE_TEMPLATE_FEATURES_MARGIN: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_FEATURES_FONT_FAMILY: { id: 0, value: "", type: "TEXT" },
-  BADGE_TEMPLATE_FEATURES_TEXT_COLOR: { id: 0, value: "", type: "HEX_COLOR" }
+  BADGE_TEMPLATE_FEATURES_TEXT_COLOR: { id: 0, value: "", type: "HEX_COLOR" },
+  BADGE_TEMPLATE_FEATURES_FONT_SIZE: { id: 0, value: "", type: "TEXT" }
 };
 
 const DEFAULT_STATE = {
