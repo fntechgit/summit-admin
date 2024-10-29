@@ -11,7 +11,7 @@
 
 "@adobe/css-tools@^4.3.2":
   version "4.3.3"
-  resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.3.3.tgz#90749bde8b89cd41764224f5aac29cd4138f75ff"
+  resolved "https://registry.yarnpkg.com/@adobeff/css-tools/-/css-tools-4.3.3.tgz#90749bde8b89cd41764224f5aac29cd4138f75ff"
   integrity sha512-rE0Pygv0sEZ4vBWHlAgJLGDU7Pm8xoO6p3wsEceb7GYAjScrOHpEo8KK/eVkAcnSM+slAEtXjA2JpdjLp4fJQQ==
 
 "@ampproject/remapping@^2.2.0":
@@ -9912,10 +9912,10 @@ open@^8.0.9:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openstack-uicore-foundation@4.1.89-beta.3:
-  version "4.1.89-beta.3"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.1.89-beta.3.tgz#228b480a0e8e1cd1f78ea3727f8d081c6a496fb7"
-  integrity sha512-q1Pfls+2WyRkEMGi1qu0qbWcYBk3Me1XuRzDhVCpOG+M70cHlVnyZ6zX/6eWKQL56xhh6k6aV3ADLudbTUWRxg==
+openstack-uicore-foundation@4.1.91:
+  version "4.1.91"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.1.91.tgz#352806f78ba9c008d7f18fcf246ccc790345229c"
+  integrity sha512-O86rDJ99X4TXkAEXCj2r8uqkzsVJLNOq0VFG+XiRQsJm1MatAed2MilINMZUbn0jM3NYxSU9b2KditBO/BL+7g==
 
 optionator@^0.9.1:
   version "0.9.4"
