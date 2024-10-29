@@ -220,10 +220,10 @@ export const saveMarketingSetting =
 
     if (entity.id) {
       if (file)
-        return postFile(
+        return putRequest(
           createAction(UPDATE_SETTING),
-          createAction(SETTING_ADDED),
-          `${window.MARKETING_API_BASE_URL}/api/v1/config-values`,
+          createAction(SETTING_UPDATED),
+          `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
           file,
           normalizedEntity,
           customErrorHandler,

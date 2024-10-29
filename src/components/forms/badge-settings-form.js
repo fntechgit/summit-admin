@@ -100,14 +100,15 @@ class BadgeSettingsForm extends React.Component {
   }
 
   handleRemoveFile(attr) {
-    console.log("CHECK...", attr);
     const newEntity = { ...this.state.entity };
 
     newEntity[attr].file_preview = "";
 
     if (newEntity[attr].id) {
       newEntity[attr].file = "";
-      this.props.onDeleteImage(newEntity[attr].id);
+      this.props.onDeleteImage(newEntity[attr].id).then(() => {
+        newEntity[attr].id = 0;
+      });
     }
 
     this.setState({ entity: newEntity });
@@ -1041,6 +1042,7 @@ class BadgeSettingsForm extends React.Component {
                 />
               </div>
             </div>
+            <br />
             <div className="row">
               <div className="col-md-6">
                 <label>
