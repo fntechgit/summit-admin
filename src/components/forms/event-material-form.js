@@ -43,7 +43,6 @@ class EventMaterialForm extends React.Component {
     this.state = {
       entity: { ...props.entity },
       file: null,
-      fileUploadUrl: null,
       errors: props.errors
     };
 
@@ -53,6 +52,7 @@ class EventMaterialForm extends React.Component {
     this.handleUploadFile = this.handleUploadFile.bind(this);
     this.handleRemoveFile = this.handleRemoveFile.bind(this);
     this.onMediaUploadComplete = this.onMediaUploadComplete.bind(this);
+    this.handleGetPostUrl = this.handleGetPostUrl.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -96,20 +96,12 @@ class EventMaterialForm extends React.Component {
     errors[id] = "";
     entity[id] = value;
 
-    if (
-      entity.class_name === MATERIAL_TYPE.PRESENTATION_SLIDE ||
-      entity.class_name === MATERIAL_TYPE.PRESENTATION_MEDIA_UPLOAD
-    ) {
-      const accessToken = await getAccessTokenSafely();
-      this.setState({
-        entity,
-        errors,
-        fileUploadUrl: `${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload?access_token=${accessToken}`
-      });
-      return;
-    }
-
     this.setState({ entity, errors });
+  }
+
+  async handleGetPostUrl() {
+    const accessToken = await getAccessTokenSafely();
+    return `${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload?access_token=${accessToken}`;
   }
 
   handleChangeMUType(ev) {
@@ -156,7 +148,7 @@ class EventMaterialForm extends React.Component {
   }
 
   render() {
-    const { entity, errors, fileUploadUrl } = this.state;
+    const { entity, errors } = this.state;
 
     // on admin we upload one per time
     const media_type = { ...entity.media_upload_type, max_uploads_qty: 1 };
@@ -293,7 +285,7 @@ class EventMaterialForm extends React.Component {
                 onUploadComplete={this.onMediaUploadComplete}
                 value={mediaInputValue}
                 mediaType={slideMediaType}
-                postUrl={fileUploadUrl}
+                getPostUrl={this.handleGetPostUrl}
                 error={hasErrors("slide", errors)}
                 djsConfig={{ withCredentials: true }}
                 parallelChunkUploads
@@ -364,7 +356,7 @@ class EventMaterialForm extends React.Component {
                   value={mediaInputValue}
                   mediaType={media_type}
                   onRemove={this.handleRemoveFile}
-                  postUrl={fileUploadUrl}
+                  getPostUrl={this.handleGetPostUrl}
                   error={hasErrors(media_type.name, errors)}
                   djsConfig={{ withCredentials: true }}
                   parallelChunkUploads
