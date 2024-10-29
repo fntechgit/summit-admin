@@ -604,7 +604,10 @@ export const getBadgeTypes =
       page: 1,
       per_page: HUNDRED_PER_PAGE,
       access_token: accessToken,
-      expand: "access_levels,allowed_view_types"
+      expand: "access_levels",
+      fields:
+        "id,name,is_default,description,access_levels.id,access_levels.name",
+      relations: "access_levels,access_levels.none"
     };
 
     // order
