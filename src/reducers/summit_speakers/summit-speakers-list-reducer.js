@@ -210,14 +210,4 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action = {}) => {
   }
 };
 
-const markCheckedItems = (data, state) => data.map((it) => {
-    if (state.selectedAll) {
-      it.checked = !state.excludedItems.includes(it.id);
-    } else {
-      it.checked = state.selectedItems.includes(it.id);
-    }
-
-    return it;
-  });
-
 export default summitSpeakersListReducer;

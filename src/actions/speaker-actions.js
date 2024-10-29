@@ -782,6 +782,16 @@ const parseFilters = (filters) => {
   }
 
   if (
+    filters?.trackGroupFilter &&
+    Array.isArray(filters.trackGroupFilter) &&
+    filters.trackGroupFilter.length > 0
+  ) {
+    filter.push(
+      `presentations_track_group_id==${filters.trackGroupFilter.join("||")}`
+    );
+  }
+
+  if (
     filters?.activityTypeFilter &&
     Array.isArray(filters.activityTypeFilter) &&
     filters.activityTypeFilter.length > 0
@@ -1141,114 +1151,4 @@ export const unselectAllSummitSpeakers = () => (dispatch) => {
 
 export const setCurrentFlowEvent = (value) => (dispatch) => {
   dispatch(createAction(SET_SPEAKERS_CURRENT_FLOW_EVENT)(value));
-};
-
-const parseFilters = (filters) => {
-  const filter = [];
-
-  if (
-    filters.hasOwnProperty("selectionPlanFilter") &&
-    Array.isArray(filters.selectionPlanFilter) &&
-    filters.selectionPlanFilter.length > 0
-  ) {
-    filter.push(
-      `presentations_selection_plan_id==${filters.selectionPlanFilter.join(
-        "||"
-      )}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("trackFilter") &&
-    Array.isArray(filters.trackFilter) &&
-    filters.trackFilter.length > 0
-  ) {
-    filter.push(`presentations_track_id==${filters.trackFilter.join("||")}`);
-  }
-
-  if (
-    filters.hasOwnProperty("trackGroupFilter") &&
-    Array.isArray(filters.trackGroupFilter) &&
-    filters.trackGroupFilter.length > 0
-  ) {
-    filter.push(
-      `presentations_track_group_id==${filters.trackGroupFilter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("activityTypeFilter") &&
-    Array.isArray(filters.activityTypeFilter) &&
-    filters.activityTypeFilter.length > 0
-  ) {
-    filter.push(
-      `presentations_type_id==${filters.activityTypeFilter.join("||")}`
-    );
-  }
-
-  if (
-    filters.hasOwnProperty("selectionStatusFilter") &&
-    Array.isArray(filters.selectionStatusFilter) &&
-    filters.selectionStatusFilter.length > 0
-  ) {
-    // exclusive filters
-    if (filters.selectionStatusFilter.includes("only_rejected")) {
-      filter.push("has_rejected_presentations==true");
-      filter.push("has_accepted_presentations==false");
-      filter.push("has_alternate_presentations==false");
-    } else if (filters.selectionStatusFilter.includes("only_accepted")) {
-      filter.push("has_rejected_presentations==false");
-      filter.push("has_accepted_presentations==true");
-      filter.push("has_alternate_presentations==false");
-    } else if (filters.selectionStatusFilter.includes("only_alternate")) {
-      filter.push("has_rejected_presentations==false");
-      filter.push("has_accepted_presentations==false");
-      filter.push("has_alternate_presentations==true");
-    } else if (filters.selectionStatusFilter.includes("accepted_alternate")) {
-      filter.push("has_rejected_presentations==false");
-      filter.push("has_accepted_presentations==true");
-      filter.push("has_alternate_presentations==true");
-    } else if (filters.selectionStatusFilter.includes("accepted_rejected")) {
-      filter.push("has_rejected_presentations==true");
-      filter.push("has_accepted_presentations==true");
-      filter.push("has_alternate_presentations==false");
-    } else if (filters.selectionStatusFilter.includes("alternate_rejected")) {
-      filter.push("has_rejected_presentations==true");
-      filter.push("has_accepted_presentations==false");
-      filter.push("has_alternate_presentations==true");
-    } else {
-      filter.push(
-        filters.selectionStatusFilter.reduce(
-          (accumulator, at) =>
-            `${
-              accumulator + (accumulator !== "" ? "," : "")
-            }has_${at}_presentations==true`,
-          ""
-        )
-      );
-    }
-  }
-
-  if (
-    filters.hasOwnProperty("mediaUploadTypeFilter") &&
-    filters.mediaUploadTypeFilter.operator !== null &&
-    Array.isArray(filters.mediaUploadTypeFilter.value) &&
-    filters.mediaUploadTypeFilter.value.length > 0
-  ) {
-    filter.push(
-      `${
-        filters.mediaUploadTypeFilter.operator
-      }${filters.mediaUploadTypeFilter.value
-        .map((v) => v.id)
-        .join(
-          filters.mediaUploadTypeFilter.operator ===
-            "has_media_upload_with_type=="
-            ? "||"
-            : "&&"
-        )}`
-    );
-  }
-
-  // return checkOrFilter(filters, filter);
-  return filter;
 };
