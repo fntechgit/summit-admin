@@ -1098,7 +1098,9 @@ export const getAccessLevels =
     const params = {
       page: 1,
       per_page: HUNDRED_PER_PAGE,
-      access_token: accessToken
+      access_token: accessToken,
+      fields: "id,name,description,is_default",
+      relations: "none"
     };
 
     // order
