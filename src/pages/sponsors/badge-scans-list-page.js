@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -53,14 +53,14 @@ class BadgeScansListPage extends React.Component {
     this.props.getBadgeScans(sponsorId, page, perPage, order, orderDir);
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { sponsorId, page, perPage } = this.props;
     this.props.getBadgeScans(sponsorId, page, perPage, key, dir);
   }
 
   handleSponsorChange(ev) {
     const { order, orderDir, page, perPage } = this.props;
-    let value = ev.target.value;
+    const {value} = ev.target;
     this.props.getBadgeScans(value, page, perPage, order, orderDir);
   }
 
@@ -68,7 +68,7 @@ class BadgeScansListPage extends React.Component {
     const { sponsorId, order, orderDir, allSponsors } = this.props;
     ev.preventDefault();
 
-    let sponsor = allSponsors.find((s) => s.id === sponsorId);
+    const sponsor = allSponsors.find((s) => s.id === sponsorId);
 
     this.props.exportBadgeScans(sponsor, order, orderDir);
   }
@@ -104,6 +104,11 @@ class BadgeScansListPage extends React.Component {
       {
         columnKey: "scan_date",
         value: T.translate("badge_scan_list.created"),
+        sortable: true
+      },
+      {
+        columnKey: "scanned_by",
+        value: T.translate("badge_scan_list.scanned_by"),
         sortable: true
       },
       {
@@ -143,7 +148,7 @@ class BadgeScansListPage extends React.Component {
 
     if (!currentSummit.id) return <div />;
 
-    let sponsors_ddl = allSponsors
+    const sponsors_ddl = allSponsors
       ? allSponsors.map((s) => ({ label: s.company.name, value: s.id }))
       : null;
 
@@ -158,6 +163,7 @@ class BadgeScansListPage extends React.Component {
             <button
               className="btn btn-default right-space pull-right"
               onClick={this.handleExport}
+              disabled={!sponsorId}
             >
               {T.translate("general.export")}
             </button>
@@ -174,32 +180,38 @@ class BadgeScansListPage extends React.Component {
           </div>
         </div>
 
-        {badgeScans.length === 0 && (
-          <div>{T.translate("badge_scan_list.no_badge_scans")}</div>
-        )}
+        {!sponsorId ? (
+          <div>{T.translate("badge_scan_list.select_sponsor")}</div>
+        ) : (
+          <>
+            {badgeScans.length === 0 && (
+              <div>{T.translate("badge_scan_list.no_badge_scans")}</div>
+            )}
 
-        {badgeScans.length > 0 && (
-          <div>
-            <Table
-              options={table_options}
-              data={badgeScans}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </div>
+            {badgeScans.length > 0 && (
+              <div>
+                <Table
+                  options={table_options}
+                  data={badgeScans}
+                  columns={columns}
+                  onSort={this.handleSort}
+                />
+                <Pagination
+                  bsSize="medium"
+                  prev
+                  next
+                  first
+                  last
+                  ellipsis
+                  boundaryLinks
+                  maxButtons={10}
+                  items={lastPage}
+                  activePage={currentPage}
+                  onSelect={this.handlePageChange}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     );

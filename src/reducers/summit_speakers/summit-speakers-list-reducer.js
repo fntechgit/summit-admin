@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
+
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   INIT_SPEAKERS_LIST_PARAMS,
@@ -52,7 +53,15 @@ const DEFAULT_STATE = {
   currentSummitId: null
 };
 
-const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
+const markCheckedItems = (data, state) =>
+  data.map((it) => ({
+    ...it,
+    checked: state.selectedAll
+      ? !state.excludedItems.includes(it.id)
+      : state.selectedItems.includes(it.id)
+  }));
+
+const summitSpeakersListReducer = (state = DEFAULT_STATE, action = {}) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
@@ -93,16 +102,20 @@ const summitSpeakersListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_SPEAKERS_BY_SUMMIT: {
-      const { current_page, total, last_page } = payload.response;
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
 
       const items = buildSpeakersSubmittersList(state, payload.response.data);
 
       return {
         ...state,
         items: markCheckedItems(items, state),
-        currentPage: current_page,
+        currentPage,
         totalItems: total,
-        lastPage: last_page
+        lastPage
       };
     }
     case SELECT_SUMMIT_SPEAKER: {

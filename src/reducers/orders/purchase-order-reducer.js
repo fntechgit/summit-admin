@@ -23,7 +23,8 @@ import {
   UPDATE_PURCHASE_ORDER,
   PURCHASE_ORDER_CANCEL_REFUND,
   PURCHASE_ORDER_UPDATED,
-  RECEIVE_PURCHASE_ORDER_REFUNDS
+  RECEIVE_PURCHASE_ORDER_REFUNDS,
+  RECEIVE_PURCHASE_ORDER_TICKETS
 } from "../../actions/order-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -147,7 +148,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
     case RESET_PURCHASE_ORDER_FORM:
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case RECEIVE_PURCHASE_ORDER: {
-      const entity = { ...payload.response };
+      const entity = { ...payload.response, tickets: [] };
 
       const final_amount_formatted = `${
         entity.currency_symbol
@@ -169,12 +170,6 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
         last_name: entity.owner_last_name
       };
 
-      entity.tickets = assembleTicketsState(
-        entity.tickets,
-        entity.currency_symbol,
-        entity.summit_id
-      );
-
       return {
         ...state,
         entity: {
@@ -184,6 +179,22 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
           final_amount_adjusted_formatted
         },
         errors: {}
+      };
+    }
+    case RECEIVE_PURCHASE_ORDER_TICKETS: {
+      const tickets = payload;
+      const entity = { ...state.entity };
+      entity.tickets = assembleTicketsState(
+        tickets,
+        entity.currency_symbol,
+        entity.summit_id
+      );
+
+      return {
+        ...state,
+        entity: {
+          ...entity
+        }
       };
     }
     case UPDATE_PURCHASE_ORDER: {

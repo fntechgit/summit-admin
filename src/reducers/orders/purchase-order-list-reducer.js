@@ -63,7 +63,7 @@ const purchaseOrderListReducer = (state = DEFAULT_STATE, action) => {
           owner_id: a.owner_id,
           owner_name: `${a.owner_first_name} ${a.owner_last_name}`,
           owner_email: a.owner_email,
-          company: a.owner_company,
+          owner_company: a.owner_company,
           bought_date,
           amount: `${a.currency_symbol}${a.amount}`,
           payment_method: a.payment_method,

@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -32,6 +31,12 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
+import history from "../history";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_PER_PAGE,
+  HUNDRED_PER_PAGE
+} from "../utils/constants";
 
 export const REQUEST_SPONSORS = "REQUEST_SPONSORS";
 export const RECEIVE_SPONSORS = "RECEIVE_SPONSORS";
@@ -144,58 +149,65 @@ export const RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META =
 export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
   "SPONSOR_LEAD_REPORT_SETTINGS_UPDATED";
 
-/******************  SPONSORS ****************************************/
+/** ****************  SPONSORS *************************************** */
 
 export const getSponsors =
-  (term = null, page = 1, perPage = 100, order = "order", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
+  (
+    term = null,
+    page = 1,
+    perPage = HUNDRED_PER_PAGE,
+    order = "order",
+    orderDir = 1
+  ) =>
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(
-        `company_name=@${escapedTerm},sponsorship_name=@${escapedTerm},sponsorship_size=@${escapedTerm}`
-      );
-    }
+      if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(
+          `company_name=@${escapedTerm},sponsorship_name=@${escapedTerm},sponsorship_size=@${escapedTerm}`
+        );
+      }
 
-    const params = {
-      page: page,
-      per_page: perPage,
-      expand: "company,sponsorship,sponsorship.type",
-      access_token: accessToken
+      const params = {
+        page,
+        per_page: perPage,
+        expand: "company,sponsorship,sponsorship.type",
+        relations: "company.none,sponsorship.none,sponsorship.type.none,none",
+        fields: "id,company.name,company.id,sponsorship.id,sponsorship.type.name",
+        access_token: accessToken
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_SPONSORS),
+        createAction(RECEIVE_SPONSORS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
+        authErrorHandler,
+        { page, perPage, order, orderDir, term }
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_SPONSORS),
-      createAction(RECEIVE_SPONSORS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
-      authErrorHandler,
-      { page, perPage, order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const getSponsorsWithBadgeScans = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-  const filter = [];
 
   dispatch(startLoading());
 
@@ -242,7 +254,7 @@ export const getSponsor = (sponsorId) => async (dispatch, getState) => {
   });
 };
 
-export const resetSponsorForm = () => (dispatch, getState) => {
+export const resetSponsorForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSOR_FORM)({}));
 };
 
@@ -267,7 +279,7 @@ export const saveSponsor = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("edit_sponsor.sponsor_saved")));
     });
   } else {
@@ -314,7 +326,7 @@ export const addMemberToSponsor =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/users/${member.id}`,
       {},
       authErrorHandler
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -401,29 +413,28 @@ const normalizeSponsor = (entity) => {
   return normalizedEntity;
 };
 
-export const createCompany =
-  (company, callback) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+export const createCompany = (company, callback) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const params = {
-      access_token: accessToken
-    };
-
-    dispatch(startLoading());
-
-    postRequest(
-      null,
-      createAction(COMPANY_ADDED),
-      `${window.API_BASE_URL}/api/v1/companies`,
-      { name: company },
-      authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      dispatch(stopLoading());
-      callback(payload.response);
-    });
+  const params = {
+    access_token: accessToken
   };
 
-/******************  EXTRA QUESTIONS  ****************************************/
+  dispatch(startLoading());
+
+  postRequest(
+    null,
+    createAction(COMPANY_ADDED),
+    `${window.API_BASE_URL}/api/v1/companies`,
+    { name: company },
+    authErrorHandler
+  )(params)(dispatch).then((payload) => {
+    dispatch(stopLoading());
+    callback(payload.response);
+  });
+};
+
+/** ****************  EXTRA QUESTIONS  *************************************** */
 
 export const getExtraQuestionMeta = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -446,25 +457,25 @@ export const getExtraQuestionMeta = () => async (dispatch, getState) => {
 
 export const updateExtraQuestionOrder =
   (extraQuestions, sponsorId, questionId, newOrder) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
 
-    const params = {
-      access_token: accessToken
+      const params = {
+        access_token: accessToken
+      };
+
+      putRequest(
+        null,
+        createAction(SPONSOR_EXTRA_QUESTION_ORDER_UPDATED)(extraQuestions),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}`,
+        { order: newOrder },
+        authErrorHandler
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    putRequest(
-      null,
-      createAction(SPONSOR_EXTRA_QUESTION_ORDER_UPDATED)(extraQuestions),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}`,
-      { order: newOrder },
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const deleteExtraQuestion =
   (sponsorId, questionId) => async (dispatch, getState) => {
@@ -520,35 +531,34 @@ export const saveSponsorExtraQuestion =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_sponsor.extra_question_saved"))
         );
       });
-    } else {
-      const success_message = {
-        title: T.translate("general.done"),
-        html: T.translate("edit_sponsor.extra_question_created"),
-        type: "success"
-      };
-
-      return postRequest(
-        createAction(UPDATE_SPONSOR_EXTRA_QUESTION),
-        createAction(SPONSOR_EXTRA_QUESTION_ADDED),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
-        dispatch(
-          showMessage(success_message, () => {
-            history.push(
-              `/app/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${payload.response.id}`
-            );
-          })
-        );
-      });
     }
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_sponsor.extra_question_created"),
+      type: "success"
+    };
+
+    return postRequest(
+      createAction(UPDATE_SPONSOR_EXTRA_QUESTION),
+      createAction(SPONSOR_EXTRA_QUESTION_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      dispatch(
+        showMessage(success_message, () => {
+          history.push(
+            `/app/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${payload.response.id}`
+          );
+        })
+      );
+    });
   };
 
 export const getSponsorExtraQuestion =
@@ -577,7 +587,7 @@ export const getSponsorExtraQuestion =
     });
   };
 
-export const resetSponsorExtraQuestionForm = () => (dispatch, getState) => {
+export const resetSponsorExtraQuestionForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSOR_EXTRA_QUESTION_FORM)({}));
 };
 
@@ -604,7 +614,7 @@ export const saveSponsorExtraQuestionValue =
         entity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(stopLoading());
       });
     }
@@ -616,7 +626,7 @@ export const saveSponsorExtraQuestionValue =
       entity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -656,7 +666,7 @@ export const updateSponsorExtraQuestionValueOrder =
       { order: newOrder },
       authErrorHandler,
       { order: newOrder, id: valueId }
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -685,40 +695,40 @@ export const deleteSponsorExtraQuestionValue =
     });
   };
 
-/******************  SPONSORSHIPS ****************************************/
+/** ****************  SPONSORSHIPS *************************************** */
 
 export const getSummitSponsorships =
   (order = "name", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    const params = {
-      page: 1,
-      per_page: 100,
-      access_token: accessToken,
-      expand: "type"
+      const params = {
+        page: 1,
+        per_page: 100,
+        access_token: accessToken,
+        expand: "type"
+      };
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_SUMMIT_SPONSORSHIPS),
+        createAction(RECEIVE_SUMMIT_SPONSORSHIPS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
+        authErrorHandler,
+        { order, orderDir }
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_SUMMIT_SPONSORSHIPS),
-      createAction(RECEIVE_SUMMIT_SPONSORSHIPS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
-      authErrorHandler,
-      { order, orderDir }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const getSummitSponsorship =
   (sponsorshipId) => async (dispatch, getState) => {
@@ -743,7 +753,7 @@ export const getSummitSponsorship =
     });
   };
 
-export const resetSummitSponsorshipForm = () => (dispatch, getState) => {
+export const resetSummitSponsorshipForm = () => (dispatch) => {
   dispatch(createAction(RESET_SUMMIT_SPONSORSHIP_FORM)({}));
 };
 
@@ -769,7 +779,7 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(
         showSuccessMessage(T.translate("edit_sponsorship.sponsorship_saved"))
       );
@@ -823,7 +833,7 @@ export const uploadSponsorshipBadgeImage =
       file,
       authErrorHandler,
       { pic: entity.pic }
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
       history.push(
         `/app/summits/${currentSummit.id}/sponsorships/${entity.id}`
@@ -900,11 +910,11 @@ export const deleteSummitSponsorship =
 const normalizeSponsorship = (entity) => {
   const normalizedEntity = { ...entity };
 
-  normalizedEntity["type_id"] = normalizedEntity.type
+  normalizedEntity.type_id = normalizedEntity.type
     ? normalizedEntity.type.id
     : 0;
 
-  delete normalizedEntity["type"];
+  delete normalizedEntity.type;
 
   return normalizedEntity;
 };
@@ -912,7 +922,7 @@ const normalizeSponsorship = (entity) => {
 const normalizeCollection = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["order"];
+  delete normalizedEntity.order;
 
   return normalizedEntity;
 };
@@ -922,7 +932,7 @@ const normalizeSocialNetwork = (entity) => {
 
   normalizeCollection(normalizedEntity);
 
-  normalizedEntity["icon_css_class"] = entity.icon_css_class?.value
+  normalizedEntity.icon_css_class = entity.icon_css_class?.value
     ? entity.icon_css_class.value
     : entity.icon_css_class;
 
@@ -935,91 +945,96 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-/******************  BADGE SCANS  ****************************************/
+/** ****************  BADGE SCANS  *************************************** */
 
 export const getBadgeScans =
   (
     sponsorId = null,
     page = 1,
-    perPage = 10,
+    perPage = DEFAULT_PER_PAGE,
     order = "attendee_last_name",
     orderDir = 1
   ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
-    const summitTZ = currentSummit.time_zone.name;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
+      const summitTZ = currentSummit.time_zone.name;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    if (sponsorId) {
-      filter.push(`sponsor_id==${sponsorId}`);
-    }
+      if (sponsorId) {
+        filter.push(`sponsor_id==${sponsorId}`);
+      }
 
-    const params = {
-      page: page,
-      per_page: perPage,
-      expand: "badge,badge.ticket,badge.ticket.owner,badge.ticket.owner.member",
-      access_token: accessToken
+      const params = {
+        access_token: accessToken,
+        page,
+        per_page: perPage,
+        expand:
+          "badge,badge.ticket,badge.ticket.owner,badge.ticket.owner.member,scanned_by",
+        relations:
+          "scanned_by,badge,scanned_by.none,badge.none,badge.ticket.none,badge.ticket.owner.none,badge.ticket.owner.member.none",
+        fields:
+          "id,created,scan_date,attendee_first_name,attendee_last_name,attendee_email,attendee_company,scanned_by.email,scanned_by.first_name,scanned_by.last_name,badge.ticket,badge.ticket.owner,badge.ticket.owner.member.first_name,badge.ticket.owner.member.last_name,badge.ticket.owner.email,badge.ticket.owner.company,badge.ticket.owner.first_name,badge.ticket.owner.last_name"
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_BADGE_SCANS),
+        createAction(RECEIVE_BADGE_SCANS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans`,
+        authErrorHandler,
+        { page, perPage, order, orderDir, sponsorId, summitTZ }
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_BADGE_SCANS),
-      createAction(RECEIVE_BADGE_SCANS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans`,
-      authErrorHandler,
-      { page, perPage, order, orderDir, sponsorId, summitTZ }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const exportBadgeScans =
   (sponsor = null, order = "attendee_last_name", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
-    const filename = sponsor.company.name + "-BadgeScans.csv";
-    const params = {
-      access_token: accessToken,
-      columns:
-        "scan_date,attendee_first_name,attendee_last_name,attendee_email,attendee_company"
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
+      const filename = `${sponsor.company.name}-BadgeScans.csv`;
+      const params = {
+        access_token: accessToken,
+        columns:
+          "scan_date,scanned_by,attendee_first_name,attendee_last_name,attendee_email,attendee_company"
+      };
+
+      filter.push(`sponsor_id==${sponsor.id}`);
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      dispatch(
+        getCSV(
+          `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans/csv`,
+          params,
+          filename
+        )
+      );
     };
-
-    filter.push(`sponsor_id==${sponsor.id}`);
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    dispatch(
-      getCSV(
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans/csv`,
-        params,
-        filename
-      )
-    );
-  };
 
 export const getBadgeScan = (scanId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -1031,7 +1046,11 @@ export const getBadgeScan = (scanId) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "badge,badge.ticket,badge.ticket.owner,badge.ticket.owner.member,sponsor,sponsor.extra_questions,sponsor.extra_questions.values,extra_questions"
+      "scanned_by,badge,badge.ticket,badge.ticket.owner,badge.ticket.owner.member,sponsor,sponsor.extra_questions,sponsor.extra_questions.values,extra_questions",
+    relations:
+      "scanned_by,sponsor,sponsor.none,badge,scanned_by.none,badge.none,badge.ticket.none,badge.ticket.owner.none,badge.ticket.owner.member.none",
+    fields:
+      "id,notes,extra_questions,created,scan_date,attendee_first_name,attendee_last_name,attendee_email,attendee_company,sponsor.id,sponsor.extra_questions,scanned_by.email,scanned_by.first_name,scanned_by.last_name,badge.ticket,badge.ticket.owner,badge.ticket.owner.member.first_name,badge.ticket.owner.member.last_name,badge.ticket.owner.email,badge.ticket.owner.company,badge.ticket.owner.first_name,badge.ticket.owner.last_name"
   };
 
   return getRequest(
@@ -1064,31 +1083,31 @@ export const saveBadgeScan = (entity) => async (dispatch, getState) => {
     normalizedEntity,
     authErrorHandler,
     entity
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(
       showSuccessMessage(T.translate("edit_badge_scan.badge_scan_saved"))
     );
   });
 };
 
-export const resetBadgeScanForm = () => (dispatch, getState) => {
+export const resetBadgeScanForm = () => (dispatch) => {
   dispatch(createAction(RESET_BADGE_SCAN_FORM)({}));
 };
 
 const normalizeBadgeScan = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["sponsor_extra_questions"];
-  delete normalizedEntity["attendee_company"];
-  delete normalizedEntity["attendee_full_name"];
+  delete normalizedEntity.sponsor_extra_questions;
+  delete normalizedEntity.attendee_company;
+  delete normalizedEntity.attendee_full_name;
 
   return normalizedEntity;
 };
 
-/******************  SPONSOR PAGES  ****************************************/
+/** ****************  SPONSOR PAGES  *************************************** */
 
 export const attachSponsorImage =
-  (entity, file, picAttr) => async (dispatch, getState) => {
+  (entity, file, picAttr) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
@@ -1105,10 +1124,10 @@ export const attachSponsorImage =
       picAttr === "header_image"
         ? uploadHeaderImage
         : picAttr === "side_image"
-        ? uploadSideImage
-        : picAttr === "header_mobile_image"
-        ? uploadHeaderMobileImage
-        : uploadCarouselImage;
+          ? uploadSideImage
+          : picAttr === "header_mobile_image"
+            ? uploadHeaderMobileImage
+            : uploadCarouselImage;
 
     if (entity.id) {
       dispatch(uploadFile(entity, file));
@@ -1219,21 +1238,20 @@ const uploadCarouselImage = (entity, file) => async (dispatch, getState) => {
   });
 };
 
-export const removeSponsorImage =
-  (entity, picAttr) => async (dispatch, getState) => {
-    dispatch(startLoading());
+export const removeSponsorImage = (entity, picAttr) => async (dispatch) => {
+  dispatch(startLoading());
 
-    const removeFile =
-      picAttr === "header_image"
-        ? removeHeaderImage
-        : picAttr === "side_image"
+  const removeFile =
+    picAttr === "header_image"
+      ? removeHeaderImage
+      : picAttr === "side_image"
         ? removeSideImage
         : picAttr === "header_mobile_image"
-        ? removeHeaderMobileImage
-        : removeCarouselImage;
+          ? removeHeaderMobileImage
+          : removeCarouselImage;
 
-    return dispatch(removeFile(entity));
-  };
+  return dispatch(removeFile(entity));
+};
 
 export const removeHeaderImage = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -1318,32 +1336,32 @@ export const removeCarouselImage = (entity) => async (dispatch, getState) => {
 
 export const getSponsorAdvertisements =
   (sponsorId, order = "order", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    const params = {
-      access_token: accessToken
+      const params = {
+        access_token: accessToken
+      };
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_ADVERTISEMENTS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/ads`,
+        authErrorHandler
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_SPONSOR_ADVERTISEMENTS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/ads`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const saveSponsorAdvertisement =
   (entity) => async (dispatch, getState) => {
@@ -1370,7 +1388,7 @@ export const saveSponsorAdvertisement =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_sponsor.advertisement_saved"))
         );
@@ -1451,7 +1469,7 @@ export const updateSponsorAdsOrder =
     });
   };
 
-export const resetSponsorAdvertisementForm = () => (dispatch, getState) => {
+export const resetSponsorAdvertisementForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSOR_ADVERTISEMENT_FORM)({}));
 };
 
@@ -1563,32 +1581,32 @@ export const removeSponsorAdvertisementImage =
 
 export const getSponsorMaterials =
   (sponsorId, order = "order", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    const params = {
-      access_token: accessToken
+      const params = {
+        access_token: accessToken
+      };
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        null,
+        createAction(RECEIVE_SPONSOR_MATERIALS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/materials`,
+        authErrorHandler
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_SPONSOR_MATERIALS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/materials`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const saveSponsorMaterial = (entity) => async (dispatch, getState) => {
   const { currentSummitState, currentSponsorState } = getState();
@@ -1614,7 +1632,7 @@ export const saveSponsorMaterial = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("edit_sponsor.material_saved")));
     });
   } else {
@@ -1693,7 +1711,7 @@ export const updateSponsorMaterialOrder =
     });
   };
 
-export const resetSponsorMaterialForm = () => (dispatch, getState) => {
+export const resetSponsorMaterialForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSOR_MATERIAL_FORM)({}));
 };
 
@@ -1732,7 +1750,7 @@ export const getSponsorSocialNetworks =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -1772,7 +1790,7 @@ export const saveSponsorSocialNetwork =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_sponsor.social_network_saved"))
         );
@@ -1828,7 +1846,7 @@ export const getSponsorSocialNetwork =
     });
   };
 
-export const resetSponsorSocialNetworkForm = () => (dispatch, getState) => {
+export const resetSponsorSocialNetworkForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSOR_SOCIAL_NETWORK_FORM)({}));
 };
 
@@ -1873,10 +1891,10 @@ export const querySummitSponsorships = _.debounce(
       })
       .catch(fetchErrorHandler);
   },
-  500
+  DEBOUNCE_WAIT
 );
 
-/******************  SPONSOR PROMOCODES  ****************************************/
+/** ****************  SPONSOR PROMOCODES  *************************************** */
 
 export const selectPromocode = (promocodeId) => (dispatch) => {
   dispatch(createAction(SELECT_SPONSOR_PROMOCODE)(promocodeId));
@@ -1898,97 +1916,103 @@ export const setSelectedAll = (value) => (dispatch) => {
   dispatch(createAction(SET_SELECTED_ALL_SPONSOR_PROMOCODES)(value));
 };
 
-export const changeSearchTerm = (term) => (dispatch, getState) => {
+export const changeSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_SPONSOR_PROMOCODES_SEARCH_TERM)({ term }));
 };
 
 export const getSponsorPromocodes =
-  (term = null, page = 1, perPage = 100, order = "order", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
+  (
+    term = null,
+    page = 1,
+    perPage = HUNDRED_PER_PAGE,
+    order = "order",
+    orderDir = 1
+  ) =>
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(
-        `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
-      );
-    }
+      if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(
+          `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
+        );
+      }
 
-    const params = {
-      page: page,
-      per_page: perPage,
-      expand:
-        "sponsor,owner,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,badge_features,allowed_ticket_types,ticket_types_rules,ticket_types_rules.ticket_type",
-      access_token: accessToken
+      const params = {
+        page,
+        per_page: perPage,
+        expand:
+          "sponsor,owner,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,badge_features,allowed_ticket_types,ticket_types_rules,ticket_types_rules.ticket_type",
+        access_token: accessToken
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_SPONSOR_PROMOCODES),
+        createAction(RECEIVE_SPONSOR_PROMOCODES),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes`,
+        authErrorHandler,
+        { page, perPage, order, orderDir, term }
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
     };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_SPONSOR_PROMOCODES),
-      createAction(RECEIVE_SPONSOR_PROMOCODES),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes`,
-      authErrorHandler,
-      { page, perPage, order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const exportSponsorPromocodes =
   (term = null, order = "order", orderDir = 1) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    const filter = [];
-    const filename = `${currentSummit.name}-SponsorPromocodes.csv`;
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
+      const filename = `${currentSummit.name}-SponsorPromocodes.csv`;
 
-    dispatch(startLoading());
+      dispatch(startLoading());
 
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(
-        `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
+      if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(
+          `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
+        );
+      }
+
+      const params = {
+        expand: "",
+        access_token: accessToken
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      dispatch(
+        getCSV(
+          `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes/csv`,
+          params,
+          filename
+        )
       );
-    }
-
-    const params = {
-      expand: "",
-      access_token: accessToken
     };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
-    }
-
-    dispatch(
-      getCSV(
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsor-promo-codes/csv`,
-        params,
-        filename
-      )
-    );
-  };
 
 export const importSponsorPromocodesCSV =
   (file) => async (dispatch, getState) => {
@@ -2015,68 +2039,68 @@ export const importSponsorPromocodesCSV =
 
 export const sendEmails =
   (recipientEmail = null) =>
-  async (dispatch, getState) => {
-    const { currentSummitState, currentSponsorPromocodeListState } = getState();
-    const { term, currentFlowEvent, selectedAll, selectedIds, excludedIds } =
-      currentSponsorPromocodeListState;
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-    let filter = [];
+    async (dispatch, getState) => {
+      const { currentSummitState, currentSponsorPromocodeListState } = getState();
+      const { term, currentFlowEvent, selectedAll, selectedIds, excludedIds } =
+        currentSponsorPromocodeListState;
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+      const filter = [];
 
-    const params = {
-      access_token: accessToken
-    };
+      const params = {
+        access_token: accessToken
+      };
 
-    if (!selectedAll && selectedIds.length > 0) {
-      // we don't need the filter criteria, we have the ids
-      filter.push(`id==${selectedIds.join("||")}`);
-    } else {
-      if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(
-          `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
-        );
+      if (!selectedAll && selectedIds.length > 0) {
+        // we don't need the filter criteria, we have the ids
+        filter.push(`id==${selectedIds.join("||")}`);
+      } else {
+        if (term) {
+          const escapedTerm = escapeFilterValue(term);
+          filter.push(
+            `sponsor_company_name@@${escapedTerm},tier_name@@${escapedTerm},code@@${escapedTerm}`
+          );
+        }
+
+        if (selectedAll && excludedIds.length > 0) {
+          filter.push(`not_id==${excludedIds.join("||")}`);
+        }
       }
 
-      if (selectedAll && excludedIds.length > 0) {
-        filter.push(`not_id==${excludedIds.join("||")}`);
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
       }
-    }
 
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
+      const payload = {
+        email_flow_event: currentFlowEvent
+      };
 
-    const payload = {
-      email_flow_event: currentFlowEvent
+      if (recipientEmail) {
+        payload.test_email_recipient = recipientEmail;
+      }
+
+      dispatch(startLoading());
+
+      const success_message = {
+        title: T.translate("general.done"),
+        html: T.translate("registration_invitation_list.resend_done"),
+        type: "success"
+      };
+
+      return putRequest(
+        null,
+        createAction(SEND_SPONSOR_PROMOCODES_EMAILS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/all/promo-codes/all/send`,
+        payload,
+        authErrorHandler
+      )(params)(dispatch).then((payload) => {
+        dispatch(showMessage(success_message));
+        dispatch(stopLoading());
+        return payload;
+      });
     };
 
-    if (recipientEmail) {
-      payload["test_email_recipient"] = recipientEmail;
-    }
-
-    dispatch(startLoading());
-
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("registration_invitation_list.resend_done"),
-      type: "success"
-    };
-
-    return putRequest(
-      null,
-      createAction(SEND_SPONSOR_PROMOCODES_EMAILS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/all/promo-codes/all/send`,
-      payload,
-      authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      dispatch(showMessage(success_message));
-      dispatch(stopLoading());
-      return payload;
-    });
-  };
-
-/******************  LEAD REPORT SETTINGS  ****************************************/
+/** ****************  LEAD REPORT SETTINGS  *************************************** */
 
 export const getSponsorLeadReportSettingsMeta =
   (sponsorId) => async (dispatch, getState) => {

@@ -69,21 +69,25 @@ export const REG_LITE_BOOLEAN_SETTINGS = [
 export const DUMMY_ACTION = "DUMMY_ACTION";
 
 export const DEFAULT_CURRENT_PAGE = 1;
-
 export const DEFAULT_PER_PAGE = 10;
 
+export const TWENTY_PER_PAGE = 20;
+
+export const TWENTYTHREE_HOURS = 23;
+
 export const FIVE_PER_PAGE = 5;
-
+export const HUNDRED_PER_PAGE = 100;
 export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
-
 export const DEFAULT_ORDER_DIR = 1;
 
 export const INT_BASE = 10;
+export const FIFTY_NINE = 59;
 export const ONE_MINUTE = 60;
 export const FIFTEEN_MINUTES = 900;
 export const HOUR_AND_HALF = 5400;
 export const SECONDS_TO_MINUTES = 60;
 export const MILLISECONDS_IN_SECOND = 1000;
+export const DEFAULT_100_PER_PAGE = 100;
 
 export const SORT_ASCENDING = 1;
 export const SORT_DESCENDING = -1;
@@ -117,6 +121,8 @@ export const UPPERCASE_A_IN_ASCII = 65;
 export const DECIMAL_DIGITS = 2;
 
 export const TWO = 2;
+
+export const TEN = 10;
 
 export const DEFAULT_Z_INDEX = 1;
 

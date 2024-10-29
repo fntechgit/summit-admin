@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ *  */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -29,9 +28,16 @@ import {
   fetchErrorHandler,
   getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import { saveMarketingSetting } from "./marketing-actions";
 import { getAccessTokenSafely } from "../utils/methods";
-import { DUMMY_ACTION } from "../utils/constants";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_PER_PAGE,
+  DUMMY_ACTION,
+  HUNDRED_PER_PAGE
+} from "../utils/constants";
 
 export const BADGE_DELETED = "BADGE_DELETED";
 export const FEATURE_BADGE_REMOVED = "FEATURE_BADGE_REMOVED";
@@ -88,10 +94,10 @@ export const REQUEST_BADGE_PRINTS = "REQUEST_BADGE_PRINTS";
 export const RECEIVE_BADGE_PRINTS = "RECEIVE_BADGE_PRINTS";
 export const RECEIVE_BADGE_SETTINGS = "RECEIVE_BADGE_SETTINGS";
 
-/***********************  MARKETING BADGE SETTINGS  ***************************/
+/** *********************  MARKETING BADGE SETTINGS  ************************** */
 
 export const getBadgeSettings =
-  (page = 1, perPage = 100) =>
+  (page = DEFAULT_CURRENT_PAGE, perPage = HUNDRED_PER_PAGE) =>
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
@@ -99,7 +105,7 @@ export const getBadgeSettings =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       key__contains: "BADGE_TEMPLATE"
     };
@@ -115,13 +121,13 @@ export const getBadgeSettings =
     });
   };
 
-export const saveBadgeSettings = (badgeSettings) => async (dispatch) => {
-  return Promise.all(
+export const saveBadgeSettings = (badgeSettings) => async (dispatch) =>
+  Promise.all(
     Object.keys(badgeSettings).map((m) => {
       let value = badgeSettings[m].value ?? "";
-      let file = badgeSettings[m].file ?? null;
+      const file = badgeSettings[m].file ?? null;
 
-      if (typeof value == "boolean") {
+      if (typeof value === "boolean") {
         value = value ? "1" : "0";
       }
 
@@ -129,15 +135,14 @@ export const saveBadgeSettings = (badgeSettings) => async (dispatch) => {
         id: badgeSettings[m].id,
         type: badgeSettings[m].type,
         key: m.toUpperCase(),
-        value: value
+        value
       };
 
       return dispatch(saveMarketingSetting(badge_setting, file));
     })
   );
-};
 
-/***********************  BADGE  ************************************************/
+/** *********************  BADGE  *********************************************** */
 
 export const deleteBadge = (ticketId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -241,10 +246,10 @@ export const printBadge =
     dispatch(createAction(PRINT_BADGE));
 
     window.open(
-      `${process.env["PRINT_APP_URL"]}/check-in/${
+      `${process.env.PRINT_APP_URL}/check-in/${
         currentSummit.slug
       }/tickets/${ticketId}?access_token=${accessToken}${
-        viewType ? `&view_type=${viewType}` : ``
+        viewType ? `&view_type=${viewType}` : ""
       }`,
       "_blank"
     );
@@ -273,13 +278,13 @@ export const checkInBadge = (code) => async (dispatch, getState) => {
   });
 };
 
-/***********************  BADGE PRINTS  ************************************************/
+/** *********************  BADGE PRINTS  *********************************************** */
 
 export const getBadgePrints =
   (
     term = null,
-    page = 1,
-    perPage = 10,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = 1,
     filters = {}
@@ -295,7 +300,7 @@ export const getBadgePrints =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "requestor"
@@ -310,7 +315,7 @@ export const getBadgePrints =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -349,7 +354,7 @@ export const exportBadgePrints =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     // GET /api/v1/summits/{id}/tickets/{ticket_id}/badge/current/prints/csv
@@ -377,7 +382,7 @@ const parseFilters = (filters, term) => {
     Array.isArray(filters.viewTypeFilter) &&
     filters.viewTypeFilter.length > 0
   ) {
-    filter.push("view_type_id==" + filters.viewTypeFilter.join("||"));
+    filter.push(`view_type_id==${filters.viewTypeFilter.join("||")}`);
   }
 
   if (
@@ -394,13 +399,13 @@ const parseFilters = (filters, term) => {
               filters.printDateFilter[0] !== null &&
               filters.printDateFilter[0] > 0
                 ? `print_date>=${filters.printDateFilter[0]}`
-                : ``
+                : ""
             }
             ${
               filters.printDateFilter[1] !== null &&
               filters.printDateFilter[1] > 0
                 ? `print_date<=${filters.printDateFilter[1]}`
-                : ``
+                : ""
             }`);
     }
   }
@@ -430,10 +435,16 @@ export const clearBadgePrints = (ticketId) => async (dispatch, getState) => {
   });
 };
 
-/***********************  VIEW TYPES  ************************************************/
+/** *********************  VIEW TYPES  *********************************************** */
 
 export const getViewTypes =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -443,7 +454,7 @@ export const getViewTypes =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -457,7 +468,7 @@ export const getViewTypes =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -572,13 +583,13 @@ const normalizeViewType = (entity) => {
   const normalizedEntity = { ...entity };
   delete normalizedEntity.id;
   if (!normalizedEntity.is_default) {
-    normalizedEntity["is_default"] = false;
+    normalizedEntity.is_default = false;
   }
 
   return normalizedEntity;
 };
 
-/***********************  BADGE TYPE  ************************************************/
+/** *********************  BADGE TYPE  *********************************************** */
 
 export const getBadgeTypes =
   (order = "name", orderDir = 1) =>
@@ -591,7 +602,7 @@ export const getBadgeTypes =
 
     const params = {
       page: 1,
-      per_page: 100,
+      per_page: HUNDRED_PER_PAGE,
       access_token: accessToken,
       expand: "access_levels,allowed_view_types"
     };
@@ -599,7 +610,7 @@ export const getBadgeTypes =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -862,7 +873,7 @@ const normalizeBadgeType = (entity) => {
   return normalizedEntity;
 };
 
-/***********************  BADGE FEATURE  ************************************************/
+/** *********************  BADGE FEATURE  *********************************************** */
 
 export const queryBadgeFeatures = _.debounce(
   async (summitId, input, callback) => {
@@ -880,7 +891,7 @@ export const queryBadgeFeatures = _.debounce(
       })
       .catch(fetchErrorHandler);
   },
-  500
+  DEBOUNCE_WAIT
 );
 
 export const getBadgeFeatures =
@@ -894,14 +905,15 @@ export const getBadgeFeatures =
 
     const params = {
       page: 1,
-      per_page: 100,
+      fields: "name,id,description",
+      per_page: HUNDRED_PER_PAGE,
       access_token: accessToken
     };
 
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -1072,7 +1084,7 @@ const normalizeBadgeFeature = (entity) => {
   return normalizedEntity;
 };
 
-/***********************  ACCESS LEVEL  ************************************************/
+/** *********************  ACCESS LEVEL  *********************************************** */
 
 export const getAccessLevels =
   (order = "name", orderDir = 1) =>
@@ -1085,14 +1097,16 @@ export const getAccessLevels =
 
     const params = {
       page: 1,
-      per_page: 100,
-      access_token: accessToken
+      per_page: HUNDRED_PER_PAGE,
+      access_token: accessToken,
+      fields: "id,name,description,is_default",
+      relations: "none"
     };
 
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(

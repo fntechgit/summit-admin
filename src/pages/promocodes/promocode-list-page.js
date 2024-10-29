@@ -31,13 +31,13 @@ import {
   exportPromocodes,
   importPromoCodesCSV
 } from "../../actions/promocode-actions";
-import { trim } from "../../utils/methods";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import ImportPromocodesBtn from "../../components/import-promocodes";
 import {
-  TRIM_TEXT_LENGTH_40,
-  TRIM_TEXT_LENGTH_50
+  TRIM_TEXT_LENGTH_50,
+  TRIM_TEXT_LENGTH_40
 } from "../../utils/constants";
+import { trim } from "../../utils/methods";
 
 const fieldNames = [
   { columnKey: "class_name", value: "type" },
@@ -56,6 +56,7 @@ const fieldNames = [
   },
   { columnKey: "tags", value: "tags" },
   { columnKey: "owner_email", value: "owner_email" },
+  { columnKey: "owner", value: "owner" },
   { columnKey: "email_sent", value: "emailed" },
   { columnKey: "creator", value: "creator" }
 ];
@@ -244,7 +245,7 @@ class PromocodeListPage extends React.Component {
     );
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage, filters } = this.props;
     key = key === "name" ? "last_name" : key;
     const { selectedColumns } = this.state;
@@ -273,7 +274,7 @@ class PromocodeListPage extends React.Component {
     );
   }
 
-  handleNewPromocode(ev) {
+  handleNewPromocode() {
     const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/promocodes/new`);
   }
@@ -342,6 +343,10 @@ class PromocodeListPage extends React.Component {
         label: T.translate("promocode_list.description")
       },
       {
+        value: "owner",
+        label: T.translate("promocode_list.owner")
+      },
+      {
         value: "owner_email",
         label: T.translate("promocode_list.owner_email")
       },
@@ -384,6 +389,16 @@ class PromocodeListPage extends React.Component {
     const promocode_classes_ddl = allClasses.map((c) => ({
       label: c.class_name,
       value: c.class_name
+    }));
+
+    const promocodesFormatted = promocodes.map((p) => ({
+      ...p,
+      owner_email: (
+        <abbr title={p.owner_email}>
+          {trim(p?.owner_email, TRIM_TEXT_LENGTH_40)}
+        </abbr>
+      ),
+      owner: <abbr title={p.owner}>{trim(p?.owner, TRIM_TEXT_LENGTH_40)}</abbr>
     }));
 
     return (
@@ -539,14 +554,7 @@ class PromocodeListPage extends React.Component {
           <div>
             <Table
               options={table_options}
-              data={promocodes.map((p) => ({
-                ...p,
-                owner_email: (
-                  <abbr title={p.owner_email}>
-                    {trim(p?.owner_email, TRIM_TEXT_LENGTH_40)}
-                  </abbr>
-                )
-              }))}
+              data={promocodesFormatted}
               columns={columns}
               onSort={this.handleSort}
             />

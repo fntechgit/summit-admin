@@ -106,6 +106,56 @@ const parseFilters = (filters, term = null) => {
   return checkOrFilter(filters, filter);
 };
 
+const normalizeEntity = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  if (entity.class_name?.indexOf("MEMBER_") === 0) {
+    if (entity.owner != null) {
+      normalizedEntity.first_name = entity.owner.first_name;
+      normalizedEntity.last_name = entity.owner.last_name;
+      normalizedEntity.email = entity.owner.email;
+    }
+  } else if (entity.class_name?.indexOf("SPEAKER_") === 0) {
+    if (entity.speaker != null) normalizedEntity.speaker_id = entity.speaker.id;
+  } else if (entity.class_name?.indexOf("SPEAKERS_") === 0) {
+    if (entity.speakers != null && entity.speakers.speakers_list.length > 0) {
+      normalizedEntity.speaker_ids = entity.speakers.speakers_list.map(
+        (s) => s.id
+      );
+    }
+    delete normalizedEntity.speakers;
+  } else if (entity.class_name?.indexOf("SPONSOR_") === 0) {
+    if (entity.sponsor != null) normalizedEntity.sponsor_id = entity.sponsor.id;
+    if (entity.owner != null) {
+      normalizedEntity.first_name = entity.owner.first_name;
+      normalizedEntity.last_name = entity.owner.last_name;
+      normalizedEntity.email = entity.owner.email;
+    }
+  }
+
+  // clear dates
+
+  if (entity.valid_since_date === 0) {
+    normalizedEntity.valid_since_date = "";
+  }
+
+  if (entity.valid_until_date === 0) {
+    normalizedEntity.valid_until_date = "";
+  }
+
+  if (entity.tags.length > 0) {
+    normalizedEntity.tags = entity.tags.map((e) => e.tag);
+  }
+
+  delete normalizedEntity.owner;
+  delete normalizedEntity.owner_id;
+  delete normalizedEntity.speaker;
+  delete normalizedEntity.sponsor;
+  delete normalizedEntity.apply_to_all_tix;
+
+  return normalizedEntity;
+};
+
 export const getPromocodeMeta = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -144,9 +194,12 @@ export const getPromocodes =
 
     const filter = parseFilters(filters, term);
 
-    const expand = "speaker,owner,sponsor,creator,tags,owners,owners.speaker";
-    const relations = "owners.speaker.none";
-    const fields = "owners.speaker.email";
+    const expand =
+      "speaker,owner,sponsor,sponsor.company,creator,tags,owners,owners.speaker";
+    const relations =
+      "creator,sponsor,tags,speaker,owner,owners,owners.speaker.none,creator.none,sponsor.company,sponsor.company.none";
+    const fields =
+      "id,code,redeemed,class_name,description,email_sent,first_name,last_name,email,contact_email,owners.speaker.email,owners.speaker.first_name,owners.speaker.last_name,creator.first_name,creator.last_name,sponsor.first_name,sponsor.last_name,sponsor.company.name,tags.tag,owner.first_name,owner.last_name,owner.email,speaker.first_name,speaker.last_name,speaker.email";
 
     const params = {
       expand,
@@ -201,7 +254,7 @@ export const getPromocode = (promocodeId) => async (dispatch, getState) => {
   });
 };
 
-export const resetPromocodeForm = () => (dispatch, getState) => {
+export const resetPromocodeForm = () => (dispatch) => {
   dispatch(createAction(RESET_PROMOCODE_FORM)({}));
 };
 
@@ -229,13 +282,13 @@ export const savePromocode =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(T.translate("edit_promocode.promocode_saved"))
         );
       });
     }
-    const success_message = {
+    const successMessage = {
       title: T.translate("general.done"),
       html: T.translate("edit_promocode.promocode_created"),
       type: "success"
@@ -250,7 +303,7 @@ export const savePromocode =
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(
-        showMessage(success_message, () => {
+        showMessage(successMessage, () => {
           history.push(
             `/app/summits/${currentSummit.id}${
               isSponsor ? "/sponsors" : ""
@@ -296,7 +349,7 @@ export const sendEmail = (promocodeId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${promocodeId}/mail`,
     null,
     authErrorHandler
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(stopLoading());
     dispatch(
       showMessage(
@@ -343,56 +396,6 @@ export const exportPromocodes =
       )
     );
   };
-
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  if (entity.class_name?.indexOf("MEMBER_") === 0) {
-    if (entity.owner != null) {
-      normalizedEntity.first_name = entity.owner.first_name;
-      normalizedEntity.last_name = entity.owner.last_name;
-      normalizedEntity.email = entity.owner.email;
-    }
-  } else if (entity.class_name?.indexOf("SPEAKER_") === 0) {
-    if (entity.speaker != null) normalizedEntity.speaker_id = entity.speaker.id;
-  } else if (entity.class_name?.indexOf("SPEAKERS_") === 0) {
-    if (entity.speakers != null && entity.speakers.speakers_list.length > 0) {
-      normalizedEntity.speaker_ids = entity.speakers.speakers_list.map(
-        (s) => s.id
-      );
-    }
-    delete normalizedEntity.speakers;
-  } else if (entity.class_name?.indexOf("SPONSOR_") === 0) {
-    if (entity.sponsor != null) normalizedEntity.sponsor_id = entity.sponsor.id;
-    if (entity.owner != null) {
-      normalizedEntity.first_name = entity.owner.first_name;
-      normalizedEntity.last_name = entity.owner.last_name;
-      normalizedEntity.email = entity.owner.email;
-    }
-  }
-
-  // clear dates
-
-  if (entity.valid_since_date === 0) {
-    normalizedEntity.valid_since_date = "";
-  }
-
-  if (entity.valid_until_date === 0) {
-    normalizedEntity.valid_until_date = "";
-  }
-
-  if (entity.tags.length > 0) {
-    normalizedEntity.tags = entity.tags.map((e) => e.tag);
-  }
-
-  delete normalizedEntity.owner;
-  delete normalizedEntity.owner_id;
-  delete normalizedEntity.speaker;
-  delete normalizedEntity.sponsor;
-  delete normalizedEntity.apply_to_all_tix;
-
-  return normalizedEntity;
-};
 
 /** **********************  BADGE FEATURES ********************************* */
 
@@ -460,7 +463,7 @@ export const addDiscountTicket = (ticket) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/promo-codes/${ticket.owner_id}/ticket-types/${ticket.ticket_type_id}`,
     ticket,
     authErrorHandler
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
 };

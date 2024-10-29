@@ -35,6 +35,7 @@ import history from "../../history";
 import TextAreaInputWithCounter from "../inputs/text-area-input-with-counter";
 import TextInputWithCounter from "../inputs/text-input-with-counter";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import UrlInput from "../inputs/url-input";
 
 class SummitForm extends React.Component {
   constructor(props) {
@@ -543,7 +544,6 @@ class SummitForm extends React.Component {
               onChange={this.handleChange}
             />
           </div>
-
           <div className="col-md-4">
             <label htmlFor="dates_label">
               {" "}
@@ -1526,6 +1526,13 @@ class SummitForm extends React.Component {
           handleClick={(ev) => this.toggleSection("virtual_event", ev)}
         >
           <div className="row form-group">
+            <div className="col-md-12">
+              <span className="note">
+                {T.translate("edit_summit.virtual_event_note")}
+              </span>
+            </div>
+          </div>
+          <div className="row form-group">
             <div className="col-md-4">
               <label htmlFor="marketing_site_url">
                 {" "}
@@ -1537,7 +1544,7 @@ class SummitForm extends React.Component {
                 aria-hidden="true"
                 title={T.translate("edit_summit.url_registered_idp")}
               />
-              <Input
+              <UrlInput
                 className="form-control"
                 error={this.hasErrors("marketing_site_url")}
                 id="marketing_site_url"
@@ -1583,7 +1590,7 @@ class SummitForm extends React.Component {
                 aria-hidden="true"
                 title={T.translate("edit_summit.url_registered_idp")}
               />
-              <Input
+              <UrlInput
                 className="form-control"
                 error={this.hasErrors("virtual_site_url")}
                 id="virtual_site_url"

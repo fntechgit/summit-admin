@@ -214,7 +214,7 @@ const DEFAULT_PRINT_APP_MARKETING_SETTINGS = {
 const DEFAULT_STATE = {
   currentSummit: DEFAULT_ENTITY,
   errors: {},
-  loading: false,
+  loading: true,
   reg_lite_marketing_settings: DEFAULT_REG_LITE_MARKETING_SETTINGS,
   print_app_marketing_settings: DEFAULT_PRINT_APP_MARKETING_SETTINGS
 };
@@ -235,7 +235,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       const { id } = payload;
       let { currentSummit } = state;
       if (id !== currentSummit.id) {
-        currentSummit = { ...DEFAULT_ENTITY, id: payload.id };
+        currentSummit = { ...DEFAULT_ENTITY, id: payload.id, loading: true };
       }
       return { ...DEFAULT_STATE, loading: true, currentSummit };
     }

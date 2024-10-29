@@ -9,32 +9,31 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { Exclusive } from "openstack-uicore-foundation/lib/components";
+import styles from "./menu.module.less";
 
-export default class MenuItem extends React.Component {
-  render() {
-    let { name, iconClass, onClick } = this.props;
+const MenuItem = ({ name, iconClass, onClick, exclusive }) => {
+  const itemHtml = [
+    <a
+      id={`${name}-menu`}
+      key={`${name}-menu`}
+      className={styles.menuItem}
+      onClick={onClick}
+    >
+      <i className={`${iconClass} fa`} />
+      <span>{T.translate(`menu.${name}`)}</span>
+    </a>
+  ];
 
-    const itemHtml = [
-      <a
-        id={name + "-menu"}
-        key={name + "-menu"}
-        className="menu-item"
-        onClick={onClick}
-      >
-        <i className={iconClass + " fa"} />
-        {T.translate("menu." + name)}
-      </a>
-    ];
-
-    if (this.props.hasOwnProperty("exclusive")) {
-      return <Exclusive name={this.props.exclusive}>{itemHtml}</Exclusive>;
-    } else {
-      return itemHtml;
-    }
+  if (exclusive) {
+    return <Exclusive name={exclusive}>{itemHtml}</Exclusive>;
   }
-}
+
+  return itemHtml;
+};
+
+export default MenuItem;

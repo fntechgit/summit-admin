@@ -509,13 +509,14 @@ export const normalizeBulkEvents = (entity) => {
       streaming_url: e.streaming_url,
       streaming_type: e.streaming_type,
       meeting_url: e.meeting_url,
-      etherpad_link: e.etherpad_link
+      etherpad_link: e.etherpad_link,
+      allow_feedback: e.allow_feedback,
+      to_record: e.to_record
     };
     Object.keys(normalizedEvent).forEach((property) => {
       if (
         normalizedEvent[property] === undefined ||
-        normalizedEvent[property] === null ||
-        normalizedEvent[property] === ""
+        normalizedEvent[property] === null
       ) {
         delete normalizedEvent[property];
       }
@@ -551,7 +552,7 @@ export const getEvents =
       relations:
         "none,speakers.none,selection_plan.none,track.none,type.none,created_by.none,location.none,media_uploads.media_upload_type.none",
       fields:
-        "id,created,last_edited,title,start_date,end_date,summit_id,duration,class_name,is_published,level,published_date,meeting_url,status,progress,selection_status,streaming_url,streaming_type,etherpad_link,location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,selection_plan.id,media_uploads.id,media_uploads.created,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id,type.id,type.name,sponsors.id,sponsors.name",
+        "id,created,last_edited,title,start_date,end_date,summit_id,duration,class_name,is_published,level,published_date,meeting_url,status,progress,selection_status,streaming_url,streaming_type,etherpad_link,location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,selection_plan.id,media_uploads.id,media_uploads.created,media_uploads.class_name,media_uploads.display_on_site,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id,type.id,type.name,sponsors.id,sponsors.name,allow_feedback,to_record",
       page,
       per_page: perPage,
       access_token: accessToken
@@ -598,7 +599,7 @@ export const bulkUpdateEvents =
       )
     );
 
-    putRequest(
+    return putRequest(
       null,
       createAction(UPDATED_REMOTE_EVENTS)({}),
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/events/?access_token=${accessToken}`,
@@ -618,7 +619,7 @@ export const bulkUpdateEvents =
         const {
           currentEventListState: {
             term,
-            page,
+            currentPage,
             perPage,
             order,
             orderDir,
@@ -627,7 +628,15 @@ export const bulkUpdateEvents =
           }
         } = getState();
         dispatch(
-          getEvents(term, page, perPage, order, orderDir, filters, extraColumns)
+          getEvents(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            filters,
+            extraColumns
+          )
         );
       })
       .catch(() => {
