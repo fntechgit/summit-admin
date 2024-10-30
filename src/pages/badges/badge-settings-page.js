@@ -18,6 +18,7 @@ import BadgeSettingsForm from "../../components/forms/badge-settings-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getBadgeSettings,
+  removeBadgeFeatureImage,
   saveBadgeSettings
 } from "../../actions/badge-actions";
 import { deleteSetting } from "../../actions/marketing-actions";
@@ -43,6 +44,7 @@ class BadgeSettingsPage extends React.Component {
             errors={errors}
             onSubmit={this.props.saveBadgeSettings}
             onDeleteImage={this.props.deleteSetting}
+            onDeleteBadgeTypeImage={this.props.removeBadgeFeatureImage}
           />
         )}
       </div>
@@ -64,5 +66,6 @@ export default connect(mapStateToProps, {
   getSummitById,
   deleteSetting,
   getBadgeSettings,
-  saveBadgeSettings
+  saveBadgeSettings,
+  removeBadgeFeatureImage
 })(BadgeSettingsPage);

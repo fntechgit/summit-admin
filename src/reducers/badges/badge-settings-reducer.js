@@ -64,7 +64,6 @@ const DEFAULT_BADGE_SETTINGS = {
   BADGE_TEMPLATE_COMPANY_FONT_SIZE_MAX: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_COMPANY_TEXT_FIT_MODE: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_COMPANY_FONT_FAMILY: { id: 0, value: "", type: "TEXT" },
-  BADGE_TEMPLATE_FONT: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_FONT_FAMILY: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_QR_DISPLAY: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_QR_SIZE: { id: 0, value: "", type: "TEXT" },
