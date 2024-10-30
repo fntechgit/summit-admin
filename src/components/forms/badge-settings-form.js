@@ -927,7 +927,7 @@ class BadgeSettingsForm extends React.Component {
               <br />
               <Switch
                 id="BADGE_TEMPLATE_QR_DISPLAY"
-                checked={entity?.BADGE_TEMPLATE_QR_DISPLAY?.value || false}
+                checked={entity?.BADGE_TEMPLATE_QR_DISPLAY?.value || true}
                 onChange={(val) => {
                   this.handleOnSwitchChange("BADGE_TEMPLATE_QR_DISPLAY", val);
                 }}
@@ -1170,7 +1170,7 @@ class BadgeSettingsForm extends React.Component {
                       <Switch
                         id={badgeTemplateFeatureDisplay}
                         checked={
-                          entity?.[badgeTemplateFeatureDisplay]?.value || false
+                          entity?.[badgeTemplateFeatureDisplay]?.value || true
                         }
                         onChange={(val) => {
                           this.handleOnSwitchChange(
