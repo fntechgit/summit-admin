@@ -234,7 +234,7 @@ class SmartSpeakerReport extends React.Component {
 
     if (empty_photo != null) {
       delete newFilters.empty_photo;
-      if (empty_bio) {
+      if (empty_photo) {
         newFilters.hasPhoto = false;
       } else {
         delete newFilters.hasPhoto;
@@ -307,7 +307,7 @@ class SmartSpeakerReport extends React.Component {
     return sortKey;
   }
 
-  preProcessData(data, extraData, forExport = false) {
+  preProcessData(data) {
     const { showFields } = this.state;
 
     const transformedData = data.map((entry) => ({
