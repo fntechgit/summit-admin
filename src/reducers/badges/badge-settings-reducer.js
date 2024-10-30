@@ -29,7 +29,7 @@ const DEFAULT_BADGE_SETTINGS = {
   BADGE_TEMPLATE_BACKGROUND_COLOR: { id: 0, value: "", type: "HEX_COLOR" },
   BADGE_TEMPLATE_BACK_BACKGROUND_IMG: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_MARGIN: { id: 0, value: "", type: "TEXT" },
-  BADGE_TEMPLATE_FONT_FACE_INLINE_DEFINITION: {
+  BADGE_TEMPLATE_FONT_FACES_INLINE_DEFINITION: {
     id: 0,
     value: "",
     type: "TEXT"
@@ -65,6 +65,7 @@ const DEFAULT_BADGE_SETTINGS = {
   BADGE_TEMPLATE_COMPANY_TEXT_FIT_MODE: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_COMPANY_FONT_FAMILY: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_FONT: { id: 0, value: "", type: "TEXT" },
+  BADGE_TEMPLATE_FONT_FAMILY: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_QR_DISPLAY: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_QR_SIZE: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_QR_TOP: { id: 0, value: "", type: "TEXT" },
@@ -72,8 +73,6 @@ const DEFAULT_BADGE_SETTINGS = {
   BADGE_TEMPLATE_QR_COLOR: { id: 0, value: "", type: "HEX_COLOR" },
   BADGE_TEMPLATE_TEXT_FIELDS_MARGIN: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_TEXT_FIELDS_COLOR: { id: 0, value: "", type: "HEX_COLOR" },
-  BADGE_TEMPLATE_FEATURES_TOP: { id: 0, value: "", type: "TEXT" },
-  BADGE_TEMPLATE_FEATURES_LEFT: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_FEATURES_MARGIN: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_FEATURES_FONT_FAMILY: { id: 0, value: "", type: "TEXT" },
   BADGE_TEMPLATE_FEATURES_TEXT_COLOR: { id: 0, value: "", type: "HEX_COLOR" },
