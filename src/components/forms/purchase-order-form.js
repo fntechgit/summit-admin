@@ -21,6 +21,7 @@ import {
   Panel,
   PromocodeInput
 } from "openstack-uicore-foundation/lib/components";
+import { Pagination } from "react-bootstrap";
 import OwnerInput from "../inputs/owner-input";
 import {
   hasErrors,
@@ -139,7 +140,8 @@ class PurchaseOrderForm extends React.Component {
 
   render() {
     const { entity, errors, showSection } = this.state;
-    const { currentSummit } = this.props;
+    const { currentSummit, ticketsCurrentPage, ticketsTotal, ticketsLastPage } =
+      this.props;
 
     const ticket_columns = [
       {
@@ -157,6 +159,10 @@ class PurchaseOrderForm extends React.Component {
       {
         columnKey: "email_link",
         value: T.translate("edit_purchase_order.owner_email")
+      },
+      {
+        columnKey: "promo_code",
+        value: T.translate("edit_purchase_order.promo_code")
       },
       {
         columnKey: "final_amount_formatted",
@@ -471,78 +477,100 @@ class PurchaseOrderForm extends React.Component {
         </Panel>
         {entity.id !== 0 && (
           <>
-            <div>
-              <Table
-                options={ticket_options}
-                data={entity?.tickets}
-                columns={ticket_columns}
-              />
-              <div className="row form-group add-tickets-wrapper">
-                <div className="col-md-4">
-                  <label>
-                    {" "}
-                    {T.translate("edit_purchase_order.ticket_type")}
-                  </label>
-                  <Dropdown
-                    clearable
-                    options={ticket_type_ddl}
-                    value={this.state.addTicketTypeId}
-                    onChange={(ev) => {
-                      this.setState({
-                        ...this.state,
-                        addTicketTypeId: parseInt(ev.target.value)
-                      });
-                    }}
-                  />
-                </div>
-                <div className="col-md-4">
-                  <label>
-                    {" "}
-                    {T.translate("edit_purchase_order.promo_code")}
-                  </label>
-                  <PromocodeInput
-                    id="promo_code_edit"
-                    value={this.state.addPromoCode}
-                    summitId={currentSummit.id}
-                    onChange={(ev) => {
-                      this.setState({
-                        ...this.state,
-                        addPromoCode: ev.target.value
-                      });
-                    }}
-                    isClearable
-                    error={hasErrors("promo_code_edit", errors)}
-                  />
-                </div>
-                <div className="col-md-2">
-                  <label>
-                    {" "}
-                    {T.translate("edit_purchase_order.ticket_qty")}
-                  </label>
-                  <Input
-                    onChange={(ev) => {
-                      this.setState({
-                        ...this.state,
-                        addTicketQty: parseInt(ev.target.value)
-                      });
-                    }}
-                    value={this.state.addTicketQty}
-                    type="number"
-                    className="form-control"
-                    min="1"
-                    max="100"
-                  />
-                </div>
-                <div className="col-md-2">
-                  <input
-                    type="button"
-                    onClick={this.handleAddTickets}
-                    className="btn btn-primary pull-right"
-                    value="Add Tickets"
-                  />
+            <Panel
+              show={showSection === "tickets"}
+              title={`${T.translate(
+                "edit_purchase_order.tickets"
+              )} (${ticketsTotal})`}
+              handleClick={this.toggleSection.bind(this, "tickets")}
+            >
+              <div>
+                <Table
+                  options={ticket_options}
+                  data={entity?.tickets}
+                  columns={ticket_columns}
+                />
+                <Pagination
+                  bsSize="medium"
+                  prev
+                  next
+                  first
+                  last
+                  ellipsis
+                  boundaryLinks
+                  maxButtons={10}
+                  items={ticketsLastPage}
+                  activePage={ticketsCurrentPage}
+                  onSelect={(page) => this.props.getTickets(entity.id, page)}
+                />
+                <hr />
+                <div className="row form-group add-tickets-wrapper">
+                  <div className="col-md-4">
+                    <label>
+                      {" "}
+                      {T.translate("edit_purchase_order.ticket_type")}
+                    </label>
+                    <Dropdown
+                      clearable
+                      options={ticket_type_ddl}
+                      value={this.state.addTicketTypeId}
+                      onChange={(ev) => {
+                        this.setState({
+                          ...this.state,
+                          addTicketTypeId: parseInt(ev.target.value)
+                        });
+                      }}
+                    />
+                  </div>
+                  <div className="col-md-4">
+                    <label>
+                      {" "}
+                      {T.translate("edit_purchase_order.promo_code")}
+                    </label>
+                    <PromocodeInput
+                      id="promo_code_edit"
+                      value={this.state.addPromoCode}
+                      summitId={currentSummit.id}
+                      onChange={(ev) => {
+                        this.setState({
+                          ...this.state,
+                          addPromoCode: ev.target.value
+                        });
+                      }}
+                      isClearable
+                      error={hasErrors("promo_code_edit", errors)}
+                    />
+                  </div>
+                  <div className="col-md-2">
+                    <label>
+                      {" "}
+                      {T.translate("edit_purchase_order.ticket_qty")}
+                    </label>
+                    <Input
+                      onChange={(ev) => {
+                        this.setState({
+                          ...this.state,
+                          addTicketQty: parseInt(ev.target.value)
+                        });
+                      }}
+                      value={this.state.addTicketQty}
+                      type="number"
+                      className="form-control"
+                      min="1"
+                      max="100"
+                    />
+                  </div>
+                  <div className="col-md-2">
+                    <input
+                      type="button"
+                      onClick={this.handleAddTickets}
+                      className="btn btn-primary pull-right"
+                      value="Add Tickets"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            </Panel>
             <Panel
               show={showSection === "purchase_history"}
               title={T.translate("edit_purchase_order.purchase_history")}

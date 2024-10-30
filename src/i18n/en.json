@@ -2077,6 +2077,7 @@
     "purchase_order": "Purchase Order",
     "number": "Order Number",
     "ticket_number": "Ticket Number",
+    "tickets": "Tickets",
     "ticket_type": "Ticket Type",
     "ticket_qty": "Number of Tickets",
     "status": "Status",

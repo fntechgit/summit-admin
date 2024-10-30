@@ -31,8 +31,7 @@ import history from "../history";
 import {
   checkOrFilter,
   getAccessTokenSafely,
-  parseDateRangeFilter,
-  range
+  parseDateRangeFilter
 } from "../utils/methods";
 
 import {
@@ -572,82 +571,40 @@ export const getPurchaseOrder = (orderId) => async (dispatch, getState) => {
     authErrorHandler
   )(params)(dispatch).then(() => {
     // load tickets on separate request bc performance issues ( there are orders with over 100 tickets )
-    const orderTicketsPerPage = 10;
-    const pageTwo = 2;
-    const ticketsParams = {
-      page: 1,
-      per_page: orderTicketsPerPage,
+    getOrderTickets(orderId, 1)(dispatch, getState);
+  });
+};
+
+export const getOrderTickets =
+  (orderId, page = DEFAULT_CURRENT_PAGE) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      page,
+      per_page: DEFAULT_PER_PAGE,
       access_token: accessToken,
-      expand: "owner,owner.member,ticket_type",
+      expand: "owner,owner.member,ticket_type,promo_code",
       relations:
-        "applied_taxes,owner.member.none,ticket_type.none,owner.member",
+        "applied_taxes,owner.member.none,ticket_type.none,owner.member,promo_code.none",
       fields:
-        "ticket_type.name,owner.id,owner.first_name,owner.last_name,owner.email,owner.member.id,owner.member.email,owner.member.first_name,owner.member.last_name",
+        "ticket_type.name,owner.id,owner.first_name,owner.last_name,owner.email,owner.member.id,owner.member.email,owner.member.first_name,owner.member.last_name,promo_code.code",
       "filter[]": `order_id==${orderId}`
     };
 
-    const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets`;
-
     return getRequest(
-      createAction("DUMMY"),
-      createAction("DUMMY"),
-      endpoint,
+      null,
+      createAction(RECEIVE_PURCHASE_ORDER_TICKETS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/tickets`,
       authErrorHandler
-    )(ticketsParams)(dispatch)
-      .then((payload) => {
-        const { response } = payload;
-        const { total, per_page, data: initial_data } = response;
-        // then do a promise all to get remaining ones
-        const totalPages = Math.ceil(total / per_page);
-        if (totalPages === 1) {
-          // we have only one page ...
-          dispatch(createAction(RECEIVE_PURCHASE_ORDER_TICKETS)(initial_data));
-          dispatch(stopLoading());
-          return initial_data;
-        }
-        // only continue if totalPages > 1
-        const ticketsParams = range(pageTwo, totalPages, 1).map((i) => ({
-          page: i,
-          per_page: orderTicketsPerPage,
-          access_token: accessToken,
-          expand: "owner,owner.member,ticket_type",
-          relations:
-            "applied_taxes,owner.member.none,ticket_type.none,owner.member",
-          fields:
-            "ticket_type.name,owner.id,owner.first_name,owner.last_name,owner.email,owner.member.id,owner.member.email,owner.member.first_name,owner.member.last_name",
-          "filter[]": `order_id==${orderId}`
-        }));
-
-        // get remaining ones
-        return Promise.all(
-          ticketsParams.map((p) =>
-            getRequest(
-              createAction("DUMMY"),
-              createAction("DUMMY"),
-              endpoint,
-              authErrorHandler
-            )(p)(dispatch)
-          )
-        )
-          .then((responses) => {
-            let data = [];
-            responses?.forEach((e) => data.push(...e.response.data));
-            data = [...initial_data, ...data];
-            dispatch(createAction(RECEIVE_PURCHASE_ORDER_TICKETS)(data));
-            dispatch(stopLoading());
-            return data;
-          })
-          .catch(() => {
-            dispatch(stopLoading());
-            return Promise.reject(e);
-          });
-      })
-      .catch((e) => {
-        dispatch(stopLoading());
-        return Promise.reject(e);
-      });
-  });
-};
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 export const resetPurchaseOrderForm = () => (dispatch) => {
   dispatch(createAction(RESET_PURCHASE_ORDER_FORM)({}));
