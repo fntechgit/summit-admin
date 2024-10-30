@@ -323,6 +323,7 @@ class SummitSpeakersListPage extends React.Component {
       orderDir,
       perPage,
       selectionPlanFilter,
+      trackGroupFilter,
       activityTypeFilter,
       selectionStatusFilter,
       mediaUploadTypeFilter
