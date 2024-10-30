@@ -264,11 +264,11 @@ class BadgeSettingsForm extends React.Component {
               {T.translate("badge_settings.badge_template_font_family")}
             </label>
             <br />
-            <HexColorInput
-              onChange={this.handleChange}
+            <Input
+              className="form-control"
               id="BADGE_TEMPLATE_FONT_FAMILY"
               value={entity?.BADGE_TEMPLATE_FONT_FAMILY?.value}
-              className="form-control"
+              onChange={this.handleChange}
             />
           </div>
           <div className="col-md-6">
