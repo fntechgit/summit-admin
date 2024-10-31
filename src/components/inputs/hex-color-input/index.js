@@ -6,8 +6,6 @@ const HexColorInput = ({ onChange, id, className, value }) => {
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [hexColor, setHexColor] = useState(value);
 
-  console.log("CLOR VALUE", value);
-
   const handlePopupClose = () => {
     const newEvent = {
       target: {
