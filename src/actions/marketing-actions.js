@@ -19,6 +19,7 @@ import {
   startLoading,
   authErrorHandler,
   postFile,
+  putFile,
   putRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from "sweetalert2";
@@ -221,7 +222,7 @@ export const saveMarketingSetting =
 
     if (entity.id) {
       if (file)
-        return putRequest(
+        return putFile(
           createAction(UPDATE_SETTING),
           createAction(SETTING_UPDATED),
           `${window.MARKETING_API_BASE_URL}/api/v1/config-values/${entity.id}`,
