@@ -81,9 +81,14 @@ class BadgeSettingsForm extends React.Component {
 
     if (!newEntity[id]?.type) {
       const newEntityType = id.includes("_COLOR") ? "HEX_COLOR" : "TEXT";
-      newEntity[id] = { ...newEntity[id], value, type: newEntityType };
+      newEntity[id] = {
+        ...newEntity[id],
+        value,
+        type: newEntityType,
+        updated: true
+      };
     } else {
-      newEntity[id] = { ...newEntity[id], value };
+      newEntity[id] = { ...newEntity[id], value, updated: true };
     }
 
     this.setState({ entity: newEntity, errors: newErrors });
@@ -96,6 +101,7 @@ class BadgeSettingsForm extends React.Component {
 
     newEntity[id].file = file;
     newEntity[id].file_preview = file.preview;
+    newEntity[id].updated = true;
 
     this.setState({ entity: newEntity });
   }
@@ -139,6 +145,7 @@ class BadgeSettingsForm extends React.Component {
     }
 
     newEntity[setting].value = value ? "SHOW" : "HIDE";
+    newEntity[setting].updated = true;
 
     this.setState((prevState) => ({
       ...prevState,
@@ -153,11 +160,7 @@ class BadgeSettingsForm extends React.Component {
     // save only the settings with the following conditions
     const settingsToSave = Object.fromEntries(
       Object.entries(this.state.entity).filter(
-        ([, values]) =>
-          (values.type === "TEXT" && (values.value !== "" || values.id)) ||
-          (values.type === "HEX_COLOR" && values.value !== "") ||
-          (values.type === "FILE" && values.file) ||
-          !values.type === "BOOL" // ignore toggle values with initial true value
+        ([, values]) => values.updated === true
       )
     );
 

@@ -207,6 +207,7 @@ export const saveMarketingSetting =
   (entity, file = null) =>
   async (dispatch, getState) => {
     if (entity.type === "FILE" && !file) return Promise.resolve();
+    // TODO: review to save hex color settings with empty values
     if (entity.type === "HEX_COLOR" && !entity.value) return Promise.resolve();
 
     const { currentSummitState } = getState();
