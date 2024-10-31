@@ -40,7 +40,6 @@ class BadgeSettingsForm extends React.Component {
     this.handleUploadFile = this.handleUploadFile.bind(this);
     this.handleRemoveFile = this.handleRemoveFile.bind(this);
     this.handleRemoveBadgeTypeFile = this.handleRemoveBadgeTypeFile.bind(this);
-    this.handleInitialSwitchValue = this.handleInitialSwitchValue.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -67,21 +66,6 @@ class BadgeSettingsForm extends React.Component {
     ev.preventDefault();
 
     this.setState({ showSection: newShowSection });
-  }
-
-  handleInitialSwitchValue(setting) {
-    const { entity, errors } = this.state;
-    const newEntity = { ...entity };
-    // display all switch components with default true value
-    if (!newEntity.hasOwnProperty(setting)) {
-      newEntity[setting] = { value: "SHOW", type: "BOOL" };
-
-      this.setState((prevState) => ({
-        ...prevState,
-        entity: newEntity,
-        errors
-      }));
-    }
   }
 
   handleChange(ev) {
@@ -155,7 +139,6 @@ class BadgeSettingsForm extends React.Component {
     }
 
     newEntity[setting].value = value ? "SHOW" : "HIDE";
-    newEntity[setting].type = "TEXT";
 
     this.setState((prevState) => ({
       ...prevState,
@@ -1120,7 +1103,6 @@ class BadgeSettingsForm extends React.Component {
             const badgeTemplateFeatureDisplay = `BADGE_TEMPLATE_FEATURE_${bf.id}_DISPLAY`;
             const badgeTemplateFeatureImageWidth = `BADGE_TEMPLATE_FEATURE_${bf.id}_IMAGE_WIDTH`;
             const badgeTemplateFeatureImageHeight = `BADGE_TEMPLATE_FEATURE_${bf.id}_IMAGE_HEIGHT`;
-            this.handleInitialSwitchValue(badgeTemplateFeatureDisplay);
             return (
               <Panel
                 key={bf.name}
@@ -1201,10 +1183,8 @@ class BadgeSettingsForm extends React.Component {
                       <Switch
                         id={badgeTemplateFeatureDisplay}
                         checked={
-                          entity?.[badgeTemplateFeatureDisplay]?.value ===
-                          "SHOW"
-                            ? true
-                            : false || false
+                          entity?.[badgeTemplateFeatureDisplay]?.value !==
+                          "HIDE"
                         }
                         onChange={(val) => {
                           this.handleOnSwitchChange(
@@ -1333,11 +1313,7 @@ class BadgeSettingsForm extends React.Component {
               <br />
               <Switch
                 id="BADGE_TEMPLATE_QR_DISPLAY"
-                checked={
-                  entity?.BADGE_TEMPLATE_QR_DISPLAY?.value === "SHOW"
-                    ? true
-                    : false || false
-                }
+                checked={entity?.BADGE_TEMPLATE_QR_DISPLAY?.value !== "HIDE"}
                 onChange={(val) => {
                   this.handleOnSwitchChange("BADGE_TEMPLATE_QR_DISPLAY", val);
                 }}
