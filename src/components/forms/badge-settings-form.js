@@ -40,7 +40,6 @@ class BadgeSettingsForm extends React.Component {
     this.handleUploadFile = this.handleUploadFile.bind(this);
     this.handleRemoveFile = this.handleRemoveFile.bind(this);
     this.handleRemoveBadgeTypeFile = this.handleRemoveBadgeTypeFile.bind(this);
-    this.handleInitialSwitchValue = this.handleInitialSwitchValue.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -67,21 +66,6 @@ class BadgeSettingsForm extends React.Component {
     ev.preventDefault();
 
     this.setState({ showSection: newShowSection });
-  }
-
-  handleInitialSwitchValue(setting) {
-    const { entity, errors } = this.state;
-    const newEntity = { ...entity };
-    // display all switch components with default true value
-    if (!newEntity.hasOwnProperty(setting)) {
-      newEntity[setting] = { value: "SHOW", type: "BOOL" };
-
-      this.setState((prevState) => ({
-        ...prevState,
-        entity: newEntity,
-        errors
-      }));
-    }
   }
 
   handleChange(ev) {
@@ -155,7 +139,6 @@ class BadgeSettingsForm extends React.Component {
     }
 
     newEntity[setting].value = value ? "SHOW" : "HIDE";
-    newEntity[setting].type = "TEXT";
 
     this.setState((prevState) => ({
       ...prevState,
@@ -173,8 +156,7 @@ class BadgeSettingsForm extends React.Component {
         ([, values]) =>
           (values.type === "TEXT" && (values.value !== "" || values.id)) ||
           (values.type === "HEX_COLOR" && values.value !== "") ||
-          (values.type === "FILE" && values.file) ||
-          !values.type === "BOOL" // ignore toggle values with initial true value
+          (values.type === "FILE" && values.file)
       )
     );
 
@@ -223,14 +205,7 @@ class BadgeSettingsForm extends React.Component {
 
         <div className="row form-group">
           <div className="col-md-6">
-            <label>
-              {T.translate("badge_settings.badge_template_width")} &nbsp;{" "}
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("badge_settings.css_length_info")}
-              />
-            </label>
+            <label>{T.translate("badge_settings.badge_template_width")}</label>
             <br />
             <Input
               className="form-control"
@@ -240,14 +215,7 @@ class BadgeSettingsForm extends React.Component {
             />
           </div>
           <div className="col-md-6">
-            <label>
-              {T.translate("badge_settings.badge_template_height")} &nbsp;{" "}
-              <i
-                className="fa fa-info-circle"
-                aria-hidden="true"
-                title={T.translate("badge_settings.css_length_info")}
-              />
-            </label>
+            <label>{T.translate("badge_settings.badge_template_height")}</label>
             <br />
             <Input
               className="form-control"
@@ -368,13 +336,7 @@ class BadgeSettingsForm extends React.Component {
               <label>
                 {T.translate(
                   "badge_settings.badge_template_text_fields_font_family"
-                )}{" "}
-                &nbsp;{" "}
-                <i
-                  className="fa fa-info-circle"
-                  aria-hidden="true"
-                  title={T.translate("badge_settings.font_family_info")}
-                />
+                )}
               </label>
               <br />
               <Input
@@ -428,21 +390,6 @@ class BadgeSettingsForm extends React.Component {
                 value={entity?.BADGE_TEMPLATE_NAME_DISPLAY_MODE?.value}
                 onChange={this.handleChange}
                 options={ddlNameDisplayMode}
-                isClearable
-              />
-            </div>
-          </div>
-          <div className="row form-group">
-            <div className="col-md-6">
-              <label>
-                {T.translate("badge_settings.badge_template_text_fields_align")}
-              </label>
-              <br />
-              <Dropdown
-                id="BADGE_TEMPLATE_TEXT_FIELDS_ALIGN"
-                value={entity?.BADGE_TEMPLATE_TEXT_FIELDS_ALIGN?.value}
-                onChange={this.handleChange}
-                options={ddlAlignOptions}
                 isClearable
               />
             </div>
@@ -1093,13 +1040,7 @@ class BadgeSettingsForm extends React.Component {
                 <label>
                   {T.translate(
                     "badge_settings.badge_template_features_font_size"
-                  )}{" "}
-                  &nbsp;{" "}
-                  <i
-                    className="fa fa-info-circle"
-                    aria-hidden="true"
-                    title={T.translate("badge_settings.css_length_info")}
-                  />
+                  )}
                 </label>
                 <br />
                 <Input
@@ -1120,7 +1061,6 @@ class BadgeSettingsForm extends React.Component {
             const badgeTemplateFeatureDisplay = `BADGE_TEMPLATE_FEATURE_${bf.id}_DISPLAY`;
             const badgeTemplateFeatureImageWidth = `BADGE_TEMPLATE_FEATURE_${bf.id}_IMAGE_WIDTH`;
             const badgeTemplateFeatureImageHeight = `BADGE_TEMPLATE_FEATURE_${bf.id}_IMAGE_HEIGHT`;
-            this.handleInitialSwitchValue(badgeTemplateFeatureDisplay);
             return (
               <Panel
                 key={bf.name}
@@ -1268,15 +1208,7 @@ class BadgeSettingsForm extends React.Component {
                           <label>
                             {T.translate(
                               "badge_settings.badge_template_feature_image_width"
-                            )}{" "}
-                            &nbsp;{" "}
-                            <i
-                              className="fa fa-info-circle"
-                              aria-hidden="true"
-                              title={T.translate(
-                                "badge_settings.css_length_info"
-                              )}
-                            />
+                            )}
                           </label>
                           <br />
                           <Input
@@ -1292,15 +1224,7 @@ class BadgeSettingsForm extends React.Component {
                           <label>
                             {T.translate(
                               "badge_settings.badge_template_feature_image_height"
-                            )}{" "}
-                            &nbsp;{" "}
-                            <i
-                              className="fa fa-info-circle"
-                              aria-hidden="true"
-                              title={T.translate(
-                                "badge_settings.css_length_info"
-                              )}
-                            />
+                            )}
                           </label>
                           <br />
                           <Input
