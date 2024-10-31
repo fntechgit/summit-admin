@@ -12,10 +12,6 @@
  * */
 
 import { RECEIVE_BADGE_SETTINGS } from "../../actions/badge-actions";
-import {
-  SETTING_ADDED,
-  SETTING_UPDATED
-} from "../../actions/marketing-actions";
 
 const DEFAULT_BADGE_SETTINGS = {
   BADGE_TEMPLATE_BACKGROUND_IMG: {
@@ -99,24 +95,6 @@ const badgeSettingsReducer = (state = DEFAULT_STATE, action) => {
         });
       }
       return { ...state, badge_settings: { ...reducerSettings } };
-    }
-    case SETTING_ADDED:
-    case SETTING_UPDATED: {
-      const { response: entity } = payload;
-      const newBadgeSettings = {};
-      Object.keys(state.badge_settings).forEach((key) => {
-        const setting = state.badge_settings[key];
-        if (key === entity.key)
-          newBadgeSettings[key] =
-            entity.type === "FILE"
-              ? { ...setting, id: entity.id, file: entity.file }
-              : { ...setting, id: entity.id, value: entity.value };
-        else newBadgeSettings[key] = setting;
-      });
-      return {
-        ...state,
-        badge_settings: { ...newBadgeSettings }
-      };
     }
     default:
       return state;
