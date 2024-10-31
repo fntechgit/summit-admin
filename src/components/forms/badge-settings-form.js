@@ -97,7 +97,11 @@ class BadgeSettingsForm extends React.Component {
   handleUploadFile(file, props) {
     const { id } = props;
 
-    const newEntity = { ...this.state.entity, [id]: { type: "FILE" } };
+    const formerFile = { ...this.state.entity[id] };
+    const newEntity = {
+      ...this.state.entity,
+      [id]: { id: formerFile?.id || 0, type: "FILE" }
+    };
 
     newEntity[id].file = file;
     newEntity[id].file_preview = file.preview;
@@ -503,7 +507,7 @@ class BadgeSettingsForm extends React.Component {
                   <i
                     className="fa fa-info-circle"
                     aria-hidden="true"
-                    title={T.translate("badge_settings.integer_value_innfo")}
+                    title={T.translate("badge_settings.integer_value_info")}
                   />
                 </label>
                 <br />
@@ -655,7 +659,7 @@ class BadgeSettingsForm extends React.Component {
                   <i
                     className="fa fa-info-circle"
                     aria-hidden="true"
-                    title={T.translate("badge_settings.integer_value_innfo")}
+                    title={T.translate("badge_settings.integer_value_info")}
                   />
                 </label>
                 <br />
@@ -803,7 +807,7 @@ class BadgeSettingsForm extends React.Component {
                   <i
                     className="fa fa-info-circle"
                     aria-hidden="true"
-                    title={T.translate("badge_settings.integer_value_innfo")}
+                    title={T.translate("badge_settings.integer_value_info")}
                   />
                 </label>
                 <br />
