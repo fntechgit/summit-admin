@@ -19,8 +19,27 @@
   justify-content: space-between;
 }
 
-.colorSquare {
-  border: 1px solid black;
+.selectedColorContainer {
+  display: flex;
+  gap: 5px;
   height: 100%;
-  width: 20px;
+  justify-content: center;
+  align-items: center;
+
+  .colorSquare {
+    border: 1px solid black;
+    height: 100%;
+    width: 20px;
+  }
+
+  .removeColor {
+    background-color: transparent;
+    border: none;
+    transition: color 150ms;
+    font-size: 16px;
+    color: hsl(0, 0%, 80%);
+    &:hover {
+      color: hsl(0, 0%, 60%);
+    }
+  }
 }
