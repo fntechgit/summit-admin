@@ -1737,6 +1737,8 @@
     "audience": "Audience",
     "allows_to_delegate": "Allows to delegate?",
     "allows_to_delegate_info": "Delegation implies that ticket owner could delegate this ticket to another Attendee and becomes their Ticket manager, allowing tickets changes and extra questions answering",
+    "allows_to_reassign": "Allow to reassign related Tickets ?",
+    "allows_to_reassign_info": "If unchecked, tickets with this type cannot be transferred to another owner.",
     "cost": "Cost",
     "currency": "Currency",
     "quantity_to_sell": "Quantity to sell",

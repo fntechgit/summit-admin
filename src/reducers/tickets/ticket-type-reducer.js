@@ -9,8 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_TICKET_TYPE,
   RESET_TICKET_TYPE_FORM,
@@ -18,9 +20,6 @@ import {
   TICKET_TYPE_UPDATED,
   TICKET_TYPE_ADDED
 } from "../../actions/ticket-actions";
-
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
@@ -35,7 +34,9 @@ export const DEFAULT_ENTITY = {
   max_quantity_per_order: 0,
   sales_start_date: "",
   sales_end_date: "",
-  audience: "All"
+  audience: "All",
+  allows_to_delegate: false,
+  allows_to_reassign: true
 };
 
 const DEFAULT_STATE = {
@@ -43,54 +44,41 @@ const DEFAULT_STATE = {
   errors: {}
 };
 
-const ticketTypeReducer = (state = DEFAULT_STATE, action) => {
+const ticketTypeReducer = (state = DEFAULT_STATE, action = {}) => {
   const { type, payload } = action;
   switch (type) {
-    case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
-      }
-      break;
-    case SET_CURRENT_SUMMIT:
-    case RESET_TICKET_TYPE_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case UPDATE_TICKET_TYPE:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
-    case TICKET_TYPE_ADDED:
-    case RECEIVE_TICKET_TYPE:
-      {
-        let entity = { ...payload.response };
-
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
-        }
-
-        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-      }
-      break;
-    case TICKET_TYPE_UPDATED:
-      {
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload?.persistStore) {
         return state;
       }
-      break;
-    case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case SET_CURRENT_SUMMIT:
+    case RESET_TICKET_TYPE_FORM: {
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case UPDATE_TICKET_TYPE: {
+      return { ...state, entity: { ...payload }, errors: {} };
+    }
+    case TICKET_TYPE_ADDED:
+    case RECEIVE_TICKET_TYPE: {
+      const entity = { ...payload.response };
+
+      for (const key in entity) {
+        if (entity[key]) {
+          entity[key] = entity[key] == null ? "" : entity[key];
+        }
       }
-      break;
+
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case TICKET_TYPE_UPDATED: {
+      return state;
+    }
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
     default:
       return state;
   }
