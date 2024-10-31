@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import styles from "./index.module.less";
 import Sketch from "@uiw/react-color-sketch";
+import styles from "./index.module.less";
 
 const HexColorInput = ({ onChange, id, className, value }) => {
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
@@ -10,12 +10,27 @@ const HexColorInput = ({ onChange, id, className, value }) => {
     const newEvent = {
       target: {
         value: hexColor,
-        id: id,
+        id,
         type: "hexcolorinput"
       }
     };
 
     onChange(newEvent);
+    setDisplayColorPicker(false);
+  };
+
+  const handleRemoveColor = (ev) => {
+    ev.stopPropagation();
+    const newEvent = {
+      target: {
+        value: "",
+        id,
+        type: "hexcolorinput"
+      }
+    };
+
+    onChange(newEvent);
+    setHexColor("");
     setDisplayColorPicker(false);
   };
 
@@ -26,10 +41,18 @@ const HexColorInput = ({ onChange, id, className, value }) => {
     >
       {value}
       {value && (
-        <div
-          className={styles.colorSquare}
-          style={{ backgroundColor: value }}
-        />
+        <div className={styles.selectedColorContainer}>
+          <button
+            className={styles.removeColor}
+            onClick={(ev) => handleRemoveColor(ev)}
+          >
+            <i className="fa fa-close" />
+          </button>
+          <div
+            className={styles.colorSquare}
+            style={{ backgroundColor: value }}
+          />
+        </div>
       )}
       {displayColorPicker ? (
         <div className={styles.popover}>
@@ -37,7 +60,7 @@ const HexColorInput = ({ onChange, id, className, value }) => {
           <Sketch
             key={`color-picker-${value}`}
             style={{ padding: 5 }}
-            disableAlpha={true}
+            disableAlpha
             presetColors={false}
             onChange={(color) => {
               setHexColor(color.hex);

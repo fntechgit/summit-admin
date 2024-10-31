@@ -28,6 +28,7 @@ import {
   fetchErrorHandler,
   getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
+import pLimit from "p-limit";
 import history from "../history";
 import { saveMarketingSetting } from "./marketing-actions";
 import { getAccessTokenSafely } from "../utils/methods";
@@ -36,7 +37,8 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
   DUMMY_ACTION,
-  HUNDRED_PER_PAGE
+  HUNDRED_PER_PAGE,
+  TEN
 } from "../utils/constants";
 
 export const BADGE_DELETED = "BADGE_DELETED";
@@ -121,9 +123,11 @@ export const getBadgeSettings =
     });
   };
 
-export const saveBadgeSettings = (badgeSettings) => async (dispatch) =>
-  Promise.all(
-    Object.keys(badgeSettings).map((m) => {
+export const saveBadgeSettings = (badgeSettings) => async (dispatch) => {
+  const limit = pLimit(TEN);
+
+  const input = Object.keys(badgeSettings).map((m) =>
+    limit(() => {
       let value = badgeSettings[m].value ?? "";
       const file = badgeSettings[m].file ?? null;
 
@@ -141,6 +145,9 @@ export const saveBadgeSettings = (badgeSettings) => async (dispatch) =>
       return dispatch(saveMarketingSetting(badge_setting, file));
     })
   );
+
+  return Promise.all(input);
+};
 
 /** *********************  BADGE  *********************************************** */
 

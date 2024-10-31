@@ -81,9 +81,14 @@ class BadgeSettingsForm extends React.Component {
 
     if (!newEntity[id]?.type) {
       const newEntityType = id.includes("_COLOR") ? "HEX_COLOR" : "TEXT";
-      newEntity[id] = { ...newEntity[id], value, type: newEntityType };
+      newEntity[id] = {
+        ...newEntity[id],
+        value,
+        type: newEntityType,
+        updated: true
+      };
     } else {
-      newEntity[id] = { ...newEntity[id], value };
+      newEntity[id] = { ...newEntity[id], value, updated: true };
     }
 
     this.setState({ entity: newEntity, errors: newErrors });
@@ -96,6 +101,7 @@ class BadgeSettingsForm extends React.Component {
 
     newEntity[id].file = file;
     newEntity[id].file_preview = file.preview;
+    newEntity[id].updated = true;
 
     this.setState({ entity: newEntity });
   }
@@ -139,6 +145,7 @@ class BadgeSettingsForm extends React.Component {
     }
 
     newEntity[setting].value = value ? "SHOW" : "HIDE";
+    newEntity[setting].updated = true;
 
     this.setState((prevState) => ({
       ...prevState,
@@ -153,10 +160,7 @@ class BadgeSettingsForm extends React.Component {
     // save only the settings with the following conditions
     const settingsToSave = Object.fromEntries(
       Object.entries(this.state.entity).filter(
-        ([, values]) =>
-          (values.type === "TEXT" && (values.value !== "" || values.id)) ||
-          (values.type === "HEX_COLOR" && values.value !== "") ||
-          (values.type === "FILE" && values.file)
+        ([, values]) => values.updated === true
       )
     );
 
@@ -205,7 +209,14 @@ class BadgeSettingsForm extends React.Component {
 
         <div className="row form-group">
           <div className="col-md-6">
-            <label>{T.translate("badge_settings.badge_template_width")}</label>
+            <label>
+              {T.translate("badge_settings.badge_template_width")} &nbsp;{" "}
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("badge_settings.css_length_info")}
+              />
+            </label>
             <br />
             <Input
               className="form-control"
@@ -215,7 +226,14 @@ class BadgeSettingsForm extends React.Component {
             />
           </div>
           <div className="col-md-6">
-            <label>{T.translate("badge_settings.badge_template_height")}</label>
+            <label>
+              {T.translate("badge_settings.badge_template_height")} &nbsp;{" "}
+              <i
+                className="fa fa-info-circle"
+                aria-hidden="true"
+                title={T.translate("badge_settings.css_length_info")}
+              />
+            </label>
             <br />
             <Input
               className="form-control"
@@ -336,7 +354,13 @@ class BadgeSettingsForm extends React.Component {
               <label>
                 {T.translate(
                   "badge_settings.badge_template_text_fields_font_family"
-                )}
+                )}{" "}
+                &nbsp;{" "}
+                <i
+                  className="fa fa-info-circle"
+                  aria-hidden="true"
+                  title={T.translate("badge_settings.font_family_info")}
+                />
               </label>
               <br />
               <Input
@@ -390,6 +414,21 @@ class BadgeSettingsForm extends React.Component {
                 value={entity?.BADGE_TEMPLATE_NAME_DISPLAY_MODE?.value}
                 onChange={this.handleChange}
                 options={ddlNameDisplayMode}
+                isClearable
+              />
+            </div>
+          </div>
+          <div className="row form-group">
+            <div className="col-md-6">
+              <label>
+                {T.translate("badge_settings.badge_template_text_fields_align")}
+              </label>
+              <br />
+              <Dropdown
+                id="BADGE_TEMPLATE_TEXT_FIELDS_ALIGN"
+                value={entity?.BADGE_TEMPLATE_TEXT_FIELDS_ALIGN?.value}
+                onChange={this.handleChange}
+                options={ddlAlignOptions}
                 isClearable
               />
             </div>
@@ -1040,7 +1079,13 @@ class BadgeSettingsForm extends React.Component {
                 <label>
                   {T.translate(
                     "badge_settings.badge_template_features_font_size"
-                  )}
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.css_length_info")}
+                  />
                 </label>
                 <br />
                 <Input
@@ -1141,10 +1186,8 @@ class BadgeSettingsForm extends React.Component {
                       <Switch
                         id={badgeTemplateFeatureDisplay}
                         checked={
-                          entity?.[badgeTemplateFeatureDisplay]?.value ===
-                          "SHOW"
-                            ? true
-                            : false || false
+                          entity?.[badgeTemplateFeatureDisplay]?.value !==
+                          "HIDE"
                         }
                         onChange={(val) => {
                           this.handleOnSwitchChange(
@@ -1208,7 +1251,15 @@ class BadgeSettingsForm extends React.Component {
                           <label>
                             {T.translate(
                               "badge_settings.badge_template_feature_image_width"
-                            )}
+                            )}{" "}
+                            &nbsp;{" "}
+                            <i
+                              className="fa fa-info-circle"
+                              aria-hidden="true"
+                              title={T.translate(
+                                "badge_settings.css_length_info"
+                              )}
+                            />
                           </label>
                           <br />
                           <Input
@@ -1224,7 +1275,15 @@ class BadgeSettingsForm extends React.Component {
                           <label>
                             {T.translate(
                               "badge_settings.badge_template_feature_image_height"
-                            )}
+                            )}{" "}
+                            &nbsp;{" "}
+                            <i
+                              className="fa fa-info-circle"
+                              aria-hidden="true"
+                              title={T.translate(
+                                "badge_settings.css_length_info"
+                              )}
+                            />
                           </label>
                           <br />
                           <Input
@@ -1257,11 +1316,7 @@ class BadgeSettingsForm extends React.Component {
               <br />
               <Switch
                 id="BADGE_TEMPLATE_QR_DISPLAY"
-                checked={
-                  entity?.BADGE_TEMPLATE_QR_DISPLAY?.value === "SHOW"
-                    ? true
-                    : false || false
-                }
+                checked={entity?.BADGE_TEMPLATE_QR_DISPLAY?.value !== "HIDE"}
                 onChange={(val) => {
                   this.handleOnSwitchChange("BADGE_TEMPLATE_QR_DISPLAY", val);
                 }}
