@@ -68,7 +68,7 @@ class PromocodeForm extends React.Component {
     this.validate = this.validate.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     const { errors, entity } = this.props;
     scrollToError(errors);
@@ -338,7 +338,7 @@ class PromocodeForm extends React.Component {
             />
           </div>
           <div className="col-md-4 checkboxes-div">
-            <div className="form-check abc-checkbox" data-tip="SANTI">
+            <div className="form-check abc-checkbox">
               <input
                 type="checkbox"
                 id="allows_to_delegate"
@@ -352,6 +352,26 @@ class PromocodeForm extends React.Component {
                   className="fa fa-info-circle"
                   aria-hidden="true"
                   title={T.translate("edit_promocode.allows_to_delegate_info")}
+                />
+              </label>
+            </div>
+            <div
+              className="form-check abc-checkbox"
+              style={{ marginTop: "10px" }}
+            >
+              <input
+                type="checkbox"
+                id="allows_to_reassign"
+                checked={entity.allows_to_reassign}
+                onChange={this.handleChange}
+                className="form-check-input"
+              />
+              <label className="form-check-label" htmlFor="allows_to_reassign">
+                {T.translate("edit_promocode.allows_to_reassign")}&nbsp;
+                <i
+                  className="fa fa-info-circle"
+                  aria-hidden="true"
+                  title={T.translate("edit_promocode.allows_to_reassign_info")}
                 />
               </label>
             </div>
