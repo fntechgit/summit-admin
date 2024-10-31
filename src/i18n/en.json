@@ -951,6 +951,7 @@
     "resend_done": "Emails sent successfully.",
     "send_emails_title": "You are about to send an EMAIL BLAST to selected speakers !",
     "should_send_copy_2_submitter": "Also send to submitter?",
+    "allows_to_reassign": "Allow to reassign?",
     "items_qty": "Selected {qty} Speakers",
     "placeholders": {
       "search_speakers": "Search by Full Name, Email, Speaker Id, Member Id, Title Or Abstract",
