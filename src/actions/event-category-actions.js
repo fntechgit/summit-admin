@@ -9,9 +9,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
-import T from "i18n-react/dist/i18n-react";
-import history from "../history";
+ * */
+
 import {
   getRequest,
   putRequest,
@@ -24,6 +23,8 @@ import {
   showSuccessMessage,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import T from "i18n-react/dist/i18n-react";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 
 export const REQUEST_EVENT_CATEGORIES = "REQUEST_EVENT_CATEGORIES";
@@ -162,7 +163,7 @@ export const saveEventCategory = (entity) => async (dispatch, getState) => {
     });
   }
 
-  const success_message = {
+  const successMessage = {
     title: T.translate("general.done"),
     html: T.translate("edit_event_category.category_created"),
     type: "success"
@@ -178,7 +179,7 @@ export const saveEventCategory = (entity) => async (dispatch, getState) => {
   )(params)(dispatch).then((payload) => {
     dispatch(stopLoading());
     dispatch(
-      showMessage(success_message, () => {
+      showMessage(successMessage, () => {
         history.push(
           `/app/summits/${currentSummit.id}/event-categories/${payload.response.id}`
         );
@@ -343,19 +344,20 @@ export const updateSubCategoryOrder =
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  //remove # from color hexa
+  // remove # from color hexa
   if (normalizedEntity.color)
     normalizedEntity.color = normalizedEntity.color.substr(1);
 
-  //remove # from text color hexa
+  // remove # from text color hexa
   if (normalizedEntity.text_color)
     normalizedEntity.text_color = normalizedEntity.text_color.substr(1);
 
-  normalizedEntity.session_count = parseInt(entity.session_count);
-  normalizedEntity.alternate_count = parseInt(entity.alternate_count);
-  normalizedEntity.lightning_count = parseInt(entity.lightning_count);
+  normalizedEntity.session_count = parseInt(entity.session_count, 10);
+  normalizedEntity.alternate_count = parseInt(entity.alternate_count, 10);
+  normalizedEntity.lightning_count = parseInt(entity.lightning_count, 10);
   normalizedEntity.lightning_alternate_count = parseInt(
-    entity.lightning_alternate_count
+    entity.lightning_alternate_count,
+    10
   );
   normalizedEntity.allowed_tags = entity.allowed_tags.map((t) => t.tag);
   normalizedEntity.allowed_access_levels = entity.allowed_access_levels.map(
@@ -364,13 +366,13 @@ const normalizeEntity = (entity) => {
 
   normalizedEntity.proposed_schedule_transition_time =
     normalizedEntity.proposed_schedule_transition_time
-      ? parseInt(entity.proposed_schedule_transition_time)
+      ? parseInt(entity.proposed_schedule_transition_time, 10)
       : null;
 
   return normalizedEntity;
 };
 
-/***********************************  CATEGORY GROUPS ***************************************************/
+/** *********************************  CATEGORY GROUPS ************************************************** */
 
 export const getEventCategoryGroups = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -380,10 +382,12 @@ export const getEventCategoryGroups = () => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    expand: "tracks",
     access_token: accessToken,
     page: 1,
-    per_page: 100
+    per_page: 100,
+    expand: "tracks",
+    fields: "id,name,class_name,color,tracks.name,tracks.id",
+    relations: "tracks.none"
   };
 
   return getRequest(
@@ -469,7 +473,7 @@ export const saveEventCategoryGroup =
         );
       });
     } else {
-      const success_message = {
+      const successMessage = {
         title: T.translate("general.done"),
         html: T.translate("edit_event_category_group.group_created"),
         type: "success"
@@ -484,7 +488,7 @@ export const saveEventCategoryGroup =
         entity
       )(params)(dispatch).then((payload) => {
         dispatch(
-          showMessage(success_message, () => {
+          showMessage(successMessage, () => {
             history.replace(
               `/app/summits/${currentSummit.id}/event-category-groups/${payload.response.id}`
             );
@@ -609,16 +613,16 @@ export const removeAllowedGroupFromGroup =
 
 const normalizeGroupEntity = (entity) => {
   const normalizedEntity = { ...entity };
-  normalizedEntity["color"] = normalizedEntity["color"].substr(1);
+  normalizedEntity.color = normalizedEntity.color.substr(1);
 
-  if (!normalizedEntity["begin_attendee_voting_period_date"])
-    normalizedEntity["begin_attendee_voting_period_date"] = null;
-  if (!normalizedEntity["end_attendee_voting_period_date"])
-    normalizedEntity["end_attendee_voting_period_date"] = null;
-  if (!normalizedEntity["submission_begin_date"])
-    normalizedEntity["submission_begin_date"] = null;
-  if (!normalizedEntity["submission_end_date"])
-    normalizedEntity["submission_end_date"] = null;
+  if (!normalizedEntity.begin_attendee_voting_period_date)
+    normalizedEntity.begin_attendee_voting_period_date = null;
+  if (!normalizedEntity.end_attendee_voting_period_date)
+    normalizedEntity.end_attendee_voting_period_date = null;
+  if (!normalizedEntity.submission_begin_date)
+    normalizedEntity.submission_begin_date = null;
+  if (!normalizedEntity.submission_end_date)
+    normalizedEntity.submission_end_date = null;
 
   return normalizedEntity;
 };
