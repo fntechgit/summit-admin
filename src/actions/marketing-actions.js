@@ -211,6 +211,12 @@ export const saveMarketingSetting =
   async (dispatch, getState) => {
     if (entity.type === MARKETING_SETTING_TYPE_FILE && !file)
       return Promise.resolve();
+    if (
+      !entity.id &&
+      entity.type === MARKETING_SETTING_TYPE_HEX_COLOR &&
+      !entity.value
+    )
+      return Promise.resolve();
     // delete empty hex color settings
     if (
       entity.id &&
