@@ -968,7 +968,8 @@ export const sendSpeakerEmails =
           (t) => t.id
         ),
         badge_features: promocodeSpecification.badgeFeatures.map((b) => b.id),
-        tags: promocodeSpecification.tags.map((t) => t.tag)
+        tags: promocodeSpecification.tags.map((t) => t.tag),
+        allows_to_reassign: promocodeSpecification.allowsToReassign
       };
 
       if (promoCodeStrategy === AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE) {

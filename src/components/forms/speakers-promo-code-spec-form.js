@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -50,8 +50,8 @@ class SpeakerPromoCodeSpecForm extends React.Component {
 
   handleChange(ev) {
     const { promoCodeStrategy } = this.props;
-    let entity = { ...this.props.entity };
-    let errors = { ...this.props.errors };
+    const entity = { ...this.props.entity };
+    const errors = { ...this.props.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -65,7 +65,7 @@ class SpeakerPromoCodeSpecForm extends React.Component {
 
   handleNewTag(newTag) {
     const { promoCodeStrategy } = this.props;
-    let entity = { ...this.props.entity };
+    const entity = { ...this.props.entity };
     entity.tags = [...entity.tags, { tag: newTag }];
     this.props.updateSpecs(promoCodeStrategy, entity);
   }
@@ -73,7 +73,7 @@ class SpeakerPromoCodeSpecForm extends React.Component {
   render() {
     const { entity, errors, promoCodeStrategy, summit } = this.props;
 
-    let promoCodeTypeDDL = [
+    const promoCodeTypeDDL = [
       {
         label: T.translate("promo_code_specification.select_promo_code_type"),
         value: ""
@@ -107,7 +107,7 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                           "promo_code_specification.placeholders.speakers_discount_code"
                         )
                   }
-                  isClearable={true}
+                  isClearable
                   error={hasErrors("existingPromoCode", errors)}
                   extraFilters={[
                     `class_name==${
@@ -135,7 +135,7 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                   value={entity.type}
                   onChange={this.handleChange}
                   options={promoCodeTypeDDL}
-                  isClearable={true}
+                  isClearable
                   error={hasErrors("type", errors)}
                 />
               </div>
@@ -166,27 +166,48 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                   placeholder={T.translate(
                     "promo_code_specification.placeholders.badge_features"
                   )}
-                  isMulti={true}
-                  isClearable={true}
+                  isMulti
+                  isClearable
                 />
               </div>
             </div>
             {promoCodeStrategy === AUTO_GENERATED_SPEAKERS_PROMO_CODE && (
-              <div className="row form-group">
-                <div className="col-md-12">
-                  <TicketTypesInput
-                    id="ticketTypes"
-                    value={entity.ticketTypes}
-                    summitId={summit.id}
-                    onChange={this.handleChange}
-                    placeholder={T.translate(
-                      "promo_code_specification.placeholders.ticket_types"
-                    )}
-                    isMulti={true}
-                    isClearable={true}
-                  />
+              <>
+                <div className="row form-group">
+                  <div className="col-md-12">
+                    <TicketTypesInput
+                      id="ticketTypes"
+                      value={entity.ticketTypes}
+                      summitId={summit.id}
+                      onChange={this.handleChange}
+                      placeholder={T.translate(
+                        "promo_code_specification.placeholders.ticket_types"
+                      )}
+                      isMulti
+                      isClearable
+                    />
+                  </div>
                 </div>
-              </div>
+                <div className="row form-group">
+                  <div className="col-md-12">
+                    <div className="form-check abc-checkbox">
+                      <input
+                        id="allowsToReassign"
+                        className="form-check-input"
+                        type="checkbox"
+                        onChange={this.handleChange}
+                        value={entity.allowsToReassign}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor="allowsToReassign"
+                      >
+                        {T.translate("summit_speakers_list.allows_to_reassign")}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
             {promoCodeStrategy === AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE && (
               <>
@@ -220,8 +241,8 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                         placeholder={T.translate(
                           "promo_code_specification.placeholders.ticket_types"
                         )}
-                        isMulti={true}
-                        isClearable={true}
+                        isMulti
+                        isClearable
                       />
                     </div>
                   </div>

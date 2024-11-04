@@ -9,8 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_PROMOCODE,
   RECEIVE_PROMOCODE_META,
@@ -28,9 +30,6 @@ import {
   RECEIVE_ASSIGNED_SPEAKERS,
   REQUEST_ASSIGNED_SPEAKERS
 } from "../../actions/promocode-actions";
-
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_SPEAKERS_ASSIGNMENT_STATE = {
@@ -71,7 +70,9 @@ export const DEFAULT_ENTITY = {
   amount: "",
   rate: "",
   description: "",
-  tags: []
+  tags: [],
+  allows_to_delegate: false,
+  allows_to_reassign: true
 };
 
 const DEFAULT_STATE = {
@@ -93,134 +94,113 @@ const pageList = (list, page, perPage) => {
 const promocodeReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
-    case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
       }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
     case SET_CURRENT_SUMMIT:
-    case RESET_PROMOCODE_FORM:
-      {
-        return {
-          ...state,
-          entity: {
-            ...DEFAULT_ENTITY,
-            speakers: { ...DEFAULT_SPEAKERS_ASSIGNMENT_STATE }
-          },
-          errors: {}
-        };
-      }
-      break;
-    case RECEIVE_PROMOCODE_META:
-      {
-        let types = [...DEFAULT_STATE.allTypes];
+    case RESET_PROMOCODE_FORM: {
+      return {
+        ...state,
+        entity: {
+          ...DEFAULT_ENTITY,
+          speakers: { ...DEFAULT_SPEAKERS_ASSIGNMENT_STATE }
+        },
+        errors: {}
+      };
+    }
+    case RECEIVE_PROMOCODE_META: {
+      let types = [...DEFAULT_STATE.allTypes];
 
-        let allClasses = [...payload.response];
+      const allClasses = [...payload.response];
 
-        allClasses.map((t) => {
-          types = types.concat(t.type);
-        });
+      allClasses.map((t) => {
+        types = types.concat(t.type);
+      });
 
-        let unique_types = [...new Set(types)];
+      const unique_types = [...new Set(types)];
 
-        return { ...state, allTypes: unique_types, allClasses: allClasses };
-      }
-      break;
-    case UPDATE_PROMOCODE:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
+      return { ...state, allTypes: unique_types, allClasses };
+    }
+    case UPDATE_PROMOCODE: {
+      return { ...state, entity: { ...payload }, errors: {} };
+    }
     case PROMOCODE_ADDED:
-    case RECEIVE_PROMOCODE:
-      {
-        let entity = { ...payload.response };
+    case RECEIVE_PROMOCODE: {
+      const entity = { ...payload.response };
 
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
         }
+      }
 
-        entity.owner = {
-          email: entity.email,
-          first_name: entity.first_name,
-          last_name: entity.last_name
-        };
-        entity.speakers = state.entity.speakers;
+      entity.owner = {
+        email: entity.email,
+        first_name: entity.first_name,
+        last_name: entity.last_name
+      };
+      entity.speakers = state.entity.speakers;
 
-        const discount_classes = [
-          "SPEAKER_DISCOUNT_CODE",
-          "SPONSOR_DISCOUNT_CODE",
-          "MEMBER_DISCOUNT_CODE",
-          "SUMMIT_DISCOUNT_CODE",
-          "SPEAKERS_DISCOUNT_CODE"
-        ];
+      const discount_classes = [
+        "SPEAKER_DISCOUNT_CODE",
+        "SPONSOR_DISCOUNT_CODE",
+        "MEMBER_DISCOUNT_CODE",
+        "SUMMIT_DISCOUNT_CODE",
+        "SPEAKERS_DISCOUNT_CODE"
+      ];
 
-        if (discount_classes.includes(entity.class_name)) {
-          entity.apply_to_all_tix = entity.ticket_types_rules.length === 0;
+      if (discount_classes.includes(entity.class_name)) {
+        entity.apply_to_all_tix = entity.ticket_types_rules.length === 0;
+      }
+
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case PROMOCODE_UPDATED: {
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          badge_features_apply_to_all_tix_retroactively: false
         }
-
-        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-      }
-      break;
-    case PROMOCODE_UPDATED:
-      {
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            badge_features_apply_to_all_tix_retroactively: false
-          }
-        };
-      }
-      break;
-    case DISCOUNT_TICKET_ADDED:
-      {
-        let ticket = { ...payload.response };
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            ticket_types_rules: ticket.ticket_types_rules,
-            apply_to_all_tix: false,
-            badge_features_apply_to_all_tix_retroactively: false
-          }
-        };
-      }
-      break;
-    case DISCOUNT_TICKET_DELETED:
-      {
-        let { ticketId } = payload;
-        let ticket_types_rules = state.entity.ticket_types_rules.filter(
-          (tr) => tr.id !== ticketId
-        );
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            ticket_types_rules,
-            apply_to_all_tix: false,
-            badge_features_apply_to_all_tix_retroactively: false
-          }
-        };
-      }
-      break;
-    case EMAIL_SENT:
-      {
-        return { ...state, entity: { ...state.entity, email_sent: true } };
-      }
-      break;
-    case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+      };
+    }
+    case DISCOUNT_TICKET_ADDED: {
+      const ticket = { ...payload.response };
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          ticket_types_rules: ticket.ticket_types_rules,
+          apply_to_all_tix: false,
+          badge_features_apply_to_all_tix_retroactively: false
+        }
+      };
+    }
+    case DISCOUNT_TICKET_DELETED: {
+      const { ticketId } = payload;
+      const ticket_types_rules = state.entity.ticket_types_rules.filter(
+        (tr) => tr.id !== ticketId
+      );
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          ticket_types_rules,
+          apply_to_all_tix: false,
+          badge_features_apply_to_all_tix_retroactively: false
+        }
+      };
+    }
+    case EMAIL_SENT: {
+      return { ...state, entity: { ...state.entity, email_sent: true } };
+    }
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
     case SPEAKER_ASSIGNED_LOCALLY: {
       const { entity } = payload;
       const { speaker, speakers } = entity;
@@ -233,7 +213,7 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
         email_sent: false,
         redeemed: false
       };
-      let speakersList = [
+      const speakersList = [
         ...speakers.speakers_list.filter((s) => s.id !== assignment.id),
         assignment
       ];
@@ -263,7 +243,7 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case GET_ASSIGNED_SPEAKERS_LOCALLY: {
-      let { promoCodeClassName, term, page, perPage, order, orderDir } =
+      const { promoCodeClassName, term, page, perPage, order, orderDir } =
         payload;
 
       let speakersList = state.entity.speakers.speakers_list;
@@ -306,10 +286,10 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
     }
     case SPEAKER_UNASSIGNED:
     case SPEAKER_UNASSIGNED_LOCALLY: {
-      let { speakerId } = payload;
+      const { speakerId } = payload;
       const { currentPage, perPage } = state.entity.speakers;
 
-      let speakersList = state.entity.speakers.speakers_list.filter(
+      const speakersList = state.entity.speakers.speakers_list.filter(
         (s) => s.id !== speakerId
       );
 
@@ -355,18 +335,16 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_ASSIGNED_SPEAKERS: {
-      let { current_page, data, last_page, per_page, total } = {
+      const { current_page, data, last_page, per_page, total } = {
         ...payload.response
       };
 
-      const speakersList = data.map((assigment) => {
-        return {
-          ...assigment.speaker,
-          email_sent: assigment.sent,
-          redeemed: assigment.redeemed,
-          full_name: `${assigment.speaker.first_name} ${assigment.speaker.last_name}`
-        };
-      });
+      const speakersList = data.map((assigment) => ({
+        ...assigment.speaker,
+        email_sent: assigment.sent,
+        redeemed: assigment.redeemed,
+        full_name: `${assigment.speaker.first_name} ${assigment.speaker.last_name}`
+      }));
 
       const speakersInfo = {
         speakers_list: speakersList,
