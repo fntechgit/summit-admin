@@ -27,7 +27,9 @@ import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_PER_PAGE,
   ERROR_CODE_412,
-  HUNDRED_PER_PAGE
+  HUNDRED_PER_PAGE,
+  MARKETING_SETTING_TYPE_FILE,
+  MARKETING_SETTING_TYPE_HEX_COLOR
 } from "../utils/constants";
 
 export const REQUEST_SETTINGS = "REQUEST_SETTINGS";
@@ -207,9 +209,11 @@ export const resetSettingForm = () => (dispatch) => {
 export const saveMarketingSetting =
   (entity, file = null) =>
   async (dispatch, getState) => {
-    if (entity.type === "FILE" && !file) return Promise.resolve();
+    if (entity.type === MARKETING_SETTING_TYPE_FILE && !file)
+      return Promise.resolve();
     // TODO: review to save hex color settings with empty values
-    if (entity.type === "HEX_COLOR" && !entity.value) return Promise.resolve();
+    if (entity.type === MARKETING_SETTING_TYPE_HEX_COLOR && !entity.value)
+      return Promise.resolve();
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -321,7 +325,7 @@ const normalizeEntity = (entity, summitId) => {
   delete normalizedEntity.id;
   delete normalizedEntity.created;
   delete normalizedEntity.modified;
-  if (entity.type !== "FILE") {
+  if (entity.type !== MARKETING_SETTING_TYPE_FILE) {
     delete normalizedEntity.file;
   }
 
