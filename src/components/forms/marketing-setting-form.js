@@ -85,11 +85,11 @@ class MarketingSettingForm extends React.Component {
 
   handleSubmit(ev) {
     ev.preventDefault();
-    const { entity, file } = this.state;
+    const { entity } = this.state;
     const { currentSummit } = this.props;
     if (
       (entity.type !== "FILE" && !entity.value) ||
-      (entity.type === "FILE" && !file)
+      (entity.type === "FILE" && !entity.file)
     ) {
       const msg = `${
         setting_types_ddl.find((e) => e.value === entity.type)?.label
@@ -97,7 +97,7 @@ class MarketingSettingForm extends React.Component {
       return Swal.fire("Validation error", msg, "warning");
     }
 
-    this.props.onSubmit(entity, file).then((payload) => {
+    this.props.onSubmit(entity, entity.file).then((payload) => {
       if (entity.id && entity.id > 0) {
         // UPDATE
         this.props.showSuccessMessage(T.translate("marketing.setting_saved"));
@@ -130,9 +130,10 @@ class MarketingSettingForm extends React.Component {
   handleUploadFile(file) {
     const newEntity = { ...this.state.entity };
 
+    newEntity.file = file;
     newEntity.file_preview = file.preview;
 
-    this.setState({ file, entity: newEntity });
+    this.setState({ entity: newEntity });
   }
 
   handleRemoveFile() {
