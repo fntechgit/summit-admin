@@ -24,7 +24,8 @@ import { getSummitById } from "../../actions/summit-actions";
 import {
   getMarketingSetting,
   resetSettingForm,
-  saveMarketingSetting
+  saveMarketingSetting,
+  deleteSetting
 } from "../../actions/marketing-actions";
 import "../../styles/edit-marketing-setting-page.less";
 import AddNewButton from "../../components/buttons/add-new-button";
@@ -41,7 +42,7 @@ class EditMarketingSettingPage extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.setting_id;
     const newId = this.props.match.params.setting_id;
 
@@ -75,6 +76,7 @@ class EditMarketingSettingPage extends React.Component {
             entity={entity}
             errors={errors}
             onSubmit={this.props.saveMarketingSetting}
+            onDeleteImage={this.props.deleteSetting}
             showMessage={this.props.showMessage}
             showSuccessMessage={this.props.showSuccessMessage}
           />
@@ -94,6 +96,7 @@ export default connect(mapStateToProps, {
   getMarketingSetting,
   resetSettingForm,
   saveMarketingSetting,
+  deleteSetting,
   showMessage,
   showSuccessMessage
 })(EditMarketingSettingPage);

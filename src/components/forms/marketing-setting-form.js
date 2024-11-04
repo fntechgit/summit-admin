@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -20,11 +20,10 @@ import {
   UploadInput,
   TextEditorV2
 } from "openstack-uicore-foundation/lib/components";
+import Swal from "sweetalert2";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import history from "../../history";
 import HexColorInput from "../inputs/hex-color-input";
-
-import Swal from "sweetalert2";
 
 const setting_types_ddl = [
   { label: "Plain Text", value: "TEXT" },
@@ -48,7 +47,7 @@ class MarketingSettingForm extends React.Component {
     this.handleRemoveFile = this.handleRemoveFile.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -67,8 +66,8 @@ class MarketingSettingForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const newEntity = { ...this.state.entity };
+    const newErrors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -79,9 +78,9 @@ class MarketingSettingForm extends React.Component {
       value = parseInt(ev.target.value);
     }
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    newErrors[id] = "";
+    newEntity[id] = value;
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleSubmit(ev) {
@@ -120,7 +119,7 @@ class MarketingSettingForm extends React.Component {
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -129,18 +128,29 @@ class MarketingSettingForm extends React.Component {
   }
 
   handleUploadFile(file) {
-    let entity = { ...this.state.entity };
+    const newEntity = { ...this.state.entity };
 
-    entity.file_preview = file.preview;
+    newEntity.file = file;
+    newEntity.file_preview = file.preview;
 
-    this.setState({ file: file, entity: entity });
+    this.setState({ file, entity: newEntity });
+
+    this.setState({ entity: newEntity });
   }
 
-  handleRemoveFile(ev) {
-    let entity = { ...this.state.entity };
+  handleRemoveFile() {
+    const newEntity = { ...this.state.entity };
 
-    entity.file_preview = "";
-    this.setState({ entity: entity });
+    newEntity.file_preview = "";
+    newEntity.file = "";
+
+    if (newEntity.id) {
+      this.props.onDeleteImage(newEntity.id).then(() => {
+        newEntity.id = 0;
+      });
+    }
+
+    this.setState({ entity: newEntity });
   }
 
   render() {
