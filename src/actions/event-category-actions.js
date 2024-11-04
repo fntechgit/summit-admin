@@ -26,6 +26,7 @@ import {
 import T from "i18n-react/dist/i18n-react";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
+import { HUNDRED_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_EVENT_CATEGORIES = "REQUEST_EVENT_CATEGORIES";
 export const RECEIVE_EVENT_CATEGORIES = "RECEIVE_EVENT_CATEGORIES";
@@ -384,7 +385,7 @@ export const getEventCategoryGroups = () => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     page: 1,
-    per_page: 100,
+    per_page: HUNDRED_PER_PAGE,
     expand: "tracks",
     fields: "id,name,class_name,color,tracks.name,tracks.id",
     relations: "tracks.none"
