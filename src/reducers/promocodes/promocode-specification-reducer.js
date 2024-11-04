@@ -9,15 +9,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE } from "../../actions/promocode-actions";
 import {
   RESET_PROMOCODE_SPEC_FORM,
   UPDATE_SPECS,
   VALIDATE_SPECS
 } from "../../actions/promocode-specification-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
@@ -28,7 +28,8 @@ export const DEFAULT_ENTITY = {
   applyToAllTix: true,
   ticketTypes: [],
   amount: null,
-  rate: null
+  rate: null,
+  allowsToReassign: true
 };
 
 const DEFAULT_STATE = {
@@ -43,9 +44,9 @@ const promocodeSpecificationReducer = (state = DEFAULT_STATE, action) => {
       // we need this in case the token expired while editing the form
       if (payload.hasOwnProperty("persistStore")) {
         return state;
-      } else {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
       }
+
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     }
     case SET_CURRENT_SUMMIT:
     case RESET_PROMOCODE_SPEC_FORM: {

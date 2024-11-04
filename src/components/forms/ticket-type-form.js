@@ -218,7 +218,7 @@ class TicketTypeForm extends React.Component {
             />
           </div>
           <div className="col-md-4 checkboxes-div">
-            <div className="form-check abc-checkbox" data-tip="SANTI">
+            <div className="form-check abc-checkbox">
               <input
                 type="checkbox"
                 id="allows_to_delegate"
@@ -267,6 +267,27 @@ class TicketTypeForm extends React.Component {
               onChange={this.handleChange}
               value={entity.max_quantity_per_order}
             />
+          </div>
+          <div className="col-md-4 checkboxes-div">
+            <div className="form-check abc-checkbox">
+              <input
+                type="checkbox"
+                id="allows_to_reassign"
+                checked={entity.allows_to_reassign}
+                onChange={this.handleChange}
+                className="form-check-input"
+              />
+              <label className="form-check-label" htmlFor="allows_to_reassign">
+                {T.translate("edit_ticket_type.allows_to_reassign")}&nbsp;
+                <i
+                  className="fa fa-info-circle"
+                  aria-hidden="true"
+                  title={T.translate(
+                    "edit_ticket_type.allows_to_reassign_info"
+                  )}
+                />
+              </label>
+            </div>
           </div>
         </div>
         <div className="row form-group">
