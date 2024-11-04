@@ -9,16 +9,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_MEDIA_UPLOADS,
   REQUEST_MEDIA_UPLOADS,
   MEDIA_UPLOAD_DELETED
 } from "../../actions/media-upload-actions";
-
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   media_uploads: [],
@@ -30,7 +29,7 @@ const DEFAULT_STATE = {
   perPage: 10
 };
 
-const mediaUploadListReducer = (state = DEFAULT_STATE, action) => {
+const mediaUploadListReducer = (state = DEFAULT_STATE, action = {}) => {
   const { type, payload } = action;
   switch (type) {
     case SET_CURRENT_SUMMIT:
@@ -38,30 +37,28 @@ const mediaUploadListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_MEDIA_UPLOADS: {
-      let { order, orderDir, term } = payload;
+      const { order, orderDir, term } = payload;
 
       return { ...state, order, orderDir, term };
     }
     case RECEIVE_MEDIA_UPLOADS: {
-      let { total, last_page, current_page } = payload.response;
-      let media_uploads = payload.response.data.map((mft) => {
-        return {
-          id: mft.id,
-          name: mft.name,
-          description: mft.description,
-          allowed_extensions: mft.allowed_extensions
-        };
-      });
+      const { last_page: lastPage, current_page: currentPage } =
+        payload.response;
+      const media_uploads = payload.response.data.map((mft) => ({
+        id: mft.id,
+        name: mft.name,
+        description: mft.description
+      }));
 
       return {
         ...state,
-        media_uploads: media_uploads,
-        currentPage: current_page,
-        lastPage: last_page
+        media_uploads,
+        currentPage,
+        lastPage
       };
     }
     case MEDIA_UPLOAD_DELETED: {
-      let { mediaUploadId } = payload;
+      const { mediaUploadId } = payload;
       return {
         ...state,
         media_uploads: state.media_uploads.filter(

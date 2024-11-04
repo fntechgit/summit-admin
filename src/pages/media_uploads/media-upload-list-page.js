@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
@@ -28,56 +28,46 @@ import {
 } from "../../actions/media-upload-actions";
 import SummitDropdown from "../../components/summit-dropdown";
 
-class MediaUploadListPage extends React.Component {
-  constructor(props) {
-    super(props);
+const MediaUploadListPage = ({
+  history,
+  currentSummit,
+  media_uploads,
+  term,
+  order,
+  orderDir,
+  currentPage,
+  lastPage,
+  perPage,
+  ...props
+}) => {
+  useEffect(() => {
+    props.getMediaUploads();
+  }, []);
 
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleNewMediaUpload = this.handleNewMediaUpload.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handleCopyMediaUploads = this.handleCopyMediaUploads.bind(this);
-
-    this.state = {};
-  }
-
-  componentDidMount() {
-    this.props.getMediaUploads();
-  }
-
-  handleEdit(media_upload_id) {
-    const { history, currentSummit } = this.props;
+  const handleEdit = (media_upload_id) => {
     history.push(
       `/app/summits/${currentSummit.id}/media-uploads/${media_upload_id}`
     );
-  }
+  };
 
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.getMediaUploads(term, page, perPage, order, orderDir);
-  }
+  const handlePageChange = (page) => {
+    props.getMediaUploads(term, page, perPage, order, orderDir);
+  };
 
-  handleSort(index, key, dir) {
-    const { term, page, perPage } = this.props;
-    this.props.getMediaUploads(term, page, perPage, key, dir);
-  }
+  const handleSort = (index, key, dir) => {
+    props.getMediaUploads(term, currentPage, perPage, key, dir);
+  };
 
-  handleSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
-    this.props.getMediaUploads(term, page, perPage, order, orderDir);
-  }
+  const handleSearch = (term) => {
+    props.getMediaUploads(term, currentPage, perPage, order, orderDir);
+  };
 
-  handleNewMediaUpload(ev) {
-    const { history, currentSummit } = this.props;
+  const handleNewMediaUpload = (ev) => {
     ev.preventDefault();
-
     history.push(`/app/summits/${currentSummit.id}/media-uploads/new`);
-  }
+  };
 
-  handleDelete(mediaUploadId) {
-    const { deleteMediaUpload, media_uploads } = this.props;
+  const handleDelete = (mediaUploadId) => {
     const media_upload = media_uploads.find((t) => t.id === mediaUploadId);
 
     Swal.fire({
@@ -91,99 +81,94 @@ class MediaUploadListPage extends React.Component {
       confirmButtonText: T.translate("general.yes_delete")
     }).then((result) => {
       if (result.value) {
-        deleteMediaUpload(mediaUploadId);
+        props.deleteMediaUpload(mediaUploadId);
       }
     });
-  }
+  };
 
-  handleCopyMediaUploads(fromSummitId) {
-    this.props.copyMediaUploads(fromSummitId);
-  }
+  const handleCopyMediaUploads = (fromSummitId) => {
+    props.copyMediaUploads(fromSummitId);
+  };
 
-  canEdit = (item) => !item.is_system_defined;
+  const canEdit = (item) => !item.is_system_defined;
 
-  render() {
-    const { media_uploads, lastPage, currentPage, term, order, orderDir } =
-      this.props;
+  const columns = [
+    { columnKey: "id", value: T.translate("general.id"), sortable: true },
+    {
+      columnKey: "name",
+      value: T.translate("media_upload.name"),
+      sortable: true
+    },
+    {
+      columnKey: "description",
+      value: T.translate("media_upload.description")
+    }
+  ];
 
-    const columns = [
-      { columnKey: "id", value: T.translate("general.id"), sortable: true },
-      {
-        columnKey: "name",
-        value: T.translate("media_upload.name"),
-        sortable: true
-      },
-      {
-        columnKey: "description",
-        value: T.translate("media_upload.description")
-      }
-    ];
+  const table_options = {
+    sortCol: order,
+    sortDir: orderDir,
+    actions: {
+      edit: { onClick: handleEdit },
+      delete: { onClick: handleDelete, display: canEdit }
+    }
+  };
 
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete, display: this.canEdit }
-      }
-    };
-
-    return (
-      <div className="container">
-        <h3> {T.translate("media_upload.media_upload_list")}</h3>
-        <div className="row">
-          <div className="col-md-6">
-            <FreeTextSearch
-              value={term}
-              placeholder={T.translate("media_upload.placeholders.search")}
-              onSearch={this.handleSearch}
-            />
-          </div>
-          <div className="col-md-6 text-right">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNewMediaUpload}
-            >
-              {T.translate("media_upload.add")}
-            </button>
-            <SummitDropdown
-              onClick={this.handleCopyMediaUploads}
-              actionLabel={T.translate("media_upload.copy_media_uploads")}
-            />
-          </div>
+  return (
+    <div className="container">
+      <h3> {T.translate("media_upload.media_upload_list")}</h3>
+      <div className="row">
+        <div className="col-md-6">
+          <FreeTextSearch
+            value={term}
+            placeholder={T.translate("media_upload.placeholders.search")}
+            onSearch={handleSearch}
+          />
         </div>
-
-        {media_uploads.length === 0 && (
-          <div>{T.translate("media_upload.no_results")}</div>
-        )}
-
-        {media_uploads.length > 0 && (
-          <div>
-            <Table
-              options={table_options}
-              data={media_uploads}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </div>
-        )}
+        <div className="col-md-6 text-right">
+          <button
+            className="btn btn-primary right-space"
+            onClick={handleNewMediaUpload}
+          >
+            {T.translate("media_upload.add")}
+          </button>
+          <SummitDropdown
+            onClick={handleCopyMediaUploads}
+            actionLabel={T.translate("media_upload.copy_media_uploads")}
+          />
+        </div>
       </div>
-    );
-  }
-}
+
+      {media_uploads.length === 0 && (
+        <div>{T.translate("media_upload.no_results")}</div>
+      )}
+
+      {media_uploads.length > 0 && (
+        <div>
+          <Table
+            options={table_options}
+            data={media_uploads}
+            columns={columns}
+            onSort={handleSort}
+          />
+          <Pagination
+            bsSize="medium"
+            prev
+            next
+            first
+            last
+            ellipsis
+            boundaryLinks
+            maxButtons={10}
+            items={lastPage}
+            activePage={currentPage}
+            onSelect={handlePageChange}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, mediaUploadListState }) => ({
   currentSummit: currentSummitState.currentSummit,
