@@ -24,12 +24,18 @@ import Swal from "sweetalert2";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import history from "../../history";
 import HexColorInput from "../inputs/hex-color-input";
+import {
+  MARKETING_SETTING_TYPE_FILE,
+  MARKETING_SETTING_TYPE_HEX_COLOR,
+  MARKETING_SETTING_TYPE_TEXT,
+  MARKETING_SETTING_TYPE_TEXTAREA
+} from "../../utils/constants";
 
 const setting_types_ddl = [
-  { label: "Plain Text", value: "TEXT" },
-  { label: "Html", value: "TEXTAREA" },
-  { label: "File", value: "FILE" },
-  { label: "Hex Color", value: "HEX_COLOR" }
+  { label: "Plain Text", value: MARKETING_SETTING_TYPE_TEXT },
+  { label: "Html", value: MARKETING_SETTING_TYPE_TEXTAREA },
+  { label: "File", value: MARKETING_SETTING_TYPE_FILE },
+  { label: "Hex Color", value: MARKETING_SETTING_TYPE_HEX_COLOR }
 ];
 
 class MarketingSettingForm extends React.Component {
@@ -88,8 +94,8 @@ class MarketingSettingForm extends React.Component {
     const { entity } = this.state;
     const { currentSummit } = this.props;
     if (
-      (entity.type !== "FILE" && !entity.value) ||
-      (entity.type === "FILE" && !entity.file)
+      (entity.type !== MARKETING_SETTING_TYPE_FILE && !entity.value) ||
+      (entity.type === MARKETING_SETTING_TYPE_FILE && !entity.file)
     ) {
       const msg = `${
         setting_types_ddl.find((e) => e.value === entity.type)?.label
@@ -191,7 +197,7 @@ class MarketingSettingForm extends React.Component {
           </div>
         </div>
         <div className="row form-group">
-          {entity.type === "TEXT" && (
+          {entity.type === MARKETING_SETTING_TYPE_TEXT && (
             <div className="col-md-4">
               <label> {T.translate("marketing.plain_text")} *</label>
               <Input
@@ -203,7 +209,7 @@ class MarketingSettingForm extends React.Component {
               />
             </div>
           )}
-          {entity.type === "TEXTAREA" && (
+          {entity.type === MARKETING_SETTING_TYPE_TEXTAREA && (
             <div className="col-md-8">
               <label> {T.translate("marketing.html")} *</label>
               <TextEditorV2
@@ -214,7 +220,7 @@ class MarketingSettingForm extends React.Component {
               />
             </div>
           )}
-          {entity.type === "FILE" && (
+          {entity.type === MARKETING_SETTING_TYPE_FILE && (
             <div className="col-md-12">
               <label> {T.translate("marketing.file")} *</label>
               <UploadInput
@@ -226,7 +232,7 @@ class MarketingSettingForm extends React.Component {
               />
             </div>
           )}
-          {entity.type === "HEX_COLOR" && (
+          {entity.type === MARKETING_SETTING_TYPE_HEX_COLOR && (
             <div className="col-md-4">
               <label> {T.translate("marketing.hex_color")} *</label>
               <HexColorInput
