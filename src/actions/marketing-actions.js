@@ -211,9 +211,13 @@ export const saveMarketingSetting =
   async (dispatch, getState) => {
     if (entity.type === MARKETING_SETTING_TYPE_FILE && !file)
       return Promise.resolve();
-    // TODO: review to save hex color settings with empty values
-    if (entity.type === MARKETING_SETTING_TYPE_HEX_COLOR && !entity.value)
-      return Promise.resolve();
+    // delete empty hex color settings
+    if (
+      entity.id &&
+      entity.type === MARKETING_SETTING_TYPE_HEX_COLOR &&
+      !entity.value
+    )
+      return dispatch(deleteSetting(entity.id));
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();

@@ -30,7 +30,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import pLimit from "p-limit";
 import history from "../history";
-import { saveMarketingSetting, deleteSetting } from "./marketing-actions";
+import { saveMarketingSetting } from "./marketing-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,
@@ -141,14 +141,6 @@ export const saveBadgeSettings = (badgeSettings) => async (dispatch) => {
         key: m.toUpperCase(),
         value
       };
-
-      if (
-        badge_setting.id &&
-        badge_setting.type === "HEX_COLOR" &&
-        value === ""
-      ) {
-        return dispatch(deleteSetting(badge_setting.id));
-      }
 
       return dispatch(saveMarketingSetting(badge_setting, file));
     })
