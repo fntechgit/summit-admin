@@ -130,12 +130,9 @@ class MarketingSettingForm extends React.Component {
   handleUploadFile(file) {
     const newEntity = { ...this.state.entity };
 
-    newEntity.file = file;
     newEntity.file_preview = file.preview;
 
     this.setState({ file, entity: newEntity });
-
-    this.setState({ entity: newEntity });
   }
 
   handleRemoveFile() {
