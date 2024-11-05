@@ -699,7 +699,8 @@ export const addTicketsToOrder =
       authErrorHandler
     )(params)(dispatch)
       .then(() => {
-        dispatch(stopLoading());
+        // load tickets on separate request bc performance issues ( there are orders with over 100 tickets )
+        getOrderTickets(orderId, 1)(dispatch, getState);
       })
       .catch(() => dispatch(stopLoading()));
   };
