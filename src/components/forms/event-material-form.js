@@ -21,7 +21,6 @@ import {
   TextEditor
 } from "openstack-uicore-foundation/lib/components";
 import {
-  getAccessTokenSafely,
   isEmpty,
   scrollToError,
   shallowEqual,
@@ -46,13 +45,14 @@ class EventMaterialForm extends React.Component {
       errors: props.errors
     };
 
+    this.fileUploadUrl = `${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`;
+
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeMUType = this.handleChangeMUType.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleUploadFile = this.handleUploadFile.bind(this);
     this.handleRemoveFile = this.handleRemoveFile.bind(this);
     this.onMediaUploadComplete = this.onMediaUploadComplete.bind(this);
-    this.handleGetPostUrl = this.handleGetPostUrl.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -97,11 +97,6 @@ class EventMaterialForm extends React.Component {
     entity[id] = value;
 
     this.setState({ entity, errors });
-  }
-
-  async handleGetPostUrl() {
-    const accessToken = await getAccessTokenSafely();
-    return `${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload?access_token=${accessToken}`;
   }
 
   handleChangeMUType(ev) {
@@ -285,7 +280,7 @@ class EventMaterialForm extends React.Component {
                 onUploadComplete={this.onMediaUploadComplete}
                 value={mediaInputValue}
                 mediaType={slideMediaType}
-                getPostUrl={this.handleGetPostUrl}
+                postUrl={this.fileUploadUrl}
                 error={hasErrors("slide", errors)}
                 djsConfig={{ withCredentials: true }}
                 parallelChunkUploads
@@ -356,7 +351,7 @@ class EventMaterialForm extends React.Component {
                   value={mediaInputValue}
                   mediaType={media_type}
                   onRemove={this.handleRemoveFile}
-                  getPostUrl={this.handleGetPostUrl}
+                  postUrl={this.fileUploadUrl}
                   error={hasErrors(media_type.name, errors)}
                   djsConfig={{ withCredentials: true }}
                   parallelChunkUploads
