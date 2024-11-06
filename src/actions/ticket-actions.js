@@ -252,7 +252,7 @@ const parseFilters = (filters, term = null) => {
     filter.push(
       filters.ownerFullNameStartWithFilter.reduce(
         (accumulator, alpha) =>
-          `${accumulator}${accumulator !== "" ? "," : ""}owner_first_name==${
+          `${accumulator}${accumulator !== "" ? "," : ""}owner_first_name@@${
             alpha.value
           }`,
         ""
