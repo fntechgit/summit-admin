@@ -252,7 +252,19 @@ const parseFilters = (filters, term = null) => {
     filter.push(
       filters.ownerFullNameStartWithFilter.reduce(
         (accumulator, alpha) =>
-          `${accumulator}${accumulator !== "" ? "," : ""}owner_first_name==${
+          `${accumulator}${accumulator !== "" ? "," : ""}owner_first_name@@${
+            alpha.value
+          }`,
+        ""
+      )
+    );
+  }
+
+  if (filters.ownerLastNameStartWithFilter?.length > 0) {
+    filter.push(
+      filters.ownerLastNameStartWithFilter.reduce(
+        (accumulator, alpha) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}owner_last_name@@${
             alpha.value
           }`,
         ""
