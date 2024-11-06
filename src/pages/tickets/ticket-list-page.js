@@ -38,7 +38,8 @@ import {
   clearAllSelectedTicket,
   setSelectedAll,
   printTickets,
-  getTicket
+  getTicket,
+  getTicketTypes
 } from "../../actions/ticket-actions";
 import { getSummitById } from "../../actions/summit-actions";
 import QrReaderInput from "../../components/inputs/qr-reader-input";
@@ -175,7 +176,8 @@ class TicketListPage extends React.Component {
       orderDir,
       filters,
       extraColumns,
-      getTickets
+      getTickets,
+      getTicketTypes
     } = this.props;
 
     if (currentSummit) {
@@ -189,15 +191,18 @@ class TicketListPage extends React.Component {
         enabledFilters,
         ticketFilters: { ...ticketFilters, ...filters }
       }));
-      getTickets(
-        term,
-        DEFAULT_CURRENT_PAGE,
-        DEFAULT_PER_PAGE,
-        order,
-        orderDir,
-        filters,
-        extraColumns
-      );
+      if (currentSummit) {
+        getTicketTypes(currentSummit);
+        getTickets(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          DEFAULT_PER_PAGE,
+          order,
+          orderDir,
+          filters,
+          extraColumns
+        );
+      }
     }
   }
 
@@ -1450,5 +1455,6 @@ export default connect(mapStateToProps, {
   getTicket,
   getBadgeTypes,
   saveFilterCriteria,
-  deleteFilterCriteria
+  deleteFilterCriteria,
+  getTicketTypes
 })(TicketListPage);
