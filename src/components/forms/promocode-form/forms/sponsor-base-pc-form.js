@@ -4,12 +4,9 @@ import {
   Input,
   SponsorInput
 } from "openstack-uicore-foundation/lib/components";
-import MemberBasePCForm from "./member-base-pc-form";
-import { hasErrors } from "../../../../utils/methods";
 
 const SponsorBasePCForm = (props) => (
-  <>
-    <div className="row form-group">
+  <div className="row form-group">
       <div className="col-md-6">
         <label> {T.translate("edit_promocode.sponsor")} *</label>
         <SponsorInput
@@ -33,7 +30,6 @@ const SponsorBasePCForm = (props) => (
         />
       </div>
     </div>
-  </>
 );
 
 export default SponsorBasePCForm;
