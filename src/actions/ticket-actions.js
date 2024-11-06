@@ -260,6 +260,18 @@ const parseFilters = (filters, term = null) => {
     );
   }
 
+  if (filters.ownerLastNameStartWithFilter?.length > 0) {
+    filter.push(
+      filters.ownerLastNameStartWithFilter.reduce(
+        (accumulator, alpha) =>
+          `${accumulator}${accumulator !== "" ? "," : ""}owner_last_name@@${
+            alpha.value
+          }`,
+        ""
+      )
+    );
+  }
+
   if (filters?.ownerCompany?.length > 0) {
     const nonTBD = filters?.ownerCompany.filter((of) => of.id !== "NULL");
     const ownerCompany = [];
