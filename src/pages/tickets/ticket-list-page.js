@@ -103,6 +103,16 @@ const fieldNames = (badge_types) => [
     columnKey: "badge_prints_count",
     value: "badge_prints_count",
     sortable: true
+  },
+  {
+    columnKey: "owner_first_name",
+    value: "owner_first_name",
+    sortable: true
+  },
+  {
+    columnKey: "owner_last_name",
+    value: "owner_last_name",
+    sortable: true
   }
 ];
 
@@ -666,6 +676,14 @@ class TicketListPage extends React.Component {
       {
         value: "badge_prints_count",
         label: T.translate("ticket_list.badge_prints_count")
+      },
+      {
+        value: "owner_first_name",
+        label: T.translate("ticket_list.owner_first_name")
+      },
+      {
+        value: "owner_last_name",
+        label: T.translate("ticket_list.owner_last_name")
       }
     ];
 
@@ -674,7 +692,8 @@ class TicketListPage extends React.Component {
       { label: "Completed", value: "completedFilter" },
       { label: "Badge", value: "hasBadgeFilter" },
       { label: "Amount", value: "amountFilter" },
-      { label: "Assignee Name", value: "ownerFullNameStartWithFilter" },
+      { label: "Assignee First Name", value: "ownerFullNameStartWithFilter" },
+      { label: "Assignee Last Name", value: "ownerLastNameStartWithFilter" },
       { label: "Owner Company", value: "ownerCompany" },
       { label: "View Type", value: "viewTypesFilter" },
       { label: "Ticket Type", value: "ticketTypesFilter" },
@@ -942,6 +961,24 @@ class TicketListPage extends React.Component {
                   value={ticketFilters.ownerFullNameStartWithFilter}
                   onChange={(val) =>
                     this.handleFilterChange("ownerFullNameStartWithFilter", val)
+                  }
+                  options={alphabet}
+                  isClearable
+                  isMulti
+                  className="dropdownFilter"
+                />
+              </div>
+            )}
+            {enabledFilters.includes("ownerLastNameStartWithFilter") && (
+              <div className="col-md-6">
+                <Select
+                  placeholder={T.translate(
+                    "ticket_list.placeholders.owner_last_name"
+                  )}
+                  name="ownerLastNameStartWithFilter"
+                  value={ticketFilters.ownerLastNameStartWithFilter}
+                  onChange={(val) =>
+                    this.handleFilterChange("ownerLastNameStartWithFilter", val)
                   }
                   options={alphabet}
                   isClearable
