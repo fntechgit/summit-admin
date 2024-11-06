@@ -26,7 +26,12 @@ import {
   shallowEqual,
   hasErrors
 } from "../../utils/methods";
-import { KB } from "../../utils/constants";
+import {
+  ALLOWED_SLIDES_FORMATS,
+  KB,
+  MAX_MEDIA_UPLOAD_SIZE,
+  MAX_SLIDE_UPLOAD_SIZE
+} from "../../utils/constants";
 
 const MATERIAL_TYPE = {
   PRESENTATION_LINK: "PresentationLink",
@@ -80,7 +85,7 @@ class EventMaterialForm extends React.Component {
     }
   }
 
-  async handleChange(ev) {
+  handleChange(ev) {
     const entity = { ...this.state.entity };
     const errors = { ...this.state.errors };
     let { value, id } = ev.target;
@@ -146,7 +151,11 @@ class EventMaterialForm extends React.Component {
     const { entity, errors } = this.state;
 
     // on admin we upload one per time
-    const media_type = { ...entity.media_upload_type, max_uploads_qty: 1 };
+    const media_type = {
+      ...entity.media_upload_type,
+      max_size: entity.media_upload_type.max_size || MAX_MEDIA_UPLOAD_SIZE,
+      max_uploads_qty: 1
+    };
     const mediaInputValue = entity.filename ? [entity] : [];
 
     const event_materials_ddl = [
@@ -165,13 +174,11 @@ class EventMaterialForm extends React.Component {
     const disableInputs =
       entity.class_name === MATERIAL_TYPE.PRESENTATION_MEDIA_UPLOAD;
 
-    const MULTIPLIER = 500;
-
     const slideMediaType = {
       id: "slide",
-      max_size: MULTIPLIER * KB,
+      max_size: MAX_SLIDE_UPLOAD_SIZE,
       type: {
-        allowed_extensions: ["jpg", "jpeg", "ppt", "pptx", "pdf"]
+        allowed_extensions: ALLOWED_SLIDES_FORMATS
       }
     };
 
