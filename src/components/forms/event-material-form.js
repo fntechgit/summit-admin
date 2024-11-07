@@ -50,8 +50,6 @@ class EventMaterialForm extends React.Component {
       errors: props.errors
     };
 
-    this.fileUploadUrl = `${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`;
-
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeMUType = this.handleChangeMUType.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -287,7 +285,7 @@ class EventMaterialForm extends React.Component {
                 onUploadComplete={this.onMediaUploadComplete}
                 value={mediaInputValue}
                 mediaType={slideMediaType}
-                postUrl={this.fileUploadUrl}
+                postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
                 error={hasErrors("slide", errors)}
                 djsConfig={{ withCredentials: true }}
                 parallelChunkUploads
@@ -358,7 +356,7 @@ class EventMaterialForm extends React.Component {
                   value={mediaInputValue}
                   mediaType={media_type}
                   onRemove={this.handleRemoveFile}
-                  // postUrl={this.fileUploadUrl}
+                  postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
                   error={hasErrors(media_type.name, errors)}
                   djsConfig={{ withCredentials: true }}
                   parallelChunkUploads
