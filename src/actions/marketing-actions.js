@@ -23,13 +23,12 @@ import {
   putRequest
 } from "openstack-uicore-foundation/lib/utils/actions";
 import Swal from "sweetalert2";
-import { getAccessTokenSafely } from "../utils/methods";
+import { getAccessTokenSafely, isHexColorSetting } from "../utils/methods";
 import {
   DEFAULT_PER_PAGE,
   ERROR_CODE_412,
   HUNDRED_PER_PAGE,
-  MARKETING_SETTING_TYPE_FILE,
-  MARKETING_SETTING_TYPE_HEX_COLOR
+  MARKETING_SETTING_TYPE_FILE
 } from "../utils/constants";
 
 export const REQUEST_SETTINGS = "REQUEST_SETTINGS";
@@ -211,19 +210,14 @@ export const saveMarketingSetting =
   async (dispatch, getState) => {
     if (entity.type === MARKETING_SETTING_TYPE_FILE && !file)
       return Promise.resolve();
-    if (
-      !entity.id &&
-      entity.type === MARKETING_SETTING_TYPE_HEX_COLOR &&
-      !entity.value
-    )
-      return Promise.resolve();
-    // delete empty hex color settings
-    if (
-      entity.id &&
-      entity.type === MARKETING_SETTING_TYPE_HEX_COLOR &&
-      !entity.value
-    )
-      return dispatch(deleteSetting(entity.id));
+
+    // Helper function to check if the entity is a hex color setting
+    if (isHexColorSetting(entity)) {
+      // If entity is new and has no value, dont save it
+      if (!entity.id && !entity.value) return Promise.resolve();
+      // if entity exists and has no value, delete it
+      if (entity.id && !entity.value) return dispatch(deleteSetting(entity.id));
+    }
 
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
