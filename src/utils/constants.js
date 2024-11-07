@@ -151,3 +151,10 @@ export const MARKETING_SETTING_TYPE_TEXT = "TEXT";
 export const MARKETING_SETTING_TYPE_TEXTAREA = "TEXTAREA";
 export const MARKETING_SETTING_TYPE_FILE = "FILE";
 export const MARKETING_SETTING_TYPE_HEX_COLOR = "HEX_COLOR";
+export const KB = 1024;
+// 500 * 1024kb
+export const MAX_MEDIA_UPLOAD_SIZE = 512000;
+// 500 * 1024kb
+export const MAX_SLIDE_UPLOAD_SIZE = 512000;
+
+export const ALLOWED_SLIDES_FORMATS = ["jpg", "jpeg", "ppt", "pptx", "pdf"];

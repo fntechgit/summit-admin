@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -26,6 +26,19 @@ import {
   shallowEqual,
   hasErrors
 } from "../../utils/methods";
+import {
+  ALLOWED_SLIDES_FORMATS,
+  KB,
+  MAX_MEDIA_UPLOAD_SIZE,
+  MAX_SLIDE_UPLOAD_SIZE
+} from "../../utils/constants";
+
+const MATERIAL_TYPE = {
+  PRESENTATION_LINK: "PresentationLink",
+  PRESENTATION_MEDIA_UPLOAD: "PresentationMediaUpload",
+  PRESENTATION_SLIDE: "PresentationSlide",
+  PRESENTATION_VIDEO: "PresentationVideo"
+};
 
 class EventMaterialForm extends React.Component {
   constructor(props) {
@@ -45,7 +58,7 @@ class EventMaterialForm extends React.Component {
     this.onMediaUploadComplete = this.onMediaUploadComplete.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     const name = this.props.entity.id
       ? this.props.entity.name
@@ -85,7 +98,8 @@ class EventMaterialForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+
+    this.setState({ entity, errors });
   }
 
   handleChangeMUType(ev) {
@@ -101,24 +115,23 @@ class EventMaterialForm extends React.Component {
     entity.media_upload_type = type;
     entity.name = type.name;
 
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleUploadFile(file) {
-    this.setState({ file: file });
+    this.setState({ file });
   }
 
-  handleRemoveFile(ev) {
+  handleRemoveFile() {
     const entity = { ...this.state.entity };
     entity.file_link = "";
     entity.filename = "";
     entity.filepath = "";
-    this.setState({ entity: entity, file: null });
+    this.setState({ entity, file: null });
   }
 
-  onMediaUploadComplete(response, id, data) {
+  onMediaUploadComplete(response) {
     const { entity } = this.state;
-
     if (response) {
       entity.filepath = `${response.path}${response.name}`;
       entity.filename = response.name;
@@ -134,15 +147,20 @@ class EventMaterialForm extends React.Component {
 
   render() {
     const { entity, errors } = this.state;
+
     // on admin we upload one per time
-    const media_type = { ...entity.media_upload_type, max_uploads_qty: 1 };
+    const media_type = {
+      ...entity.media_upload_type,
+      max_size: entity.media_upload_type?.max_size || MAX_MEDIA_UPLOAD_SIZE,
+      max_uploads_qty: 1
+    };
     const mediaInputValue = entity.filename ? [entity] : [];
 
     const event_materials_ddl = [
-      { label: "Link", value: "PresentationLink" },
-      { label: "Slide", value: "PresentationSlide" },
-      { label: "Video", value: "PresentationVideo" },
-      { label: "Media Upload", value: "PresentationMediaUpload" }
+      { label: "Link", value: MATERIAL_TYPE.PRESENTATION_LINK },
+      { label: "Slide", value: MATERIAL_TYPE.PRESENTATION_SLIDE },
+      { label: "Video", value: MATERIAL_TYPE.PRESENTATION_VIDEO },
+      { label: "Media Upload", value: MATERIAL_TYPE.PRESENTATION_MEDIA_UPLOAD }
     ];
 
     const media_uploads_ddl =
@@ -151,13 +169,14 @@ class EventMaterialForm extends React.Component {
         value: mu.id
       }));
 
-    const disableInputs = entity.class_name === "PresentationMediaUpload";
+    const disableInputs =
+      entity.class_name === MATERIAL_TYPE.PRESENTATION_MEDIA_UPLOAD;
 
     const slideMediaType = {
       id: "slide",
-      max_size: 500 * 1024,
+      max_size: MAX_SLIDE_UPLOAD_SIZE,
       type: {
-        allowed_extensions: ["jpg", "jpeg", "ppt", "pptx", "pdf"]
+        allowed_extensions: ALLOWED_SLIDES_FORMATS
       }
     };
 
@@ -179,7 +198,7 @@ class EventMaterialForm extends React.Component {
               disabled={entity.id !== 0}
             />
           </div>
-          {entity.class_name === "PresentationMediaUpload" && (
+          {entity.class_name === MATERIAL_TYPE.PRESENTATION_MEDIA_UPLOAD && (
             <div className="col-md-4">
               <label>
                 {" "}
@@ -239,7 +258,7 @@ class EventMaterialForm extends React.Component {
             </div>
           </div>
         )}
-        {entity.class_name === "PresentationLink" && (
+        {entity.class_name === MATERIAL_TYPE.PRESENTATION_LINK && (
           <div className="row form-group">
             <div className="col-md-6">
               <label> {T.translate("edit_event_material.link")} *</label>
@@ -254,7 +273,7 @@ class EventMaterialForm extends React.Component {
           </div>
         )}
 
-        {entity.class_name === "PresentationSlide" && (
+        {entity.class_name === MATERIAL_TYPE.PRESENTATION_SLIDE && (
           <div className="row form-group">
             <div className="col-md-12">
               <label>
@@ -266,9 +285,10 @@ class EventMaterialForm extends React.Component {
                 onUploadComplete={this.onMediaUploadComplete}
                 value={mediaInputValue}
                 mediaType={slideMediaType}
-                postUrl={`${window.API_BASE_URL}/api/public/v1/files/upload`}
+                postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
                 error={hasErrors("slide", errors)}
                 djsConfig={{ withCredentials: true }}
+                parallelChunkUploads
               />
             </div>
             <div className="col-md-7 text-center">
@@ -288,7 +308,7 @@ class EventMaterialForm extends React.Component {
           </div>
         )}
 
-        {entity.class_name === "PresentationVideo" && (
+        {entity.class_name === MATERIAL_TYPE.PRESENTATION_VIDEO && (
           <div className="row form-group">
             <div className="col-md-6">
               <label> {T.translate("edit_event_material.youtube_id")} *</label>
@@ -302,7 +322,7 @@ class EventMaterialForm extends React.Component {
             </div>
           </div>
         )}
-        {entity.class_name === "PresentationVideo" && (
+        {entity.class_name === MATERIAL_TYPE.PRESENTATION_VIDEO && (
           <div className="row form-group">
             <div className="col-md-6">
               <label>
@@ -320,7 +340,7 @@ class EventMaterialForm extends React.Component {
           </div>
         )}
 
-        {entity.class_name === "PresentationMediaUpload" &&
+        {entity.class_name === MATERIAL_TYPE.PRESENTATION_MEDIA_UPLOAD &&
           media_type &&
           media_type.type && (
             <div className="row form-group">
@@ -328,7 +348,7 @@ class EventMaterialForm extends React.Component {
                 <label>
                   {" "}
                   {T.translate("edit_event_material.media_upload_file")}{" "}
-                  {`(max size: ${entity.media_upload_type.max_size / 1024}Mb )`}
+                  {`(max size: ${entity.media_upload_type.max_size / KB}Mb )`}
                 </label>
                 <UploadInputV2
                   id={`media_upload_${media_type.id}`}
@@ -336,9 +356,10 @@ class EventMaterialForm extends React.Component {
                   value={mediaInputValue}
                   mediaType={media_type}
                   onRemove={this.handleRemoveFile}
-                  postUrl={`${window.API_BASE_URL}/api/public/v1/files/upload`}
+                  postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
                   error={hasErrors(media_type.name, errors)}
                   djsConfig={{ withCredentials: true }}
+                  parallelChunkUploads
                 />
               </div>
             </div>
