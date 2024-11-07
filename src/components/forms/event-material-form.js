@@ -153,7 +153,7 @@ class EventMaterialForm extends React.Component {
     // on admin we upload one per time
     const media_type = {
       ...entity.media_upload_type,
-      max_size: entity.media_upload_type.max_size || MAX_MEDIA_UPLOAD_SIZE,
+      max_size: entity.media_upload_type?.max_size || MAX_MEDIA_UPLOAD_SIZE,
       max_uploads_qty: 1
     };
     const mediaInputValue = entity.filename ? [entity] : [];
@@ -358,7 +358,7 @@ class EventMaterialForm extends React.Component {
                   value={mediaInputValue}
                   mediaType={media_type}
                   onRemove={this.handleRemoveFile}
-                  postUrl={this.fileUploadUrl}
+                  // postUrl={this.fileUploadUrl}
                   error={hasErrors(media_type.name, errors)}
                   djsConfig={{ withCredentials: true }}
                   parallelChunkUploads
