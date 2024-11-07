@@ -38,8 +38,7 @@ import {
   clearAllSelectedTicket,
   setSelectedAll,
   printTickets,
-  getTicket,
-  getTicketTypes
+  getTicket
 } from "../../actions/ticket-actions";
 import { getSummitById } from "../../actions/summit-actions";
 import QrReaderInput from "../../components/inputs/qr-reader-input";
@@ -176,8 +175,7 @@ class TicketListPage extends React.Component {
       orderDir,
       filters,
       extraColumns,
-      getTickets,
-      getTicketTypes
+      getTickets
     } = this.props;
 
     if (currentSummit) {
@@ -192,7 +190,6 @@ class TicketListPage extends React.Component {
         ticketFilters: { ...ticketFilters, ...filters }
       }));
       if (currentSummit) {
-        getTicketTypes(currentSummit);
         getTickets(
           term,
           DEFAULT_CURRENT_PAGE,
@@ -571,7 +568,6 @@ class TicketListPage extends React.Component {
       selectedFilterCriteria
     } = this.state;
 
-    const { ticket_types } = currentSummit;
     const { badge_types } = currentSummit;
 
     let columns = [
@@ -579,9 +575,7 @@ class TicketListPage extends React.Component {
       {
         columnKey: "ticket_type",
         value: T.translate("ticket_list.ticket_type"),
-        sortable: true,
-        render: (row) =>
-          ticket_types.find((tt) => tt.id === row.ticket_type)?.name || "N/A"
+        sortable: true
       },
       {
         columnKey: "owner_name",
@@ -1455,6 +1449,5 @@ export default connect(mapStateToProps, {
   getTicket,
   getBadgeTypes,
   saveFilterCriteria,
-  deleteFilterCriteria,
-  getTicketTypes
+  deleteFilterCriteria
 })(TicketListPage);

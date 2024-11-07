@@ -483,7 +483,6 @@ export const getTickets =
       "number",
       "refunded_amount",
       "status",
-      "ticket_type_id",
       "badge_prints_count",
       "bought_date",
       "currency",
@@ -502,18 +501,22 @@ export const getTickets =
       "badge.type_id",
       "promo_code.code",
       "refund_requests.status",
-      "promo_code.tags.tag"
+      "promo_code.tags.tag",
+      "ticket_type.name",
+      "ticket_type.id"
     ];
 
     const params = {
       page,
       per_page: perPage,
       access_token: accessToken,
-      expand: "owner,badge,promo_code,promo_code.tags,refund_requests",
+      expand:
+        "owner,badge,promo_code,promo_code.tags,refund_requests,ticket_type",
       fields: `${first_level_fields.join(",")},${second_level_fields.join(
         ","
       )}`,
-      relations: "owner.none,badge.none,promo_code.tags,refund_requests.none"
+      relations:
+        "owner.none,badge.none,promo_code.tags,refund_requests.none,ticket_type.none"
     };
 
     const filter = parseFilters(filters, term);

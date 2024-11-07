@@ -64,7 +64,6 @@ import { RECEIVE_USER_ROLES_BY_SUMMIT } from "../../actions/user-chat-roles-acti
 
 import {
   RECEIVE_REFUND_POLICIES,
-  RECEIVE_TICKET_TYPES,
   TICKET_TYPES_CURRENCY_UPDATED
 } from "../../actions/ticket-actions";
 import {
@@ -756,17 +755,6 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         currentSummit: {
           ...state.currentSummit,
           default_ticket_type_currency: currency
-        }
-      };
-    }
-    case RECEIVE_TICKET_TYPES: {
-      const ticketTypes = payload.response.data;
-
-      return {
-        ...state,
-        currentSummit: {
-          ...state.currentSummit,
-          ticket_types: ticketTypes
         }
       };
     }
