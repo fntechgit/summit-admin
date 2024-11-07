@@ -199,15 +199,17 @@ class TicketListPage extends React.Component {
         enabledFilters,
         ticketFilters: { ...ticketFilters, ...filters }
       }));
-      getTickets(
-        term,
-        DEFAULT_CURRENT_PAGE,
-        DEFAULT_PER_PAGE,
-        order,
-        orderDir,
-        filters,
-        extraColumns
-      );
+      if (currentSummit) {
+        getTickets(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          DEFAULT_PER_PAGE,
+          order,
+          orderDir,
+          filters,
+          extraColumns
+        );
+      }
     }
   }
 
@@ -576,7 +578,6 @@ class TicketListPage extends React.Component {
       selectedFilterCriteria
     } = this.state;
 
-    const { ticket_types } = currentSummit;
     const { badge_types } = currentSummit;
 
     let columns = [
@@ -584,9 +585,7 @@ class TicketListPage extends React.Component {
       {
         columnKey: "ticket_type",
         value: T.translate("ticket_list.ticket_type"),
-        sortable: true,
-        render: (row) =>
-          ticket_types.find((tt) => tt.id === row.ticket_type)?.name || "N/A"
+        sortable: true
       },
       {
         columnKey: "owner_name",
