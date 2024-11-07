@@ -1439,9 +1439,11 @@ class TicketListPage extends React.Component {
                   id="check_in"
                   checked={doCheckIn}
                   onChange={(ev) => {
+                    if (!ev.target) return;
+                    const doCheckIn = ev?.target?.checked || false;
                     this.setState((prevState) => ({
                       ...prevState,
-                      doCheckIn: ev.target.checked
+                      doCheckIn
                     }));
                   }}
                   className="form-check-input"
