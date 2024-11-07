@@ -30,12 +30,12 @@ export default class SummitDropdown extends React.Component {
   }
 
   handleChange(ev) {
-    this.setState({ summitValue: ev.value });
+    this.setState({ summitValue: ev.target.value });
   }
 
   handleClick(ev) {
     ev.preventDefault();
-    this.props.onClick(this.state.summitValue.value);
+    this.props.onClick(this.state.summitValue.id);
   }
 
   render() {
@@ -46,7 +46,7 @@ export default class SummitDropdown extends React.Component {
       <div className={`${styles.summitDropdown} btn-group ${bigClass}`}>
         <SummitInput
           id="summit-select"
-          value={this.state.summitValue}
+          value={this.state.summitValue?.value?.name}
           onChange={this.handleChange}
           placeholder={T.translate("general.select_summit")}
           className={`btn-group ${styles.summitSelect} text-left`}
