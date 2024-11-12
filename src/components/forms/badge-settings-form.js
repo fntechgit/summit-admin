@@ -195,11 +195,6 @@ class BadgeSettingsForm extends React.Component {
       { label: "Uppercase", value: "UPPERCASE" }
     ];
 
-    const ddlTextFitMode = [
-      { label: "Single", value: "SINGLE" },
-      { label: "Multi", value: "MULTI" }
-    ];
-
     const ddlNameDisplayMode = [
       { label: "Full Name", value: "FULL_NAME" },
       { label: "Stacked", value: "STACKED" },
@@ -543,16 +538,23 @@ class BadgeSettingsForm extends React.Component {
               <div className="col-md-6">
                 <label>
                   {T.translate(
-                    "badge_settings.badge_template_first_name_text_fit_mode"
-                  )}
+                    "badge_settings.badge_template_first_name_shrink_at_line"
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.shrink_info")}
+                  />
                 </label>
                 <br />
-                <Dropdown
-                  id="BADGE_TEMPLATE_FIRST_NAME_TEXT_FIT_MODE"
-                  value={entity?.BADGE_TEMPLATE_FIRST_NAME_TEXT_FIT_MODE?.value}
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_FIRST_NAME_SHRINK_AT_LINE"
+                  value={
+                    entity?.BADGE_TEMPLATE_FIRST_NAME_SHRINK_AT_LINE?.value
+                  }
                   onChange={this.handleChange}
-                  options={ddlTextFitMode}
-                  isClearable
                 />
               </div>
             </div>
@@ -695,16 +697,21 @@ class BadgeSettingsForm extends React.Component {
               <div className="col-md-6">
                 <label>
                   {T.translate(
-                    "badge_settings.badge_template_last_name_text_fit_mode"
-                  )}
+                    "badge_settings.badge_template_last_name_shrink_at_line"
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.shrink_info")}
+                  />
                 </label>
                 <br />
-                <Dropdown
-                  id="BADGE_TEMPLATE_LAST_NAME_TEXT_FIT_MODE"
-                  value={entity?.BADGE_TEMPLATE_LAST_NAME_TEXT_FIT_MODE?.value}
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_LAST_NAME_SHRINK_AT_LINE"
+                  value={entity?.BADGE_TEMPLATE_LAST_NAME_SHRINK_AT_LINE?.value}
                   onChange={this.handleChange}
-                  options={ddlTextFitMode}
-                  isClearable
                 />
               </div>
             </div>
@@ -843,16 +850,21 @@ class BadgeSettingsForm extends React.Component {
               <div className="col-md-6">
                 <label>
                   {T.translate(
-                    "badge_settings.badge_template_company_text_fit_mode"
-                  )}
+                    "badge_settings.badge_template_company_shrink_at_line"
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.shrink_info")}
+                  />
                 </label>
                 <br />
-                <Dropdown
-                  id="BADGE_TEMPLATE_COMPANY_TEXT_FIT_MODE"
-                  value={entity?.BADGE_TEMPLATE_COMPANY_TEXT_FIT_MODE?.value}
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_COMPANY_SHRINK_AT_LINE"
+                  value={entity?.BADGE_TEMPLATE_COMPANY_SHRINK_AT_LINE?.value}
                   onChange={this.handleChange}
-                  options={ddlTextFitMode}
-                  isClearable
                 />
               </div>
             </div>
@@ -1008,16 +1020,21 @@ class BadgeSettingsForm extends React.Component {
               <div className="col-md-6">
                 <label>
                   {T.translate(
-                    "badge_settings.badge_template_title_text_fit_mode"
-                  )}
+                    "badge_settings.badge_template_title_shrink_at_line"
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.shrink_info")}
+                  />
                 </label>
                 <br />
-                <Dropdown
-                  id="BADGE_TEMPLATE_TITLE_TEXT_FIT_MODE"
-                  value={entity?.BADGE_TEMPLATE_TITLE_TEXT_FIT_MODE?.value}
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_TITLE_SHRINK_AT_LINE"
+                  value={entity?.BADGE_TEMPLATE_TITLE_SHRINK_AT_LINE?.value}
                   onChange={this.handleChange}
-                  options={ddlTextFitMode}
-                  isClearable
                 />
               </div>
             </div>
