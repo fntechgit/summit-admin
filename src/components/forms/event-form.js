@@ -32,6 +32,7 @@ import {
   Table,
   MemberInput,
   FreeTextSearch,
+  TicketTypesInput,
   SortableTable
 } from "openstack-uicore-foundation/lib/components";
 import { Pagination } from "react-bootstrap";
@@ -986,11 +987,6 @@ class EventForm extends React.Component {
       { label: "Submission", value: "Submission" }
     ];
 
-    const ticket_types_ddl = currentSummit.ticket_types.map((t) => ({
-      value: t.id,
-      label: t.name
-    }));
-
     return (
       <div>
         <input type="hidden" id="id" value={entity.id} />
@@ -1509,7 +1505,7 @@ class EventForm extends React.Component {
               <UploadInput
                 value={entity.attachment}
                 handleUpload={this.handleUploadFile}
-                handleRemove={(ev) => this.handleRemoveFile("attachment")}
+                handleRemove={() => this.handleRemoveFile("attachment")}
                 className="dropzone col-md-6"
                 multiple={this.props.multi}
                 accept="image/*"
@@ -1523,7 +1519,7 @@ class EventForm extends React.Component {
             <UploadInput
               value={entity.image}
               handleUpload={this.handleUploadPic}
-              handleRemove={(ev) => this.handleRemoveFile("image")}
+              handleRemove={() => this.handleRemoveFile("image")}
               className="dropzone col-md-6"
               multiple={false}
               accept="image/*"
@@ -1975,14 +1971,17 @@ class EventForm extends React.Component {
           <div className="row">
             <div className="col-md-4">
               <label> {T.translate("edit_event.allowed_ticket_types")}</label>
-              <Dropdown
+              <TicketTypesInput
                 id="allowed_ticket_types"
                 value={entity?.allowed_ticket_types}
                 placeholder={T.translate(
                   "edit_event.placeholders.allowed_ticket_types"
                 )}
-                options={ticket_types_ddl}
+                summitId={currentSummit.id}
                 onChange={this.handleChange}
+                version="v2"
+                defaultOptions
+                optionsLimit={100}
                 isMulti
               />
             </div>
