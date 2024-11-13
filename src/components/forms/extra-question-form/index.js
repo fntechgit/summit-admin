@@ -9,18 +9,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
-import history from "../../../history";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   Dropdown,
   Input,
   TextEditor,
-  SortableTable
+  SortableTable,
+  TicketTypesInput
 } from "openstack-uicore-foundation/lib/components";
+import { Modal } from "react-bootstrap";
+import history from "../../../history";
 import {
   isEmpty,
   scrollToError,
@@ -28,7 +30,6 @@ import {
   hasErrors
 } from "../../../utils/methods";
 import { ExtraQuestionsTypeAllowSubQuestion } from "../../../utils/constants";
-import { Modal } from "react-bootstrap";
 import "./styles.less";
 
 class ExtraQuestionForm extends React.Component {
@@ -56,7 +57,7 @@ class ExtraQuestionForm extends React.Component {
     this.handleAddNewValue = this.handleAddNewValue.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -75,15 +76,15 @@ class ExtraQuestionForm extends React.Component {
   }
 
   handleChangeValue(ev) {
-    const currentEditValue = { ...this.state.currentEditValue };
+    const newCurrentEditValue = { ...this.state.currentEditValue };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
       value = ev.target.checked;
     }
 
-    currentEditValue[id] = value;
-    this.setState({ ...this.state, currentEditValue: currentEditValue });
+    newCurrentEditValue[id] = value;
+    this.setState({ ...this.state, currentEditValue: newCurrentEditValue });
   }
 
   handleEditValue(valueId) {
@@ -94,17 +95,17 @@ class ExtraQuestionForm extends React.Component {
   }
 
   handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
+    const newEntity = { ...this.state.entity };
+    const newErrors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
       value = ev.target.checked;
     }
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    newErrors[id] = "";
+    newEntity[id] = value;
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleOnSaveQuestionValue(ev) {
@@ -122,7 +123,7 @@ class ExtraQuestionForm extends React.Component {
     this.props.onSubmit(this.state.entity);
   }
 
-  handleNewSubQuestionRule(ev) {
+  handleNewSubQuestionRule() {
     const { entity } = this.state;
     history.push(
       `/app/summits/${entity.summit_id}/order-extra-questions/${entity.id}/sub-rule/new`
@@ -156,7 +157,7 @@ class ExtraQuestionForm extends React.Component {
 
   formatRuleQuestionColumn(item) {
     const { summitExtraQuestions } = this.props;
-    let question = summitExtraQuestions.find(
+    const question = summitExtraQuestions.find(
       (e) => e.id === item.sub_question_id
     );
     return `${item.visibility === "Visible" ? "Show" : "Not Show"} ${
@@ -219,15 +220,6 @@ class ExtraQuestionForm extends React.Component {
             value: f.id
           }))
         : [];
-    const ticket_type_ddl =
-      currentSummit &&
-      currentSummit.ticket_types &&
-      currentSummit.ticket_types.length > 0
-        ? currentSummit.ticket_types.map((tt) => ({
-            label: tt.name,
-            value: tt.id
-          }))
-        : [];
 
     const question_usage_ddl = [
       { label: "Order", value: "Order" },
@@ -247,9 +239,8 @@ class ExtraQuestionForm extends React.Component {
       {
         columnKey: "is_default",
         value: T.translate("question_form.is_default"),
-        render: (row, val) => {
-          return val ? T.translate("general.yes") : T.translate("general.no");
-        },
+        render: (row, val) =>
+          val ? T.translate("general.yes") : T.translate("general.no"),
         input: "checkbox"
       }
     ];
@@ -421,7 +412,7 @@ class ExtraQuestionForm extends React.Component {
             )}
           </div>
           <div className="row form-group">
-            {ticket_type_ddl.length > 0 && (
+            {currentSummit?.ticket_types.length > 0 && (
               <div className="col-md-4">
                 <label>
                   {T.translate("question_form.allowed_ticket_types")} &nbsp;
@@ -432,13 +423,14 @@ class ExtraQuestionForm extends React.Component {
                     )}
                   />
                 </label>
-                <Dropdown
+                <TicketTypesInput
                   id="allowed_ticket_types"
-                  clearable
-                  isMulti
-                  value={entity.allowed_ticket_types}
+                  value={entity?.allowed_ticket_types}
+                  summitId={currentSummit.id}
                   onChange={this.handleChange}
-                  options={ticket_type_ddl}
+                  optionsLimit={100}
+                  defaultOptions
+                  isMulti
                 />
               </div>
             )}
@@ -539,7 +531,7 @@ class ExtraQuestionForm extends React.Component {
         {currentEditValue != null && (
           <Modal
             className="modal_edit_value"
-            show={true}
+            show
             onHide={() =>
               this.setState({ ...this.state, currentEditValue: null })
             }

@@ -105,6 +105,11 @@ const normalizeQuestion = (entity) => {
       normalizedEntity.max_selected_values
     );
   }
+  if (normalizedEntity.allowed_ticket_types?.length > 0) {
+    normalizedEntity.allowed_ticket_types = entity.allowed_ticket_types.map(
+      (tt) => (tt.hasOwnProperty("id") ? tt.id : tt)
+    );
+  }
   return normalizedEntity;
 };
 
@@ -195,7 +200,8 @@ export const getOrderExtraQuestion =
 
     const params = {
       access_token: accessToken,
-      expand: "values,sub_question_rules"
+      expand: "values,sub_question_rules,allowed_ticket_types",
+      fields: "allowed_ticket_types.id, allowed_ticket_types.name"
     };
 
     return getRequest(
