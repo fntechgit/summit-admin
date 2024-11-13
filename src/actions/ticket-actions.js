@@ -196,7 +196,7 @@ const parseFilters = (filters, term = null) => {
       filters.ticketTypesFilter.reduce(
         (accumulator, tt) =>
           `${accumulator}${accumulator !== "" ? "," : ""}ticket_type_id==${
-            tt.value
+            tt.id
           }`,
         ""
       )

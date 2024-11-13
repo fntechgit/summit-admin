@@ -21,7 +21,8 @@ import {
   Dropdown,
   PromocodeInput,
   TagInput,
-  CompanyInput
+  CompanyInput,
+  TicketTypesInput
 } from "openstack-uicore-foundation/lib/components";
 import { Modal, Pagination } from "react-bootstrap";
 import { Breadcrumb } from "react-breadcrumbs";
@@ -614,10 +615,6 @@ class TicketListPage extends React.Component {
 
     if (!currentSummit.id) return <div />;
 
-    const ticketTypesOptions = [
-      ...currentSummit.ticket_types.map((t) => ({ label: t.name, value: t.id }))
-    ];
-
     const alpha = Array.from(Array(LETTERS_IN_ALPHABET)).map(
       (e, i) => i + UPPERCASE_A_IN_ASCII
     );
@@ -1023,19 +1020,24 @@ class TicketListPage extends React.Component {
             )}
             {enabledFilters.includes("ticketTypesFilter") && (
               <div className="col-md-6">
-                <Select
+                <TicketTypesInput
                   placeholder={T.translate(
                     "ticket_list.placeholders.ticket_types"
                   )}
                   name="ticketTypesFilter"
                   value={ticketFilters.ticketTypesFilter}
-                  onChange={(val) =>
-                    this.handleFilterChange("ticketTypesFilter", val)
+                  onChange={(ev) =>
+                    this.handleFilterChange(
+                      "ticketTypesFilter",
+                      ev.target.value
+                    )
                   }
-                  options={ticketTypesOptions}
-                  isClearable
                   isMulti
                   className="dropdownFilter"
+                  version="v2"
+                  summitId={currentSummit.id}
+                  optionsLimit={100}
+                  defaultOptions
                 />
               </div>
             )}
