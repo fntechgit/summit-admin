@@ -431,6 +431,26 @@ class BadgeSettingsForm extends React.Component {
                 isClearable
               />
             </div>
+            <div className="col-md-6">
+              <label>
+                {T.translate(
+                  "badge_settings.badge_template_text_fields_line_height"
+                )}{" "}
+                &nbsp;{" "}
+                <i
+                  className="fa fa-info-circle"
+                  aria-hidden="true"
+                  title={T.translate("badge_settings.line_height_info")}
+                />
+              </label>
+              <br />
+              <Input
+                className="form-control"
+                id="BADGE_TEMPLATE_TEXT_FIELDS_LINE_HEIGHT"
+                value={entity?.BADGE_TEMPLATE_TEXT_FIELDS_LINE_HEIGHT?.value}
+                onChange={this.handleChange}
+              />
+            </div>
           </div>
         </div>
 
@@ -589,6 +609,28 @@ class BadgeSettingsForm extends React.Component {
                 />
               </div>
             </div>
+            <div className="row form-group">
+              <div className="col-md-6">
+                <label>
+                  {T.translate(
+                    "badge_settings.badge_template_first_name_line_height"
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.line_height_info")}
+                  />
+                </label>
+                <br />
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_FIRST_NAME_LINE_HEIGHT"
+                  value={entity?.BADGE_TEMPLATE_FIRST_NAME_LINE_HEIGHT?.value}
+                  onChange={this.handleChange}
+                />
+              </div>
+            </div>
           </div>
         </Panel>
 
@@ -741,6 +783,28 @@ class BadgeSettingsForm extends React.Component {
                   id="BADGE_TEMPLATE_LAST_NAME_COLOR"
                   value={entity?.BADGE_TEMPLATE_LAST_NAME_COLOR?.value}
                   className="form-control"
+                />
+              </div>
+            </div>
+            <div className="row form-group">
+              <div className="col-md-6">
+                <label>
+                  {T.translate(
+                    "badge_settings.badge_template_last_name_line_height"
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.line_height_info")}
+                  />
+                </label>
+                <br />
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_LAST_NAME_LINE_HEIGHT"
+                  value={entity?.BADGE_TEMPLATE_LAST_NAME_LINE_HEIGHT?.value}
+                  onChange={this.handleChange}
                 />
               </div>
             </div>
@@ -897,6 +961,28 @@ class BadgeSettingsForm extends React.Component {
                 />
               </div>
             </div>
+            <div className="row form-group">
+              <div className="col-md-6">
+                <label>
+                  {T.translate(
+                    "badge_settings.badge_template_company_line_height"
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.line_height_info")}
+                  />
+                </label>
+                <br />
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_COMPANY_LINE_HEIGHT"
+                  value={entity?.BADGE_TEMPLATE_COMPANY_LINE_HEIGHT?.value}
+                  onChange={this.handleChange}
+                />
+              </div>
+            </div>
           </div>
         </Panel>
 
@@ -1034,6 +1120,26 @@ class BadgeSettingsForm extends React.Component {
                   className="form-control"
                   id="BADGE_TEMPLATE_TITLE_SHRINK_AT_LINE"
                   value={entity?.BADGE_TEMPLATE_TITLE_SHRINK_AT_LINE?.value}
+                  onChange={this.handleChange}
+                />
+              </div>
+              <div className="col-md-6">
+                <label>
+                  {T.translate(
+                    "badge_settings.badge_template_title_line_height"
+                  )}{" "}
+                  &nbsp;{" "}
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate("badge_settings.line_height_info")}
+                  />
+                </label>
+                <br />
+                <Input
+                  className="form-control"
+                  id="BADGE_TEMPLATE_TITLE_LINE_HEIGHT"
+                  value={entity?.BADGE_TEMPLATE_TITLE_LINE_HEIGHT?.value}
                   onChange={this.handleChange}
                 />
               </div>
