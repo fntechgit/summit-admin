@@ -140,7 +140,10 @@ const parseFilters = (filters, term = null) => {
     Array.isArray(filters.ticketTypeFilter) &&
     filters.ticketTypeFilter.length > 0
   ) {
-    filter.push(`ticket_type_id==${filters.ticketTypeFilter.join("||")}`);
+    const ticketTypesIds = filters.ticketTypeFilter.map((tt) =>
+      tt.hasOwnProperty("id") ? tt.id : tt
+    );
+    filter.push(`ticket_type_id==${ticketTypesIds.join("||")}`);
   }
 
   if (filters?.companyFilter?.length > 0) {
