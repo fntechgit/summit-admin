@@ -235,14 +235,28 @@ export const getSpeakers =
 export const getSpeaker = (speakerId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
+  const params = {
+    access_token: accessToken,
+    expand: "member,presentations,all_presentations",
+    fields:
+      "id,email,title,first_name,last_name,twitter,irc,company,phone_number,bio,pic,big_pic," +
+      "member,member.id,member.first_name,member.last_name,member.email," +
+      "affiliations,affiliations.job_title,affiliations.organization.name,affiliations.start_date,affiliations.end_date,affiliations.is_current," +
+      "presentations,presentations.speakers,presentations.moderator_speaker_id,presentations.id,presentations.title,presentations.summit_id," +
+      "summit_assistances,summit_assistances.id,summit_assistances.on_site_phone,summit_assistances.registered,summit_assistances.checked_in,summit_assistances.is_confirmed,summit_assistances.summit_id," +
+      "registration_codes,registration_codes.id,registration_codes.code,registration_codes.email_sent,registration_codes.redeemed,registration_codes.summit_id",
+    relations:
+      "member,member.none,presentations,presentations.speakers,presentations.none,all_presentations,summit_assistances,registration_codes,registration_codes.none"
+  };
+
   dispatch(startLoading());
 
   return getRequest(
     null,
     createAction(RECEIVE_SPEAKER),
-    `${window.API_BASE_URL}/api/v1/speakers/${speakerId}?access_token=${accessToken}&expand=member,presentations`,
+    `${window.API_BASE_URL}/api/v1/speakers/${speakerId}`,
     authErrorHandler
-  )({})(dispatch).then(() => {
+  )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
 };
