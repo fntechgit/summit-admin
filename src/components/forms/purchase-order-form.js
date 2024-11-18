@@ -375,7 +375,7 @@ class PurchaseOrderForm extends React.Component {
             />
           </div>
           <div className="col-md-3">
-            <label> {T.translate("edit_purchase_order.owner_company")} *</label>
+            <label> {T.translate("edit_purchase_order.owner_company")}</label>
             <Input
               id="owner_company"
               value={entity.owner_company}
