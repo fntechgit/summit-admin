@@ -97,7 +97,6 @@ const SummitIdLayout = ({ currentSummit, loading, match, ...props }) => {
   return (
     <div>
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-
       <Switch>
         <Route
           strict

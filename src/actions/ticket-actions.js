@@ -879,16 +879,17 @@ export const addBadgeToTicket = (ticketId) => async (dispatch, getState) => {
 
 export const getTicketTypes =
   (
-    summit,
-    term,
+    term = null,
     order = "name",
     orderDir = DEFAULT_ORDER_DIR,
     currentPage = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     filters = {}
   ) =>
-  async (dispatch) => {
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
 
@@ -919,7 +920,7 @@ export const getTicketTypes =
     return getRequest(
       createAction(REQUEST_TICKET_TYPES),
       createAction(RECEIVE_TICKET_TYPES),
-      `${window.API_BASE_URL}/api/v2/summits/${summit.id}/ticket-types`,
+      `${window.API_BASE_URL}/api/v2/summits/${currentSummit.id}/ticket-types`,
       authErrorHandler,
       { term, order, orderDir, currentPage, perPage, filters, summitTZ }
     )(params)(dispatch).then(() => {
