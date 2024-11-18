@@ -9,9 +9,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import Swal from "sweetalert2";
 import {
   VALIDATE,
@@ -29,15 +28,21 @@ import {
   fetchErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
+import URI from "urijs";
+import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
-import URI from "urijs";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_PER_PAGE,
+  ERROR_CODE_412,
+  HUNDRED_PER_PAGE
+} from "../utils/constants";
 
 export const REQUEST_TEMPLATES = "REQUEST_TEMPLATES";
 export const RECEIVE_TEMPLATES = "RECEIVE_TEMPLATES";
 export const RECEIVE_TEMPLATE = "RECEIVE_TEMPLATE";
 export const RESET_TEMPLATE_FORM = "RESET_TEMPLATE_FORM";
-export const UPDATE_TEMPLATE = "UPDATE_TEMPLATE";
 export const TEMPLATE_UPDATED = "TEMPLATE_UPDATED";
 export const TEMPLATE_ADDED = "TEMPLATE_ADDED";
 export const TEMPLATE_DELETED = "TEMPLATE_DELETED";
@@ -58,14 +63,20 @@ export const VALIDATE_RENDER = "VALIDATE_RENDER";
 export const RECEIVE_EMAIL_SETTINGS = "RECEIVE_EMAIL_SETTINGS";
 
 export const getEmailTemplates =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
-  async (dispatch, getState) => {
+  (
+    term = null,
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -77,7 +88,7 @@ export const getEmailTemplates =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -91,7 +102,7 @@ export const getEmailTemplates =
     });
   };
 
-export const getEmailTemplate = (templateId) => async (dispatch, getState) => {
+export const getEmailTemplate = (templateId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -108,13 +119,13 @@ export const getEmailTemplate = (templateId) => async (dispatch, getState) => {
   });
 };
 
-export const resetTemplateForm = () => (dispatch, getState) => {
+export const resetTemplateForm = () => (dispatch) => {
   dispatch(createAction(RESET_TEMPLATE_FORM)({}));
 };
 
 export const saveEmailTemplate =
   (entity, noAlert = false) =>
-  async (dispatch, getState) => {
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
@@ -130,7 +141,7 @@ export const saveEmailTemplate =
         normalizedEntity,
         customErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         if (!noAlert)
           dispatch(showSuccessMessage(T.translate("emails.template_saved")));
         else dispatch(stopLoading());
@@ -159,45 +170,43 @@ export const saveEmailTemplate =
     }
   };
 
-export const deleteEmailTemplate =
-  (templateId) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+export const deleteEmailTemplate = (templateId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(TEMPLATE_DELETED)({ templateId }),
-      `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${templateId}`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken
   };
 
-export const renderEmailTemplate =
-  (json, html) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+  return deleteRequest(
+    null,
+    createAction(TEMPLATE_DELETED)({ templateId }),
+    `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/${templateId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
-    const params = {
-      access_token: accessToken
-    };
+export const renderEmailTemplate = (json, html) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    return putRequest(
-      createAction(REQUEST_TEMPLATE_RENDER),
-      createAction(TEMPLATE_RENDER_RECEIVED),
-      `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/all/render`,
-      { payload: json, html },
-      renderErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken
   };
 
-const renderErrorHandler = (err, res) => (dispatch, state) => {
+  return putRequest(
+    createAction(REQUEST_TEMPLATE_RENDER),
+    createAction(TEMPLATE_RENDER_RECEIVED),
+    `${window.EMAIL_API_BASE_URL}/api/v1/mail-templates/all/render`,
+    { payload: json, html },
+    renderErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+const renderErrorHandler = (err) => (dispatch) => {
   dispatch({
     type: VALIDATE_RENDER,
     payload: { errors: err.response.body }
@@ -207,9 +216,9 @@ const renderErrorHandler = (err, res) => (dispatch, state) => {
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["modified"];
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.modified;
 
   if (entity.parent) {
     normalizedEntity.parent = entity.parent.id;
@@ -221,7 +230,7 @@ const normalizeEntity = (entity) => {
 export const queryTemplates = _.debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
 
-  let endpoint = URI(`${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`);
+  const endpoint = URI(`${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`);
 
   input = escapeFilterValue(input);
 
@@ -229,7 +238,9 @@ export const queryTemplates = _.debounce(async (input, callback) => {
   endpoint.addQuery("order", "-id");
 
   if (input) {
-    endpoint.addQuery("identifier__contains", input);
+    endpoint.addQuery("identifier__startswith", input);
+    endpoint.addQuery("page", 1);
+    endpoint.addQuery("per_page", HUNDRED_PER_PAGE);
   }
 
   fetch(endpoint)
@@ -240,21 +251,21 @@ export const queryTemplates = _.debounce(async (input, callback) => {
       callback(options);
     })
     .catch(fetchErrorHandler);
-}, 500);
+}, DEBOUNCE_WAIT);
 
-/************************************************************************************************************/
+/** ********************************************************************************************************* */
 /*                          SENT EMAILS                                                                     */
-/************************************************************************************************************/
+/** ********************************************************************************************************* */
 
 export const getSentEmailsByTemplatesAndEmail =
-  (templates = [], toEmail, page = 1, perPage = 10) =>
-  async (dispatch, getState) => {
+  (templates = [], toEmail, page = 1, perPage = DEFAULT_PER_PAGE) =>
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "template",
@@ -279,18 +290,18 @@ export const getSentEmails =
   (
     term = null,
     page = 1,
-    perPage = 10,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = 1,
     filters = {}
   ) =>
-  async (dispatch, getState) => {
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
     let params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "template"
@@ -303,7 +314,7 @@ export const getSentEmails =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     const filter = parseFilters(filters);
@@ -323,15 +334,13 @@ export const getSentEmails =
     });
   };
 
-export const updateTemplateJsonData = (data) => async (dispatch, getState) => {
-  return dispatch(createAction(UPDATE_JSON_DATA)(data));
-};
+export const updateTemplateJsonData = (data) => async (dispatch) => dispatch(createAction(UPDATE_JSON_DATA)(data));
 
-/************************************************************************************************************/
+/** ********************************************************************************************************* */
 /*                          CLIENTS                                                                     */
-/************************************************************************************************************/
+/** ********************************************************************************************************* */
 
-export const getAllClients = () => async (dispatch, getState) => {
+export const getAllClients = () => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -352,12 +361,12 @@ export const getAllClients = () => async (dispatch, getState) => {
   });
 };
 
-/************************************************************************************************************/
+/** ********************************************************************************************************* */
 /*                          EMAIL_SETTINGS                                                                  */
-/************************************************************************************************************/
+/** ********************************************************************************************************* */
 
 export const getMarketingEmailSettings =
-  (page = 1, perPage = 100) =>
+  (page = 1, perPage = HUNDRED_PER_PAGE) =>
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
@@ -365,7 +374,7 @@ export const getMarketingEmailSettings =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       key__contains: "EMAIL_TEMPLATE"
     };
@@ -382,13 +391,12 @@ export const getMarketingEmailSettings =
   };
 
 export const saveMarketingEmailSettings =
-  (emailMarketingSettings) => async (dispatch) => {
-    return Promise.all(
+  (emailMarketingSettings) => async (dispatch) => Promise.all(
       Object.keys(emailMarketingSettings).map((m) => {
         let value = emailMarketingSettings[m].value ?? "";
-        let file = emailMarketingSettings[m].file ?? null;
+        const file = emailMarketingSettings[m].file ?? null;
 
-        if (typeof value == "boolean") {
+        if (typeof value === "boolean") {
           value = value ? "1" : "0";
         }
 
@@ -396,33 +404,32 @@ export const saveMarketingEmailSettings =
           id: emailMarketingSettings[m].id,
           type: emailMarketingSettings[m].type,
           key: m.toUpperCase(),
-          value: value
+          value
         };
 
         return dispatch(saveMarketingSetting(email_setting, file));
       })
     );
-  };
 
-export const customErrorHandler = (err, res) => (dispatch, state) => {
+export const customErrorHandler = (err, res) => (dispatch) => {
   const code = err.status;
   let msg = "";
 
   dispatch(stopLoading());
 
   switch (code) {
-    case 412:
+    case ERROR_CODE_412:
       if (Array.isArray(err.response.body)) {
         err.response.body.forEach((er) => {
-          msg += er + "<br>";
+          msg += `${er  }<br>`;
         });
       } else {
-        for (var [key, value] of Object.entries(err.response.body)) {
+        for (const [key, value] of Object.entries(err.response.body)) {
           if (isNaN(key)) {
-            msg += key + ": ";
+            msg += `${key  }: `;
           }
 
-          msg += value + "<br>";
+          msg += `${value  }<br>`;
         }
       }
 
