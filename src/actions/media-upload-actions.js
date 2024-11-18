@@ -9,9 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
+import URI from "urijs";
 import {
   getRequest,
   putRequest,
@@ -27,8 +27,9 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
-import URI from "urijs";
+import { DEBOUNCE_WAIT, DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_MEDIA_UPLOADS = "REQUEST_MEDIA_UPLOADS";
 export const RECEIVE_MEDIA_UPLOADS = "RECEIVE_MEDIA_UPLOADS";
@@ -43,7 +44,13 @@ export const MEDIA_UPLOAD_LINKED = "MEDIA_UPLOAD_LINKED";
 export const MEDIA_UPLOAD_UNLINKED = "MEDIA_UPLOAD_UNLINKED";
 
 export const getMediaUploads =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    term = null,
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -53,9 +60,11 @@ export const getMediaUploads =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      access_token: accessToken,
+      page,
       per_page: perPage,
-      access_token: accessToken
+      fields: "id,name,description",
+      relations: "none"
     };
 
     if (term) {
@@ -70,7 +79,7 @@ export const getMediaUploads =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -108,14 +117,14 @@ export const getMediaUpload = (mediaUploadId) => async (dispatch, getState) => {
 export const queryMediaUploads = _.debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
-
-    let apiUrl = URI(
+    const apiUrl = URI(
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types`
     );
+
     apiUrl.addQuery("access_token", accessToken);
     apiUrl.addQuery("order", "name");
     apiUrl.addQuery("expand", "type");
-    apiUrl.addQuery("per_page", 10);
+    apiUrl.addQuery("per_page", DEFAULT_PER_PAGE);
 
     if (input) {
       input = escapeFilterValue(input);
@@ -130,10 +139,10 @@ export const queryMediaUploads = _.debounce(
       })
       .catch(fetchErrorHandler);
   },
-  500
+  DEBOUNCE_WAIT
 );
 
-export const resetMediaUploadForm = () => (dispatch, getState) => {
+export const resetMediaUploadForm = () => (dispatch) => {
   dispatch(createAction(RESET_MEDIA_UPLOAD_FORM)({}));
 };
 
@@ -157,13 +166,13 @@ export const saveMediaUpload =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         if (!noAlert)
           dispatch(showSuccessMessage(T.translate("media_upload.saved")));
         else dispatch(stopLoading());
       });
     } else {
-      const success_message = {
+      const successMessage = {
         title: T.translate("general.done"),
         html: T.translate("media_upload.created"),
         type: "success"
@@ -178,7 +187,7 @@ export const saveMediaUpload =
         entity
       )(params)(dispatch).then((payload) => {
         dispatch(
-          showMessage(success_message, () => {
+          showMessage(successMessage, () => {
             history.push(
               `/app/summits/${currentSummit.id}/media-uploads/${payload.response.id}`
             );
@@ -204,7 +213,7 @@ export const linkToPresentationType =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUpload.id}/presentation-types/${presentationTypeId}`,
       null,
       authErrorHandler
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -225,7 +234,7 @@ export const unlinkFromPresentationType =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/media-upload-types/${mediaUploadId}/presentation-types/${presentationTypeId}`,
       null,
       authErrorHandler
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -266,7 +275,7 @@ export const copyMediaUploads = (summitId) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/summits/${summitId}/media-upload-types/all/clone/${currentSummit.id}`,
     null,
     authErrorHandler
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(stopLoading());
     dispatch(getMediaUploads());
   });
@@ -275,21 +284,15 @@ export const copyMediaUploads = (summitId) => async (dispatch, getState) => {
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["modified"];
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.modified;
 
-  if (
-    normalizedEntity.hasOwnProperty("temporary_links_public_storage_ttl") &&
-    normalizedEntity.temporary_links_public_storage_ttl == ""
-  ) {
+  if (normalizedEntity?.temporary_links_public_storage_ttl === "") {
     normalizedEntity.temporary_links_public_storage_ttl = 0;
   }
 
-  if (
-    normalizedEntity.hasOwnProperty("min_uploads_qty") &&
-    normalizedEntity.min_uploads_qty > 0
-  ) {
+  if (normalizedEntity?.min_uploads_qty > 0) {
     normalizedEntity.is_mandatory = true;
   }
 
