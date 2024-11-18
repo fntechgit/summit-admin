@@ -32,7 +32,8 @@ import {
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE,
   INT_BASE,
-  OR_FILTER
+  OR_FILTER,
+  MARKETING_SETTING_TYPE_HEX_COLOR
 } from "./constants";
 
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
@@ -428,3 +429,6 @@ export const handleDDLSortByLabel = (ddlArray) =>
 
 export const range = (start, stop, step) =>
   Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
+
+export const isHexColorSetting = (entity) =>
+  entity.type === MARKETING_SETTING_TYPE_HEX_COLOR;
