@@ -19,7 +19,8 @@ import {
   AttendeeInput,
   Input,
   Panel,
-  TagInput
+  TagInput,
+  Dropdown
 } from "openstack-uicore-foundation/lib/components";
 import ExtraQuestionsForm from "openstack-uicore-foundation/lib/components/extra-questions";
 import QuestionsSet from "openstack-uicore-foundation/lib/utils/questions-set";
@@ -50,7 +51,7 @@ class AttendeeForm extends React.Component {
     this.removeUnchangedFields = this.removeUnchangedFields.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -351,56 +352,47 @@ class AttendeeForm extends React.Component {
             </div>
           </div>
           <div className="row form-group">
-            <div className="col-md-3 checkboxes-div">
-              <div className="form-check abc-checkbox">
-                <input
-                  type="checkbox"
-                  id="shared_contact_info"
-                  checked={entity.shared_contact_info}
-                  onChange={this.handleChange}
-                  className="form-check-input"
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="shared_contact_info"
-                >
-                  {T.translate("edit_attendee.shared_contact_info")}
-                </label>
-              </div>
+            <div className="col-md-3 form-group">
+              <label htmlFor="shared_contact_info">
+                {T.translate("edit_attendee.shared_contact_info")}
+              </label>
+              <Dropdown
+                id="shared_contact_info"
+                value={entity.shared_contact_info}
+                onChange={this.handleChange}
+                options={[
+                  { label: "Yes", value: true },
+                  { label: "No", value: false }
+                ]}
+              />
             </div>
-            <div className="col-md-3 checkboxes-div">
-              <div className="form-check abc-checkbox">
-                <input
-                  type="checkbox"
-                  id="summit_hall_checked_in"
-                  checked={entity.summit_hall_checked_in}
-                  onChange={this.handleChange}
-                  className="form-check-input"
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="summit_hall_checked_in"
-                >
-                  {T.translate("edit_attendee.checked_in")}
-                </label>
-              </div>
+            <div className="col-md-3 form-group">
+              <label htmlFor="summit_hall_checked_in">
+                {T.translate("edit_attendee.checked_in")}
+              </label>
+              <Dropdown
+                id="summit_hall_checked_in"
+                value={entity.summit_hall_checked_in}
+                onChange={this.handleChange}
+                options={[
+                  { label: "Yes", value: true },
+                  { label: "No", value: false }
+                ]}
+              />
             </div>
-            <div className="col-md-3 checkboxes-div">
-              <div className="form-check abc-checkbox">
-                <input
-                  type="checkbox"
-                  id="disclaimer_accepted"
-                  checked={entity.disclaimer_accepted}
-                  onChange={this.handleChange}
-                  className="form-check-input"
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="disclaimer_accepted"
-                >
-                  {T.translate("edit_attendee.disclaimer_accepted")}
-                </label>
-              </div>
+            <div className="col-md-3 form-group">
+              <label htmlFor="disclaimer_accepted">
+                {T.translate("edit_attendee.disclaimer_accepted")}
+              </label>
+              <Dropdown
+                id="disclaimer_accepted"
+                value={entity.disclaimer_accepted}
+                onChange={this.handleChange}
+                options={[
+                  { label: "Yes", value: true },
+                  { label: "No", value: false }
+                ]}
+              />
             </div>
           </div>
 
