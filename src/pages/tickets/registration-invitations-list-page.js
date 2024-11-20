@@ -560,10 +560,6 @@ class RegistrationInvitationsListPage extends React.Component {
 
     if (!currentSummit.id) return <div />;
 
-    // const ticketTypesFilterDDL = currentSummit.ticket_types.map((t) => {
-    //   return { label: t.name, value: t.id };
-    // });
-
     const flowEventsDDL = [
       { label: "-- SELECT EMAIL EVENT --", value: "" },
       {

@@ -1029,7 +1029,7 @@ class TicketListPage extends React.Component {
                   onChange={(ev) =>
                     this.handleFilterChange(
                       "ticketTypesFilter",
-                      ev.target.value
+                      ev.target.value.map((tt) => ({ ...tt, value: tt.id }))
                     )
                   }
                   isMulti

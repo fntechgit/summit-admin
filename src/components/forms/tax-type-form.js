@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -18,7 +18,9 @@ import {
   Input,
   SimpleLinkList
 } from "openstack-uicore-foundation/lib/components";
+import { queryTicketTypes } from "openstack-uicore-foundation/lib/utils/query-actions";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
 
 class TaxTypeForm extends React.Component {
   constructor(props) {
@@ -36,7 +38,7 @@ class TaxTypeForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -55,8 +57,8 @@ class TaxTypeForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const newEntity = { ...this.state.entity };
+    const newErrors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -64,23 +66,23 @@ class TaxTypeForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
     }
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    newErrors[id] = "";
+    newEntity[id] = value;
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleSubmit(ev) {
-    let entity = { ...this.state.entity };
+    const entity = { ...this.state.entity };
     ev.preventDefault();
 
-    this.props.onSubmit(this.state.entity);
+    this.props.onSubmit(entity);
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -113,7 +115,7 @@ class TaxTypeForm extends React.Component {
     const { entity } = this.state;
     const { currentSummit } = this.props;
 
-    let ticketColumns = [
+    const ticketColumns = [
       { columnKey: "name", value: T.translate("edit_tax_type.name") },
       {
         columnKey: "description",
@@ -121,13 +123,14 @@ class TaxTypeForm extends React.Component {
       }
     ];
 
-    let ticketOptions = {
+    const ticketOptions = {
       title: T.translate("edit_tax_type.ticket_types"),
       valueKey: "name",
       labelKey: "name",
       defaultOptions: true,
       actions: {
-        search: this.queryTickets,
+        search: (ev, callback) =>
+          queryTicketTypes(currentSummit.id, { name: ev }, callback, "v2"),
         delete: { onClick: this.handleTicketUnLink },
         add: { onClick: this.handleTicketLink }
       }
