@@ -128,6 +128,7 @@ class SummitAttendeeListPage extends React.Component {
     this.handleApplyEventFilters = this.handleApplyEventFilters.bind(this);
     this.handleTermChange = this.handleTermChange.bind(this);
     this.handleOrAndFilter = this.handleOrAndFilter.bind(this);
+    this.handleParseFilters = this.handleParseFilters.bind(this);
     this.state = {
       showModal: false,
       modalTitle: "",
@@ -148,7 +149,7 @@ class SummitAttendeeListPage extends React.Component {
       term,
       order,
       orderDir,
-      attendeeFilters,
+      this.handleParseFilters(attendeeFilters),
       selectedColumns
     );
   }
@@ -253,7 +254,7 @@ class SummitAttendeeListPage extends React.Component {
         DEFAULT_PER_PAGE,
         order,
         orderDir,
-        filters,
+        this.handleParseFilters(filters),
         extraColumns
       );
     }
@@ -294,7 +295,7 @@ class SummitAttendeeListPage extends React.Component {
       perPage,
       order,
       orderDir,
-      attendeeFilters,
+      this.handleParseFilters(attendeeFilters),
       selectedColumns
     );
   }
@@ -309,7 +310,7 @@ class SummitAttendeeListPage extends React.Component {
       perPage,
       key,
       dir,
-      attendeeFilters,
+      this.handleParseFilters(attendeeFilters),
       selectedColumns
     );
   }
@@ -323,7 +324,7 @@ class SummitAttendeeListPage extends React.Component {
       perPage,
       order,
       orderDir,
-      attendeeFilters,
+      this.handleParseFilters(attendeeFilters),
       selectedColumns
     );
   }
@@ -362,7 +363,7 @@ class SummitAttendeeListPage extends React.Component {
       perPage,
       order,
       orderDir,
-      attendeeFilters,
+      this.handleParseFilters(attendeeFilters),
       selectedColumns
     );
   }
@@ -460,10 +461,13 @@ class SummitAttendeeListPage extends React.Component {
           : `${ev.target.operator}${ev.target.value}`;
       }
     }
-    this.setState({
-      ...this.state,
-      attendeeFilters: { ...this.state.attendeeFilters, [id]: value }
-    });
+    this.setState(
+      {
+        ...this.state,
+        attendeeFilters: { ...this.state.attendeeFilters, [id]: value }
+      },
+      () => console.log("CHECK...", this.state.attendeeFilters)
+    );
   }
 
   handleOrAndFilter(ev) {
@@ -475,6 +479,16 @@ class SummitAttendeeListPage extends React.Component {
 
   handleTermChange(term) {
     this.props.changeAttendeeListSearchTerm(term);
+  }
+
+  handleParseFilters(filters) {
+    const parsedFilters = { ...filters };
+    if (parsedFilters.ticketTypeFilter.length > 0) {
+      parsedFilters.ticketTypeFilter = filters.ticketTypeFilter.map(
+        (tt) => tt.id
+      );
+    }
+    return parsedFilters;
   }
 
   render() {

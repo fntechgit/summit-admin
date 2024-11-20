@@ -412,28 +412,24 @@ class ExtraQuestionForm extends React.Component {
             )}
           </div>
           <div className="row form-group">
-            {currentSummit?.ticket_types.length > 0 && (
-              <div className="col-md-4">
-                <label>
-                  {T.translate("question_form.allowed_ticket_types")} &nbsp;
-                  <i
-                    className="fa fa-info-circle"
-                    title={T.translate(
-                      "question_form.allowed_ticket_types_info"
-                    )}
-                  />
-                </label>
-                <TicketTypesInput
-                  id="allowed_ticket_types"
-                  value={entity?.allowed_ticket_types}
-                  summitId={currentSummit.id}
-                  onChange={this.handleChange}
-                  optionsLimit={100}
-                  defaultOptions
-                  isMulti
+            <div className="col-md-4">
+              <label>
+                {T.translate("question_form.allowed_ticket_types")} &nbsp;
+                <i
+                  className="fa fa-info-circle"
+                  title={T.translate("question_form.allowed_ticket_types_info")}
                 />
-              </div>
-            )}
+              </label>
+              <TicketTypesInput
+                id="allowed_ticket_types"
+                value={entity?.allowed_ticket_types}
+                summitId={currentSummit.id}
+                onChange={this.handleChange}
+                optionsLimit={100}
+                defaultOptions
+                isMulti
+              />
+            </div>
             {badge_features_ddl.length >= 0 && (
               <>
                 <div className="col-md-2 col-md-offset-1">
