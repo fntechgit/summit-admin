@@ -427,7 +427,7 @@ const parseFilters = (filters, term = null) => {
 
   if (filters.allowedTicketTypesIds?.length > 0) {
     const ticketTypesId = filters.allowedTicketTypesIds.map((tt) =>
-      tt.hasOwnProperty("id") ? tt.id : tt
+      tt?.id ? tt.id : tt
     );
     filter.push(`ticket_types_id==${ticketTypesId.join("||")}`);
   }

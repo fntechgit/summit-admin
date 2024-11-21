@@ -273,7 +273,10 @@ class RegistrationInvitationsListPage extends React.Component {
     const { term, page, order, orderDir, perPage, status, isSent, tagFilter } =
       this.props;
     const { value } = ev.target;
-    const ticketTypeFilter = [...value];
+    const ticketTypeFilter = [...value].map((tt) => ({
+      id: tt.id,
+      name: tt.name
+    }));
     const {
       invitationFilter: { orAndFilter }
     } = this.state;
