@@ -311,9 +311,7 @@ export const getAttendee = (attendeeId) => async (dispatch, getState) => {
     createAction(RECEIVE_ATTENDEE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}`,
     authErrorHandler
-  )(params)(dispatch).then(({ response }) => {
-    getAttendeeOrders(response)(dispatch, getState);
-  });
+  )(params)(dispatch).then(({ response }) => getAttendeeOrders(response)(dispatch, getState));
 };
 
 export const getAttendeeOrders = (attendee) => async (dispatch) => {
@@ -363,6 +361,8 @@ export const getAllowedExtraQuestions =
     };
 
     const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/allowed-extra-questions`;
+
+    dispatch(startLoading());
 
     return getRequest(
       createAction("DUMMY"),
