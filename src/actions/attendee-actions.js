@@ -364,6 +364,8 @@ export const getAllowedExtraQuestions =
 
     const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}/allowed-extra-questions`;
 
+    dispatch(startLoading());
+
     return getRequest(
       createAction("DUMMY"),
       createAction("DUMMY"),
@@ -391,6 +393,8 @@ export const getAllowedExtraQuestions =
             tickets_exclude_inactives ? "true" : "false"
           }`
         }));
+
+        dispatch(startLoading());
 
         // get remaining ones
         return Promise.all(
