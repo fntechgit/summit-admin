@@ -62,7 +62,7 @@ class SummitForm extends React.Component {
     this.toggleSection = this.toggleSection.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     const {
       errors,
@@ -1238,6 +1238,22 @@ class SummitForm extends React.Component {
                   {T.translate("edit_summit.reg_lite_allow_promo_codes")}
                 </label>
               </div>
+            </div>
+          </div>
+          <div className="row form-group">
+            <div className="col-md-6">
+              <label htmlFor="REG_LITE_ORDER_COMPLETE_TITLE">
+                {T.translate("edit_summit.reg_lite_order_complete_title")}
+              </label>
+              <TextInputWithCounter
+                className="form-control"
+                maxLength={50}
+                id="REG_LITE_ORDER_COMPLETE_TITLE"
+                value={
+                  regLiteMarketingSettings?.REG_LITE_ORDER_COMPLETE_TITLE?.value
+                }
+                onChange={this.handleChange}
+              />
             </div>
           </div>
           <div className="row form-group">
