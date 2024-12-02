@@ -187,7 +187,7 @@ const DEFAULT_REG_LITE_MARKETING_SETTINGS = {
   REG_LITE_INITIAL_ORDER_COMPLETE_STEP_1ST_PARAGRAPH: {
     id: 0,
     value:
-      "Ticket(s) have been assigned to you. To activate your ticket(s) you muse answer your attendee questions. Click the \"{button}\" button below."
+      "Ticket(s) have been assigned to you. To activate your ticket(s) you must answer your attendee questions. Click the \"{button}\" button below."
   },
   REG_LITE_INITIAL_ORDER_COMPLETE_STEP_2ND_PARAGRAPH: {
     id: 0,
