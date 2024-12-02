@@ -180,17 +180,21 @@ const DEFAULT_REG_LITE_MARKETING_SETTINGS = {
   REG_LITE_SHOW_COMPANY_INPUT: { id: 0, value: true },
   REG_LITE_COMPANY_DDL_PLACEHOLDER: { id: 0, value: "Select a company" },
   REG_LITE_SHOW_COMPANY_INPUT_DEFAULT_OPTIONS: { id: 0, value: false },
+  REG_LITE_ORDER_COMPLETE_TITLE: {
+    id: 0,
+    value: "Payment Processed"
+  },
   REG_LITE_INITIAL_ORDER_COMPLETE_STEP_1ST_PARAGRAPH: {
     id: 0,
     value:
-      "A ticket has been assigned to you. To complete your additional ticket details, please click the \"{button}\" button."
+      "Ticket(s) have been assigned to you. To activate your ticket(s) you muse answer your attendee questions. Click the \"{button}\" button below."
   },
   REG_LITE_INITIAL_ORDER_COMPLETE_STEP_2ND_PARAGRAPH: {
     id: 0,
     value:
       "If you wish to transfer your assigned ticket, close this window and visit the \"My Orders/Tickets\" tab in the top navigation bar. "
   },
-  REG_LITE_INITIAL_ORDER_COMPLETE_BTN_LABEL: { id: 0, value: "Finish Now" },
+  REG_LITE_INITIAL_ORDER_COMPLETE_BTN_LABEL: { id: 0, value: "Activate Now" },
   REG_LITE_ORDER_COMPLETE_STEP_1ST_PARAGRAPH: {
     id: 0,
     value:
