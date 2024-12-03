@@ -171,7 +171,8 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                 />
               </div>
             </div>
-            {promoCodeStrategy === AUTO_GENERATED_SPEAKERS_PROMO_CODE && (
+            {(promoCodeStrategy === AUTO_GENERATED_SPEAKERS_PROMO_CODE ||
+              promoCodeStrategy === AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE) && (
               <>
                 <div className="row form-group">
                   <div className="col-md-12">
@@ -196,7 +197,7 @@ class SpeakerPromoCodeSpecForm extends React.Component {
                         className="form-check-input"
                         type="checkbox"
                         onChange={this.handleChange}
-                        value={entity.allowsToReassign}
+                        checked={entity.allowsToReassign}
                       />
                       <label
                         className="form-check-label"
