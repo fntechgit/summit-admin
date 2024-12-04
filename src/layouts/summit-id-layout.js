@@ -104,7 +104,14 @@ const SummitIdLayout = ({ currentSummit, loading, match, ...props }) => {
           path={`${match.url}/dashboard`}
           component={SummitDashboardPage}
         />
-        <Route strict exact path={match.url} component={EditSummitPage} />
+        <Route
+          strict
+          exact
+          path={match.url}
+          render={(props) => (
+            <EditSummitPage {...props} summitId={match.params.summit_id} />
+          )}
+        />
         <Route
           path={`${match.url}/room-booking-attributes`}
           component={RoomBookingAttributeLayout}
