@@ -3024,6 +3024,8 @@
     "select_promo_code_type": "-- SELECT PROMO CODE TYPE --",
     "promo_code_mandatory": "Existing promo code is mandatory",
     "type_mandatory": "Type is mandatory",
+    "amount_mandatory": "The discount amount is mandatory when the rate is not specified",
+    "rate_mandatory": "The discount rate is mandatory when the amount is not specified",
     "placeholders": {
       "amount": "Amount ($)",
       "rate": "Rate (% discount)",
