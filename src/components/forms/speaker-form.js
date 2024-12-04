@@ -323,7 +323,7 @@ class SpeakerForm extends React.Component {
         </div>
         <div className="row form-group">
           <div className="col-md-4">
-            <label> {T.translate("edit_speaker.title")} </label>
+            <label> {T.translate("edit_speaker.title")} *</label>
             <Input
               className="form-control"
               id="title"
@@ -332,7 +332,7 @@ class SpeakerForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("general.first_name")} </label>
+            <label> {T.translate("general.first_name")} *</label>
             <Input
               className="form-control"
               id="first_name"
@@ -341,7 +341,7 @@ class SpeakerForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("general.last_name")} </label>
+            <label> {T.translate("general.last_name")} *</label>
             <Input
               className="form-control"
               id="last_name"
