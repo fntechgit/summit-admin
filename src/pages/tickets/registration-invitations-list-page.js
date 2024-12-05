@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -22,8 +22,10 @@ import {
   UploadInput,
   Dropdown,
   TagInput,
-  Input
+  Input,
+  TicketTypesInput
 } from "openstack-uicore-foundation/lib/components";
+import { SegmentedControl } from "segmented-control";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   exportInvitationsCSV,
@@ -46,11 +48,10 @@ import {
 } from "../../utils/constants";
 
 import "../../styles/registration-invitation-list-page.less";
-import { SegmentedControl } from "segmented-control";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import { validateEmail } from "../../utils/methods";
 import InvitationStatusDropdown from "../../components/inputs/invitation-status-dropdown";
-import SendEmailModal from "../../components/send-email-modal/index.jsx";
+import SendEmailModal from "../../components/send-email-modal/index";
 
 class RegistrationInvitationsListPage extends React.Component {
   constructor(props) {
@@ -145,7 +146,7 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleChangeFlowEvent(ev) {
-    const { value, id } = ev.target;
+    const { value } = ev.target;
     this.props.setCurrentFlowEvent(value);
   }
 
@@ -159,7 +160,7 @@ class RegistrationInvitationsListPage extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteAllRegistrationInvitation();
       }
@@ -168,20 +169,18 @@ class RegistrationInvitationsListPage extends React.Component {
 
   handleDelete(invitation_id) {
     const { deleteRegistrationInvitation, invitations } = this.props;
-    let invitation = invitations.find((i) => i.id === invitation_id);
+    const invitation = invitations.find((i) => i.id === invitation_id);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("registration_invitation_list.remove_warning") +
-        " (" +
-        invitation.email +
-        ") .",
+      text: `${T.translate("registration_invitation_list.remove_warning")} (${
+        invitation.email
+      }) .`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteRegistrationInvitation(invitation_id);
       }
@@ -262,10 +261,10 @@ class RegistrationInvitationsListPage extends React.Component {
   }
 
   handleSelectedAll(ev) {
-    let selectedAllCb = ev.target.checked;
+    const selectedAllCb = ev.target.checked;
     this.props.setSelectedAll(selectedAllCb);
     if (!selectedAllCb) {
-      //clear all selected
+      // clear all selected
       this.props.clearAllSelectedInvitations();
     }
   }
@@ -273,8 +272,11 @@ class RegistrationInvitationsListPage extends React.Component {
   handleTicketTypeSelected(ev) {
     const { term, page, order, orderDir, perPage, status, isSent, tagFilter } =
       this.props;
-    let { value } = ev.target;
-    const ticketTypeFilter = [...value];
+    const { value } = ev.target;
+    const ticketTypeFilter = [...value].map((tt) => ({
+      id: tt.id,
+      name: tt.name
+    }));
     const {
       invitationFilter: { orAndFilter }
     } = this.state;
@@ -287,7 +289,7 @@ class RegistrationInvitationsListPage extends React.Component {
     });
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const {
       term,
       page,
@@ -548,7 +550,7 @@ class RegistrationInvitationsListPage extends React.Component {
     const table_options = {
       sortCol: order,
       sortDir: orderDir,
-      selectedAll: selectedAll,
+      selectedAll,
       actions: {
         edit: {
           onClick: this.handleEdit,
@@ -561,11 +563,7 @@ class RegistrationInvitationsListPage extends React.Component {
 
     if (!currentSummit.id) return <div />;
 
-    const ticketTypesFilterDDL = currentSummit.ticket_types.map((t) => {
-      return { label: t.name, value: t.id };
-    });
-
-    let flowEventsDDL = [
+    const flowEventsDDL = [
       { label: "-- SELECT EMAIL EVENT --", value: "" },
       {
         label: "SUMMIT_REGISTRATION_INVITE_REGISTRATION",
@@ -628,7 +626,7 @@ class RegistrationInvitationsListPage extends React.Component {
             <OrAndFilter
               style={{ marginTop: 15 }}
               value={invitationFilter.orAndFilter}
-              entity={"invitations"}
+              entity="invitations"
               onChange={(filter) => this.handleOrAndFilter(filter)}
             />
             <div className="row">
@@ -645,21 +643,24 @@ class RegistrationInvitationsListPage extends React.Component {
                 />
               </div>
               <div className="col-md-6">
-                <Dropdown
+                <TicketTypesInput
                   id="allowed_ticket_types_filter"
                   value={allowedTicketTypesIds}
                   placeholder={T.translate(
                     "registration_invitation_list.placeholders.allowed_ticket_types_filter"
                   )}
                   onChange={this.handleTicketTypeSelected}
-                  options={ticketTypesFilterDDL}
-                  isMulti={true}
+                  summitId={currentSummit.id}
+                  version="v2"
+                  optionsLimit={100}
+                  defaultOptions
+                  isMulti
                 />
               </div>
             </div>
             <div className="row">
               <div className="col-md-6">
-                <div className={"row"}>
+                <div className="row">
                   <div className="col-md-6">
                     <SegmentedControl
                       name="isSent"
@@ -705,7 +706,7 @@ class RegistrationInvitationsListPage extends React.Component {
                   options={flowEventsDDL}
                 />
               </div>
-              <div className={"col-md-4"}>
+              <div className="col-md-4">
                 <Input
                   id="testRecipient"
                   value={testRecipient}
@@ -721,7 +722,7 @@ class RegistrationInvitationsListPage extends React.Component {
                   className="form-control"
                 />
               </div>
-              <div className={"col-md-2"}>
+              <div className="col-md-2">
                 <button
                   className="btn btn-default right-space"
                   onClick={this.handleSendClick}
