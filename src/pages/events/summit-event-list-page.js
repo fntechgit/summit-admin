@@ -201,6 +201,12 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
   },
   { columnKey: "streaming_type", value: "streaming_type", sortable: true },
   {
+    columnKey: "review_status",
+    value: "review_status",
+    sortable: false,
+    title: true
+  },
+  {
     columnKey: "status",
     value: "submission_status",
     sortable: false,
