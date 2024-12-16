@@ -69,7 +69,13 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "meeting_booking_room_allowed_attributes.values," +
       "lead_report_settings," +
       "presentation_action_types," +
-      "selection_plans"
+      "selection_plans," +
+      "ticket_types," +
+      "badge_types," +
+      "badge_features_types," +
+      "badge_access_level_types," +
+      "badge_view_types," +
+      "tax_types"
   };
 
   // set id
