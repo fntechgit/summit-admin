@@ -50,6 +50,17 @@ const getGlobalItems = () => [
     accessRoute: "companies"
   },
   {
+    name: "sponsors_inventory",
+    iconClass: "fa-users",
+    accessRoute: "sponsors-inventory",
+    childs: [
+      {
+        name: "inventory",
+        linkUrl: "sponsors-inventory/inventory"
+      }
+    ]
+  },
+  {
     name: "sponsorship_types",
     iconClass: "fa fa-handshake-o",
     linkUrl: "sponsorship-types",

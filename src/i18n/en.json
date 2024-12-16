@@ -157,7 +157,10 @@
     "schedule_settings": "Schedule",
     "registration_stats": "Registration Stats",
     "audit_log": "Audit Log",
-    "submission_invitations": "Submission Invitations"
+    "submission_invitations": "Submission Invitations",
+    "sponsors_inventory": "Sponsors",
+    "form_templates": "Form Templates",
+    "inventory": "Inventory"
   },
   "schedule": {
     "schedule": "Schedule",
@@ -3154,5 +3157,23 @@
   },
   "url_input": {
     "url_error": "URL must start with http:// or https://"
+  },
+  "sponsors_inventory": {
+    "inventory": "Inventory"
+  },
+  "inventory_item_list": {
+    "inventory_items": "Inventory Items",
+    "delete_inventory_item_warning": "Are you sure you want to delete inventory item ",
+    "add_inventory_item": "Create new Item",
+    "placeholders": {
+      "search_inventory_items": "Search"
+    }
+  },
+  "edit_inventory_item": {
+    "inventory_item": "Item",
+    "inventory_item_created": "Inventory Item created successfully.",
+    "code": "Code",
+    "name": "Name",
+    "description": "Description"
   }
 }
