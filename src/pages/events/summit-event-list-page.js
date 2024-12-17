@@ -1018,6 +1018,7 @@ class SummitEventListPage extends React.Component {
       .map((l) => ({ label: l.name, value: l.id }));
 
     const selection_status_ddl = [
+      { label: "Pending", value: "pending" },
       { label: "Accepted", value: "accepted" },
       { label: "Rejected", value: "rejected" },
       { label: "Alternate", value: "alternate" }
