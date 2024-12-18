@@ -500,6 +500,10 @@ const normalizePurchaseOrder = (entity) => {
     delete normalizedEntity.owner_company_id;
   }
 
+  if (normalizedEntity.ticket_type_id != null) {
+    normalizedEntity.ticket_type_id = normalizedEntity.ticket_type_id.id;
+  }
+
   delete normalizedEntity.extra_questions;
 
   return normalizedEntity;

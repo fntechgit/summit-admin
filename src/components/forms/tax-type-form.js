@@ -31,7 +31,6 @@ class TaxTypeForm extends React.Component {
       errors: props.errors
     };
 
-    this.queryTickets = this.queryTickets.bind(this);
     this.handleTicketLink = this.handleTicketLink.bind(this);
     this.handleTicketUnLink = this.handleTicketUnLink.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -98,17 +97,6 @@ class TaxTypeForm extends React.Component {
   handleTicketUnLink(valueId) {
     const { entity } = this.state;
     this.props.onTicketUnLink(entity.id, valueId);
-  }
-
-  queryTickets(input, callback) {
-    const { currentSummit } = this.props;
-    let ticketTypes = [];
-
-    ticketTypes = currentSummit.ticket_types.filter(
-      (f) => f.name.toLowerCase().indexOf(input.toLowerCase()) !== -1
-    );
-
-    callback(ticketTypes);
   }
 
   render() {
