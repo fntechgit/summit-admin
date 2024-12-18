@@ -16,10 +16,10 @@ import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   Input,
-  Dropdown,
   Table,
   Panel,
-  PromocodeInput
+  PromocodeInput,
+  TicketTypesInput
 } from "openstack-uicore-foundation/lib/components";
 import { Pagination } from "react-bootstrap";
 import OwnerInput from "../inputs/owner-input";
@@ -39,7 +39,7 @@ class PurchaseOrderForm extends React.Component {
       entity: { ...props.entity },
       errors: props.errors,
       showSection: "billing",
-      addTicketTypeId: 0,
+      addTicketTypeId: null,
       addTicketQty: 0,
       addPromoCode: null
     };
@@ -97,11 +97,16 @@ class PurchaseOrderForm extends React.Component {
   handleAddTickets = (ev) => {
     ev.preventDefault();
 
-    const { addTicketTypeId, addTicketQty, addPromoCode, entity } = this.state;
-    if (!entity || !addTicketTypeId || !addTicketQty) return;
+    const {
+      addTicketTypeId: { id: ticketTypeId },
+      addTicketQty,
+      addPromoCode,
+      entity
+    } = this.state;
+    if (!entity || !ticketTypeId || !addTicketQty) return;
 
     this.props
-      .addTickets(entity.id, addTicketTypeId, addTicketQty, addPromoCode)
+      .addTickets(entity.id, ticketTypeId, addTicketQty, addPromoCode)
       .then(() =>
         this.setState({
           addTicketTypeId: null,
@@ -183,11 +188,6 @@ class PurchaseOrderForm extends React.Component {
         edit: { onClick: this.handleTicketEdit }
       }
     };
-
-    const ticket_type_ddl = currentSummit?.ticket_types?.map((tt) => ({
-      label: tt.name,
-      value: tt.id
-    }));
 
     const tax_columns = [
       ...(entity?.approved_refunds_taxes?.map((tax) => ({
@@ -329,11 +329,14 @@ class PurchaseOrderForm extends React.Component {
           <div className="row form-group">
             <div className="col-md-6">
               <label> {T.translate("edit_purchase_order.ticket_type")}</label>
-              <Dropdown
+              <TicketTypesInput
                 id="ticket_type_id"
                 value={entity.ticket_type_id}
+                summitId={currentSummit.id}
                 onChange={this.handleChange}
-                options={ticket_type_ddl}
+                version="v2"
+                defaultOptions
+                optionsLimit={100}
               />
             </div>
             <div className="col-md-3">
@@ -510,16 +513,19 @@ class PurchaseOrderForm extends React.Component {
                       {" "}
                       {T.translate("edit_purchase_order.ticket_type")}
                     </label>
-                    <Dropdown
-                      clearable
-                      options={ticket_type_ddl}
+                    <TicketTypesInput
                       value={this.state.addTicketTypeId}
+                      summitId={currentSummit.id}
                       onChange={(ev) => {
                         this.setState({
                           ...this.state,
-                          addTicketTypeId: parseInt(ev.target.value)
+                          addTicketTypeId: ev.target.value
                         });
                       }}
+                      version="v2"
+                      defaultOptions
+                      optionsLimit={100}
+                      isClearable
                     />
                   </div>
                   <div className="col-md-4">

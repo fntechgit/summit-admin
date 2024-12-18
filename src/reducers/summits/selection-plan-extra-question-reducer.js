@@ -9,7 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RESET_SELECTION_PLAN_EXTRA_QUESTION_FORM,
@@ -23,8 +26,6 @@ import {
   SELECTION_PLAN_EXTRA_QUESTION_VALUE_UPDATED
 } from "../../actions/selection-plan-actions";
 
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
@@ -35,7 +36,8 @@ export const DEFAULT_ENTITY = {
   mandatory: false,
   placeholder: "",
   values: [],
-  is_editable: true
+  is_editable: true,
+  allowed_badge_features_types: []
 };
 
 const DEFAULT_STATE = {
@@ -48,102 +50,76 @@ const selectionPlanExtraQuestionReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
-      }
-      break;
-    case SET_CURRENT_SUMMIT:
-    case RESET_SELECTION_PLAN_EXTRA_QUESTION_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case RECEIVE_SELECTION_PLAN_EXTRA_QUESTION_META:
-      {
-        let allClasses = payload.response;
-
-        return { ...state, allClasses: allClasses };
-      }
-      break;
-    case UPDATE_SELECTION_PLAN_EXTRA_QUESTION:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
-    case SELECTION_PLAN_EXTRA_QUESTION_ADDED:
-    case RECEIVE_SELECTION_PLAN_EXTRA_QUESTION:
-      {
-        let entity = { ...payload.response };
-
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
-        }
-
-        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-      }
-      break;
-    case SELECTION_PLAN_EXTRA_QUESTION_UPDATED:
-      {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
         return state;
       }
-      break;
-    case SELECTION_PLAN_EXTRA_QUESTION_VALUE_ADDED:
-      {
-        let entity = { ...payload.response };
-        let values = [...state.entity.values];
-        if (entity.is_default) {
-          // reset all other values
-          values = values.map((v) => ({ ...v, is_default: false }));
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    case SET_CURRENT_SUMMIT:
+    case RESET_SELECTION_PLAN_EXTRA_QUESTION_FORM:
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    case RECEIVE_SELECTION_PLAN_EXTRA_QUESTION_META: {
+      const allClasses = payload.response;
+
+      return { ...state, allClasses };
+    }
+    case UPDATE_SELECTION_PLAN_EXTRA_QUESTION:
+      return { ...state, entity: { ...payload }, errors: {} };
+    case SELECTION_PLAN_EXTRA_QUESTION_ADDED:
+    case RECEIVE_SELECTION_PLAN_EXTRA_QUESTION: {
+      const entity = { ...payload.response };
+
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
         }
-
-        return {
-          ...state,
-          entity: { ...state.entity, values: [...values, entity] }
-        };
       }
-      break;
-    case SELECTION_PLAN_EXTRA_QUESTION_VALUE_UPDATED:
-      {
-        let entity = { ...payload.response };
-        let values_tmp = state.entity.values.filter((v) => v.id !== entity.id);
-        if (entity.is_default) {
-          // reset all other values
-          values_tmp = values_tmp.map((v) => ({ ...v, is_default: false }));
+
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case SELECTION_PLAN_EXTRA_QUESTION_UPDATED:
+      return state;
+    case SELECTION_PLAN_EXTRA_QUESTION_VALUE_ADDED: {
+      const entity = { ...payload.response };
+      let values = [...state.entity.values];
+      if (entity.is_default) {
+        // reset all other values
+        values = values.map((v) => ({ ...v, is_default: false }));
+      }
+
+      return {
+        ...state,
+        entity: { ...state.entity, values: [...values, entity] }
+      };
+    }
+    case SELECTION_PLAN_EXTRA_QUESTION_VALUE_UPDATED: {
+      const entity = { ...payload.response };
+      let values_tmp = state.entity.values.filter((v) => v.id !== entity.id);
+      if (entity.is_default) {
+        // reset all other values
+        values_tmp = values_tmp.map((v) => ({ ...v, is_default: false }));
+      }
+
+      const values = [...values_tmp, entity];
+
+      values.sort((a, b) =>
+        a.order > b.order ? 1 : a.order < b.order ? -1 : 0
+      );
+
+      return { ...state, entity: { ...state.entity, values } };
+    }
+    case SELECTION_PLAN_EXTRA_QUESTION_VALUE_DELETED: {
+      const { valueId } = payload;
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          values: state.entity.values.filter((v) => v.id !== valueId)
         }
-
-        let values = [...values_tmp, entity];
-
-        values.sort((a, b) =>
-          a.order > b.order ? 1 : a.order < b.order ? -1 : 0
-        );
-
-        return { ...state, entity: { ...state.entity, values: values } };
-      }
-      break;
-    case SELECTION_PLAN_EXTRA_QUESTION_VALUE_DELETED:
-      {
-        let { valueId } = payload;
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            values: state.entity.values.filter((v) => v.id !== valueId)
-          }
-        };
-      }
-      break;
+      };
+    }
     case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+      return { ...state, errors: payload.errors };
     default:
       return state;
   }
