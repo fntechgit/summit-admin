@@ -483,7 +483,7 @@ class SummitAttendeeListPage extends React.Component {
 
   handleParseFilters(filters) {
     const parsedFilters = { ...filters };
-    if (parsedFilters.ticketTypeFilter.length > 0) {
+    if (parsedFilters.ticketTypeFilter?.length > 0) {
       parsedFilters.ticketTypeFilter = filters.ticketTypeFilter.map(
         (tt) => tt.id
       );
