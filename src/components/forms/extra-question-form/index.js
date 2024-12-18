@@ -448,11 +448,11 @@ class ExtraQuestionForm extends React.Component {
                   </label>
                   <Dropdown
                     id="allowed_badge_features_types"
+                    value={entity.allowed_badge_features_types}
+                    options={badge_features_ddl}
+                    onChange={this.handleChange}
                     clearable
                     isMulti
-                    value={entity.allowed_badge_features_types}
-                    onChange={this.handleChange}
-                    options={badge_features_ddl}
                   />
                 </div>
               </>
