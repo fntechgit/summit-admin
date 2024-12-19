@@ -223,7 +223,7 @@ export const getAttendees =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const summitTZ = currentSummit.time_zone.name;
+    const summitTZ = currentSummit.time_zone_id;
     dispatch(startLoading());
 
     const params = {
@@ -311,7 +311,9 @@ export const getAttendee = (attendeeId) => async (dispatch, getState) => {
     createAction(RECEIVE_ATTENDEE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}`,
     authErrorHandler
-  )(params)(dispatch).then(({ response }) => getAttendeeOrders(response)(dispatch, getState));
+  )(params)(dispatch).then(({ response }) =>
+    getAttendeeOrders(response)(dispatch, getState)
+  );
 };
 
 export const getAttendeeOrders = (attendee) => async (dispatch) => {

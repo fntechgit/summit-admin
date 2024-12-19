@@ -893,7 +893,7 @@ export const getTicketTypes =
 
     dispatch(startLoading());
 
-    const summitTZ = currentSummit.time_zone.name;
+    const summitTZ = currentSummit.time_zone_id;
 
     const params = {
       page: currentPage,

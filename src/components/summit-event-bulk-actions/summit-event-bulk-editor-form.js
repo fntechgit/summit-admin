@@ -342,7 +342,7 @@ class SummitEventBulkEditorForm extends React.Component {
     const currentSummitStartDate = moment
       .tz(
         currentSummit.start_date * MILLISECONDS_IN_SECOND,
-        currentSummit.time_zone.name
+        currentSummit.time_zone_id
       )
       .hour(0)
       .minute(0)
@@ -350,7 +350,7 @@ class SummitEventBulkEditorForm extends React.Component {
     const currentSummitEndDate = moment
       .tz(
         currentSummit.end_date * MILLISECONDS_IN_SECOND,
-        currentSummit.time_zone.name
+        currentSummit.time_zone_id
       )
       .hour(TIME_23_HOURS)
       .minute(TIME_59_MINS)
@@ -458,7 +458,7 @@ class SummitEventBulkEditorForm extends React.Component {
                     "bulk_actions_page.placeholders.start_date"
                   )
                 }}
-                timezone={currentSummit.time_zone.name}
+                timezone={currentSummit.time_zone_id}
                 value={epochToMomentTimeZone(
                   currentBulkStartDate,
                   currentSummit.time_zone_id
@@ -485,7 +485,7 @@ class SummitEventBulkEditorForm extends React.Component {
                     "bulk_actions_page.placeholders.end_date"
                   )
                 }}
-                timezone={currentSummit.time_zone.name}
+                timezone={currentSummit.time_zone_id}
                 value={epochToMomentTimeZone(
                   currentBulkEndDate,
                   currentSummit.time_zone_id

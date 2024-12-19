@@ -430,7 +430,7 @@ class PurchaseOrderListPage extends React.Component {
                       "purchase_order_list.placeholders.purchased_from"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
                     purchaseOrderFilters.purchase_date_filter[0],
@@ -448,7 +448,7 @@ class PurchaseOrderListPage extends React.Component {
                       "purchase_order_list.placeholders.purchased_to"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
                     purchaseOrderFilters.purchase_date_filter[1],

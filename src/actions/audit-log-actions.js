@@ -79,7 +79,7 @@ export const getAuditLog =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const summitTZ = currentSummit.time_zone.name;
+    const summitTZ = currentSummit.time_zone_id;
     const summitFilter = [`summit_id==${currentSummit.id}`];
 
     dispatch(startLoading());

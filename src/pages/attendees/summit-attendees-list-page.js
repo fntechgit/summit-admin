@@ -1013,7 +1013,7 @@ class SummitAttendeeListPage extends React.Component {
                       "attendee_list.placeholders.checkin_date_from"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleCheckInDate(ev, false)}
                   value={epochToMomentTimeZone(
                     attendeeFilters.checkinDateFilter[0],
@@ -1034,7 +1034,7 @@ class SummitAttendeeListPage extends React.Component {
                       "attendee_list.placeholders.checkin_date_to"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleCheckInDate(ev, true)}
                   value={epochToMomentTimeZone(
                     attendeeFilters.checkinDateFilter[1],

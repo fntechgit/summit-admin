@@ -63,7 +63,6 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "track_groups," +
       "locations," +
       "locations.rooms," +
-      "locations.attributes.type," +
       "locations.floor," +
       "meeting_booking_room_allowed_attributes," +
       "meeting_booking_room_allowed_attributes.values," +
@@ -75,8 +74,112 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "badge_features," +
       "badge_features_types," +
       "badge_access_level_types," +
-      "badge_view_types," +
-      "tax_types"
+      "badge_view_types",
+    fields:
+      "id," +
+      "name," +
+      "active," +
+      "allow_update_attendee_extra_questions," +
+      "available_on_api," +
+      "calendar_sync_desc," +
+      "calendar_sync_name," +
+      "dates_label," +
+      "end_date," +
+      "event_types,event_types.id,event_types.name,event_types.order" +
+      "link," +
+      "locations,locations.id,locations.name,locations.order,locations.class_name,locations.rooms,locations.floors," +
+      "logo," +
+      "secondary_logo," +
+      "presentation_voters_count," +
+      "presentation_votes_count," +
+      "presentations_submitted_count," +
+      "published_events_count," +
+      "reassign_ticket_till_date," +
+      "registration_begin_date," +
+      "registration_end_date," +
+      "registration_link," +
+      "registration_disclaimer_content," +
+      "registration_disclaimer_mandatory," +
+      "registration_slug_prefix," +
+      "schedule_start_date," +
+      "secondary_registration_label," +
+      "secondary_registration_link," +
+      "speaker_announcement_email_accepted_alternate_count," +
+      "speaker_announcement_email_accepted_count," +
+      "speaker_announcement_email_accepted_rejected_count," +
+      "speaker_announcement_email_alternate_count," +
+      "speaker_announcement_email_alternate_rejected_count," +
+      "speaker_announcement_email_rejected_count," +
+      "speakers_count," +
+      "start_date," +
+      "start_showing_venues_date," +
+      "slug," +
+      "supported_currencies," +
+      "default_ticket_type_currency," +
+      "ticket_types,ticket_types.id,ticket_types.name," +
+      "time_zone_id," +
+      "time_zone_label," +
+      "tracks,tracks.id,tracks.name,tracks.parent_id,tracks.order,tracks.chair_visible,tracks.subtracks," +
+      "selection_plans,selection_plans.id,selection_plans.name,selection_plans.is_enabled,selection_plans.order,selection_plans.submission_begin_date,selection_plans.submission_end_date,selection_plans.voting_begin_date,selection_plans.voting_end_date,selection_plans.selection_begin_date,selection_plans.selection_end_date,selection_plans.track_groups," +
+      "meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.id,meeting_booking_room_allowed_attributes.created,meeting_booking_room_allowed_attributes.last_edited,meeting_booking_room_allowed_attributes.type,meeting_booking_room_allowed_attributes.summit_id,meeting_booking_room_allowed_attributes.values.value," +
+      "meeting_room_booking_end_time," +
+      "meeting_room_booking_max_allowed," +
+      "meeting_room_booking_slot_length," +
+      "meeting_room_booking_start_time," +
+      "api_feed_type," +
+      "api_feed_url," +
+      "api_feed_key," +
+      "badge_access_level_types,badge_access_level_types.id,badge_access_level_types.name," +
+      "badge_types,badge_types.id,badge_types.name,badge_types.allowed_view_types," +
+      "badge_features," +
+      "badge_view_types,badge_view_types.id,badge_view_types.name," +
+      "order_extra_questions," +
+      "begin_allow_booking_date," +
+      "end_allow_booking_date," +
+      "external_summit_id," +
+      "external_registration_feed_type," +
+      "external_registration_feed_api_key," +
+      "virtual_site_url," +
+      "marketing_site_url," +
+      "mux_token_id," +
+      "mux_token_secret," +
+      "mux_allowed_domains,mux_allowed_domains.label,mux_allowed_domains.value," +
+      "help_users," +
+      "registration_send_qr_as_image_attachment_on_ticket_email," +
+      "registration_send_ticket_as_pdf_attachment_on_ticket_email," +
+      "registration_allow_automatic_reminder_emails," +
+      "registration_send_order_email_automatically," +
+      "qr_codes_enc_key," +
+      "speaker_confirmation_default_page_url," +
+      "marketing_site_oauth2_client_id," +
+      "marketing_site_oauth2_client_scopes," +
+      "available_lead_report_columns," +
+      "created," +
+      "last_edited," +
+      "invite_only_registration," +
+      "registration_reminder_email_days_interval," +
+      "support_email," +
+      "speakers_support_email," +
+      "registration_send_ticket_email_automatically," +
+      "registration_allowed_refund_request_till_date," +
+      "default_ticket_type_currency_symbol," +
+      "virtual_site_oauth2_client_id," +
+      "paid_tickets_count," +
+      "track_groups,track_groups.id,track_groups.name," +
+      "lead_report_settings,lead_report_settings.sponsor_id,lead_report_settings.columns," +
+      "presentation_action_types,presentation_action_types.id,presentation_action_types.label," +
+      "badge_features_types,badge_features_types.id,badge_features_types.name," +
+      "",
+    relations:
+      "event_types.none," +
+      "tracks.none," +
+      "tracks_groups.none," +
+      "locations,locations.rooms,locations.floor,locations.none," +
+      "meeting_booking_room_allowed_attributes.values," +
+      "selection_plans.track_groups,selection_plans.none," +
+      "ticket_types.none," +
+      "badge_types.none," +
+      "none"
   };
 
   // set id

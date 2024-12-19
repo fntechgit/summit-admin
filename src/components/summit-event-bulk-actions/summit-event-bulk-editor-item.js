@@ -62,7 +62,7 @@ class SummitEventBulkEditorItem extends React.Component {
     if (atime == null) return "";
     if (!atime) return atime;
     atime *= MILLISECONDS_IN_SECOND;
-    return moment(atime).tz(this.props.currentSummit.time_zone.name);
+    return moment(atime).tz(this.props.currentSummit.time_zone_id);
   }
 
   getValidationEventTitle() {
@@ -232,7 +232,7 @@ class SummitEventBulkEditorItem extends React.Component {
     const currentSummitStartDate = moment
       .tz(
         currentSummit.start_date * MILLISECONDS_IN_SECOND,
-        currentSummit.time_zone.name
+        currentSummit.time_zone_id
       )
       .hour(0)
       .minute(0)
@@ -240,7 +240,7 @@ class SummitEventBulkEditorItem extends React.Component {
     const currentSummitEndDate = moment
       .tz(
         currentSummit.end_date * MILLISECONDS_IN_SECOND,
-        currentSummit.time_zone.name
+        currentSummit.time_zone_id
       )
       .hour(TIME_23_HOURS)
       .minute(TIME_59_MINS)
@@ -316,7 +316,7 @@ class SummitEventBulkEditorItem extends React.Component {
                   "bulk_actions_page.placeholders.start_date"
                 )
               }}
-              timezone={currentSummit.time_zone.name}
+              timezone={currentSummit.time_zone_id}
               timeConstraints={{ hours: { min: 7, max: 22 } }}
               validation={{
                 after:
@@ -341,7 +341,7 @@ class SummitEventBulkEditorItem extends React.Component {
                   "bulk_actions_page.placeholders.end_date"
                 )
               }}
-              timezone={currentSummit.time_zone.name}
+              timezone={currentSummit.time_zone_id}
               validation={{
                 after:
                   currentSummitStartDate.valueOf() / MILLISECONDS_IN_SECOND,

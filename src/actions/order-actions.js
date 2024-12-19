@@ -524,7 +524,7 @@ export const getPurchaseOrders =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const summitTZ = currentSummit.time_zone.name;
+    const summitTZ = currentSummit.time_zone_id;
 
     dispatch(startLoading());
 

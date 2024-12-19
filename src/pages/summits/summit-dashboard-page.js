@@ -9,15 +9,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React from "react";
 import { connect } from "react-redux";
 import moment from "moment-timezone";
-import { getSummitById } from "../../actions/summit-actions";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import { getSummitById } from "../../actions/summit-actions";
 import Member from "../../models/member";
 import "../../styles/summit-dashboard-page.less";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
 class SummitDashboardPage extends React.Component {
   constructor(props) {
@@ -37,18 +38,21 @@ class SummitDashboardPage extends React.Component {
   }
 
   onCollapseChange(section) {
-    let newCollapseState = { ...this.state.collapseState };
+    const newCollapseState = { ...this.state.collapseState };
     newCollapseState[section] = !newCollapseState[section];
     this.setState({ ...this.state, collapseState: newCollapseState });
   }
 
   componentDidMount() {
     const { currentSummit } = this.props;
-    this.interval = setInterval(this.localTimer.bind(this), 1000);
+    this.interval = setInterval(
+      this.localTimer.bind(this),
+      MILLISECONDS_IN_SECOND
+    );
 
     if (currentSummit) {
-      let localtime = moment().tz(currentSummit.time_zone.name);
-      this.setState({ ...this.state, localtime: localtime });
+      const localtime = moment().tz(currentSummit.time_zone_id);
+      this.setState({ ...this.state, localtime });
     }
   }
 
@@ -63,9 +67,9 @@ class SummitDashboardPage extends React.Component {
   }
 
   getFormattedTime(atime) {
-    atime = atime * 1000;
+    atime *= MILLISECONDS_IN_SECOND;
     return moment(atime)
-      .tz(this.props.currentSummit.time_zone.name)
+      .tz(this.props.currentSummit.time_zone_id)
       .format("MMMM Do YYYY, h:mm:ss a");
   }
 
@@ -77,8 +81,8 @@ class SummitDashboardPage extends React.Component {
 
   render() {
     const { currentSummit, match, member } = this.props;
-    let memberObj = new Member(member);
-    let canEditSummit = memberObj.canEditSummit();
+    const memberObj = new Member(member);
+    const canEditSummit = memberObj.canEditSummit();
 
     if (!currentSummit.id) return <div />;
 
@@ -97,20 +101,19 @@ class SummitDashboardPage extends React.Component {
           <hr />
           <h4>{T.translate("dashboard.dates")}</h4>
           <div className="row">
-            <div className="col-md-6"> {currentSummit.time_zone.name} </div>
+            <div className="col-md-6"> {currentSummit.time_zone_id} </div>
             <div className="col-md-6">
               {" "}
-              {this.getFormattedTime(this.state.localtime / 1000)}{" "}
+              {this.getFormattedTime(
+                this.state.localtime / MILLISECONDS_IN_SECOND
+              )}{" "}
             </div>
           </div>
           <div
-            className={
-              "row " +
-              this.getTimeClass(
-                currentSummit.start_date,
-                currentSummit.end_date
-              )
-            }
+            className={`row ${this.getTimeClass(
+              currentSummit.start_date,
+              currentSummit.end_date
+            )}`}
           >
             <div className="col-md-2">
               {" "}
@@ -130,13 +133,10 @@ class SummitDashboardPage extends React.Component {
             </div>
           </div>
           <div
-            className={
-              "row " +
-              this.getTimeClass(
-                currentSummit.start_date,
-                currentSummit.end_date
-              )
-            }
+            className={`row ${this.getTimeClass(
+              currentSummit.start_date,
+              currentSummit.end_date
+            )}`}
           >
             <div className="col-md-2">
               {" "}
@@ -160,17 +160,14 @@ class SummitDashboardPage extends React.Component {
           </div>
           {canEditSummit &&
             currentSummit.selection_plans.map((sp) => (
-              <div key={"seleplan_" + sp.id} className="selection-plan row">
+              <div key={`seleplan_${sp.id}`} className="selection-plan row">
                 <div className="col-md-12">{sp.name}</div>
                 <div className="col-md-12">
                   <div
-                    className={
-                      "row " +
-                      this.getTimeClass(
-                        currentSummit.start_date,
-                        currentSummit.end_date
-                      )
-                    }
+                    className={`"row ${this.getTimeClass(
+                      currentSummit.start_date,
+                      currentSummit.end_date
+                    )}`}
                   >
                     <div className="col-md-2">
                       {" "}
@@ -191,13 +188,10 @@ class SummitDashboardPage extends React.Component {
                     </div>
                   </div>
                   <div
-                    className={
-                      "row " +
-                      this.getTimeClass(
-                        currentSummit.start_date,
-                        currentSummit.end_date
-                      )
-                    }
+                    className={`row ${this.getTimeClass(
+                      currentSummit.start_date,
+                      currentSummit.end_date
+                    )}`}
                   >
                     <div className="col-md-2">
                       {" "}
@@ -218,13 +212,10 @@ class SummitDashboardPage extends React.Component {
                     </div>
                   </div>
                   <div
-                    className={
-                      "row " +
-                      this.getTimeClass(
-                        currentSummit.start_date,
-                        currentSummit.end_date
-                      )
-                    }
+                    className={`row ${this.getTimeClass(
+                      currentSummit.start_date,
+                      currentSummit.end_date
+                    )}`}
                   >
                     <div className="col-md-2">
                       {" "}
@@ -253,24 +244,24 @@ class SummitDashboardPage extends React.Component {
               <hr />
               <h4>
                 {T.translate("dashboard.events")}&nbsp;
-                {this.state.collapseState["events"] && (
+                {this.state.collapseState.events && (
                   <i
                     title={T.translate("dashboard.expand")}
                     onClick={() => this.onCollapseChange("events")}
                     className="fa fa-plus-square clickable"
                     aria-hidden="true"
-                  ></i>
+                  />
                 )}
-                {!this.state.collapseState["events"] && (
+                {!this.state.collapseState.events && (
                   <i
                     title={T.translate("dashboard.collapse")}
                     onClick={() => this.onCollapseChange("events")}
                     className="fa fa-minus-square clickable"
                     aria-hidden="true"
-                  ></i>
+                  />
                 )}
               </h4>
-              {!this.state.collapseState["events"] && (
+              {!this.state.collapseState.events && (
                 <div>
                   <div className="row">
                     <div className="col-md-4">
@@ -309,24 +300,24 @@ class SummitDashboardPage extends React.Component {
               <hr />
               <h4>
                 {T.translate("dashboard.voting")}&nbsp;
-                {this.state.collapseState["voting"] && (
+                {this.state.collapseState.voting && (
                   <i
                     title={T.translate("dashboard.expand")}
                     onClick={() => this.onCollapseChange("voting")}
                     className="fa fa-plus-square clickable"
                     aria-hidden="true"
-                  ></i>
+                  />
                 )}
-                {!this.state.collapseState["voting"] && (
+                {!this.state.collapseState.voting && (
                   <i
                     title={T.translate("dashboard.collapse")}
                     onClick={() => this.onCollapseChange("voting")}
                     className="fa fa-minus-square clickable"
                     aria-hidden="true"
-                  ></i>
+                  />
                 )}
               </h4>
-              {!this.state.collapseState["voting"] && (
+              {!this.state.collapseState.voting && (
                 <div>
                   <div className="row">
                     <div className="col-md-6">
@@ -345,24 +336,24 @@ class SummitDashboardPage extends React.Component {
               <hr />
               <h4>
                 {T.translate("dashboard.emails")}&nbsp;
-                {this.state.collapseState["emails"] && (
+                {this.state.collapseState.emails && (
                   <i
                     title={T.translate("dashboard.expand")}
                     onClick={() => this.onCollapseChange("emails")}
                     className="fa fa-plus-square clickable"
                     aria-hidden="true"
-                  ></i>
+                  />
                 )}
-                {!this.state.collapseState["emails"] && (
+                {!this.state.collapseState.emails && (
                   <i
                     title={T.translate("dashboard.collapse")}
                     onClick={() => this.onCollapseChange("emails")}
                     className="fa fa-minus-square clickable"
                     aria-hidden="true"
-                  ></i>
+                  />
                 )}
               </h4>
-              {!this.state.collapseState["emails"] && (
+              {!this.state.collapseState.emails && (
                 <div>
                   <div className="row">
                     <div className="col-md-4">

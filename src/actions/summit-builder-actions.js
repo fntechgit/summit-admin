@@ -270,7 +270,7 @@ export const changeSource = (selectedSource) => (dispatch) => {
 export const getPublishedEventsBySummitDayLocation =
   (currentSummit, currentDay, currentLocation) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
-    currentDay = moment.tz(currentDay, currentSummit.time_zone.name);
+    currentDay = moment.tz(currentDay, currentSummit.time_zone_id);
     const startDate =
       currentDay.clone().hours(0).minutes(0).seconds(0).valueOf() /
       MILLISECONDS_IN_SECOND;
@@ -317,7 +317,7 @@ export const getShowAlwaysEvents =
     const accessToken = await getAccessTokenSafely();
     const proposedSchedDayMoment = moment.tz(
       proposedSchedDay,
-      summit.time_zone.name
+      summit.time_zone_id
     );
     const startDate =
       proposedSchedDayMoment.clone().hours(0).minutes(0).seconds(0).valueOf() /
@@ -366,7 +366,7 @@ export const getProposedEvents =
     const accessToken = await getAccessTokenSafely();
     const proposedSchedDayMoment = moment.tz(
       proposedSchedDay,
-      summit.time_zone.name
+      summit.time_zone_id
     );
     const startDate =
       proposedSchedDayMoment.clone().hours(0).minutes(0).seconds(0).valueOf() /
