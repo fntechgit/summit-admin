@@ -1589,7 +1589,7 @@ class SummitEventListPage extends React.Component {
                       "event_list.placeholders.start_date_from"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
                     eventFilters.start_date_filter[0],
@@ -1607,7 +1607,7 @@ class SummitEventListPage extends React.Component {
                       "event_list.placeholders.start_date_to"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
                     eventFilters.start_date_filter[1],
@@ -1629,7 +1629,7 @@ class SummitEventListPage extends React.Component {
                       "event_list.placeholders.end_date_from"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
                     eventFilters.end_date_filter[0],
@@ -1647,7 +1647,7 @@ class SummitEventListPage extends React.Component {
                       "event_list.placeholders.end_date_to"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
                     eventFilters.end_date_filter[1],
@@ -1669,7 +1669,7 @@ class SummitEventListPage extends React.Component {
                       "event_list.placeholders.created_from"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
                     eventFilters.created_filter[0],
@@ -1687,7 +1687,7 @@ class SummitEventListPage extends React.Component {
                       "event_list.placeholders.created_to"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
                     eventFilters.created_filter[1],
@@ -1709,7 +1709,7 @@ class SummitEventListPage extends React.Component {
                       "event_list.placeholders.modified_from"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, false)}
                   value={epochToMomentTimeZone(
                     eventFilters.modified_filter[0],
@@ -1727,7 +1727,7 @@ class SummitEventListPage extends React.Component {
                       "event_list.placeholders.modified_to"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleChangeDateFilter(ev, true)}
                   value={epochToMomentTimeZone(
                     eventFilters.modified_filter[1],

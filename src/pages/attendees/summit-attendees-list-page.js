@@ -160,7 +160,7 @@ class SummitAttendeeListPage extends React.Component {
   }
 
   handleChangeFlowEvent(ev) {
-    const { value, id } = ev.target;
+    const { value } = ev.target;
     this.props.setCurrentFlowEvent(value);
   }
 
@@ -298,7 +298,7 @@ class SummitAttendeeListPage extends React.Component {
     );
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { page, perPage, term } = this.props;
     const { attendeeFilters, selectedColumns } = this.state;
     key = key === "name" ? "full_name" : key;
@@ -327,7 +327,7 @@ class SummitAttendeeListPage extends React.Component {
     );
   }
 
-  handleNewAttendee(ev) {
+  handleNewAttendee() {
     const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/attendees/new`);
   }
@@ -490,8 +490,7 @@ class SummitAttendeeListPage extends React.Component {
       currentFlowEvent,
       selectedAll,
       badgeFeatures,
-      badgeTypes,
-      sendEmails
+      badgeTypes
     } = this.props;
 
     const {
@@ -1001,7 +1000,7 @@ class SummitAttendeeListPage extends React.Component {
                       "attendee_list.placeholders.checkin_date_from"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleCheckInDate(ev, false)}
                   value={epochToMomentTimeZone(
                     attendeeFilters.checkinDateFilter[0],
@@ -1022,7 +1021,7 @@ class SummitAttendeeListPage extends React.Component {
                       "attendee_list.placeholders.checkin_date_to"
                     )
                   }}
-                  timezone={currentSummit.time_zone.name}
+                  timezone={currentSummit.time_zone_id}
                   onChange={(ev) => this.handleCheckInDate(ev, true)}
                   value={epochToMomentTimeZone(
                     attendeeFilters.checkinDateFilter[1],
