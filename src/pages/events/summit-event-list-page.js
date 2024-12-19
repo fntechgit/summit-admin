@@ -204,7 +204,7 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
   {
     columnKey: "review_status",
     value: "review_status",
-    sortable: false,
+    sortable: true,
     title: true
   },
   {
