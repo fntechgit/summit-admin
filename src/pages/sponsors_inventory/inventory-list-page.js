@@ -70,11 +70,11 @@ const InventoryListPage = ({
   };
 
   const handleSort = (index, key, dir) => {
-    getInventoryItems(term, page, perPage, key, dir);
+    getInventoryItems(term, currentPage, perPage, key, dir);
   };
 
   const handleSearch = (term) => {
-    getInventoryItems(term, page, perPage, order, orderDir);
+    getInventoryItems(term, currentPage, perPage, order, orderDir);
   };
 
   const handleNewInventoryItem = () => {
@@ -83,8 +83,16 @@ const InventoryListPage = ({
 
   const columns = [
     { columnKey: "id", value: "Id", sortable: true },
-    { columnKey: "code", value: T.translate("general.code"), sortable: true },
-    { columnKey: "name", value: T.translate("general.name"), sortable: true }
+    {
+      columnKey: "code",
+      value: T.translate("inventory_item_list.code_column_label"),
+      sortable: true
+    },
+    {
+      columnKey: "name",
+      value: T.translate("inventory_item_list.name_column_label"),
+      sortable: true
+    }
   ];
 
   const table_options = {
@@ -103,6 +111,9 @@ const InventoryListPage = ({
         {T.translate("inventory_item_list.inventory_items")} (
         {totalInventoryItems}){" "}
       </h3>
+      <div className="alert alert-info" role="alert">
+        {T.translate("inventory_item_list.alert_info")}
+      </div>
       <div className="row">
         <div className="col-md-6">
           <FreeTextSearch

@@ -19,7 +19,9 @@ import InventoryItemForm from "../../components/forms/inventory-item-form";
 import {
   getInventoryItem,
   resetInventoryItemForm,
-  saveInventoryItem
+  saveInventoryItem,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemImage
 } from "../../actions/inventory-item-actions";
 
 const EditInventoryItemPage = (props) => {
@@ -29,7 +31,9 @@ const EditInventoryItemPage = (props) => {
     errors,
     getInventoryItem,
     resetInventoryItemForm,
-    saveInventoryItem
+    saveInventoryItem,
+    deleteInventoryItemMetaFieldType,
+    deleteInventoryItemImage
   } = props;
   const inventoryItemId = match.params.inventory_item_id;
 
@@ -56,6 +60,8 @@ const EditInventoryItemPage = (props) => {
       <InventoryItemForm
         entity={entity}
         errors={errors}
+        onMetaFieldTypeDeleted={deleteInventoryItemMetaFieldType}
+        onImageDeleted={deleteInventoryItemImage}
         onSubmit={saveInventoryItem}
       />
     </div>
@@ -69,5 +75,7 @@ const mapStateToProps = ({ currentInventoryItemState }) => ({
 export default connect(mapStateToProps, {
   getInventoryItem,
   resetInventoryItemForm,
-  saveInventoryItem
+  saveInventoryItem,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemImage
 })(EditInventoryItemPage);
