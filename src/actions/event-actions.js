@@ -540,7 +540,7 @@ export const getEvents =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const summitTZ = currentSummit.time_zone.name;
+    const summitTZ = currentSummit.time_zone_id;
 
     dispatch(startLoading());
 
@@ -659,7 +659,7 @@ export const getEventsForOccupancy =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
-    const summitTZ = currentSummit.time_zone.name;
+    const summitTZ = currentSummit.time_zone_id;
     let endPoint = "events/published";
 
     dispatch(startLoading());
@@ -725,7 +725,7 @@ export const getEventsForOccupancyCSV =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
-    const summitTZ = currentSummit.time_zone.name;
+    const summitTZ = currentSummit.time_zone_id;
 
     dispatch(startLoading());
 
@@ -786,7 +786,7 @@ export const getCurrentEventForOccupancy =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [];
-    const summitTZ = currentSummit.time_zone.name;
+    const summitTZ = currentSummit.time_zone_id;
     let endPoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}`;
 
     dispatch(startLoading());
