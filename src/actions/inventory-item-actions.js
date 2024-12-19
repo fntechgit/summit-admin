@@ -44,6 +44,19 @@ export const RECEIVE_INVENTORY_ITEMS = "RECEIVE_INVENTORY_ITEMS";
 export const REQUEST_INVENTORY_ITEMS = "REQUEST_INVENTORY_ITEMS";
 export const RESET_INVENTORY_ITEM_FORM = "RESET_INVENTORY_ITEM_FORM";
 export const UPDATE_INVENTORY_ITEM = "UPDATE_INVENTORY_ITEM";
+export const ADD_INVENTORY_ITEM_IMAGE = "ADD_INVENTORY_ITEM_IMAGE";
+export const ADD_INVENTORY_ITEM_META_FIELD_TYPE =
+  "ADD_INVENTORY_ITEM_META_FIELD_TYPE";
+export const INVENTORY_ITEM_META_FIELD_SAVED =
+  "INVENTORY_ITEM_META_FIELD_SAVED";
+export const INVENTORY_ITEM_META_FIELD_DELETED =
+  "INVENTORY_ITEM_META_FIELD_DELETED";
+export const INVENTORY_ITEM_META_FIELD_VALUE_SAVED =
+  "INVENTORY_ITEM_META_FIELD_VALUE_SAVED";
+export const INVENTORY_ITEM_META_FIELD_VALUE_DELETED =
+  "INVENTORY_ITEM_META_FIELD_VALUE_DELETED";
+export const INVENTORY_ITEM_IMAGE_SAVED = "INVENTORY_ITEM_IMAGE_SAVED";
+export const INVENTORY_ITEM_IMAGE_DELETED = "INVENTORY_ITEM_IMAGE_DELETED";
 
 export const getInventoryItems =
   (
@@ -61,7 +74,7 @@ export const getInventoryItems =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      filter.push(`name=@${escapedTerm}`);
+      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
     }
 
     const params = {
@@ -77,8 +90,8 @@ export const getInventoryItems =
 
     // order
     if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.ordering = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -138,16 +151,17 @@ export const resetInventoryItemForm = () => (dispatch) => {
 
 export const saveInventoryItem = (entity) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
-  dispatch(startLoading());
-
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    expand: "images,meta_fields,meta_fields.values"
   };
+
+  dispatch(startLoading());
 
   const normalizedEntity = normalizeEntity(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_INVENTORY_ITEM),
       createAction(INVENTORY_ITEM_UPDATED),
       `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${entity.id}/`,
@@ -155,38 +169,246 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
       authErrorHandler,
       entity
     )(params)(dispatch).then(() => {
-      dispatch(
-        showSuccessMessage(
-          T.translate("edit_inventory_item.inventory_item_saved")
-        )
-      );
-    });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_inventory_item.inventory_item_created"),
-      type: "success"
-    };
+      const promises = [];
 
-    postRequest(
-      createAction(ADD_INVENTORY_ITEM),
-      createAction(INVENTORY_ITEM_ADDED),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push("/app/sponsors-inventory");
+      if (normalizedEntity.images.length > 0) {
+        promises.push(saveInventoryItemImages(normalizedEntity)(dispatch));
+      }
+
+      if (normalizedEntity.meta_fields.length > 0) {
+        promises.push(
+          saveInventoryItemMetaFieldTypes(normalizedEntity)(dispatch)
+        );
+      }
+
+      Promise.all(promises)
+        .then(() => {
+          dispatch(
+            showSuccessMessage(
+              T.translate("edit_inventory_item.inventory_item_saved")
+            )
+          );
         })
-      );
+        .finally(() => {
+          dispatch(stopLoading());
+        });
     });
   }
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_inventory_item.inventory_item_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(ADD_INVENTORY_ITEM),
+    createAction(INVENTORY_ITEM_ADDED),
+    `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    const promises = [];
+
+    if (normalizedEntity.images.length > 0) {
+      promises.push(saveInventoryItemImages(normalizedEntity)(dispatch));
+    }
+
+    if (normalizedEntity.meta_fields.length > 0) {
+      promises.push(
+        saveInventoryItemMetaFieldTypes(normalizedEntity)(dispatch)
+      );
+    }
+
+    Promise.all(promises)
+      .then(() => {
+        dispatch(
+          showMessage(success_message, () => {
+            history.push("/app/sponsors-inventory");
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  });
 };
 
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
+  normalizedEntity.meta_fields = normalizedEntity.meta_fields.map(
+    (metaField) => ({
+      ...metaField,
+      is_required: !!metaField.is_required
+    })
+  );
+
   return normalizedEntity;
 };
+
+/* ************************************  META FIELD TYPES  ************************************ */
+
+const saveInventoryItemMetaFieldTypes = (inventoryItem) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  const promises = inventoryItem.meta_fields.map((metaFieldType) => {
+    if (metaFieldType.id) {
+      return putRequest(
+        null,
+        createAction(INVENTORY_ITEM_META_FIELD_SAVED),
+        `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/meta-field-types/${metaFieldType.id}/`,
+        metaFieldType,
+        authErrorHandler,
+        metaFieldType
+      )(params)(dispatch).then(() => {
+        if (metaFieldType.values.length > 0) {
+          saveMetaFieldValues(inventoryItem.id, metaFieldType)(dispatch);
+        }
+      });
+    }
+    return postRequest(
+      null,
+      createAction(INVENTORY_ITEM_META_FIELD_SAVED),
+      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/meta-field-types/`,
+      metaFieldType,
+      authErrorHandler,
+      metaFieldType
+    )(params)(dispatch).then(({ response }) => {
+      if (metaFieldType.values.length > 0) {
+        const metaField = { ...metaFieldType, id: response.id };
+        saveMetaFieldValues(inventoryItem.id, metaField)(dispatch);
+      }
+    });
+  });
+
+  return Promise.all(promises);
+};
+
+export const deleteInventoryItemMetaFieldType =
+  (inventoryItemId, metaFieldId) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return deleteRequest(
+      null,
+      createAction(INVENTORY_ITEM_META_FIELD_DELETED)({ metaFieldId }),
+      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldId}/`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+/* ************************************  META FIELD VALUES  ************************************ */
+
+export const saveMetaFieldValues =
+  (inventoryItemId, metaFieldType) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    const promises = metaFieldType.values.map((value) => {
+      if (value.id) {
+        return putRequest(
+          null,
+          createAction(INVENTORY_ITEM_META_FIELD_VALUE_SAVED),
+          `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldType.id}/values/${value.id}/`,
+          value,
+          authErrorHandler,
+          value
+        )(params)(dispatch);
+      }
+      return postRequest(
+        null,
+        createAction(INVENTORY_ITEM_META_FIELD_VALUE_SAVED),
+        `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldType.id}/values/`,
+        value,
+        authErrorHandler,
+        value
+      )(params)(dispatch);
+    });
+
+    return Promise.all(promises);
+  };
+
+export const deleteInventoryItemMetaFieldTypeValue =
+  (inventoryItemId, metaFieldId, valueId) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return deleteRequest(
+      null,
+      createAction(INVENTORY_ITEM_META_FIELD_VALUE_DELETED)({
+        metaFieldId,
+        valueId
+      }),
+      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldId}/values/${valueId}/`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+/* ************************************  IMAGES  ************************************ */
+
+const saveInventoryItemImages = (inventoryItem) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  const promises = inventoryItem.images.map((image) => {
+    if (image.id) {
+      return putRequest(
+        null,
+        createAction(INVENTORY_ITEM_IMAGE_SAVED),
+        `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/images/${image.id}/`,
+        image,
+        authErrorHandler,
+        image
+      )(params)(dispatch);
+    }
+    return postRequest(
+      null,
+      createAction(INVENTORY_ITEM_IMAGE_SAVED),
+      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/images/`,
+      image,
+      authErrorHandler,
+      image
+    )(params)(dispatch);
+  });
+
+  return Promise.all(promises);
+};
+
+export const deleteInventoryItemImage =
+  (inventoryItemId, imageId) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return deleteRequest(
+      null,
+      createAction(INVENTORY_ITEM_IMAGE_DELETED)({ imageId }),
+      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/images/${imageId}/`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };

@@ -11,28 +11,42 @@
  * limitations under the License.
  * */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
-  Dropdown,
   Input,
+  UploadInputV2,
   TextEditor
 } from "openstack-uicore-foundation/lib/components";
 import FormRepeater from "../form-repeater";
+import InventoryItemMetaFieldForm from "./inventory-item-meta-field-form";
+import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
 import {
-  scrollToError,
-  shallowEqual,
-  hasErrors
-} from "../../utils/methods";
+  MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
+  MAX_INVENTORY_IMAGES_UPLOAD_QTY,
+  ALLOWED_INVENTORY_IMAGE_FORMATS
+} from "../../utils/constants";
 
 const InventoryItemForm = ({
   entity: initialEntity,
   errors: initialErrors,
+  onMetaFieldTypeDeleted,
+  onMetaFieldTypeValueDeleted,
+  onImageDeleted,
   onSubmit
 }) => {
+  const repeaterRef = useRef(null);
   const [entity, setEntity] = useState({ ...initialEntity });
   const [errors, setErrors] = useState(initialErrors);
+
+  const mediaType = {
+    max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
+    max_uploads_qty: MAX_INVENTORY_IMAGES_UPLOAD_QTY,
+    type: {
+      allowed_extensions: ALLOWED_INVENTORY_IMAGE_FORMATS
+    }
+  };
 
   useEffect(() => {
     scrollToError(initialErrors);
@@ -55,62 +69,97 @@ const InventoryItemForm = ({
     setErrors((prevErrors) => ({ ...prevErrors, [id]: "" }));
   };
 
+  const handleImageUploadComplete = (response) => {
+    if (response) {
+      const image = {
+        file_path: `${response.path}${response.name}`,
+        filename: response.name
+      };
+      setEntity((prevEntity) => ({
+        ...prevEntity,
+        images: [...prevEntity.images, image]
+      }));
+    }
+  };
+
+  const handleRemoveImage = (imageFile) => {
+    const images = entity.images.filter(
+      (image) => image.filename != imageFile.name
+    );
+    setEntity((prevEntity) => ({
+      ...prevEntity,
+      images
+    }));
+
+    if (onImageDeleted && entity.id && imageFile.id) {
+      onImageDeleted(entity.id, imageFile.id);
+    }
+  };
+
+  const getMediaInputValue = () =>
+    entity.images.length > 0
+      ? entity.images.map((img) => ({
+          ...img,
+          filename: img.filename ?? img.file_path
+        }))
+      : [];
+
   const handleSubmit = (ev) => {
     ev.preventDefault();
+    entity.meta_fields = getNormalizedMetaFields().filter((mf) => mf.name);
     onSubmit(entity);
   };
 
-  // const renderLineContent = (line, updateValue) => (
-  const renderLineContent = () => (
-    <div className="row form-group">
-      <div className="col-md-3">
-        <Input
-          id="meta-field-title"
-          className="form-control"
-          // error={hasErrors("meta-field-title", errors)}
-          onChange={handleChange}
-          value={entity.code}
-          placeholder="Field Title"
-        />
-      </div>
-      <div className="col-md-2">
-        <div className="form-check abc-checkbox">
-          <input
-            type="checkbox"
-            id="is_required"
-            checked={false}
-            onChange={handleChange}
-            className="form-check-input"
-          />
-          <label className="form-check-label" htmlFor="is_required">
-            Required
-          </label>
-        </div>
-      </div>
-      <div className="col-md-2">
-        <Dropdown
-          id="meta-field-type"
-          placeholder="Field Type"
-          // value={enabledFilters}
-          onChange={() => {}}
-          // options={(filters_ddl) => {}}
-        />
-      </div>
-      <div className="col-md-3">
-        <Input
-          id="meta-field-value"
-          className="form-control"
-          // error={hasErrors("meta-field-title", errors)}
-          onChange={handleChange}
-          value={entity.code}
-          placeholder="Field Value"
-        />
-      </div>
-    </div>
+  const getNormalizedMetaFields = () => {
+    if (repeaterRef.current) {
+      const content = repeaterRef.current.getContent();
+
+      return content.map((item) => {
+        const idSuffix = item.id;
+        const newValue = Object.fromEntries(
+          Object.entries(item.value).map(([key, value]) => {
+            const newKey = key.replace(`_${idSuffix}`, "");
+            return [newKey, value];
+          })
+        );
+        return newValue;
+      });
+    }
+    return [];
+  };
+
+  const initMetaFieldLines = (metaFields) =>
+    metaFields
+      .filter((metaField) => metaField.id)
+      .map((metaField) => ({
+        id: metaField.id,
+        value: { ...metaField }
+      }));
+
+  const handleRemoveMetaFieldType = (metaField) => {
+    if (onMetaFieldTypeDeleted && metaField.value.id) {
+      onMetaFieldTypeDeleted(entity.id, metaField.value.id);
+    }
+  };
+
+  const handleRemoveMetaFieldTypeValue = (metaFieldId, metaFieldValueId) => {
+    if (onMetaFieldTypeDeleted) {
+      onMetaFieldTypeValueDeleted(entity.id, metaFieldId, metaFieldValueId);
+    }
+  };
+
+  const renderMetaFieldForm = (line, updateValue) => (
+    <InventoryItemMetaFieldForm
+      entity={line.value}
+      errors={errors}
+      index={line.id}
+      onChange={updateValue}
+      onMetaFieldTypeValueDeleted={handleRemoveMetaFieldTypeValue}
+    />
   );
 
   return (
-    <form className="badge-type-form">
+    <form className="inventory-item-form">
       <input type="hidden" id="id" value={entity.id} />
       <input type="hidden" id="order" value={entity.order} />
       <div className="row form-group">
@@ -150,9 +199,39 @@ const InventoryItemForm = ({
 
       <hr />
 
-      <div className="row">
+      <div className="row form-group">
         <div className="col-md-12">
-          <FormRepeater renderContent={renderLineContent} />
+          <label>{T.translate("edit_inventory_item.meta_fields")}</label>
+          <FormRepeater
+            ref={repeaterRef}
+            initialLines={initMetaFieldLines(initialEntity.meta_fields)}
+            renderContent={renderMetaFieldForm}
+            onLineRemoved={handleRemoveMetaFieldType}
+          />
+        </div>
+      </div>
+
+      <hr />
+
+      <div className="row form-group">
+        <div className="col-md-12">
+          <label> {T.translate("edit_inventory_item.images")}</label>
+          <UploadInputV2
+            id="image"
+            onUploadComplete={handleImageUploadComplete}
+            value={getMediaInputValue()}
+            mediaType={mediaType}
+            onRemove={handleRemoveImage}
+            postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
+            error={hasErrors("image", errors)}
+            djsConfig={{ withCredentials: true }}
+            maxFiles={mediaType.max_uploads_qty}
+            canAdd={
+              mediaType.is_editable ||
+              entity.images.length < mediaType.max_uploads_qty
+            }
+            parallelChunkUploads
+          />
         </div>
       </div>
 

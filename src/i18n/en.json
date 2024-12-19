@@ -3163,6 +3163,9 @@
   },
   "inventory_item_list": {
     "inventory_items": "Inventory Items",
+    "alert_info": "You can create or archive items from the list. To edit an item click on it.",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
     "delete_inventory_item_warning": "Are you sure you want to delete inventory item ",
     "add_inventory_item": "Create new Item",
     "placeholders": {
@@ -3172,8 +3175,20 @@
   "edit_inventory_item": {
     "inventory_item": "Item",
     "inventory_item_created": "Inventory Item created successfully.",
+    "inventory_item_saved": "Inventory Item saved successfully.",
     "code": "Code",
     "name": "Name",
-    "description": "Description"
+    "description": "Description",
+    "meta_fields": "Additional Input Fields",
+    "meta_field_values": "Field Values",
+    "placeholders": {
+      "meta_field_title": "Field Title",
+      "meta_field_required": "Required Field",
+      "meta_field_type": "Field Type",
+      "meta_field_values": "Field Values",
+      "meta_field_value_name": "Name",
+      "meta_field_value_value": "Value"
+    },
+    "images": "Images"
   }
 }

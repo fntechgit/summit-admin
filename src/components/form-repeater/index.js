@@ -1,67 +1,106 @@
-import React, { useState } from "react";
+import React, {
+  useEffect,
+  useState,
+  useImperativeHandle,
+  forwardRef
+} from "react";
+import styles from "./index.module.less";
 
-const FormRepeater = ({ renderContent }) => {
-  const [lines, setLines] = useState([{ id: Date.now(), value: "" }]);
-
-  const handleAddLine = (id) => {
-    const newLine = { id: Date.now(), value: "" };
-    const index = lines.findIndex((line) => line.id === id);
-    const updatedLines = [
-      ...lines.slice(0, index + 1),
-      newLine,
-      ...lines.slice(index + 1)
-    ];
-    setLines(updatedLines);
-  };
-
-  const handleRemoveLine = (id) => {
-    setLines(lines.filter((line) => line.id !== id));
-  };
-
-  return (
-    <div>
-      {lines.map((line) => (
-        <div
-          key={line.id}
-          style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
-        >
-          <div style={{ marginRight: "8px", flex: 1 }}>
-            {renderContent(line, (value) => {
-              const updatedLines = lines.map((l) =>
-                l.id === line.id ? { ...l, value } : l
-              );
-              setLines(updatedLines);
-            })}
-          </div>
-          <button
-            type="button"
-            onClick={() => handleAddLine(line.id)}
-            style={{
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              marginRight: "4px"
-            }}
-          >
-            <i className="fa fa-plus" aria-hidden="true" title="Add" />
-          </button>
-          {lines.length > 1 && (
-            <button
-              type="button"
-              onClick={() => handleRemoveLine(line.id)}
-              style={{
-                border: "none",
-                background: "none",
-                cursor: "pointer"
-              }}
-            >
-              <i className="fa fa-trash" aria-hidden="true" title="Remove" />
-            </button>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+const ButtonPanelAlignment = {
+  RIGHT: "Right",
+  BOTTOM: "Bottom"
 };
 
+const FormRepeater = forwardRef(
+  (
+    {
+      initialLines = [],
+      renderContent,
+      onLineRemoved,
+      buttonsPanelAlignment = ButtonPanelAlignment.RIGHT
+    },
+    ref
+  ) => {
+    const [lines, setLines] = useState([{ id: Date.now(), value: "" }]);
+
+    useEffect(() => {
+      if (initialLines.length > 0) {
+        setLines(
+          initialLines.map((line) => ({ id: line.id || Date.now(), ...line }))
+        );
+      } else {
+        setLines([{ id: 1, value: "" }]);
+      }
+    }, [initialLines]);
+
+    const handleAddLine = (id) => {
+      const newLine = { id: Date.now(), value: "" };
+      const index = lines.findIndex((line) => line.id === id);
+      const updatedLines = [
+        ...lines.slice(0, index + 1),
+        newLine,
+        ...lines.slice(index + 1)
+      ];
+      setLines(updatedLines);
+    };
+
+    const handleRemoveLine = (line) => {
+      setLines(lines.filter((l) => l.id !== line.id));
+      if (onLineRemoved) {
+        onLineRemoved(line);
+      }
+    };
+
+    useImperativeHandle(ref, () => ({
+      getContent: () => lines
+    }));
+
+    return (
+      <div>
+        {lines.map((line) => (
+          <div
+            key={line.id}
+            className={styles[`container${buttonsPanelAlignment}`]}
+          >
+            <div className={styles.contentBody}>
+              {renderContent(line, (value, callback) => {
+                const updatedLines = lines.map((l) =>
+                  l.id === line.id ? { ...l, value } : l
+                );
+                if (callback) {
+                  callback(updatedLines);
+                }
+                setLines(updatedLines);
+              })}
+            </div>
+            <div className={styles[`buttonsPanel${buttonsPanelAlignment}`]}>
+              {(lines.length > 1 || (lines.length === 1 && lines[0].value)) && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveLine(line)}
+                  className={styles[`deleteButton${buttonsPanelAlignment}`]}
+                >
+                  <i
+                    className="fa fa-trash"
+                    aria-hidden="true"
+                    title="Remove"
+                  />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => handleAddLine(line.id)}
+                className={styles[`addButton${buttonsPanelAlignment}`]}
+              >
+                <i className="fa fa-plus" aria-hidden="true" title="Add" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+);
+
 export default FormRepeater;
+export { ButtonPanelAlignment };

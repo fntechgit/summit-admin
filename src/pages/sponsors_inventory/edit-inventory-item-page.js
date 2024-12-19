@@ -19,17 +19,24 @@ import InventoryItemForm from "../../components/forms/inventory-item-form";
 import {
   getInventoryItem,
   resetInventoryItemForm,
-  saveInventoryItem
+  saveInventoryItem,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemMetaFieldTypeValue,
+  deleteInventoryItemImage
 } from "../../actions/inventory-item-actions";
 
 const EditInventoryItemPage = (props) => {
   const {
     match,
+    loading,
     entity,
     errors,
     getInventoryItem,
     resetInventoryItemForm,
-    saveInventoryItem
+    saveInventoryItem,
+    deleteInventoryItemMetaFieldType,
+    deleteInventoryItemMetaFieldTypeValue,
+    deleteInventoryItemImage
   } = props;
   const inventoryItemId = match.params.inventory_item_id;
 
@@ -46,6 +53,8 @@ const EditInventoryItemPage = (props) => {
     : T.translate("general.add");
   const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
+  if (loading) return null;
+
   return (
     <div className="container">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
@@ -56,18 +65,25 @@ const EditInventoryItemPage = (props) => {
       <InventoryItemForm
         entity={entity}
         errors={errors}
+        onMetaFieldTypeDeleted={deleteInventoryItemMetaFieldType}
+        onMetaFieldTypeValueDeleted={deleteInventoryItemMetaFieldTypeValue}
+        onImageDeleted={deleteInventoryItemImage}
         onSubmit={saveInventoryItem}
       />
     </div>
   );
 };
 
-const mapStateToProps = ({ currentInventoryItemState }) => ({
-  ...currentInventoryItemState
+const mapStateToProps = ({ currentInventoryItemState, baseState }) => ({
+  ...currentInventoryItemState,
+  loading: baseState.loading
 });
 
 export default connect(mapStateToProps, {
   getInventoryItem,
   resetInventoryItemForm,
-  saveInventoryItem
+  saveInventoryItem,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemMetaFieldTypeValue,
+  deleteInventoryItemImage
 })(EditInventoryItemPage);
