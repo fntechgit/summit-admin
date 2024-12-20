@@ -147,6 +147,12 @@ const normalizeEntity = (entity) => {
     normalizedEntity.tags = entity.tags.map((e) => e.tag);
   }
 
+  if (entity.allowed_ticket_types.length > 0) {
+    normalizedEntity.allowed_ticket_types = entity.allowed_ticket_types.map(
+      (tt) => tt.id
+    );
+  }
+
   delete normalizedEntity.owner;
   delete normalizedEntity.owner_id;
   delete normalizedEntity.speaker;
@@ -240,7 +246,7 @@ export const getPromocode = (promocodeId) => async (dispatch, getState) => {
 
   const params = {
     expand:
-      "owner,sponsor,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,speaker,tickets,ticket_type,ticket_types_rules,tags",
+      "owner,sponsor,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,speaker,tickets,ticket_type,ticket_types_rules,tags,allowed_ticket_types",
     access_token: accessToken
   };
 
@@ -270,7 +276,7 @@ export const savePromocode =
 
     const params = {
       expand:
-        "owner,sponsor,sponsor.company,sponsor.sponsorship,speaker,tickets,ticket_type,ticket_types_rules,tags",
+        "owner,sponsor,sponsor.company,sponsor.sponsorship,speaker,tickets,ticket_type,ticket_types_rules,tags,allowed_ticket_types",
       access_token: accessToken
     };
 
