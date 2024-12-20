@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -29,6 +29,8 @@ import {
 import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { getSentEmailsByTemplatesAndEmail } from "./email-actions";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
+
 export const REQUEST_INVITATIONS = "REQUEST_INVITATIONS";
 export const RECEIVE_INVITATIONS = "RECEIVE_INVITATIONS";
 export const INVITATIONS_IMPORTED = "INVITATIONS_IMPORTED";
@@ -51,13 +53,13 @@ export const REGISTRATION_INVITATION_ALL_DELETED =
 export const SET_CURRENT_FLOW_EVENT = "SET_CURRENT_FLOW_EVENT";
 export const SET_SELECTED_ALL = "SET_SELECTED_ALL";
 
-/**************************   INVITATIONS   ******************************************/
+/* *************************   INVITATIONS   ***************************************** */
 
 export const getInvitations =
   (
     term = null,
     page = 1,
-    perPage = 10,
+    perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = 1,
     filters = {}
@@ -71,7 +73,7 @@ export const getInvitations =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken,
       expand: "allowed_ticket_types,tags"
@@ -86,7 +88,7 @@ export const getInvitations =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -138,7 +140,7 @@ export const exportInvitationsCSV =
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const filename = currentSummit.name + "-invitations.csv";
+    const filename = `${currentSummit.name}-invitations.csv`;
     const filter = parseFilters(filters, term);
 
     const params = {
@@ -152,7 +154,7 @@ export const exportInvitationsCSV =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     dispatch(
@@ -164,15 +166,15 @@ export const exportInvitationsCSV =
     );
   };
 
-export const selectInvitation = (invitationId) => (dispatch, getState) => {
+export const selectInvitation = (invitationId) => (dispatch) => {
   dispatch(createAction(SELECT_INVITATION)(invitationId));
 };
 
-export const unSelectInvitation = (invitationId) => (dispatch, getState) => {
+export const unSelectInvitation = (invitationId) => (dispatch) => {
   dispatch(createAction(UNSELECT_INVITATION)(invitationId));
 };
 
-export const clearAllSelectedInvitations = () => (dispatch, getState) => {
+export const clearAllSelectedInvitations = () => (dispatch) => {
   dispatch(createAction(CLEAR_ALL_SELECTED_INVITATIONS)());
 };
 
@@ -242,15 +244,15 @@ export const deleteAllRegistrationInvitation =
     });
   };
 
-export const resetRegistrationInvitationForm = () => (dispatch, getState) => {
+export const resetRegistrationInvitationForm = () => (dispatch) => {
   dispatch(createAction(RESET_REGISTRATION_INVITATION_FORM)({}));
 };
 
-export const setCurrentFlowEvent = (value) => (dispatch, getState) => {
+export const setCurrentFlowEvent = (value) => (dispatch) => {
   dispatch(createAction(SET_CURRENT_FLOW_EVENT)(value));
 };
 
-export const setSelectedAll = (value) => (dispatch, getState) => {
+export const setSelectedAll = (value) => (dispatch) => {
   dispatch(createAction(SET_SELECTED_ALL)(value));
 };
 
@@ -338,10 +340,10 @@ const normalizeEntity = (entity) => {
     (tt) => tt.id
   );
   normalizedEntity.tags = entity.tags.map((t) => t.tag);
-  delete normalizedEntity["created"];
-  delete normalizedEntity["last_edited"];
-  delete normalizedEntity["is_sent"];
-  delete normalizedEntity["accepted_date"];
+  delete normalizedEntity.created;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.is_sent;
+  delete normalizedEntity.accepted_date;
   return normalizedEntity;
 };
 
@@ -384,11 +386,11 @@ export const sendEmails =
     };
 
     if (testRecipient) {
-      payload["test_email_recipient"] = testRecipient;
+      payload.test_email_recipient = testRecipient;
     }
 
     if (excerptRecipient) {
-      payload["outcome_email_recipient"] = excerptRecipient;
+      payload.outcome_email_recipient = excerptRecipient;
     }
 
     dispatch(startLoading());
@@ -424,11 +426,14 @@ const parseFilters = (filters, term = null) => {
   }
 
   if (filters.allowedTicketTypesIds?.length > 0) {
-    filter.push("ticket_types_id==" + filters.allowedTicketTypesIds.join("||"));
+    const ticketTypesId = filters.allowedTicketTypesIds.map((tt) =>
+      tt?.id ? tt.id : tt
+    );
+    filter.push(`ticket_types_id==${ticketTypesId.join("||")}`);
   }
 
   if (filters.tagFilter?.length > 0) {
-    filter.push("tags_id==" + filters.tagFilter.map((e) => e.id).join("||"));
+    filter.push(`tags_id==${filters.tagFilter.map((e) => e.id).join("||")}`);
   }
 
   if (term) {

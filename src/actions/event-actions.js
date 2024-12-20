@@ -481,6 +481,12 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
     }
   }
 
+  if (entity.allowed_ticket_types?.length > 0) {
+    normalizedEntity.allowed_ticket_types = entity.allowed_ticket_types.map(
+      (tt) => (tt.hasOwnProperty("id") ? tt.id : tt)
+    );
+  }
+
   if (summit)
     normalizePresentationAllowedQuestionFields(normalizedEntity, summit);
 
@@ -953,7 +959,8 @@ export const getEvent = (eventId) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.extra_questions, selection_plan.extra_questions.values,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,created_by,track_chair_scores_avg.ranking_type,actions"
+      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.extra_questions, selection_plan.extra_questions.values,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types,allowed_badge_features_types",
+    fields: "allowed_ticket_types.id,allowed_ticket_types.name"
   };
 
   dispatch(startLoading());
@@ -1053,7 +1060,8 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions"
+      "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types",
+    fields: "allowed_ticket_types.id,allowed_ticket_types.name"
   };
 
   if (entity.id) {

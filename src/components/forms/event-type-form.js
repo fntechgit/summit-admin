@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -18,7 +18,8 @@ import {
   Dropdown,
   Input,
   SimpleLinkList,
-  Panel
+  Panel,
+  TicketTypesInput
 } from "openstack-uicore-foundation/lib/components";
 import {
   isEmpty,
@@ -44,7 +45,7 @@ class EventTypeForm extends React.Component {
     this.handleMediaUploadLink = this.handleMediaUploadLink.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -63,8 +64,8 @@ class EventTypeForm extends React.Component {
   }
 
   handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
+    const newEntity = { ...this.state.entity };
+    const newErrors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -75,22 +76,22 @@ class EventTypeForm extends React.Component {
       value = parseInt(ev.target.value);
     }
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    newErrors[id] = "";
+    newEntity[id] = value;
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleShowAlwaysChange(ev) {
-    const entity = { ...this.state.entity };
+    const newEntity = { ...this.state.entity };
     const value = ev.target.checked;
 
     // if true then we clear allowed ticket types
     if (value) {
-      entity.allowed_ticket_types = [];
+      newEntity.allowed_ticket_types = [];
     }
 
-    entity.show_always_on_schedule = value;
-    this.setState({ entity: entity });
+    newEntity.show_always_on_schedule = value;
+    this.setState({ entity: newEntity });
   }
 
   handleSubmit(ev) {
@@ -124,10 +125,6 @@ class EventTypeForm extends React.Component {
       { label: "Presentation", value: "PRESENTATION_TYPE" },
       { label: "Event", value: "EVENT_TYPE" }
     ];
-    const ticket_types_ddl = currentSummit.ticket_types.map((t) => ({
-      value: t.id,
-      label: t.name
-    }));
 
     const blackout_times_ddl = [
       {
@@ -598,15 +595,17 @@ class EventTypeForm extends React.Component {
                 {" "}
                 {T.translate("edit_event_type.allowed_ticket_types")}
               </label>
-              <Dropdown
+              <TicketTypesInput
                 id="allowed_ticket_types"
-                value={entity.allowed_ticket_types}
+                value={entity?.allowed_ticket_types}
                 placeholder={T.translate(
                   "edit_event_type.placeholders.allowed_ticket_types"
                 )}
-                options={ticket_types_ddl}
+                summitId={currentSummit.id}
                 onChange={this.handleChange}
+                optionsLimit={100}
                 disabled={!!entity.show_always_on_schedule}
+                defaultOptions
                 isMulti
               />
             </div>

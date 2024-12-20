@@ -56,7 +56,7 @@ class EditSelectionPlanExtraQuestionPage extends React.Component {
     this.props.saveSelectionPlanExtraQuestion(selectionPlanId, entity);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.extra_question_id;
     const newId = this.props.match.params.extra_question_id;
     const selectionPlanId = this.props.currentSelectionPlan.id;
@@ -132,6 +132,7 @@ class EditSelectionPlanExtraQuestionPage extends React.Component {
         <hr />
         {currentSummit && (
           <ExtraQuestionForm
+            currentSummit={currentSummit}
             shouldAllowSubRules={false}
             shouldShowUsage={false}
             shouldShowPrintable={false}

@@ -9,9 +9,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -24,6 +23,7 @@ import {
   showSuccessMessage,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 
 export const REQUEST_EVENT_TYPES = "REQUEST_EVENT_TYPES";
@@ -67,7 +67,9 @@ export const getEventType = (eventTypeId) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    expand: "allowed_media_upload_types, allowed_media_upload_types.type",
+    expand:
+      "allowed_media_upload_types, allowed_media_upload_types.type, allowed_ticket_types",
+    fields: "allowed_ticket_types.id,allowed_ticket_types.name",
     access_token: accessToken
   };
 
@@ -81,7 +83,7 @@ export const getEventType = (eventTypeId) => async (dispatch, getState) => {
   });
 };
 
-export const resetEventTypeForm = () => (dispatch, getState) => {
+export const resetEventTypeForm = () => (dispatch) => {
   dispatch(createAction(RESET_EVENT_TYPE_FORM)({}));
 };
 
@@ -103,7 +105,7 @@ export const saveEventType = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(
         showSuccessMessage(T.translate("edit_event_type.event_type_saved"))
       );
@@ -177,31 +179,37 @@ export const seedEventTypes = () => async (dispatch, getState) => {
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  //remove # from color hexa
-  normalizedEntity["color"] = normalizedEntity["color"].substr(1);
+  // remove # from color hexa
+  normalizedEntity.color = normalizedEntity.color.substr(1);
 
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["last_edited"];
-  delete normalizedEntity["is_default"];
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.is_default;
 
   if (normalizedEntity.class_name === "EVENT_TYPE") {
-    delete normalizedEntity["should_be_available_on_cfp"];
-    delete normalizedEntity["use_speakers"];
-    delete normalizedEntity["are_speakers_mandatory"];
-    delete normalizedEntity["min_speakers"];
-    delete normalizedEntity["max_speakers"];
-    delete normalizedEntity["use_moderator"];
-    delete normalizedEntity["is_moderator_mandatory"];
-    delete normalizedEntity["min_moderators"];
-    delete normalizedEntity["max_moderators"];
-    delete normalizedEntity["moderator_label"];
-    delete normalizedEntity["min_duration"];
-    delete normalizedEntity["max_duration"];
+    delete normalizedEntity.should_be_available_on_cfp;
+    delete normalizedEntity.use_speakers;
+    delete normalizedEntity.are_speakers_mandatory;
+    delete normalizedEntity.min_speakers;
+    delete normalizedEntity.max_speakers;
+    delete normalizedEntity.use_moderator;
+    delete normalizedEntity.is_moderator_mandatory;
+    delete normalizedEntity.min_moderators;
+    delete normalizedEntity.max_moderators;
+    delete normalizedEntity.moderator_label;
+    delete normalizedEntity.min_duration;
+    delete normalizedEntity.max_duration;
   }
 
   if (normalizedEntity.show_always_on_schedule) {
     normalizedEntity.allowed_ticket_types = [];
+  }
+
+  if (normalizedEntity.allowed_ticket_types.length > 0) {
+    normalizedEntity.allowed_ticket_types = entity.allowed_ticket_types.map(
+      (tt) => (tt.hasOwnProperty("id") ? tt.id : tt)
+    );
   }
 
   return normalizedEntity;
