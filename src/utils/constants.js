@@ -89,8 +89,12 @@ export const HOUR_AND_HALF = 5400;
 export const SECONDS_TO_MINUTES = 60;
 export const MILLISECONDS_IN_SECOND = 1000;
 export const TIME_23_HOURS = 23;
+export const TIME_7_HOURS = 7;
+export const TIME_19_HOURS = 19;
 export const TIME_59_MINS = 59;
 export const TIME_59_SECS = 59;
+export const MINUTE_STEP_SIZE_5 = 5;
+export const GAP_SIZE = 5;
 
 export const SORT_ASCENDING = 1;
 export const SORT_DESCENDING = -1;
@@ -146,6 +150,8 @@ export const TRIM_TEXT_LENGTH_40 = 50;
 export const LANGUAGE_CODE_LENGTH = 2;
 
 export const SLICE_TICKET_NUMBER = -15;
+
+export const TIMEOUT_1500 = 1500;
 
 export const MARKETING_SETTING_TYPE_TEXT = "TEXT";
 export const MARKETING_SETTING_TYPE_TEXTAREA = "TEXTAREA";
