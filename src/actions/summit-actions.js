@@ -68,7 +68,7 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "meeting_booking_room_allowed_attributes.values," +
       "lead_report_settings," +
       "presentation_action_types," +
-      "selection_plans," +
+      "selection_plans,selection_plans.track_groups," +
       "ticket_types," +
       "badge_types," +
       "badge_features," +
@@ -119,8 +119,8 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "ticket_types,ticket_types.id,ticket_types.name," +
       "time_zone_id," +
       "time_zone_label," +
-      "tracks,tracks.id,tracks.name,tracks.parent_id,tracks.order,tracks.chair_visible,tracks.subtracks," +
-      "selection_plans,selection_plans.id,selection_plans.name,selection_plans.is_enabled,selection_plans.order,selection_plans.submission_begin_date,selection_plans.submission_end_date,selection_plans.voting_begin_date,selection_plans.voting_end_date,selection_plans.selection_begin_date,selection_plans.selection_end_date,selection_plans.track_groups," +
+      "tracks,tracks.id,tracks.name,tracks.parent_id,tracks.order,tracks.chair_visible,tracks.subtracks,tracks.track_groups," +
+      "selection_plans,selection_plans.id,selection_plans.name,selection_plans.is_enabled,selection_plans.order,selection_plans.submission_begin_date,selection_plans.submission_end_date,selection_plans.voting_begin_date,selection_plans.voting_end_date,selection_plans.selection_begin_date,selection_plans.selection_end_date,selection_plans.track_groups,selection_plans.allowed_presentation_questions," +
       "meeting_booking_room_allowed_attributes,meeting_booking_room_allowed_attributes.id,meeting_booking_room_allowed_attributes.created,meeting_booking_room_allowed_attributes.last_edited,meeting_booking_room_allowed_attributes.type,meeting_booking_room_allowed_attributes.summit_id,meeting_booking_room_allowed_attributes.values.value," +
       "meeting_room_booking_end_time," +
       "meeting_room_booking_max_allowed," +
@@ -172,11 +172,11 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "",
     relations:
       "event_types.none," +
-      "tracks.none," +
+      "tracks.subtracks,tracks.track_groups," +
       "tracks_groups.none," +
       "locations,locations.rooms,locations.floor,locations.none," +
       "meeting_booking_room_allowed_attributes.values," +
-      "selection_plans.track_groups,selection_plans.none," +
+      "selection_plans.track_groups,selection_plans.allowed_presentation_questions," +
       "ticket_types.none," +
       "badge_types.none," +
       "none"
