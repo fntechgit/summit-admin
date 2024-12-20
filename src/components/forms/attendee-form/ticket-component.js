@@ -9,17 +9,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
-import history from "../../../history";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Modal } from "react-bootstrap";
 import {
   MemberInput,
-  Dropdown
+  TicketTypesInput
 } from "openstack-uicore-foundation/lib/components";
+
+import history from "../../../history";
 
 export default class TicketComponent extends React.Component {
   constructor(props) {
@@ -51,15 +52,15 @@ export default class TicketComponent extends React.Component {
   }
 
   onDelete(ticket_id, ev) {
-    let { onDelete, attendeeId } = this.props;
+    const { onDelete, attendeeId } = this.props;
     ev.preventDefault();
-    let msg = {
+    const msg = {
       title: T.translate("general.are_you_sure"),
       text: T.translate("edit_attendee.remove_ticket_from_attendee"),
       type: "warning"
     };
 
-    Swal.fire(msg).then(function () {
+    Swal.fire(msg).then(() => {
       onDelete(attendeeId, ticket_id);
     });
   }
@@ -69,7 +70,7 @@ export default class TicketComponent extends React.Component {
     this.setState({ showAddModal: true });
   }
 
-  onCloseModal(ev) {
+  onCloseModal() {
     this.setState({ showEditModal: false, showAddModal: false });
   }
 
@@ -79,10 +80,10 @@ export default class TicketComponent extends React.Component {
     });
   }
 
-  handleTicketReassign(ev) {
-    let { onReassign, attendeeId } = this.props;
-    let newOwner = { ...this.state.newOwner };
-    let editTicket = { ...this.state.editTicket };
+  handleTicketReassign() {
+    const { onReassign, attendeeId } = this.props;
+    const newOwner = { ...this.state.newOwner };
+    const editTicket = { ...this.state.editTicket };
 
     this.setState({
       showEditModal: false,
@@ -93,9 +94,13 @@ export default class TicketComponent extends React.Component {
     onReassign(attendeeId, newOwner.id, editTicket.id);
   }
 
-  handleTicketSave(ev) {
-    let { onSave, attendeeId } = this.props;
-    let newTicket = { ...this.state.newTicket };
+  handleTicketSave() {
+    const { onSave, attendeeId } = this.props;
+    const newTicket = { ...this.state.newTicket };
+
+    newTicket.ticket_type_id = newTicket.ticket_type_id.id;
+
+    console.log("CHECK...", newTicket);
 
     this.setState({
       showAddModal: false,
@@ -110,11 +115,11 @@ export default class TicketComponent extends React.Component {
   }
 
   handleTicketChange(ev) {
-    let newTicket = { ...this.state.newTicket };
-    let { value, id } = ev.target;
+    const newTicket = { ...this.state.newTicket };
+    const { value, id } = ev.target;
 
     newTicket[id] = value;
-    this.setState({ newTicket: newTicket });
+    this.setState({ newTicket });
   }
 
   handleTicketLink = (ev, ticket) => {
@@ -126,12 +131,8 @@ export default class TicketComponent extends React.Component {
   };
 
   render() {
-    let { tickets, summit } = this.props;
-    let { showEditModal, showAddModal, editTicket, newTicket } = this.state;
-
-    let ticket_types_ddl = summit.ticket_types.map((t) => {
-      return { label: t.name, value: t.id };
-    });
+    const { tickets, summit } = this.props;
+    const { showEditModal, showAddModal, editTicket, newTicket } = this.state;
 
     return (
       <div className="ticket-component">
@@ -149,7 +150,7 @@ export default class TicketComponent extends React.Component {
             </legend>
             {tickets.map((t) => (
               <div
-                key={"tix_" + t.id}
+                key={`tix_${t.id}`}
                 className="btn-group btn-group-xs ticket-btn"
               >
                 <a
@@ -263,11 +264,11 @@ export default class TicketComponent extends React.Component {
                 <br />
                 <MemberInput
                   id="member"
-                  getOptionLabel={(member) => {
-                    return member.hasOwnProperty("email")
+                  getOptionLabel={(member) =>
+                    member.hasOwnProperty("email")
                       ? `${member.first_name} ${member.last_name} (${member.email})`
-                      : `${member.first_name} ${member.last_name} (${member.id})`;
-                  }}
+                      : `${member.first_name} ${member.last_name} (${member.id})`
+                  }
                   value={this.state.newOwner}
                   onChange={this.handleMemberChange}
                 />
@@ -301,14 +302,17 @@ export default class TicketComponent extends React.Component {
                 }
               >
                 <label>{T.translate("edit_attendee.ticket_type")}</label>
-                <Dropdown
+                <TicketTypesInput
                   id="ticket_type_id"
                   placeholder={T.translate(
                     "edit_attendee.placeholders.select_ticket_type"
                   )}
-                  options={ticket_types_ddl}
+                  summitId={summit.id}
                   onChange={this.handleTicketChange}
                   value={newTicket ? newTicket.ticket_type_id : ""}
+                  version="v2"
+                  defaultOptions
+                  optionsLimit={100}
                 />
               </div>
               {summit.external_registration_feed_type === "none" && (
