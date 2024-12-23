@@ -23,7 +23,7 @@ const formatDuration = (duration) => {
 export const formatEventData = (e, summit) => {
   const published_date = e.is_published
     ? moment(e.published_date * MILLISECONDS_IN_SECOND)
-        .tz(summit.time_zone.name)
+        .tz(summit.time_zone_id)
         .format("MMMM Do YYYY, h:mm a")
     : "No";
 
@@ -116,12 +116,12 @@ export const formatEventData = (e, summit) => {
     streaming_type: e.streaming_type ? e.streaming_type : "N/A",
     start_date: e.start_date
       ? moment(e.start_date * MILLISECONDS_IN_SECOND)
-          .tz(summit.time_zone.name)
+          .tz(summit.time_zone_id)
           .format("MMMM Do YYYY, h:mm a")
       : "TBD",
     end_date: e.end_date
       ? moment(e.end_date * MILLISECONDS_IN_SECOND)
-          .tz(summit.time_zone.name)
+          .tz(summit.time_zone_id)
           .format("MMMM Do YYYY, h:mm a")
       : "TBD",
     sponsor:
@@ -133,7 +133,7 @@ export const formatEventData = (e, summit) => {
         ? e?.media_uploads?.map((m) => ({
             ...m,
             created: moment(m.created * MILLISECONDS_IN_SECOND)
-              .tz(summit.time_zone.name)
+              .tz(summit.time_zone_id)
               .format("MMMM Do YYYY, h:mm a")
           }))
         : "N/A",
