@@ -23,7 +23,7 @@ import {
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
-  purchaseOrders: [],
+  purchaseOrders: {},
   term: null,
   order: "created",
   orderDir: 1,

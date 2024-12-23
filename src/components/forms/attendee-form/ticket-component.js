@@ -100,8 +100,6 @@ export default class TicketComponent extends React.Component {
 
     newTicket.ticket_type_id = newTicket.ticket_type_id.id;
 
-    console.log("CHECK...", newTicket);
-
     this.setState({
       showAddModal: false,
       newTicket: {
