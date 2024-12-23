@@ -95,12 +95,14 @@ const attendeeReducer = (state = DEFAULT_STATE, action = {}) => {
       return { ...state };
     }
     case TICKET_ADDED: {
-      const newTicket = payload.response;
+      const newOrder = payload.response;
+      const newTicket = newOrder.tickets[0];
       return {
         ...state,
         entity: {
           ...state.entity,
-          tickets: [...state.entity.tickets, newTicket]
+          tickets: [...state.entity.tickets, newTicket],
+          orders: [...state.entity.orders, newOrder]
         }
       };
     }
