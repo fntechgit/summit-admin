@@ -149,6 +149,17 @@ export const resetInventoryItemForm = () => (dispatch) => {
   dispatch(createAction(RESET_INVENTORY_ITEM_FORM)({}));
 };
 
+const normalizeEntity = (entity) => {
+  const normalizedEntity = { ...entity };
+  normalizedEntity.meta_fields = normalizedEntity.meta_fields?.filter(
+    (mf) => mf.name
+  );
+  normalizedEntity.images = normalizedEntity.images?.filter(
+    (img) => img.file_path
+  );
+  return normalizedEntity;
+};
+
 export const saveInventoryItem = (entity) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
   const params = {
@@ -168,32 +179,40 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      const promises = [];
+    )(params)(dispatch)
+      .then(() => {
+        const promises = [];
 
-      if (normalizedEntity.images.length > 0) {
-        promises.push(saveInventoryItemImages(normalizedEntity)(dispatch));
-      }
+        if (entity.images.length > 0) {
+          promises.push(saveInventoryItemImages(normalizedEntity)(dispatch));
+        }
 
-      if (normalizedEntity.meta_fields.length > 0) {
-        promises.push(
-          saveInventoryItemMetaFieldTypes(normalizedEntity)(dispatch)
-        );
-      }
-
-      Promise.all(promises)
-        .then(() => {
-          dispatch(
-            showSuccessMessage(
-              T.translate("edit_inventory_item.inventory_item_saved")
-            )
+        if (entity.meta_fields.length > 0) {
+          promises.push(
+            saveInventoryItemMetaFieldTypes(normalizedEntity)(dispatch)
           );
-        })
-        .finally(() => {
-          dispatch(stopLoading());
-        });
-    });
+        }
+
+        Promise.all(promises)
+          .then(() => {
+            dispatch(
+              showSuccessMessage(
+                T.translate("edit_inventory_item.inventory_item_saved")
+              )
+            );
+          })
+          .catch((err) => {
+            console.error(err);
+          })
+          .finally(() => {
+            dispatch(stopLoading());
+          });
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }
+
   const success_message = {
     title: T.translate("general.done"),
     html: T.translate("edit_inventory_item.inventory_item_created"),
@@ -207,59 +226,62 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
     normalizedEntity,
     authErrorHandler,
     entity
-  )(params)(dispatch).then(() => {
-    const promises = [];
+  )(params)(dispatch)
+    .then(({ response }) => {
+      const inventoryItem = { ...normalizedEntity, id: response.id };
+      const promises = [];
 
-    if (normalizedEntity.images.length > 0) {
-      promises.push(saveInventoryItemImages(normalizedEntity)(dispatch));
-    }
+      if (entity.images.length > 0) {
+        promises.push(saveInventoryItemImages(inventoryItem)(dispatch));
+      }
 
-    if (normalizedEntity.meta_fields.length > 0) {
-      promises.push(
-        saveInventoryItemMetaFieldTypes(normalizedEntity)(dispatch)
-      );
-    }
+      if (entity.meta_fields.length > 0) {
+        promises.push(saveInventoryItemMetaFieldTypes(inventoryItem)(dispatch));
+      }
 
-    Promise.all(promises)
-      .then(() => {
-        dispatch(
-          showMessage(success_message, () => {
-            history.push("/app/sponsors-inventory");
-          })
-        );
-      })
-      .finally(() => {
-        dispatch(stopLoading());
-      });
-  });
-};
-
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  normalizedEntity.meta_fields = normalizedEntity.meta_fields.map(
-    (metaField) => ({
-      ...metaField,
-      is_required: !!metaField.is_required
+      Promise.all(promises)
+        .then(() => {
+          dispatch(
+            showMessage(success_message, () => {
+              history.push("/app/sponsors-inventory");
+            })
+          );
+        })
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          dispatch(stopLoading());
+        });
     })
-  );
-
-  return normalizedEntity;
+    .catch((err) => {
+      console.error(err);
+    });
 };
 
 /* ************************************  META FIELD TYPES  ************************************ */
 
+const normalizeMetaFieldEntity = (entity) => ({
+  ...entity,
+  is_required: !!entity.is_required
+});
+
 const saveInventoryItemMetaFieldTypes = (inventoryItem) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
+  const params = {
+    access_token: accessToken,
+    expand: "values"
+  };
 
   const promises = inventoryItem.meta_fields.map((metaFieldType) => {
+    const normalizedEntity = normalizeMetaFieldEntity(metaFieldType);
+
     if (metaFieldType.id) {
       return putRequest(
         null,
         createAction(INVENTORY_ITEM_META_FIELD_SAVED),
         `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/meta-field-types/${metaFieldType.id}/`,
-        metaFieldType,
+        normalizedEntity,
         authErrorHandler,
         metaFieldType
       )(params)(dispatch).then(() => {
@@ -272,18 +294,20 @@ const saveInventoryItemMetaFieldTypes = (inventoryItem) => async (dispatch) => {
       null,
       createAction(INVENTORY_ITEM_META_FIELD_SAVED),
       `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/meta-field-types/`,
-      metaFieldType,
+      normalizedEntity,
       authErrorHandler,
       metaFieldType
     )(params)(dispatch).then(({ response }) => {
-      if (metaFieldType.values.length > 0) {
+      if (metaFieldType.values?.length > 0) {
         const metaField = { ...metaFieldType, id: response.id };
         saveMetaFieldValues(inventoryItem.id, metaField)(dispatch);
       }
     });
   });
 
-  return Promise.all(promises);
+  return Promise.all(promises).catch((err) => {
+    console.error(err);
+  });
 };
 
 export const deleteInventoryItemMetaFieldType =
@@ -308,34 +332,44 @@ export const deleteInventoryItemMetaFieldType =
   };
 
 /* ************************************  META FIELD VALUES  ************************************ */
+const normalizeMetaFieldValueEntity = (entity) => {
+  const normalizedEntity = { ...entity };
+  delete normalizedEntity.meta_field_type_id;
+  if (normalizedEntity.isNew) {
+    delete normalizedEntity.id;
+  }
+  delete normalizedEntity.isNew;
+  return normalizedEntity;
+};
 
 export const saveMetaFieldValues =
   (inventoryItemId, metaFieldType) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const params = { access_token: accessToken };
 
-    const promises = metaFieldType.values.map((value) => {
-      if (value.id) {
-        return putRequest(
+    // These elements must be processed sequentially due to the computation of the order
+    for (const value of metaFieldType.values) {
+      const normalizedEntity = normalizeMetaFieldValueEntity(value);
+      if (normalizedEntity.id) {
+        await putRequest(
           null,
           createAction(INVENTORY_ITEM_META_FIELD_VALUE_SAVED),
-          `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldType.id}/values/${value.id}/`,
-          value,
+          `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldType.id}/values/${normalizedEntity.id}/`,
+          normalizedEntity,
+          authErrorHandler,
+          value
+        )(params)(dispatch);
+      } else {
+        await postRequest(
+          null,
+          createAction(INVENTORY_ITEM_META_FIELD_VALUE_SAVED),
+          `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldType.id}/values/`,
+          normalizedEntity,
           authErrorHandler,
           value
         )(params)(dispatch);
       }
-      return postRequest(
-        null,
-        createAction(INVENTORY_ITEM_META_FIELD_VALUE_SAVED),
-        `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldType.id}/values/`,
-        value,
-        authErrorHandler,
-        value
-      )(params)(dispatch);
-    });
-
-    return Promise.all(promises);
+    }
   };
 
 export const deleteInventoryItemMetaFieldTypeValue =

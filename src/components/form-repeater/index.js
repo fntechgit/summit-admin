@@ -16,7 +16,7 @@ const FormRepeater = forwardRef(
     {
       initialLines = [],
       renderContent,
-      onLineRemoved,
+      onLineRemoveRequest,
       buttonsPanelAlignment = ButtonPanelAlignment.RIGHT
     },
     ref
@@ -44,10 +44,9 @@ const FormRepeater = forwardRef(
       setLines(updatedLines);
     };
 
-    const handleRemoveLine = (line) => {
-      setLines(lines.filter((l) => l.id !== line.id));
-      if (onLineRemoved) {
-        onLineRemoved(line);
+    const handleRemoveLine = async (line) => {
+      if (onLineRemoveRequest && (await onLineRemoveRequest(line))) {
+        setLines(lines.filter((l) => l.id !== line.id));
       }
     };
 

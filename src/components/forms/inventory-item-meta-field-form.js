@@ -11,12 +11,15 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import { Dropdown, Input } from "openstack-uicore-foundation/lib/components";
-import FormRepeater, { ButtonPanelAlignment } from "../form-repeater";
-import InventoryItemMetaFieldValueForm from "./inventory-item-meta-field-value-form";
+import {
+  Dropdown,
+  Input,
+  SortableTable
+} from "openstack-uicore-foundation/lib/components";
+import Swal from "sweetalert2";
 import { hasErrors, scrollToError, shallowEqual } from "../../utils/methods";
 
 const InventoryItemMetaFieldForm = ({
@@ -26,9 +29,9 @@ const InventoryItemMetaFieldForm = ({
   onMetaFieldTypeValueDeleted,
   onChange
 }) => {
-  const repeaterRef = useRef(null);
   const [entity, setEntity] = useState({ ...initialEntity });
   const [errors, setErrors] = useState(initialErrors);
+  const [currentValue, setCurrentValue] = useState(null);
 
   useEffect(() => {
     if (onChange && !shallowEqual(initialEntity, entity)) {
@@ -65,40 +68,103 @@ const InventoryItemMetaFieldForm = ({
     }));
   };
 
-  const initMetaFieldValueLines = (metaField) => {
-    const metaFieldValues = metaField?.values || [];
-
-    return metaFieldValues.map((metaFieldValue, index) => ({
-      id: index,
-      value: { ...metaFieldValue }
+  const handleMetaFieldValueChange = (id, ev) => {
+    const { value, checked, type } = ev.target;
+    setCurrentValue((prevValue) => ({
+      ...prevValue,
+      [id]: type === "checkbox" ? checked : value
     }));
   };
 
-  const handleRemoveMetaFieldValue = (line) => {
-    if (onMetaFieldTypeValueDeleted && line.value.id) {
-      onMetaFieldTypeValueDeleted(entity.id, line.value.id);
+  const handleEditValueRequest = (valueId) => {
+    const selectedValue = entity.values.find((value) => value.id === valueId);
+    setCurrentValue(selectedValue);
+  };
+
+  const handleCommitValue = () => {
+    if (!currentValue || !currentValue.name || !currentValue.value) return;
+
+    const formerValue = entity.values?.find(
+      (v) => v.name === currentValue.name
+    );
+    const rest =
+      entity.values?.filter((v) => v.name !== currentValue.name) ?? [];
+
+    let value = null;
+    if (formerValue) {
+      value = { ...currentValue, id: formerValue.id, order: formerValue.order };
+      if (formerValue.isNew) {
+        value.isNew = formerValue.isNew;
+      }
+    } else {
+      value = {
+        ...currentValue,
+        id: Date.now(),
+        order: rest.length + 1,
+        isNew: true
+      };
+    }
+
+    setEntity((prevEntity) => ({
+      ...prevEntity,
+      values: [...rest, value]
+    }));
+
+    setCurrentValue(null);
+  };
+
+  const removeValueLocally = (value) => {
+    const values = entity.values
+      .filter((v) => v.id !== value.id)
+      .map((v, ix) => ({ ...v, order: ix + 1 }));
+
+    setEntity((prevEntity) => ({
+      ...prevEntity,
+      values: [...values]
+    }));
+
+    setCurrentValue(null);
+  };
+
+  const handleDeleteValue = (valueId) => {
+    if (!onMetaFieldTypeValueDeleted) return;
+    const value = entity.values.find((v) => v.id === valueId);
+    if (value && value.isNew) {
+      removeValueLocally(value);
+      return;
+    }
+
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("meta_field_values_list.delete_value_warning")} ${
+        value.name
+      }`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then((result) => {
+      if (result.value) {
+        onMetaFieldTypeValueDeleted(entity.id, valueId);
+      }
+    });
+  };
+
+  const columns = [
+    { columnKey: "name", value: T.translate("meta_field_values_list.name") },
+    { columnKey: "value", value: T.translate("meta_field_values_list.value") }
+  ];
+
+  const table_options = {
+    actions: {
+      edit: { onClick: handleEditValueRequest },
+      delete: { onClick: handleDeleteValue }
     }
   };
 
-  const renderMetaFieldValueForm = (line, updateValue) => {
-    const handleChange = (metaFieldValue) => {
-      updateValue(metaFieldValue, (values) => {
-        setEntity((prevEntity) => ({
-          ...prevEntity,
-          values: values.map((value, ix) => ({ ...value.value, order: ix + 1 }))
-        }));
-      });
-    };
-
-    return (
-      <InventoryItemMetaFieldValueForm
-        entity={line.value}
-        errors={errors}
-        index={line.id}
-        onChange={handleChange}
-      />
-    );
-  };
+  const sortedValues = entity.values
+    ? entity.values.sort((a, b) => a.order - b.order)
+    : [];
 
   return (
     <div className="panel panel-default">
@@ -113,6 +179,7 @@ const InventoryItemMetaFieldForm = ({
               value={entity.name}
               className="form-control"
               error={hasErrors("name", errors)}
+              maxLength={200}
               onChange={(ev) => {
                 handleMetaFieldChange("name", ev);
               }}
@@ -137,7 +204,7 @@ const InventoryItemMetaFieldForm = ({
               <input
                 id={`is_required_${index}`}
                 type="checkbox"
-                checked={entity.is_required}
+                checked={entity.is_required ?? false}
                 onChange={(ev) => {
                   handleMetaFieldChange("is_required", ev);
                 }}
@@ -155,17 +222,59 @@ const InventoryItemMetaFieldForm = ({
           </div>
         </div>
         <div className="row form-group">
-          <div className="col-md-7 col-md-offset-5">
+          <div className="col-md-12">
             <label>
               {T.translate("edit_inventory_item.meta_field_values")}
             </label>
-            <FormRepeater
-              ref={repeaterRef}
-              initialLines={initMetaFieldValueLines(entity)}
-              renderContent={renderMetaFieldValueForm}
-              onLineRemoved={handleRemoveMetaFieldValue}
-              buttonsPanelAlignment={ButtonPanelAlignment.BOTTOM}
-            />
+            {sortedValues.length > 0 && (
+              <div>
+                <SortableTable
+                  options={table_options}
+                  data={sortedValues}
+                  columns={columns}
+                  dropCallback={() => {}}
+                  orderField="order"
+                />
+              </div>
+            )}
+            <div className="row">
+              <div className="col-md-5">
+                <Input
+                  id="name"
+                  value={currentValue?.name ?? ""}
+                  className="form-control"
+                  maxLength={100}
+                  onChange={(ev) => {
+                    handleMetaFieldValueChange("name", ev);
+                  }}
+                  placeholder={T.translate(
+                    "meta_field_values_list.placeholders.name"
+                  )}
+                />
+              </div>
+              <div className="col-md-5">
+                <Input
+                  id="value"
+                  value={currentValue?.value ?? ""}
+                  className="form-control"
+                  maxLength={100}
+                  onChange={(ev) => {
+                    handleMetaFieldValueChange("value", ev);
+                  }}
+                  placeholder={T.translate(
+                    "meta_field_values_list.placeholders.value"
+                  )}
+                />
+              </div>
+              <div className="col-md-2">
+                <input
+                  type="button"
+                  onClick={handleCommitValue}
+                  className="btn btn-default"
+                  value={T.translate("meta_field_values_list.commit_value")}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

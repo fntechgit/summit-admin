@@ -19,6 +19,7 @@ import {
   UploadInputV2,
   TextEditor
 } from "openstack-uicore-foundation/lib/components";
+import Swal from "sweetalert2";
 import FormRepeater from "../form-repeater";
 import InventoryItemMetaFieldForm from "./inventory-item-meta-field-form";
 import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
@@ -64,6 +65,7 @@ const InventoryItemForm = ({
     const { id, value, checked, type } = ev.target;
     setEntity((prevEntity) => ({
       ...prevEntity,
+      meta_fields: getNormalizedMetaFields(),
       [id]: type === "checkbox" ? checked : value
     }));
     setErrors((prevErrors) => ({ ...prevErrors, [id]: "" }));
@@ -77,6 +79,7 @@ const InventoryItemForm = ({
       };
       setEntity((prevEntity) => ({
         ...prevEntity,
+        meta_fields: getNormalizedMetaFields(),
         images: [...prevEntity.images, image]
       }));
     }
@@ -88,6 +91,7 @@ const InventoryItemForm = ({
     );
     setEntity((prevEntity) => ({
       ...prevEntity,
+      meta_fields: getNormalizedMetaFields(),
       images
     }));
 
@@ -100,13 +104,13 @@ const InventoryItemForm = ({
     entity.images.length > 0
       ? entity.images.map((img) => ({
           ...img,
-          filename: img.filename ?? img.file_path
+          filename: img.filename ?? img.file_path ?? img.file_url
         }))
       : [];
 
   const handleSubmit = (ev) => {
     ev.preventDefault();
-    entity.meta_fields = getNormalizedMetaFields().filter((mf) => mf.name);
+    entity.meta_fields = getNormalizedMetaFields();
     onSubmit(entity);
   };
 
@@ -128,18 +132,41 @@ const InventoryItemForm = ({
     return [];
   };
 
-  const initMetaFieldLines = (metaFields) =>
-    metaFields
+  const initMetaFieldLines = (metaFields) => [
+    ...metaFields
       .filter((metaField) => metaField.id)
+      .sort((a, b) => a.id - b.id)
       .map((metaField) => ({
         id: metaField.id,
         value: { ...metaField }
-      }));
+      })),
+    ...metaFields
+      .filter((metaField) => !metaField.id)
+      .map((metaField) => ({
+        id: Date.now(),
+        value: { ...metaField }
+      }))
+  ];
 
-  const handleRemoveMetaFieldType = (metaField) => {
-    if (onMetaFieldTypeDeleted && metaField.value.id) {
-      onMetaFieldTypeDeleted(entity.id, metaField.value.id);
+  const handleRemoveMetaFieldType = async (metaField) => {
+    if (!onMetaFieldTypeDeleted || !metaField.value.id) {
+      return true;
     }
+    const result = await Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("edit_inventory_item.delete_meta_field_warning")} ${
+        metaField.value.id
+      }`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    });
+    if (result.value) {
+      onMetaFieldTypeDeleted(entity.id, metaField.value.id);
+      return true;
+    }
+    return false;
   };
 
   const handleRemoveMetaFieldTypeValue = (metaFieldId, metaFieldValueId) => {
@@ -204,9 +231,9 @@ const InventoryItemForm = ({
           <label>{T.translate("edit_inventory_item.meta_fields")}</label>
           <FormRepeater
             ref={repeaterRef}
-            initialLines={initMetaFieldLines(initialEntity.meta_fields)}
+            initialLines={initMetaFieldLines(entity.meta_fields)}
             renderContent={renderMetaFieldForm}
-            onLineRemoved={handleRemoveMetaFieldType}
+            onLineRemoveRequest={handleRemoveMetaFieldType}
           />
         </div>
       </div>

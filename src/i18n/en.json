@@ -3179,16 +3179,25 @@
     "code": "Code",
     "name": "Name",
     "description": "Description",
+    "delete_meta_field_warning": "Are you sure you want to delete meta field ",
     "meta_fields": "Additional Input Fields",
     "meta_field_values": "Field Values",
     "placeholders": {
       "meta_field_title": "Field Title",
       "meta_field_required": "Required Field",
       "meta_field_type": "Field Type",
-      "meta_field_values": "Field Values",
-      "meta_field_value_name": "Name",
-      "meta_field_value_value": "Value"
+      "meta_field_values": "Field Values"
     },
     "images": "Images"
+  },
+  "meta_field_values_list": {
+    "delete_value_warning": "Are you sure you want to delete meta field value ",
+    "name": "Name",
+    "value": "Value",
+    "commit_value": "Set Value",
+    "placeholders": {
+      "name": "Name",
+      "value": "Value"
+    }
   }
 }

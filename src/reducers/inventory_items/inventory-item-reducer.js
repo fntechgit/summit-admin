@@ -132,8 +132,9 @@ const inventoryItemReducer = (state = DEFAULT_STATE, action) => {
       }
 
       const otherValues = metaField.values.filter(
-        (value) => value !== metaFieldValue.id
+        (value) => value.id !== metaFieldValue.id
       );
+
       metaField.values = [...otherValues, metaFieldValue];
 
       const otherMetaFields = state.entity.meta_fields.filter(
@@ -171,9 +172,7 @@ const inventoryItemReducer = (state = DEFAULT_STATE, action) => {
     }
     case INVENTORY_ITEM_IMAGE_SAVED: {
       const image = payload.response;
-      const images = state.entity.images.filter(
-        (image) => image.id !== imageId
-      );
+      const images = state.entity.images.filter((img) => img.id !== image.id);
       return {
         ...state,
         entity: {

@@ -28,7 +28,6 @@ import {
 const EditInventoryItemPage = (props) => {
   const {
     match,
-    loading,
     entity,
     errors,
     getInventoryItem,
@@ -53,8 +52,6 @@ const EditInventoryItemPage = (props) => {
     : T.translate("general.add");
   const breadcrumb = entity.id ? entity.name : T.translate("general.new");
 
-  if (loading) return null;
-
   return (
     <div className="container">
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
@@ -74,9 +71,8 @@ const EditInventoryItemPage = (props) => {
   );
 };
 
-const mapStateToProps = ({ currentInventoryItemState, baseState }) => ({
-  ...currentInventoryItemState,
-  loading: baseState.loading
+const mapStateToProps = ({ currentInventoryItemState }) => ({
+  ...currentInventoryItemState
 });
 
 export default connect(mapStateToProps, {
