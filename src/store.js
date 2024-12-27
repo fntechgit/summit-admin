@@ -9,9 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import { createStore, applyMiddleware, compose } from "redux";
+import { loggedUserReducer } from "openstack-uicore-foundation/lib/security/reducers";
+import thunk from "redux-thunk";
+import { persistStore, persistCombineReducers } from "redux-persist";
+import storage from "redux-persist/es/storage";
 import baseReducer from "./reducers/base-reducer";
 import currentSummitReducer from "./reducers/summits/current-summit-reducer";
 import directoryReducer from "./reducers/summits/directory-reducer";
@@ -56,7 +60,6 @@ import roomOccupancyReducer from "./reducers/events/room-occupancy-reducer";
 import tagGroupListReducer from "./reducers/tags/tag-group-list-reducer";
 import tagGroupReducer from "./reducers/tags/tag-group-reducer";
 import reportReducer from "./reducers/reports/report-reducer";
-import { loggedUserReducer } from "openstack-uicore-foundation/lib/security/reducers";
 import roomBookingReducer from "./reducers/room_bookings/room-booking-reducer";
 import roomBookingListReducer from "./reducers/room_bookings/room-booking-list-reducer";
 import roomBookingAttributeTypeReducer from "./reducers/room_bookings/room-booking-attribute-type-reducer";
@@ -136,15 +139,14 @@ import SubmmissionInvitationListReducer from "./reducers/speakers/submission-inv
 import submissionInvitationReducer from "./reducers/speakers/submission-invitation-reducer";
 import trackTimeframesListReducer from "./reducers/track_chairs/track-timeframes-list-reducer";
 import trackTimeframeReducer from "./reducers/track_chairs/track-timeframe-reducer";
-import thunk from "redux-thunk";
-import { persistStore, persistCombineReducers } from "redux-persist";
-import storage from "redux-persist/es/storage";
 import currentRegFeedMetadataListReducer from "./reducers/summits/reg-feed-metadata-list-reducer";
 import currentRegFeedMetadataReducer from "./reducers/summits/reg-feed-metadata-reducer";
 import badgePrintReducer from "./reducers/tickets/badge-print-reducer";
 import notesReducer from "./reducers/notes/notes-reducer";
 import emailFlowEventSettingsReducer from "./reducers/email_flow_events/email-flows-event-settings-reducer";
 import badgeScanReducer from "./reducers/sponsors/badge-scan-reducer";
+import inventoryItemReducer from "./reducers/inventory_items/inventory-item-reducer";
+import inventoryItemListReducer from "./reducers/inventory_items/inventory-item-list-reducer";
 
 // default: localStorage if web, AsyncStorage if react-native
 
@@ -284,7 +286,9 @@ const reducers = persistCombineReducers(config, {
   trackTimeframesListState: trackTimeframesListReducer,
   trackTimeframeState: trackTimeframeReducer,
   currentRegFeedMetadataListState: currentRegFeedMetadataListReducer,
-  currentRegFeedMetadataState: currentRegFeedMetadataReducer
+  currentRegFeedMetadataState: currentRegFeedMetadataReducer,
+  currentInventoryItemState: inventoryItemReducer,
+  currentInventoryItemListState: inventoryItemListReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

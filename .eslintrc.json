@@ -81,7 +81,8 @@
     "guard-for-in": "warn",
     "prefer-destructuring": "warn",
     "react/function-component-definition": "off",
-    "no-unsafe-optional-chaining": "warn"
+    "no-unsafe-optional-chaining": "warn",
+    "no-await-in-loop": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }
