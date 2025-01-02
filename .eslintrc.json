@@ -17,6 +17,7 @@
     "quotes": ["error", "double"],
     "react/jsx-filename-extension": ["warn", { "extensions": [".js", ".jsx"] }],
     "import/no-extraneous-dependencies": "warn",
+    "import/extensions": "warn",
     "react/no-unused-class-component-methods": "warn",
     "class-methods-use-this": "warn",
     "import/no-unresolved": "warn",
@@ -81,7 +82,8 @@
     "guard-for-in": "warn",
     "prefer-destructuring": "warn",
     "react/function-component-definition": "off",
-    "no-unsafe-optional-chaining": "warn"
+    "no-unsafe-optional-chaining": "warn",
+    "no-await-in-loop": "warn"
   },
   "ignorePatterns": ["src/__mocks__"]
 }
