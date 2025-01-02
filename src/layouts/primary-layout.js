@@ -21,6 +21,7 @@ import SummitLayout from "./summit-layout";
 import SummitDirectoryPage from "../pages/summits/summit-directory-page";
 import SpeakerLayout from "./speaker-layout";
 import CompanyLayout from "./company-layout";
+import SponsorInventoryLayout from "./sponsor-inventory-layout";
 import EmailLayout from "./email-layout";
 import AdminAccessLayout from "./admin-access-layout";
 import MediaFileTypeLayout from "./media-file-type-layout";
@@ -61,6 +62,10 @@ const PrimaryLayout = ({ match, currentSummit, location, member }) => {
           />
           <Route path="/app/speakers" component={SpeakerLayout} />
           <Route path="/app/companies" component={CompanyLayout} />
+          <Route
+            path="/app/sponsors-inventory"
+            component={SponsorInventoryLayout}
+          />
           <Route path="/app/sponsorship-types" component={SponsorshipLayout} />
           <Route path="/app/tags" component={TagLayout} />
           <Route

@@ -157,7 +157,10 @@
     "schedule_settings": "Schedule",
     "registration_stats": "Registration Stats",
     "audit_log": "Audit Log",
-    "submission_invitations": "Submission Invitations"
+    "submission_invitations": "Submission Invitations",
+    "sponsors_inventory": "Sponsors",
+    "form_templates": "Form Templates",
+    "inventory": "Inventory"
   },
   "schedule": {
     "schedule": "Schedule",
@@ -3156,5 +3159,91 @@
   },
   "url_input": {
     "url_error": "URL must start with http:// or https://"
+  },
+  "sponsors_inventory": {
+    "inventory": "Inventory"
+  },
+  "inventory_item_list": {
+    "inventory_items": "Inventory Items",
+    "alert_info": "You can create or archive items from the list. To edit an item click on it.",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
+    "delete_inventory_item_warning": "Are you sure you want to delete inventory item ",
+    "add_inventory_item": "Create new Item",
+    "placeholders": {
+      "search_inventory_items": "Search"
+    }
+  },
+  "edit_inventory_item": {
+    "inventory_item": "Item",
+    "inventory_item_created": "Inventory Item created successfully.",
+    "inventory_item_saved": "Inventory Item saved successfully.",
+    "code": "Code",
+    "name": "Name",
+    "description": "Description",
+    "delete_meta_field_warning": "Are you sure you want to delete meta field ",
+    "meta_fields": "Additional Input Fields",
+    "meta_field_values": "Field Values",
+    "placeholders": {
+      "meta_field_title": "Field Title",
+      "meta_field_required": "Required Field",
+      "meta_field_type": "Field Type",
+      "meta_field_values": "Field Values"
+    },
+    "images": "Images"
+  },
+  "meta_field_values_list": {
+    "delete_value_warning": "Are you sure you want to delete meta field value ",
+    "name": "Name",
+    "value": "Value",
+    "commit_value": "Set Value",
+    "placeholders": {
+      "name": "Name",
+      "value": "Value"
+    }
+  },
+  "form_template_list": {
+    "form_templates": "Form Templates",
+    "alert_info": "To add an order form, select New Form Template. To edit an existing form, click on the list item. To edit the items within the form, click manage items on the form line you wish to edit.",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
+    "items_column_label": "Items",
+    "manage_items": "Manage Items",
+    "delete_form_template_warning": "Are you sure you want to delete form template ",
+    "add_form_template": "New From Template",
+    "placeholders": {
+      "search_inventory_items": "Search"
+    }
+  },
+  "edit_form_template": {
+    "form_template": "Form Template",
+    "form_template_created": "Form Template created successfully.",
+    "form_template_saved": "Form Template saved successfully.",
+    "code": "Code",
+    "name": "Name",
+    "instructions": "Instructions",
+    "delete_meta_field_warning": "Are you sure you want to delete meta field ",
+    "meta_fields": "Additional Input Fields",
+    "meta_field_values": "Field Values",
+    "materials": "Materials",
+    "placeholders": {
+      "meta_field_title": "Field Title",
+      "meta_field_required": "Required Field",
+      "meta_field_type": "Field Type",
+      "meta_field_values": "Field Values",
+      "meta_field_minimum_quantity": "Minimum Quantity",
+      "meta_field_maximum_quantity": "Maximum Quantity"
+    }
+  },
+  "form_template_item_list": {
+    "form_template_items": "Form Template Items",
+    "alert_info": "You can create or archive items from the list. To edit an item click on it.",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
+    "delete_form_template_item_warning": "Are you sure you want to delete form template item ",
+    "add_form_template_item": "Create new Item",
+    "placeholders": {
+      "search_form_template_items": "Search"
+    }
   }
 }
