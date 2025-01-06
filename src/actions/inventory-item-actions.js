@@ -243,7 +243,7 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
         .then(() => {
           dispatch(
             showMessage(success_message, () => {
-              history.push("/app/sponsors-inventory");
+              history.push("/app/inventory");
             })
           );
         })

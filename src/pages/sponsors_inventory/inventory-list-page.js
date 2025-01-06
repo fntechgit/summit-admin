@@ -43,7 +43,7 @@ const InventoryListPage = ({
   }, []);
 
   const handleEdit = (itemId) => {
-    history.push(`/app/sponsors-inventory/inventory/${itemId}`);
+    history.push(`/app/inventory/${itemId}`);
   };
 
   const handleDelete = (itemId) => {
@@ -78,7 +78,7 @@ const InventoryListPage = ({
   };
 
   const handleNewInventoryItem = () => {
-    history.push("/app/sponsors-inventory/inventory/new");
+    history.push("/app/inventory/new");
   };
 
   const columns = [

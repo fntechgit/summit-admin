@@ -21,35 +21,30 @@ import EditInventoryItemPage from "../pages/sponsors_inventory/edit-inventory-it
 import NoMatchPage from "../pages/no-match-page";
 
 const InventoryItemLayout = ({ match }) => (
-    <div>
-      <Breadcrumb
-        data={{
-          title: T.translate("inventory_item_list.inventory_items"),
-          pathname: match.url
-        }}
+  <div>
+    <Breadcrumb
+      data={{
+        title: T.translate("inventory_item_list.inventory_items"),
+        pathname: match.url
+      }}
+    />
+    <Switch>
+      <Route
+        strict
+        exact
+        path={`${match.url}/new`}
+        component={EditInventoryItemPage}
       />
-      <Switch>
-        <Route
-          strict
-          exact
-          path={`${match.url}/new`}
-          component={EditInventoryItemPage}
-        />
-        <Route
-          strict
-          exact
-          path={`${match.url}/:inventory_item_id(\\d+)`}
-          component={EditInventoryItemPage}
-        />
-        <Route
-          strict
-          exact
-          path={`${match.url}`}
-          component={InventoryListPage}
-        />
-        <Route component={NoMatchPage} />
-      </Switch>
-    </div>
-  );
+      <Route
+        strict
+        exact
+        path={`${match.url}/:inventory_item_id(\\d+)`}
+        component={EditInventoryItemPage}
+      />
+      <Route path={`${match.url}`} component={InventoryListPage} />
+      <Route component={NoMatchPage} />
+    </Switch>
+  </div>
+);
 
 export default Restrict(withRouter(InventoryItemLayout), "inventory-item");

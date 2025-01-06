@@ -52,11 +52,11 @@ const getGlobalItems = () => [
   {
     name: "sponsors_inventory",
     iconClass: "fa-users",
-    accessRoute: "sponsors-inventory",
+    accessRoute: "inventory",
     childs: [
       {
         name: "inventory",
-        linkUrl: "sponsors-inventory/inventory"
+        linkUrl: "inventory"
       }
     ]
   },
