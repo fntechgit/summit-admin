@@ -21,98 +21,77 @@ import {
   Table
 } from "openstack-uicore-foundation/lib/components";
 import {
-  getFormTemplates,
-  deleteFormTemplate
-} from "../../actions/form-template-actions";
+  getInventoryItems,
+  deleteInventoryItem
+} from "../../actions/inventory-item-actions";
 
-const FormTemplateListPage = ({
-  formTemplates,
+const InventoryListPage = ({
+  inventoryItems,
   lastPage,
   currentPage,
   perPage,
   term,
   order,
   orderDir,
-  totalFormTemplates,
+  totalInventoryItems,
   history,
-  getFormTemplates,
-  deleteFormTemplate
+  deleteInventoryItem,
+  getInventoryItems
 }) => {
   useEffect(() => {
-    getFormTemplates(term, currentPage, perPage, order, orderDir);
+    getInventoryItems(term, currentPage, perPage, order, orderDir);
   }, []);
 
-  const handleEdit = (templateId) => {
-    history.push(`/app/form-templates/${templateId}`);
+  const handleEdit = (itemId) => {
+    history.push(`/app/inventory/${itemId}`);
   };
 
-  const handleDelete = (templateId) => {
-    const formTemplate = formTemplates.find((s) => s.id === templateId);
+  const handleDelete = (itemId) => {
+    const inventoryItem = inventoryItems.find((s) => s.id === itemId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate(
-        "form_template_list.delete_form_template_warning"
-      )} ${formTemplate.name}?`,
+        "inventory_item_list.delete_inventory_item_warning"
+      )} ${inventoryItem.name}?`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
     }).then((result) => {
       if (result.value) {
-        deleteFormTemplate(templateId);
+        deleteInventoryItem(itemId);
       }
     });
   };
 
   const handlePageChange = (page) => {
-    getFormTemplates(term, page, perPage, order, orderDir);
+    getInventoryItems(term, page, perPage, order, orderDir);
   };
 
   const handleSort = (index, key, dir) => {
-    getFormTemplates(term, currentPage, perPage, key, dir);
+    getInventoryItems(term, currentPage, perPage, key, dir);
   };
 
   const handleSearch = (term) => {
-    getFormTemplates(term, currentPage, perPage, order, orderDir);
+    getInventoryItems(term, currentPage, perPage, order, orderDir);
   };
 
-  const handleNewFormTemplate = () => {
-    history.push("/app/form-templates/new");
-  };
-
-  const handleManageTemplateItems = (ev, templateId) => {
-    ev.stopPropagation();
-    history.push(`/app/form-templates/${templateId}/items`);
+  const handleNewInventoryItem = () => {
+    history.push("/app/inventory/new");
   };
 
   const columns = [
     { columnKey: "id", value: "Id", sortable: true },
     {
       columnKey: "code",
-      value: T.translate("form_template_list.code_column_label"),
+      value: T.translate("inventory_item_list.code_column_label"),
       sortable: true
     },
     {
       columnKey: "name",
-      value: T.translate("form_template_list.name_column_label"),
+      value: T.translate("inventory_item_list.name_column_label"),
       sortable: true
-    },
-    {
-      columnKey: "items_qty",
-      value: T.translate("form_template_list.items_column_label"),
-      sortable: false
-    },
-    {
-      columnKey: "manage_items",
-      render: (filter) => (
-        <button
-          className="btn btn-default"
-          onClick={(ev) => handleManageTemplateItems(ev, filter.id)}
-        >
-          {T.translate("form_template_list.manage_items")}
-        </button>
-      )
     }
   ];
 
@@ -129,34 +108,34 @@ const FormTemplateListPage = ({
     <div className="container">
       <h3>
         {" "}
-        {T.translate("form_template_list.form_templates")} ({totalFormTemplates}
-        ){" "}
+        {T.translate("inventory_item_list.inventory_items")} (
+        {totalInventoryItems}){" "}
       </h3>
       <div className="alert alert-info" role="alert">
-        {T.translate("form_template_list.alert_info")}
+        {T.translate("inventory_item_list.alert_info")}
       </div>
       <div className="row">
         <div className="col-md-6">
           <FreeTextSearch
             value={term ?? ""}
             placeholder={T.translate(
-              "form_template_list.placeholders.search_inventory_items"
+              "inventory_item_list.placeholders.search_inventory_items"
             )}
             onSearch={handleSearch}
           />
         </div>
         <div className="col-md-6 text-right">
-          <button className="btn btn-primary" onClick={handleNewFormTemplate}>
-            {T.translate("form_template_list.add_form_template")}
+          <button className="btn btn-primary" onClick={handleNewInventoryItem}>
+            {T.translate("inventory_item_list.add_inventory_item")}
           </button>
         </div>
       </div>
 
-      {formTemplates.length > 0 && (
+      {inventoryItems.length > 0 && (
         <div>
           <Table
             options={table_options}
-            data={formTemplates}
+            data={inventoryItems}
             columns={columns}
             onSort={handleSort}
           />
@@ -179,11 +158,11 @@ const FormTemplateListPage = ({
   );
 };
 
-const mapStateToProps = ({ currentFormTemplateListState }) => ({
-  ...currentFormTemplateListState
+const mapStateToProps = ({ currentInventoryItemListState }) => ({
+  ...currentInventoryItemListState
 });
 
 export default connect(mapStateToProps, {
-  getFormTemplates,
-  deleteFormTemplate
-})(FormTemplateListPage);
+  getInventoryItems,
+  deleteInventoryItem
+})(InventoryListPage);

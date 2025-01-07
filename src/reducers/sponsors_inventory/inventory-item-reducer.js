@@ -13,17 +13,17 @@
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
-  RECEIVE_FORM_TEMPLATE_ITEM,
-  RESET_FORM_TEMPLATE_ITEM_FORM,
-  FORM_TEMPLATE_ITEM_ADDED,
-  FORM_TEMPLATE_ITEM_UPDATED,
-  FORM_TEMPLATE_ITEM_META_FIELD_SAVED,
-  FORM_TEMPLATE_ITEM_META_FIELD_DELETED,
-  FORM_TEMPLATE_ITEM_META_FIELD_VALUE_SAVED,
-  FORM_TEMPLATE_ITEM_META_FIELD_VALUE_DELETED,
-  FORM_TEMPLATE_ITEM_IMAGE_SAVED,
-  FORM_TEMPLATE_ITEM_IMAGE_DELETED
-} from "../../actions/form-template-item-actions";
+  RECEIVE_INVENTORY_ITEM,
+  RESET_INVENTORY_ITEM_FORM,
+  INVENTORY_ITEM_ADDED,
+  INVENTORY_ITEM_UPDATED,
+  INVENTORY_ITEM_META_FIELD_SAVED,
+  INVENTORY_ITEM_META_FIELD_DELETED,
+  INVENTORY_ITEM_META_FIELD_VALUE_SAVED,
+  INVENTORY_ITEM_META_FIELD_VALUE_DELETED,
+  INVENTORY_ITEM_IMAGE_SAVED,
+  INVENTORY_ITEM_IMAGE_DELETED
+} from "../../actions/inventory-item-actions";
 import { amountFromCents } from "../../utils/currency";
 
 export const DEFAULT_ENTITY = {
@@ -46,7 +46,7 @@ const DEFAULT_STATE = {
   errors: {}
 };
 
-const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
+const inventoryItemReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER: {
@@ -56,10 +56,10 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
       }
       return DEFAULT_STATE;
     }
-    case RESET_FORM_TEMPLATE_ITEM_FORM: {
+    case RESET_INVENTORY_ITEM_FORM: {
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     }
-    case RECEIVE_FORM_TEMPLATE_ITEM: {
+    case RECEIVE_INVENTORY_ITEM: {
       const entity = { ...payload.response };
 
       for (const key in entity) {
@@ -80,8 +80,8 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case FORM_TEMPLATE_ITEM_ADDED:
-    case FORM_TEMPLATE_ITEM_UPDATED: {
+    case INVENTORY_ITEM_ADDED:
+    case INVENTORY_ITEM_UPDATED: {
       const entity = { ...payload.response };
 
       for (const key in entity) {
@@ -103,7 +103,7 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case FORM_TEMPLATE_ITEM_META_FIELD_SAVED: {
+    case INVENTORY_ITEM_META_FIELD_SAVED: {
       const metaField = payload.response;
       const metaFields = state.entity.meta_fields.filter(
         (m) => m.id !== metaField.id
@@ -116,7 +116,7 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case FORM_TEMPLATE_ITEM_META_FIELD_DELETED: {
+    case INVENTORY_ITEM_META_FIELD_DELETED: {
       const { metaFieldId } = payload;
       const metaFields = state.entity.meta_fields.filter(
         (metaField) => metaField.id !== metaFieldId
@@ -129,7 +129,7 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case FORM_TEMPLATE_ITEM_META_FIELD_VALUE_SAVED: {
+    case INVENTORY_ITEM_META_FIELD_VALUE_SAVED: {
       const metaFieldValue = payload.response;
 
       const metaField = state.entity.meta_fields.find(
@@ -157,7 +157,7 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case FORM_TEMPLATE_ITEM_META_FIELD_VALUE_DELETED: {
+    case INVENTORY_ITEM_META_FIELD_VALUE_DELETED: {
       const { metaFieldId, valueId } = payload;
       const metaField = state.entity.meta_fields.find(
         (mf) => mf.id === metaFieldId
@@ -179,7 +179,7 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case FORM_TEMPLATE_ITEM_IMAGE_SAVED: {
+    case INVENTORY_ITEM_IMAGE_SAVED: {
       const image = payload.response;
       const images = state.entity.images.filter((img) => img.id !== image.id);
       return {
@@ -190,9 +190,11 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case FORM_TEMPLATE_ITEM_IMAGE_DELETED: {
-      const { fileId } = payload;
-      const images = state.entity.images.filter((image) => image.id !== fileId);
+    case INVENTORY_ITEM_IMAGE_DELETED: {
+      const { imageId } = payload;
+      const images = state.entity.images.filter(
+        (image) => image.id !== imageId
+      );
       return {
         ...state,
         entity: {
@@ -206,4 +208,4 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
   }
 };
 
-export default formTemplateItemReducer;
+export default inventoryItemReducer;

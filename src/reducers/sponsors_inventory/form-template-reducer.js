@@ -179,9 +179,9 @@ const formTemplateReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case FORM_TEMPLATE_MATERIAL_DELETED: {
-      const { materialId } = payload;
+      const { fileId } = payload;
       const materials = state.entity.materials.filter(
-        (mat) => mat.id !== materialId
+        (mat) => mat.id !== fileId
       );
       return {
         ...state,

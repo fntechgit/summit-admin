@@ -22,7 +22,7 @@ import {
 import Swal from "sweetalert2";
 import { hasErrors, scrollToError, shallowEqual } from "../../utils/methods";
 
-const FormTemplateMetaFieldForm = ({
+const InventoryItemMetaFieldForm = ({
   entity: initialEntity,
   errors: initialErrors,
   index,
@@ -88,7 +88,12 @@ const FormTemplateMetaFieldForm = ({
       (v) => v.name === currentValue.name
     );
     const rest =
-      entity.values?.filter((v) => v.name !== currentValue.name) ?? [];
+      entity.values
+        ?.filter((v) => v.name !== currentValue.name)
+        .map((v) => ({
+          ...v,
+          is_default: currentValue.is_default ? false : v.is_default
+        })) ?? [];
 
     let value = null;
     if (formerValue) {
@@ -177,7 +182,7 @@ const FormTemplateMetaFieldForm = ({
         <div className="row form-group">
           <div className="col-md-5">
             <label>
-              {T.translate("edit_form_template.placeholders.meta_field_title")}
+              {T.translate("edit_inventory_item.placeholders.meta_field_title")}
             </label>
             <Input
               id="name"
@@ -192,7 +197,7 @@ const FormTemplateMetaFieldForm = ({
           </div>
           <div className="col-md-4">
             <label>
-              {T.translate("edit_form_template.placeholders.meta_field_type")}
+              {T.translate("edit_inventory_item.placeholders.meta_field_type")}
             </label>
             <Dropdown
               id="type"
@@ -220,51 +225,17 @@ const FormTemplateMetaFieldForm = ({
                 htmlFor={`is_required_${index}`}
               >
                 {T.translate(
-                  "edit_form_template.placeholders.meta_field_required"
+                  "edit_inventory_item.placeholders.meta_field_required"
                 )}
               </label>
             </div>
           </div>
         </div>
         <div className="row form-group">
-          <div className="col-md-5">
-            <label>
-              {T.translate(
-                "edit_form_template.placeholders.meta_field_minimum_quantity"
-              )}
-            </label>
-            <Input
-              id="minimum_quantity"
-              value={entity.minimum_quantity}
-              type="number"
-              className="form-control"
-              error={hasErrors("minimum_quantity", errors)}
-              onChange={(ev) => {
-                handleMetaFieldChange("minimum_quantity", ev);
-              }}
-            />
-          </div>
-          <div className="col-md-5">
-            <label>
-              {T.translate(
-                "edit_form_template.placeholders.meta_field_maximum_quantity"
-              )}
-            </label>
-            <Input
-              id="maximum_quantity"
-              value={entity.maximum_quantity}
-              type="number"
-              className="form-control"
-              error={hasErrors("maximum_quantity", errors)}
-              onChange={(ev) => {
-                handleMetaFieldChange("maximum_quantity", ev);
-              }}
-            />
-          </div>
-        </div>
-        <div className="row form-group">
           <div className="col-md-12">
-            <label>{T.translate("edit_form_template.meta_field_values")}</label>
+            <label>
+              {T.translate("edit_inventory_item.meta_field_values")}
+            </label>
             {sortedValues.length > 0 && (
               <div>
                 <SortableTable
@@ -337,4 +308,4 @@ const FormTemplateMetaFieldForm = ({
   );
 };
 
-export default FormTemplateMetaFieldForm;
+export default InventoryItemMetaFieldForm;

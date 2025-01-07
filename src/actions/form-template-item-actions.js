@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 OpenStack Foundation
+ * Copyright 2025 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,15 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
+import {
+  saveMetaFieldTypes,
+  deleteMetaFieldType,
+  saveMetaFieldValues,
+  deleteMetaFieldTypeValue,
+  saveFiles,
+  deleteFile
+} from "./inventory-shared-actions";
+import { amountToCents } from "../utils/currency";
 
 export const ADD_FORM_TEMPLATE_ITEM = "ADD_FORM_TEMPLATE_ITEM";
 export const CHANGE_FORM_TEMPLATE_ITEM_SEARCH_TERM =
@@ -161,48 +170,113 @@ const normalizeEntity = (entity) => {
   normalizedEntity.meta_fields = normalizedEntity.meta_fields?.filter(
     (mf) => mf.name
   );
+  normalizedEntity.images = normalizedEntity.images?.filter(
+    (img) => img.file_path
+  );
+  normalizedEntity.early_bird_rate = amountToCents(
+    normalizedEntity.early_bird_rate
+  );
+  normalizedEntity.standard_rate = amountToCents(
+    normalizedEntity.standard_rate
+  );
+  normalizedEntity.onsite_rate = amountToCents(normalizedEntity.onsite_rate);
   return normalizedEntity;
 };
 
-export const saveFormTemplate = (entity) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-  const params = {
-    access_token: accessToken,
-    expand: "images,meta_fields,meta_fields.values"
-  };
+export const saveFormTemplateItem =
+  (formTemplateId, entity) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = {
+      access_token: accessToken,
+      expand: "images,meta_fields,meta_fields.values"
+    };
 
-  dispatch(startLoading());
+    dispatch(startLoading());
 
-  const normalizedEntity = normalizeEntity(entity);
+    const normalizedEntity = normalizeEntity(entity);
 
-  if (entity.id) {
-    return putRequest(
-      createAction(UPDATE_FORM_TEMPLATE_ITEM),
-      createAction(FORM_TEMPLATE_ITEM_UPDATED),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${entity.id}/`,
+    if (entity.id) {
+      return putRequest(
+        createAction(UPDATE_FORM_TEMPLATE_ITEM),
+        createAction(FORM_TEMPLATE_ITEM_UPDATED),
+        `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${entity.id}/`,
+        normalizedEntity,
+        authErrorHandler,
+        entity
+      )(params)(dispatch)
+        .then(() => {
+          const promises = [];
+
+          if (normalizedEntity.images.length > 0) {
+            promises.push(
+              saveItemImages(formTemplateId, normalizedEntity)(dispatch)
+            );
+          }
+
+          if (normalizedEntity.meta_fields.length > 0) {
+            promises.push(
+              saveItemMetaFieldTypes(formTemplateId, normalizedEntity)(dispatch)
+            );
+          }
+
+          Promise.all(promises)
+            .then(() => {
+              dispatch(
+                showSuccessMessage(
+                  T.translate(
+                    "edit_form_template_item.form_template_item_saved"
+                  )
+                )
+              );
+            })
+            .catch((err) => {
+              console.error(err);
+            })
+            .finally(() => {
+              dispatch(stopLoading());
+            });
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("edit_form_template_item.form_template_item_created"),
+      type: "success"
+    };
+
+    return postRequest(
+      createAction(ADD_FORM_TEMPLATE_ITEM),
+      createAction(FORM_TEMPLATE_ITEM_ADDED),
+      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/`,
       normalizedEntity,
       authErrorHandler,
       entity
     )(params)(dispatch)
-      .then(() => {
+      .then(({ response }) => {
+        const formTemplateItem = { ...normalizedEntity, id: response.id };
         const promises = [];
 
-        if (entity.images.length > 0) {
-          promises.push(saveFormTemplateMaterials(normalizedEntity)(dispatch));
+        if (normalizedEntity.images.length > 0) {
+          promises.push(
+            saveItemImages(formTemplateId, formTemplateItem)(dispatch)
+          );
         }
 
-        if (entity.meta_fields.length > 0) {
+        if (normalizedEntity.meta_fields.length > 0) {
           promises.push(
-            saveFormTemplateMetaFieldTypes(normalizedEntity)(dispatch)
+            saveItemMetaFieldTypes(formTemplateId, formTemplateItem)(dispatch)
           );
         }
 
         Promise.all(promises)
           .then(() => {
             dispatch(
-              showSuccessMessage(
-                T.translate("edit_form_template.form_template_saved")
-              )
+              showMessage(success_message, () => {
+                history.push("/app/form-templates");
+              })
             );
           })
           .catch((err) => {
@@ -215,239 +289,109 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
       .catch((err) => {
         console.error(err);
       });
-  }
-
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_inventory_item.inventory_item_created"),
-    type: "success"
   };
 
-  return postRequest(
-    createAction(ADD_FORM_TEMPLATE_ITEM),
-    createAction(FORM_TEMPLATE_ITEM_ADDED),
-    `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/`,
-    normalizedEntity,
-    authErrorHandler,
-    entity
-  )(params)(dispatch)
-    .then(({ response }) => {
-      const formTemplate = { ...normalizedEntity, id: response.id };
-      const promises = [];
+export const cloneFromInventoryItem =
+  (formTemplateId, inventoryItemId) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = {
+      access_token: accessToken,
+      expand: "images,meta_fields,meta_fields.values"
+    };
 
-      if (entity.images.length > 0) {
-        promises.push(saveFormTemplateMaterials(formTemplate)(dispatch));
-      }
+    const payload = {
+      inventory_item_id: inventoryItemId
+    };
 
-      if (entity.meta_fields.length > 0) {
-        promises.push(saveFormTemplateMetaFieldTypes(formTemplate)(dispatch));
-      }
+    dispatch(startLoading());
 
-      Promise.all(promises)
-        .then(() => {
-          dispatch(
-            showMessage(success_message, () => {
-              history.push("/app/sponsors-inventory");
-            })
-          );
-        })
-        .catch((err) => {
-          console.error(err);
-        })
-        .finally(() => {
-          dispatch(stopLoading());
-        });
-    })
-    .catch((err) => {
-      console.error(err);
+    return postRequest(
+      createAction(ADD_FORM_TEMPLATE_ITEM),
+      createAction(FORM_TEMPLATE_ITEM_ADDED),
+      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/clone/`,
+      payload,
+      authErrorHandler,
+      payload
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
     });
-};
+  };
 
 /* ************************************  META FIELD TYPES  ************************************ */
 
-const normalizeMetaFieldEntity = (entity) => ({
-  ...entity,
-  is_required: !!entity.is_required
-});
-
-const saveFormTemplateMetaFieldTypes = (formTemplate) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-  const params = {
-    access_token: accessToken,
-    expand: "values"
+const saveItemMetaFieldTypes = (formTemplateId, formTemplateItem) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/meta-field-types/`,
+    addedActionName: FORM_TEMPLATE_ITEM_META_FIELD_SAVED,
+    updatedActionName: FORM_TEMPLATE_ITEM_META_FIELD_SAVED
   };
-
-  const promises = formTemplate.meta_fields.map((metaFieldType) => {
-    const normalizedEntity = normalizeMetaFieldEntity(metaFieldType);
-
-    if (metaFieldType.id) {
-      return putRequest(
-        null,
-        createAction(FORM_TEMPLATE_ITEM_META_FIELD_SAVED),
-        `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/meta-field-types/${metaFieldType.id}/`,
-        normalizedEntity,
-        authErrorHandler,
-        metaFieldType
-      )(params)(dispatch).then(() => {
-        if (metaFieldType.values.length > 0) {
-          saveMetaFieldValues(formTemplate.id, metaFieldType)(dispatch);
-        }
-      });
-    }
-    return postRequest(
-      null,
-      createAction(FORM_TEMPLATE_ITEM_META_FIELD_SAVED),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/meta-field-types/`,
-      normalizedEntity,
-      authErrorHandler,
-      metaFieldType
-    )(params)(dispatch).then(({ response }) => {
-      if (metaFieldType.values?.length > 0) {
-        const metaField = { ...metaFieldType, id: response.id };
-        saveMetaFieldValues(formTemplate.id, metaField)(dispatch);
-      }
-    });
-  });
-
-  return Promise.all(promises).catch((err) => {
-    console.error(err);
-  });
+  return saveMetaFieldTypes(
+    formTemplateItem,
+    settings,
+    (formTemplateItemId, metaFieldType) =>
+      saveItemMetaFieldValues(formTemplateId, formTemplateItemId, metaFieldType)
+  );
 };
 
-export const deleteFormTemplateMetaFieldType =
-  (templateId, metaFieldId) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(FORM_TEMPLATE_ITEM_META_FIELD_DELETED)({ metaFieldId }),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldId}/`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+export const deleteItemMetaFieldType = (
+  formTemplateId,
+  formTemplateItemId,
+  metaFieldId
+) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}/meta-field-types/`,
+    deletedActionName: FORM_TEMPLATE_ITEM_META_FIELD_DELETED
   };
+  return deleteMetaFieldType(metaFieldId, settings);
+};
 
 /* ************************************  META FIELD VALUES  ************************************ */
 
-const normalizeMetaFieldValueEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-  delete normalizedEntity.meta_field_type_id;
-  if (normalizedEntity.isNew) {
-    delete normalizedEntity.id;
-  }
-  delete normalizedEntity.isNew;
-  return normalizedEntity;
+const saveItemMetaFieldValues = (
+  formTemplateId,
+  formTemplateItemId,
+  metaFieldType
+) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}/meta-field-types/${metaFieldType.id}/values/`,
+    addedActionName: FORM_TEMPLATE_ITEM_META_FIELD_VALUE_SAVED,
+    updatedActionName: FORM_TEMPLATE_ITEM_META_FIELD_VALUE_SAVED
+  };
+  return saveMetaFieldValues(metaFieldType, settings);
 };
 
-export const saveMetaFieldValues =
-  (templateId, metaFieldType) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
-
-    // These elements must be processed sequentially due to the computation of the order
-    for (const value of metaFieldType.values) {
-      const normalizedEntity = normalizeMetaFieldValueEntity(value);
-      if (normalizedEntity.id) {
-        await putRequest(
-          null,
-          createAction(FORM_TEMPLATE_ITEM_META_FIELD_VALUE_SAVED),
-          `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldType.id}/values/${normalizedEntity.id}/`,
-          normalizedEntity,
-          authErrorHandler,
-          value
-        )(params)(dispatch);
-      } else {
-        await postRequest(
-          null,
-          createAction(FORM_TEMPLATE_ITEM_META_FIELD_VALUE_SAVED),
-          `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldType.id}/values/`,
-          normalizedEntity,
-          authErrorHandler,
-          value
-        )(params)(dispatch);
-      }
-    }
+export const deleteItemMetaFieldTypeValue = (
+  formTemplateId,
+  formTemplateItemId,
+  metaFieldId,
+  valueId
+) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}/meta-field-types/${metaFieldId}/values/`,
+    deletedActionName: FORM_TEMPLATE_ITEM_META_FIELD_VALUE_DELETED
   };
-
-export const deleteFormTemplateMetaFieldTypeValue =
-  (templateId, metaFieldId, valueId) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(FORM_TEMPLATE_ITEM_META_FIELD_VALUE_DELETED)({
-        metaFieldId,
-        valueId
-      }),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldId}/values/${valueId}/`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
+  return deleteMetaFieldTypeValue(metaFieldId, valueId, settings);
+};
 
 /* **************************************  IMAGES  ************************************** */
 
-// const saveFormTemplateItemImages = (entity) => async (dispatch) => {
-//   const accessToken = await getAccessTokenSafely();
-//   const params = { access_token: accessToken };
-
-//   const promises = entity.images.map((image) => {
-//     if (image.id) {
-//       return putRequest(
-//         null,
-//         createAction(FORM_TEMPLATE_ITEM_IMAGE_SAVED),
-//         `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${entity.id}/images/${image.id}/`,
-//         image,
-//         authErrorHandler,
-//         image
-//       )(params)(dispatch);
-//     }
-//     return postRequest(
-//       null,
-//       createAction(FORM_TEMPLATE_ITEM_IMAGE_SAVED),
-//       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${entity.id}/images/`,
-//       image,
-//       authErrorHandler,
-//       image
-//     )(params)(dispatch);
-//   });
-
-//   return Promise.all(promises);
-// };
-
-export const deleteFormTemplateItemImage =
-  (templateId, imageId) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(FORM_TEMPLATE_ITEM_IMAGE_DELETED)({ imageId }),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/images/${imageId}/`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+const saveItemImages = (formTemplateId, formTemplateItem) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/images/`,
+    addedActionName: FORM_TEMPLATE_ITEM_IMAGE_SAVED,
+    updatedActionName: FORM_TEMPLATE_ITEM_IMAGE_SAVED
   };
+  return saveFiles(formTemplateItem.images, settings);
+};
+
+export const deleteItemImage = (
+  formTemplateId,
+  formTemplateItemId,
+  imageId
+) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}/images/`,
+    deletedActionName: FORM_TEMPLATE_ITEM_IMAGE_DELETED
+  };
+  return deleteFile(imageId, settings);
+};

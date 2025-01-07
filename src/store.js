@@ -145,6 +145,8 @@ import badgePrintReducer from "./reducers/tickets/badge-print-reducer";
 import notesReducer from "./reducers/notes/notes-reducer";
 import emailFlowEventSettingsReducer from "./reducers/email_flow_events/email-flows-event-settings-reducer";
 import badgeScanReducer from "./reducers/sponsors/badge-scan-reducer";
+import inventoryItemReducer from "./reducers/sponsors_inventory/inventory-item-reducer";
+import inventoryItemListReducer from "./reducers/sponsors_inventory/inventory-item-list-reducer";
 import formTemplateReducer from "./reducers/sponsors_inventory/form-template-reducer.js";
 import formTemplateListReducer from "./reducers/sponsors_inventory/form-template-list-reducer.js";
 import formTemplateItemReducer from "./reducers/sponsors_inventory/form-template-item-reducer.js";
@@ -289,6 +291,8 @@ const reducers = persistCombineReducers(config, {
   trackTimeframeState: trackTimeframeReducer,
   currentRegFeedMetadataListState: currentRegFeedMetadataListReducer,
   currentRegFeedMetadataState: currentRegFeedMetadataReducer,
+  currentInventoryItemState: inventoryItemReducer,
+  currentInventoryItemListState: inventoryItemListReducer,
   currentFormTemplateState: formTemplateReducer,
   currentFormTemplateListState: formTemplateListReducer,
   currentFormTemplateItemState: formTemplateItemReducer,

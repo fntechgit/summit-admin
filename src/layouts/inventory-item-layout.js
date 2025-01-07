@@ -12,31 +12,39 @@
  * */
 
 import React from "react";
-import { Switch, Redirect, Route, withRouter } from "react-router-dom";
+import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
-import FormTemplateLayout from "./form-template-layout";
+import InventoryListPage from "../pages/sponsors_inventory/inventory-list-page";
+import EditInventoryItemPage from "../pages/sponsors_inventory/edit-inventory-item-page";
+import NoMatchPage from "../pages/no-match-page";
 
-const SponsorInventoryLayout = ({ match }) => (
+const InventoryItemLayout = ({ match }) => (
   <div>
     <Breadcrumb
       data={{
-        title: T.translate("sponsors_inventory.inventory"),
+        title: T.translate("inventory_item_list.inventory_items"),
         pathname: match.url
       }}
     />
     <Switch>
       <Route
-        path={`${match.url}/form-templates`}
-        component={FormTemplateLayout}
+        strict
+        exact
+        path={`${match.url}/new`}
+        component={EditInventoryItemPage}
       />
-      <Redirect to="/app/sponsors-inventory/inventory" />
+      <Route
+        strict
+        exact
+        path={`${match.url}/:inventory_item_id(\\d+)`}
+        component={EditInventoryItemPage}
+      />
+      <Route path={`${match.url}`} component={InventoryListPage} />
+      <Route component={NoMatchPage} />
     </Switch>
   </div>
 );
 
-export default Restrict(
-  withRouter(SponsorInventoryLayout),
-  "sponsors-inventory"
-);
+export default Restrict(withRouter(InventoryItemLayout), "inventory-item");

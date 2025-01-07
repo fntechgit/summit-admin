@@ -32,6 +32,14 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
+import {
+  saveMetaFieldTypes,
+  deleteMetaFieldType,
+  saveMetaFieldValues,
+  deleteMetaFieldTypeValue,
+  saveFiles,
+  deleteFile
+} from "./inventory-shared-actions";
 
 export const ADD_FORM_TEMPLATE = "ADD_FORM_TEMPLATE";
 export const CHANGE_FORM_TEMPLATE_SEARCH_TERM =
@@ -154,6 +162,9 @@ const normalizeEntity = (entity) => {
   normalizedEntity.meta_fields = normalizedEntity.meta_fields?.filter(
     (mf) => mf.name
   );
+  normalizedEntity.materials = normalizedEntity.materials?.filter(
+    (mat) => mat.file_path
+  );
   return normalizedEntity;
 };
 
@@ -258,189 +269,66 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
 
 /* ************************************  META FIELD TYPES  ************************************ */
 
-const normalizeMetaFieldEntity = (entity) => ({
-  ...entity,
-  is_required: !!entity.is_required
-});
-
-const saveFormTemplateMetaFieldTypes = (formTemplate) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-  const params = {
-    access_token: accessToken,
-    expand: "values"
+const saveFormTemplateMetaFieldTypes = (formTemplate) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/meta-field-types/`,
+    addedActionName: FORM_TEMPLATE_META_FIELD_SAVED,
+    updatedActionName: FORM_TEMPLATE_META_FIELD_SAVED
   };
-
-  const promises = formTemplate.meta_fields.map((metaFieldType) => {
-    const normalizedEntity = normalizeMetaFieldEntity(metaFieldType);
-
-    if (metaFieldType.id) {
-      return putRequest(
-        null,
-        createAction(FORM_TEMPLATE_META_FIELD_SAVED),
-        `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/meta-field-types/${metaFieldType.id}/`,
-        normalizedEntity,
-        authErrorHandler,
-        metaFieldType
-      )(params)(dispatch).then(() => {
-        if (metaFieldType.values.length > 0) {
-          saveMetaFieldValues(formTemplate.id, metaFieldType)(dispatch);
-        }
-      });
-    }
-    return postRequest(
-      null,
-      createAction(FORM_TEMPLATE_META_FIELD_SAVED),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/meta-field-types/`,
-      normalizedEntity,
-      authErrorHandler,
-      metaFieldType
-    )(params)(dispatch).then(({ response }) => {
-      if (metaFieldType.values?.length > 0) {
-        const metaField = { ...metaFieldType, id: response.id };
-        saveMetaFieldValues(formTemplate.id, metaField)(dispatch);
-      }
-    });
-  });
-
-  return Promise.all(promises).catch((err) => {
-    console.error(err);
-  });
+  return saveMetaFieldTypes(
+    formTemplate,
+    settings,
+    (formTemplateId, metaFieldType) =>
+      saveFormTemplateMetaFieldTypeValues(formTemplateId, metaFieldType)
+  );
 };
 
-export const deleteFormTemplateMetaFieldType =
-  (templateId, metaFieldId) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(FORM_TEMPLATE_META_FIELD_DELETED)({ metaFieldId }),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldId}/`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+export const deleteFormTemplateMetaFieldType = (templateId, metaFieldId) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/`,
+    deletedActionName: FORM_TEMPLATE_META_FIELD_DELETED
   };
+  return deleteMetaFieldType(metaFieldId, settings);
+};
 
 /* ************************************  META FIELD VALUES  ************************************ */
 
-const normalizeMetaFieldValueEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-  delete normalizedEntity.meta_field_type_id;
-  if (normalizedEntity.isNew) {
-    delete normalizedEntity.id;
-  }
-  delete normalizedEntity.isNew;
-  return normalizedEntity;
+const saveFormTemplateMetaFieldTypeValues = (templateId, metaFieldType) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldType.id}/values/`,
+    addedActionName: FORM_TEMPLATE_META_FIELD_VALUE_SAVED,
+    updatedActionName: FORM_TEMPLATE_META_FIELD_VALUE_SAVED
+  };
+  return saveMetaFieldValues(metaFieldType, settings);
 };
 
-export const saveMetaFieldValues =
-  (templateId, metaFieldType) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
-
-    // These elements must be processed sequentially due to the computation of the order
-    for (const value of metaFieldType.values) {
-      const normalizedEntity = normalizeMetaFieldValueEntity(value);
-      if (normalizedEntity.id) {
-        await putRequest(
-          null,
-          createAction(FORM_TEMPLATE_META_FIELD_VALUE_SAVED),
-          `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldType.id}/values/${normalizedEntity.id}/`,
-          normalizedEntity,
-          authErrorHandler,
-          value
-        )(params)(dispatch);
-      } else {
-        await postRequest(
-          null,
-          createAction(FORM_TEMPLATE_META_FIELD_VALUE_SAVED),
-          `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldType.id}/values/`,
-          normalizedEntity,
-          authErrorHandler,
-          value
-        )(params)(dispatch);
-      }
-    }
+export const deleteFormTemplateMetaFieldTypeValue = (
+  templateId,
+  metaFieldId,
+  valueId
+) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldId}/values/`,
+    deletedActionName: FORM_TEMPLATE_META_FIELD_VALUE_DELETED
   };
-
-export const deleteFormTemplateMetaFieldTypeValue =
-  (templateId, metaFieldId, valueId) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(FORM_TEMPLATE_META_FIELD_VALUE_DELETED)({
-        metaFieldId,
-        valueId
-      }),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldId}/values/${valueId}/`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
+  return deleteMetaFieldTypeValue(metaFieldId, valueId, settings);
+};
 
 /* ************************************  MATERIALS  ************************************ */
 
-const saveFormTemplateMaterials = (template) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
-
-  const promises = template.materials.map((material) => {
-    if (material.id) {
-      return putRequest(
-        null,
-        createAction(FORM_TEMPLATE_MATERIAL_SAVED),
-        `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${template.id}/materials/${material.id}/`,
-        material,
-        authErrorHandler,
-        material
-      )(params)(dispatch);
-    }
-    return postRequest(
-      null,
-      createAction(FORM_TEMPLATE_MATERIAL_SAVED),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${template.id}/materials/`,
-      material,
-      authErrorHandler,
-      material
-    )(params)(dispatch);
-  });
-
-  return Promise.all(promises);
+const saveFormTemplateMaterials = (template) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${template.id}/materials/`,
+    addedActionName: FORM_TEMPLATE_MATERIAL_SAVED,
+    updatedActionName: FORM_TEMPLATE_MATERIAL_SAVED
+  };
+  return saveFiles(template.materials, settings);
 };
 
-export const deleteFormTemplateMaterial =
-  (templateId, materialId) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-
-    dispatch(startLoading());
-
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(FORM_TEMPLATE_MATERIAL_DELETED)({ materialId }),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/materials/${materialId}/`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+export const deleteFormTemplateMaterial = (templateId, materialId) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/materials/`,
+    deletedActionName: FORM_TEMPLATE_MATERIAL_DELETED
   };
+  return deleteFile(materialId, settings);
+};

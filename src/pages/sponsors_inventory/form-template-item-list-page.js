@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
@@ -20,9 +20,11 @@ import {
   FreeTextSearch,
   Table
 } from "openstack-uicore-foundation/lib/components";
+import InventoryItemsModal from "../../components/inventory-items-modal";
 import {
-  getFormTemplateItems,
-  deleteFormTemplateItem
+  cloneFromInventoryItem,
+  deleteFormTemplateItem,
+  getFormTemplateItems
 } from "../../actions/form-template-item-actions";
 
 const FormTemplateItemListPage = ({
@@ -36,9 +38,12 @@ const FormTemplateItemListPage = ({
   orderDir,
   totalFormTemplateItems,
   history,
+  cloneFromInventoryItem,
   deleteFormTemplateItem,
   getFormTemplateItems
 }) => {
+  const [showInventoryItemsModal, setShowInventoryItemsModal] = useState(false);
+
   useEffect(() => {
     getFormTemplateItems(
       formTemplateId,
@@ -51,26 +56,24 @@ const FormTemplateItemListPage = ({
   }, []);
 
   const handleEdit = (itemId) => {
-    history.push(
-      `/app/sponsors-inventory/form-templates/${formTemplateId}/items/${itemId}`
-    );
+    history.push(`/app/form-templates/${formTemplateId}/items/${itemId}`);
   };
 
   const handleDelete = (itemId) => {
-    const inventoryItem = inventoryItems.find((s) => s.id === itemId);
+    const formTemplateItem = formTemplateItems.find((s) => s.id === itemId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate(
         "form_template_item_list.delete_form_template_item_warning"
-      )} ${inventoryItem.name}?`,
+      )} ${formTemplateItem.name}?`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
     }).then((result) => {
       if (result.value) {
-        deleteFormTemplateItem(itemId);
+        deleteFormTemplateItem(formTemplateId, itemId);
       }
     });
   };
@@ -94,10 +97,35 @@ const FormTemplateItemListPage = ({
     );
   };
 
-  const handleNewFormTemplateItem = () => {
-    history.push(
-      `/app/sponsors-inventory/form-templates/${formTemplateId}/items/new`
+  const handleAddInventoryItem = () => {
+    setShowInventoryItemsModal(true);
+  };
+
+  const handleAddSelectedItems = (items) => {
+    const promises = items.map((item) =>
+      cloneFromInventoryItem(formTemplateId, item)
     );
+    Promise.all(promises)
+      .then(() => {
+        getFormTemplateItems(
+          formTemplateId,
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir
+        );
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        setShowInventoryItemsModal(false);
+      });
+  };
+
+  const handleNewFormTemplateItem = () => {
+    history.push(`/app/form-templates/${formTemplateId}/items/new`);
   };
 
   const columns = [
@@ -143,7 +171,12 @@ const FormTemplateItemListPage = ({
             onSearch={handleSearch}
           />
         </div>
-        <div className="col-md-6 text-right">
+        <div className="col-md-offset-2 col-md-2 text-right">
+          <button className="btn btn-primary" onClick={handleAddInventoryItem}>
+            {T.translate("form_template_item_list.add_inventory_item")}
+          </button>
+        </div>
+        <div className="col-md-2 text-right">
           <button
             className="btn btn-primary"
             onClick={handleNewFormTemplateItem}
@@ -176,6 +209,11 @@ const FormTemplateItemListPage = ({
           />
         </div>
       )}
+      <InventoryItemsModal
+        show={showInventoryItemsModal}
+        onHide={() => setShowInventoryItemsModal(false)}
+        onAddSelected={handleAddSelectedItems}
+      />
     </div>
   );
 };
@@ -185,6 +223,7 @@ const mapStateToProps = ({ currentFormTemplateItemListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getFormTemplateItems,
-  deleteFormTemplateItem
+  cloneFromInventoryItem,
+  deleteFormTemplateItem,
+  getFormTemplateItems
 })(FormTemplateItemListPage);
