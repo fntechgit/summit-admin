@@ -3194,6 +3194,7 @@
     "delete_value_warning": "Are you sure you want to delete meta field value ",
     "name": "Name",
     "value": "Value",
+    "is_default": "Is Default?",
     "commit_value": "Set Value",
     "placeholders": {
       "name": "Name",

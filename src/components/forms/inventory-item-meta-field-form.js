@@ -88,7 +88,12 @@ const InventoryItemMetaFieldForm = ({
       (v) => v.name === currentValue.name
     );
     const rest =
-      entity.values?.filter((v) => v.name !== currentValue.name) ?? [];
+      entity.values
+        ?.filter((v) => v.name !== currentValue.name)
+        .map((v) => ({
+          ...v,
+          is_default: currentValue.is_default ? false : v.is_default
+        })) ?? [];
 
     let value = null;
     if (formerValue) {
@@ -152,7 +157,12 @@ const InventoryItemMetaFieldForm = ({
 
   const columns = [
     { columnKey: "name", value: T.translate("meta_field_values_list.name") },
-    { columnKey: "value", value: T.translate("meta_field_values_list.value") }
+    { columnKey: "value", value: T.translate("meta_field_values_list.value") },
+    {
+      columnKey: "is_default",
+      value: T.translate("meta_field_values_list.is_default"),
+      render: (filter) => (filter.is_default ? "YES" : "NO")
+    }
   ];
 
   const table_options = {
@@ -238,7 +248,7 @@ const InventoryItemMetaFieldForm = ({
               </div>
             )}
             <div className="row">
-              <div className="col-md-5">
+              <div className="col-md-3">
                 <Input
                   id="name"
                   value={currentValue?.name ?? ""}
@@ -252,7 +262,7 @@ const InventoryItemMetaFieldForm = ({
                   )}
                 />
               </div>
-              <div className="col-md-5">
+              <div className="col-md-3">
                 <Input
                   id="value"
                   value={currentValue?.value ?? ""}
@@ -265,6 +275,22 @@ const InventoryItemMetaFieldForm = ({
                     "meta_field_values_list.placeholders.value"
                   )}
                 />
+              </div>
+              <div className="col-md-4">
+                <div className="form-check abc-checkbox">
+                  <input
+                    id="is_default"
+                    type="checkbox"
+                    checked={currentValue?.is_default ?? false}
+                    onChange={(ev) => {
+                      handleMetaFieldValueChange("is_default", ev);
+                    }}
+                    className="form-check-input"
+                  />
+                  <label className="form-check-label" htmlFor="is_default">
+                    {T.translate("meta_field_values_list.is_default")}
+                  </label>
+                </div>
               </div>
               <div className="col-md-2">
                 <input
