@@ -224,6 +224,82 @@ const InventoryItemForm = ({
         </div>
       </div>
 
+      <div className="row form-group">
+        <div className="col-md-4">
+          <label>{T.translate("edit_inventory_item.default_quantity")}</label>
+          <Input
+            id="default_quantity"
+            className="form-control"
+            type="number"
+            error={hasErrors("default_quantity", errors)}
+            onChange={handleChange}
+            value={entity.default_quantity}
+          />
+        </div>
+        <div className="col-md-4">
+          <label>
+            {T.translate("edit_inventory_item.quantity_limit_per_show")}
+          </label>
+          <Input
+            id="quantity_limit_per_show"
+            className="form-control"
+            type="number"
+            error={hasErrors("quantity_limit_per_show", errors)}
+            onChange={handleChange}
+            value={entity.quantity_limit_per_show}
+          />
+        </div>
+        <div className="col-md-4">
+          <label>
+            {T.translate("edit_inventory_item.quantity_limit_per_sponsor")}
+          </label>
+          <Input
+            id="quantity_limit_per_sponsor"
+            className="form-control"
+            type="number"
+            error={hasErrors("quantity_limit_per_sponsor", errors)}
+            onChange={handleChange}
+            value={entity.quantity_limit_per_sponsor}
+          />
+        </div>
+      </div>
+
+      <div className="row form-group">
+        <div className="col-md-4">
+          <label>{T.translate("edit_inventory_item.early_bird_rate")}</label>
+          <Input
+            id="early_bird_rate"
+            className="form-control"
+            type="number"
+            error={hasErrors("early_bird_rate", errors)}
+            onChange={handleChange}
+            value={entity.early_bird_rate}
+          />
+        </div>
+        <div className="col-md-4">
+          <label>{T.translate("edit_inventory_item.standard_rate")}</label>
+          <Input
+            id="standard_rate"
+            className="form-control"
+            type="number"
+            error={hasErrors("standard_rate", errors)}
+            onChange={handleChange}
+            value={entity.standard_rate}
+          />
+        </div>
+        <div className="col-md-4">
+          <label>{T.translate("edit_inventory_item.onsite_rate")}</label>
+          <Input
+            id="onsite_rate"
+            className="form-control"
+            type="number"
+            error={hasErrors("onsite_rate", errors)}
+            onChange={handleChange}
+            value={entity.onsite_rate}
+          />
+        </div>
+      </div>
+
       <hr />
 
       <div className="row form-group">
