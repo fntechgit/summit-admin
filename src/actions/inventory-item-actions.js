@@ -32,6 +32,7 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
+import { amountToCents } from "../utils/currency";
 
 export const ADD_INVENTORY_ITEM = "ADD_INVENTORY_ITEM";
 export const CHANGE_INVENTORY_ITEM_SEARCH_TERM =
@@ -157,6 +158,15 @@ const normalizeEntity = (entity) => {
   normalizedEntity.images = normalizedEntity.images?.filter(
     (img) => img.file_path
   );
+
+  normalizedEntity.early_bird_rate = amountToCents(
+    normalizedEntity.early_bird_rate
+  );
+  normalizedEntity.standard_rate = amountToCents(
+    normalizedEntity.standard_rate
+  );
+  normalizedEntity.onsite_rate = amountToCents(normalizedEntity.onsite_rate);
+
   return normalizedEntity;
 };
 

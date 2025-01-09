@@ -24,6 +24,7 @@ import {
   INVENTORY_ITEM_IMAGE_SAVED,
   INVENTORY_ITEM_IMAGE_DELETED
 } from "../../actions/inventory-item-actions";
+import { amountFromCents } from "../../utils/currency";
 
 export const DEFAULT_ENTITY = {
   id: 0,
@@ -67,6 +68,10 @@ const inventoryItemReducer = (state = DEFAULT_STATE, action) => {
         }
       }
 
+      entity.early_bird_rate = amountFromCents(entity.early_bird_rate);
+      entity.standard_rate = amountFromCents(entity.standard_rate);
+      entity.onsite_rate = amountFromCents(entity.onsite_rate);
+
       return {
         ...state,
         entity: {
@@ -84,6 +89,10 @@ const inventoryItemReducer = (state = DEFAULT_STATE, action) => {
           entity[key] = entity[key] == null ? "" : entity[key];
         }
       }
+
+      entity.early_bird_rate = amountFromCents(entity.early_bird_rate);
+      entity.standard_rate = amountFromCents(entity.standard_rate);
+      entity.onsite_rate = amountFromCents(entity.onsite_rate);
 
       return {
         ...state,
