@@ -2550,7 +2550,7 @@
   "email_flow_event_list": {
     "email_flow_events": "Email Events",
     "email_flow_event_list": "Email Events",
-    "event_type_name": "Activity",
+    "event_type_name": "Event",
     "flow_name": "Flow",
     "email_template_identifier": "Email Template",
     "no_email_flow_events": "No items found for this search criteria.",
@@ -2562,7 +2562,7 @@
     "email_template_identifier": "Email Template (Associated with Event)",
     "email_flow_event": "Email Events",
     "flow_name": "eFlow Name",
-    "event_type": "Activity Type",
+    "event_type": "Event Type",
     "saved": "Email template Flow saved successfully.",
     "recipient": "To",
     "variables": "Available Variables",
