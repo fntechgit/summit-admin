@@ -69,10 +69,10 @@ export const resetEventMaterialForm = () => (dispatch) => {
 };
 
 export const saveEventMaterial = (entity) => async (dispatch, getState) => {
-  const { currentSummitState, currentSummitEventState } = getState();
+  const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-  const eventId = entity.presentation_id || currentSummitEventState.entity.id;
+  const eventId = entity.presentation_id;
 
   let slug = "";
 
