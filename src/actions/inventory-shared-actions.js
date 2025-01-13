@@ -34,6 +34,9 @@ const validateSettings = (settings) => {
   return { isValid: true };
 };
 
+export const metafieldHasValues = (type) =>
+  ["CheckBoxList", "ComboBox", "RadioButtonList"].includes(type);
+
 /* ************************************  META FIELD TYPES  ************************************ */
 
 const normalizeMetaFieldEntity = (entity) => ({
@@ -68,7 +71,11 @@ export const saveMetaFieldTypes =
           authErrorHandler,
           metaFieldType
         )(params)(dispatch).then(() => {
-          if (metaFieldType.values.length > 0 && saveMetaFieldValuesCallback) {
+          if (
+            metaFieldType.values.length > 0 &&
+            metafieldHasValues(metaFieldType.type) &&
+            saveMetaFieldValuesCallback
+          ) {
             return saveMetaFieldValuesCallback(
               parent.id,
               metaFieldType
@@ -84,7 +91,11 @@ export const saveMetaFieldTypes =
         authErrorHandler,
         metaFieldType
       )(params)(dispatch).then(({ response }) => {
-        if (metaFieldType.values?.length > 0 && saveMetaFieldValuesCallback) {
+        if (
+          metaFieldType.values?.length > 0 &&
+          metafieldHasValues(metaFieldType.type) &&
+          saveMetaFieldValuesCallback
+        ) {
           const metaField = { ...metaFieldType, id: response.id };
           return saveMetaFieldValuesCallback(parent.id, metaField)(dispatch);
         }

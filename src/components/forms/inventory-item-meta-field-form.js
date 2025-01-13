@@ -21,6 +21,7 @@ import {
 } from "openstack-uicore-foundation/lib/components";
 import Swal from "sweetalert2";
 import { hasErrors, scrollToError, shallowEqual } from "../../utils/methods";
+import { metafieldHasValues } from "../../actions/inventory-shared-actions";
 
 const InventoryItemMetaFieldForm = ({
   entity: initialEntity,
@@ -32,6 +33,9 @@ const InventoryItemMetaFieldForm = ({
   const [entity, setEntity] = useState({ ...initialEntity });
   const [errors, setErrors] = useState(initialErrors);
   const [currentValue, setCurrentValue] = useState(null);
+  const [showValues, setShowValues] = useState(
+    metafieldHasValues(initialEntity.type)
+  );
 
   useEffect(() => {
     if (onChange && !shallowEqual(initialEntity, entity)) {
@@ -66,6 +70,7 @@ const InventoryItemMetaFieldForm = ({
       ...prevEntity,
       [id]: type === "checkbox" ? checked : value
     }));
+    setShowValues(type === "dropdown" && metafieldHasValues(value));
   };
 
   const handleMetaFieldValueChange = (id, ev) => {
@@ -231,78 +236,80 @@ const InventoryItemMetaFieldForm = ({
             </div>
           </div>
         </div>
-        <div className="row form-group">
-          <div className="col-md-12">
-            <label>
-              {T.translate("edit_inventory_item.meta_field_values")}
-            </label>
-            {sortedValues.length > 0 && (
-              <div>
-                <SortableTable
-                  options={table_options}
-                  data={sortedValues}
-                  columns={columns}
-                  dropCallback={() => {}}
-                  orderField="order"
-                />
-              </div>
-            )}
-            <div className="row">
-              <div className="col-md-3">
-                <Input
-                  id="name"
-                  value={currentValue?.name ?? ""}
-                  className="form-control"
-                  maxLength={100}
-                  onChange={(ev) => {
-                    handleMetaFieldValueChange("name", ev);
-                  }}
-                  placeholder={T.translate(
-                    "meta_field_values_list.placeholders.name"
-                  )}
-                />
-              </div>
-              <div className="col-md-3">
-                <Input
-                  id="value"
-                  value={currentValue?.value ?? ""}
-                  className="form-control"
-                  maxLength={100}
-                  onChange={(ev) => {
-                    handleMetaFieldValueChange("value", ev);
-                  }}
-                  placeholder={T.translate(
-                    "meta_field_values_list.placeholders.value"
-                  )}
-                />
-              </div>
-              <div className="col-md-4">
-                <div className="form-check abc-checkbox">
-                  <input
-                    id="is_default"
-                    type="checkbox"
-                    checked={currentValue?.is_default ?? false}
-                    onChange={(ev) => {
-                      handleMetaFieldValueChange("is_default", ev);
-                    }}
-                    className="form-check-input"
+        {showValues && (
+          <div className="row form-group">
+            <div className="col-md-12">
+              <label>
+                {T.translate("edit_inventory_item.meta_field_values")}
+              </label>
+              {sortedValues.length > 0 && (
+                <div>
+                  <SortableTable
+                    options={table_options}
+                    data={sortedValues}
+                    columns={columns}
+                    dropCallback={() => {}}
+                    orderField="order"
                   />
-                  <label className="form-check-label" htmlFor="is_default">
-                    {T.translate("meta_field_values_list.is_default")}
-                  </label>
                 </div>
-              </div>
-              <div className="col-md-2">
-                <input
-                  type="button"
-                  onClick={handleCommitValue}
-                  className="btn btn-default"
-                  value={T.translate("meta_field_values_list.commit_value")}
-                />
+              )}
+              <div className="row">
+                <div className="col-md-3">
+                  <Input
+                    id="name"
+                    value={currentValue?.name ?? ""}
+                    className="form-control"
+                    maxLength={100}
+                    onChange={(ev) => {
+                      handleMetaFieldValueChange("name", ev);
+                    }}
+                    placeholder={T.translate(
+                      "meta_field_values_list.placeholders.name"
+                    )}
+                  />
+                </div>
+                <div className="col-md-3">
+                  <Input
+                    id="value"
+                    value={currentValue?.value ?? ""}
+                    className="form-control"
+                    maxLength={100}
+                    onChange={(ev) => {
+                      handleMetaFieldValueChange("value", ev);
+                    }}
+                    placeholder={T.translate(
+                      "meta_field_values_list.placeholders.value"
+                    )}
+                  />
+                </div>
+                <div className="col-md-4">
+                  <div className="form-check abc-checkbox">
+                    <input
+                      id="is_default"
+                      type="checkbox"
+                      checked={currentValue?.is_default ?? false}
+                      onChange={(ev) => {
+                        handleMetaFieldValueChange("is_default", ev);
+                      }}
+                      className="form-check-input"
+                    />
+                    <label className="form-check-label" htmlFor="is_default">
+                      {T.translate("meta_field_values_list.is_default")}
+                    </label>
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <input
+                    type="button"
+                    onClick={handleCommitValue}
+                    className="btn btn-default"
+                    value={T.translate("meta_field_values_list.commit_value")}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
