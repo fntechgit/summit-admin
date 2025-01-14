@@ -61,13 +61,24 @@ class EditSummitPage extends React.Component {
   }
 
   componentDidMount() {
-    const { currentSummit } = this.props;
+    const { summitId, resetSummitForm } = this.props;
 
-    if (currentSummit?.id) {
+    if (summitId) {
       this.props.getUserRolesBySummit();
       this.props.getMarketingSettingsForRegLite();
       this.props.getMarketingSettingsForPrintApp();
       this.props.getRegFeedMetadataBySummit();
+    } else {
+      resetSummitForm();
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const oldId = prevProps.summitId;
+    const newId = this.props.summitId;
+
+    if (newId !== oldId && !newId) {
+      this.props.resetSummitForm();
     }
   }
 
