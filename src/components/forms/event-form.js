@@ -43,7 +43,8 @@ import {
   scrollToError,
   shallowEqual,
   hasErrors,
-  adjustEventDuration
+  adjustEventDuration,
+  isValidUrl
 } from "../../utils/methods";
 import ProgressFlags from "../inputs/ProgressFlags";
 import {
@@ -444,7 +445,12 @@ class EventForm extends React.Component {
   handleMaterialDownload(materialId) {
     const { entity } = this.props;
     const material = entity.materials.find((m) => m.id === materialId);
-    window.open(material.private_url || material.public_url, "_blank");
+    window.open(
+      isValidUrl(material.private_url)
+        ? material.private_url
+        : material.public_url,
+      "_blank"
+    );
   }
 
   handleMaterialDelete(materialId) {
