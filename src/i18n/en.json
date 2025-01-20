@@ -461,6 +461,8 @@
     "cfp_presentation_summary_hide_activity_type_selection": "Hide Activity Type Selection",
     "cfp_presentation_summary_hide_activity_type_selection_info": "cfp_presentation_summary_hide_activity_type_selection_info",
     "cfp_presentation_edition_default_tab": "Default Landing Tab on Edition",
+    "cfp_presentation_selection_plan_link": "Selection Plan Link",
+    "cfp_presentation_all_selection_plan_link": "All Selection Plans Link",
     "placeholders": {
       "creator_notification_email_select_template": "Select a creator notification email template...",
       "moderator_notification_email_select_template": "Select a moderator notification email template...",
