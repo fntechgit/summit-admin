@@ -76,7 +76,6 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "badge_features_types," +
       "badge_access_level_types," +
       "badge_view_types," +
-      "order_extra_questions," +
       "tax_types"
   };
 

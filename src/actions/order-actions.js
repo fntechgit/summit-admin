@@ -200,8 +200,10 @@ export const getOrderExtraQuestion =
 
     const params = {
       access_token: accessToken,
-      expand: "values,sub_question_rules,allowed_ticket_types",
-      fields: "allowed_ticket_types.id, allowed_ticket_types.name"
+      expand:
+        "values,sub_question_rules,allowed_ticket_types,sub_question_rules.sub_question",
+      fields:
+        "allowed_ticket_types.id, allowed_ticket_types.name,sub_question_rules.sub_question.name"
     };
 
     return getRequest(
