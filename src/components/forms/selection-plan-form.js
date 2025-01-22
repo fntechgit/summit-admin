@@ -1406,40 +1406,42 @@ class SelectionPlanForm extends React.Component {
                   />
                 </div>
               </div>
-              <div className="row form-group">
-                <div className="col-md-6">
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_selection_plan_link"
-                    )}
-                  </label>
-                  <br />
-                  <a
-                    className="text-table-link"
-                    href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.id}`}
-                  </a>
+              {window.CFP_APP_BASE_URL && (
+                <div className="row form-group">
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_selection_plan_link"
+                      )}
+                    </label>
+                    <br />
+                    <a
+                      className="text-table-link"
+                      href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.id}`}
+                    </a>
+                  </div>
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_all_selection_plan_link"
+                      )}
+                    </label>
+                    <br />
+                    <a
+                      className="text-table-link"
+                      href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                    </a>
+                  </div>
                 </div>
-                <div className="col-md-6">
-                  <label>
-                    {T.translate(
-                      "edit_selection_plan.cfp_presentation_all_selection_plan_link"
-                    )}
-                  </label>
-                  <br />
-                  <a
-                    className="text-table-link"
-                    href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
-                  </a>
-                </div>
-              </div>
+              )}
             </Panel>
           </>
         )}
