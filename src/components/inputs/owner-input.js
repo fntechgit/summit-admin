@@ -16,6 +16,7 @@ import AsyncCreatableSelect from "react-select/lib/AsyncCreatable";
 import { queryMembers } from "openstack-uicore-foundation/lib/utils/query-actions";
 import T from "i18n-react/dist/i18n-react";
 import { Input } from "openstack-uicore-foundation/lib/components";
+import CopyClipboard from "../buttons/copy-clipboard";
 
 export default class OwnerInput extends React.Component {
   constructor(props) {
@@ -90,15 +91,7 @@ export default class OwnerInput extends React.Component {
         <div className="col-md-4">
           <label>
             {T.translate("edit_purchase_order.owner_email")} *&nbsp;
-            <i
-              className="copy-button fa fa-clipboard"
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  owner.hasOwnProperty("email") ? owner.email : ""
-                );
-              }}
-              title="Copy to clipboard"
-            />
+            <CopyClipboard toClipboard={owner.email} />
           </label>
           <AsyncCreatableSelect
             value={theValue}
