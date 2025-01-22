@@ -565,6 +565,7 @@
     "upgrade_message": "You are about to Upgrade activity from SummitEvent to Presentation Type.",
     "upgrade_message_2": "In order continue, please do save the Activity, and perform all Presentation Type related changes after that.",
     "downgrade_message": "You can not change from Presentation Type to SummitEvent Type.",
+    "invalid_material_url": "Invalid download link",
     "placeholders": {
       "select_venue": "Select an Activity Venue ...",
       "start_date": "Start Date",

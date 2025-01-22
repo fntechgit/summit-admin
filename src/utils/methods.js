@@ -432,3 +432,12 @@ export const range = (start, stop, step) =>
 
 export const isHexColorSetting = (entity) =>
   entity.type === MARKETING_SETTING_TYPE_HEX_COLOR;
+
+export const isValidUrl = (url) => {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+  } catch (error) {
+    return false;
+  }
+};
