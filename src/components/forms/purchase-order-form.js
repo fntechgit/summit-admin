@@ -251,7 +251,7 @@ class PurchaseOrderForm extends React.Component {
                 <label>
                   {" "}
                   {T.translate("edit_purchase_order.number")}
-                  <CopyClipboard toClipboard={entity.number} />
+                  <CopyClipboard text={entity.number} />
                 </label>
                 <Input
                   id="number"

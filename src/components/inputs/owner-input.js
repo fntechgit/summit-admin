@@ -91,7 +91,7 @@ export default class OwnerInput extends React.Component {
         <div className="col-md-4">
           <label>
             {T.translate("edit_purchase_order.owner_email")} *&nbsp;
-            <CopyClipboard toClipboard={owner.email} />
+            <CopyClipboard text={owner.email} />
           </label>
           <AsyncCreatableSelect
             value={theValue}
