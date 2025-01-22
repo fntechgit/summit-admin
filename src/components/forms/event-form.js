@@ -445,12 +445,23 @@ class EventForm extends React.Component {
   handleMaterialDownload(materialId) {
     const { entity } = this.props;
     const material = entity.materials.find((m) => m.id === materialId);
-    window.open(
-      isValidUrl(material.private_url)
-        ? material.private_url
-        : material.public_url,
-      "_blank"
-    );
+
+    const url = isValidUrl(material.private_url)
+      ? material.private_url
+      : isValidUrl(material.public_url)
+      ? material.public_url
+      : null;
+
+    if (!url) {
+      Swal.fire(
+        "Not Found",
+        T.translate("edit_event.invalid_material_url"),
+        "warning"
+      );
+      return;
+    }
+
+    window.open(url, "_blank");
   }
 
   handleMaterialDelete(materialId) {
