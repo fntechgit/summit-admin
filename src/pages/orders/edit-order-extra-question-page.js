@@ -44,7 +44,7 @@ class EditOrderExtraQuestionPage extends React.Component {
   }
 
   handleValueDelete(valueId) {
-    const { deleteOrderExtraQuestionValue, currentSummit, entity } = this.props;
+    const { deleteOrderExtraQuestionValue, entity } = this.props;
     const value = entity.values.find((v) => v.id === valueId);
 
     Swal.fire({
@@ -69,9 +69,9 @@ class EditOrderExtraQuestionPage extends React.Component {
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text: T.translate(
-        "edit_order_extra_question_sub_rule.remove_rule_warning"
-      ),
+      text: `${T.translate("edit_order_extra_question.remove_value_warning")} ${
+        value.value
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -118,7 +118,6 @@ class EditOrderExtraQuestionPage extends React.Component {
             shouldAllowSubRules
             shouldShowUsage
             shouldShowPrintable
-            summitExtraQuestions={currentSummit.order_extra_questions}
             onValueDelete={this.handleValueDelete}
             onValueSave={this.handleValueSave}
             onRuleDelete={this.handleRuleDelete}
