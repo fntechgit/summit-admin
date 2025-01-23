@@ -62,6 +62,7 @@ import {
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE
 } from "../../utils/constants";
+import CopyClipboard from "../buttons/copy-clipboard";
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -993,16 +994,13 @@ class EventForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-8">
             <label> {T.translate("edit_event.submitter")} </label> &nbsp;
-            <i
-              className="copy-button fa fa-clipboard"
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  entity.created_by.hasOwnProperty("email")
-                    ? `${entity.created_by.first_name} ${entity.created_by.last_name} <${entity.created_by.email}>`
-                    : `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.id})`
-                );
-              }}
-              title="Copy to clipboard"
+            <CopyClipboard
+              text={
+                entity.created_by.hasOwnProperty("email")
+                  ? `${entity.created_by.first_name} ${entity.created_by.last_name} <${entity.created_by.email}>`
+                  : `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.id})`
+              }
+              tooltipText="Copy Submitter"
             />
             <div>
               <MemberInput

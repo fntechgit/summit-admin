@@ -251,7 +251,10 @@ class PurchaseOrderForm extends React.Component {
                 <label>
                   {" "}
                   {T.translate("edit_purchase_order.number")}
-                  <CopyClipboard text={entity.number} />
+                  <CopyClipboard
+                    text={entity.number}
+                    tooltipText="Copy Order Number"
+                  />
                 </label>
                 <Input
                   id="number"
