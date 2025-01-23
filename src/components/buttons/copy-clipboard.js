@@ -1,6 +1,6 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Tooltip } from "react-tooltip-5";
+import { Tooltip } from "react-tooltip";
 import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
 const CopyClipboard = ({ text, tooltipText }) => {

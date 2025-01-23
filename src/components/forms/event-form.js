@@ -15,7 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Swal from "sweetalert2";
-import ReactTooltip from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   TextEditor,
@@ -1836,12 +1836,12 @@ class EventForm extends React.Component {
                           {rating_type?.score_types?.length > 0 && (
                             <>
                               <a
-                                data-tip={this.getPopupScores(
+                                data-tooltip-html={this.getPopupScores(
                                   score.ranking_type_id
                                 )}
-                                data-for="help"
+                                data-tooltip-id="help"
                               >
-                                <ReactTooltip
+                                <Tooltip
                                   id="help"
                                   place="bottom"
                                   type="light"
@@ -1849,14 +1849,6 @@ class EventForm extends React.Component {
                                   multiline
                                   clickable
                                   border
-                                  getContent={(dataTip) => (
-                                    <div
-                                      className="tooltip-popover"
-                                      dangerouslySetInnerHTML={{
-                                        __html: dataTip
-                                      }}
-                                    />
-                                  )}
                                 />
                                 <i className="fa fa-question-circle" />
                               </a>

@@ -1,20 +1,21 @@
 import React from "react";
-import ActionsTableCell from "./ActionsTableCell";
 import T from "i18n-react/dist/i18n-react";
-import ReactTooltip from "react-tooltip";
-import { shallowEqual } from "../../../utils/methods";
-import LocationDropdown from "../../inputs/location-dropdown";
-import DayTimeframeTable from "./DayTimeframeTable";
+import { Tooltip } from "react-tooltip";
 import {
   epochToMomentTimeZone,
   parseLocationHour
 } from "openstack-uicore-foundation/lib/utils/methods";
+import ActionsTableCell from "./ActionsTableCell";
+import { shallowEqual } from "../../../utils/methods";
+import LocationDropdown from "../../inputs/location-dropdown";
+import DayTimeframeTable from "./DayTimeframeTable";
 
 import "./styles.css";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import { MILLISECONDS_IN_SECOND, TWO } from "../../../utils/constants";
 
 const createRow = (row, actions, summitTZ) => {
-  var cells = [];
+  let cells = [];
   const timeframes = row.allowed_timeframes
     .sort((a, b) => a.day - b.day)
     .map((tf) => {
@@ -38,7 +39,7 @@ const createRow = (row, actions, summitTZ) => {
   if (actions) {
     cells.push(
       <ActionsTableCell
-        key={"actions_" + row.id}
+        key={`actions_${row.id}`}
         id={row.id}
         actions={actions}
         isEdit={row.is_edit}
@@ -50,7 +51,7 @@ const createRow = (row, actions, summitTZ) => {
 };
 
 const createNewRow = (row, actions, locations) => {
-  let cells = [
+  const cells = [
     <td key="new_location_id">
       <LocationDropdown
         id="location_id"
@@ -98,7 +99,7 @@ class TrackTimeframeTable extends React.Component {
     this.newActions.handleChange = this.onChangeNewCell.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (!shallowEqual(this.props.data, prevProps.data)) {
       this.setState({ rows: this.props.data });
     }
@@ -109,44 +110,44 @@ class TrackTimeframeTable extends React.Component {
     this.props.onDelete(trackId, id);
   }
 
-  editRow(id, ev) {
+  editRow(id) {
     const { rows } = this.state;
     rows.forEach((r) => {
       r.is_edit = false;
     });
-    let row = rows.find((r) => r.id === id);
+    const row = rows.find((r) => r.id === id);
 
     row.is_edit = true;
 
     this.setState({
-      rows: rows
+      rows
     });
   }
 
-  editRowCancel(id, ev) {
+  editRowCancel() {
     const { rows } = this.state;
     rows.forEach((r) => {
       r.is_edit = false;
     });
 
     this.setState({
-      rows: rows
+      rows
     });
   }
 
   onChangeNewCell(ev) {
     const { new_row } = this.state;
-    let field = ev.target;
-    let value = field.value;
+    const field = ev.target;
+    let {value} = field;
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
     new_row[field.id] = value;
 
     this.setState({
-      new_row: new_row
+      new_row
     });
   }
 
@@ -179,10 +180,10 @@ class TrackTimeframeTable extends React.Component {
           </thead>
           <tbody>
             {rows.map((row, i) => {
-              let rowClass = i % 2 === 0 ? "even" : "odd";
+              const rowClass = i % TWO === 0 ? "even" : "odd";
 
               return (
-                <React.Fragment key={"row_" + row.id}>
+                <React.Fragment key={`row_${row.id}`}>
                   <tr id={row.id} role="row" className={rowClass}>
                     {createRow(row, this.actions, summitTZ)}
                   </tr>
@@ -215,7 +216,7 @@ class TrackTimeframeTable extends React.Component {
             </tr>
           </tbody>
         </table>
-        <ReactTooltip delayShow={10} />
+        <Tooltip delayShow={10} />
       </div>
     );
   }

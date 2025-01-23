@@ -1,22 +1,23 @@
 import React from "react";
 import { connect } from "react-redux";
-import BannersActionsTableCell from "./BannersActionsTableCell";
 import { DateTimePicker } from "openstack-uicore-foundation/lib/components";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import T from "i18n-react/dist/i18n-react";
+import { Tooltip } from "react-tooltip";
+
+import "./bannerstable.css";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import BannersActionsTableCell from "./BannersActionsTableCell";
 import {
   saveBanner,
   deleteBanner,
   publishDate
 } from "../../../actions/signage-actions";
-import T from "i18n-react/dist/i18n-react";
-import ReactTooltip from "react-tooltip";
-
-import "./bannerstable.css";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { shallowEqual } from "../../../utils/methods";
+import { MILLISECONDS_IN_SECOND, TWO } from "../../../utils/constants";
 
 const createRow = (row, actions, summitTz) => {
-  var cells = [];
+  let cells = [];
 
   if (row.is_edit) {
     cells = [
@@ -73,7 +74,7 @@ const createRow = (row, actions, summitTz) => {
   if (actions) {
     cells.push(
       <BannersActionsTableCell
-        key={"actions_" + row.id}
+        key={`actions_${row.id}`}
         id={row.id}
         actions={actions}
       />
@@ -84,7 +85,7 @@ const createRow = (row, actions, summitTz) => {
 };
 
 const createNewRow = (row, actions, summitTz, roomName) => {
-  let cells = [
+  const cells = [
     <td key="new_id">TBD</td>,
     <td key="new_title">
       <input
@@ -168,7 +169,7 @@ class BannersTable extends React.Component {
     this.newActions.handleChange = this.onChangeNewCell.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (!shallowEqual(this.props.data, prevProps.data)) {
       this.setState({ rows: this.props.data });
     }
@@ -176,13 +177,13 @@ class BannersTable extends React.Component {
 
   saveRow(id) {
     const { rows } = this.state;
-    let row = rows.find((r) => r.id === id);
+    const row = rows.find((r) => r.id === id);
     row.is_edit = false;
 
     this.editing_row = null;
 
     this.setState({
-      rows: rows
+      rows
     });
 
     this.props.saveBanner(row);
@@ -192,65 +193,65 @@ class BannersTable extends React.Component {
     this.props.deleteBanner(id);
   }
 
-  editRow(id, ev) {
+  editRow(id) {
     const { rows } = this.state;
-    let row = rows.find((r) => r.id === id);
+    const row = rows.find((r) => r.id === id);
 
-    //save editing row for cancel
+    // save editing row for cancel
     this.editing_row = { ...row };
 
     row.is_edit = true;
 
     this.setState({
-      rows: rows
+      rows
     });
   }
 
-  editRowCancel(id, ev) {
+  editRowCancel(id) {
     const { rows } = this.state;
     rows.forEach((r) => {
       r.is_edit = false;
     });
 
-    let rowIdx = rows.findIndex((r) => r.id === id);
+    const rowIdx = rows.findIndex((r) => r.id === id);
 
     rows[rowIdx] = this.editing_row;
 
     this.setState({
-      rows: rows
+      rows
     });
   }
 
   onChangeCell(id, ev) {
     const { rows } = this.state;
-    let field = ev.target;
-    let row = rows.find((r) => r.id === id);
-    let value = field.value;
+    const field = ev.target;
+    const row = rows.find((r) => r.id === id);
+    let {value} = field;
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
     row[field.id] = value;
 
     this.setState({
-      rows: rows
+      rows
     });
   }
 
   onChangeNewCell(ev) {
     const { new_row } = this.state;
-    let field = ev.target;
-    let value = field.value;
+    const field = ev.target;
+    let {value} = field;
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
     new_row[field.id] = value;
 
     this.setState({
-      new_row: new_row
+      new_row
     });
   }
 
@@ -294,12 +295,12 @@ class BannersTable extends React.Component {
           </thead>
           <tbody>
             {this.state.rows.map((row, i) => {
-              let rowClass = i % 2 === 0 ? "even" : "odd";
+              const rowClass = i % TWO === 0 ? "even" : "odd";
 
               return (
                 <tr
                   id={row.id}
-                  key={"row_" + row.id}
+                  key={`row_${row.id}`}
                   role="row"
                   className={rowClass}
                 >
@@ -318,7 +319,7 @@ class BannersTable extends React.Component {
             </tr>
           </tbody>
         </table>
-        <ReactTooltip delayShow={10} />
+        <Tooltip delayShow={10} />
       </div>
     );
   }

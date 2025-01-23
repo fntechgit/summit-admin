@@ -1,9 +1,9 @@
 import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
-import styles from "./index.module.less";
 import { Modal } from "react-bootstrap";
-import ReactTooltip from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
+import styles from "./index.module.less";
 
 const UnlockScheduleButton = ({
   track = null,
@@ -56,7 +56,7 @@ const UnlockScheduleButton = ({
         <Modal.Body>
           {lockCopy}
           <p>
-            By clicking "Unlock", the proposed schedule for track{" "}
+            By clicking &quot;Unlock&quot;, the proposed schedule for track{" "}
             <b>{track?.name}</b> will be unlocked for edition.
           </p>
           <textarea ref={note} placeholder="Note for track chairs (optional)" />
@@ -71,7 +71,7 @@ const UnlockScheduleButton = ({
           </button>
         </Modal.Footer>
       </Modal>
-      <ReactTooltip />
+      <Tooltip />
     </>
   );
 };

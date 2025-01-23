@@ -45,34 +45,49 @@ export default class AffiliationsActionsTableCell extends React.Component {
   }
 
   render() {
-    let { actions, id } = this.props;
+    const { actions, id } = this.props;
 
     if (this.state.is_editing) {
       return (
         <td className="actions">
-          <a href="" onClick={this.onSave.bind(this, id)} data-tip="save">
+          <a
+            href=""
+            onClick={this.onSave.bind(this, id)}
+            data-tooltip-content="save"
+          >
             <i className="fa fa-floppy-o" />
           </a>
-          <a href="" onClick={this.onCancel.bind(this, id)} data-tip="cancel">
+          <a
+            href=""
+            onClick={this.onCancel.bind(this, id)}
+            data-tooltip-content="cancel"
+          >
             <i className="fa fa-times" />
           </a>
         </td>
       );
-    } else {
-      return (
-        <td className="actions">
-          {"edit" in actions && (
-            <a href="" onClick={this.onEdit.bind(this, id)} data-tip="edit">
-              <i className="fa fa-pencil-square-o" />
-            </a>
-          )}
-          {"delete" in actions && (
-            <a href="" onClick={this.onDelete.bind(this, id)} data-tip="delete">
-              <i className="fa fa-trash-o" />
-            </a>
-          )}
-        </td>
-      );
     }
+    return (
+      <td className="actions">
+        {"edit" in actions && (
+          <a
+            href=""
+            onClick={this.onEdit.bind(this, id)}
+            data-tooltip-content="edit"
+          >
+            <i className="fa fa-pencil-square-o" />
+          </a>
+        )}
+        {"delete" in actions && (
+          <a
+            href=""
+            onClick={this.onDelete.bind(this, id)}
+            data-tooltip-content="delete"
+          >
+            <i className="fa fa-trash-o" />
+          </a>
+        )}
+      </td>
+    );
   }
 }

@@ -12,12 +12,6 @@ const ActionsTableCell = ({ id, actions, isEdit = false }) => {
     actions.delete(id);
   };
 
-  const onSave = (ev) => {
-    ev.preventDefault();
-    setIsEditing(false);
-    actions.save(id);
-  };
-
   const onEdit = (ev) => {
     ev.preventDefault();
     setIsEditing(true);
@@ -33,27 +27,26 @@ const ActionsTableCell = ({ id, actions, isEdit = false }) => {
   if (isEditing) {
     return (
       <td className="actions">
-        <a href="" onClick={onCancel} data-tip="close">
+        <a href="" onClick={onCancel} data-tooltip-content="close">
           <i className="fa fa-times" />
         </a>
       </td>
     );
-  } else {
-    return (
-      <td className="actions">
-        {"edit" in actions && (
-          <a href="" onClick={onEdit} data-tip="edit">
-            <i className="fa fa-pencil-square-o" />
-          </a>
-        )}
-        {"delete" in actions && (
-          <a href="" onClick={onDelete} data-tip="delete">
-            <i className="fa fa-trash-o" />
-          </a>
-        )}
-      </td>
-    );
   }
+  return (
+    <td className="actions">
+      {"edit" in actions && (
+        <a href="" onClick={onEdit} data-tooltip-content="edit">
+          <i className="fa fa-pencil-square-o" />
+        </a>
+      )}
+      {"delete" in actions && (
+        <a href="" onClick={onDelete} data-tooltip-content="delete">
+          <i className="fa fa-trash-o" />
+        </a>
+      )}
+    </td>
+  );
 };
 
 export default ActionsTableCell;

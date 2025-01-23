@@ -1,13 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import ActionsTableCell from "./ActionsTableCell";
-import {
-  deleteDayTimeframe,
-  saveDayTimeframe
-} from "../../../actions/track-timeframes-actions";
 import T from "i18n-react/dist/i18n-react";
-import ReactTooltip from "react-tooltip";
-import { shallowEqual } from "../../../utils/methods";
+import { Tooltip } from "react-tooltip";
 import {
   DateTimePicker,
   Dropdown
@@ -20,8 +14,16 @@ import {
 import "./styles.css";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 
+import { shallowEqual } from "../../../utils/methods";
+import ActionsTableCell from "./ActionsTableCell";
+import {
+  deleteDayTimeframe,
+  saveDayTimeframe
+} from "../../../actions/track-timeframes-actions";
+import { TWO } from "../../../utils/constants";
+
 const createRow = (row, actions, days, summitTZ) => {
-  var cells = [];
+  let cells = [];
 
   cells = [
     <td key="day">
@@ -38,7 +40,7 @@ const createRow = (row, actions, days, summitTZ) => {
   if (actions) {
     cells.push(
       <ActionsTableCell
-        key={"actions_" + row.id}
+        key={`actions_${row.id}`}
         id={row.id}
         actions={actions}
       />
@@ -49,7 +51,7 @@ const createRow = (row, actions, days, summitTZ) => {
 };
 
 const createNewRow = (row, actions, days) => {
-  let cells = [
+  const cells = [
     <td key="new_day">
       <Dropdown
         id="day"
@@ -64,7 +66,7 @@ const createNewRow = (row, actions, days) => {
         onChange={actions.handleChange}
         format={{ date: false, time: "HH:mm" }}
         value={row.opening_hour}
-        utc={true}
+        utc
       />
     </td>,
     <td key="new_closing_hour">
@@ -73,7 +75,7 @@ const createNewRow = (row, actions, days) => {
         onChange={actions.handleChange}
         format={{ date: false, time: "HH:mm" }}
         value={row.closing_hour}
-        utc={true}
+        utc
       />
     </td>
   ];
@@ -113,7 +115,7 @@ class DayTimeframeTable extends React.Component {
     this.newActions.handleChange = this.onChangeNewCell.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (!shallowEqual(this.props.data, prevProps.data)) {
       this.setState({ rows: this.props.data });
     }
@@ -126,12 +128,12 @@ class DayTimeframeTable extends React.Component {
 
   onChangeNewCell(ev) {
     const { new_row } = this.state;
-    let field = ev.target;
+    const field = ev.target;
 
     new_row[field.id] = field.value;
 
     this.setState({
-      new_row: new_row
+      new_row
     });
   }
 
@@ -167,12 +169,12 @@ class DayTimeframeTable extends React.Component {
           </thead>
           <tbody>
             {rows.map((row, i) => {
-              let rowClass = i % 2 === 0 ? "even" : "odd";
+              const rowClass = i % TWO === 0 ? "even" : "odd";
 
               return (
                 <tr
                   id={row.id}
-                  key={"row_" + row.id}
+                  key={`row_${row.id}`}
                   role="row"
                   className={rowClass}
                 >
@@ -186,7 +188,7 @@ class DayTimeframeTable extends React.Component {
             </tr>
           </tbody>
         </table>
-        <ReactTooltip delayShow={10} />
+        <Tooltip delayShow={10} />
       </div>
     );
   }
