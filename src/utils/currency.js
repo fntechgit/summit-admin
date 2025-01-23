@@ -22,7 +22,7 @@ const DECIMAL_PLACES = 2;
 export const amountToCents = (amount) => {
   const normalizedAmount = parseFloat(amount);
   if (isNaN(normalizedAmount)) {
-    throw new Error("The provided value is not a valid number.");
+    return 0;
   }
   return Math.round(normalizedAmount * CENTS_FACTOR);
 };
