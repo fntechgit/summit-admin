@@ -12,7 +12,7 @@
  * */
 
 import React from "react";
-import ReactTooltip from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 
 export const buildSpeakersSubmittersList = (state, data) =>
   data.map((s) => {
@@ -54,7 +54,7 @@ export const buildSpeakersSubmittersList = (state, data) =>
             href="#"
           >
             {s.accepted_presentations.length}
-            <ReactTooltip
+            <Tooltip
               delayHide={1000}
               id={`accepted_${s.id}`}
               multiline
@@ -79,7 +79,7 @@ export const buildSpeakersSubmittersList = (state, data) =>
             href="#"
           >
             {s.alternate_presentations.length}
-            <ReactTooltip
+            <Tooltip
               delayHide={1000}
               id={`alternate_${s.id}`}
               multiline
@@ -104,7 +104,7 @@ export const buildSpeakersSubmittersList = (state, data) =>
             href="#"
           >
             {s.rejected_presentations.length}
-            <ReactTooltip
+            <Tooltip
               delayHide={1000}
               id={`rejected_${s.id}`}
               multiline
