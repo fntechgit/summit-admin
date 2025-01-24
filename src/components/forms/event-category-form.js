@@ -17,7 +17,7 @@ import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   Input,
   Panel,
-  TextEditor,
+  TextEditorV3,
   TagInput,
   UploadInput,
   AccessLevelsInput,
@@ -203,8 +203,9 @@ class EventCategoryForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_event_category.description")} </label>
-            <TextEditor
+            <TextEditorV3
               id="description"
+              placeholder="Enter text"
               value={entity.description}
               onChange={this.handleChange}
               error={hasErrors("description", errors)}
