@@ -48,8 +48,6 @@ export const buildSpeakersSubmittersList = (state, data) =>
           <a
             data-tooltip-html={acceptedPresentationsToolTip}
             data-tooltip-id={`accepted_${s.id}`}
-            data-tooltip-delay-hide={1000}
-            data-tooltip-variant="light"
             onClick={(ev) => {
               ev.stopPropagation();
             }}
@@ -60,7 +58,9 @@ export const buildSpeakersSubmittersList = (state, data) =>
               id={`accepted_${s.id}`}
               multiline
               clickable
+              delayHide={1000}
               place="bottom"
+              variant="light"
               border="1px solid black"
             />
           </a>
@@ -72,8 +72,6 @@ export const buildSpeakersSubmittersList = (state, data) =>
           <a
             data-tooltip-html={alternatePresentationsToolTip}
             data-tooltip-id={`alternate_${s.id}`}
-            data-tooltip-delay-hide={1000}
-            data-tooltip-variant="light"
             onClick={(ev) => {
               ev.stopPropagation();
             }}
@@ -84,7 +82,9 @@ export const buildSpeakersSubmittersList = (state, data) =>
               id={`alternate_${s.id}`}
               multiline
               clickable
+              delayHide={1000}
               place="bottom"
+              variant="light"
               border="1px solid black"
             />
           </a>
@@ -96,8 +96,6 @@ export const buildSpeakersSubmittersList = (state, data) =>
           <a
             data-tooltip-html={rejectedPresentationsToolTip}
             data-tooltip-id={`rejected_${s.id}`}
-            data-tooltip-delay-hide={1000}
-            data-tooltip-variant="light"
             onClick={(ev) => {
               ev.stopPropagation();
             }}
@@ -108,7 +106,9 @@ export const buildSpeakersSubmittersList = (state, data) =>
               id={`rejected_${s.id}`}
               multiline
               clickable
+              delayHide={1000}
               place="bottom"
+              variant="light"
               border="1px solid black"
             />
           </a>
