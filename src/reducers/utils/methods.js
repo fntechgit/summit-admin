@@ -48,6 +48,8 @@ export const buildSpeakersSubmittersList = (state, data) =>
           <a
             data-tooltip-html={acceptedPresentationsToolTip}
             data-tooltip-id={`accepted_${s.id}`}
+            data-tooltip-delay-hide={1000}
+            data-tooltip-variant="light"
             onClick={(ev) => {
               ev.stopPropagation();
             }}
@@ -55,14 +57,11 @@ export const buildSpeakersSubmittersList = (state, data) =>
           >
             {s.accepted_presentations.length}
             <Tooltip
-              delayHide={1000}
               id={`accepted_${s.id}`}
               multiline
               clickable
-              border
               place="bottom"
-              type="light"
-              effect="solid"
+              border="1px solid black"
             />
           </a>
         ) : (
@@ -73,6 +72,8 @@ export const buildSpeakersSubmittersList = (state, data) =>
           <a
             data-tooltip-html={alternatePresentationsToolTip}
             data-tooltip-id={`alternate_${s.id}`}
+            data-tooltip-delay-hide={1000}
+            data-tooltip-variant="light"
             onClick={(ev) => {
               ev.stopPropagation();
             }}
@@ -80,14 +81,11 @@ export const buildSpeakersSubmittersList = (state, data) =>
           >
             {s.alternate_presentations.length}
             <Tooltip
-              delayHide={1000}
               id={`alternate_${s.id}`}
               multiline
               clickable
-              border
               place="bottom"
-              type="light"
-              effect="solid"
+              border="1px solid black"
             />
           </a>
         ) : (
@@ -98,6 +96,8 @@ export const buildSpeakersSubmittersList = (state, data) =>
           <a
             data-tooltip-html={rejectedPresentationsToolTip}
             data-tooltip-id={`rejected_${s.id}`}
+            data-tooltip-delay-hide={1000}
+            data-tooltip-variant="light"
             onClick={(ev) => {
               ev.stopPropagation();
             }}
@@ -105,14 +105,11 @@ export const buildSpeakersSubmittersList = (state, data) =>
           >
             {s.rejected_presentations.length}
             <Tooltip
-              delayHide={1000}
               id={`rejected_${s.id}`}
               multiline
               clickable
-              border
               place="bottom"
-              type="light"
-              effect="solid"
+              border="1px solid black"
             />
           </a>
         ) : (

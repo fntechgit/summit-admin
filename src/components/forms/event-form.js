@@ -1838,15 +1838,14 @@ class EventForm extends React.Component {
                                   score.ranking_type_id
                                 )}
                                 data-tooltip-id="help"
+                                data-tooltip-variant="light"
                               >
                                 <Tooltip
                                   id="help"
                                   place="bottom"
-                                  type="light"
-                                  effect="solid"
                                   multiline
                                   clickable
-                                  border
+                                  border="1px solid black"
                                 />
                                 <i className="fa fa-question-circle" />
                               </a>
