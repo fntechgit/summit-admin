@@ -30,6 +30,7 @@ import {
   shallowEqual
 } from "../../utils/methods";
 import { DECIMAL_DIGITS } from "../../utils/constants";
+import CopyClipboard from "../buttons/copy-clipboard";
 
 class PurchaseOrderForm extends React.Component {
   constructor(props) {
@@ -247,7 +248,14 @@ class PurchaseOrderForm extends React.Component {
           <>
             <div className="row form-group">
               <div className="col-md-6">
-                <label> {T.translate("edit_purchase_order.number")}</label>
+                <label>
+                  {" "}
+                  {T.translate("edit_purchase_order.number")}
+                  <CopyClipboard
+                    text={entity.number}
+                    tooltipText="Copy Order Number"
+                  />
+                </label>
                 <Input
                   id="number"
                   value={entity.number}

@@ -15,7 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Swal from "sweetalert2";
-import ReactTooltip from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   TextEditor,
@@ -62,6 +62,7 @@ import {
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE
 } from "../../utils/constants";
+import CopyClipboard from "../buttons/copy-clipboard";
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -993,16 +994,13 @@ class EventForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-8">
             <label> {T.translate("edit_event.submitter")} </label> &nbsp;
-            <i
-              className="copy-button fa fa-clipboard"
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  entity.created_by.hasOwnProperty("email")
-                    ? `${entity.created_by.first_name} ${entity.created_by.last_name} <${entity.created_by.email}>`
-                    : `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.id})`
-                );
-              }}
-              title="Copy to clipboard"
+            <CopyClipboard
+              text={
+                entity.created_by.hasOwnProperty("email")
+                  ? `${entity.created_by.first_name} ${entity.created_by.last_name} <${entity.created_by.email}>`
+                  : `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.id})`
+              }
+              tooltipText="Copy Submitter"
             />
             <div>
               <MemberInput
@@ -1836,27 +1834,18 @@ class EventForm extends React.Component {
                           {rating_type?.score_types?.length > 0 && (
                             <>
                               <a
-                                data-tip={this.getPopupScores(
+                                data-tooltip-html={this.getPopupScores(
                                   score.ranking_type_id
                                 )}
-                                data-for="help"
+                                data-tooltip-id="help"
                               >
-                                <ReactTooltip
+                                <Tooltip
                                   id="help"
                                   place="bottom"
-                                  type="light"
-                                  effect="solid"
                                   multiline
                                   clickable
-                                  border
-                                  getContent={(dataTip) => (
-                                    <div
-                                      className="tooltip-popover"
-                                      dangerouslySetInnerHTML={{
-                                        __html: dataTip
-                                      }}
-                                    />
-                                  )}
+                                  border="1px solid black"
+                                  variant="light"
                                 />
                                 <i className="fa fa-question-circle" />
                               </a>
