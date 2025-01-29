@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import AffiliationsActionsTableCell from "./AffiliationsActionsTableCell";
 import {
   DateTimePicker,
   OrganizationInput
@@ -9,22 +8,24 @@ import {
   epochToMoment,
   formatEpoch
 } from "openstack-uicore-foundation/lib/utils/methods";
+import T from "i18n-react/dist/i18n-react";
+import { Tooltip } from "react-tooltip";
+import AffiliationsActionsTableCell from "./AffiliationsActionsTableCell";
 import {
   addAffiliation,
   saveAffiliation,
   deleteAffiliation,
   addOrganization
 } from "../../../actions/member-actions";
-import T from "i18n-react/dist/i18n-react";
-import ReactTooltip from "react-tooltip";
 
 import "./affiliationstable.css";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { shallowEqual } from "../../../utils/methods";
+import { MILLISECONDS_IN_SECOND, TWO } from "../../../utils/constants";
 
 const createRow = (row, actions) => {
-  var cells = [];
-  var org_value = row.organization ? row.organization : null;
+  let cells = [];
+  const org_value = row.organization ? row.organization : null;
 
   if (row.is_edit) {
     cells = [
@@ -50,7 +51,7 @@ const createRow = (row, actions) => {
           id="start_date"
           onChange={actions.handleChange.bind(this, row.id)}
           format={{ date: "YYYY-MM-DD", time: false }}
-          timezone={"UTC"}
+          timezone="UTC"
           value={epochToMoment(row.start_date)}
         />
       </td>,
@@ -59,7 +60,7 @@ const createRow = (row, actions) => {
           id="end_date"
           onChange={actions.handleChange.bind(this, row.id)}
           format={{ date: "YYYY-MM-DD", time: false }}
-          timezone={"UTC"}
+          timezone="UTC"
           value={epochToMoment(row.end_date)}
         />
       </td>,
@@ -87,7 +88,7 @@ const createRow = (row, actions) => {
   if (actions) {
     cells.push(
       <AffiliationsActionsTableCell
-        key={"actions_" + row.id}
+        key={`actions_${row.id}`}
         id={row.id}
         actions={actions}
       />
@@ -98,7 +99,7 @@ const createRow = (row, actions) => {
 };
 
 const createNewRow = (row, actions) => {
-  let cells = [
+  const cells = [
     <td key="new_job_title">
       <input
         id="job_title"
@@ -121,7 +122,7 @@ const createNewRow = (row, actions) => {
         id="start_date"
         onChange={actions.handleChange}
         format={{ date: "YYYY-MM-DD", time: false }}
-        timezone={"UTC"}
+        timezone="UTC"
         value={epochToMoment(row.start_date)}
       />
     </td>,
@@ -130,7 +131,7 @@ const createNewRow = (row, actions) => {
         id="end_date"
         onChange={actions.handleChange}
         format={{ date: "YYYY-MM-DD", time: false }}
-        timezone={"UTC"}
+        timezone="UTC"
         value={epochToMoment(row.end_date)}
       />
     </td>,
@@ -188,25 +189,30 @@ class AffiliationsTable extends React.Component {
     this.newActions.addOrganization = props.addOrganization;
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (!shallowEqual(this.props.data, prevProps.data)) {
       this.setState({ rows: this.props.data });
     }
 
     if (this.props.ownerId !== prevProps.ownerId) {
-      this.setState({ owner_id: this.props.ownerId });
+      this.setState((prevState) => ({
+        new_row: {
+          ...prevState.new_row,
+          owner_id: this.props.ownerId
+        }
+      }));
     }
   }
 
   saveRow(id) {
     const { rows } = this.state;
-    let row = rows.find((r) => r.id === id);
+    const row = rows.find((r) => r.id === id);
     row.is_edit = false;
 
     this.editing_row = null;
 
     this.setState({
-      rows: rows
+      rows
     });
 
     this.props.saveAffiliation(row);
@@ -216,81 +222,86 @@ class AffiliationsTable extends React.Component {
     this.props.deleteAffiliation(this.props.ownerId, id);
   }
 
-  editRow(id, ev) {
+  editRow(id) {
     const { rows } = this.state;
-    let row = rows.find((r) => r.id === id);
+    const row = rows.find((r) => r.id === id);
 
-    //save editing row for cancel
+    // save editing row for cancel
     this.editing_row = { ...row };
 
     row.is_edit = true;
 
     this.setState({
-      rows: rows
+      rows
     });
   }
 
-  editRowCancel(id, ev) {
+  editRowCancel(id) {
     const { rows } = this.state;
     rows.forEach((r) => {
       r.is_edit = false;
     });
 
-    let rowIdx = rows.findIndex((r) => r.id === id);
+    const rowIdx = rows.findIndex((r) => r.id === id);
 
     rows[rowIdx] = this.editing_row;
 
     this.setState({
-      rows: rows
+      rows
     });
   }
 
   onChangeCell(id, ev) {
     const { rows } = this.state;
-    let field = ev.target;
-    let row = rows.find((r) => r.id === id);
-    let value = field.value;
+    const field = ev.target;
+    const row = rows.find((r) => r.id === id);
+    let {value} = field;
 
     if (field.type === "checkbox") {
       value = field.checked;
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
     row[field.id] = value;
 
     this.setState({
-      rows: rows
+      rows
     });
   }
 
   onChangeNewCell(ev) {
     const { new_row } = this.state;
-    let field = ev.target;
-    let value = field.value;
+    const field = ev.target;
+    let {value} = field;
 
     if (field.type === "checkbox") {
       value = field.checked;
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
     new_row[field.id] = value;
 
     this.setState({
-      new_row: new_row
+      new_row
     });
   }
 
   saveNewRow(ev) {
     ev.preventDefault();
 
-    let new_row = { ...this.state.new_row };
-    new_row.owner_id = this.props.ownerId;
+    const new_row = { ...this.state.new_row };
+    this.setState((prevState) => ({
+      new_row: {
+        ...prevState.new_row,
+        owner_id: this.props.ownerId
+      }
+    }));
 
     this.setState({ new_row: { ...this.new_row } });
 
@@ -325,12 +336,12 @@ class AffiliationsTable extends React.Component {
           </thead>
           <tbody>
             {this.state.rows.map((row, i) => {
-              let rowClass = i % 2 === 0 ? "even" : "odd";
+              const rowClass = i % TWO === 0 ? "even" : "odd";
 
               return (
                 <tr
                   id={row.id}
-                  key={"row_" + row.id}
+                  key={`row_${row.id}`}
                   role="row"
                   className={rowClass}
                 >
@@ -344,7 +355,7 @@ class AffiliationsTable extends React.Component {
             </tr>
           </tbody>
         </table>
-        <ReactTooltip delayShow={10} />
+        <Tooltip delayShow={10} />
       </div>
     );
   }

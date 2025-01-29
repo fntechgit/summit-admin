@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import ReactTooltip from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 import T from "i18n-react/dist/i18n-react";
 import EditableTableHeading from "./EditableTableHeading";
 import EditableTableRow from "./EditableTableRow";
@@ -261,7 +261,7 @@ function EditableTable(props) {
           </tbody>
         </table>
       </div>
-      <ReactTooltip delayShow={10} />
+      <Tooltip delayShow={10} />
     </div>
   );
 }
