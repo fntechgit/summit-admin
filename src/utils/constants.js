@@ -158,3 +158,19 @@ export const MAX_MEDIA_UPLOAD_SIZE = 512000;
 export const MAX_SLIDE_UPLOAD_SIZE = 512000;
 
 export const ALLOWED_SLIDES_FORMATS = ["jpg", "jpeg", "ppt", "pptx", "pdf"];
+
+// 500 * 1024kb
+export const MAX_FORM_TEMPLATE_MATERIALS_UPLOAD_SIZE = 512000;
+export const MAX_FORM_TEMPLATE_MATERIALS_UPLOAD_QTY = 5;
+export const ALLOWED_FORM_TEMPLATE_MATERIAL_FORMATS = [
+  "jpg",
+  "jpeg",
+  "ppt",
+  "pptx",
+  "pdf"
+];
+
+// 500 * 1024kb
+export const MAX_INVENTORY_IMAGE_UPLOAD_SIZE = 512000;
+export const MAX_INVENTORY_IMAGES_UPLOAD_QTY = 5;
+export const ALLOWED_INVENTORY_IMAGE_FORMATS = ["jpg", "jpeg", "png"];

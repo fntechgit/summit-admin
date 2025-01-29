@@ -156,12 +156,8 @@ class ExtraQuestionForm extends React.Component {
   }
 
   formatRuleQuestionColumn(item) {
-    const { summitExtraQuestions } = this.props;
-    const question = summitExtraQuestions.find(
-      (e) => e.id === item.sub_question_id
-    );
     return `${item.visibility === "Visible" ? "Show" : "Not Show"} ${
-      question.name
+      item.sub_question.name
     }`;
   }
 
