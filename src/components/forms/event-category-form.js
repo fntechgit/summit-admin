@@ -17,7 +17,6 @@ import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   Input,
   Panel,
-  TextEditorV3,
   TagInput,
   UploadInput,
   AccessLevelsInput,
@@ -31,6 +30,8 @@ import {
   hasErrors
 } from "../../utils/methods";
 import TrackDropdown from "../inputs/track-dropdown";
+import TextEditorV3bis from "../editor-input-v3";
+import TextEditorV4 from "../editor-input-v4";
 
 class EventCategoryForm extends React.Component {
   constructor(props) {
@@ -203,7 +204,16 @@ class EventCategoryForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_event_category.description")} </label>
-            <TextEditorV3
+            <TextEditorV3bis
+              id="description"
+              placeholder="Enter text"
+              value={entity.description}
+              onChange={this.handleChange}
+              error={hasErrors("description", errors)}
+            />
+            <br />
+            <br />
+            <TextEditorV4
               id="description"
               placeholder="Enter text"
               value={entity.description}
