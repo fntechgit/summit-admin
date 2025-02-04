@@ -79,6 +79,7 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
         id: a.id,
         code: a.code,
         name: a.name,
+        hasImage: a.images.length > 0,
         checked: false
       }));
 

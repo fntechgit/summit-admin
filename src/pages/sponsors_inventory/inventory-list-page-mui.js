@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 // import ScopedCssBaseline from '@mui/material/ScopedCssBaseline';
 import {
   Alert,
@@ -30,18 +30,19 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import {
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
-import { Pagination } from "react-bootstrap";
-import {
   getInventoryItems,
-  deleteInventoryItem
+  getInventoryItem,
+  saveInventoryItem,
+  deleteInventoryItem,
+  deleteInventoryItemImage,
+  resetInventoryItemForm
 } from "../../actions/inventory-item-actions";
+import InventoryTable from "../../components/mui/table/inventory-table";
+import SponsorInventoryDialog from "../../components/mui/popup/sponsor-inventory-popup";
 
 const InventoryListPageMUI = ({
   inventoryItems,
-  lastPage,
+  selectedInventoryItem,
   currentPage,
   perPage,
   term,
@@ -49,9 +50,20 @@ const InventoryListPageMUI = ({
   orderDir,
   totalInventoryItems,
   history,
+  saveInventoryItem,
   deleteInventoryItem,
-  getInventoryItems
+  deleteInventoryItemImage,
+  getInventoryItems,
+  getInventoryItem,
+  resetInventoryItemForm
 }) => {
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   useEffect(() => {
     getInventoryItems(term, currentPage, perPage, order, orderDir);
   }, []);
@@ -87,13 +99,37 @@ const InventoryListPageMUI = ({
     getInventoryItems(term, currentPage, perPage, key, dir);
   };
 
-  const handleSearch = (term) => {
-    getInventoryItems(term, currentPage, perPage, order, orderDir);
+  const handleSearch = (ev) => {
+    console.log("CHECK TERM", searchTerm);
+    if (ev.key === "Enter") {
+      getInventoryItems(searchTerm, currentPage, perPage, order, orderDir);
+    }
+  };
+
+  const handleRowEdit = (row) => {
+    if (row) getInventoryItem(row.id);
+    setOpen(true);
   };
 
   const handleNewInventoryItem = () => {
-    history.push("/app/inventory/new");
+    resetInventoryItemForm();
+    setOpen(true);
   };
+
+  const handleInventorySave = (item) => {
+    saveInventoryItem(item).then(() =>
+      getInventoryItems(term, currentPage, perPage, order, orderDir)
+    );
+    setOpen(false);
+  };
+
+  const handleRemoveFile = (file, inventoryId) => {
+    deleteInventoryItemImage(file.id, inventoryId);
+  };
+
+  const handleMetaFieldTypeDelete = () => {};
+
+  const handleMetaFieldTypeValueDelete = () => {};
 
   const columns = [
     { columnKey: "id", value: "Id", sortable: true },
@@ -129,7 +165,8 @@ const InventoryListPageMUI = ({
         severity="info"
         sx={{
           justifyContent: "start",
-          alignItems: "center"
+          alignItems: "center",
+          mb: 2
         }}
       >
         {T.translate("inventory_item_list.alert_info")}
@@ -139,7 +176,8 @@ const InventoryListPageMUI = ({
         spacing={2}
         sx={{
           justifyContent: "center",
-          alignItems: "center"
+          alignItems: "center",
+          mb: 2
         }}
       >
         <Grid2 size={6}>
@@ -176,72 +214,74 @@ const InventoryListPageMUI = ({
           <Grid2 size={4}>
             <TextField
               variant="outlined"
+              value={searchTerm}
               placeholder={T.translate(
                 "inventory_item_list.placeholders.search_inventory_items"
               )}
               slotProps={{
                 input: {
-                  startAdornment: <SearchIcon />
+                  startAdornment: <SearchIcon sx={{ mr: 1 }} />
                 }
               }}
+              onChange={() => setSearchTerm(event.target.value)}
+              onKeyDown={handleSearch}
             />
           </Grid2>
           <Grid2 size={4}>
-            <Button variant="contained" startIcon={<AddIcon />}>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleNewInventoryItem}
+              startIcon={<AddIcon />}
+            >
               {T.translate("inventory_item_list.add_inventory_item")}
             </Button>
           </Grid2>
         </Grid2>
       </Grid2>
-      <div className="row">
-        <div className="col-md-6">
-          <FreeTextSearch
-            value={term ?? ""}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-            onSearch={handleSearch}
-          />
-        </div>
-        <div className="col-md-6 text-right">
-          <button className="btn btn-primary" onClick={handleNewInventoryItem}>
-            {T.translate("inventory_item_list.add_inventory_item")}
-          </button>
-        </div>
-      </div>
 
       {inventoryItems.length > 0 && (
         <div>
-          <Table
-            options={table_options}
-            data={inventoryItems}
+          <InventoryTable
             columns={columns}
+            data={inventoryItems}
+            options={table_options}
+            perPage={perPage}
+            currentPage={currentPage}
+            onRowEdit={handleRowEdit}
+            onPageChange={handlePageChange}
             onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
           />
         </div>
       )}
+
+      <SponsorInventoryDialog
+        initialValues={selectedInventoryItem}
+        open={open}
+        onSave={handleInventorySave}
+        onClose={handleClose}
+        onMetaFieldTypeDeleted={handleMetaFieldTypeDelete}
+        onMetaFieldTypeValueDeleted={handleMetaFieldTypeValueDelete}
+        onImageDeleted={handleRemoveFile}
+        onRemoveFile={handleRemoveFile}
+      />
     </div>
   );
 };
 
-const mapStateToProps = ({ currentInventoryItemListState }) => ({
-  ...currentInventoryItemListState
+const mapStateToProps = ({
+  currentInventoryItemListState,
+  currentInventoryItemState
+}) => ({
+  ...currentInventoryItemListState,
+  selectedInventoryItem: currentInventoryItemState.entity
 });
 
 export default connect(mapStateToProps, {
   getInventoryItems,
-  deleteInventoryItem
+  getInventoryItem,
+  resetInventoryItemForm,
+  saveInventoryItem,
+  deleteInventoryItem,
+  deleteInventoryItemImage
 })(InventoryListPageMUI);
