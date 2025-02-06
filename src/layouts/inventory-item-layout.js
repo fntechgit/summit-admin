@@ -19,7 +19,6 @@ import Restrict from "../routes/restrict";
 import InventoryListPage from "../pages/sponsors_inventory/inventory-list-page";
 import EditInventoryItemPage from "../pages/sponsors_inventory/edit-inventory-item-page";
 import NoMatchPage from "../pages/no-match-page";
-import inventoryListPageMui from "../pages/sponsors_inventory/inventory-list-page-mui";
 
 const InventoryItemLayout = ({ match }) => (
   <div>
@@ -41,12 +40,6 @@ const InventoryItemLayout = ({ match }) => (
         exact
         path={`${match.url}/:inventory_item_id(\\d+)`}
         component={EditInventoryItemPage}
-      />
-      <Route
-        strict
-        exact
-        path={`${match.url}/mui`}
-        component={inventoryListPageMui}
       />
       <Route path={`${match.url}`} component={InventoryListPage} />
       <Route component={NoMatchPage} />
