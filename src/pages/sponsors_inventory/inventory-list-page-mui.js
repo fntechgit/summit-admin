@@ -23,21 +23,25 @@ import {
   TextField
 } from "@mui/material";
 import Box from "@mui/material/Box";
-// import Table from "@mui/material/Table";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
+import IconButton from "@mui/material/IconButton";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import EditIcon from "@mui/icons-material/Edit";
+import ImageIcon from "@mui/icons-material/Image";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
 import {
   getInventoryItems,
   getInventoryItem,
   saveInventoryItem,
   deleteInventoryItem,
   deleteInventoryItemImage,
-  resetInventoryItemForm
+  resetInventoryItemForm,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemMetaFieldTypeValue
 } from "../../actions/inventory-item-actions";
-import InventoryTable from "../../components/mui/table/inventory-table";
+import MuiTable from "../../components/mui/table/mui-table";
 import SponsorInventoryDialog from "../../components/mui/popup/sponsor-inventory-popup";
 
 const InventoryListPageMUI = ({
@@ -49,10 +53,10 @@ const InventoryListPageMUI = ({
   order,
   orderDir,
   totalInventoryItems,
-  history,
   saveInventoryItem,
-  deleteInventoryItem,
   deleteInventoryItemImage,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemMetaFieldTypeValue,
   getInventoryItems,
   getInventoryItem,
   resetInventoryItemForm
@@ -65,31 +69,8 @@ const InventoryListPageMUI = ({
   };
 
   useEffect(() => {
-    getInventoryItems(term, currentPage, perPage, order, orderDir);
+    getInventoryItems(term, 1, perPage, order, orderDir);
   }, []);
-
-  const handleEdit = (itemId) => {
-    history.push(`/app/inventory/${itemId}`);
-  };
-
-  const handleDelete = (itemId) => {
-    const inventoryItem = inventoryItems.find((s) => s.id === itemId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate(
-        "inventory_item_list.delete_inventory_item_warning"
-      )} ${inventoryItem.name}?`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteInventoryItem(itemId);
-      }
-    });
-  };
 
   const handlePageChange = (page) => {
     getInventoryItems(term, page, perPage, order, orderDir);
@@ -100,7 +81,6 @@ const InventoryListPageMUI = ({
   };
 
   const handleSearch = (ev) => {
-    console.log("CHECK TERM", searchTerm);
     if (ev.key === "Enter") {
       getInventoryItems(searchTerm, currentPage, perPage, order, orderDir);
     }
@@ -123,35 +103,73 @@ const InventoryListPageMUI = ({
     setOpen(false);
   };
 
-  const handleRemoveFile = (file, inventoryId) => {
-    deleteInventoryItemImage(file.id, inventoryId);
-  };
-
-  const handleMetaFieldTypeDelete = () => {};
-
-  const handleMetaFieldTypeValueDelete = () => {};
-
   const columns = [
-    { columnKey: "id", value: "Id", sortable: true },
     {
+      // The key in data, used to render default cell content unless `render` is provided
       columnKey: "code",
-      value: T.translate("inventory_item_list.code_column_label"),
+      header: "Code",
+      width: 120,
       sortable: true
+      // Optionally a custom render function
+      // render: (row) => <strong>{row.code}</strong>,
     },
     {
       columnKey: "name",
-      value: T.translate("inventory_item_list.name_column_label"),
+      header: "Name",
       sortable: true
+    },
+    {
+      columnKey: "hasImage",
+      header: "", // or "Image" if you want a label
+      width: 40,
+      align: "center",
+      // We don't usually display the boolean text; we render an icon or nothing
+      render: (row) =>
+        row.hasImage ? (
+          <IconButton size="small">
+            <ImageIcon fontSize="small" />
+          </IconButton>
+        ) : null
+    },
+    {
+      columnKey: "edit",
+      header: "", // no header label
+      width: 40,
+      align: "center",
+      // A custom column for editing
+      render: (row, { onRowEdit }) => (
+        <IconButton size="small" onClick={() => onRowEdit(row)}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      ),
+      // If you need a dotted border, you could do it via cell styling (shown below)
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "archive",
+      header: "",
+      width: 70,
+      align: "center",
+      render: () => <IconButton size="small">Archive</IconButton>,
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "more",
+      header: "",
+      width: 40,
+      align: "center",
+      render: () => (
+        <IconButton size="small">
+          <UnfoldMoreIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
     }
   ];
 
   const table_options = {
     sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      edit: { onClick: handleEdit },
-      delete: { onClick: handleDelete }
-    }
+    sortDir: orderDir
   };
 
   return (
@@ -223,7 +241,7 @@ const InventoryListPageMUI = ({
                   startAdornment: <SearchIcon sx={{ mr: 1 }} />
                 }
               }}
-              onChange={() => setSearchTerm(event.target.value)}
+              onChange={(event) => setSearchTerm(event.target.value)}
               onKeyDown={handleSearch}
             />
           </Grid2>
@@ -231,7 +249,7 @@ const InventoryListPageMUI = ({
             <Button
               variant="contained"
               fullWidth
-              onClick={handleNewInventoryItem}
+              onClick={() => handleNewInventoryItem()}
               startIcon={<AddIcon />}
             >
               {T.translate("inventory_item_list.add_inventory_item")}
@@ -242,7 +260,7 @@ const InventoryListPageMUI = ({
 
       {inventoryItems.length > 0 && (
         <div>
-          <InventoryTable
+          <MuiTable
             columns={columns}
             data={inventoryItems}
             options={table_options}
@@ -260,10 +278,9 @@ const InventoryListPageMUI = ({
         open={open}
         onSave={handleInventorySave}
         onClose={handleClose}
-        onMetaFieldTypeDeleted={handleMetaFieldTypeDelete}
-        onMetaFieldTypeValueDeleted={handleMetaFieldTypeValueDelete}
-        onImageDeleted={handleRemoveFile}
-        onRemoveFile={handleRemoveFile}
+        onMetaFieldTypeDeleted={deleteInventoryItemMetaFieldType}
+        onMetaFieldTypeValueDeleted={deleteInventoryItemMetaFieldTypeValue}
+        onImageDeleted={deleteInventoryItemImage}
       />
     </div>
   );
@@ -283,5 +300,7 @@ export default connect(mapStateToProps, {
   resetInventoryItemForm,
   saveInventoryItem,
   deleteInventoryItem,
-  deleteInventoryItemImage
+  deleteInventoryItemImage,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemMetaFieldTypeValue
 })(InventoryListPageMUI);

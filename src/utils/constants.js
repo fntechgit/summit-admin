@@ -128,6 +128,8 @@ export const TWO = 2;
 
 export const TEN = 10;
 
+export const ONE_HUNDRED = 100;
+
 export const DEFAULT_Z_INDEX = 1;
 
 export const HIGH_Z_INDEX = 9999;

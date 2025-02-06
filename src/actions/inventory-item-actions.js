@@ -320,7 +320,7 @@ export const deleteInventoryItemMetaFieldType = (
 ) => {
   const settings = {
     url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/`,
-    deletedActionName: FORM_TEMPLATE_ITEM_META_FIELD_DELETED
+    deletedActionName: INVENTORY_ITEM_META_FIELD_DELETED
   };
   return deleteMetaFieldType(metaFieldId, settings);
 };
