@@ -39,9 +39,7 @@ const EditItemDialog = ({
   onClose,
   onSave,
   onImageDeleted,
-  // eslint-disable-next-line
   onMetaFieldTypeDeleted,
-  // eslint-disable-next-line
   onMetaFieldTypeValueDeleted,
   initialValues
 }) => {
