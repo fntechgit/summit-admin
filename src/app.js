@@ -44,6 +44,11 @@ import { getTimezones } from "./actions/base-actions";
 import { LANGUAGE_CODE_LENGTH } from "./utils/constants";
 import { SentryFallbackFunction } from "./components/SentryErrorComponent";
 
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+
 // here is set by default user lang as en
 let language =
   (navigator.languages && navigator.languages[0]) ||
@@ -71,8 +76,8 @@ window.REPORT_API_BASE_URL = process.env.REPORT_API_BASE_URL;
 window.MARKETING_API_BASE_URL = process.env.MARKETING_API_BASE_URL;
 window.EMAIL_API_BASE_URL = process.env.EMAIL_API_BASE_URL;
 window.FILE_UPLOAD_API_BASE_URL = process.env.FILE_UPLOAD_API_BASE_URL;
-window.INVENTORY_API_BASE_URL = process.env.INVENTORY_API_BASE_URL;
 window.SIGNAGE_BASE_URL = process.env.SIGNAGE_BASE_URL;
+window.INVENTORY_API_BASE_URL = process.env.INVENTORY_API_BASE_URL;
 window.OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID;
 window.SCOPES = process.env.SCOPES;
 window.ALLOWED_USER_GROUPS = process.env.ALLOWED_USER_GROUPS;

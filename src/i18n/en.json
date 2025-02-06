@@ -3172,6 +3172,7 @@
     "name_column_label": "Name",
     "delete_inventory_item_warning": "Are you sure you want to delete inventory item ",
     "add_inventory_item": "Create new Item",
+    "hide_archived": "Hide archived items",
     "placeholders": {
       "search_inventory_items": "Search"
     }
