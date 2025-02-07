@@ -78,6 +78,7 @@ export const TWENTYTHREE_HOURS = 23;
 
 export const FIVE_PER_PAGE = 5;
 export const HUNDRED_PER_PAGE = 100;
+export const TWO_HUNDRED_PER_PAGE = 200;
 export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
 export const DEFAULT_ORDER_DIR = 1;
 

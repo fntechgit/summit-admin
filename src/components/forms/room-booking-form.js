@@ -27,6 +27,7 @@ import {
 } from "../../utils/methods";
 
 import "../../styles/booking-room.less";
+import BookableRoomsDropdown from "../inputs/bookable-room-input";
 
 const RoomBookingForm = ({
   entity,
@@ -51,9 +52,7 @@ const RoomBookingForm = ({
 
   const handleEntityChange = (newEntity) => {
     if (newEntity.id) {
-      const currentRoom = currentSummit.locations.find(
-        (l) => l.id === newEntity.room_id
-      );
+      const currentRoom = newEntity.room_id;
       const availableDates = getAvailableBookingDates(currentSummit);
       const bookingDate = getDayFromReservation(newEntity, availableDates);
       if (bookingDate) getAvailableSlots(currentRoom.id, bookingDate);
@@ -70,11 +69,12 @@ const RoomBookingForm = ({
   };
 
   const handleRoomChange = (ev) => {
-    const { value } = ev.target;
-    const currentRoom = currentSummit.locations.find(
-      (l) => l.id === parseInt(value)
-    );
-    setCurrentRoom(currentRoom);
+    const { value, room } = ev.target;
+    setCurrentRoom(room);
+    setStateEntity((prevState) => ({
+      ...prevState,
+      room_id: value.id
+    }));
   };
 
   const handleBookingDateChange = (ev) => {
@@ -144,10 +144,6 @@ const RoomBookingForm = ({
     return "";
   };
 
-  const rooms_ddl = currentSummit.locations
-    .filter((v) => v.class_name === "SummitBookableVenueRoom")
-    .map((l) => ({ label: l.name, value: l.id }));
-
   const available_booking_dates_ddl = getAvailableBookingDates(
     currentSummit
   ).map((v) => ({ value: v.epoch, label: v.str }));
@@ -172,11 +168,11 @@ const RoomBookingForm = ({
       <div className="row form-group">
         <div className="col-md-4">
           <label> {T.translate("edit_room_booking.room")} </label>
-          <Dropdown
+          <BookableRoomsDropdown
             id="room_id"
             value={stateEntity.room_id}
             key={JSON.stringify(stateEntity.room_id)}
-            options={rooms_ddl}
+            summitId={currentSummit.id}
             placeholder={T.translate(
               "edit_room_booking.placeholders.select_room"
             )}
@@ -223,7 +219,7 @@ const RoomBookingForm = ({
                     <div className="meeting-room-amenities col-xs-12">
                       {currentRoom.attributes.length > 0
                         ? currentRoom.attributes
-                            .map((a) => `${a.type.type}: ${a.value}`)
+                            .map((a) => `${a.type?.type}: ${a.value}`)
                             .join(" | ")
                         : ""}
                     </div>

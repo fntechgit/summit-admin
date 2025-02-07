@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
@@ -28,6 +28,7 @@ import {
   FreeTextSearch,
   Table
 } from "openstack-uicore-foundation/lib/components";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   getLocations,
   getSign,
@@ -41,7 +42,6 @@ import {
 } from "../../actions/signage-actions";
 import LocationGroupedDropdown from "../../components/inputs/location-grouped-dropdown";
 import { BannersTable } from "../../components/tables/signagebannerstable";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import styles from "../../styles/signage-page.module.less";
 
 const SignagePage = ({
@@ -116,7 +116,7 @@ const SignagePage = ({
     }
   };
 
-  const onSort = (index, key, dir, func) => {
+  const onSort = (index, key, dir) => {
     if (view === "activities") {
       getEvents(null, null, null, key, dir);
     } else if (view === "banners") {
@@ -199,11 +199,36 @@ const SignagePage = ({
             <div className="col-md-4">
               <label> {T.translate("signage.location")} </label>
               <LocationGroupedDropdown
-                locations={locations}
                 value={locationId}
                 placeholder={T.translate("signage.placeholders.locations")}
-                onChange={(op) => onChangeLocation(op.value)}
+                onChange={(op) => onChangeLocation(op.target.value)}
+                summitId={summit.id}
               />
+              {/* <LocationGroupedAsyncDropdown
+                id="test-location"
+                value={locationId}
+                placeholder={T.translate("signage.placeholders.locations")}
+                onChange={(op) => onChangeLocation(op.target.value)}
+                summitId={summit.id}
+              />
+              <BookableRoomsDropdown
+                id="test-bookable"
+                value={locationId}
+                placeholder={"bookeable room"}
+                onChange={(op) => onChangeLocation(op.target.value.id)}
+                summitId={summit.id} />
+              <VenuesDropdown
+                id="test-bookable"
+                value={locationId}
+                placeholder={"All venues"}
+                onChange={(op) => onChangeLocation(op.target.value.id)}
+                summitId={summit.id} />
+              <RoomsInput
+                id="test-bookable"
+                value={locationId}
+                placeholder={"All room"}
+                onChange={(op) => onChangeLocation(op.target.value.id)}
+                summitId={summit.id} /> */}
             </div>
             <div className="col-md-4">
               <label> {T.translate("signage.template")} </label>
@@ -221,7 +246,7 @@ const SignagePage = ({
                 onClick={viewSign}
                 disabled={!sign?.template}
               >
-                {T.translate(`signage.view_sign`)}
+                {T.translate("signage.view_sign")}
               </button>
             </div>
           </div>
@@ -246,7 +271,7 @@ const SignagePage = ({
                       onClick={jumpToDate}
                       disabled={!locationId || !jumpDate}
                     >
-                      {T.translate(`signage.jump`)}
+                      {T.translate("signage.jump")}
                     </button>
                   </InputGroup.Button>
                 </InputGroup>
@@ -269,7 +294,7 @@ const SignagePage = ({
                       onClick={saveStaticBanner}
                       disabled={!locationId}
                     >
-                      {T.translate(`signage.set`)}
+                      {T.translate("signage.set")}
                     </button>
                   </InputGroup.Button>
                 </InputGroup>
@@ -281,7 +306,7 @@ const SignagePage = ({
                 onClick={reloadSign}
                 disabled={!locationId}
               >
-                {T.translate(`signage.reload_sign`)}
+                {T.translate("signage.reload_sign")}
               </button>
             </div>
           </div>
@@ -299,10 +324,10 @@ const SignagePage = ({
                       onChange={setView}
                     >
                       <ToggleButton value="activities">
-                        {T.translate(`signage.activities`)}
+                        {T.translate("signage.activities")}
                       </ToggleButton>
                       <ToggleButton value="banners">
-                        {T.translate(`signage.banners`)}
+                        {T.translate("signage.banners")}
                       </ToggleButton>
                     </ToggleButtonGroup>
                   </ButtonToolbar>
