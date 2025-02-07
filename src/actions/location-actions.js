@@ -28,10 +28,15 @@ import {
   getCSV,
   geoCodeAddress,
   geoCodeLatLng,
-  authErrorHandler
+  authErrorHandler,
+  escapeFilterValue,
+  fetchResponseHandler,
+  fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import URI from "urijs";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
+import { DEBOUNCE_WAIT, TWO_HUNDRED_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_LOCATIONS = "REQUEST_LOCATIONS";
 export const RECEIVE_LOCATIONS = "RECEIVE_LOCATIONS";
@@ -1013,3 +1018,124 @@ const normalizeMapEntity = (entity) => {
 
   return normalizedEntity;
 };
+
+export const queryGroupLocations = _.debounce(
+  async (summitId, input, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/locations`
+    );
+
+    endpoint.addQuery("access_token", accessToken);
+    endpoint.addQuery("per_page", TWO_HUNDRED_PER_PAGE);
+    endpoint.addQuery("expand", "rooms,floors");
+    endpoint.addQuery("fields", "id,name,order,class_name,rooms,floors");
+    endpoint.addQuery("relations", "rooms,floors,none");
+
+    if (input) {
+      input = escapeFilterValue(input);
+      endpoint.addQuery("filter[]", `rooms=@${input}`);
+    }
+
+    fetch(endpoint)
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);
+
+export const queryAllRooms = _.debounce(async (summitId, input, callback) => {
+  const accessToken = await getAccessTokenSafely();
+
+  console.log("query all rooms");
+
+  const endpoint = URI(
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/locations/venues/all/rooms`
+  );
+
+  endpoint.addQuery("access_token", accessToken);
+  endpoint.addQuery("per_page", TWO_HUNDRED_PER_PAGE);
+  // endpoint.addQuery("expand", "rooms,floors");
+  // endpoint.addQuery("fields", "id,name,order,class_name,rooms,floors");
+  // endpoint.addQuery("relations", "rooms,floors,none");
+
+  if (input) {
+    input = escapeFilterValue(input);
+    endpoint.addQuery("filter[]", `name=@${input}`);
+  }
+
+  fetch(endpoint)
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data];
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);
+
+export const queryBookableRooms = _.debounce(
+  async (summitId, input, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/locations/venues/all/bookable-rooms`
+    );
+
+    endpoint.addQuery("access_token", accessToken);
+    endpoint.addQuery("per_page", TWO_HUNDRED_PER_PAGE);
+    endpoint.addQuery("expand", "attributes.type, floor");
+    endpoint.addQuery(
+      "fields",
+      "id,name,image.url,currency,time_slot_cost,capacity,attributes.type.type,attributes.value,floor.name"
+    );
+    endpoint.addQuery("relations", "none");
+
+    if (input) {
+      input = escapeFilterValue(input);
+      endpoint.addQuery("filter[]", `name=@${input}`);
+    }
+
+    fetch(endpoint)
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);
+
+export const queryVenues = _.debounce(async (summitId, input, callback) => {
+  const accessToken = await getAccessTokenSafely();
+
+  console.log("query venues");
+
+  const endpoint = URI(
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/locations/venues`
+  );
+
+  endpoint.addQuery("access_token", accessToken);
+  endpoint.addQuery("per_page", TWO_HUNDRED_PER_PAGE);
+  // endpoint.addQuery("expand", "rooms,floors");
+  // endpoint.addQuery("fields", "id,name,order,class_name,rooms,floors");
+  // endpoint.addQuery("relations", "rooms,floors,none");
+
+  if (input) {
+    input = escapeFilterValue(input);
+    endpoint.addQuery("filter[]", `rooms=@${input}`);
+  }
+
+  fetch(endpoint)
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data];
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);
