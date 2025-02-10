@@ -86,7 +86,7 @@ export const getFormTemplates =
 
     const params = {
       page,
-      fields: "id,code,name",
+      fields: "id,code,name,level,expire_date",
       relations: "items",
       per_page: perPage,
       access_token: accessToken

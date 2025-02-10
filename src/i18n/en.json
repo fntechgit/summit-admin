@@ -3228,8 +3228,10 @@
     "name_column_label": "Name",
     "items_column_label": "Items",
     "manage_items": "Manage Items",
+    "hide_archived": "Hide archived forms",
     "delete_form_template_warning": "Are you sure you want to delete form template ",
     "add_form_template": "New From Template",
+    "add_using_global_template": "Using Global Template",
     "placeholders": {
       "search_inventory_items": "Search"
     }
