@@ -41,11 +41,11 @@ import {
   deleteInventoryItemMetaFieldTypeValue
 } from "../../actions/inventory-item-actions";
 import MuiTable from "../../components/mui/table/mui-table";
-import SponsorInventoryDialog from "../../components/mui/popup/sponsor-inventory-popup";
+import SponsorInventoryDialog from "./popup/sponsor-inventory-popup";
 
 const InventoryListPage = ({
   inventoryItems,
-  selectedInventoryItem,
+  currentInventoryItem,
   currentPage,
   perPage,
   term,
@@ -105,13 +105,13 @@ const InventoryListPage = ({
   const columns = [
     {
       columnKey: "code",
-      header: "Code",
+      header: T.translate("inventory_item_list.code_column_label"),
       width: 120,
       sortable: true
     },
     {
       columnKey: "name",
-      header: "Name",
+      header: T.translate("inventory_item_list.name_column_label"),
       sortable: true
     },
     {
@@ -120,9 +120,18 @@ const InventoryListPage = ({
       width: 40,
       align: "center",
       render: (row) =>
-        row.hasImage ? (
+        row.images.length > 0 ? (
           <IconButton size="small">
-            <ImageIcon fontSize="small" />
+            <ImageIcon
+              fontSize="small"
+              onClick={() =>
+                window.open(
+                  row.images[0].file_url,
+                  "_blank",
+                  "noopener,noreferrer"
+                )
+              }
+            />
           </IconButton>
         ) : null
     },
@@ -143,7 +152,11 @@ const InventoryListPage = ({
       header: "",
       width: 70,
       align: "center",
-      render: () => <IconButton size="small">Archive</IconButton>,
+      render: () => (
+        <Button variant="text" color="inherit" size="small">
+          {T.translate("inventory_item_list.archive_button")}
+        </Button>
+      ),
       className: "dottedBorderLeft"
     },
     {
@@ -267,7 +280,7 @@ const InventoryListPage = ({
       )}
 
       <SponsorInventoryDialog
-        initialValues={selectedInventoryItem}
+        initialValues={currentInventoryItem}
         open={open}
         onSave={handleInventorySave}
         onClose={handleClose}
@@ -284,7 +297,7 @@ const mapStateToProps = ({
   currentInventoryItemState
 }) => ({
   ...currentInventoryItemListState,
-  selectedInventoryItem: currentInventoryItemState.entity
+  currentInventoryItem: currentInventoryItemState.entity
 });
 
 export default connect(mapStateToProps, {

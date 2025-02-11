@@ -29,6 +29,8 @@ import {
 } from "openstack-uicore-foundation/lib/security/methods";
 import IdTokenVerifier from "idtoken-verifier";
 import T from "i18n-react";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 // eslint-disable-next-line
 import exclusiveSections from "js-yaml-loader!./exclusive-sections.yml";
 import * as Sentry from "@sentry/react";
@@ -165,40 +167,42 @@ class App extends React.PureComponent {
       <Sentry.ErrorBoundary
         fallback={SentryFallbackFunction({ componentName: "Summit Admin App" })}
       >
-        <Router history={history}>
-          <div>
-            <AjaxLoader show={loading} size={120} />
-            <div className="header" id="page-header">
-              <div className="header-title">
-                {T.translate("landing.os_summit_admin")}
-                <AuthButton
-                  isLoggedUser={isLoggedUser}
-                  picture={profile_pic}
-                  doLogin={this.onClickLogin.bind(this)}
-                  initLogOut={initLogOut}
-                />
+        <LocalizationProvider dateAdapter={AdapterMoment}>
+          <Router history={history}>
+            <div>
+              <AjaxLoader show={loading} size={120} />
+              <div className="header" id="page-header">
+                <div className="header-title">
+                  {T.translate("landing.os_summit_admin")}
+                  <AuthButton
+                    isLoggedUser={isLoggedUser}
+                    picture={profile_pic}
+                    doLogin={this.onClickLogin.bind(this)}
+                    initLogOut={initLogOut}
+                  />
+                </div>
               </div>
+              <Switch>
+                <AuthorizedRoute
+                  isLoggedUser={isLoggedUser}
+                  backUrl={backUrl}
+                  path="/app"
+                  component={PrimaryLayout}
+                />
+                <AuthorizationCallbackRoute
+                  onUserAuth={onUserAuth}
+                  path="/auth/callback"
+                  getUserInfo={getUserInfo}
+                />
+                <LogOutCallbackRoute doLogout={doLogout} path="/auth/logout" />
+                <Route path="/logout" render={() => <p>404 - Not Found</p>} />
+                <Route path="/404" render={() => <p>404 - Not Found</p>} />
+                <Route path="/error" component={CustomErrorPage} />
+                <DefaultRoute isLoggedUser={isLoggedUser} />
+              </Switch>
             </div>
-            <Switch>
-              <AuthorizedRoute
-                isLoggedUser={isLoggedUser}
-                backUrl={backUrl}
-                path="/app"
-                component={PrimaryLayout}
-              />
-              <AuthorizationCallbackRoute
-                onUserAuth={onUserAuth}
-                path="/auth/callback"
-                getUserInfo={getUserInfo}
-              />
-              <LogOutCallbackRoute doLogout={doLogout} path="/auth/logout" />
-              <Route path="/logout" render={() => <p>404 - Not Found</p>} />
-              <Route path="/404" render={() => <p>404 - Not Found</p>} />
-              <Route path="/error" component={CustomErrorPage} />
-              <DefaultRoute isLoggedUser={isLoggedUser} />
-            </Switch>
-          </div>
-        </Router>
+          </Router>
+        </LocalizationProvider>
       </Sentry.ErrorBoundary>
     );
   }

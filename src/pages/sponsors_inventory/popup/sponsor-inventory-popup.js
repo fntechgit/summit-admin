@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
+import moment from "moment-timezone";
 import PropTypes from "prop-types";
 import {
   Dialog,
@@ -17,9 +18,10 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid2,
-  FormGroup
+  Grid2
 } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
@@ -32,9 +34,10 @@ import {
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
   MAX_INVENTORY_IMAGES_UPLOAD_QTY
 } from "../../../utils/constants";
-import showConfirmDialog from "../components/showConfirmDialog";
+import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
+import MetaFieldValues from "./meta-field-values";
 
-const EditItemDialog = ({
+const SponsorItemDialog = ({
   open,
   onClose,
   onSave,
@@ -72,12 +75,34 @@ const EditItemDialog = ({
       meta_fields:
         initialValues?.meta_fields.length > 0
           ? initialValues?.meta_fields
-          : [{ name: "", type: "Text", is_required: false, values: [] }],
+          : [
+              {
+                name: "",
+                type: "Text",
+                is_required: false,
+                values: [],
+                minimum_quantity: null,
+                maximum_quantity: null
+              }
+            ],
       images: initialValues?.images.length > 0 ? initialValues?.images : []
     });
   }, [initialValues]);
 
+  const METAFIELD_TYPES = [
+    "CheckBox",
+    "CheckBoxList",
+    "ComboBox",
+    "RadioButtonList",
+    "Text",
+    "TextArea",
+    "Quantity",
+    "DateTime",
+    "Time"
+  ];
+
   const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
+  const fieldTypesWithDates = ["DateTime", "Time"];
 
   const mediaType = {
     max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
@@ -196,6 +221,21 @@ const EditItemDialog = ({
     setFormData({ ...formData, meta_fields: newFields });
   };
 
+  const handleFieldValueQuantityChange = (fieldIndex, key, value) => {
+    const newFields = [...formData.meta_fields];
+    newFields[fieldIndex][key] = value;
+    newFields[fieldIndex].quantity = true;
+    setFormData({ ...formData, meta_fields: newFields });
+  };
+
+  const handleChangeDateTime = (value, fieldIndex) => {
+    const newFields = [...formData.meta_fields];
+    console.log("CHECKING...", value, value.unix());
+    newFields[fieldIndex].minimum_quantity = value;
+    newFields[fieldIndex].quantity = false;
+    setFormData({ ...formData, meta_fields: newFields });
+  };
+
   const handleImageUploadComplete = (response) => {
     if (response) {
       const image = {
@@ -243,7 +283,9 @@ const EditItemDialog = ({
       <DialogContent sx={{ p: 0 }}>
         <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
           <Grid2 size={4}>
-            <InputLabel htmlFor="code">Code</InputLabel>
+            <InputLabel htmlFor="code">
+              {T.translate("edit_inventory_item.code")} *
+            </InputLabel>
             <TextField
               variant="outlined"
               name="code"
@@ -254,7 +296,9 @@ const EditItemDialog = ({
             />
           </Grid2>
           <Grid2 size={8}>
-            <InputLabel htmlFor="name">Name</InputLabel>
+            <InputLabel htmlFor="name">
+              {T.translate("edit_inventory_item.name")} *
+            </InputLabel>
             <TextField
               variant="outlined"
               name="name"
@@ -265,12 +309,12 @@ const EditItemDialog = ({
             />
           </Grid2>
         </Grid2>
-
         <Divider />
-
         <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
           <Grid2 size={12}>
-            <InputLabel htmlFor="description">Description</InputLabel>
+            <InputLabel htmlFor="description">
+              {T.translate("edit_inventory_item.description")} *
+            </InputLabel>
             <TextEditor
               name="description"
               id="description"
@@ -284,7 +328,9 @@ const EditItemDialog = ({
 
         <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
           <Grid2 size={4}>
-            <InputLabel htmlFor="early_bird_rate">Early Bird Rate</InputLabel>
+            <InputLabel htmlFor="early_bird_rate">
+              {T.translate("edit_inventory_item.early_bird_rate")}
+            </InputLabel>
             <TextField
               variant="outlined"
               name="early_bird_rate"
@@ -296,7 +342,9 @@ const EditItemDialog = ({
             />
           </Grid2>
           <Grid2 size={4}>
-            <InputLabel htmlFor="standard_rate">Standard Rate</InputLabel>
+            <InputLabel htmlFor="standard_rate">
+              {T.translate("edit_inventory_item.standard_rate")}
+            </InputLabel>
             <TextField
               variant="outlined"
               name="standard_rate"
@@ -308,7 +356,9 @@ const EditItemDialog = ({
             />
           </Grid2>
           <Grid2 size={4}>
-            <InputLabel htmlFor="onsite_rate">On Site Rate</InputLabel>
+            <InputLabel htmlFor="onsite_rate">
+              {T.translate("edit_inventory_item.onsite_rate")}
+            </InputLabel>
             <TextField
               variant="outlined"
               name="onsite_rate"
@@ -324,7 +374,7 @@ const EditItemDialog = ({
         <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
           <Grid2 size={4}>
             <InputLabel htmlFor="quantity_limit_per_sponsor">
-              Limit total per sponsor (empty = disabled)
+              {T.translate("edit_inventory_item.quantity_limit_per_sponsor")}
             </InputLabel>
             <TextField
               variant="outlined"
@@ -338,7 +388,7 @@ const EditItemDialog = ({
           </Grid2>
           <Grid2 size={4}>
             <InputLabel htmlFor="quantity_limit_per_show">
-              Limit total per show (empty = disabled)
+              {T.translate("edit_inventory_item.quantity_limit_per_show")}
             </InputLabel>
             <TextField
               variant="outlined"
@@ -353,7 +403,9 @@ const EditItemDialog = ({
         </Grid2>
 
         <Divider />
-        <DialogTitle sx={{ p: 3 }}>Additional Input Fields</DialogTitle>
+        <DialogTitle sx={{ p: 3 }}>
+          {T.translate("edit_inventory_item.meta_fields")}
+        </DialogTitle>
 
         <Box sx={{ px: 3 }}>
           {formData.meta_fields.map((field, fieldIndex) => (
@@ -369,7 +421,9 @@ const EditItemDialog = ({
                 >
                   <Grid2 container spacing={2} sx={{ alignItems: "end" }}>
                     <Grid2 size={4}>
-                      <InputLabel htmlFor="fieldTitle">Field Title</InputLabel>
+                      <InputLabel htmlFor="fieldTitle">
+                        {T.translate("edit_inventory_item.meta_field_title")}
+                      </InputLabel>
                       <TextField
                         name="fieldTitle"
                         variant="outlined"
@@ -381,7 +435,9 @@ const EditItemDialog = ({
                       />
                     </Grid2>
                     <Grid2 size={4}>
-                      <InputLabel htmlFor="fieldType">Field Type</InputLabel>
+                      <InputLabel htmlFor="fieldType">
+                        {T.translate("edit_inventory_item.meta_field_type")}
+                      </InputLabel>
                       <Select
                         value={field.type}
                         name="fieldType"
@@ -390,14 +446,9 @@ const EditItemDialog = ({
                           handleFieldChange(fieldIndex, "type", ev.target.value)
                         }
                       >
-                        <MenuItem value="CheckBox">CheckBox</MenuItem>
-                        <MenuItem value="CheckBoxList">CheckBoxList</MenuItem>
-                        <MenuItem value="ComboBox">ComboBox</MenuItem>
-                        <MenuItem value="RadioButtonList">
-                          RadioButtonList
-                        </MenuItem>
-                        <MenuItem value="Text">Text</MenuItem>
-                        <MenuItem value="TextArea">TextArea</MenuItem>
+                        {METAFIELD_TYPES.map((field_type) => (
+                          <MenuItem value={field_type}>{field_type}</MenuItem>
+                        ))}
                       </Select>
                     </Grid2>
                     <Grid2 size={4}>
@@ -415,114 +466,122 @@ const EditItemDialog = ({
                               }
                             />
                           }
-                          label="Required"
+                          label={T.translate(
+                            "edit_inventory_item.meta_field_required"
+                          )}
                         />
                       </FormControl>
                     </Grid2>
                   </Grid2>
                   {fieldTypesWithOptions.includes(field.type) && (
-                    <Box>
-                      {field.values
-                        .sort((a, b) => a.order - b.order)
-                        .map((val, valueIndex) => (
-                          <Grid2
-                            container
-                            spacing={2}
-                            sx={{ alignItems: "end", my: 2 }}
-                          >
-                            <Grid2 size={4}>
-                              <Box
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                <TextField
-                                  value={val.name}
-                                  placeholder={T.translate(
-                                    "meta_field_values_list.name"
-                                  )}
-                                  onChange={(e) =>
-                                    handleFieldValueChange(
-                                      fieldIndex,
-                                      valueIndex,
-                                      "name",
-                                      e.target.value
-                                    )
-                                  }
-                                  fullWidth
-                                />
-                              </Box>
-                            </Grid2>
-                            <Grid2 size={4}>
-                              <Box
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                <TextField
-                                  value={val.value}
-                                  placeholder={T.translate(
-                                    "meta_field_values_list.value"
-                                  )}
-                                  onChange={(e) =>
-                                    handleFieldValueChange(
-                                      fieldIndex,
-                                      valueIndex,
-                                      "value",
-                                      e.target.value
-                                    )
-                                  }
-                                  fullWidth
-                                  slotProps={{
-                                    input: {
-                                      endAdornment: (
-                                        <IconButton
-                                          onClick={() =>
-                                            handleRemoveValue(
-                                              field,
-                                              val,
-                                              valueIndex,
-                                              fieldIndex
-                                            )
-                                          }
-                                        >
-                                          <CloseIcon />
-                                        </IconButton>
-                                      )
-                                    }
-                                  }}
-                                />
-                              </Box>
-                            </Grid2>
-                            <Grid2 size={4}>
-                              <FormGroup>
-                                <FormControlLabel
-                                  control={
-                                    <Checkbox
-                                      checked={val.is_default}
-                                      onChange={(e) =>
-                                        handleFieldValueChange(
-                                          fieldIndex,
-                                          valueIndex,
-                                          "is_default",
-                                          e.target.checked
-                                        )
-                                      }
-                                    />
-                                  }
-                                  label={T.translate(
-                                    "meta_field_values_list.is_default"
-                                  )}
-                                />
-                              </FormGroup>
-                            </Grid2>
-                          </Grid2>
-                        ))}
-                      <Grid2 container spacing={2} offset={4}>
-                        <Button
-                          startIcon={<AddIcon />}
-                          onClick={() => handleAddValue(fieldIndex)}
-                        >
-                          Add a value
-                        </Button>
+                    <>
+                      <Divider sx={{ mt: 2 }} />
+                      <MetaFieldValues
+                        field={field}
+                        fieldIndex={fieldIndex}
+                        formData={formData}
+                        setFormData={setFormData}
+                        handleFieldValueChange={handleFieldValueChange}
+                        handleRemoveValue={handleRemoveValue}
+                        handleAddValue={handleAddValue}
+                      />
+                    </>
+                  )}
+                  {field.type === "Quantity" && (
+                    <Grid2
+                      container
+                      spacing={2}
+                      sx={{ alignItems: "end", my: 2 }}
+                    >
+                      <Grid2 size={4}>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <TextField
+                            value={field.minimum_quantity}
+                            placeholder={T.translate(
+                              "edit_inventory_item.placeholders.meta_field_minimum_quantity"
+                            )}
+                            type="number"
+                            onChange={(e) =>
+                              handleFieldValueQuantityChange(
+                                fieldIndex,
+                                "minimum_quantity",
+                                e.target.value
+                              )
+                            }
+                            fullWidth
+                          />
+                        </Box>
                       </Grid2>
-                    </Box>
+                      <Grid2 size={4}>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <TextField
+                            value={field.maximum_quantity}
+                            placeholder={T.translate(
+                              "edit_inventory_item.placeholders.meta_field_maximum_quantity"
+                            )}
+                            type="number"
+                            onChange={(e) =>
+                              handleFieldValueQuantityChange(
+                                fieldIndex,
+                                "maximum_quantity",
+                                e.target.value
+                              )
+                            }
+                            fullWidth
+                          />
+                        </Box>
+                      </Grid2>
+                    </Grid2>
+                  )}
+                  {fieldTypesWithDates.includes(field.type) && (
+                    <Grid2
+                      container
+                      spacing={2}
+                      sx={{ alignItems: "end", my: 2 }}
+                    >
+                      <Grid2 size={4} offset={4}>
+                        <InputLabel htmlFor="value">Value</InputLabel>
+                        {field.type === "DateTime" ? (
+                          <DatePicker
+                            name="value"
+                            id="value"
+                            timezone="UTC"
+                            value={field.minimum_quantity}
+                            onChange={(ev) =>
+                              handleChangeDateTime(ev, fieldIndex)
+                            }
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                variant: "outlined"
+                              }
+                            }}
+                          />
+                        ) : (
+                          <TimePicker
+                            name="value"
+                            id="value"
+                            value={
+                              field.minimum_quantity ||
+                              moment.tz("1970-01-01T00:00:00", "UTC")
+                            }
+                            defaultValue={null}
+                            ampm={false}
+                            minutesStep={1}
+                            timezone="UTC"
+                            onChange={(ev) =>
+                              handleChangeDateTime(ev, fieldIndex)
+                            }
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                variant: "outlined"
+                              }
+                            }}
+                          />
+                        )}
+                      </Grid2>
+                    </Grid2>
                   )}
                 </Box>
               </Grid2>
@@ -571,9 +630,12 @@ const EditItemDialog = ({
 
         <Grid2 container spacing={2} sx={{ alignItems: "start", px: 3, py: 1 }}>
           <Grid2 size={12}>
-            <InputLabel htmlFor="file">PDF</InputLabel>
+            <InputLabel htmlFor="image">
+              {T.translate("edit_inventory_item.images")}
+            </InputLabel>
             <UploadInputV2
               id="image-upload"
+              name="image"
               onUploadComplete={handleImageUploadComplete}
               value={getMediaInputValue()}
               mediaType={mediaType}
@@ -600,11 +662,11 @@ const EditItemDialog = ({
   );
 };
 
-EditItemDialog.propTypes = {
+SponsorItemDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   initialValues: PropTypes.object
 };
 
-export default EditItemDialog;
+export default SponsorItemDialog;

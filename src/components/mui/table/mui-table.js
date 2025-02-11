@@ -1,4 +1,5 @@
 import * as React from "react";
+import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -35,8 +36,6 @@ const MuiTable = ({
 
   const { sortCol, sortDir } = options;
 
-  console.log("CHECK OPTINOS", sortCol, sortDir);
-
   return (
     <Box sx={{ width: "100%" }}>
       <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
@@ -70,8 +69,8 @@ const MuiTable = ({
                         {sortCol === col.columnKey ? (
                           <Box component="span" sx={visuallyHidden}>
                             {sortDir === "-1"
-                              ? "sorted descending"
-                              : "sorted ascending"}
+                              ? T.translate("mui_table.sorted_desc")
+                              : T.translate("mui_table.sorted_asc")}
                           </Box>
                         ) : null}
                       </TableSortLabel>
@@ -113,7 +112,7 @@ const MuiTable = ({
               {data.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={columns.length} align="center">
-                    No items found
+                    {T.translate("mui_table.no_items")}
                   </TableCell>
                 </TableRow>
               )}
@@ -135,7 +134,7 @@ const MuiTable = ({
           onPageChange={(_, newPage) => {
             handleChangePage(newPage + 1);
           }}
-          labelRowsPerPage="Rows per page"
+          labelRowsPerPage={T.translate("mui_table.rows_per_page")}
           sx={{
             ".MuiTablePagination-toolbar": {
               alignItems: "baseline",
