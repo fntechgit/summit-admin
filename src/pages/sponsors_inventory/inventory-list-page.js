@@ -46,6 +46,7 @@ import SponsorInventoryDialog from "./popup/sponsor-inventory-popup";
 const InventoryListPage = ({
   inventoryItems,
   currentInventoryItem,
+  currentInventoryItemErrors,
   currentPage,
   perPage,
   term,
@@ -280,7 +281,8 @@ const InventoryListPage = ({
       )}
 
       <SponsorInventoryDialog
-        initialValues={currentInventoryItem}
+        entity={currentInventoryItem}
+        errors={currentInventoryItemErrors}
         open={open}
         onSave={handleInventorySave}
         onClose={handleClose}
@@ -297,7 +299,8 @@ const mapStateToProps = ({
   currentInventoryItemState
 }) => ({
   ...currentInventoryItemListState,
-  currentInventoryItem: currentInventoryItemState.entity
+  currentInventoryItem: currentInventoryItemState.entity,
+  currentInventoryItemErrors: currentInventoryItemState.errors
 });
 
 export default connect(mapStateToProps, {

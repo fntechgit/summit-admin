@@ -36,6 +36,7 @@ import {
 } from "../../../utils/constants";
 import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
+import { hasErrors } from "../../../utils/methods";
 
 const SponsorItemDialog = ({
   open,
@@ -44,9 +45,10 @@ const SponsorItemDialog = ({
   onImageDeleted,
   onMetaFieldTypeDeleted,
   onMetaFieldTypeValueDeleted,
-  initialValues
+  entity: initialEntity,
+  errors: initialErrors
 }) => {
-  const [formData, setFormData] = useState({
+  const [entity, setEntity] = useState({
     id: null,
     code: "",
     name: "",
@@ -57,24 +59,30 @@ const SponsorItemDialog = ({
     quantity_limit_per_sponsor: 0,
     quantity_limit_per_show: 0,
     meta_fields: [{ name: "", type: "Text", required: false, values: [] }],
-    images: initialValues?.images || []
+    images: initialEntity?.images || []
   });
 
+  const [errors, setErrors] = useState(initialErrors || {});
+
   useEffect(() => {
-    setFormData({
-      id: initialValues?.id || null,
-      code: initialValues?.code || "",
-      name: initialValues?.name || "",
-      description: initialValues?.description || "",
-      early_bird_rate: initialValues?.early_bird_rate || 0,
-      standard_rate: initialValues?.standard_rate || 0,
-      onsite_rate: initialValues?.onsite_rate || 0,
+    setErrors(initialErrors || {});
+  }, [open]);
+
+  useEffect(() => {
+    setEntity({
+      id: initialEntity?.id || null,
+      code: initialEntity?.code || "",
+      name: initialEntity?.name || "",
+      description: initialEntity?.description || "",
+      early_bird_rate: initialEntity?.early_bird_rate || 0,
+      standard_rate: initialEntity?.standard_rate || 0,
+      onsite_rate: initialEntity?.onsite_rate || 0,
       quantity_limit_per_sponsor:
-        initialValues?.quantity_limit_per_sponsor || 0,
-      quantity_limit_per_show: initialValues?.quantity_limit_per_show || 0,
+        initialEntity?.quantity_limit_per_sponsor || 0,
+      quantity_limit_per_show: initialEntity?.quantity_limit_per_show || 0,
       meta_fields:
-        initialValues?.meta_fields.length > 0
-          ? initialValues?.meta_fields
+        initialEntity?.meta_fields.length > 0
+          ? initialEntity?.meta_fields
           : [
               {
                 name: "",
@@ -85,9 +93,9 @@ const SponsorItemDialog = ({
                 maximum_quantity: null
               }
             ],
-      images: initialValues?.images.length > 0 ? initialValues?.images : []
+      images: initialEntity?.images.length > 0 ? initialEntity?.images : []
     });
-  }, [initialValues]);
+  }, [initialEntity]);
 
   const METAFIELD_TYPES = [
     "CheckBox",
@@ -114,18 +122,42 @@ const SponsorItemDialog = ({
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData({ ...formData, [id]: value });
+    setEntity({ ...entity, [id]: value });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    const requiredFields = ["code", "name", "description"];
+
+    requiredFields.forEach((field) => {
+      if (!entity[field].trim()) {
+        newErrors[field] = T.translate("edit_inventory_item.required_error");
+      }
+    });
+
+    if (entity.images.length === 0) {
+      newErrors.images = T.translate("edit_inventory_item.required_error");
+    }
+
+    return newErrors;
   };
 
   const handleSave = () => {
-    onSave(formData);
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
+    onSave(entity);
   };
 
   const handleAddField = () => {
-    setFormData({
-      ...formData,
+    setEntity({
+      ...entity,
       meta_fields: [
-        ...formData.meta_fields,
+        ...entity.meta_fields,
         { name: "", type: "Text", is_required: false, values: [] }
       ]
     });
@@ -144,17 +176,17 @@ const SponsorItemDialog = ({
 
     if (isConfirmed) {
       const removeFromUI = () => {
-        let new_meta_fields = [...formData.meta_fields].filter(
+        let new_meta_fields = [...entity.meta_fields].filter(
           (_, i) => i !== index
         );
         if (new_meta_fields.length === 0)
           new_meta_fields = [
             { name: "", type: "Text", is_required: false, values: [] }
           ];
-        setFormData({ ...formData, meta_fields: new_meta_fields });
+        setEntity({ ...entity, meta_fields: new_meta_fields });
       };
       if (fieldType.id) {
-        onMetaFieldTypeDeleted(formData.id, fieldType.id).then(() => {
+        onMetaFieldTypeDeleted(entity.id, fieldType.id).then(() => {
           removeFromUI();
         });
       } else {
@@ -164,9 +196,9 @@ const SponsorItemDialog = ({
   };
 
   const handleAddValue = (index) => {
-    const newFields = [...formData.meta_fields];
+    const newFields = [...entity.meta_fields];
     newFields[index].values.push({ value: "", isDefault: false });
-    setFormData({ ...formData, meta_fields: newFields });
+    setEntity({ ...entity, meta_fields: newFields });
   };
 
   const handleRemoveValue = async (
@@ -187,16 +219,16 @@ const SponsorItemDialog = ({
 
     if (isConfirmed) {
       const removeValueFromFields = () => {
-        const newFields = [...formData.meta_fields];
+        const newFields = [...entity.meta_fields];
         newFields[fieldIndex].values = newFields[fieldIndex].values.filter(
           (_, index) => index !== valueIndex
         );
-        setFormData({ ...formData, meta_fields: newFields });
+        setEntity({ ...entity, meta_fields: newFields });
       };
       if (metaField.id && metaFieldValue.id) {
         if (onMetaFieldTypeDeleted) {
           onMetaFieldTypeValueDeleted(
-            formData.id,
+            entity.id,
             metaField.id,
             metaFieldValue.id
           ).then(() => {
@@ -210,30 +242,29 @@ const SponsorItemDialog = ({
   };
 
   const handleFieldChange = (index, field, value) => {
-    const newFields = [...formData.meta_fields];
+    const newFields = [...entity.meta_fields];
     newFields[index][field] = value;
-    setFormData({ ...formData, meta_fields: newFields });
+    setEntity({ ...entity, meta_fields: newFields });
   };
 
   const handleFieldValueChange = (fieldIndex, valueIndex, key, value) => {
-    const newFields = [...formData.meta_fields];
+    const newFields = [...entity.meta_fields];
     newFields[fieldIndex].values[valueIndex][key] = value;
-    setFormData({ ...formData, meta_fields: newFields });
+    setEntity({ ...entity, meta_fields: newFields });
   };
 
   const handleFieldValueQuantityChange = (fieldIndex, key, value) => {
-    const newFields = [...formData.meta_fields];
+    const newFields = [...entity.meta_fields];
     newFields[fieldIndex][key] = value;
     newFields[fieldIndex].quantity = true;
-    setFormData({ ...formData, meta_fields: newFields });
+    setEntity({ ...entity, meta_fields: newFields });
   };
 
   const handleChangeDateTime = (value, fieldIndex) => {
-    const newFields = [...formData.meta_fields];
-    console.log("CHECKING...", value, value.unix());
+    const newFields = [...entity.meta_fields];
     newFields[fieldIndex].minimum_quantity = value;
     newFields[fieldIndex].quantity = false;
-    setFormData({ ...formData, meta_fields: newFields });
+    setEntity({ ...entity, meta_fields: newFields });
   };
 
   const handleImageUploadComplete = (response) => {
@@ -242,7 +273,7 @@ const SponsorItemDialog = ({
         file_path: `${response.path}${response.name}`,
         filename: response.name
       };
-      setFormData((prevEntity) => ({
+      setEntity((prevEntity) => ({
         ...prevEntity,
         images: [...prevEntity.images, image]
       }));
@@ -250,22 +281,22 @@ const SponsorItemDialog = ({
   };
 
   const handleRemoveImage = (imageFile) => {
-    const images = formData.images.filter(
+    const images = entity.images.filter(
       (image) => image.filename !== imageFile.name
     );
-    setFormData((prevEntity) => ({
+    setEntity((prevEntity) => ({
       ...prevEntity,
       images
     }));
 
-    if (onImageDeleted && formData.id && imageFile.id) {
-      onImageDeleted(formData.id, imageFile.id);
+    if (onImageDeleted && entity.id && imageFile.id) {
+      onImageDeleted(entity.id, imageFile.id);
     }
   };
 
   const getMediaInputValue = () =>
-    formData.images.length > 0
-      ? formData.images.map((img) => ({
+    entity.images.length > 0
+      ? entity.images.map((img) => ({
           ...img,
           filename: img.filename ?? img.file_path ?? img.file_url
         }))
@@ -290,7 +321,9 @@ const SponsorItemDialog = ({
               variant="outlined"
               name="code"
               id="code"
-              value={formData.code}
+              value={entity.code}
+              error={!!errors.code}
+              helperText={errors.code}
               onChange={handleChange}
               fullWidth
             />
@@ -303,7 +336,9 @@ const SponsorItemDialog = ({
               variant="outlined"
               name="name"
               id="name"
-              value={formData.name}
+              value={entity.name}
+              error={!!errors.name}
+              helperText={errors.name}
               onChange={handleChange}
               fullWidth
             />
@@ -318,7 +353,9 @@ const SponsorItemDialog = ({
             <TextEditor
               name="description"
               id="description"
-              value={formData.description}
+              value={entity.description}
+              error={hasErrors("description", errors)}
+              helperText={errors.description}
               onChange={handleChange}
             />
           </Grid2>
@@ -335,7 +372,7 @@ const SponsorItemDialog = ({
               variant="outlined"
               name="early_bird_rate"
               id="early_bird_rate"
-              value={formData.early_bird_rate}
+              value={entity.early_bird_rate}
               onChange={handleChange}
               type="number"
               fullWidth
@@ -349,7 +386,7 @@ const SponsorItemDialog = ({
               variant="outlined"
               name="standard_rate"
               id="standard_rate"
-              value={formData.standard_rate}
+              value={entity.standard_rate}
               onChange={handleChange}
               type="number"
               fullWidth
@@ -363,7 +400,7 @@ const SponsorItemDialog = ({
               variant="outlined"
               name="onsite_rate"
               id="onsite_rate"
-              value={formData.onsite_rate}
+              value={entity.onsite_rate}
               onChange={handleChange}
               type="number"
               fullWidth
@@ -380,7 +417,7 @@ const SponsorItemDialog = ({
               variant="outlined"
               name="quantity_limit_per_sponsor"
               id="quantity_limit_per_sponsor"
-              value={formData.quantity_limit_per_sponsor}
+              value={entity.quantity_limit_per_sponsor}
               onChange={handleChange}
               type="number"
               fullWidth
@@ -394,7 +431,7 @@ const SponsorItemDialog = ({
               variant="outlined"
               name="quantity_limit_per_show"
               id="quantity_limit_per_show"
-              value={formData.quantity_limit_per_show}
+              value={entity.quantity_limit_per_show}
               onChange={handleChange}
               type="number"
               fullWidth
@@ -408,7 +445,7 @@ const SponsorItemDialog = ({
         </DialogTitle>
 
         <Box sx={{ px: 3 }}>
-          {formData.meta_fields.map((field, fieldIndex) => (
+          {entity.meta_fields.map((field, fieldIndex) => (
             <Grid2 container spacing={2} sx={{ alignItems: "center" }}>
               <Grid2 size={11}>
                 <Box
@@ -479,8 +516,8 @@ const SponsorItemDialog = ({
                       <MetaFieldValues
                         field={field}
                         fieldIndex={fieldIndex}
-                        formData={formData}
-                        setFormData={setFormData}
+                        entity={entity}
+                        setEntity={setEntity}
                         handleFieldValueChange={handleFieldValueChange}
                         handleRemoveValue={handleRemoveValue}
                         handleAddValue={handleAddValue}
@@ -645,7 +682,7 @@ const SponsorItemDialog = ({
               maxFiles={mediaType.max_uploads_qty}
               canAdd={
                 mediaType.is_editable ||
-                formData.images.length < mediaType.max_uploads_qty
+                entity.images.length < mediaType.max_uploads_qty
               }
               parallelChunkUploads
             />
@@ -666,7 +703,7 @@ SponsorItemDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  initialValues: PropTypes.object
+  entity: PropTypes.object
 };
 
 export default SponsorItemDialog;

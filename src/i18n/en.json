@@ -3205,7 +3205,8 @@
       "meta_field_maximum_quantity": "Maximum",
       "meta_field_minimum_quantity": "Minimum"
     },
-    "images": "Images"
+    "images": "Images",
+    "required_error": "This field is required."
   },
   "meta_field_values_list": {
     "delete_value_warning": "Are you sure you want to delete meta field value ",
