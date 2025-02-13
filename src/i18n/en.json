@@ -3206,6 +3206,7 @@
       "meta_field_minimum_quantity": "Minimum"
     },
     "images": "Images",
+    "save_changes": "Save Changes",
     "required_error": "This field is required."
   },
   "meta_field_values_list": {

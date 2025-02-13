@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import moment from "moment-timezone";
 import PropTypes from "prop-types";
 import {
   Dialog,
@@ -18,10 +17,9 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid2
+  Grid2,
+  FormHelperText
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
@@ -36,7 +34,7 @@ import {
 } from "../../../utils/constants";
 import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
-import { hasErrors } from "../../../utils/methods";
+import { hasErrors, scrollToError } from "../../../utils/methods";
 
 const SponsorItemDialog = ({
   open,
@@ -58,7 +56,16 @@ const SponsorItemDialog = ({
     onsite_rate: 0,
     quantity_limit_per_sponsor: 0,
     quantity_limit_per_show: 0,
-    meta_fields: [{ name: "", type: "Text", required: false, values: [] }],
+    meta_fields: [
+      {
+        name: "",
+        type: "Text",
+        required: false,
+        minimum_quantity: "",
+        maximum_quantity: "",
+        values: []
+      }
+    ],
     images: initialEntity?.images || []
   });
 
@@ -89,8 +96,8 @@ const SponsorItemDialog = ({
                 type: "Text",
                 is_required: false,
                 values: [],
-                minimum_quantity: null,
-                maximum_quantity: null
+                minimum_quantity: "",
+                maximum_quantity: ""
               }
             ],
       images: initialEntity?.images.length > 0 ? initialEntity?.images : []
@@ -110,7 +117,6 @@ const SponsorItemDialog = ({
   ];
 
   const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
-  const fieldTypesWithDates = ["DateTime", "Time"];
 
   const mediaType = {
     max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
@@ -139,6 +145,8 @@ const SponsorItemDialog = ({
     if (entity.images.length === 0) {
       newErrors.images = T.translate("edit_inventory_item.required_error");
     }
+
+    scrollToError(newErrors);
 
     return newErrors;
   };
@@ -256,14 +264,6 @@ const SponsorItemDialog = ({
   const handleFieldValueQuantityChange = (fieldIndex, key, value) => {
     const newFields = [...entity.meta_fields];
     newFields[fieldIndex][key] = value;
-    newFields[fieldIndex].quantity = true;
-    setEntity({ ...entity, meta_fields: newFields });
-  };
-
-  const handleChangeDateTime = (value, fieldIndex) => {
-    const newFields = [...entity.meta_fields];
-    newFields[fieldIndex].minimum_quantity = value;
-    newFields[fieldIndex].quantity = false;
     setEntity({ ...entity, meta_fields: newFields });
   };
 
@@ -570,56 +570,6 @@ const SponsorItemDialog = ({
                       </Grid2>
                     </Grid2>
                   )}
-                  {fieldTypesWithDates.includes(field.type) && (
-                    <Grid2
-                      container
-                      spacing={2}
-                      sx={{ alignItems: "end", my: 2 }}
-                    >
-                      <Grid2 size={4} offset={4}>
-                        <InputLabel htmlFor="value">Value</InputLabel>
-                        {field.type === "DateTime" ? (
-                          <DatePicker
-                            name="value"
-                            id="value"
-                            timezone="UTC"
-                            value={field.minimum_quantity}
-                            onChange={(ev) =>
-                              handleChangeDateTime(ev, fieldIndex)
-                            }
-                            slotProps={{
-                              textField: {
-                                fullWidth: true,
-                                variant: "outlined"
-                              }
-                            }}
-                          />
-                        ) : (
-                          <TimePicker
-                            name="value"
-                            id="value"
-                            value={
-                              field.minimum_quantity ||
-                              moment.tz("1970-01-01T00:00:00", "UTC")
-                            }
-                            defaultValue={null}
-                            ampm={false}
-                            minutesStep={1}
-                            timezone="UTC"
-                            onChange={(ev) =>
-                              handleChangeDateTime(ev, fieldIndex)
-                            }
-                            slotProps={{
-                              textField: {
-                                fullWidth: true,
-                                variant: "outlined"
-                              }
-                            }}
-                          />
-                        )}
-                      </Grid2>
-                    </Grid2>
-                  )}
                 </Box>
               </Grid2>
               <Grid2 size={1}>
@@ -667,9 +617,12 @@ const SponsorItemDialog = ({
 
         <Grid2 container spacing={2} sx={{ alignItems: "start", px: 3, py: 1 }}>
           <Grid2 size={12}>
-            <InputLabel htmlFor="image">
+            <InputLabel htmlFor="image" id="images">
               {T.translate("edit_inventory_item.images")}
             </InputLabel>
+            {errors.images && (
+              <FormHelperText error>{errors.images}</FormHelperText>
+            )}
             <UploadInputV2
               id="image-upload"
               name="image"
@@ -692,7 +645,7 @@ const SponsorItemDialog = ({
       <Divider />
       <DialogActions>
         <Button onClick={handleSave} fullWidth variant="contained">
-          Save Changes
+          {T.translate("edit_inventory_item.save_changes")}
         </Button>
       </DialogActions>
     </Dialog>
