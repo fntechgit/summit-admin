@@ -27,7 +27,7 @@ import {
   TextEditor,
   UploadInputV2
 } from "openstack-uicore-foundation/lib/components";
-import { scrollToError, shallowEqual, hasErrors } from "../../../utils/methods";
+import { scrollToError, hasErrors } from "../../../utils/methods";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
@@ -58,16 +58,7 @@ const FormTemplateDialog = ({
         required: false,
         minimum_quantity: "",
         maximum_quantity: "",
-        values: [
-          {
-            name: "",
-            type: "Text",
-            is_required: false,
-            values: [],
-            minimum_quantity: "",
-            maximum_quantity: ""
-          }
-        ]
+        values: []
       }
     ],
     materials: initialEntity?.materials || []
@@ -76,48 +67,34 @@ const FormTemplateDialog = ({
   const [errors, setErrors] = useState(initialErrors || {});
 
   useEffect(() => {
-    if (open) {
-      const defaultMetaFields = [
-        {
-          name: "",
-          type: "Text",
-          is_required: false,
-          values: [],
-          minimum_quantity: "",
-          maximum_quantity: ""
-        }
-      ];
-      const newEntity = {
-        id: initialEntity?.id || null,
-        code: initialEntity?.code || "",
-        name: initialEntity?.name || "",
-        instructions: initialEntity?.instructions || "",
-        meta_fields:
-          initialEntity?.meta_fields && initialEntity.meta_fields.length > 0
-            ? initialEntity.meta_fields
-            : defaultMetaFields,
-        materials:
-          initialEntity?.materials && initialEntity.materials.length > 0
-            ? initialEntity.materials
-            : []
-      };
-      console.log("CHECK...", newEntity);
-      setEntity(newEntity);
-      setErrors(initialErrors || {});
-    }
-  }, [open, initialEntity, initialErrors]);
+    setEntity({
+      id: initialEntity?.id || null,
+      code: initialEntity?.code || "",
+      name: initialEntity?.name || "",
+      instructions: initialEntity?.instructions || "",
+      meta_fields:
+        initialEntity?.meta_fields.length > 0
+          ? initialEntity?.meta_fields
+          : [
+              {
+                name: "",
+                type: "Text",
+                is_required: false,
+                values: [],
+                minimum_quantity: "",
+                maximum_quantity: ""
+              }
+            ],
+      materials:
+        initialEntity?.materials && initialEntity.materials.length > 0
+          ? initialEntity.materials
+          : []
+    });
+  }, [initialEntity]);
 
   useEffect(() => {
-    scrollToError(initialErrors);
-    if (!shallowEqual(initialEntity, entity)) {
-      setEntity({ ...initialEntity });
-      setErrors({});
-    }
-
-    if (!shallowEqual(initialErrors, errors)) {
-      setErrors({ ...initialErrors });
-    }
-  }, [initialEntity, initialErrors]);
+    setErrors(initialErrors || {});
+  }, [open]);
 
   const METAFIELD_TYPES = [
     "CheckBox",

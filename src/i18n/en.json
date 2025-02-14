@@ -3250,6 +3250,10 @@
     "materials": "Materials",
     "save_changes": "Save Changes",
     "add_form": "Add Form",
+    "required_error": "This field is required.",
+    "meta_field_title": "Field Title",
+    "meta_field_required": "Required Field",
+    "meta_field_type": "Field Type",
     "placeholders": {
       "meta_field_title": "Field Title",
       "meta_field_required": "Required Field",
