@@ -18,12 +18,11 @@ import {
   IconButton,
   Divider,
   Grid2,
-  FormGroup
+  FormHelperText
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import {
   TextEditor,
   UploadInputV2
@@ -35,12 +34,13 @@ import {
   MAX_INVENTORY_IMAGES_UPLOAD_QTY
 } from "../../../utils/constants";
 import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
+import MetaFieldValues from "./meta-field-values";
 
 const FormTemplateDialog = ({
   open,
   onClose,
   onSave,
-  onMaterialDeleted,
+  onImageDeleted,
   onMetaFieldTypeDeleted,
   onMetaFieldTypeValueDeleted,
   entity: initialEntity,
@@ -50,30 +50,62 @@ const FormTemplateDialog = ({
     id: null,
     code: "",
     name: "",
-    sponsors: [],
-    opens_at: 0,
-    expires_at: 0,
     instructions: "",
-    meta_fields: [{ name: "", type: "Text", required: false, values: [] }],
-    images: []
+    meta_fields: [
+      {
+        name: "",
+        type: "Text",
+        required: false,
+        minimum_quantity: "",
+        maximum_quantity: "",
+        values: [
+          {
+            name: "",
+            type: "Text",
+            is_required: false,
+            values: [],
+            minimum_quantity: "",
+            maximum_quantity: ""
+          }
+        ]
+      }
+    ],
+    materials: initialEntity?.materials || []
   });
 
+  const [errors, setErrors] = useState(initialErrors || {});
+
   useEffect(() => {
-    setEntity({
-      id: initialEntity?.id || null,
-      code: initialEntity?.code || "",
-      name: initialEntity?.name || "",
-      sponsors: initialEntity?.sponsors || [],
-      opens_at: initialEntity?.opens_at || null,
-      expires_at: initialEntity?.expires_at || null,
-      instructions: initialEntity?.instructions || "",
-      meta_fields:
-        initialEntity?.meta_fields?.length > 0
-          ? initialEntity?.meta_fields
-          : [{ name: "", type: "Text", is_required: false, values: [] }],
-      images: initialEntity?.images?.length > 0 ? initialEntity?.images : []
-    });
-  }, [initialEntity]);
+    if (open) {
+      const defaultMetaFields = [
+        {
+          name: "",
+          type: "Text",
+          is_required: false,
+          values: [],
+          minimum_quantity: "",
+          maximum_quantity: ""
+        }
+      ];
+      const newEntity = {
+        id: initialEntity?.id || null,
+        code: initialEntity?.code || "",
+        name: initialEntity?.name || "",
+        instructions: initialEntity?.instructions || "",
+        meta_fields:
+          initialEntity?.meta_fields && initialEntity.meta_fields.length > 0
+            ? initialEntity.meta_fields
+            : defaultMetaFields,
+        materials:
+          initialEntity?.materials && initialEntity.materials.length > 0
+            ? initialEntity.materials
+            : []
+      };
+      console.log("CHECK...", newEntity);
+      setEntity(newEntity);
+      setErrors(initialErrors || {});
+    }
+  }, [open, initialEntity, initialErrors]);
 
   useEffect(() => {
     scrollToError(initialErrors);
@@ -86,6 +118,18 @@ const FormTemplateDialog = ({
       setErrors({ ...initialErrors });
     }
   }, [initialEntity, initialErrors]);
+
+  const METAFIELD_TYPES = [
+    "CheckBox",
+    "CheckBoxList",
+    "ComboBox",
+    "RadioButtonList",
+    "Text",
+    "TextArea",
+    "Quantity",
+    "DateTime",
+    "Time"
+  ];
 
   const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
 
@@ -102,11 +146,33 @@ const FormTemplateDialog = ({
     setEntity({ ...entity, [id]: value });
   };
 
-  const handleChangeDateTime = (e) => {
-    console.log("e", e, e.unix());
+  const validateForm = () => {
+    const newErrors = {};
+
+    const requiredFields = ["code", "name", "instructions"];
+
+    requiredFields.forEach((field) => {
+      if (!entity[field].trim()) {
+        newErrors[field] = T.translate("edit_form_template.required_error");
+      }
+    });
+
+    if (entity.materials.length === 0) {
+      newErrors.materials = T.translate("edit_form_template.required_error");
+    }
+
+    scrollToError(newErrors);
+
+    return newErrors;
   };
 
   const handleSave = () => {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
     onSave(entity);
   };
 
@@ -123,7 +189,7 @@ const FormTemplateDialog = ({
   const handleRemoveFieldType = async (fieldType, index) => {
     const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
-      text: `${T.translate("edit_inventory_item.delete_meta_field_warning")} ${
+      text: `${T.translate("edit_form_template.delete_meta_field_warning")} ${
         fieldType.name
       }`,
       type: "warning",
@@ -210,38 +276,42 @@ const FormTemplateDialog = ({
     setEntity({ ...entity, meta_fields: newFields });
   };
 
-  const handleMaterialUploadComplete = (response) => {
+  const handleFieldValueQuantityChange = (fieldIndex, key, value) => {
+    const newFields = [...entity.meta_fields];
+    newFields[fieldIndex][key] = value;
+    setEntity({ ...entity, meta_fields: newFields });
+  };
+
+  const handleImageUploadComplete = (response) => {
     if (response) {
-      const material = {
+      const image = {
         file_path: `${response.path}${response.name}`,
         filename: response.name
       };
       setEntity((prevEntity) => ({
         ...prevEntity,
-        meta_fields: getNormalizedMetaFields(),
-        materials: [...prevEntity.materials, material]
+        materials: [...prevEntity.materials, image]
       }));
     }
   };
 
-  const handleRemoveMaterial = (materialFile) => {
+  const handleRemoveImage = (imageFile) => {
     const materials = entity.materials.filter(
-      (material) => material.filename != materialFile.name
+      (image) => image.filename !== imageFile.name
     );
     setEntity((prevEntity) => ({
       ...prevEntity,
-      meta_fields: getNormalizedMetaFields(),
       materials
     }));
 
-    if (onMaterialDeleted && entity.id && materialFile.id) {
-      onMaterialDeleted(entity.id, materialFile.id);
+    if (onImageDeleted && entity.id && imageFile.id) {
+      onImageDeleted(entity.id, imageFile.id);
     }
   };
 
   const getMediaInputValue = () =>
-    entity.images.length > 0
-      ? entity.images.map((img) => ({
+    entity.materials.length > 0
+      ? entity.materials.map((img) => ({
           ...img,
           filename: img.filename ?? img.file_path ?? img.file_url
         }))
@@ -259,88 +329,57 @@ const FormTemplateDialog = ({
       <DialogContent sx={{ p: 0 }}>
         <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
           <Grid2 size={4}>
-            <InputLabel htmlFor="code">Code</InputLabel>
+            <InputLabel htmlFor="code">
+              {T.translate("edit_form_template.code")} *
+            </InputLabel>
             <TextField
               variant="outlined"
               name="code"
               id="code"
               value={entity.code}
+              error={!!errors.code}
+              helperText={errors.code}
               onChange={handleChange}
               fullWidth
             />
           </Grid2>
-          <Grid2 size={4}>
-            <InputLabel htmlFor="name">Name</InputLabel>
+          <Grid2 size={8}>
+            <InputLabel htmlFor="name">
+              {T.translate("edit_form_template.name")} *
+            </InputLabel>
             <TextField
               variant="outlined"
               name="name"
               id="name"
               value={entity.name}
+              error={!!errors.name}
+              helperText={errors.name}
               onChange={handleChange}
               fullWidth
             />
           </Grid2>
-          <Grid2 size={4}>
-            <InputLabel id="sponsors">Always apply to</InputLabel>
-            <FormControl fullWidth>
-              <Select
-                labelId="sponsors"
-                id="sponsors"
-                value={entity.sponsors}
-                placeholder="Select All or Sponsor Levels..."
-                onChange={handleChange}
-              >
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid2>
         </Grid2>
-
-        <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-          <Grid2 size={4}>
-            <InputLabel htmlFor="opens_at">Opens at</InputLabel>
-            <DatePicker
-              name="opens_at"
-              id="opens_at"
-              value={entity.opens_at}
-              onChange={handleChangeDateTime}
-              sx={{ width: "100%" }}
-              renderInput={(params) => (
-                <TextField {...params} fullWidth variant="outlined" />
-              )}
-            />
-          </Grid2>
-          <Grid2 size={4}>
-            <InputLabel htmlFor="expires_at">Expires at</InputLabel>
-            <DatePicker
-              name="expires_at"
-              id="expires_at"
-              value={entity.expires_at}
-              onChange={handleChangeDateTime}
-              sx={{ width: "100%" }}
-              renderInput={(params) => (
-                <TextField {...params} fullWidth variant="outlined" />
-              )}
-            />
-          </Grid2>
-        </Grid2>
-
+        <Divider />
         <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
           <Grid2 size={12}>
-            <InputLabel htmlFor="instructions">instructions</InputLabel>
+            <InputLabel htmlFor="instructions">
+              {T.translate("edit_form_template.instructions")} *
+            </InputLabel>
             <TextEditor
               name="instructions"
               id="instructions"
               value={entity.instructions}
+              error={hasErrors("instructions", errors)}
+              helperText={errors.instructions}
               onChange={handleChange}
             />
           </Grid2>
         </Grid2>
 
         <Divider />
-        <DialogTitle sx={{ p: 3 }}>Additional Input Fields</DialogTitle>
+        <DialogTitle sx={{ p: 3 }}>
+          {T.translate("edit_form_template.meta_fields")}
+        </DialogTitle>
 
         <Box sx={{ px: 3 }}>
           {entity.meta_fields.map((field, fieldIndex) => (
@@ -356,7 +395,9 @@ const FormTemplateDialog = ({
                 >
                   <Grid2 container spacing={2} sx={{ alignItems: "end" }}>
                     <Grid2 size={4}>
-                      <InputLabel htmlFor="fieldTitle">Field Title</InputLabel>
+                      <InputLabel htmlFor="fieldTitle">
+                        {T.translate("edit_form_template.meta_field_title")}
+                      </InputLabel>
                       <TextField
                         name="fieldTitle"
                         variant="outlined"
@@ -368,7 +409,9 @@ const FormTemplateDialog = ({
                       />
                     </Grid2>
                     <Grid2 size={4}>
-                      <InputLabel htmlFor="fieldType">Field Type</InputLabel>
+                      <InputLabel htmlFor="fieldType">
+                        {T.translate("edit_form_template.meta_field_type")}
+                      </InputLabel>
                       <Select
                         value={field.type}
                         name="fieldType"
@@ -377,14 +420,9 @@ const FormTemplateDialog = ({
                           handleFieldChange(fieldIndex, "type", ev.target.value)
                         }
                       >
-                        <MenuItem value="CheckBox">CheckBox</MenuItem>
-                        <MenuItem value="CheckBoxList">CheckBoxList</MenuItem>
-                        <MenuItem value="ComboBox">ComboBox</MenuItem>
-                        <MenuItem value="RadioButtonList">
-                          RadioButtonList
-                        </MenuItem>
-                        <MenuItem value="Text">Text</MenuItem>
-                        <MenuItem value="TextArea">TextArea</MenuItem>
+                        {METAFIELD_TYPES.map((field_type) => (
+                          <MenuItem value={field_type}>{field_type}</MenuItem>
+                        ))}
                       </Select>
                     </Grid2>
                     <Grid2 size={4}>
@@ -402,114 +440,72 @@ const FormTemplateDialog = ({
                               }
                             />
                           }
-                          label="Required"
+                          label={T.translate(
+                            "edit_form_template.meta_field_required"
+                          )}
                         />
                       </FormControl>
                     </Grid2>
                   </Grid2>
                   {fieldTypesWithOptions.includes(field.type) && (
-                    <Box>
-                      {field.values
-                        .sort((a, b) => a.order - b.order)
-                        .map((val, valueIndex) => (
-                          <Grid2
-                            container
-                            spacing={2}
-                            sx={{ alignItems: "end", my: 2 }}
-                          >
-                            <Grid2 size={4}>
-                              <Box
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                <TextField
-                                  value={val.name}
-                                  placeholder={T.translate(
-                                    "meta_field_values_list.name"
-                                  )}
-                                  onChange={(e) =>
-                                    handleFieldValueChange(
-                                      fieldIndex,
-                                      valueIndex,
-                                      "name",
-                                      e.target.value
-                                    )
-                                  }
-                                  fullWidth
-                                />
-                              </Box>
-                            </Grid2>
-                            <Grid2 size={4}>
-                              <Box
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                <TextField
-                                  value={val.value}
-                                  placeholder={T.translate(
-                                    "meta_field_values_list.value"
-                                  )}
-                                  onChange={(e) =>
-                                    handleFieldValueChange(
-                                      fieldIndex,
-                                      valueIndex,
-                                      "value",
-                                      e.target.value
-                                    )
-                                  }
-                                  fullWidth
-                                  slotProps={{
-                                    input: {
-                                      endAdornment: (
-                                        <IconButton
-                                          onClick={() =>
-                                            handleRemoveValue(
-                                              field,
-                                              val,
-                                              valueIndex,
-                                              fieldIndex
-                                            )
-                                          }
-                                        >
-                                          <CloseIcon />
-                                        </IconButton>
-                                      )
-                                    }
-                                  }}
-                                />
-                              </Box>
-                            </Grid2>
-                            <Grid2 size={4}>
-                              <FormGroup>
-                                <FormControlLabel
-                                  control={
-                                    <Checkbox
-                                      checked={val.is_default}
-                                      onChange={(e) =>
-                                        handleFieldValueChange(
-                                          fieldIndex,
-                                          valueIndex,
-                                          "is_default",
-                                          e.target.checked
-                                        )
-                                      }
-                                    />
-                                  }
-                                  label={T.translate(
-                                    "meta_field_values_list.is_default"
-                                  )}
-                                />
-                              </FormGroup>
-                            </Grid2>
-                          </Grid2>
-                        ))}
-                      <Grid2 container spacing={2} offset={4}>
-                        <Button
-                          startIcon={<AddIcon />}
-                          onClick={() => handleAddValue(fieldIndex)}
-                        >
-                          Add a value
-                        </Button>
+                    <>
+                      <Divider sx={{ mt: 2 }} />
+                      <MetaFieldValues
+                        field={field}
+                        fieldIndex={fieldIndex}
+                        entity={entity}
+                        setEntity={setEntity}
+                        handleFieldValueChange={handleFieldValueChange}
+                        handleRemoveValue={handleRemoveValue}
+                        handleAddValue={handleAddValue}
+                      />
+                    </>
+                  )}
+                  {field.type === "Quantity" && (
+                    <Grid2
+                      container
+                      spacing={2}
+                      sx={{ alignItems: "end", my: 2 }}
+                    >
+                      <Grid2 size={4}>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <TextField
+                            value={field.minimum_quantity}
+                            placeholder={T.translate(
+                              "edit_form_template.placeholders.meta_field_minimum_quantity"
+                            )}
+                            type="number"
+                            onChange={(e) =>
+                              handleFieldValueQuantityChange(
+                                fieldIndex,
+                                "minimum_quantity",
+                                e.target.value
+                              )
+                            }
+                            fullWidth
+                          />
+                        </Box>
                       </Grid2>
-                    </Box>
+                      <Grid2 size={4}>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <TextField
+                            value={field.maximum_quantity}
+                            placeholder={T.translate(
+                              "edit_form_template.placeholders.meta_field_maximum_quantity"
+                            )}
+                            type="number"
+                            onChange={(e) =>
+                              handleFieldValueQuantityChange(
+                                fieldIndex,
+                                "maximum_quantity",
+                                e.target.value
+                              )
+                            }
+                            fullWidth
+                          />
+                        </Box>
+                      </Grid2>
+                    </Grid2>
                   )}
                 </Box>
               </Grid2>
@@ -558,15 +554,20 @@ const FormTemplateDialog = ({
 
         <Grid2 container spacing={2} sx={{ alignItems: "start", px: 3, py: 1 }}>
           <Grid2 size={12}>
-            <InputLabel htmlFor="file">PDF</InputLabel>
+            <InputLabel htmlFor="image" id="materials">
+              {T.translate("edit_form_template.materials")}
+            </InputLabel>
+            {errors.materials && (
+              <FormHelperText error>{errors.materials}</FormHelperText>
+            )}
             <UploadInputV2
-              id="material"
-              onUploadComplete={handleMaterialUploadComplete}
+              id="image-upload"
+              name="image"
+              onUploadComplete={handleImageUploadComplete}
               value={getMediaInputValue()}
               mediaType={mediaType}
-              onRemove={handleRemoveMaterial}
+              onRemove={handleRemoveImage}
               postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
-              error={hasErrors("material", errors)}
               djsConfig={{ withCredentials: true }}
               maxFiles={mediaType.max_uploads_qty}
               canAdd={
@@ -581,7 +582,9 @@ const FormTemplateDialog = ({
       <Divider />
       <DialogActions>
         <Button onClick={handleSave} fullWidth variant="contained">
-          Save Form
+          {entity.id
+            ? T.translate("edit_form_template.save_changes")
+            : T.translate("edit_form_template.add_form")}
         </Button>
       </DialogActions>
     </Dialog>
@@ -592,7 +595,7 @@ FormTemplateDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  initialValues: PropTypes.object
+  entity: PropTypes.object
 };
 
 export default FormTemplateDialog;

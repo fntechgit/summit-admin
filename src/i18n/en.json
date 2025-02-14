@@ -3230,7 +3230,8 @@
     "manage_items": "Manage Items",
     "hide_archived": "Hide archived forms",
     "delete_form_template_warning": "Are you sure you want to delete form template ",
-    "add_form_template": "New From Template",
+    "using_duplicate": "Using Duplicate",
+    "add_form_template": "New Form",
     "add_using_global_template": "Using Global Template",
     "placeholders": {
       "search_inventory_items": "Search"
@@ -3247,6 +3248,8 @@
     "meta_fields": "Additional Input Fields",
     "meta_field_values": "Field Values",
     "materials": "Materials",
+    "save_changes": "Save Changes",
+    "add_form": "Add Form",
     "placeholders": {
       "meta_field_title": "Field Title",
       "meta_field_required": "Required Field",
