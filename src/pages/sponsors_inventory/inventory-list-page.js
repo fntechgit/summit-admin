@@ -250,6 +250,11 @@ const InventoryListPage = ({
               }}
               onChange={(event) => setSearchTerm(event.target.value)}
               onKeyDown={handleSearch}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  height: "36px"
+                }
+              }}
             />
           </Grid2>
           <Grid2 size={4}>
@@ -258,6 +263,7 @@ const InventoryListPage = ({
               fullWidth
               onClick={() => handleNewInventoryItem()}
               startIcon={<AddIcon />}
+              sx={{ height: "36px" }}
             >
               {T.translate("inventory_item_list.add_inventory_item")}
             </Button>
