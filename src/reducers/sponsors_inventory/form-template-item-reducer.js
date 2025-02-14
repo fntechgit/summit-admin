@@ -37,7 +37,7 @@ export const DEFAULT_ENTITY = {
   early_bird_rate: 0,
   standard_rate: 0,
   onsite_rate: 0,
-  images: [],
+  materials: [],
   meta_fields: []
 };
 

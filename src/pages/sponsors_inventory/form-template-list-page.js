@@ -26,8 +26,6 @@ import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-import SwapVertIcon from "@mui/icons-material/SwapVert";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -37,7 +35,8 @@ import {
   saveFormTemplate,
   deleteFormTemplateMaterial,
   deleteFormTemplateMetaFieldTypeValue,
-  deleteFormTemplateMetaFieldType
+  deleteFormTemplateMetaFieldType,
+  resetFormTemplateForm
 } from "../../actions/form-template-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import FormTemplateDialog from "./popup/form-template-popup";
@@ -55,6 +54,7 @@ const FormTemplateListPage = ({
   getFormTemplates,
   getFormTemplate,
   saveFormTemplate,
+  resetFormTemplateForm,
   deleteFormTemplateMaterial,
   deleteFormTemplateMetaFieldTypeValue,
   deleteFormTemplateMetaFieldType
@@ -86,6 +86,11 @@ const FormTemplateListPage = ({
     setFormTemplatePopupOpen(true);
   };
 
+  const handleNewFormTemplate = () => {
+    resetFormTemplateForm();
+    setFormTemplatePopupOpen(true);
+  };
+
   const columns = [
     {
       columnKey: "code",
@@ -96,18 +101,6 @@ const FormTemplateListPage = ({
       columnKey: "name",
       header: T.translate("form_template_list.name_column_label"),
       sortable: true
-    },
-    {
-      columnKey: "sponsor_level",
-      header: "Sponsor Level"
-    },
-    {
-      columnKey: "opens_at",
-      header: "Opens at"
-    },
-    {
-      columnKey: "expires_at",
-      header: "Expires at"
     },
     {
       columnKey: "items_qty",
@@ -186,7 +179,7 @@ const FormTemplateListPage = ({
         <Grid2 size={1}>
           <Box component="span">{totalFormTemplates} forms</Box>
         </Grid2>
-        <Grid2 size={2}>
+        <Grid2 size={2} offset={3}>
           <FormGroup>
             <FormControlLabel
               control={
@@ -203,27 +196,7 @@ const FormTemplateListPage = ({
             />
           </FormGroup>
         </Grid2>
-        <Grid2 size={1}>
-          <Button
-            variant="text"
-            size="large"
-            sx={{ color: "black", fontWeight: "bold" }}
-            onClick={() => console.log("filter")}
-          >
-            <FilterListIcon fontSize="large" sx={{ mr: 1 }} /> filter
-          </Button>
-        </Grid2>
-        <Grid2 size={1}>
-          <Button
-            variant="text"
-            size="large"
-            sx={{ color: "black", fontWeight: "bold" }}
-            onClick={() => console.log("sort")}
-          >
-            <SwapVertIcon fontSize="large" sx={{ mr: 1 }} /> sort by
-          </Button>
-        </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={2}>
           <TextField
             variant="outlined"
             value={searchTerm}
@@ -238,24 +211,33 @@ const FormTemplateListPage = ({
             onChange={(event) => setSearchTerm(event.target.value)}
             onKeyDown={handleSearch}
             fullWidth
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: "36px"
+              }
+            }}
           />
         </Grid2>
         <Grid2 size={2}>
           <Button
             variant="contained"
+            size="medium"
             fullWidth
             onClick={() => handleNewInventoryItem()}
             startIcon={<AddIcon />}
+            sx={{ height: "36px" }}
           >
-            {T.translate("form_template_list.add_using_global_template")}
+            {T.translate("form_template_list.using_duplicate")}
           </Button>
         </Grid2>
         <Grid2 size={2}>
           <Button
             variant="contained"
+            size="medium"
             fullWidth
-            onClick={() => handleNewInventoryItem()}
+            onClick={() => handleNewFormTemplate()}
             startIcon={<AddIcon />}
+            sx={{ height: "36px" }}
           >
             {T.translate("form_template_list.add_form_template")}
           </Button>
@@ -276,12 +258,13 @@ const FormTemplateListPage = ({
           />
         </div>
       )}
+      {console.log("check....", currentFormTemplate)}
       <FormTemplateDialog
         entity={currentFormTemplate}
         errors={currentFormTemplateErrors}
         open={formTemplatePopupOpen}
         onSave={saveFormTemplate}
-        onClose={() => setInventoryItemPopup(false)}
+        onClose={() => setFormTemplatePopupOpen(false)}
         onMetaFieldTypeDeleted={deleteFormTemplateMetaFieldType}
         onMetaFieldTypeValueDeleted={deleteFormTemplateMetaFieldTypeValue}
         onMaterialDeleted={deleteFormTemplateMaterial}
@@ -306,5 +289,6 @@ export default connect(mapStateToProps, {
   saveFormTemplate,
   deleteFormTemplateMetaFieldType,
   deleteFormTemplateMetaFieldTypeValue,
-  deleteFormTemplateMaterial
+  deleteFormTemplateMaterial,
+  resetFormTemplateForm
 })(FormTemplateListPage);
