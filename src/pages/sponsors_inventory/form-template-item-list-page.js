@@ -14,69 +14,58 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
 import {
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Grid2
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import IconButton from "@mui/material/IconButton";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import Tooltip from "@mui/material/Tooltip";
+import EditIcon from "@mui/icons-material/Edit";
+import ImageIcon from "@mui/icons-material/Image";
+import MuiTable from "../../components/mui/table/mui-table";
 import InventoryItemsModal from "../../components/inventory-items-modal";
 import {
   cloneFromInventoryItem,
   deleteFormTemplateItem,
   getFormTemplateItems
 } from "../../actions/form-template-item-actions";
+import { getFormTemplate } from "../../actions/form-template-actions";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
   formTemplateItems,
-  lastPage,
+  currentFormTemplate,
   currentPage,
   perPage,
   term,
   order,
   orderDir,
   totalFormTemplateItems,
-  history,
   cloneFromInventoryItem,
-  deleteFormTemplateItem,
+  getFormTemplate,
   getFormTemplateItems
 }) => {
   const [showInventoryItemsModal, setShowInventoryItemsModal] = useState(false);
 
   useEffect(() => {
-    getFormTemplateItems(
-      formTemplateId,
-      term,
-      currentPage,
-      perPage,
-      order,
-      orderDir
-    );
-  }, []);
-
-  const handleEdit = (itemId) => {
-    history.push(`/app/form-templates/${formTemplateId}/items/${itemId}`);
-  };
-
-  const handleDelete = (itemId) => {
-    const formTemplateItem = formTemplateItems.find((s) => s.id === itemId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate(
-        "form_template_item_list.delete_form_template_item_warning"
-      )} ${formTemplateItem.name}?`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteFormTemplateItem(formTemplateId, itemId);
-      }
+    getFormTemplate(formTemplateId).then(() => {
+      getFormTemplateItems(
+        formTemplateId,
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir
+      );
     });
-  };
+  }, []);
 
   const handlePageChange = (page) => {
     getFormTemplateItems(formTemplateId, term, page, perPage, order, orderDir);
@@ -86,19 +75,19 @@ const FormTemplateItemListPage = ({
     getFormTemplateItems(formTemplateId, term, currentPage, perPage, key, dir);
   };
 
-  const handleSearch = (term) => {
-    getFormTemplateItems(
-      formTemplateId,
-      term,
-      currentPage,
-      perPage,
-      order,
-      orderDir
-    );
-  };
+  // const handleSearch = (term) => {
+  //   getFormTemplateItems(
+  //     formTemplateId,
+  //     term,
+  //     currentPage,
+  //     perPage,
+  //     order,
+  //     orderDir
+  //   );
+  // };
 
-  const handleAddInventoryItem = () => {
-    setShowInventoryItemsModal(true);
+  const handleRowEdit = (rowId) => {
+    console.log("row edit...", rowId);
   };
 
   const handleAddSelectedItems = (items) => {
@@ -124,93 +113,165 @@ const FormTemplateItemListPage = ({
       });
   };
 
-  const handleNewFormTemplateItem = () => {
-    history.push(`/app/form-templates/${formTemplateId}/items/new`);
-  };
-
   const columns = [
-    { columnKey: "id", value: "Id", sortable: true },
     {
       columnKey: "code",
-      value: T.translate("form_template_item_list.code_column_label"),
+      header: T.translate("form_template_item_list.code_column_label"),
       sortable: true
     },
     {
       columnKey: "name",
-      value: T.translate("form_template_item_list.name_column_label"),
+      header: T.translate("form_template_item_list.name_column_label"),
       sortable: true
+    },
+    {
+      columnKey: "hasImage",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row) =>
+        row.images?.length > 0 ? (
+          <Tooltip title={row.images[0].file_url} placement="top" arrow>
+            <IconButton size="small">
+              <ImageIcon
+                fontSize="small"
+                onClick={() =>
+                  window.open(
+                    row.images[0].file_url,
+                    "_blank",
+                    "noopener,noreferrer"
+                  )
+                }
+              />
+            </IconButton>
+          </Tooltip>
+        ) : null
+    },
+    {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row, { onRowEdit }) => (
+        <IconButton size="small" onClick={() => onRowEdit(row)}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "archive",
+      header: "",
+      width: 70,
+      align: "center",
+      render: () => (
+        <Button variant="text" color="inherit" size="small">
+          {T.translate("form_template_item_list.archive_button")}
+        </Button>
+      ),
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "more",
+      header: "",
+      width: 40,
+      align: "center",
+      render: () => (
+        <IconButton size="small">
+          <UnfoldMoreIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
     }
   ];
 
   const table_options = {
     sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      edit: { onClick: handleEdit },
-      delete: { onClick: handleDelete }
-    }
+    sortDir: orderDir
   };
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("form_template_item_list.form_template_items")} (
-        {totalFormTemplateItems}){" "}
-      </h3>
-      <div className="alert alert-info" role="alert">
+      <h3>{`${currentFormTemplate.code} - ${currentFormTemplate.name}`}</h3>
+      <Alert
+        severity="info"
+        sx={{
+          justifyContent: "start",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
         {T.translate("form_template_item_list.alert_info")}
-      </div>
-      <div className="row">
-        <div className="col-md-6">
-          <FreeTextSearch
-            value={term ?? ""}
-            placeholder={T.translate(
-              "form_template_item_list.placeholders.search_form_template_items"
-            )}
-            onSearch={handleSearch}
-          />
-        </div>
-        <div className="col-md-offset-2 col-md-2 text-right">
-          <button className="btn btn-primary" onClick={handleAddInventoryItem}>
-            {T.translate("form_template_item_list.add_inventory_item")}
-          </button>
-        </div>
-        <div className="col-md-2 text-right">
-          <button
-            className="btn btn-primary"
-            onClick={handleNewFormTemplateItem}
-          >
-            {T.translate("form_template_item_list.add_form_template_item")}
-          </button>
-        </div>
-      </div>
+      </Alert>
+      <Grid2
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={6}>
+          <Box component="span">{totalFormTemplateItems} items</Box>
+        </Grid2>
+        <Grid2
+          container
+          size={6}
+          spacing={1}
+          sx={{
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={4} offset={4}>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    onChange={(ev) =>
+                      console.log("CHECK BOX", ev.target.checked)
+                    }
+                    inputProps={{
+                      "aria-label": T.translate(
+                        "form_template_item_list.hide_archived"
+                      )
+                    }}
+                  />
+                }
+                label={T.translate("form_template_item_list.hide_archived")}
+              />
+            </FormGroup>
+          </Grid2>
+          <Grid2 size={4}>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={() => console.log()}
+              startIcon={<AddIcon />}
+            >
+              {T.translate("form_template_item_list.add_item")}
+            </Button>
+          </Grid2>
+        </Grid2>
+      </Grid2>
 
       {formTemplateItems.length > 0 && (
         <div>
-          <Table
-            options={table_options}
-            data={formTemplateItems}
+          <MuiTable
             columns={columns}
+            data={formTemplateItems}
+            options={table_options}
+            perPage={perPage}
+            currentPage={currentPage}
+            onRowEdit={handleRowEdit}
+            onPageChange={handlePageChange}
             onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
           />
         </div>
       )}
       <InventoryItemsModal
-        show={showInventoryItemsModal}
+        open={showInventoryItemsModal}
         onHide={() => setShowInventoryItemsModal(false)}
         onAddSelected={handleAddSelectedItems}
       />
@@ -218,12 +279,17 @@ const FormTemplateItemListPage = ({
   );
 };
 
-const mapStateToProps = ({ currentFormTemplateItemListState }) => ({
-  ...currentFormTemplateItemListState
+const mapStateToProps = ({
+  currentFormTemplateItemListState,
+  currentFormTemplateState
+}) => ({
+  ...currentFormTemplateItemListState,
+  currentFormTemplate: currentFormTemplateState.entity
 });
 
 export default connect(mapStateToProps, {
   cloneFromInventoryItem,
   deleteFormTemplateItem,
-  getFormTemplateItems
+  getFormTemplateItems,
+  getFormTemplate
 })(FormTemplateItemListPage);

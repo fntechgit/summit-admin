@@ -40,6 +40,8 @@ import {
 } from "../../actions/form-template-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import FormTemplateDialog from "./popup/form-template-popup";
+import history from "../../history";
+import FormTemplateFromDuplicateDialog from "./popup/form-template-from-duplicate-popup";
 
 const FormTemplateListPage = ({
   formTemplates,
@@ -60,11 +62,15 @@ const FormTemplateListPage = ({
   deleteFormTemplateMetaFieldType
 }) => {
   const [formTemplatePopupOpen, setFormTemplatePopupOpen] = useState(false);
-  // const [formTemplateItemPopupOpen, setFormTemplateItemPopupOpen] = useState(false);
+  const [
+    formTemplateFromDuplicatePopupOpen,
+    setFormTemplateFromDuplicatePopupOpen
+  ] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     getFormTemplates(term, currentPage, perPage, order, orderDir);
+    resetFormTemplateForm();
   }, []);
 
   const handlePageChange = (page) => {
@@ -86,9 +92,17 @@ const FormTemplateListPage = ({
     setFormTemplatePopupOpen(true);
   };
 
+  const handleNewFromDuplicate = () => {
+    setFormTemplateFromDuplicatePopupOpen(true);
+  };
+
   const handleNewFormTemplate = () => {
     resetFormTemplateForm();
     setFormTemplatePopupOpen(true);
+  };
+
+  const handleManageItems = (formTemplate) => {
+    history.push(`/app/form-templates/${formTemplate.id}/items`);
   };
 
   const columns = [
@@ -104,7 +118,7 @@ const FormTemplateListPage = ({
     },
     {
       columnKey: "items_qty",
-      value: T.translate("form_template_list.items_column_label"),
+      header: T.translate("form_template_list.items_column_label"),
       sortable: false
     },
     {
@@ -112,8 +126,13 @@ const FormTemplateListPage = ({
       header: "",
       width: 100,
       align: "center",
-      render: () => (
-        <Button variant="text" color="inherit" size="small">
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="small"
+          onClick={() => handleManageItems(row)}
+        >
           Manage Items
         </Button>
       )
@@ -223,7 +242,7 @@ const FormTemplateListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => handleNewInventoryItem()}
+            onClick={() => handleNewFromDuplicate()}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -258,7 +277,6 @@ const FormTemplateListPage = ({
           />
         </div>
       )}
-      {console.log("check....", currentFormTemplate)}
       <FormTemplateDialog
         entity={currentFormTemplate}
         errors={currentFormTemplateErrors}
@@ -268,6 +286,16 @@ const FormTemplateListPage = ({
         onMetaFieldTypeDeleted={deleteFormTemplateMetaFieldType}
         onMetaFieldTypeValueDeleted={deleteFormTemplateMetaFieldTypeValue}
         onMaterialDeleted={deleteFormTemplateMaterial}
+      />
+      <FormTemplateFromDuplicateDialog
+        open={formTemplateFromDuplicatePopupOpen}
+        options={table_options}
+        onClose={() => setFormTemplateFromDuplicatePopupOpen(false)}
+        onDuplicate={(ids) => console.log("CHECK...", ids)}
+        onSearch={() => console.log("CHECK...")}
+        onFilter={() => console.log("CHECK...")}
+        onSort={() => console.log("CHECK...")}
+        formTemplates={formTemplates}
       />
     </div>
   );
