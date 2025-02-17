@@ -14,6 +14,7 @@ const TextEditorV3 = ({
   // all options from https://xdsoft.net/jodit/docs/,
   const config = useMemo(
     () => ({
+      license: process.env.JODIT_LICENSE_KEY,
       placeholder: "Start typings...",
       className,
       buttons: [
@@ -38,6 +39,11 @@ const TextEditorV3 = ({
       ],
       askBeforePasteHTML: false,
       askBeforePasteFromWord: false,
+      pasteFromWord: {
+        enable: true,
+        convertUnitsToPixel: true
+      },
+      beautifyHTML: false,
       ...options
     }),
     [options, className]
