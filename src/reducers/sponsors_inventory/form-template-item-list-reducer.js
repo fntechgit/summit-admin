@@ -70,7 +70,8 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       const formTemplateItems = payload.response.data.map((a) => ({
         id: a.id,
         code: a.code,
-        name: a.name
+        name: a.name,
+        images: a.images
       }));
 
       return {

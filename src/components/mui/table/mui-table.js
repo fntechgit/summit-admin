@@ -55,7 +55,11 @@ const MuiTable = ({
                 {columns.map((col) => (
                   <TableCell
                     key={col.columnKey}
-                    sx={{ width: col.width }}
+                    sx={{
+                      width: col.width,
+                      minWidth: col.width,
+                      maxWidth: col.width
+                    }}
                     align={col.align ?? "left"}
                   >
                     {col.sortable ? (
