@@ -111,7 +111,8 @@ export const getInventoryItems =
 
     const params = {
       page,
-      fields: "id,code,name,images,images.file_url,",
+      fields:
+        "id,code,name,images,images.file_url,early_bird_rate,standard_rate,onsite_rate,default_quantity",
       expand: "images",
       per_page: perPage,
       access_token: accessToken

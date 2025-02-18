@@ -54,13 +54,14 @@ const FormTemplateItemListPage = ({
   term,
   order,
   orderDir,
+  getInventoryItems,
   totalFormTemplateItems,
   cloneFromInventoryItem,
   getFormTemplate,
   getFormTemplateItems,
+  getFormTemplateItem,
   currentFormTemplateItem,
   currentFormTemplateItemErrors,
-  saveInventoryItem,
   deleteItemMetaFieldType,
   deleteItemMetaFieldTypeValue,
   deleteItemImage
@@ -90,20 +91,14 @@ const FormTemplateItemListPage = ({
     getFormTemplateItems(formTemplateId, term, currentPage, perPage, key, dir);
   };
 
-  // const handleSearch = (term) => {
-  //   getFormTemplateItems(
-  //     formTemplateId,
-  //     term,
-  //     currentPage,
-  //     perPage,
-  //     order,
-  //     orderDir
-  //   );
-  // };
-
   const handleRowEdit = (row) => {
-    if (row) getFormTemplateItem(row.id);
+    if (row) getFormTemplateItem(formTemplateId, row.id);
     setShowInventoryItemModal(true);
+  };
+
+  const handleNewInventoryItem = () => {
+    getInventoryItems();
+    setShowAddInventoryItemsModal(true);
   };
 
   const handleAddSelectedItems = (items) => {
@@ -129,8 +124,8 @@ const FormTemplateItemListPage = ({
       });
   };
 
-  const handleInventorySave = (item) => {
-    saveInventoryItem(item).then(() =>
+  const handleFormTemplateSave = (item) => {
+    saveFormTemplateItem(item).then(() =>
       getFormTemplateItems(term, currentPage, perPage, order, orderDir)
     );
     setShowInventoryItemModal(false);
@@ -270,7 +265,7 @@ const FormTemplateItemListPage = ({
             <Button
               variant="contained"
               fullWidth
-              onClick={() => setShowAddInventoryItemsModal(true)}
+              onClick={() => handleNewInventoryItem()}
               startIcon={<AddIcon />}
             >
               {T.translate("form_template_item_list.add_item")}
@@ -302,7 +297,7 @@ const FormTemplateItemListPage = ({
         entity={currentFormTemplateItem}
         errors={currentFormTemplateItemErrors}
         open={showInventoryItemModal}
-        onSave={handleInventorySave}
+        onSave={handleFormTemplateSave}
         onClose={() => setShowInventoryItemModal(false)}
         onMetaFieldTypeDeleted={deleteItemMetaFieldType}
         onMetaFieldTypeValueDeleted={deleteItemMetaFieldTypeValue}

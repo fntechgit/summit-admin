@@ -42,6 +42,7 @@ import MuiTable from "../../components/mui/table/mui-table";
 import FormTemplateDialog from "./popup/form-template-popup";
 import history from "../../history";
 import FormTemplateFromDuplicateDialog from "./popup/form-template-from-duplicate-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const FormTemplateListPage = ({
   formTemplates,
@@ -69,7 +70,7 @@ const FormTemplateListPage = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    getFormTemplates(term, currentPage, perPage, order, orderDir);
+    getFormTemplates("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
     resetFormTemplateForm();
   }, []);
 
@@ -85,6 +86,9 @@ const FormTemplateListPage = ({
     if (ev.key === "Enter") {
       getFormTemplates(searchTerm, currentPage, perPage, order, orderDir);
     }
+    // search on duplicate popup
+    if (typeof ev === "string")
+      getFormTemplates(ev, currentPage, perPage, order, orderDir);
   };
 
   const handleRowEdit = (row) => {
@@ -103,6 +107,11 @@ const FormTemplateListPage = ({
 
   const handleManageItems = (formTemplate) => {
     history.push(`/app/form-templates/${formTemplate.id}/items`);
+  };
+
+  const handleDuplicatePopupClose = () => {
+    getFormTemplates("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    setFormTemplateFromDuplicatePopupOpen(false);
   };
 
   const columns = [
@@ -290,11 +299,10 @@ const FormTemplateListPage = ({
       <FormTemplateFromDuplicateDialog
         open={formTemplateFromDuplicatePopupOpen}
         options={table_options}
-        onClose={() => setFormTemplateFromDuplicatePopupOpen(false)}
+        onClose={handleDuplicatePopupClose}
         onDuplicate={(ids) => console.log("CHECK...", ids)}
-        onSearch={() => console.log("CHECK...")}
-        onFilter={() => console.log("CHECK...")}
-        onSort={() => console.log("CHECK...")}
+        onSearch={handleSearch}
+        onSort={handleSort}
         formTemplates={formTemplates}
       />
     </div>

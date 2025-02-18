@@ -18,7 +18,6 @@ import {
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
@@ -51,7 +50,6 @@ const AddFormTemplateItemDialog = ({
   term = ""
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState([]);
 
   useEffect(() => {
     getInventoryItems(term, currentPage, perPage, order, orderDir);
@@ -74,14 +72,6 @@ const AddFormTemplateItemDialog = ({
       getInventoryItems(searchTerm, currentPage, perPage, order, orderDir);
   };
 
-  const handleFilter = (filter) => {
-    const newFilters = selectedFilters.includes(filter)
-      ? selectedFilters.filter((key) => key !== filter)
-      : [...selectedFilters, filter];
-    setSelectedFilters(newFilters);
-    // onFilter(newFilters);
-  };
-
   const handleSelected = (id, isSelected) => {
     if (isSelected) {
       selectInventoryItem(id);
@@ -92,6 +82,7 @@ const AddFormTemplateItemDialog = ({
 
   const handleonAddItems = () => {
     onAddItems(selectedIds);
+    clearAllSelectedInventoryItems();
   };
 
   const handleClose = () => {
@@ -137,7 +128,7 @@ const AddFormTemplateItemDialog = ({
         "inventory_items_list_modal.early_bid_rate_column_label"
       ),
       sortable: false,
-      render: (row) => `$ ${row.early_bird_rate.toFixed(DECIMAL_DIGITS)}`
+      render: (row) => `$ ${row.early_bird_rate?.toFixed(DECIMAL_DIGITS)}`
     },
     {
       columnKey: "standard_rate",
@@ -145,7 +136,7 @@ const AddFormTemplateItemDialog = ({
         "inventory_items_list_modal.standard_rate_column_label"
       ),
       sortable: false,
-      render: (row) => `$ ${row.standard_rate.toFixed(DECIMAL_DIGITS)}`
+      render: (row) => `$ ${row.standard_rate?.toFixed(DECIMAL_DIGITS)}`
     },
     {
       columnKey: "onsite_rate",
@@ -153,10 +144,10 @@ const AddFormTemplateItemDialog = ({
         "inventory_items_list_modal.onsite_rate_column_label"
       ),
       sortable: false,
-      render: (row) => `$ ${row.onsite_rate.toFixed(DECIMAL_DIGITS)}`
+      render: (row) => `$ ${row.onsite_rate?.toFixed(DECIMAL_DIGITS)}`
     },
     {
-      columnKey: "quantity",
+      columnKey: "default_quantity",
       header: T.translate("inventory_items_list_modal.quantity_column_label"),
       sortable: false
     },
@@ -198,37 +189,6 @@ const AddFormTemplateItemDialog = ({
         <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
           <Grid2 container spacing={2} size={6} sx={{ alignItems: "baseline" }}>
             <Grid2 size={4}>{selectedCount} items selected</Grid2>
-            <Grid2 size={4} offset={4}>
-              <MenuButton
-                buttonId="sort-button"
-                menuId="sort-menu"
-                buttonSx={{ color: "#000" }}
-                hasBadge
-                menuItems={[
-                  { label: "Labor", onClick: () => handleFilter("labor") },
-                  {
-                    label: "Furniture",
-                    onClick: () => handleFilter("furniture")
-                  },
-                  {
-                    label: "Electrical",
-                    onClick: () => handleFilter("electrical")
-                  },
-                  { label: "AV", onClick: () => handleFilter("av") },
-                  {
-                    label: "Networking",
-                    onClick: () => handleFilter("networking")
-                  },
-                  {
-                    label: "Graphic/Signage",
-                    onClick: () => handleFilter("graphic")
-                  }
-                ]}
-              >
-                <FilterListIcon fontSize="large" sx={{ mr: 2 }} />
-                filter
-              </MenuButton>
-            </Grid2>
           </Grid2>
           <Grid2 container spacing={2} size={6}>
             <Grid2 size={4}>
@@ -237,17 +197,17 @@ const AddFormTemplateItemDialog = ({
                 menuId="sort-menu"
                 buttonSx={{ color: "#000" }}
                 menuItems={[
-                  {
-                    label: "Price: Low to High",
-                    onClick: () => handleSort("date", "+")
-                  },
-                  {
-                    label: "Price: High to Low",
-                    onClick: () => handleSort("date", "+")
-                  },
-                  { label: "Newest", onClick: () => handleSort("date", "+") },
-                  { label: "A-Z", onClick: () => handleSort("name", "+") },
-                  { label: "Z-A", onClick: () => handleSort("name", "-") }
+                  // {
+                  //   label: "Price: Low to High",
+                  //   onClick: () => handleSort("date", "+")
+                  // },
+                  // {
+                  //   label: "Price: High to Low",
+                  //   onClick: () => handleSort("date", "+")
+                  // },
+                  // { label: "Newest", onClick: () => handleSort("date", "+") },
+                  { label: "A-Z", onClick: () => handleSort("name", 1) },
+                  { label: "Z-A", onClick: () => handleSort("name", 0) }
                 ]}
               >
                 <SwapVertIcon fontSize="large" sx={{ mr: 1 }} /> sort by

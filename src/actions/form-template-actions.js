@@ -223,7 +223,7 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
 
   const success_message = {
     title: T.translate("general.done"),
-    html: T.translate("edit_inventory_item.inventory_item_created"),
+    html: T.translate("edit_form_template.form_template_created"),
     type: "success"
   };
 
