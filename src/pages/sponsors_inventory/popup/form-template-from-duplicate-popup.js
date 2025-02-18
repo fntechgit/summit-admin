@@ -17,7 +17,6 @@ import {
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiTable from "../../../components/mui/table/mui-table";
@@ -29,25 +28,14 @@ const FormTemplateFromDuplicateDialog = ({
   onClose,
   onDuplicate,
   onSearch,
-  onFilter,
   onSort,
   formTemplates
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
-  const [selectedFilters, setSelectedFilters] = useState([]);
 
-  const handleFilter = (filter) => {
-    const newFilters = selectedFilters.includes(filter)
-      ? selectedFilters.filter((key) => key !== filter)
-      : [...selectedFilters, filter];
-    setSelectedFilters(newFilters);
-    onFilter(newFilters);
-  };
-
-  const handleSort = (sort) => {
-    console.log("ON SORT WITH...", sort);
-    onSort(sort);
+  const handleSort = (key, dir) => {
+    onSort(_, key, dir);
   };
 
   const handleOnCheck = (rowId) => {
@@ -63,6 +51,7 @@ const FormTemplateFromDuplicateDialog = ({
   };
 
   const handleOnSearch = (ev) => {
+    console.log("CHECL ev", ev);
     if (ev.key === "Enter") onSearch(searchTerm);
   };
 
@@ -115,37 +104,6 @@ const FormTemplateFromDuplicateDialog = ({
         <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
           <Grid2 container spacing={2} size={6} sx={{ alignItems: "baseline" }}>
             <Grid2 size={4}>{selectedRows.length} items selected</Grid2>
-            <Grid2 size={4} offset={4}>
-              <MenuButton
-                buttonId="sort-button"
-                menuId="sort-menu"
-                buttonSx={{ color: "#000" }}
-                hasBadge
-                menuItems={[
-                  { label: "Labor", onClick: () => handleFilter("labor") },
-                  {
-                    label: "Furniture",
-                    onClick: () => handleFilter("furniture")
-                  },
-                  {
-                    label: "Electrical",
-                    onClick: () => handleFilter("electrical")
-                  },
-                  { label: "AV", onClick: () => handleFilter("av") },
-                  {
-                    label: "Networking",
-                    onClick: () => handleFilter("networking")
-                  },
-                  {
-                    label: "Graphic/Signage",
-                    onClick: () => handleFilter("graphic")
-                  }
-                ]}
-              >
-                <FilterListIcon fontSize="large" sx={{ mr: 2 }} />
-                filter
-              </MenuButton>
-            </Grid2>
           </Grid2>
           <Grid2 container spacing={2} size={6}>
             <Grid2 size={4}>
@@ -154,9 +112,9 @@ const FormTemplateFromDuplicateDialog = ({
                 menuId="sort-menu"
                 buttonSx={{ color: "#000" }}
                 menuItems={[
-                  { label: "Newest", onClick: () => handleSort("+date") },
-                  { label: "A-Z", onClick: () => handleSort("+name") },
-                  { label: "Z-A", onClick: () => handleSort("-name") }
+                  // { label: "Newest", onClick: () => handleSort("+date") },
+                  { label: "A-Z", onClick: () => handleSort("name", 1) },
+                  { label: "Z-A", onClick: () => handleSort("name", 0) }
                 ]}
               >
                 <SwapVertIcon fontSize="large" sx={{ mr: 1 }} /> sort by
@@ -220,7 +178,6 @@ FormTemplateFromDuplicateDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onDuplicate: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
-  onFilter: PropTypes.func.isRequired,
   onSort: PropTypes.func.isRequired,
   options: PropTypes.object.isRequired,
   formTemplates: PropTypes.array.isRequired

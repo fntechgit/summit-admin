@@ -54,6 +54,7 @@ const SponsorItemDialog = ({
     early_bird_rate: 0,
     standard_rate: 0,
     onsite_rate: 0,
+    default_quantity: 0,
     quantity_limit_per_sponsor: 0,
     quantity_limit_per_show: 0,
     meta_fields: [
@@ -84,6 +85,7 @@ const SponsorItemDialog = ({
       early_bird_rate: initialEntity?.early_bird_rate || 0,
       standard_rate: initialEntity?.standard_rate || 0,
       onsite_rate: initialEntity?.onsite_rate || 0,
+      default_quantity: initialEntity?.default_quantity || 0,
       quantity_limit_per_sponsor:
         initialEntity?.quantity_limit_per_sponsor || 0,
       quantity_limit_per_show: initialEntity?.quantity_limit_per_show || 0,
@@ -415,6 +417,20 @@ const SponsorItemDialog = ({
         </Grid2>
         <Divider />
         <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
+          <Grid2 size={4}>
+            <InputLabel htmlFor="default_quantity">
+              {T.translate("edit_inventory_item.default_quantity")}
+            </InputLabel>
+            <TextField
+              variant="outlined"
+              name="default_quantity"
+              id="default_quantity"
+              value={entity.default_quantity}
+              onChange={handleChange}
+              type="number"
+              fullWidth
+            />
+          </Grid2>
           <Grid2 size={4}>
             <InputLabel htmlFor="quantity_limit_per_sponsor">
               {T.translate("edit_inventory_item.quantity_limit_per_sponsor")}
