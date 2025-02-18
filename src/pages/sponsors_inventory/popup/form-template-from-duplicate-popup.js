@@ -62,8 +62,8 @@ const FormTemplateFromDuplicateDialog = ({
     onDuplicate(selectedRows);
   };
 
-  const handleOnSearch = () => {
-    onSearch(searchTerm);
+  const handleOnSearch = (ev) => {
+    if (ev.key === "Enter") onSearch(searchTerm);
   };
 
   const columns = [

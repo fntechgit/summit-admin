@@ -3294,8 +3294,15 @@
     "title": "Select Items",
     "add_selected": "Add Selected Items",
     "selected_items_qty": "Selected {qty} Items",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
+    "early_bid_rate_column_label": "Early Bird Rate",
+    "standard_rate_column_label": "Standard Rate",
+    "onsite_rate_column_label": "Onsite Rate",
+    "quantity_column_label": "Quantity",
+    "select_items": "Select items",
     "placeholders": {
-      "search_inventory_items": "Search"
+      "search_inventory_items": "Search..."
     }
   },
   "edit_form_template_item": {

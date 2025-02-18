@@ -29,7 +29,7 @@ const MuiTable = ({
   onPageChange,
   onPerPageChange,
   onSort,
-  options
+  options = { sortCol: "", sortDir: "" }
 }) => {
   const handleChangePage = (_, newPage) => {
     onPageChange(newPage);
