@@ -30,13 +30,20 @@ import Tooltip from "@mui/material/Tooltip";
 import EditIcon from "@mui/icons-material/Edit";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "../../components/mui/table/mui-table";
-import InventoryItemsModal from "../../components/inventory-items-modal";
 import {
   cloneFromInventoryItem,
   deleteFormTemplateItem,
-  getFormTemplateItems
+  getFormTemplateItem,
+  getFormTemplateItems,
+  saveFormTemplateItem,
+  deleteItemMetaFieldType,
+  deleteItemMetaFieldTypeValue,
+  deleteItemImage
 } from "../../actions/form-template-item-actions";
 import { getFormTemplate } from "../../actions/form-template-actions";
+import AddFormTemplateItemDialog from "./popup/add-form-template-item-popup";
+import SponsorItemDialog from "./popup/sponsor-inventory-popup";
+import { getInventoryItems } from "../../actions/inventory-item-actions";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
@@ -50,9 +57,17 @@ const FormTemplateItemListPage = ({
   totalFormTemplateItems,
   cloneFromInventoryItem,
   getFormTemplate,
-  getFormTemplateItems
+  getFormTemplateItems,
+  currentFormTemplateItem,
+  currentFormTemplateItemErrors,
+  saveInventoryItem,
+  deleteItemMetaFieldType,
+  deleteItemMetaFieldTypeValue,
+  deleteItemImage
 }) => {
-  const [showInventoryItemsModal, setShowInventoryItemsModal] = useState(false);
+  const [showAddInventoryItemsModal, setShowAddInventoryItemsModal] =
+    useState(false);
+  const [showInventoryItemModal, setShowInventoryItemModal] = useState(false);
 
   useEffect(() => {
     getFormTemplate(formTemplateId).then(() => {
@@ -86,8 +101,9 @@ const FormTemplateItemListPage = ({
   //   );
   // };
 
-  const handleRowEdit = (rowId) => {
-    console.log("row edit...", rowId);
+  const handleRowEdit = (row) => {
+    if (row) getFormTemplateItem(row.id);
+    setShowInventoryItemModal(true);
   };
 
   const handleAddSelectedItems = (items) => {
@@ -109,8 +125,15 @@ const FormTemplateItemListPage = ({
         console.error(error);
       })
       .finally(() => {
-        setShowInventoryItemsModal(false);
+        setShowAddInventoryItemsModal(false);
       });
+  };
+
+  const handleInventorySave = (item) => {
+    saveInventoryItem(item).then(() =>
+      getFormTemplateItems(term, currentPage, perPage, order, orderDir)
+    );
+    setShowInventoryItemModal(false);
   };
 
   const columns = [
@@ -247,7 +270,7 @@ const FormTemplateItemListPage = ({
             <Button
               variant="contained"
               fullWidth
-              onClick={() => console.log()}
+              onClick={() => setShowAddInventoryItemsModal(true)}
               startIcon={<AddIcon />}
             >
               {T.translate("form_template_item_list.add_item")}
@@ -270,10 +293,20 @@ const FormTemplateItemListPage = ({
           />
         </div>
       )}
-      <InventoryItemsModal
-        open={showInventoryItemsModal}
-        onHide={() => setShowInventoryItemsModal(false)}
-        onAddSelected={handleAddSelectedItems}
+      <AddFormTemplateItemDialog
+        open={showAddInventoryItemsModal}
+        onClose={() => setShowAddInventoryItemsModal(false)}
+        onAddItems={handleAddSelectedItems}
+      />
+      <SponsorItemDialog
+        entity={currentFormTemplateItem}
+        errors={currentFormTemplateItemErrors}
+        open={showInventoryItemModal}
+        onSave={handleInventorySave}
+        onClose={() => setShowInventoryItemModal(false)}
+        onMetaFieldTypeDeleted={deleteItemMetaFieldType}
+        onMetaFieldTypeValueDeleted={deleteItemMetaFieldTypeValue}
+        onImageDeleted={deleteItemImage}
       />
     </div>
   );
@@ -281,15 +314,24 @@ const FormTemplateItemListPage = ({
 
 const mapStateToProps = ({
   currentFormTemplateItemListState,
-  currentFormTemplateState
+  currentFormTemplateState,
+  currentFormTemplateItemState
 }) => ({
   ...currentFormTemplateItemListState,
-  currentFormTemplate: currentFormTemplateState.entity
+  currentFormTemplate: currentFormTemplateState.entity,
+  currentFormTemplateItem: currentFormTemplateItemState.entity,
+  currentFormTemplateItemErrors: currentFormTemplateItemState.errors
 });
 
 export default connect(mapStateToProps, {
   cloneFromInventoryItem,
   deleteFormTemplateItem,
   getFormTemplateItems,
-  getFormTemplate
+  getFormTemplate,
+  getInventoryItems,
+  getFormTemplateItem,
+  saveFormTemplateItem,
+  deleteItemMetaFieldType,
+  deleteItemMetaFieldTypeValue,
+  deleteItemImage
 })(FormTemplateItemListPage);
