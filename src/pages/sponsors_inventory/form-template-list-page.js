@@ -63,6 +63,7 @@ const FormTemplateListPage = ({
   deleteFormTemplateMetaFieldType
 }) => {
   const [formTemplatePopupOpen, setFormTemplatePopupOpen] = useState(false);
+  const [formTemplateDuplicate, setFormTemplateDuplicate] = useState(false);
   const [
     formTemplateFromDuplicatePopupOpen,
     setFormTemplateFromDuplicatePopupOpen
@@ -109,8 +110,17 @@ const FormTemplateListPage = ({
     history.push(`/app/form-templates/${formTemplate.id}/items`);
   };
 
+  const handleDuplicateForm = (formTemplateId) => {
+    getFormTemplate(formTemplateId).then(() => {
+      setFormTemplatePopupOpen(true);
+      setFormTemplateDuplicate(true);
+    });
+    setFormTemplateFromDuplicatePopupOpen(false);
+  };
+
   const handleDuplicatePopupClose = () => {
     getFormTemplates("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    setFormTemplateDuplicate(false);
     setFormTemplateFromDuplicatePopupOpen(false);
   };
 
@@ -291,6 +301,7 @@ const FormTemplateListPage = ({
         errors={currentFormTemplateErrors}
         open={formTemplatePopupOpen}
         onSave={saveFormTemplate}
+        toDuplicate={formTemplateDuplicate}
         onClose={() => setFormTemplatePopupOpen(false)}
         onMetaFieldTypeDeleted={deleteFormTemplateMetaFieldType}
         onMetaFieldTypeValueDeleted={deleteFormTemplateMetaFieldTypeValue}
@@ -300,7 +311,7 @@ const FormTemplateListPage = ({
         open={formTemplateFromDuplicatePopupOpen}
         options={table_options}
         onClose={handleDuplicatePopupClose}
-        onDuplicate={(ids) => console.log("duplicate...", ids)}
+        onDuplicate={handleDuplicateForm}
         onSearch={handleSearch}
         onSort={handleSort}
         formTemplates={formTemplates}

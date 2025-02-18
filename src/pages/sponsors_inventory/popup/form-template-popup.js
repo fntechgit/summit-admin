@@ -40,6 +40,7 @@ const FormTemplateDialog = ({
   open,
   onClose,
   onSave,
+  toDuplicate = false,
   onImageDeleted,
   onMetaFieldTypeDeleted,
   onMetaFieldTypeValueDeleted,
@@ -68,7 +69,7 @@ const FormTemplateDialog = ({
 
   useEffect(() => {
     setEntity({
-      id: initialEntity?.id || null,
+      id: toDuplicate ? null : initialEntity?.id || null,
       code: initialEntity?.code || "",
       name: initialEntity?.name || "",
       instructions: initialEntity?.instructions || "",
@@ -90,7 +91,7 @@ const FormTemplateDialog = ({
           ? initialEntity.materials
           : []
     });
-  }, [initialEntity]);
+  }, [initialEntity, toDuplicate]);
 
   useEffect(() => {
     setErrors(initialErrors || {});
