@@ -32,27 +32,24 @@ const FormTemplateFromDuplicateDialog = ({
   formTemplates
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   const handleSort = (key, dir) => {
     onSort(_, key, dir);
   };
 
   const handleClose = () => {
-    setSelectedRows([]);
+    setSelectedRow(null);
     onClose();
   };
 
   const handleOnCheck = (rowId) => {
-    setSelectedRows((prevSelectedRows) =>
-      prevSelectedRows.includes(rowId)
-        ? prevSelectedRows.filter((id) => id !== rowId)
-        : [...prevSelectedRows, rowId]
-    );
+    const newSelectedRow = selectedRow !== rowId ? rowId : null;
+    setSelectedRow(newSelectedRow);
   };
 
   const handleOnDuplicate = () => {
-    onDuplicate(selectedRows);
+    onDuplicate(selectedRow);
   };
 
   const handleOnSearch = (ev) => {
@@ -69,7 +66,7 @@ const FormTemplateFromDuplicateDialog = ({
         <FormControlLabel
           control={
             <Checkbox
-              checked={selectedRows.includes(row.id)}
+              checked={selectedRow === row.id}
               onChange={() => handleOnCheck(row.id)}
             />
           }
@@ -107,7 +104,7 @@ const FormTemplateFromDuplicateDialog = ({
       <DialogContent sx={{ p: 0 }}>
         <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
           <Grid2 container spacing={2} size={6} sx={{ alignItems: "baseline" }}>
-            <Grid2 size={4}>{selectedRows.length} items selected</Grid2>
+            <Grid2 size={4}>{selectedRow ? "1" : "0"} items selected</Grid2>
           </Grid2>
           <Grid2 container spacing={2} size={6}>
             <Grid2 size={4}>
@@ -164,7 +161,7 @@ const FormTemplateFromDuplicateDialog = ({
       <DialogActions>
         <Button
           onClick={handleOnDuplicate}
-          disabled={selectedRows.length === 0}
+          disabled={!selectedRow}
           fullWidth
           variant="contained"
         >
