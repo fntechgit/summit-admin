@@ -300,7 +300,7 @@ const FormTemplateListPage = ({
         open={formTemplateFromDuplicatePopupOpen}
         options={table_options}
         onClose={handleDuplicatePopupClose}
-        onDuplicate={(ids) => console.log("CHECK...", ids)}
+        onDuplicate={(ids) => console.log("duplicate...", ids)}
         onSearch={handleSearch}
         onSort={handleSort}
         formTemplates={formTemplates}

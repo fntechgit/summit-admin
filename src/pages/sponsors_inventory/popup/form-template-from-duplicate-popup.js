@@ -38,6 +38,11 @@ const FormTemplateFromDuplicateDialog = ({
     onSort(_, key, dir);
   };
 
+  const handleClose = () => {
+    setSelectedRows([]);
+    onClose();
+  };
+
   const handleOnCheck = (rowId) => {
     setSelectedRows((prevSelectedRows) =>
       prevSelectedRows.includes(rowId)
@@ -51,7 +56,6 @@ const FormTemplateFromDuplicateDialog = ({
   };
 
   const handleOnSearch = (ev) => {
-    console.log("CHECL ev", ev);
     if (ev.key === "Enter") onSearch(searchTerm);
   };
 
@@ -90,12 +94,12 @@ const FormTemplateFromDuplicateDialog = ({
   ];
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("form_template_from_duplicate_dialog.duplicate_form")}
         </Typography>
-        <IconButton size="small" onClick={() => onClose()} sx={{ mr: 1 }}>
+        <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
