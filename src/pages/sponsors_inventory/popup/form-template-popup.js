@@ -27,6 +27,7 @@ import {
   TextEditor,
   UploadInputV2
 } from "openstack-uicore-foundation/lib/components";
+import { scrollToError, hasErrors } from "../../../utils/methods";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
@@ -34,12 +35,12 @@ import {
 } from "../../../utils/constants";
 import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
-import { hasErrors, scrollToError } from "../../../utils/methods";
 
-const SponsorItemDialog = ({
+const FormTemplateDialog = ({
   open,
   onClose,
   onSave,
+  toDuplicate = false,
   onImageDeleted,
   onMetaFieldTypeDeleted,
   onMetaFieldTypeValueDeleted,
@@ -50,13 +51,7 @@ const SponsorItemDialog = ({
     id: null,
     code: "",
     name: "",
-    description: "",
-    early_bird_rate: 0,
-    standard_rate: 0,
-    onsite_rate: 0,
-    default_quantity: 0,
-    quantity_limit_per_sponsor: 0,
-    quantity_limit_per_show: 0,
+    instructions: "",
     meta_fields: [
       {
         name: "",
@@ -67,28 +62,17 @@ const SponsorItemDialog = ({
         values: []
       }
     ],
-    images: initialEntity?.images || []
+    materials: initialEntity?.materials || []
   });
 
   const [errors, setErrors] = useState(initialErrors || {});
 
   useEffect(() => {
-    setErrors(initialErrors || {});
-  }, [open]);
-
-  useEffect(() => {
     setEntity({
-      id: initialEntity?.id || null,
+      id: toDuplicate ? null : initialEntity?.id || null,
       code: initialEntity?.code || "",
       name: initialEntity?.name || "",
-      description: initialEntity?.description || "",
-      early_bird_rate: initialEntity?.early_bird_rate || 0,
-      standard_rate: initialEntity?.standard_rate || 0,
-      onsite_rate: initialEntity?.onsite_rate || 0,
-      default_quantity: initialEntity?.default_quantity || 0,
-      quantity_limit_per_sponsor:
-        initialEntity?.quantity_limit_per_sponsor || 0,
-      quantity_limit_per_show: initialEntity?.quantity_limit_per_show || 0,
+      instructions: initialEntity?.instructions || "",
       meta_fields:
         initialEntity?.meta_fields.length > 0
           ? initialEntity?.meta_fields
@@ -102,9 +86,16 @@ const SponsorItemDialog = ({
                 maximum_quantity: ""
               }
             ],
-      images: initialEntity?.images.length > 0 ? initialEntity?.images : []
+      materials:
+        initialEntity?.materials && initialEntity.materials.length > 0
+          ? initialEntity.materials
+          : []
     });
-  }, [initialEntity]);
+  }, [initialEntity, toDuplicate]);
+
+  useEffect(() => {
+    setErrors(initialErrors || {});
+  }, [open]);
 
   const METAFIELD_TYPES = [
     "CheckBox",
@@ -136,16 +127,16 @@ const SponsorItemDialog = ({
   const validateForm = () => {
     const newErrors = {};
 
-    const requiredFields = ["code", "name", "description"];
+    const requiredFields = ["code", "name", "instructions"];
 
     requiredFields.forEach((field) => {
       if (!entity[field].trim()) {
-        newErrors[field] = T.translate("edit_inventory_item.required_error");
+        newErrors[field] = T.translate("edit_form_template.required_error");
       }
     });
 
-    if (entity.images.length === 0) {
-      newErrors.images = T.translate("edit_inventory_item.required_error");
+    if (entity.materials.length === 0) {
+      newErrors.materials = T.translate("edit_form_template.required_error");
     }
 
     scrollToError(newErrors);
@@ -176,7 +167,7 @@ const SponsorItemDialog = ({
   const handleRemoveFieldType = async (fieldType, index) => {
     const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
-      text: `${T.translate("edit_inventory_item.delete_meta_field_warning")} ${
+      text: `${T.translate("edit_form_template.delete_meta_field_warning")} ${
         fieldType.name
       }`,
       type: "warning",
@@ -277,18 +268,18 @@ const SponsorItemDialog = ({
       };
       setEntity((prevEntity) => ({
         ...prevEntity,
-        images: [...prevEntity.images, image]
+        materials: [...prevEntity.materials, image]
       }));
     }
   };
 
   const handleRemoveImage = (imageFile) => {
-    const images = entity.images.filter(
+    const materials = entity.materials.filter(
       (image) => image.filename !== imageFile.name
     );
     setEntity((prevEntity) => ({
       ...prevEntity,
-      images
+      materials
     }));
 
     if (onImageDeleted && entity.id && imageFile.id) {
@@ -297,8 +288,8 @@ const SponsorItemDialog = ({
   };
 
   const getMediaInputValue = () =>
-    entity.images.length > 0
-      ? entity.images.map((img) => ({
+    entity.materials.length > 0
+      ? entity.materials.map((img) => ({
           ...img,
           filename: img.filename ?? img.file_path ?? img.file_url
         }))
@@ -317,7 +308,7 @@ const SponsorItemDialog = ({
         <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
           <Grid2 size={4}>
             <InputLabel htmlFor="code">
-              {T.translate("edit_inventory_item.code")} *
+              {T.translate("edit_form_template.code")} *
             </InputLabel>
             <TextField
               variant="outlined"
@@ -332,7 +323,7 @@ const SponsorItemDialog = ({
           </Grid2>
           <Grid2 size={8}>
             <InputLabel htmlFor="name">
-              {T.translate("edit_inventory_item.name")} *
+              {T.translate("edit_form_template.name")} *
             </InputLabel>
             <TextField
               variant="outlined"
@@ -349,115 +340,23 @@ const SponsorItemDialog = ({
         <Divider />
         <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
           <Grid2 size={12}>
-            <InputLabel htmlFor="description">
-              {T.translate("edit_inventory_item.description")} *
+            <InputLabel htmlFor="instructions">
+              {T.translate("edit_form_template.instructions")} *
             </InputLabel>
             <TextEditor
-              name="description"
-              id="description"
-              value={entity.description}
-              error={hasErrors("description", errors)}
-              helperText={errors.description}
+              name="instructions"
+              id="instructions"
+              value={entity.instructions}
+              error={hasErrors("instructions", errors)}
+              helperText={errors.instructions}
               onChange={handleChange}
-            />
-          </Grid2>
-        </Grid2>
-
-        <Divider />
-
-        <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-          <Grid2 size={4}>
-            <InputLabel htmlFor="early_bird_rate">
-              {T.translate("edit_inventory_item.early_bird_rate")}
-            </InputLabel>
-            <TextField
-              variant="outlined"
-              name="early_bird_rate"
-              id="early_bird_rate"
-              value={entity.early_bird_rate}
-              onChange={handleChange}
-              type="number"
-              fullWidth
-            />
-          </Grid2>
-          <Grid2 size={4}>
-            <InputLabel htmlFor="standard_rate">
-              {T.translate("edit_inventory_item.standard_rate")}
-            </InputLabel>
-            <TextField
-              variant="outlined"
-              name="standard_rate"
-              id="standard_rate"
-              value={entity.standard_rate}
-              onChange={handleChange}
-              type="number"
-              fullWidth
-            />
-          </Grid2>
-          <Grid2 size={4}>
-            <InputLabel htmlFor="onsite_rate">
-              {T.translate("edit_inventory_item.onsite_rate")}
-            </InputLabel>
-            <TextField
-              variant="outlined"
-              name="onsite_rate"
-              id="onsite_rate"
-              value={entity.onsite_rate}
-              onChange={handleChange}
-              type="number"
-              fullWidth
-            />
-          </Grid2>
-        </Grid2>
-        <Divider />
-        <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-          <Grid2 size={4}>
-            <InputLabel htmlFor="default_quantity">
-              {T.translate("edit_inventory_item.default_quantity")}
-            </InputLabel>
-            <TextField
-              variant="outlined"
-              name="default_quantity"
-              id="default_quantity"
-              value={entity.default_quantity}
-              onChange={handleChange}
-              type="number"
-              fullWidth
-            />
-          </Grid2>
-          <Grid2 size={4}>
-            <InputLabel htmlFor="quantity_limit_per_sponsor">
-              {T.translate("edit_inventory_item.quantity_limit_per_sponsor")}
-            </InputLabel>
-            <TextField
-              variant="outlined"
-              name="quantity_limit_per_sponsor"
-              id="quantity_limit_per_sponsor"
-              value={entity.quantity_limit_per_sponsor}
-              onChange={handleChange}
-              type="number"
-              fullWidth
-            />
-          </Grid2>
-          <Grid2 size={4}>
-            <InputLabel htmlFor="quantity_limit_per_show">
-              {T.translate("edit_inventory_item.quantity_limit_per_show")}
-            </InputLabel>
-            <TextField
-              variant="outlined"
-              name="quantity_limit_per_show"
-              id="quantity_limit_per_show"
-              value={entity.quantity_limit_per_show}
-              onChange={handleChange}
-              type="number"
-              fullWidth
             />
           </Grid2>
         </Grid2>
 
         <Divider />
         <DialogTitle sx={{ p: 3 }}>
-          {T.translate("edit_inventory_item.meta_fields")}
+          {T.translate("edit_form_template.meta_fields")}
         </DialogTitle>
 
         <Box sx={{ px: 3 }}>
@@ -475,7 +374,7 @@ const SponsorItemDialog = ({
                   <Grid2 container spacing={2} sx={{ alignItems: "end" }}>
                     <Grid2 size={4}>
                       <InputLabel htmlFor="fieldTitle">
-                        {T.translate("edit_inventory_item.meta_field_title")}
+                        {T.translate("edit_form_template.meta_field_title")}
                       </InputLabel>
                       <TextField
                         name="fieldTitle"
@@ -489,7 +388,7 @@ const SponsorItemDialog = ({
                     </Grid2>
                     <Grid2 size={4}>
                       <InputLabel htmlFor="fieldType">
-                        {T.translate("edit_inventory_item.meta_field_type")}
+                        {T.translate("edit_form_template.meta_field_type")}
                       </InputLabel>
                       <Select
                         value={field.type}
@@ -520,7 +419,7 @@ const SponsorItemDialog = ({
                             />
                           }
                           label={T.translate(
-                            "edit_inventory_item.meta_field_required"
+                            "edit_form_template.meta_field_required"
                           )}
                         />
                       </FormControl>
@@ -551,7 +450,7 @@ const SponsorItemDialog = ({
                           <TextField
                             value={field.minimum_quantity}
                             placeholder={T.translate(
-                              "edit_inventory_item.placeholders.meta_field_minimum_quantity"
+                              "edit_form_template.placeholders.meta_field_minimum_quantity"
                             )}
                             type="number"
                             onChange={(e) =>
@@ -570,7 +469,7 @@ const SponsorItemDialog = ({
                           <TextField
                             value={field.maximum_quantity}
                             placeholder={T.translate(
-                              "edit_inventory_item.placeholders.meta_field_maximum_quantity"
+                              "edit_form_template.placeholders.meta_field_maximum_quantity"
                             )}
                             type="number"
                             onChange={(e) =>
@@ -633,11 +532,11 @@ const SponsorItemDialog = ({
 
         <Grid2 container spacing={2} sx={{ alignItems: "start", px: 3, py: 1 }}>
           <Grid2 size={12}>
-            <InputLabel htmlFor="image" id="images">
-              {T.translate("edit_inventory_item.images")}
+            <InputLabel htmlFor="image" id="materials">
+              {T.translate("edit_form_template.materials")}
             </InputLabel>
-            {errors.images && (
-              <FormHelperText error>{errors.images}</FormHelperText>
+            {errors.materials && (
+              <FormHelperText error>{errors.materials}</FormHelperText>
             )}
             <UploadInputV2
               id="image-upload"
@@ -651,7 +550,7 @@ const SponsorItemDialog = ({
               maxFiles={mediaType.max_uploads_qty}
               canAdd={
                 mediaType.is_editable ||
-                entity.images.length < mediaType.max_uploads_qty
+                entity.materials.length < mediaType.max_uploads_qty
               }
               parallelChunkUploads
             />
@@ -661,18 +560,20 @@ const SponsorItemDialog = ({
       <Divider />
       <DialogActions>
         <Button onClick={handleSave} fullWidth variant="contained">
-          {T.translate("edit_inventory_item.save_changes")}
+          {entity.id
+            ? T.translate("edit_form_template.save_changes")
+            : T.translate("edit_form_template.add_form")}
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-SponsorItemDialog.propTypes = {
+FormTemplateDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   entity: PropTypes.object
 };
 
-export default SponsorItemDialog;
+export default FormTemplateDialog;

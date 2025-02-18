@@ -86,7 +86,7 @@ export const getFormTemplates =
 
     const params = {
       page,
-      fields: "id,code,name",
+      fields: "id,code,name,level,expire_date",
       relations: "items",
       per_page: perPage,
       access_token: accessToken
@@ -223,7 +223,7 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
 
   const success_message = {
     title: T.translate("general.done"),
-    html: T.translate("edit_inventory_item.inventory_item_created"),
+    html: T.translate("edit_form_template.form_template_created"),
     type: "success"
   };
 

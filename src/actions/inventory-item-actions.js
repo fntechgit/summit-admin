@@ -111,7 +111,8 @@ export const getInventoryItems =
 
     const params = {
       page,
-      fields: "id,code,name,images,images.file_url",
+      fields:
+        "id,code,name,images,images.file_url,early_bird_rate,standard_rate,onsite_rate,default_quantity",
       expand: "images",
       per_page: perPage,
       access_token: accessToken
@@ -132,7 +133,7 @@ export const getInventoryItems =
       createAction(RECEIVE_INVENTORY_ITEMS),
       `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/`,
       authErrorHandler,
-      { order, orderDir, page, term }
+      { order, orderDir, page, perPage, term }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

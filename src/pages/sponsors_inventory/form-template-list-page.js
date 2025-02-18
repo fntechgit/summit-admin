@@ -11,59 +11,69 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Grid2,
+  TextField
+} from "@mui/material";
+import Box from "@mui/material/Box";
+import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
+import EditIcon from "@mui/icons-material/Edit";
+import IconButton from "@mui/material/IconButton";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
 import {
   getFormTemplates,
-  deleteFormTemplate
+  deleteFormTemplate,
+  getFormTemplate,
+  saveFormTemplate,
+  deleteFormTemplateMaterial,
+  deleteFormTemplateMetaFieldTypeValue,
+  deleteFormTemplateMetaFieldType,
+  resetFormTemplateForm
 } from "../../actions/form-template-actions";
+import MuiTable from "../../components/mui/table/mui-table";
+import FormTemplateDialog from "./popup/form-template-popup";
+import history from "../../history";
+import FormTemplateFromDuplicateDialog from "./popup/form-template-from-duplicate-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const FormTemplateListPage = ({
   formTemplates,
-  lastPage,
   currentPage,
   perPage,
   term,
   order,
   orderDir,
   totalFormTemplates,
-  history,
+  currentFormTemplate,
+  currentFormTemplateErrors,
   getFormTemplates,
-  deleteFormTemplate
+  getFormTemplate,
+  saveFormTemplate,
+  resetFormTemplateForm,
+  deleteFormTemplateMaterial,
+  deleteFormTemplateMetaFieldTypeValue,
+  deleteFormTemplateMetaFieldType
 }) => {
+  const [formTemplatePopupOpen, setFormTemplatePopupOpen] = useState(false);
+  const [formTemplateDuplicate, setFormTemplateDuplicate] = useState(false);
+  const [
+    formTemplateFromDuplicatePopupOpen,
+    setFormTemplateFromDuplicatePopupOpen
+  ] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
-    getFormTemplates(term, currentPage, perPage, order, orderDir);
+    getFormTemplates("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    resetFormTemplateForm();
   }, []);
-
-  const handleEdit = (templateId) => {
-    history.push(`/app/form-templates/${templateId}`);
-  };
-
-  const handleDelete = (templateId) => {
-    const formTemplate = formTemplates.find((s) => s.id === templateId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate(
-        "form_template_list.delete_form_template_warning"
-      )} ${formTemplate.name}?`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteFormTemplate(templateId);
-      }
-    });
-  };
 
   const handlePageChange = (page) => {
     getFormTemplates(term, page, perPage, order, orderDir);
@@ -73,56 +83,108 @@ const FormTemplateListPage = ({
     getFormTemplates(term, currentPage, perPage, key, dir);
   };
 
-  const handleSearch = (term) => {
-    getFormTemplates(term, currentPage, perPage, order, orderDir);
+  const handleSearch = (ev) => {
+    if (ev.key === "Enter") {
+      getFormTemplates(searchTerm, currentPage, perPage, order, orderDir);
+    }
+    // search on duplicate popup
+    if (typeof ev === "string")
+      getFormTemplates(ev, currentPage, perPage, order, orderDir);
+  };
+
+  const handleRowEdit = (row) => {
+    if (row) getFormTemplate(row.id);
+    setFormTemplatePopupOpen(true);
+  };
+
+  const handleNewFromDuplicate = () => {
+    setFormTemplateFromDuplicatePopupOpen(true);
   };
 
   const handleNewFormTemplate = () => {
-    history.push("/app/form-templates/new");
+    resetFormTemplateForm();
+    setFormTemplatePopupOpen(true);
   };
 
-  const handleManageTemplateItems = (ev, templateId) => {
-    ev.stopPropagation();
-    history.push(`/app/form-templates/${templateId}/items`);
+  const handleManageItems = (formTemplate) => {
+    history.push(`/app/form-templates/${formTemplate.id}/items`);
+  };
+
+  const handleDuplicateForm = (formTemplateId) => {
+    getFormTemplate(formTemplateId).then(() => {
+      setFormTemplatePopupOpen(true);
+      setFormTemplateDuplicate(true);
+    });
+    setFormTemplateFromDuplicatePopupOpen(false);
+  };
+
+  const handleDuplicatePopupClose = () => {
+    getFormTemplates("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    setFormTemplateDuplicate(false);
+    setFormTemplateFromDuplicatePopupOpen(false);
   };
 
   const columns = [
-    { columnKey: "id", value: "Id", sortable: true },
     {
       columnKey: "code",
-      value: T.translate("form_template_list.code_column_label"),
+      header: T.translate("form_template_list.code_column_label"),
       sortable: true
     },
     {
       columnKey: "name",
-      value: T.translate("form_template_list.name_column_label"),
+      header: T.translate("form_template_list.name_column_label"),
       sortable: true
     },
     {
       columnKey: "items_qty",
-      value: T.translate("form_template_list.items_column_label"),
+      header: T.translate("form_template_list.items_column_label"),
       sortable: false
     },
     {
       columnKey: "manage_items",
-      render: (filter) => (
-        <button
-          className="btn btn-default"
-          onClick={(ev) => handleManageTemplateItems(ev, filter.id)}
+      header: "",
+      width: 100,
+      align: "center",
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="small"
+          onClick={() => handleManageItems(row)}
         >
-          {T.translate("form_template_list.manage_items")}
-        </button>
+          Manage Items
+        </Button>
       )
+    },
+    {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row, { onRowEdit }) => (
+        <IconButton size="small" onClick={() => onRowEdit(row)}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "archive",
+      header: "",
+      width: 70,
+      align: "center",
+      render: () => (
+        <Button variant="text" color="inherit" size="medium">
+          Archive
+        </Button>
+      ),
+      className: "dottedBorderLeft"
     }
   ];
 
   const table_options = {
     sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      edit: { onClick: handleEdit },
-      delete: { onClick: handleDelete }
-    }
+    sortDir: orderDir
   };
 
   return (
@@ -132,58 +194,148 @@ const FormTemplateListPage = ({
         {T.translate("form_template_list.form_templates")} ({totalFormTemplates}
         ){" "}
       </h3>
-      <div className="alert alert-info" role="alert">
+      <Alert
+        severity="info"
+        sx={{
+          justifyContent: "start",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
         {T.translate("form_template_list.alert_info")}
-      </div>
-      <div className="row">
-        <div className="col-md-6">
-          <FreeTextSearch
-            value={term ?? ""}
+      </Alert>
+
+      <Grid2
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={1}>
+          <Box component="span">{totalFormTemplates} forms</Box>
+        </Grid2>
+        <Grid2 size={2} offset={3}>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  onChange={(ev) => console.log("CHECK BOX", ev.target.checked)}
+                  inputProps={{
+                    "aria-label": T.translate(
+                      "form_template_list.hide_archived"
+                    )
+                  }}
+                />
+              }
+              label={T.translate("form_template_list.hide_archived")}
+            />
+          </FormGroup>
+        </Grid2>
+        <Grid2 size={2}>
+          <TextField
+            variant="outlined"
+            value={searchTerm}
             placeholder={T.translate(
-              "form_template_list.placeholders.search_inventory_items"
+              "inventory_item_list.placeholders.search_inventory_items"
             )}
-            onSearch={handleSearch}
+            slotProps={{
+              input: {
+                startAdornment: <SearchIcon sx={{ mr: 1 }} />
+              }
+            }}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            onKeyDown={handleSearch}
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: "36px"
+              }
+            }}
           />
-        </div>
-        <div className="col-md-6 text-right">
-          <button className="btn btn-primary" onClick={handleNewFormTemplate}>
+        </Grid2>
+        <Grid2 size={2}>
+          <Button
+            variant="contained"
+            size="medium"
+            fullWidth
+            onClick={() => handleNewFromDuplicate()}
+            startIcon={<AddIcon />}
+            sx={{ height: "36px" }}
+          >
+            {T.translate("form_template_list.using_duplicate")}
+          </Button>
+        </Grid2>
+        <Grid2 size={2}>
+          <Button
+            variant="contained"
+            size="medium"
+            fullWidth
+            onClick={() => handleNewFormTemplate()}
+            startIcon={<AddIcon />}
+            sx={{ height: "36px" }}
+          >
             {T.translate("form_template_list.add_form_template")}
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Grid2>
+      </Grid2>
 
       {formTemplates.length > 0 && (
         <div>
-          <Table
-            options={table_options}
-            data={formTemplates}
+          <MuiTable
             columns={columns}
+            data={formTemplates}
+            options={table_options}
+            perPage={perPage}
+            currentPage={currentPage}
+            onRowEdit={handleRowEdit}
+            onPageChange={handlePageChange}
             onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
           />
         </div>
       )}
+      <FormTemplateDialog
+        entity={currentFormTemplate}
+        errors={currentFormTemplateErrors}
+        open={formTemplatePopupOpen}
+        onSave={saveFormTemplate}
+        toDuplicate={formTemplateDuplicate}
+        onClose={() => setFormTemplatePopupOpen(false)}
+        onMetaFieldTypeDeleted={deleteFormTemplateMetaFieldType}
+        onMetaFieldTypeValueDeleted={deleteFormTemplateMetaFieldTypeValue}
+        onMaterialDeleted={deleteFormTemplateMaterial}
+      />
+      <FormTemplateFromDuplicateDialog
+        open={formTemplateFromDuplicatePopupOpen}
+        options={table_options}
+        onClose={handleDuplicatePopupClose}
+        onDuplicate={handleDuplicateForm}
+        onSearch={handleSearch}
+        onSort={handleSort}
+        formTemplates={formTemplates}
+      />
     </div>
   );
 };
 
-const mapStateToProps = ({ currentFormTemplateListState }) => ({
-  ...currentFormTemplateListState
+const mapStateToProps = ({
+  currentFormTemplateListState,
+  currentFormTemplateState
+}) => ({
+  ...currentFormTemplateListState,
+  currentFormTemplate: currentFormTemplateState.entity,
+  currentFormTemplateErrors: currentFormTemplateState.errors
 });
 
 export default connect(mapStateToProps, {
   getFormTemplates,
-  deleteFormTemplate
+  getFormTemplate,
+  deleteFormTemplate,
+  saveFormTemplate,
+  deleteFormTemplateMetaFieldType,
+  deleteFormTemplateMetaFieldTypeValue,
+  deleteFormTemplateMaterial,
+  resetFormTemplateForm
 })(FormTemplateListPage);

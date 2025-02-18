@@ -27,11 +27,16 @@ const MuiTable = ({
   currentPage,
   onRowEdit,
   onPageChange,
+  onPerPageChange,
   onSort,
-  options
+  options = { sortCol: "", sortDir: "" }
 }) => {
   const handleChangePage = (_, newPage) => {
     onPageChange(newPage);
+  };
+
+  const handlePerPageChange = (perPage) => {
+    onPerPageChange(perPage);
   };
 
   const { sortCol, sortDir } = options;
@@ -50,7 +55,11 @@ const MuiTable = ({
                 {columns.map((col) => (
                   <TableCell
                     key={col.columnKey}
-                    sx={{ width: col.width }}
+                    sx={{
+                      width: col.width,
+                      minWidth: col.width,
+                      maxWidth: col.width
+                    }}
                     align={col.align ?? "left"}
                   >
                     {col.sortable ? (
@@ -121,33 +130,36 @@ const MuiTable = ({
         </TableContainer>
 
         {/* PAGINATION */}
-        <TablePagination
-          component="div"
-          count={data.length}
-          rowsPerPageOptions={[
-            DEFAULT_PER_PAGE,
-            TWENTY_PER_PAGE,
-            FIFTY_PER_PAGE
-          ]}
-          rowsPerPage={perPage}
-          page={currentPage - 1}
-          onPageChange={(_, newPage) => {
-            handleChangePage(newPage + 1);
-          }}
-          labelRowsPerPage={T.translate("mui_table.rows_per_page")}
-          sx={{
-            ".MuiTablePagination-toolbar": {
-              alignItems: "baseline",
-              marginTop: "1.6rem"
-            },
-            ".MuiTablePagination-spacer": {
-              display: "none"
-            },
-            ".MuiTablePagination-displayedRows": {
-              marginLeft: "auto"
-            }
-          }}
-        />
+        {currentPage && perPage && (
+          <TablePagination
+            component="div"
+            count={data.length}
+            rowsPerPageOptions={[
+              DEFAULT_PER_PAGE,
+              TWENTY_PER_PAGE,
+              FIFTY_PER_PAGE
+            ]}
+            onRowsPerPageChange={(ev) => handlePerPageChange(ev.target.value)}
+            rowsPerPage={perPage}
+            page={currentPage - 1}
+            onPageChange={(_, newPage) => {
+              handleChangePage(newPage + 1);
+            }}
+            labelRowsPerPage={T.translate("mui_table.rows_per_page")}
+            sx={{
+              ".MuiTablePagination-toolbar": {
+                alignItems: "baseline",
+                marginTop: "1.6rem"
+              },
+              ".MuiTablePagination-spacer": {
+                display: "none"
+              },
+              ".MuiTablePagination-displayedRows": {
+                marginLeft: "auto"
+              }
+            }}
+          />
+        )}
       </Paper>
     </Box>
   );
