@@ -443,15 +443,22 @@ class EventForm extends React.Component {
     onAttach(newEntity, formData, "profile");
   }
 
+  getMaterialUrl(material) {
+    let url = null;
+    if (isValidUrl(material.private_url)) url = material.private_url;
+    if (isValidUrl(material.public_url)) url = material.public_url;
+    if (isValidUrl(material.link)) url = material.link;
+    if (material.youtube_id)
+      url = `https://www.youtube.com/watch?v=${material.youtube_id}`;
+    if (material.external_url) url = material.external_url;
+
+    return url;
+  }
+
   handleMaterialDownload(materialId) {
     const { entity } = this.props;
     const material = entity.materials.find((m) => m.id === materialId);
-
-    const url = isValidUrl(material.private_url)
-      ? material.private_url
-      : isValidUrl(material.public_url)
-      ? material.public_url
-      : null;
+    const url = this.getMaterialUrl(material);
 
     if (!url) {
       Swal.fire(
