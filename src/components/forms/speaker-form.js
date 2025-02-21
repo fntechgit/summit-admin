@@ -30,6 +30,7 @@ import {
   stripTags
 } from "../../utils/methods";
 import { mustReplaceSpeakerFieldsWithMemberInfo } from "../../models/app-config";
+import CopyClipboard from "../buttons/copy-clipboard";
 
 class SpeakerForm extends React.Component {
   constructor(props) {
@@ -311,7 +312,14 @@ class SpeakerForm extends React.Component {
             />
           </div>
           <div className="col-md-4">
-            <label> {T.translate("general.email")} </label>
+            <label>
+              {" "}
+              {T.translate("general.email")}
+              <CopyClipboard
+                text={entity.email}
+                tooltipText={T.translate("edit_speaker.copy_email")}
+              />
+            </label>
             <Input
               className="form-control"
               id="email"
