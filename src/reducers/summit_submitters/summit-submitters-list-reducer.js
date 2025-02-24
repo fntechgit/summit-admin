@@ -9,7 +9,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   INIT_SUBMITTERS_LIST_PARAMS,
   REQUEST_SUBMITTERS_BY_SUMMIT,
@@ -22,7 +23,6 @@ import {
   SET_SUBMITTERS_CURRENT_FLOW_EVENT
 } from "../../actions/submitter-actions";
 
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   REQUEST_SUMMIT,
   SET_CURRENT_SUMMIT
@@ -44,6 +44,7 @@ const DEFAULT_STATE = {
   selectedAll: false,
   selectionPlanFilter: [],
   trackFilter: [],
+  trackGroupFilter: [],
   activityTypeFilter: [],
   selectionStatusFilter: [],
   mediaUploadTypeFilter: { operator: null, value: [] },
@@ -61,7 +62,7 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SUBMITTERS_BY_SUMMIT: {
-      let { order, orderDir, page, ...rest } = payload;
+      const { order, orderDir, page, ...rest } = payload;
 
       if (
         order !== state.order ||
@@ -92,7 +93,7 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_SUBMITTERS_BY_SUMMIT: {
-      let { current_page, total, last_page } = payload.response;
+      const { current_page, total, last_page } = payload.response;
 
       const items = buildSpeakersSubmittersList(state, payload.response.data);
 
@@ -197,8 +198,8 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
   }
 };
 
-const markCheckedItems = (data, state) => {
-  return data.map((it) => {
+const markCheckedItems = (data, state) =>
+  data.map((it) => {
     if (state.selectedAll) {
       it.checked = !state.excludedItems.includes(it.id);
     } else {
@@ -207,6 +208,5 @@ const markCheckedItems = (data, state) => {
 
     return it;
   });
-};
 
 export default summitSubmittersListReducer;
