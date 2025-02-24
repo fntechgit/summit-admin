@@ -73,6 +73,7 @@ export const DEFAULT_PER_PAGE = 10;
 export const DEFAULT_100_PER_PAGE = 100;
 
 export const TWENTY_PER_PAGE = 20;
+export const FIFTY_PER_PAGE = 50;
 
 export const TWENTYTHREE_HOURS = 23;
 
@@ -126,6 +127,8 @@ export const DECIMAL_DIGITS = 2;
 export const TWO = 2;
 
 export const TEN = 10;
+
+export const ONE_HUNDRED = 100;
 
 export const DEFAULT_Z_INDEX = 1;
 
