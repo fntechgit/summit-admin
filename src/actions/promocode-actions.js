@@ -240,7 +240,7 @@ export const getPromocode = (promocodeId) => async (dispatch, getState) => {
 
   const params = {
     expand:
-      "owner,sponsor,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,speaker,tickets,ticket_type,ticket_types_rules,tags",
+      "owner,sponsor,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,speaker,tickets,ticket_type,ticket_types_rules,tags,allowed_ticket_types",
     access_token: accessToken
   };
 
@@ -270,7 +270,7 @@ export const savePromocode =
 
     const params = {
       expand:
-        "owner,sponsor,sponsor.company,sponsor.sponsorship,speaker,tickets,ticket_type,ticket_types_rules,tags",
+        "owner,sponsor,sponsor.company,sponsor.sponsorship,speaker,tickets,ticket_type,ticket_types_rules,tags,allowed_ticket_types",
       access_token: accessToken
     };
 
