@@ -22,6 +22,7 @@ import OwnerInput from "../inputs/owner-input";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import CopyClipboard from "../buttons/copy-clipboard";
 
 class TicketForm extends React.Component {
   constructor(props) {
@@ -84,7 +85,7 @@ class TicketForm extends React.Component {
     if (ev.target.type === "checkbox") {
       value = ev.target.checked;
     }
-    let {shouldShowSave} = this.state;
+    let { shouldShowSave } = this.state;
     if (id === "ticket_type") {
       shouldShowSave = !(value == null);
     }
@@ -279,7 +280,14 @@ class TicketForm extends React.Component {
             />
           </div>
           <div className="col-md-6">
-            <label> {T.translate("edit_ticket.number")}:&nbsp;</label>
+            <label>
+              {" "}
+              {T.translate("edit_ticket.number")}:&nbsp;
+              <CopyClipboard
+                text={entity.number}
+                tooltipText={T.translate("edit_ticket.copy_ticket_number")}
+              />
+            </label>
             <br />
             {entity.number}
           </div>

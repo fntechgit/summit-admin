@@ -645,7 +645,8 @@
     "speaker_saved": "Speaker saved successfully.",
     "speaker_created": "Speaker created successfully.",
     "company": "Company",
-    "phone_number": "Phone #"
+    "phone_number": "Phone #",
+    "copy_email": "Copy Email"
   },
   "merge_speakers": {
     "merge_speakers": "Merge Speakers",
@@ -1613,6 +1614,7 @@
     "ticket": "Ticket",
     "type": "Type",
     "number": "Number",
+    "copy_ticket_number": "Copy Ticket Number",
     "bought_date": "Purchase Date",
     "discount": "Discount",
     "currency": "Currency",
@@ -2566,6 +2568,7 @@
   },
   "edit_email_flow_event": {
     "email_template_identifier": "Email Template (Associated with Event)",
+    "copy_email_template": "Copy Email Template",
     "email_flow_event": "Email Events",
     "flow_name": "eFlow Name",
     "event_type": "Event Type",
