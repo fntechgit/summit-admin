@@ -9,9 +9,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   putRequest,
   postRequest,
@@ -25,6 +24,7 @@ import {
   putFile,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 
 export const RECEIVE_EVENT_MATERIAL = "RECEIVE_EVENT_MATERIAL";
@@ -64,15 +64,15 @@ export const getEventMaterial = (eventMaterialId) => (dispatch, getState) => {
   dispatch(stopLoading());
 };
 
-export const resetEventMaterialForm = () => (dispatch, getState) => {
+export const resetEventMaterialForm = () => (dispatch) => {
   dispatch(createAction(RESET_EVENT_MATERIAL_FORM)({}));
 };
 
 export const saveEventMaterial = (entity) => async (dispatch, getState) => {
-  const { currentSummitState, currentSummitEventState } = getState();
+  const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
-  const eventId = currentSummitEventState.entity.id;
+  const eventId = entity.presentation_id;
 
   let slug = "";
 
@@ -84,7 +84,6 @@ export const saveEventMaterial = (entity) => async (dispatch, getState) => {
   if (slug == "media-uploads") withCredentials = true;
   dispatch(startLoading());
 
-  const normalizedEventMaterialFormEntity = normalizeEntity(entity);
   const params = {
     access_token: accessToken,
     expand: "media_upload_type, media_upload_type.type"
@@ -101,7 +100,7 @@ export const saveEventMaterial = (entity) => async (dispatch, getState) => {
       authErrorHandler,
       entity,
       withCredentials
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(
         showSuccessMessage(
           T.translate("edit_event_material.event_material_saved")
@@ -123,7 +122,7 @@ export const saveEventMaterial = (entity) => async (dispatch, getState) => {
     authErrorHandler,
     entity,
     withCredentials
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(
       showMessage(success_message, () => {
         history.push(`/app/summits/${currentSummit.id}/events/${eventId}`);
@@ -157,7 +156,7 @@ export const saveEventMaterialWithFile =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showSuccessMessage(
             T.translate("edit_event_material.event_material_saved")
@@ -179,7 +178,7 @@ export const saveEventMaterialWithFile =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(
           showMessage(success_message, () => {
             history.push(`/app/summits/${currentSummit.id}/events/${eventId}`);
@@ -244,22 +243,22 @@ const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
   if (entity.class_name !== "PresentationVideo") {
-    delete normalizedEntity["youtube_id"];
+    delete normalizedEntity.youtube_id;
   }
 
   if (entity.class_name === "PresentationVideo") {
-    delete normalizedEntity["link"];
+    delete normalizedEntity.link;
   }
 
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["last_edited"];
-  delete normalizedEntity["is_default"];
-  delete normalizedEntity["display_on_site_label"];
-  delete normalizedEntity["order"];
-  delete normalizedEntity["presentation_id"];
-  delete normalizedEntity["file"];
-  delete normalizedEntity["file_link"];
-  delete normalizedEntity["has_file"];
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.is_default;
+  delete normalizedEntity.display_on_site_label;
+  delete normalizedEntity.order;
+  delete normalizedEntity.presentation_id;
+  delete normalizedEntity.file;
+  delete normalizedEntity.file_link;
+  delete normalizedEntity.has_file;
   return normalizedEntity;
 };
