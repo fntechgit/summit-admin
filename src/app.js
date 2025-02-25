@@ -87,6 +87,7 @@ window.SENTRY_DSN = process.env.SENTRY_DSN;
 window.SENTRY_TRACE_SAMPLE_RATE = process.env.SENTRY_TRACE_SAMPLE_RATE;
 window.SENTRY_TRACE_PROPAGATION_TARGETS =
   process.env.SENTRY_TRACE_PROPAGATION_TARGETS;
+window.CFP_APP_BASE_URL = process.env.CFP_APP_BASE_URL;
 
 if (exclusiveSections.hasOwnProperty(process.env.APP_CLIENT_NAME)) {
   window.EXCLUSIVE_SECTIONS = exclusiveSections[process.env.APP_CLIENT_NAME];
