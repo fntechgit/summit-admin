@@ -1,4 +1,4 @@
-/**
+/* *
  * Copyright 2017 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,12 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
-
-import { RECEIVE_EMAILS, REQUEST_EMAILS } from "../../actions/email-actions";
+ * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { RECEIVE_EMAILS, REQUEST_EMAILS } from "../../actions/email-actions";
 
 const DEFAULT_STATE = {
   emails: [],
@@ -35,7 +34,7 @@ const emailLogListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EMAILS: {
-      let { order, orderDir, term, filters } = payload;
+      const { order, orderDir, term, filters } = payload;
 
       return { ...state, order, orderDir, term, filters };
     }
@@ -43,15 +42,15 @@ const emailLogListReducer = (state = DEFAULT_STATE, action) => {
       let { total, last_page, current_page, data } = payload.response;
 
       data = data.map((m) => {
-        let sent_date = m.sent_date
+        const sent_date = m.sent_date
           ? epochToMomentTimeZone(m.sent_date, "UTC").format(
               "MMMM Do YYYY, h:mm:ss a"
             )
           : "";
         return {
           ...m,
-          template: m.template.identifier,
-          sent_date: sent_date,
+          template: m.template?.identifier || "N/A",
+          sent_date,
           last_error: m.last_error ? m.last_error : "N/A"
         };
       });
