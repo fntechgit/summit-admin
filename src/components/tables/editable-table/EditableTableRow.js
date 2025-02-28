@@ -133,10 +133,7 @@ function EditableTableRow(props) {
               );
             }
             return (
-              <td
-                key={`row-edit-${col.columnKey}-${row.id}`}
-                className={styles.bulkEditCol}
-              >
+              <td key={`row-edit-${col.columnKey}-${row.id}`}>
                 {col.render
                   ? col.render(row[col.columnKey])
                   : formattedData[col.columnKey]}

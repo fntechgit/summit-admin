@@ -17,27 +17,27 @@ import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";
 import {
-  FreeTextSearch,
-  UploadInput,
-  Input,
-  TagInput,
-  SpeakerInput,
-  Dropdown,
+  CompanyInput,
   DateTimePicker,
-  OperatorInput,
+  Dropdown,
+  FreeTextSearch,
+  Input,
   MemberInput,
-  CompanyInput
+  OperatorInput,
+  SpeakerInput,
+  TagInput,
+  UploadInput
 } from "openstack-uicore-foundation/lib/components";
 import { SegmentedControl } from "segmented-control";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
-  getEvents,
+  bulkUpdateEvents,
+  changeEventListSearchTerm,
   deleteEvent,
   exportEvents,
+  getEvents,
   importEventsCSV,
-  importMP4AssetsFromMUX,
-  changeEventListSearchTerm,
-  bulkUpdateEvents
+  importMP4AssetsFromMUX
 } from "../../actions/event-actions";
 import { handleDDLSortByLabel, hasErrors, uuidv4 } from "../../utils/methods";
 import "../../styles/summit-event-list-page.less";
@@ -60,14 +60,14 @@ import {
 import SaveFilterCriteria from "../../components/filters/save-filter-criteria";
 import SelectFilterCriteria from "../../components/filters/select-filter-criteria";
 import {
-  saveFilterCriteria,
-  deleteFilterCriteria
+  deleteFilterCriteria,
+  saveFilterCriteria
 } from "../../actions/filter-criteria-actions";
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
 import { saveEventMaterial } from "../../actions/event-material-actions";
 
-const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
+const fieldNames = (allSelectionPlans, allTracks, event_types) => [
   {
     columnKey: "speakers",
     value: "speakers",
@@ -110,24 +110,30 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
     columnKey: "track",
     value: "track",
     sortable: true,
-    editableField: (extraProps) => (
-      <Dropdown
-        id="track"
-        value={extraProps.value}
-        options={track_ddl}
-        menuPortalTarget={document.body}
-        menuPosition="fixed"
-        styles={{
-          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-          control: (base, state) => ({
-            ...base,
-            zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
-          })
-        }}
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        {...extraProps}
-      />
-    )
+    editableField: (extraProps) => {
+      const track_ddl = allTracks
+        ?.sort((a, b) => a.order - b.order)
+        .map((t) => ({ label: t.name, value: t.id }));
+
+      return (
+        <Dropdown
+          id="track"
+          value={extraProps.value}
+          options={track_ddl}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
+          styles={{
+            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+            control: (base, state) => ({
+              ...base,
+              zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+            })
+          }}
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...extraProps}
+        />
+      );
+    }
   },
   { columnKey: "start_date", value: "start_date", sortable: true },
   { columnKey: "end_date", value: "end_date", sortable: true },
@@ -145,6 +151,7 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
     sortable: true,
     editableField: (extraProps) => {
       if (!extraProps.row.type?.id) return false;
+
       const event_type = event_types.find(
         (t) => t.id === extraProps.row.type?.id
       );
@@ -153,10 +160,22 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
         ["PresentationType"].indexOf(event_type.class_name) !==
           INDEX_NOT_FOUND ||
         ["PresentationType"].indexOf(event_type.name) !== INDEX_NOT_FOUND;
-      return allowSelectionPlanEdit ? (
+
+      if (!allowSelectionPlanEdit) return false;
+
+      const track = allTracks.find((t) => t.id === extraProps.row?.track?.id);
+
+      const selection_plans_per_track = allSelectionPlans
+        .filter((sp) =>
+          sp.track_groups.some((gr) => track.track_groups.includes(gr))
+        )
+        ?.sort((a, b) => a.order - b.order)
+        .map((sp) => ({ label: sp.name, value: sp.id }));
+
+      return (
         <Dropdown
           id="selection_plan"
-          options={selection_plans_ddl}
+          options={selection_plans_per_track}
           value={extraProps.value || ""}
           menuPortalTarget={document.body}
           menuPosition="fixed"
@@ -164,17 +183,19 @@ const fieldNames = (selection_plans_ddl, track_ddl, event_types) => [
             menuPortal: (base) => ({ ...base, zIndex: 9999 }),
             control: (base, state) => ({
               ...base,
+              width: 220,
               zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
             })
           }}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...extraProps}
         />
-      ) : (
-        false
       );
     },
-    render: (e) => (e?.name ? e.name : "N/A")
+    render: (e) => {
+      console.log(e);
+      return e?.name ? e.name : "N/A";
+    }
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
@@ -1231,8 +1252,8 @@ class SummitEventListPage extends React.Component {
     );
 
     const showColumns = fieldNames(
-      selection_plans_ddl,
-      track_ddl,
+      currentSummit.selection_plans,
+      currentSummit.tracks,
       currentSummit.event_types
     )
       .filter(
