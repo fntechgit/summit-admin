@@ -9,10 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
+import { Input } from "openstack-uicore-foundation/lib/components";
 import EmailTemplateInput from "../../inputs/email-template-input";
 import {
   hasErrors,
@@ -21,8 +22,8 @@ import {
   shallowEqual,
   validateEmail
 } from "../../../utils/methods";
-import { Input } from "openstack-uicore-foundation/lib/components";
 import TemplateSchemaTree from "./template-schema-tree";
+import CopyClipboard from "../../buttons/copy-clipboard";
 
 class EmailFlowEventForm extends React.Component {
   constructor(props) {
@@ -37,7 +38,7 @@ class EmailFlowEventForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -56,15 +57,15 @@ class EmailFlowEventForm extends React.Component {
   }
 
   handleChange(ev) {
-    const entity = { ...this.state.entity };
-    const errors = { ...this.state.errors };
+    const newEntity = { ...this.state.entity };
+    const newErrors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
       value = ev.target.checked;
     }
 
-    errors[id] = "";
+    newErrors[id] = "";
 
     // this is an array
     if (id === "recipients") {
@@ -72,12 +73,12 @@ class EmailFlowEventForm extends React.Component {
       // then validate emails
       value.forEach((email) => {
         if (!validateEmail(email)) {
-          errors[id] = `email ${email} is not valid`;
+          newErrors[id] = `email ${email} is not valid`;
         }
       });
     }
-    entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    newEntity[id] = value;
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleSubmit(ev) {
@@ -117,6 +118,12 @@ class EmailFlowEventForm extends React.Component {
                   >
                     see template
                   </a>
+                  <CopyClipboard
+                    text={entity.email_template_identifier}
+                    tooltipText={T.translate(
+                      "edit_email_flow_event.copy_email_template"
+                    )}
+                  />
                 </>
               )}
             </label>
