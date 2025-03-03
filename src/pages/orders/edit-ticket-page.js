@@ -370,7 +370,7 @@ const EditTicketPage = ({
         <Panel
           show={showSection === "refund_requests"}
           title={T.translate("edit_ticket.refund_requests")}
-          handleClick={() => toggleSection("refund_requests")}
+          handleClick={(ev) => toggleSection("refund_requests", ev)}
         >
           <div>
             <div className="row">
@@ -444,7 +444,7 @@ const EditTicketPage = ({
         <Panel
           show={showSection === "admin_notes"}
           title={T.translate("edit_ticket.admin_notes")}
-          handleClick={() => toggleSection("admin_notes")}
+          handleClick={(ev) => toggleSection("admin_notes", ev)}
         >
           <Notes attendeeId={entity?.owner?.id} ticketId={entity.id} />
         </Panel>
@@ -494,7 +494,7 @@ const EditTicketPage = ({
       <Panel
         show={showSection === "audit_log"}
         title={T.translate("audit_log.title")}
-        handleClick={() => toggleSection("audit_log")}
+        handleClick={(ev) => toggleSection("audit_log", ev)}
       >
         {entity.badge && (
           <AuditLogs
