@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -31,6 +31,7 @@ import {
   Dropdown
 } from "openstack-uicore-foundation/lib/components";
 import Switch from "react-switch";
+import { Pagination } from "react-bootstrap";
 import {
   isEmpty,
   scrollToError,
@@ -38,12 +39,14 @@ import {
   stripTags
 } from "../../utils/methods";
 import EmailTemplateInput from "../inputs/email-template-input";
-import ImportModal from "../inputs/import-modal/index.jsx";
-import { PresentationTypeClassName } from "../../utils/constants";
+import ImportModal from "../inputs/import-modal";
+import {
+  MILLISECONDS_TO_SECONDS,
+  PresentationTypeClassName
+} from "../../utils/constants";
 import Many2ManyDropDown from "../inputs/many-2-many-dropdown";
 import { querySelectionPlanExtraQuestions } from "../../actions/selection-plan-actions";
 import { querySummitProgressFlags } from "../../actions/track-chair-actions";
-import { Pagination } from "react-bootstrap";
 import {
   DEFAULT_ALLOWED_EDITABLE_QUESTIONS,
   DEFAULT_ALLOWED_QUESTIONS,
@@ -98,7 +101,7 @@ class SelectionPlanForm extends React.Component {
   }
 
   fetchSummitSelectionPlanExtraQuestions(input, callback) {
-    let { currentSummit } = this.props;
+    const { currentSummit } = this.props;
 
     if (!input) {
       return Promise.resolve({ options: [] });
@@ -114,7 +117,7 @@ class SelectionPlanForm extends React.Component {
   }
 
   linkSummitSelectionPlanExtraQuestion(question) {
-    let { currentSummit } = this.props;
+    const { currentSummit } = this.props;
     this.props.onAssignExtraQuestion2SelectionPlan(
       currentSummit.id,
       this.state.entity.id,
@@ -134,7 +137,7 @@ class SelectionPlanForm extends React.Component {
     this.props.onAddNewExtraQuestion();
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -153,8 +156,8 @@ class SelectionPlanForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const newEntity = { ...this.state.entity };
+    const newErrors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -162,37 +165,37 @@ class SelectionPlanForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
     }
 
     if (id.startsWith("cfp_")) {
-      if (!entity["marketing_settings"].hasOwnProperty(id)) {
-        entity["marketing_settings"][id] = { value: "" };
+      if (!newEntity.marketing_settings.hasOwnProperty(id)) {
+        newEntity.marketing_settings[id] = { value: "" };
       }
-      entity["marketing_settings"][id].value = value;
+      newEntity.marketing_settings[id].value = value;
     } else {
-      errors[id] = "";
-      entity[id] = value;
+      newErrors[id] = "";
+      newEntity[id] = value;
     }
 
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   handleNotificationEmailTemplateChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+    const newEntity = { ...this.state.entity };
+    const newErrors = { ...this.state.errors };
+    const { value, id } = ev.target;
 
-    errors[id] = "";
-    entity[id] = value;
-    this.setState({ ...this.state, entity: entity, errors: errors });
+    newErrors[id] = "";
+    newEntity[id] = value;
+    this.setState({ ...this.state, entity: newEntity, errors: newErrors });
   }
 
   handleSubmit(ev) {
     ev.preventDefault();
 
-    let entity = { ...this.state.entity };
-    let { currentSummit } = this.props;
+    const entity = { ...this.state.entity };
+    const { currentSummit } = this.props;
 
     this.props.onSubmit(this.state.entity).then((e) => {
       this.props
@@ -207,7 +210,7 @@ class SelectionPlanForm extends React.Component {
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -248,7 +251,7 @@ class SelectionPlanForm extends React.Component {
   }
 
   fetchSummitPresentationActionTypes(input, callback) {
-    let { currentSummit } = this.props;
+    const { currentSummit } = this.props;
 
     if (!input) {
       return Promise.resolve({ options: [] });
@@ -257,7 +260,7 @@ class SelectionPlanForm extends React.Component {
   }
 
   linkSummitProgressFlag(progressFlag) {
-    let { currentSummit } = this.props;
+    const { currentSummit } = this.props;
     this.props.onAssignProgressFlag2SelectionPlan(
       currentSummit.id,
       this.state.entity.id,
@@ -292,22 +295,22 @@ class SelectionPlanForm extends React.Component {
   }
 
   toggleSection(section) {
-    let { showSection } = this.state;
-    let newShowSection = showSection === section ? "main" : section;
+    const { showSection } = this.state;
+    const newShowSection = showSection === section ? "main" : section;
     this.setState({ showSection: newShowSection });
   }
 
   handleOnSwitchChange(setting, value) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const newEntity = { ...this.state.entity };
+    const newErrors = { ...this.state.errors };
 
-    if (!entity["marketing_settings"].hasOwnProperty(setting)) {
-      entity["marketing_settings"][setting] = { value: "" };
+    if (!newEntity.marketing_settings.hasOwnProperty(setting)) {
+      newEntity.marketing_settings[setting] = { value: "" };
     }
 
-    entity["marketing_settings"][setting].value = value;
+    newEntity.marketing_settings[setting].value = value;
 
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity: newEntity, errors: newErrors });
   }
 
   render() {
@@ -321,7 +324,7 @@ class SelectionPlanForm extends React.Component {
       allowedMembers
     } = this.props;
 
-    let trackGroupsColumns = [
+    const trackGroupsColumns = [
       { columnKey: "name", value: T.translate("edit_selection_plan.name") },
       {
         columnKey: "description",
@@ -329,7 +332,7 @@ class SelectionPlanForm extends React.Component {
       }
     ];
 
-    let trackGroupsOptions = {
+    const trackGroupsOptions = {
       valueKey: "name",
       labelKey: "name",
       defaultOptions: true,
@@ -342,11 +345,11 @@ class SelectionPlanForm extends React.Component {
       }
     };
 
-    let eventTypesColumns = [
+    const eventTypesColumns = [
       { columnKey: "name", value: T.translate("edit_selection_plan.name") }
     ];
 
-    let eventTypesOptions = {
+    const eventTypesOptions = {
       valueKey: "name",
       labelKey: "name",
       defaultOptions: true,
@@ -393,7 +396,7 @@ class SelectionPlanForm extends React.Component {
       { columnKey: "weight", value: T.translate("rating_type_list.weight") }
     ];
 
-    let ratingTypesOptions = {
+    const ratingTypesOptions = {
       actions: {
         edit: { onClick: this.handleEditRatingType },
         delete: { onClick: this.handleDeleteRatingType }
@@ -412,18 +415,20 @@ class SelectionPlanForm extends React.Component {
       }
     };
 
-    let allowedMembersColumns = [
+    const allowedMembersColumns = [
       { columnKey: "id", value: T.translate("edit_selection_plan.id") },
       { columnKey: "email", value: T.translate("edit_selection_plan.email") }
     ];
 
-    let allowedMembersOptions = {
+    const allowedMembersOptions = {
       sortCol: "email",
       sortDir: 1,
       actions: {
         delete: { onClick: this.handleDeleteAllowedMember }
       }
     };
+
+    console.log("CHECK...", entity, currentSummit);
 
     return (
       <form className="selection-plan-form">
@@ -700,10 +705,10 @@ class SelectionPlanForm extends React.Component {
                 this.toggleSection("extra_questions");
               }}
             >
-              <div className={"row"}>
+              <div className="row">
                 <Many2ManyDropDown
                   id="addAllowedExtraQuestions"
-                  isClearable={true}
+                  isClearable
                   placeholder={T.translate(
                     "edit_selection_plan.placeholders.link_question"
                   )}
@@ -727,9 +732,10 @@ class SelectionPlanForm extends React.Component {
               {entity.extra_questions.length > 0 && (
                 <SortableTable
                   options={extraQuestionsOptions}
-                  data={entity.extra_questions.map((q) => {
-                    return { ...q, label: stripTags(q.label) };
-                  })}
+                  data={entity.extra_questions.map((q) => ({
+                    ...q,
+                    label: stripTags(q.label)
+                  }))}
                   columns={extraQuestionColumns}
                   dropCallback={this.props.updateExtraQuestionOrder}
                   orderField="order"
@@ -760,7 +766,7 @@ class SelectionPlanForm extends React.Component {
                       "edit_selection_plan.placeholders.creator_notification_email_select_template"
                     )}
                     onChange={this.handleNotificationEmailTemplateChange}
-                    isClearable={true}
+                    isClearable
                     plainValue
                   />
                 </div>
@@ -780,7 +786,7 @@ class SelectionPlanForm extends React.Component {
                       "edit_selection_plan.placeholders.moderator_notification_email_select_template"
                     )}
                     onChange={this.handleNotificationEmailTemplateChange}
-                    isClearable={true}
+                    isClearable
                     plainValue
                   />
                 </div>
@@ -802,7 +808,7 @@ class SelectionPlanForm extends React.Component {
                       "edit_selection_plan.placeholders.speaker_notification_email_select_template"
                     )}
                     onChange={this.handleNotificationEmailTemplateChange}
-                    isClearable={true}
+                    isClearable
                     plainValue
                   />
                 </div>
@@ -815,7 +821,7 @@ class SelectionPlanForm extends React.Component {
                 this.toggleSection("track_chair_settings");
               }}
             >
-              <div className={"row"}>
+              <div className="row">
                 <div className="col-md-4 checkboxes-div">
                   <div className="form-check abc-checkbox">
                     <input
@@ -837,7 +843,7 @@ class SelectionPlanForm extends React.Component {
                 </div>
               </div>
               <hr />
-              <div className={"row"}>
+              <div className="row">
                 <div className="col-md-6 text-right col-md-offset-6">
                   <button
                     className="btn btn-primary right-space"
@@ -864,10 +870,10 @@ class SelectionPlanForm extends React.Component {
                 this.toggleSection("presentation_action_types");
               }}
             >
-              <div className={"row"}>
+              <div className="row">
                 <Many2ManyDropDown
                   id="addAllowedPresentationActionType"
-                  isClearable={true}
+                  isClearable
                   CSSClass="col-md-9"
                   placeholder={T.translate(
                     "edit_selection_plan.placeholders.link_presentation_action_type"
@@ -1006,7 +1012,7 @@ class SelectionPlanForm extends React.Component {
                     )}
                     onChange={this.handleChange}
                     options={DEFAULT_ALLOWED_QUESTIONS}
-                    isMulti={true}
+                    isMulti
                   />
                 </div>
               </div>
@@ -1027,7 +1033,7 @@ class SelectionPlanForm extends React.Component {
                     )}
                     onChange={this.handleChange}
                     options={DEFAULT_ALLOWED_EDITABLE_QUESTIONS}
-                    isMulti={true}
+                    isMulti
                   />
                 </div>
               </div>
@@ -1051,7 +1057,7 @@ class SelectionPlanForm extends React.Component {
                     onChange={this.handleChange}
                     options={DEFAULT_CFP_PRESENTATION_EDITION_TABS}
                     isMulti={false}
-                    isClearable={true}
+                    isClearable
                   />
                 </div>
               </div>
@@ -1400,6 +1406,42 @@ class SelectionPlanForm extends React.Component {
                   />
                 </div>
               </div>
+              {window.CFP_APP_BASE_URL && (
+                <div className="row form-group">
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_selection_plan_link"
+                      )}
+                    </label>
+                    <br />
+                    <a
+                      className="text-table-link"
+                      href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans/${entity.id}`}
+                    </a>
+                  </div>
+                  <div className="col-md-6">
+                    <label>
+                      {T.translate(
+                        "edit_selection_plan.cfp_presentation_all_selection_plan_link"
+                      )}
+                    </label>
+                    <br />
+                    <a
+                      className="text-table-link"
+                      href={`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {`${window.CFP_APP_BASE_URL}/app/${currentSummit.slug}/all-plans`}
+                    </a>
+                  </div>
+                </div>
+              )}
             </Panel>
           </>
         )}
