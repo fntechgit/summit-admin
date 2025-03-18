@@ -30,6 +30,7 @@ import RsvpComponent from "./rsvp-component";
 import { AffiliationsTable } from "../../tables/affiliationstable";
 import { isEmpty, scrollToError, shallowEqual } from "../../../utils/methods";
 import Notes from "../../notes";
+import CopyClipboard from "../../buttons/copy-clipboard";
 import { MILLISECONDS_IN_SECOND } from "../../../utils/constants";
 
 class AttendeeForm extends React.Component {
@@ -250,20 +251,34 @@ class AttendeeForm extends React.Component {
             </div>
           )}
           <div className="row form-group">
-            <div className="col-md-4">
+            <div className="col-md-5">
               <label> {T.translate("general.member")} *</label>
-              <MemberInput
-                id="member"
-                value={entity.member}
-                getOptionLabel={(member) =>
-                  `${member.first_name || ""} ${member.last_name || ""} (${
-                    member.email || member.id
-                  })`
-                }
-                onChange={this.handleChange}
-                isClearable
-                isDisabled={disableMemberInput}
-              />
+              <div
+                className="member-input"
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <MemberInput
+                  id="member"
+                  value={entity.member}
+                  getOptionLabel={(member) =>
+                    `${member.first_name || ""} ${member.last_name || ""} (${
+                      member.email || member.id
+                    })`
+                  }
+                  onChange={this.handleChange}
+                  isClearable
+                  isDisabled={disableMemberInput}
+                />
+                {entity?.member && (
+                  <span style={{ marginLeft: 10 }}>
+                    <CopyClipboard
+                      text={`${entity.member.first_name || ""} ${
+                        entity.member.last_name || ""
+                      } (${entity.member.email || entity.member.id})`}
+                    />
+                  </span>
+                )}
+              </div>
             </div>
             <div className="col-md-1" style={{ marginTop: 20 }}>
               -- OR --
@@ -278,14 +293,19 @@ class AttendeeForm extends React.Component {
                   title={T.translate("edit_attendee.email_disclaimer")}
                 />
               </label>
-              <Input
-                id="email"
-                value={entity.email}
-                onChange={this.handleChange}
-                className="form-control"
-                error={this.hasErrors("email")}
-                disabled={!!entity.member}
-              />
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <Input
+                  id="email"
+                  value={entity.email}
+                  onChange={this.handleChange}
+                  className="form-control"
+                  error={this.hasErrors("email")}
+                  disabled={!!entity.member}
+                />
+                <span style={{ marginLeft: 10 }}>
+                  <CopyClipboard text={entity?.email} />
+                </span>
+              </div>
             </div>
           </div>
 
