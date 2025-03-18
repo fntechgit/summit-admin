@@ -269,13 +269,15 @@ class AttendeeForm extends React.Component {
                   isClearable
                   isDisabled={disableMemberInput}
                 />
-                <span style={{ marginLeft: 10 }}>
-                  <CopyClipboard
-                    text={`${entity.member.first_name || ""} ${
-                      entity.member.last_name || ""
-                    } (${entity.member.email || entity.member.id})`}
-                  />
-                </span>
+                {entity?.member && (
+                  <span style={{ marginLeft: 10 }}>
+                    <CopyClipboard
+                      text={`${entity.member.first_name || ""} ${
+                        entity.member.last_name || ""
+                      } (${entity.member.email || entity.member.id})`}
+                    />
+                  </span>
+                )}
               </div>
             </div>
             <div className="col-md-1" style={{ marginTop: 20 }}>
@@ -301,7 +303,7 @@ class AttendeeForm extends React.Component {
                   disabled={!!entity.member}
                 />
                 <span style={{ marginLeft: 10 }}>
-                  <CopyClipboard text={entity.email} />
+                  <CopyClipboard text={entity?.email} />
                 </span>
               </div>
             </div>
