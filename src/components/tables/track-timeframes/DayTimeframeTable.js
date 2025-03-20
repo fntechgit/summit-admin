@@ -10,16 +10,15 @@ import {
   parseLocationHour,
   epochToMomentTimeZone
 } from "openstack-uicore-foundation/lib/utils/methods";
-
-import "./styles.css";
-import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-
-import { shallowEqual } from "../../../utils/methods";
 import ActionsTableCell from "./ActionsTableCell";
 import {
   deleteDayTimeframe,
   saveDayTimeframe
 } from "../../../actions/track-timeframes-actions";
+import { shallowEqual } from "../../../utils/methods";
+
+import "./styles.css";
+import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { TWO } from "../../../utils/constants";
 
 const createRow = (row, actions, days, summitTZ) => {
@@ -194,11 +193,7 @@ class DayTimeframeTable extends React.Component {
   }
 }
 
-const mapStateToProps = ({ currentSummitState }) => ({
-  locations: currentSummitState.currentSummit.locations
-});
-
-export default connect(mapStateToProps, {
+export default connect(null, {
   saveDayTimeframe,
   deleteDayTimeframe
 })(DayTimeframeTable);

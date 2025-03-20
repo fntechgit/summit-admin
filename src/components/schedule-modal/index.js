@@ -9,13 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
 import { Modal } from "react-bootstrap";
 import "./schedule-modal.less";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
 export default class ScheduleModal extends React.Component {
   constructor(props) {
@@ -25,30 +26,30 @@ export default class ScheduleModal extends React.Component {
   }
 
   getFormattedTime(atime) {
-    atime = atime * 1000;
+    atime *= MILLISECONDS_IN_SECOND;
     return moment(atime).tz(this.props.summit.time_zone.name).format("h:mm a");
   }
 
   getFormattedDay(atime) {
-    atime = atime * 1000;
+    atime *= MILLISECONDS_IN_SECOND;
     return moment(atime).tz(this.props.summit.time_zone.name).format("dddd D");
   }
 
   getFormattedLocation(location_id) {
-    let venue = this.props.summit.locations.find(
+    const venue = this.props.summit.locations.find(
       (l) => l.id === location_id
     ).name;
     return venue;
   }
 
   getFormatedSchedule() {
-    let groupedSchedule = {};
-    let sortedSchedule = this.props.schedule.sort((a, b) =>
+    const groupedSchedule = {};
+    const sortedSchedule = this.props.schedule.sort((a, b) =>
       a.start_date > b.start_date ? 1 : a.start_date < b.start_date ? -1 : 0
     );
 
-    for (var i in sortedSchedule) {
-      let day = this.getFormattedDay(sortedSchedule[i].start_date);
+    for (const i in sortedSchedule) {
+      const day = this.getFormattedDay(sortedSchedule[i].start_date);
       if (!groupedSchedule.hasOwnProperty(day)) groupedSchedule[day] = [];
       groupedSchedule[day].push(sortedSchedule[i]);
     }
@@ -83,7 +84,7 @@ export default class ScheduleModal extends React.Component {
   }
 
   render() {
-    let { show, title, onClose, schedule } = this.props;
+    const { show, title, onClose, schedule } = this.props;
 
     return (
       <Modal show={show} onHide={onClose} dialogClassName="schedule-modal">
