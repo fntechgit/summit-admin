@@ -217,13 +217,11 @@ const wrapReport = (ReportComponent, specs) => {
           <div className="col-md-3" key="room-filter">
             <RoomFilter
               value={filterValue}
-              rooms={currentSummit.locations.filter(
-                (l) => l.class_name === "SummitVenueRoom"
-              )}
               onChange={(value) => {
                 this.handleFilterChange("room", value, true);
               }}
               isMulti
+              summitId={currentSummit.id}
             />
           </div>
         );

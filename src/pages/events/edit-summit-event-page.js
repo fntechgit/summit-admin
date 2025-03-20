@@ -280,7 +280,6 @@ function EditSummitEventPage(props) {
           levelOpts={levelOptions}
           trackOpts={currentSummit.tracks}
           typeOpts={currentSummit.event_types}
-          locationOpts={currentSummit.locations}
           selectionPlansOpts={currentSummit.selection_plans}
           rsvpTemplateOpts={rsvpTemplateOptions}
           actionTypes={actionTypes}

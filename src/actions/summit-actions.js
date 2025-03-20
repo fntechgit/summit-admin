@@ -85,7 +85,7 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "calendar_sync_name," +
       "dates_label," +
       "end_date," +
-      "event_types,event_types.id,event_types.name,event_types.order" +
+      "event_types,event_types.id,event_types.name,event_types.order,event_types.allows_attachment,event_types.allows_level,event_types.allows_location,event_types.allows_location_timeframe_collision,event_types.allows_publishing_dates," +
       "link," +
       "locations,locations.id,locations.name,locations.order,locations.class_name,locations.rooms,locations.floors," +
       "logo," +

@@ -16,8 +16,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Pagination } from "react-bootstrap";
 import {
-  FreeTextSearch,
-  Dropdown
+  FreeTextSearch
 } from "openstack-uicore-foundation/lib/components";
 import { getSummitById } from "../../actions/summit-actions";
 import {
@@ -31,6 +30,7 @@ import OccupancyTable from "../../components/tables/room-occupancy-table/Occupan
 import FragmentParser from "../../utils/fragmen-parser";
 
 import "../../styles/room-occupancy-page.less";
+import VenuesDropdown from "../../components/inputs/venue-input";
 
 class RoomOccupancyPage extends React.Component {
   constructor(props) {
@@ -111,7 +111,7 @@ class RoomOccupancyPage extends React.Component {
 
   handleRoomFilter(ev) {
     const { term, order, orderDir, page, perPage, currentEvents } = this.props;
-    const roomId = ev.target.value;
+    const roomId = ev.target.value.id;
 
     this.fragmentParser.setParam("room", roomId);
     window.location.hash = this.fragmentParser.serialize();
@@ -238,10 +238,6 @@ class RoomOccupancyPage extends React.Component {
 
     if (!currentSummit.id) return <div />;
 
-    const room_ddl = currentSummit.locations
-      .filter((v) => v.class_name === "SummitVenueRoom")
-      .map((r) => ({ label: r.name, value: r.id }));
-
     return (
       <div className="occupancyWrapper">
         <div className="container">
@@ -257,15 +253,18 @@ class RoomOccupancyPage extends React.Component {
               />
             </div>
             <div className="col-md-3">
-              <Dropdown
+              <VenuesDropdown
                 id="roomId"
-                value={roomId}
+                // convert string to array of numbers
+                value={Number(roomId)}
+                onChange={this.handleRoomFilter}
+                summitId={currentSummit.id}
                 placeholder={T.translate(
                   "room_occupancy.placeholders.select_room"
                 )}
-                options={room_ddl}
-                onChange={this.handleRoomFilter}
-                clearable
+                venuesRooms
+                isMulti={false}
+                isClearable
               />
             </div>
             <div className="col-md-3 checkboxes-div currentEvents">

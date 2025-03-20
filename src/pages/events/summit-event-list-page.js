@@ -66,6 +66,7 @@ import {
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
 import { saveEventMaterial } from "../../actions/event-material-actions";
+import RoomsInput from "../../components/inputs/rooms-input";
 
 const fieldNames = (allSelectionPlans, allTracks, event_types) => [
   {
@@ -1034,10 +1035,6 @@ class SummitEventListPage extends React.Component {
       ?.sort((a, b) => a.order - b.order)
       .map((sp) => ({ label: sp.name, value: sp.id }));
 
-    const location_ddl = currentSummit.locations
-      ?.sort((a, b) => a.order - b.order)
-      .map((l) => ({ label: l.name, value: l.id }));
-
     const selection_status_ddl = [
       { label: "Pending", value: "pending" },
       { label: "Accepted", value: "accepted" },
@@ -1409,12 +1406,12 @@ class SummitEventListPage extends React.Component {
           )}
           {enabledFilters.includes("location_id_filter") && (
             <div className="col-md-6">
-              <Dropdown
+              <RoomsInput
                 id="location_id_filter"
                 placeholder={T.translate("event_list.placeholders.location")}
                 value={eventFilters.location_id_filter}
                 onChange={this.handleExtraFilterChange}
-                options={location_ddl}
+                summitId={currentSummit.id}
                 isClearable
                 isMulti
               />

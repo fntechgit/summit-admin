@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import moment from "moment-timezone";
@@ -21,11 +21,13 @@ import {
   Panel,
   Table
 } from "openstack-uicore-foundation/lib/components";
-const Query = require("graphql-query-builder");
+import ReactDOMServer from "react-dom/server";
+import RoomsInput from "../inputs/rooms-input";
 import wrapReport from "./report-wrapper";
 import { groupByDate } from "../../utils/methods";
 import { flattenData } from "../../actions/report-actions";
-import ReactDOMServer from "react-dom/server";
+
+const Query = require("graphql-query-builder");
 
 const RawMetricsTable = ({ data, timezone }) => {
   const columns = [
@@ -166,12 +168,12 @@ class MetricsReport extends React.Component {
     const metrics = new Query("uniqueMetrics", overallFilter);
     metrics.find(metricsFields);
     const sponsors = new Query(...sponsorsMessage);
-    sponsors.find(["id", "companyName", { metrics: metrics }]);
+    sponsors.find(["id", "companyName", { metrics }]);
     const events = new Query(...eventsMessage, eventQueryFilter);
-    events.find(["id", "title", { metrics: metrics }]);
+    events.find(["id", "title", { metrics }]);
     const rooms = new Query(...roomsMessage, roomQueryFilter);
     const venueRoom = new Query(...venueRoomMessage);
-    venueRoom.find([{ metrics: metrics }]);
+    venueRoom.find([{ metrics }]);
     const extraQuestions = new Query("orderExtraQuestions");
     extraQuestions.find(["id", "name"]);
 
@@ -183,20 +185,20 @@ class MetricsReport extends React.Component {
     const posters = new Query("events", { type_Type: "Poster" });
     posters.find(["id", "title", { metrics: posterMetrics }]);
 
-    const findQueries = ["id", "title", { extraQuestions: extraQuestions }];
+    const findQueries = ["id", "title", { extraQuestions }];
 
     if (eventType === "EVENT") {
-      rooms.find(["id", "name", { events: events }]);
-      findQueries.push({ rooms: rooms });
+      rooms.find(["id", "name", { events }]);
+      findQueries.push({ rooms });
     } else if (eventType === "ROOM") {
       rooms.find(["id", "name", { venueroom: venueRoom }]);
-      findQueries.push({ rooms: rooms });
+      findQueries.push({ rooms });
     } else if (eventType === "SPONSOR") {
-      findQueries.push({ sponsors: sponsors });
+      findQueries.push({ sponsors });
     } else if (eventType === "POSTER") {
-      findQueries.push({ posters: posters });
+      findQueries.push({ posters });
     } else {
-      findQueries.push({ metrics: metrics });
+      findQueries.push({ metrics });
     }
 
     query.find(findQueries);
@@ -232,9 +234,9 @@ class MetricsReport extends React.Component {
       listFilters.onlyFinished = true;
     }
 
-    let query = new Query("metrics", listFilters);
-    let results = new Query("results", filters);
-    let eventmetric = new Query("eventmetric");
+    const query = new Query("metrics", listFilters);
+    const results = new Query("results", filters);
+    const eventmetric = new Query("eventmetric");
     eventmetric.find(["subType"]);
     results.find([
       "type",
@@ -245,10 +247,10 @@ class MetricsReport extends React.Component {
       "sponsorName",
       "locationName",
       "ip",
-      { eventmetric: eventmetric }
+      { eventmetric }
     ]);
 
-    query.find([{ results: results }, "totalCount"]);
+    query.find([{ results }, "totalCount"]);
 
     return query;
   };
@@ -287,8 +289,8 @@ class MetricsReport extends React.Component {
       listFilters.onlyFinished = true;
     }
 
-    let query = new Query("metrics", listFilters);
-    let results = new Query("results", filters);
+    const query = new Query("metrics", listFilters);
+    const results = new Query("results", filters);
     results.find([
       "type",
       "ingressDate",
@@ -302,9 +304,9 @@ class MetricsReport extends React.Component {
       "ip"
     ]);
 
-    query.find([{ results: results }, "totalCount"]);
+    query.find([{ results }, "totalCount"]);
 
-    return "{ reportData: " + query + " }";
+    return `{ reportData: ${query} }`;
   };
 
   async toggleDrillDownData(target, id, metric) {
@@ -422,7 +424,7 @@ class MetricsReport extends React.Component {
 
   preProcessData(data, extraData, forExport = false) {
     const { currentSummit } = this.props;
-    let { eventType, showAnswers } = this.state;
+    const { eventType, showAnswers } = this.state;
     let processedData = [];
     let columns = [];
 
@@ -438,7 +440,7 @@ class MetricsReport extends React.Component {
             .utc(d.ingressDate)
             .tz(currentSummit.time_zone_id)
             .format("dddd, MMMM Do YYYY, h:mm a (z)"),
-          origin: origin,
+          origin,
           member: d.memberName,
           subtype: d.eventmetric?.subType,
           ip: d.ip
@@ -466,7 +468,7 @@ class MetricsReport extends React.Component {
         ];
 
         processedData = Object.entries(processedData).reduce((result, item) => {
-          const [key, value] = item;
+          const [value] = item;
           result = [...result, ...value];
           return result;
         }, []);
@@ -512,51 +514,45 @@ class MetricsReport extends React.Component {
           return { reportData: processedData, tableColumns: columns };
 
         processedData = data.rooms
-          .map((rm) => {
-            return {
-              ...rm,
-              events: rm.events
-                .filter((ev) => ev?.metrics?.length)
-                .map((ev) => {
-                  const metrics = ev.metrics.map((m) => {
-                    const metric = this.parseMetricData(m);
-                    return {
-                      ...metric,
-                      metric: forExport ? (
-                        metric.metric
-                      ) : (
-                        <div>
-                          <span
-                            className="metricDrilldown"
-                            onClick={(evt) =>
-                              this.toggleDrillDownData(
-                                evt.target,
-                                ev.id,
-                                metric
-                              )
-                            }
-                          >
-                            {metric.metric}
-                          </span>
-                          <div className="raw-metrics-table" />
-                        </div>
-                      ),
-                      ingress: moment
-                        .utc(metric.ingress)
-                        .tz(currentSummit.time_zone_id)
-                        .format("dddd, MMMM Do YYYY, h:mm a (z)"),
-                      outgress: metric.outgress
-                        ? moment
-                            .utc(metric.outgress)
-                            .tz(currentSummit.time_zone_id)
-                            .format("dddd, MMMM Do YYYY, h:mm a (z)")
-                        : "-"
-                    };
-                  });
-                  return { ...ev, metrics };
-                })
-            };
-          })
+          .map((rm) => ({
+            ...rm,
+            events: rm.events
+              .filter((ev) => ev?.metrics?.length)
+              .map((ev) => {
+                const metrics = ev.metrics.map((m) => {
+                  const metric = this.parseMetricData(m);
+                  return {
+                    ...metric,
+                    metric: forExport ? (
+                      metric.metric
+                    ) : (
+                      <div>
+                        <span
+                          className="metricDrilldown"
+                          onClick={(evt) =>
+                            this.toggleDrillDownData(evt.target, ev.id, metric)
+                          }
+                        >
+                          {metric.metric}
+                        </span>
+                        <div className="raw-metrics-table" />
+                      </div>
+                    ),
+                    ingress: moment
+                      .utc(metric.ingress)
+                      .tz(currentSummit.time_zone_id)
+                      .format("dddd, MMMM Do YYYY, h:mm a (z)"),
+                    outgress: metric.outgress
+                      ? moment
+                          .utc(metric.outgress)
+                          .tz(currentSummit.time_zone_id)
+                          .format("dddd, MMMM Do YYYY, h:mm a (z)")
+                      : "-"
+                  };
+                });
+                return { ...ev, metrics };
+              })
+          }))
           .filter((rm) => rm.events.length);
 
         if (forExport) {
@@ -746,7 +742,7 @@ class MetricsReport extends React.Component {
   }
 
   handleFilterChange(ev) {
-    let { id, value, type, checked } = ev.target;
+    const { id, value, type, checked } = ev.target;
     const { state } = this;
     state[id] = type === "checkbox" ? checked : value;
     if (id === "eventType") {
@@ -754,10 +750,13 @@ class MetricsReport extends React.Component {
       state.eventFilter = null;
       state.subTypeFilter = null;
     }
+    if (id === "roomFilter") {
+      state.roomFilter = value.id;
+    }
     this.setState(state);
   }
 
-  filterReport(ev) {
+  filterReport() {
     this.props.onReload();
   }
 
@@ -851,11 +850,11 @@ class MetricsReport extends React.Component {
       tables = data
         .filter((rm) => rm.events.length)
         .map((room) => {
-          const name = room.name;
-          const id = room.id;
+          const {name} = room;
+          const {id} = room;
 
           return (
-            <div className="panel panel-default" key={"section_" + id}>
+            <div className="panel panel-default" key={`section_${id}`}>
               <div className="panel-heading">{name}</div>
               <div style={{ padding: 10 }}>
                 {room.events.map((ev) => {
@@ -885,8 +884,8 @@ class MetricsReport extends React.Component {
         });
     } else if (eventType === "ROOM") {
       tables = data.map((room) => {
-        const name = room.name;
-        const id = room.id;
+        const {name} = room;
+        const {id} = room;
 
         const sectionId = `section_${id}`;
 
@@ -941,7 +940,7 @@ class MetricsReport extends React.Component {
 
     const report_options = {
       sortCol: sortKey,
-      sortDir: sortDir,
+      sortDir,
       actions: {}
     };
 
@@ -960,11 +959,6 @@ class MetricsReport extends React.Component {
       { label: "In-Person", value: "ON_SITE" },
       { label: "Virtual", value: "VIRTUAL" }
     ];
-
-    const room_ddl = currentSummit.locations.map((l) => ({
-      label: l.name,
-      value: l.id
-    }));
 
     return (
       <div id="metric-report-wrapper">
@@ -993,11 +987,12 @@ class MetricsReport extends React.Component {
             {eventType === "ROOM" && (
               <div className="col-md-3">
                 <label>Room</label>
-                <Dropdown
+                <RoomsInput
                   id="roomFilter"
-                  options={room_ddl}
                   onChange={this.handleFilterChange}
                   value={roomFilter}
+                  summitId={currentSummit.id}
+                  isMulti={false}
                   clearable
                 />
               </div>
@@ -1010,7 +1005,7 @@ class MetricsReport extends React.Component {
                   summit={currentSummit}
                   value={eventFilter}
                   onChange={this.handleFilterChange}
-                  onlyPublished={true}
+                  onlyPublished
                   isClearable
                 />
               </div>

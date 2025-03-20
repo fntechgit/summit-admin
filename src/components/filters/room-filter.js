@@ -9,10 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
-import Select from "react-select";
+import VenuesDropdown from "../inputs/venue-input";
 
 export default class RoomFilter extends React.Component {
   constructor(props) {
@@ -22,29 +22,23 @@ export default class RoomFilter extends React.Component {
   }
 
   handleFilterChange(value) {
-    let theValue = this.props.isMulti ? value.map((v) => v.value) : value.value;
+    const theValue = this.props.isMulti ? value.map((v) => v.id) : value.value;
     this.props.onChange(theValue);
   }
 
   render() {
-    let { rooms, value, onChange, ...rest } = this.props;
-    let theValue = null;
-    let options = rooms.map((t) => ({ value: t.id, label: t.name }));
-
-    if (value) {
-      theValue = this.props.isMulti
-        ? options.filter((op) => value.includes(op.value))
-        : options.find((op) => op.value === value);
-    }
+    const { value, onChange, summitId, ...rest } = this.props;
 
     return (
       <div className="room-filter">
         <label>Filter by Room</label>
-        <Select
-          value={theValue}
+        <VenuesDropdown
+          // convert string to array of numbers
+          value={value?.split(",").map(Number)}
           id="room-filter"
-          options={options}
-          onChange={this.handleFilterChange}
+          onChange={(ev) => this.handleFilterChange(ev.target.value)}
+          summitId={summitId}
+          venuesRooms
           {...rest}
         />
       </div>
