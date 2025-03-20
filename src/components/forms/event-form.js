@@ -20,7 +20,6 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import {
   TextEditor,
   Dropdown,
-  GroupedDropdown,
   DateTimePicker,
   TagInput,
   SpeakerInput,
@@ -63,6 +62,7 @@ import {
   ONE_MINUTE
 } from "../../utils/constants";
 import CopyClipboard from "../buttons/copy-clipboard";
+import LocationGroupedAsyncDropdown from "../inputs/location-grouped-dropdown";
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -831,7 +831,6 @@ class EventForm extends React.Component {
       levelOpts,
       typeOpts,
       trackOpts,
-      locationOpts,
       rsvpTemplateOpts,
       selectionPlansOpts,
       history,
@@ -870,18 +869,6 @@ class EventForm extends React.Component {
     const tracks_ddl = trackOpts
       .filter((track) => track.subtracks.length === 0)
       .map((t) => ({ label: t.name, value: t.id }));
-
-    const venues = locationOpts
-      .filter((v) => v.class_name === "SummitVenue")
-      .map((l) => {
-        let options = [];
-        if (l.rooms) {
-          options = l.rooms.map((r) => ({ label: r.name, value: r.id }));
-        }
-        return { label: l.name, value: l.id, options };
-      });
-
-    const locations_ddl = [{ label: "TBD", value: 0 }, ...venues];
 
     const levels_ddl = levelOpts.map((l) => ({ label: l, value: l }));
 
@@ -994,14 +981,16 @@ class EventForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-8">
             <label> {T.translate("edit_event.submitter")} </label> &nbsp;
-            <CopyClipboard
-              text={
-                entity.created_by.hasOwnProperty("email")
-                  ? `${entity.created_by.first_name} ${entity.created_by.last_name} <${entity.created_by.email}>`
-                  : `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.id})`
-              }
-              tooltipText="Copy Submitter"
-            />
+            {entity.created_by && (
+              <CopyClipboard
+                text={
+                  entity.created_by.hasOwnProperty("email")
+                    ? `${entity.created_by.first_name} ${entity.created_by.last_name} <${entity.created_by.email}>`
+                    : `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.id})`
+                }
+                tooltipText="Copy Submitter"
+              />
+            )}
             <div>
               <MemberInput
                 id="created_by"
@@ -1184,10 +1173,10 @@ class EventForm extends React.Component {
           {this.shouldShowField("allows_location") && (
             <div className="col-md-4">
               <label> {T.translate("edit_event.location")} </label>
-              <GroupedDropdown
+              <LocationGroupedAsyncDropdown
                 id="location_id"
                 value={entity.location_id}
-                options={locations_ddl}
+                summitId={currentSummit.id}
                 placeholder={T.translate(
                   "edit_event.placeholders.select_venue"
                 )}

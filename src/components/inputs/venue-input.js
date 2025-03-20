@@ -23,6 +23,7 @@ const VenuesDropdown = ({
   onChange,
   id,
   multi,
+  venuesRooms,
   ...rest
 }) => {
   const [theValue, setTheValue] = useState(null);
@@ -31,22 +32,24 @@ const VenuesDropdown = ({
   const isMulti = multi || rest.isMulti;
 
   useEffect(() => {
-    if (isMulti && value.length > 0) {
+    if (isMulti && value) {
       const updatedValue = [];
       allOptions.forEach((op) => {
-        if (value.includes((v) => v === op.value)) {
+        if (value.includes(op.value)) {
           updatedValue.push(op);
         }
       });
       setTheValue(updatedValue);
     } else if (!isMulti && value) {
       allOptions.forEach((op) => {
-        if (op.value === value) {
+        if (op.value === value || op.value === value.id) {
           setTheValue(op);
         }
       });
+    } else if (!value) {
+      setTheValue(isMulti ? [] : null);
     }
-  }, [allOptions]);
+  }, [allOptions, value]);
 
   const handleChange = (value) => {
     let theValue = null;
@@ -69,8 +72,6 @@ const VenuesDropdown = ({
   };
 
   const getRooms = (input, callback) => {
-    console.log("get venue locations");
-
     // we need to map into value/label because of a bug in react-select 2
     // https://github.com/JedWatson/react-select/issues/2998
 
@@ -87,7 +88,7 @@ const VenuesDropdown = ({
       callback(newOptions);
     };
 
-    queryVenues(summitId, input, translateOptions);
+    queryVenues(summitId, input, translateOptions, venuesRooms);
   };
 
   const has_error = error && error !== "";

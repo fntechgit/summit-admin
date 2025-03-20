@@ -1060,9 +1060,6 @@ export const queryAllRooms = _.debounce(async (summitId, input, callback) => {
 
   endpoint.addQuery("access_token", accessToken);
   endpoint.addQuery("per_page", TWO_HUNDRED_PER_PAGE);
-  // endpoint.addQuery("expand", "rooms,floors");
-  // endpoint.addQuery("fields", "id,name,order,class_name,rooms,floors");
-  // endpoint.addQuery("relations", "rooms,floors,none");
 
   if (input) {
     input = escapeFilterValue(input);
@@ -1111,31 +1108,35 @@ export const queryBookableRooms = _.debounce(
   DEBOUNCE_WAIT
 );
 
-export const queryVenues = _.debounce(async (summitId, input, callback) => {
-  const accessToken = await getAccessTokenSafely();
+export const queryVenues = _.debounce(
+  async (summitId, input, callback, venuesRooms) => {
+    const accessToken = await getAccessTokenSafely();
 
-  console.log("query venues");
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/locations/venues`
+    );
 
-  const endpoint = URI(
-    `${window.API_BASE_URL}/api/v1/summits/${summitId}/locations/venues`
-  );
+    endpoint.addQuery("access_token", accessToken);
+    endpoint.addQuery("per_page", TWO_HUNDRED_PER_PAGE);
+    endpoint.addQuery("expand", "rooms");
 
-  endpoint.addQuery("access_token", accessToken);
-  endpoint.addQuery("per_page", TWO_HUNDRED_PER_PAGE);
-  // endpoint.addQuery("expand", "rooms,floors");
-  // endpoint.addQuery("fields", "id,name,order,class_name,rooms,floors");
-  // endpoint.addQuery("relations", "rooms,floors,none");
+    if (input) {
+      input = escapeFilterValue(input);
+      endpoint.addQuery("filter[]", `rooms=@${input}`);
+    }
 
-  if (input) {
-    input = escapeFilterValue(input);
-    endpoint.addQuery("filter[]", `rooms=@${input}`);
-  }
-
-  fetch(endpoint)
-    .then(fetchResponseHandler)
-    .then((json) => {
-      const options = [...json.data];
-      callback(options);
-    })
-    .catch(fetchErrorHandler);
-}, DEBOUNCE_WAIT);
+    fetch(endpoint)
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = venuesRooms
+          ? [...json.data]
+              .map((v) => v.rooms)
+              .flat()
+              .filter((r) => r.class_name === "SummitVenueRoom")
+          : [...json.data];
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);

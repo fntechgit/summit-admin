@@ -61,7 +61,7 @@ const RoomsInput = ({
       target: {
         id,
         value: theValue,
-        type: "bookableroominput"
+        type: "roominput"
       }
     };
 

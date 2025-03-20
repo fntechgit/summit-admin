@@ -35,7 +35,7 @@ const BookableRoomsDropdown = ({
     if (isMulti && value.length > 0) {
       const updatedValue = [];
       allOptions.forEach((op) => {
-        if (value.includes((v) => v === op.value)) {
+        if (value.includes(op.value)) {
           updatedValue.push(op);
         }
       });
