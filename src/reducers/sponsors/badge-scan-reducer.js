@@ -86,8 +86,12 @@ const badgeScanReducer = (state = DEFAULT_STATE, action) => {
 
       return { ...state, entity: { ...newBadgeScan } };
     }
-    case BADGE_SCAN_UPDATED:
-      return state;
+    case BADGE_SCAN_UPDATED: {
+      const badgeScan = payload.response;
+      // only editable field that could change is notes and extra questions answers
+      const { notes, extra_questions } = badgeScan;
+      return { ...state, entity: { ...state.entity, notes, extra_questions } };
+    }
     case VALIDATE:
       return { ...state, errors: payload.errors };
     default:
