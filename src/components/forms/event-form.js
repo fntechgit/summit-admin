@@ -1018,14 +1018,16 @@ class EventForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-8">
             <label> {T.translate("edit_event.submitter")} </label> &nbsp;
-            <CopyClipboard
-              text={
-                entity.created_by.hasOwnProperty("email")
-                  ? `${entity.created_by.first_name} ${entity.created_by.last_name} <${entity.created_by.email}>`
-                  : `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.id})`
-              }
-              tooltipText="Copy Submitter"
-            />
+            {entity?.created_by && (
+              <CopyClipboard
+                text={
+                  entity.created_by.hasOwnProperty("email")
+                    ? `${entity.created_by.first_name} ${entity.created_by.last_name} <${entity.created_by.email}>`
+                    : `${entity.created_by.first_name} ${entity.created_by.last_name} (${entity.created_by.id})`
+                }
+                tooltipText="Copy Submitter"
+              />
+            )}
             <div>
               <MemberInput
                 id="created_by"
