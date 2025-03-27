@@ -3176,8 +3176,10 @@
     "alert_info": "You can create or archive items from the list. To edit an item click on it.",
     "code_column_label": "Code",
     "name_column_label": "Name",
+    "archive_button": "Archive",
     "delete_inventory_item_warning": "Are you sure you want to delete inventory item ",
     "add_inventory_item": "Create new Item",
+    "hide_archived": "Hide archived items",
     "placeholders": {
       "search_inventory_items": "Search"
     }
@@ -3189,8 +3191,8 @@
     "code": "Code",
     "name": "Name",
     "default_quantity": "Default Quantity",
-    "quantity_limit_per_show": "Quantity Limit Per Show",
-    "quantity_limit_per_sponsor": "Quantity Limit Per Sponsor",
+    "quantity_limit_per_show": "Limit total per show (empty = disabled)",
+    "quantity_limit_per_sponsor": "Limit total per sponsor (empty = disabled)",
     "early_bird_rate": "Early Bird Rate",
     "standard_rate": "Standard Rate",
     "onsite_rate": "Onsite Rate",
@@ -3198,13 +3200,20 @@
     "delete_meta_field_warning": "Are you sure you want to delete meta field ",
     "meta_fields": "Additional Input Fields",
     "meta_field_values": "Field Values",
+    "meta_field_title": "Field Title",
+    "meta_field_required": "Required Field",
+    "meta_field_type": "Field Type",
+    "meta_field_add_value": "Add a value",
+    "meta_field_is_default": "Is Default?",
     "placeholders": {
-      "meta_field_title": "Field Title",
-      "meta_field_required": "Required Field",
-      "meta_field_type": "Field Type",
-      "meta_field_values": "Field Values"
+      "meta_field_name": "Name",
+      "meta_field_value": "Value",
+      "meta_field_maximum_quantity": "Maximum",
+      "meta_field_minimum_quantity": "Minimum"
     },
-    "images": "Images"
+    "images": "Images",
+    "save_changes": "Save Changes",
+    "required_error": "This field is required."
   },
   "meta_field_values_list": {
     "delete_value_warning": "Are you sure you want to delete meta field value ",
@@ -3287,5 +3296,11 @@
       "meta_field_values": "Field Values"
     },
     "images": "Images"
+  },
+  "mui_table": {
+    "no_items": "No items found.",
+    "rows_per_page": "Rows per page",
+    "sorted_desc": "sorted descending",
+    "sorted_asc": "sorted ascending"
   }
 }

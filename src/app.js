@@ -29,6 +29,8 @@ import {
 } from "openstack-uicore-foundation/lib/security/methods";
 import IdTokenVerifier from "idtoken-verifier";
 import T from "i18n-react";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 // eslint-disable-next-line
 import exclusiveSections from "js-yaml-loader!./exclusive-sections.yml";
 import * as Sentry from "@sentry/react";
@@ -43,6 +45,11 @@ import DefaultRoute from "./routes/default-route";
 import { getTimezones } from "./actions/base-actions";
 import { LANGUAGE_CODE_LENGTH } from "./utils/constants";
 import { SentryFallbackFunction } from "./components/SentryErrorComponent";
+
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
 
 // here is set by default user lang as en
 let language =
@@ -71,8 +78,8 @@ window.REPORT_API_BASE_URL = process.env.REPORT_API_BASE_URL;
 window.MARKETING_API_BASE_URL = process.env.MARKETING_API_BASE_URL;
 window.EMAIL_API_BASE_URL = process.env.EMAIL_API_BASE_URL;
 window.FILE_UPLOAD_API_BASE_URL = process.env.FILE_UPLOAD_API_BASE_URL;
-window.INVENTORY_API_BASE_URL = process.env.INVENTORY_API_BASE_URL;
 window.SIGNAGE_BASE_URL = process.env.SIGNAGE_BASE_URL;
+window.INVENTORY_API_BASE_URL = process.env.INVENTORY_API_BASE_URL;
 window.OAUTH2_CLIENT_ID = process.env.OAUTH2_CLIENT_ID;
 window.SCOPES = process.env.SCOPES;
 window.ALLOWED_USER_GROUPS = process.env.ALLOWED_USER_GROUPS;
@@ -161,40 +168,42 @@ class App extends React.PureComponent {
       <Sentry.ErrorBoundary
         fallback={SentryFallbackFunction({ componentName: "Summit Admin App" })}
       >
-        <Router history={history}>
-          <div>
-            <AjaxLoader show={loading} size={120} />
-            <div className="header" id="page-header">
-              <div className="header-title">
-                {T.translate("landing.os_summit_admin")}
-                <AuthButton
-                  isLoggedUser={isLoggedUser}
-                  picture={profile_pic}
-                  doLogin={this.onClickLogin.bind(this)}
-                  initLogOut={initLogOut}
-                />
+        <LocalizationProvider dateAdapter={AdapterMoment}>
+          <Router history={history}>
+            <div>
+              <AjaxLoader show={loading} size={120} />
+              <div className="header" id="page-header">
+                <div className="header-title">
+                  {T.translate("landing.os_summit_admin")}
+                  <AuthButton
+                    isLoggedUser={isLoggedUser}
+                    picture={profile_pic}
+                    doLogin={this.onClickLogin.bind(this)}
+                    initLogOut={initLogOut}
+                  />
+                </div>
               </div>
+              <Switch>
+                <AuthorizedRoute
+                  isLoggedUser={isLoggedUser}
+                  backUrl={backUrl}
+                  path="/app"
+                  component={PrimaryLayout}
+                />
+                <AuthorizationCallbackRoute
+                  onUserAuth={onUserAuth}
+                  path="/auth/callback"
+                  getUserInfo={getUserInfo}
+                />
+                <LogOutCallbackRoute doLogout={doLogout} path="/auth/logout" />
+                <Route path="/logout" render={() => <p>404 - Not Found</p>} />
+                <Route path="/404" render={() => <p>404 - Not Found</p>} />
+                <Route path="/error" component={CustomErrorPage} />
+                <DefaultRoute isLoggedUser={isLoggedUser} />
+              </Switch>
             </div>
-            <Switch>
-              <AuthorizedRoute
-                isLoggedUser={isLoggedUser}
-                backUrl={backUrl}
-                path="/app"
-                component={PrimaryLayout}
-              />
-              <AuthorizationCallbackRoute
-                onUserAuth={onUserAuth}
-                path="/auth/callback"
-                getUserInfo={getUserInfo}
-              />
-              <LogOutCallbackRoute doLogout={doLogout} path="/auth/logout" />
-              <Route path="/logout" render={() => <p>404 - Not Found</p>} />
-              <Route path="/404" render={() => <p>404 - Not Found</p>} />
-              <Route path="/error" component={CustomErrorPage} />
-              <DefaultRoute isLoggedUser={isLoggedUser} />
-            </Switch>
-          </div>
-        </Router>
+          </Router>
+        </LocalizationProvider>
       </Sentry.ErrorBoundary>
     );
   }
