@@ -95,7 +95,7 @@ export const getEventCategory =
 
     const params = {
       expand:
-        "track_groups,allowed_tags,extra_questions,allowed_access_levels,subtracks",
+        "track_groups,allowed_tags,extra_questions,allowed_access_levels,subtracks,parent",
       access_token: accessToken
     };
 
