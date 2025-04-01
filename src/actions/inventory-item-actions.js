@@ -130,7 +130,7 @@ export const getInventoryItems =
     return getRequest(
       createAction(REQUEST_INVENTORY_ITEMS),
       createAction(RECEIVE_INVENTORY_ITEMS),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/`,
+      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items`,
       authErrorHandler,
       { order, orderDir, page, term }
     )(params)(dispatch).then(() => {
@@ -262,7 +262,7 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
   return postRequest(
     createAction(ADD_INVENTORY_ITEM),
     createAction(INVENTORY_ITEM_ADDED),
-    `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/`,
+    `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items`,
     normalizedEntity,
     authErrorHandler,
     entity
@@ -303,7 +303,7 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
 
 const saveItemMetaFieldTypes = (entity) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${entity.id}/meta-field-types/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${entity.id}/meta-field-types`,
     addedActionName: INVENTORY_ITEM_META_FIELD_SAVED,
     updatedActionName: INVENTORY_ITEM_META_FIELD_SAVED
   };
@@ -330,7 +330,7 @@ export const deleteInventoryItemMetaFieldType = (
 
 const saveItemMetaFieldValues = (inventoryItemId, metaFieldType) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldType.id}/values/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldType.id}/values`,
     addedActionName: INVENTORY_ITEM_META_FIELD_VALUE_SAVED,
     updatedActionName: INVENTORY_ITEM_META_FIELD_VALUE_SAVED
   };
@@ -353,7 +353,7 @@ export const deleteInventoryItemMetaFieldTypeValue = (
 
 const saveItemImages = (inventoryItem) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/images/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/images`,
     addedActionName: INVENTORY_ITEM_IMAGE_SAVED,
     updatedActionName: INVENTORY_ITEM_IMAGE_SAVED
   };

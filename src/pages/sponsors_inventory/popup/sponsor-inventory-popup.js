@@ -61,8 +61,8 @@ const SponsorItemDialog = ({
         name: "",
         type: "Text",
         required: false,
-        minimum_quantity: "",
-        maximum_quantity: "",
+        minimum_quantity: 0,
+        maximum_quantity: 0,
         values: []
       }
     ],
@@ -96,8 +96,8 @@ const SponsorItemDialog = ({
                 type: "Text",
                 is_required: false,
                 values: [],
-                minimum_quantity: "",
-                maximum_quantity: ""
+                minimum_quantity: 0,
+                maximum_quantity: 0
               }
             ],
       images: initialEntity?.images.length > 0 ? initialEntity?.images : []
