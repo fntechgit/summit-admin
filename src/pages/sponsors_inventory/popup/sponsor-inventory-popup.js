@@ -205,7 +205,7 @@ const SponsorItemDialog = ({
 
   const handleAddValue = (index) => {
     const newFields = [...entity.meta_fields];
-    newFields[index].values.push({ value: "", isDefault: false });
+    newFields[index].values.push({ value: "", is_default: false });
     setEntity({ ...entity, meta_fields: newFields });
   };
 
@@ -257,6 +257,12 @@ const SponsorItemDialog = ({
 
   const handleFieldValueChange = (fieldIndex, valueIndex, key, value) => {
     const newFields = [...entity.meta_fields];
+    if (key === "is_default" && value === true) {
+      // revert all the values to false before set it as true
+      newFields[fieldIndex].values.forEach((v) => {
+        v.is_default = false;
+      });
+    }
     newFields[fieldIndex].values[valueIndex][key] = value;
     setEntity({ ...entity, meta_fields: newFields });
   };

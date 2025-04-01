@@ -40,8 +40,8 @@ const DragAndDropList = ({
           <Box ref={provided.innerRef} {...provided.droppableProps}>
             {items.map((item, index) => (
               <Draggable
-                key={String(item[idKey])}
-                draggableId={String(item[idKey])}
+                key={String(item[idKey] || `new-${index}`)}
+                draggableId={String(item[idKey] || `new-${index}`)}
                 index={index}
               >
                 {(provided, snapshot) => (
