@@ -151,7 +151,7 @@ export const getInventoryItem = (inventoryItemId) => async (dispatch) => {
   return getRequest(
     null,
     createAction(RECEIVE_INVENTORY_ITEM),
-    `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/`,
+    `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}`,
     authErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
@@ -170,7 +170,7 @@ export const deleteInventoryItem = (inventoryItemId) => async (dispatch) => {
   return deleteRequest(
     null,
     createAction(INVENTORY_ITEM_DELETED)({ inventoryItemId }),
-    `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/`,
+    `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}`,
     null,
     authErrorHandler
   )(params)(dispatch).then(() => {
@@ -217,7 +217,7 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
     return putRequest(
       createAction(UPDATE_INVENTORY_ITEM),
       createAction(INVENTORY_ITEM_UPDATED),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${entity.id}/`,
+      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${entity.id}`,
       normalizedEntity,
       authErrorHandler,
       entity
@@ -320,7 +320,7 @@ export const deleteInventoryItemMetaFieldType = (
   metaFieldId
 ) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types`,
     deletedActionName: INVENTORY_ITEM_META_FIELD_DELETED
   };
   return deleteMetaFieldType(metaFieldId, settings);
@@ -343,7 +343,7 @@ export const deleteInventoryItemMetaFieldTypeValue = (
   valueId
 ) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldId}/values/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/meta-field-types/${metaFieldId}/values`,
     deletedActionName: INVENTORY_ITEM_META_FIELD_VALUE_DELETED
   };
   return deleteMetaFieldTypeValue(metaFieldId, valueId, settings);
@@ -362,7 +362,7 @@ const saveItemImages = (inventoryItem) => {
 
 export const deleteInventoryItemImage = (inventoryItemId, imageId) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/images/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}/images`,
     deletedActionName: INVENTORY_ITEM_IMAGE_DELETED
   };
   return deleteFile(imageId, settings);
