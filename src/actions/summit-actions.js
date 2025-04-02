@@ -63,7 +63,7 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "track_groups," +
       "locations," +
       "locations.rooms," +
-      "locations.floor," +
+      "locations.rooms.floor," +
       "meeting_booking_room_allowed_attributes," +
       "meeting_booking_room_allowed_attributes.values," +
       "lead_report_settings," +
@@ -87,7 +87,7 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "end_date," +
       "event_types,event_types.id,event_types.name,event_types.order,event_types.allows_attachment,event_types.allows_level,event_types.allows_location,event_types.allows_location_timeframe_collision,event_types.allows_publishing_dates," +
       "link," +
-      "locations,locations.id,locations.name,locations.order,locations.class_name,locations.rooms,locations.floors," +
+      "locations,locations.id,locations.name,locations.order,locations.class_name,locations.rooms.id,locations.rooms.name,locations.rooms.floor.id,locations.rooms.floor.name," +
       "logo," +
       "secondary_logo," +
       "presentation_voters_count," +
@@ -174,7 +174,7 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "event_types.none," +
       "tracks.subtracks,tracks.track_groups," +
       "tracks_groups.none," +
-      "locations,locations.rooms,locations.floor,locations.none," +
+      "locations,locations.rooms,locations.rooms.none,locations.floor,locations.none," +
       "meeting_booking_room_allowed_attributes.values," +
       "selection_plans.track_groups,selection_plans.allowed_presentation_questions," +
       "ticket_types.none," +
