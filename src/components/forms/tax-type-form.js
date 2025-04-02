@@ -101,7 +101,6 @@ class TaxTypeForm extends React.Component {
 
   render() {
     const { entity } = this.state;
-    const { currentSummit } = this.props;
 
     const ticketColumns = [
       { columnKey: "name", value: T.translate("edit_tax_type.name") },
