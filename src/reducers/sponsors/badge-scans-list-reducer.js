@@ -15,7 +15,7 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_BADGE_SCANS,
-  RECEIVE_SPONSORS,
+  RECEIVE_SPONSORS_WITH_SCANS,
   REQUEST_BADGE_SCANS
 } from "../../actions/sponsor-actions";
 
@@ -104,8 +104,13 @@ const badgeScansListReducer = (state = DEFAULT_STATE, action = {}) => {
         lastPage
       };
     }
-    case RECEIVE_SPONSORS: {
-      return { ...state, allSponsors: payload.response.data };
+    case RECEIVE_SPONSORS_WITH_SCANS: {
+      const { current_page, data } = payload.response;
+
+      const allSponsors =
+        current_page === 1 ? data : [...state.allSponsors, ...data];
+
+      return { ...state, allSponsors };
     }
     default:
       return state;
