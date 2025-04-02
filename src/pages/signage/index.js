@@ -204,31 +204,6 @@ const SignagePage = ({
                 onChange={(op) => onChangeLocation(op.target.value)}
                 summitId={summit.id}
               />
-              {/* <LocationGroupedAsyncDropdown
-                id="test-location"
-                value={locationId}
-                placeholder={T.translate("signage.placeholders.locations")}
-                onChange={(op) => onChangeLocation(op.target.value)}
-                summitId={summit.id}
-              />
-              <BookableRoomsDropdown
-                id="test-bookable"
-                value={locationId}
-                placeholder={"bookeable room"}
-                onChange={(op) => onChangeLocation(op.target.value.id)}
-                summitId={summit.id} />
-              <VenuesDropdown
-                id="test-bookable"
-                value={locationId}
-                placeholder={"All venues"}
-                onChange={(op) => onChangeLocation(op.target.value.id)}
-                summitId={summit.id} />
-              <RoomsInput
-                id="test-bookable"
-                value={locationId}
-                placeholder={"All room"}
-                onChange={(op) => onChangeLocation(op.target.value.id)}
-                summitId={summit.id} /> */}
             </div>
             <div className="col-md-4">
               <label> {T.translate("signage.template")} </label>
