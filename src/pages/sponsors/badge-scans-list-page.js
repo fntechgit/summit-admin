@@ -14,14 +14,14 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Table, Dropdown } from "openstack-uicore-foundation/lib/components";
+import {
+  Table,
+  SponsorInput
+} from "openstack-uicore-foundation/lib/components";
+import { querySponsorsWithBadgeScans } from "openstack-uicore-foundation/lib/utils/query-actions";
 import { Pagination } from "react-bootstrap";
 import { getSummitById } from "../../actions/summit-actions";
-import {
-  getSponsorsWithBadgeScans,
-  getBadgeScans,
-  exportBadgeScans
-} from "../../actions/sponsor-actions";
+import { getBadgeScans, exportBadgeScans } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
 
 const BadgeScansListPage = ({
@@ -40,8 +40,6 @@ const BadgeScansListPage = ({
   ...props
 }) => {
   useEffect(() => {
-    props.getSponsorsWithBadgeScans();
-
     if (sponsorId) {
       props.getBadgeScans(sponsorId);
     }
@@ -57,7 +55,7 @@ const BadgeScansListPage = ({
 
   const handleSponsorChange = (ev) => {
     const { value } = ev.target;
-    props.getBadgeScans(value, currentPage, perPage, order, orderDir);
+    props.getBadgeScans(value.id, currentPage, perPage, order, orderDir);
   };
 
   const handleExport = (ev) => {
@@ -113,22 +111,18 @@ const BadgeScansListPage = ({
 
   const table_options = {
     sortCol: order,
-    sortDir: orderDir,
-    actions: {}
+    sortDir: orderDir
   };
 
   if (canEditBadgeScans) {
     table_options.actions = {
-      ...table_options.actions,
       edit: { onClick: handleEditBadgeScan }
     };
   }
 
   if (!currentSummit.id) return <div />;
 
-  const sponsors_ddl = allSponsors
-    ? allSponsors.map((s) => ({ label: s.company.name, value: s.id }))
-    : null;
+  // console.log(badgeScans, table_options, columns)
 
   return (
     <div className="container">
@@ -146,13 +140,16 @@ const BadgeScansListPage = ({
             {T.translate("general.export")}
           </button>
           <div className="col-md-6 pull-right">
-            <Dropdown
+            <SponsorInput
+              id="sponsor"
               value={sponsorId}
+              onChange={handleSponsorChange}
+              summitId={currentSummit?.id}
               placeholder={T.translate(
                 "badge_scan_list.placeholders.select_sponsor"
               )}
-              options={sponsors_ddl}
-              onChange={handleSponsorChange}
+              queryFunction={querySponsorsWithBadgeScans}
+              defaultOptions
             />
           </div>
         </div>
@@ -207,7 +204,6 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getSummitById,
-  getSponsorsWithBadgeScans,
   getBadgeScans,
   exportBadgeScans
 })(BadgeScansListPage);
