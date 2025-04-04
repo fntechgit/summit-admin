@@ -83,11 +83,11 @@ const assembleTicketsState = (tickets, currencySymbol, summitId) =>
     const final_amount_formatted = `${currencySymbol}${t.final_amount.toFixed(
       DECIMAL_DIGITS
     )}`;
-    const refunded_amount_formatted = `${currencySymbol}${t.refunded_amount.toFixed(
+    const refunded_amount_formatted = `${currencySymbol}${t.total_refunded_amount.toFixed(
       DECIMAL_DIGITS
     )}`;
     const final_amount_adjusted_formatted = `${currencySymbol}${(
-      t.final_amount - t.refunded_amount
+      t.final_amount - t.total_refunded_amount
     ).toFixed(DECIMAL_DIGITS)}`;
 
     if (t.owner) {
