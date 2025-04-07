@@ -307,7 +307,7 @@ const EditTicketPage = ({
           name: "Reject",
           tooltip: T.translate("edit_ticket.cancel_refund"),
           icon: <i className="fa fa-ban" />,
-          onClick: () => setShowRefundModal(true),
+          onClick: () => setShowRefundRejectModal(true),
           display: shouldDisplayRejectRefundRequest
         }
       ]
