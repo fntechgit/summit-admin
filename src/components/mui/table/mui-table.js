@@ -27,11 +27,16 @@ const MuiTable = ({
   currentPage,
   onRowEdit,
   onPageChange,
+  onPerPageChange,
   onSort,
   options
 }) => {
   const handleChangePage = (_, newPage) => {
     onPageChange(newPage);
+  };
+
+  const handleChangeRowsPerPage = (ev) => {
+    onPerPageChange(ev.target.value);
   };
 
   const { sortCol, sortDir } = options;
@@ -134,6 +139,7 @@ const MuiTable = ({
           onPageChange={(_, newPage) => {
             handleChangePage(newPage + 1);
           }}
+          onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage={T.translate("mui_table.rows_per_page")}
           sx={{
             ".MuiTablePagination-toolbar": {

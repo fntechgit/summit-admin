@@ -137,7 +137,7 @@ export const getInventoryItems =
       createAction(RECEIVE_INVENTORY_ITEMS),
       `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items`,
       authErrorHandler,
-      { order, orderDir, page, term }
+      { order, orderDir, page, perPage, term }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -207,12 +207,16 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const saveInventoryItem = (entity) => async (dispatch) => {
+export const saveInventoryItem = (entity) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   const params = {
     access_token: accessToken,
     expand: "images,meta_fields,meta_fields.values"
   };
+
+  const {
+    currentInventoryItemListState: { term, page, perPage, order, orderDir }
+  } = getState();
 
   dispatch(startLoading());
 
@@ -251,6 +255,7 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
           })
           .finally(() => {
             dispatch(stopLoading());
+            dispatch(getInventoryItems(term, page, perPage, order, orderDir));
           });
       })
       .catch((err) => {
@@ -297,6 +302,7 @@ export const saveInventoryItem = (entity) => async (dispatch) => {
         })
         .finally(() => {
           dispatch(stopLoading());
+          dispatch(getInventoryItems(term, page, perPage, order, orderDir));
         });
     })
     .catch((err) => {

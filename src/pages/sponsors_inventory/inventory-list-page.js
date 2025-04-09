@@ -80,6 +80,10 @@ const InventoryListPage = ({
     getInventoryItems(term, page, perPage, order, orderDir);
   };
 
+  const handlePerPageChange = (newPerPage) => {
+    getInventoryItems(term, currentPage, newPerPage, order, orderDir);
+  };
+
   const handleSort = (index, key, dir) => {
     getInventoryItems(term, currentPage, perPage, key, dir);
   };
@@ -297,6 +301,7 @@ const InventoryListPage = ({
             currentPage={currentPage}
             onRowEdit={handleRowEdit}
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
           />
         </div>
