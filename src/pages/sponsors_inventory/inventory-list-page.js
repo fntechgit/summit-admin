@@ -11,97 +11,192 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Grid2,
+  TextField
+} from "@mui/material";
+import Box from "@mui/material/Box";
+import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
+import IconButton from "@mui/material/IconButton";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import EditIcon from "@mui/icons-material/Edit";
+import ImageIcon from "@mui/icons-material/Image";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
 import {
   getInventoryItems,
-  deleteInventoryItem
+  getInventoryItem,
+  saveInventoryItem,
+  deleteInventoryItem,
+  deleteInventoryItemImage,
+  resetInventoryItemForm,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemMetaFieldTypeValue,
+  archiveInventoryItem,
+  unarchiveInventoryItem
 } from "../../actions/inventory-item-actions";
+import MuiTable from "../../components/mui/table/mui-table";
+import SponsorInventoryDialog from "./popup/sponsor-inventory-popup";
 
 const InventoryListPage = ({
   inventoryItems,
-  lastPage,
+  currentInventoryItem,
+  currentInventoryItemErrors,
   currentPage,
   perPage,
   term,
   order,
   orderDir,
   totalInventoryItems,
-  history,
-  deleteInventoryItem,
-  getInventoryItems
+  saveInventoryItem,
+  deleteInventoryItemImage,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemMetaFieldTypeValue,
+  getInventoryItems,
+  getInventoryItem,
+  archiveInventoryItem,
+  unarchiveInventoryItem,
+  resetInventoryItemForm
 }) => {
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   useEffect(() => {
-    getInventoryItems(term, currentPage, perPage, order, orderDir);
+    getInventoryItems(term, 1, perPage, order, orderDir);
   }, []);
-
-  const handleEdit = (itemId) => {
-    history.push(`/app/inventory/${itemId}`);
-  };
-
-  const handleDelete = (itemId) => {
-    const inventoryItem = inventoryItems.find((s) => s.id === itemId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate(
-        "inventory_item_list.delete_inventory_item_warning"
-      )} ${inventoryItem.name}?`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteInventoryItem(itemId);
-      }
-    });
-  };
 
   const handlePageChange = (page) => {
     getInventoryItems(term, page, perPage, order, orderDir);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getInventoryItems(term, currentPage, newPerPage, order, orderDir);
   };
 
   const handleSort = (index, key, dir) => {
     getInventoryItems(term, currentPage, perPage, key, dir);
   };
 
-  const handleSearch = (term) => {
-    getInventoryItems(term, currentPage, perPage, order, orderDir);
+  const handleSearch = (ev) => {
+    if (ev.key === "Enter") {
+      getInventoryItems(searchTerm, currentPage, perPage, order, orderDir);
+    }
+  };
+
+  const handleRowEdit = (row) => {
+    if (row) getInventoryItem(row.id);
+    setOpen(true);
   };
 
   const handleNewInventoryItem = () => {
-    history.push("/app/inventory/new");
+    resetInventoryItemForm();
+    setOpen(true);
   };
 
+  const handleInventorySave = (item) => {
+    saveInventoryItem(item).then(() =>
+      getInventoryItems(term, currentPage, perPage, order, orderDir)
+    );
+    setOpen(false);
+  };
+
+  const handleArchiveItem = (item) =>
+    item.is_archived
+      ? unarchiveInventoryItem(item)
+      : archiveInventoryItem(item);
+
   const columns = [
-    { columnKey: "id", value: "Id", sortable: true },
     {
       columnKey: "code",
-      value: T.translate("inventory_item_list.code_column_label"),
+      header: T.translate("inventory_item_list.code_column_label"),
+      width: 120,
       sortable: true
     },
     {
       columnKey: "name",
-      value: T.translate("inventory_item_list.name_column_label"),
+      header: T.translate("inventory_item_list.name_column_label"),
       sortable: true
+    },
+    {
+      columnKey: "hasImage",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row) =>
+        row.images.length > 0 ? (
+          <IconButton size="small">
+            <ImageIcon
+              fontSize="small"
+              onClick={() =>
+                window.open(
+                  row.images[0].file_url,
+                  "_blank",
+                  "noopener,noreferrer"
+                )
+              }
+            />
+          </IconButton>
+        ) : null
+    },
+    {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row, { onRowEdit }) => (
+        <IconButton size="small" onClick={() => onRowEdit(row)}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "archive",
+      header: "",
+      width: 70,
+      align: "center",
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="small"
+          onClick={() => handleArchiveItem(row)}
+        >
+          {row.is_archived
+            ? T.translate("inventory_item_list.unarchive_button")
+            : T.translate("inventory_item_list.archive_button")}
+        </Button>
+      ),
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "more",
+      header: "",
+      width: 40,
+      align: "center",
+      render: () => (
+        <IconButton size="small">
+          <UnfoldMoreIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
     }
   ];
 
   const table_options = {
     sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      edit: { onClick: handleEdit },
-      delete: { onClick: handleDelete }
-    }
+    sortDir: orderDir
   };
 
   return (
@@ -111,58 +206,139 @@ const InventoryListPage = ({
         {T.translate("inventory_item_list.inventory_items")} (
         {totalInventoryItems}){" "}
       </h3>
-      <div className="alert alert-info" role="alert">
+      <Alert
+        severity="info"
+        sx={{
+          justifyContent: "start",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
         {T.translate("inventory_item_list.alert_info")}
-      </div>
-      <div className="row">
-        <div className="col-md-6">
-          <FreeTextSearch
-            value={term ?? ""}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-            onSearch={handleSearch}
-          />
-        </div>
-        <div className="col-md-6 text-right">
-          <button className="btn btn-primary" onClick={handleNewInventoryItem}>
-            {T.translate("inventory_item_list.add_inventory_item")}
-          </button>
-        </div>
-      </div>
+      </Alert>
+      <Grid2
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={6}>
+          <Box component="span">{totalInventoryItems} items</Box>
+        </Grid2>
+        <Grid2
+          container
+          size={6}
+          spacing={1}
+          sx={{
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={4}>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    onChange={(ev) =>
+                      console.log("CHECK BOX", ev.target.checked)
+                    }
+                    inputProps={{
+                      "aria-label": T.translate(
+                        "inventory_item_list.hide_archived"
+                      )
+                    }}
+                  />
+                }
+                label={T.translate("inventory_item_list.hide_archived")}
+              />
+            </FormGroup>
+          </Grid2>
+          <Grid2 size={4}>
+            <TextField
+              variant="outlined"
+              value={searchTerm}
+              placeholder={T.translate(
+                "inventory_item_list.placeholders.search_inventory_items"
+              )}
+              slotProps={{
+                input: {
+                  startAdornment: <SearchIcon sx={{ mr: 1 }} />
+                }
+              }}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              onKeyDown={handleSearch}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  height: "36px"
+                }
+              }}
+            />
+          </Grid2>
+          <Grid2 size={4}>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={() => handleNewInventoryItem()}
+              startIcon={<AddIcon />}
+              sx={{ height: "36px" }}
+            >
+              {T.translate("inventory_item_list.add_inventory_item")}
+            </Button>
+          </Grid2>
+        </Grid2>
+      </Grid2>
 
       {inventoryItems.length > 0 && (
         <div>
-          <Table
-            options={table_options}
-            data={inventoryItems}
+          <MuiTable
             columns={columns}
+            data={inventoryItems}
+            options={table_options}
+            perPage={perPage}
+            currentPage={currentPage}
+            onRowEdit={handleRowEdit}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
-          />
-          <Pagination
-            bsSize="medium"
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            maxButtons={10}
-            items={lastPage}
-            activePage={currentPage}
-            onSelect={handlePageChange}
           />
         </div>
       )}
+
+      <SponsorInventoryDialog
+        entity={currentInventoryItem}
+        errors={currentInventoryItemErrors}
+        open={open}
+        onSave={handleInventorySave}
+        onClose={handleClose}
+        onMetaFieldTypeDeleted={deleteInventoryItemMetaFieldType}
+        onMetaFieldTypeValueDeleted={deleteInventoryItemMetaFieldTypeValue}
+        onImageDeleted={deleteInventoryItemImage}
+      />
     </div>
   );
 };
 
-const mapStateToProps = ({ currentInventoryItemListState }) => ({
-  ...currentInventoryItemListState
+const mapStateToProps = ({
+  currentInventoryItemListState,
+  currentInventoryItemState
+}) => ({
+  ...currentInventoryItemListState,
+  currentInventoryItem: currentInventoryItemState.entity,
+  currentInventoryItemErrors: currentInventoryItemState.errors
 });
 
 export default connect(mapStateToProps, {
   getInventoryItems,
-  deleteInventoryItem
+  getInventoryItem,
+  resetInventoryItemForm,
+  saveInventoryItem,
+  deleteInventoryItem,
+  deleteInventoryItemImage,
+  deleteInventoryItemMetaFieldType,
+  deleteInventoryItemMetaFieldTypeValue,
+  archiveInventoryItem,
+  unarchiveInventoryItem
 })(InventoryListPage);
