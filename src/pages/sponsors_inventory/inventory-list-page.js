@@ -38,7 +38,9 @@ import {
   deleteInventoryItemImage,
   resetInventoryItemForm,
   deleteInventoryItemMetaFieldType,
-  deleteInventoryItemMetaFieldTypeValue
+  deleteInventoryItemMetaFieldTypeValue,
+  archiveInventoryItem,
+  unarchiveInventoryItem
 } from "../../actions/inventory-item-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import SponsorInventoryDialog from "./popup/sponsor-inventory-popup";
@@ -59,6 +61,8 @@ const InventoryListPage = ({
   deleteInventoryItemMetaFieldTypeValue,
   getInventoryItems,
   getInventoryItem,
+  archiveInventoryItem,
+  unarchiveInventoryItem,
   resetInventoryItemForm
 }) => {
   const [open, setOpen] = useState(false);
@@ -102,6 +106,11 @@ const InventoryListPage = ({
     );
     setOpen(false);
   };
+
+  const handleArchiveItem = (item) =>
+    item.is_archived
+      ? unarchiveInventoryItem(item)
+      : archiveInventoryItem(item);
 
   const columns = [
     {
@@ -153,9 +162,16 @@ const InventoryListPage = ({
       header: "",
       width: 70,
       align: "center",
-      render: () => (
-        <Button variant="text" color="inherit" size="small">
-          {T.translate("inventory_item_list.archive_button")}
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="small"
+          onClick={() => handleArchiveItem(row)}
+        >
+          {row.is_archived
+            ? T.translate("inventory_item_list.unarchive_button")
+            : T.translate("inventory_item_list.archive_button")}
         </Button>
       ),
       className: "dottedBorderLeft"
@@ -317,5 +333,7 @@ export default connect(mapStateToProps, {
   deleteInventoryItem,
   deleteInventoryItemImage,
   deleteInventoryItemMetaFieldType,
-  deleteInventoryItemMetaFieldTypeValue
+  deleteInventoryItemMetaFieldTypeValue,
+  archiveInventoryItem,
+  unarchiveInventoryItem
 })(InventoryListPage);

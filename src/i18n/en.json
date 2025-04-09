@@ -3171,6 +3171,7 @@
     "code_column_label": "Code",
     "name_column_label": "Name",
     "archive_button": "Archive",
+    "unarchive_button": "Unarchive",
     "delete_inventory_item_warning": "Are you sure you want to delete inventory item ",
     "add_inventory_item": "Create new Item",
     "hide_archived": "Hide archived items",

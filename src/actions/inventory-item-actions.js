@@ -38,7 +38,9 @@ import {
   saveMetaFieldValues,
   deleteMetaFieldTypeValue,
   saveFiles,
-  deleteFile
+  deleteFile,
+  archiveItem,
+  unarchiveItem
 } from "./inventory-shared-actions";
 import { amountToCents } from "../utils/currency";
 
@@ -73,6 +75,9 @@ export const CLEAR_ALL_SELECTED_INVENTORY_ITEMS =
   "CLEAR_ALL_SELECTED_INVENTORY_ITEMS";
 export const SET_SELECTED_ALL_INVENTORY_ITEMS =
   "SET_SELECTED_ALL_INVENTORY_ITEMS";
+
+export const INVENTORY_ITEM_ARCHIVED = "INVENTORY_ITEM_ARCHIVED";
+export const INVENTORY_ITEM_UNARCHIVED = "INVENTORY_ITEM_UNARCHIVED";
 
 export const selectInventoryItem = (inventoryItemId) => (dispatch) => {
   dispatch(createAction(SELECT_INVENTORY_ITEM)(inventoryItemId));
@@ -111,7 +116,7 @@ export const getInventoryItems =
 
     const params = {
       page,
-      fields: "id,code,name,images,images.file_url",
+      fields: "id,code,name,images,images.file_url,is_archived",
       expand: "images",
       per_page: perPage,
       access_token: accessToken
@@ -366,4 +371,22 @@ export const deleteInventoryItemImage = (inventoryItemId, imageId) => {
     deletedActionName: INVENTORY_ITEM_IMAGE_DELETED
   };
   return deleteFile(imageId, settings);
+};
+
+/* **************************************  ARCHIVE  ************************************** */
+
+export const archiveInventoryItem = (inventoryItem) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
+    updatedActionName: INVENTORY_ITEM_ARCHIVED
+  };
+  return archiveItem(inventoryItem, settings);
+};
+
+export const unarchiveInventoryItem = (inventoryItem) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItem.id}/archive`,
+    deletedActionName: INVENTORY_ITEM_UNARCHIVED
+  };
+  return unarchiveItem(inventoryItem, settings);
 };

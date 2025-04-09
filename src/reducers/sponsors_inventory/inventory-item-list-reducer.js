@@ -20,7 +20,9 @@ import {
   SELECT_INVENTORY_ITEM,
   UNSELECT_INVENTORY_ITEM,
   CLEAR_ALL_SELECTED_INVENTORY_ITEMS,
-  SET_SELECTED_ALL_INVENTORY_ITEMS
+  SET_SELECTED_ALL_INVENTORY_ITEMS,
+  INVENTORY_ITEM_ARCHIVED,
+  INVENTORY_ITEM_UNARCHIVED
 } from "../../actions/inventory-item-actions";
 
 const DEFAULT_STATE = {
@@ -80,6 +82,7 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
         code: a.code,
         name: a.name,
         images: a.images,
+        is_archived: a.is_archived,
         checked: false
       }));
 
@@ -187,6 +190,22 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
         inventoryItems,
         selectedCount
       };
+    }
+    case INVENTORY_ITEM_ARCHIVED: {
+      const updatedItem = payload.response;
+
+      const updatedInventoryItems = state.inventoryItems.map((item) =>
+        item.id === updatedItem.id ? { ...item, is_archived: true } : item
+      );
+      return { ...state, inventoryItems: updatedInventoryItems };
+    }
+    case INVENTORY_ITEM_UNARCHIVED: {
+      const updatedItemId = payload;
+
+      const updatedInventoryItems = state.inventoryItems.map((item) =>
+        item.id === updatedItemId ? { ...item, is_archived: false } : item
+      );
+      return { ...state, inventoryItems: updatedInventoryItems };
     }
     default:
       return state;
