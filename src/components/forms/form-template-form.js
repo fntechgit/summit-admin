@@ -17,7 +17,7 @@ import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   Input,
   UploadInputV2,
-  TextEditor
+  TextEditorV3
 } from "openstack-uicore-foundation/lib/components";
 import Swal from "sweetalert2";
 import FormRepeater from "../form-repeater";
@@ -215,11 +215,12 @@ const FormTemplateForm = ({
       <div className="row form-group">
         <div className="col-md-12">
           <label>{T.translate("edit_form_template.instructions")} *</label>
-          <TextEditor
+          <TextEditorV3
             id="instructions"
             value={entity.instructions}
             onChange={handleChange}
             error={hasErrors("instructions", errors)}
+            license={process.env.JODIT_LICENSE_KEY}
           />
         </div>
       </div>

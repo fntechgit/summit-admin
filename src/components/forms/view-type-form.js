@@ -9,14 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react";
 import {
   Input,
-  TextEditor,
-  UploadInput
+  TextEditorV3
 } from "openstack-uicore-foundation/lib/components";
 import {
   hasErrors,
@@ -38,7 +37,7 @@ class ViewTypeForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -67,7 +66,7 @@ class ViewTypeForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
@@ -96,11 +95,12 @@ class ViewTypeForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_view_type.description")}</label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
               error={hasErrors("description", errors)}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>

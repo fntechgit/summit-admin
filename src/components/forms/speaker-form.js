@@ -15,7 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
-  TextEditor,
+  TextEditorV3,
   MemberInput,
   UploadInput,
   Input,
@@ -401,10 +401,11 @@ class SpeakerForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_speaker.bio")} </label>
-            <TextEditor
+            <TextEditorV3
               id="bio"
               value={entity.bio}
               onChange={this.handleChange}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>

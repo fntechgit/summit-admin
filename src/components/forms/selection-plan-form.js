@@ -25,7 +25,7 @@ import {
   DateTimePicker,
   SimpleLinkList,
   SortableTable,
-  TextEditor,
+  TextEditorV3,
   Panel,
   Table,
   Dropdown
@@ -659,11 +659,12 @@ class SelectionPlanForm extends React.Component {
               )}{" "}
               *
             </label>
-            <TextEditor
+            <TextEditorV3
               id="submission_period_disclaimer"
               value={entity.submission_period_disclaimer}
               onChange={this.handleChange}
               error={this.hasErrors("submission_period_disclaimer")}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>
@@ -983,7 +984,7 @@ class SelectionPlanForm extends React.Component {
                       )}
                     />
                   </label>
-                  <TextEditor
+                  <TextEditorV3
                     id="cfp_presentation_edition_custom_message"
                     error={this.hasErrors(
                       "cfp_presentation_edition_custom_message"
@@ -993,6 +994,7 @@ class SelectionPlanForm extends React.Component {
                       entity.marketing_settings
                         .cfp_presentation_edition_custom_message?.value || ""
                     }
+                    license={process.env.JODIT_LICENSE_KEY}
                   />
                 </div>
               </div>

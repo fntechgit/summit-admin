@@ -20,7 +20,8 @@ import {
   TagInput,
   UploadInput,
   AccessLevelsInput,
-  SortableTable
+  SortableTable,
+  TextEditorV3
 } from "openstack-uicore-foundation/lib/components";
 
 import {
@@ -30,7 +31,6 @@ import {
   hasErrors
 } from "../../utils/methods";
 import TrackDropdown from "../inputs/track-dropdown";
-import TextEditorV3bis from "../editor-input-v3";
 
 class EventCategoryForm extends React.Component {
   constructor(props) {
@@ -203,12 +203,13 @@ class EventCategoryForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_event_category.description")} *</label>
-            <TextEditorV3bis
+            <TextEditorV3
               id="description"
               placeholder="Enter text"
               value={entity.description}
               onChange={this.handleChange}
               error={hasErrors("description", errors)}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>

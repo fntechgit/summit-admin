@@ -9,14 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   Input,
-  TextEditor,
+  TextEditorV3,
   SimpleLinkList,
   Dropdown,
   UploadInput
@@ -41,7 +41,7 @@ class RoomForm extends React.Component {
     this.handleClearHours = this.handleClearHours.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -60,8 +60,8 @@ class RoomForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "number") {
@@ -74,12 +74,12 @@ class RoomForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(continueAdding, ev) {
-    let entity = { ...this.state.entity };
-    let { locationId } = this.props;
+    const entity = { ...this.state.entity };
+    const { locationId } = this.props;
 
     ev.preventDefault();
 
@@ -87,15 +87,15 @@ class RoomForm extends React.Component {
   }
 
   handleClearHours() {
-    let entity = { ...this.state.entity };
+    const entity = { ...this.state.entity };
     const { locationHours } = this.props;
-    entity["opening_hour"] = locationHours.opening_hour || null;
-    entity["closing_hour"] = locationHours.closing_hour || null;
-    this.setState({ entity: entity });
+    entity.opening_hour = locationHours.opening_hour || null;
+    entity.closing_hour = locationHours.closing_hour || null;
+    this.setState({ entity });
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -105,7 +105,7 @@ class RoomForm extends React.Component {
 
   queryAttributes(input, callback) {
     const { currentSummit } = this.props;
-    let attributeTypes = currentSummit.meeting_booking_room_allowed_attributes;
+    const attributeTypes = currentSummit.meeting_booking_room_allowed_attributes;
     let attributes = [];
 
     attributeTypes.forEach((type) => {
@@ -113,7 +113,7 @@ class RoomForm extends React.Component {
     });
 
     attributes = attributes.map((attr) => {
-      let type = attributeTypes.find((at) => at.id === attr.type_id);
+      const type = attributeTypes.find((at) => at.id === attr.type_id);
       return { ...attr, label: `${type.type}: ${attr.value}` };
     });
 
@@ -125,17 +125,17 @@ class RoomForm extends React.Component {
   }
 
   handleUploadFile(file) {
-    let entity = { ...this.state.entity };
-    let { locationId } = this.props;
+    const entity = { ...this.state.entity };
+    const { locationId } = this.props;
 
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append("file", file);
     this.props.onAttach(locationId, entity, formData);
   }
 
-  handleRemoveFile(ev) {
-    let entity = { ...this.state.entity };
-    let { locationId } = this.props;
+  handleRemoveFile() {
+    const entity = { ...this.state.entity };
+    const { locationId } = this.props;
 
     entity.image = "";
     this.setState({ entity });
@@ -144,16 +144,16 @@ class RoomForm extends React.Component {
 
   render() {
     const { entity } = this.state;
-    let { allFloors, currentSummit, locationHours } = this.props;
-    let floors_ddl = allFloors.map((f) => ({ label: f.name, value: f.id }));
+    const { allFloors, currentSummit, locationHours } = this.props;
+    const floors_ddl = allFloors.map((f) => ({ label: f.name, value: f.id }));
 
-    let attributeColumns = [
+    const attributeColumns = [
       { columnKey: "id", value: T.translate("general.id") },
       { columnKey: "type_name", value: T.translate("general.type") },
       { columnKey: "value", value: T.translate("general.value") }
     ];
 
-    let attributeOptions = {
+    const attributeOptions = {
       title: T.translate("edit_room.attribute_values"),
       valueKey: "id",
       labelKey: "label",
@@ -165,10 +165,10 @@ class RoomForm extends React.Component {
       }
     };
 
-    let roomAttributes = entity.attributes.map((attr) => {
-      let attributeTypes =
+    const roomAttributes = entity.attributes.map((attr) => {
+      const attributeTypes =
         currentSummit.meeting_booking_room_allowed_attributes;
-      let type = attributeTypes.find((at) => at.id === attr.type_id);
+      const type = attributeTypes.find((at) => at.id === attr.type_id);
 
       return {
         ...attr,
@@ -177,17 +177,17 @@ class RoomForm extends React.Component {
       };
     });
 
-    let class_ddl = [
+    const class_ddl = [
       { label: "Room", value: "SummitVenueRoom" },
       { label: "Bookable Room", value: "SummitBookableVenueRoom" }
     ];
 
-    let currency_ddl = [
+    const currency_ddl = [
       { label: "USD", value: "USD" },
       { label: "EUR", value: "EUR" }
     ];
 
-    let image_url = entity.image != null ? entity.image.url : "";
+    const image_url = entity.image != null ? entity.image.url : "";
 
     return (
       <form className="room-form">
@@ -271,11 +271,12 @@ class RoomForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_room.description")} </label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
               error={this.hasErrors("description")}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>

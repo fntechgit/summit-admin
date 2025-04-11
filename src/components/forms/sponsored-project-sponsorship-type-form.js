@@ -9,13 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
-  TextEditor,
+  TextEditorV3,
   Input,
   SortableTable
 } from "openstack-uicore-foundation/lib/components";
@@ -37,7 +37,7 @@ class SponsoredProjectSponsorshipTypeForm extends React.Component {
       this.handleAddSupportingCompany.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -66,7 +66,7 @@ class SponsoredProjectSponsorshipTypeForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(publish, ev) {
@@ -81,7 +81,7 @@ class SponsoredProjectSponsorshipTypeForm extends React.Component {
     );
   }
 
-  handleAddSupportingCompany(ev) {
+  handleAddSupportingCompany() {
     const { history, project, entity } = this.props;
     history.push(
       `/app/sponsored-projects/${project.id}/sponsorship-types/${entity.id}/supporting-companies/new`
@@ -94,19 +94,19 @@ class SponsoredProjectSponsorshipTypeForm extends React.Component {
     const { onSupportingCompanyDelete, onSupportingCompanyReorder } =
       this.props;
 
-    let table_options = {
+    const table_options = {
       actions: {
         // just delete
         delete: { onClick: onSupportingCompanyDelete }
       }
     };
 
-    let sortedSupportedCompanies = [...entity.supporting_companies];
+    const sortedSupportedCompanies = [...entity.supporting_companies];
     sortedSupportedCompanies.sort((a, b) =>
       a.order > b.order ? 1 : a.order < b.order ? -1 : 0
     );
 
-    let columns = [
+    const columns = [
       { columnKey: "id", value: T.translate("general.id") },
       {
         columnKey: "company_name",
@@ -155,10 +155,11 @@ class SponsoredProjectSponsorshipTypeForm extends React.Component {
                 "edit_sponsored_project_sponsorship_type.description"
               )}{" "}
             </label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>

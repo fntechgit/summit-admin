@@ -9,13 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react";
 import {
   Input,
-  TextEditor,
+  TextEditorV3,
   UploadInput
 } from "openstack-uicore-foundation/lib/components";
 import {
@@ -40,7 +40,7 @@ class BadgeFeatureTypeForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -69,7 +69,7 @@ class BadgeFeatureTypeForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
@@ -81,7 +81,7 @@ class BadgeFeatureTypeForm extends React.Component {
     const entity = { ...this.state.entity };
 
     entity.image = file.preview;
-    this.setState({ entity: entity });
+    this.setState({ entity });
 
     const formData = new FormData();
     formData.append("file", file);
@@ -97,7 +97,7 @@ class BadgeFeatureTypeForm extends React.Component {
       this.props.onRemoveImage(entity.id);
     }
 
-    this.setState({ entity: entity });
+    this.setState({ entity });
   }
 
   render() {
@@ -121,11 +121,12 @@ class BadgeFeatureTypeForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_badge_feature.description")} *</label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
               error={hasErrors("description", errors)}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>
@@ -135,11 +136,12 @@ class BadgeFeatureTypeForm extends React.Component {
               {" "}
               {T.translate("edit_badge_feature.template_content")} *
             </label>
-            <TextEditor
+            <TextEditorV3
               id="template_content"
               value={entity.template_content}
               onChange={this.handleChange}
               error={hasErrors("template_content", errors)}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>
@@ -150,7 +152,7 @@ class BadgeFeatureTypeForm extends React.Component {
               <UploadInput
                 value={entity.image}
                 handleUpload={this.handleUploadImage}
-                handleRemove={(ev) => this.handleRemoveFile("image")}
+                handleRemove={() => this.handleRemoveFile("image")}
                 className="dropzone col-md-6"
                 multiple={false}
                 accept="image/*"
