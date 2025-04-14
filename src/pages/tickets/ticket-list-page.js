@@ -698,7 +698,7 @@ class TicketListPage extends React.Component {
       { label: "Refund Requested", value: "show_refund_request_pending" },
       { label: "Printable", value: "show_printable" },
       {
-        label: "Exclude Free Unassigned Tickets",
+        label: "Exclude ALL free unassigned tickets",
         value: "exclude_free_unassigned"
       },
       { label: "Badge Type", value: "badgeTypesFilter" }
