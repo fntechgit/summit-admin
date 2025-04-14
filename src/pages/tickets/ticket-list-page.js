@@ -870,6 +870,9 @@ class TicketListPage extends React.Component {
           <div className="row filtersWrapper">
             {enabledFilters.includes("hasOwnerFilter") && (
               <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.has_assignee")}
+                </label>
                 <SegmentedControl
                   name="hasOwnerFilter"
                   options={[
@@ -898,6 +901,9 @@ class TicketListPage extends React.Component {
             )}
             {enabledFilters.includes("isActiveFilter") && (
               <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.is_active")}
+                </label>
                 <SegmentedControl
                   name="isActiveFilter"
                   options={[
@@ -926,6 +932,9 @@ class TicketListPage extends React.Component {
             )}
             {enabledFilters.includes("completedFilter") && (
               <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.completed")}
+                </label>
                 <SegmentedControl
                   name="completedFilter"
                   options={[
@@ -954,6 +963,9 @@ class TicketListPage extends React.Component {
             )}
             {enabledFilters.includes("hasBadgeFilter") && (
               <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.badge")}
+                </label>
                 <SegmentedControl
                   name="hasBadgeFilter"
                   options={[
@@ -982,6 +994,9 @@ class TicketListPage extends React.Component {
             )}
             {enabledFilters.includes("amountFilter") && (
               <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.amount")}
+                </label>
                 <SegmentedControl
                   name="amountFilter"
                   options={[
