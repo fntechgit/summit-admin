@@ -26,11 +26,12 @@ import wrapReport from "./report-wrapper";
 import { groupByDate } from "../../utils/methods";
 import { flattenData } from "../../actions/report-actions";
 import ReactDOMServer from "react-dom/server";
-import { buildQuery } from "./queries";
+import { buildQuery, buildDrillDownQuery } from "./queries";
 import FilterComponent from "./filters";
+import RawMetricsTable from "./raw-metrics-table";
 
 
-const MetricsReport = ({data, currentSummit, sortKey, sortDir }) => {
+const MetricsReport = ({data, currentSummit, sortKey, sortDir, getMetricRaw }) => {
   const [filters, setFilters] = useState({});
   const isMemberReport = !!filters.search;
 
@@ -69,6 +70,25 @@ const MetricsReport = ({data, currentSummit, sortKey, sortDir }) => {
 
   const getSearchPlaceholder = () => {
     return "Search by Member Email, Attendee Email or Room Name";
+  }
+
+  const toggleDrillDownData = async (target, id, metric) => {
+    if (target.nextSibling.innerHTML) {
+      target.nextSibling.innerHTML = "";
+      return;
+    }
+
+    const query = buildDrillDownQuery(
+      id,
+      metric.memberId,
+      metric.attendeeId,
+      currentSummit.id,
+
+    );
+    const data = await getMetricRaw(query);
+    target.nextSibling.innerHTML = ReactDOMServer.renderToString(
+      <RawMetricsTable data={data} timezone={currentSummit.time_zone_id} />
+    );
   }
 
   const preProcessData = (extraData, forExport = false) => {

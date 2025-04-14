@@ -1,7 +1,7 @@
 import moment from "moment-timezone";
 import Query from "graphql-query-builder";
 
-export const buildMemberQuery = (filters, listFilters, localFilters, summitId) => {
+const buildMemberQuery = (filters, listFilters, localFilters, summitId) => {
   const { fromDate, toDate, eventType, onlyFinished } = localFilters;
   const queryFilters = { ...listFilters };
   const resultsFilters = { ...filters };
@@ -52,12 +52,12 @@ export const buildMemberQuery = (filters, listFilters, localFilters, summitId) =
 };
 
 
-export const buildBaseQuery = (listFilters, summitId) => {
+const buildBaseQuery = (listFilters, summitId) => {
   const queryFilters = { ...listFilters, id: summitId };
   return new Query("summits", queryFilters);
 };
 
-export const buildFindQuery = () => {
+const buildFindQuery = () => {
   const extraQuestions = new Query("orderExtraQuestions");
   extraQuestions.find(["id", "name"]);
 
@@ -66,7 +66,7 @@ export const buildFindQuery = () => {
 
 
 
-export const buildMetricsQuery = (sortKey, sortDir, localFilters, isPoster = false) => {
+const buildMetricsQuery = (sortKey, sortDir, localFilters, isPoster = false) => {
   const {
     fromDate,
     toDate,
@@ -131,10 +131,7 @@ export const buildMetricsQuery = (sortKey, sortDir, localFilters, isPoster = fal
   return metrics;
 }
 
-
-
-
-export const buildEventMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
+const buildEventMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
   const { sponsor, eventFilter, roomFilter } = localFilters;
   const eventQueryFilter = {};
   const roomQueryFilter = {};
@@ -172,7 +169,7 @@ export const buildEventMetricQuery = (listFilters, localFilters, summitId, sortK
   return baseQuery;
 }
 
-export const buildRoomMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
+const buildRoomMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
   const { sponsor, roomFilter } = localFilters;
   const roomQueryFilter = {};
 
@@ -204,7 +201,7 @@ export const buildRoomMetricQuery = (listFilters, localFilters, summitId, sortKe
 }
 
 
-export const buildSponsorMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
+const buildSponsorMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
   const { sponsor } = localFilters;
   const sponsorsMessage = ["sponsors"];
   const baseQuery = buildBaseQuery(listFilters, summitId);
@@ -226,7 +223,7 @@ export const buildSponsorMetricQuery = (listFilters, localFilters, summitId, sor
 }
 
 
-export const buildPosterMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
+const buildPosterMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
   const baseQuery = buildBaseQuery(listFilters, summitId);
   const metrics = buildMetricsQuery(sortKey, sortDir, localFilters, true);
   const findQueries = buildFindQuery();
@@ -240,7 +237,7 @@ export const buildPosterMetricQuery = (listFilters, localFilters, summitId, sort
   return baseQuery;
 }
 
-export const buildAllMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
+const buildAllMetricQuery = (listFilters, localFilters, summitId, sortKey, sortDir) => {
   const baseQuery = buildBaseQuery(listFilters, summitId);
   const metrics = buildMetricsQuery(sortKey, sortDir, localFilters);
   const findQueries = buildFindQuery();
@@ -250,6 +247,59 @@ export const buildAllMetricQuery = (listFilters, localFilters, summitId, sortKey
 
   return baseQuery;
 }
+
+export const buildDrillDownQuery = (typeId, memberId, attendeeId, summitId, localFilters) => {
+  const { fromDate, toDate, eventType, onlyFinished } = localFilters;
+  const filters = { ordering: "ingress_date", limit: 3000 };
+  const listFilters = { summitId, type: eventType };
+
+  if (memberId) {
+    listFilters.memberId = memberId;
+  } else if (attendeeId) {
+    listFilters.attendeeId = attendeeId;
+  }
+
+  if (eventType === "ROOM") {
+    listFilters.roomId = typeId;
+  } else if (eventType === "EVENT") {
+    listFilters.eventId = typeId;
+  }
+
+  if (fromDate) {
+    listFilters.fromDate = moment(fromDate)
+      .tz("UTC")
+      .format("YYYY-MM-DDTHH:mm:ss+00:00");
+  }
+
+  if (toDate) {
+    listFilters.toDate = moment(toDate)
+      .tz("UTC")
+      .format("YYYY-MM-DDTHH:mm:ss+00:00");
+  }
+
+  if (onlyFinished) {
+    listFilters.onlyFinished = true;
+  }
+
+  const query = new Query("metrics", listFilters);
+  const results = new Query("results", filters);
+  results.find([
+    "type",
+    "ingressDate",
+    "outgressDate",
+    "memberName",
+    "attendeeName",
+    "eventName",
+    "sponsorName",
+    "locationName",
+    "subType",
+    "ip"
+  ]);
+
+  query.find([{ results }, "totalCount"]);
+
+  return `{ reportData: ${query} }`;
+};
 
 export const buildQuery = (filters, listFilters, localFilters, summitId, sortKey, sortDir) => {
   const { eventType, search } = localFilters;
