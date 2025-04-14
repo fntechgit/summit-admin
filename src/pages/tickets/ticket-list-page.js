@@ -695,11 +695,11 @@ class TicketListPage extends React.Component {
       { label: "Ticket Type", value: "ticketTypesFilter" },
       { label: "Promo Code", value: "promocodesFilter" },
       { label: "Promo Code Tags", value: "promocodeTagsFilter" },
-      { label: "Refund Requested", value: "show_refund_request_pending" },
-      { label: "Printable", value: "show_printable" },
+      { label: "Refund Requested", value: "showOnlyPendingRefundRequests" },
+      { label: "Printable", value: "showOnlyPrintable" },
       {
         label: "Exclude ALL free unassigned tickets",
-        value: "exclude_free_unassigned"
+        value: "excludeFreeUnassigned"
       },
       { label: "Badge Type", value: "badgeTypesFilter" }
     ];
@@ -1079,12 +1079,12 @@ class TicketListPage extends React.Component {
                 />
               </div>
             )}
-            {enabledFilters.includes("show_refund_request_pending") && (
+            {enabledFilters.includes("showOnlyPendingRefundRequests") && (
               <div className="col-md-6">
                 <div className="form-check abc-checkbox">
                   <input
                     type="checkbox"
-                    id="show_refund_request_pending"
+                    id="showOnlyPendingRefundRequests"
                     checked={ticketFilters.showOnlyPendingRefundRequests}
                     onChange={(ev) =>
                       this.handleFilterChange(
@@ -1096,19 +1096,19 @@ class TicketListPage extends React.Component {
                   />
                   <label
                     className="form-check-label"
-                    htmlFor="show_refund_request_pending"
+                    htmlFor="showOnlyPendingRefundRequests"
                   >
                     {T.translate("ticket_list.show_refund_request_pending")}
                   </label>
                 </div>
               </div>
             )}
-            {enabledFilters.includes("show_printable") && (
+            {enabledFilters.includes("showOnlyPrintable") && (
               <div className="col-md-6">
                 <div className="form-check abc-checkbox">
                   <input
                     type="checkbox"
-                    id="show_printable"
+                    id="showOnlyPrintable"
                     checked={ticketFilters.showOnlyPrintable}
                     onChange={(ev) =>
                       this.handleFilterChange(
@@ -1118,7 +1118,10 @@ class TicketListPage extends React.Component {
                     }
                     className="form-check-input"
                   />
-                  <label className="form-check-label" htmlFor="show_printable">
+                  <label
+                    className="form-check-label"
+                    htmlFor="showOnlyPrintable"
+                  >
                     {T.translate("ticket_list.show_printable")} &nbsp;
                     <i
                       className="fa fa-info-circle"
@@ -1129,12 +1132,12 @@ class TicketListPage extends React.Component {
                 </div>
               </div>
             )}
-            {enabledFilters.includes("exclude_free_unassigned") && (
+            {enabledFilters.includes("excludeFreeUnassigned") && (
               <div className="col-md-6">
                 <div className="form-check abc-checkbox">
                   <input
                     type="checkbox"
-                    id="exclude_free_unassigned"
+                    id="excludeFreeUnassigned"
                     checked={ticketFilters.excludeFreeUnassigned}
                     onChange={(ev) =>
                       this.handleFilterChange(
@@ -1146,7 +1149,7 @@ class TicketListPage extends React.Component {
                   />
                   <label
                     className="form-check-label"
-                    htmlFor="exclude_free_unassigned"
+                    htmlFor="excludeFreeUnassigned"
                   >
                     {T.translate("ticket_list.exclude_free_unassigned")} &nbsp;
                   </label>
