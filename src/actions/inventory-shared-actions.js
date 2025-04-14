@@ -273,7 +273,7 @@ export const deleteFile =
     return deleteRequest(
       null,
       createAction(settings.deletedActionName)({ fileId }),
-      `${settings.url}${fileId}/`,
+      `${settings.url}/${fileId}`,
       null,
       authErrorHandler
     )(params)(dispatch).then(() => {

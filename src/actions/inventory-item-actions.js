@@ -207,16 +207,12 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const saveInventoryItem = (entity) => async (dispatch, getState) => {
+export const saveInventoryItem = (entity) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
   const params = {
     access_token: accessToken,
     expand: "images,meta_fields,meta_fields.values"
   };
-
-  const {
-    currentInventoryItemListState: { term, page, perPage, order, orderDir }
-  } = getState();
 
   dispatch(startLoading());
 
@@ -255,7 +251,6 @@ export const saveInventoryItem = (entity) => async (dispatch, getState) => {
           })
           .finally(() => {
             dispatch(stopLoading());
-            dispatch(getInventoryItems(term, page, perPage, order, orderDir));
           });
       })
       .catch((err) => {
@@ -302,7 +297,6 @@ export const saveInventoryItem = (entity) => async (dispatch, getState) => {
         })
         .finally(() => {
           dispatch(stopLoading());
-          dispatch(getInventoryItems(term, page, perPage, order, orderDir));
         });
     })
     .catch((err) => {

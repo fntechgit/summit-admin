@@ -22,7 +22,8 @@ import {
   CLEAR_ALL_SELECTED_INVENTORY_ITEMS,
   SET_SELECTED_ALL_INVENTORY_ITEMS,
   INVENTORY_ITEM_ARCHIVED,
-  INVENTORY_ITEM_UNARCHIVED
+  INVENTORY_ITEM_UNARCHIVED,
+  INVENTORY_ITEM_IMAGE_SAVED
 } from "../../actions/inventory-item-actions";
 
 const DEFAULT_STATE = {
@@ -204,6 +205,16 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
 
       const updatedInventoryItems = state.inventoryItems.map((item) =>
         item.id === updatedItemId ? { ...item, is_archived: false } : item
+      );
+      return { ...state, inventoryItems: updatedInventoryItems };
+    }
+    case INVENTORY_ITEM_IMAGE_SAVED: {
+      const newImage = payload.response;
+      const imageArray = [{ ...newImage }];
+      const updatedInventoryItems = state.inventoryItems.map((item) =>
+        item.id === newImage.inventory_item_id
+          ? { ...item, images: imageArray }
+          : item
       );
       return { ...state, inventoryItems: updatedInventoryItems };
     }
