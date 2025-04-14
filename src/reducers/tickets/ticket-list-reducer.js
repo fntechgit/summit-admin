@@ -122,13 +122,15 @@ const ticketListReducer = (state = DEFAULT_STATE, action) => {
           bought_date,
           owner_name:
             t.owner && t.owner.first_name && t.owner.last_name
-              ? `${t.owner.first_name} ${t.owner.last_name}`
-              : "N/A",
+              ? `${t.owner.first_name} ${t.owner.last_name} (${t.owner.email})`
+              : t.owner
+              ? `(${t.owner.email})`
+              : "TBD",
           owner_first_name:
-            t.owner && t.owner.first_name ? `${t.owner.first_name}` : "N/A",
+            t.owner && t.owner.first_name ? `${t.owner.first_name}` : "TBD",
           owner_last_name:
-            t.owner && t.owner.last_name ? `${t.owner.last_name}` : "N/A",
-          owner_email: t.owner ? t.owner.email : "N/A",
+            t.owner && t.owner.last_name ? `${t.owner.last_name}` : "TBD",
+          owner_email: t.owner ? t.owner.email : "TBD",
           owner_company: t.owner?.company || "TBD",
           promo_code: t.promo_code ? t.promo_code.code : "N/A",
           status: t.status,
