@@ -127,6 +127,7 @@ const defaultFilters = {
   completedFilter: null,
   amountFilter: null,
   hasBadgeFilter: null,
+  isActiveFilter: null,
   showOnlyPrintable: false,
   excludeFreeUnassigned: false,
   promocodesFilter: [],
@@ -406,6 +407,7 @@ class TicketListPage extends React.Component {
           completedFilter: null,
           amountFilter: null,
           hasBadgeFilter: null,
+          isActiveFilter: null,
           showOnlyPrintable: false,
           excludeFreeUnassigned: false,
           promocodesFilter: [],
@@ -684,24 +686,55 @@ class TicketListPage extends React.Component {
     ];
 
     const filters_ddl = [
-      { label: "Has Assignee?", value: "hasOwnerFilter" },
-      { label: "Completed", value: "completedFilter" },
-      { label: "Badge", value: "hasBadgeFilter" },
-      { label: "Amount", value: "amountFilter" },
-      { label: "Assignee First Name", value: "ownerFullNameStartWithFilter" },
-      { label: "Assignee Last Name", value: "ownerLastNameStartWithFilter" },
-      { label: "Owner Company", value: "ownerCompany" },
-      { label: "View Type", value: "viewTypesFilter" },
-      { label: "Ticket Type", value: "ticketTypesFilter" },
-      { label: "Promo Code", value: "promocodesFilter" },
-      { label: "Promo Code Tags", value: "promocodeTagsFilter" },
-      { label: "Refund Requested", value: "showOnlyPendingRefundRequests" },
-      { label: "Printable", value: "showOnlyPrintable" },
       {
-        label: "Exclude ALL free unassigned tickets",
+        label: T.translate("ticket_list.has_assignee"),
+        value: "hasOwnerFilter"
+      },
+      { label: T.translate("ticket_list.completed"), value: "completedFilter" },
+      { label: T.translate("ticket_list.badge"), value: "hasBadgeFilter" },
+      { label: T.translate("ticket_list.amount"), value: "amountFilter" },
+      {
+        label: T.translate("ticket_list.owner_first_name"),
+        value: "ownerFullNameStartWithFilter"
+      },
+      {
+        label: T.translate("ticket_list.owner_last_name"),
+        value: "ownerLastNameStartWithFilter"
+      },
+      {
+        label: T.translate("ticket_list.owner_company"),
+        value: "ownerCompany"
+      },
+      { label: T.translate("ticket_list.view_type"), value: "viewTypesFilter" },
+      {
+        label: T.translate("ticket_list.ticket_type"),
+        value: "ticketTypesFilter"
+      },
+      {
+        label: T.translate("ticket_list.promo_code"),
+        value: "promocodesFilter"
+      },
+      {
+        label: T.translate("ticket_list.promo_code_tags"),
+        value: "promocodeTagsFilter"
+      },
+      {
+        label: T.translate("ticket_list.refund_requested"),
+        value: "showOnlyPendingRefundRequests"
+      },
+      {
+        label: T.translate("ticket_list.printable"),
+        value: "showOnlyPrintable"
+      },
+      {
+        label: T.translate("ticket_list.exclude_free_unassigned"),
         value: "excludeFreeUnassigned"
       },
-      { label: "Badge Type", value: "badgeTypesFilter" }
+      {
+        label: T.translate("ticket_list.badge_type"),
+        value: "badgeTypesFilter"
+      },
+      { label: T.translate("ticket_list.is_active"), value: "isActiveFilter" }
     ];
 
     const showColumns = fieldNames(badge_types)
@@ -858,6 +891,34 @@ class TicketListPage extends React.Component {
                   ]}
                   setValue={(val) =>
                     this.handleFilterChange("hasOwnerFilter", val)
+                  }
+                  className="segmentFilter"
+                />
+              </div>
+            )}
+            {enabledFilters.includes("isActiveFilter") && (
+              <div className="col-md-6">
+                <SegmentedControl
+                  name="isActiveFilter"
+                  options={[
+                    {
+                      label: T.translate("ticket_list.all"),
+                      value: null,
+                      default: ticketFilters.isActiveFilter === null
+                    },
+                    {
+                      label: T.translate("ticket_list.yes"),
+                      value: "IS_ACTIVE",
+                      default: ticketFilters.isActiveFilter === "IS_ACTIVE"
+                    },
+                    {
+                      label: T.translate("ticket_list.no"),
+                      value: "IS_NOT_ACTIVE",
+                      default: ticketFilters.isActiveFilter === "IS_NOT_ACTIVE"
+                    }
+                  ]}
+                  setValue={(val) =>
+                    this.handleFilterChange("isActiveFilter", val)
                   }
                   className="segmentFilter"
                 />
