@@ -186,6 +186,11 @@ const parseFilters = (filters, term = null) => {
     if (filters.hasOwnerFilter === "HAS_NO_OWNER") filter.push("has_owner==0");
   }
 
+  if (filters?.isActiveFilter) {
+    if (filters.isActiveFilter === "IS_ACTIVE") filter.push("is_active==1");
+    if (filters.isActiveFilter === "IS_NOT_ACTIVE") filter.push("is_active==0");
+  }
+
   if (filters?.hasBadgeFilter) {
     if (filters.hasBadgeFilter === "HAS_BADGE") filter.push("has_badge==1");
     if (filters.hasBadgeFilter === "HAS_NO_BADGE") filter.push("has_badge==0");
