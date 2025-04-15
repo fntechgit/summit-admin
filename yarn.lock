@@ -8498,16 +8498,16 @@ jest@^29.7.0:
     jest-cli "^29.7.0"
 
 jodit-react@^5.0.10:
-  version "5.0.10"
-  resolved "https://registry.yarnpkg.com/jodit-react/-/jodit-react-5.0.10.tgz#4420d4e03a345b746adfb7f04a2defbb58aba47a"
-  integrity sha512-OhOcy/B01LlqMHv+mzfYjnUlqLlGkSKRB3TZQUWAJBjAAsK/RzpurCe4QJRLMusCa5igyu5wt6ELiyb5yicxnw==
+  version "5.2.19"
+  resolved "https://registry.yarnpkg.com/jodit-react/-/jodit-react-5.2.19.tgz#e270a934ad14f41ca7ce4321bf701c2beab351a0"
+  integrity sha512-vOHbHijZ2A8JOhIyHxaAW//MVA2jDSJC9U3eHzsX494wt4NTqjfEJJzZOiin2afmgL9RbfiGeh+1dn0ZR72zkA==
   dependencies:
-    jodit "^4.2.48"
+    jodit "^4.6.2"
 
-jodit@^4.2.48:
-  version "4.2.50"
-  resolved "https://registry.yarnpkg.com/jodit/-/jodit-4.2.50.tgz#5d3dd2f32d9a35dc0704ab56d2b49f611b7e70c2"
-  integrity sha512-fEOyJyLzOTE20qeu0tXItcI8kGWOVWOcPsABMlkGXrhq+Lee9RXNSLshK6xScudh+n/AvRS0DisAPcm2fx5JmQ==
+jodit@^4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/jodit/-/jodit-4.6.2.tgz#993a0e15fc6b998bd19fc1992aec8a2234dc250e"
+  integrity sha512-euIYTOBzZO04jroi79RvhRiXVs3ANCSg5JC8HOT/gf81dIdduxUKvkM4lVSdVP28aZBxs0u+nIdLC7OGXh1jhg==
   dependencies:
     autobind-decorator "^2.4.0"
 
@@ -9885,10 +9885,10 @@ open@^8.0.9:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openstack-uicore-foundation@4.1.96:
-  version "4.1.96"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.1.96.tgz#1833b0764aac692d54d69adec1d7268cfd685138"
-  integrity sha512-4TBqC1/Elp4BVD24sxzMEKxq4/0zT9ckhtl/BlbvzGQ3+7nYOIc4VtQI0yLFBkDWMORwsdnlgNiRckNKzpHXUg==
+openstack-uicore-foundation@4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.1.tgz#19c18e39eca17da3aec52c7fe087dd9df4e6e965"
+  integrity sha512-vvJq5khQAuSfeR7e3EM/m42gHfOtkJHV1gKmiERM3XPlg7o9JIPqPxUrdNizCeMOIUZIONwfWi6Lik21JImXYw==
 
 optionator@^0.9.1:
   version "0.9.4"
@@ -9939,6 +9939,13 @@ p-limit@^3.0.2, p-limit@^3.1.0:
   integrity sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ==
   dependencies:
     yocto-queue "^0.1.0"
+
+p-limit@^6.1.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/p-limit/-/p-limit-6.2.0.tgz#c254d22ba6aeef441a3564c5e6c2f2da59268a0f"
+  integrity sha512-kuUqqHNUqoIWp/c467RI4X6mmyuojY5jGutNU0wVTmEOOfcuwLqyMVoAi9MKi2Ak+5i9+nhmrK4ufZE8069kHA==
+  dependencies:
+    yocto-queue "^1.1.1"
 
 p-locate@^4.1.0:
   version "4.1.0"
@@ -13496,6 +13503,11 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
+
+yocto-queue@^1.1.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-1.2.1.tgz#36d7c4739f775b3cbc28e6136e21aa057adec418"
+  integrity sha512-AyeEbWOu/TAXdxlV9wmGcR0+yh2j3vYPGOECcIj2S7MkrLyC7ne+oye2BKTItt0ii2PHk4cDy+95+LshzbXnGg==
 
 yoga-layout@^2.0.1:
   version "2.0.1"
