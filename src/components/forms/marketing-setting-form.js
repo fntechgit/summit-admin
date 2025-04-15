@@ -18,7 +18,7 @@ import {
   Dropdown,
   Input,
   UploadInput,
-  TextEditorV2
+  TextEditorV3
 } from "openstack-uicore-foundation/lib/components";
 import Swal from "sweetalert2";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
@@ -210,13 +210,14 @@ class MarketingSettingForm extends React.Component {
             </div>
           )}
           {entity.type === MARKETING_SETTING_TYPE_TEXTAREA && (
-            <div className="col-md-8">
+            <div className="col-md-12">
               <label> {T.translate("marketing.html")} *</label>
-              <TextEditorV2
+              <TextEditorV3
                 id="value"
                 value={entity.value}
                 onChange={this.handleChange}
                 error={this.hasErrors("value")}
+                license={process.env.JODIT_LICENSE_KEY}
               />
             </div>
           )}

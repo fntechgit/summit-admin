@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -17,14 +17,9 @@ import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   Input,
   Dropdown,
-  TextEditor
+  TextEditorV3
 } from "openstack-uicore-foundation/lib/components";
-import {
-  hasErrors,
-  isEmpty,
-  scrollToError,
-  shallowEqual
-} from "../../utils/methods";
+import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class MediaUploadForm extends React.Component {
   constructor(props) {
@@ -39,7 +34,7 @@ class MediaUploadForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -58,8 +53,8 @@ class MediaUploadForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -68,18 +63,17 @@ class MediaUploadForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
-    let entity = { ...this.state.entity };
     ev.preventDefault();
 
     this.props.onSubmit(this.state.entity);
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -91,13 +85,13 @@ class MediaUploadForm extends React.Component {
     const { entity } = this.state;
     const { currentSummit, mediaFileTypes } = this.props;
 
-    let private_storage_ddl = [
+    const private_storage_ddl = [
       { value: "None", label: "None" },
       { value: "DropBox", label: "DropBox" },
       { value: "Local", label: "Local" }
     ];
 
-    let public_storage_ddl = [
+    const public_storage_ddl = [
       { value: "None", label: "None" },
       { value: "Local", label: "Local" }
     ];
@@ -108,7 +102,7 @@ class MediaUploadForm extends React.Component {
     if (window.PUBLIC_STORAGES.includes("SWIFT"))
       public_storage_ddl.push({ value: "Swift", label: "Swift" });
 
-    let presentation_types_ddl = currentSummit.event_types
+    const presentation_types_ddl = currentSummit.event_types
       .filter((t) => t.class_name === "PresentationType")
       .map((t) => ({ value: t.id, label: t.name }));
 
@@ -174,12 +168,13 @@ class MediaUploadForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-8">
             <label> {T.translate("media_upload.description")}</label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
               error={this.hasErrors("description")}
               maxLength={5120}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>

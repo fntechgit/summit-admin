@@ -9,14 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   SponsoredProjectInput,
-  TextEditor,
+  TextEditorV3,
   Input,
   UploadInput,
   SortableTable,
@@ -53,7 +53,7 @@ class SponsoredProjectForm extends React.Component {
     this.handleSearch = this.handleSearch.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -81,12 +81,12 @@ class SponsoredProjectForm extends React.Component {
     }
 
     if (ev.target.type === "sponsoredprojectinput") {
-      entity["parent_project_id"] = value;
+      entity.parent_project_id = value;
     }
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleUploadLogo(file) {
@@ -111,12 +111,12 @@ class SponsoredProjectForm extends React.Component {
     );
   }
 
-  handleAddSponsorshipType(ev) {
+  handleAddSponsorshipType() {
     const { history, entity } = this.props;
     history.push(`/app/sponsored-projects/${entity.id}/sponsorship-types/new`);
   }
 
-  handleAddSubproject(ev) {
+  handleAddSubproject() {
     const { history, entity } = this.props;
     history.push(`/app/sponsored-projects/new#parent_project_id=${entity.id}`);
   }
@@ -138,30 +138,29 @@ class SponsoredProjectForm extends React.Component {
     const {
       onSponsorshipTypeDelete,
       onSponsorshipTypeReorder,
-      onSubprojectDelete,
-      term
+      onSubprojectDelete
     } = this.props;
 
-    let sponsorship_types_table_options = {
+    const sponsorship_types_table_options = {
       actions: {
         edit: { onClick: this.handleEditSponsorshipType },
         delete: { onClick: onSponsorshipTypeDelete }
       }
     };
 
-    let subprojects_table_options = {
+    const subprojects_table_options = {
       actions: {
         edit: { onClick: this.handleEditSubproject },
         delete: { onClick: onSubprojectDelete }
       }
     };
 
-    let sortedTypes = [...entity.sponsorship_types];
+    const sortedTypes = [...entity.sponsorship_types];
     sortedTypes.sort((a, b) =>
       a.order > b.order ? 1 : a.order < b.order ? -1 : 0
     );
 
-    let columns = [
+    const columns = [
       { columnKey: "id", value: T.translate("general.id") },
       { columnKey: "name", value: T.translate("edit_sponsored_project.name") }
     ];
@@ -231,7 +230,7 @@ class SponsoredProjectForm extends React.Component {
               value={entity.parent_project}
               onChange={this.handleChange}
               error={hasErrors("parent_project", errors)}
-              isClearable={true}
+              isClearable
               placeholder={T.translate(
                 "edit_sponsored_project.placeholders.search_parent_project"
               )}
@@ -241,10 +240,11 @@ class SponsoredProjectForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_sponsored_project.description")} </label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>

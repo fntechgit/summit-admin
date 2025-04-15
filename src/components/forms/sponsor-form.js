@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -22,17 +22,12 @@ import {
   CompanyInput,
   MemberInput,
   Panel,
-  TextEditor,
+  TextEditorV3,
   Input,
   UploadInput,
   Table
 } from "openstack-uicore-foundation/lib/components";
-import {
-  isEmpty,
-  scrollToError,
-  shallowEqual,
-  hasErrors
-} from "../../utils/methods";
+import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import EventInput from "../inputs/event-input";
 import SummitSponsorshipTypeInput from "../inputs/summit-sponsorship-type-input";
 import ExtraQuestionsTable from "../tables/extra-questions-table";
@@ -40,6 +35,7 @@ import {
   denormalizeLeadReportSettings,
   renderOptions
 } from "../../models/lead-report-settings";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
 class SponsorForm extends React.Component {
   constructor(props) {
@@ -50,7 +46,7 @@ class SponsorForm extends React.Component {
     this.state = {
       entity: { ...entity },
       showSection: "",
-      errors: errors,
+      errors,
       selectedColumns: []
     };
 
@@ -76,7 +72,7 @@ class SponsorForm extends React.Component {
     this.handleColumnsChange = this.handleColumnsChange.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -105,8 +101,8 @@ class SponsorForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -114,21 +110,21 @@ class SponsorForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleChangeMember(ev) {
-    let { onAddMember, onRemoveMember, entity } = this.props;
+    const { onAddMember, onRemoveMember, entity } = this.props;
 
-    let currentMembers = this.state.entity.members;
-    let currentMemberIds = currentMembers.map((m) => m.id);
-    let newMembers = ev.target.value;
-    let newMemberIds = newMembers.map((m) => m.id);
+    const currentMembers = this.state.entity.members;
+    const currentMemberIds = currentMembers.map((m) => m.id);
+    const newMembers = ev.target.value;
+    const newMemberIds = newMembers.map((m) => m.id);
 
     newMembers.forEach((mem) => {
       if (!currentMemberIds.includes(mem.id)) {
@@ -174,7 +170,7 @@ class SponsorForm extends React.Component {
   handleRemoveFile(picAttr) {
     const entity = { ...this.state.entity };
     entity[picAttr] = "";
-    this.setState({ entity: entity });
+    this.setState({ entity });
     this.props.onRemoveImage(entity, picAttr);
   }
 
@@ -285,14 +281,12 @@ class SponsorForm extends React.Component {
   }
 
   handleSubmit(ev) {
-    let entity = { ...this.state.entity };
     ev.preventDefault();
-
     this.props.onSubmit(this.state.entity);
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -305,27 +299,28 @@ class SponsorForm extends React.Component {
     const { onAdvertisementDelete, onMaterialDelete, onSocialNetworkDelete } =
       this.props;
 
-    let deleteElement = entity[`${collection}_collection`][
+    const deleteElement = entity[`${collection}_collection`][
       `${collection}`
     ].find((s) => s.id === element);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate(`edit_sponsor.remove_warning_${collection}`) +
-        " " +
-        (deleteElement.name || deleteElement.link),
+      text: `${T.translate(`edit_sponsor.remove_warning_${collection}`)} ${
+        deleteElement.name || deleteElement.link
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
-        collection === "ads"
-          ? onAdvertisementDelete(element)
-          : collection === "materials"
-          ? onMaterialDelete(element)
-          : onSocialNetworkDelete(element);
+        if (collection === "ads") {
+          onAdvertisementDelete(element);
+        } else if (collection === "materials") {
+          onMaterialDelete(element);
+        } else {
+          onSocialNetworkDelete(element);
+        }
       }
     });
   }
@@ -333,7 +328,7 @@ class SponsorForm extends React.Component {
   handleColumnsChange(ev) {
     const { entity, upsertSponsorLeadReportSettings } = this.props;
     const { value } = ev.target;
-    let newColumns = value;
+    const newColumns = value;
     this.setState({ ...this.state, selectedColumns: newColumns });
     upsertSponsorLeadReportSettings(entity.id, newColumns);
   }
@@ -445,12 +440,12 @@ class SponsorForm extends React.Component {
                 id="members"
                 value={entity.members}
                 onChange={this.handleChangeMember}
-                multi={true}
-                getOptionLabel={(member) => {
-                  return member.hasOwnProperty("email")
+                multi
+                getOptionLabel={(member) =>
+                  member.hasOwnProperty("email")
                     ? `${member.first_name} ${member.last_name} (${member.email})`
-                    : `${member.first_name} ${member.last_name} (${member.id})`;
-                }}
+                    : `${member.first_name} ${member.last_name} (${member.id})`
+                }
               />
             </div>
           </div>
@@ -467,10 +462,11 @@ class SponsorForm extends React.Component {
               <div className="row form-group">
                 <div className="col-md-12">
                   <label> {T.translate("edit_sponsor.intro")} </label>
-                  <TextEditor
+                  <TextEditorV3
                     id="intro"
                     value={entity.intro}
                     onChange={this.handleChange}
+                    license={process.env.JODIT_LICENSE_KEY}
                   />
                 </div>
               </div>
@@ -526,7 +522,7 @@ class SponsorForm extends React.Component {
                       <UploadInput
                         value={entity.header_image}
                         handleUpload={this.handleUploadHeaderImage}
-                        handleRemove={(ev) =>
+                        handleRemove={() =>
                           this.handleRemoveFile("header_image")
                         }
                         className="dropzone col-md-6"
@@ -557,7 +553,7 @@ class SponsorForm extends React.Component {
                       <UploadInput
                         value={entity.header_image_mobile}
                         handleUpload={this.handleUploadHeaderMobileImage}
-                        handleRemove={(ev) =>
+                        handleRemove={() =>
                           this.handleRemoveFile("header_image_mobile")
                         }
                         className="dropzone col-md-6"
@@ -589,9 +585,7 @@ class SponsorForm extends React.Component {
                       <UploadInput
                         value={entity.side_image}
                         handleUpload={this.handleUploadSideImage}
-                        handleRemove={(ev) =>
-                          this.handleRemoveFile("side_image")
-                        }
+                        handleRemove={() => this.handleRemoveFile("side_image")}
                         className="dropzone col-md-6"
                         multiple={false}
                         accept="image/*"
@@ -622,7 +616,7 @@ class SponsorForm extends React.Component {
                       <UploadInput
                         value={entity.carousel_advertise_image}
                         handleUpload={this.handleUploadCarouselImage}
-                        handleRemove={(ev) =>
+                        handleRemove={() =>
                           this.handleRemoveFile("carousel_advertise_image")
                         }
                         className="dropzone col-md-6"

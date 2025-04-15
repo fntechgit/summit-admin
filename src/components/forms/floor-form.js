@@ -1,4 +1,4 @@
-/**
+/* *
  * Copyright 2017 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,14 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   Input,
-  TextEditor,
+  TextEditorV3,
   Panel,
   Table,
   UploadInput
@@ -41,7 +41,7 @@ class FloorForm extends React.Component {
     this.handleNewRoom = this.handleNewRoom.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -60,8 +60,8 @@ class FloorForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "number") {
@@ -70,12 +70,12 @@ class FloorForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(continueAdding, ev) {
-    let entity = { ...this.state.entity };
-    let { locationId } = this.props;
+    const entity = { ...this.state.entity };
+    const { locationId } = this.props;
 
     ev.preventDefault();
 
@@ -83,7 +83,7 @@ class FloorForm extends React.Component {
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -114,17 +114,17 @@ class FloorForm extends React.Component {
   }
 
   handleUploadFile(file) {
-    let entity = { ...this.state.entity };
-    let { locationId } = this.props;
+    const entity = { ...this.state.entity };
+    const { locationId } = this.props;
 
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append("file", file);
     this.props.onAttach(locationId, entity, formData);
   }
 
-  handleRemoveFile(ev) {
-    let entity = { ...this.state.entity };
-    let { locationId } = this.props;
+  handleRemoveFile() {
+    const entity = { ...this.state.entity };
+    const { locationId } = this.props;
 
     entity.image = "";
     this.setState({ entity });
@@ -134,21 +134,19 @@ class FloorForm extends React.Component {
   render() {
     const { entity, showRooms } = this.state;
 
-    let room_columns = [
+    const room_columns = [
       { columnKey: "id", value: T.translate("general.id") },
       { columnKey: "name", value: T.translate("general.name") },
       { columnKey: "capacity", value: T.translate("edit_location.capacity") },
       { columnKey: "floor_name", value: T.translate("edit_location.floor") }
     ];
 
-    let room_options = {
+    const room_options = {
       actions: {
         edit: { onClick: this.handleRoomEdit },
         delete: { onClick: this.props.onRoomDelete }
       }
     };
-
-    let image_url = entity.image != null ? entity.image.url : "";
 
     return (
       <form className="floor-form">
@@ -179,11 +177,12 @@ class FloorForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_floor.description")} </label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
               error={this.hasErrors("description")}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>

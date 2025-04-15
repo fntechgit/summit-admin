@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,13 +9,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
-  TextEditor,
+  TextEditorV3,
   UploadInput,
   Input,
   CountryDropdown,
@@ -23,7 +23,6 @@ import {
   Table
 } from "openstack-uicore-foundation/lib/components";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
-import { Pagination } from "react-bootstrap";
 
 class CompanyForm extends React.Component {
   constructor(props) {
@@ -49,7 +48,7 @@ class CompanyForm extends React.Component {
     this.onAddSponsorshipType = this.onAddSponsorshipType.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -82,7 +81,7 @@ class CompanyForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleUploadLogo(file) {
@@ -100,7 +99,7 @@ class CompanyForm extends React.Component {
   handleRemoveFile(picAttr) {
     const entity = { ...this.state.entity };
     entity[picAttr] = "";
-    this.setState({ entity: entity });
+    this.setState({ entity });
   }
 
   handleSubmit(publish, ev) {
@@ -110,30 +109,28 @@ class CompanyForm extends React.Component {
 
   handleSelectedSponsoredProject(ev) {
     const { sponsoredProjects } = this.props;
-    let { value } = ev.target;
+    const { value } = ev.target;
 
-    let project = sponsoredProjects.find((e) => e.id == value);
+    const project = sponsoredProjects.find((e) => e.id == value);
 
     this.setState({
       ...this.state,
       selectedSponsoredProject: value,
       sponsorShipTypes: project
-        ? project.sponsorship_types.map((s) => {
-            return { label: s.name, value: s.id };
-          })
+        ? project.sponsorship_types.map((s) => ({ label: s.name, value: s.id }))
         : [],
       selectedSponsorShipType: null
     });
   }
 
   handleSelectedSponsorshipType(ev) {
-    let { value, id } = ev.target;
+    const { value } = ev.target;
     this.setState({ ...this.state, selectedSponsorShipType: value });
   }
 
   onAddSponsorshipType(ev) {
     ev.preventDefault();
-    let { selectedSponsoredProject, selectedSponsorShipType, entity } =
+    const { selectedSponsoredProject, selectedSponsorShipType, entity } =
       this.state;
     if (!selectedSponsoredProject) return;
     if (!selectedSponsorShipType) return;
@@ -159,12 +156,10 @@ class CompanyForm extends React.Component {
 
     const sponsored_projects_ddl =
       sponsoredProjects && Array.isArray(sponsoredProjects)
-        ? sponsoredProjects.map((sp) => {
-            return {
-              label: sp.name,
-              value: sp.id
-            };
-          })
+        ? sponsoredProjects.map((sp) => ({
+            label: sp.name,
+            value: sp.id
+          }))
         : [];
 
     const columns = [
@@ -309,30 +304,33 @@ class CompanyForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_company.description")} </label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_company.overview")} </label>
-            <TextEditor
+            <TextEditorV3
               id="overview"
               value={entity.overview}
               onChange={this.handleChange}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_company.commitment")} </label>
-            <TextEditor
+            <TextEditorV3
               id="commitment"
               value={entity.commitment}
               onChange={this.handleChange}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>
@@ -378,9 +376,10 @@ class CompanyForm extends React.Component {
               <div className="col-md-12">
                 <Table
                   options={table_options}
-                  data={entity.project_sponsorships.map((sp) => {
-                    return { ...sp, project_name: sp.sponsored_project.name };
-                  })}
+                  data={entity.project_sponsorships.map((sp) => ({
+                    ...sp,
+                    project_name: sp.sponsored_project.name
+                  }))}
                   columns={columns}
                 />
               </div>
@@ -392,7 +391,7 @@ class CompanyForm extends React.Component {
             <UploadInput
               value={entity.logo}
               handleUpload={this.handleUploadLogo}
-              handleRemove={(ev) => this.handleRemoveFile("logo")}
+              handleRemove={() => this.handleRemoveFile("logo")}
               className="dropzone col-md-6"
               multiple={false}
               accept="image/*"
@@ -403,7 +402,7 @@ class CompanyForm extends React.Component {
             <UploadInput
               value={entity.big_logo}
               handleUpload={this.handleUploadBigLogo}
-              handleRemove={(ev) => this.handleRemoveFile("big_logo")}
+              handleRemove={() => this.handleRemoveFile("big_logo")}
               className="dropzone col-md-6"
               multiple={false}
               accept="image/*"

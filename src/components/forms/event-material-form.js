@@ -18,7 +18,7 @@ import {
   Dropdown,
   Input,
   UploadInputV2,
-  TextEditor
+  TextEditorV3
 } from "openstack-uicore-foundation/lib/components";
 import {
   isEmpty,
@@ -249,11 +249,12 @@ class EventMaterialForm extends React.Component {
           <div className="row form-group">
             <div className="col-md-12">
               <label> {T.translate("edit_event_material.description")} *</label>
-              <TextEditor
+              <TextEditorV3
                 id="description"
                 value={entity.description}
                 onChange={this.handleChange}
                 error={hasErrors("description", errors)}
+                license={process.env.JODIT_LICENSE_KEY}
               />
             </div>
           </div>

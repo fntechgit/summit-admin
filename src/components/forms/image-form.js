@@ -9,14 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import {
   Input,
-  TextEditor,
+  TextEditorV3,
   UploadInput
 } from "openstack-uicore-foundation/lib/components";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
@@ -37,7 +37,7 @@ class ImageForm extends React.Component {
     this.handleRemoveFile = this.handleRemoveFile.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -56,18 +56,18 @@ class ImageForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
-    let { value, id } = ev.target;
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
+    const { value, id } = ev.target;
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
     const { entity, file } = this.state;
-    let { locationId } = this.props;
+    const { locationId } = this.props;
 
     ev.preventDefault();
 
@@ -75,7 +75,7 @@ class ImageForm extends React.Component {
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -84,25 +84,25 @@ class ImageForm extends React.Component {
   }
 
   handleUploadFile(file) {
-    let entity = { ...this.state.entity };
-    let { valueField } = this.props;
+    const entity = { ...this.state.entity };
+    const { valueField } = this.props;
 
     entity[valueField] = file.preview;
 
-    this.setState({ file: file, entity: entity });
+    this.setState({ file, entity });
   }
 
-  handleRemoveFile(ev) {
-    let entity = { ...this.state.entity };
-    let { valueField } = this.props;
+  handleRemoveFile() {
+    const entity = { ...this.state.entity };
+    const { valueField } = this.props;
 
     entity[valueField] = "";
-    this.setState({ entity: entity });
+    this.setState({ entity });
   }
 
   render() {
     const { entity } = this.state;
-    let { valueField } = this.props;
+    const { valueField } = this.props;
 
     return (
       <form className="image-form">
@@ -122,11 +122,12 @@ class ImageForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("general.description")} </label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
               error={this.hasErrors("description")}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>

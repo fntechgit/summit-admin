@@ -23,7 +23,7 @@ import {
   Dropdown,
   Table,
   UploadInput,
-  TextEditor,
+  TextEditorV3,
   MemberInput,
   Exclusive,
   FreeMultiTextInput
@@ -708,11 +708,12 @@ class SummitForm extends React.Component {
                   onChange={this.handleChange}
                   className="form-control"
             /> */}
-            <TextEditor
+            <TextEditorV3
               id="registration_disclaimer_content"
               className="registration_disclaimer_input"
               value={entity.registration_disclaimer_content}
               onChange={this.handleChange}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>
@@ -1429,13 +1430,14 @@ class SummitForm extends React.Component {
                   "edit_summit.reg_lite_no_allowed_tickets_message_info"
                 )}
               />
-              <TextEditor
+              <TextEditorV3
                 id="REG_LITE_NO_ALLOWED_TICKETS_MESSAGE"
                 value={
                   regLiteMarketingSettings?.REG_LITE_NO_ALLOWED_TICKETS_MESSAGE
                     ?.value
                 }
                 onChange={this.handleChange}
+                license={process.env.JODIT_LICENSE_KEY}
               />
             </div>
           </div>

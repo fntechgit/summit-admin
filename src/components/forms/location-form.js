@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -18,13 +18,14 @@ import {
   Dropdown,
   CountryDropdown,
   Input,
-  TextEditor,
+  TextEditorV3,
   Table,
   Panel
 } from "openstack-uicore-foundation/lib/components";
 import { GMap } from "openstack-uicore-foundation/lib/components/google-map";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import HourIntervalInput from "../inputs/date-interval-input";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
 class LocationForm extends React.Component {
   constructor(props) {
@@ -53,7 +54,7 @@ class LocationForm extends React.Component {
     this.handleClearHours = this.handleClearHours.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -72,8 +73,8 @@ class LocationForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -81,31 +82,31 @@ class LocationForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleClearHours() {
-    let entity = { ...this.state.entity };
-    entity["opening_hour"] = null;
-    entity["closing_hour"] = null;
-    this.setState({ entity: entity });
+    const entity = { ...this.state.entity };
+    entity.opening_hour = null;
+    entity.closing_hour = null;
+    this.setState({ entity });
   }
 
   handleSubmit(ev) {
-    let entity = { ...this.state.entity };
-    let { allClasses } = this.props;
+    const entity = { ...this.state.entity };
+    const { allClasses } = this.props;
     ev.preventDefault();
 
     this.props.onSubmit(entity, allClasses);
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -114,10 +115,10 @@ class LocationForm extends React.Component {
   }
 
   display(component) {
-    let { class_name } = this.state.entity;
+    const { class_name } = this.state.entity;
     if (!class_name) return false;
 
-    let location_class = this.props.allClasses.find(
+    const location_class = this.props.allClasses.find(
       (c) => c.class_name === class_name
     );
 
@@ -125,14 +126,14 @@ class LocationForm extends React.Component {
   }
 
   toggleSection(section, ev) {
-    let { showSection } = this.state;
-    let newShowSection = showSection === section ? "main" : section;
+    const { showSection } = this.state;
+    const newShowSection = showSection === section ? "main" : section;
     ev.preventDefault();
 
     this.setState({ showSection: newShowSection });
   }
 
-  handleNewFloor(ev) {
+  handleNewFloor() {
     const { currentSummit, history, entity } = this.props;
     history.push(
       `/app/summits/${currentSummit.id}/locations/${entity.id}/floors/new`
@@ -146,7 +147,7 @@ class LocationForm extends React.Component {
     );
   }
 
-  handleNewRoom(ev) {
+  handleNewRoom() {
     const { currentSummit, history, entity } = this.props;
     history.push(
       `/app/summits/${currentSummit.id}/locations/${entity.id}/rooms/new`
@@ -160,7 +161,7 @@ class LocationForm extends React.Component {
     );
   }
 
-  handleNewImage(ev) {
+  handleNewImage() {
     const { currentSummit, history, entity } = this.props;
     history.push(
       `/app/summits/${currentSummit.id}/locations/${entity.id}/images/new`
@@ -174,7 +175,7 @@ class LocationForm extends React.Component {
     );
   }
 
-  handleNewMap(ev) {
+  handleNewMap() {
     const { currentSummit, history, entity } = this.props;
     history.push(
       `/app/summits/${currentSummit.id}/locations/${entity.id}/maps/new`
@@ -189,7 +190,7 @@ class LocationForm extends React.Component {
   }
 
   handleMarkerDragged(lat, lng) {
-    let entity = { ...this.state.entity };
+    const entity = { ...this.state.entity };
     entity.lat = lat;
     entity.lng = lng;
 
@@ -197,14 +198,14 @@ class LocationForm extends React.Component {
   }
 
   handleMapUpdate(ev) {
-    let entity = { ...this.state.entity };
+    const entity = { ...this.state.entity };
     ev.preventDefault();
 
     this.props.onMapUpdate(entity);
   }
 
   handleMapClick(lat, lng) {
-    let entity = { ...this.state.entity };
+    const entity = { ...this.state.entity };
     entity.lat = lat;
     entity.lng = lng;
 
@@ -214,20 +215,20 @@ class LocationForm extends React.Component {
   render() {
     const { entity, showSection } = this.state;
     const { currentSummit, allClasses } = this.props;
-    let location_class_ddl = allClasses.map((l) => ({
+    const location_class_ddl = allClasses.map((l) => ({
       label: l.class_name,
       value: l.class_name
     }));
-    let airport_type_ddl = [
+    const airport_type_ddl = [
       { label: "International", value: "International" },
       { label: "Domestic", value: "Domestic" }
     ];
-    let hotel_type_ddl = [
+    const hotel_type_ddl = [
       { label: "Primary", value: "Primary" },
       { label: "Alternate", value: "Alternate" }
     ];
-    let mapPin = [];
-    let mapCenter = {
+    const mapPin = [];
+    const mapCenter = {
       lat: parseFloat(entity.lat),
       lng: parseFloat(entity.lng)
     };
@@ -240,51 +241,51 @@ class LocationForm extends React.Component {
       });
     }
 
-    let floor_columns = [
+    const floor_columns = [
       { columnKey: "id", value: T.translate("general.id") },
       { columnKey: "name", value: T.translate("general.name") },
       { columnKey: "number", value: T.translate("edit_location.number") }
     ];
 
-    let floor_options = {
+    const floor_options = {
       actions: {
         edit: { onClick: this.handleFloorEdit },
         delete: { onClick: this.props.onFloorDelete }
       }
     };
 
-    let room_columns = [
+    const room_columns = [
       { columnKey: "id", value: T.translate("general.id") },
       { columnKey: "name", value: T.translate("general.name") },
       { columnKey: "capacity", value: T.translate("edit_location.capacity") },
       { columnKey: "floor_name", value: T.translate("edit_location.floor") }
     ];
 
-    let room_options = {
+    const room_options = {
       actions: {
         edit: { onClick: this.handleRoomEdit },
         delete: { onClick: this.props.onRoomDelete }
       }
     };
 
-    let image_columns = [
+    const image_columns = [
       { columnKey: "id", value: T.translate("general.id") },
       { columnKey: "name", value: T.translate("general.name") }
     ];
 
-    let image_options = {
+    const image_options = {
       actions: {
         edit: { onClick: this.handleImageEdit },
         delete: { onClick: this.props.onImageDelete }
       }
     };
 
-    let map_columns = [
+    const map_columns = [
       { columnKey: "id", value: T.translate("general.id") },
       { columnKey: "name", value: T.translate("general.name") }
     ];
 
-    let map_options = {
+    const map_options = {
       actions: {
         edit: { onClick: this.handleMapEdit },
         delete: { onClick: this.props.onMapDelete }
@@ -355,11 +356,12 @@ class LocationForm extends React.Component {
         <div className="row form-group">
           <div className="col-md-12">
             <label> {T.translate("edit_location.description")} </label>
-            <TextEditor
+            <TextEditorV3
               id="description"
               value={entity.description}
               onChange={this.handleChange}
               error={this.hasErrors("description")}
+              license={process.env.JODIT_LICENSE_KEY}
             />
           </div>
         </div>
@@ -418,11 +420,12 @@ class LocationForm extends React.Component {
           {this.display("location_message") && (
             <div className="col-md-12">
               <label> {T.translate("edit_location.location_message")}</label>
-              <TextEditor
+              <TextEditorV3
                 id="location_message"
                 value={entity.location_message}
                 onChange={this.handleChange}
                 error={this.hasErrors("location_message")}
+                license={process.env.JODIT_LICENSE_KEY}
               />
             </div>
           )}
