@@ -127,6 +127,7 @@ const defaultFilters = {
   completedFilter: null,
   amountFilter: null,
   hasBadgeFilter: null,
+  isActiveFilter: null,
   showOnlyPrintable: false,
   excludeFreeUnassigned: false,
   promocodesFilter: [],
@@ -406,6 +407,7 @@ class TicketListPage extends React.Component {
           completedFilter: null,
           amountFilter: null,
           hasBadgeFilter: null,
+          isActiveFilter: null,
           showOnlyPrintable: false,
           excludeFreeUnassigned: false,
           promocodesFilter: [],
@@ -684,24 +686,55 @@ class TicketListPage extends React.Component {
     ];
 
     const filters_ddl = [
-      { label: "Has Assignee?", value: "hasOwnerFilter" },
-      { label: "Completed", value: "completedFilter" },
-      { label: "Badge", value: "hasBadgeFilter" },
-      { label: "Amount", value: "amountFilter" },
-      { label: "Assignee First Name", value: "ownerFullNameStartWithFilter" },
-      { label: "Assignee Last Name", value: "ownerLastNameStartWithFilter" },
-      { label: "Owner Company", value: "ownerCompany" },
-      { label: "View Type", value: "viewTypesFilter" },
-      { label: "Ticket Type", value: "ticketTypesFilter" },
-      { label: "Promo Code", value: "promocodesFilter" },
-      { label: "Promo Code Tags", value: "promocodeTagsFilter" },
-      { label: "Refund Requested", value: "show_refund_request_pending" },
-      { label: "Printable", value: "show_printable" },
       {
-        label: "Exclude Free Unassigned Tickets",
-        value: "exclude_free_unassigned"
+        label: T.translate("ticket_list.has_assignee"),
+        value: "hasOwnerFilter"
       },
-      { label: "Badge Type", value: "badgeTypesFilter" }
+      { label: T.translate("ticket_list.completed"), value: "completedFilter" },
+      { label: T.translate("ticket_list.badge"), value: "hasBadgeFilter" },
+      { label: T.translate("ticket_list.amount"), value: "amountFilter" },
+      {
+        label: T.translate("ticket_list.owner_first_name"),
+        value: "ownerFullNameStartWithFilter"
+      },
+      {
+        label: T.translate("ticket_list.owner_last_name"),
+        value: "ownerLastNameStartWithFilter"
+      },
+      {
+        label: T.translate("ticket_list.owner_company"),
+        value: "ownerCompany"
+      },
+      { label: T.translate("ticket_list.view_type"), value: "viewTypesFilter" },
+      {
+        label: T.translate("ticket_list.ticket_type"),
+        value: "ticketTypesFilter"
+      },
+      {
+        label: T.translate("ticket_list.promo_code"),
+        value: "promocodesFilter"
+      },
+      {
+        label: T.translate("ticket_list.promo_code_tags"),
+        value: "promocodeTagsFilter"
+      },
+      {
+        label: T.translate("ticket_list.refund_requested"),
+        value: "showOnlyPendingRefundRequests"
+      },
+      {
+        label: T.translate("ticket_list.printable"),
+        value: "showOnlyPrintable"
+      },
+      {
+        label: T.translate("ticket_list.exclude_free_unassigned"),
+        value: "excludeFreeUnassigned"
+      },
+      {
+        label: T.translate("ticket_list.badge_type"),
+        value: "badgeTypesFilter"
+      },
+      { label: T.translate("ticket_list.is_active"), value: "isActiveFilter" }
     ];
 
     const showColumns = fieldNames(badge_types)
@@ -837,6 +870,9 @@ class TicketListPage extends React.Component {
           <div className="row filtersWrapper">
             {enabledFilters.includes("hasOwnerFilter") && (
               <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.has_assignee")}
+                </label>
                 <SegmentedControl
                   name="hasOwnerFilter"
                   options={[
@@ -863,8 +899,42 @@ class TicketListPage extends React.Component {
                 />
               </div>
             )}
+            {enabledFilters.includes("isActiveFilter") && (
+              <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.is_active")}
+                </label>
+                <SegmentedControl
+                  name="isActiveFilter"
+                  options={[
+                    {
+                      label: T.translate("ticket_list.all"),
+                      value: null,
+                      default: ticketFilters.isActiveFilter === null
+                    },
+                    {
+                      label: T.translate("ticket_list.yes"),
+                      value: "IS_ACTIVE",
+                      default: ticketFilters.isActiveFilter === "IS_ACTIVE"
+                    },
+                    {
+                      label: T.translate("ticket_list.no"),
+                      value: "IS_NOT_ACTIVE",
+                      default: ticketFilters.isActiveFilter === "IS_NOT_ACTIVE"
+                    }
+                  ]}
+                  setValue={(val) =>
+                    this.handleFilterChange("isActiveFilter", val)
+                  }
+                  className="segmentFilter"
+                />
+              </div>
+            )}
             {enabledFilters.includes("completedFilter") && (
               <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.completed")}
+                </label>
                 <SegmentedControl
                   name="completedFilter"
                   options={[
@@ -893,6 +963,9 @@ class TicketListPage extends React.Component {
             )}
             {enabledFilters.includes("hasBadgeFilter") && (
               <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.badge")}
+                </label>
                 <SegmentedControl
                   name="hasBadgeFilter"
                   options={[
@@ -921,6 +994,9 @@ class TicketListPage extends React.Component {
             )}
             {enabledFilters.includes("amountFilter") && (
               <div className="col-md-6">
+                <label className="labelSegment">
+                  {T.translate("ticket_list.amount")}
+                </label>
                 <SegmentedControl
                   name="amountFilter"
                   options={[
@@ -1079,12 +1155,12 @@ class TicketListPage extends React.Component {
                 />
               </div>
             )}
-            {enabledFilters.includes("show_refund_request_pending") && (
+            {enabledFilters.includes("showOnlyPendingRefundRequests") && (
               <div className="col-md-6">
                 <div className="form-check abc-checkbox">
                   <input
                     type="checkbox"
-                    id="show_refund_request_pending"
+                    id="showOnlyPendingRefundRequests"
                     checked={ticketFilters.showOnlyPendingRefundRequests}
                     onChange={(ev) =>
                       this.handleFilterChange(
@@ -1096,19 +1172,19 @@ class TicketListPage extends React.Component {
                   />
                   <label
                     className="form-check-label"
-                    htmlFor="show_refund_request_pending"
+                    htmlFor="showOnlyPendingRefundRequests"
                   >
                     {T.translate("ticket_list.show_refund_request_pending")}
                   </label>
                 </div>
               </div>
             )}
-            {enabledFilters.includes("show_printable") && (
+            {enabledFilters.includes("showOnlyPrintable") && (
               <div className="col-md-6">
                 <div className="form-check abc-checkbox">
                   <input
                     type="checkbox"
-                    id="show_printable"
+                    id="showOnlyPrintable"
                     checked={ticketFilters.showOnlyPrintable}
                     onChange={(ev) =>
                       this.handleFilterChange(
@@ -1118,7 +1194,10 @@ class TicketListPage extends React.Component {
                     }
                     className="form-check-input"
                   />
-                  <label className="form-check-label" htmlFor="show_printable">
+                  <label
+                    className="form-check-label"
+                    htmlFor="showOnlyPrintable"
+                  >
                     {T.translate("ticket_list.show_printable")} &nbsp;
                     <i
                       className="fa fa-info-circle"
@@ -1129,12 +1208,12 @@ class TicketListPage extends React.Component {
                 </div>
               </div>
             )}
-            {enabledFilters.includes("exclude_free_unassigned") && (
+            {enabledFilters.includes("excludeFreeUnassigned") && (
               <div className="col-md-6">
                 <div className="form-check abc-checkbox">
                   <input
                     type="checkbox"
-                    id="exclude_free_unassigned"
+                    id="excludeFreeUnassigned"
                     checked={ticketFilters.excludeFreeUnassigned}
                     onChange={(ev) =>
                       this.handleFilterChange(
@@ -1146,7 +1225,7 @@ class TicketListPage extends React.Component {
                   />
                   <label
                     className="form-check-label"
-                    htmlFor="exclude_free_unassigned"
+                    htmlFor="excludeFreeUnassigned"
                   >
                     {T.translate("ticket_list.exclude_free_unassigned")} &nbsp;
                   </label>
