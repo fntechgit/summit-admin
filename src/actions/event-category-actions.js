@@ -97,9 +97,10 @@ export const getEventCategory =
       fields:
         "id,name,code,color,text_color,description,session_count,alternate_count,lightning_count,lightning_alternate_count," +
         "voting_visible,chair_visible,allowed_tags,allowed_tags.id,allowed_tags.tag,allowed_access_levels,allowed_access_levels.id," +
-        "allowed_access_levels.name,icon_url,proposed_schedule_transition_time,subtrack.id,subtrack.name,subtrack.code,subtrack.color,parent.id,parent.name",
+        "allowed_access_levels.name,icon_url,proposed_schedule_transition_time,subtracks.id,subtracks.name,subtracks.code,subtracks.color,parent.id,parent.name",
       expand:
         "track_groups,allowed_tags,extra_questions,allowed_access_levels,subtracks,parent",
+      relations: "subtracks.none",
       access_token: accessToken
     };
 
