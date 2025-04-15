@@ -1574,6 +1574,7 @@
     "promocode": "Promo Code",
     "promo_code_tags": "Promo Code Tags",
     "badge_type": "Badge Type",
+    "access_level": "Access Level",
     "badge_prints_count": "Badge Print Count",
     "import_tickets_format": "Format must be the following:",
     "import_tickets_id": "id",
@@ -1619,7 +1620,8 @@
       "promocodes": "Select a Promo Code ...",
       "promocodes_tags": "Select a Promo Code Tag ...",
       "select_fields": "Select data to display",
-      "badge_type": "Badge Type"
+      "badge_type": "Badge Type",
+      "access_level": "Select a Access Level ..."
     }
   },
   "edit_ticket": {

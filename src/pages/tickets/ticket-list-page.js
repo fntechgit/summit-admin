@@ -22,6 +22,7 @@ import {
   PromocodeInput,
   TagInput,
   CompanyInput,
+  AccessLevelsInput,
   TicketTypesInput
 } from "openstack-uicore-foundation/lib/components";
 import { Modal, Pagination } from "react-bootstrap";
@@ -132,6 +133,7 @@ const defaultFilters = {
   excludeFreeUnassigned: false,
   promocodesFilter: [],
   promocodeTagsFilter: [],
+  accessLevelFilter: [],
   orAndFilter: ALL_FILTER
 };
 
@@ -734,7 +736,11 @@ class TicketListPage extends React.Component {
         label: T.translate("ticket_list.badge_type"),
         value: "badgeTypesFilter"
       },
-      { label: T.translate("ticket_list.is_active"), value: "isActiveFilter" }
+      { label: T.translate("ticket_list.is_active"), value: "isActiveFilter" },
+      {
+        label: T.translate("ticket_list.access_level"),
+        value: "accessLevelFilter"
+      }
     ];
 
     const showColumns = fieldNames(badge_types)
@@ -1113,6 +1119,27 @@ class TicketListPage extends React.Component {
                   version="v2"
                   summitId={currentSummit.id}
                   optionsLimit={100}
+                  defaultOptions
+                />
+              </div>
+            )}
+            {enabledFilters.includes("accessLevelFilter") && (
+              <div className="col-md-6">
+                <AccessLevelsInput
+                  id="accessLevelFilter"
+                  className="dropdownFilter"
+                  value={ticketFilters.accessLevelFilter}
+                  summitId={currentSummit.id}
+                  placeholder={T.translate(
+                    "ticket_list.placeholders.access_level"
+                  )}
+                  onChange={(ev) =>
+                    this.handleFilterChange(
+                      "accessLevelFilter",
+                      ev.target.value
+                    )
+                  }
+                  multi
                   defaultOptions
                 />
               </div>
