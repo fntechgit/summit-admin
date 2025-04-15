@@ -319,6 +319,14 @@ const parseFilters = (filters, term = null) => {
     );
   }
 
+  if (filters.accessLevelFilter?.length > 0) {
+    filter.push(
+      `access_level_type_id==${filters.accessLevelFilter
+        .map((al) => al.id)
+        .join("||")}`
+    );
+  }
+
   if (term) {
     const escapedTerm = escapeFilterValue(term);
     let searchString = `number=@${escapedTerm},owner_email=@${escapedTerm},owner_name=@${escapedTerm},owner_company=@${escapedTerm},promo_code=@${escapedTerm},promo_code_description=@${escapedTerm},promo_code_tag=@${escapedTerm}`;
