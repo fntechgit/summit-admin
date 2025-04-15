@@ -104,7 +104,7 @@ export const deleteFilterCriteria = (filterCriteriaId) => async (dispatch) => {
     createAction(FILTER_CRITERIA_DELETED)({ filterCriteriaId }),
     `${window.PERSIST_FILTER_CRITERIA_API}/api/v1/filter-criterias/${filterCriteriaId}`,
     null,
-    authErrorHandler
+    customErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
