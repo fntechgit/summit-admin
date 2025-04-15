@@ -36,7 +36,9 @@ import {
   deleteFormTemplateMaterial,
   deleteFormTemplateMetaFieldTypeValue,
   deleteFormTemplateMetaFieldType,
-  resetFormTemplateForm
+  resetFormTemplateForm,
+  archiveFormTemplate,
+  unarchiveFormTemplate
 } from "../../actions/form-template-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import FormTemplateDialog from "./popup/form-template-popup";
@@ -60,7 +62,9 @@ const FormTemplateListPage = ({
   resetFormTemplateForm,
   deleteFormTemplateMaterial,
   deleteFormTemplateMetaFieldTypeValue,
-  deleteFormTemplateMetaFieldType
+  deleteFormTemplateMetaFieldType,
+  archiveFormTemplate,
+  unarchiveFormTemplate
 }) => {
   const [formTemplatePopupOpen, setFormTemplatePopupOpen] = useState(false);
   const [formTemplateDuplicate, setFormTemplateDuplicate] = useState(false);
@@ -124,6 +128,13 @@ const FormTemplateListPage = ({
     setFormTemplateFromDuplicatePopupOpen(false);
   };
 
+  const handleArchiveItem = (item) =>
+    item.is_archived ? unarchiveFormTemplate(item) : archiveFormTemplate(item);
+
+  const handleHideArchivedForms = (value) => {
+    getFormTemplates(term, currentPage, perPage, order, orderDir, value);
+  };
+
   const columns = [
     {
       columnKey: "code",
@@ -173,9 +184,16 @@ const FormTemplateListPage = ({
       header: "",
       width: 70,
       align: "center",
-      render: () => (
-        <Button variant="text" color="inherit" size="medium">
-          Archive
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="medium"
+          onClick={() => handleArchiveItem(row)}
+        >
+          {row.is_archived
+            ? T.translate("inventory_item_list.unarchive_button")
+            : T.translate("inventory_item_list.archive_button")}
         </Button>
       ),
       className: "dottedBorderLeft"
@@ -222,7 +240,7 @@ const FormTemplateListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={(ev) => console.log("CHECK BOX", ev.target.checked)}
+                  onChange={(ev) => handleHideArchivedForms(ev.target.checked)}
                   inputProps={{
                     "aria-label": T.translate(
                       "form_template_list.hide_archived"
@@ -337,5 +355,7 @@ export default connect(mapStateToProps, {
   deleteFormTemplateMetaFieldType,
   deleteFormTemplateMetaFieldTypeValue,
   deleteFormTemplateMaterial,
-  resetFormTemplateForm
+  resetFormTemplateForm,
+  archiveFormTemplate,
+  unarchiveFormTemplate
 })(FormTemplateListPage);

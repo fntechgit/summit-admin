@@ -38,7 +38,9 @@ import {
   saveMetaFieldValues,
   deleteMetaFieldTypeValue,
   saveFiles,
-  deleteFile
+  deleteFile,
+  archiveItem,
+  unarchiveItem
 } from "./inventory-shared-actions";
 
 export const ADD_FORM_TEMPLATE = "ADD_FORM_TEMPLATE";
@@ -64,6 +66,8 @@ export const FORM_TEMPLATE_META_FIELD_VALUE_DELETED =
   "FORM_TEMPLATE_META_FIELD_VALUE_DELETED";
 export const FORM_TEMPLATE_MATERIAL_SAVED = "FORM_TEMPLATE_MATERIAL_SAVED";
 export const FORM_TEMPLATE_MATERIAL_DELETED = "FORM_TEMPLATE_MATERIAL_DELETED";
+export const FORM_TEMPLATE_ARCHIVED = "FORM_TEMPLATE_ARCHIVED";
+export const FORM_TEMPLATE_UNARCHIVED = "FORM_TEMPLATE_UNARCHIVED";
 
 export const getFormTemplates =
   (
@@ -71,7 +75,8 @@ export const getFormTemplates =
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = DEFAULT_ORDER_DIR
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
   ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
@@ -86,11 +91,13 @@ export const getFormTemplates =
 
     const params = {
       page,
-      fields: "id,code,name,level,expire_date",
+      fields: "id,code,name,level,expire_date,is_archived",
       relations: "items",
       per_page: perPage,
       access_token: accessToken
     };
+
+    if (hideArchived) filter.push("is_archived==0");
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -105,7 +112,7 @@ export const getFormTemplates =
     return getRequest(
       createAction(REQUEST_FORM_TEMPLATES),
       createAction(RECEIVE_FORM_TEMPLATES),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/`,
+      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates`,
       authErrorHandler,
       { order, orderDir, page, term }
     )(params)(dispatch).then(() => {
@@ -126,7 +133,7 @@ export const getFormTemplate = (formTemplateId) => async (dispatch) => {
   return getRequest(
     null,
     createAction(RECEIVE_FORM_TEMPLATE),
-    `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/`,
+    `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}`,
     authErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
@@ -145,7 +152,7 @@ export const deleteFormTemplate = (formTemplateId) => async (dispatch) => {
   return deleteRequest(
     null,
     createAction(FORM_TEMPLATE_DELETED)({ formTemplateId }),
-    `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/`,
+    `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}`,
     null,
     authErrorHandler
   )(params)(dispatch).then(() => {
@@ -183,7 +190,7 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
     return putRequest(
       createAction(UPDATE_FORM_TEMPLATE),
       createAction(FORM_TEMPLATE_UPDATED),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${entity.id}/`,
+      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${entity.id}`,
       normalizedEntity,
       authErrorHandler,
       entity
@@ -230,7 +237,7 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
   return postRequest(
     createAction(ADD_FORM_TEMPLATE),
     createAction(FORM_TEMPLATE_ADDED),
-    `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/`,
+    `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates`,
     normalizedEntity,
     authErrorHandler,
     entity
@@ -271,7 +278,7 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
 
 const saveFormTemplateMetaFieldTypes = (formTemplate) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/meta-field-types/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/meta-field-types`,
     addedActionName: FORM_TEMPLATE_META_FIELD_SAVED,
     updatedActionName: FORM_TEMPLATE_META_FIELD_SAVED
   };
@@ -285,7 +292,7 @@ const saveFormTemplateMetaFieldTypes = (formTemplate) => {
 
 export const deleteFormTemplateMetaFieldType = (templateId, metaFieldId) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types`,
     deletedActionName: FORM_TEMPLATE_META_FIELD_DELETED
   };
   return deleteMetaFieldType(metaFieldId, settings);
@@ -295,7 +302,7 @@ export const deleteFormTemplateMetaFieldType = (templateId, metaFieldId) => {
 
 const saveFormTemplateMetaFieldTypeValues = (templateId, metaFieldType) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldType.id}/values/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldType.id}/values`,
     addedActionName: FORM_TEMPLATE_META_FIELD_VALUE_SAVED,
     updatedActionName: FORM_TEMPLATE_META_FIELD_VALUE_SAVED
   };
@@ -308,7 +315,7 @@ export const deleteFormTemplateMetaFieldTypeValue = (
   valueId
 ) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldId}/values/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/meta-field-types/${metaFieldId}/values`,
     deletedActionName: FORM_TEMPLATE_META_FIELD_VALUE_DELETED
   };
   return deleteMetaFieldTypeValue(metaFieldId, valueId, settings);
@@ -318,7 +325,7 @@ export const deleteFormTemplateMetaFieldTypeValue = (
 
 const saveFormTemplateMaterials = (template) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${template.id}/materials/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${template.id}/materials`,
     addedActionName: FORM_TEMPLATE_MATERIAL_SAVED,
     updatedActionName: FORM_TEMPLATE_MATERIAL_SAVED
   };
@@ -327,8 +334,26 @@ const saveFormTemplateMaterials = (template) => {
 
 export const deleteFormTemplateMaterial = (templateId, materialId) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/materials/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${templateId}/materials`,
     deletedActionName: FORM_TEMPLATE_MATERIAL_DELETED
   };
   return deleteFile(materialId, settings);
+};
+
+/* **************************************  ARCHIVE  ************************************** */
+
+export const archiveFormTemplate = (formTemplate) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/archive`,
+    updatedActionName: FORM_TEMPLATE_ARCHIVED
+  };
+  return archiveItem(formTemplate, settings);
+};
+
+export const unarchiveFormTemplate = (formTemplate) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplate.id}/archive`,
+    deletedActionName: FORM_TEMPLATE_UNARCHIVED
+  };
+  return unarchiveItem(formTemplate, settings);
 };
