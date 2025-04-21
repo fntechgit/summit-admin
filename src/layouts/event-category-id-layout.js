@@ -9,16 +9,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { Switch, Route } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import { connect } from "react-redux";
 import Restrict from "../routes/restrict";
 import EditEventCategoryPage from "../pages/events/edit-event-category-page";
 import NoMatchPage from "../pages/no-match-page";
-import { connect } from "react-redux";
 import {
   getEventCategory,
   resetEventCategoryForm
@@ -30,6 +30,8 @@ class EventCategoryIdLayout extends React.Component {
 
     const eventCategoryId = props.match.params.event_category_id;
 
+    this.handleParentBreadCrumbs = this.handleParentBreadCrumbs.bind(this);
+
     if (!eventCategoryId) {
       props.resetEventCategoryForm();
     } else {
@@ -37,7 +39,7 @@ class EventCategoryIdLayout extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.event_category_id;
     const newId = this.props.match.params.event_category_id;
 
@@ -50,15 +52,46 @@ class EventCategoryIdLayout extends React.Component {
     }
   }
 
+  handleParentBreadCrumbs(eventCategory) {
+    const { match } = this.props;
+
+    const breadcrumb = eventCategory.id
+      ? eventCategory.name
+      : T.translate("general.new");
+
+    const baseUrl = match.url.substring(0, match.url.lastIndexOf("/"));
+    const currentBreadcrumbUrl = `${baseUrl}/${eventCategory.id}`;
+
+    if (eventCategory.parent) {
+      const parentUrl = `${baseUrl}/${eventCategory.parent.id}`;
+      return (
+        <>
+          <Breadcrumb
+            data={{
+              title: eventCategory.parent.name,
+              pathname: parentUrl
+            }}
+          />
+          <Breadcrumb
+            data={{ title: breadcrumb, pathname: currentBreadcrumbUrl }}
+          />
+        </>
+      );
+    }
+
+    return (
+      <Breadcrumb
+        data={{ title: breadcrumb, pathname: currentBreadcrumbUrl }}
+      />
+    );
+  }
+
   render() {
     const { match, currentEventCategory } = this.props;
-    let breadcrumb = currentEventCategory.id
-      ? currentEventCategory.name
-      : T.translate("general.new");
 
     return (
       <div>
-        <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
+        {this.handleParentBreadCrumbs(currentEventCategory)}
         <Switch>
           <Route
             strict
