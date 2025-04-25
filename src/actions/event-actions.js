@@ -571,10 +571,17 @@ export const getEvents =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
-      params.order =
-        order === "created_by_fullname"
-          ? `${orderDirSign}${order},${orderDirSign}created_by_email`
-          : `${orderDirSign}${order}`;
+      switch (order) {
+        case "created_by_fullname":
+          params.order = `${orderDirSign}${order},${orderDirSign}created_by_email`;
+          break;
+        case "status":
+          params.order = `${orderDirSign}submission_status`;
+          break;
+        default:
+          params.order = `${orderDirSign}${order}`;
+          break;
+      }
     }
 
     return getRequest(
