@@ -11,21 +11,21 @@
  * limitations under the License.
  * */
 import {
-  getRequest,
+  authErrorHandler,
+  createAction,
   deleteRequest,
+  escapeFilterValue,
+  getCSV,
+  getRequest,
   postRequest,
   putRequest,
-  createAction,
-  stopLoading,
   startLoading,
-  authErrorHandler,
-  escapeFilterValue,
-  getCSV
+  stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {
-  getAccessTokenSafely,
+  fetchErrorHandler,
   fetchResponseHandler,
-  fetchErrorHandler
+  getAccessTokenSafely
 } from "../utils/methods";
 import { DEFAULT_ORDER_DIR, DEFAULT_PER_PAGE } from "../utils/constants";
 
@@ -40,6 +40,16 @@ export const PROGRESS_FLAG_UPDATED = "PROGRESS_FLAG_UPDATED";
 export const PROGRESS_FLAG_ADDED = "PROGRESS_FLAG_ADDED";
 export const PROGRESS_FLAG_DELETED = "PROGRESS_FLAG_DELETED";
 export const PROGRESS_FLAG_REORDERED = "PROGRESS_FLAG_REORDERED";
+
+export const RECEIVE_SELECTION_PLANS = "RECEIVE_SELECTION_PLANS";
+export const SET_SOURCE_SEL_PLAN = "SET_SOURCE_SEL_PLAN";
+export const SET_TEAM_SEL_PLAN = "SET_TEAM_SEL_PLAN";
+export const REQUEST_SOURCE_LIST = "REQUEST_SOURCE_LIST";
+export const RECEIVE_SOURCE_LIST = "RECEIVE_SOURCE_LIST";
+export const REQUEST_TEAM_LIST = "REQUEST_TEAM_LIST";
+export const RECEIVE_TEAM_LIST = "RECEIVE_TEAM_LIST";
+export const REORDER_LIST = "REORDER_LIST";
+export const TEAM_LIST_UPDATED = "TEAM_LIST_UPDATED";
 
 const callDelay = 500; // miliseconds
 
@@ -375,3 +385,127 @@ export const reorderProgressFlags =
       dispatch(stopLoading());
     });
   };
+
+/** ********************************************************************************************************* */
+/*                          TEAM LISTS                                                                        */
+/** ********************************************************************************************************* */
+
+export const getSelectionPlans = () => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
+
+  const params = {
+    page: 1,
+    per_page: 100,
+    access_token: accessToken,
+    expand: "track_groups,track_groups.tracks"
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SELECTION_PLANS),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const setSelectionPlan = (target, selectionPlanId) => (dispatch) => {
+  const action = target === "source" ? SET_SOURCE_SEL_PLAN : SET_TEAM_SEL_PLAN;
+  dispatch(createAction(action)({ selectionPlanId }));
+};
+
+export const getSourceList =
+  (selectionPlanId, trackId, searchTerm = "") =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filter = [
+      `selection_plan_id==${selectionPlanId}`,
+      `track_id==${trackId}`
+    ];
+
+    dispatch(startLoading());
+
+    if (searchTerm) {
+      const escapedTerm = escapeFilterValue(searchTerm);
+      filter.push(
+        `id==${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm}`
+      );
+    }
+
+    const params = {
+      page: 1,
+      per_page: DEFAULT_PER_PAGE,
+      access_token: accessToken,
+      "filter[]": filter
+    };
+
+    return getRequest(
+      createAction(REQUEST_SOURCE_LIST),
+      createAction(RECEIVE_SOURCE_LIST),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
+      authErrorHandler,
+      { trackId, searchTerm }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const getTeamList =
+  (selectionPlanId, trackId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken,
+      expand: "selected_presentations, selected_presentations.presentation"
+    };
+
+    return getRequest(
+      createAction(REQUEST_TEAM_LIST),
+      createAction(RECEIVE_TEAM_LIST),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/tracks/${trackId}/selection-lists/team`,
+      authErrorHandler,
+      { trackId }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const reorderList = (listId, selections) => (dispatch) => {
+  dispatch(createAction(REORDER_LIST)({ listId, selections }));
+};
+
+export const updateTeamList = () => async (dispatch, getState) => {
+  const { currentSummitState, teamListsState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const { teamSelPlanId, teamTrackId, teamList } = teamListsState;
+  const presentations = teamList.selections.map((s) => s.id);
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken,
+    expand: "member,categories"
+  };
+
+  putRequest(
+    null,
+    createAction(TEAM_LIST_UPDATED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${teamSelPlanId}/tracks/${teamTrackId}/selection-lists/${teamList.id}/reorder`,
+    { hash: teamList.hash, collection: "selected", presentations },
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
