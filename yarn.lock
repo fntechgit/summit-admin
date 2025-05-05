@@ -9885,10 +9885,10 @@ open@^8.0.9:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openstack-uicore-foundation@4.2.5:
-  version "4.2.5"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.5.tgz#ce6759e4b38d8a91ada09c11fc20e4c9dfbfe266"
-  integrity sha512-qXMjLBGLyCkhnKFenjbE7ENhsH8tJyRdd6119Qvziyn3TUIVNvp7WZv3v3Nz4I4NMvuoViocUbmKnMUO3PZRtw==
+openstack-uicore-foundation@4.2.6:
+  version "4.2.6"
+  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.6.tgz#a7bdeed38ec9bf19f417cceda221e43cf81b4eb4"
+  integrity sha512-Ap2oNmL61I645Sxqfuofh86kG6+J8G64Q711Tac0Ccr78IsSRM3KrOpPys+Z7wYvC6aooEWOmeoQuHgmW0KFcw==
 
 optionator@^0.9.1:
   version "0.9.4"
