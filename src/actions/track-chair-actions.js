@@ -420,27 +420,35 @@ export const setSelectionPlan = (target, selectionPlanId) => (dispatch) => {
 };
 
 export const getSourceList =
-  (selectionPlanId, trackId, searchTerm = "") =>
+  (selectionPlanId, trackId, searchTerm = "", page = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const filter = [
       `selection_plan_id==${selectionPlanId}`,
-      `track_id==${trackId}`
+      `track_id==${trackId}`,
+      "status==Received",
+      "progress==5"
     ];
 
     dispatch(startLoading());
 
     if (searchTerm) {
       const escapedTerm = escapeFilterValue(searchTerm);
-      filter.push(
-        `id==${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm}`
-      );
+      if (Number.isInteger(parseInt(escapedTerm, 10))) {
+        filter.push(
+          `id==${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm}`
+        );
+      } else {
+        filter.push(
+          `title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm}`
+        );
+      }
     }
 
     const params = {
-      page: 1,
+      page,
       per_page: DEFAULT_PER_PAGE,
       access_token: accessToken,
       "filter[]": filter
@@ -481,8 +489,8 @@ export const getTeamList =
     });
   };
 
-export const reorderList = (listId, selections) => (dispatch) => {
-  dispatch(createAction(REORDER_LIST)({ listId, selections }));
+export const reorderList = (listId, items) => (dispatch) => {
+  dispatch(createAction(REORDER_LIST)({ listId, items }));
 };
 
 export const updateTeamList = () => async (dispatch, getState) => {
@@ -490,7 +498,7 @@ export const updateTeamList = () => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
   const { teamSelPlanId, teamTrackId, teamList } = teamListsState;
-  const presentations = teamList.selections.map((s) => s.id);
+  const ids = teamList.items.map((it) => it.id);
 
   dispatch(startLoading());
 
@@ -503,7 +511,7 @@ export const updateTeamList = () => async (dispatch, getState) => {
     null,
     createAction(TEAM_LIST_UPDATED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${teamSelPlanId}/tracks/${teamTrackId}/selection-lists/${teamList.id}/reorder`,
-    { hash: teamList.hash, collection: "selected", presentations },
+    { hash: teamList.hash, collection: "selected", presentations: ids },
     authErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());

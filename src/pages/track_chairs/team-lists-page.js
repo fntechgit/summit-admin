@@ -30,9 +30,9 @@ import List from "../../components/dnd-list/List";
 import { moveItem } from "../../utils/methods";
 import styles from "../../styles/team-list-page.module.less";
 
-const getTracksFromSelectionPlan = (selectionPlan) => {
+const getTracksFromSelectionPlan = (selectionPlan) => 
   // get all tracks from the selection plan and track visible
-  return selectionPlan?.track_groups
+   selectionPlan?.track_groups
     .reduce((result, trackGroup) => {
       trackGroup?.tracks?.forEach((track) => {
         if (!result.find((tr) => tr.id === track.id)) {
@@ -41,8 +41,8 @@ const getTracksFromSelectionPlan = (selectionPlan) => {
       });
       return result;
     }, [])
-    .filter((t) => t?.chair_visible);
-};
+    .filter((t) => t?.chair_visible)
+;
 
 const TeamListsPage = ({
   summit,
@@ -50,27 +50,31 @@ const TeamListsPage = ({
   selectionPlans,
   sourceList,
   teamList,
-  searchTerm,
+  sourceSearchTerm,
   sourceTrackId,
   sourceSelPlanId,
   teamSelPlanId,
   teamTrackId,
+  sourcePage,
+  sourceLastPage,
   ...props
 }) => {
-  const sourceTrackOptions = useMemo(
-    () =>
-      getTracksFromSelectionPlan(
-        selectionPlans.find((sp) => sp.id === sourceSelPlanId)
-      ),
-    [sourceSelPlanId]
-  ) || [];
-  const teamTrackOptions = useMemo(
-    () =>
-      getTracksFromSelectionPlan(
-        selectionPlans.find((sp) => sp.id === teamSelPlanId)
-      ),
-    [teamSelPlanId]
-  ) || [];
+  const sourceTrackOptions =
+    useMemo(
+      () =>
+        getTracksFromSelectionPlan(
+          selectionPlans.find((sp) => sp.id === sourceSelPlanId)
+        ),
+      [sourceSelPlanId]
+    ) || [];
+  const teamTrackOptions =
+    useMemo(
+      () =>
+        getTracksFromSelectionPlan(
+          selectionPlans.find((sp) => sp.id === teamSelPlanId)
+        ),
+      [teamSelPlanId]
+    ) || [];
 
   useEffect(() => {
     if (!selectionPlans.length) {
@@ -80,7 +84,7 @@ const TeamListsPage = ({
 
   const handleTrackChange = (target, trackId) => {
     if (target === "source") {
-      props.getSourceList(sourceSelPlanId, trackId, searchTerm);
+      props.getSourceList(sourceSelPlanId, trackId, sourceSearchTerm);
     } else if (target === "team") {
       props.getTeamList(teamSelPlanId, trackId);
     }
@@ -90,35 +94,52 @@ const TeamListsPage = ({
     props.getSourceList(sourceSelPlanId, sourceTrackId, term);
   };
 
-  const handleColumnChange = (fromItem, toItem) => {
+  const handleScrollEvent = (ev) => {
+    const bottom =
+      ev.target.scrollHeight - ev.target.scrollTop === ev.target.clientHeight;
+
+    if (bottom && sourcePage < sourceLastPage) {
+      props.getSourceList(
+        sourceSelPlanId,
+        sourceTrackId,
+        sourceSearchTerm,
+        sourcePage + 1
+      );
+    }
+  };
+
+  const handleColumnChange = (fromItem, toItem, toListId) => {
     const lists = [sourceList, teamList];
-    const fromList = lists.find(l => l.id === fromItem.originalList.id);
-    const toList = lists.find(l => l.id === toItem.list.id);
-    const newFromSelections = fromList.selections.filter(s => s.id !== fromItem.id);
+    const fromList = lists.find((l) => l.id === fromItem.originalList.id);
+    const toList = lists.find((l) => l.id === toListId);
+    const newFromItems = fromList.items.filter((it) => it.id !== fromItem.id);
 
     // If list already has the item we return with no effect.
-    if (toList.selections.find(s => s.id === fromItem.id)) {
+    if (toList.items.find((it) => it.id === fromItem.id)) {
       return;
     }
 
     // Remove from the old list
-    props.reorderList(fromItem.originalList.id, newFromSelections);
+    props.reorderList(fromItem.originalList.id, newFromItems);
 
     // Update to list
-    const newToSelections = [
-      ...toList.selections,
+    const newToItems = [
+      ...toList.items,
       {
         id: fromItem.id,
-        listId: toItem.list.id,
-        presentation: fromItem.presentation,
-        order: toItem.order,
-        type: toItem.type,
+        title: fromItem.title,
+        level: fromItem.level,
+        order: toItem.order
       }
     ];
 
-    const newToSelectionsOrdered = moveItem(newToSelections, (newToSelections.length-1), toItem.index);
+    const newToItemsOrdered = moveItem(
+      newToItems,
+      newToItems.length - 1,
+      toItem.order
+    );
 
-    props.reorderList(toItem.list.id, newToSelectionsOrdered);
+    props.reorderList(toList.id, newToItemsOrdered);
   };
 
   return (
@@ -159,7 +180,7 @@ const TeamListsPage = ({
                 )}
               />
               <FreeTextSearch
-                value={searchTerm}
+                value={sourceSearchTerm}
                 className={styles.filter}
                 placeholder={T.translate(
                   "track_team_lists.placeholders.search_activities"
@@ -167,10 +188,12 @@ const TeamListsPage = ({
                 onSearch={handleSearch}
               />
             </div>
-            <div className={styles.sourceListWrapper}>
+            <div
+              className={styles.sourceListWrapper}
+              onScroll={handleScrollEvent}
+            >
               <List
                 list={sourceList}
-                dragOut
                 altThreshold={7}
                 limit={10}
                 onCardClick={console.log}
@@ -186,7 +209,9 @@ const TeamListsPage = ({
                 id="sp-team"
                 value={teamSelPlanId}
                 className={styles.filter}
-                onChange={(ev) => props.setSelectionPlan("team", ev.target.value)}
+                onChange={(ev) =>
+                  props.setSelectionPlan("team", ev.target.value)
+                }
                 selectionPlans={selectionPlans}
                 placeholder={T.translate(
                   "track_team_lists.placeholders.select_selection_plan"
@@ -206,7 +231,6 @@ const TeamListsPage = ({
             </div>
             <List
               list={teamList}
-              dragIn
               sortable
               altThreshold={7}
               limit={10}
