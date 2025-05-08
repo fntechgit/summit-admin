@@ -17,22 +17,13 @@ import {
   Box,
   IconButton,
   Divider,
-  Grid2,
-  FormHelperText
+  Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  TextEditor,
-  UploadInputV2
-} from "openstack-uicore-foundation/lib/components";
+import { TextEditor } from "openstack-uicore-foundation/lib/components";
 import { scrollToError, hasErrors } from "../../../utils/methods";
-import {
-  ALLOWED_INVENTORY_IMAGE_FORMATS,
-  MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
-  MAX_INVENTORY_IMAGES_UPLOAD_QTY
-} from "../../../utils/constants";
 import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
 
@@ -41,7 +32,6 @@ const FormTemplateDialog = ({
   onClose,
   onSave,
   toDuplicate = false,
-  onImageDeleted,
   onMetaFieldTypeDeleted,
   onMetaFieldTypeValueDeleted,
   entity: initialEntity,
@@ -111,14 +101,6 @@ const FormTemplateDialog = ({
 
   const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
 
-  const mediaType = {
-    max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
-    max_uploads_qty: MAX_INVENTORY_IMAGES_UPLOAD_QTY,
-    type: {
-      allowed_extensions: ALLOWED_INVENTORY_IMAGE_FORMATS
-    }
-  };
-
   const handleChange = (e) => {
     const { id, value } = e.target;
     setEntity({ ...entity, [id]: value });
@@ -134,10 +116,6 @@ const FormTemplateDialog = ({
         newErrors[field] = T.translate("edit_form_template.required_error");
       }
     });
-
-    if (entity.materials.length === 0) {
-      newErrors.materials = T.translate("edit_form_template.required_error");
-    }
 
     scrollToError(newErrors);
 
@@ -259,41 +237,6 @@ const FormTemplateDialog = ({
     newFields[fieldIndex][key] = value;
     setEntity({ ...entity, meta_fields: newFields });
   };
-
-  const handleImageUploadComplete = (response) => {
-    if (response) {
-      const image = {
-        file_path: `${response.path}${response.name}`,
-        filename: response.name
-      };
-      setEntity((prevEntity) => ({
-        ...prevEntity,
-        materials: [...prevEntity.materials, image]
-      }));
-    }
-  };
-
-  const handleRemoveImage = (imageFile) => {
-    const materials = entity.materials.filter(
-      (image) => image.filename !== imageFile.name
-    );
-    setEntity((prevEntity) => ({
-      ...prevEntity,
-      materials
-    }));
-
-    if (onImageDeleted && entity.id && imageFile.id) {
-      onImageDeleted(entity.id, imageFile.id);
-    }
-  };
-
-  const getMediaInputValue = () =>
-    entity.materials.length > 0
-      ? entity.materials.map((img) => ({
-          ...img,
-          filename: img.filename ?? img.file_path ?? img.file_url
-        }))
-      : [];
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -529,33 +472,6 @@ const FormTemplateDialog = ({
             </Grid2>
           ))}
         </Box>
-
-        <Grid2 container spacing={2} sx={{ alignItems: "start", px: 3, py: 1 }}>
-          <Grid2 size={12}>
-            <InputLabel htmlFor="image" id="materials">
-              {T.translate("edit_form_template.materials")}
-            </InputLabel>
-            {errors.materials && (
-              <FormHelperText error>{errors.materials}</FormHelperText>
-            )}
-            <UploadInputV2
-              id="image-upload"
-              name="image"
-              onUploadComplete={handleImageUploadComplete}
-              value={getMediaInputValue()}
-              mediaType={mediaType}
-              onRemove={handleRemoveImage}
-              postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
-              djsConfig={{ withCredentials: true }}
-              maxFiles={mediaType.max_uploads_qty}
-              canAdd={
-                mediaType.is_editable ||
-                entity.materials.length < mediaType.max_uploads_qty
-              }
-              parallelChunkUploads
-            />
-          </Grid2>
-        </Grid2>
       </DialogContent>
       <Divider />
       <DialogActions>
