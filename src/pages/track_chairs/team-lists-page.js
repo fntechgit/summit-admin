@@ -30,9 +30,9 @@ import List from "../../components/dnd-list/List";
 import { moveItem } from "../../utils/methods";
 import styles from "../../styles/team-list-page.module.less";
 
-const getTracksFromSelectionPlan = (selectionPlan) => 
+const getTracksFromSelectionPlan = (selectionPlan) =>
   // get all tracks from the selection plan and track visible
-   selectionPlan?.track_groups
+  selectionPlan?.track_groups
     .reduce((result, trackGroup) => {
       trackGroup?.tracks?.forEach((track) => {
         if (!result.find((tr) => tr.id === track.id)) {
@@ -41,9 +41,7 @@ const getTracksFromSelectionPlan = (selectionPlan) =>
       });
       return result;
     }, [])
-    .filter((t) => t?.chair_visible)
-;
-
+    .filter((t) => t?.chair_visible);
 const TeamListsPage = ({
   summit,
   match,
@@ -53,8 +51,6 @@ const TeamListsPage = ({
   sourceSearchTerm,
   sourceTrackId,
   sourceSelPlanId,
-  teamSelPlanId,
-  teamTrackId,
   sourcePage,
   sourceLastPage,
   ...props
@@ -67,14 +63,10 @@ const TeamListsPage = ({
         ),
       [sourceSelPlanId]
     ) || [];
-  const teamTrackOptions =
-    useMemo(
-      () =>
-        getTracksFromSelectionPlan(
-          selectionPlans.find((sp) => sp.id === teamSelPlanId)
-        ),
-      [teamSelPlanId]
-    ) || [];
+
+  const track = sourceTrackOptions.find((t) => t.id === sourceTrackId);
+  const trackLimit = track ? track.session_count + track.alternate_count : 0;
+  const teamListLength = teamList?.items?.length || 0;
 
   useEffect(() => {
     if (!selectionPlans.length) {
@@ -82,12 +74,9 @@ const TeamListsPage = ({
     }
   }, [selectionPlans]);
 
-  const handleTrackChange = (target, trackId) => {
-    if (target === "source") {
-      props.getSourceList(sourceSelPlanId, trackId, sourceSearchTerm);
-    } else if (target === "team") {
-      props.getTeamList(teamSelPlanId, trackId);
-    }
+  const handleTrackChange = (trackId) => {
+    props.getSourceList(sourceSelPlanId, trackId, sourceSearchTerm);
+    props.getTeamList(sourceSelPlanId, trackId);
   };
 
   const handleSearch = (term) => {
@@ -115,6 +104,11 @@ const TeamListsPage = ({
     const newFromItems = fromList.items.filter((it) => it.id !== fromItem.id);
 
     // If list already has the item we return with no effect.
+    console.log(
+      "handleColumnChange: ",
+      toList.items.map((it) => it.id),
+      fromItem.id
+    );
     if (toList.items.find((it) => it.id === fromItem.id)) {
       return;
     }
@@ -153,16 +147,14 @@ const TeamListsPage = ({
       <div className="container">
         <h3> {T.translate("track_team_lists.team_lists")} </h3>
         <hr />
-        <div className="row">
-          <div className="col-md-6">
+        <div className={`row ${styles.wrapper}`}>
+          <div className={`col-md-6 ${styles.sourceWrapper}`}>
             <div className={styles.filtersWrapper}>
               <SelectionPlanDropdown
                 id="sp-source"
                 value={sourceSelPlanId}
                 className={styles.filter}
-                onChange={(ev) =>
-                  props.setSelectionPlan("source", ev.target.value)
-                }
+                onChange={(ev) => props.setSelectionPlan(ev.target.value)}
                 selectionPlans={selectionPlans}
                 placeholder={T.translate(
                   "track_team_lists.placeholders.select_selection_plan"
@@ -172,7 +164,7 @@ const TeamListsPage = ({
                 id="source-tracks"
                 value={sourceTrackId}
                 className={styles.filter}
-                onChange={(ev) => handleTrackChange("source", ev.target.value)}
+                onChange={(ev) => handleTrackChange(ev.target.value)}
                 tracks={sourceTrackOptions}
                 disabled={!sourceTrackOptions?.length}
                 placeholder={T.translate(
@@ -194,7 +186,7 @@ const TeamListsPage = ({
             >
               <List
                 list={sourceList}
-                altThreshold={7}
+                altThreshold={10}
                 limit={10}
                 onCardClick={console.log}
                 onReorder={console.log}
@@ -203,31 +195,27 @@ const TeamListsPage = ({
               />
             </div>
           </div>
-          <div className="col-md-6">
-            <div className={styles.filtersWrapper}>
-              <SelectionPlanDropdown
-                id="sp-team"
-                value={teamSelPlanId}
-                className={styles.filter}
-                onChange={(ev) =>
-                  props.setSelectionPlan("team", ev.target.value)
-                }
-                selectionPlans={selectionPlans}
-                placeholder={T.translate(
-                  "track_team_lists.placeholders.select_selection_plan"
-                )}
-              />
-              <TrackDropdown
-                id="team-tracks"
-                value={teamTrackId}
-                className={styles.filter}
-                onChange={(ev) => handleTrackChange("team", ev.target.value)}
-                tracks={teamTrackOptions}
-                disabled={!teamTrackOptions?.length}
-                placeholder={T.translate(
-                  "track_team_lists.placeholders.select_track"
-                )}
-              />
+          <div className={`col-md-6 ${styles.teamWrapper}`}>
+            <div className={styles.teamListHeader}>
+              <p className={styles.title}>
+                Team List ({teamListLength} / {trackLimit})
+              </p>
+              {teamList && (
+                <div className={styles.meta}>
+                  <div className={styles.metaItem}>
+                    <b>Beginner:</b> {teamList.meta?.beginner}
+                  </div>
+                  <div className={styles.metaItem}>
+                    <b>Intermediate:</b> {teamList.meta?.intermediate}
+                  </div>
+                  <div className={styles.metaItem}>
+                    <b>Advanced:</b> {teamList.meta?.advanced}
+                  </div>
+                  <div className={styles.metaItem}>
+                    <b>N/A:</b> {teamList.meta?.na}
+                  </div>
+                </div>
+              )}
             </div>
             <List
               list={teamList}

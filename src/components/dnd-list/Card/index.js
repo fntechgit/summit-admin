@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-
+import MetaSection from "./MetaSection";
 import styles from "./index.module.less";
 
 const Card = ({
   id,
   title,
   level,
+  meta,
   sortable,
   order,
   isAlternate,
@@ -72,6 +73,9 @@ const Card = ({
         </div>
       </div>
       <div className={styles.footer}>
+        <div className={styles.metrics}>
+          <MetaSection meta={meta} />
+        </div>
         {sortable && <div className={styles.remove}>{removeBlock()}</div>}
       </div>
     </div>

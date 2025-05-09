@@ -4,6 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import SortableCard from "../SortableCard";
 import { moveItem } from "../../../utils/methods";
 import styles from "./index.module.less";
+import ListPlaceholder from "../Placeholder";
 
 // const altThreshold = track.session_count;
 // limit = track.limit
@@ -50,6 +51,11 @@ const List = ({
     onDrop();
   };
 
+  const handleDropOnEmptyList = (listId, newItems) => {
+    onReorder(listId, newItems);
+    onDrop();
+  };
+
   if (!list) return <div>Not found</div>;
 
   return (
@@ -68,6 +74,9 @@ const List = ({
           />
         ))}
       </div>
+      {list.items.length === 0 && (
+        <ListPlaceholder list={list} onDrop={handleDropOnEmptyList} />
+      )}
     </DndProvider>
   );
 };

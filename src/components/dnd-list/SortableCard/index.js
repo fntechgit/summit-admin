@@ -105,6 +105,7 @@ const SortableCard = ({
         id={item.id}
         title={item.title}
         level={item.level}
+        meta={item.meta}
         order={item.order}
         sortable={list.sortable}
         isAlternate={isAlternate}

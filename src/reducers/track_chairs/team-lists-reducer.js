@@ -18,12 +18,32 @@ import {
   RECEIVE_TEAM_LIST,
   REORDER_LIST,
   REQUEST_SOURCE_LIST,
-  REQUEST_TEAM_LIST,
   SET_SOURCE_SEL_PLAN,
-  SET_TEAM_SEL_PLAN,
   TEAM_LIST_UPDATED
 } from "../../actions/track-chair-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+
+const getMetaData = (items) =>
+  items.reduce(
+    (results, it) => {
+      switch (it.level) {
+        case "Beginner":
+          results.beginner++;
+          break;
+        case "Intermediate":
+          results.intermediate++;
+          break;
+        case "Advanced":
+          results.advanced++;
+          break;
+        default:
+          results.na++;
+      }
+
+      return results;
+    },
+    { beginner: 0, intermediate: 0, advanced: 0, na: 0 }
+  );
 
 const DEFAULT_STATE = {
   selectionPlans: [],
@@ -31,8 +51,6 @@ const DEFAULT_STATE = {
   sourceTrackId: null,
   sourceSearchTerm: "",
   sourceList: null,
-  teamSelPlanId: null,
-  teamTrackId: null,
   teamList: null,
   sourcePage: 1,
   sourceLastPage: 1
@@ -48,15 +66,19 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_SELECTION_PLANS: {
       const { data } = payload.response;
 
-      return { ...state, selectionPlans: data };
+      const selPlansWithVisibleTracks = data.filter((sp) =>
+        sp.track_groups.some((tg) => tg.tracks.some((t) => t.chair_visible))
+      );
+
+      return { ...state, selectionPlans: selPlansWithVisibleTracks };
     }
     case SET_SOURCE_SEL_PLAN: {
       const { selectionPlanId } = payload;
-      return { ...state, sourceSelPlanId: selectionPlanId };
-    }
-    case SET_TEAM_SEL_PLAN: {
-      const { selectionPlanId } = payload;
-      return { ...state, teamSelPlanId: selectionPlanId };
+      return {
+        ...DEFAULT_STATE,
+        selectionPlans: state.selectionPlans,
+        sourceSelPlanId: selectionPlanId
+      };
     }
     case REQUEST_SOURCE_LIST: {
       const { trackId, searchTerm } = payload;
@@ -73,7 +95,14 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
         id: d.id,
         order: idx,
         title: d.title,
-        level: d.level
+        level: d.level,
+        meta: {
+          selectors_count: d.selectors_count,
+          likers_count: d.likers_count,
+          passers_count: d.passers_count,
+          track_chair_avg_score: d.track_chair_avg_score,
+          comments_count: d.comments_count
+        }
       }));
 
       const items =
@@ -93,10 +122,6 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case REQUEST_TEAM_LIST: {
-      const { trackId } = payload;
-      return { ...state, teamTrackId: trackId };
-    }
     case RECEIVE_TEAM_LIST: {
       const { id, selected_presentations: selections, hash } = payload.response;
       const items = selections
@@ -104,9 +129,18 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
           id: sp.presentation.id,
           order: sp.order,
           title: sp.presentation.title,
-          level: sp.presentation.level
+          level: sp.presentation.level,
+          meta: {
+            selectors_count: sp.presentation.selectors_count,
+            likers_count: sp.presentation.likers_count,
+            passers_count: sp.presentation.passers_count,
+            track_chair_avg_score: sp.presentation.track_chair_avg_score,
+            comments_count: sp.presentation.comments_count
+          }
         }))
         .sort((a, b) => a.order - b.order);
+
+      const meta = getMetaData(items);
 
       return {
         ...state,
@@ -116,7 +150,8 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
           dragOut: false,
           sortable: true,
           hash,
-          items
+          items,
+          meta
         }
       };
     }
@@ -130,9 +165,11 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
     case TEAM_LIST_UPDATED: {
       const list = payload.response;
 
+      const meta = getMetaData(state.teamList.items);
+
       return {
         ...state,
-        teamList: { ...state.teamList, hash: list.hash }
+        teamList: { ...state.teamList, hash: list.hash, meta }
       };
     }
     default:
