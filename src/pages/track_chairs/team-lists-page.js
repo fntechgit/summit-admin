@@ -99,22 +99,17 @@ const TeamListsPage = ({
 
   const handleColumnChange = (fromItem, toItem, toListId) => {
     const lists = [sourceList, teamList];
-    const fromList = lists.find((l) => l.id === fromItem.originalList.id);
+    // const fromList = lists.find((l) => l.id === fromItem.originalList.id);
     const toList = lists.find((l) => l.id === toListId);
-    const newFromItems = fromList.items.filter((it) => it.id !== fromItem.id);
+    // const newFromItems = fromList.items.filter((it) => it.id !== fromItem.id);
 
     // If list already has the item we return with no effect.
-    console.log(
-      "handleColumnChange: ",
-      toList.items.map((it) => it.id),
-      fromItem.id
-    );
     if (toList.items.find((it) => it.id === fromItem.id)) {
       return;
     }
 
-    // Remove from the old list
-    props.reorderList(fromItem.originalList.id, newFromItems);
+    // Remove from the old list TODO: do this only for lists that are not "clonable"
+    // props.reorderList(fromItem.originalList.id, newFromItems);
 
     // Update to list
     const newToItems = [
@@ -184,15 +179,22 @@ const TeamListsPage = ({
               className={styles.sourceListWrapper}
               onScroll={handleScrollEvent}
             >
-              <List
-                list={sourceList}
-                altThreshold={10}
-                limit={10}
-                onCardClick={console.log}
-                onReorder={console.log}
-                onColumnChange={console.log}
-                onDrop={console.log}
-              />
+              {!sourceList?.items?.length && (
+                <div className={styles.emptyTrack}>
+                  No Activities found for this track.
+                </div>
+              )}
+              {sourceList?.items?.length > 0 && (
+                <List
+                  list={sourceList}
+                  altThreshold={10}
+                  limit={10}
+                  onCardClick={console.log}
+                  onReorder={console.log}
+                  onColumnChange={console.log}
+                  onDrop={console.log}
+                />
+              )}
             </div>
           </div>
           <div className={`col-md-6 ${styles.teamWrapper}`}>

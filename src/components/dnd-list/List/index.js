@@ -73,10 +73,10 @@ const List = ({
             onDrop={onDrop}
           />
         ))}
+        {list.items.length === 0 && (
+          <ListPlaceholder list={list} onDrop={handleDropOnEmptyList} />
+        )}
       </div>
-      {list.items.length === 0 && (
-        <ListPlaceholder list={list} onDrop={handleDropOnEmptyList} />
-      )}
     </DndProvider>
   );
 };
