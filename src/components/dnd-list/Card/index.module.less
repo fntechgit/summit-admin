@@ -1,0 +1,115 @@
+.wrapper {
+  position: relative;
+  padding: 5px 8px;
+  margin: 0;
+  border-radius:5px;
+  border: 1px solid #aaa;
+  background-color: white;
+  color: #676a6c;
+  min-height: 95px;
+  display: flex;
+  flex-direction: column;
+  cursor: grab;
+
+  &.sortable {
+    border: 1px dashed #aaa;
+  }
+
+  &.disabled {
+    background-color: lightgray;
+    cursor: not-allowed;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    height: 20px;
+
+    .rank {
+      font-size: 12px;
+      font-weight: bold;
+      background-color: red;
+      color:white;
+      padding: 0 5px;
+      border-top-left-radius: 4px;
+      position: absolute;
+      left: -1px;
+      top: -1px;
+    }
+
+    .actions {
+      font-size: 10px;
+      position: absolute;
+      width: 80px;
+      left: calc(50% - 30px);
+      text-align: center;
+      font-weight: bold;
+      display: flex;
+
+      .actionWrapper {
+        width: 20px;
+      }
+
+      .up {
+        margin-right: 10px;
+        position: relative;
+        top: -2px;
+      }
+
+      .down {
+        margin-left: 10px;
+        position: relative;
+        top: -2px;
+      }
+    }
+
+    .level {
+      font-size: 10px;
+      margin-left: auto;
+    }
+  }
+
+  .title {
+    padding: 0;
+    cursor: pointer;
+    display: inline-block;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+
+    .remove, .reset {
+      align-self: end;
+
+      .trash, .refresh {
+        color: #676a6c;
+
+        &:hover {
+          color: red;
+        }
+      }
+
+      .confirm {
+        font-size: 12px;
+
+        span {
+          margin: 0 10px;
+        }
+
+        .yes {
+          color: green;
+        }
+
+        .no {
+          color: red;
+        }
+      }
+    }
+  }
+}

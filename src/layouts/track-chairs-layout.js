@@ -22,68 +22,68 @@ import TrackChairListPage from "../pages/track_chairs/track-chair-list-page";
 import ProgressFlagsPage from "../pages/track_chairs/progress-flags-page";
 import TrackTimeframeListPage from "../pages/track_chairs/track-timeframe-list-page";
 import TrackTimeframePage from "../pages/track_chairs/track-timeframe-page";
-import EditEventMaterialPage from "../pages/events/edit-event-material-page";
-import EditEventCommentPage from "../pages/events/edit-event-comment-page";
+import TeamListsPage from "../pages/track_chairs/team-lists-page";
 
-class TrackChairsLayout extends React.Component {
-  render() {
-    const { match } = this.props;
-    return (
-      <div>
-        <Breadcrumb
-          data={{
-            title: T.translate("track_chairs.track_chairs"),
-            pathname: match.url
-          }}
+const TrackChairsLayout = ({match}) => (
+    <div>
+      <Breadcrumb
+        data={{
+          title: T.translate("track_chairs.track_chairs"),
+          pathname: match.url
+        }}
+      />
+
+      <Switch>
+        <Route strict exact path={match.url} component={TrackChairListPage} />
+        <Route
+          strict
+          exact
+          path={`${match.url}/progress-flags`}
+          component={ProgressFlagsPage}
         />
-
-        <Switch>
-          <Route strict exact path={match.url} component={TrackChairListPage} />
-          <Route
-            strict
-            exact
-            path={`${match.url}/progress-flags`}
-            component={ProgressFlagsPage}
-          />
-          <Route
-            path={`${match.url}/track-timeframes`}
-            render={(props) => (
-              <div>
-                <Breadcrumb
-                  data={{
-                    title: T.translate("track_timeframes.track_timeframes"),
-                    pathname: props.match.url
-                  }}
+        <Route
+          strict
+          exact
+          path={`${match.url}/team-lists`}
+          component={TeamListsPage}
+        />
+        <Route
+          path={`${match.url}/track-timeframes`}
+          render={(props) => (
+            <div>
+              <Breadcrumb
+                data={{
+                  title: T.translate("track_timeframes.track_timeframes"),
+                  pathname: props.match.url
+                }}
+              />
+              <Switch>
+                <Route
+                  strict
+                  exact
+                  path={props.match.url}
+                  component={TrackTimeframeListPage}
                 />
-                <Switch>
-                  <Route
-                    strict
-                    exact
-                    path={props.match.url}
-                    component={TrackTimeframeListPage}
-                  />
-                  <Route
-                    strict
-                    exact
-                    path={`${props.match.url}/:track_id(\\d+)`}
-                    component={TrackTimeframePage}
-                  />
-                  <Route
-                    strict
-                    exact
-                    path={`${props.match.url}/new`}
-                    component={TrackTimeframePage}
-                  />
-                  <Route component={NoMatchPage} />
-                </Switch>
-              </div>
-            )}
-          />
-          <Route component={NoMatchPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
+                <Route
+                  strict
+                  exact
+                  path={`${props.match.url}/:track_id(\\d+)`}
+                  component={TrackTimeframePage}
+                />
+                <Route
+                  strict
+                  exact
+                  path={`${props.match.url}/new`}
+                  component={TrackTimeframePage}
+                />
+                <Route component={NoMatchPage} />
+              </Switch>
+            </div>
+          )}
+        />
+        <Route component={NoMatchPage} />
+      </Switch>
+    </div>
+  )
 
 export default Restrict(withRouter(TrackChairsLayout), "track-chairs");

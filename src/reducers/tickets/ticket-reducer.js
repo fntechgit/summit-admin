@@ -30,10 +30,7 @@ import {
   FEATURE_BADGE_ADDED,
   FEATURE_BADGE_REMOVED
 } from "../../actions/badge-actions";
-import {
-  RECEIVE_SUMMIT,
-  SET_CURRENT_SUMMIT
-} from "../../actions/summit-actions";
+import { RECEIVE_SUMMIT } from "../../actions/summit-actions";
 import { DECIMAL_DIGITS } from "../../utils/constants";
 
 export const DEFAULT_ENTITY = {
@@ -72,8 +69,7 @@ const DEFAULT_STATE = {
 const ticketReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
-    case RECEIVE_SUMMIT:
-    case SET_CURRENT_SUMMIT: {
+    case RECEIVE_SUMMIT: {
       const summit = payload.response;
       return { ...state, summitTZ: summit.time_zone_id };
     }

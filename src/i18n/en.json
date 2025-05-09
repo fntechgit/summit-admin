@@ -153,6 +153,7 @@
     "track_chairs": "Track Chairs",
     "track_chair_list": "Track Chair List",
     "track_timeframes": "Track Timeframes",
+    "track_chair_team_lists": "Team Lists",
     "progress_flags": "Progress Flags",
     "sponsored_projects": "Sponsored Projects",
     "settings": "Settings",
@@ -3042,6 +3043,14 @@
     "no_items": "No Track Timeframes found.",
     "remove_warning": "Are you sure you want to remove the timeframes for ",
     "timeframe_created": "Track timeframe created successfully."
+  },
+  "track_team_lists": {
+    "team_lists": "Team Lists",
+    "placeholders": {
+      "select_selection_plan": "Select a selection plan",
+      "select_track": "Select a track",
+      "search_activities": "Search activities by id, title, abstract or speaker"
+    }
   },
   "promo_code_specification": {
     "select_promo_code_type": "-- SELECT PROMO CODE TYPE --",
