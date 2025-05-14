@@ -65,6 +65,7 @@ const TeamListsPage = ({
     ) || [];
 
   const track = sourceTrackOptions.find((t) => t.id === sourceTrackId);
+  const trackAltThreshold = track?.session_count || 0;
   const trackLimit = track ? track.session_count + track.alternate_count : 0;
   const teamListLength = teamList?.items?.length || 0;
 
@@ -222,8 +223,8 @@ const TeamListsPage = ({
             <List
               list={teamList}
               sortable
-              altThreshold={7}
-              limit={10}
+              altThreshold={trackAltThreshold}
+              limit={trackLimit}
               onCardClick={console.log}
               onReorder={props.reorderList}
               onColumnChange={handleColumnChange}

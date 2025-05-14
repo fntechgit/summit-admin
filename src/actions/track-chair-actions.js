@@ -27,7 +27,11 @@ import {
   fetchResponseHandler,
   getAccessTokenSafely
 } from "../utils/methods";
-import { DEFAULT_ORDER_DIR, DEFAULT_PER_PAGE } from "../utils/constants";
+import {
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE,
+  DOUBLE_PER_PAGE
+} from "../utils/constants";
 
 export const REQUEST_TRACK_CHAIRS = "REQUEST_TRACK_CHAIRS";
 export const RECEIVE_TRACK_CHAIRS = "RECEIVE_TRACK_CHAIRS";
@@ -449,7 +453,7 @@ export const getSourceList =
 
     const params = {
       page,
-      per_page: DEFAULT_PER_PAGE,
+      per_page: DOUBLE_PER_PAGE,
       access_token: accessToken,
       "filter[]": filter,
       fields:

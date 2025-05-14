@@ -70,6 +70,7 @@ export const DUMMY_ACTION = "DUMMY_ACTION";
 
 export const DEFAULT_CURRENT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;
+export const DOUBLE_PER_PAGE = 20;
 export const DEFAULT_100_PER_PAGE = 100;
 
 export const TWENTY_PER_PAGE = 20;
