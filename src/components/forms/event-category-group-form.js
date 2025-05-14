@@ -120,6 +120,7 @@ class EventCategoryGroupForm extends React.Component {
   render() {
     const { entity, errors } = this.state;
     const { currentSummit, allClasses } = this.props;
+    const selectedTrackIds = entity?.tracks?.map((t) => t.id) || [];
 
     const tracksColumns = [
       { columnKey: "name", value: T.translate("edit_event_category.name") },
@@ -132,7 +133,7 @@ class EventCategoryGroupForm extends React.Component {
       labelKey: "name",
       actions: {
         search: (input, callback) => {
-          queryTracks(currentSummit.id, input, callback);
+          queryTracks(currentSummit.id, input, callback, selectedTrackIds);
         },
         delete: { onClick: this.handleTrackUnLink },
         add: { onClick: this.handleTrackLink }
