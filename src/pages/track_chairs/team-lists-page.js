@@ -75,8 +75,15 @@ const TeamListsPage = ({
     }
   }, [selectionPlans]);
 
+  // when team list changes we update source list to filter out selected presentations
+  useEffect(() => {
+    console.log("EFFFECT: ", sourceSelPlanId, sourceTrackId);
+    if (sourceSelPlanId && sourceTrackId) {
+      props.getSourceList(sourceSelPlanId, sourceTrackId, sourceSearchTerm);
+    }
+  }, [teamList?.hash]);
+
   const handleTrackChange = (trackId) => {
-    props.getSourceList(sourceSelPlanId, trackId, sourceSearchTerm);
     props.getTeamList(sourceSelPlanId, trackId);
   };
 

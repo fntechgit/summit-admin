@@ -18,6 +18,7 @@ import {
   RECEIVE_TEAM_LIST,
   REORDER_LIST,
   REQUEST_SOURCE_LIST,
+  REQUEST_TEAM_LIST,
   SET_SOURCE_SEL_PLAN,
   TEAM_LIST_UPDATED
 } from "../../actions/track-chair-actions";
@@ -121,6 +122,10 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
           items
         }
       };
+    }
+    case REQUEST_TEAM_LIST: {
+      const { trackId } = payload;
+      return { ...state, sourceTrackId: trackId };
     }
     case RECEIVE_TEAM_LIST: {
       const { id, selected_presentations: selections, hash } = payload.response;

@@ -49,6 +49,7 @@ export const RECEIVE_SELECTION_PLANS = "RECEIVE_SELECTION_PLANS";
 export const SET_SOURCE_SEL_PLAN = "SET_SOURCE_SEL_PLAN";
 export const REQUEST_SOURCE_LIST = "REQUEST_SOURCE_LIST";
 export const RECEIVE_SOURCE_LIST = "RECEIVE_SOURCE_LIST";
+export const REQUEST_TEAM_LIST = "REQUEST_TEAM_LIST";
 export const RECEIVE_TEAM_LIST = "RECEIVE_TEAM_LIST";
 export const REORDER_LIST = "REORDER_LIST";
 export const TEAM_LIST_UPDATED = "TEAM_LIST_UPDATED";
@@ -426,15 +427,21 @@ export const setSelectionPlan = (selectionPlanId) => (dispatch) => {
 export const getSourceList =
   (selectionPlanId, trackId, searchTerm = "", page = 1) =>
   async (dispatch, getState) => {
-    const { currentSummitState } = getState();
+    const { currentSummitState, teamListsState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
+    const { teamList } = teamListsState;
     const filter = [
       `selection_plan_id==${selectionPlanId}`,
       `track_id==${trackId}`,
       "status==Received",
       "progress==5"
     ];
+
+    if (teamList?.items?.length > 0) {
+      const excludedIds = teamList.items.map((it) => it.id);
+      filter.push(`not_id==${excludedIds.join("||")}`);
+    }
 
     dispatch(startLoading());
 
@@ -490,7 +497,7 @@ export const getTeamList =
     };
 
     return getRequest(
-      null,
+      createAction(REQUEST_TEAM_LIST),
       createAction(RECEIVE_TEAM_LIST),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/tracks/${trackId}/selection-lists/team`,
       authErrorHandler,
