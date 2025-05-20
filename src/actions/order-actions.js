@@ -846,7 +846,9 @@ export const saveOrderExtraQuestionsSubQuestionsRule =
     dispatch(startLoading());
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "sub_question",
+      fields: "sub_question.name"
     };
 
     const normalizedEntity = normalizeSubRule(entity);
