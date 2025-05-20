@@ -149,9 +149,9 @@ export const DEFAULT_ENTITY = {
   badge_types: null,
   badge_features: null,
   badge_view_types: null,
-  order_extra_questions: null,
-  order_only_extra_questions: null,
-  attendee_extra_questions: null,
+  order_extra_questions: [],
+  order_only_extra_questions: [],
+  attendee_extra_questions: [],
   attendee_main_extra_questions: null,
   begin_allow_booking_date: 0,
   end_allow_booking_date: 0,
@@ -648,6 +648,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         currentSummit: {
           ...state.currentSummit,
+          order_extra_questions: allExtraQuestions,
           order_only_extra_questions,
           attendee_extra_questions
         }
