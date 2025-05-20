@@ -68,8 +68,7 @@ import {
 } from "../../actions/ticket-actions";
 import {
   RECEIVE_ORDER_EXTRA_QUESTIONS,
-  RECEIVE_MAIN_ORDER_EXTRA_QUESTIONS,
-  ORDER_EXTRA_QUESTION_ADDED
+  RECEIVE_MAIN_ORDER_EXTRA_QUESTIONS
 } from "../../actions/order-actions";
 import {
   RECEIVE_PRINT_APP_SETTINGS,
@@ -149,7 +148,6 @@ export const DEFAULT_ENTITY = {
   badge_types: null,
   badge_features: null,
   badge_view_types: null,
-  order_extra_questions: [],
   order_only_extra_questions: [],
   attendee_extra_questions: [],
   attendee_main_extra_questions: null,
@@ -648,7 +646,6 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         currentSummit: {
           ...state.currentSummit,
-          order_extra_questions: allExtraQuestions,
           order_only_extra_questions,
           attendee_extra_questions
         }
@@ -671,19 +668,6 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
         currentSummit: {
           ...state.currentSummit,
           attendee_main_extra_questions: mainExtraQuestions
-        }
-      };
-    }
-    case ORDER_EXTRA_QUESTION_ADDED: {
-      const extraQuestion = payload.response;
-      return {
-        ...state,
-        currentSummit: {
-          ...state.currentSummit,
-          order_extra_questions: [
-            ...state.currentSummit.order_extra_questions,
-            extraQuestion
-          ]
         }
       };
     }
