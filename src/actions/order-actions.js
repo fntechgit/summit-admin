@@ -848,7 +848,8 @@ export const saveOrderExtraQuestionsSubQuestionsRule =
     const params = {
       access_token: accessToken,
       expand: "sub_question",
-      fields: "sub_question.name"
+      fields: "sub_question.name",
+      relations: "sub_question.none"
     };
 
     const normalizedEntity = normalizeSubRule(entity);
