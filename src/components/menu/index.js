@@ -196,6 +196,11 @@ const getSummitItems = (summitId) => [
         name: "track_timeframes",
         linkUrl: `summits/${summitId}/track-chairs/track-timeframes`,
         accessRoute: "track-timeframes"
+      },
+      {
+        name: "track_chair_team_lists",
+        linkUrl: `summits/${summitId}/track-chairs/team-lists`,
+        accessRoute: "team-lists"
       }
     ]
   },
