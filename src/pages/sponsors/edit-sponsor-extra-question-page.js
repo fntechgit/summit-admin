@@ -100,6 +100,8 @@ function EditSponsorExtraQuestionPage({
           onSubmit={props.saveSponsorExtraQuestion}
           updateQuestionValueOrder={props.updateSponsorExtraQuestionValueOrder}
           shouldHideMandatory
+          shouldHideAllowedTicketTypes
+          shouldHideAllowedFeatures
         />
       )}
     </div>

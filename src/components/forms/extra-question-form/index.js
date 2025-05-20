@@ -199,7 +199,9 @@ class ExtraQuestionForm extends React.Component {
       questionClasses,
       updateSubQuestionRuleOrder,
       updateQuestionValueOrder,
-      shouldHideMandatory = false
+      shouldHideMandatory = false,
+      shouldHideAllowedTicketTypes = false,
+      shouldHideAllowedFeatures = false
     } = this.props;
 
     const question_class_ddl = questionClasses.map((c) => ({
@@ -409,25 +411,29 @@ class ExtraQuestionForm extends React.Component {
             )}
           </div>
           <div className="row form-group">
-            <div className="col-md-4">
-              <label>
-                {T.translate("question_form.allowed_ticket_types")} &nbsp;
-                <i
-                  className="fa fa-info-circle"
-                  title={T.translate("question_form.allowed_ticket_types_info")}
+            {!shouldHideAllowedTicketTypes && (
+              <div className="col-md-4">
+                <label>
+                  {T.translate("question_form.allowed_ticket_types")} &nbsp;
+                  <i
+                    className="fa fa-info-circle"
+                    title={T.translate(
+                      "question_form.allowed_ticket_types_info"
+                    )}
+                  />
+                </label>
+                <TicketTypesInput
+                  id="allowed_ticket_types"
+                  value={entity?.allowed_ticket_types}
+                  summitId={currentSummit.id}
+                  onChange={this.handleChange}
+                  optionsLimit={100}
+                  defaultOptions
+                  isMulti
                 />
-              </label>
-              <TicketTypesInput
-                id="allowed_ticket_types"
-                value={entity?.allowed_ticket_types}
-                summitId={currentSummit.id}
-                onChange={this.handleChange}
-                optionsLimit={100}
-                defaultOptions
-                isMulti
-              />
-            </div>
-            {badge_features_ddl.length >= 0 && (
+              </div>
+            )}
+            {!shouldHideAllowedFeatures && badge_features_ddl.length >= 0 && (
               <>
                 <div className="col-md-2 col-md-offset-1">
                   <label>Or</label>

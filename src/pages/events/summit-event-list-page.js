@@ -231,7 +231,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
   {
     columnKey: "status",
     value: "submission_status",
-    sortable: false,
+    sortable: true,
     title: true
   },
   {

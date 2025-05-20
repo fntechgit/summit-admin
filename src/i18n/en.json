@@ -3096,7 +3096,7 @@
     "placeholders": {
       "has_media_upload_with_type==": "Select the Media Upload Types to include",
       "has_not_media_upload_with_type==": "Select the Media Upload Types to exclude",
-      "operator": "Has or Not Has Media Upload Types"
+      "operator": "'Has' or 'Has Not' Media Upload Types"
     }
   },
   "edit_reg_feed_metadata": {

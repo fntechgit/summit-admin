@@ -30,8 +30,8 @@ import _ from "lodash";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,
-  DEFAULT_PER_PAGE,
-  ERROR_CODE_412
+  ERROR_CODE_412,
+  FIFTEEN_PER_PAGE
 } from "../utils/constants";
 
 export const FILTER_CRITERIA_ADDED = "FILTER_CRITERIA_ADDED";
@@ -120,7 +120,7 @@ export const queryFilterCriterias = _.debounce(
     apiUrl.addQuery("access_token", accessToken);
     apiUrl.addQuery("order", "+name");
     apiUrl.addQuery("order", "+id");
-    apiUrl.addQuery("per_page", DEFAULT_PER_PAGE);
+    apiUrl.addQuery("per_page", FIFTEEN_PER_PAGE);
     apiUrl.addQuery("show_id", `${summitId}`);
     apiUrl.addQuery("context", `${context}`);
 
