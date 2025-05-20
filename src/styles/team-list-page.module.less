@@ -1,0 +1,58 @@
+.wrapper {
+  display: flex;
+
+  .sourceWrapper {
+    display: flex;
+    flex-direction: column;
+
+    .filtersWrapper {
+      .filter {
+        margin-bottom: 10px;
+      }
+    }
+
+    .sourceListWrapper {
+      background-color: #e7e5e5;
+      flex-basis: 0;
+      flex-grow: 1;
+      overflow-y: auto;
+
+      .emptyTrack {
+        margin-top: 20px;
+        text-align: center;
+      }
+    }
+  }
+
+  .teamWrapper {
+    border: 1px solid black;
+    min-height: 800px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    .teamListHeader {
+      background-color: #e7e5e5;
+      padding: 10px;
+      margin: 0 -14px 38px;
+      height: 100px;
+
+      .title {
+        font-size: 20px;
+      }
+
+      .meta {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        .metaItem {
+        }
+      }
+    }
+
+    .teamListWrapper {
+      flex-grow: 1;
+    }
+  }
+}

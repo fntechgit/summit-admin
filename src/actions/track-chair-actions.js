@@ -11,23 +11,27 @@
  * limitations under the License.
  * */
 import {
-  getRequest,
+  authErrorHandler,
+  createAction,
   deleteRequest,
+  escapeFilterValue,
+  getCSV,
+  getRequest,
   postRequest,
   putRequest,
-  createAction,
-  stopLoading,
   startLoading,
-  authErrorHandler,
-  escapeFilterValue,
-  getCSV
+  stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import {
-  getAccessTokenSafely,
+  fetchErrorHandler,
   fetchResponseHandler,
-  fetchErrorHandler
+  getAccessTokenSafely
 } from "../utils/methods";
-import { DEFAULT_ORDER_DIR, DEFAULT_PER_PAGE } from "../utils/constants";
+import {
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE,
+  DOUBLE_PER_PAGE
+} from "../utils/constants";
 
 export const REQUEST_TRACK_CHAIRS = "REQUEST_TRACK_CHAIRS";
 export const RECEIVE_TRACK_CHAIRS = "RECEIVE_TRACK_CHAIRS";
@@ -40,6 +44,15 @@ export const PROGRESS_FLAG_UPDATED = "PROGRESS_FLAG_UPDATED";
 export const PROGRESS_FLAG_ADDED = "PROGRESS_FLAG_ADDED";
 export const PROGRESS_FLAG_DELETED = "PROGRESS_FLAG_DELETED";
 export const PROGRESS_FLAG_REORDERED = "PROGRESS_FLAG_REORDERED";
+
+export const RECEIVE_SELECTION_PLANS = "RECEIVE_SELECTION_PLANS";
+export const SET_SOURCE_SEL_PLAN = "SET_SOURCE_SEL_PLAN";
+export const REQUEST_SOURCE_LIST = "REQUEST_SOURCE_LIST";
+export const RECEIVE_SOURCE_LIST = "RECEIVE_SOURCE_LIST";
+export const REQUEST_TEAM_LIST = "REQUEST_TEAM_LIST";
+export const RECEIVE_TEAM_LIST = "RECEIVE_TEAM_LIST";
+export const REORDER_LIST = "REORDER_LIST";
+export const TEAM_LIST_UPDATED = "TEAM_LIST_UPDATED";
 
 const callDelay = 500; // miliseconds
 
@@ -375,3 +388,150 @@ export const reorderProgressFlags =
       dispatch(stopLoading());
     });
   };
+
+/** ********************************************************************************************************* */
+/*                          TEAM LISTS                                                                        */
+/** ********************************************************************************************************* */
+
+export const getSelectionPlans = () => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
+
+  const params = {
+    page: 1,
+    per_page: 100,
+    access_token: accessToken,
+    fields:
+      "id,name,track_groups.id,track_groups.name,track_groups.tracks.id,track_groups.tracks.name,track_groups.tracks.color,track_groups.tracks.chair_visible,track_groups.tracks.session_count,track_groups.tracks.alternate_count",
+    relations: "track_groups,track_groups.tracks,track_groups.tracks.none",
+    expand: "track_groups,track_groups.tracks"
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SELECTION_PLANS),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const setSelectionPlan = (selectionPlanId) => (dispatch) => {
+  dispatch(createAction(SET_SOURCE_SEL_PLAN)({ selectionPlanId }));
+};
+
+export const getSourceList =
+  (selectionPlanId, trackId, searchTerm = "", page = 1) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, teamListsState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const { teamList } = teamListsState;
+    const filter = [
+      `selection_plan_id==${selectionPlanId}`,
+      `track_id==${trackId}`,
+      "status==Received",
+      "progress==5"
+    ];
+
+    if (teamList?.items?.length > 0) {
+      const excludedIds = teamList.items.map((it) => it.id);
+      filter.push(`not_id==${excludedIds.join("||")}`);
+    }
+
+    dispatch(startLoading());
+
+    if (searchTerm) {
+      const escapedTerm = escapeFilterValue(searchTerm);
+      if (Number.isInteger(parseInt(escapedTerm, 10))) {
+        filter.push(
+          `id==${escapedTerm},title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm}`
+        );
+      } else {
+        filter.push(
+          `title=@${escapedTerm},abstract=@${escapedTerm},speaker=@${escapedTerm}`
+        );
+      }
+    }
+
+    const params = {
+      page,
+      per_page: DOUBLE_PER_PAGE,
+      access_token: accessToken,
+      "filter[]": filter,
+      fields:
+        "id,title,likers_count,selectors_count,passers_count,track_chair_avg_score,comments_count",
+      relations: "none"
+    };
+
+    return getRequest(
+      createAction(REQUEST_SOURCE_LIST),
+      createAction(RECEIVE_SOURCE_LIST),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events`,
+      authErrorHandler,
+      { trackId, searchTerm }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const getTeamList =
+  (selectionPlanId, trackId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken,
+      expand: "selected_presentations,selected_presentations.presentation",
+      fields:
+        "id,hash,selected_presentations.order,selected_presentations.presentation.id,selected_presentations.presentation.title,selected_presentations.presentation.level,selected_presentations.presentation.selectors_count,selected_presentations.presentation.likers_count,selected_presentations.presentation.passers_count,selected_presentations.presentation.comments_count,selected_presentations.presentation.track_chair_avg_score",
+      relations:
+        "selected_presentations.presentation,selected_presentations.presentation.none"
+    };
+
+    return getRequest(
+      createAction(REQUEST_TEAM_LIST),
+      createAction(RECEIVE_TEAM_LIST),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/tracks/${trackId}/selection-lists/team`,
+      authErrorHandler,
+      { trackId }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const reorderList = (listId, items) => (dispatch) => {
+  dispatch(createAction(REORDER_LIST)({ listId, items }));
+};
+
+export const updateTeamList = () => async (dispatch, getState) => {
+  const { currentSummitState, teamListsState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const { sourceSelPlanId, sourceTrackId, teamList } = teamListsState;
+  const ids = teamList.items.map((it) => it.id);
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken,
+    expand: "member,categories"
+  };
+
+  putRequest(
+    null,
+    createAction(TEAM_LIST_UPDATED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${sourceSelPlanId}/tracks/${sourceTrackId}/selection-lists/${teamList.id}/reorder`,
+    { hash: teamList.hash, collection: "selected", presentations: ids },
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};

@@ -227,7 +227,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case SET_CURRENT_SUMMIT: {
-      return { ...state, currentSummit: payload.response };
+      return state;
     }
     case LOGOUT_USER: {
       return DEFAULT_STATE;

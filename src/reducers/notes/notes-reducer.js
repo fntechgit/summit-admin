@@ -9,9 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import moment from "moment-timezone";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+
 import {
   CLEAR_NOTES_PARAMS,
   REQUEST_NOTES,
@@ -19,13 +21,11 @@ import {
   NOTE_ADDED,
   NOTE_DELETED
 } from "../../actions/notes-actions";
-
 import {
   RECEIVE_SUMMIT,
   SET_CURRENT_SUMMIT
 } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { parseSpeakerAuditLog } from "../../utils/methods";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   summitId: null,
@@ -41,10 +41,12 @@ const DEFAULT_STATE = {
 const notesReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
-    case RECEIVE_SUMMIT:
     case SET_CURRENT_SUMMIT: {
+      return DEFAULT_STATE;
+    }
+    case RECEIVE_SUMMIT: {
       const summitId = payload.response.id;
-      return { ...DEFAULT_STATE, summitId };
+      return { ...state, summitId };
     }
     case CLEAR_NOTES_PARAMS:
     case LOGOUT_USER: {
@@ -83,17 +85,17 @@ const notesReducer = (state = DEFAULT_STATE, action) => {
   }
 };
 
-const formatNote = (note, summitId) => {
-  return {
-    ...note,
-    author_fullname: `${note.author?.first_name} ${note.author?.last_name}`,
-    author_email: note.author?.email,
-    created: moment(note.created * 1000).format("MMMM Do YYYY, h:mm a"),
-    ticket_link: note.ticket
-      ? `<a href="/app/summits/${summitId}/purchase-orders/${note.ticket.order_id}/tickets/${note.ticket.id}">${note.ticket.id}</a>`
-      : "-",
-    ticket_id: note.ticket?.id
-  };
-};
+const formatNote = (note, summitId) => ({
+  ...note,
+  author_fullname: `${note.author?.first_name} ${note.author?.last_name}`,
+  author_email: note.author?.email,
+  created: moment(note.created * MILLISECONDS_IN_SECOND).format(
+    "MMMM Do YYYY, h:mm a"
+  ),
+  ticket_link: note.ticket
+    ? `<a href="/app/summits/${summitId}/purchase-orders/${note.ticket.order_id}/tickets/${note.ticket.id}">${note.ticket.id}</a>`
+    : "-",
+  ticket_id: note.ticket?.id
+});
 
 export default notesReducer;

@@ -51,8 +51,12 @@ export const RECEIVE_LEAD_REPORT_SETTINGS_META =
   "RECEIVE_LEAD_REPORT_SETTINGS_META";
 export const LEAD_REPORT_SETTINGS_UPDATED = "LEAD_REPORT_SETTINGS_UPDATED";
 
-export const getSummitById = (summitId) => async (dispatch) => {
+export const getSummitById = (summitId) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
+  const {
+    currentSummitState: { currentSummit }
+  } = getState();
+
   dispatch(startLoading());
 
   const params = {
@@ -78,6 +82,12 @@ export const getSummitById = (summitId) => async (dispatch) => {
       "badge_view_types," +
       "tax_types"
   };
+
+  // reset reducers if summit changed
+  if (currentSummit?.id !== summitId) {
+    // TODO: change this action name to something more meaningful like SUMMIT_CHANGED
+    dispatch(createAction(SET_CURRENT_SUMMIT)({}));
+  }
 
   // set id
   dispatch(createAction(REQUEST_SUMMIT)({ id: summitId }));

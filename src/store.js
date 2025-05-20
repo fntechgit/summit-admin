@@ -113,6 +113,7 @@ import tagListReducer from "./reducers/tags/tag-list-reducer";
 import tagReducer from "./reducers/tags/tag-reducer";
 import featuredSpeakersReducer from "./reducers/summit_speakers/featured-speakers-reducer";
 import trackChairListReducer from "./reducers/track_chairs/track-chair-list-reducer";
+import teamListsReducer from "./reducers/track_chairs/team-lists-reducer";
 import progressFlagsReducer from "./reducers/track_chairs/progress-flags-reducer";
 import sponsoredProjectListReducer from "./reducers/sponsored_projects/sponsored-project-list-reducer";
 import sponsoredProjectReducer from "./reducers/sponsored_projects/sponsored-project-reducer";
@@ -270,6 +271,7 @@ const reducers = persistCombineReducers(config, {
   currentTagState: tagReducer,
   featuredSpeakersState: featuredSpeakersReducer,
   trackChairListState: trackChairListReducer,
+  teamListsState: teamListsReducer,
   progressFlagsState: progressFlagsReducer,
   sponsoredProjectListState: sponsoredProjectListReducer,
   sponsoredProjectState: sponsoredProjectReducer,

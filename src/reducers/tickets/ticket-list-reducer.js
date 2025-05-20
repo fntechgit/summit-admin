@@ -22,10 +22,7 @@ import {
   SET_SELECTED_ALL_TICKETS,
   UNSELECT_TICKET
 } from "../../actions/ticket-actions";
-import {
-  RECEIVE_SUMMIT,
-  SET_CURRENT_SUMMIT
-} from "../../actions/summit-actions";
+import { RECEIVE_SUMMIT } from "../../actions/summit-actions";
 import { DECIMAL_DIGITS, SLICE_TICKET_NUMBER } from "../../utils/constants";
 
 const DEFAULT_STATE = {
@@ -50,8 +47,7 @@ const DEFAULT_STATE = {
 const ticketListReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
-    case RECEIVE_SUMMIT:
-    case SET_CURRENT_SUMMIT: {
+    case RECEIVE_SUMMIT: {
       const summit = payload.response;
       return { ...DEFAULT_STATE, summitTZ: summit.time_zone_id };
     }
