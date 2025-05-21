@@ -3228,8 +3228,11 @@
     "name_column_label": "Name",
     "items_column_label": "Items",
     "manage_items": "Manage Items",
+    "hide_archived": "Hide archived forms",
     "delete_form_template_warning": "Are you sure you want to delete form template ",
-    "add_form_template": "New From Template",
+    "using_duplicate": "Using Duplicate",
+    "add_form_template": "New Form",
+    "add_using_global_template": "Using Global Template",
     "placeholders": {
       "search_inventory_items": "Search"
     }
@@ -3245,6 +3248,12 @@
     "meta_fields": "Additional Input Fields",
     "meta_field_values": "Field Values",
     "materials": "Materials",
+    "save_changes": "Save Changes",
+    "add_form": "Add Form",
+    "required_error": "This field is required.",
+    "meta_field_title": "Field Title",
+    "meta_field_required": "Required Field",
+    "meta_field_type": "Field Type",
     "placeholders": {
       "meta_field_title": "Field Title",
       "meta_field_required": "Required Field",
@@ -3254,11 +3263,26 @@
       "meta_field_maximum_quantity": "Maximum Quantity"
     }
   },
+  "form_template_from_duplicate_dialog": {
+    "duplicate_form": "Duplicate Form",
+    "filter": "Filter",
+    "sort_by": "Sort By",
+    "code": "Code",
+    "name": "Name",
+    "items": "Items",
+    "duplicate_selected": "Duplicate Selected Form",
+    "placeholders": {
+      "search": "Search..."
+    }
+  },
   "form_template_item_list": {
     "form_template_items": "Form Template Items",
     "alert_info": "You can clone, create or archive items from the list. To edit an item click on it.",
     "code_column_label": "Code",
     "name_column_label": "Name",
+    "hide_archived": "Hide archived items",
+    "add_item": "Add Item",
+    "archive_button": "Archive",
     "delete_form_template_item_warning": "Are you sure you want to delete form template item ",
     "add_inventory_item": "Add Inventory Item",
     "add_form_template_item": "Create new Item",
@@ -3270,8 +3294,15 @@
     "title": "Select Items",
     "add_selected": "Add Selected Items",
     "selected_items_qty": "Selected {qty} Items",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
+    "early_bid_rate_column_label": "Early Bird Rate",
+    "standard_rate_column_label": "Standard Rate",
+    "onsite_rate_column_label": "Onsite Rate",
+    "quantity_column_label": "Quantity",
+    "select_items": "Select items",
     "placeholders": {
-      "search_inventory_items": "Search"
+      "search_inventory_items": "Search..."
     }
   },
   "edit_form_template_item": {

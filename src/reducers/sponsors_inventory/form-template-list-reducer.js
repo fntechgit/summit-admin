@@ -16,7 +16,9 @@ import {
   REQUEST_FORM_TEMPLATES,
   RECEIVE_FORM_TEMPLATES,
   FORM_TEMPLATE_DELETED,
-  CHANGE_FORM_TEMPLATE_SEARCH_TERM
+  CHANGE_FORM_TEMPLATE_SEARCH_TERM,
+  FORM_TEMPLATE_ARCHIVED,
+  FORM_TEMPLATE_UNARCHIVED
 } from "../../actions/form-template-actions";
 
 const DEFAULT_STATE = {
@@ -73,7 +75,8 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
         name: a.name,
         items_qty: `${a.items.length} ${
           a.items.length === 1 ? "Item" : "Items"
-        }`
+        }`,
+        is_archived: a.is_archived
       }));
 
       return {
@@ -92,6 +95,26 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
           (a) => a.id !== formTemplateId
         )
       };
+    }
+    case FORM_TEMPLATE_ARCHIVED: {
+      const updatedFormTemplate = payload.response;
+
+      const updatedFormTemplates = state.formTemplates.map((item) =>
+        item.id === updatedFormTemplate.id
+          ? { ...item, is_archived: true }
+          : item
+      );
+      return { ...state, formTemplates: updatedFormTemplates };
+    }
+    case FORM_TEMPLATE_UNARCHIVED: {
+      const updatedFormTemplateId = payload;
+
+      const updatedFormTemplates = state.formTemplates.map((item) =>
+        item.id === updatedFormTemplateId
+          ? { ...item, is_archived: false }
+          : item
+      );
+      return { ...state, formTemplates: updatedFormTemplates };
     }
     case CHANGE_FORM_TEMPLATE_SEARCH_TERM: {
       const { term } = payload;

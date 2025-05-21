@@ -84,6 +84,9 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
         name: a.name,
         images: a.images,
         is_archived: a.is_archived,
+        early_bird_rate: a.early_bird_rate,
+        standard_rate: a.standard_rate,
+        onsite_rate: a.onsite_rate,
         checked: false
       }));
 
@@ -155,7 +158,7 @@ const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {
       } else {
         newState = {
           ...state,
-          selectedIds: inventoryItems.filter((it) => it !== itemId),
+          selectedIds: state.selectedIds.filter((it) => it !== itemId),
           excludedIds: []
         };
       }
