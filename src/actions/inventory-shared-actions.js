@@ -273,9 +273,47 @@ export const deleteFile =
     return deleteRequest(
       null,
       createAction(settings.deletedActionName)({ fileId }),
-      `${settings.url}${fileId}/`,
+      `${settings.url}/${fileId}`,
       null,
       authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+/* ************************************  ARCHIVE  ************************************ */
+
+export const archiveItem =
+  (item, settings = null) =>
+  async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    return putRequest(
+      null,
+      createAction(settings.updatedActionName),
+      `${settings.url}`,
+      item,
+      authErrorHandler,
+      item
+    )(params)(dispatch);
+  };
+
+export const unarchiveItem =
+  (item, settings = null) =>
+  async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(settings.deletedActionName)(item.id),
+      `${settings.url}`,
+      null,
+      authErrorHandler,
+      item
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

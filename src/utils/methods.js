@@ -13,7 +13,6 @@
 
 import moment from "moment-timezone";
 import {
-  findElementPos,
   epochToMomentTimeZone
 } from "openstack-uicore-foundation/lib/utils/methods";
 import {
@@ -84,7 +83,8 @@ export const scrollToError = (errors) => {
   if (Object.keys(errors).length > 0) {
     const firstError = Object.keys(errors)[0];
     const firstNode = document.getElementById(firstError);
-    if (firstNode) window.scrollTo(0, findElementPos(firstNode));
+    if (firstNode)
+      firstNode.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 };
 

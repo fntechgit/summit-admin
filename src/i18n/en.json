@@ -3197,8 +3197,11 @@
     "alert_info": "You can create or archive items from the list. To edit an item click on it.",
     "code_column_label": "Code",
     "name_column_label": "Name",
+    "archive_button": "Archive",
+    "unarchive_button": "Unarchive",
     "delete_inventory_item_warning": "Are you sure you want to delete inventory item ",
     "add_inventory_item": "Create new Item",
+    "hide_archived": "Hide archived items",
     "placeholders": {
       "search_inventory_items": "Search"
     }
@@ -3210,8 +3213,8 @@
     "code": "Code",
     "name": "Name",
     "default_quantity": "Default Quantity",
-    "quantity_limit_per_show": "Quantity Limit Per Show",
-    "quantity_limit_per_sponsor": "Quantity Limit Per Sponsor",
+    "quantity_limit_per_show": "Limit total per show (empty = disabled)",
+    "quantity_limit_per_sponsor": "Limit total per sponsor (empty = disabled)",
     "early_bird_rate": "Early Bird Rate",
     "standard_rate": "Standard Rate",
     "onsite_rate": "Onsite Rate",
@@ -3219,13 +3222,20 @@
     "delete_meta_field_warning": "Are you sure you want to delete meta field ",
     "meta_fields": "Additional Input Fields",
     "meta_field_values": "Field Values",
+    "meta_field_title": "Field Title",
+    "meta_field_required": "Required Field",
+    "meta_field_type": "Field Type",
+    "meta_field_add_value": "Add a value",
+    "meta_field_is_default": "Is Default?",
     "placeholders": {
-      "meta_field_title": "Field Title",
-      "meta_field_required": "Required Field",
-      "meta_field_type": "Field Type",
-      "meta_field_values": "Field Values"
+      "meta_field_name": "Name",
+      "meta_field_value": "Value",
+      "meta_field_maximum_quantity": "Maximum",
+      "meta_field_minimum_quantity": "Minimum"
     },
-    "images": "Images"
+    "images": "Images",
+    "save_changes": "Save Changes",
+    "required_error": "This field is required."
   },
   "meta_field_values_list": {
     "delete_value_warning": "Are you sure you want to delete meta field value ",
@@ -3245,8 +3255,11 @@
     "name_column_label": "Name",
     "items_column_label": "Items",
     "manage_items": "Manage Items",
+    "hide_archived": "Hide archived forms",
     "delete_form_template_warning": "Are you sure you want to delete form template ",
-    "add_form_template": "New From Template",
+    "using_duplicate": "Using Duplicate",
+    "add_form_template": "New Form",
+    "add_using_global_template": "Using Global Template",
     "placeholders": {
       "search_inventory_items": "Search"
     }
@@ -3262,6 +3275,12 @@
     "meta_fields": "Additional Input Fields",
     "meta_field_values": "Field Values",
     "materials": "Materials",
+    "save_changes": "Save Changes",
+    "add_form": "Add Form",
+    "required_error": "This field is required.",
+    "meta_field_title": "Field Title",
+    "meta_field_required": "Required Field",
+    "meta_field_type": "Field Type",
     "placeholders": {
       "meta_field_title": "Field Title",
       "meta_field_required": "Required Field",
@@ -3271,11 +3290,26 @@
       "meta_field_maximum_quantity": "Maximum Quantity"
     }
   },
+  "form_template_from_duplicate_dialog": {
+    "duplicate_form": "Duplicate Form",
+    "filter": "Filter",
+    "sort_by": "Sort By",
+    "code": "Code",
+    "name": "Name",
+    "items": "Items",
+    "duplicate_selected": "Duplicate Selected Form",
+    "placeholders": {
+      "search": "Search..."
+    }
+  },
   "form_template_item_list": {
     "form_template_items": "Form Template Items",
     "alert_info": "You can clone, create or archive items from the list. To edit an item click on it.",
     "code_column_label": "Code",
     "name_column_label": "Name",
+    "hide_archived": "Hide archived items",
+    "add_item": "Add Item",
+    "archive_button": "Archive",
     "delete_form_template_item_warning": "Are you sure you want to delete form template item ",
     "add_inventory_item": "Add Inventory Item",
     "add_form_template_item": "Create new Item",
@@ -3287,8 +3321,15 @@
     "title": "Select Items",
     "add_selected": "Add Selected Items",
     "selected_items_qty": "Selected {qty} Items",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
+    "early_bid_rate_column_label": "Early Bird Rate",
+    "standard_rate_column_label": "Standard Rate",
+    "onsite_rate_column_label": "Onsite Rate",
+    "quantity_column_label": "Quantity",
+    "select_items": "Select items",
     "placeholders": {
-      "search_inventory_items": "Search"
+      "search_inventory_items": "Search..."
     }
   },
   "edit_form_template_item": {
@@ -3308,5 +3349,11 @@
       "meta_field_values": "Field Values"
     },
     "images": "Images"
+  },
+  "mui_table": {
+    "no_items": "No items found.",
+    "rows_per_page": "Rows per page",
+    "sorted_desc": "sorted descending",
+    "sorted_asc": "sorted ascending"
   }
 }
