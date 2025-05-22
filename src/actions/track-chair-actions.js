@@ -45,7 +45,7 @@ export const PROGRESS_FLAG_ADDED = "PROGRESS_FLAG_ADDED";
 export const PROGRESS_FLAG_DELETED = "PROGRESS_FLAG_DELETED";
 export const PROGRESS_FLAG_REORDERED = "PROGRESS_FLAG_REORDERED";
 
-export const RECEIVE_SELECTION_PLANS = "RECEIVE_SELECTION_PLANS";
+export const RECEIVE_TC_SELECTION_PLANS = "RECEIVE_TC_SELECTION_PLANS";
 export const SET_SOURCE_SEL_PLAN = "SET_SOURCE_SEL_PLAN";
 export const REQUEST_SOURCE_LIST = "REQUEST_SOURCE_LIST";
 export const RECEIVE_SOURCE_LIST = "RECEIVE_SOURCE_LIST";
@@ -412,7 +412,7 @@ export const getSelectionPlans = () => async (dispatch, getState) => {
 
   return getRequest(
     null,
-    createAction(RECEIVE_SELECTION_PLANS),
+    createAction(RECEIVE_TC_SELECTION_PLANS),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans`,
     authErrorHandler
   )(params)(dispatch).then(() => {

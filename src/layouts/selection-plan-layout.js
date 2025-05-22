@@ -9,46 +9,46 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { connect } from "react-redux";
+import { Redirect, Route, Switch } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import EditSelectionPlanPage from "../pages/summits/edit-selection-plan-page";
-import { connect } from "react-redux";
-import EditSelectionPlanExtraQuestionPage from "../pages/summits/edit-selection-plan-extra-question-page";
+import EditSelectionPlanPage from "../pages/selection-plans/edit-selection-plan-page";
+import SelectionPlanListPage from "../pages/selection-plans/selection-plan-list-page";
 import SelectionPlanIdLayout from "./selection-plan-id-layout";
-import NoMatchPage from "../pages/no-match-page";
 
-class SelectionPlanLayout extends React.Component {
-  render() {
-    const { match, currentSummit } = this.props;
-    return (
-      <div>
-        <Breadcrumb
-          data={{
-            title: T.translate("edit_selection_plan.selection_plans"),
-            pathname: match.url
-          }}
-        />
-        <Switch>
-          <Route
-            strict
-            exact
-            path={`${match.url}/new`}
-            component={EditSelectionPlanPage}
-          />
-          <Route
-            path={`${match.url}/:selection_plan_id(\\d+)`}
-            component={SelectionPlanIdLayout}
-          />
-          <Redirect to={`/app/summits/${currentSummit.id}`} />
-        </Switch>
-      </div>
-    );
-  }
-}
+const SelectionPlanLayout = ({ match, currentSummit }) => (
+  <div>
+    <Breadcrumb
+      data={{
+        title: T.translate("edit_selection_plan.selection_plans"),
+        pathname: match.url
+      }}
+    />
+    <Switch>
+      <Route
+        strict
+        exact
+        path={`${match.url}`}
+        component={SelectionPlanListPage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/new`}
+        component={EditSelectionPlanPage}
+      />
+      <Route
+        path={`${match.url}/:selection_plan_id(\\d+)`}
+        component={SelectionPlanIdLayout}
+      />
+      <Redirect to={`/app/summits/${currentSummit.id}`} />
+    </Switch>
+  </div>
+);
 
 const mapStateToProps = ({ currentSummitState }) => ({
   ...currentSummitState

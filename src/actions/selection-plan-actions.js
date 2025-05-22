@@ -9,10 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
+import _ from "lodash";
 import {
   getRequest,
   putRequest,
@@ -26,15 +26,18 @@ import {
   authErrorHandler,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import {
   getAccessTokenSafely,
   escapeFilterValue,
   fetchResponseHandler,
   fetchErrorHandler
 } from "../utils/methods";
-import _ from "lodash";
 import { saveMarketingSetting } from "./marketing-actions";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
+export const REQUEST_SELECTION_PLANS = "REQUEST_SELECTION_PLANS";
+export const RECEIVE_SELECTION_PLANS = "RECEIVE_SELECTION_PLANS";
 export const RECEIVE_SELECTION_PLAN = "RECEIVE_SELECTION_PLAN";
 export const RESET_SELECTION_PLAN_FORM = "RESET_SELECTION_PLAN_FORM";
 export const UPDATE_SELECTION_PLAN = "UPDATE_SELECTION_PLAN";
@@ -59,7 +62,44 @@ export const SELECTION_PLAN_PROGRESS_FLAG_REMOVED =
 export const SELECTION_PLAN_PROGRESS_FLAG_ORDER_UPDATED =
   "SELECTION_PLAN_PROGRESS_FLAG_ORDER_UPDATED";
 
-const callDelay = 500; //miliseconds
+const callDelay = 500; // milliseconds
+
+export const getSelectionPlans =
+  (term = "", page = 1, order = "id", orderDir = 1) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const filter = [];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm}`);
+    }
+
+    const params = {
+      access_token: accessToken,
+      relations: "none",
+      page,
+      per_page: DEFAULT_PER_PAGE,
+      order: `${orderDir === 1 ? "" : "-"}${order}`
+    };
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_SELECTION_PLANS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans`,
+      authErrorHandler
+    )(params)(dispatch).then(async () => {
+      dispatch(stopLoading());
+    });
+  };
 
 export const getSelectionPlan =
   (selectionPlanId) => async (dispatch, getState) => {
@@ -89,7 +129,7 @@ export const getSelectionPlan =
     });
   };
 
-export const resetSelectionPlanForm = () => (dispatch, getState) => {
+export const resetSelectionPlanForm = () => (dispatch) => {
   dispatch(createAction(RESET_SELECTION_PLAN_FORM)({}));
 };
 
@@ -208,29 +248,29 @@ export const removeTrackGroupFromSelectionPlan =
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  if (!normalizedEntity["selection_begin_date"])
-    normalizedEntity["selection_begin_date"] = null;
-  if (!normalizedEntity["selection_end_date"])
-    normalizedEntity["selection_end_date"] = null;
-  if (!normalizedEntity["submission_begin_date"])
-    normalizedEntity["submission_begin_date"] = null;
-  if (!normalizedEntity["submission_end_date"])
-    normalizedEntity["submission_end_date"] = null;
-  if (!normalizedEntity["voting_begin_date"])
-    normalizedEntity["voting_begin_date"] = null;
-  if (!normalizedEntity["voting_end_date"])
-    normalizedEntity["voting_end_date"] = null;
+  if (!normalizedEntity.selection_begin_date)
+    normalizedEntity.selection_begin_date = null;
+  if (!normalizedEntity.selection_end_date)
+    normalizedEntity.selection_end_date = null;
+  if (!normalizedEntity.submission_begin_date)
+    normalizedEntity.submission_begin_date = null;
+  if (!normalizedEntity.submission_end_date)
+    normalizedEntity.submission_end_date = null;
+  if (!normalizedEntity.voting_begin_date)
+    normalizedEntity.voting_begin_date = null;
+  if (!normalizedEntity.voting_end_date)
+    normalizedEntity.voting_end_date = null;
 
-  delete normalizedEntity["created"];
-  delete normalizedEntity["last_edited"];
-  delete normalizedEntity["id"];
-  delete normalizedEntity["summit_id"];
-  delete normalizedEntity["track_groups"];
+  delete normalizedEntity.created;
+  delete normalizedEntity.last_edited;
+  delete normalizedEntity.id;
+  delete normalizedEntity.summit_id;
+  delete normalizedEntity.track_groups;
 
   return normalizedEntity;
 };
 
-/***********************  EXTRA QUESTIONS  *******************************************/
+/** *********************  EXTRA QUESTIONS  ****************************************** */
 
 export const RECEIVE_SELECTION_PLAN_EXTRA_QUESTION_META =
   "RECEIVE_SELECTION_PLAN_EXTRA_QUESTION_META";
@@ -261,10 +301,9 @@ export const SELECTION_PLAN_EXTRA_QUESTION_VALUE_DELETED =
 export const RESET_SELECTION_PLAN_EXTRA_QUESTION_FORM =
   "RESET_SELECTION_PLAN_EXTRA_QUESTION_FORM";
 
-export const resetSelectionPlanExtraQuestionForm =
-  () => (dispatch, getState) => {
-    dispatch(createAction(RESET_SELECTION_PLAN_EXTRA_QUESTION_FORM)({}));
-  };
+export const resetSelectionPlanExtraQuestionForm = () => (dispatch) => {
+  dispatch(createAction(RESET_SELECTION_PLAN_EXTRA_QUESTION_FORM)({}));
+};
 
 export const getExtraQuestionMeta =
   (selectionPlanId) => async (dispatch, getState) => {
@@ -474,7 +513,7 @@ export const saveSelectionPlanExtraQuestionValue =
         entity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(stopLoading());
       });
     }
@@ -486,7 +525,7 @@ export const saveSelectionPlanExtraQuestionValue =
       entity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -518,7 +557,7 @@ export const updateSelectionPlanExtraQuestionValueOrder =
       { order: newOrder },
       authErrorHandler,
       { order: newOrder, id: valueId }
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -544,7 +583,7 @@ export const deleteSelectionPlanExtraQuestionValue =
     });
   };
 
-/***********************  EVENT TYPES  *******************************************/
+/** *********************  EVENT TYPES  ****************************************** */
 
 export const EVENT_TYPE_ADDED = "EVENT_TYPE_ADDED";
 export const EVENT_TYPE_REMOVED = "EVENT_TYPE_REMOVED";
@@ -594,7 +633,7 @@ export const deleteEventTypeSelectionPlan =
     });
   };
 
-/***********************  RATING TYPES  *******************************************/
+/** *********************  RATING TYPES  ****************************************** */
 
 export const SELECTION_PLAN_RATING_TYPE_ADDED =
   "SELECTION_PLAN_RATING_TYPE_ADDED";
@@ -618,7 +657,7 @@ export const updateRatingTypeOrder =
       access_token: accessToken
     };
 
-    let ratingType = ratingTypes.find((r) => r.id === ratingTypeId);
+    const ratingType = ratingTypes.find((r) => r.id === ratingTypeId);
     ratingType.order = newOrder;
 
     return putRequest(
@@ -657,14 +696,14 @@ export const querySelectionPlanExtraQuestions = _.debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
     input = escapeFilterValue(input);
-    let filters = encodeURIComponent(`name=@${input}`);
+    const filters = encodeURIComponent(`name=@${input}`);
 
     fetch(
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plan-extra-questions?filter=${filters}&&access_token=${accessToken}`
     )
       .then(fetchResponseHandler)
       .then((json) => {
-        let options = [...json.data];
+        const options = [...json.data];
 
         callback(options);
       })
@@ -674,7 +713,7 @@ export const querySelectionPlanExtraQuestions = _.debounce(
 );
 
 export const assignExtraQuestion2SelectionPlan =
-  (summitId, selectionPlanId, questionId) => async (dispatch, getState) => {
+  (summitId, selectionPlanId, questionId) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     postRequest(
@@ -683,7 +722,7 @@ export const assignExtraQuestion2SelectionPlan =
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plans/${selectionPlanId}/extra-questions/${questionId}?access_token=${accessToken}`,
       {},
       authErrorHandler
-    )({})(dispatch).then((payload) => {
+    )({})(dispatch).then(() => {
       dispatch(stopLoading());
       dispatch(
         showSuccessMessage(
@@ -693,7 +732,7 @@ export const assignExtraQuestion2SelectionPlan =
     });
   };
 
-/***********************  ALLOWED MEMBERS  *******************************************/
+/** *********************  ALLOWED MEMBERS  ****************************************** */
 
 export const getAllowedMembers =
   (selectionPlanId, page = 1) =>
@@ -707,7 +746,7 @@ export const getAllowedMembers =
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: 10,
       access_token: accessToken
     };
@@ -797,7 +836,7 @@ export const importAllowedMembersCSV =
     });
   };
 
-/***********************  PROGRESS FLAGS / PRESENTATION ACTION TYPES  ********************************/
+/** *********************  PROGRESS FLAGS / PRESENTATION ACTION TYPES  ******************************* */
 
 export const getSelectionPlanProgressFlags =
   (summitId, selectionPlanId) => async (dispatch) => {
@@ -823,7 +862,7 @@ export const getSelectionPlanProgressFlags =
   };
 
 export const assignProgressFlag2SelectionPlan =
-  (summitId, selectionPlanId, progressFlagId) => async (dispatch, getState) => {
+  (summitId, selectionPlanId, progressFlagId) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     dispatch(startLoading());
     postRequest(
@@ -832,7 +871,7 @@ export const assignProgressFlag2SelectionPlan =
       `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plans/${selectionPlanId}/allowed-presentation-action-types/${progressFlagId}?access_token=${accessToken}`,
       {},
       authErrorHandler
-    )({})(dispatch).then((payload) => {
+    )({})(dispatch).then(() => {
       dispatch(stopLoading());
       dispatch(
         showSuccessMessage(
@@ -855,7 +894,7 @@ export const updateProgressFlagOrder =
       access_token: accessToken
     };
 
-    let progressFlag = progressFlags.find((r) => r.id === progressFlagId);
+    const progressFlag = progressFlags.find((r) => r.id === progressFlagId);
 
     progressFlag.order = newOrder;
 
@@ -865,7 +904,7 @@ export const updateProgressFlagOrder =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/allowed-presentation-action-types/${progressFlagId}`,
       progressFlag,
       authErrorHandler
-    )(params)(dispatch).then((data) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
@@ -892,8 +931,8 @@ export const unassignProgressFlagFromSelectionPlan =
   };
 
 export const saveSelectionPlanSettings =
-  (marketingSettings, selectionPlanId) => async (dispatch, getState) => {
-    return Promise.all(
+  (marketingSettings, selectionPlanId) => async (dispatch) =>
+    Promise.all(
       Object.keys(marketingSettings).map((m) => {
         const setting_type =
           m === "cfp_presentation_edition_custom_message" ? "TEXTAREA" : "TEXT";
@@ -913,4 +952,3 @@ export const saveSelectionPlanSettings =
         return dispatch(saveMarketingSetting(mkt_setting));
       })
     );
-  };
