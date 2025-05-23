@@ -27,10 +27,6 @@ import {
   savePrintAppMarketingSettings,
   generateEncryptionKey
 } from "../../actions/summit-actions";
-import {
-  deleteSelectionPlan,
-  resetSelectionPlanForm
-} from "../../actions/selection-plan-actions";
 import { deleteRoomBookingAttributeType } from "../../actions/room-booking-actions";
 import {
   addHelpMember,
@@ -52,12 +48,9 @@ class EditSummitPage extends React.Component {
   constructor(props) {
     super(props);
 
-    this.handleSPlanDelete = this.handleSPlanDelete.bind(this);
     this.handleAttributeTypeDelete = this.handleAttributeTypeDelete.bind(this);
     this.handleRegFeedMetadataDelete =
       this.handleRegFeedMetadataDelete.bind(this);
-    // reset selection plan
-    this.props.resetSelectionPlanForm();
   }
 
   componentDidMount() {
@@ -104,28 +97,6 @@ class EditSummitPage extends React.Component {
       if (result.value) {
         console.log("key delete", regFeedMetadataId);
         deleteRegFeedMetadata(regFeedMetadataId);
-      }
-    });
-  }
-
-  handleSPlanDelete(selectionPlanId) {
-    const { currentSummit, deleteSelectionPlan } = this.props;
-    const selectionPlan = currentSummit.selection_plans.find(
-      (sp) => sp.id === selectionPlanId
-    );
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("edit_summit.remove_sp_warning")} ${
-        selectionPlan.name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteSelectionPlan(selectionPlanId);
       }
     });
   }
@@ -179,7 +150,6 @@ class EditSummitPage extends React.Component {
           timezones={timezones}
           errors={errors}
           onSubmit={this.props.saveSummit}
-          onSPlanDelete={this.handleSPlanDelete}
           onRegFeedMetadataDelete={this.handleRegFeedMetadataDelete}
           onAttributeTypeDelete={this.handleAttributeTypeDelete}
           onLogoAttach={attachLogo}
@@ -219,14 +189,12 @@ export default Restrict(
     getSummitById,
     saveSummit,
     resetSummitForm,
-    deleteSelectionPlan,
     deleteRoomBookingAttributeType,
     deleteRegFeedMetadata,
     attachLogo,
     deleteLogo,
     addHelpMember,
     removeHelpMember,
-    resetSelectionPlanForm,
     saveRegistrationLiteMarketingSettings,
     savePrintAppMarketingSettings,
     generateEncryptionKey,

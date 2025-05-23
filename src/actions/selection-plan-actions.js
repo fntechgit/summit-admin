@@ -267,6 +267,9 @@ const normalizeEntity = (entity) => {
   delete normalizedEntity.summit_id;
   delete normalizedEntity.track_groups;
 
+  normalizedEntity.is_hidden = !!normalizedEntity.is_hidden;
+  normalizedEntity.is_active = !!normalizedEntity.is_active;
+
   return normalizedEntity;
 };
 

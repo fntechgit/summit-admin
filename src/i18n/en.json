@@ -399,6 +399,7 @@
   "selection_plan_list": {
     "selection_plan_list": "Selection Plans",
     "add_selection_plan": "Add Selection Plan",
+    "no_selection_plans": "No Selection Plans found",
     "id": "Id",
     "name": "Name",
     "type": "Type",

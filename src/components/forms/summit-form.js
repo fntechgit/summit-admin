@@ -52,8 +52,6 @@ class SummitForm extends React.Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleSPlanEdit = this.handleSPlanEdit.bind(this);
-    this.handleSPlanAdd = this.handleSPlanAdd.bind(this);
     this.handleRegFeedMetadataEdit = this.handleRegFeedMetadataEdit.bind(this);
     this.handleRegFeedMetadataAdd = this.handleRegFeedMetadataAdd.bind(this);
     this.handleAttributeTypeEdit = this.handleAttributeTypeEdit.bind(this);
@@ -280,19 +278,6 @@ class SummitForm extends React.Component {
     }
   }
 
-  handleSPlanEdit(selectionPlanId) {
-    const { entity, history } = this.props;
-    history.push(
-      `/app/summits/${entity.id}/selection-plans/${selectionPlanId}`
-    );
-  }
-
-  handleSPlanAdd(ev) {
-    const { entity, history } = this.props;
-    ev.preventDefault();
-    history.push(`/app/summits/${entity.id}/selection-plans/new`);
-  }
-
   handleRegFeedMetadataEdit(regFeedMetadataId) {
     const { entity, history } = this.props;
     history.push(
@@ -389,27 +374,11 @@ class SummitForm extends React.Component {
       printAppMarketingSettings,
       regFeedMetadataListSettings
     } = this.state;
-    const {
-      timezones,
-      onSPlanDelete,
-      onAttributeTypeDelete,
-      onRegFeedMetadataDelete
-    } = this.props;
+    const { timezones, onAttributeTypeDelete, onRegFeedMetadataDelete } =
+      this.props;
     const time_zones_ddl = timezones.map((tz) => ({ label: tz, value: tz }));
     const dates_enabled =
       entity.hasOwnProperty("time_zone_id") && entity.time_zone_id !== "";
-
-    const splan_columns = [
-      { columnKey: "name", value: T.translate("edit_summit.name") },
-      { columnKey: "is_enabled", value: T.translate("edit_summit.enabled") }
-    ];
-
-    const splan_table_options = {
-      actions: {
-        edit: { onClick: this.handleSPlanEdit },
-        delete: { onClick: onSPlanDelete }
-      }
-    };
 
     const registration_feed_metadata_table_columns = [
       { columnKey: "key", value: T.translate("edit_reg_feed_metadata.key") },
@@ -893,26 +862,6 @@ class SummitForm extends React.Component {
               />
             </div>
           </div>
-
-          {entity.id !== 0 && (
-            <div>
-              <input
-                type="button"
-                onClick={this.handleSPlanAdd}
-                className="btn btn-primary pull-right"
-                value={T.translate("edit_summit.add_splan")}
-              />
-              <Table
-                options={splan_table_options}
-                data={entity.selection_plans.map((sl) => ({
-                  id: sl.id,
-                  name: sl.name,
-                  is_enabled: sl.is_enabled ? "True" : "False"
-                }))}
-                columns={splan_columns}
-              />
-            </div>
-          )}
         </Panel>
 
         <Panel
