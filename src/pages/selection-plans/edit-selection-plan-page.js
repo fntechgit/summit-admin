@@ -194,7 +194,6 @@ class EditSelectionPlanPage extends React.Component {
       entity,
       allowedMembers,
       errors,
-      match,
       extraQuestionsOrder,
       extraQuestionsOrderDir
     } = this.props;

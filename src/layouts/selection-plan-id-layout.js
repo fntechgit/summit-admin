@@ -1,7 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Switch, Route, Redirect } from "react-router-dom";
-import EditSelectionPlanPage from "../pages/summits/edit-selection-plan-page";
+import { Breadcrumb } from "react-breadcrumbs";
+import T from "i18n-react";
+import EditSelectionPlanPage from "../pages/selection-plans/edit-selection-plan-page";
 import {
   getSelectionPlan,
   resetSelectionPlanForm
@@ -9,12 +11,11 @@ import {
 import { getMarketingSettingsBySelectionPlan } from "../actions/marketing-actions";
 import SelectionPlanExtraQuestionsLayout from "./selection-plan-extra-questions-layout";
 import SelectionPlanRatingTypesLayout from "./selection-plan-rating-types-layout";
-import { Breadcrumb } from "react-breadcrumbs";
-import T from "i18n-react";
+import { DEFAULT_100_PER_PAGE } from "../utils/constants";
 
 class SelectionPlanIdLayout extends React.Component {
   componentDidMount() {
-    let selectionPlanId = this.props.match.params.selection_plan_id;
+    const selectionPlanId = this.props.match.params.selection_plan_id;
 
     if (!selectionPlanId) {
       this.props.resetSelectionPlanForm();
@@ -26,13 +27,13 @@ class SelectionPlanIdLayout extends React.Component {
             selectionPlanId,
             null,
             1,
-            100
+            DEFAULT_100_PER_PAGE
           )
         );
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.selection_plan_id;
     const newId = this.props.match.params.selection_plan_id;
 
@@ -43,7 +44,12 @@ class SelectionPlanIdLayout extends React.Component {
         this.props
           .getSelectionPlan(newId)
           .then(() =>
-            this.props.getMarketingSettingsBySelectionPlan(newId, null, 1, 100)
+            this.props.getMarketingSettingsBySelectionPlan(
+              newId,
+              null,
+              1,
+              DEFAULT_100_PER_PAGE
+            )
           );
       }
     }
@@ -51,8 +57,8 @@ class SelectionPlanIdLayout extends React.Component {
 
   render() {
     const { match, currentSelectionPlan, currentSummit } = this.props;
-    let selectionPlanId = this.props.match.params.selection_plan_id;
-    let breadcrumb = selectionPlanId
+    const selectionPlanId = this.props.match.params.selection_plan_id;
+    const breadcrumb = selectionPlanId
       ? currentSelectionPlan.name
       : T.translate("general.new");
     return (
