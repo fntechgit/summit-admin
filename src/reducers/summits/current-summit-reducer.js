@@ -176,7 +176,7 @@ export const DEFAULT_ENTITY = {
 const DEFAULT_REG_LITE_MARKETING_SETTINGS = {
   REG_LITE_ALLOW_PROMO_CODES: { id: 0, value: true },
   REG_LITE_SHOW_COMPANY_INPUT: { id: 0, value: true },
-  REG_LITE_COMPANY_DDL_PLACEHOLDER: { id: 0, value: "Select a company" },
+  REG_LITE_COMPANY_DDL_PLACEHOLDER: { id: 0, value: "Company" },
   REG_LITE_SHOW_COMPANY_INPUT_DEFAULT_OPTIONS: { id: 0, value: false },
   REG_LITE_ORDER_COMPLETE_TITLE: {
     id: 0,
