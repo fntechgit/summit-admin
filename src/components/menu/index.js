@@ -50,21 +50,6 @@ const getGlobalItems = () => [
     accessRoute: "companies"
   },
   {
-    name: "sponsors_inventory",
-    iconClass: "fa-users",
-    accessRoute: "inventory",
-    childs: [
-      {
-        name: "inventory",
-        linkUrl: "inventory"
-      },
-      {
-        name: "form_templates",
-        linkUrl: "form-templates"
-      }
-    ]
-  },
-  {
     name: "sponsorship_types",
     iconClass: "fa fa-handshake-o",
     linkUrl: "sponsorship-types",
@@ -211,11 +196,6 @@ const getSummitItems = (summitId) => [
         name: "track_timeframes",
         linkUrl: `summits/${summitId}/track-chairs/track-timeframes`,
         accessRoute: "track-timeframes"
-      },
-      {
-        name: "track_chair_team_lists",
-        linkUrl: `summits/${summitId}/track-chairs/team-lists`,
-        accessRoute: "team-lists"
       }
     ]
   },
