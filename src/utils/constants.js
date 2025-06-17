@@ -103,6 +103,7 @@ export const SORT_ASCENDING = 1;
 export const SORT_DESCENDING = -1;
 
 export const DEFAULT_EXPORT_PAGE_SIZE = 500;
+export const EXPORT_PAGE_SIZE_200 = 200;
 
 export const DATE_FILTER_ARRAY_SIZE = 2;
 
