@@ -16,7 +16,8 @@ const List = ({
   onReorder,
   onDrop,
   onColumnChange,
-  onCardClick
+  onCardClick,
+  onRevert
 }) => {
   const handleDrag = (item, toItem, toList) => {
     const toItemIds = toList.items.map((it) => it.id);
@@ -71,6 +72,7 @@ const List = ({
             onMove={handleDrag}
             onRemove={handleRemove}
             onDrop={onDrop}
+            onRevert={onRevert}
           />
         ))}
         {list.items.length === 0 && (

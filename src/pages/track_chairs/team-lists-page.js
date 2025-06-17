@@ -21,6 +21,7 @@ import {
   getSourceList,
   getTeamList,
   reorderList,
+  revertChanges,
   setSelectionPlan,
   updateTeamList
 } from "../../actions/track-chair-actions";
@@ -200,6 +201,7 @@ const TeamListsPage = ({
                   onReorder={console.log}
                   onColumnChange={console.log}
                   onDrop={console.log}
+                  onRevert={props.revertChanges}
                 />
               )}
             </div>
@@ -235,6 +237,7 @@ const TeamListsPage = ({
               onReorder={props.reorderList}
               onColumnChange={handleColumnChange}
               onDrop={props.updateTeamList}
+              onRevert={props.revertChanges}
             />
           </div>
         </div>
@@ -254,5 +257,6 @@ export default connect(mapStateToProps, {
   getSourceList,
   getTeamList,
   reorderList,
-  updateTeamList
+  updateTeamList,
+  revertChanges
 })(TeamListsPage);

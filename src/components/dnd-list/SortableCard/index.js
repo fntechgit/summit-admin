@@ -11,7 +11,8 @@ const SortableCard = ({
   onMove,
   onDrop,
   onCardClick,
-  onRemove
+  onRemove,
+  onRevert
 }) => {
   const ref = useRef(null);
 
@@ -38,6 +39,7 @@ const SortableCard = ({
       if (draggedItem.id === item.id) {
         return;
       }
+
       // Determine rectangle on screen
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
       // Get vertical middle
@@ -58,6 +60,7 @@ const SortableCard = ({
       ) {
         return;
       }
+
       // Dragging upwards
       if (
         draggedItem.order > item.order &&
@@ -66,6 +69,7 @@ const SortableCard = ({
       ) {
         return;
       }
+
       // Time to actually perform the action
       onMove(draggedItem, item, list);
     },
@@ -85,6 +89,12 @@ const SortableCard = ({
   const [{ isDragging }, drag] = useDrag({
     type: "card",
     item: () => ({ ...item, originalList: list }),
+    end: (draggedItem, monitor) => {
+      if (!monitor.didDrop()) {
+        // Revert the drag operation if it was dropped outside
+        onRevert();
+      }
+    },
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     })
