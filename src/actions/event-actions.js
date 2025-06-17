@@ -47,9 +47,9 @@ import { getAuditLog } from "./audit-log-actions";
 import {
   DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_EXPORT_PAGE_SIZE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
+  EXPORT_PAGE_SIZE_200,
   FIFTEEN_MINUTES,
   HOUR_AND_HALF,
   SECONDS_TO_MINUTES
@@ -1409,9 +1409,10 @@ export const exportEvents =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const { totalEvents } = currentEventListState;
+
     const csvMIME = "text/csv;charset=utf-8";
     const filename = `${currentSummit.name}-Activities.csv`;
-    const totalPages = Math.ceil(totalEvents / DEFAULT_EXPORT_PAGE_SIZE);
+    const totalPages = Math.ceil(totalEvents / EXPORT_PAGE_SIZE_200);
 
     const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`;
 
@@ -1421,7 +1422,7 @@ export const exportEvents =
       const res = {
         page: i + DEFAULT_CURRENT_PAGE,
         access_token: accessToken,
-        per_page: DEFAULT_EXPORT_PAGE_SIZE
+        per_page: EXPORT_PAGE_SIZE_200
       };
 
       if (filter.length > 0) {
@@ -1436,8 +1437,6 @@ export const exportEvents =
 
       return res;
     });
-
-    console.log("PARAMS", params);
 
     // export CSV file by chunks ...
     Promise.all(params.map((p) => getRawCSV(endpoint, p)))
