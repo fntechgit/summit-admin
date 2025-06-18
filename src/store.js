@@ -55,7 +55,8 @@ import taxTypeListReducer from "./reducers/taxes/tax-type-list-reducer";
 import taxTypeReducer from "./reducers/taxes/tax-type-reducer";
 import pushNotificationListReducer from "./reducers/push_notifications/push-notification-list-reducer";
 import pushNotificationReducer from "./reducers/push_notifications/push-notification-reducer";
-import selectionPlanReducer from "./reducers/summits/selection-plan-reducer";
+import selectionPlanListReducer from "./reducers/selection_plans/selection-plan-list-reducer";
+import selectionPlanReducer from "./reducers/selection_plans/selection-plan-reducer";
 import roomOccupancyReducer from "./reducers/events/room-occupancy-reducer";
 import tagGroupListReducer from "./reducers/tags/tag-group-list-reducer";
 import tagGroupReducer from "./reducers/tags/tag-group-reducer";
@@ -121,7 +122,7 @@ import sponsoredProjectSponsorshipTypeReducer from "./reducers/sponsored_project
 import sponsoredProjectSponsorshipTypeSupportingCompanyReducer from "./reducers/sponsored_projects/sponsored-project-sponsorship-type-supporting-company-reducer";
 import scheduleSettingsReducer from "./reducers/schedule-settings/schedule-settings-reducer";
 import scheduleSettingsListReducer from "./reducers/schedule-settings/schedule-settings-list-reducer";
-import selectionPlanExtraQuestionReducer from "./reducers/summits/selection-plan-extra-question-reducer";
+import selectionPlanExtraQuestionReducer from "./reducers/selection_plans/selection-plan-extra-question-reducer";
 import registrationCompanyListReducer from "./reducers/companies/registration-companies-list-reducer";
 import orderExtraQuestionRuleReducer from "./reducers/orders/order-extra-question-rule-reducer";
 import presentationVotesReducer from "./reducers/events/summit-presentation-votes-reducer";
@@ -204,6 +205,7 @@ const reducers = persistCombineReducers(config, {
   currentTaxTypeState: taxTypeReducer,
   currentPushNotificationListState: pushNotificationListReducer,
   currentPushNotificationState: pushNotificationReducer,
+  currentSelectionPlanListState: selectionPlanListReducer,
   currentSelectionPlanState: selectionPlanReducer,
   currentRoomOccupancyState: roomOccupancyReducer,
   currentTagGroupListState: tagGroupListReducer,

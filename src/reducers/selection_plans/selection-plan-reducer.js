@@ -123,9 +123,9 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       // we need this in case the token expired while editing the form
       if (payload.hasOwnProperty("persistStore")) {
         return state;
-      } else {
+      } 
         return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
+      
     }
     case SET_CURRENT_SUMMIT:
     case RESET_SELECTION_PLAN_FORM: {
@@ -136,10 +136,10 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
     }
     case SELECTION_PLAN_ADDED:
     case RECEIVE_SELECTION_PLAN: {
-      let entity = { ...payload.response };
-      let marketing_setting = state.entity.marketing_settings;
+      const entity = { ...payload.response };
+      const marketing_setting = state.entity.marketing_settings;
 
-      for (var key in entity) {
+      for (const key in entity) {
         if (entity.hasOwnProperty(key)) {
           entity[key] = entity[key] == null ? "" : entity[key];
         }
@@ -158,14 +158,14 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         allowedMembers: {
-          data: data,
+          data,
           currentPage: current_page,
           lastPage: last_page
         }
       };
     }
     case SELECTION_PLAN_ASSIGNED_EXTRA_QUESTION: {
-      let question = { ...payload.response };
+      const question = { ...payload.response };
       return {
         ...state,
         entity: {
@@ -175,13 +175,11 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_SELECTION_PLAN_PROGRESS_FLAGS: {
-      let progressFlags = payload.response.data.map((r) => {
-        return {
+      const progressFlags = payload.response.data.map((r) => ({
           id: r.id,
           label: r.label,
           order: parseInt(r.order)
-        };
-      });
+        }));
       return {
         ...state,
         entity: {
@@ -191,7 +189,7 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_ASSIGNED_PROGRESS_FLAG: {
-      let progressFlag = { ...payload.response };
+      const progressFlag = { ...payload.response };
       return {
         ...state,
         entity: {
@@ -204,13 +202,11 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_PROGRESS_FLAG_ORDER_UPDATED: {
-      let progressFlags = payload.map((r) => {
-        return {
+      const progressFlags = payload.map((r) => ({
           id: r.id,
           label: r.label,
           order: parseInt(r.order)
-        };
-      });
+        }));
       return {
         ...state,
         entity: {
@@ -220,8 +216,8 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_PROGRESS_FLAG_REMOVED: {
-      let { progressFlagId } = payload;
-      let allowedActionTypes =
+      const { progressFlagId } = payload;
+      const allowedActionTypes =
         state.entity.allowed_presentation_action_types.filter(
           (t) => t.id !== progressFlagId
         );
@@ -234,8 +230,8 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case TRACK_GROUP_REMOVED: {
-      let { trackGroupId } = payload;
-      let trackGroups = state.entity.track_groups.filter(
+      const { trackGroupId } = payload;
+      const trackGroups = state.entity.track_groups.filter(
         (t) => t.id !== trackGroupId
       );
       return {
@@ -244,7 +240,7 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case TRACK_GROUP_ADDED: {
-      let trackGroup = { ...payload.trackGroup };
+      const trackGroup = { ...payload.trackGroup };
       return {
         ...state,
         entity: {
@@ -254,14 +250,14 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_TYPE_REMOVED: {
-      let { eventTypeId } = payload;
-      let eventTypes = state.entity.event_types.filter(
+      const { eventTypeId } = payload;
+      const eventTypes = state.entity.event_types.filter(
         (t) => t.id !== eventTypeId
       );
       return { ...state, entity: { ...state.entity, event_types: eventTypes } };
     }
     case EVENT_TYPE_ADDED: {
-      let eventType = { ...payload.eventType };
+      const eventType = { ...payload.eventType };
       return {
         ...state,
         entity: {
@@ -271,7 +267,7 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_EXTRA_QUESTION_ADDED: {
-      let question = { ...payload.response };
+      const question = { ...payload.response };
       return {
         ...state,
         entity: {
@@ -281,7 +277,7 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_EXTRA_QUESTION_DELETED: {
-      let { questionId } = payload;
+      const { questionId } = payload;
       return {
         ...state,
         entity: {
@@ -293,8 +289,8 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_EXTRA_QUESTION_UPDATED: {
-      let question = { ...payload.response };
-      let extra_questions = state.entity.extra_questions.map((q) => {
+      const question = { ...payload.response };
+      const extra_questions = state.entity.extra_questions.map((q) => {
         if (q.id !== question.id) {
           return q;
         }
@@ -305,29 +301,27 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       });
       return {
         ...state,
-        entity: { ...state.entity, extra_questions: extra_questions }
+        entity: { ...state.entity, extra_questions }
       };
     }
 
     case SELECTION_PLAN_EXTRA_QUESTION_ORDER_UPDATED: {
-      let extra_questions = payload.map((q, i) => {
-        return {
+      const extra_questions = payload.map((q, i) => ({
           id: q.id,
           name: q.name,
           label: q.label,
           type: q.type,
           order: i + 1
-        };
-      });
+        }));
 
       return {
         ...state,
-        entity: { ...state.entity, extra_questions: extra_questions }
+        entity: { ...state.entity, extra_questions }
       };
     }
     case SELECTION_PLAN_RATING_TYPE_REMOVED: {
-      let { ratingTypeId } = payload;
-      let ratingTypes = state.entity.track_chair_rating_types.filter(
+      const { ratingTypeId } = payload;
+      const ratingTypes = state.entity.track_chair_rating_types.filter(
         (t) => t.id !== ratingTypeId
       );
       return {
@@ -336,7 +330,7 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_RATING_TYPE_ADDED: {
-      let ratingType = { ...payload.response };
+      const ratingType = { ...payload.response };
       return {
         ...state,
         entity: {
@@ -349,8 +343,8 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_RATING_TYPE_UPDATED: {
-      let ratingType = { ...payload.response };
-      let ratingTypes = state.entity.track_chair_rating_types.filter(
+      const ratingType = { ...payload.response };
+      const ratingTypes = state.entity.track_chair_rating_types.filter(
         (t) => t.id !== ratingType.id
       );
       return {
@@ -362,25 +356,23 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED: {
-      let track_chair_rating_types = payload.map((r) => {
-        return {
+      const track_chair_rating_types = payload.map((r) => ({
           id: r.id,
           name: r.name,
           weight: parseFloat(r.weight),
           order: parseInt(r.order)
-        };
-      });
+        }));
       return {
         ...state,
         entity: {
           ...state.entity,
-          track_chair_rating_types: track_chair_rating_types
+          track_chair_rating_types
         }
       };
     }
     case ALLOWED_MEMBER_REMOVED: {
-      let { emailId } = payload;
-      let allowedMembers = state.allowedMembers.data.filter(
+      const { emailId } = payload;
+      const allowedMembers = state.allowedMembers.data.filter(
         (t) => t.id !== emailId
       );
       return {
@@ -404,7 +396,7 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, errors: payload.errors };
     }
     case RECEIVE_SELECTION_PLAN_SETTINGS: {
-      let data = payload.response.data;
+      const {data} = payload.response;
       // parse data
       const settings = data.map((ms) => ({
         [ms.key.toLowerCase()]: {
@@ -414,8 +406,6 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
             ms.key === "CFP_PRESENTATION_SUMMARY_HIDE_TRACK_SELECTION" ||
             ms.key === "CFP_PRESENTATION_SUMMARY_HIDE_ACTIVITY_TYPE_SELECTION"
               ? ms.value === "1"
-                ? true
-                : false
               : ms.value
         }
       }));

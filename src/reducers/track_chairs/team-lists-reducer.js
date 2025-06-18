@@ -14,7 +14,7 @@
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import _ from "lodash";
 import {
-  RECEIVE_SELECTION_PLANS,
+  RECEIVE_TC_SELECTION_PLANS,
   RECEIVE_SOURCE_LIST,
   RECEIVE_TEAM_LIST,
   REORDER_LIST,
@@ -67,7 +67,7 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
     case LOGOUT_USER: {
       return DEFAULT_STATE;
     }
-    case RECEIVE_SELECTION_PLANS: {
+    case RECEIVE_TC_SELECTION_PLANS: {
       const { data } = payload.response;
 
       const selPlansWithVisibleTracks = data.filter((sp) =>

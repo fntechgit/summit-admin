@@ -84,6 +84,7 @@
     "general": "General",
     "directory": "Directory",
     "dashboard": "Dashboard",
+    "selection_plans": "Selection Plans",
     "events": "Activities",
     "event_list": "All Activities",
     "voteable_presentations": "Voteable Presentations",
@@ -393,6 +394,20 @@
       "api_feed_type": "Select API feed type...",
       "external_registration_feed_type": "Select Ext. Reg. feed type...",
       "mux_allowed_domains": "Type any Allowed Domain.."
+    }
+  },
+  "selection_plan_list": {
+    "selection_plan_list": "Selection Plans",
+    "add_selection_plan": "Add Selection Plan",
+    "no_selection_plans": "No Selection Plans found",
+    "id": "Id",
+    "name": "Name",
+    "type": "Type",
+    "is_hidden": "Hidden?",
+    "is_enabled": "Enabled?",
+    "remove_warning": "Are you sure you want to remove selection plan ",
+    "placeholders": {
+      "search": "Search selection plans"
     }
   },
   "edit_selection_plan": {

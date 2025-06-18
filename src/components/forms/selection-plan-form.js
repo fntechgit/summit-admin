@@ -51,7 +51,7 @@ import {
   DEFAULT_ALLOWED_EDITABLE_QUESTIONS,
   DEFAULT_ALLOWED_QUESTIONS,
   DEFAULT_CFP_PRESENTATION_EDITION_TABS
-} from "../../reducers/summits/selection-plan-reducer";
+} from "../../reducers/selection_plans/selection-plan-reducer";
 import history from "../../history";
 
 class SelectionPlanForm extends React.Component {
