@@ -12,9 +12,7 @@
  */
 
 import moment from "moment-timezone";
-import {
-  epochToMomentTimeZone
-} from "openstack-uicore-foundation/lib/utils/methods";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   getAccessToken,
   initLogOut
@@ -385,6 +383,44 @@ export const joinCVSChunks = (chunks) => {
   }, "");
 
   return `${header}\n${csv}`;
+};
+
+export const joinCVSChunksAndNormalizeHeaders = (csvFiles) => {
+  function parseCsv(csv) {
+    const [headerLine, ...lines] = csv.trim().split("\n");
+    const headers = headerLine.split(",");
+    const data = lines.map((line) => {
+      const values = line.split(",");
+      const obj = {};
+      headers.forEach((key, i) => {
+        obj[key] = values[i] || "";
+      });
+      return obj;
+    });
+    return { headers, data };
+  }
+
+  const allHeadersSet = new Set();
+  const allData = [];
+
+  for (const csv of csvFiles) {
+    const { headers, data } = parseCsv(csv);
+    headers.forEach((h) => allHeadersSet.add(h));
+    allData.push(...data);
+  }
+
+  const allHeaders = Array.from(allHeadersSet);
+
+  function alignData(row) {
+    return allHeaders.map((h) => (row[h] !== undefined ? row[h] : ""));
+  }
+
+  const rows = [
+    allHeaders.join(","),
+    ...allData.map((row) => alignData(row).join(","))
+  ];
+
+  return rows.join("\n");
 };
 
 export const htmlToString = (html) =>

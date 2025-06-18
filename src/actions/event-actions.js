@@ -39,7 +39,7 @@ import {
   checkOrFilter,
   getAccessTokenSafely,
   isNumericString,
-  joinCVSChunks,
+  joinCVSChunksAndNormalizeHeaders,
   parseDateRangeFilter
 } from "../utils/methods";
 import { getQAUsersBySummitEvent } from "./user-chat-roles-actions";
@@ -1442,7 +1442,7 @@ export const exportEvents =
     Promise.all(params.map((p) => getRawCSV(endpoint, p)))
       .then((files) => {
         if (files.length > 0) {
-          const cvs = joinCVSChunks(files);
+          const cvs = joinCVSChunksAndNormalizeHeaders(files);
           // then simulate the file download
           downloadFileByContent(filename, cvs, csvMIME);
         }
