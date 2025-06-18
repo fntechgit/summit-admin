@@ -241,7 +241,8 @@ export const getPromocode = (promocodeId) => async (dispatch, getState) => {
   const params = {
     expand:
       "owner,sponsor,sponsor.company,sponsor.sponsorship,sponsor.sponsorship.type,ticket_type,ticket_types_rules,tags,allowed_ticket_types",
-    relations: "owner,sponsor,ticket_types_rules,tags,allowed_ticket_types",
+    relations:
+      "owner,sponsor,ticket_types_rules,tags,allowed_ticket_types,badge_features",
     access_token: accessToken
   };
 
