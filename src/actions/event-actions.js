@@ -1746,6 +1746,40 @@ export const querySubmitterCompany = _.debounce(async (input, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
+export const queryAllCompanies = _.debounce(async (input, callback) => {
+  input = escapeFilterValue(input);
+
+  const accessToken = await getAccessTokenSafely();
+
+  const urls = [
+    `${window.API_BASE_URL}/api/public/v1/speakers/all/companies?filter[]=company@@${input}&order=company`,
+    `${window.API_BASE_URL}/api/public/v1/members/all/companies?filter[]=company@@${input}&order=company`,
+    `${window.API_BASE_URL}/api/v1/companies?filter[]=name@@${input}&order=name&page=1&per_page=5&access_token=${accessToken}`
+  ];
+
+  try {
+    const companies = await Promise.all(
+      urls.map((url) =>
+        fetch(url)
+          .then(fetchResponseHandler)
+          .then((json) =>
+            json.data.map((item) => {
+              const name = item.company ?? item.name;
+              return { id: name, name };
+            })
+          )
+      )
+    );
+    const flatCompanies = companies.flat();
+    const uniqueCompanies = Array.from(
+      new Map(flatCompanies.map((o) => [o.id, o])).values()
+    );
+    callback(uniqueCompanies);
+  } catch (err) {
+    fetchErrorHandler(err);
+  }
+}, DEBOUNCE_WAIT);
+
 export const changeEventListSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_SEARCH_TERM)({ term }));
 };
