@@ -9,7 +9,7 @@ import {
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 
 const BasePCForm = (props) => {
-  let badge_features_ddl = props.summit.badge_features.map((f) => ({
+  const badge_features_ddl = props.summit.badge_features.map((f) => ({
     label: f.name,
     value: f.id
   }));
@@ -111,7 +111,6 @@ const BasePCForm = (props) => {
               )}
             </label>
           </div>
-
           <Dropdown
             id="badge_features"
             value={props.entity.badge_features}
