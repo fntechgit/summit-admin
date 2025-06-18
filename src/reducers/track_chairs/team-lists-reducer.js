@@ -12,6 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import _ from "lodash";
 import {
   RECEIVE_SELECTION_PLANS,
   RECEIVE_SOURCE_LIST,
@@ -19,6 +20,7 @@ import {
   REORDER_LIST,
   REQUEST_SOURCE_LIST,
   REQUEST_TEAM_LIST,
+  REVERT_LISTS,
   SET_SOURCE_SEL_PLAN,
   TEAM_LIST_UPDATED
 } from "../../actions/track-chair-actions";
@@ -52,6 +54,7 @@ const DEFAULT_STATE = {
   sourceTrackId: null,
   sourceSearchTerm: "",
   sourceList: null,
+  prevList: null,
   teamList: null,
   sourcePage: 1,
   sourceLastPage: 1
@@ -162,10 +165,20 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
     }
     case REORDER_LIST: {
       const { items } = payload;
-
+      const newState = _.cloneDeep(state);
       const newItems = items.map((it, i) => ({ ...it, order: i + 1 }));
 
-      return { ...state, teamList: { ...state.teamList, items: newItems } };
+      // only store the original list for rollback
+      if (!newState.prevList)
+        newState.prevList = _.cloneDeep(newState.teamList);
+
+      newState.teamList.items = newItems;
+
+      return newState;
+    }
+    case REVERT_LISTS: {
+      const teamList = state.prevList || state.teamList;
+      return { ...state, teamList: { ...teamList } };
     }
     case TEAM_LIST_UPDATED: {
       const list = payload.response;
@@ -174,7 +187,8 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
-        teamList: { ...state.teamList, hash: list.hash, meta }
+        teamList: { ...state.teamList, hash: list.hash, meta },
+        prevList: null
       };
     }
     default:

@@ -52,6 +52,7 @@ export const RECEIVE_SOURCE_LIST = "RECEIVE_SOURCE_LIST";
 export const REQUEST_TEAM_LIST = "REQUEST_TEAM_LIST";
 export const RECEIVE_TEAM_LIST = "RECEIVE_TEAM_LIST";
 export const REORDER_LIST = "REORDER_LIST";
+export const REVERT_LISTS = "REVERT_LISTS";
 export const TEAM_LIST_UPDATED = "TEAM_LIST_UPDATED";
 
 const callDelay = 500; // miliseconds
@@ -509,6 +510,10 @@ export const getTeamList =
 
 export const reorderList = (listId, items) => (dispatch) => {
   dispatch(createAction(REORDER_LIST)({ listId, items }));
+};
+
+export const revertChanges = () => async (dispatch) => {
+  dispatch(createAction(REVERT_LISTS)({}));
 };
 
 export const updateTeamList = () => async (dispatch, getState) => {
