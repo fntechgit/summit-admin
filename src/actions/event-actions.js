@@ -1712,6 +1712,40 @@ export const queryEvents = _.debounce(async (summitId, input, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
+export const querySpeakerCompany = _.debounce(async (input, callback) => {
+  input = escapeFilterValue(input);
+
+  fetch(
+    `${window.API_BASE_URL}/api/public/v1/speakers/all/companies?filter[]=company@@${input}&order=company`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data].map(({ company }) => ({
+        id: company,
+        name: company
+      }));
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);
+
+export const querySubmitterCompany = _.debounce(async (input, callback) => {
+  input = escapeFilterValue(input);
+
+  fetch(
+    `${window.API_BASE_URL}/api/public/v1/members/all/companies?filter[]=company@@${input}&order=company`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data].map(({ company }) => ({
+        id: company,
+        name: company
+      }));
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);
+
 export const changeEventListSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_SEARCH_TERM)({ term }));
 };

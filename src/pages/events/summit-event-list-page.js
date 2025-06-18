@@ -37,7 +37,9 @@ import {
   exportEvents,
   getEvents,
   importEventsCSV,
-  importMP4AssetsFromMUX
+  importMP4AssetsFromMUX,
+  querySpeakerCompany,
+  querySubmitterCompany
 } from "../../actions/event-actions";
 import { handleDDLSortByLabel, hasErrors, uuidv4 } from "../../utils/methods";
 import "../../styles/summit-event-list-page.less";
@@ -1529,6 +1531,7 @@ class SummitEventListPage extends React.Component {
                   "event_list.placeholders.speaker_company"
                 )}
                 onChange={this.handleExtraFilterChange}
+                queryFunction={querySpeakerCompany}
                 multi
               />
             </div>
@@ -1784,6 +1787,7 @@ class SummitEventListPage extends React.Component {
                   "event_list.placeholders.submitter_company"
                 )}
                 onChange={this.handleExtraFilterChange}
+                queryFunction={querySubmitterCompany}
                 multi
                 allowCreate
                 allowCreateWhileLoading
