@@ -166,8 +166,10 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
       const track = allTracks.find((t) => t.id === extraProps.row?.track?.id);
 
       const selection_plans_per_track = allSelectionPlans
-        .filter((sp) =>
-          sp.track_groups.some((gr) => track.track_groups.includes(gr))
+        .filter(
+          (sp) =>
+            !track ||
+            sp.track_groups.some((gr) => track.track_groups.includes(gr))
         )
         ?.sort((a, b) => a.order - b.order)
         .map((sp) => ({ label: sp.name, value: sp.id }));
@@ -192,10 +194,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
         />
       );
     },
-    render: (e) => {
-      console.log(e);
-      return e?.name ? e.name : "N/A";
-    }
+    render: (e) => e?.name ? e.name : "N/A"
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
