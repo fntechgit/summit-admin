@@ -299,6 +299,7 @@ const InventoryListPage = ({
             options={table_options}
             perPage={perPage}
             currentPage={currentPage}
+            totalRows={totalInventoryItems}
             onRowEdit={handleRowEdit}
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}

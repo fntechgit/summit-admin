@@ -23,6 +23,7 @@ import {
 const MuiTable = ({
   columns = [],
   data = [],
+  totalRows,
   perPage,
   currentPage,
   onRowEdit,
@@ -32,7 +33,7 @@ const MuiTable = ({
   options = { sortCol: "", sortDir: "" }
 }) => {
   const handleChangePage = (_, newPage) => {
-    onPageChange(newPage);
+    onPageChange(newPage + 1);
   };
 
   const handleChangeRowsPerPage = (ev) => {
@@ -132,7 +133,7 @@ const MuiTable = ({
         {/* PAGINATION */}
         <TablePagination
           component="div"
-          count={data.length}
+          count={totalRows}
           rowsPerPageOptions={[
             DEFAULT_PER_PAGE,
             TWENTY_PER_PAGE,
@@ -140,9 +141,7 @@ const MuiTable = ({
           ]}
           rowsPerPage={perPage}
           page={currentPage - 1}
-          onPageChange={(_, newPage) => {
-            handleChangePage(newPage + 1);
-          }}
+          onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage={T.translate("mui_table.rows_per_page")}
           sx={{

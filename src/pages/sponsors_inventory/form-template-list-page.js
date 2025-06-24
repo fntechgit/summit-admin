@@ -308,6 +308,7 @@ const FormTemplateListPage = ({
             options={table_options}
             perPage={perPage}
             currentPage={currentPage}
+            totalRows={totalFormTemplates}
             onRowEdit={handleRowEdit}
             onPageChange={handlePageChange}
             onSort={handleSort}

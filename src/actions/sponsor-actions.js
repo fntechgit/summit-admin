@@ -155,8 +155,8 @@ export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
 export const getSponsors =
   (
     term = null,
-    page = 1,
-    perPage = HUNDRED_PER_PAGE,
+    currentPage = 1,
+    perPage = DEFAULT_PER_PAGE,
     order = "order",
     orderDir = 1
   ) =>
@@ -176,7 +176,7 @@ export const getSponsors =
     }
 
     const params = {
-      page,
+      page: currentPage,
       per_page: perPage,
       expand: "company,sponsorship,sponsorship.type",
       relations: "company.none,sponsorship.none,sponsorship.type.none,none",
@@ -199,7 +199,7 @@ export const getSponsors =
       createAction(RECEIVE_SPONSORS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
       authErrorHandler,
-      { page, perPage, order, orderDir, term }
+      { currentPage, perPage, order, orderDir, term }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
