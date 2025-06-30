@@ -21,6 +21,7 @@ import "font-awesome/css/font-awesome.css";
 import "./styles/landing.css";
 import "./styles/general.less";
 import "openstack-uicore-foundation/lib/css/components/index.css";
+import CustomTheme from "./components/CustomTheme";
 
 const onBeforeLift = () => {
   console.log("reading state ...");
@@ -29,7 +30,9 @@ const onBeforeLift = () => {
 ReactDOM.render(
   <Provider store={store}>
     <PersistGate onBeforeLift={onBeforeLift} persistor={persistor}>
-      <App />
+      <CustomTheme>
+        <App />
+      </CustomTheme>
     </PersistGate>
   </Provider>,
   document.querySelector("#root")
