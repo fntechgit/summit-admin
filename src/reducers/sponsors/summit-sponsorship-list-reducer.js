@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/utils/actions";
 
 import {
   RECEIVE_SUMMIT_SPONSORSHIPS,
@@ -19,10 +21,12 @@ import {
 } from "../../actions/sponsor-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/utils/actions";
 
 const DEFAULT_STATE = {
   sponsorships: [],
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
   order: "order",
   orderDir: 1,
   totalSponsorships: 0
@@ -36,13 +40,13 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SUMMIT_SPONSORSHIPS: {
-      let { order, orderDir } = payload;
+      const { order, orderDir } = payload;
 
       return { ...state, order, orderDir };
     }
     case RECEIVE_SUMMIT_SPONSORSHIPS: {
-      let { total } = payload.response;
-      let sponsorships = payload.response.data;
+      const { current_page, total, last_page } = payload.response;
+      const sponsorships = payload.response.data;
 
       sponsorships.map((s) => {
         s.sponsorship_type = s.type?.name;
@@ -51,14 +55,20 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
         s.widget_title = s.widget_title ? s.widget_title : "N/A";
       });
 
-      return { ...state, sponsorships: sponsorships, totalSponsorships: total };
+      return {
+        ...state,
+        sponsorships,
+        currentPage: current_page,
+        totalSponsorships: total,
+        lastPage: last_page
+      };
     }
     case SUMMIT_SPONSORSHIP_ORDER_UPDATED: {
-      let sponsorships = payload;
-      return { ...state, sponsorships: sponsorships };
+      const sponsorships = payload;
+      return { ...state, sponsorships };
     }
     case SUMMIT_SPONSORSHIP_DELETED: {
-      let { sponsorshipId } = payload;
+      const { sponsorshipId } = payload;
       return {
         ...state,
         sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId)
