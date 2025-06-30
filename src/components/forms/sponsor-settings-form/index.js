@@ -14,73 +14,46 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { useFormik } from "formik";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Grid2,
+  TextField
+} from "@mui/material";
+import { DateField } from "@mui/x-date-pickers/DateField";
 import * as yup from "yup";
-import { Box, Button, Grid2 } from "@mui/material";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import MuiFormikDatepicker from "../../inputs/mui-formik-datepicker";
-import MuiFormikTextField from "../../inputs/mui-formik-textfield";
-import MuiFormikCheckbox from "../../inputs/mui-formik-checkbox";
 import styles from "./styles.module.less";
-import { addEmailListValidator } from "../../../utils/yup";
-import useScrollToError from "../../../hooks/useScrollToError";
 
-const buildInitialValues = (settings, summitTZ) => {
-  const {
-    early_bird_end_date,
-    standard_price_end_date,
-    onsite_price_start_date,
-    onsite_price_end_date
-  } = settings;
-  const normalizedSettings = { ...settings };
-  normalizedSettings.early_bird_end_date = early_bird_end_date
-    ? epochToMomentTimeZone(early_bird_end_date, summitTZ)
-    : null;
-  normalizedSettings.standard_price_end_date = standard_price_end_date
-    ? epochToMomentTimeZone(standard_price_end_date, summitTZ)
-    : null;
-  normalizedSettings.onsite_price_start_date = onsite_price_start_date
-    ? epochToMomentTimeZone(onsite_price_start_date, summitTZ)
-    : null;
-  normalizedSettings.onsite_price_end_date = onsite_price_end_date
-    ? epochToMomentTimeZone(onsite_price_end_date, summitTZ)
-    : null;
-
-  return normalizedSettings;
-};
-
-addEmailListValidator();
-
-const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
+const SponsorSettingsForm = ({ settings, onSubmit }) => {
   const formik = useFormik({
-    initialValues: buildInitialValues(settings, summitTZ),
+    initialValues: settings,
     validationSchema: yup.object({
-      early_bird_end_date: yup
-        .date(T.translate("validation.date"))
-        .required(T.translate("validation.required")),
-      standard_price_end_date: yup
-        .date(T.translate("validation.date"))
-        .required(T.translate("validation.required")),
-      onsite_price_start_date: yup
-        .date(T.translate("validation.date"))
-        .required(T.translate("validation.required")),
-      onsite_price_end_date: yup
-        .date(T.translate("validation.date"))
-        .required(T.translate("validation.required")),
+      early_bird_start_date: yup.date(T.translate("validation.date")),
+      early_bird_end_date: yup.date(T.translate("validation.date")),
+      standard_price_start_date: yup.date(T.translate("validation.date")),
+      standard_price_end_date: yup.date(T.translate("validation.date")),
+      onsite_price_start_date: yup.date(T.translate("validation.date")),
+      onsite_price_end_date: yup.date(T.translate("validation.date")),
+      wire_transfer_fee: yup.number(T.translate("validation.number")),
       wire_transfer_notification_email: yup
         .string(T.translate("validation.string"))
-        .emailList(T.translate("validation.email")),
-      access_request_notification_email: yup
+        .email(T.translate("validation.email")),
+      support_email: yup
         .string(T.translate("validation.string"))
-        .emailList(T.translate("validation.email")),
+        .email(T.translate("validation.email")),
+      access_request_notification_email: yup.string(
+        T.translate("validation.string")
+      ),
       wire_transfer_detail: yup.string(T.translate("validation.string")),
-      cart_checkout_cancel_policy: yup.string(T.translate("validation.string"))
+      cart_checkout_cancel_policy: yup.string(T.translate("validation.string")),
+      is_wire_transfer_enabled: yup.boolean(T.translate("validation.checkbox")),
+      is_access_request_enabled: yup.boolean(T.translate("validation.checkbox"))
     }),
     onSubmit,
     enableReinitialize: true
   });
-
-  // SCROLL TO ERROR
-  useScrollToError(formik);
 
   return (
     <Box
@@ -91,86 +64,142 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
       autoComplete="off"
     >
       <Grid2 container spacing={2}>
-        <Grid2 size={4}>
-          <MuiFormikDatepicker
+        <Grid2 item size={4}>
+          <DateField
+            name="early_bird_start_date"
+            label={T.translate("sponsor_settings.early_bird_start_date")}
+            value={settings.early_bird_start_date}
+            margin="normal"
+            fullWidth
+          />
+        </Grid2>
+        <Grid2 item size={4}>
+          <DateField
             name="early_bird_end_date"
             label={T.translate("sponsor_settings.early_bird_end_date")}
-            formik={formik}
+            value={settings.early_bird_end_date}
+            margin="normal"
+            fullWidth
           />
         </Grid2>
-        <Grid2 size={4}>
-          <MuiFormikDatepicker
+        <Grid2 item size={4}>
+          <DateField
+            name="standard_price_start_date"
+            label={T.translate("sponsor_settings.standard_price_start_date")}
+            value={settings.standard_price_start_date}
+            margin="normal"
+            fullWidth
+          />
+        </Grid2>
+        <Grid2 item size={4}>
+          <DateField
             name="standard_price_end_date"
             label={T.translate("sponsor_settings.standard_price_end_date")}
-            formik={formik}
+            value={settings.standard_price_end_date}
+            margin="normal"
+            fullWidth
           />
         </Grid2>
-        <Grid2 size={4}>
-          <MuiFormikDatepicker
+        <Grid2 item size={4}>
+          <DateField
             name="onsite_price_start_date"
             label={T.translate("sponsor_settings.onsite_price_start_date")}
-            formik={formik}
+            value={settings.onsite_price_start_date}
+            margin="normal"
+            fullWidth
           />
         </Grid2>
-        <Grid2 size={4}>
-          <MuiFormikDatepicker
+        <Grid2 item size={4}>
+          <DateField
             name="onsite_price_end_date"
             label={T.translate("sponsor_settings.onsite_price_end_date")}
-            formik={formik}
+            value={settings.onsite_price_end_date}
+            margin="normal"
+            fullWidth
           />
         </Grid2>
-        <Grid2 size={4}>
-          <MuiFormikTextField
+        <Grid2 item size={4}>
+          <DateField
+            name="wire_transfer_fee"
+            label={T.translate("sponsor_settings.wire_transfer_fee")}
+            value={settings.wire_transfer_fee}
+            margin="normal"
+            fullWidth
+          />
+        </Grid2>
+        <Grid2 item size={4}>
+          <DateField
             name="wire_transfer_notification_email"
             label={T.translate(
               "sponsor_settings.wire_transfer_notification_email"
             )}
-            formik={formik}
+            value={settings.wire_transfer_notification_email}
+            margin="normal"
             fullWidth
           />
         </Grid2>
-        <Grid2 size={12}>
-          <MuiFormikTextField
+        <Grid2 item size={4}>
+          <DateField
+            name="support_email"
+            label={T.translate("sponsor_settings.support_email")}
+            value={settings.support_email}
+            margin="normal"
+            fullWidth
+          />
+        </Grid2>
+        <Grid2 item size={12}>
+          <TextField
             name="access_request_notification_email"
             label={T.translate(
               "sponsor_settings.access_request_notification_email"
             )}
-            formik={formik}
+            value={settings.access_request_notification_email}
+            margin="normal"
             fullWidth
           />
         </Grid2>
-        <Grid2 size={12}>
-          <MuiFormikTextField
+        <Grid2 item size={12}>
+          <TextField
             name="wire_transfer_detail"
             label={T.translate("sponsor_settings.wire_transfer_detail")}
-            formik={formik}
+            value={settings.wire_transfer_detail}
+            margin="normal"
             fullWidth
             multiline
             rows={4}
           />
         </Grid2>
-        <Grid2 size={12}>
-          <MuiFormikTextField
+        <Grid2 item size={12}>
+          <TextField
             name="cart_checkout_cancel_policy"
             label={T.translate("sponsor_settings.cart_checkout_cancel_policy")}
-            formik={formik}
+            value={settings.cart_checkout_cancel_policy}
+            margin="normal"
             fullWidth
             multiline
             rows={4}
           />
         </Grid2>
-        <Grid2 size={4}>
-          <MuiFormikCheckbox
-            name="is_wire_transfer_enabled"
+        <Grid2 item size={4}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="is_wire_transfer_enabled"
+                checked={settings.is_wire_transfer_enabled}
+              />
+            }
             label={T.translate("sponsor_settings.is_wire_transfer_enabled")}
-            formik={formik}
           />
         </Grid2>
-        <Grid2 size={4}>
-          <MuiFormikCheckbox
-            name="is_access_request_enabled"
+        <Grid2 item size={4}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="is_access_request_enabled"
+                checked={settings.is_access_request_enabled}
+              />
+            }
             label={T.translate("sponsor_settings.is_access_request_enabled")}
-            formik={formik}
           />
         </Grid2>
       </Grid2>
