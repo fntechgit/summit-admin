@@ -9,143 +9,207 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import {
-  Table,
-  SortableTable
-} from "openstack-uicore-foundation/lib/components";
+import { Button, Grid2, IconButton, Alert, Box } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getSummitSponsorships,
   deleteSummitSponsorship,
   updateSummitSponsorhipOrder
 } from "../../actions/sponsor-actions";
-import { getSponsorships } from "../../actions/sponsorship-actions";
+import MuiTable from "../../components/mui/table/mui-table";
 
-class SummitSponsorshipListPage extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleNewSponsorship = this.handleNewSponsorship.bind(this);
-
-    this.state = {};
-  }
-
-  componentDidMount() {
-    const { currentSummit } = this.props;
+const SummitSponsorshipListPage = ({
+  currentSummit,
+  history,
+  deleteSummitSponsorship,
+  sponsorships,
+  currentPage,
+  perPage,
+  totalSponsorships,
+  updateSummitSponsorhipOrder,
+  getSummitSponsorships
+}) => {
+  useEffect(() => {
     if (currentSummit) {
-      this.props.getSummitSponsorships();
+      getSummitSponsorships();
     }
-  }
+  }, []);
 
-  handleEdit(sponsorship_id) {
-    const { currentSummit, history } = this.props;
+  const handleEdit = (sponsorship_id) => {
     history.push(
       `/app/summits/${currentSummit.id}/sponsorships/${sponsorship_id}`
     );
-  }
+  };
 
-  handleDelete(sponsorshipId) {
-    const { deleteSummitSponsorship, sponsorships } = this.props;
-    let sponsorship = sponsorships.find((t) => t.id === sponsorshipId);
+  const handleDelete = (sponsorshipId) => {
+    const sponsorship = sponsorships.find((t) => t.id === sponsorshipId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("summit_sponsorship_list.remove_warning") +
-        " " +
-        sponsorship.type.name,
+      text: `${T.translate("summit_sponsorship_list.remove_warning")} ${
+        sponsorship.type.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSummitSponsorship(sponsorshipId);
       }
     });
-  }
+  };
 
-  handleSort(index, key, dir, func) {
-    this.props.getSummitSponsorships(key, dir);
-  }
+  const handleSort = (index, key, dir) => {
+    getSummitSponsorships(key, dir);
+  };
 
-  handleNewSponsorship(ev) {
-    const { currentSummit, history } = this.props;
+  const handleNewSponsorship = () => {
     history.push(`/app/summits/${currentSummit.id}/sponsorships/new`);
-  }
+  };
 
-  render() {
-    const { currentSummit, sponsorships, totalSponsorships } = this.props;
+  const handleReorder = (newOrder, itemId, newItemOrder) => {
+    setTableData(newOrder);
+    updateSummitSponsorhipOrder(newOrder, itemId, newItemOrder);
+  };
 
-    const sortedSponsorships = sponsorships.sort((a, b) => a.order - b.order);
+  const sortedSponsorships = sponsorships.sort((a, b) => a.order - b.order);
 
-    const columns = [
-      {
-        columnKey: "sponsorship_type",
-        value: T.translate("summit_sponsorship_list.sponsorship_type")
-      },
-      {
-        columnKey: "label",
-        value: T.translate("summit_sponsorship_list.label")
-      },
-      { columnKey: "size", value: T.translate("summit_sponsorship_list.size") }
-    ];
+  const [tableData, setTableData] = useState(sortedSponsorships);
 
-    const table_options = {
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
+  const columns = [
+    {
+      columnKey: "sponsorship_type",
+      header: T.translate("summit_sponsorship_list.sponsorship_type"),
+      value: T.translate("summit_sponsorship_list.sponsorship_type")
+    },
+    {
+      columnKey: "label",
+      header: T.translate("summit_sponsorship_list.label"),
+      value: T.translate("summit_sponsorship_list.label")
+    },
+    {
+      columnKey: "size",
+      header: T.translate("summit_sponsorship_list.size"),
+      value: T.translate("summit_sponsorship_list.size")
+    },
+    {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row) => (
+        <IconButton size="small" onClick={() => handleEdit(row.id)}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row) => (
+        <IconButton size="small" onClick={() => handleDelete(row.id)}>
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
+    }
+  ];
 
-    if (!currentSummit.id) return <div />;
+  const table_options = {
+    actions: {
+      edit: { onClick: handleEdit },
+      delete: { onClick: handleDelete }
+    }
+  };
 
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("summit_sponsorship_list.summit_sponsorship_list")} (
-          {totalSponsorships})
-        </h3>
-        <div className={"row"}>
-          <div className="col-md-6 text-right col-md-offset-6">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNewSponsorship}
+  if (!currentSummit.id) return <div />;
+
+  return (
+    <div className="container">
+      <h3>
+        {" "}
+        {T.translate("summit_sponsorship_list.summit_sponsorship_list")} (
+        {totalSponsorships})
+      </h3>
+
+      <Alert
+        severity="info"
+        sx={{
+          justifyContent: "start",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        {T.translate("summit_sponsorship_list.alert_info")}
+      </Alert>
+      <Grid2
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={6}>
+          <Box component="span">{totalSponsorships} summit tiers</Box>
+        </Grid2>
+        <Grid2
+          container
+          size={6}
+          spacing={1}
+          sx={{
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={8} />
+          <Grid2 size={4}>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleNewSponsorship}
+              startIcon={<AddIcon />}
+              sx={{ height: "36px" }}
             >
               {T.translate("summit_sponsorship_list.add_sponsorship")}
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Grid2>
+        </Grid2>
+      </Grid2>
 
-        {sortedSponsorships.length === 0 && (
-          <div>{T.translate("summit_sponsorship_list.no_sponsorships")}</div>
-        )}
+      {sortedSponsorships.length === 0 && (
+        <div>{T.translate("summit_sponsorship_list.no_sponsorships")}</div>
+      )}
 
-        {sortedSponsorships.length > 0 && (
-          <>
-            <SortableTable
-              options={table_options}
-              data={sortedSponsorships}
-              columns={columns}
-              dropCallback={this.props.updateSummitSponsorhipOrder}
-              orderField="order"
-            />
-          </>
-        )}
-      </div>
-    );
-  }
-}
+      {sortedSponsorships.length > 0 && (
+        <MuiTable
+          options={table_options}
+          data={tableData}
+          columns={columns}
+          totalRows={totalSponsorships}
+          currentPage={currentPage}
+          perPage={perPage}
+          onSort={handleSort}
+          onReorder={handleReorder}
+        />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
