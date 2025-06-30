@@ -37,9 +37,12 @@ import {
   exportEvents,
   getEvents,
   importEventsCSV,
-  importMP4AssetsFromMUX
+  importMP4AssetsFromMUX,
+  queryAllCompanies,
+  querySpeakerCompany,
+  querySubmitterCompany
 } from "../../actions/event-actions";
-import { handleDDLSortByLabel, hasErrors, uuidv4 } from "../../utils/methods";
+import { handleDDLSortByLabel, hasErrors } from "../../utils/methods";
 import "../../styles/summit-event-list-page.less";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import MediaTypeFilter from "../../components/filters/media-type-filter";
@@ -1528,6 +1531,7 @@ class SummitEventListPage extends React.Component {
                   "event_list.placeholders.speaker_company"
                 )}
                 onChange={this.handleExtraFilterChange}
+                queryFunction={querySpeakerCompany}
                 multi
               />
             </div>
@@ -1577,23 +1581,17 @@ class SummitEventListPage extends React.Component {
                 placeholder={T.translate(
                   "event_list.placeholders.all_companies"
                 )}
+                queryFunction={queryAllCompanies}
                 onChange={this.handleExtraFilterChange}
                 multi
-                allowCreate
-                allowCreateWhileLoading
-                formatCreateLabel={(input) => `${input}`}
-                onCreate={(newCompanyName) => {
-                  const id = "all_companies";
-                  const currFilter = eventFilters[id];
-                  const value = { id: uuidv4(), name: newCompanyName };
-                  const newFilter = [...currFilter, value];
-                  this.setState((prevState) => ({
-                    ...prevState,
-                    eventFilters: {
-                      ...eventFilters,
-                      [id]: newFilter
-                    }
-                  }));
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+                styles={{
+                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  control: (base, state) => ({
+                    ...base,
+                    zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+                  })
                 }}
               />
             </div>
@@ -1783,23 +1781,8 @@ class SummitEventListPage extends React.Component {
                   "event_list.placeholders.submitter_company"
                 )}
                 onChange={this.handleExtraFilterChange}
+                queryFunction={querySubmitterCompany}
                 multi
-                allowCreate
-                allowCreateWhileLoading
-                formatCreateLabel={(input) => `${input}`}
-                onCreate={(newCompanyName) => {
-                  const id = "submitter_company";
-                  const currFilter = eventFilters[id];
-                  const value = { id: uuidv4(), name: newCompanyName };
-                  const newFilter = [...currFilter, value];
-                  this.setState((prevState) => ({
-                    ...prevState,
-                    eventFilters: {
-                      ...eventFilters,
-                      [id]: newFilter
-                    }
-                  }));
-                }}
               />
             </div>
           )}
