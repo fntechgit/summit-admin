@@ -153,6 +153,7 @@ import formTemplateReducer from "./reducers/sponsors_inventory/form-template-red
 import formTemplateListReducer from "./reducers/sponsors_inventory/form-template-list-reducer.js";
 import formTemplateItemReducer from "./reducers/sponsors_inventory/form-template-item-reducer.js";
 import formTemplateItemListReducer from "./reducers/sponsors_inventory/form-template-item-list-reducer.js";
+import sponsorSettingsReducer from "./reducers/sponsor_settings/sponsor-settings-reducer";
 
 // default: localStorage if web, AsyncStorage if react-native
 
@@ -300,7 +301,8 @@ const reducers = persistCombineReducers(config, {
   currentFormTemplateState: formTemplateReducer,
   currentFormTemplateListState: formTemplateListReducer,
   currentFormTemplateItemState: formTemplateItemReducer,
-  currentFormTemplateItemListState: formTemplateItemListReducer
+  currentFormTemplateItemListState: formTemplateItemListReducer,
+  sponsorSettingsState: sponsorSettingsReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
