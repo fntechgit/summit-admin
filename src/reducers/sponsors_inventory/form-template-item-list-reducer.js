@@ -21,7 +21,7 @@ import {
 
 const DEFAULT_STATE = {
   formTemplateItems: [],
-  term: null,
+  term: "",
   order: "name",
   orderDir: 1,
   currentPage: 1,

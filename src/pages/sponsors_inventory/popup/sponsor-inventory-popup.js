@@ -102,7 +102,7 @@ const SponsorItemDialog = ({
                 maximum_quantity: 0
               }
             ],
-      images: initialEntity?.images.length > 0 ? initialEntity?.images : []
+      images: initialEntity?.images?.length > 0 ? initialEntity?.images : []
     });
   }, [initialEntity]);
 

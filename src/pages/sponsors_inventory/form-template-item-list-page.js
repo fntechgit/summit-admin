@@ -62,6 +62,7 @@ const FormTemplateItemListPage = ({
   getFormTemplateItem,
   currentFormTemplateItem,
   currentFormTemplateItemErrors,
+  saveFormTemplateItem,
   deleteItemMetaFieldType,
   deleteItemMetaFieldTypeValue,
   deleteItemImage
@@ -125,8 +126,15 @@ const FormTemplateItemListPage = ({
   };
 
   const handleFormTemplateSave = (item) => {
-    saveFormTemplateItem(item).then(() =>
-      getFormTemplateItems(term, currentPage, perPage, order, orderDir)
+    saveFormTemplateItem(formTemplateId, item).then(() =>
+      getFormTemplateItems(
+        formTemplateId,
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir
+      )
     );
     setShowInventoryItemModal(false);
   };

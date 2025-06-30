@@ -71,7 +71,7 @@ export const FORM_TEMPLATE_ITEM_IMAGE_DELETED =
 export const getFormTemplateItems =
   (
     formTemplateId,
-    term = null,
+    term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
@@ -220,7 +220,7 @@ export const saveFormTemplateItem =
             );
           }
 
-          Promise.all(promises)
+          return Promise.all(promises)
             .then(() => {
               dispatch(
                 showSuccessMessage(
@@ -272,7 +272,7 @@ export const saveFormTemplateItem =
           );
         }
 
-        Promise.all(promises)
+        return Promise.all(promises)
           .then(() => {
             dispatch(
               showMessage(success_message, () => {
