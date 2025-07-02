@@ -13,29 +13,36 @@
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
-  RECEIVE_SPONSOR_SETTINGS,
-  REQUEST_SPONSOR_SETTINGS
+  RECEIVE_PURCHASE_SPONSOR_SETTINGS,
+  RECEIVE_USER_SPONSOR_SETTINGS,
+  REQUEST_SPONSOR_SETTINGS,
+  SET_EMPTY_PURCHASES_SETTINGS,
+  SET_EMPTY_SPONSOR_USERS_SETTINGS,
+  SPONSOR_USER_SETTINGS_UPDATED,
+  SPONSOR_PURCHASE_SETTINGS_UPDATED
 } from "../../actions/sponsor-settings-actions";
-import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import {
+  RECEIVE_SUMMIT,
+  SET_CURRENT_SUMMIT
+} from "../../actions/summit-actions";
+import { arrayToString } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   settings: {
-    early_bird_start_date: null,
     early_bird_end_date: null,
-    standard_price_start_date: null,
     standard_price_end_date: null,
     onsite_price_start_date: null,
     onsite_price_end_date: null,
-    wire_transfer_fee: 0,
     wire_transfer_notification_email: "",
-    support_email: "",
     access_request_notification_email: "",
     wire_transfer_detail: "",
     cart_checkout_cancel_policy: "",
     is_wire_transfer_enabled: false,
     is_access_request_enabled: false
   },
-  errors: {}
+  emptyPurchaseSettings: false,
+  emptySponsorUserSettings: false,
+  summitTZ: "utc"
 };
 
 const sponsorSettingsReducer = (state = DEFAULT_STATE, action) => {
@@ -52,13 +59,44 @@ const sponsorSettingsReducer = (state = DEFAULT_STATE, action) => {
     case SET_CURRENT_SUMMIT: {
       return { ...DEFAULT_STATE };
     }
+    case RECEIVE_SUMMIT: {
+      const entity = { ...payload.response };
+      return { ...state, summitTZ: entity.time_zone_id };
+    }
     case REQUEST_SPONSOR_SETTINGS: {
       return state;
     }
+    case SET_EMPTY_SPONSOR_USERS_SETTINGS: {
+      return { ...state, emptySponsorUserSettings: true };
+    }
+    case SET_EMPTY_PURCHASES_SETTINGS: {
+      return { ...state, emptyPurchaseSettings: true };
+    }
+    case SPONSOR_PURCHASE_SETTINGS_UPDATED:
+    case RECEIVE_PURCHASE_SPONSOR_SETTINGS: {
+      const normalizedSettings = { ...payload.response };
 
-    case RECEIVE_SPONSOR_SETTINGS: {
-      const newSettings = { ...payload.response };
-      return { ...state, settings: {...state.settings, ...newSettings} };
+      normalizedSettings.wire_transfer_notification_email = arrayToString(
+        normalizedSettings.wire_transfer_notification_email
+      );
+
+      return {
+        ...state,
+        settings: { ...state.settings, ...normalizedSettings }
+      };
+    }
+    case SPONSOR_USER_SETTINGS_UPDATED:
+    case RECEIVE_USER_SPONSOR_SETTINGS: {
+      const normalizedSettings = { ...payload.response };
+
+      normalizedSettings.access_request_notification_email = arrayToString(
+        normalizedSettings.access_request_notification_email
+      );
+
+      return {
+        ...state,
+        settings: { ...state.settings, ...normalizedSettings }
+      };
     }
     default:
       return state;
