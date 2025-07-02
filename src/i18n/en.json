@@ -74,6 +74,12 @@
       "select_invitation_status": "Select status"
     }
   },
+  "validation": {
+    "required": "This field is required.",
+    "string": "Must be a string.",
+    "email": "Wrong email format.",
+    "date": "Wrong date format."
+  },
   "landing": {
     "os_summit_admin": "Show Admin",
     "sign_out": "Sign out",

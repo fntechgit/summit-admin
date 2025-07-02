@@ -493,3 +493,11 @@ export const moveItem = (array, fromIndex, toIndex) => {
 
   return newArray;
 };
+
+export const arrayToString = (array, join = ",") => {
+  if (Array.isArray(array)) {
+    return array.length > 0 ? array.join(join) : "";
+  }
+
+  return array;
+};

@@ -18,10 +18,13 @@ import { Breadcrumb } from "react-breadcrumbs";
 import { Box, Tab, Tabs } from "@mui/material";
 import PropTypes from "prop-types";
 import SponsorSettingsForm from "../../components/forms/sponsor-settings-form";
-import { getSponsorPurchasesMeta, getSponsorUsersMeta } from "../../actions/sponsor-settings-actions";
+import {
+  getSponsorPurchasesMeta,
+  getSponsorUsersMeta,
+  saveAllSettings
+} from "../../actions/sponsor-settings-actions";
 
-
-function TabPanel({ children, value, id}) {
+function TabPanel({ children, value, id }) {
   return (
     <div
       role="tabpanel"
@@ -37,11 +40,17 @@ function TabPanel({ children, value, id}) {
 TabPanel.propTypes = {
   children: PropTypes.node,
   id: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired
 };
 
-
-const SponsorSettingsPage = ({ currentSummit, match, errors, settings, getSponsorPurchasesMeta, getSponsorUsersMeta }) => {
+const SponsorSettingsPage = ({
+  match,
+  currentSummit,
+  settings,
+  getSponsorPurchasesMeta,
+  getSponsorUsersMeta,
+  saveAllSettings
+}) => {
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
@@ -53,8 +62,8 @@ const SponsorSettingsPage = ({ currentSummit, match, errors, settings, getSponso
     setActiveTab(newValue);
   };
 
-  const onSaveSettings = () => {
-    console.log("onSaveSettings");
+  const onSaveSettings = (values) => {
+    saveAllSettings(values);
   };
 
   return (
@@ -68,15 +77,27 @@ const SponsorSettingsPage = ({ currentSummit, match, errors, settings, getSponso
       <h3>{T.translate("sponsor_settings.sponsor_settings")}</h3>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={activeTab} onChange={handleChange} aria-label="basic tabs">
-          <Tab label={T.translate("sponsor_settings.general")} id="tab-0" aria-controls="tabpanel-0" />
-          <Tab label={T.translate("sponsor_settings.badge_scans")} id="tab-1" aria-controls="tabpanel-1" />
+          <Tab
+            label={T.translate("sponsor_settings.general")}
+            id="tab-0"
+            aria-controls="tabpanel-0"
+          />
+          <Tab
+            label={T.translate("sponsor_settings.badge_scans")}
+            id="tab-1"
+            aria-controls="tabpanel-1"
+          />
         </Tabs>
       </Box>
-      <Box sx={{backgroundColor: "white"}}>
+      <Box sx={{ backgroundColor: "white" }}>
         <TabPanel value={activeTab} id={0}>
           <h4>{T.translate("sponsor_settings.registration_settings")}</h4>
           <hr />
-          <SponsorSettingsForm onSubmit={onSaveSettings} errors={errors} settings={settings} />
+          <SponsorSettingsForm
+            onSubmit={onSaveSettings}
+            settings={settings}
+            summitTZ={currentSummit.time_zone_id}
+          />
         </TabPanel>
         <TabPanel value={activeTab} id={1}>
           <h4>{T.translate("sponsor_settings.badge_scans")}</h4>
@@ -88,10 +109,11 @@ const SponsorSettingsPage = ({ currentSummit, match, errors, settings, getSponso
 
 const mapStateToProps = ({ currentSummitState, sponsorSettingsState }) => ({
   currentSummit: currentSummitState.currentSummit,
-  ...sponsorSettingsState,
+  ...sponsorSettingsState
 });
 
 export default connect(mapStateToProps, {
   getSponsorPurchasesMeta,
-  getSponsorUsersMeta
+  getSponsorUsersMeta,
+  saveAllSettings
 })(SponsorSettingsPage);
