@@ -722,7 +722,13 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       const availableColumns = renderOptions(
         denormalizeLeadReportSettings(payload.response)
       );
-      return { ...state, available_lead_report_columns: availableColumns };
+      return {
+        ...state,
+        currentSummit: {
+          ...state.currentSummit,
+          available_lead_report_columns: availableColumns
+        }
+      };
     }
     case LEAD_REPORT_SETTINGS_UPDATED: {
       const updatedSettings = updateSummitLeadReportSettings(
