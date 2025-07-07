@@ -177,9 +177,9 @@ const normalizeEntity = (entity, summitTZ) => {
   } = entity;
 
   normalizedEntity.wire_transfer_notification_email =
-    wire_transfer_notification_email?.split(",") || [];
+    wire_transfer_notification_email?.split(";") || [];
   normalizedEntity.access_request_notification_email =
-    access_request_notification_email?.split(",") || [];
+    access_request_notification_email?.split(";") || [];
   normalizedEntity.early_bird_end_date = moment
     .tz(early_bird_end_date, summitTZ)
     .unix();

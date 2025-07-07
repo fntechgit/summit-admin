@@ -77,7 +77,8 @@ const sponsorSettingsReducer = (state = DEFAULT_STATE, action) => {
       const normalizedSettings = { ...payload.response };
 
       normalizedSettings.wire_transfer_notification_email = arrayToString(
-        normalizedSettings.wire_transfer_notification_email
+        normalizedSettings.wire_transfer_notification_email,
+        ";"
       );
 
       return {
@@ -90,7 +91,8 @@ const sponsorSettingsReducer = (state = DEFAULT_STATE, action) => {
       const normalizedSettings = { ...payload.response };
 
       normalizedSettings.access_request_notification_email = arrayToString(
-        normalizedSettings.access_request_notification_email
+        normalizedSettings.access_request_notification_email,
+        ";"
       );
 
       return {
