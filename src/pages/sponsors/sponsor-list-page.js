@@ -9,24 +9,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
+import { SortableTable } from "openstack-uicore-foundation/lib/components";
 import {
-  Dropdown,
-  SortableTable
-} from "openstack-uicore-foundation/lib/components";
-import {
-  getSummitById,
   getLeadReportSettingsMeta,
+  getSummitById,
   upsertLeadReportSettings
 } from "../../actions/summit-actions";
 import {
-  getSponsors,
   deleteSponsor,
+  getSponsors,
   updateSponsorOrder
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
@@ -62,7 +59,7 @@ class SponsorListPage extends React.Component {
         const selectedColumns = renderOptions(
           denormalizeLeadReportSettings(settings.columns)
         ).map((c) => c.value);
-        this.setState({ ...this.state, selectedColumns: selectedColumns });
+        this.setState({ ...this.state, selectedColumns });
       }
     }
   }
@@ -74,24 +71,25 @@ class SponsorListPage extends React.Component {
 
   handleDelete(sponsorId) {
     const { deleteSponsor, sponsors } = this.props;
-    let sponsor = sponsors.find((s) => s.id === sponsorId);
+    const sponsor = sponsors.find((s) => s.id === sponsorId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("sponsor_list.remove_warning") + " " + sponsor.company_name,
+      text: `${T.translate("sponsor_list.remove_warning")} ${
+        sponsor.company_name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deleteSponsor(sponsorId);
       }
     });
   }
 
-  handleNewSponsor(ev) {
+  handleNewSponsor() {
     const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/sponsors/new`);
   }
@@ -99,25 +97,18 @@ class SponsorListPage extends React.Component {
   handleColumnsChange(ev) {
     const { upsertLeadReportSettings } = this.props;
     const { value } = ev.target;
-    let newColumns = value;
+    const newColumns = value;
     this.setState({ ...this.state, selectedColumns: newColumns });
     upsertLeadReportSettings(newColumns);
   }
 
   render() {
-    const {
-      currentSummit,
-      sponsors,
-      totalSponsors,
-      member,
-      availableLeadReportColumns
-    } = this.props;
+    const { currentSummit, sponsors, totalSponsors, member } = this.props;
     const memberObj = new Member(member);
     const canAddSponsors = memberObj.canAddSponsors();
     const canDeleteSponsors = memberObj.canDeleteSponsors();
-    const canEditLeadReportSettings = memberObj.canEditLeadReportSettings();
 
-    let columns = [
+    const columns = [
       { columnKey: "id", value: T.translate("sponsor_list.id") },
       {
         columnKey: "sponsorship_name",
@@ -141,7 +132,7 @@ class SponsorListPage extends React.Component {
 
     if (!currentSummit.id) return <div />;
 
-    let sortedSponsors = [...sponsors];
+    const sortedSponsors = [...sponsors];
     sortedSponsors.sort((a, b) =>
       a.order > b.order ? 1 : a.order < b.order ? -1 : 0
     );
@@ -153,23 +144,8 @@ class SponsorListPage extends React.Component {
           {T.translate("sponsor_list.sponsor_list")} ({totalSponsors})
         </h3>
         {canAddSponsors && (
-          <div className={"row"}>
-            <div className="col-md-10">
-              {canEditLeadReportSettings && (
-                <Dropdown
-                  id="sponsor_columns"
-                  options={availableLeadReportColumns ?? []}
-                  clearable
-                  isMulti
-                  value={this.state.selectedColumns}
-                  onChange={this.handleColumnsChange}
-                  placeholder={T.translate(
-                    "sponsor_list.placeholders.lead_report_columns"
-                  )}
-                />
-              )}
-            </div>
-            <div className="col-md-2 text-right">
+          <div className="row">
+            <div className="col-md-2 text-right col-md-offset-10">
               <button
                 className="btn btn-primary right-space"
                 onClick={this.handleNewSponsor}
@@ -205,7 +181,6 @@ const mapStateToProps = ({
   currentSponsorListState,
   currentSummitSponsorshipListState
 }) => ({
-  availableLeadReportColumns: currentSummitState.available_lead_report_columns,
   summitLeadReportColumns: currentSummitState.lead_report_settings,
   currentSummit: currentSummitState.currentSummit,
   allSponsorships: currentSummitSponsorshipListState.sponsorships,

@@ -87,6 +87,13 @@ const theme = createTheme({
           backgroundColor: "#2196f3"
         }
       }
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontSize: "12px"
+        }
+      }
     }
   }
 });
