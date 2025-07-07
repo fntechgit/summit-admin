@@ -15,18 +15,13 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import {
-  Button,
-  Grid2,
-  TextField
-} from "@mui/material";
+import { Button, Grid2, TextField } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Dropdown } from "openstack-uicore-foundation/lib/components";
 import {
   getSummitById,
   getLeadReportSettingsMeta,
@@ -38,45 +33,27 @@ import {
   updateSponsorOrder
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
-import {
-  denormalizeLeadReportSettings,
-  getSummitLeadReportSettings,
-  renderOptions
-} from "../../models/lead-report-settings";
 import MuiTable from "../../components/mui/table/mui-table";
 
 const SponsorListPage = ({
   currentSummit,
   getSponsors,
-  getLeadReportSettingsMeta,
   history,
   deleteSponsor,
   sponsors,
-  upsertLeadReportSettings,
   totalSponsors,
   perPage,
   currentPage,
   member,
-  availableLeadReportColumns,
   term,
   order,
   orderDir
 }) => {
-  const [selectedColumns, setSelectedColumns] = useState([]);
   const [searchTerm, setSearchTerm] = useState(term);
 
   useEffect(() => {
     if (currentSummit) {
       getSponsors();
-      getLeadReportSettingsMeta();
-      const settings = getSummitLeadReportSettings(currentSummit);
-      if (settings) {
-        const newSelectedColumns = renderOptions(
-          denormalizeLeadReportSettings(settings.columns)
-        ).map((c) => c.value);
-        setSelectedColumns(newSelectedColumns);
-        // this.setState({ ...this.state, selectedColumns });
-      }
     }
   }, [currentSummit]);
 
@@ -113,13 +90,6 @@ const SponsorListPage = ({
     history.push(`/app/summits/${currentSummit.id}/sponsors/new`);
   };
 
-  const handleColumnsChange = (ev) => {
-    const { value } = ev.target;
-    const newColumns = value;
-    setSelectedColumns(newColumns);
-    upsertLeadReportSettings(newColumns);
-  };
-
   const handlePageChange = (page) => {
     getSponsors(term, page, perPage, order, orderDir);
   };
@@ -139,7 +109,6 @@ const SponsorListPage = ({
   const memberObj = new Member(member);
   const canAddSponsors = memberObj.canAddSponsors();
   const canDeleteSponsors = memberObj.canDeleteSponsors();
-  const canEditLeadReportSettings = memberObj.canEditLeadReportSettings();
 
   const columns = [
     { columnKey: "id", header: T.translate("sponsor_list.id") },
@@ -207,48 +176,6 @@ const SponsorListPage = ({
         {" "}
         {T.translate("sponsor_list.sponsor_list")} ({totalSponsors})
       </h3>
-      {canAddSponsors && (
-        <div className="row">
-          <div className="col-md-10">
-            {canEditLeadReportSettings && (
-              <Dropdown
-                id="sponsor_columns"
-                options={availableLeadReportColumns ?? []}
-                clearable
-                isMulti
-                value={selectedColumns}
-                onChange={handleColumnsChange}
-                placeholder={T.translate(
-                  "sponsor_list.placeholders.lead_report_columns"
-                )}
-              />
-            )}
-          </div>
-          <div className="col-md-2 text-right">
-            <button
-              className="btn btn-primary right-space"
-              onClick={handleNewSponsor}
-            >
-              {T.translate("sponsor_list.add_sponsor")}
-            </button>
-          </div>
-        </div>
-      )}
-      {sponsors.length === 0 && (
-        <div>{T.translate("sponsor_list.no_sponsors")}</div>
-      )}
-
-      {/* {sponsors.length > 0 && (
-        <div>
-          <SortableTable
-            options={table_options}
-            data={sortedSponsors}
-            columns={columns}
-            dropCallback={updateSponsorOrder}
-            orderField="order"
-          />
-        </div>
-      )} */}
 
       <Grid2
         container
@@ -295,18 +222,24 @@ const SponsorListPage = ({
             />
           </Grid2>
           <Grid2 size={4}>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => handleNewSponsor()}
-              startIcon={<AddIcon />}
-              sx={{ height: "36px" }}
-            >
-              {T.translate("sponsor_list.add_sponsor")}
-            </Button>
+            {canAddSponsors && (
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => handleNewSponsor()}
+                startIcon={<AddIcon />}
+                sx={{ height: "36px" }}
+              >
+                {T.translate("sponsor_list.add_sponsor")}
+              </Button>
+            )}
           </Grid2>
         </Grid2>
       </Grid2>
+
+      {sponsors.length === 0 && (
+        <div>{T.translate("sponsor_list.no_sponsors")}</div>
+      )}
 
       {sponsors.length > 0 && (
         <div>
