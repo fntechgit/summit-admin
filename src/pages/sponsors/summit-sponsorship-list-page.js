@@ -176,8 +176,8 @@ const SummitSponsorshipListPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={8} />
-          <Grid2 size={4}>
+          <Grid2 size={7} />
+          <Grid2 size={5}>
             <Button
               variant="contained"
               fullWidth
