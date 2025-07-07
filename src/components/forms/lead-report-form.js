@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -48,7 +48,8 @@ const LeadReportForm = ({
     currentSummit.available_lead_report_columns;
   const canAddSponsors = memberObj.canAddSponsors();
   const canEditLeadReportSettings = memberObj.canEditLeadReportSettings();
-  const [selectedColumns, setSelectedColumns] = React.useState([]);
+  const [selectedColumns, setSelectedColumns] = useState([]);
+  const [isDirty, setIsDirty] = useState(false);
   const inputLabel = T.translate(
     "sponsor_list.placeholders.lead_report_columns"
   );
@@ -66,10 +67,15 @@ const LeadReportForm = ({
     }
   }, [currentSummit.lead_report_settings]);
 
-  const handleColumnsChange = (ev) => {
-    const values = ev.target.value;
-    setSelectedColumns(values);
-    upsertLeadReportSettings(values);
+  const submitNewColumns = (newValue) => {
+    setSelectedColumns(newValue);
+    upsertLeadReportSettings(newValue);
+    setIsDirty(false);
+  };
+
+  const handleColumnChange = (value) => {
+    setSelectedColumns(value);
+    setIsDirty(true);
   };
 
   const handleRemoveItem = (value) => {
@@ -90,7 +96,8 @@ const LeadReportForm = ({
           multiple
           fullWidth
           value={selectedColumns}
-          onChange={handleColumnsChange}
+          onChange={(ev) => handleColumnChange(ev.target.value)}
+          onClose={() => (isDirty ? submitNewColumns(selectedColumns) : null)}
           input={<OutlinedInput label={inputLabel} />}
           renderValue={(selected) => (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
@@ -122,7 +129,7 @@ const LeadReportForm = ({
               <InputAdornment sx={{ marginRight: "10px" }} position="end">
                 <IconButton
                   onClick={() => {
-                    setSelectedColumns([]);
+                    submitNewColumns([]);
                   }}
                 >
                   <ClearIcon />
