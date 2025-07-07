@@ -29,8 +29,7 @@ import { ClearIcon } from "@mui/x-date-pickers";
 import Member from "../../models/member";
 import {
   getLeadReportSettingsMeta,
-  upsertLeadReportSettings,
-  getLeadReportSettingsBySummit
+  upsertLeadReportSettings
 } from "../../actions/summit-actions";
 import {
   denormalizeLeadReportSettings,
@@ -42,8 +41,7 @@ const LeadReportForm = ({
   currentSummit,
   member,
   upsertLeadReportSettings,
-  getLeadReportSettingsMeta,
-  getLeadReportSettingsBySummit
+  getLeadReportSettingsMeta
 }) => {
   const memberObj = new Member(member);
   const availableLeadReportColumns =
@@ -55,13 +53,6 @@ const LeadReportForm = ({
   const inputLabel = T.translate(
     "sponsor_list.placeholders.lead_report_columns"
   );
-
-  // get current selected options
-  useEffect(() => {
-    if (currentSummit) {
-      getLeadReportSettingsBySummit();
-    }
-  }, []);
 
   useEffect(() => {
     if (currentSummit) {
@@ -93,12 +84,7 @@ const LeadReportForm = ({
     upsertLeadReportSettings(newValues);
   };
 
-  if (
-    !canAddSponsors ||
-    !canEditLeadReportSettings ||
-    !availableLeadReportColumns.length > 0
-  )
-    return null;
+  if (!canAddSponsors || !canEditLeadReportSettings) return null;
 
   return (
     <Box>
@@ -170,6 +156,5 @@ const mapStateToProps = ({ loggedUserState, currentSummitState }) => ({
 
 export default connect(mapStateToProps, {
   getLeadReportSettingsMeta,
-  upsertLeadReportSettings,
-  getLeadReportSettingsBySummit
+  upsertLeadReportSettings
 })(LeadReportForm);

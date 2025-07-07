@@ -23,6 +23,7 @@ import {
   getSponsorUsersMeta,
   saveAllSettings
 } from "../../actions/sponsor-settings-actions";
+import LeadReportForm from "../../components/forms/lead-report-form";
 
 function TabPanel({ children, value, id }) {
   return (
@@ -100,7 +101,9 @@ const SponsorSettingsPage = ({
           />
         </TabPanel>
         <TabPanel value={activeTab} id={1}>
-          <h4>{T.translate("sponsor_settings.badge_scans")}</h4>
+          <h4>{T.translate("sponsor_settings.lead_report_settings")}</h4>
+          <hr />
+          <LeadReportForm />
         </TabPanel>
       </Box>
     </div>

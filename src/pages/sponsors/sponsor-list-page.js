@@ -15,26 +15,15 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
+import { SortableTable } from "openstack-uicore-foundation/lib/components";
 import {
-  Button,
-  Grid2,
-  TextField
-} from "@mui/material";
-import Box from "@mui/material/Box";
-import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
-import IconButton from "@mui/material/IconButton";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Dropdown } from "openstack-uicore-foundation/lib/components";
-import {
-  getSummitById,
   getLeadReportSettingsMeta,
+  getSummitById,
   upsertLeadReportSettings
 } from "../../actions/summit-actions";
 import {
-  getSponsors,
   deleteSponsor,
+  getSponsors,
   updateSponsorOrder
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
@@ -74,8 +63,7 @@ const SponsorListPage = ({
         const newSelectedColumns = renderOptions(
           denormalizeLeadReportSettings(settings.columns)
         ).map((c) => c.value);
-        setSelectedColumns(newSelectedColumns);
-        // this.setState({ ...this.state, selectedColumns });
+        this.setState({ ...this.state, selectedColumns });
       }
     }
   }, [currentSummit]);
@@ -90,7 +78,8 @@ const SponsorListPage = ({
     history.push(`/app/summits/${currentSummit.id}/sponsors/${sponsor_id}`);
   };
 
-  const handleDelete = (sponsorId) => {
+  handleDelete(sponsorId) {
+    const { deleteSponsor, sponsors } = this.props;
     const sponsor = sponsors.find((s) => s.id === sponsorId);
 
     Swal.fire({
@@ -109,30 +98,44 @@ const SponsorListPage = ({
     });
   };
 
-  const handleNewSponsor = () => {
+  handleNewSponsor() {
+    const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/sponsors/new`);
   };
 
   const handleColumnsChange = (ev) => {
     const { value } = ev.target;
     const newColumns = value;
-    setSelectedColumns(newColumns);
+    this.setState({ ...this.state, selectedColumns: newColumns });
     upsertLeadReportSettings(newColumns);
   };
 
-  const handlePageChange = (page) => {
-    getSponsors(term, page, perPage, order, orderDir);
-  };
-  const handlePerPageChange = (newPerPage) => {
-    getSponsors(term, currentPage, newPerPage, order, orderDir);
-  };
-  const handleSort = (index, key, dir) => {
-    getInventoryItems(term, currentPage, perPage, key, dir);
-  };
+  render() {
+    const { currentSummit, sponsors, totalSponsors, member } = this.props;
+    const memberObj = new Member(member);
+    const canAddSponsors = memberObj.canAddSponsors();
+    const canDeleteSponsors = memberObj.canDeleteSponsors();
 
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getSponsors(searchTerm, currentPage, perPage, order, orderDir);
+    const columns = [
+      { columnKey: "id", value: T.translate("sponsor_list.id") },
+      {
+        columnKey: "sponsorship_name",
+        value: T.translate("sponsor_list.sponsorship")
+      },
+      { columnKey: "company_name", value: T.translate("sponsor_list.company") }
+    ];
+
+    const table_options = {
+      actions: {
+        edit: { onClick: this.handleEdit }
+      }
+    };
+
+    if (canDeleteSponsors) {
+      table_options.actions = {
+        ...table_options.actions,
+        delete: { onClick: this.handleDelete }
+      };
     }
   };
 
@@ -141,51 +144,32 @@ const SponsorListPage = ({
   const canDeleteSponsors = memberObj.canDeleteSponsors();
   const canEditLeadReportSettings = memberObj.canEditLeadReportSettings();
 
-  const columns = [
-    { columnKey: "id", header: T.translate("sponsor_list.id") },
-    { columnKey: "company_name", header: T.translate("sponsor_list.company") },
-    {
-      columnKey: "sponsorship_name",
-      header: T.translate("sponsor_list.sponsorship")
-    },
-    { columnKey: "documents", header: T.translate("sponsor_list.documents") },
-    { columnKey: "company_name", header: T.translate("sponsor_list.forms") },
-    {
-      columnKey: "company_name",
-      header: T.translate("sponsor_list.purchases")
-    },
-    { columnKey: "company_name", header: T.translate("sponsor_list.pages") },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row) => (
-        <IconButton size="small" onClick={() => handleEdit(row.id)}>
-          <EditIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row) => (
-        <IconButton size="small" onClick={() => handleDelete(row.id)}>
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
-    }
-  ];
+    const sortedSponsors = [...sponsors];
+    sortedSponsors.sort((a, b) =>
+      a.order > b.order ? 1 : a.order < b.order ? -1 : 0
+    );
 
-  const table_options = {
-    actions: {
-      edit: { onClick: handleEdit }
-    }
-  };
+    return (
+      <div className="container">
+        <h3>
+          {" "}
+          {T.translate("sponsor_list.sponsor_list")} ({totalSponsors})
+        </h3>
+        {canAddSponsors && (
+          <div className="row">
+            <div className="col-md-2 text-right col-md-offset-10">
+              <button
+                className="btn btn-primary right-space"
+                onClick={this.handleNewSponsor}
+              >
+                {T.translate("sponsor_list.add_sponsor")}
+              </button>
+            </div>
+          </div>
+        )}
+        {sponsors.length === 0 && (
+          <div>{T.translate("sponsor_list.no_sponsors")}</div>
+        )}
 
   if (canDeleteSponsors) {
     table_options.actions = {
@@ -336,7 +320,6 @@ const mapStateToProps = ({
   currentSponsorListState,
   currentSummitSponsorshipListState
 }) => ({
-  availableLeadReportColumns: currentSummitState.available_lead_report_columns,
   summitLeadReportColumns: currentSummitState.lead_report_settings,
   currentSummit: currentSummitState.currentSummit,
   allSponsorships: currentSummitSponsorshipListState.sponsorships,
