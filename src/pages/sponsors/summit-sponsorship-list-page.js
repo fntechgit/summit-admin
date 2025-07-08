@@ -73,6 +73,13 @@ const SummitSponsorshipListPage = ({
     getSummitSponsorships(key, dir);
   };
 
+  const handlePageChange = (page) => {
+    getSummitSponsorships(term, page, perPage, order, orderDir);
+  };
+  const handlePerPageChange = (newPerPage) => {
+    getSummitSponsorships(term, currentPage, newPerPage, order, orderDir);
+  };
+
   const handleNewSponsorship = () => {
     history.push(`/app/summits/${currentSummit.id}/sponsorships/new`);
   };
@@ -205,6 +212,8 @@ const SummitSponsorshipListPage = ({
           perPage={perPage}
           onSort={handleSort}
           onReorder={handleReorder}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
         />
       )}
     </div>
