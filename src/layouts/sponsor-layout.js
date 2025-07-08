@@ -22,6 +22,7 @@ import SponsorIdLayout from "./sponsor-id-layout";
 import SponsorPromocodesListPage from "../pages/sponsors/sponsor-promocodes-list-page";
 import EditPromocodePage from "../pages/promocodes/edit-promocode-page";
 import SponsorSettingsPage from "../pages/sponsor_settings/sponsor-settings-page";
+import SponsorFormsListPage from "../pages/sponsors/sponsor-forms-list-page";
 
 const SponsorLayout = ({ match }) => (
     <div>
@@ -33,6 +34,12 @@ const SponsorLayout = ({ match }) => (
       />
       <Switch>
         <Route strict exact path={match.url} component={SponsorListPage} />
+        <Route
+          strict
+          exact
+          path={`${match.url}/forms`}
+          component={SponsorFormsListPage}
+        />
         <Route
           strict
           exact
