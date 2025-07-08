@@ -7,6 +7,7 @@ const theme = createTheme({
   palette: {
     primary: {
       main: "#2196F3",
+      dark: "#1E88E5",
       contrast: "#FFFFFF"
     },
     background: {
@@ -93,6 +94,16 @@ const theme = createTheme({
         root: {
           fontSize: "12px"
         }
+      }
+    },
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          fontSize: "12px"
+        },
+        standardInfo: ({ theme }) => ({
+          color: theme.palette.primary.dark
+        })
       }
     }
   }

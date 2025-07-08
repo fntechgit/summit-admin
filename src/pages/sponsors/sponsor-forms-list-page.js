@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 OpenStack Foundation
+ * Copyright 2024 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,49 +11,100 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import { Box, Button } from "@mui/material";
-
+import T from "i18n-react/dist/i18n-react";
 import {
-  getLeadReportSettingsMeta,
-  getSummitById,
-  upsertLeadReportSettings
-} from "../../actions/summit-actions";
-import {
-  deleteSponsor,
-  getSponsors,
-  updateSponsorOrder
-} from "../../actions/sponsor-actions";
-import MuiTable from "../../components/mui/table/mui-table";
-import IconButton from "@mui/material/IconButton";
+  Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Grid2,
+  Box,
+  IconButton
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import history from "../../history";
+import {
+  archiveSponsorForm,
+  getSponsorForms,
+  unarchiveSponsorForm
+} from "../../actions/sponsor-forms-actions";
+import MuiTable from "../../components/mui/table/mui-table";
+import CustomAlert from "../../components/mui/components/custom-alert";
+import SearchInput from "../../components/mui/components/search-input";
 
 const SponsorFormsListPage = ({
   match,
+  sponsorForms,
   currentPage,
   perPage,
   term,
   order,
   orderDir,
-  totalFormTemplates
+  totalCount,
+  getSponsorForms,
+  archiveSponsorForm,
+  unarchiveSponsorForm
 }) => {
+  useEffect(() => {
+    getSponsorForms();
+  }, []);
+
+  const handlePageChange = (page) => {
+    getSponsorForms(term, page, perPage, order, orderDir);
+  };
+
+  const handleSort = (index, key, dir) => {
+    getSponsorForms(term, currentPage, perPage, key, dir);
+  };
+
+  const handleSearch = (searchTerm) => {
+    getSponsorForms(searchTerm, currentPage, perPage, order, orderDir);
+  };
+
+  const handleRowEdit = (row) => {
+    console.log("EDIT CLICKED", row);
+  };
+
+  const handleNewFormTemplate = () => {
+    console.log("NEW CLICKED");
+  };
+
+  const handleManageItems = (form) => {
+    history.push(`/app/sponsors/forms/${form.id}`);
+  };
+
+  const handleArchiveItem = (item) =>
+    item.is_archived ? unarchiveSponsorForm(item) : archiveSponsorForm(item);
+
+  const handleHideArchivedForms = (ev) => {
+    getSponsorForms(
+      term,
+      currentPage,
+      perPage,
+      order,
+      orderDir,
+      ev.target.checked
+    );
+  };
+
   const columns = [
     {
       columnKey: "code",
-      header: T.translate("form_template_list.code_column_label"),
+      header: T.translate("sponsor_forms.code_column_label"),
       sortable: true
     },
     {
       columnKey: "name",
-      header: T.translate("form_template_list.name_column_label"),
+      header: T.translate("sponsor_forms.name_column_label"),
       sortable: true
     },
     {
       columnKey: "items_qty",
-      header: T.translate("form_template_list.items_column_label"),
+      header: T.translate("sponsor_forms.items_column_label"),
       sortable: false
     },
     {
@@ -105,54 +156,107 @@ const SponsorFormsListPage = ({
     }
   ];
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
     sortDir: orderDir
   };
 
   return (
-    <div className="container" style={{ backgroundColor: "transparent" }}>
+    <div className="container">
       <Breadcrumb
         data={{
           title: T.translate("sponsor_forms.forms"),
           pathname: match.url
         }}
       />
-      <h3>{T.translate("sponsor_forms.forms")}</h3>
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <MuiTable
-          columns={columns}
-          data={formTemplates}
-          options={table_options}
-          perPage={perPage}
-          currentPage={currentPage}
-          onRowEdit={handleRowEdit}
-          onPageChange={handlePageChange}
-          onSort={handleSort}
-        />
-      </Box>
+      <h3>
+        {T.translate("sponsor_forms.forms")} ({totalCount})
+      </h3>
+      <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
+      <Grid2
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={1}>
+          <Box component="span">{totalCount} forms</Box>
+        </Grid2>
+        <Grid2 size={2} offset={1}>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  onChange={handleHideArchivedForms}
+                  inputProps={{
+                    "aria-label": T.translate("sponsor_forms.hide_archived")
+                  }}
+                />
+              }
+              label={T.translate("sponsor_forms.hide_archived")}
+            />
+          </FormGroup>
+        </Grid2>
+        <Grid2 size={2}>
+          <SearchInput
+            term={term}
+            onSearch={handleSearch}
+            placeholder={T.translate("sponsor_forms.placeholders.search")}
+          />
+        </Grid2>
+        <Grid2 size={3}>
+          <Button
+            variant="contained"
+            size="medium"
+            fullWidth
+            onClick={console.log}
+            startIcon={<AddIcon />}
+            sx={{ height: "36px" }}
+          >
+            {T.translate("sponsor_forms.using_duplicate")}
+          </Button>
+        </Grid2>
+        <Grid2 size={3}>
+          <Button
+            variant="contained"
+            size="medium"
+            fullWidth
+            onClick={() => handleNewFormTemplate()}
+            startIcon={<AddIcon />}
+            sx={{ height: "36px" }}
+          >
+            {T.translate("sponsor_forms.add_form")}
+          </Button>
+        </Grid2>
+      </Grid2>
+
+      {sponsorForms.length > 0 && (
+        <div>
+          <MuiTable
+            columns={columns}
+            data={sponsorForms}
+            options={tableOptions}
+            perPage={perPage}
+            currentPage={currentPage}
+            onRowEdit={handleRowEdit}
+            onPageChange={handlePageChange}
+            onSort={handleSort}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
-const mapStateToProps = ({
-  loggedUserState,
-  currentSummitState,
-  currentSponsorListState,
-  currentSummitSponsorshipListState
-}) => ({
-  summitLeadReportColumns: currentSummitState.lead_report_settings,
-  currentSummit: currentSummitState.currentSummit,
-  allSponsorships: currentSummitSponsorshipListState.sponsorships,
-  member: loggedUserState.member,
-  ...currentSponsorListState
+const mapStateToProps = ({ sponsorFormsListState }) => ({
+  ...sponsorFormsListState
 });
 
 export default connect(mapStateToProps, {
-  getLeadReportSettingsMeta,
-  getSummitById,
-  getSponsors,
-  deleteSponsor,
-  updateSponsorOrder,
-  upsertLeadReportSettings
+  getSponsorForms,
+  archiveSponsorForm,
+  unarchiveSponsorForm
 })(SponsorFormsListPage);
