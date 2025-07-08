@@ -246,6 +246,11 @@ const getSummitItems = (summitId) => [
         accessRoute: "admin-sponsors"
       },
       {
+        name: "sponsor_settings",
+        linkUrl: `summits/${summitId}/sponsors/settings`,
+        accessRoute: "admin-sponsors"
+      },
+      {
         name: "badge_scans",
         linkUrl: `summits/${summitId}/badge-scans`,
         accessRoute: "badge-scans"

@@ -50,6 +50,7 @@ export const REGISTRATION_KEY_GENERATED = "REGISTRATION_KEY_GENERATED";
 export const RECEIVE_LEAD_REPORT_SETTINGS_META =
   "RECEIVE_LEAD_REPORT_SETTINGS_META";
 export const LEAD_REPORT_SETTINGS_UPDATED = "LEAD_REPORT_SETTINGS_UPDATED";
+export const RECEIVE_LEAD_REPORT_SETTINGS = "RECEIVE_LEAD_REPORT_SETTINGS";
 
 export const getSummitById = (summitId) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
@@ -391,6 +392,28 @@ export const getLeadReportSettingsMeta = () => async (dispatch, getState) => {
     dispatch(stopLoading());
   });
 };
+
+export const getLeadReportSettingsBySummit =
+  () => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_LEAD_REPORT_SETTINGS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/lead-report-settings`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 export const upsertLeadReportSettings =
   (allowed_columns) => async (dispatch, getState) => {

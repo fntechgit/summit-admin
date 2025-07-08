@@ -13,7 +13,8 @@ import {
   CLEAR_SUMMIT,
   REGISTRATION_KEY_GENERATED,
   RECEIVE_LEAD_REPORT_SETTINGS_META,
-  LEAD_REPORT_SETTINGS_UPDATED
+  LEAD_REPORT_SETTINGS_UPDATED,
+  RECEIVE_LEAD_REPORT_SETTINGS
 } from "../../actions/summit-actions";
 import {
   EVENT_CATEGORY_UPDATED,
@@ -718,11 +719,27 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
 
       return { ...state, print_app_marketing_settings: newMarketingSettings };
     }
+    case RECEIVE_LEAD_REPORT_SETTINGS: {
+      const lead_report_settings = payload.response;
+      return {
+        ...state,
+        currentSummit: {
+          ...state.currentSummit,
+          lead_report_settings
+        }
+      };
+    }
     case RECEIVE_LEAD_REPORT_SETTINGS_META: {
       const availableColumns = renderOptions(
         denormalizeLeadReportSettings(payload.response)
       );
-      return { ...state, available_lead_report_columns: availableColumns };
+      return {
+        ...state,
+        currentSummit: {
+          ...state.currentSummit,
+          available_lead_report_columns: availableColumns
+        }
+      };
     }
     case LEAD_REPORT_SETTINGS_UPDATED: {
       const updatedSettings = updateSummitLeadReportSettings(
