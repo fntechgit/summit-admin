@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
@@ -34,6 +34,7 @@ import {
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
 import MuiTable from "../../components/mui/table/mui-table";
+import { DEBOUNCE_WAIT } from "../../utils/constants";
 
 const SponsorListPage = ({
   currentSummit,
@@ -57,11 +58,14 @@ const SponsorListPage = ({
     }
   }, [currentSummit]);
 
-  // componentDidMount() {
-  //   const { currentSummit, getSponsors, getLeadReportSettingsMeta } =
-  //     this.props;
+  const handleSearchDebounced = useCallback(
+    _.debounce((term) => {
+      getSponsors(term, currentPage, perPage, order, orderDir);
+    }, DEBOUNCE_WAIT),
+    [currentPage, perPage, order, orderDir]
+  );
 
-  // }
+  useEffect(() => handleSearchDebounced.cancel(), [handleSearchDebounced]);
 
   const handleEdit = (sponsor_id) => {
     history.push(`/app/summits/${currentSummit.id}/sponsors/${sponsor_id}`);
@@ -100,12 +104,6 @@ const SponsorListPage = ({
     getInventoryItems(term, currentPage, perPage, key, dir);
   };
 
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getSponsors(searchTerm, currentPage, perPage, order, orderDir);
-    }
-  };
-
   const memberObj = new Member(member);
   const canAddSponsors = memberObj.canAddSponsors();
   const canDeleteSponsors = memberObj.canDeleteSponsors();
@@ -117,27 +115,44 @@ const SponsorListPage = ({
       columnKey: "sponsorship_name",
       header: T.translate("sponsor_list.sponsorship")
     },
-    { columnKey: "documents", header: T.translate("sponsor_list.documents") },
-    { columnKey: "company_name", header: T.translate("sponsor_list.forms") },
     {
-      columnKey: "company_name",
-      header: T.translate("sponsor_list.purchases")
+      columnKey: "documents",
+      header: T.translate("sponsor_list.documents"),
+      render: (row) => `${row.documents?.length || 0}`
     },
-    { columnKey: "company_name", header: T.translate("sponsor_list.pages") },
+    {
+      columnKey: "forms",
+      header: T.translate("sponsor_list.forms"),
+      render: (row) => `${row.forms?.length || 0}`
+    },
+    {
+      columnKey: "purchases",
+      header: T.translate("sponsor_list.purchases"),
+      render: (row) => `${row.purchases?.length || 0}`
+    },
+    {
+      columnKey: "pages",
+      header: T.translate("sponsor_list.pages"),
+      render: (row) => `${row.pages?.length || 0}`
+    },
     {
       columnKey: "edit",
       header: "",
       width: 40,
       align: "center",
       render: (row) => (
-        <IconButton size="small" onClick={() => handleEdit(row.id)}>
+        <IconButton
+          size="small"
+          onClick={() => handleEdit(row.id)}
+          key={`edit-${row.id}`}
+        >
           <EditIcon fontSize="small" />
         </IconButton>
       ),
       className: "dottedBorderLeft"
     },
     {
-      columnKey: "edit",
+      columnKey: "delete",
       header: "",
       width: 40,
       align: "center",
@@ -172,10 +187,7 @@ const SponsorListPage = ({
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("sponsor_list.sponsor_list")} ({totalSponsors})
-      </h3>
+      <h3> {T.translate("sponsor_list.sponsor_list")}</h3>
 
       <Grid2
         container
@@ -187,7 +199,7 @@ const SponsorListPage = ({
         }}
       >
         <Grid2 size={6}>
-          <Box component="span">{totalSponsors} items</Box>
+          <Box component="span">{totalSponsors} sponsors</Box>
         </Grid2>
         <Grid2
           container
@@ -211,8 +223,11 @@ const SponsorListPage = ({
                   startAdornment: <SearchIcon sx={{ mr: 1 }} />
                 }
               }}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              onKeyDown={handleSearch}
+              onChange={(event) => {
+                const { value } = event.target;
+                setSearchTerm(value);
+                handleSearchDebounced(value);
+              }}
               fullWidth
               sx={{
                 "& .MuiOutlinedInput-root": {
