@@ -34,6 +34,8 @@ const SummitSponsorshipListPage = ({
   sponsorships,
   currentPage,
   perPage,
+  order,
+  orderDir,
   totalSponsorships,
   updateSummitSponsorhipOrder,
   getSummitSponsorships
@@ -43,6 +45,13 @@ const SummitSponsorshipListPage = ({
       getSummitSponsorships();
     }
   }, []);
+
+  const [tableData, setTableData] = useState(sponsorships);
+
+  useEffect(() => {
+    const sortedSponsorships = sponsorships.sort((a, b) => a.order - b.order);
+    setTableData(sortedSponsorships);
+  }, [sponsorships]);
 
   const handleEdit = (sponsorship_id) => {
     history.push(
@@ -74,10 +83,10 @@ const SummitSponsorshipListPage = ({
   };
 
   const handlePageChange = (page) => {
-    getSummitSponsorships(term, page, perPage, order, orderDir);
+    getSummitSponsorships(page, perPage, order, orderDir);
   };
   const handlePerPageChange = (newPerPage) => {
-    getSummitSponsorships(term, currentPage, newPerPage, order, orderDir);
+    getSummitSponsorships(currentPage, newPerPage, order, orderDir);
   };
 
   const handleNewSponsorship = () => {
@@ -88,10 +97,6 @@ const SummitSponsorshipListPage = ({
     setTableData(newOrder);
     updateSummitSponsorhipOrder(newOrder, itemId, newItemOrder);
   };
-
-  const sortedSponsorships = sponsorships.sort((a, b) => a.order - b.order);
-
-  const [tableData, setTableData] = useState(sortedSponsorships);
 
   const columns = [
     {
@@ -198,11 +203,11 @@ const SummitSponsorshipListPage = ({
         </Grid2>
       </Grid2>
 
-      {sortedSponsorships.length === 0 && (
+      {sponsorships.length === 0 && (
         <div>{T.translate("summit_sponsorship_list.no_sponsorships")}</div>
       )}
 
-      {sortedSponsorships.length > 0 && (
+      {sponsorships.length > 0 && (
         <MuiTable
           options={table_options}
           data={tableData}

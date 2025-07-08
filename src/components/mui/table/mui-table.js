@@ -46,6 +46,16 @@ const MuiTable = ({
     onPerPageChange(ev.target.value);
   };
 
+  const basePerPageOptions = [
+    DEFAULT_PER_PAGE,
+    TWENTY_PER_PAGE,
+    FIFTY_PER_PAGE
+  ];
+
+  const customPerPageOptions = basePerPageOptions.includes(perPage)
+    ? basePerPageOptions
+    : [...basePerPageOptions, perPage].sort((a, b) => a - b);
+
   const { sortCol, sortDir } = options;
 
   const handleDragEnd = (result) => {
@@ -216,11 +226,7 @@ const MuiTable = ({
         <TablePagination
           component="div"
           count={totalRows}
-          rowsPerPageOptions={[
-            DEFAULT_PER_PAGE,
-            TWENTY_PER_PAGE,
-            FIFTY_PER_PAGE
-          ]}
+          rowsPerPageOptions={customPerPageOptions}
           rowsPerPage={perPage}
           page={currentPage - 1}
           onPageChange={handleChangePage}

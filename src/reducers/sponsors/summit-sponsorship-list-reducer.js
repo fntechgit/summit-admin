@@ -21,12 +21,13 @@ import {
 } from "../../actions/sponsor-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { DEFAULT_100_PER_PAGE } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   sponsorships: [],
   currentPage: 1,
   lastPage: 1,
-  perPage: 10,
+  perPage: DEFAULT_100_PER_PAGE,
   order: "order",
   orderDir: 1,
   totalSponsorships: 0
@@ -40,9 +41,9 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SUMMIT_SPONSORSHIPS: {
-      const { order, orderDir } = payload;
+      const { order, orderDir, perPage, page } = payload;
 
-      return { ...state, order, orderDir };
+      return { ...state, order, orderDir, perPage, page };
     }
     case RECEIVE_SUMMIT_SPONSORSHIPS: {
       const { current_page, total, last_page } = payload.response;
