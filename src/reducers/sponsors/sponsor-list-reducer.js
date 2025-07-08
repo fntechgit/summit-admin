@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_SPONSORS,
@@ -19,13 +21,16 @@ import {
 } from "../../actions/sponsor-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   sponsors: [],
+  term: "",
   order: "order",
   orderDir: 1,
-  totalSponsors: 0
+  totalSponsors: 0,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10
 };
 
 const sponsorListReducer = (state = DEFAULT_STATE, action) => {
@@ -36,36 +41,36 @@ const sponsorListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSORS: {
-      let { order, orderDir, term } = payload;
+      const { currentPage, perPage, order, orderDir, term } = payload;
 
-      return { ...state, order, orderDir, term };
+      return { ...state, currentPage, perPage, order, orderDir, term };
     }
     case RECEIVE_SPONSORS: {
-      let { total } = payload.response;
+      const { total, last_page } = payload.response;
       let sponsors = payload.response.data;
 
       sponsors = sponsors.map((s) => {
-        let sponsorship_name = s.sponsorship ? s.sponsorship.type.name : "";
-        let company_name = s.company ? s.company.name : "";
+        const sponsorship_name = s.sponsorship ? s.sponsorship.type.name : "";
+        const company_name = s.company ? s.company.name : "";
 
         return { ...s, sponsorship_name, company_name };
       });
 
-      return { ...state, sponsors: sponsors, totalSponsors: total };
+      return { ...state, lastPage: last_page, sponsors, totalSponsors: total };
     }
     case SPONSOR_ORDER_UPDATED: {
-      let sponsors = payload.map((s, index) => {
-        let sponsorship_name = s.sponsorship ? s.sponsorship.type.name : "";
-        let company_name = s.company ? s.company.name : "";
-        let order = s.order + index;
+      const sponsors = payload.map((s, index) => {
+        const sponsorship_name = s.sponsorship ? s.sponsorship.type.name : "";
+        const company_name = s.company ? s.company.name : "";
+        const order = s.order + index;
 
         return { ...s, sponsorship_name, company_name, order };
       });
 
-      return { ...state, sponsors: sponsors };
+      return { ...state, sponsors };
     }
     case SPONSOR_DELETED: {
-      let { sponsorId } = payload;
+      const { sponsorId } = payload;
       return {
         ...state,
         sponsors: state.sponsors.filter((t) => t.id !== sponsorId)
