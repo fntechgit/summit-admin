@@ -9,23 +9,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import {
-  RECEIVE_SPONSORS,
-  REQUEST_SPONSORS,
-  SPONSOR_DELETED,
-  SPONSOR_ORDER_UPDATED
-} from "../../actions/sponsor-actions";
-
-import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import {
+  RECEIVE_SPONSOR_FORMS,
+  REQUEST_SPONSOR_FORMS,
+  SPONSOR_FORM_ARCHIVED,
+  SPONSOR_FORM_UNARCHIVED
+} from "../../actions/sponsor-forms-actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
-  sponsors: [],
-  order: "order",
+  sponsorForms: [],
+  term: "",
+  order: "name",
   orderDir: 1,
-  totalSponsors: 0
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalCount: 0
 };
 
 const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
@@ -35,41 +38,60 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
     case LOGOUT_USER: {
       return DEFAULT_STATE;
     }
-    case REQUEST_SPONSORS: {
-      let { order, orderDir, term } = payload;
+    case REQUEST_SPONSOR_FORMS: {
+      const { order, orderDir, page, term } = payload;
 
-      return { ...state, order, orderDir, term };
-    }
-    case RECEIVE_SPONSORS: {
-      let { total } = payload.response;
-      let sponsors = payload.response.data;
-
-      sponsors = sponsors.map((s) => {
-        let sponsorship_name = s.sponsorship ? s.sponsorship.type.name : "";
-        let company_name = s.company ? s.company.name : "";
-
-        return { ...s, sponsorship_name, company_name };
-      });
-
-      return { ...state, sponsors: sponsors, totalSponsors: total };
-    }
-    case SPONSOR_ORDER_UPDATED: {
-      let sponsors = payload.map((s, index) => {
-        let sponsorship_name = s.sponsorship ? s.sponsorship.type.name : "";
-        let company_name = s.company ? s.company.name : "";
-        let order = s.order + index;
-
-        return { ...s, sponsorship_name, company_name, order };
-      });
-
-      return { ...state, sponsors: sponsors };
-    }
-    case SPONSOR_DELETED: {
-      let { sponsorId } = payload;
       return {
         ...state,
-        sponsors: state.sponsors.filter((t) => t.id !== sponsorId)
+        order,
+        orderDir,
+        sponsorForms: [],
+        currentPage: page,
+        term
       };
+    }
+    case RECEIVE_SPONSOR_FORMS: {
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
+
+      const sponsorForms = payload.response.data.map((a) => ({
+        id: a.id,
+        code: a.code,
+        name: a.name,
+        items_qty: `${a.items.length} ${
+          a.items.length === 1 ? "Item" : "Items"
+        }`,
+        is_archived: a.is_archived
+      }));
+
+      return {
+        ...state,
+        sponsorForms,
+        currentPage,
+        totalCount: total,
+        lastPage
+      };
+    }
+    case SPONSOR_FORM_ARCHIVED: {
+      const { id: formId } = payload.response;
+
+      const sponsorForms = state.sponsorForms.map((item) =>
+        item.id === formId ? { ...item, is_archived: true } : item
+      );
+
+      return { ...state, sponsorForms };
+    }
+    case SPONSOR_FORM_UNARCHIVED: {
+      const { formId } = payload;
+
+      const sponsorForms = state.sponsorForms.map((item) =>
+        item.id === formId ? { ...item, is_archived: false } : item
+      );
+
+      return { ...state, sponsorForms };
     }
     default:
       return state;

@@ -2298,7 +2298,14 @@
     }
   },
   "sponsor_forms": {
-    "forms": "Forms"
+    "forms": "Forms",
+    "alert_info": "To add an order form, select Add Form to start the process. To edit an existing form, click on the form name. To edit the line items within the form click manage items on the form line you wish to edit.",
+    "hide_archived": "Hide archived Forms",
+    "using_duplicate": "USING GLOBAL TEMPLATE",
+    "add_form": "NEW FORM TEMPLATE",
+    "placeholders": {
+      "search": "Search..."
+    }
   },
   "sponsorship_list": {
     "sponsorships": "Sponsorships",
