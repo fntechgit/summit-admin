@@ -139,6 +139,7 @@
     "order_extra_questions": "Extra Questions",
     "sponsors": "Sponsors",
     "sponsor_list": "Sponsor List",
+    "sponsor_forms": "Forms",
     "sponsorship_list": "Tiers",
     "sponsors_promocodes": "Promo Codes",
     "sponsor_settings": "Settings",
@@ -2295,6 +2296,9 @@
       "sponsorship_type": "Start Typing to choose a Tier",
       "select_material_type": "Select Material Type"
     }
+  },
+  "sponsor_forms": {
+    "forms": "Forms"
   },
   "sponsorship_list": {
     "sponsorships": "Sponsorships",

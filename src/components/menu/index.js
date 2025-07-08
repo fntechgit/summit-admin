@@ -236,6 +236,11 @@ const getSummitItems = (summitId) => [
         accessRoute: "sponsors"
       },
       {
+        name: "sponsor_forms",
+        linkUrl: `summits/${summitId}/sponsors/forms`,
+        accessRoute: "admin-sponsors"
+      },
+      {
         name: "sponsorship_list",
         linkUrl: `summits/${summitId}/sponsorships`,
         accessRoute: "admin-sponsors"
