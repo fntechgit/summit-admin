@@ -84,7 +84,12 @@ const LeadReportForm = ({
     upsertLeadReportSettings(newValues);
   };
 
-  if (!canAddSponsors || !canEditLeadReportSettings) return null;
+  if (
+    !canAddSponsors ||
+    !canEditLeadReportSettings ||
+    !availableLeadReportColumns.length > 0
+  )
+    return null;
 
   return (
     <Box>
