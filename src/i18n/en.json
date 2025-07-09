@@ -139,6 +139,7 @@
     "order_extra_questions": "Extra Questions",
     "sponsors": "Sponsors",
     "sponsor_list": "Sponsor List",
+    "sponsor_forms": "Forms",
     "sponsorship_list": "Tiers",
     "sponsors_promocodes": "Promo Codes",
     "sponsor_settings": "Settings",
@@ -2294,6 +2295,16 @@
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start Typing to choose a Tier",
       "select_material_type": "Select Material Type"
+    }
+  },
+  "sponsor_forms": {
+    "forms": "Forms",
+    "alert_info": "To add an order form, select Add Form to start the process. To edit an existing form, click on the form name. To edit the line items within the form click manage items on the form line you wish to edit.",
+    "hide_archived": "Hide archived Forms",
+    "using_duplicate": "USING GLOBAL TEMPLATE",
+    "add_form": "NEW FORM TEMPLATE",
+    "placeholders": {
+      "search": "Search..."
     }
   },
   "sponsorship_list": {
