@@ -23,9 +23,11 @@ import { getSummitById } from "../../actions/summit-actions";
 import {
   getSummitSponsorships,
   deleteSummitSponsorship,
-  updateSummitSponsorhipOrder
+  updateSummitSponsorhipOrder,
+  saveSummitSponsorship
 } from "../../actions/sponsor-actions";
 import MuiTable from "../../components/mui/table/mui-table";
+import AddTierPopup from "./popup/add-tier-popup";
 
 const SummitSponsorshipListPage = ({
   currentSummit,
@@ -38,7 +40,8 @@ const SummitSponsorshipListPage = ({
   orderDir,
   totalSponsorships,
   updateSummitSponsorhipOrder,
-  getSummitSponsorships
+  getSummitSponsorships,
+  saveSummitSponsorship
 }) => {
   useEffect(() => {
     if (currentSummit) {
@@ -47,6 +50,7 @@ const SummitSponsorshipListPage = ({
   }, []);
 
   const [tableData, setTableData] = useState(sponsorships);
+  const [showAddTierModal, setShowAddTierModal] = useState(false);
 
   useEffect(() => {
     const sortedSponsorships = sponsorships.sort((a, b) => a.order - b.order);
@@ -90,12 +94,16 @@ const SummitSponsorshipListPage = ({
   };
 
   const handleNewSponsorship = () => {
-    history.push(`/app/summits/${currentSummit.id}/sponsorships/new`);
+    setShowAddTierModal(true);
   };
 
   const handleReorder = (newOrder, itemId, newItemOrder) => {
     setTableData(newOrder);
     updateSummitSponsorhipOrder(newOrder, itemId, newItemOrder);
+  };
+
+  const handleSaveSummitSponsorship = (sponsorship) => {
+    saveSummitSponsorship(sponsorship).then(() => setShowAddTierModal(false));
   };
 
   const columns = [
@@ -188,8 +196,8 @@ const SummitSponsorshipListPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={7} />
-          <Grid2 size={5}>
+          <Grid2 size={{ xs: 0, sm: 4, lg: 6, xl: 7 }} />
+          <Grid2 size={{ xs: 12, sm: 8, lg: 6, xl: 5 }}>
             <Button
               variant="contained"
               fullWidth
@@ -221,6 +229,14 @@ const SummitSponsorshipListPage = ({
           onPerPageChange={handlePerPageChange}
         />
       )}
+
+      <AddTierPopup
+        open={showAddTierModal}
+        onClose={() => setShowAddTierModal(false)}
+        onSave={handleSaveSummitSponsorship}
+        entity={null}
+        sponsorships={tableData}
+      />
     </div>
   );
 };
@@ -237,5 +253,6 @@ export default connect(mapStateToProps, {
   getSummitById,
   getSummitSponsorships,
   deleteSummitSponsorship,
-  updateSummitSponsorhipOrder
+  updateSummitSponsorhipOrder,
+  saveSummitSponsorship
 })(SummitSponsorshipListPage);

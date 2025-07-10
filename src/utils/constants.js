@@ -129,6 +129,8 @@ export const HEX_RADIX = 16;
 
 export const DEBOUNCE_WAIT = 500;
 
+export const DEBOUNCE_WAIT_250 = 250;
+
 export const LETTERS_IN_ALPHABET = 26;
 
 export const UPPERCASE_A_IN_ASCII = 65;
