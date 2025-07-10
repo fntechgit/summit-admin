@@ -27,10 +27,11 @@ import {
   saveSummitSponsorship
 } from "../../actions/sponsor-actions";
 import MuiTable from "../../components/mui/table/mui-table";
-import AddTierPopup from "./popup/add-tier-popup";
+import EditTierPopup from "./popup/edit-tier-popup";
 
 const SummitSponsorshipListPage = ({
   currentSummit,
+  currentEntity,
   history,
   deleteSummitSponsorship,
   sponsorships,
@@ -230,12 +231,11 @@ const SummitSponsorshipListPage = ({
         />
       )}
 
-      <AddTierPopup
+      <EditTierPopup
         open={showAddTierModal}
         onClose={() => setShowAddTierModal(false)}
-        onSave={handleSaveSummitSponsorship}
-        entity={null}
-        sponsorships={tableData}
+        onSubmit={handleSaveSummitSponsorship}
+        entity={currentEntity}
       />
     </div>
   );
@@ -243,9 +243,11 @@ const SummitSponsorshipListPage = ({
 
 const mapStateToProps = ({
   currentSummitState,
-  currentSummitSponsorshipListState
+  currentSummitSponsorshipListState,
+  currentSummitSponsorshipState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
+  currentEntity: currentSummitSponsorshipState.entity,
   ...currentSummitSponsorshipListState
 });
 
