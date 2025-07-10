@@ -814,14 +814,8 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`
-          );
-        })
-      );
+    )(params)(dispatch).then(() => {
+      dispatch(showMessage(success_message));
     });
   }
 };
