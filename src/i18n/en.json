@@ -2301,10 +2301,25 @@
     "forms": "Forms",
     "alert_info": "To add an order form, select Add Form to start the process. To edit an existing form, click on the form name. To edit the line items within the form click manage items on the form line you wish to edit.",
     "hide_archived": "Hide archived Forms",
-    "using_duplicate": "USING GLOBAL TEMPLATE",
-    "add_form": "NEW FORM TEMPLATE",
+    "using_global": "Using Global Template",
+    "add_form": "New Form Template",
     "placeholders": {
       "search": "Search..."
+    },
+    "global_template_popup": {
+      "title": "Add Form Using Global Template",
+      "items_selected": "items selected",
+      "code": "Code",
+      "name": "Name",
+      "items": "Items",
+      "add_selected": "Add Selected Form Template",
+      "placeholders": {
+        "search": "Search..."
+      }
+    },
+    "sponsorships_popup": {
+      "title": "Add Form Using Global Template",
+      "apply": "Apply"
     }
   },
   "sponsorship_list": {

@@ -14,9 +14,9 @@
 import {
   authErrorHandler,
   createAction,
+  deleteRequest,
   getRequest,
   putRequest,
-  deleteRequest,
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
@@ -31,6 +31,9 @@ export const REQUEST_SPONSOR_FORMS = "REQUEST_SPONSOR_FORMS";
 export const RECEIVE_SPONSOR_FORMS = "RECEIVE_SPONSOR_FORMS";
 export const SPONSOR_FORM_ARCHIVED = "SPONSOR_FORM_ARCHIVED";
 export const SPONSOR_FORM_UNARCHIVED = "SPONSOR_FORM_UNARCHIVED";
+export const REQUEST_GLOBAL_TEMPLATES = "REQUEST_GLOBAL_TEMPLATES";
+export const RECEIVE_GLOBAL_TEMPLATES = "RECEIVE_GLOBAL_TEMPLATES";
+export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
 
 export const getSponsorForms =
   (
@@ -114,3 +117,78 @@ export const unarchiveSponsorForm = (formId) => async (dispatch) => {
     dispatch(stopLoading());
   });
 };
+
+export const getGlobalTemplates =
+  (
+    term = null,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
+  ) =>
+  async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+    const filter = [];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
+    }
+
+    const params = {
+      page,
+      fields: "id,code,name,level,expire_date,is_archived",
+      relations: "items",
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    if (hideArchived) filter.push("is_archived==0");
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.ordering = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_GLOBAL_TEMPLATES),
+      createAction(RECEIVE_GLOBAL_TEMPLATES),
+      `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates`,
+      authErrorHandler,
+      { order, orderDir, page, term }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const getSponsorships =
+  (page = 1, perPage = DEFAULT_PER_PAGE) =>
+  async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      page,
+      per_page: perPage,
+      access_token: accessToken,
+      sorting: "order"
+    };
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_GLOBAL_SPONSORSHIPS),
+      `${window.API_BASE_URL}/api/v1/sponsorship-types`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };

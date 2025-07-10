@@ -36,7 +36,7 @@ const theme = createTheme({
       letterSpacing: "0.25px"
     },
     h5: {
-      fontSize: "1.6em",
+      fontSize: "24px",
       fontWeight: 400,
       "&.MuiTypography-gutterBottom": {
         marginBottom: "20px"
