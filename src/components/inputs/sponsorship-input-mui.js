@@ -12,6 +12,7 @@
  * */
 
 import React, { useState, useEffect, useMemo } from "react";
+import PropTypes from "prop-types";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -21,11 +22,9 @@ import { DEBOUNCE_WAIT_250 } from "../../utils/constants";
 const SponsorshipTypeInputMUI = ({
   id,
   name,
-  value,
+  formik,
   placeholder,
-  error,
   plainValue,
-  onChange,
   ...rest
 }) => {
   const [options, setOptions] = useState([]);
@@ -33,7 +32,8 @@ const SponsorshipTypeInputMUI = ({
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const hasError = !!error;
+  const value = formik?.values[name];
+  const error = formik?.touched[name] && formik?.errors[name];
 
   const fetchOptions = async (input) => {
     if (!input) {
@@ -81,14 +81,7 @@ const SponsorshipTypeInputMUI = ({
         : { id: parseInt(newValue.value), name: newValue.label };
     }
 
-    onChange({
-      target: {
-        id,
-        name,
-        value: theValue,
-        type: "sponsorshipinput"
-      }
-    });
+    formik.setFieldValue(name, theValue);
   };
 
   return (
@@ -111,8 +104,8 @@ const SponsorshipTypeInputMUI = ({
           {...params}
           placeholder={placeholder}
           variant="outlined"
-          error={hasError}
-          helperText={hasError ? error : ""}
+          error={Boolean(error)}
+          helperText={error || ""}
           slotProps={{
             ...params.InputProps,
             inputLabel: { shrink: false },
@@ -134,6 +127,14 @@ const SponsorshipTypeInputMUI = ({
       {...rest}
     />
   );
+};
+
+SponsorshipTypeInputMUI.propTypes = {
+  id: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  formik: PropTypes.object.isRequired,
+  placeholder: PropTypes.string,
+  plainValue: PropTypes.bool
 };
 
 export default SponsorshipTypeInputMUI;

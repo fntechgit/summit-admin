@@ -78,9 +78,11 @@
   "validation": {
     "required": "This field is required.",
     "string": "Must be a string.",
+    "number": "Must be a number.",
     "email": "Wrong email format.",
     "date": "Wrong date format.",
-    "after": "'{field1}' must be after '{field2}'."
+    "after": "'{field1}' must be after '{field2}'.",
+    "boolean": "Must be a boolean."
   },
   "landing": {
     "os_summit_admin": "Show Admin",
