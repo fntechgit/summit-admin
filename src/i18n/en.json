@@ -2303,6 +2303,9 @@
     "hide_archived": "Hide archived Forms",
     "using_global": "Using Global Template",
     "add_form": "New Form Template",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
+    "items_column_label": "Items",
     "placeholders": {
       "search": "Search..."
     },
@@ -2313,12 +2316,15 @@
       "name": "Name",
       "items": "Items",
       "add_selected": "Add Selected Form Template",
+      "success": "Forms created successfully.",
+      "error": "There was a problem creating the forms, please try again.",
       "placeholders": {
         "search": "Search..."
       }
     },
     "sponsorships_popup": {
       "title": "Add Form Using Global Template",
+      "all_tiers": "All Tiers",
       "apply": "Apply"
     }
   },

@@ -16,6 +16,7 @@ import {
   createAction,
   deleteRequest,
   getRequest,
+  postRequest,
   putRequest,
   startLoading,
   stopLoading
@@ -24,7 +25,8 @@ import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  ERROR_CODE_412
 } from "../utils/constants";
 
 export const REQUEST_SPONSOR_FORMS = "REQUEST_SPONSOR_FORMS";
@@ -34,6 +36,7 @@ export const SPONSOR_FORM_UNARCHIVED = "SPONSOR_FORM_UNARCHIVED";
 export const REQUEST_GLOBAL_TEMPLATES = "REQUEST_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_TEMPLATES = "RECEIVE_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
+export const GLOBAL_TEMPLATE_CLONED = "GLOBAL_TEMPLATE_CLONED";
 
 export const getSponsorForms =
   (
@@ -192,3 +195,45 @@ export const getSponsorships =
       dispatch(stopLoading());
     });
   };
+
+export const cloneGlobalTemplate =
+  (tempateIds, sponsorIds, allSponsors) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    const normalizedEntity = {
+      form_template_ids: tempateIds,
+      sponsorship_type_ids: sponsorIds,
+      apply_to_all_types: allSponsors
+    };
+
+    return postRequest(
+      null,
+      createAction(GLOBAL_TEMPLATE_CLONED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/clone`,
+      normalizedEntity,
+      customErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(getSponsorForms());
+    });
+  };
+
+const customErrorHandler = (err, res) => (dispatch, state) => {
+  const code = err.status;
+  dispatch(stopLoading());
+
+  switch (code) {
+    case ERROR_CODE_412:
+      // dont do anything, caller will catch
+      break;
+    default:
+      authErrorHandler(err, res)(dispatch, state);
+  }
+};

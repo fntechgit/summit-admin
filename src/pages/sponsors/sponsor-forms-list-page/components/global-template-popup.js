@@ -1,35 +1,55 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import T from "i18n-react/dist/i18n-react";
+import { connect } from "react-redux";
 import { Dialog } from "@mui/material";
 import SelectTemplatesDialog from "./select-templates-dialog";
 import SelectSponsorshipsDialog from "./select-sponsorships-dialog";
+import { cloneGlobalTemplate } from "../../../../actions/sponsor-forms-actions";
+import { useCustomNotification } from "../../../../components/mui/components/CustomNotification/Context";
 
-const GlobalTemplatePopup = ({ open, onClose }) => {
+const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
   const [stage, setStage] = useState("templates");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
+  const { successMessage, errorMessage } = useCustomNotification();
+  const dialogSize = stage === "templates" ? "md" : "sm";
 
   const handleClose = () => {
     setSelectedTemplates([]);
+    setStage("templates");
     onClose();
-  }
+  };
 
   const handleOnSelectTemplates = (templates) => {
     setSelectedTemplates(templates);
     setStage("sponsorships");
-  }
+  };
 
   const handleOnSave = (selectedTiers, allTiers) => {
-    console.log(selectedTemplates, selectedTiers, allTiers);
-  }
+    cloneGlobalTemplate(selectedTemplates, selectedTiers, allTiers)
+      .then(() => {
+        successMessage(
+          T.translate("sponsor_forms.global_template_popup.success")
+        );
+        handleClose();
+      })
+      .catch(() => {
+        errorMessage(T.translate("sponsor_forms.global_template_popup.error"));
+        handleClose();
+      });
+  };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      {stage === "templates" &&
-      <SelectTemplatesDialog onSave={handleOnSelectTemplates} onClose={handleClose} />
-      }
-      {stage === "sponsorships" &&
+    <Dialog open={open} onClose={onClose} maxWidth={dialogSize} fullWidth>
+      {stage === "templates" && (
+        <SelectTemplatesDialog
+          onSave={handleOnSelectTemplates}
+          onClose={handleClose}
+        />
+      )}
+      {stage === "sponsorships" && (
         <SelectSponsorshipsDialog onSave={handleOnSave} onClose={handleClose} />
-      }
+      )}
     </Dialog>
   );
 };
@@ -39,4 +59,8 @@ GlobalTemplatePopup.propTypes = {
   onClose: PropTypes.func.isRequired
 };
 
-export default GlobalTemplatePopup;
+const mapStateToProps = () => ({});
+
+export default connect(mapStateToProps, {
+  cloneGlobalTemplate
+})(GlobalTemplatePopup);

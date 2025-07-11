@@ -38,18 +38,18 @@ import SearchInput from "../../../components/mui/components/search-input";
 import GlobalTemplatePopup from "./components/global-template-popup";
 
 const SponsorFormsListPage = ({
-                                match,
-                                sponsorForms,
-                                currentPage,
-                                perPage,
-                                term,
-                                order,
-                                orderDir,
-                                totalCount,
-                                getSponsorForms,
-                                archiveSponsorForm,
-                                unarchiveSponsorForm
-                              }) => {
+  match,
+  sponsorForms,
+  currentPage,
+  perPage,
+  term,
+  order,
+  orderDir,
+  totalCount,
+  getSponsorForms,
+  archiveSponsorForm,
+  unarchiveSponsorForm
+}) => {
   const [createFromGlobal, setCreateFromGlobal] = useState(false);
 
   useEffect(() => {
@@ -243,6 +243,7 @@ const SponsorFormsListPage = ({
             data={sponsorForms}
             options={tableOptions}
             perPage={perPage}
+            totalRows={totalCount}
             currentPage={currentPage}
             onRowEdit={handleRowEdit}
             onPageChange={handlePageChange}

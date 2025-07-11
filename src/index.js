@@ -22,6 +22,7 @@ import "./styles/landing.css";
 import "./styles/general.less";
 import "openstack-uicore-foundation/lib/css/components/index.css";
 import CustomTheme from "./components/CustomTheme";
+import CustomNotification from "./components/mui/components/CustomNotification";
 
 const onBeforeLift = () => {
   console.log("reading state ...");
@@ -31,7 +32,9 @@ ReactDOM.render(
   <Provider store={store}>
     <PersistGate onBeforeLift={onBeforeLift} persistor={persistor}>
       <CustomTheme>
-        <App />
+        <CustomNotification>
+          <App />
+        </CustomNotification>
       </CustomTheme>
     </PersistGate>
   </Provider>,

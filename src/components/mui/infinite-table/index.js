@@ -60,7 +60,9 @@ const MuiInfiniteTable = ({
                       <TableSortLabel
                         active={sortCol === col.columnKey}
                         direction={
-                          sortCol === col.columnKey && sortDir === 1 ? "asc" : "desc"
+                          sortCol === col.columnKey && sortDir === 1
+                            ? "asc"
+                            : "desc"
                         }
                         onClick={() => onSort(col.columnKey, sortDir * -1)}
                       >
@@ -125,12 +127,12 @@ const MuiInfiniteTable = ({
 
 MuiInfiniteTable.propTypes = {
   boxHeight: PropTypes.string,
-  columns: PropTypes.object,
+  columns: PropTypes.array,
   data: PropTypes.array,
   loadMoreData: PropTypes.func,
   onRowEdit: PropTypes.func,
   onSort: PropTypes.func,
-  options: PropTypes.object,
+  options: PropTypes.object
 };
 
 export default MuiInfiniteTable;

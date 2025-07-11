@@ -23,7 +23,7 @@ const SelectSponsorshipsDialog = ({
   getSponsorships
 }) => {
   const { items, currentPage, total } = sponsorships;
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [selection, setSelection] = useState({ ids: [], all: false });
 
   useEffect(() => {
     getSponsorships(1, DEFAULT_PER_PAGE);
@@ -36,21 +36,21 @@ const SelectSponsorshipsDialog = ({
   };
 
   const handleClose = () => {
-    setSelectedRows([]);
+    setSelection({ ids: [], all: false });
     onClose();
   };
 
-  const handleOnCheck = (rowId, checked) => {
-    if (checked) {
-      setSelectedRows([...selectedRows, rowId]);
+  const handleOnChangeSelected = (rowIds, allSelected) => {
+    if (allSelected) {
+      setSelection({ ids: [], all: true });
     } else {
-      setSelectedRows(selectedRows.filter((r) => r !== rowId));
+      setSelection({ ids: rowIds, all: false });
     }
   };
 
   const handleOnSave = () => {
-    onSave(selectedRows);
-  }
+    onSave(selection.ids, selection.all);
+  };
 
   return (
     <>
@@ -67,13 +67,20 @@ const SelectSponsorshipsDialog = ({
       </DialogTitle>
       <Divider />
       <DialogContent sx={{ p: 0 }}>
-        <CheckBoxList items={items} loadMoreData={handleLoadMore} />
+        <CheckBoxList
+          items={items}
+          onChange={handleOnChangeSelected}
+          loadMoreData={handleLoadMore}
+          allItemsLabel={T.translate(
+            "sponsor_forms.sponsorships_popup.all_tiers"
+          )}
+        />
       </DialogContent>
       <Divider />
       <DialogActions>
         <Button
           onClick={handleOnSave}
-          disabled={selectedRows.length === 0}
+          disabled={selection.ids.length === 0 && !selection.all}
           fullWidth
           variant="contained"
         >

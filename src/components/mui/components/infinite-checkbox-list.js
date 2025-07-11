@@ -1,7 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { Checkbox, FormControlLabel, FormGroup, Box, Divider } from "@mui/material";
+import React, { useState } from "react";
+import {
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Box,
+  Divider
+} from "@mui/material";
 
-const CheckBoxList = ({ items = [], loadMoreData, boxHeight = "400px" }) => {
+const CheckBoxList = ({
+  items = [],
+  onChange,
+  loadMoreData,
+  boxHeight = "400px",
+  allItemsLabel = "Select All"
+}) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
 
@@ -13,34 +25,44 @@ const CheckBoxList = ({ items = [], loadMoreData, boxHeight = "400px" }) => {
     }
   };
 
-  useEffect(() => {
-    // Update the "All Tiers" checkbox if all items are selected
-    setIsAllSelected(items.length > 0 && items.every((item) => selectedItems.includes(item.id)));
-  }, [selectedItems, items]);
-
   const handleItemChange = (itemId) => {
+    let selected = [];
     if (selectedItems.includes(itemId)) {
-      setSelectedItems(selectedItems.filter((id) => id !== itemId));
+      selected = selectedItems.filter((id) => id !== itemId);
     } else {
-      setSelectedItems([...selectedItems, itemId]);
+      selected = [...selectedItems, itemId];
     }
+
+    setSelectedItems(selected);
+    // if user selects an item, then allSelected should be unchecked
+    setIsAllSelected(false);
+    onChange(selected);
   };
 
   const handleAllChange = () => {
-    if (isAllSelected) {
-      setSelectedItems([]); // Deselect all items
-    } else {
-      setSelectedItems(items.map((item) => item.id)); // Select all items
-    }
+    // if user selects all, we should remove all other selections
+    setSelectedItems([]);
     setIsAllSelected(!isAllSelected);
+    onChange([], true);
   };
 
   return (
-    <Box sx={{ width: "100%", height: boxHeight, overflow: "auto", border: "1px solid #ccc", padding: 2 }} onScroll={handleScroll}>
+    <Box
+      sx={{
+        width: "100%",
+        height: boxHeight,
+        overflow: "auto",
+        border: "1px solid #ccc",
+        padding: 2
+      }}
+      onScroll={handleScroll}
+    >
       <FormGroup>
         <FormControlLabel
-          control={<Checkbox checked={isAllSelected} onChange={handleAllChange} />}
-          label="All Tiers"
+          control={
+            <Checkbox checked={isAllSelected} onChange={handleAllChange} />
+          }
+          label={allItemsLabel}
         />
         <Divider />
         {items.map((item) => (
