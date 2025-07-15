@@ -28,6 +28,7 @@ import {
   DEFAULT_PER_PAGE,
   ERROR_CODE_412
 } from "../utils/constants";
+import moment from "moment-timezone";
 
 export const REQUEST_SPONSOR_FORMS = "REQUEST_SPONSOR_FORMS";
 export const RECEIVE_SPONSOR_FORMS = "RECEIVE_SPONSOR_FORMS";
@@ -239,7 +240,7 @@ const customErrorHandler = (err, res) => (dispatch, state) => {
   }
 };
 
-export const saveTemplateForm = (entity) => async (dispatch, getState) => {
+export const saveFormTemplate = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
@@ -250,13 +251,29 @@ export const saveTemplateForm = (entity) => async (dispatch, getState) => {
     access_token: accessToken
   };
 
+  const normalizedEntity = normalizeFormTemplate(entity, currentSummit.time_zone_id);
+
   return postRequest(
     null,
     createAction(TEMPLATE_FORM_CREATED),
-    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/clone`,
-    entity,
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
+    normalizedEntity,
     customErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(getSponsorForms());
   });
+};
+
+const normalizeFormTemplate = (entity, summitTZ) => {
+  const normalizedEntity = { ...entity };
+  const { opens_at, expires_at } = entity;
+
+  normalizedEntity.opens_at = moment
+    .tz(opens_at, summitTZ)
+    .unix();
+  normalizedEntity.expires_at = moment
+    .tz(expires_at, summitTZ)
+    .unix();
+
+  return normalizedEntity;
 };

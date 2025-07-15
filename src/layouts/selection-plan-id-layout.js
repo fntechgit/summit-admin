@@ -11,7 +11,7 @@ import {
 import { getMarketingSettingsBySelectionPlan } from "../actions/marketing-actions";
 import SelectionPlanExtraQuestionsLayout from "./selection-plan-extra-questions-layout";
 import SelectionPlanRatingTypesLayout from "./selection-plan-rating-types-layout";
-import { DEFAULT_100_PER_PAGE } from "../utils/constants";
+import { MAX_PER_PAGE } from "../utils/constants";
 
 class SelectionPlanIdLayout extends React.Component {
   componentDidMount() {
@@ -27,7 +27,7 @@ class SelectionPlanIdLayout extends React.Component {
             selectionPlanId,
             null,
             1,
-            DEFAULT_100_PER_PAGE
+            MAX_PER_PAGE
           )
         );
     }
@@ -48,7 +48,7 @@ class SelectionPlanIdLayout extends React.Component {
               newId,
               null,
               1,
-              DEFAULT_100_PER_PAGE
+              MAX_PER_PAGE
             )
           );
       }

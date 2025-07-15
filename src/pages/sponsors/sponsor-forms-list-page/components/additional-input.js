@@ -23,7 +23,7 @@ const AdditionalInput = ({field, fieldIdx, entity, setEntity, onMetaFieldDelete}
   const handleChange = (name, value) => {
     const newFields = [...entity.meta_fields];
     newFields[fieldIdx][name] = value;
-    setEntity({ ...entity, meta_fields: newFields });
+    setEntity(prevEntity => ({ ...prevEntity, meta_fields: newFields }));
   }
 
   const handleRemoveFieldType = async (fieldType, index) => {

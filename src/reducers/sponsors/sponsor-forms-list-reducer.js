@@ -19,7 +19,7 @@ import {
   REQUEST_GLOBAL_TEMPLATES,
   REQUEST_SPONSOR_FORMS,
   SPONSOR_FORM_ARCHIVED,
-  SPONSOR_FORM_UNARCHIVED
+  SPONSOR_FORM_UNARCHIVED, TEMPLATE_FORM_CREATED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
