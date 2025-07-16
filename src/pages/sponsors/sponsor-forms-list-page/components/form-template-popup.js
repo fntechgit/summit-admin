@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
-import { saveTemplateForm } from "../../../../actions/sponsor-forms-actions";
 import {
   Box,
   Button,
@@ -13,7 +12,6 @@ import {
   Divider,
   Grid2,
   IconButton,
-  Select,
   TextField,
   Typography
 } from "@mui/material";
@@ -22,12 +20,19 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import CloseIcon from "@mui/icons-material/Close";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useCustomNotification } from "../../../../components/mui/components/CustomNotification/Context";
+import {
+  getSponsorships,
+  saveFormTemplate
+} from "../../../../actions/sponsor-forms-actions";
 import { hasErrors } from "../../../../utils/methods";
 import AdditionalInput from "./additional-input";
+import { MAX_PER_PAGE } from "../../../../utils/constants";
+import DropdownCheckbox from "../../../../components/mui/components/dropdown-checkbox";
 
 const DEFAULT_ENTITY = {
   code: "",
   name: "",
+  sponsorships: [],
   apply_to: null,
   opens_at: null,
   expires_at: null,
@@ -37,23 +42,26 @@ const DEFAULT_ENTITY = {
       name: "",
       type: "Text",
       required: false,
-      minimum_quantity: "",
-      maximum_quantity: "",
       values: []
     }
   ]
 };
 
 const FormTemplatePopup = ({
-  entity: initialEntity,
   errors: initialErrors,
+  sponsorships,
   open,
   onClose,
-  saveTemplateForm
+  getSponsorships,
+  saveFormTemplate
 }) => {
   const { successMessage, errorMessage } = useCustomNotification();
   const [errors, setErrors] = useState(initialErrors || {});
   const [entity, setEntity] = useState(DEFAULT_ENTITY);
+
+  useEffect(() => {
+    getSponsorships(1, MAX_PER_PAGE);
+  }, []);
 
   const handleClose = () => {
     setEntity(DEFAULT_ENTITY);
@@ -61,7 +69,7 @@ const FormTemplatePopup = ({
   };
 
   const handleOnSave = () => {
-    saveTemplateForm(entity)
+    saveFormTemplate(entity)
       .then(() => {
         successMessage(
           T.translate("sponsor_forms.global_template_popup.success")
@@ -113,7 +121,6 @@ const FormTemplatePopup = ({
               variant="outlined"
               name="name"
               label={T.translate("sponsor_forms.form_template_popup.name")}
-              required
               value={entity.name}
               error={!!errors.name}
               helperText={errors.name}
@@ -122,13 +129,17 @@ const FormTemplatePopup = ({
             />
           </Grid2>
           <Grid2 size={4}>
-            <Select
-              name="sponsorship"
+            <DropdownCheckbox
+              name="sponsorships"
               label={T.translate(
                 "sponsor_forms.form_template_popup.sponsorship"
               )}
-              required
-              onSelect={handleChange}
+              allLabel={T.translate(
+                "sponsor_forms.form_template_popup.all_tiers"
+              )}
+              value={entity.sponsorships}
+              options={sponsorships.items}
+              onChange={handleChange}
             />
           </Grid2>
           <Grid2 size={4}>
@@ -143,6 +154,7 @@ const FormTemplatePopup = ({
                     name: "opens_at",
                     fullWidth: true,
                     margin: "normal",
+                    required: true,
                     label: T.translate(
                       "sponsor_forms.form_template_popup.opens_at"
                     ),
@@ -165,8 +177,9 @@ const FormTemplatePopup = ({
                     name: "expires_at",
                     fullWidth: true,
                     margin: "normal",
+                    required: true,
                     label: T.translate(
-                      "sponsor_forms.form_template_popup.opens_at"
+                      "sponsor_forms.form_template_popup.expires_at"
                     ),
                     error: !!errors.expires_at,
                     helperText: errors.expires_at
@@ -183,6 +196,7 @@ const FormTemplatePopup = ({
               )}
               required
               fullWidth
+              multiline
               minRows={3}
               value={entity.instructions}
               error={hasErrors("instructions", errors)}
@@ -197,6 +211,8 @@ const FormTemplatePopup = ({
         <Box sx={{ px: 3 }}>
           {entity.meta_fields.map((field, fieldIndex) => (
             <AdditionalInput
+              // eslint-disable-next-line react/no-array-index-key
+              key={`additional_input_${fieldIndex}`}
               entity={entity}
               field={field}
               fieldIdx={fieldIndex}
@@ -226,8 +242,11 @@ FormTemplatePopup.propTypes = {
   onClose: PropTypes.func.isRequired
 };
 
-const mapStateToProps = () => ({});
+const mapStateToProps = ({ sponsorFormsListState }) => ({
+  sponsorships: sponsorFormsListState.sponsorships
+});
 
 export default connect(mapStateToProps, {
-  saveTemplateForm
+  saveFormTemplate,
+  getSponsorships
 })(FormTemplatePopup);
