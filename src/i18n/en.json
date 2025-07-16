@@ -2334,6 +2334,22 @@
       "all_tiers": "All Tiers",
       "no_tiers_found": "No summit tiers found for current search criteria.",
       "apply": "Apply"
+    },
+    "form_template_popup": {
+      "title": "Create New Form Template",
+      "code": "Code",
+      "name": "Name",
+      "sponsorship": "Always apply to",
+      "opens_at": "Opens at",
+      "expires_at": "Expires at",
+      "instructions": "Instructions",
+      "additional_fields": "Additional Input Fields",
+      "meta_field_title": "Field Title",
+      "meta_field_type": "Field Type",
+      "meta_field_required": "Required",
+      "delete_meta_field_warning": "Are you sure you want to delete meta field ",
+      "delete_value_warning": "Are you sure you want to delete meta field value ",
+      "save": "Save Form"
     }
   },
   "sponsorship_list": {

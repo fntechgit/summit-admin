@@ -190,3 +190,15 @@ export const ALLOWED_FORM_TEMPLATE_MATERIAL_FORMATS = [
 export const MAX_INVENTORY_IMAGE_UPLOAD_SIZE = 512000;
 export const MAX_INVENTORY_IMAGES_UPLOAD_QTY = 5;
 export const ALLOWED_INVENTORY_IMAGE_FORMATS = ["jpg", "jpeg", "png"];
+
+export const METAFIELD_TYPES_WITH_OPTIONS = ["CheckBoxList", "ComboBox", "RadioButtonList"];
+
+export const METAFIELD_TYPES = [
+  "CheckBox",
+  ...METAFIELD_TYPES_WITH_OPTIONS,
+  "Text",
+  "TextArea",
+  "Quantity",
+  "DateTime",
+  "Time"
+];

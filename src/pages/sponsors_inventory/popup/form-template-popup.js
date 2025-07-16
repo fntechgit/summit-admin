@@ -26,6 +26,7 @@ import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 import MuiFormikSelect from "../../../components/inputs/mui-formik-select";
 import MuiFormikCheckbox from "../../../components/inputs/mui-formik-checkbox";
 import useScrollToError from "../../../hooks/useScrollToError";
+import { METAFIELD_TYPES, METAFIELD_TYPES_WITH_OPTIONS } from "../../../utils/constants";
 
 const FormTemplateDialog = ({
   open,
@@ -36,17 +37,6 @@ const FormTemplateDialog = ({
   onMetaFieldTypeValueDeleted,
   entity: initialEntity
 }) => {
-  const METAFIELD_TYPES = [
-    "CheckBox",
-    "CheckBoxList",
-    "ComboBox",
-    "RadioButtonList",
-    "Text",
-    "TextArea",
-    "Quantity",
-    "DateTime",
-    "Time"
-  ];
 
   const formik = useFormik({
     initialValues: {
@@ -104,8 +94,6 @@ const FormTemplateDialog = ({
       onSave(finalValues);
     }
   });
-
-  const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
 
   useScrollToError(formik);
 
@@ -266,7 +254,7 @@ const FormTemplateDialog = ({
                                 />
                               </Grid2>
                             </Grid2>
-                            {fieldTypesWithOptions.includes(field.type) && (
+                            {METAFIELD_TYPES_WITH_OPTIONS.includes(field.type) && (
                               <>
                                 <Divider sx={{ mt: 2 }} />
                                 <MetaFieldValues

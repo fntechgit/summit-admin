@@ -16,12 +16,12 @@ import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import {
+  Box,
   Button,
   Checkbox,
   FormControlLabel,
   FormGroup,
   Grid2,
-  Box,
   IconButton
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -36,6 +36,7 @@ import MuiTable from "../../../components/mui/table/mui-table";
 import CustomAlert from "../../../components/mui/components/custom-alert";
 import SearchInput from "../../../components/mui/components/search-input";
 import GlobalTemplatePopup from "./components/global-template-popup";
+import FormTemplatePopup from "./components/form-template-popup";
 
 const SponsorFormsListPage = ({
   match,
@@ -50,7 +51,7 @@ const SponsorFormsListPage = ({
   archiveSponsorForm,
   unarchiveSponsorForm
 }) => {
-  const [createFromGlobal, setCreateFromGlobal] = useState(false);
+  const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
     getSponsorForms();
@@ -70,10 +71,6 @@ const SponsorFormsListPage = ({
 
   const handleRowEdit = (row) => {
     console.log("EDIT CLICKED", row);
-  };
-
-  const handleNewFormTemplate = () => {
-    console.log("NEW CLICKED");
   };
 
   const handleManageItems = (form) => {
@@ -215,7 +212,7 @@ const SponsorFormsListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setCreateFromGlobal(true)}
+            onClick={() => setOpenPopup("clone")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -227,7 +224,7 @@ const SponsorFormsListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => handleNewFormTemplate()}
+            onClick={() => setOpenPopup("new")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -252,8 +249,12 @@ const SponsorFormsListPage = ({
         </div>
       )}
       <GlobalTemplatePopup
-        open={createFromGlobal}
-        onClose={() => setCreateFromGlobal(false)}
+        open={openPopup === "clone"}
+        onClose={() => setOpenPopup(null)}
+      />
+      <FormTemplatePopup
+        open={openPopup === "new"}
+        onClose={() => setOpenPopup(null)}
       />
     </div>
   );

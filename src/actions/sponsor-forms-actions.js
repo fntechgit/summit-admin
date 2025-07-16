@@ -38,6 +38,7 @@ export const REQUEST_GLOBAL_TEMPLATES = "REQUEST_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_TEMPLATES = "RECEIVE_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
 export const GLOBAL_TEMPLATE_CLONED = "GLOBAL_TEMPLATE_CLONED";
+export const TEMPLATE_FORM_CREATED = "TEMPLATE_FORM_CREATED";
 
 export const getSponsorForms =
   (
@@ -242,3 +243,25 @@ export const cloneGlobalTemplate =
       })
       .catch(() => {}); // need to catch promise reject
   };
+
+export const saveTemplateForm = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return postRequest(
+    null,
+    createAction(TEMPLATE_FORM_CREATED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/clone`,
+    entity,
+    snackbarErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(getSponsorForms());
+  });
+};
