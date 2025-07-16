@@ -21,7 +21,10 @@ import MuiFormikDatepicker from "../../inputs/mui-formik-datepicker";
 import MuiFormikTextField from "../../inputs/mui-formik-textfield";
 import MuiFormikCheckbox from "../../inputs/mui-formik-checkbox";
 import styles from "./styles.module.less";
-import { addEmailListValidator } from "../../../utils/yup";
+import {
+  addEmailListValidator,
+  addIssAfterDateFieldValidator
+} from "../../../utils/yup";
 import useScrollToError from "../../../hooks/useScrollToError";
 
 const buildInitialValues = (settings, summitTZ) => {
@@ -49,6 +52,7 @@ const buildInitialValues = (settings, summitTZ) => {
 };
 
 addEmailListValidator();
+addIssAfterDateFieldValidator();
 
 const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
   const formik = useFormik({
@@ -60,54 +64,32 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
       standard_price_end_date: yup
         .date(T.translate("validation.date"))
         .required(T.translate("validation.required"))
-        .test(
-          "is-after-early_bird_end_date",
+        .isAfterDateField(
+          yup.ref("early_bird_end_date"),
           T.translate("validation.after", {
             field1: T.translate("sponsor_settings.standard_price_end_date"),
             field2: T.translate("sponsor_settings.early_bird_end_date")
-          }),
-          (standard_price_end_date, ctx) => {
-            const early_bird_end_date = ctx.resolve(
-              yup.ref("early_bird_end_date")
-            );
-            if (!early_bird_end_date || !standard_price_end_date) return true;
-            return early_bird_end_date < standard_price_end_date;
-          }
+          })
         ),
       onsite_price_start_date: yup
         .date(T.translate("validation.date"))
         .required(T.translate("validation.required"))
-        .test(
-          "is-after-standard_price_end_date",
+        .isAfterDateField(
+          yup.ref("standard_price_end_date"),
           T.translate("validation.after", {
             field1: T.translate("sponsor_settings.onsite_price_start_date"),
             field2: T.translate("sponsor_settings.standard_price_end_date")
-          }),
-          (onsite_price_start_date, ctx) => {
-            const standard_price_end_date = ctx.resolve(
-              yup.ref("standard_price_end_date")
-            );
-            if (!standard_price_end_date || !onsite_price_start_date)
-              return true;
-            return standard_price_end_date < onsite_price_start_date;
-          }
+          })
         ),
       onsite_price_end_date: yup
         .date(T.translate("validation.date"))
         .required(T.translate("validation.required"))
-        .test(
-          "is-after-onsite_price_start_date",
+        .isAfterDateField(
+          yup.ref("onsite_price_start_date"),
           T.translate("validation.after", {
             field1: T.translate("sponsor_settings.onsite_price_end_date"),
             field2: T.translate("sponsor_settings.onsite_price_start_date")
-          }),
-          (onsite_price_end_date, ctx) => {
-            const onsite_price_start_date = ctx.resolve(
-              yup.ref("onsite_price_start_date")
-            );
-            if (!onsite_price_start_date || !onsite_price_end_date) return true;
-            return onsite_price_start_date < onsite_price_end_date;
-          }
+          })
         ),
       wire_transfer_notification_email: yup
         .string(T.translate("validation.string"))

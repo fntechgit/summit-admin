@@ -4,28 +4,14 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useField } from "formik";
-import { TextField } from "@mui/material";
-import moment from "moment";
 
-const MuiFormikDatepicker = ({ name, label, ...props }) => {
+const MuiFormikDatepicker = ({ name, label }) => {
   const [field, meta, helpers] = useField(name);
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
       <DatePicker
-        value={field.value ? moment(field.value) : null}
-        onChange={(newValue) => {
-          helpers.setValue(newValue);
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            {...props}
-            error={meta.touched && Boolean(meta.error)}
-            helperText={meta.touched && meta.error}
-            fullWidth
-            margin="normal"
-          />
-        )}
+        value={field.value}
+        onChange={helpers.setValue}
         slotProps={{
           textField: {
             name,
