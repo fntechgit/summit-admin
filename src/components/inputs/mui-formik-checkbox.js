@@ -6,30 +6,31 @@ import {
   FormControlLabel,
   FormHelperText
 } from "@mui/material";
+import { useField } from "formik";
 
-const MuiFormikCheckbox = ({ name, label, formik }) => {
-  const { errors, values, touched, handleChange } = formik;
+const MuiFormikCheckbox = ({ name, label, ...props }) => {
+  const [field, meta] = useField({ name, type: "checkbox" });
 
   return (
     <FormControl
       fullWidth
       margin="normal"
-      error={touched[name] && Boolean(errors[name])}
+      error={meta.touched && Boolean(meta.error)}
     >
       <FormControlLabel
         control={
           <Checkbox
             name={name}
-            checked={values[name]}
-            onChange={handleChange}
+            {...field}
+            checked={field.value}
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {...props}
           />
         }
         label={label}
       />
-      {touched[name] && Boolean(errors[name]) && (
-        <FormHelperText>
-          {(touched[name] && errors[name]) ?? " "}
-        </FormHelperText>
+      {meta.touched && meta.error && (
+        <FormHelperText>{meta.error}</FormHelperText>
       )}
     </FormControl>
   );
@@ -37,8 +38,7 @@ const MuiFormikCheckbox = ({ name, label, formik }) => {
 
 MuiFormikCheckbox.propTypes = {
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  formik: PropTypes.object.isRequired
+  label: PropTypes.string.isRequired
 };
 
 export default MuiFormikCheckbox;
