@@ -66,9 +66,8 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
             field1: T.translate("sponsor_settings.standard_price_end_date"),
             field2: T.translate("sponsor_settings.early_bird_end_date")
           }),
-          function (standard_price_end_date) {
-            // eslint-disable-next-line react/no-this-in-sfc
-            const early_bird_end_date = this.resolve(
+          (standard_price_end_date, ctx) => {
+            const early_bird_end_date = ctx.resolve(
               yup.ref("early_bird_end_date")
             );
             if (!early_bird_end_date || !standard_price_end_date) return true;
@@ -84,9 +83,8 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
             field1: T.translate("sponsor_settings.onsite_price_start_date"),
             field2: T.translate("sponsor_settings.standard_price_end_date")
           }),
-          function (onsite_price_start_date) {
-            // eslint-disable-next-line react/no-this-in-sfc
-            const standard_price_end_date = this.resolve(
+          (onsite_price_start_date, ctx) => {
+            const standard_price_end_date = ctx.resolve(
               yup.ref("standard_price_end_date")
             );
             if (!standard_price_end_date || !onsite_price_start_date)
@@ -103,9 +101,8 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
             field1: T.translate("sponsor_settings.onsite_price_end_date"),
             field2: T.translate("sponsor_settings.onsite_price_start_date")
           }),
-          function (onsite_price_end_date) {
-            // eslint-disable-next-line react/no-this-in-sfc
-            const onsite_price_start_date = this.resolve(
+          (onsite_price_end_date, ctx) => {
+            const onsite_price_start_date = ctx.resolve(
               yup.ref("onsite_price_start_date")
             );
             if (!onsite_price_start_date || !onsite_price_end_date) return true;
