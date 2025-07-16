@@ -18,7 +18,7 @@ import showConfirmDialog from "../../../../components/mui/components/showConfirm
 
 
 
-const AdditionalInput = ({field, fieldIdx, entity, setEntity, onMetaFieldDelete}) => {
+const AdditionalInput = ({field, fieldIdx, entity, setEntity, onDelete, onDeleteValue}) => {
 
   const handleChange = (name, value) => {
     const newFields = [...entity.meta_fields];
@@ -26,7 +26,7 @@ const AdditionalInput = ({field, fieldIdx, entity, setEntity, onMetaFieldDelete}
     setEntity(prevEntity => ({ ...prevEntity, meta_fields: newFields }));
   }
 
-  const handleRemoveFieldType = async (fieldType, index) => {
+  const handleRemove = async (fieldType, index) => {
     const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("sponsor_forms.form_template_popup.delete_meta_field_warning")} ${
@@ -49,7 +49,7 @@ const AdditionalInput = ({field, fieldIdx, entity, setEntity, onMetaFieldDelete}
         setEntity({ ...entity, meta_fields: new_meta_fields });
       };
       if (fieldType.id) {
-        onMetaFieldDelete(entity.id, fieldType.id).then(() => {
+        onDelete(entity.id, fieldType.id).then(() => {
           removeFromUI();
         });
       } else {
@@ -83,8 +83,8 @@ const AdditionalInput = ({field, fieldIdx, entity, setEntity, onMetaFieldDelete}
         setEntity({ ...entity, meta_fields: newFields });
       };
       if (metaField.id && metaFieldValue.id) {
-        if (onMetaFieldTypeDeleted) {
-          onMetaFieldTypeValueDeleted(
+        if (onDeleteValue) {
+          onDeleteValue(
             entity.id,
             metaField.id,
             metaFieldValue.id
@@ -104,7 +104,7 @@ const AdditionalInput = ({field, fieldIdx, entity, setEntity, onMetaFieldDelete}
     setEntity({ ...entity, meta_fields: newFields });
   };
 
-  const handleFieldValueChange = (fieldIndex, valueIndex, key, value) => {
+  const handleValueChange = (fieldIndex, valueIndex, key, value) => {
     const newFields = [...entity.meta_fields];
     newFields[fieldIndex].values[valueIndex][key] = value;
     setEntity({ ...entity, meta_fields: newFields });
@@ -179,7 +179,7 @@ const AdditionalInput = ({field, fieldIdx, entity, setEntity, onMetaFieldDelete}
                 fieldIndex={fieldIdx}
                 entity={entity}
                 setEntity={setEntity}
-                handleFieldValueChange={handleFieldValueChange}
+                handleValueChange={handleValueChange}
                 handleRemoveValue={handleRemoveValue}
                 handleAddValue={handleAddValue}
               />
@@ -206,7 +206,7 @@ const AdditionalInput = ({field, fieldIdx, entity, setEntity, onMetaFieldDelete}
               borderRadius: "50%",
               padding: 0
             }}
-            onClick={() => handleRemoveFieldType(field, fieldIdx)}
+            onClick={() => handleRemove(field, fieldIdx)}
           >
             <DeleteIcon />
           </Button>
