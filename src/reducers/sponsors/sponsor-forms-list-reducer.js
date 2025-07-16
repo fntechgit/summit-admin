@@ -13,7 +13,10 @@
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
+  RECEIVE_GLOBAL_SPONSORSHIPS,
+  RECEIVE_GLOBAL_TEMPLATES,
   RECEIVE_SPONSOR_FORMS,
+  REQUEST_GLOBAL_TEMPLATES,
   REQUEST_SPONSOR_FORMS,
   SPONSOR_FORM_ARCHIVED,
   SPONSOR_FORM_UNARCHIVED
@@ -28,11 +31,27 @@ const DEFAULT_STATE = {
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
-  totalCount: 0
+  totalCount: 0,
+  globalTemplates: {
+    items: [],
+    currentPage: 0,
+    lastPage: 0,
+    order: "id",
+    orderDir: 1,
+    term: "",
+    total: 0
+  },
+  sponsorships: {
+    items: [],
+    currentPage: 0,
+    lastPage: 0,
+    total: 0
+  }
 };
 
 const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
+
   switch (type) {
     case SET_CURRENT_SUMMIT:
     case LOGOUT_USER: {
@@ -92,6 +111,74 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
       );
 
       return { ...state, sponsorForms };
+    }
+    case REQUEST_GLOBAL_TEMPLATES: {
+      const { order, orderDir, page, term } = payload;
+      return {
+        ...state,
+        globalTemplates: {
+          ...state.globalTemplates,
+          order,
+          orderDir,
+          currentPage: page,
+          term
+        }
+      };
+    }
+    case RECEIVE_GLOBAL_TEMPLATES: {
+      const {
+        current_page: currentPage,
+        last_page: lastPage,
+        total
+      } = payload.response;
+
+      const newTemplates = payload.response.data.map((a) => ({
+        id: a.id,
+        code: a.code,
+        name: a.name,
+        items_qty: `${a.items.length} ${
+          a.items.length === 1 ? "Item" : "Items"
+        }`
+      }));
+
+      const items =
+        currentPage === 1
+          ? newTemplates
+          : [...state.globalTemplates.items, ...newTemplates ];
+
+      return {
+        ...state,
+        globalTemplates: {
+          ...state.globalTemplates,
+          items,
+          currentPage,
+          lastPage,
+          total
+        }
+      };
+    }
+    case RECEIVE_GLOBAL_SPONSORSHIPS: {
+      const {
+        current_page: currentPage,
+        last_page: lastPage,
+        total,
+        data: newSponsorships
+      } = payload.response;
+
+      const items =
+        currentPage === 1
+          ? newSponsorships
+          : [...state.sponsorships.items, ...newSponsorships ];
+
+      return {
+        ...state,
+        sponsorships: {
+          items,
+          currentPage,
+          lastPage,
+          total
+        }
+      };
     }
     default:
       return state;

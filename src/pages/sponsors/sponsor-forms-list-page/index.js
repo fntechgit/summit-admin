@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
@@ -26,15 +26,16 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import history from "../../history";
+import history from "../../../history";
 import {
   archiveSponsorForm,
   getSponsorForms,
   unarchiveSponsorForm
-} from "../../actions/sponsor-forms-actions";
-import MuiTable from "../../components/mui/table/mui-table";
-import CustomAlert from "../../components/mui/components/custom-alert";
-import SearchInput from "../../components/mui/components/search-input";
+} from "../../../actions/sponsor-forms-actions";
+import MuiTable from "../../../components/mui/table/mui-table";
+import CustomAlert from "../../../components/mui/components/custom-alert";
+import SearchInput from "../../../components/mui/components/search-input";
+import GlobalTemplatePopup from "./components/global-template-popup";
 
 const SponsorFormsListPage = ({
   match,
@@ -49,6 +50,8 @@ const SponsorFormsListPage = ({
   archiveSponsorForm,
   unarchiveSponsorForm
 }) => {
+  const [createFromGlobal, setCreateFromGlobal] = useState(false);
+
   useEffect(() => {
     getSponsorForms();
   }, []);
@@ -212,11 +215,11 @@ const SponsorFormsListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={console.log}
+            onClick={() => setCreateFromGlobal(true)}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
-            {T.translate("sponsor_forms.using_duplicate")}
+            {T.translate("sponsor_forms.using_global")}
           </Button>
         </Grid2>
         <Grid2 size={3}>
@@ -240,6 +243,7 @@ const SponsorFormsListPage = ({
             data={sponsorForms}
             options={tableOptions}
             perPage={perPage}
+            totalRows={totalCount}
             currentPage={currentPage}
             onRowEdit={handleRowEdit}
             onPageChange={handlePageChange}
@@ -247,6 +251,10 @@ const SponsorFormsListPage = ({
           />
         </div>
       )}
+      <GlobalTemplatePopup
+        open={createFromGlobal}
+        onClose={() => setCreateFromGlobal(false)}
+      />
     </div>
   );
 };

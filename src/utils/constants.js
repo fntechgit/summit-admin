@@ -66,6 +66,8 @@ export const REG_LITE_BOOLEAN_SETTINGS = [
   "REG_LITE_SHOW_COMPANY_INPUT_DEFAULT_OPTIONS"
 ];
 
+export const NOTIFICATION_TIMEOUT = 2000;
+
 export const DUMMY_ACTION = "DUMMY_ACTION";
 
 export const DEFAULT_CURRENT_PAGE = 1;
@@ -110,6 +112,8 @@ export const DATE_FILTER_ARRAY_SIZE = 2;
 export const MILLISECONDS_TO_SECONDS = 1000;
 
 export const INDEX_NOT_FOUND = -1;
+
+export const CODE_200 = 200;
 
 export const ERROR_CODE_403 = 403;
 
