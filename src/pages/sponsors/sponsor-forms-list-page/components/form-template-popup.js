@@ -22,7 +22,9 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useCustomNotification } from "../../../../components/mui/components/CustomNotification/Context";
 import {
   getSponsorships,
-  saveFormTemplate
+  saveFormTemplate,
+  deleteFormTemplateAddtlField,
+  deleteFormTemplateAddtlFieldValue
 } from "../../../../actions/sponsor-forms-actions";
 import { hasErrors } from "../../../../utils/methods";
 import AdditionalInput from "./additional-input";
@@ -53,7 +55,9 @@ const FormTemplatePopup = ({
   open,
   onClose,
   getSponsorships,
-  saveFormTemplate
+  saveFormTemplate,
+  deleteFormTemplateAddtlField,
+  deleteFormTemplateAddtlFieldValue
 }) => {
   const { successMessage, errorMessage } = useCustomNotification();
   const [errors, setErrors] = useState(initialErrors || {});
@@ -217,7 +221,8 @@ const FormTemplatePopup = ({
               field={field}
               fieldIdx={fieldIndex}
               setEntity={setEntity}
-              onMetaFieldDelete={console.log}
+              onDelete={deleteFormTemplateAddtlField}
+              onDeleteValue={deleteFormTemplateAddtlFieldValue}
             />
           ))}
         </Box>
@@ -248,5 +253,7 @@ const mapStateToProps = ({ sponsorFormsListState }) => ({
 
 export default connect(mapStateToProps, {
   saveFormTemplate,
+  deleteFormTemplateAddtlField,
+  deleteFormTemplateAddtlFieldValue,
   getSponsorships
 })(FormTemplatePopup);
