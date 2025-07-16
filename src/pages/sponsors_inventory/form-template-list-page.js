@@ -154,7 +154,7 @@ const FormTemplateListPage = ({
     {
       columnKey: "manage_items",
       header: "",
-      width: 100,
+      width: 150,
       align: "center",
       render: (row) => (
         <Button
@@ -162,6 +162,12 @@ const FormTemplateListPage = ({
           color="inherit"
           size="small"
           onClick={() => handleManageItems(row)}
+          sx={{
+            fontSize: "1.3rem",
+            fontWeight: 500,
+            lineHeight: "2.2rem",
+            padding: "4px 5px"
+          }}
         >
           Manage Items
         </Button>
@@ -188,8 +194,14 @@ const FormTemplateListPage = ({
         <Button
           variant="text"
           color="inherit"
-          size="medium"
+          size="small"
           onClick={() => handleArchiveItem(row)}
+          sx={{
+            fontSize: "1.3rem",
+            fontWeight: 500,
+            lineHeight: "2.2rem",
+            padding: "4px 5px"
+          }}
         >
           {row.is_archived
             ? T.translate("inventory_item_list.unarchive_button")
@@ -225,7 +237,7 @@ const FormTemplateListPage = ({
 
       <Grid2
         container
-        spacing={2}
+        spacing={1}
         sx={{
           justifyContent: "center",
           alignItems: "center",
@@ -235,7 +247,7 @@ const FormTemplateListPage = ({
         <Grid2 size={1}>
           <Box component="span">{totalFormTemplates} forms</Box>
         </Grid2>
-        <Grid2 size={2} offset={3}>
+        <Grid2 size={11} justifyContent="flex-end" gap={1} container>
           <FormGroup>
             <FormControlLabel
               control={
@@ -251,8 +263,7 @@ const FormTemplateListPage = ({
               label={T.translate("form_template_list.hide_archived")}
             />
           </FormGroup>
-        </Grid2>
-        <Grid2 size={2}>
+
           <TextField
             variant="outlined"
             value={searchTerm}
@@ -266,34 +277,39 @@ const FormTemplateListPage = ({
             }}
             onChange={(event) => setSearchTerm(event.target.value)}
             onKeyDown={handleSearch}
-            fullWidth
             sx={{
               "& .MuiOutlinedInput-root": {
                 height: "36px"
               }
             }}
           />
-        </Grid2>
-        <Grid2 size={2}>
           <Button
             variant="contained"
             size="medium"
-            fullWidth
             onClick={() => handleNewFromDuplicate()}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
           >
             {T.translate("form_template_list.using_duplicate")}
           </Button>
-        </Grid2>
-        <Grid2 size={2}>
           <Button
             variant="contained"
             size="medium"
-            fullWidth
             onClick={() => handleNewFormTemplate()}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
           >
             {T.translate("form_template_list.add_form_template")}
           </Button>

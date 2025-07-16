@@ -79,7 +79,8 @@
     "required": "This field is required.",
     "string": "Must be a string.",
     "email": "Wrong email format.",
-    "date": "Wrong date format."
+    "date": "Wrong date format.",
+    "after": "'{field1}' must be after '{field2}'."
   },
   "landing": {
     "os_summit_admin": "Show Admin",

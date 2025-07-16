@@ -172,6 +172,12 @@ const InventoryListPage = ({
           color="inherit"
           size="small"
           onClick={() => handleArchiveItem(row)}
+          sx={{
+            fontSize: "1.3rem",
+            fontWeight: 500,
+            lineHeight: "2.2rem",
+            padding: "4px 5px"
+          }}
         >
           {row.is_archived
             ? T.translate("inventory_item_list.unarchive_button")
@@ -225,69 +231,67 @@ const InventoryListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={6}>
+        <Grid2 size={2}>
           <Box component="span">{totalInventoryItems} items</Box>
         </Grid2>
         <Grid2
           container
-          size={6}
+          size={10}
           spacing={1}
+          gap={1}
           sx={{
-            justifyContent: "center",
+            justifyContent: "flex-end",
             alignItems: "center"
           }}
         >
-          <Grid2 size={4}>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    onChange={(ev) =>
-                      console.log("CHECK BOX", ev.target.checked)
-                    }
-                    inputProps={{
-                      "aria-label": T.translate(
-                        "inventory_item_list.hide_archived"
-                      )
-                    }}
-                  />
-                }
-                label={T.translate("inventory_item_list.hide_archived")}
-              />
-            </FormGroup>
-          </Grid2>
-          <Grid2 size={4}>
-            <TextField
-              variant="outlined"
-              value={searchTerm}
-              placeholder={T.translate(
-                "inventory_item_list.placeholders.search_inventory_items"
-              )}
-              slotProps={{
-                input: {
-                  startAdornment: <SearchIcon sx={{ mr: 1 }} />
-                }
-              }}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              onKeyDown={handleSearch}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  height: "36px"
-                }
-              }}
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  onChange={(ev) => console.log("CHECK BOX", ev.target.checked)}
+                  inputProps={{
+                    "aria-label": T.translate(
+                      "inventory_item_list.hide_archived"
+                    )
+                  }}
+                />
+              }
+              label={T.translate("inventory_item_list.hide_archived")}
             />
-          </Grid2>
-          <Grid2 size={4}>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => handleNewInventoryItem()}
-              startIcon={<AddIcon />}
-              sx={{ height: "36px" }}
-            >
-              {T.translate("inventory_item_list.add_inventory_item")}
-            </Button>
-          </Grid2>
+          </FormGroup>
+          <TextField
+            variant="outlined"
+            value={searchTerm}
+            placeholder={T.translate(
+              "inventory_item_list.placeholders.search_inventory_items"
+            )}
+            slotProps={{
+              input: {
+                startAdornment: <SearchIcon sx={{ mr: 1 }} />
+              }
+            }}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            onKeyDown={handleSearch}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: "36px"
+              }
+            }}
+          />
+          <Button
+            variant="contained"
+            onClick={() => handleNewInventoryItem()}
+            startIcon={<AddIcon />}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
+          >
+            {T.translate("inventory_item_list.add_inventory_item")}
+          </Button>
         </Grid2>
       </Grid2>
 
