@@ -22,11 +22,12 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
+import moment from "moment-timezone";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  DEFAULT_ORDER_DIR
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
@@ -244,7 +245,8 @@ export const cloneGlobalTemplate =
       .catch(() => {}); // need to catch promise reject
   };
 
-export const saveTemplateForm = (entity) => async (dispatch, getState) => {
+
+export const saveFormTemplate = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;
@@ -255,13 +257,29 @@ export const saveTemplateForm = (entity) => async (dispatch, getState) => {
     access_token: accessToken
   };
 
+  const normalizedEntity = normalizeFormTemplate(entity, currentSummit.time_zone_id);
+
   return postRequest(
     null,
     createAction(TEMPLATE_FORM_CREATED),
-    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/clone`,
-    entity,
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
+    normalizedEntity,
     snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(getSponsorForms());
   });
+};
+
+const normalizeFormTemplate = (entity, summitTZ) => {
+  const normalizedEntity = { ...entity };
+  const { opens_at, expires_at } = entity;
+
+  normalizedEntity.opens_at = moment
+    .tz(opens_at, summitTZ)
+    .unix();
+  normalizedEntity.expires_at = moment
+    .tz(expires_at, summitTZ)
+    .unix();
+
+  return normalizedEntity;
 };

@@ -78,7 +78,7 @@ export const DOUBLE_PER_PAGE = 20;
 
 export const FIFTEEN_PER_PAGE = 15;
 
-export const DEFAULT_100_PER_PAGE = 100;
+export const MAX_PER_PAGE = 100;
 
 export const TWENTY_PER_PAGE = 20;
 export const FIFTY_PER_PAGE = 50;

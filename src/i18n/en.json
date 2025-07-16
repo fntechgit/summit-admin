@@ -2340,6 +2340,7 @@
       "code": "Code",
       "name": "Name",
       "sponsorship": "Always apply to",
+      "all_tiers": "All Tiers",
       "opens_at": "Opens at",
       "expires_at": "Expires at",
       "instructions": "Instructions",
