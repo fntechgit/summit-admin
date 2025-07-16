@@ -114,7 +114,7 @@ export const getFormTemplates =
       createAction(RECEIVE_FORM_TEMPLATES),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates`,
       authErrorHandler,
-      { order, orderDir, page, term }
+      { order, orderDir, page, perPage, term }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -258,7 +258,7 @@ export const saveFormTemplate = (entity) => async (dispatch) => {
         .then(() => {
           dispatch(
             showMessage(success_message, () => {
-              history.push("/app/sponsors-inventory");
+              history.push("/app/form-templates");
             })
           );
         })

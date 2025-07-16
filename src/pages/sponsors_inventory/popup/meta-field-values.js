@@ -21,15 +21,14 @@ const MetaFieldValues = ({
   handleFieldValueChange,
   handleRemoveValue,
   handleAddValue,
-  entity,
-  setEntity
+  formik
 }) => {
   const sortedValues = [...field.values].sort((a, b) => a.order - b.order);
 
   const onReorder = (newValues) => {
-    const newMetaFields = [...entity.meta_fields];
+    const newMetaFields = [...formik.values.meta_fields];
     newMetaFields[fieldIndex].values = newValues;
-    setEntity({ ...entity, meta_fields: newMetaFields });
+    formik.setFieldValue("meta_fields", newMetaFields);
   };
 
   const renderMetaFieldValue = (val, valueIndex, provided, snapshot) => (
