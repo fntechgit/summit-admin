@@ -40,6 +40,8 @@ export const RECEIVE_GLOBAL_TEMPLATES = "RECEIVE_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
 export const GLOBAL_TEMPLATE_CLONED = "GLOBAL_TEMPLATE_CLONED";
 export const TEMPLATE_FORM_CREATED = "TEMPLATE_FORM_CREATED";
+export const ADDITIONAL_FIELD_DELETED = "ADDITIONAL_FIELD_DELETED";
+export const ADDITIONAL_FIELD_VALUE_DELETED = "ADDITIONAL_FIELD_VALUE_DELETED";
 
 export const getSponsorForms =
   (
@@ -257,7 +259,10 @@ export const saveFormTemplate = (entity) => async (dispatch, getState) => {
     access_token: accessToken
   };
 
-  const normalizedEntity = normalizeFormTemplate(entity, currentSummit.time_zone_id);
+  const normalizedEntity = normalizeFormTemplate(
+    entity,
+    currentSummit.time_zone_id
+  );
 
   return postRequest(
     null,
@@ -274,12 +279,55 @@ const normalizeFormTemplate = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
   const { opens_at, expires_at } = entity;
 
-  normalizedEntity.opens_at = moment
-    .tz(opens_at, summitTZ)
-    .unix();
-  normalizedEntity.expires_at = moment
-    .tz(expires_at, summitTZ)
-    .unix();
+  normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
+  normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
 
   return normalizedEntity;
 };
+
+export const deleteFormTemplateAddtlField =
+  (formId, metaFieldId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return deleteRequest(
+      null,
+      createAction(ADDITIONAL_FIELD_DELETED)({ formId, metaFieldId }),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${metaFieldId}`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const deleteFormTemplateAddtlFieldValue =
+  (formId, metaFieldId, valueId) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return deleteRequest(
+      null,
+      createAction(ADDITIONAL_FIELD_VALUE_DELETED)({ formId, metaFieldId, valueId }),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${metaFieldId}`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
