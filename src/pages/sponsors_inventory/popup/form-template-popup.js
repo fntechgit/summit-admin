@@ -26,6 +26,7 @@ import { TextEditor } from "openstack-uicore-foundation/lib/components";
 import { scrollToError, hasErrors } from "../../../utils/methods";
 import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
+import { METAFIELD_TYPES } from "../../../utils/constants";
 
 const FormTemplateDialog = ({
   open,
@@ -86,20 +87,6 @@ const FormTemplateDialog = ({
   useEffect(() => {
     setErrors(initialErrors || {});
   }, [open]);
-
-  const METAFIELD_TYPES = [
-    "CheckBox",
-    "CheckBoxList",
-    "ComboBox",
-    "RadioButtonList",
-    "Text",
-    "TextArea",
-    "Quantity",
-    "DateTime",
-    "Time"
-  ];
-
-  const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -368,7 +355,7 @@ const FormTemplateDialog = ({
                       </FormControl>
                     </Grid2>
                   </Grid2>
-                  {fieldTypesWithOptions.includes(field.type) && (
+                  {METAFIELD_TYPES_WITH_OPTIONS.includes(field.type) && (
                     <>
                       <Divider sx={{ mt: 2 }} />
                       <MetaFieldValues
