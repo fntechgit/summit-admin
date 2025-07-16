@@ -71,7 +71,7 @@ export const saveSponsorPurchasesMeta =
       access_token: accessToken
     };
 
-    const normalizedEntity = normalizeEntity(
+    const normalizedEntity = normalizeEntityFprPurchaseAPI(
       entity,
       currentSummit.time_zone_id
     );
@@ -130,7 +130,7 @@ export const saveSponsorUsersMeta = (entity) => async (dispatch, getState) => {
     access_token: accessToken
   };
 
-  const normalizedEntity = normalizeEntity(entity, currentSummit.time_zone_id);
+  const normalizedEntity = normalizeEntityForSponsorUserAPI(entity);
 
   if (emptySponsorUserSettings) {
     return postRequest(
@@ -165,11 +165,10 @@ export const saveAllSettings = (entity) => async (dispatch, getState) => {
   });
 };
 
-const normalizeEntity = (entity, summitTZ) => {
+const normalizeEntityFprPurchaseAPI = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
   const {
     wire_transfer_notification_email,
-    access_request_notification_email,
     early_bird_end_date,
     standard_price_end_date,
     onsite_price_start_date,
@@ -178,8 +177,6 @@ const normalizeEntity = (entity, summitTZ) => {
 
   normalizedEntity.wire_transfer_notification_email =
     wire_transfer_notification_email?.split(";") || [];
-  normalizedEntity.access_request_notification_email =
-    access_request_notification_email?.split(";") || [];
   normalizedEntity.early_bird_end_date = moment
     .tz(early_bird_end_date, summitTZ)
     .unix();
@@ -192,6 +189,18 @@ const normalizeEntity = (entity, summitTZ) => {
   normalizedEntity.onsite_price_end_date = moment
     .tz(onsite_price_end_date, summitTZ)
     .unix();
+
+  return normalizedEntity;
+};
+
+const normalizeEntityForSponsorUserAPI = (entity) => {
+  const normalizedEntity = {
+    access_request_notification_email: entity.access_request_notification_email,
+    is_access_request_enabled: entity.is_access_request_enabled
+  };
+
+  normalizedEntity.access_request_notification_email =
+    normalizedEntity.access_request_notification_email?.split(";") || [];
 
   return normalizedEntity;
 };
