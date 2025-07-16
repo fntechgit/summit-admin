@@ -68,6 +68,7 @@
     "edit_selected": "Edit Selected",
     "copy_to_clipboard": "Copy to clipboard",
     "copied": "Copied!",
+    "success": "Success!",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",

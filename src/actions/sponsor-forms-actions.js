@@ -21,13 +21,14 @@ import {
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
+import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE,
-  ERROR_CODE_412
+  DEFAULT_PER_PAGE
 } from "../utils/constants";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_SPONSOR_FORMS = "REQUEST_SPONSOR_FORMS";
 export const RECEIVE_SPONSOR_FORMS = "RECEIVE_SPONSOR_FORMS";
@@ -214,26 +215,25 @@ export const cloneGlobalTemplate =
       apply_to_all_types: allSponsors
     };
 
+    if (allSponsors) {
+      delete normalizedEntity.form_template_ids;
+    }
+
     return postRequest(
       null,
       createAction(GLOBAL_TEMPLATE_CLONED),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/clone`,
       normalizedEntity,
-      customErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(getSponsorForms());
-    });
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(getSponsorForms());
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_forms.global_template_popup.success")
+          })
+        );
+      })
+      .catch(() => {}); // need to catch promise reject
   };
-
-const customErrorHandler = (err, res) => (dispatch, state) => {
-  const code = err.status;
-  dispatch(stopLoading());
-
-  switch (code) {
-    case ERROR_CODE_412:
-      // dont do anything, caller will catch
-      break;
-    default:
-      authErrorHandler(err, res)(dispatch, state);
-  }
-};

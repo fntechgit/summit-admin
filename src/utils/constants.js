@@ -113,6 +113,8 @@ export const MILLISECONDS_TO_SECONDS = 1000;
 
 export const INDEX_NOT_FOUND = -1;
 
+export const CODE_200 = 200;
+
 export const ERROR_CODE_403 = 403;
 
 export const ERROR_CODE_401 = 401;

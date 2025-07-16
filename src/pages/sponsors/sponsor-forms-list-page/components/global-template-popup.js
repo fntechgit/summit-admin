@@ -1,17 +1,14 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import { Dialog } from "@mui/material";
 import SelectTemplatesDialog from "./select-templates-dialog";
 import SelectSponsorshipsDialog from "./select-sponsorships-dialog";
 import { cloneGlobalTemplate } from "../../../../actions/sponsor-forms-actions";
-import { useCustomNotification } from "../../../../components/mui/components/CustomNotification/Context";
 
 const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
   const [stage, setStage] = useState("templates");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
-  const { successMessage, errorMessage } = useCustomNotification();
   const dialogSize = stage === "templates" ? "md" : "sm";
 
   const handleClose = () => {
@@ -26,17 +23,11 @@ const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
   };
 
   const handleOnSave = (selectedTiers, allTiers) => {
-    cloneGlobalTemplate(selectedTemplates, selectedTiers, allTiers)
-      .then(() => {
-        successMessage(
-          T.translate("sponsor_forms.global_template_popup.success")
-        );
+    cloneGlobalTemplate(selectedTemplates, selectedTiers, allTiers).finally(
+      () => {
         handleClose();
-      })
-      .catch(() => {
-        errorMessage(T.translate("sponsor_forms.global_template_popup.error"));
-        handleClose();
-      });
+      }
+    );
   };
 
   return (
