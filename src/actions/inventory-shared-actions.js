@@ -127,7 +127,7 @@ export const deleteMetaFieldType =
     return deleteRequest(
       null,
       createAction(settings.deletedActionName)({ metaFieldId }),
-      `${settings.url}${metaFieldId}/`,
+      `${settings.url}/${metaFieldId}`,
       null,
       authErrorHandler
     )(params)(dispatch).then(() => {

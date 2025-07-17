@@ -29,7 +29,12 @@ const FormTemplateFromDuplicateDialog = ({
   onDuplicate,
   onSearch,
   onSort,
-  formTemplates
+  formTemplates,
+  perPage,
+  currentPage,
+  totalRows,
+  onPageChange,
+  onPerPageChange
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
@@ -153,6 +158,11 @@ const FormTemplateFromDuplicateDialog = ({
               data={formTemplates}
               options={options}
               onSort={handleSort}
+              perPage={perPage}
+              currentPage={currentPage}
+              totalRows={totalRows}
+              onPageChange={onPageChange}
+              onPerPageChange={onPerPageChange}
             />
           </Box>
         )}
