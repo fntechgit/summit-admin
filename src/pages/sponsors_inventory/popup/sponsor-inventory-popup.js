@@ -143,64 +143,6 @@ const SponsorItemDialog = ({
 
   const buildFieldName = (base, index, field) => `${base}[${index}].${field}`;
 
-  const handleAddValue = (index) => {
-    const newFields = [...formik.values.meta_fields];
-    newFields[index].values.push({ value: "", is_default: false });
-    formik.setFieldValue("meta_fields", newFields);
-  };
-
-  const handleRemoveValue = async (
-    metaField,
-    metaFieldValue,
-    valueIndex,
-    fieldIndex
-  ) => {
-    const isConfirmed = await showConfirmDialog({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("meta_field_values_list.delete_value_warning")} ${
-        metaFieldValue.name
-      }`,
-      type: "warning",
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    });
-
-    if (isConfirmed) {
-      const removeValueFromFields = () => {
-        const newFields = [...formik.values.meta_fields];
-        newFields[fieldIndex].values = newFields[fieldIndex].values.filter(
-          (_, index) => index !== valueIndex
-        );
-        formik.setFieldValue("meta_fields", newFields);
-      };
-      if (metaField.id && metaFieldValue.id) {
-        if (onMetaFieldTypeDeleted) {
-          onMetaFieldTypeValueDeleted(
-            initialEntity.id,
-            metaField.id,
-            metaFieldValue.id
-          ).then(() => {
-            removeValueFromFields();
-          });
-        }
-      } else {
-        removeValueFromFields();
-      }
-    }
-  };
-
-  const handleFieldValueChange = (fieldIndex, valueIndex, key, value) => {
-    const newFields = [...formik.values.meta_fields];
-    if (key === "is_default" && value === true) {
-      // revert all the values to false before set it as true
-      newFields[fieldIndex].values.forEach((v) => {
-        v.is_default = false;
-      });
-    }
-    newFields[fieldIndex].values[valueIndex][key] = value;
-    formik.setFieldValue("meta_fields", newFields);
-  };
-
   const handleImageUploadComplete = (response) => {
     if (response) {
       const image = {
@@ -444,12 +386,10 @@ const SponsorItemDialog = ({
                                 <MetaFieldValues
                                   field={field}
                                   fieldIndex={fieldIndex}
-                                  formik={formik}
-                                  handleFieldValueChange={
-                                    handleFieldValueChange
+                                  initialEntity={initialEntity}
+                                  onMetaFieldTypeValueDeleted={
+                                    onMetaFieldTypeValueDeleted
                                   }
-                                  handleRemoveValue={handleRemoveValue}
-                                  handleAddValue={handleAddValue}
                                 />
                               </>
                             )}

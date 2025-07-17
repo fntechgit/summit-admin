@@ -140,58 +140,6 @@ const FormTemplateDialog = ({
     }
   };
 
-  const handleAddValue = (index) => {
-    const newFields = [...formik.values.meta_fields];
-    newFields[index].values.push({ value: "", is_default: false });
-    formik.setFieldValue("meta_fields", newFields);
-  };
-
-  const handleRemoveValue = async (
-    metaField,
-    metaFieldValue,
-    valueIndex,
-    fieldIndex
-  ) => {
-    const isConfirmed = await showConfirmDialog({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("meta_field_values_list.delete_value_warning")} ${
-        metaFieldValue.name
-      }`,
-      type: "warning",
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    });
-
-    if (isConfirmed) {
-      const removeValueFromFields = () => {
-        const newFields = [...formik.values.meta_fields];
-        newFields[fieldIndex].values = newFields[fieldIndex].values.filter(
-          (_, index) => index !== valueIndex
-        );
-        formik.setFieldValue("meta_fields", newFields);
-      };
-      if (metaField.id && metaFieldValue.id) {
-        if (onMetaFieldTypeDeleted) {
-          onMetaFieldTypeValueDeleted(
-            initialEntity.id,
-            metaField.id,
-            metaFieldValue.id
-          ).then(() => {
-            removeValueFromFields();
-          });
-        }
-      } else {
-        removeValueFromFields();
-      }
-    }
-  };
-
-  const handleFieldValueChange = (fieldIndex, valueIndex, key, value) => {
-    const newFields = [...formik.values.meta_fields];
-    newFields[fieldIndex].values[valueIndex][key] = value;
-    formik.setFieldValue("meta_fields", newFields);
-  };
-
   const buildFieldName = (base, index, field) => `${base}[${index}].${field}`;
 
   return (
@@ -333,12 +281,10 @@ const FormTemplateDialog = ({
                                 <MetaFieldValues
                                   field={field}
                                   fieldIndex={fieldIndex}
-                                  formik={formik}
-                                  handleFieldValueChange={
-                                    handleFieldValueChange
+                                  initialEntity={initialEntity}
+                                  onMetaFieldTypeValueDeleted={
+                                    onMetaFieldTypeValueDeleted
                                   }
-                                  handleRemoveValue={handleRemoveValue}
-                                  handleAddValue={handleAddValue}
                                 />
                               </>
                             )}
