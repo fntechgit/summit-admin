@@ -26,6 +26,7 @@ import { TextEditor } from "openstack-uicore-foundation/lib/components";
 import { scrollToError, hasErrors } from "../../../utils/methods";
 import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
+import { METAFIELD_TYPES } from "../../../utils/constants";
 
 const FormTemplateDialog = ({
   open,
@@ -86,20 +87,6 @@ const FormTemplateDialog = ({
   useEffect(() => {
     setErrors(initialErrors || {});
   }, [open]);
-
-  const METAFIELD_TYPES = [
-    "CheckBox",
-    "CheckBoxList",
-    "ComboBox",
-    "RadioButtonList",
-    "Text",
-    "TextArea",
-    "Quantity",
-    "DateTime",
-    "Time"
-  ];
-
-  const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -238,6 +225,12 @@ const FormTemplateDialog = ({
     setEntity({ ...entity, meta_fields: newFields });
   };
 
+  const handleReorderValues = (fieldIndex, newValues) => {
+    const newMetaFields = [...entity.meta_fields];
+    newMetaFields[fieldIndex].values = newValues;
+    setEntity({ ...entity, meta_fields: newMetaFields });
+  }
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -368,14 +361,13 @@ const FormTemplateDialog = ({
                       </FormControl>
                     </Grid2>
                   </Grid2>
-                  {fieldTypesWithOptions.includes(field.type) && (
+                  {METAFIELD_TYPES_WITH_OPTIONS.includes(field.type) && (
                     <>
                       <Divider sx={{ mt: 2 }} />
                       <MetaFieldValues
-                        field={field}
+                        values={field.values}
                         fieldIndex={fieldIndex}
-                        entity={entity}
-                        setEntity={setEntity}
+                        onReorder={handleReorderValues}
                         handleFieldValueChange={handleFieldValueChange}
                         handleRemoveValue={handleRemoveValue}
                         handleAddValue={handleAddValue}
