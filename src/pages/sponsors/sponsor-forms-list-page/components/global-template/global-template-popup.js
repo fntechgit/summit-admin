@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { Dialog } from "@mui/material";
 import SelectTemplatesDialog from "./select-templates-dialog";
 import SelectSponsorshipsDialog from "./select-sponsorships-dialog";
-import { cloneGlobalTemplate } from "../../../../actions/sponsor-forms-actions";
+import { cloneGlobalTemplate } from "../../../../../actions/sponsor-forms-actions";
 
 const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
   const [stage, setStage] = useState("templates");

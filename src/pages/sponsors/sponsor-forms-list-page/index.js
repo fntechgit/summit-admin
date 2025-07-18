@@ -35,8 +35,8 @@ import {
 import MuiTable from "../../../components/mui/table/mui-table";
 import CustomAlert from "../../../components/mui/components/custom-alert";
 import SearchInput from "../../../components/mui/components/search-input";
-import GlobalTemplatePopup from "./components/global-template-popup";
-import FormTemplatePopup from "./components/form-template-popup";
+import GlobalTemplatePopup from "./components/global-template/global-template-popup";
+import FormTemplatePopup from "./components/form-template/form-template-popup";
 
 const SponsorFormsListPage = ({
   match,

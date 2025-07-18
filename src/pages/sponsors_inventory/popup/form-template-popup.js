@@ -225,6 +225,12 @@ const FormTemplateDialog = ({
     setEntity({ ...entity, meta_fields: newFields });
   };
 
+  const handleReorderValues = (fieldIndex, newValues) => {
+    const newMetaFields = [...entity.meta_fields];
+    newMetaFields[fieldIndex].values = newValues;
+    setEntity({ ...entity, meta_fields: newMetaFields });
+  }
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -359,10 +365,9 @@ const FormTemplateDialog = ({
                     <>
                       <Divider sx={{ mt: 2 }} />
                       <MetaFieldValues
-                        field={field}
+                        values={field.values}
                         fieldIndex={fieldIndex}
-                        entity={entity}
-                        setEntity={setEntity}
+                        onReorder={handleReorderValues}
                         handleFieldValueChange={handleFieldValueChange}
                         handleRemoveValue={handleRemoveValue}
                         handleAddValue={handleAddValue}

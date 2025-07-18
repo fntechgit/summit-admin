@@ -16,21 +16,14 @@ import AddIcon from "@mui/icons-material/Add";
 import DragAndDropList from "../../../components/mui/components/dnd-list";
 
 const MetaFieldValues = ({
-  field,
+  values,
   fieldIndex,
   handleFieldValueChange,
   handleRemoveValue,
   handleAddValue,
-  entity,
-  setEntity
+  onReorder
 }) => {
-  const sortedValues = [...field.values].sort((a, b) => a.order - b.order);
-
-  const onReorder = (newValues) => {
-    const newMetaFields = [...entity.meta_fields];
-    newMetaFields[fieldIndex].values = newValues;
-    setEntity({ ...entity, meta_fields: newMetaFields });
-  };
+  const sortedValues = [...values].sort((a, b) => a.order - b.order);
 
   const renderMetaFieldValue = (val, valueIndex, provided, snapshot) => (
     <>
@@ -128,7 +121,7 @@ const MetaFieldValues = ({
     <Box>
       <DragAndDropList
         items={sortedValues}
-        onReorder={onReorder}
+        onReorder={values => onReorder(fieldIndex, values)}
         renderItem={renderMetaFieldValue}
         idKey="id"
         updateOrder="order"

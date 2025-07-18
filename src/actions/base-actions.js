@@ -42,8 +42,9 @@ export const setSnackbarMessage = (message) => (dispatch) => {
   dispatch(createAction(SET_SNACKBAR_MESSAGE)(message));
 };
 
-export const snackbarErrorHandler = (err, res) => (dispatch, state) =>
+export const snackbarErrorHandler = (err, res) => (dispatch, state) => {
   authErrorHandler(err, res, setSnackbarMessage)(dispatch, state);
+}
 
 export const snackbarSuccessHandler = (message) => (dispatch, state) =>
   setSnackbarMessage({ ...message, type: "success", code: CODE_200 })(

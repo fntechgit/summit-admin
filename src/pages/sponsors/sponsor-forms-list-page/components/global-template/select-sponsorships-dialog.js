@@ -12,9 +12,9 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { getSponsorships } from "../../../../actions/sponsor-forms-actions";
-import { DEFAULT_PER_PAGE } from "../../../../utils/constants";
-import CheckBoxList from "../../../../components/mui/components/infinite-checkbox-list";
+import { getSponsorships } from "../../../../../actions/sponsor-forms-actions";
+import { DEFAULT_PER_PAGE } from "../../../../../utils/constants";
+import CheckBoxList from "../../../../../components/mui/components/infinite-checkbox-list";
 
 const SelectSponsorshipsDialog = ({
   sponsorships,
