@@ -26,8 +26,8 @@ import moment from "moment-timezone";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_PER_PAGE,
-  DEFAULT_ORDER_DIR
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
@@ -247,7 +247,6 @@ export const cloneGlobalTemplate =
       .catch(() => {}); // need to catch promise reject
   };
 
-
 export const saveFormTemplate = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -270,9 +269,16 @@ export const saveFormTemplate = (entity) => async (dispatch, getState) => {
     `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
     normalizedEntity,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(getSponsorForms());
-  });
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_forms.form_template_popup.success")
+        })
+      );
+    })
+    .catch(() => {}); // need to catch promise reject
 };
 
 const normalizeFormTemplate = (entity, summitTZ) => {
@@ -309,8 +315,7 @@ export const deleteFormTemplateAddtlField =
   };
 
 export const deleteFormTemplateAddtlFieldValue =
-  (formId, metaFieldId, valueId) =>
-  async (dispatch, getState) => {
+  (formId, metaFieldId, valueId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -323,7 +328,11 @@ export const deleteFormTemplateAddtlFieldValue =
 
     return deleteRequest(
       null,
-      createAction(ADDITIONAL_FIELD_VALUE_DELETED)({ formId, metaFieldId, valueId }),
+      createAction(ADDITIONAL_FIELD_VALUE_DELETED)({
+        formId,
+        metaFieldId,
+        valueId
+      }),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${metaFieldId}`,
       null,
       authErrorHandler

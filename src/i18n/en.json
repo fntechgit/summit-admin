@@ -2350,7 +2350,9 @@
       "meta_field_required": "Required",
       "delete_meta_field_warning": "Are you sure you want to delete meta field ",
       "delete_value_warning": "Are you sure you want to delete meta field value ",
-      "save": "Save Form"
+      "save": "Save Form",
+      "success": "Form created successfully.",
+      "error": "There was a problem creating the forms, please try again."
     }
   },
   "sponsorship_list": {
