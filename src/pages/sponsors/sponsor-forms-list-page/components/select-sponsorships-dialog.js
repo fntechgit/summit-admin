@@ -74,6 +74,9 @@ const SelectSponsorshipsDialog = ({
           allItemsLabel={T.translate(
             "sponsor_forms.sponsorships_popup.all_tiers"
           )}
+          noItemsLabel={T.translate(
+            "sponsor_forms.sponsorships_popup.no_tiers_found"
+          )}
         />
       </DialogContent>
       <Divider />

@@ -144,7 +144,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
       const items =
         currentPage === 1
           ? newTemplates
-          : [...state.globalTemplates.items, ...newTemplates ];
+          : [...state.globalTemplates.items, ...newTemplates];
 
       return {
         ...state,
@@ -162,13 +162,18 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         current_page: currentPage,
         last_page: lastPage,
         total,
-        data: newSponsorships
+        data
       } = payload.response;
+
+      const newSponsorships = data.map((s) => ({
+        id: s.id,
+        name: s.type.name
+      }));
 
       const items =
         currentPage === 1
           ? newSponsorships
-          : [...state.sponsorships.items, ...newSponsorships ];
+          : [...state.sponsorships.items, ...newSponsorships];
 
       return {
         ...state,
