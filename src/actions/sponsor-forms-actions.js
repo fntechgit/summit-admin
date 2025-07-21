@@ -216,7 +216,7 @@ export const cloneGlobalTemplate =
     };
 
     if (allSponsors) {
-      delete normalizedEntity.form_template_ids;
+      delete normalizedEntity.sponsorship_type_ids;
     }
 
     return postRequest(
