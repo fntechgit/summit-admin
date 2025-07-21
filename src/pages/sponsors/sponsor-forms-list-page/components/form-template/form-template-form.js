@@ -34,10 +34,8 @@ const buildInitialValues = (data, summitTZ) => {
 
 addIssAfterDateFieldValidator();
 
-
-
 const FormTemplateForm = ({
-  data,
+  initialValues,
   sponsorships,
   summitTZ,
   onSubmit,
@@ -45,7 +43,7 @@ const FormTemplateForm = ({
   onDeleteAddtlFieldValue
 }) => {
   const formik = useFormik({
-    initialValues: buildInitialValues(data, summitTZ),
+    initialValues: buildInitialValues(initialValues, summitTZ),
     validationSchema: yup.object({
       code: yup
         .string(T.translate("validation.string"))
@@ -62,7 +60,7 @@ const FormTemplateForm = ({
             field1: T.translate("sponsor_forms.form_template_popup.expires_at"),
             field2: T.translate("sponsor_forms.form_template_popup.opens_at")
           })
-        ),
+        )
     }),
     onSubmit,
     enableReinitialize: true
@@ -73,13 +71,13 @@ const FormTemplateForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <DialogContent sx={{ p: 0 }}>
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          autoComplete="off"
-        >
+      <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
+        noValidate
+        autoComplete="off"
+      >
+        <DialogContent sx={{ p: 0 }}>
           <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
             <Grid2 size={4}>
               <MuiFormikTextField
@@ -98,14 +96,14 @@ const FormTemplateForm = ({
             </Grid2>
             <Grid2 size={4} sx={{ pt: "16px" }}>
               <DropdownCheckbox
-                name="sponsorships"
+                name="sponsorship_type_ids"
                 label={T.translate(
                   "sponsor_forms.form_template_popup.sponsorship"
                 )}
                 allLabel={T.translate(
                   "sponsor_forms.form_template_popup.all_tiers"
                 )}
-                value={formik.values.sponsorships}
+                value={formik.values.sponsorship_type_ids}
                 options={sponsorships.items}
                 onChange={formik.handleChange}
               />
@@ -148,14 +146,14 @@ const FormTemplateForm = ({
               onDeleteValue={onDeleteAddtlFieldValue}
             />
           </Box>
-        </Box>
-      </DialogContent>
-      <Divider />
-      <DialogActions>
-        <Button type="submit" fullWidth variant="contained">
-          {T.translate("sponsor_forms.form_template_popup.save")}
-        </Button>
-      </DialogActions>
+        </DialogContent>
+        <Divider />
+        <DialogActions>
+          <Button type="submit" fullWidth variant="contained">
+            {T.translate("sponsor_forms.form_template_popup.save")}
+          </Button>
+        </DialogActions>
+      </Box>
     </FormikProvider>
   );
 };

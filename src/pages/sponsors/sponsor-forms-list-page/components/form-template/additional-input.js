@@ -1,7 +1,9 @@
 import React from "react";
 import {
-  Box, Button,
-  Checkbox, Divider,
+  Box,
+  Button,
+  Checkbox,
+  Divider,
   FormControl,
   FormControlLabel,
   Grid2,
@@ -13,13 +15,22 @@ import T from "i18n-react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import MetaFieldValues from "../../../../sponsors_inventory/popup/meta-field-values";
-import { METAFIELD_TYPES, METAFIELD_TYPES_WITH_OPTIONS } from "../../../../../utils/constants";
-import showConfirmDialog from "../../../../../components/mui/components/showConfirmDialog";
+import {
+  METAFIELD_TYPES,
+  METAFIELD_TYPES_WITH_OPTIONS
+} from "../../../../../utils/constants";
 
-
-
-const AdditionalInput = ({item, itemIdx, onChange, onChangeValue, onAdd, onAddValue, onDelete, onDeleteValue, onReorderValue}) => {
-  return (
+const AdditionalInput = ({
+  item,
+  itemIdx,
+  onChange,
+  onChangeValue,
+  onAdd,
+  onAddValue,
+  onDelete,
+  onDeleteValue,
+  onReorderValue
+}) => (
     <Grid2 container spacing={2} sx={{ alignItems: "center" }}>
       <Grid2 size={11}>
         <Box
@@ -34,10 +45,12 @@ const AdditionalInput = ({item, itemIdx, onChange, onChangeValue, onAdd, onAddVa
             <Grid2 size={4}>
               <TextField
                 name="fieldTitle"
-                label={T.translate("sponsor_forms.form_template_popup.meta_field_title")}
+                label={T.translate(
+                  "sponsor_forms.form_template_popup.meta_field_title"
+                )}
                 variant="outlined"
                 value={item.name}
-                onChange={ev => onChange(itemIdx, "name", ev.target.value)}
+                onChange={(ev) => onChange(itemIdx, "name", ev.target.value)}
                 fullWidth
               />
             </Grid2>
@@ -45,12 +58,16 @@ const AdditionalInput = ({item, itemIdx, onChange, onChangeValue, onAdd, onAddVa
               <Select
                 value={item.type}
                 name="fieldType"
-                label={T.translate("sponsor_forms.form_template_popup.meta_field_type")}
+                label={T.translate(
+                  "sponsor_forms.form_template_popup.meta_field_type"
+                )}
                 fullWidth
-                onChange={ev => onChange(itemIdx, "type", ev.target.value)}
+                onChange={(ev) => onChange(itemIdx, "type", ev.target.value)}
               >
                 {METAFIELD_TYPES.map((fieldType) => (
-                  <MenuItem key={fieldType} value={fieldType}>{fieldType}</MenuItem>
+                  <MenuItem key={fieldType} value={fieldType}>
+                    {fieldType}
+                  </MenuItem>
                 ))}
               </Select>
             </Grid2>
@@ -60,7 +77,9 @@ const AdditionalInput = ({item, itemIdx, onChange, onChangeValue, onAdd, onAddVa
                   control={
                     <Checkbox
                       checked={item.is_required}
-                      onChange={ev => onChange(itemIdx, "is_required", ev.target.checked)}
+                      onChange={(ev) =>
+                        onChange(itemIdx, "is_required", ev.target.checked)
+                      }
                     />
                   }
                   label={T.translate(
@@ -77,7 +96,7 @@ const AdditionalInput = ({item, itemIdx, onChange, onChangeValue, onAdd, onAddVa
                 values={item.values}
                 fieldIndex={itemIdx}
                 onReorder={onReorderValue}
-                handleValueChange={onChangeValue}
+                handleFieldValueChange={onChangeValue}
                 handleRemoveValue={onDeleteValue}
                 handleAddValue={onAddValue}
               />
@@ -126,6 +145,5 @@ const AdditionalInput = ({item, itemIdx, onChange, onChangeValue, onAdd, onAddVa
       </Grid2>
     </Grid2>
   );
-}
 
 export default AdditionalInput;

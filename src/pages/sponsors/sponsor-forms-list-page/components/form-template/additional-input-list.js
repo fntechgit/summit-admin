@@ -6,9 +6,7 @@ import AdditionalInput from "./additional-input";
 import showConfirmDialog from "../../../../../components/mui/components/showConfirmDialog";
 
 const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
-  const [field, meta, helper] = useField(name);
-
-  console.log(field, meta);
+  const [field, helper] = useField(name);
 
   const handleChange = (itemIdx, fieldName, fieldValue) => {
     const newValues = _.cloneDeep(field.value);
@@ -107,7 +105,7 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
     const newValues = _.cloneDeep(field.value);
     newValues[itemIdx].values = newItemValues;
     helper.setValue(newValues);
-  }
+  };
 
   return (
     <>
