@@ -79,25 +79,16 @@ const SponsorItemDialog = ({
       images: yup.array().min(1, T.translate("validation.required")),
       meta_fields: yup.array().of(
         yup.object().shape({
-          name: yup
-            .string()
-            .trim()
-            .required(T.translate("validation.required")),
-          type: yup
-            .string()
-            .oneOf(METAFIELD_TYPES)
-            .required(T.translate("validation.required")),
+          name: yup.string().trim(),
+          type: yup.string().oneOf(METAFIELD_TYPES),
           is_required: yup.boolean(),
           minimum_quantity: yup.number().optional(),
           maximum_quantity: yup.number().optional(),
           values: yup.array().of(
             yup.object().shape({
-              value: yup
-                .string()
-                .trim()
-                .required(T.translate("validation.required")),
+              value: yup.string().trim(),
               is_default: yup.boolean(),
-              name: yup.string().required(T.translate("validation.required"))
+              name: yup.string()
             })
           )
         })
