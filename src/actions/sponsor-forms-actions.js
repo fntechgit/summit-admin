@@ -175,8 +175,10 @@ export const getGlobalTemplates =
 
 export const getSponsorships =
   (page = 1, perPage = DEFAULT_PER_PAGE) =>
-  async (dispatch) => {
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
 
     dispatch(startLoading());
 
@@ -184,13 +186,16 @@ export const getSponsorships =
       page,
       per_page: perPage,
       access_token: accessToken,
-      sorting: "order"
+      sorting: "order",
+      expand: "type",
+      relations: "type",
+      fields: "id,type.id,type.name"
     };
 
     return getRequest(
       null,
       createAction(RECEIVE_GLOBAL_SPONSORSHIPS),
-      `${window.API_BASE_URL}/api/v1/sponsorship-types`,
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());

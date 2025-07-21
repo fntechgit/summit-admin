@@ -12,7 +12,8 @@ const CheckBoxList = ({
   onChange,
   loadMoreData,
   boxHeight = "400px",
-  allItemsLabel = "Select All"
+  allItemsLabel = "Select All",
+  noItemsLabel = "No items found"
 }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
@@ -57,27 +58,31 @@ const CheckBoxList = ({
       }}
       onScroll={handleScroll}
     >
-      <FormGroup>
-        <FormControlLabel
-          control={
-            <Checkbox checked={isAllSelected} onChange={handleAllChange} />
-          }
-          label={allItemsLabel}
-        />
-        <Divider />
-        {items.map((item) => (
+      {items.length === 0 ? (
+        <p>{noItemsLabel}</p>
+      ) : (
+        <FormGroup>
           <FormControlLabel
-            key={item.id}
             control={
-              <Checkbox
-                checked={selectedItems.includes(item.id)}
-                onChange={() => handleItemChange(item.id)}
-              />
+              <Checkbox checked={isAllSelected} onChange={handleAllChange} />
             }
-            label={item.name}
+            label={allItemsLabel}
           />
-        ))}
-      </FormGroup>
+          <Divider />
+          {items.map((item) => (
+            <FormControlLabel
+              key={item.id}
+              control={
+                <Checkbox
+                  checked={selectedItems.includes(item.id)}
+                  onChange={() => handleItemChange(item.id)}
+                />
+              }
+              label={item.name}
+            />
+          ))}
+        </FormGroup>
+      )}
     </Box>
   );
 };

@@ -2327,6 +2327,7 @@
     "sponsorships_popup": {
       "title": "Add Form Using Global Template",
       "all_tiers": "All Tiers",
+      "no_tiers_found": "No summit tiers found for current search criteria.",
       "apply": "Apply"
     }
   },
