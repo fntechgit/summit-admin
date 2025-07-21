@@ -6,12 +6,13 @@ import AdditionalInput from "./additional-input";
 import showConfirmDialog from "../../../../../components/mui/components/showConfirmDialog";
 
 const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
-  const [field, helper] = useField(name);
+  // eslint-disable-next-line no-unused-vars
+  const [field, meta, helpers] = useField(name);
 
   const handleChange = (itemIdx, fieldName, fieldValue) => {
     const newValues = _.cloneDeep(field.value);
     newValues[itemIdx][fieldName] = fieldValue;
-    helper.setValue(newValues);
+    helpers.setValue(newValues);
   };
 
   const handleRemove = async (item, index) => {
@@ -37,7 +38,7 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
             values: []
           });
 
-        helper.setValue(newValues);
+        helpers.setValue(newValues);
       };
 
       if (item.id) {
@@ -67,7 +68,7 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
         newValues[itemIndex].values = newValues[itemIndex].values.filter(
           (val, idx) => idx !== valueIndex
         );
-        helper.setValue(newValues);
+        helpers.setValue(newValues);
       };
 
       if (item.id && itemValue.id) {
@@ -85,17 +86,17 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
   const handleAddValue = (index) => {
     const newValues = _.cloneDeep(field.value);
     newValues[index].values.push({ value: "", isDefault: false });
-    helper.setValue(newValues);
+    helpers.setValue(newValues);
   };
 
   const handleValueChange = (itemIdx, valueIdx, key, value) => {
     const newValues = _.cloneDeep(field.value);
     newValues[itemIdx].values[valueIdx][key] = value;
-    helper.setValue(newValues);
+    helpers.setValue(newValues);
   };
 
   const handleAddItem = () => {
-    helper.setValue([
+    helpers.setValue([
       ...field.value,
       { name: "", type: "Text", is_required: false, values: [] }
     ]);
@@ -104,7 +105,7 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
   const handleReorderValues = (itemIdx, newItemValues) => {
     const newValues = _.cloneDeep(field.value);
     newValues[itemIdx].values = newItemValues;
-    helper.setValue(newValues);
+    helpers.setValue(newValues);
   };
 
   return (

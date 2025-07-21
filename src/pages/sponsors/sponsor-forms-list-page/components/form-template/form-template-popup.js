@@ -23,7 +23,6 @@ const DEFAULT_ENTITY = {
   code: "",
   name: "",
   sponsorship_type_ids: [],
-  apply_to: null,
   opens_at: null,
   expires_at: null,
   instructions: "",
