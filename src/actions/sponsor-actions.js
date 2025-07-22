@@ -845,9 +845,6 @@ export const uploadSponsorshipBadgeImage =
       { pic: entity.pic }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
-      history.push(
-        `/app/summits/${currentSummit.id}/sponsorships/${entity.id}`
-      );
     });
   };
 

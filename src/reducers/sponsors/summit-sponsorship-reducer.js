@@ -9,7 +9,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import {
+  LOGOUT_USER,
+  VALIDATE
+} from "openstack-uicore-foundation/lib/utils/actions";
 
 import {
   RECEIVE_SUMMIT_SPONSORSHIP,
@@ -21,10 +26,6 @@ import {
   BADGE_IMAGE_DELETED
 } from "../../actions/sponsor-actions";
 
-import {
-  LOGOUT_USER,
-  VALIDATE
-} from "openstack-uicore-foundation/lib/utils/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
@@ -56,45 +57,32 @@ const summitSponsorshipReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
-      }
-      break;
-    case SET_CURRENT_SUMMIT:
-    case RESET_SUMMIT_SPONSORSHIP_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case UPDATE_SUMMIT_SPONSORSHIP:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
-    case SUMMIT_SPONSORSHIP_ADDED:
-    case RECEIVE_SUMMIT_SPONSORSHIP:
-      {
-        let entity = { ...payload.response };
-
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
-        }
-
-        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-      }
-      break;
-    case SUMMIT_SPONSORSHIP_UPDATED:
-      {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
         return state;
       }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    case SET_CURRENT_SUMMIT:
+    case RESET_SUMMIT_SPONSORSHIP_FORM:
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    case UPDATE_SUMMIT_SPONSORSHIP:
+      return { ...state, entity: { ...payload }, errors: {} };
+    case SUMMIT_SPONSORSHIP_ADDED: {
+      return { ...state, entity: { ...DEFAULT_ENTITY } };
+    }
+    case RECEIVE_SUMMIT_SPONSORSHIP: {
+      const entity = { ...payload.response };
+
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
+        }
+      }
+
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case SUMMIT_SPONSORSHIP_UPDATED:
+      return state;
     case BADGE_IMAGE_ATTACHED: {
       const badge_image = payload.response.url;
       return { ...state, entity: { ...state.entity, badge_image } };
@@ -103,10 +91,7 @@ const summitSponsorshipReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, entity: { ...state.entity, badge_image: "" } };
     }
     case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+      return { ...state, errors: payload.errors };
     default:
       return state;
   }

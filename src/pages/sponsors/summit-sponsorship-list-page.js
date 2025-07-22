@@ -24,7 +24,11 @@ import {
   getSummitSponsorships,
   deleteSummitSponsorship,
   updateSummitSponsorhipOrder,
-  saveSummitSponsorship
+  saveSummitSponsorship,
+  getSummitSponsorship,
+  resetSummitSponsorshipForm,
+  uploadSponsorshipBadgeImage,
+  removeSponsorshipBadgeImage
 } from "../../actions/sponsor-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import EditTierPopup from "./popup/edit-tier-popup";
@@ -42,7 +46,11 @@ const SummitSponsorshipListPage = ({
   totalSponsorships,
   updateSummitSponsorhipOrder,
   getSummitSponsorships,
-  saveSummitSponsorship
+  getSummitSponsorship,
+  saveSummitSponsorship,
+  uploadSponsorshipBadgeImage,
+  removeSponsorshipBadgeImage,
+  resetSummitSponsorshipForm
 }) => {
   useEffect(() => {
     if (currentSummit) {
@@ -95,6 +103,12 @@ const SummitSponsorshipListPage = ({
   };
 
   const handleNewSponsorship = () => {
+    resetSummitSponsorshipForm();
+    setShowAddTierModal(true);
+  };
+
+  const handleEditSponsorship = (row) => {
+    if (row) getSummitSponsorship(row.id);
     setShowAddTierModal(true);
   };
 
@@ -129,14 +143,14 @@ const SummitSponsorshipListPage = ({
       width: 40,
       align: "center",
       render: (row) => (
-        <IconButton size="small" onClick={() => handleEdit(row.id)}>
+        <IconButton size="small" onClick={() => handleEditSponsorship(row)}>
           <EditIcon fontSize="small" />
         </IconButton>
       ),
       className: "dottedBorderLeft"
     },
     {
-      columnKey: "edit",
+      columnKey: "delete",
       header: "",
       width: 40,
       align: "center",
@@ -235,6 +249,8 @@ const SummitSponsorshipListPage = ({
         open={showAddTierModal}
         onClose={() => setShowAddTierModal(false)}
         onSubmit={handleSaveSummitSponsorship}
+        onBadgeImageAttach={uploadSponsorshipBadgeImage}
+        onBadgeImageRemove={removeSponsorshipBadgeImage}
         entity={currentEntity}
       />
     </div>
@@ -254,7 +270,11 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   getSummitById,
   getSummitSponsorships,
+  getSummitSponsorship,
+  resetSummitSponsorshipForm,
   deleteSummitSponsorship,
   updateSummitSponsorhipOrder,
-  saveSummitSponsorship
+  saveSummitSponsorship,
+  uploadSponsorshipBadgeImage,
+  removeSponsorshipBadgeImage
 })(SummitSponsorshipListPage);
