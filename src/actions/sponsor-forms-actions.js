@@ -278,7 +278,10 @@ export const saveFormTemplate = (entity) => async (dispatch, getState) => {
         })
       );
     })
-    .catch(() => {}); // need to catch promise reject
+    .catch(() => {}) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 const normalizeFormTemplate = (entity, summitTZ) => {

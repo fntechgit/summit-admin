@@ -30,7 +30,7 @@ const DEFAULT_ENTITY = {
     {
       name: "",
       type: "Text",
-      required: false,
+      is_required: false,
       values: []
     }
   ]
