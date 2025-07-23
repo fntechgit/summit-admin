@@ -29,6 +29,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import history from "../../../history";
 import {
   archiveSponsorForm,
+  getSponsorForm,
   getSponsorForms,
   unarchiveSponsorForm
 } from "../../../actions/sponsor-forms-actions";
@@ -48,6 +49,7 @@ const SponsorFormsListPage = ({
   orderDir,
   totalCount,
   getSponsorForms,
+  getSponsorForm,
   archiveSponsorForm,
   unarchiveSponsorForm
 }) => {
@@ -70,7 +72,9 @@ const SponsorFormsListPage = ({
   };
 
   const handleRowEdit = (row) => {
-    console.log("EDIT CLICKED", row);
+    getSponsorForm(row.id).then(() => {
+      setOpenPopup("new");
+    });
   };
 
   const handleManageItems = (form) => {
@@ -266,6 +270,7 @@ const mapStateToProps = ({ sponsorFormsListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorForms,
+  getSponsorForm,
   archiveSponsorForm,
   unarchiveSponsorForm
 })(SponsorFormsListPage);

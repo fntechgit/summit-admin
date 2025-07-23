@@ -14,35 +14,21 @@ import {
   deleteFormTemplateAddtlField,
   deleteFormTemplateAddtlFieldValue,
   getSponsorships,
-  saveFormTemplate
+  saveFormTemplate,
+  updateFormTemplate
 } from "../../../../../actions/sponsor-forms-actions";
 import { MAX_PER_PAGE } from "../../../../../utils/constants";
 import FormTemplateForm from "./form-template-form";
 
-const DEFAULT_ENTITY = {
-  code: "",
-  name: "",
-  sponsorship_type_ids: [],
-  opens_at: null,
-  expires_at: null,
-  instructions: "",
-  meta_fields: [
-    {
-      name: "",
-      type: "Text",
-      is_required: false,
-      values: []
-    }
-  ]
-};
-
 const FormTemplatePopup = ({
   summitTZ,
   sponsorships,
+  formTemplate,
   open,
   onClose,
   getSponsorships,
   saveFormTemplate,
+  updateFormTemplate,
   deleteFormTemplateAddtlField,
   deleteFormTemplateAddtlFieldValue
 }) => {
@@ -55,7 +41,9 @@ const FormTemplatePopup = ({
   };
 
   const handleOnSave = (values) => {
-    saveFormTemplate(values).finally(() => {
+    const save = values.id ? updateFormTemplate : saveFormTemplate;
+
+    save(values).finally(() => {
       handleClose();
     });
   };
@@ -75,7 +63,7 @@ const FormTemplatePopup = ({
       </DialogTitle>
       <Divider />
       <FormTemplateForm
-        initialValues={DEFAULT_ENTITY}
+        initialValues={formTemplate}
         sponsorships={sponsorships}
         summitTZ={summitTZ}
         onSubmit={handleOnSave}
@@ -93,11 +81,13 @@ FormTemplatePopup.propTypes = {
 
 const mapStateToProps = ({ sponsorFormsListState, currentSummitState }) => ({
   sponsorships: sponsorFormsListState.sponsorships,
+  formTemplate: sponsorFormsListState.formTemplate,
   summitTZ: currentSummitState.currentSummit.time_zone_id
 });
 
 export default connect(mapStateToProps, {
   saveFormTemplate,
+  updateFormTemplate,
   deleteFormTemplateAddtlField,
   deleteFormTemplateAddtlFieldValue,
   getSponsorships
