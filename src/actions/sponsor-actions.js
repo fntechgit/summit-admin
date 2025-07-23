@@ -38,6 +38,7 @@ import {
   DEFAULT_PER_PAGE,
   HUNDRED_PER_PAGE
 } from "../utils/constants";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_SPONSORS = "REQUEST_SPONSORS";
 export const RECEIVE_SPONSORS = "RECEIVE_SPONSORS";
@@ -814,14 +815,8 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`
-          );
-        })
-      );
+    )(params)(dispatch).then(() => {
+      dispatch(showMessage(success_message));
     });
   }
 };
@@ -851,9 +846,6 @@ export const uploadSponsorshipBadgeImage =
       { pic: entity.pic }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
-      history.push(
-        `/app/summits/${currentSummit.id}/sponsorships/${entity.id}`
-      );
     });
   };
 
@@ -917,9 +909,15 @@ export const deleteSummitSponsorship =
       createAction(SUMMIT_SPONSORSHIP_DELETED)({ sponsorshipId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${sponsorshipId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("summit_sponsorship_list.tier_deleted")
+        })
+      );
     });
   };
 

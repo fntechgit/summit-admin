@@ -16,8 +16,10 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/utils/actions";
 import {
   RECEIVE_SUMMIT_SPONSORSHIPS,
   REQUEST_SUMMIT_SPONSORSHIPS,
+  SUMMIT_SPONSORSHIP_ADDED,
   SUMMIT_SPONSORSHIP_DELETED,
-  SUMMIT_SPONSORSHIP_ORDER_UPDATED
+  SUMMIT_SPONSORSHIP_ORDER_UPDATED,
+  SUMMIT_SPONSORSHIP_UPDATED
 } from "../../actions/sponsor-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -54,6 +56,7 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
         s.label = s.type?.label;
         s.size = s.type?.size;
         s.widget_title = s.widget_title ? s.widget_title : "N/A";
+        s.type_id = s.type?.id;
       });
 
       return {
@@ -73,6 +76,42 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId)
+      };
+    }
+    case SUMMIT_SPONSORSHIP_UPDATED: {
+      const { response } = payload;
+
+      const updatedSponsorship = {
+        ...response,
+        sponsorship_type: response.type?.name,
+        label: response.type?.label,
+        size: response.type?.size,
+        widget_title: response.widget_title ? response.widget_title : "N/A",
+        type_id: response.type?.id
+      };
+
+      const previousSponsorships = state.sponsorships.filter(
+        (s) => s.id !== updatedSponsorship.id
+      );
+
+      return {
+        ...state,
+        sponsorships: [...previousSponsorships, updatedSponsorship]
+      };
+    }
+    case SUMMIT_SPONSORSHIP_ADDED: {
+      const { response } = payload;
+      const sponsorship = {
+        ...response,
+        sponsorship_type: response.type?.name,
+        label: response.type?.label,
+        size: response.type?.size,
+        widget_title: response.widget_title ? response.widget_title : "N/A",
+        type_id: response.type?.id
+      };
+      return {
+        ...state,
+        sponsorships: [...state.sponsorships, sponsorship]
       };
     }
     default:
