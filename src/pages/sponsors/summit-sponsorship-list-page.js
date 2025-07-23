@@ -14,7 +14,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
 import { Button, Grid2, IconButton, Alert, Box } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -32,6 +31,7 @@ import {
 } from "../../actions/sponsor-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import EditTierPopup from "./popup/edit-tier-popup";
+import showConfirmDialog from "../../components/mui/components/showConfirmDialog";
 
 const SummitSponsorshipListPage = ({
   currentSummit,
@@ -72,10 +72,10 @@ const SummitSponsorshipListPage = ({
     );
   };
 
-  const handleDelete = (sponsorshipId) => {
+  const handleDelete = async (sponsorshipId) => {
     const sponsorship = sponsorships.find((t) => t.id === sponsorshipId);
 
-    Swal.fire({
+    const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("summit_sponsorship_list.remove_warning")} ${
         sponsorship.type.name
@@ -84,11 +84,11 @@ const SummitSponsorshipListPage = ({
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteSummitSponsorship(sponsorshipId);
-      }
     });
+
+    if (isConfirmed) {
+      deleteSummitSponsorship(sponsorshipId);
+    }
   };
 
   const handleSort = (index, key, dir) => {
