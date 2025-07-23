@@ -83,6 +83,10 @@ const FormTemplateListPage = ({
     getFormTemplates(term, page, perPage, order, orderDir);
   };
 
+  const handlePerPageChange = (newPerPage) => {
+    getFormTemplates(term, currentPage, newPerPage, order, orderDir);
+  };
+
   const handleSort = (index, key, dir) => {
     getFormTemplates(term, currentPage, perPage, key, dir);
   };
@@ -327,6 +331,7 @@ const FormTemplateListPage = ({
             totalRows={totalFormTemplates}
             onRowEdit={handleRowEdit}
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
           />
         </div>
@@ -349,6 +354,11 @@ const FormTemplateListPage = ({
         onDuplicate={handleDuplicateForm}
         onSearch={handleSearch}
         onSort={handleSort}
+        perPage={perPage}
+        currentPage={currentPage}
+        totalRows={totalFormTemplates}
+        onPageChange={handlePageChange}
+        onPerPageChange={handlePerPageChange}
         formTemplates={formTemplates}
       />
     </div>

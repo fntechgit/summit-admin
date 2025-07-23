@@ -1,5 +1,6 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
+import { useFormikContext } from "formik";
 import {
   Box,
   Button,
@@ -18,18 +19,73 @@ import DragAndDropList from "../../../components/mui/components/dnd-list";
 const MetaFieldValues = ({
   field,
   fieldIndex,
-  handleFieldValueChange,
-  handleRemoveValue,
-  handleAddValue,
-  entity,
-  setEntity
+  onMetaFieldTypeValueDeleted,
+  initialEntity
 }) => {
+  const { values, setFieldValue } = useFormikContext();
+
   const sortedValues = [...field.values].sort((a, b) => a.order - b.order);
 
   const onReorder = (newValues) => {
-    const newMetaFields = [...entity.meta_fields];
+    const newMetaFields = [...values.meta_fields];
     newMetaFields[fieldIndex].values = newValues;
-    setEntity({ ...entity, meta_fields: newMetaFields });
+    setFieldValue("meta_fields", newMetaFields);
+  };
+
+  const handleFieldValueChange = (fieldIndex, valueIndex, key, value) => {
+    const newFields = [...values.meta_fields];
+    if (key === "is_default" && value === true) {
+      newFields[fieldIndex].values.forEach((v) => {
+        v.is_default = false;
+      });
+    }
+    newFields[fieldIndex].values[valueIndex][key] = value;
+    setFieldValue("meta_fields", newFields);
+  };
+
+  const handleAddValue = (index) => {
+    const newFields = [...values.meta_fields];
+    newFields[index].values.push({ value: "", is_default: false });
+    setFieldValue("meta_fields", newFields);
+  };
+
+  const handleRemoveValue = async (
+    metaField,
+    metaFieldValue,
+    valueIndex,
+    fieldIndex
+  ) => {
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("meta_field_values_list.delete_value_warning")} ${
+        metaFieldValue.name
+      }`,
+      type: "warning",
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    });
+
+    if (isConfirmed) {
+      const removeValueFromFields = () => {
+        const newFields = [...values.meta_fields];
+        newFields[fieldIndex].values = newFields[fieldIndex].values.filter(
+          (_, index) => index !== valueIndex
+        );
+        setFieldValue("meta_fields", newFields);
+      };
+
+      if (metaField.id && metaFieldValue.id && onMetaFieldTypeValueDeleted) {
+        onMetaFieldTypeValueDeleted(
+          initialEntity.id,
+          metaField.id,
+          metaFieldValue.id
+        ).then(() => {
+          removeValueFromFields();
+        });
+      } else {
+        removeValueFromFields();
+      }
+    }
   };
 
   const renderMetaFieldValue = (val, valueIndex, provided, snapshot) => (
@@ -49,55 +105,51 @@ const MetaFieldValues = ({
         }}
       >
         <Grid2 size={4}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <TextField
-              value={val.name}
-              placeholder={T.translate(
-                "edit_inventory_item.placeholders.meta_field_name"
-              )}
-              onChange={(e) =>
-                handleFieldValueChange(
-                  fieldIndex,
-                  valueIndex,
-                  "name",
-                  e.target.value
-                )
-              }
-              fullWidth
-            />
-          </Box>
+          <TextField
+            value={val.name}
+            placeholder={T.translate(
+              "edit_inventory_item.placeholders.meta_field_name"
+            )}
+            onChange={(e) =>
+              handleFieldValueChange(
+                fieldIndex,
+                valueIndex,
+                "name",
+                e.target.value
+              )
+            }
+            fullWidth
+          />
         </Grid2>
         <Grid2 size={4}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <TextField
-              value={val.value}
-              placeholder={T.translate(
-                "edit_inventory_item.placeholders.meta_field_value"
-              )}
-              onChange={(e) =>
-                handleFieldValueChange(
-                  fieldIndex,
-                  valueIndex,
-                  "value",
-                  e.target.value
+          <TextField
+            value={val.value}
+            placeholder={T.translate(
+              "edit_inventory_item.placeholders.meta_field_value"
+            )}
+            onChange={(e) =>
+              handleFieldValueChange(
+                fieldIndex,
+                valueIndex,
+                "value",
+                e.target.value
+              )
+            }
+            fullWidth
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <IconButton
+                    onClick={() =>
+                      handleRemoveValue(field, val, valueIndex, fieldIndex)
+                    }
+                  >
+                    <CloseIcon />
+                  </IconButton>
                 )
               }
-              fullWidth
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <IconButton
-                      onClick={() =>
-                        handleRemoveValue(field, val, valueIndex, fieldIndex)
-                      }
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  )
-                }
-              }}
-            />
-          </Box>
+            }}
+          />
         </Grid2>
         <Grid2 size={4}>
           <FormGroup>
