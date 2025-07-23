@@ -41,7 +41,7 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
         helpers.setValue(newValues);
       };
 
-      if (item.id) {
+      if (item.id && onDelete) {
         onDelete(item.id).then(() => {
           removeFromUI();
         });
@@ -71,12 +71,10 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
         helpers.setValue(newValues);
       };
 
-      if (item.id && itemValue.id) {
-        if (onDeleteValue) {
-          onDeleteValue(item.id, itemValue.id).then(() => {
-            removeFromUI();
-          });
-        }
+      if (item.id && itemValue.id && onDeleteValue) {
+        onDeleteValue(item.id, itemValue.id).then(() => {
+          removeFromUI();
+        });
       } else {
         removeFromUI();
       }

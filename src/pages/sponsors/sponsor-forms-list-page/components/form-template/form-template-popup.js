@@ -11,8 +11,6 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
-  deleteFormTemplateAddtlField,
-  deleteFormTemplateAddtlFieldValue,
   getSponsorships,
   saveFormTemplate,
   updateFormTemplate
@@ -28,9 +26,7 @@ const FormTemplatePopup = ({
   onClose,
   getSponsorships,
   saveFormTemplate,
-  updateFormTemplate,
-  deleteFormTemplateAddtlField,
-  deleteFormTemplateAddtlFieldValue
+  updateFormTemplate
 }) => {
   useEffect(() => {
     getSponsorships(1, MAX_PER_PAGE);
@@ -67,8 +63,6 @@ const FormTemplatePopup = ({
         sponsorships={sponsorships}
         summitTZ={summitTZ}
         onSubmit={handleOnSave}
-        onDeleteAddtlField={deleteFormTemplateAddtlField}
-        onDeleteAddtlFieldValue={deleteFormTemplateAddtlFieldValue}
       />
     </Dialog>
   );
@@ -88,7 +82,5 @@ const mapStateToProps = ({ sponsorFormsListState, currentSummitState }) => ({
 export default connect(mapStateToProps, {
   saveFormTemplate,
   updateFormTemplate,
-  deleteFormTemplateAddtlField,
-  deleteFormTemplateAddtlFieldValue,
   getSponsorships
 })(FormTemplatePopup);

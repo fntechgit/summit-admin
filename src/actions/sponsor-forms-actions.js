@@ -105,7 +105,8 @@ export const getSponsorForm = (formId) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    expand: "applied_types"
   };
 
   return getRequest(
@@ -293,10 +294,11 @@ export const saveFormTemplate = (entity) => async (dispatch, getState) => {
     snackbarErrorHandler
   )(params)(dispatch)
     .then(() => {
+      dispatch(getSponsorForms());
       dispatch(
         snackbarSuccessHandler({
           title: T.translate("general.success"),
-          html: T.translate("sponsor_forms.form_template_popup.success")
+          html: T.translate("sponsor_forms.form_template_popup.created")
         })
       );
     })
@@ -330,10 +332,13 @@ export const updateFormTemplate = (entity) => async (dispatch, getState) => {
     snackbarErrorHandler
   )(params)(dispatch)
     .then(() => {
+      dispatch(getSponsorForms());
       dispatch(
         snackbarSuccessHandler({
           title: T.translate("general.success"),
-          html: T.translate("sponsor_forms.form_template_popup.success")
+          html: T.translate("sponsor_forms.form_template_popup.updated", {
+            formName: entity.name
+          })
         })
       );
     })
@@ -345,10 +350,22 @@ export const updateFormTemplate = (entity) => async (dispatch, getState) => {
 
 const normalizeFormTemplate = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
-  const { opens_at, expires_at } = entity;
+  const { opens_at, expires_at, sponsorship_type_ids, meta_fields } = entity;
 
   normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
   normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
+  normalizedEntity.apply_to_all_types = false;
+  normalizedEntity.sponsorship_type_ids = sponsorship_type_ids;
+
+  if (sponsorship_type_ids.includes("all")) {
+    normalizedEntity.apply_to_all_types = true;
+    delete normalizedEntity.sponsorship_type_ids;
+  }
+
+  normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
+  if (normalizedEntity.meta_fields.length === 0) {
+    delete normalizedEntity.meta_fields;
+  }
 
   return normalizedEntity;
 };

@@ -38,9 +38,7 @@ const FormTemplateForm = ({
   initialValues,
   sponsorships,
   summitTZ,
-  onSubmit,
-  onDeleteAddtlField,
-  onDeleteAddtlFieldValue
+  onSubmit
 }) => {
   const formik = useFormik({
     initialValues: buildInitialValues(initialValues, summitTZ),
@@ -97,6 +95,7 @@ const FormTemplateForm = ({
             <Grid2 size={4} sx={{ pt: "16px" }}>
               <DropdownCheckbox
                 name="sponsorship_type_ids"
+                allName="apply_to_all_types"
                 label={T.translate(
                   "sponsor_forms.form_template_popup.sponsorship"
                 )}
@@ -104,6 +103,7 @@ const FormTemplateForm = ({
                   "sponsor_forms.form_template_popup.all_tiers"
                 )}
                 value={formik.values.sponsorship_type_ids}
+                allValue={formik.values.apply_to_all_types}
                 options={sponsorships.items}
                 onChange={formik.handleChange}
               />
@@ -140,11 +140,7 @@ const FormTemplateForm = ({
             {T.translate("sponsor_forms.form_template_popup.additional_fields")}
           </Typography>
           <Box sx={{ px: 3 }}>
-            <AdditionalInputList
-              name="meta_fields"
-              onDelete={onDeleteAddtlField}
-              onDeleteValue={onDeleteAddtlFieldValue}
-            />
+            <AdditionalInputList name="meta_fields" />
           </Box>
         </DialogContent>
         <Divider />

@@ -10,37 +10,36 @@ import {
   Select
 } from "@mui/material";
 
-const DropdownCheckbox = ({ name, label, allLabel, value, options, onChange }) => {
-  const allIds = options.map(({ id }) => id);
-  const isAllSelected = allIds.every((id) => value.includes(id));
+const DropdownCheckbox = ({
+  name,
+  label,
+  allLabel,
+  value = [],
+  options,
+  onChange
+}) => {
+  const handleChange = (ev) => {
+    const selected = ev.target.value;
 
-  const handleChange = (event) => {
-    const selectedValues = event.target.value;
-    const responseVal = {target: {name, value: []}};
-
-    // Handle "All" selection
-    if (selectedValues.includes("all")) {
-      // If "all" is selected and not yet fully selected, select all IDs
-      if (!isAllSelected) {
-        responseVal.target.value = allIds; // Select all options
-      } else {
-        responseVal.target.value = [];
+    if (selected.includes("all")) {
+      if (!value.includes("all")) {
+        // if all changed from unselected to selected we remove the rest of selections
+        onChange({ target: { name, value: ["all"] } });
+      } else if (selected.length > 1) {
+        // if all was selected and now select an item, we remove "all" from selections
+        onChange({
+          target: { name, value: selected.filter((v) => v !== "all") }
+        });
       }
     } else {
-      // Handle individual option selection
-      responseVal.target.value = selectedValues;
+      // else if "all" is not selected we just send selection
+      onChange({ target: { name, value: selected } });
     }
-
-    onChange(responseVal);
-
   };
-
 
   return (
     <FormControl fullWidth>
-      <InputLabel id={`${name}_label`}>
-        {label}
-      </InputLabel>
+      <InputLabel id={`${name}_label`}>{label}</InputLabel>
       <Select
         labelId={`${name}_label`}
         name={name}
@@ -49,24 +48,24 @@ const DropdownCheckbox = ({ name, label, allLabel, value, options, onChange }) =
         onChange={handleChange}
         input={<OutlinedInput label={label} />}
         renderValue={(selected) => {
-          if (isAllSelected) {
+          if (selected.includes("all")) {
             return allLabel; // Display allLabel when all options are selected
           }
           const selectedNames = options
             .filter(({ id }) => selected.includes(id))
-            .map(({ name }) => name);
+            .map(({ name: opName }) => opName);
           return selectedNames.join(", ");
         }}
       >
         <MenuItem key="all" value="all">
-          <Checkbox checked={isAllSelected} />
+          <Checkbox checked={value.includes("all")} />
           <ListItemText primary={allLabel} />
         </MenuItem>
         <Divider />
-        {options.map(({ name, id }) => (
+        {options.map(({ name: opName, id }) => (
           <MenuItem key={id} value={id}>
             <Checkbox checked={value.includes(id)} />
-            <ListItemText primary={name} />
+            <ListItemText primary={opName} />
           </MenuItem>
         ))}
       </Select>

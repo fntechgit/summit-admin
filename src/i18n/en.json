@@ -2351,7 +2351,8 @@
       "delete_meta_field_warning": "Are you sure you want to delete meta field ",
       "delete_value_warning": "Are you sure you want to delete meta field value ",
       "save": "Save Form",
-      "success": "Form created successfully.",
+      "created": "Form created successfully.",
+      "updated": "Form {formName} updated successfully.",
       "error": "There was a problem creating the forms, please try again."
     }
   },
