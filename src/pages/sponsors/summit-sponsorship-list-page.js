@@ -14,7 +14,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
 import { Button, Grid2, IconButton, Alert, Box } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -24,10 +23,15 @@ import {
   getSummitSponsorships,
   deleteSummitSponsorship,
   updateSummitSponsorhipOrder,
-  saveSummitSponsorship
+  saveSummitSponsorship,
+  getSummitSponsorship,
+  resetSummitSponsorshipForm,
+  uploadSponsorshipBadgeImage,
+  removeSponsorshipBadgeImage
 } from "../../actions/sponsor-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import EditTierPopup from "./popup/edit-tier-popup";
+import showConfirmDialog from "../../components/mui/components/showConfirmDialog";
 
 const SummitSponsorshipListPage = ({
   currentSummit,
@@ -42,7 +46,11 @@ const SummitSponsorshipListPage = ({
   totalSponsorships,
   updateSummitSponsorhipOrder,
   getSummitSponsorships,
-  saveSummitSponsorship
+  getSummitSponsorship,
+  saveSummitSponsorship,
+  uploadSponsorshipBadgeImage,
+  removeSponsorshipBadgeImage,
+  resetSummitSponsorshipForm
 }) => {
   useEffect(() => {
     if (currentSummit) {
@@ -64,10 +72,10 @@ const SummitSponsorshipListPage = ({
     );
   };
 
-  const handleDelete = (sponsorshipId) => {
+  const handleDelete = async (sponsorshipId) => {
     const sponsorship = sponsorships.find((t) => t.id === sponsorshipId);
 
-    Swal.fire({
+    const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("summit_sponsorship_list.remove_warning")} ${
         sponsorship.type.name
@@ -76,11 +84,11 @@ const SummitSponsorshipListPage = ({
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteSummitSponsorship(sponsorshipId);
-      }
     });
+
+    if (isConfirmed) {
+      deleteSummitSponsorship(sponsorshipId);
+    }
   };
 
   const handleSort = (index, key, dir) => {
@@ -95,6 +103,12 @@ const SummitSponsorshipListPage = ({
   };
 
   const handleNewSponsorship = () => {
+    resetSummitSponsorshipForm();
+    setShowAddTierModal(true);
+  };
+
+  const handleEditSponsorship = (row) => {
+    if (row) getSummitSponsorship(row.id);
     setShowAddTierModal(true);
   };
 
@@ -129,14 +143,14 @@ const SummitSponsorshipListPage = ({
       width: 40,
       align: "center",
       render: (row) => (
-        <IconButton size="small" onClick={() => handleEdit(row.id)}>
+        <IconButton size="small" onClick={() => handleEditSponsorship(row)}>
           <EditIcon fontSize="small" />
         </IconButton>
       ),
       className: "dottedBorderLeft"
     },
     {
-      columnKey: "edit",
+      columnKey: "delete",
       header: "",
       width: 40,
       align: "center",
@@ -235,6 +249,8 @@ const SummitSponsorshipListPage = ({
         open={showAddTierModal}
         onClose={() => setShowAddTierModal(false)}
         onSubmit={handleSaveSummitSponsorship}
+        onBadgeImageAttach={uploadSponsorshipBadgeImage}
+        onBadgeImageRemove={removeSponsorshipBadgeImage}
         entity={currentEntity}
       />
     </div>
@@ -254,7 +270,11 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   getSummitById,
   getSummitSponsorships,
+  getSummitSponsorship,
+  resetSummitSponsorshipForm,
   deleteSummitSponsorship,
   updateSummitSponsorhipOrder,
-  saveSummitSponsorship
+  saveSummitSponsorship,
+  uploadSponsorshipBadgeImage,
+  removeSponsorshipBadgeImage
 })(SummitSponsorshipListPage);

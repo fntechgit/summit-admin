@@ -19,13 +19,21 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
+import { UploadInput } from "openstack-uicore-foundation/lib/components";
 import SponsorshipTypeInputMUI from "../../../components/inputs/sponsorship-input-mui";
 import MuiFormikTextField from "../../../components/inputs/mui-formik-textfield";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikSelect from "../../../components/inputs/mui-formik-select";
 import MuiFormikCheckbox from "../../../components/inputs/mui-formik-checkbox";
 
-const EditTierDialog = ({ open, onClose, onSubmit, entity: initialEntity }) => {
+const EditTierDialog = ({
+  open,
+  onClose,
+  onSubmit,
+  onBadgeImageAttach,
+  onBadgeImageRemove,
+  entity: initialEntity
+}) => {
   const formik = useFormik({
     initialValues: initialEntity,
     validationSchema: yup.object({
@@ -67,6 +75,17 @@ const EditTierDialog = ({ open, onClose, onSubmit, entity: initialEntity }) => {
 
   // SCROLL TO ERROR
   useScrollToError(formik);
+
+  const handleUploadBadgeImage = (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    onBadgeImageAttach(initialEntity, formData);
+  };
+
+  const handleRemoveBadgeImage = () => {
+    formik.setFieldValue("badge_image", "");
+    onBadgeImageRemove(initialEntity.id);
+  };
 
   const handleClose = () => {
     formik.resetForm();
@@ -432,9 +451,46 @@ const EditTierDialog = ({ open, onClose, onSubmit, entity: initialEntity }) => {
               </Grid2>
             </Grid2>
           </Grid2>
+          {initialEntity.id > 0 && (
+            <>
+              <Divider />
+              <Grid2
+                container
+                spacing={2}
+                sx={{ alignItems: "start", px: 3, py: 1 }}
+              >
+                <Grid2 size={12}>
+                  <InputLabel htmlFor="badge_image" id="images" sx={{ my: 1 }}>
+                    {T.translate("edit_summit_sponsorship.badge_image")}
+                  </InputLabel>
+                  <UploadInput
+                    name="badge_image"
+                    value={formik.values.badge_image}
+                    handleUpload={handleUploadBadgeImage}
+                    handleRemove={handleRemoveBadgeImage}
+                    className="dropzone col-md-6"
+                    multiple={false}
+                    accept="image/*"
+                  />
+                </Grid2>
+                <Grid2 size={12} sx={{ my: 1 }}>
+                  <InputLabel htmlFor="badge_image_alt_text">
+                    {T.translate("edit_summit_sponsorship.badge_alt")}
+                  </InputLabel>
+                  <MuiFormikTextField
+                    formik={formik}
+                    name="badge_image_alt_text"
+                    variant="outlined"
+                    margin="none"
+                    fullWidth
+                  />
+                </Grid2>
+              </Grid2>
+            </>
+          )}
         </DialogContent>
         <Divider />
-        <DialogActions sx={{ py: 2 }}>
+        <DialogActions sx={{ p: 2 }}>
           <Button type="submit" fullWidth variant="contained">
             {T.translate("edit_summit_sponsorship.save")}
           </Button>

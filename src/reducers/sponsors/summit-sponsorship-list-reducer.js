@@ -78,7 +78,27 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
         sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId)
       };
     }
-    case SUMMIT_SPONSORSHIP_UPDATED:
+    case SUMMIT_SPONSORSHIP_UPDATED: {
+      const { response } = payload;
+
+      const updatedSponsorship = {
+        ...response,
+        sponsorship_type: response.type?.name,
+        label: response.type?.label,
+        size: response.type?.size,
+        widget_title: response.widget_title ? response.widget_title : "N/A",
+        type_id: response.type?.id
+      };
+
+      const previousSponsorships = state.sponsorships.filter(
+        (s) => s.id !== updatedSponsorship.id
+      );
+
+      return {
+        ...state,
+        sponsorships: [...previousSponsorships, updatedSponsorship]
+      };
+    }
     case SUMMIT_SPONSORSHIP_ADDED: {
       const { response } = payload;
       const sponsorship = {

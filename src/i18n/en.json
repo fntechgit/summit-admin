@@ -2398,6 +2398,7 @@
     "alert_info": "Drag and Drop to sort items.",
     "no_sponsorships": "No summit tiers found for current search criteria.",
     "remove_warning": "Are you sure you want to delete summit tier ",
+    "tier_deleted": "Tier deleted successfully.",
     "sponsorship_type": "Summit Tier",
     "label": "Label",
     "size": "Size"
