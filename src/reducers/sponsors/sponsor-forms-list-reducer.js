@@ -51,7 +51,7 @@ const DEFAULT_STATE = {
   formTemplate: {
     code: "",
     name: "",
-    sponsorship_type_ids: [],
+    sponsorship_types: [],
     opens_at: null,
     expires_at: null,
     instructions: "",
@@ -116,13 +116,13 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
 
       const sponsorshipTypeTds = form.apply_to_all_types
         ? ["all"]
-        : [...form.applied_types];
+        : [...form.sponsorship_types];
 
       const formTemplate = {
         id: form.id,
         code: form.code,
         name: form.name,
-        sponsorship_type_ids: sponsorshipTypeTds,
+        sponsorship_types: sponsorshipTypeTds,
         opens_at: form.opens_at,
         expires_at: form.expires_at,
         instructions: form.instructions,

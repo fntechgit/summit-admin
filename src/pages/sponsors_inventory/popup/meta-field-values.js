@@ -180,7 +180,7 @@ const MetaFieldValues = ({
     <Box>
       <DragAndDropList
         items={sortedValues}
-        onReorder={values => onReorder(fieldIndex, values)}
+        onReorder={(values) => onReorder(fieldIndex, values)}
         renderItem={renderMetaFieldValue}
         idKey="id"
         updateOrder="order"

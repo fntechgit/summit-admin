@@ -105,8 +105,7 @@ export const getSponsorForm = (formId) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    access_token: accessToken,
-    expand: "applied_types"
+    access_token: accessToken
   };
 
   return getRequest(
@@ -350,22 +349,19 @@ export const updateFormTemplate = (entity) => async (dispatch, getState) => {
 
 const normalizeFormTemplate = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
-  const { opens_at, expires_at, sponsorship_type_ids, meta_fields } = entity;
+  const { opens_at, expires_at, sponsorship_types, meta_fields } = entity;
 
   normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
   normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
   normalizedEntity.apply_to_all_types = false;
-  normalizedEntity.sponsorship_type_ids = sponsorship_type_ids;
+  normalizedEntity.sponsorship_types = sponsorship_types;
 
-  if (sponsorship_type_ids.includes("all")) {
+  if (sponsorship_types.includes("all")) {
     normalizedEntity.apply_to_all_types = true;
-    delete normalizedEntity.sponsorship_type_ids;
+    delete normalizedEntity.sponsorship_types;
   }
 
   normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
-  if (normalizedEntity.meta_fields.length === 0) {
-    delete normalizedEntity.meta_fields;
-  }
 
   return normalizedEntity;
 };
