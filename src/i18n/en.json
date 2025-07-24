@@ -78,9 +78,11 @@
   "validation": {
     "required": "This field is required.",
     "string": "Must be a string.",
+    "number": "Must be a number.",
     "email": "Wrong email format.",
     "date": "Wrong date format.",
-    "after": "'{field1}' must be after '{field2}'."
+    "after": "'{field1}' must be after '{field2}'.",
+    "boolean": "Must be a boolean."
   },
   "landing": {
     "os_summit_admin": "Show Admin",
@@ -2295,7 +2297,7 @@
     "lead_report_settings": "Lead Report Settings",
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
-      "sponsorship_type": "Start Typing to choose a Tier",
+      "sponsorship_type": "Start typing to choose a Tier...",
       "select_material_type": "Select Material Type"
     }
   },
@@ -2393,8 +2395,10 @@
   "summit_sponsorship_list": {
     "summit_sponsorship_list": "Summit Tier List",
     "add_sponsorship": "Add Summit Tier",
+    "alert_info": "Drag and Drop to sort items.",
     "no_sponsorships": "No summit tiers found for current search criteria.",
     "remove_warning": "Are you sure you want to delete summit tier ",
+    "tier_deleted": "Tier deleted successfully.",
     "sponsorship_type": "Summit Tier",
     "label": "Label",
     "size": "Size"
@@ -2415,11 +2419,14 @@
     "should_display_on_lobby_page": "Display on Lobby Page",
     "badge_image": "Badge Image",
     "badge_alt": "Badge Alt Text",
+    "save": "Save",
     "placeholders": {
-      "select_lobby_template": "Select a Lobby Template",
-      "select_expo_hall_template": "Select an Expo Hall Template",
-      "select_sponsor_page_template": "Select a Sponsor Page Template",
-      "select_event_page_template": "Select a Event Page Template"
+      "sponsorship_type": "Start typing to choose a Tier...",
+      "widget_title": "Widget Title...",
+      "select_lobby_template": "Select a Lobby Template...",
+      "select_expo_hall_template": "Select an Expo Hall Template...",
+      "select_sponsor_page_template": "Select a Sponsor Page Template...",
+      "select_event_page_template": "Select a Event Page Template..."
     }
   },
   "badge_scan_list": {

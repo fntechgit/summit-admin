@@ -34,9 +34,11 @@ import { normalizeLeadReportSettings } from "../models/lead-report-settings";
 import history from "../history";
 import {
   DEBOUNCE_WAIT,
+  DEFAULT_100_PER_PAGE,
   DEFAULT_PER_PAGE,
   HUNDRED_PER_PAGE
 } from "../utils/constants";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_SPONSORS = "REQUEST_SPONSORS";
 export const RECEIVE_SPONSORS = "RECEIVE_SPONSORS";
@@ -713,7 +715,7 @@ export const deleteSponsorExtraQuestionValue =
 /** ****************  SPONSORSHIPS *************************************** */
 
 export const getSummitSponsorships =
-  (order = "name", orderDir = 1) =>
+  (page = 1, perPage = DEFAULT_100_PER_PAGE, order = "name", orderDir = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -722,8 +724,8 @@ export const getSummitSponsorships =
     dispatch(startLoading());
 
     const params = {
-      page: 1,
-      per_page: 100,
+      page,
+      per_page: perPage,
       access_token: accessToken,
       expand: "type"
     };
@@ -739,7 +741,7 @@ export const getSummitSponsorships =
       createAction(RECEIVE_SUMMIT_SPONSORSHIPS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
       authErrorHandler,
-      { order, orderDir }
+      { order, orderDir, page, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -813,14 +815,8 @@ export const saveSummitSponsorship = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/sponsorships/${payload.response.id}`
-          );
-        })
-      );
+    )(params)(dispatch).then(() => {
+      dispatch(showMessage(success_message));
     });
   }
 };
@@ -850,9 +846,6 @@ export const uploadSponsorshipBadgeImage =
       { pic: entity.pic }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
-      history.push(
-        `/app/summits/${currentSummit.id}/sponsorships/${entity.id}`
-      );
     });
   };
 
@@ -916,9 +909,15 @@ export const deleteSummitSponsorship =
       createAction(SUMMIT_SPONSORSHIP_DELETED)({ sponsorshipId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types/${sponsorshipId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("summit_sponsorship_list.tier_deleted")
+        })
+      );
     });
   };
 

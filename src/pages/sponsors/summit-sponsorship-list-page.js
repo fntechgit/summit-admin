@@ -9,155 +9,272 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import {
-  Table,
-  SortableTable
-} from "openstack-uicore-foundation/lib/components";
+import { Button, Grid2, IconButton, Alert, Box } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getSummitSponsorships,
   deleteSummitSponsorship,
-  updateSummitSponsorhipOrder
+  updateSummitSponsorhipOrder,
+  saveSummitSponsorship,
+  getSummitSponsorship,
+  resetSummitSponsorshipForm,
+  uploadSponsorshipBadgeImage,
+  removeSponsorshipBadgeImage
 } from "../../actions/sponsor-actions";
-import { getSponsorships } from "../../actions/sponsorship-actions";
+import MuiTable from "../../components/mui/table/mui-table";
+import EditTierPopup from "./popup/edit-tier-popup";
+import showConfirmDialog from "../../components/mui/components/showConfirmDialog";
 
-class SummitSponsorshipListPage extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleNewSponsorship = this.handleNewSponsorship.bind(this);
-
-    this.state = {};
-  }
-
-  componentDidMount() {
-    const { currentSummit } = this.props;
+const SummitSponsorshipListPage = ({
+  currentSummit,
+  currentEntity,
+  history,
+  deleteSummitSponsorship,
+  sponsorships,
+  currentPage,
+  perPage,
+  order,
+  orderDir,
+  totalSponsorships,
+  updateSummitSponsorhipOrder,
+  getSummitSponsorships,
+  getSummitSponsorship,
+  saveSummitSponsorship,
+  uploadSponsorshipBadgeImage,
+  removeSponsorshipBadgeImage,
+  resetSummitSponsorshipForm
+}) => {
+  useEffect(() => {
     if (currentSummit) {
-      this.props.getSummitSponsorships();
+      getSummitSponsorships();
     }
-  }
+  }, []);
 
-  handleEdit(sponsorship_id) {
-    const { currentSummit, history } = this.props;
+  const [tableData, setTableData] = useState(sponsorships);
+  const [showAddTierModal, setShowAddTierModal] = useState(false);
+
+  useEffect(() => {
+    const sortedSponsorships = sponsorships.sort((a, b) => a.order - b.order);
+    setTableData(sortedSponsorships);
+  }, [sponsorships]);
+
+  const handleEdit = (sponsorship_id) => {
     history.push(
       `/app/summits/${currentSummit.id}/sponsorships/${sponsorship_id}`
     );
-  }
+  };
 
-  handleDelete(sponsorshipId) {
-    const { deleteSummitSponsorship, sponsorships } = this.props;
-    let sponsorship = sponsorships.find((t) => t.id === sponsorshipId);
+  const handleDelete = async (sponsorshipId) => {
+    const sponsorship = sponsorships.find((t) => t.id === sponsorshipId);
 
-    Swal.fire({
+    const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("summit_sponsorship_list.remove_warning") +
-        " " +
-        sponsorship.type.name,
+      text: `${T.translate("summit_sponsorship_list.remove_warning")} ${
+        sponsorship.type.name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
-      if (result.value) {
-        deleteSummitSponsorship(sponsorshipId);
-      }
     });
-  }
 
-  handleSort(index, key, dir, func) {
-    this.props.getSummitSponsorships(key, dir);
-  }
+    if (isConfirmed) {
+      deleteSummitSponsorship(sponsorshipId);
+    }
+  };
 
-  handleNewSponsorship(ev) {
-    const { currentSummit, history } = this.props;
-    history.push(`/app/summits/${currentSummit.id}/sponsorships/new`);
-  }
+  const handleSort = (index, key, dir) => {
+    getSummitSponsorships(key, dir);
+  };
 
-  render() {
-    const { currentSummit, sponsorships, totalSponsorships } = this.props;
+  const handlePageChange = (page) => {
+    getSummitSponsorships(page, perPage, order, orderDir);
+  };
+  const handlePerPageChange = (newPerPage) => {
+    getSummitSponsorships(currentPage, newPerPage, order, orderDir);
+  };
 
-    const sortedSponsorships = sponsorships.sort((a, b) => a.order - b.order);
+  const handleNewSponsorship = () => {
+    resetSummitSponsorshipForm();
+    setShowAddTierModal(true);
+  };
 
-    const columns = [
-      {
-        columnKey: "sponsorship_type",
-        value: T.translate("summit_sponsorship_list.sponsorship_type")
-      },
-      {
-        columnKey: "label",
-        value: T.translate("summit_sponsorship_list.label")
-      },
-      { columnKey: "size", value: T.translate("summit_sponsorship_list.size") }
-    ];
+  const handleEditSponsorship = (row) => {
+    if (row) getSummitSponsorship(row.id);
+    setShowAddTierModal(true);
+  };
 
-    const table_options = {
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
+  const handleReorder = (newOrder, itemId, newItemOrder) => {
+    setTableData(newOrder);
+    updateSummitSponsorhipOrder(newOrder, itemId, newItemOrder);
+  };
 
-    if (!currentSummit.id) return <div />;
+  const handleSaveSummitSponsorship = (sponsorship) => {
+    saveSummitSponsorship(sponsorship).then(() => setShowAddTierModal(false));
+  };
 
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("summit_sponsorship_list.summit_sponsorship_list")} (
-          {totalSponsorships})
-        </h3>
-        <div className={"row"}>
-          <div className="col-md-6 text-right col-md-offset-6">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNewSponsorship}
+  const columns = [
+    {
+      columnKey: "sponsorship_type",
+      header: T.translate("summit_sponsorship_list.sponsorship_type"),
+      value: T.translate("summit_sponsorship_list.sponsorship_type")
+    },
+    {
+      columnKey: "label",
+      header: T.translate("summit_sponsorship_list.label"),
+      value: T.translate("summit_sponsorship_list.label")
+    },
+    {
+      columnKey: "size",
+      header: T.translate("summit_sponsorship_list.size"),
+      value: T.translate("summit_sponsorship_list.size")
+    },
+    {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row) => (
+        <IconButton size="small" onClick={() => handleEditSponsorship(row)}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "delete",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row) => (
+        <IconButton size="small" onClick={() => handleDelete(row.id)}>
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
+    }
+  ];
+
+  const table_options = {
+    actions: {
+      edit: { onClick: handleEdit },
+      delete: { onClick: handleDelete }
+    }
+  };
+
+  if (!currentSummit.id) return <div />;
+
+  return (
+    <div className="container">
+      <h3>
+        {" "}
+        {T.translate("summit_sponsorship_list.summit_sponsorship_list")} (
+        {totalSponsorships})
+      </h3>
+
+      <Alert
+        severity="info"
+        sx={{
+          justifyContent: "start",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        {T.translate("summit_sponsorship_list.alert_info")}
+      </Alert>
+      <Grid2
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={6}>
+          <Box component="span">{totalSponsorships} summit tiers</Box>
+        </Grid2>
+        <Grid2
+          container
+          size={6}
+          spacing={1}
+          sx={{
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={{ xs: 0, sm: 4, lg: 6, xl: 7 }} />
+          <Grid2 size={{ xs: 12, sm: 8, lg: 6, xl: 5 }}>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleNewSponsorship}
+              startIcon={<AddIcon />}
+              sx={{ height: "36px" }}
             >
               {T.translate("summit_sponsorship_list.add_sponsorship")}
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Grid2>
+        </Grid2>
+      </Grid2>
 
-        {sortedSponsorships.length === 0 && (
-          <div>{T.translate("summit_sponsorship_list.no_sponsorships")}</div>
-        )}
+      {sponsorships.length === 0 && (
+        <div>{T.translate("summit_sponsorship_list.no_sponsorships")}</div>
+      )}
 
-        {sortedSponsorships.length > 0 && (
-          <>
-            <SortableTable
-              options={table_options}
-              data={sortedSponsorships}
-              columns={columns}
-              dropCallback={this.props.updateSummitSponsorhipOrder}
-              orderField="order"
-            />
-          </>
-        )}
-      </div>
-    );
-  }
-}
+      {sponsorships.length > 0 && (
+        <MuiTable
+          options={table_options}
+          data={tableData}
+          columns={columns}
+          totalRows={totalSponsorships}
+          currentPage={currentPage}
+          perPage={perPage}
+          onSort={handleSort}
+          onReorder={handleReorder}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+        />
+      )}
+
+      <EditTierPopup
+        open={showAddTierModal}
+        onClose={() => setShowAddTierModal(false)}
+        onSubmit={handleSaveSummitSponsorship}
+        onBadgeImageAttach={uploadSponsorshipBadgeImage}
+        onBadgeImageRemove={removeSponsorshipBadgeImage}
+        entity={currentEntity}
+      />
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
-  currentSummitSponsorshipListState
+  currentSummitSponsorshipListState,
+  currentSummitSponsorshipState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
+  currentEntity: currentSummitSponsorshipState.entity,
   ...currentSummitSponsorshipListState
 });
 
 export default connect(mapStateToProps, {
   getSummitById,
   getSummitSponsorships,
+  getSummitSponsorship,
+  resetSummitSponsorshipForm,
   deleteSummitSponsorship,
-  updateSummitSponsorhipOrder
+  updateSummitSponsorhipOrder,
+  saveSummitSponsorship,
+  uploadSponsorshipBadgeImage,
+  removeSponsorshipBadgeImage
 })(SummitSponsorshipListPage);
