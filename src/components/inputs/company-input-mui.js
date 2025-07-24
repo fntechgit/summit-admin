@@ -16,10 +16,10 @@ import PropTypes from "prop-types";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
-import { querySponsorships } from "../../actions/sponsorship-actions";
+import { queryCompanies } from "../../actions/company-actions";
 import { DEBOUNCE_WAIT_250 } from "../../utils/constants";
 
-const SponsorshipTypeInputMUI = ({
+const CompanyInputMUI = ({
   id,
   name,
   formik,
@@ -50,7 +50,7 @@ const SponsorshipTypeInputMUI = ({
         label: r.name
       }));
 
-    await querySponsorships(input, (results) => {
+    await queryCompanies(input, (results) => {
       setOptions(normalize(results));
       setLoading(false);
     });
@@ -147,7 +147,7 @@ const SponsorshipTypeInputMUI = ({
   );
 };
 
-SponsorshipTypeInputMUI.propTypes = {
+CompanyInputMUI.propTypes = {
   id: PropTypes.string,
   name: PropTypes.string.isRequired,
   formik: PropTypes.object.isRequired,
@@ -156,4 +156,4 @@ SponsorshipTypeInputMUI.propTypes = {
   isMulti: PropTypes.bool
 };
 
-export default SponsorshipTypeInputMUI;
+export default CompanyInputMUI;

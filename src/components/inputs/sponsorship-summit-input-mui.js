@@ -16,13 +16,14 @@ import PropTypes from "prop-types";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
-import { querySponsorships } from "../../actions/sponsorship-actions";
+import { querySponsorshipsBySummit } from "../../actions/sponsorship-actions";
 import { DEBOUNCE_WAIT_250 } from "../../utils/constants";
 
-const SponsorshipTypeInputMUI = ({
+const SponsorshipsBySummitInputMUI = ({
   id,
   name,
   formik,
+  summitId,
   placeholder,
   plainValue,
   isMulti = false,
@@ -47,10 +48,10 @@ const SponsorshipTypeInputMUI = ({
     const normalize = (results) =>
       results.map((r) => ({
         value: r.id.toString(),
-        label: r.name
+        label: r.type.name
       }));
 
-    await querySponsorships(input, (results) => {
+    await querySponsorshipsBySummit(input, summitId, (results) => {
       setOptions(normalize(results));
       setLoading(false);
     });
@@ -147,13 +148,14 @@ const SponsorshipTypeInputMUI = ({
   );
 };
 
-SponsorshipTypeInputMUI.propTypes = {
+SponsorshipsBySummitInputMUI.propTypes = {
   id: PropTypes.string,
   name: PropTypes.string.isRequired,
   formik: PropTypes.object.isRequired,
+  summitId: PropTypes.number.isRequired,
   placeholder: PropTypes.string,
   plainValue: PropTypes.bool,
   isMulti: PropTypes.bool
 };
 
-export default SponsorshipTypeInputMUI;
+export default SponsorshipsBySummitInputMUI;

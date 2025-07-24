@@ -29,12 +29,14 @@ import {
 } from "../../actions/summit-actions";
 import {
   getSponsors,
+  addSponsorToSummit,
   deleteSponsor,
   updateSponsorOrder
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
 import MuiTable from "../../components/mui/table/mui-table";
 import { DEBOUNCE_WAIT } from "../../utils/constants";
+import AddSponsorDialog from "./popup/add-sponsor-popup";
 
 const SponsorListPage = ({
   currentSummit,
@@ -48,9 +50,12 @@ const SponsorListPage = ({
   member,
   term,
   order,
-  orderDir
+  orderDir,
+  lastPage,
+  addSponsorToSummit
 }) => {
   const [searchTerm, setSearchTerm] = useState(term);
+  const [showAddSponsorModal, setShowAddSponsorModal] = useState(false);
 
   useEffect(() => {
     if (currentSummit) {
@@ -90,8 +95,11 @@ const SponsorListPage = ({
     });
   };
 
-  const handleNewSponsor = () => {
-    history.push(`/app/summits/${currentSummit.id}/sponsors/new`);
+  const handleNewSponsor = (sponsor) => {
+    addSponsorToSummit(sponsor).then(() => {
+      setShowAddSponsorModal(false);
+      getSponsors(term, lastPage, perPage, order, orderDir);
+    });
   };
 
   const handlePageChange = (page) => {
@@ -101,7 +109,15 @@ const SponsorListPage = ({
     getSponsors(term, currentPage, newPerPage, order, orderDir);
   };
   const handleSort = (index, key, dir) => {
-    getInventoryItems(term, currentPage, perPage, key, dir);
+    getSponsors(term, currentPage, perPage, key, dir);
+  };
+
+  const handleOpenAddSponsorPopup = () => {
+    setShowAddSponsorModal(true);
+  };
+
+  const handleCloseAddSponsorPopup = () => {
+    setShowAddSponsorModal(false);
   };
 
   const memberObj = new Member(member);
@@ -241,7 +257,7 @@ const SponsorListPage = ({
               <Button
                 variant="contained"
                 fullWidth
-                onClick={() => handleNewSponsor()}
+                onClick={() => handleOpenAddSponsorPopup()}
                 startIcon={<AddIcon />}
                 sx={{ height: "36px" }}
               >
@@ -274,6 +290,15 @@ const SponsorListPage = ({
           />
         </div>
       )}
+
+      {showAddSponsorModal && (
+        <AddSponsorDialog
+          open={showAddSponsorModal}
+          onClose={handleCloseAddSponsorPopup}
+          onSubmit={handleNewSponsor}
+          summitId={currentSummit.id}
+        />
+      )}
     </div>
   );
 };
@@ -298,5 +323,6 @@ export default connect(mapStateToProps, {
   getSponsors,
   deleteSponsor,
   updateSponsorOrder,
-  upsertLeadReportSettings
+  upsertLeadReportSettings,
+  addSponsorToSummit
 })(SponsorListPage);

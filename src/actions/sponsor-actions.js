@@ -49,6 +49,7 @@ export const SPONSOR_UPDATED = "SPONSOR_UPDATED";
 export const SPONSOR_ADDED = "SPONSOR_ADDED";
 export const SPONSOR_DELETED = "SPONSOR_DELETED";
 export const SPONSOR_ORDER_UPDATED = "SPONSOR_ORDER_UPDATED";
+export const SPONSOR_ADDED_TO_SUMMIT = "SPONSOR_ADDED_TO_SUMMIT";
 export const MEMBER_ADDED_TO_SPONSOR = "MEMBER_ADDED_TO_SPONSOR";
 export const MEMBER_REMOVED_FROM_SPONSOR = "MEMBER_REMOVED_FROM_SPONSOR";
 export const COMPANY_ADDED = "COMPANY_ADDED";
@@ -269,6 +270,48 @@ export const getSponsor = (sponsorId) => async (dispatch, getState) => {
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
+};
+
+export const addSponsorToSummit = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  const normalizedEntity = normalizeSponsorToAdd(entity);
+
+  postRequest(
+    null,
+    createAction(SPONSOR_ADDED_TO_SUMMIT),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("sponsor_list.sponsor_added")
+      })
+    );
+  });
+};
+
+const normalizeSponsorToAdd = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  normalizedEntity.company_id = normalizedEntity.company?.id || 0;
+  normalizedEntity.sponsorships = normalizedEntity.sponsorships.map((s) => ({
+    type_id: s.id
+  }));
+
+  return normalizedEntity;
 };
 
 export const resetSponsorForm = () => (dispatch) => {
