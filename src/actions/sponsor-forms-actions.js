@@ -203,7 +203,7 @@ export const getSponsorships =
   };
 
 export const cloneGlobalTemplate =
-  (tempateIds, sponsorIds, allSponsors) => async (dispatch, getState) => {
+  (templateIds, sponsorIds, allSponsors) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -215,13 +215,13 @@ export const cloneGlobalTemplate =
     };
 
     const normalizedEntity = {
-      form_template_ids: tempateIds,
-      sponsorship_type_ids: sponsorIds,
+      form_template_ids: templateIds,
+      sponsorship_types: sponsorIds,
       apply_to_all_types: allSponsors
     };
 
     if (allSponsors) {
-      delete normalizedEntity.sponsorship_type_ids;
+      delete normalizedEntity.sponsorship_types;
     }
 
     return postRequest(
