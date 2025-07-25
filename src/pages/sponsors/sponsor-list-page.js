@@ -35,7 +35,7 @@ import {
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
 import MuiTable from "../../components/mui/table/mui-table";
-import { DEBOUNCE_WAIT } from "../../utils/constants";
+import { DEBOUNCE_WAIT, DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import AddSponsorDialog from "./popup/add-sponsor-popup";
 
 const SponsorListPage = ({
@@ -65,9 +65,9 @@ const SponsorListPage = ({
 
   const handleSearchDebounced = useCallback(
     _.debounce((term) => {
-      getSponsors(term, currentPage, perPage, order, orderDir);
+      getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
     }, DEBOUNCE_WAIT),
-    [currentPage, perPage, order, orderDir]
+    [perPage, order, orderDir]
   );
 
   useEffect(() => handleSearchDebounced.cancel(), [handleSearchDebounced]);

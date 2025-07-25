@@ -288,7 +288,7 @@ export const addSponsorToSummit = (entity) => async (dispatch, getState) => {
   postRequest(
     null,
     createAction(SPONSOR_ADDED_TO_SUMMIT),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/`,
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
     normalizedEntity,
     snackbarErrorHandler,
     entity

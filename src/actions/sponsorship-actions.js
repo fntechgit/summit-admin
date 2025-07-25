@@ -190,9 +190,13 @@ export const querySponsorshipsBySummit = _.debounce(
 
     input = escapeFilterValue(input);
 
-    fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsorships-types?page=1&per_page=100&access_token=${accessToken}&expand=type&order=%2Bname&filter=name=@${input}`
-    )
+    const url = `${
+      window.API_BASE_URL
+    }/api/v1/summits/${summitId}/sponsorships-types?page=1&per_page=100&access_token=${accessToken}&expand=type&order=%2Bname${
+      input ? `&filter=name=@${input}` : ""
+    }`;
+
+    fetch(url)
       .then(fetchResponseHandler)
       .then((json) => {
         const options = [...json.data];
