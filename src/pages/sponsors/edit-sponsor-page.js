@@ -14,7 +14,7 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Container, Tab, Tabs } from "@mui/material";
+import { Box, Container, Tab, Tabs, Typography } from "@mui/material";
 import SponsorForm from "../../components/forms/sponsor-form";
 import {
   saveSponsor,
@@ -130,17 +130,31 @@ const EditSponsorPage = (props) => {
   return (
     <Box>
       <Container maxWidth="lg">
-        <Box>
+        <Typography fontSize="3.4rem" variant="h4">
+          {entity.company?.name}
+        </Typography>
+        <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 2 }}>
           <Tabs
             value={selectedTab}
             onChange={handleTabChange}
             aria-label="basic tabs example"
+            sx={{
+              minHeight: "36px"
+            }}
           >
             {tabs.map((t) => (
               <Tab
                 key={t.value}
                 label={t.label}
                 value={t.value}
+                sx={{
+                  fontSize: "1.4rem",
+                  lineHeight: "1.8rem",
+                  height: "36px",
+                  minHeight: "36px",
+                  px: 2,
+                  py: 1
+                }}
                 {...a11yProps(t.value)}
               />
             ))}
