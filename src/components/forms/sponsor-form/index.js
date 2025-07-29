@@ -14,14 +14,16 @@
 import React from "react";
 import { Container } from "@mui/material";
 import SponsorHeader from "./sponsor-header";
+import Sponsorship from "./sponsorship";
 
-const SponsorForm = ({ sponsor }) => {
+const SponsorForm = ({ sponsor, summitId }) => {
   console.log("CS", sponsor);
 
   return (
     <Container maxWidth="lg">
       <form className="sponsor-form">
         <SponsorHeader sponsor={sponsor} />
+        <Sponsorship sponsor={sponsor} summitId={summitId} />
       </form>
     </Container>
   );

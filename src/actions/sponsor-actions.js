@@ -53,6 +53,7 @@ export const SPONSOR_ADDED_TO_SUMMIT = "SPONSOR_ADDED_TO_SUMMIT";
 export const MEMBER_ADDED_TO_SPONSOR = "MEMBER_ADDED_TO_SPONSOR";
 export const MEMBER_REMOVED_FROM_SPONSOR = "MEMBER_REMOVED_FROM_SPONSOR";
 export const COMPANY_ADDED = "COMPANY_ADDED";
+export const TIER_ADD_TO_SPONSOR = "TIER_ADD_TO_SPONSOR";
 export const RECEIVE_SPONSOR_EXTRA_QUESTION_META =
   "RECEIVE_SPONSOR_EXTRA_QUESTION_META";
 export const SPONSOR_EXTRA_QUESTION_ORDER_UPDATED =
@@ -303,6 +304,41 @@ export const addSponsorToSummit = (entity) => async (dispatch, getState) => {
   });
 };
 
+
+export const addTierToSponsor = (entity) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: sponsorId }
+  } = currentSponsorState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  const normalizedEntity = normalizeTiersForSponsor(entity);
+
+  postRequest(
+    null,
+    createAction(TIER_ADD_TO_SPONSOR),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_sponsor.sponsor_added")
+      })
+    );
+  });
+};
+
 const normalizeSponsorToAdd = (entity) => {
   const normalizedEntity = { ...entity };
 
@@ -310,6 +346,15 @@ const normalizeSponsorToAdd = (entity) => {
   normalizedEntity.sponsorships = normalizedEntity.sponsorships.map((s) => ({
     type_id: s.id
   }));
+  
+  return normalizedEntity;
+}
+const normalizeTiersForSponsor = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  normalizedEntity.type_ids = normalizedEntity.sponsorships.map((s) => s.id);
+
+  delete normalizedEntity.company;
 
   return normalizedEntity;
 };
