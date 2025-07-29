@@ -2247,6 +2247,12 @@
   },
   "edit_sponsor": {
     "sponsor": "Sponsor",
+    "general_information": "General Information",
+    "sponsor_name": "Sponsor Name",
+    "sponsor_address": "Sponsor Address",
+    "add_tier": "Add Tier",
+    "add_sponsor": "Add Sponsor",
+    "tiers": "Tiers",
     "name": "Name",
     "order": "Order",
     "company": "Company",
@@ -2315,7 +2321,8 @@
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start typing to choose a Tier...",
-      "select_material_type": "Select Material Type"
+      "select_material_type": "Select Material Type",
+      "select": "Select..."
     }
   },
   "sponsor_forms": {

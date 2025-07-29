@@ -23,6 +23,7 @@ import {
   getSponsorSocialNetworks,
   getSponsorLeadReportSettingsMeta
 } from "../../actions/sponsor-actions";
+import SponsorFormMUI from "../../components/forms/sponsor-form/index";
 
 const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -115,8 +116,10 @@ const EditSponsorPage = (props) => {
             ))}
           </Tabs>
         </Box>
-      </Container>
-      <CustomTabPanel value={selectedTab} index={0} />
+      </Container>      
+      <CustomTabPanel value={selectedTab} index={0}>
+        <SponsorFormMUI sponsor={entity} />
+      </CustomTabPanel>      
     </Box>
   );
 };
