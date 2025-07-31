@@ -23,10 +23,10 @@ import useScrollToError from "../../../hooks/useScrollToError";
 import SponsorshipsBySummitSelectMUI from "../../inputs/sponsorship-summit-select-mui";
 import MuiFormikTextField from "../../inputs/mui-formik-textfield";
 
-const AddTierPopup = ({ company, open, onClose, onSubmit, summitId }) => {
+const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
   const formik = useFormik({
     initialValues: {
-      company: company.name,
+      company: sponsor.company.name,
       sponsorships: []
     },
     validationSchema: yup.object({
@@ -115,6 +115,9 @@ const AddTierPopup = ({ company, open, onClose, onSubmit, summitId }) => {
                   summitId={summitId}
                   isMulti
                   placeholder={T.translate("edit_sponsor.placeholders.select")}
+                  hiddenOptions={sponsor.sponsorships_collection.sponsorships.map(
+                    (e) => e.type.id
+                  )}
                 />
               </Grid2>
             </Grid2>
