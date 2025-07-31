@@ -15,30 +15,14 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Container, Tab, Tabs, Typography } from "@mui/material";
-import SponsorForm from "../../components/forms/sponsor-form";
 import {
   saveSponsor,
   resetSponsorForm,
-  addMemberToSponsor,
-  removeMemberFromSponsor,
-  createCompany,
-  deleteSponsorAdvertisement,
-  deleteSponsorMaterial,
-  deleteSponsorSocialNetwork,
-  removeSponsorImage,
-  attachSponsorImage,
   getSponsorAdvertisements,
   getSponsorMaterials,
   getSponsorSocialNetworks,
-  updateSponsorAdsOrder,
-  updateSponsorMaterialOrder,
-  deleteExtraQuestion,
-  updateExtraQuestionOrder,
-  getSponsorLeadReportSettingsMeta,
-  upsertSponsorLeadReportSettings
+  getSponsorLeadReportSettingsMeta
 } from "../../actions/sponsor-actions";
-import Member from "../../models/member";
-import AddNewButton from "../../components/buttons/add-new-button";
 
 const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -63,47 +47,19 @@ const a11yProps = (index) => ({
 
 const EditSponsorPage = (props) => {
   const {
-    currentSummit,
     entity,
-    errors,
-    history,
-    sponsorships,
-    member,
-    saveSponsor,
     resetSponsorForm,
-    addMemberToSponsor,
-    removeMemberFromSponsor,
-    createCompany,
-    deleteSponsorAdvertisement,
-    deleteSponsorMaterial,
-    deleteSponsorSocialNetwork,
-    removeSponsorImage,
-    attachSponsorImage,
     getSponsorAdvertisements,
     getSponsorMaterials,
     getSponsorSocialNetworks,
-    updateSponsorAdsOrder,
-    updateSponsorMaterialOrder,
-    deleteExtraQuestion,
-    updateExtraQuestionOrder,
-    getSponsorLeadReportSettingsMeta,
-    upsertSponsorLeadReportSettings
+    getSponsorLeadReportSettingsMeta
   } = props;
-
-  const memberObj = new Member(member);
-  const canEditSponsors = memberObj.canEditSponsors();
-  const canEditSponsorExtraQuestions = memberObj.canEditSponsorExtraQuestions();
-  const canEditLeadReportSettings = memberObj.canEditLeadReportSettings();
 
   const [selectedTab, setSelectedTab] = useState(0);
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
   };
-
-  const title = entity.id
-    ? T.translate("general.edit")
-    : T.translate("general.add");
 
   useEffect(() => {
     if (entity.id > 0) {
@@ -117,14 +73,14 @@ const EditSponsorPage = (props) => {
   }, [entity.id]);
 
   const tabs = [
-    { label: "general", value: 0 },
-    { label: "users", value: 1 },
-    { label: "pages", value: 2 },
-    { label: "media uploads", value: 3 },
-    { label: "forms", value: 4 },
-    { label: "cart", value: 5 },
-    { label: "purchases", value: 6 },
-    { label: "badge scans", value: 7 }
+    { label: T.translate("edit_sponsor.tab.general"), value: 0 },
+    { label: T.translate("edit_sponsor.tab.users"), value: 1 },
+    { label: T.translate("edit_sponsor.tab.pages"), value: 2 },
+    { label: T.translate("edit_sponsor.tab.media_uploads"), value: 3 },
+    { label: T.translate("edit_sponsor.tab.forms"), value: 4 },
+    { label: T.translate("edit_sponsor.tab.cart"), value: 5 },
+    { label: T.translate("edit_sponsor.tab.purchases"), value: 6 },
+    { label: T.translate("edit_sponsor.tab.badge_scans"), value: 7 }
   ];
 
   return (
@@ -137,7 +93,6 @@ const EditSponsorPage = (props) => {
           <Tabs
             value={selectedTab}
             onChange={handleTabChange}
-            aria-label="basic tabs example"
             sx={{
               minHeight: "36px"
             }}
@@ -161,45 +116,7 @@ const EditSponsorPage = (props) => {
           </Tabs>
         </Box>
       </Container>
-      <CustomTabPanel value={selectedTab} index={0}>
-        <div className="container">
-          <h3>
-            {title} {T.translate("edit_sponsor.sponsor")}
-            <AddNewButton entity={entity} />
-          </h3>
-          <hr />
-          {currentSummit && (
-            <SponsorForm
-              history={history}
-              entity={entity}
-              currentSummit={currentSummit}
-              sponsorships={sponsorships}
-              errors={errors}
-              onCreateCompany={createCompany}
-              onAttachImage={attachSponsorImage}
-              onRemoveImage={removeSponsorImage}
-              onAddMember={addMemberToSponsor}
-              onRemoveMember={removeMemberFromSponsor}
-              onSponsorAdsOrderUpdate={updateSponsorAdsOrder}
-              onAdvertisementDelete={deleteSponsorAdvertisement}
-              onSponsorMaterialOrderUpdate={updateSponsorMaterialOrder}
-              onMaterialDelete={deleteSponsorMaterial}
-              onSocialNetworkDelete={deleteSponsorSocialNetwork}
-              onSubmit={saveSponsor}
-              getSponsorAdvertisements={getSponsorAdvertisements}
-              getSponsorMaterials={getSponsorMaterials}
-              getSponsorSocialNetworks={getSponsorSocialNetworks}
-              canEditSponsors={canEditSponsors}
-              canEditSponsorExtraQuestions={canEditSponsorExtraQuestions}
-              canEditLeadReportSettings={canEditLeadReportSettings}
-              deleteExtraQuestion={deleteExtraQuestion}
-              updateExtraQuestionOrder={updateExtraQuestionOrder}
-              availableLeadReportColumns={entity.available_lead_report_columns}
-              upsertSponsorLeadReportSettings={upsertSponsorLeadReportSettings}
-            />
-          )}
-        </div>
-      </CustomTabPanel>
+      <CustomTabPanel value={selectedTab} index={0} />
     </Box>
   );
 };
@@ -219,21 +136,8 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   saveSponsor,
   resetSponsorForm,
-  addMemberToSponsor,
-  removeMemberFromSponsor,
-  createCompany,
-  deleteSponsorAdvertisement,
-  deleteSponsorMaterial,
-  deleteSponsorSocialNetwork,
-  removeSponsorImage,
-  attachSponsorImage,
   getSponsorAdvertisements,
   getSponsorMaterials,
   getSponsorSocialNetworks,
-  updateSponsorAdsOrder,
-  updateSponsorMaterialOrder,
-  deleteExtraQuestion,
-  updateExtraQuestionOrder,
-  getSponsorLeadReportSettingsMeta,
-  upsertSponsorLeadReportSettings
+  getSponsorLeadReportSettingsMeta
 })(EditSponsorPage);
