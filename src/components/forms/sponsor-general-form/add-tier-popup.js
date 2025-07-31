@@ -23,10 +23,10 @@ import useScrollToError from "../../../hooks/useScrollToError";
 import SponsorshipsBySummitSelectMUI from "../../inputs/sponsorship-summit-select-mui";
 import MuiFormikTextField from "../../inputs/mui-formik-textfield";
 
-const AddTierPopup = ({ company, open, onClose, onSubmit, summitId }) => {
+const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
   const formik = useFormik({
     initialValues: {
-      company: company.name,
+      company: sponsor.company?.name,
       sponsorships: []
     },
     validationSchema: yup.object({
@@ -130,7 +130,7 @@ const AddTierPopup = ({ company, open, onClose, onSubmit, summitId }) => {
                 formik.values.sponsorships.length === 0
               }
             >
-              {T.translate("edit_sponsor.add_sponsor")}
+              {T.translate("edit_sponsor.add_tier")}
             </Button>
           </DialogActions>
         </Box>

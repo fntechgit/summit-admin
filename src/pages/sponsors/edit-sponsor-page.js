@@ -49,6 +49,7 @@ const a11yProps = (index) => ({
 const EditSponsorPage = (props) => {
   const {
     entity,
+    currentSummit,
     resetSponsorForm,
     getSponsorAdvertisements,
     getSponsorMaterials,
@@ -118,7 +119,7 @@ const EditSponsorPage = (props) => {
         </Box>
       </Container>
       <CustomTabPanel value={selectedTab} index={0}>
-        <SponsorGeneralForm sponsor={entity} />
+        <SponsorGeneralForm sponsor={entity} summitId={currentSummit.id} />
       </CustomTabPanel>
     </Box>
   );

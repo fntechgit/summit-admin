@@ -20,8 +20,6 @@ import AddTierPopup from "./add-tier-popup";
 const Sponsorship = ({ sponsor, summitId }) => {
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
 
-  console.log("CHECK SPONSOR!", sponsor);
-
   const handleCloseAddTierPopup = () => {
     setShowAddTierPopup(false);
   };
@@ -30,13 +28,11 @@ const Sponsorship = ({ sponsor, summitId }) => {
     setShowAddTierPopup(true);
   };
 
-  const handleAddTierToSponsor = (tiers) => {
-    console.log("CHECK TIERS", tiers);
-  };
+  const handleAddTierToSponsor = () => {};
 
   return (
     <>
-      <Box className="container" sx={{ px: 2, py: 0, mt: 2 }}>
+      <Box sx={{ px: 2, py: 0, mt: 2, backgroundColor: "white" }}>
         <Grid2 container size={12} sx={{ height: "68px" }}>
           <Grid2
             container
@@ -66,7 +62,7 @@ const Sponsorship = ({ sponsor, summitId }) => {
       </Box>
       {showAddTierPopup && (
         <AddTierPopup
-          company={sponsor.company}
+          sponsor={sponsor}
           summitId={summitId}
           open={showAddTierPopup}
           onClose={handleCloseAddTierPopup}
