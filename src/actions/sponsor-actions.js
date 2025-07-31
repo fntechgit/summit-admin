@@ -35,7 +35,9 @@ import history from "../history";
 import {
   DEBOUNCE_WAIT,
   MAX_PER_PAGE,
+  DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
+  FIVE_PER_PAGE,
   HUNDRED_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
@@ -54,6 +56,8 @@ export const MEMBER_ADDED_TO_SPONSOR = "MEMBER_ADDED_TO_SPONSOR";
 export const MEMBER_REMOVED_FROM_SPONSOR = "MEMBER_REMOVED_FROM_SPONSOR";
 export const COMPANY_ADDED = "COMPANY_ADDED";
 export const TIER_ADD_TO_SPONSOR = "TIER_ADD_TO_SPONSOR";
+export const REQUEST_SPONSOR_SPONSORSHIPS = "REQUEST_SPONSOR_SPONSORSHIPS";
+export const RECEIVE_SPONSOR_SPONSORSHIPS = "RECEIVE_SPONSOR_SPONSORSHIPS";
 export const RECEIVE_SPONSOR_EXTRA_QUESTION_META =
   "RECEIVE_SPONSOR_EXTRA_QUESTION_META";
 export const SPONSOR_EXTRA_QUESTION_ORDER_UPDATED =
@@ -266,7 +270,7 @@ export const getSponsor = (sponsorId) => async (dispatch, getState) => {
   return getRequest(
     null,
     createAction(RECEIVE_SPONSOR),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}`,
+    `${window.API_BASE_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsorId}`,
     authErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
@@ -304,6 +308,45 @@ export const addSponsorToSummit = (entity) => async (dispatch, getState) => {
   });
 };
 
+
+export const getSponsorTiers =
+  (
+    sponsorId,
+    currentPage = DEFAULT_CURRENT_PAGE,
+    perPage = FIVE_PER_PAGE,
+    order = "name",
+    orderDir = 1
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      page: currentPage,
+      per_page: perPage,
+      access_token: accessToken,
+      expand: "type, type.type"
+    };
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_SPONSORSHIPS),
+      createAction(RECEIVE_SPONSOR_SPONSORSHIPS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships`,
+      authErrorHandler,
+      { order, orderDir }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 export const addTierToSponsor = (entity) => async (dispatch, getState) => {
   const { currentSummitState, currentSponsorState } = getState();

@@ -57,9 +57,13 @@ const MuiTable = ({
     FIFTY_PER_PAGE
   ];
 
-  const customPerPageOptions = basePerPageOptions.includes(perPage)
+  const initialPerPage = React.useRef(perPage);
+
+  const customPerPageOptions = basePerPageOptions.includes(
+    initialPerPage.current
+  )
     ? basePerPageOptions
-    : [...basePerPageOptions, perPage].sort((a, b) => a - b);
+    : [...basePerPageOptions, initialPerPage.current].sort((a, b) => a - b);
 
   const { sortCol, sortDir } = options;
 
@@ -175,20 +179,20 @@ const MuiTable = ({
                             sx={{
                               ...(snapshot.isDragging
                                 ? {
-                                    display: "table",
-                                    width: "100%",
-                                    tableLayout: "fixed",
-                                    backgroundColor: "#f0f0f0",
-                                    transform: "scale(1.01)",
-                                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                                    zIndex: 1,
-                                    position: "relative",
-                                    transition:
-                                      "transform 0.2s ease, background-color 0.2s ease"
-                                  }
+                                  display: "table",
+                                  width: "100%",
+                                  tableLayout: "fixed",
+                                  backgroundColor: "#f0f0f0",
+                                  transform: "scale(1.01)",
+                                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                                  zIndex: 1,
+                                  position: "relative",
+                                  transition:
+                                    "transform 0.2s ease, background-color 0.2s ease"
+                                }
                                 : {
-                                    transition: "background-color 0.2s ease"
-                                  })
+                                  transition: "background-color 0.2s ease"
+                                })
                             }}
                           >
                             {/* Main content columns */}
@@ -196,9 +200,8 @@ const MuiTable = ({
                               <TableCell
                                 key={col.columnKey}
                                 align={col.align ?? "left"}
-                                className={`${
-                                  col.dottedBorder && styles.dottedBorderLeft
-                                } ${col.className}`}
+                                className={`${col.dottedBorder && styles.dottedBorderLeft
+                                  } ${col.className}`}
                               >
                                 {col.render?.(row) || row[col.columnKey]}
                               </TableCell>
@@ -262,6 +265,42 @@ const MuiTable = ({
                 )}
               </Droppable>
             </DragDropContext>
+            ) : (
+            <TableBody>
+              {data.map((row, rowIndex) => (
+                <TableRow key={row[idKey] || rowIndex}>
+                  {/* Main content columns */}
+                  {columns.map((col) => {
+                    const cellContent = col.render
+                      ? col.render(row, { onRowEdit })
+                      : row[col.columnKey];
+
+                    const cellClassName = col.className
+                      ? styles[col.className] || col.className
+                      : "";
+
+                    return (
+                      <TableCell
+                        key={col.columnKey}
+                        align={col.align ?? "left"}
+                        className={cellClassName}
+                      >
+                        {cellContent}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))}
+
+              {data.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={columns.length} align="center">
+                    {T.translate("mui_table.no_items")}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+            )
           </Table>
         </TableContainer>
 
