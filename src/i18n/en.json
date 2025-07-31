@@ -2150,6 +2150,8 @@
     "refunded_amount": "Refunded Amount",
     "total_refunded_amount": "Total Refunded Amount",
     "paid_amount_adjusted": "Amount Paid Adjusted",
+    "payment_type": "Payment Type",
+    "payment_details": "Payment Details",
     "credit_card_type": "Credit Card Type",
     "credit_card_4number": "Credit Card last 4 numbers",
     "purchase_history": "Purchase History",
@@ -2166,7 +2168,8 @@
     "adjusted_net_price": "Adjusted Net Price",
     "adjusted_tax_price": "Adjusted {tax_name} Price",
     "adjusted_order_price": "Adjusted  Order Price",
-    "adjusted_total_order_purchase_price": "Adjusted Total Order Purchase Price"
+    "adjusted_total_order_purchase_price": "Adjusted Total Order Purchase Price",
+    "see_at_payment_gateway": "See it at Stripe"
   },
   "sponsor_list": {
     "sponsors": "Sponsors",
