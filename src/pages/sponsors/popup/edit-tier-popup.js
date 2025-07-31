@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { useFormik } from "formik";
+import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
 import PropTypes from "prop-types";
 import {
@@ -135,367 +135,384 @@ const EditTierDialog = ({
         </IconButton>
       </DialogTitle>
       <Divider />
-      <Box
-        component="form"
-        onSubmit={formik.handleSubmit}
-        noValidate
-        autoComplete="off"
-      >
-        <DialogContent sx={{ p: 0 }}>
-          <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-            <Grid2
-              container
-              spacing={2}
-              size={12}
-              sx={{ alignItems: "baseline" }}
-            >
-              <Grid2
-                container
-                spacing={0}
-                size={6}
-                sx={{ alignItems: "baseline" }}
-              >
-                <InputLabel htmlFor="type">
-                  {T.translate("edit_summit_sponsorship.sponsorship_type")}
-                </InputLabel>
-                <Box width="100%">
-                  <SponsorshipTypeInputMUI
-                    name="type"
-                    formik={formik}
-                    placeholder={T.translate(
-                      "edit_sponsor.placeholders.sponsorship_type"
-                    )}
-                  />
-                </Box>
-              </Grid2>
-              <Grid2
-                container
-                spacing={0}
-                size={6}
-                sx={{ alignItems: "baseline" }}
-              >
-                <InputLabel htmlFor="widget_title">
-                  {T.translate("edit_summit_sponsorship.widget_title")}
-                </InputLabel>
-                <MuiFormikTextField
-                  formik={formik}
-                  name="widget_title"
-                  variant="outlined"
-                  margin="none"
-                  placeholder={T.translate(
-                    "edit_summit_sponsorship.placeholders.widget_title"
-                  )}
-                  fullWidth
-                />
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              spacing={2}
-              size={12}
-              sx={{ alignItems: "baseline" }}
-            >
-              <Grid2
-                container
-                spacing={0}
-                size={6}
-                sx={{ alignItems: "baseline" }}
-              >
-                <InputLabel htmlFor="lobby_template">
-                  {T.translate("edit_summit_sponsorship.lobby_template")}
-                </InputLabel>
-                <MuiFormikSelect
-                  name="lobby_template"
-                  formik={formik}
-                  IconComponent={ExpandMoreIcon}
-                  renderValue={(selected) => {
-                    if (!selected) {
-                      return (
-                        <span style={{ color: "#00000061" }}>
-                          {T.translate(
-                            "edit_summit_sponsorship.placeholders.select_lobby_template"
-                          )}
-                        </span>
-                      );
-                    }
-                    const selectedOption = lobby_template_ddl.find(
-                      (t) => t.value === selected
-                    );
-                    return selectedOption?.label || selected;
-                  }}
-                >
-                  {lobby_template_ddl.map((lobby_template) => (
-                    <MenuItem
-                      key={lobby_template.value}
-                      value={lobby_template.value}
-                    >
-                      {lobby_template.label}
-                    </MenuItem>
-                  ))}
-                </MuiFormikSelect>
-              </Grid2>
-              <Grid2
-                container
-                spacing={0}
-                size={6}
-                sx={{ alignItems: "baseline" }}
-              >
-                <InputLabel htmlFor="expo_hall_template">
-                  {T.translate("edit_summit_sponsorship.expo_hall_template")}
-                </InputLabel>
-                <MuiFormikSelect
-                  name="expo_hall_template"
-                  formik={formik}
-                  IconComponent={ExpandMoreIcon}
-                  renderValue={(selected) => {
-                    if (!selected) {
-                      return (
-                        <span style={{ color: "#00000061" }}>
-                          {T.translate(
-                            "edit_summit_sponsorship.placeholders.select_expo_hall_template"
-                          )}
-                        </span>
-                      );
-                    }
-                    const selectedOption = expo_hall_template_ddl.find(
-                      (t) => t.value === selected
-                    );
-                    return selectedOption?.label || selected;
-                  }}
-                >
-                  {expo_hall_template_ddl.map((expo_hall_template) => (
-                    <MenuItem value={expo_hall_template.value}>
-                      {expo_hall_template.label}
-                    </MenuItem>
-                  ))}
-                </MuiFormikSelect>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              spacing={2}
-              size={12}
-              sx={{ alignItems: "baseline" }}
-            >
-              <Grid2
-                container
-                spacing={0}
-                size={6}
-                sx={{ alignItems: "baseline" }}
-              >
-                <InputLabel htmlFor="event_page_template">
-                  {T.translate("edit_summit_sponsorship.event_page_template")}
-                </InputLabel>
-                <MuiFormikSelect
-                  name="event_page_template"
-                  formik={formik}
-                  IconComponent={ExpandMoreIcon}
-                  renderValue={(selected) => {
-                    if (!selected) {
-                      return (
-                        <span style={{ color: "#00000061" }}>
-                          {T.translate(
-                            "edit_summit_sponsorship.placeholders.select_event_page_template"
-                          )}
-                        </span>
-                      );
-                    }
-                    const selectedOption = event_page_template_ddl.find(
-                      (t) => t.value === selected
-                    );
-                    return selectedOption?.label || selected;
-                  }}
-                >
-                  {event_page_template_ddl.map((event_page_template) => (
-                    <MenuItem value={event_page_template.value}>
-                      {event_page_template.label}
-                    </MenuItem>
-                  ))}
-                </MuiFormikSelect>
-              </Grid2>
-              <Grid2
-                container
-                spacing={0}
-                size={6}
-                sx={{ alignItems: "baseline" }}
-              >
-                <InputLabel htmlFor="sponsor_page_template">
-                  {T.translate("edit_summit_sponsorship.sponsor_page_template")}
-                </InputLabel>
-                <MuiFormikSelect
-                  name="sponsor_page_template"
-                  formik={formik}
-                  IconComponent={ExpandMoreIcon}
-                  renderValue={(selected) => {
-                    if (!selected) {
-                      return (
-                        <span style={{ color: "#00000061" }}>
-                          {T.translate(
-                            "edit_summit_sponsorship.placeholders.select_sponsor_page_template"
-                          )}
-                        </span>
-                      );
-                    }
-                    const selectedOption = sponsor_page_template_ddl.find(
-                      (t) => t.value === selected
-                    );
-                    return selectedOption?.label || selected;
-                  }}
-                >
-                  {sponsor_page_template_ddl.map((sponsor_page_template) => (
-                    <MenuItem value={sponsor_page_template.value}>
-                      {sponsor_page_template.label}
-                    </MenuItem>
-                  ))}
-                </MuiFormikSelect>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              spacing={2}
-              mt={3}
-              size={12}
-              sx={{ alignItems: "baseline" }}
-            >
-              <Grid2
-                container
-                spacing={0}
-                size={4}
-                sx={{ alignItems: "baseline" }}
-              >
-                <MuiFormikCheckbox
-                  name="sponsor_page_use_disqus_widget"
-                  label={T.translate(
-                    "edit_summit_sponsorship.sponsor_page_use_disqus_widget"
-                  )}
-                  formik={formik}
-                />
-              </Grid2>
-              <Grid2
-                container
-                spacing={0}
-                size={4}
-                sx={{ alignItems: "baseline" }}
-              >
-                <MuiFormikCheckbox
-                  name="should_display_on_expo_hall_page"
-                  label={T.translate(
-                    "edit_summit_sponsorship.should_display_on_expo_hall_page"
-                  )}
-                  formik={formik}
-                />
-              </Grid2>
-              <Grid2
-                container
-                spacing={0}
-                size={4}
-                sx={{ alignItems: "baseline" }}
-              >
-                <MuiFormikCheckbox
-                  name="sponsor_page_use_schedule_widget"
-                  label={T.translate(
-                    "edit_summit_sponsorship.sponsor_page_use_schedule_widget"
-                  )}
-                  formik={formik}
-                />
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              spacing={2}
-              mb={1}
-              size={12}
-              sx={{ alignItems: "baseline" }}
-            >
-              <Grid2
-                container
-                spacing={0}
-                size={4}
-                sx={{ alignItems: "baseline" }}
-              >
-                <MuiFormikCheckbox
-                  name="sponsor_page_use_banner_widget"
-                  label={T.translate(
-                    "edit_summit_sponsorship.sponsor_page_use_banner_widget"
-                  )}
-                  formik={formik}
-                />
-              </Grid2>
-              <Grid2
-                container
-                spacing={0}
-                size={4}
-                sx={{ alignItems: "baseline" }}
-              >
-                <MuiFormikCheckbox
-                  name="sponsor_page_use_live_event_widget"
-                  label={T.translate(
-                    "edit_summit_sponsorship.sponsor_page_use_live_event_widget"
-                  )}
-                  formik={formik}
-                />
-              </Grid2>
-              <Grid2
-                container
-                spacing={0}
-                size={4}
-                sx={{ alignItems: "baseline" }}
-              >
-                <MuiFormikCheckbox
-                  name="should_display_on_lobby_page"
-                  label={T.translate(
-                    "edit_summit_sponsorship.should_display_on_lobby_page"
-                  )}
-                  formik={formik}
-                />
-              </Grid2>
-            </Grid2>
-          </Grid2>
-          {initialEntity.id > 0 && (
-            <>
-              <Divider />
+      <FormikProvider value={formik}>
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          noValidate
+          autoComplete="off"
+        >
+          <DialogContent sx={{ p: 0 }}>
+            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
               <Grid2
                 container
                 spacing={2}
-                sx={{ alignItems: "start", px: 3, py: 1 }}
+                size={12}
+                sx={{ alignItems: "baseline" }}
               >
-                <Grid2 size={12}>
-                  <InputLabel htmlFor="badge_image" id="images" sx={{ my: 1 }}>
-                    {T.translate("edit_summit_sponsorship.badge_image")}
+                <Grid2
+                  container
+                  spacing={0}
+                  size={6}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <InputLabel htmlFor="type">
+                    {T.translate("edit_summit_sponsorship.sponsorship_type")}
                   </InputLabel>
-                  <UploadInput
-                    name="badge_image"
-                    value={formik.values.badge_image}
-                    handleUpload={handleUploadBadgeImage}
-                    handleRemove={handleRemoveBadgeImage}
-                    className="dropzone col-md-6"
-                    multiple={false}
-                    accept="image/*"
-                  />
+                  <Box width="100%">
+                    <SponsorshipTypeInputMUI
+                      name="type"
+                      formik={formik}
+                      placeholder={T.translate(
+                        "edit_sponsor.placeholders.sponsorship_type"
+                      )}
+                    />
+                  </Box>
                 </Grid2>
-                <Grid2 size={12} sx={{ my: 1 }}>
-                  <InputLabel htmlFor="badge_image_alt_text">
-                    {T.translate("edit_summit_sponsorship.badge_alt")}
+                <Grid2
+                  container
+                  spacing={0}
+                  size={6}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <InputLabel htmlFor="widget_title">
+                    {T.translate("edit_summit_sponsorship.widget_title")}
                   </InputLabel>
                   <MuiFormikTextField
                     formik={formik}
-                    name="badge_image_alt_text"
+                    name="widget_title"
                     variant="outlined"
                     margin="none"
+                    placeholder={T.translate(
+                      "edit_summit_sponsorship.placeholders.widget_title"
+                    )}
                     fullWidth
                   />
                 </Grid2>
               </Grid2>
-            </>
-          )}
-        </DialogContent>
-        <Divider />
-        <DialogActions sx={{ p: 2 }}>
-          <Button type="submit" fullWidth variant="contained">
-            {T.translate("edit_summit_sponsorship.save")}
-          </Button>
-        </DialogActions>
-      </Box>
+              <Grid2
+                container
+                spacing={2}
+                size={12}
+                sx={{ alignItems: "baseline" }}
+              >
+                <Grid2
+                  container
+                  spacing={0}
+                  size={6}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <InputLabel htmlFor="lobby_template">
+                    {T.translate("edit_summit_sponsorship.lobby_template")}
+                  </InputLabel>
+                  <MuiFormikSelect
+                    name="lobby_template"
+                    formik={formik}
+                    IconComponent={ExpandMoreIcon}
+                    renderValue={(selected) => {
+                      if (!selected) {
+                        return (
+                          <span style={{ color: "#00000061" }}>
+                            {T.translate(
+                              "edit_summit_sponsorship.placeholders.select_lobby_template"
+                            )}
+                          </span>
+                        );
+                      }
+                      const selectedOption = lobby_template_ddl.find(
+                        (t) => t.value === selected
+                      );
+                      return selectedOption?.label || selected;
+                    }}
+                  >
+                    {lobby_template_ddl.map((lobby_template) => (
+                      <MenuItem
+                        key={lobby_template.value}
+                        value={lobby_template.value}
+                      >
+                        {lobby_template.label}
+                      </MenuItem>
+                    ))}
+                  </MuiFormikSelect>
+                </Grid2>
+                <Grid2
+                  container
+                  spacing={0}
+                  size={6}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <InputLabel htmlFor="expo_hall_template">
+                    {T.translate("edit_summit_sponsorship.expo_hall_template")}
+                  </InputLabel>
+                  <MuiFormikSelect
+                    name="expo_hall_template"
+                    formik={formik}
+                    IconComponent={ExpandMoreIcon}
+                    renderValue={(selected) => {
+                      if (!selected) {
+                        return (
+                          <span style={{ color: "#00000061" }}>
+                            {T.translate(
+                              "edit_summit_sponsorship.placeholders.select_expo_hall_template"
+                            )}
+                          </span>
+                        );
+                      }
+                      const selectedOption = expo_hall_template_ddl.find(
+                        (t) => t.value === selected
+                      );
+                      return selectedOption?.label || selected;
+                    }}
+                  >
+                    {expo_hall_template_ddl.map((expo_hall_template) => (
+                      <MenuItem
+                        value={expo_hall_template.value}
+                        key={expo_hall_template.value}
+                      >
+                        {expo_hall_template.label}
+                      </MenuItem>
+                    ))}
+                  </MuiFormikSelect>
+                </Grid2>
+              </Grid2>
+              <Grid2
+                container
+                spacing={2}
+                size={12}
+                sx={{ alignItems: "baseline" }}
+              >
+                <Grid2
+                  container
+                  spacing={0}
+                  size={6}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <InputLabel htmlFor="event_page_template">
+                    {T.translate("edit_summit_sponsorship.event_page_template")}
+                  </InputLabel>
+                  <MuiFormikSelect
+                    name="event_page_template"
+                    formik={formik}
+                    IconComponent={ExpandMoreIcon}
+                    renderValue={(selected) => {
+                      if (!selected) {
+                        return (
+                          <span style={{ color: "#00000061" }}>
+                            {T.translate(
+                              "edit_summit_sponsorship.placeholders.select_event_page_template"
+                            )}
+                          </span>
+                        );
+                      }
+                      const selectedOption = event_page_template_ddl.find(
+                        (t) => t.value === selected
+                      );
+                      return selectedOption?.label || selected;
+                    }}
+                  >
+                    {event_page_template_ddl.map((event_page_template) => (
+                      <MenuItem
+                        value={event_page_template.value}
+                        key={event_page_template.value}
+                      >
+                        {event_page_template.label}
+                      </MenuItem>
+                    ))}
+                  </MuiFormikSelect>
+                </Grid2>
+                <Grid2
+                  container
+                  spacing={0}
+                  size={6}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <InputLabel htmlFor="sponsor_page_template">
+                    {T.translate(
+                      "edit_summit_sponsorship.sponsor_page_template"
+                    )}
+                  </InputLabel>
+                  <MuiFormikSelect
+                    name="sponsor_page_template"
+                    formik={formik}
+                    IconComponent={ExpandMoreIcon}
+                    renderValue={(selected) => {
+                      if (!selected) {
+                        return (
+                          <span style={{ color: "#00000061" }}>
+                            {T.translate(
+                              "edit_summit_sponsorship.placeholders.select_sponsor_page_template"
+                            )}
+                          </span>
+                        );
+                      }
+                      const selectedOption = sponsor_page_template_ddl.find(
+                        (t) => t.value === selected
+                      );
+                      return selectedOption?.label || selected;
+                    }}
+                  >
+                    {sponsor_page_template_ddl.map((sponsor_page_template) => (
+                      <MenuItem
+                        value={sponsor_page_template.value}
+                        key={sponsor_page_template.value}
+                      >
+                        {sponsor_page_template.label}
+                      </MenuItem>
+                    ))}
+                  </MuiFormikSelect>
+                </Grid2>
+              </Grid2>
+              <Grid2
+                container
+                spacing={2}
+                mt={3}
+                size={12}
+                sx={{ alignItems: "baseline" }}
+              >
+                <Grid2
+                  container
+                  spacing={0}
+                  size={4}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <MuiFormikCheckbox
+                    name="sponsor_page_use_disqus_widget"
+                    label={T.translate(
+                      "edit_summit_sponsorship.sponsor_page_use_disqus_widget"
+                    )}
+                    formik={formik}
+                  />
+                </Grid2>
+                <Grid2
+                  container
+                  spacing={0}
+                  size={4}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <MuiFormikCheckbox
+                    name="should_display_on_expo_hall_page"
+                    label={T.translate(
+                      "edit_summit_sponsorship.should_display_on_expo_hall_page"
+                    )}
+                    formik={formik}
+                  />
+                </Grid2>
+                <Grid2
+                  container
+                  spacing={0}
+                  size={4}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <MuiFormikCheckbox
+                    name="sponsor_page_use_schedule_widget"
+                    label={T.translate(
+                      "edit_summit_sponsorship.sponsor_page_use_schedule_widget"
+                    )}
+                    formik={formik}
+                  />
+                </Grid2>
+              </Grid2>
+              <Grid2
+                container
+                spacing={2}
+                mb={1}
+                size={12}
+                sx={{ alignItems: "baseline" }}
+              >
+                <Grid2
+                  container
+                  spacing={0}
+                  size={4}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <MuiFormikCheckbox
+                    name="sponsor_page_use_banner_widget"
+                    label={T.translate(
+                      "edit_summit_sponsorship.sponsor_page_use_banner_widget"
+                    )}
+                    formik={formik}
+                  />
+                </Grid2>
+                <Grid2
+                  container
+                  spacing={0}
+                  size={4}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <MuiFormikCheckbox
+                    name="sponsor_page_use_live_event_widget"
+                    label={T.translate(
+                      "edit_summit_sponsorship.sponsor_page_use_live_event_widget"
+                    )}
+                    formik={formik}
+                  />
+                </Grid2>
+                <Grid2
+                  container
+                  spacing={0}
+                  size={4}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <MuiFormikCheckbox
+                    name="should_display_on_lobby_page"
+                    label={T.translate(
+                      "edit_summit_sponsorship.should_display_on_lobby_page"
+                    )}
+                    formik={formik}
+                  />
+                </Grid2>
+              </Grid2>
+            </Grid2>
+            {initialEntity.id > 0 && (
+              <>
+                <Divider />
+                <Grid2
+                  container
+                  spacing={2}
+                  sx={{ alignItems: "start", px: 3, py: 1 }}
+                >
+                  <Grid2 size={12}>
+                    <InputLabel
+                      htmlFor="badge_image"
+                      id="images"
+                      sx={{ my: 1 }}
+                    >
+                      {T.translate("edit_summit_sponsorship.badge_image")}
+                    </InputLabel>
+                    <UploadInput
+                      name="badge_image"
+                      value={formik.values.badge_image}
+                      handleUpload={handleUploadBadgeImage}
+                      handleRemove={handleRemoveBadgeImage}
+                      className="dropzone col-md-6"
+                      multiple={false}
+                      accept="image/*"
+                    />
+                  </Grid2>
+                  <Grid2 size={12} sx={{ my: 1 }}>
+                    <InputLabel htmlFor="badge_image_alt_text">
+                      {T.translate("edit_summit_sponsorship.badge_alt")}
+                    </InputLabel>
+                    <MuiFormikTextField
+                      formik={formik}
+                      name="badge_image_alt_text"
+                      variant="outlined"
+                      margin="none"
+                      fullWidth
+                    />
+                  </Grid2>
+                </Grid2>
+              </>
+            )}
+          </DialogContent>
+          <Divider />
+          <DialogActions sx={{ p: 2 }}>
+            <Button type="submit" fullWidth variant="contained">
+              {T.translate("edit_summit_sponsorship.save")}
+            </Button>
+          </DialogActions>
+        </Box>
+      </FormikProvider>
     </Dialog>
   );
 };
