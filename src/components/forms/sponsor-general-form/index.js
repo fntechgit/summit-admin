@@ -12,17 +12,19 @@
  * */
 
 import React from "react";
-import { Container } from "@mui/material";
+import { Box } from "@mui/material";
 import SponsorHeader from "./sponsor-header";
 import Sponsorship from "./sponsorship";
 
-const SponsorGeneralForm = ({ sponsor, summitId }) => (
-  <Container maxWidth="lg">
-    <form className="sponsor-form">
-      <SponsorHeader sponsor={sponsor} />
-      <Sponsorship sponsor={sponsor} summitId={summitId} />
-    </form>
-  </Container>
+const SponsorGeneralForm = ({ sponsor, summitId, onSponsorshipPaginate }) => (
+  <Box sx={{ mt: 2 }}>
+    <SponsorHeader sponsor={sponsor} />
+    <Sponsorship
+      sponsor={sponsor}
+      summitId={summitId}
+      onSponsorshipPaginate={onSponsorshipPaginate}
+    />
+  </Box>
 );
 
 export default SponsorGeneralForm;

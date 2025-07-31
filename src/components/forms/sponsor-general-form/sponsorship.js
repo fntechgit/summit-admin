@@ -13,12 +13,23 @@
 
 import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, Typography } from "@mui/material";
+import { Box, Button, Grid2, IconButton, Typography } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
 
-const Sponsorship = ({ sponsor, summitId }) => {
+const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
+
+  const {
+    sponsorships,
+    currentPage,
+    perPage,
+    totalSponsorships,
+    order,
+    orderDir
+  } = sponsor.sponsorships_collection;
 
   const handleCloseAddTierPopup = () => {
     setShowAddTierPopup(false);
@@ -29,6 +40,68 @@ const Sponsorship = ({ sponsor, summitId }) => {
   };
 
   const handleAddTierToSponsor = () => {};
+
+  const handlePageChange = (page) => {
+    onSponsorshipPaginate(page, perPage, order, orderDir);
+  };
+  const handlePerPageChange = (newPerPage) => {
+    onSponsorshipPaginate(currentPage, newPerPage, order, orderDir);
+  };
+  const handleSort = (index, key, dir) => {
+    onSponsorshipPaginate(currentPage, perPage, key, dir);
+  };
+
+  const columns = [
+    {
+      columnKey: "tier",
+      header: T.translate("edit_sponsor.tier"),
+      sortable: true
+    },
+    {
+      columnKey: "addons",
+      header: T.translate("edit_sponsor.addons"),
+      sortable: true,
+      render: (row) =>
+        row.add_ons.length > 0
+          ? row.add_ons.map((a) => a.map).split(", ")
+          : "None"
+    },
+    {
+      columnKey: "manage_addons",
+      header: "",
+      width: 170,
+      align: "center",
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="small"
+          onClick={() => handleManageItems(row)}
+          sx={{
+            fontSize: "1.3rem",
+            fontWeight: 500,
+            lineHeight: "2.2rem",
+            padding: "4px 5px"
+          }}
+        >
+          {T.translate("edit_sponsor.manage_addons")}
+        </Button>
+      ),
+      className: "dottedBorderLeft"
+    },
+    {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row, { onRowEdit }) => (
+        <IconButton size="small" onClick={() => onRowEdit(row)}>
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      ),
+      className: "dottedBorderLeft"
+    }
+  ];
 
   return (
     <>
@@ -69,6 +142,20 @@ const Sponsorship = ({ sponsor, summitId }) => {
           onSubmit={handleAddTierToSponsor}
         />
       )}
+
+      <div>
+        <MuiTable
+          data={sponsorships}
+          columns={columns}
+          totalRows={totalSponsorships}
+          orderField="order"
+          perPage={perPage}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+        />
+      </div>
     </>
   );
 };

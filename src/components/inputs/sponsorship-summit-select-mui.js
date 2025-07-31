@@ -40,7 +40,7 @@ const SponsorshipsBySummitSelectMUI = ({
   summitId,
   placeholder,
   plainValue,
-  hiddenOptions
+  hiddenOptions = []
 }) => {
   const [field, meta, helpers] = useField(name);
   const [options, setOptions] = useState([]);
