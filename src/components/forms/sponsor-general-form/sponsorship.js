@@ -13,7 +13,8 @@
 
 import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, Typography } from "@mui/material";
+import { Box, Button, Grid2, IconButton, Typography } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
