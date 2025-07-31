@@ -2302,6 +2302,16 @@
     "remove_warning_extra_question": "Are you sure you want to delete extra question ",
     "remove_value_warning": "Are you sure you want to delete value ",
     "lead_report_settings": "Lead Report Settings",
+    "tab": {
+      "general": "general",
+      "users": "users",
+      "pages": "pages",
+      "media_uploads": "media uploads",
+      "forms": "forms",
+      "cart": "cart",
+      "purchases": "purchases",
+      "badge_scans": "badge scans"
+    },
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start typing to choose a Tier...",
