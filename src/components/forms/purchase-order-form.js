@@ -44,6 +44,8 @@ class PurchaseOrderForm extends React.Component {
       addTicketQty: 0,
       addPromoCode: null
     };
+    this.getPaymentType = this.getPaymentType.bind(this);
+    this.getPaymentDetails = this.getPaymentDetails.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -142,6 +144,53 @@ class PurchaseOrderForm extends React.Component {
     history.push(
       `/app/summits/${currentSummit.id}/purchase-orders/${entity.id}/tickets/${ticketId}`
     );
+  };
+
+  getPaymentType = () => {
+    const { entity } = this.state;
+    if (entity?.payment_info_type == "link") {
+      return <a href="https://app.link.com/">link</a>;
+    }
+    if (entity?.payment_info_type == "us_bank_account") return "ACH";
+    if (
+      entity?.payment_info_type == "card" &&
+      entity?.payment_info_details?.wallet_type
+    )
+      return entity?.payment_info_details?.wallet_type;
+    return entity?.payment_info_type;
+  };
+
+  getPaymentDetails = () => {
+    const { entity } = this.state;
+    switch (entity?.payment_info_type) {
+      case "card": {
+        return (
+          <>
+            <p>{entity?.payment_info_details?.brand}</p>
+            <p>{entity?.payment_info_details?.last4}</p>
+          </>
+        );
+      }
+      case "link": {
+        return (
+          <>
+            <p>{entity?.payment_info_details?.email}</p>
+            <p>{entity?.payment_info_details?.country}</p>
+          </>
+        );
+      }
+      case "us_bank_account": {
+        return (
+          <>
+            <p>{entity?.payment_info_details?.bank_name}</p>
+            <p>{entity?.payment_info_details?.account_type}</p>
+            <p>{entity?.payment_info_details?.last4}</p>
+          </>
+        );
+      }
+      default:
+        return null;
+    }
   };
 
   render() {
@@ -272,18 +321,27 @@ class PurchaseOrderForm extends React.Component {
               <div className="col-md-2">
                 <label>
                   {" "}
-                  {T.translate("edit_purchase_order.credit_card_type")}
+                  {T.translate("edit_purchase_order.payment_type")}
                 </label>
                 <br />
-                {entity?.credit_card_type}
+                {this.getPaymentType()}
               </div>
               <div className="col-md-3">
                 <label>
                   {" "}
-                  {T.translate("edit_purchase_order.credit_card_4number")}
+                  {T.translate("edit_purchase_order.payment_details")}
                 </label>
                 <br />
-                {entity?.credit_card_4number}
+                {this.getPaymentDetails()}
+                <p>
+                  <a
+                    target="_blank"
+                    rel="noreferrer"
+                    href={`https://dashboard.stripe.com/payments/${entity.payment_gateway_cart_id}`}
+                  >
+                    {T.translate("edit_purchase_order.see_at_payment_gateway")}
+                  </a>
+                </p>
               </div>
             </div>
             <div className="row form-group">
@@ -301,7 +359,6 @@ class PurchaseOrderForm extends React.Component {
                 </label>
                 {entity.payment_method}
               </div>
-              <div className="col-md-6">&nbsp;</div>
             </div>
             {entity.refunded_amount > 0.0 && (
               <>
