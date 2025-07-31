@@ -96,7 +96,7 @@ const Sponsorship = ({
       ),
       className: "dottedBorderLeft"
     }
-  ];
+  ];  
 
   return (
     <>
