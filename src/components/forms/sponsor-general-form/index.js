@@ -15,16 +15,12 @@ import React from "react";
 import { Container } from "@mui/material";
 import SponsorHeader from "./sponsor-header";
 
-const SponsorForm = ({ sponsor }) => {
-  console.log("CS", sponsor);
+const SponsorGeneralForm = ({ sponsor }) => (
+  <Container maxWidth="lg">
+    <form className="sponsor-form">
+      <SponsorHeader sponsor={sponsor} />
+    </form>
+  </Container>
+);
 
-  return (
-    <Container maxWidth="lg">
-      <form className="sponsor-form">
-        <SponsorHeader sponsor={sponsor} />
-      </form>
-    </Container>
-  );
-};
-
-export default SponsorForm;
+export default SponsorGeneralForm;
