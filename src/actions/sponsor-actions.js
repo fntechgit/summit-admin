@@ -55,7 +55,8 @@ export const SPONSOR_ADDED_TO_SUMMIT = "SPONSOR_ADDED_TO_SUMMIT";
 export const MEMBER_ADDED_TO_SPONSOR = "MEMBER_ADDED_TO_SPONSOR";
 export const MEMBER_REMOVED_FROM_SPONSOR = "MEMBER_REMOVED_FROM_SPONSOR";
 export const COMPANY_ADDED = "COMPANY_ADDED";
-export const TIER_ADD_TO_SPONSOR = "TIER_ADD_TO_SPONSOR";
+export const SPONSOR_TIER_ADDED = "SPONSOR_TIER_ADDED";
+export const SPONSOR_TIER_DELETED = "SPONSOR_TIER_DELETED";
 export const REQUEST_SPONSOR_SPONSORSHIPS = "REQUEST_SPONSOR_SPONSORSHIPS";
 export const RECEIVE_SPONSOR_SPONSORSHIPS = "RECEIVE_SPONSOR_SPONSORSHIPS";
 export const RECEIVE_SPONSOR_EXTRA_QUESTION_META =
@@ -348,39 +349,73 @@ export const getSponsorTiers =
     });
   };
 
-export const addTierToSponsor = (entity) => async (dispatch, getState) => {
-  const { currentSummitState, currentSponsorState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
-  const {
-    entity: { id: sponsorId }
-  } = currentSponsorState;
+export const addTierToSponsor =
+  (sponsorships) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
 
-  const params = {
-    access_token: accessToken
+    const params = {
+      access_token: accessToken,
+      expand: "type,type.type"
+    };
+
+    dispatch(startLoading());
+
+    const normalizedSponsorships = normalizeTiersForSponsor(sponsorships);
+
+    postRequest(
+      null,
+      createAction(SPONSOR_TIER_ADDED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships`,
+      normalizedSponsorships,
+      snackbarErrorHandler,
+      sponsorships
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsor.sponsorship_added")
+        })
+      );
+    });
   };
 
-  dispatch(startLoading());
+export const removeTierFromSponsor =
+  (sponsorshipId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
 
-  const normalizedEntity = normalizeTiersForSponsor(entity);
+    const params = {
+      access_token: accessToken
+    };
 
-  postRequest(
-    null,
-    createAction(TIER_ADD_TO_SPONSOR),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships`,
-    normalizedEntity,
-    snackbarErrorHandler,
-    entity
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-    dispatch(
-      snackbarSuccessHandler({
-        title: T.translate("general.success"),
-        html: T.translate("edit_sponsor.sponsor_added")
-      })
-    );
-  });
-};
+    dispatch(startLoading());
+
+    deleteRequest(
+      null,
+      createAction(SPONSOR_TIER_DELETED)({ sponsorshipId }),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsor.sponsorship_removed")
+        })
+      );
+    });
+  };
 
 const normalizeSponsorToAdd = (entity) => {
   const normalizedEntity = { ...entity };
@@ -393,11 +428,9 @@ const normalizeSponsorToAdd = (entity) => {
   return normalizedEntity;
 }
 const normalizeTiersForSponsor = (entity) => {
-  const normalizedEntity = { ...entity };
-
-  normalizedEntity.type_ids = normalizedEntity.sponsorships.map((s) => s.id);
-
-  delete normalizedEntity.company;
+  const normalizedEntity = {
+    type_ids: entity.map((e) => e.id)
+  };
 
   return normalizedEntity;
 };

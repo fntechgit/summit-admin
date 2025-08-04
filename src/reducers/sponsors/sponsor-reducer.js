@@ -50,7 +50,8 @@ import {
   SPONSOR_EXTRA_QUESTION_UPDATED,
   RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META,
   SPONSOR_LEAD_REPORT_SETTINGS_UPDATED,
-  TIER_ADD_TO_SPONSOR,
+  SPONSOR_TIER_ADDED,
+  SPONSOR_TIER_DELETED,
   REQUEST_SPONSOR_SPONSORSHIPS,
   RECEIVE_SPONSOR_SPONSORSHIPS
 } from "../../actions/sponsor-actions";
@@ -517,9 +518,48 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case TIER_ADD_TO_SPONSOR: {
-      console.log("CHECK PAYLOAD", payload);
-      return { ...state };
+    case SPONSOR_TIER_ADDED: {
+      let newSponsorships = [];
+      newSponsorships = payload.response.map((s) => ({
+        ...s,
+        tier: s.type?.type.name
+      }));
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: [
+              ...state.entity.sponsorships_collection.sponsorships,
+              ...newSponsorships
+            ],
+            totalSponsorships:
+              state.entity.sponsorships_collection.totalSponsorships + 1
+          }
+        }
+      };
+    }
+    case SPONSOR_TIER_DELETED: {
+      const { sponsorshipId } = payload;
+      const newSponsorships =
+        state.entity.sponsorships_collection.sponsorships.filter(
+          (s) => s.id !== sponsorshipId
+        );
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: newSponsorships,
+            totalSponsorships:
+              state.entity.sponsorships_collection.totalSponsorships - 1
+          }
+        }
+      };
     }
     default:
       return state;

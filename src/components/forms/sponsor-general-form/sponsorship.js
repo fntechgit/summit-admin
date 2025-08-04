@@ -13,13 +13,18 @@
 
 import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, IconButton, Typography } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, Button, Grid2, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
 
-const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
+const Sponsorship = ({
+  sponsor,
+  summitId,
+  onSponsorshipPaginate,
+  onSponsorshipAdd,
+  onSponsorshipDelete
+}) => {
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
 
   const {
@@ -39,7 +44,9 @@ const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
     setShowAddTierPopup(true);
   };
 
-  const handleAddTierToSponsor = () => {};
+  const handleAddTierToSponsor = (sponsorships) => {
+    onSponsorshipAdd(sponsorships).then(() => setShowAddTierPopup(false));
+  };
 
   const handlePageChange = (page) => {
     onSponsorshipPaginate(page, perPage, order, orderDir);
@@ -139,6 +146,7 @@ const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
           orderField="order"
           perPage={perPage}
           currentPage={currentPage}
+          onDelete={onSponsorshipDelete}
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}
           onSort={handleSort}

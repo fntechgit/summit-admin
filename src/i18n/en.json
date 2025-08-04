@@ -2308,6 +2308,8 @@
     "remove_warning_extra_question": "Are you sure you want to delete extra question ",
     "remove_value_warning": "Are you sure you want to delete value ",
     "lead_report_settings": "Lead Report Settings",
+    "sponsorship_added": "Tier added successfully.",
+    "sponsorship_removed": "Tier removed successfully.",
     "tier": "Tier",
     "addons": "Add-ons",
     "manage_addons": "Manage Add-ons",

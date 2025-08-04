@@ -22,7 +22,9 @@ import {
   getSponsorMaterials,
   getSponsorSocialNetworks,
   getSponsorLeadReportSettingsMeta,
-  getSponsorTiers
+  getSponsorTiers,
+  addTierToSponsor,
+  removeTierFromSponsor
 } from "../../actions/sponsor-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 
@@ -56,7 +58,9 @@ const EditSponsorPage = (props) => {
     getSponsorMaterials,
     getSponsorSocialNetworks,
     getSponsorLeadReportSettingsMeta,
-    getSponsorTiers
+    getSponsorTiers,
+    addTierToSponsor,
+    removeTierFromSponsor
   } = props;
 
   const [selectedTab, setSelectedTab] = useState(0);
@@ -129,9 +133,11 @@ const EditSponsorPage = (props) => {
             sponsor={entity}
             summitId={currentSummit.id}
             onSponsorshipPaginate={handleSponsorshipPaginate}
+            onSponsorshipAdd={addTierToSponsor}
+            onSponsorshipDelete={removeTierFromSponsor}
           />
-        </CustomTabPanel>        
-      </Container>      
+        </CustomTabPanel>
+      </Container>
     </Box>
   );
 };
@@ -155,5 +161,7 @@ export default connect(mapStateToProps, {
   getSponsorMaterials,
   getSponsorSocialNetworks,
   getSponsorLeadReportSettingsMeta,
-  getSponsorTiers
+  getSponsorTiers,
+  addTierToSponsor,
+  removeTierFromSponsor
 })(EditSponsorPage);

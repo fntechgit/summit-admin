@@ -16,13 +16,21 @@ import { Box } from "@mui/material";
 import SponsorHeader from "./sponsor-header";
 import Sponsorship from "./sponsorship";
 
-const SponsorGeneralForm = ({ sponsor, summitId, onSponsorshipPaginate }) => (
+const SponsorGeneralForm = ({
+  sponsor,
+  summitId,
+  onSponsorshipPaginate,
+  onSponsorshipAdd,
+  onSponsorshipDelete
+}) => (
   <Box sx={{ mt: 2 }}>
     <SponsorHeader sponsor={sponsor} />
     <Sponsorship
       sponsor={sponsor}
       summitId={summitId}
       onSponsorshipPaginate={onSponsorshipPaginate}
+      onSponsorshipAdd={onSponsorshipAdd}
+      onSponsorshipDelete={onSponsorshipDelete}
     />
   </Box>
 );
