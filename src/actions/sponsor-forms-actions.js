@@ -41,8 +41,7 @@ export const RECEIVE_GLOBAL_TEMPLATES = "RECEIVE_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
 export const GLOBAL_TEMPLATE_CLONED = "GLOBAL_TEMPLATE_CLONED";
 export const TEMPLATE_FORM_CREATED = "TEMPLATE_FORM_CREATED";
-export const ADDITIONAL_FIELD_DELETED = "ADDITIONAL_FIELD_DELETED";
-export const ADDITIONAL_FIELD_VALUE_DELETED = "ADDITIONAL_FIELD_VALUE_DELETED";
+export const RESET_TEMPLATE_FORM = "RESET_TEMPLATE_FORM";
 
 export const getSponsorForms =
   (
@@ -116,6 +115,10 @@ export const getSponsorForm = (formId) => async (dispatch, getState) => {
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
+};
+
+export const resetFormTemplate = () => (dispatch) => {
+  dispatch(createAction(RESET_TEMPLATE_FORM)({}));
 };
 
 export const archiveSponsorForm = (formId) => async (dispatch) => {

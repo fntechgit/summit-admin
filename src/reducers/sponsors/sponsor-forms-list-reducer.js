@@ -19,6 +19,7 @@ import {
   RECEIVE_SPONSOR_FORMS,
   REQUEST_GLOBAL_TEMPLATES,
   REQUEST_SPONSOR_FORMS,
+  RESET_TEMPLATE_FORM,
   SPONSOR_FORM_ARCHIVED,
   SPONSOR_FORM_UNARCHIVED
 } from "../../actions/sponsor-forms-actions";
@@ -140,6 +141,9 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
       };
 
       return { ...state, formTemplate };
+    }
+    case RESET_TEMPLATE_FORM: {
+      return { ...state, formTemplate: DEFAULT_STATE.formTemplate };
     }
     case SPONSOR_FORM_ARCHIVED: {
       const { id: formId } = payload.response;

@@ -83,7 +83,7 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
 
   const handleAddValue = (index) => {
     const newValues = _.cloneDeep(field.value);
-    newValues[index].values.push({ value: "", isDefault: false });
+    newValues[index].values.push({ value: "", is_default: false });
     helpers.setValue(newValues);
   };
 

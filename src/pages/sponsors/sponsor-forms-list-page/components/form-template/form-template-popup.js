@@ -12,6 +12,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import {
   getSponsorships,
+  resetFormTemplate,
   saveFormTemplate,
   updateFormTemplate
 } from "../../../../../actions/sponsor-forms-actions";
@@ -25,6 +26,7 @@ const FormTemplatePopup = ({
   open,
   onClose,
   getSponsorships,
+  resetFormTemplate,
   saveFormTemplate,
   updateFormTemplate
 }) => {
@@ -33,6 +35,8 @@ const FormTemplatePopup = ({
   }, []);
 
   const handleClose = () => {
+    // clear form from reducer
+    resetFormTemplate();
     onClose();
   };
 
@@ -45,7 +49,7 @@ const FormTemplatePopup = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -53,7 +57,7 @@ const FormTemplatePopup = ({
         <Typography variant="h5">
           {T.translate("sponsor_forms.form_template_popup.title")}
         </Typography>
-        <IconButton size="large" sx={{ p: 0 }} onClick={() => handleClose()}>
+        <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>
@@ -80,6 +84,7 @@ const mapStateToProps = ({ sponsorFormsListState, currentSummitState }) => ({
 });
 
 export default connect(mapStateToProps, {
+  resetFormTemplate,
   saveFormTemplate,
   updateFormTemplate,
   getSponsorships
