@@ -122,21 +122,25 @@ export const resetFormTemplate = () => (dispatch) => {
   dispatch(createAction(RESET_TEMPLATE_FORM)({}));
 };
 
-export const archiveSponsorForm = (formId) => async (dispatch) => {
+export const archiveSponsorForm = (formId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
   const params = { access_token: accessToken };
 
   return putRequest(
     null,
     createAction(SPONSOR_FORM_ARCHIVED),
-    `${window.PURCHASES_API_URL}/api/v1/form-templates/${formId}/archive`,
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/archive`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch);
 };
 
-export const unarchiveSponsorForm = (formId) => async (dispatch) => {
+export const unarchiveSponsorForm = (formId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
   const params = { access_token: accessToken };
 
   dispatch(startLoading());
@@ -144,9 +148,9 @@ export const unarchiveSponsorForm = (formId) => async (dispatch) => {
   return deleteRequest(
     null,
     createAction(SPONSOR_FORM_UNARCHIVED)({ formId }),
-    `${window.PURCHASES_API_URL}/api/v1/form-templates/${formId}/archive`,
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/archive`,
     null,
-    authErrorHandler
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
