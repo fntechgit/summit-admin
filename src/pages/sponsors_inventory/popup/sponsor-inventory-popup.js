@@ -24,7 +24,8 @@ import { UploadInputV2 } from "openstack-uicore-foundation/lib/components";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
-  MAX_INVENTORY_IMAGES_UPLOAD_QTY
+  MAX_INVENTORY_IMAGES_UPLOAD_QTY,
+  METAFIELD_TYPES
 } from "../../../utils/constants";
 import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
@@ -43,17 +44,6 @@ const SponsorItemDialog = ({
   onMetaFieldTypeValueDeleted,
   entity: initialEntity
 }) => {
-  const METAFIELD_TYPES = [
-    "CheckBox",
-    "CheckBoxList",
-    "ComboBox",
-    "RadioButtonList",
-    "Text",
-    "TextArea",
-    "Quantity",
-    "DateTime",
-    "Time"
-  ];
 
   const formik = useFormik({
     initialValues: {

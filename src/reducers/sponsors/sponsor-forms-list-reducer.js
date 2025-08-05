@@ -15,9 +15,11 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_GLOBAL_SPONSORSHIPS,
   RECEIVE_GLOBAL_TEMPLATES,
+  RECEIVE_SPONSOR_FORM,
   RECEIVE_SPONSOR_FORMS,
   REQUEST_GLOBAL_TEMPLATES,
   REQUEST_SPONSOR_FORMS,
+  RESET_TEMPLATE_FORM,
   SPONSOR_FORM_ARCHIVED,
   SPONSOR_FORM_UNARCHIVED
 } from "../../actions/sponsor-forms-actions";
@@ -46,6 +48,22 @@ const DEFAULT_STATE = {
     currentPage: 0,
     lastPage: 0,
     total: 0
+  },
+  formTemplate: {
+    code: "",
+    name: "",
+    sponsorship_types: [],
+    opens_at: null,
+    expires_at: null,
+    instructions: "",
+    meta_fields: [
+      {
+        name: "",
+        type: "Text",
+        is_required: false,
+        values: []
+      }
+    ]
   }
 };
 
@@ -93,6 +111,39 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         totalCount: total,
         lastPage
       };
+    }
+    case RECEIVE_SPONSOR_FORM: {
+      const form = payload.response;
+
+      const sponsorshipTypeTds = form.apply_to_all_types
+        ? ["all"]
+        : [...form.sponsorship_types];
+
+      const formTemplate = {
+        id: form.id,
+        code: form.code,
+        name: form.name,
+        sponsorship_types: sponsorshipTypeTds,
+        opens_at: form.opens_at,
+        expires_at: form.expires_at,
+        instructions: form.instructions,
+        meta_fields:
+          form.meta_fields.length > 0
+            ? form.meta_fields
+            : [
+                {
+                  name: "",
+                  type: "Text",
+                  is_required: false,
+                  values: []
+                }
+              ]
+      };
+
+      return { ...state, formTemplate };
+    }
+    case RESET_TEMPLATE_FORM: {
+      return { ...state, formTemplate: DEFAULT_STATE.formTemplate };
     }
     case SPONSOR_FORM_ARCHIVED: {
       const { id: formId } = payload.response;

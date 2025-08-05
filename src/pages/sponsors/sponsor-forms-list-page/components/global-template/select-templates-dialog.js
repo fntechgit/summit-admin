@@ -16,10 +16,10 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import SearchInput from "../../../../components/mui/components/search-input";
-import { getGlobalTemplates } from "../../../../actions/sponsor-forms-actions";
-import { DEFAULT_PER_PAGE } from "../../../../utils/constants";
-import MuiInfiniteTable from "../../../../components/mui/infinite-table";
+import SearchInput from "../../../../../components/mui/components/search-input";
+import { getGlobalTemplates } from "../../../../../actions/sponsor-forms-actions";
+import { DEFAULT_PER_PAGE } from "../../../../../utils/constants";
+import MuiInfiniteTable from "../../../../../components/mui/infinite-table";
 
 const SelectTemplatesDialog = ({
   globalTemplates,

@@ -22,6 +22,7 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
+import moment from "moment-timezone";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -32,12 +33,15 @@ import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_SPONSOR_FORMS = "REQUEST_SPONSOR_FORMS";
 export const RECEIVE_SPONSOR_FORMS = "RECEIVE_SPONSOR_FORMS";
+export const RECEIVE_SPONSOR_FORM = "RECEIVE_SPONSOR_FORM";
 export const SPONSOR_FORM_ARCHIVED = "SPONSOR_FORM_ARCHIVED";
 export const SPONSOR_FORM_UNARCHIVED = "SPONSOR_FORM_UNARCHIVED";
 export const REQUEST_GLOBAL_TEMPLATES = "REQUEST_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_TEMPLATES = "RECEIVE_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
 export const GLOBAL_TEMPLATE_CLONED = "GLOBAL_TEMPLATE_CLONED";
+export const TEMPLATE_FORM_CREATED = "TEMPLATE_FORM_CREATED";
+export const RESET_TEMPLATE_FORM = "RESET_TEMPLATE_FORM";
 
 export const getSponsorForms =
   (
@@ -91,6 +95,31 @@ export const getSponsorForms =
       dispatch(stopLoading());
     });
   };
+
+export const getSponsorForm = (formId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SPONSOR_FORM),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const resetFormTemplate = () => (dispatch) => {
+  dispatch(createAction(RESET_TEMPLATE_FORM)({}));
+};
 
 export const archiveSponsorForm = (formId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
@@ -242,3 +271,100 @@ export const cloneGlobalTemplate =
       })
       .catch(() => {}); // need to catch promise reject
   };
+
+export const saveFormTemplate = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  const normalizedEntity = normalizeFormTemplate(
+    entity,
+    currentSummit.time_zone_id
+  );
+
+  return postRequest(
+    null,
+    createAction(TEMPLATE_FORM_CREATED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
+    normalizedEntity,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(getSponsorForms());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_forms.form_template_popup.created")
+        })
+      );
+    })
+    .catch(() => {}) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const updateFormTemplate = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  const normalizedEntity = normalizeFormTemplate(
+    entity,
+    currentSummit.time_zone_id
+  );
+
+  return putRequest(
+    null,
+    createAction(TEMPLATE_FORM_CREATED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${entity.id}`,
+    normalizedEntity,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(getSponsorForms());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_forms.form_template_popup.updated", {
+            formName: entity.name
+          })
+        })
+      );
+    })
+    .catch(() => {}) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+const normalizeFormTemplate = (entity, summitTZ) => {
+  const normalizedEntity = { ...entity };
+  const { opens_at, expires_at, sponsorship_types, meta_fields } = entity;
+
+  normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
+  normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
+  normalizedEntity.apply_to_all_types = false;
+  normalizedEntity.sponsorship_types = sponsorship_types;
+
+  if (sponsorship_types.includes("all")) {
+    normalizedEntity.apply_to_all_types = true;
+    delete normalizedEntity.sponsorship_types;
+  }
+
+  normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
+
+  return normalizedEntity;
+};
