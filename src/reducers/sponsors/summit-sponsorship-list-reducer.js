@@ -23,13 +23,13 @@ import {
 } from "../../actions/sponsor-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { DEFAULT_100_PER_PAGE } from "../../utils/constants";
+import { MAX_PER_PAGE } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   sponsorships: [],
   currentPage: 1,
   lastPage: 1,
-  perPage: DEFAULT_100_PER_PAGE,
+  perPage: MAX_PER_PAGE,
   order: "order",
   orderDir: 1,
   totalSponsorships: 0
