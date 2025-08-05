@@ -34,7 +34,7 @@ import { normalizeLeadReportSettings } from "../models/lead-report-settings";
 import history from "../history";
 import {
   DEBOUNCE_WAIT,
-  DEFAULT_100_PER_PAGE,
+  MAX_PER_PAGE,
   DEFAULT_PER_PAGE,
   HUNDRED_PER_PAGE
 } from "../utils/constants";
@@ -715,7 +715,7 @@ export const deleteSponsorExtraQuestionValue =
 /** ****************  SPONSORSHIPS *************************************** */
 
 export const getSummitSponsorships =
-  (page = 1, perPage = DEFAULT_100_PER_PAGE, order = "name", orderDir = 1) =>
+  (page = 1, perPage = MAX_PER_PAGE, order = "name", orderDir = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
