@@ -2236,7 +2236,10 @@
     "pages": "Pages",
     "order": "Order",
     "remove_warning": "Are you sure you want to delete sponsor ",
+    "sponsorships": "Tiers",
+    "sponsor_added": "Sponsor added successfully.",
     "placeholders": {
+      "select": "Select...",
       "lead_report_columns": "Select lead report columns to show",
       "search_sponsors": "Search by Sponsorship, Company, Size"
     }
