@@ -59,6 +59,12 @@ export const SPONSOR_TIER_ADDED = "SPONSOR_TIER_ADDED";
 export const SPONSOR_TIER_DELETED = "SPONSOR_TIER_DELETED";
 export const REQUEST_SPONSOR_SPONSORSHIPS = "REQUEST_SPONSOR_SPONSORSHIPS";
 export const RECEIVE_SPONSOR_SPONSORSHIPS = "RECEIVE_SPONSOR_SPONSORSHIPS";
+export const REQUEST_SPONSOR_SPONSORSHIPS_ADDONS =
+  "REQUEST_SPONSOR_SPONSORSHIPS_ADDONS";
+export const RECEIVE_SPONSOR_SPONSORSHIPS_ADDONS =
+  "RECEIVE_SPONSOR_SPONSORSHIPS_ADDONS";
+export const SPONSOR_SPONSORSHIPS_ADDON_ADDED =
+  "SPONSOR_SPONSORSHIPS_ADDON_ADDED";
 export const RECEIVE_SPONSOR_EXTRA_QUESTION_META =
   "RECEIVE_SPONSOR_EXTRA_QUESTION_META";
 export const SPONSOR_EXTRA_QUESTION_ORDER_UPDATED =
@@ -434,6 +440,82 @@ const normalizeTiersForSponsor = (entity) => {
 
   return normalizedEntity;
 };
+
+export const getSponsorshipAddons = (sponsorshipId) => async (dispatch) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: sponsorId }
+  } = currentSponsorState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  return getRequest(
+    createAction(REQUEST_SPONSOR_SPONSORSHIPS_ADDONS),
+    createAction(RECEIVE_SPONSOR_SPONSORSHIPS_ADDONS),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/addons`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const addAddonToSponsorship = (entity) => async (dispatch) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: sponsorId }
+  } = currentSponsorState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  return postRequest(
+    null,
+    createAction(SPONSOR_SPONSORSHIPS_ADDON_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/addons`,
+    entity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const removeAddonToSponsorship =
+  (sponsorshipId, addonId) => async (dispatch) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_SPONSORSHIPS_ADDON_DELETED)({ addonId }),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/addons/${addonId}`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 export const resetSponsorForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSOR_FORM)({}));
@@ -2066,6 +2148,24 @@ export const querySummitSponsorships = _.debounce(
         const options = [...json.data];
 
         callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);
+
+export const querySummitAddons = _.debounce(
+  async (input, summitId, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    fetch(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/add-ons/metadata?access_token=${accessToken}`
+    )
+      .then(fetchResponseHandler)
+      .then((data) => {
+        callback(data);
       })
       .catch(fetchErrorHandler);
   },

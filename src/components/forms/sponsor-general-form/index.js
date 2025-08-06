@@ -21,7 +21,10 @@ const SponsorGeneralForm = ({
   summitId,
   onSponsorshipPaginate,
   onSponsorshipAdd,
-  onSponsorshipDelete
+  onSponsorshipDelete,
+  getSponsorshipAddons,
+  onSponsorshipAddonAdd,
+  onSponsorshipAddonRemove
 }) => (
   <Box sx={{ mt: 2 }}>
     <SponsorHeader sponsor={sponsor} />
@@ -31,6 +34,9 @@ const SponsorGeneralForm = ({
       onSponsorshipPaginate={onSponsorshipPaginate}
       onSponsorshipAdd={onSponsorshipAdd}
       onSponsorshipDelete={onSponsorshipDelete}
+      getSponsorshipAddons={getSponsorshipAddons}
+      onSponsorshipAddonAdd={onSponsorshipAddonAdd}
+      onSponsorshipAddonRemove={onSponsorshipAddonRemove}
     />
   </Box>
 );

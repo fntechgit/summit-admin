@@ -2313,6 +2313,9 @@
     "tier": "Tier",
     "addons": "Add-ons",
     "manage_addons": "Manage Add-ons",
+    "addon_type": "Add-on Type",
+    "addon_name": "Add-on Name",
+    "save_changes": "Save Changes",
     "tab": {
       "general": "general",
       "users": "users",

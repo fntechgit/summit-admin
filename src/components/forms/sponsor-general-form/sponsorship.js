@@ -17,15 +17,21 @@ import { Box, Button, Grid2, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
+import ManageTierAddonsPopup from "./manage-tier-addons-popup";
 
 const Sponsorship = ({
   sponsor,
   summitId,
   onSponsorshipPaginate,
   onSponsorshipAdd,
-  onSponsorshipDelete
+  onSponsorshipDelete,
+  getSponsorshipAddons,
+  // onSponsorshipAddonAdd,
+  onSponsorshipAddonRemove
 }) => {
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
+  const [showManageTierAddonsPopup, setShowManageTierAddons] = useState(false);
+  const [selectedSponsorship, setSelectedSponsorship] = useState(null);
 
   const {
     sponsorships,
@@ -58,6 +64,20 @@ const Sponsorship = ({
     onSponsorshipPaginate(currentPage, perPage, key, dir);
   };
 
+  const handleOpenManageAddonsPopup = (sponsorship) => {
+    setSelectedSponsorship(sponsorship);
+    setShowManageTierAddons(true);
+  };
+
+  const handleCloseManageAddonsPopup = () => {
+    setShowManageTierAddons(false);
+    setSelectedSponsorship(null);
+  };
+
+  const handleAddSponsorshipAddon = (addons) => {
+    console.log("CHJECK addons", addons);
+  };
+
   const columns = [
     {
       columnKey: "tier",
@@ -83,7 +103,7 @@ const Sponsorship = ({
           variant="text"
           color="inherit"
           size="small"
-          onClick={() => handleManageItems(row)}
+          onClick={() => handleOpenManageAddonsPopup(row)}
           sx={{
             fontSize: "1.3rem",
             fontWeight: 500,
@@ -135,6 +155,18 @@ const Sponsorship = ({
           open={showAddTierPopup}
           onClose={handleCloseAddTierPopup}
           onSubmit={handleAddTierToSponsor}
+        />
+      )}
+
+      {showManageTierAddonsPopup && (
+        <ManageTierAddonsPopup
+          sponsorship={selectedSponsorship}
+          summitId={summitId}
+          open={showManageTierAddonsPopup}
+          getSponsorshipAddons={getSponsorshipAddons}
+          onSponsorshipAddonRemove={onSponsorshipAddonRemove}
+          onClose={handleCloseManageAddonsPopup}
+          onSubmit={handleAddSponsorshipAddon}
         />
       )}
 
