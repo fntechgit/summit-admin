@@ -485,7 +485,6 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case REQUEST_SPONSOR_SPONSORSHIPS: {
-      console.log("CHECK 1", payload);
       const { order, orderDir } = payload;
       return {
         ...state,
@@ -496,7 +495,8 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_SPONSOR_SPONSORSHIPS: {
-      const { current_page, per_page, total, last_page, data } = payload.response;
+      const { current_page, per_page, total, last_page, data } =
+        payload.response;
       let newSponsorships = [];
 
       if (data.length > 0) {

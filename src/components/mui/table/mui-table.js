@@ -159,148 +159,171 @@ const MuiTable = ({
             </TableHead>
 
             {/* TABLE BODY */}
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="mui-table-droppable">
-                {(droppableProvided) => (
-                  <TableBody
-                    ref={droppableProvided.innerRef}
-                    {...droppableProvided.droppableProps}
-                  >
-                    {data.map((row, rowIndex) => (
-                      <Draggable
-                        key={row[idKey] || rowIndex}
-                        draggableId={String(row[idKey] || rowIndex)}
-                        index={rowIndex}
-                      >
-                        {(provided, snapshot) => (
-                          <TableRow
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            sx={{
-                              ...(snapshot.isDragging
-                                ? {
-                                  display: "table",
-                                  width: "100%",
-                                  tableLayout: "fixed",
-                                  backgroundColor: "#f0f0f0",
-                                  transform: "scale(1.01)",
-                                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                                  zIndex: 1,
-                                  position: "relative",
-                                  transition:
-                                    "transform 0.2s ease, background-color 0.2s ease"
-                                }
-                                : {
-                                  transition: "background-color 0.2s ease"
-                                })
-                            }}
-                          >
-                            {/* Main content columns */}
-                            {columns.map((col) => (
-                              <TableCell
-                                key={col.columnKey}
-                                align={col.align ?? "left"}
-                                className={`${col.dottedBorder && styles.dottedBorderLeft
+            {onReorder ? (
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="mui-table-droppable">
+                  {(droppableProvided) => (
+                    <TableBody
+                      ref={droppableProvided.innerRef}
+                      {...droppableProvided.droppableProps}
+                    >
+                      {data.map((row, rowIndex) => (
+                        <Draggable
+                          key={row[idKey] || rowIndex}
+                          draggableId={String(row[idKey] || rowIndex)}
+                          index={rowIndex}
+                        >
+                          {(provided, snapshot) => (
+                            <TableRow
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              sx={{
+                                ...(snapshot.isDragging
+                                  ? {
+                                      display: "table",
+                                      width: "100%",
+                                      tableLayout: "fixed",
+                                      backgroundColor: "#f0f0f0",
+                                      transform: "scale(1.01)",
+                                      boxShadow:
+                                        "0 4px 12px rgba(0, 0, 0, 0.1)",
+                                      zIndex: 1,
+                                      position: "relative",
+                                      transition:
+                                        "transform 0.2s ease, background-color 0.2s ease"
+                                    }
+                                  : {
+                                      transition: "background-color 0.2s ease"
+                                    })
+                              }}
+                            >
+                              {/* Main content columns */}
+                              {columns.map((col) => (
+                                <TableCell
+                                  key={col.columnKey}
+                                  align={col.align ?? "left"}
+                                  className={`${
+                                    col.dottedBorder && styles.dottedBorderLeft
                                   } ${col.className}`}
-                              >
-                                {col.render?.(row) || row[col.columnKey]}
-                              </TableCell>
-                            ))}
-                            {/* Edit column */}
-                            {onEdit && (
-                              <TableCell
-                                align="center"
-                                sx={{ width: 40 }}
-                                className={styles.dottedBorderLeft}
-                              >
-                                <IconButton
-                                  size="large"
-                                  onClick={() => onEdit(row)}
                                 >
-                                  <EditIcon fontSize="large" />
-                                </IconButton>
-                              </TableCell>
-                            )}
-                            {/* Delete column */}
-                            {onDelete && (
-                              <TableCell
-                                align="center"
-                                sx={{ width: 40 }}
-                                className={styles.dottedBorderLeft}
-                              >
-                                <IconButton
-                                  size="large"
-                                  onClick={() => handleDelete(row)}
+                                  {col.render?.(row) || row[col.columnKey]}
+                                </TableCell>
+                              ))}
+                              {/* Edit column */}
+                              {onEdit && (
+                                <TableCell
+                                  align="center"
+                                  sx={{ width: 40 }}
+                                  className={styles.dottedBorderLeft}
                                 >
-                                  <DeleteIcon fontSize="large" />
-                                </IconButton>
-                              </TableCell>
-                            )}
-                            {/* Re order column */}
-                            {onReorder && (
-                              <TableCell
-                                align="center"
-                                sx={{ width: 40 }}
-                                className={styles.dottedBorderLeft}
-                                {...provided.dragHandleProps}
-                              >
-                                <IconButton size="large">
-                                  <UnfoldMoreIcon fontSize="large" />
-                                </IconButton>
-                              </TableCell>
-                            )}
-                          </TableRow>
-                        )}
-                      </Draggable>
-                    ))}
-                    {droppableProvided.placeholder}
-                    {data.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} align="center">
-                          {T.translate("mui_table.no_items")}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                )}
-              </Droppable>
-            </DragDropContext>
+                                  <IconButton
+                                    size="large"
+                                    onClick={() => onEdit(row)}
+                                  >
+                                    <EditIcon fontSize="large" />
+                                  </IconButton>
+                                </TableCell>
+                              )}
+                              {/* Delete column */}
+                              {onDelete && (
+                                <TableCell
+                                  align="center"
+                                  sx={{ width: 40 }}
+                                  className={styles.dottedBorderLeft}
+                                >
+                                  <IconButton
+                                    size="large"
+                                    onClick={() => handleDelete(row)}
+                                  >
+                                    <DeleteIcon fontSize="large" />
+                                  </IconButton>
+                                </TableCell>
+                              )}
+                              {/* Re order column */}
+                              {onReorder && (
+                                <TableCell
+                                  align="center"
+                                  sx={{ width: 40 }}
+                                  className={styles.dottedBorderLeft}
+                                  {...provided.dragHandleProps}
+                                >
+                                  <IconButton size="large">
+                                    <UnfoldMoreIcon fontSize="large" />
+                                  </IconButton>
+                                </TableCell>
+                              )}
+                            </TableRow>
+                          )}
+                        </Draggable>
+                      ))}
+                      {droppableProvided.placeholder}
+                      {data.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={columns.length} align="center">
+                            {T.translate("mui_table.no_items")}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  )}
+                </Droppable>
+              </DragDropContext>
             ) : (
-            <TableBody>
-              {data.map((row, rowIndex) => (
-                <TableRow key={row[idKey] || rowIndex}>
-                  {/* Main content columns */}
-                  {columns.map((col) => {
-                    const cellContent = col.render
-                      ? col.render(row, { onRowEdit })
-                      : row[col.columnKey];
-
-                    const cellClassName = col.className
-                      ? styles[col.className] || col.className
-                      : "";
-
-                    return (
+              <TableBody>
+                {data.map((row, rowIndex) => (
+                  <TableRow key={row[idKey] || rowIndex}>
+                    {/* Main content columns */}
+                    {/* Main content columns */}
+                    {columns.map((col) => (
                       <TableCell
                         key={col.columnKey}
                         align={col.align ?? "left"}
-                        className={cellClassName}
+                        className={`${
+                          col.dottedBorder && styles.dottedBorderLeft
+                        } ${col.className}`}
                       >
-                        {cellContent}
+                        {col.render?.(row) || row[col.columnKey]}
                       </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))}
+                    ))}
+                    {/* Edit column */}
+                    {onEdit && (
+                      <TableCell
+                        align="center"
+                        sx={{ width: 40 }}
+                        className={styles.dottedBorderLeft}
+                      >
+                        <IconButton size="large" onClick={() => onEdit(row)}>
+                          <EditIcon fontSize="large" />
+                        </IconButton>
+                      </TableCell>
+                    )}
+                    {/* Delete column */}
+                    {onDelete && (
+                      <TableCell
+                        align="center"
+                        sx={{ width: 40 }}
+                        className={styles.dottedBorderLeft}
+                      >
+                        <IconButton
+                          size="large"
+                          onClick={() => handleDelete(row)}
+                        >
+                          <DeleteIcon fontSize="large" />
+                        </IconButton>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
 
-              {data.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} align="center">
-                    {T.translate("mui_table.no_items")}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-            )
+                {data.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} align="center">
+                      {T.translate("mui_table.no_items")}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            )}
           </Table>
         </TableContainer>
 

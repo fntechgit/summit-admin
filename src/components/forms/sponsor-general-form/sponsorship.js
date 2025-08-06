@@ -13,8 +13,7 @@
 
 import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, IconButton, Typography } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, Button, Grid2, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
@@ -86,18 +85,6 @@ const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
         >
           {T.translate("edit_sponsor.manage_addons")}
         </Button>
-      ),
-      className: "dottedBorderLeft"
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row, { onRowEdit }) => (
-        <IconButton size="small" onClick={() => onRowEdit(row)}>
-          <DeleteIcon fontSize="small" />
-        </IconButton>
       ),
       className: "dottedBorderLeft"
     }
