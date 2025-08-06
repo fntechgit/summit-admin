@@ -27,7 +27,6 @@ import {
   getSponsors,
   addSponsorToSummit,
   deleteSponsor,
-  getSponsors,
   updateSponsorOrder
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
