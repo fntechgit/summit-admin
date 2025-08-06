@@ -39,6 +39,7 @@
     "clear": "Clear",
     "scan": "Scan",
     "remove": "Remove",
+    "row_remove_warning": "Are you sure you want to delete item ",
     "delete": "Delete",
     "clone": "Clone",
     "new": "New",

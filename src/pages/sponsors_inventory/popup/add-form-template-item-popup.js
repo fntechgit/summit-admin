@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import {
+  Box,
+  Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  TextField,
-  Checkbox,
-  FormControlLabel,
-  Box,
-  IconButton,
   Divider,
+  FormControlLabel,
   Grid2,
+  IconButton,
+  TextField,
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
@@ -90,7 +90,7 @@ const AddFormTemplateItemDialog = ({
     clearAllSelectedInventoryItems();
   };
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
     sortDir: orderDir
   };
@@ -243,7 +243,7 @@ const AddFormTemplateItemDialog = ({
             <MuiTable
               columns={columns}
               data={inventoryItems}
-              options={table_options}
+              options={tableOptions}
               currentPage={currentPage}
               perPage={perPage}
               onSort={handleSort}

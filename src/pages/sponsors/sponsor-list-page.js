@@ -11,26 +11,23 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
 import { Button, Grid2, TextField } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import IconButton from "@mui/material/IconButton";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  getSummitById,
   getLeadReportSettingsMeta,
+  getSummitById,
   upsertLeadReportSettings
 } from "../../actions/summit-actions";
 import {
   getSponsors,
   addSponsorToSummit,
   deleteSponsor,
+  getSponsors,
   updateSponsorOrder
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
@@ -72,27 +69,12 @@ const SponsorListPage = ({
 
   useEffect(() => handleSearchDebounced.cancel(), [handleSearchDebounced]);
 
-  const handleEdit = (sponsor_id) => {
-    history.push(`/app/summits/${currentSummit.id}/sponsors/${sponsor_id}`);
+  const handleEdit = (sponsor) => {
+    history.push(`/app/summits/${currentSummit.id}/sponsors/${sponsor.id}`);
   };
 
   const handleDelete = (sponsorId) => {
-    const sponsor = sponsors.find((s) => s.id === sponsorId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("sponsor_list.remove_warning")} ${
-        sponsor.company_name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteSponsor(sponsorId);
-      }
-    });
+    deleteSponsor(sponsorId);
   };
 
   const handleNewSponsor = (sponsor) => {
@@ -150,49 +132,8 @@ const SponsorListPage = ({
       columnKey: "pages",
       header: T.translate("sponsor_list.pages"),
       render: (row) => `${row.pages?.length || 0}`
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row) => (
-        <IconButton
-          size="small"
-          onClick={() => handleEdit(row.id)}
-          key={`edit-${row.id}`}
-        >
-          <EditIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
-    },
-    {
-      columnKey: "delete",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row) => (
-        <IconButton size="small" onClick={() => handleDelete(row.id)}>
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
     }
   ];
-
-  const table_options = {
-    actions: {
-      edit: { onClick: handleEdit }
-    }
-  };
-
-  if (canDeleteSponsors) {
-    table_options.actions = {
-      ...table_options.actions,
-      delete: { onClick: handleDelete }
-    };
-  }
 
   if (!currentSummit.id) return <div />;
 
@@ -275,15 +216,14 @@ const SponsorListPage = ({
       {sponsors.length > 0 && (
         <div>
           <MuiTable
-            options={table_options}
             data={sortedSponsors}
             columns={columns}
             totalRows={totalSponsors}
-            // dropCallback={this.props.updateSponsorOrder}
-            // orderField="order"
             perPage={perPage}
             currentPage={currentPage}
-            onRowEdit={handleEdit}
+            getName={(item) => item.company_name}
+            onEdit={handleEdit}
+            onDelete={canDeleteSponsors ? handleDelete : null}
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}

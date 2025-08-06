@@ -12,16 +12,19 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { IconButton } from "@mui/material";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { visuallyHidden } from "@mui/utils";
 
 import styles from "./mui-table.module.less";
 
 import {
   DEFAULT_PER_PAGE,
-  TWENTY_PER_PAGE,
-  FIFTY_PER_PAGE
+  FIFTY_PER_PAGE,
+  TWENTY_PER_PAGE
 } from "../../../utils/constants";
+import showConfirmDialog from "../components/showConfirmDialog";
 
 const MuiTable = ({
   columns = [],
@@ -29,11 +32,13 @@ const MuiTable = ({
   totalRows,
   perPage,
   currentPage,
-  onRowEdit,
   onPageChange,
   onPerPageChange,
   onSort,
   options = { sortCol: "", sortDir: "" },
+  getName = (item) => item.name,
+  onEdit,
+  onDelete,
   onReorder,
   idKey = "id",
   updateOrderKey = "order"
@@ -79,6 +84,21 @@ const MuiTable = ({
     )?.[updateOrderKey];
 
     onReorder?.(reordered, movedItemId, newOrder);
+  };
+
+  const handleDelete = async (item) => {
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("general.row_remove_warning")} ${getName(item)}`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    });
+
+    if (isConfirmed) {
+      onDelete(item.id);
+    }
   };
 
   return (
@@ -128,6 +148,8 @@ const MuiTable = ({
                     )}
                   </TableCell>
                 ))}
+                {onEdit && <TableCell sx={{ width: 40 }} />}
+                {onDelete && <TableCell sx={{ width: 40 }} />}
                 {onReorder && <TableCell sx={{ width: 40 }} />}
               </TableRow>
             </TableHead>
@@ -170,26 +192,47 @@ const MuiTable = ({
                             }}
                           >
                             {/* Main content columns */}
-                            {columns.map((col) => {
-                              const cellContent = col.render
-                                ? col.render(row, { onRowEdit })
-                                : row[col.columnKey];
-
-                              const cellClassName = col.className
-                                ? styles[col.className] || col.className
-                                : "";
-
-                              return (
-                                <TableCell
-                                  key={col.columnKey}
-                                  align={col.align ?? "left"}
-                                  className={cellClassName}
+                            {columns.map((col) => (
+                              <TableCell
+                                key={col.columnKey}
+                                align={col.align ?? "left"}
+                                className={`${
+                                  col.dottedBorder && styles.dottedBorderLeft
+                                } ${col.className}`}
+                              >
+                                {col.render?.(row) || row[col.columnKey]}
+                              </TableCell>
+                            ))}
+                            {/* Edit column */}
+                            {onEdit && (
+                              <TableCell
+                                align="center"
+                                sx={{ width: 40 }}
+                                className={styles.dottedBorderLeft}
+                              >
+                                <IconButton
+                                  size="large"
+                                  onClick={() => onEdit(row)}
                                 >
-                                  {cellContent}
-                                </TableCell>
-                              );
-                            })}
-
+                                  <EditIcon fontSize="large" />
+                                </IconButton>
+                              </TableCell>
+                            )}
+                            {/* Delete column */}
+                            {onDelete && (
+                              <TableCell
+                                align="center"
+                                sx={{ width: 40 }}
+                                className={styles.dottedBorderLeft}
+                              >
+                                <IconButton
+                                  size="large"
+                                  onClick={() => handleDelete(row)}
+                                >
+                                  <DeleteIcon fontSize="large" />
+                                </IconButton>
+                              </TableCell>
+                            )}
                             {/* Re order column */}
                             {onReorder && (
                               <TableCell
@@ -198,8 +241,8 @@ const MuiTable = ({
                                 className={styles.dottedBorderLeft}
                                 {...provided.dragHandleProps}
                               >
-                                <IconButton size="small">
-                                  <UnfoldMoreIcon fontSize="small" />
+                                <IconButton size="large">
+                                  <UnfoldMoreIcon fontSize="large" />
                                 </IconButton>
                               </TableCell>
                             )}
