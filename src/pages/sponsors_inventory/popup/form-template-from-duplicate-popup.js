@@ -2,18 +2,18 @@ import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import {
+  Box,
+  Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  TextField,
-  Checkbox,
-  FormControlLabel,
-  Box,
-  IconButton,
   Divider,
+  FormControlLabel,
   Grid2,
+  IconButton,
+  TextField,
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";

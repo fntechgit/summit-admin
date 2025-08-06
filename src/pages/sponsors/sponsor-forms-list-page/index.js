@@ -21,11 +21,9 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2,
-  IconButton
+  Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
 import history from "../../../history";
 import {
   archiveSponsorForm,
@@ -125,19 +123,8 @@ const SponsorFormsListPage = ({
         >
           Manage Items
         </Button>
-      )
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row, { onRowEdit }) => (
-        <IconButton size="small" onClick={() => onRowEdit(row)}>
-          <EditIcon fontSize="small" />
-        </IconButton>
       ),
-      className: "dottedBorderLeft"
+      dottedBorder: true
     },
     {
       columnKey: "archive",
@@ -156,7 +143,7 @@ const SponsorFormsListPage = ({
             : T.translate("inventory_item_list.archive_button")}
         </Button>
       ),
-      className: "dottedBorderLeft"
+      dottedBorder: true
     }
   ];
 
@@ -246,7 +233,8 @@ const SponsorFormsListPage = ({
             perPage={perPage}
             totalRows={totalCount}
             currentPage={currentPage}
-            onRowEdit={handleRowEdit}
+            onEdit={handleRowEdit}
+            onDelete={console.log}
             onPageChange={handlePageChange}
             onSort={handleSort}
           />

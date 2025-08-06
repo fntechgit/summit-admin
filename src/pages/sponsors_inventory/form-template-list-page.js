@@ -24,20 +24,18 @@ import {
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import EditIcon from "@mui/icons-material/Edit";
-import IconButton from "@mui/material/IconButton";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
-  getFormTemplates,
-  deleteFormTemplate,
-  getFormTemplate,
-  saveFormTemplate,
-  deleteFormTemplateMaterial,
-  deleteFormTemplateMetaFieldTypeValue,
-  deleteFormTemplateMetaFieldType,
-  resetFormTemplateForm,
   archiveFormTemplate,
+  deleteFormTemplate,
+  deleteFormTemplateMaterial,
+  deleteFormTemplateMetaFieldType,
+  deleteFormTemplateMetaFieldTypeValue,
+  getFormTemplate,
+  getFormTemplates,
+  resetFormTemplateForm,
+  saveFormTemplate,
   unarchiveFormTemplate
 } from "../../actions/form-template-actions";
 import MuiTable from "../../components/mui/table/mui-table";
@@ -175,19 +173,8 @@ const FormTemplateListPage = ({
         >
           Manage Items
         </Button>
-      )
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row, { onRowEdit }) => (
-        <IconButton size="small" onClick={() => onRowEdit(row)}>
-          <EditIcon fontSize="small" />
-        </IconButton>
       ),
-      className: "dottedBorderLeft"
+      dottedBorder: true
     },
     {
       columnKey: "archive",
@@ -212,11 +199,11 @@ const FormTemplateListPage = ({
             : T.translate("inventory_item_list.archive_button")}
         </Button>
       ),
-      className: "dottedBorderLeft"
+      dottedBorder: true
     }
   ];
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
     sortDir: orderDir
   };
@@ -325,11 +312,11 @@ const FormTemplateListPage = ({
           <MuiTable
             columns={columns}
             data={formTemplates}
-            options={table_options}
+            options={tableOptions}
             perPage={perPage}
             currentPage={currentPage}
             totalRows={totalFormTemplates}
-            onRowEdit={handleRowEdit}
+            onEdit={handleRowEdit}
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
@@ -349,7 +336,7 @@ const FormTemplateListPage = ({
       />
       <FormTemplateFromDuplicateDialog
         open={formTemplateFromDuplicatePopupOpen}
-        options={table_options}
+        options={tableOptions}
         onClose={handleDuplicatePopupClose}
         onDuplicate={handleDuplicateForm}
         onSearch={handleSearch}

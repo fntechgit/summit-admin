@@ -27,7 +27,6 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import Tooltip from "@mui/material/Tooltip";
-import EditIcon from "@mui/icons-material/Edit";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "../../components/mui/table/mui-table";
 import {
@@ -174,18 +173,6 @@ const FormTemplateItemListPage = ({
         ) : null
     },
     {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row, { onRowEdit }) => (
-        <IconButton size="small" onClick={() => onRowEdit(row)}>
-          <EditIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
-    },
-    {
       columnKey: "archive",
       header: "",
       width: 70,
@@ -195,7 +182,7 @@ const FormTemplateItemListPage = ({
           {T.translate("form_template_item_list.archive_button")}
         </Button>
       ),
-      className: "dottedBorderLeft"
+      dottedBorder: true
     },
     {
       columnKey: "more",
@@ -207,11 +194,11 @@ const FormTemplateItemListPage = ({
           <UnfoldMoreIcon fontSize="small" />
         </IconButton>
       ),
-      className: "dottedBorderLeft"
+      dottedBorder: true
     }
   ];
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
     sortDir: orderDir
   };
@@ -287,10 +274,10 @@ const FormTemplateItemListPage = ({
           <MuiTable
             columns={columns}
             data={formTemplateItems}
-            options={table_options}
+            options={tableOptions}
             perPage={perPage}
             currentPage={currentPage}
-            onRowEdit={handleRowEdit}
+            onEdit={handleRowEdit}
             onPageChange={handlePageChange}
             onSort={handleSort}
           />

@@ -26,20 +26,19 @@ import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import EditIcon from "@mui/icons-material/Edit";
 import ImageIcon from "@mui/icons-material/Image";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
-  getInventoryItems,
-  getInventoryItem,
-  saveInventoryItem,
+  archiveInventoryItem,
   deleteInventoryItem,
   deleteInventoryItemImage,
-  resetInventoryItemForm,
   deleteInventoryItemMetaFieldType,
   deleteInventoryItemMetaFieldTypeValue,
-  archiveInventoryItem,
+  getInventoryItem,
+  getInventoryItems,
+  resetInventoryItemForm,
+  saveInventoryItem,
   unarchiveInventoryItem
 } from "../../actions/inventory-item-actions";
 import MuiTable from "../../components/mui/table/mui-table";
@@ -150,18 +149,6 @@ const InventoryListPage = ({
         ) : null
     },
     {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row, { onRowEdit }) => (
-        <IconButton size="small" onClick={() => onRowEdit(row)}>
-          <EditIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
-    },
-    {
       columnKey: "archive",
       header: "",
       width: 70,
@@ -184,7 +171,7 @@ const InventoryListPage = ({
             : T.translate("inventory_item_list.archive_button")}
         </Button>
       ),
-      className: "dottedBorderLeft"
+      dottedBorder: true
     },
     {
       columnKey: "more",
@@ -196,11 +183,11 @@ const InventoryListPage = ({
           <UnfoldMoreIcon fontSize="small" />
         </IconButton>
       ),
-      className: "dottedBorderLeft"
+      dottedBorder: true
     }
   ];
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
     sortDir: orderDir
   };
@@ -300,11 +287,11 @@ const InventoryListPage = ({
           <MuiTable
             columns={columns}
             data={inventoryItems}
-            options={table_options}
+            options={tableOptions}
             perPage={perPage}
             currentPage={currentPage}
             totalRows={totalInventoryItems}
-            onRowEdit={handleRowEdit}
+            onEdit={handleRowEdit}
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
