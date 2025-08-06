@@ -23,11 +23,14 @@ import {
   showMessage,
   showSuccessMessage,
   authErrorHandler,
-  escapeFilterValue
+  escapeFilterValue,
+  fetchResponseHandler,
+  fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
+  DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
@@ -262,3 +265,20 @@ const normalizeEntity = (entity) => {
 
   return normalizedEntity;
 };
+
+export const queryCompanies = _.debounce(async (input, callback) => {
+  const accessToken = await getAccessTokenSafely();
+
+  input = escapeFilterValue(input);
+
+  fetch(
+    `${window.API_BASE_URL}/api/v1/companies?filter=name=@${input}&access_token=${accessToken}&fields=id,name&relations=none`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data];
+
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);
