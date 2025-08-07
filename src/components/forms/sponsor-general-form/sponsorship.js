@@ -26,7 +26,8 @@ const Sponsorship = ({
   onSponsorshipAdd,
   onSponsorshipDelete,
   getSponsorshipAddons,
-  // onSponsorshipAddonAdd,
+  onSponsorshipSelect,
+  onSponsorshipAddonSave,
   onSponsorshipAddonRemove
 }) => {
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
@@ -66,16 +67,20 @@ const Sponsorship = ({
 
   const handleOpenManageAddonsPopup = (sponsorship) => {
     setSelectedSponsorship(sponsorship);
+    onSponsorshipSelect(sponsorship);
     setShowManageTierAddons(true);
   };
 
   const handleCloseManageAddonsPopup = () => {
     setShowManageTierAddons(false);
+    onSponsorshipSelect(null);
     setSelectedSponsorship(null);
   };
 
-  const handleAddSponsorshipAddon = (addons) => {
-    console.log("CHJECK addons", addons);
+  const handleAddSponsorshipAddon = (addons, sponsorshipId) => {
+    onSponsorshipAddonSave(addons, sponsorshipId).then(() =>
+      setShowManageTierAddons(false)
+    );
   };
 
   const columns = [
@@ -85,12 +90,12 @@ const Sponsorship = ({
       sortable: true
     },
     {
-      columnKey: "addons",
+      columnKey: "add_ons",
       header: T.translate("edit_sponsor.addons"),
       sortable: true,
       render: (row) =>
         row.add_ons.length > 0
-          ? row.add_ons.map((a) => a.map).split(", ")
+          ? row.add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
           : "None"
     },
     {
@@ -116,7 +121,7 @@ const Sponsorship = ({
       ),
       className: "dottedBorderLeft"
     }
-  ];  
+  ];
 
   return (
     <>

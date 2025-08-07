@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { MenuItem, CircularProgress, Select, Box } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PropTypes from "prop-types";
@@ -15,36 +15,29 @@ const getCustomIcon = (loading) => {
   return Icon;
 };
 
-const SummitAddonSelect = ({
-  name,
-  summitId,
-  placeholder = "Select...",
-  hiddenOptions = []
-}) => {
+const SummitAddonSelect = ({ name, summitId, placeholder = "Select..." }) => {
   const [field, meta, helpers] = useField(name);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hasOptions, setHasOptions] = useState(false);
 
   const value = field.value || "";
   const error = meta.touched && meta.error;
 
   const fetchOptions = async () => {
+    if (hasOptions || loading) return;
+
     setLoading(true);
     await querySummitAddons("", summitId, (results) => {
-      const normalized = results
-        .filter((r) => !hiddenOptions.includes(r))
-        .map((r) => ({
-          value: r,
-          label: r
-        }));
+      const normalized = results.map((r) => ({
+        value: r,
+        label: r
+      }));
       setOptions(normalized);
+      setHasOptions(true);
       setLoading(false);
     });
   };
-
-  useEffect(() => {
-    fetchOptions();
-  }, []);
 
   const handleChange = (event) => {
     helpers.setValue(event.target.value);
@@ -60,12 +53,14 @@ const SummitAddonSelect = ({
         onChange={handleChange}
         displayEmpty
         IconComponent={IconWithLoading}
+        onOpen={fetchOptions}
         error={Boolean(error)}
         renderValue={(selected) => {
           if (!selected) {
             return <span style={{ color: "#aaa" }}>{placeholder}</span>;
           }
-          return options.find((opt) => opt.value === selected)?.label || "";
+          const match = options.find((opt) => opt.value === selected);
+          return match ? match.label : selected;
         }}
       >
         {loading ? (
@@ -98,8 +93,7 @@ const SummitAddonSelect = ({
 SummitAddonSelect.propTypes = {
   name: PropTypes.string.isRequired,
   summitId: PropTypes.number.isRequired,
-  placeholder: PropTypes.string,
-  hiddenOptions: PropTypes.array
+  placeholder: PropTypes.string
 };
 
 export default SummitAddonSelect;

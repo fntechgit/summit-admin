@@ -23,7 +23,8 @@ const SponsorGeneralForm = ({
   onSponsorshipAdd,
   onSponsorshipDelete,
   getSponsorshipAddons,
-  onSponsorshipAddonAdd,
+  onSponsorshipSelect,
+  onSponsorshipAddonSave,
   onSponsorshipAddonRemove
 }) => (
   <Box sx={{ mt: 2 }}>
@@ -35,7 +36,8 @@ const SponsorGeneralForm = ({
       onSponsorshipAdd={onSponsorshipAdd}
       onSponsorshipDelete={onSponsorshipDelete}
       getSponsorshipAddons={getSponsorshipAddons}
-      onSponsorshipAddonAdd={onSponsorshipAddonAdd}
+      onSponsorshipSelect={onSponsorshipSelect}
+      onSponsorshipAddonSave={onSponsorshipAddonSave}
       onSponsorshipAddonRemove={onSponsorshipAddonRemove}
     />
   </Box>

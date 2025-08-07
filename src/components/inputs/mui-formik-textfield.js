@@ -11,6 +11,7 @@ const MuiFormikTextField = ({ name, label, ...props }) => {
       name={name}
       label={label}
       {...field}
+      onBlur={field.onBlur}
       margin="normal"
       error={meta.touched && Boolean(meta.error)}
       helperText={meta.touched && meta.error}

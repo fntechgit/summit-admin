@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
@@ -31,14 +31,15 @@ const ManageTierAddonsPopup = ({
   open,
   onClose,
   onSubmit,
-  summitId
+  summitId,
+  onSponsorshipAddonRemove
 }) => {
   const [editingRow, setEditingRow] = useState(null);
-  const originalAddons = sponsorship.addons || [];
+  const originalAddons = sponsorship.add_ons || [];
 
   const formik = useFormik({
     initialValues: {
-      addons: originalAddons.map((a) => ({ ...a })),
+      addons: originalAddons,
       newAddon: { type: "", name: "" }
     },
     validationSchema: yup.object({
@@ -46,13 +47,75 @@ const ManageTierAddonsPopup = ({
         .array()
         .of(
           yup.object().shape({
-            type: yup.number().required("Type is required"),
-            name: yup.string().required()
+            type: yup.string().required("Type is required"),
+            name: yup.string().required("Name is required")
           })
         )
-        .min(1, "At least one addon is required")
+        .test(
+          "no-duplicate-addon",
+          "Addon with same type and name already exists",
+          (addons = []) => {
+            const { newAddon } = formik.values;
+            const all = [...addons];
+
+            if (newAddon?.type && newAddon?.name) {
+              all.push({ type: newAddon.type, name: newAddon.name });
+            }
+
+            const seen = new Set();
+
+            const isValid = all.every((addon) => {
+              const key = `${addon.type?.trim()}${addon.name?.trim()}`;
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
+            return isValid;
+          }
+        ),
+      newAddon: yup
+        .object()
+        .shape({
+          type: yup.string(),
+          name: yup.string()
+        })
+        .test(
+          "newAddon-required-if-any-filled",
+          "Both type and name are required",
+          (value) => {
+            if (!value) return true;
+            const { type, name } = value;
+
+            const oneIsFilled = type?.trim() || name?.trim();
+            const bothAreFilled = type?.trim() && name?.trim();
+
+            return !oneIsFilled || bothAreFilled;
+          }
+        )
     }),
-    onSubmit,
+    onSubmit: (values) => {
+      const { newAddon, addons: currentAddons } = values;
+      const initialAddons = formik.initialValues.addons;
+
+      const isAddonModified = (addon, original) =>
+        addon.type !== original.type || addon.name !== original.name;
+
+      // only send edited addons
+      const modifiedAddons = currentAddons.filter((addon, index) => {
+        const original = initialAddons[index];
+        return !original || isAddonModified(addon, original);
+      });
+
+      const shouldIncludeNewAddon =
+        newAddon.type?.trim() && newAddon.name?.trim();
+
+      const valuesToSave = {
+        ...(modifiedAddons.length > 0 && { addons: modifiedAddons }),
+        ...(shouldIncludeNewAddon && { newAddon })
+      };
+
+      onSubmit(valuesToSave, sponsorship.id);
+    },
     enableReinitialize: true
   });
 
@@ -76,6 +139,32 @@ const ManageTierAddonsPopup = ({
   const handleEditAddon = (index) => {
     setEditingRow(index);
   };
+
+  const handleDeleteAddon = async (addon) => {
+    if (addon.id) {
+      try {
+        await onSponsorshipAddonRemove(addon.id, sponsorship.id);
+      } catch (error) {
+        console.error("Error deleting addon:", error);
+        return;
+      }
+    }
+
+    const updated = formik.values.addons.filter((a) => a !== addon);
+    formik.setFieldValue("addons", updated);
+  };
+
+  useEffect(() => {
+    if (Object.keys(formik.errors).length > 0) {
+      console.log("Validation errors:", formik.errors);
+    }
+  }, [formik.errors]);
+
+  useEffect(() => {
+    if (Object.keys(formik.values).length > 0) {
+      console.log("Validation values:", formik.values);
+    }
+  }, [formik.values]);
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -109,6 +198,7 @@ const ManageTierAddonsPopup = ({
             </Typography>
             {formik.values.addons.map((addon, index) => (
               <Grid2
+                key={addon?.id || index}
                 container
                 spacing={3}
                 size={12}
@@ -132,8 +222,7 @@ const ManageTierAddonsPopup = ({
                   {editingRow === index ? (
                     <Box width="100%">
                       <SummitAddonSelect
-                        name="type"
-                        formik={formik.values.addons[index]}
+                        name={`addons[${index}].type`}
                         fullWidth
                         placeholder={T.translate(
                           "edit_sponsor.placeholders.select"
@@ -158,9 +247,7 @@ const ManageTierAddonsPopup = ({
                   </InputLabel>
                   {editingRow === index ? (
                     <MuiFormikTextField
-                      name="name"
-                      formik={formik.values.addons[index]}
-                      disabled
+                      name={`addons[${index}].name`}
                       fullWidth
                       margin="none"
                       placeholder={T.translate("edit_sponsor.name")}
@@ -170,24 +257,7 @@ const ManageTierAddonsPopup = ({
                   )}
                 </Grid2>
                 <Grid2 container size={2} spacing={2} sx={{ display: "flex" }}>
-                  {editingRow === index ? (
-                    <Button
-                      variant="contained"
-                      aria-label="add"
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        minWidth: "auto",
-                        borderRadius: "50%",
-                        padding: 0,
-                        alignSelf: "end",
-                        mb: "10px"
-                      }}
-                      onClick={() => handleAddAddon}
-                    >
-                      <AddIcon />
-                    </Button>
-                  ) : (
+                  {editingRow !== index && (
                     <>
                       <Grid2
                         className="dottedBorderLeft"
@@ -218,6 +288,14 @@ const ManageTierAddonsPopup = ({
                 </Grid2>
               </Grid2>
             ))}
+            {!formik.errors.addons &&
+              typeof formik.errors.addons === "string" && (
+                <Box mb={2} pl={2}>
+                  <Typography color="error" sx={{ fontSize: "12px" }}>
+                    {formik.errors.addons}
+                  </Typography>
+                </Box>
+              )}
             <Grid2
               container
               spacing={3}
@@ -285,6 +363,14 @@ const ManageTierAddonsPopup = ({
                   <AddIcon />
                 </Button>
               </Grid2>
+              {formik.errors.newAddon &&
+                typeof formik.errors.newAddon === "string" && (
+                  <Box mb={2} pl={2}>
+                    <Typography color="error" sx={{ fontSize: "12px" }}>
+                      {formik.errors.newAddon}
+                    </Typography>
+                  </Box>
+                )}
             </Grid2>
           </DialogContent>
           <Divider />
@@ -293,10 +379,7 @@ const ManageTierAddonsPopup = ({
               type="submit"
               fullWidth
               variant="contained"
-              disabled={
-                !formik.values.company ||
-                formik.values.sponsorships.length === 0
-              }
+              disabled={!formik.dirty}
             >
               {T.translate("edit_sponsor.save_changes")}
             </Button>
@@ -311,6 +394,7 @@ ManageTierAddonsPopup.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  onSponsorshipAddonRemove: PropTypes.func.isRequired,
   summitId: PropTypes.number.isRequired
 };
 
