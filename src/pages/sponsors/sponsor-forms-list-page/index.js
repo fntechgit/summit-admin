@@ -29,7 +29,8 @@ import {
   archiveSponsorForm,
   getSponsorForm,
   getSponsorForms,
-  unarchiveSponsorForm
+  unarchiveSponsorForm,
+  deleteSponsorForm
 } from "../../../actions/sponsor-forms-actions";
 import MuiTable from "../../../components/mui/table/mui-table";
 import CustomAlert from "../../../components/mui/components/custom-alert";
@@ -49,7 +50,8 @@ const SponsorFormsListPage = ({
   getSponsorForms,
   getSponsorForm,
   archiveSponsorForm,
-  unarchiveSponsorForm
+  unarchiveSponsorForm,
+  deleteSponsorForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -73,6 +75,10 @@ const SponsorFormsListPage = ({
     getSponsorForm(row.id).then(() => {
       setOpenPopup("new");
     });
+  };
+
+  const handleRowDelete = (itemId) => {
+    deleteSponsorForm(itemId);
   };
 
   const handleManageItems = (form) => {
@@ -234,7 +240,7 @@ const SponsorFormsListPage = ({
             totalRows={totalCount}
             currentPage={currentPage}
             onEdit={handleRowEdit}
-            onDelete={console.log}
+            onDelete={handleRowDelete}
             onPageChange={handlePageChange}
             onSort={handleSort}
           />
@@ -260,5 +266,6 @@ export default connect(mapStateToProps, {
   getSponsorForms,
   getSponsorForm,
   archiveSponsorForm,
-  unarchiveSponsorForm
+  unarchiveSponsorForm,
+  deleteSponsorForm
 })(SponsorFormsListPage);

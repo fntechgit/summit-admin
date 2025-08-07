@@ -36,6 +36,7 @@ export const RECEIVE_SPONSOR_FORMS = "RECEIVE_SPONSOR_FORMS";
 export const RECEIVE_SPONSOR_FORM = "RECEIVE_SPONSOR_FORM";
 export const SPONSOR_FORM_ARCHIVED = "SPONSOR_FORM_ARCHIVED";
 export const SPONSOR_FORM_UNARCHIVED = "SPONSOR_FORM_UNARCHIVED";
+export const SPONSOR_FORM_DELETED = "SPONSOR_FORM_DELETED";
 export const REQUEST_GLOBAL_TEMPLATES = "REQUEST_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_TEMPLATES = "RECEIVE_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
@@ -149,6 +150,34 @@ export const unarchiveSponsorForm = (formId) => async (dispatch) => {
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
+};
+
+export const deleteSponsorForm = (formId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_FORM_DELETED)({ formId }),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_forms.form_delete_success")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const getGlobalTemplates =

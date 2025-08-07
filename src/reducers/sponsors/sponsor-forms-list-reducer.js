@@ -21,6 +21,7 @@ import {
   REQUEST_SPONSOR_FORMS,
   RESET_TEMPLATE_FORM,
   SPONSOR_FORM_ARCHIVED,
+  SPONSOR_FORM_DELETED,
   SPONSOR_FORM_UNARCHIVED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -160,6 +161,12 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
       const sponsorForms = state.sponsorForms.map((item) =>
         item.id === formId ? { ...item, is_archived: false } : item
       );
+
+      return { ...state, sponsorForms };
+    }
+    case SPONSOR_FORM_DELETED: {
+      const { formId } = payload;
+      const sponsorForms = state.sponsorForms.filter((it) => it.id !== formId);
 
       return { ...state, sponsorForms };
     }
