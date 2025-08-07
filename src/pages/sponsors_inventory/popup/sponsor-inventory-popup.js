@@ -44,7 +44,6 @@ const SponsorItemDialog = ({
   onMetaFieldTypeValueDeleted,
   entity: initialEntity
 }) => {
-
   const formik = useFormik({
     initialValues: {
       ...initialEntity,
@@ -146,7 +145,7 @@ const SponsorItemDialog = ({
   };
 
   const getMediaInputValue = () =>
-    initialEntity.images.length > 0
+    initialEntity.images?.length > 0
       ? initialEntity.images.map((img) => ({
           ...img,
           filename: img.filename ?? img.file_path ?? img.file_url
@@ -513,7 +512,8 @@ const SponsorItemDialog = ({
                   maxFiles={mediaType.max_uploads_qty}
                   canAdd={
                     mediaType.is_editable ||
-                    initialEntity.images.length < mediaType.max_uploads_qty
+                    (initialEntity.images?.length || 0) <
+                      mediaType.max_uploads_qty
                   }
                   parallelChunkUploads
                 />
