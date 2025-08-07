@@ -2363,6 +2363,26 @@
       "error": "There was a problem creating the forms, please try again."
     }
   },
+  "sponsor_form_item_list": {
+    "form_items": "Form Items",
+    "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit botton. You can also change only a rate by clicking on it.",
+    "code": "Code",
+    "name": "Name",
+    "early_bird_rate": "Early bird rate",
+    "standard_rate": "Standard rate",
+    "onsite_rate": "On site rate",
+    "default_quantity": "Default quantity",
+    "hide_archived": "Hide archived items",
+    "add_item": "Add Item",
+    "add_item_from_inventory": "Add Item from Inventory",
+    "archive_button": "Archive",
+    "delete_form_template_item_warning": "Are you sure you want to delete form template item ",
+    "add_inventory_item": "Add Inventory Item",
+    "add_form_template_item": "Create new Item",
+    "placeholders": {
+      "search_form_template_items": "Search"
+    }
+  },
   "sponsorship_list": {
     "sponsorships": "Sponsorships",
     "sponsorship_types": "Tiers",
