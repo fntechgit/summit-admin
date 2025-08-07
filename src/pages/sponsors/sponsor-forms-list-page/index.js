@@ -82,7 +82,7 @@ const SponsorFormsListPage = ({
   };
 
   const handleManageItems = (form) => {
-    history.push(`/app/sponsors/forms/${form.id}`);
+    history.push(`forms/${form.id}/items`);
   };
 
   const handleArchiveItem = (item) =>
