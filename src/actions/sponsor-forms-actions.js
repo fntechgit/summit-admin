@@ -414,7 +414,6 @@ const normalizeFormTemplate = (entity, summitTZ) => {
 export const getSponsorFormItems =
   (
     formId,
-    term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
@@ -428,11 +427,6 @@ export const getSponsorFormItems =
     const filter = [];
 
     dispatch(startLoading());
-
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
-    }
 
     const params = {
       page,
@@ -460,7 +454,7 @@ export const getSponsorFormItems =
       createAction(RECEIVE_SPONSOR_FORM_ITEMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items`,
       authErrorHandler,
-      { order, orderDir, page, term, hideArchived }
+      { order, orderDir, page, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -485,7 +479,8 @@ export const saveSponsorFormItem =
       quantity_limit_per_sponsor: 6,
       early_bird_rate: 5,
       standard_rate: 15,
-      onsite_rate: 25
+      onsite_rate: 25,
+      is_archived: true
     };
 
     return postRequest(
