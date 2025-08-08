@@ -23,77 +23,99 @@ import SponsorPromocodesListPage from "../pages/sponsors/sponsor-promocodes-list
 import EditPromocodePage from "../pages/promocodes/edit-promocode-page";
 import SponsorSettingsPage from "../pages/sponsor_settings/sponsor-settings-page";
 import SponsorFormsListPage from "../pages/sponsors/sponsor-forms-list-page";
+import SponsorFormItemListPage from "../pages/sponsors/sponsor-form-item-list-page";
 
 const SponsorLayout = ({ match }) => (
-    <div>
-      <Breadcrumb
-        data={{
-          title: T.translate("sponsor_list.sponsors"),
-          pathname: match.url
-        }}
-      />
-      <Switch>
-        <Route strict exact path={match.url} component={SponsorListPage} />
-        <Route
-          strict
-          exact
-          path={`${match.url}/forms`}
-          component={SponsorFormsListPage}
-        />
-        <Route
-          strict
-          exact
-          path={`${match.url}/settings`}
-          component={SponsorSettingsPage}
-        />
-        <Route
-          strict
-          exact
-          path={`${match.url}/promocodes`}
-          component={SponsorPromocodesListPage}
-        />
-        <Route
-          path={`${match.url}/promocodes`}
-          render={(props) => (
-            <div>
-              <Breadcrumb
-                data={{
-                  title: T.translate("sponsor_promocodes_list.promocodes"),
-                  pathname: props.match.url
-                }}
+  <div>
+    <Breadcrumb
+      data={{
+        title: T.translate("sponsor_list.sponsors"),
+        pathname: match.url
+      }}
+    />
+    <Switch>
+      <Route strict exact path={match.url} component={SponsorListPage} />
+      <Route
+        path={`${match.url}/forms`}
+        render={(props) => (
+          <div>
+            <Breadcrumb
+              data={{
+                title: T.translate("sponsor_forms.forms"),
+                pathname: props.match.url
+              }}
+            />
+            <Switch>
+              <Route
+                strict
+                exact
+                path={props.match.url}
+                component={SponsorFormsListPage}
               />
-              <Switch>
-                <Route
-                  strict
-                  exact
-                  path={props.match.url}
-                  component={SponsorPromocodesListPage}
-                />
-                <Route
-                  path={`${props.match.url}/new`}
-                  component={EditPromocodePage}
-                />
-                <Route
-                  path={`${props.match.url}/:promocode_id(\\d+)`}
-                  component={EditPromocodePage}
-                />
-              </Switch>
-            </div>
-          )}
-        />
-        <Route
-          strict
-          exact
-          path={`${match.url}/new`}
-          component={SponsorIdLayout}
-        />
-        <Route
-          path={`${match.url}/:sponsor_id(\\d+)`}
-          component={SponsorIdLayout}
-        />
-        <Route component={NoMatchPage} />
-      </Switch>
-    </div>
-  );
+              <Route
+                strict
+                exact
+                path={`${props.match.url}/:form_id(\\d+)/items`}
+                component={SponsorFormItemListPage}
+              />
+            </Switch>
+          </div>
+        )}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/settings`}
+        component={SponsorSettingsPage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/promocodes`}
+        component={SponsorPromocodesListPage}
+      />
+      <Route
+        path={`${match.url}/promocodes`}
+        render={(props) => (
+          <div>
+            <Breadcrumb
+              data={{
+                title: T.translate("sponsor_promocodes_list.promocodes"),
+                pathname: props.match.url
+              }}
+            />
+            <Switch>
+              <Route
+                strict
+                exact
+                path={props.match.url}
+                component={SponsorPromocodesListPage}
+              />
+              <Route
+                path={`${props.match.url}/new`}
+                component={EditPromocodePage}
+              />
+              <Route
+                path={`${props.match.url}/:promocode_id(\\d+)`}
+                component={EditPromocodePage}
+              />
+            </Switch>
+          </div>
+        )}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/new`}
+        component={SponsorIdLayout}
+      />
+      <Route
+        path={`${match.url}/:sponsor_id(\\d+)`}
+        component={SponsorIdLayout}
+      />
+      <Route component={NoMatchPage} />
+    </Switch>
+  </div>
+);
 
 export default Restrict(withRouter(SponsorLayout), "sponsors");
