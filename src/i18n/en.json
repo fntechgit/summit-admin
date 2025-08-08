@@ -2235,6 +2235,7 @@
     "forms": "Forms",
     "purchases": "Purchases",
     "pages": "Pages",
+    "add_ons": "Add-ons",
     "order": "Order",
     "remove_warning": "Are you sure you want to delete sponsor ",
     "sponsorships": "Tiers",
@@ -2317,7 +2318,6 @@
     "code_column_label": "Code",
     "name_column_label": "Name",
     "items_column_label": "Items",
-    "form_delete_success": "Form successfully deleted.",
     "placeholders": {
       "search": "Search..."
     },
