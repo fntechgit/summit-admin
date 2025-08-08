@@ -24,7 +24,11 @@ import {
   getSponsorLeadReportSettingsMeta,
   getSponsorTiers,
   addTierToSponsor,
-  removeTierFromSponsor
+  removeTierFromSponsor,
+  getSponsorshipAddons,
+  saveAddonsToSponsorship,
+  removeAddonToSponsorship,
+  setSelectedSponsorship
 } from "../../actions/sponsor-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 
@@ -60,7 +64,11 @@ const EditSponsorPage = (props) => {
     getSponsorLeadReportSettingsMeta,
     getSponsorTiers,
     addTierToSponsor,
-    removeTierFromSponsor
+    removeTierFromSponsor,
+    getSponsorshipAddons,
+    saveAddonsToSponsorship,
+    removeAddonToSponsorship,
+    setSelectedSponsorship
   } = props;
 
   const [selectedTab, setSelectedTab] = useState(0);
@@ -135,6 +143,10 @@ const EditSponsorPage = (props) => {
             onSponsorshipPaginate={handleSponsorshipPaginate}
             onSponsorshipAdd={addTierToSponsor}
             onSponsorshipDelete={removeTierFromSponsor}
+            getSponsorshipAddons={getSponsorshipAddons}
+            onSponsorshipSelect={setSelectedSponsorship}
+            onSponsorshipAddonSave={saveAddonsToSponsorship}
+            onSponsorshipAddonRemove={removeAddonToSponsorship}
           />
         </CustomTabPanel>
       </Container>
@@ -163,5 +175,9 @@ export default connect(mapStateToProps, {
   getSponsorLeadReportSettingsMeta,
   getSponsorTiers,
   addTierToSponsor,
-  removeTierFromSponsor
+  removeTierFromSponsor,
+  getSponsorshipAddons,
+  saveAddonsToSponsorship,
+  removeAddonToSponsorship,
+  setSelectedSponsorship
 })(EditSponsorPage);

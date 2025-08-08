@@ -17,15 +17,22 @@ import { Box, Button, Grid2, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
+import ManageTierAddonsPopup from "./manage-tier-addons-popup";
 
 const Sponsorship = ({
   sponsor,
   summitId,
   onSponsorshipPaginate,
   onSponsorshipAdd,
-  onSponsorshipDelete
+  onSponsorshipDelete,
+  getSponsorshipAddons,
+  onSponsorshipSelect,
+  onSponsorshipAddonSave,
+  onSponsorshipAddonRemove
 }) => {
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
+  const [showManageTierAddonsPopup, setShowManageTierAddons] = useState(false);
+  const [selectedSponsorship, setSelectedSponsorship] = useState(null);
 
   const {
     sponsorships,
@@ -58,6 +65,24 @@ const Sponsorship = ({
     onSponsorshipPaginate(currentPage, perPage, key, dir);
   };
 
+  const handleOpenManageAddonsPopup = (sponsorship) => {
+    setSelectedSponsorship(sponsorship);
+    onSponsorshipSelect(sponsorship);
+    setShowManageTierAddons(true);
+  };
+
+  const handleCloseManageAddonsPopup = () => {
+    setShowManageTierAddons(false);
+    onSponsorshipSelect(null);
+    setSelectedSponsorship(null);
+  };
+
+  const handleAddSponsorshipAddon = (addons, sponsorshipId) => {
+    onSponsorshipAddonSave(addons, sponsorshipId).then(() =>
+      setShowManageTierAddons(false)
+    );
+  };
+
   const columns = [
     {
       columnKey: "tier",
@@ -65,12 +90,12 @@ const Sponsorship = ({
       sortable: true
     },
     {
-      columnKey: "addons",
+      columnKey: "add_ons",
       header: T.translate("edit_sponsor.addons"),
       sortable: true,
       render: (row) =>
         row.add_ons.length > 0
-          ? row.add_ons.map((a) => a.map).split(", ")
+          ? row.add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
           : "None"
     },
     {
@@ -83,7 +108,7 @@ const Sponsorship = ({
           variant="text"
           color="inherit"
           size="small"
-          onClick={() => handleManageItems(row)}
+          onClick={() => handleOpenManageAddonsPopup(row)}
           sx={{
             fontSize: "1.3rem",
             fontWeight: 500,
@@ -135,6 +160,18 @@ const Sponsorship = ({
           open={showAddTierPopup}
           onClose={handleCloseAddTierPopup}
           onSubmit={handleAddTierToSponsor}
+        />
+      )}
+
+      {showManageTierAddonsPopup && (
+        <ManageTierAddonsPopup
+          sponsorship={selectedSponsorship}
+          summitId={summitId}
+          open={showManageTierAddonsPopup}
+          getSponsorshipAddons={getSponsorshipAddons}
+          onSponsorshipAddonRemove={onSponsorshipAddonRemove}
+          onClose={handleCloseManageAddonsPopup}
+          onSubmit={handleAddSponsorshipAddon}
         />
       )}
 
