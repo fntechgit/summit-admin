@@ -273,7 +273,6 @@ const MuiTable = ({
                 {data.map((row, rowIndex) => (
                   <TableRow key={row[idKey] || rowIndex}>
                     {/* Main content columns */}
-                    {/* Main content columns */}
                     {columns.map((col) => (
                       <TableCell
                         key={col.columnKey}

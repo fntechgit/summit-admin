@@ -48,24 +48,7 @@ const SponsorHeader = ({ sponsor }) => (
           {T.translate("edit_sponsor.sponsor_name")}
         </Typography>
       </Grid2>
-      <Grid2>
-        {[
-          sponsor.company?.city,
-          sponsor.company?.state,
-          sponsor.company?.country
-        ]
-          // filter empty or undefined fields
-          .filter(Boolean)
-          .join(" - ")}
-        {sponsor.company?.contact_email && (
-          <>
-            &nbsp;
-            <a href={`mailto:${sponsor.company.contact_email}`}>
-              {sponsor.company.contact_email}
-            </a>
-          </>
-        )}
-      </Grid2>
+      <Grid2>{sponsor.company?.name}</Grid2>
     </Grid2>
     <Divider />
     <Grid2
@@ -83,6 +66,24 @@ const SponsorHeader = ({ sponsor }) => (
         >
           {T.translate("edit_sponsor.sponsor_address")}
         </Typography>
+      </Grid2>
+      <Grid2>
+        {[
+          sponsor.company?.city,
+          sponsor.company?.state,
+          sponsor.company?.country
+        ]
+          // filter empty or undefined fields
+          .filter(Boolean)
+          .join(" - ")}
+        {sponsor.company?.contact_email && (
+          <>
+            &nbsp;
+            <a href={`mailto:${sponsor.company.contact_email}`}>
+              {sponsor.company.contact_email}
+            </a>
+          </>
+        )}
       </Grid2>
     </Grid2>
   </Box>

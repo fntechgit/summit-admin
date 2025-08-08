@@ -17,9 +17,22 @@ import { Box, Button, Grid2, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
+import ManageTierAddonsPopup from "./manage-tier-addons-popup";
 
-const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
+const Sponsorship = ({
+  sponsor,
+  summitId,
+  onSponsorshipPaginate,
+  onSponsorshipAdd,
+  onSponsorshipDelete,
+  getSponsorshipAddons,
+  onSponsorshipSelect,
+  onSponsorshipAddonSave,
+  onSponsorshipAddonRemove
+}) => {
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
+  const [showManageTierAddonsPopup, setShowManageTierAddons] = useState(false);
+  const [selectedSponsorship, setSelectedSponsorship] = useState(null);
 
   const {
     sponsorships,
@@ -38,7 +51,9 @@ const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
     setShowAddTierPopup(true);
   };
 
-  const handleAddTierToSponsor = () => {};
+  const handleAddTierToSponsor = (sponsorships) => {
+    onSponsorshipAdd(sponsorships).then(() => setShowAddTierPopup(false));
+  };
 
   const handlePageChange = (page) => {
     onSponsorshipPaginate(page, perPage, order, orderDir);
@@ -50,6 +65,24 @@ const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
     onSponsorshipPaginate(currentPage, perPage, key, dir);
   };
 
+  const handleOpenManageAddonsPopup = (sponsorship) => {
+    setSelectedSponsorship(sponsorship);
+    onSponsorshipSelect(sponsorship);
+    setShowManageTierAddons(true);
+  };
+
+  const handleCloseManageAddonsPopup = () => {
+    setShowManageTierAddons(false);
+    onSponsorshipSelect(null);
+    setSelectedSponsorship(null);
+  };
+
+  const handleAddSponsorshipAddon = (addons, sponsorshipId) => {
+    onSponsorshipAddonSave(addons, sponsorshipId).then(() =>
+      setShowManageTierAddons(false)
+    );
+  };
+
   const columns = [
     {
       columnKey: "tier",
@@ -57,12 +90,12 @@ const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
       sortable: true
     },
     {
-      columnKey: "addons",
+      columnKey: "add_ons",
       header: T.translate("edit_sponsor.addons"),
       sortable: true,
       render: (row) =>
         row.add_ons.length > 0
-          ? row.add_ons.map((a) => a.map).split(", ")
+          ? row.add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
           : "None"
     },
     {
@@ -75,7 +108,7 @@ const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
           variant="text"
           color="inherit"
           size="small"
-          onClick={() => handleManageItems(row)}
+          onClick={() => handleOpenManageAddonsPopup(row)}
           sx={{
             fontSize: "1.3rem",
             fontWeight: 500,
@@ -130,6 +163,18 @@ const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
         />
       )}
 
+      {showManageTierAddonsPopup && (
+        <ManageTierAddonsPopup
+          sponsorship={selectedSponsorship}
+          summitId={summitId}
+          open={showManageTierAddonsPopup}
+          getSponsorshipAddons={getSponsorshipAddons}
+          onSponsorshipAddonRemove={onSponsorshipAddonRemove}
+          onClose={handleCloseManageAddonsPopup}
+          onSubmit={handleAddSponsorshipAddon}
+        />
+      )}
+
       <div>
         <MuiTable
           data={sponsorships}
@@ -138,6 +183,7 @@ const Sponsorship = ({ sponsor, summitId, onSponsorshipPaginate }) => {
           orderField="order"
           perPage={perPage}
           currentPage={currentPage}
+          onDelete={onSponsorshipDelete}
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}
           onSort={handleSort}

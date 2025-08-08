@@ -50,9 +50,14 @@ import {
   SPONSOR_EXTRA_QUESTION_UPDATED,
   RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META,
   SPONSOR_LEAD_REPORT_SETTINGS_UPDATED,
-  TIER_ADD_TO_SPONSOR,
+  SPONSOR_TIER_ADDED,
+  SPONSOR_TIER_DELETED,
   REQUEST_SPONSOR_SPONSORSHIPS,
-  RECEIVE_SPONSOR_SPONSORSHIPS
+  RECEIVE_SPONSOR_SPONSORSHIPS,
+  SPONSOR_SPONSORSHIPS_ADDON_UPDATED,
+  SPONSOR_SPONSORSHIPS_ADDON_DELETED,
+  SPONSOR_SPONSORSHIPS_ADDON_ADDED,
+  SET_SELECTED_SPONSORSHIP
 } from "../../actions/sponsor-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -129,6 +134,7 @@ export const DEFAULT_ENTITY = {
 
 const DEFAULT_STATE = {
   entity: DEFAULT_ENTITY,
+  selectedSponsorship: null,
   errors: {}
 };
 
@@ -517,10 +523,144 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case TIER_ADD_TO_SPONSOR: {
-      console.log("CHECK PAYLOAD", payload);
-      return { ...state };
+    case SPONSOR_TIER_ADDED: {
+      let newSponsorships = [];
+      newSponsorships = payload.response.map((s) => ({
+        ...s,
+        tier: s.type?.type.name
+      }));
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: [
+              ...state.entity.sponsorships_collection.sponsorships,
+              ...newSponsorships
+            ],
+            totalSponsorships:
+              state.entity.sponsorships_collection.totalSponsorships + 1
+          }
+        }
+      };
     }
+    case SPONSOR_TIER_DELETED: {
+      const { sponsorshipId } = payload;
+      const newSponsorships =
+        state.entity.sponsorships_collection.sponsorships.filter(
+          (s) => s.id !== sponsorshipId
+        );
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: newSponsorships,
+            totalSponsorships:
+              state.entity.sponsorships_collection.totalSponsorships - 1
+          }
+        }
+      };
+    }
+    case SET_SELECTED_SPONSORSHIP: {
+      console.log("CHECK PAYLOAD...", payload);
+      const { sponsorship } = payload;
+      return {
+        ...state,
+        selectedSponsorship: sponsorship?.id ?? null
+      };
+    }
+    case SPONSOR_SPONSORSHIPS_ADDON_ADDED: {
+      console.log("CHJECK>>>", payload);
+      const newAddon = payload.response;
+
+      const updatedSponsorships =
+        state.entity.sponsorships_collection.sponsorships.map((s) => {
+          if (s.id !== state.selectedSponsorship) return s;
+          return {
+            ...s,
+            add_ons: [...s.add_ons, newAddon]
+          };
+        });
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: updatedSponsorships
+          }
+        }
+      };
+    }
+    case SPONSOR_SPONSORSHIPS_ADDON_UPDATED: {
+      const updatedAddon = payload.response;
+      console.log("UPDATED", updatedAddon);
+      const { id: addonId } = updatedAddon;
+
+      const updatedSponsorships =
+        state.entity.sponsorships_collection.sponsorships.map((s) => {
+          if (s.id !== state.selectedSponsorship) return s;
+
+          const updatedAddons = s.add_ons.map((addon) =>
+            addon.id === addonId ? updatedAddon : addon
+          );
+
+          console.log("UPDATED ADDONS...", updatedAddons);
+
+          return {
+            ...s,
+            add_ons: updatedAddons
+          };
+        });
+
+      console.log("CHECK NEW SPONSORSHIP", updatedSponsorships);
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: updatedSponsorships
+          }
+        }
+      };
+    }
+    case SPONSOR_SPONSORSHIPS_ADDON_DELETED: {
+      const { sponsorshipId, addonId } = payload;
+
+      const updatedSponsorships =
+        state.entity.sponsorships_collection.sponsorships.map((s) => {
+          if (s.id !== sponsorshipId) return s;
+
+          const updatedAddons = (s.add_ons || []).filter(
+            (addon) => addon.id !== addonId
+          );
+
+          return {
+            ...s,
+            add_ons: updatedAddons
+          };
+        });
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: updatedSponsorships
+          }
+        }
+      };
+    }
+
     default:
       return state;
   }
