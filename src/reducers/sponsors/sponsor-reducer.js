@@ -9,7 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_SPONSOR,
@@ -46,16 +49,21 @@ import {
   SPONSOR_EXTRA_QUESTION_ADDED,
   SPONSOR_EXTRA_QUESTION_UPDATED,
   RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META,
-  SPONSOR_LEAD_REPORT_SETTINGS_UPDATED
+  SPONSOR_LEAD_REPORT_SETTINGS_UPDATED,
+  SPONSOR_TIER_ADDED,
+  SPONSOR_TIER_DELETED,
+  REQUEST_SPONSOR_SPONSORSHIPS,
+  RECEIVE_SPONSOR_SPONSORSHIPS,
+  SPONSOR_SPONSORSHIPS_ADDON_UPDATED,
+  SPONSOR_SPONSORSHIPS_ADDON_DELETED,
+  SPONSOR_SPONSORSHIPS_ADDON_ADDED,
+  SET_SELECTED_SPONSORSHIP
 } from "../../actions/sponsor-actions";
 
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   denormalizeLeadReportSettings,
-  renderOptions,
-  updateSummitLeadReportSettings
+  renderOptions
 } from "../../models/lead-report-settings";
 
 const DEFAULT_ADS_STATE = {
@@ -84,6 +92,16 @@ const DEFAULT_SOCIAL_NETWORKS_STATE = {
   totalAds: 0
 };
 
+const DEFAULT_SPONSORHIPS_STATE = {
+  sponsorships: [],
+  order: "order",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 5,
+  totalSponsorships: 0
+};
+
 export const DEFAULT_ENTITY = {
   id: 0,
   company: null,
@@ -110,11 +128,13 @@ export const DEFAULT_ENTITY = {
   social_networks_collection: DEFAULT_SOCIAL_NETWORKS_STATE,
   extra_questions: [],
   lead_report_setting: {},
-  available_lead_report_columns: []
+  available_lead_report_columns: [],
+  sponsorships_collection: DEFAULT_SPONSORHIPS_STATE
 };
 
 const DEFAULT_STATE = {
   entity: DEFAULT_ENTITY,
+  selectedSponsorship: null,
   errors: {}
 };
 
@@ -122,261 +142,201 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
-      }
-      break;
-    case SET_CURRENT_SUMMIT:
-    case RESET_SPONSOR_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case UPDATE_SPONSOR:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
-    case SPONSOR_ADDED:
-    case RECEIVE_SPONSOR:
-      {
-        let entity = { ...payload.response };
-
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
-        }
-
-        if (!entity.lead_report_setting) entity.lead_report_setting = {};
-
-        const sponsorship = {
-          ...entity.sponsorship,
-          name: entity.sponsorship?.type.name
-        };
-
-        return {
-          ...state,
-          entity: { ...state.entity, ...entity, sponsorship }
-        };
-      }
-      break;
-    case SPONSOR_UPDATED:
-      {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
         return state;
       }
-      break;
-    case MEMBER_ADDED_TO_SPONSOR:
-      {
-        let { member } = payload;
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            members: [...state.entity.members, member]
-          }
-        };
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    case SET_CURRENT_SUMMIT:
+    case RESET_SPONSOR_FORM:
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+
+    case UPDATE_SPONSOR:
+      return { ...state, entity: { ...payload }, errors: {} };
+    case SPONSOR_ADDED:
+    case RECEIVE_SPONSOR: {
+      const entity = { ...payload.response };
+
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
+        }
       }
-      break;
-    case MEMBER_REMOVED_FROM_SPONSOR:
-      {
-        let { memberId } = payload;
-        let currentMembers = state.entity.members.filter(
-          (m) => m.id !== memberId
-        );
-        return {
-          ...state,
-          entity: { ...state.entity, members: currentMembers }
-        };
-      }
-      break;
-    case HEADER_IMAGE_ATTACHED:
-      {
-        const header_image = payload.response.url;
-        return { ...state, entity: { ...state.entity, header_image } };
-      }
-      break;
+
+      if (!entity.lead_report_setting) entity.lead_report_setting = {};
+
+      return {
+        ...state,
+        entity: { ...state.entity, ...entity }
+      };
+    }
+    case SPONSOR_UPDATED:
+      return state;
+    case MEMBER_ADDED_TO_SPONSOR: {
+      const { member } = payload;
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          members: [...state.entity.members, member]
+        }
+      };
+    }
+    case MEMBER_REMOVED_FROM_SPONSOR: {
+      const { memberId } = payload;
+      const currentMembers = state.entity.members.filter(
+        (m) => m.id !== memberId
+      );
+      return {
+        ...state,
+        entity: { ...state.entity, members: currentMembers }
+      };
+    }
+    case HEADER_IMAGE_ATTACHED: {
+      const header_image = payload.response.url;
+      return { ...state, entity: { ...state.entity, header_image } };
+    }
     case HEADER_IMAGE_DELETED:
-      {
-        return { ...state, entity: { ...state.entity, header_image: "" } };
-      }
-      break;
-    case HEADER_MOBILE_IMAGE_ATTACHED:
-      {
-        const header_image_mobile = payload.response.url;
-        return { ...state, entity: { ...state.entity, header_image_mobile } };
-      }
-      break;
+      return { ...state, entity: { ...state.entity, header_image: "" } };
+    case HEADER_MOBILE_IMAGE_ATTACHED: {
+      const header_image_mobile = payload.response.url;
+      return { ...state, entity: { ...state.entity, header_image_mobile } };
+    }
     case HEADER_MOBILE_IMAGE_DELETED:
-      {
-        return { ...state, entity: { ...state.entity, header_image: "" } };
-      }
-      break;
-    case SIDE_IMAGE_ATTACHED:
-      {
-        const side_image = payload.response.url;
-        return { ...state, entity: { ...state.entity, side_image } };
-      }
-      break;
+      return { ...state, entity: { ...state.entity, header_image: "" } };
+    case SIDE_IMAGE_ATTACHED: {
+      const side_image = payload.response.url;
+      return { ...state, entity: { ...state.entity, side_image } };
+    }
     case SIDE_IMAGE_DELETED:
-      {
-        return { ...state, entity: { ...state.entity, side_image: "" } };
-      }
-      break;
-    case CAROUSEL_IMAGE_ATTACHED:
-      {
-        const carousel_advertise_image = payload.response.url;
-        return {
-          ...state,
-          entity: { ...state.entity, carousel_advertise_image }
-        };
-      }
-      break;
-    case CAROUSEL_IMAGE_DELETED:
-      {
-        return {
-          ...state,
-          entity: { ...state.entity, carousel_advertise_image: "" }
-        };
-      }
-      break;
-    case RECEIVE_SPONSOR_ADVERTISEMENTS:
-      {
-        let { total } = payload.response;
-        const ads = payload.response.data;
-        return {
-          ...state,
-          entity: { ...state.entity, ads_collection: { ads, total } }
-        };
-      }
-      break;
-    case SPONSOR_ADS_ORDER_UPDATED:
-      {
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            ads_collection: { ...state.entity.ads_collection, ads: payload }
+      return { ...state, entity: { ...state.entity, side_image: "" } };
+    case CAROUSEL_IMAGE_ATTACHED: {
+      const carousel_advertise_image = payload.response.url;
+      return {
+        ...state,
+        entity: { ...state.entity, carousel_advertise_image }
+      };
+    }
+    case CAROUSEL_IMAGE_DELETED: {
+      return {
+        ...state,
+        entity: { ...state.entity, carousel_advertise_image: "" }
+      };
+    }
+    case RECEIVE_SPONSOR_ADVERTISEMENTS: {
+      const { total } = payload.response;
+      const ads = payload.response.data;
+      return {
+        ...state,
+        entity: { ...state.entity, ads_collection: { ads, total } }
+      };
+    }
+    case SPONSOR_ADS_ORDER_UPDATED: {
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          ads_collection: { ...state.entity.ads_collection, ads: payload }
+        }
+      };
+    }
+    case SPONSOR_ADVERTISEMENT_ADDED: {
+      const newAdvertisement = payload.response;
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          ads_collection: {
+            ...state.entity.ads_collection,
+            ads: [...state.entity.ads_collection.ads, newAdvertisement]
           }
-        };
-      }
-      break;
-    case SPONSOR_ADVERTISEMENT_ADDED:
-      {
-        const newAdvertisement = payload.response;
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            ads_collection: {
-              ...state.entity.ads_collection,
-              ads: [...state.entity.ads_collection.ads, newAdvertisement]
-            }
+        }
+      };
+    }
+    case SPONSOR_ADVERTISEMENT_UPDATED: {
+      const updatedAdvertisement = payload.response;
+      const ads = state.entity.ads_collection.ads.filter(
+        (ad) => ad.id !== updatedAdvertisement.id
+      );
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          ads_collection: {
+            ...state.entity.ads_collection,
+            ads: [...ads, updatedAdvertisement]
           }
-        };
-      }
-      break;
-    case SPONSOR_ADVERTISEMENT_UPDATED:
-      {
-        const updatedAdvertisement = payload.response;
-        const ads = state.entity.ads_collection.ads.filter(
-          (ad) => ad.id !== updatedAdvertisement.id
-        );
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            ads_collection: {
-              ...state.entity.ads_collection,
-              ads: [...ads, updatedAdvertisement]
-            }
+        }
+      };
+    }
+    case SPONSOR_ADVERTISEMENT_DELETED: {
+      const { advertisementId } = payload;
+      const ads = state.entity.ads_collection.ads.filter(
+        (ad) => ad.id !== advertisementId
+      );
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          ads_collection: { ...state.entity.ads_collection, ads }
+        }
+      };
+    }
+    case RECEIVE_SPONSOR_MATERIALS: {
+      const { total } = payload.response;
+      const materials = payload.response.data;
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          materials_collection: { materials, total }
+        }
+      };
+    }
+    case SPONSOR_MATERIAL_ORDER_UPDATED: {
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          materials_collection: {
+            ...state.entity.materials_collection,
+            materials: payload
           }
-        };
-      }
-      break;
-    case SPONSOR_ADVERTISEMENT_DELETED:
-      {
-        const { advertisementId } = payload;
-        const ads = state.entity.ads_collection.ads.filter(
-          (ad) => ad.id !== advertisementId
-        );
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            ads_collection: { ...state.entity.ads_collection, ads }
+        }
+      };
+    }
+    case SPONSOR_MATERIAL_ADDED: {
+      const newMaterial = payload.response;
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          materials_collection: {
+            ...state.entity.materials_collection,
+            materials: [
+              ...state.entity.materials_collection.materials,
+              newMaterial
+            ]
           }
-        };
-      }
-      break;
-    case RECEIVE_SPONSOR_MATERIALS:
-      {
-        let { total } = payload.response;
-        const materials = payload.response.data;
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            materials_collection: { materials, total }
+        }
+      };
+    }
+    case SPONSOR_MATERIAL_UPDATED: {
+      const updatedMaterial = payload.response;
+      const materials = state.entity.materials_collection.materials.filter(
+        (material) => material.id !== updatedMaterial.id
+      );
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          materials_collection: {
+            ...state.entity.materials_collection,
+            materials: [...materials, updatedMaterial]
           }
-        };
-      }
-      break;
-    case SPONSOR_MATERIAL_ORDER_UPDATED:
-      {
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            materials_collection: {
-              ...state.entity.materials_collection,
-              materials: payload
-            }
-          }
-        };
-      }
-      break;
-    case SPONSOR_MATERIAL_ADDED:
-      {
-        const newMaterial = payload.response;
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            materials_collection: {
-              ...state.entity.materials_collection,
-              materials: [
-                ...state.entity.materials_collection.materials,
-                newMaterial
-              ]
-            }
-          }
-        };
-      }
-      break;
-    case SPONSOR_MATERIAL_UPDATED:
-      {
-        const updatedMaterial = payload.response;
-        const materials = state.entity.materials_collection.materials.filter(
-          (material) => material.id !== updatedMaterial.id
-        );
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            materials_collection: {
-              ...state.entity.materials_collection,
-              materials: [...materials, updatedMaterial]
-            }
-          }
-        };
-      }
-      break;
+        }
+      };
+    }
     case SPONSOR_MATERIAL_DELETED: {
       const { materialId } = payload;
       const materials = state.entity.materials_collection.materials.filter(
@@ -393,76 +353,66 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case RECEIVE_SPONSOR_SOCIAL_NETWORKS:
-      {
-        let { current_page, per_page, total, last_page } = payload.response;
-        const social_networks = payload.response.data.map((social_network) => {
-          return {
-            ...social_network,
-            is_enabled: social_network.is_enabled ? "True" : "False"
-          };
-        });
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            social_networks_collection: {
-              social_networks,
-              currentPage: current_page,
-              lastPage: last_page,
-              total,
-              perPage: per_page
-            }
+    case RECEIVE_SPONSOR_SOCIAL_NETWORKS: {
+      const { current_page, per_page, total, last_page } = payload.response;
+      const social_networks = payload.response.data.map((social_network) => ({
+        ...social_network,
+        is_enabled: social_network.is_enabled ? "True" : "False"
+      }));
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          social_networks_collection: {
+            social_networks,
+            currentPage: current_page,
+            lastPage: last_page,
+            total,
+            perPage: per_page
           }
-        };
-      }
-      break;
-    case SPONSOR_SOCIAL_NETWORK_ADDED:
-      {
-        const newSocialNetwork = payload.response;
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            social_networks_collection: {
-              ...state.entity.social_networks_collection,
-              social_networks: [
-                ...state.entity.social_networks_collection.social_networks,
-                newSocialNetwork
-              ]
-            }
+        }
+      };
+    }
+    case SPONSOR_SOCIAL_NETWORK_ADDED: {
+      const newSocialNetwork = payload.response;
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          social_networks_collection: {
+            ...state.entity.social_networks_collection,
+            social_networks: [
+              ...state.entity.social_networks_collection.social_networks,
+              newSocialNetwork
+            ]
           }
-        };
-      }
-      break;
-    case SPONSOR_SOCIAL_NETWORK_UPDATED:
-      {
-        const updatedSocialNetwork = {
-          ...payload.response,
-          is_enabled: payload.response.is_enabled ? "True" : "False"
-        };
-        let social_networks =
-          state.entity.social_networks_collection.social_networks.filter(
-            (social_network) => social_network.id !== updatedSocialNetwork.id
-          );
-        social_networks = social_networks.map((social_network) => {
-          return {
-            ...social_network,
-            is_enabled: social_network.is_enabled ? "True" : "False"
-          };
-        });
-        return {
-          ...state,
-          entity: {
-            ...state.entity,
-            social_networks_collection: {
-              ...state.entity.social_networks_collection,
-              social_networks: [...social_networks, updatedSocialNetwork]
-            }
+        }
+      };
+    }
+    case SPONSOR_SOCIAL_NETWORK_UPDATED: {
+      const updatedSocialNetwork = {
+        ...payload.response,
+        is_enabled: payload.response.is_enabled ? "True" : "False"
+      };
+      let social_networks =
+        state.entity.social_networks_collection.social_networks.filter(
+          (social_network) => social_network.id !== updatedSocialNetwork.id
+        );
+      social_networks = social_networks.map((social_network) => ({
+        ...social_network,
+        is_enabled: social_network.is_enabled ? "True" : "False"
+      }));
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          social_networks_collection: {
+            ...state.entity.social_networks_collection,
+            social_networks: [...social_networks, updatedSocialNetwork]
           }
-        };
-      }
-      break;
+        }
+      };
+    }
     case SPONSOR_SOCIAL_NETWORK_DELETED: {
       const { socialNetWorkId } = payload;
       const social_networks =
@@ -480,14 +430,12 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case SPONSOR_EXTRA_QUESTION_ORDER_UPDATED:
-      {
-        return {
-          ...state,
-          entity: { ...state.entity, extra_questions: payload }
-        };
-      }
-      break;
+    case SPONSOR_EXTRA_QUESTION_ORDER_UPDATED: {
+      return {
+        ...state,
+        entity: { ...state.entity, extra_questions: payload }
+      };
+    }
     case SPONSOR_EXTRA_QUESTION_DELETED: {
       const { questionId } = payload;
       const extraQuestions = state.entity.extra_questions.filter(
@@ -498,13 +446,11 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         entity: { ...state.entity, extra_questions: extraQuestions }
       };
     }
-    case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
     case SPONSOR_EXTRA_QUESTION_ADDED: {
-      let new_extra_question = { ...payload.response };
+      const new_extra_question = { ...payload.response };
       return {
         ...state,
         entity: {
@@ -514,8 +460,8 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SPONSOR_EXTRA_QUESTION_UPDATED: {
-      let updated_extra_question = { ...payload.response };
-      let extra_questions = state.entity.extra_questions.filter(
+      const updated_extra_question = { ...payload.response };
+      const extra_questions = state.entity.extra_questions.filter(
         (q) => q.id !== updated_extra_question.id
       );
       return {
@@ -544,6 +490,177 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         entity: { ...state.entity, lead_report_setting: payload.response }
       };
     }
+    case REQUEST_SPONSOR_SPONSORSHIPS: {
+      const { order, orderDir } = payload;
+      return {
+        ...state,
+        sponsorships_collection: {
+          order,
+          orderDir
+        }
+      };
+    }
+    case RECEIVE_SPONSOR_SPONSORSHIPS: {
+      const { current_page, per_page, total, last_page, data } =
+        payload.response;
+      let newSponsorships = [];
+
+      if (data.length > 0) {
+        newSponsorships = data.map((s) => ({ ...s, tier: s.type?.type.name }));
+      }
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            sponsorships: newSponsorships,
+            currentPage: current_page,
+            perPage: per_page,
+            lastPage: last_page,
+            totalSponsorships: total
+          }
+        }
+      };
+    }
+    case SPONSOR_TIER_ADDED: {
+      let newSponsorships = [];
+      newSponsorships = payload.response.map((s) => ({
+        ...s,
+        tier: s.type?.type.name
+      }));
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: [
+              ...state.entity.sponsorships_collection.sponsorships,
+              ...newSponsorships
+            ],
+            totalSponsorships:
+              state.entity.sponsorships_collection.totalSponsorships + 1
+          }
+        }
+      };
+    }
+    case SPONSOR_TIER_DELETED: {
+      const { sponsorshipId } = payload;
+      const newSponsorships =
+        state.entity.sponsorships_collection.sponsorships.filter(
+          (s) => s.id !== sponsorshipId
+        );
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: newSponsorships,
+            totalSponsorships:
+              state.entity.sponsorships_collection.totalSponsorships - 1
+          }
+        }
+      };
+    }
+    case SET_SELECTED_SPONSORSHIP: {
+      console.log("CHECK PAYLOAD...", payload);
+      const { sponsorship } = payload;
+      return {
+        ...state,
+        selectedSponsorship: sponsorship?.id ?? null
+      };
+    }
+    case SPONSOR_SPONSORSHIPS_ADDON_ADDED: {
+      console.log("CHJECK>>>", payload);
+      const newAddon = payload.response;
+
+      const updatedSponsorships =
+        state.entity.sponsorships_collection.sponsorships.map((s) => {
+          if (s.id !== state.selectedSponsorship) return s;
+          return {
+            ...s,
+            add_ons: [...s.add_ons, newAddon]
+          };
+        });
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: updatedSponsorships
+          }
+        }
+      };
+    }
+    case SPONSOR_SPONSORSHIPS_ADDON_UPDATED: {
+      const updatedAddon = payload.response;
+      console.log("UPDATED", updatedAddon);
+      const { id: addonId } = updatedAddon;
+
+      const updatedSponsorships =
+        state.entity.sponsorships_collection.sponsorships.map((s) => {
+          if (s.id !== state.selectedSponsorship) return s;
+
+          const updatedAddons = s.add_ons.map((addon) =>
+            addon.id === addonId ? updatedAddon : addon
+          );
+
+          console.log("UPDATED ADDONS...", updatedAddons);
+
+          return {
+            ...s,
+            add_ons: updatedAddons
+          };
+        });
+
+      console.log("CHECK NEW SPONSORSHIP", updatedSponsorships);
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: updatedSponsorships
+          }
+        }
+      };
+    }
+    case SPONSOR_SPONSORSHIPS_ADDON_DELETED: {
+      const { sponsorshipId, addonId } = payload;
+
+      const updatedSponsorships =
+        state.entity.sponsorships_collection.sponsorships.map((s) => {
+          if (s.id !== sponsorshipId) return s;
+
+          const updatedAddons = (s.add_ons || []).filter(
+            (addon) => addon.id !== addonId
+          );
+
+          return {
+            ...s,
+            add_ons: updatedAddons
+          };
+        });
+
+      return {
+        ...state,
+        entity: {
+          ...state.entity,
+          sponsorships_collection: {
+            ...state.entity.sponsorships_collection,
+            sponsorships: updatedSponsorships
+          }
+        }
+      };
+    }
+
     default:
       return state;
   }

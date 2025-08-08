@@ -39,7 +39,8 @@ const SponsorshipsBySummitSelectMUI = ({
   name,
   summitId,
   placeholder,
-  plainValue
+  plainValue,
+  hiddenOptions = []
 }) => {
   const [field, meta, helpers] = useField(name);
   const [options, setOptions] = useState([]);
@@ -51,10 +52,12 @@ const SponsorshipsBySummitSelectMUI = ({
   const fetchOptions = async () => {
     setLoading(true);
     await querySponsorshipsBySummit("", summitId, (results) => {
-      const normalized = results.map((r) => ({
-        value: r.id.toString(),
-        label: r.type.name
-      }));
+      const normalized = results
+        .filter((r) => !hiddenOptions.includes(r.id))
+        .map((r) => ({
+          value: r.id.toString(),
+          label: r.type.name
+        }));
       setOptions(normalized);
       setLoading(false);
     });
