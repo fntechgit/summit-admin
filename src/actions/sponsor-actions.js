@@ -285,7 +285,7 @@ export const addSponsorToSummit = (entity) => async (dispatch, getState) => {
 
   const normalizedEntity = normalizeSponsorToAdd(entity);
 
-  postRequest(
+  return postRequest(
     null,
     createAction(SPONSOR_ADDED_TO_SUMMIT),
     `${window.API_BASE_URL}/api/v2/summits/${currentSummit.id}/sponsors`,
