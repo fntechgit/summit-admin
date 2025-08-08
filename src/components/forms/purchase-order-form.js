@@ -28,7 +28,8 @@ import {
   hasErrors,
   isEmpty,
   scrollToError,
-  shallowEqual
+  shallowEqual,
+  capitalizeFirstLetter
 } from "../../utils/methods";
 import { DECIMAL_DIGITS } from "../../utils/constants";
 import CopyClipboard from "../buttons/copy-clipboard";
@@ -171,7 +172,7 @@ class PurchaseOrderForm extends React.Component {
         return (
           <>
             <p>{createdDate}</p>
-            <p>{entity?.payment_info_details?.brand}</p>
+            <p>{capitalizeFirstLetter(entity?.payment_info_details?.brand)}</p>
             <p>{entity?.payment_info_details?.last4}</p>
           </>
         );

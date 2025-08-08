@@ -501,3 +501,6 @@ export const arrayToString = (array, join = ",") => {
 
   return array;
 };
+
+export const capitalizeFirstLetter = (val) =>
+  String(val).charAt(0).toUpperCase() + String(val).slice(1);
