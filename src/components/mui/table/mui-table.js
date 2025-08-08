@@ -199,6 +199,9 @@ const MuiTable = ({
                                 className={`${
                                   col.dottedBorder && styles.dottedBorderLeft
                                 } ${col.className}`}
+                                sx={{
+                                  ...(row.cellStyle ? row.cellStyle : {})
+                                }}
                               >
                                 {col.render?.(row) || row[col.columnKey]}
                               </TableCell>

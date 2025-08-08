@@ -2318,6 +2318,8 @@
     "name_column_label": "Name",
     "items_column_label": "Items",
     "form_delete_success": "Form successfully deleted.",
+    "unarchive_button": "Unarchive",
+    "archive_button": "Archive",
     "placeholders": {
       "search": "Search..."
     },
