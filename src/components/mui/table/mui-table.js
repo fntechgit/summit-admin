@@ -52,9 +52,13 @@ const MuiTable = ({
     FIFTY_PER_PAGE
   ];
 
-  const customPerPageOptions = basePerPageOptions.includes(perPage)
+  const initialPerPage = React.useRef(perPage);
+
+  const customPerPageOptions = basePerPageOptions.includes(
+    initialPerPage.current
+  )
     ? basePerPageOptions
-    : [...basePerPageOptions, perPage].sort((a, b) => a - b);
+    : [...basePerPageOptions, initialPerPage.current].sort((a, b) => a - b);
 
   const { sortCol, sortDir } = options;
 
