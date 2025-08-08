@@ -30,20 +30,20 @@ const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
       sponsorships: []
     },
     validationSchema: yup.object({
-      company: yup.object().shape({
-        id: yup.number().required(),
-        name: yup.string().required(),
-        sponsorships: yup
-          .array()
-          .of(
-            yup.object().shape({
-              type_id: yup.number().required("Type ID is required")
-            })
-          )
-          .min(1, "At least one sponsorship is required")
-      })
+      company: yup.string().required(),
+      sponsorships: yup
+        .array()
+        .of(
+          yup.object().shape({
+            id: yup.number().required("Type ID is required"),
+            name: yup.string().required()
+          })
+        )
+        .min(1, "At least one sponsorship is required")
     }),
-    onSubmit,
+    onSubmit: (values) => {
+      onSubmit(values.sponsorships);
+    },
     enableReinitialize: true
   });
 
@@ -60,6 +60,12 @@ const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
       console.log("Validation errors:", formik.errors);
     }
   }, [formik.errors]);
+
+  useEffect(() => {
+    if (Object.keys(formik.values).length > 0) {
+      console.log("Validation values:", formik.values);
+    }
+  }, [formik.values]);
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
@@ -115,6 +121,9 @@ const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
                   summitId={summitId}
                   isMulti
                   placeholder={T.translate("edit_sponsor.placeholders.select")}
+                  hiddenOptions={sponsor.sponsorships_collection.sponsorships.map(
+                    (e) => e.type.id
+                  )}
                 />
               </Grid2>
             </Grid2>

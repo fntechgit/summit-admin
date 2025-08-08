@@ -21,7 +21,14 @@ import {
   getSponsorAdvertisements,
   getSponsorMaterials,
   getSponsorSocialNetworks,
-  getSponsorLeadReportSettingsMeta
+  getSponsorLeadReportSettingsMeta,
+  getSponsorTiers,
+  addTierToSponsor,
+  removeTierFromSponsor,
+  getSponsorshipAddons,
+  saveAddonsToSponsorship,
+  removeAddonToSponsorship,
+  setSelectedSponsorship
 } from "../../actions/sponsor-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 
@@ -36,7 +43,7 @@ const CustomTabPanel = (props) => {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box>{children}</Box>}
     </div>
   );
 };
@@ -54,7 +61,14 @@ const EditSponsorPage = (props) => {
     getSponsorAdvertisements,
     getSponsorMaterials,
     getSponsorSocialNetworks,
-    getSponsorLeadReportSettingsMeta
+    getSponsorLeadReportSettingsMeta,
+    getSponsorTiers,
+    addTierToSponsor,
+    removeTierFromSponsor,
+    getSponsorshipAddons,
+    saveAddonsToSponsorship,
+    removeAddonToSponsorship,
+    setSelectedSponsorship
   } = props;
 
   const [selectedTab, setSelectedTab] = useState(0);
@@ -69,10 +83,15 @@ const EditSponsorPage = (props) => {
       getSponsorMaterials(entity.id);
       getSponsorSocialNetworks(entity.id);
       getSponsorLeadReportSettingsMeta(entity.id);
+      getSponsorTiers(entity.id);
     } else {
       resetSponsorForm();
     }
   }, [entity.id]);
+
+  const handleSponsorshipPaginate = (page, perPage, order, orderDir) => {
+    getSponsorTiers(entity.id, page, perPage, order, orderDir);
+  };
 
   const tabs = [
     { label: T.translate("edit_sponsor.tab.general"), value: 0 },
@@ -117,10 +136,20 @@ const EditSponsorPage = (props) => {
             ))}
           </Tabs>
         </Box>
+        <CustomTabPanel value={selectedTab} index={0}>
+          <SponsorGeneralForm
+            sponsor={entity}
+            summitId={currentSummit.id}
+            onSponsorshipPaginate={handleSponsorshipPaginate}
+            onSponsorshipAdd={addTierToSponsor}
+            onSponsorshipDelete={removeTierFromSponsor}
+            getSponsorshipAddons={getSponsorshipAddons}
+            onSponsorshipSelect={setSelectedSponsorship}
+            onSponsorshipAddonSave={saveAddonsToSponsorship}
+            onSponsorshipAddonRemove={removeAddonToSponsorship}
+          />
+        </CustomTabPanel>
       </Container>
-      <CustomTabPanel value={selectedTab} index={0}>
-        <SponsorGeneralForm sponsor={entity} summitId={currentSummit.id} />
-      </CustomTabPanel>
     </Box>
   );
 };
@@ -143,5 +172,12 @@ export default connect(mapStateToProps, {
   getSponsorAdvertisements,
   getSponsorMaterials,
   getSponsorSocialNetworks,
-  getSponsorLeadReportSettingsMeta
+  getSponsorLeadReportSettingsMeta,
+  getSponsorTiers,
+  addTierToSponsor,
+  removeTierFromSponsor,
+  getSponsorshipAddons,
+  saveAddonsToSponsorship,
+  removeAddonToSponsorship,
+  setSelectedSponsorship
 })(EditSponsorPage);

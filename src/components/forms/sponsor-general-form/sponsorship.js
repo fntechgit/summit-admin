@@ -15,10 +15,33 @@ import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Grid2, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
+import ManageTierAddonsPopup from "./manage-tier-addons-popup";
 
-const Sponsorship = ({ sponsor, summitId }) => {
+const Sponsorship = ({
+  sponsor,
+  summitId,
+  onSponsorshipPaginate,
+  onSponsorshipAdd,
+  onSponsorshipDelete,
+  getSponsorshipAddons,
+  onSponsorshipSelect,
+  onSponsorshipAddonSave,
+  onSponsorshipAddonRemove
+}) => {
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
+  const [showManageTierAddonsPopup, setShowManageTierAddons] = useState(false);
+  const [selectedSponsorship, setSelectedSponsorship] = useState(null);
+
+  const {
+    sponsorships,
+    currentPage,
+    perPage,
+    totalSponsorships,
+    order,
+    orderDir
+  } = sponsor.sponsorships_collection;
 
   const handleCloseAddTierPopup = () => {
     setShowAddTierPopup(false);
@@ -28,7 +51,77 @@ const Sponsorship = ({ sponsor, summitId }) => {
     setShowAddTierPopup(true);
   };
 
-  const handleAddTierToSponsor = () => {};
+  const handleAddTierToSponsor = (sponsorships) => {
+    onSponsorshipAdd(sponsorships).then(() => setShowAddTierPopup(false));
+  };
+
+  const handlePageChange = (page) => {
+    onSponsorshipPaginate(page, perPage, order, orderDir);
+  };
+  const handlePerPageChange = (newPerPage) => {
+    onSponsorshipPaginate(currentPage, newPerPage, order, orderDir);
+  };
+  const handleSort = (index, key, dir) => {
+    onSponsorshipPaginate(currentPage, perPage, key, dir);
+  };
+
+  const handleOpenManageAddonsPopup = (sponsorship) => {
+    setSelectedSponsorship(sponsorship);
+    onSponsorshipSelect(sponsorship);
+    setShowManageTierAddons(true);
+  };
+
+  const handleCloseManageAddonsPopup = () => {
+    setShowManageTierAddons(false);
+    onSponsorshipSelect(null);
+    setSelectedSponsorship(null);
+  };
+
+  const handleAddSponsorshipAddon = (addons, sponsorshipId) => {
+    onSponsorshipAddonSave(addons, sponsorshipId).then(() =>
+      setShowManageTierAddons(false)
+    );
+  };
+
+  const columns = [
+    {
+      columnKey: "tier",
+      header: T.translate("edit_sponsor.tier"),
+      sortable: true
+    },
+    {
+      columnKey: "add_ons",
+      header: T.translate("edit_sponsor.addons"),
+      sortable: true,
+      render: (row) =>
+        row.add_ons.length > 0
+          ? row.add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
+          : "None"
+    },
+    {
+      columnKey: "manage_addons",
+      header: "",
+      width: 170,
+      align: "center",
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="small"
+          onClick={() => handleOpenManageAddonsPopup(row)}
+          sx={{
+            fontSize: "1.3rem",
+            fontWeight: 500,
+            lineHeight: "2.2rem",
+            padding: "4px 5px"
+          }}
+        >
+          {T.translate("edit_sponsor.manage_addons")}
+        </Button>
+      ),
+      className: "dottedBorderLeft"
+    }
+  ];
 
   return (
     <>
@@ -69,6 +162,33 @@ const Sponsorship = ({ sponsor, summitId }) => {
           onSubmit={handleAddTierToSponsor}
         />
       )}
+
+      {showManageTierAddonsPopup && (
+        <ManageTierAddonsPopup
+          sponsorship={selectedSponsorship}
+          summitId={summitId}
+          open={showManageTierAddonsPopup}
+          getSponsorshipAddons={getSponsorshipAddons}
+          onSponsorshipAddonRemove={onSponsorshipAddonRemove}
+          onClose={handleCloseManageAddonsPopup}
+          onSubmit={handleAddSponsorshipAddon}
+        />
+      )}
+
+      <div>
+        <MuiTable
+          data={sponsorships}
+          columns={columns}
+          totalRows={totalSponsorships}
+          orderField="order"
+          perPage={perPage}
+          currentPage={currentPage}
+          onDelete={onSponsorshipDelete}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+        />
+      </div>
     </>
   );
 };
