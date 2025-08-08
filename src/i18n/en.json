@@ -2317,6 +2317,7 @@
     "code_column_label": "Code",
     "name_column_label": "Name",
     "items_column_label": "Items",
+    "form_delete_success": "Form successfully deleted.",
     "placeholders": {
       "search": "Search..."
     },
