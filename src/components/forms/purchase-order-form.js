@@ -21,13 +21,15 @@ import {
   PromocodeInput,
   TicketTypesInput
 } from "openstack-uicore-foundation/lib/components";
+import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { Pagination } from "react-bootstrap";
 import OwnerInput from "../inputs/owner-input";
 import {
   hasErrors,
   isEmpty,
   scrollToError,
-  shallowEqual
+  shallowEqual,
+  capitalizeFirstLetter
 } from "../../utils/methods";
 import { DECIMAL_DIGITS } from "../../utils/constants";
 import CopyClipboard from "../buttons/copy-clipboard";
@@ -162,11 +164,15 @@ class PurchaseOrderForm extends React.Component {
 
   getPaymentDetails = () => {
     const { entity } = this.state;
+    const createdDate = `${epochToMoment(entity?.created).format(
+      "MMMM Do h:mma"
+    )} UTC`;
     switch (entity?.payment_info_type) {
       case "card": {
         return (
           <>
-            <p>{entity?.payment_info_details?.brand}</p>
+            <p>{createdDate}</p>
+            <p>{capitalizeFirstLetter(entity?.payment_info_details?.brand)}</p>
             <p>{entity?.payment_info_details?.last4}</p>
           </>
         );
@@ -174,6 +180,7 @@ class PurchaseOrderForm extends React.Component {
       case "link": {
         return (
           <>
+            <p>{createdDate}</p>
             <p>{entity?.payment_info_details?.email}</p>
             <p>{entity?.payment_info_details?.country}</p>
           </>
@@ -182,6 +189,7 @@ class PurchaseOrderForm extends React.Component {
       case "us_bank_account": {
         return (
           <>
+            <p>{createdDate}</p>
             <p>{entity?.payment_info_details?.bank_name}</p>
             <p>{entity?.payment_info_details?.account_type}</p>
             <p>{entity?.payment_info_details?.last4}</p>
@@ -332,16 +340,16 @@ class PurchaseOrderForm extends React.Component {
                   {T.translate("edit_purchase_order.payment_details")}
                 </label>
                 <br />
-                {this.getPaymentDetails()}
                 <p>
                   <a
                     target="_blank"
                     rel="noreferrer"
                     href={`https://dashboard.stripe.com/payments/${entity.payment_gateway_cart_id}`}
                   >
-                    {T.translate("edit_purchase_order.see_at_payment_gateway")}
+                    {entity.payment_gateway_cart_id}
                   </a>
                 </p>
+                {this.getPaymentDetails()}
               </div>
             </div>
             <div className="row form-group">

@@ -493,3 +493,14 @@ export const moveItem = (array, fromIndex, toIndex) => {
 
   return newArray;
 };
+
+export const arrayToString = (array, join = ",") => {
+  if (Array.isArray(array)) {
+    return array.length > 0 ? array.join(join) : "";
+  }
+
+  return array;
+};
+
+export const capitalizeFirstLetter = (val) =>
+  String(val).charAt(0).toUpperCase() + String(val).slice(1);
