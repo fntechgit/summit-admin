@@ -21,7 +21,6 @@ import { DECIMAL_DIGITS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   items: [],
-  term: "",
   hideArchived: false,
   order: "name",
   orderDir: 1,
@@ -40,7 +39,7 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_FORM_ITEMS: {
-      const { order, orderDir, page, term, hideArchived } = payload;
+      const { order, orderDir, page, hideArchived } = payload;
 
       return {
         ...state,
@@ -48,7 +47,6 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         orderDir,
         items: [],
         currentPage: page,
-        term,
         hideArchived
       };
     }

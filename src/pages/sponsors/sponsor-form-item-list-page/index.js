@@ -29,70 +29,36 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "../../../components/mui/table/mui-table";
-import {
-  getSponsorFormItems,
-  saveSponsorFormItem
-} from "../../../actions/sponsor-forms-actions";
+import { getSponsorFormItems } from "../../../actions/sponsor-forms-actions";
 
 const SponsorFormItemListPage = ({
   match,
   items,
   currentPage,
   perPage,
-  term,
   hideArchived,
   order,
   orderDir,
   totalCount,
-  getSponsorFormItems,
-  saveSponsorFormItem
+  getSponsorFormItems
 }) => {
   const { form_id: formId } = match.params;
 
   useEffect(() => {
-    saveSponsorFormItem(formId, "LENA");
-  }, []);
-
-  useEffect(() => {
-    getSponsorFormItems(
-      formId,
-      term,
-      currentPage,
-      perPage,
-      order,
-      orderDir,
-      hideArchived
-    );
+    getSponsorFormItems(formId);
   }, []);
 
   const handlePageChange = (page) => {
-    getSponsorFormItems(
-      formId,
-      term,
-      page,
-      perPage,
-      order,
-      orderDir,
-      hideArchived
-    );
+    getSponsorFormItems(formId, page, perPage, order, orderDir, hideArchived);
   };
 
   const handleSort = (index, key, dir) => {
-    getSponsorFormItems(
-      formId,
-      term,
-      currentPage,
-      perPage,
-      key,
-      dir,
-      hideArchived
-    );
+    getSponsorFormItems(formId, currentPage, perPage, key, dir, hideArchived);
   };
 
   const handleHideArchivedForms = (ev) => {
     getSponsorFormItems(
       formId,
-      term,
       currentPage,
       perPage,
       order,
@@ -281,6 +247,5 @@ const mapStateToProps = ({ sponsorFormItemsListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSponsorFormItems,
-  saveSponsorFormItem
+  getSponsorFormItems
 })(SponsorFormItemListPage);
