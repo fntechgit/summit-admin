@@ -14,7 +14,8 @@
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_SPONSOR_FORM_ITEMS,
-  REQUEST_SPONSOR_FORM_ITEMS
+  REQUEST_SPONSOR_FORM_ITEMS,
+  RESET_SPONSOR_FORM_ITEM
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { DECIMAL_DIGITS } from "../../utils/constants";
@@ -27,7 +28,27 @@ const DEFAULT_STATE = {
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
-  totalCount: 0
+  totalCount: 0,
+  currentItem: {
+    code: "",
+    name: "",
+    description: "",
+    early_bird_rate: "",
+    standard_rate: "",
+    onsite_rate: "",
+    quantity_limit_per_show: "",
+    quantity_limit_per_sponsor: "",
+    default_quantity: "",
+    images: [],
+    meta_fields: [
+      {
+        name: "",
+        type: "Text",
+        is_required: false,
+        values: []
+      }
+    ]
+  }
 };
 
 const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
@@ -76,6 +97,9 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         totalCount: total,
         lastPage
       };
+    }
+    case RESET_SPONSOR_FORM_ITEM: {
+      return { ...state, currentItem: DEFAULT_STATE.currentItem };
     }
     default:
       return state;

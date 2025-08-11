@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
@@ -30,6 +30,7 @@ import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "../../../components/mui/table/mui-table";
 import { getSponsorFormItems } from "../../../actions/sponsor-forms-actions";
+import ItemPopup from "./components/item-popup";
 
 const SponsorFormItemListPage = ({
   match,
@@ -42,6 +43,7 @@ const SponsorFormItemListPage = ({
   totalCount,
   getSponsorFormItems
 }) => {
+  const [openPopup, setOpenPopup] = useState(null);
   const { form_id: formId } = match.params;
 
   useEffect(() => {
@@ -68,11 +70,11 @@ const SponsorFormItemListPage = ({
   };
 
   const handleRowEdit = () => {
-    console.log("edit item");
+    console.log("EDIT ITEM");
   };
 
   const handleNewItem = () => {
-    console.log("new item");
+    setOpenPopup("crud");
   };
 
   const handleNewInventoryItem = () => {
@@ -238,6 +240,11 @@ const SponsorFormItemListPage = ({
           />
         </div>
       )}
+      <ItemPopup
+        formId={formId}
+        open={openPopup === "crud"}
+        onClose={() => setOpenPopup(null)}
+      />
     </div>
   );
 };
