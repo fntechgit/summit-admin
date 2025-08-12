@@ -25,6 +25,7 @@ import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
+  CENTS_FACTOR,
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
@@ -500,6 +501,8 @@ export const saveSponsorFormItem =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
 
+    dispatch(startLoading());
+
     const params = {
       access_token: accessToken
     };
@@ -514,22 +517,32 @@ export const saveSponsorFormItem =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(({ response }) => {
+        const promises = [];
+
         if (normalizedEntity.images.length > 0) {
-          saveItemImages(
+          const savingImages = saveItemImages(
             formId,
             response.id,
             normalizedEntity.images
-          )(dispatch, getState).then(() => {
-            dispatch(
-              snackbarSuccessHandler({
-                title: T.translate("general.success"),
-                html: T.translate("sponsor_form_item_list.edit_item.created")
-              })
-            );
-          });
+          )(dispatch, getState);
+
+          promises.push(savingImages);
         }
+
+        return Promise.all(promises).then(() => {
+          dispatch(getSponsorFormItems(formId));
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("sponsor_form_item_list.edit_item.created")
+            })
+          );
+        });
       })
-      .catch(() => {}); // need to catch promise reject
+      .catch(() => {}) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const updateSponsorFormItem =
@@ -554,7 +567,7 @@ export const updateSponsorFormItem =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        dispatch(getSponsorForms());
+        dispatch(getSponsorFormItems(formId));
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
@@ -589,8 +602,12 @@ const normalizeItem = (entity) => {
   normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
 
   if (early_bird_rate === "") delete normalizedEntity.early_bird_rate;
+  else normalizedEntity.early_bird_rate = early_bird_rate * CENTS_FACTOR;
   if (standard_rate === "") delete normalizedEntity.standard_rate;
+  else normalizedEntity.standard_rate = standard_rate * CENTS_FACTOR;
   if (onsite_rate === "") delete normalizedEntity.onsite_rate;
+  else normalizedEntity.onsite_rate = onsite_rate * CENTS_FACTOR;
+
   if (quantity_limit_per_show === "")
     delete normalizedEntity.quantity_limit_per_show;
   if (quantity_limit_per_sponsor === "")

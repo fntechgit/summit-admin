@@ -11,8 +11,7 @@
  * limitations under the License.
  * */
 
-const CENTS_FACTOR = 100;
-const DECIMAL_PLACES = 2;
+import { CENTS_FACTOR, DECIMAL_PLACES } from "./constants";
 
 /**
  * Converts a decimal amount to cents.

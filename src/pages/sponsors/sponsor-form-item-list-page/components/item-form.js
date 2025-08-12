@@ -17,6 +17,7 @@ import MuiFormikTextField from "../../../../components/inputs/mui-formik-textfie
 import AdditionalInputList from "../../components/additional-input-list";
 import useScrollToError from "../../../../hooks/useScrollToError";
 import MuiFormikUpload from "../../../../components/inputs/mui-formik-upload";
+import MuiFormikPriceField from "../../../../components/inputs/mui-formik-pricefield";
 
 const buildInitialValues = (data) => {
   const normalized = { ...data };
@@ -95,36 +96,30 @@ const ItemForm = ({ initialValues, onSubmit }) => {
               />
             </Grid2>
             <Grid2 size={4}>
-              <MuiFormikTextField
+              <MuiFormikPriceField
                 name="early_bird_rate"
                 label={T.translate(
                   "sponsor_form_item_list.edit_item.early_bird_rate"
                 )}
                 fullWidth
-                type="number"
-                inputProps={{ min: 0 }}
               />
             </Grid2>
             <Grid2 size={4}>
-              <MuiFormikTextField
+              <MuiFormikPriceField
                 name="standard_rate"
                 label={T.translate(
                   "sponsor_form_item_list.edit_item.standard_rate"
                 )}
                 fullWidth
-                type="number"
-                inputProps={{ min: 0 }}
               />
             </Grid2>
             <Grid2 size={4}>
-              <MuiFormikTextField
+              <MuiFormikPriceField
                 name="onsite_rate"
                 label={T.translate(
                   "sponsor_form_item_list.edit_item.onsite_rate"
                 )}
                 fullWidth
-                type="number"
-                inputProps={{ min: 0 }}
               />
             </Grid2>
             <Grid2 size={4}>

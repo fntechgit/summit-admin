@@ -18,7 +18,7 @@ import {
   RESET_SPONSOR_FORM_ITEM
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { DECIMAL_DIGITS } from "../../utils/constants";
+import { CENTS_FACTOR, DECIMAL_DIGITS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   items: [],
@@ -82,9 +82,15 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         id: a.id,
         code: a.code,
         name: a.name,
-        early_bird_rate: `$${a.early_bird_rate.toFixed(DECIMAL_DIGITS)}`,
-        standard_rate: `$${a.standard_rate.toFixed(DECIMAL_DIGITS)}`,
-        onsite_rate: `$${a.onsite_rate.toFixed(DECIMAL_DIGITS)}`,
+        early_bird_rate: `$${(a.early_bird_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        )}`,
+        standard_rate: `$${(a.standard_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        )}`,
+        onsite_rate: `$${(a.onsite_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        )}`,
         default_quantity: a.default_quantity,
         is_archived: a.is_archived,
         images: a.images
