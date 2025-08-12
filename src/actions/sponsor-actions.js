@@ -181,9 +181,11 @@ export const getSponsors =
     const params = {
       page: currentPage,
       per_page: perPage,
-      expand: "company,sponsorship,sponsorship.type",
-      relations: "company.none,sponsorship.none,sponsorship.type.none,none",
-      fields: "id,company.name,company.id,sponsorship.id,sponsorship.type.name",
+      expand:
+        "company,sponsorships,sponsorships.type,sponsorships.type.type,sponsorships.add_ons",
+      relations: "company.none,sponsorships.none,sponsorships.type.none,none",
+      fields:
+        "id,company.name,company.id,sponsorships.id,sponsorships.type.type.name,sponsorships.add_ons.name,sponsorships.add_ons.type",
       access_token: accessToken
     };
 
@@ -200,7 +202,7 @@ export const getSponsors =
     return getRequest(
       createAction(REQUEST_SPONSORS),
       createAction(RECEIVE_SPONSORS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
+      `${window.API_BASE_URL}/api/v2/summits/${currentSummit.id}/sponsors`,
       authErrorHandler,
       { currentPage, perPage, order, orderDir, term }
     )(params)(dispatch).then(() => {
