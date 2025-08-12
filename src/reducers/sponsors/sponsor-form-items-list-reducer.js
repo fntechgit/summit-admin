@@ -13,6 +13,7 @@
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
+  RECEIVE_SPONSOR_FORM_ITEM,
   RECEIVE_SPONSOR_FORM_ITEMS,
   REQUEST_SPONSOR_FORM_ITEMS,
   RESET_SPONSOR_FORM_ITEM,
@@ -104,6 +105,33 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         totalCount: total,
         lastPage
       };
+    }
+    case RECEIVE_SPONSOR_FORM_ITEM: {
+      const item = payload.response;
+
+      const currentItem = {
+        ...item,
+        early_bird_rate: (item.early_bird_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        ),
+        standard_rate: (item.standard_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        ),
+        onsite_rate: (item.onsite_rate / CENTS_FACTOR).toFixed(DECIMAL_DIGITS),
+        meta_fields:
+          item.meta_fields.length > 0
+            ? item.meta_fields
+            : [
+                {
+                  name: "",
+                  type: "Text",
+                  is_required: false,
+                  values: []
+                }
+              ]
+      };
+
+      return { ...state, currentItem };
     }
     case RESET_SPONSOR_FORM_ITEM: {
       return { ...state, currentItem: DEFAULT_STATE.currentItem };

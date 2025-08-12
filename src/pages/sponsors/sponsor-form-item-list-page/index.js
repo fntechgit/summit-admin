@@ -31,7 +31,8 @@ import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "../../../components/mui/table/mui-table";
 import {
   deleteSponsorFormItem,
-  getSponsorFormItems
+  getSponsorFormItems,
+  getSponsorFormItem
 } from "../../../actions/sponsor-forms-actions";
 import ItemPopup from "./components/item-popup";
 
@@ -45,6 +46,7 @@ const SponsorFormItemListPage = ({
   orderDir,
   totalCount,
   getSponsorFormItems,
+  getSponsorFormItem,
   deleteSponsorFormItem
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
@@ -73,8 +75,10 @@ const SponsorFormItemListPage = ({
     );
   };
 
-  const handleRowEdit = () => {
-    console.log("EDIT ITEM");
+  const handleRowEdit = (row) => {
+    getSponsorFormItem(formId, row.id).then(() => {
+      setOpenPopup("crud");
+    });
   };
 
   const handleRowDelete = (itemId) => {
@@ -128,9 +132,9 @@ const SponsorFormItemListPage = ({
       render: (row) =>
         row.images?.length > 0 ? (
           <Tooltip title={row.images[0].file_url} placement="top" arrow>
-            <IconButton size="small">
+            <IconButton size="large">
               <ImageIcon
-                fontSize="small"
+                fontSize="large"
                 onClick={() =>
                   window.open(
                     row.images[0].file_url,
@@ -264,5 +268,6 @@ const mapStateToProps = ({ sponsorFormItemsListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorFormItems,
-  deleteSponsorFormItem
+  deleteSponsorFormItem,
+  getSponsorFormItem
 })(SponsorFormItemListPage);

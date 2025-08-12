@@ -48,6 +48,7 @@ export const RESET_TEMPLATE_FORM = "RESET_TEMPLATE_FORM";
 // ITEMS
 export const REQUEST_SPONSOR_FORM_ITEMS = "REQUEST_SPONSOR_FORM_ITEMS";
 export const RECEIVE_SPONSOR_FORM_ITEMS = "RECEIVE_SPONSOR_FORM_ITEMS";
+export const RECEIVE_SPONSOR_FORM_ITEM = "RECEIVE_SPONSOR_FORM_ITEM";
 export const SPONSOR_FORM_ITEM_UPDATED = "SPONSOR_FORM_ITEM_UPDATED";
 export const RESET_SPONSOR_FORM_ITEM = "RESET_SPONSOR_FORM_ITEM";
 export const SPONSOR_FORM_ITEM_DELETED = "SPONSOR_FORM_ITEM_DELETED";
@@ -465,6 +466,28 @@ export const getSponsorFormItems =
     });
   };
 
+export const getSponsorFormItem =
+  (formId, itemId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_FORM_ITEM),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${itemId}`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
 export const deleteSponsorFormItem =
   (formId, itemId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -592,20 +615,32 @@ export const updateSponsorFormItem =
     return putRequest(
       null,
       createAction(SPONSOR_FORM_ITEM_UPDATED),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${entity.id}`,
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        dispatch(getSponsorFormItems(formId));
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate("sponsor_form_item_list.edit_item.updated", {
-              formName: entity.name
+        const promises = [];
+
+        if (normalizedEntity.images.length > 0) {
+          const savingImages = saveItemImages(
+            formId,
+            entity.id,
+            normalizedEntity.images
+          )(dispatch, getState);
+
+          promises.push(savingImages);
+        }
+
+        return Promise.all(promises).then(() => {
+          dispatch(getSponsorFormItems(formId));
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("sponsor_form_item_list.edit_item.updated")
             })
-          })
-        );
+          );
+        });
       })
       .catch(() => {}) // need to catch promise reject
       .finally(() => {
@@ -626,10 +661,13 @@ const normalizeItem = (entity) => {
     onsite_rate,
     quantity_limit_per_show,
     quantity_limit_per_sponsor,
-    default_quantity
+    default_quantity,
+    images
   } = entity;
 
   normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
+
+  normalizedEntity.images = images?.filter((img) => img.file_path);
 
   if (early_bird_rate === "") delete normalizedEntity.early_bird_rate;
   else normalizedEntity.early_bird_rate = early_bird_rate * CENTS_FACTOR;
