@@ -86,7 +86,9 @@ const SponsorFormsListPage = ({
   };
 
   const handleArchiveItem = (item) =>
-    item.is_archived ? unarchiveSponsorForm(item) : archiveSponsorForm(item);
+    item.is_archived
+      ? unarchiveSponsorForm(item.id)
+      : archiveSponsorForm(item.id);
 
   const handleHideArchivedForms = (ev) => {
     getSponsorForms(
@@ -127,7 +129,7 @@ const SponsorFormsListPage = ({
           size="small"
           onClick={() => handleManageItems(row)}
         >
-          Manage Items
+          Manage&nbsp;Items
         </Button>
       ),
       dottedBorder: true
@@ -145,8 +147,8 @@ const SponsorFormsListPage = ({
           onClick={() => handleArchiveItem(row)}
         >
           {row.is_archived
-            ? T.translate("inventory_item_list.unarchive_button")
-            : T.translate("inventory_item_list.archive_button")}
+            ? T.translate("sponsor_forms.unarchive_button")
+            : T.translate("sponsor_forms.archive_button")}
         </Button>
       ),
       dottedBorder: true
@@ -157,6 +159,16 @@ const SponsorFormsListPage = ({
     sortCol: order,
     sortDir: orderDir
   };
+
+  const tableData = sponsorForms.map((sf) => ({
+    ...sf,
+    cellStyle: sf.is_archived
+      ? {
+          backgroundColor: "background.light",
+          color: "text.disabled"
+        }
+      : {}
+  }));
 
   return (
     <div className="container">
@@ -234,7 +246,7 @@ const SponsorFormsListPage = ({
         <div>
           <MuiTable
             columns={columns}
-            data={sponsorForms}
+            data={tableData}
             options={tableOptions}
             perPage={perPage}
             totalRows={totalCount}
