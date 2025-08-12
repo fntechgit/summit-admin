@@ -15,7 +15,8 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_SPONSOR_FORM_ITEMS,
   REQUEST_SPONSOR_FORM_ITEMS,
-  RESET_SPONSOR_FORM_ITEM
+  RESET_SPONSOR_FORM_ITEM,
+  SPONSOR_FORM_ITEM_DELETED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { CENTS_FACTOR, DECIMAL_DIGITS } from "../../utils/constants";
@@ -106,6 +107,12 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
     }
     case RESET_SPONSOR_FORM_ITEM: {
       return { ...state, currentItem: DEFAULT_STATE.currentItem };
+    }
+    case SPONSOR_FORM_ITEM_DELETED: {
+      const { itemId } = payload;
+      const items = state.items.filter((it) => it.id !== itemId);
+
+      return { ...state, items };
     }
     default:
       return state;

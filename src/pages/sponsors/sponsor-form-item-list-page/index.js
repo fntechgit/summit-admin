@@ -29,7 +29,10 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "../../../components/mui/table/mui-table";
-import { getSponsorFormItems } from "../../../actions/sponsor-forms-actions";
+import {
+  deleteSponsorFormItem,
+  getSponsorFormItems
+} from "../../../actions/sponsor-forms-actions";
 import ItemPopup from "./components/item-popup";
 
 const SponsorFormItemListPage = ({
@@ -41,7 +44,8 @@ const SponsorFormItemListPage = ({
   order,
   orderDir,
   totalCount,
-  getSponsorFormItems
+  getSponsorFormItems,
+  deleteSponsorFormItem
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const { form_id: formId } = match.params;
@@ -71,6 +75,10 @@ const SponsorFormItemListPage = ({
 
   const handleRowEdit = () => {
     console.log("EDIT ITEM");
+  };
+
+  const handleRowDelete = (itemId) => {
+    deleteSponsorFormItem(formId, itemId);
   };
 
   const handleNewItem = () => {
@@ -235,6 +243,7 @@ const SponsorFormItemListPage = ({
             totalRows={totalCount}
             currentPage={currentPage}
             onEdit={handleRowEdit}
+            onDelete={handleRowDelete}
             onPageChange={handlePageChange}
             onSort={handleSort}
           />
@@ -254,5 +263,6 @@ const mapStateToProps = ({ sponsorFormItemsListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSponsorFormItems
+  getSponsorFormItems,
+  deleteSponsorFormItem
 })(SponsorFormItemListPage);
