@@ -2384,6 +2384,7 @@
     "add_item_from_inventory": "Add Item from Inventory",
     "archive_button": "Archive",
     "delete_form_template_item_warning": "Are you sure you want to delete form template item ",
+    "item_delete_success": "Item successfully deleted.",
     "add_inventory_item": "Add Inventory Item",
     "add_form_template_item": "Create new Item",
     "placeholders": {
