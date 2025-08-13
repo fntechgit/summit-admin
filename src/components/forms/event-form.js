@@ -926,9 +926,9 @@ class EventForm extends React.Component {
     }));
 
     const rsvp_types_ddl = [
-      { label: "None", value: "None" },
-      { label: "Public", value: "Public" },
-      { label: "Private", value: "Private" }
+      { label: T.translate("edit_event.rsvp_type_none"), value: "None" },
+      { label: T.translate("edit_event.rsvp_type_public"), value: "Public" },
+      { label: T.translate("edit_event.rsvp_type_private"), value: "Private" }
     ];
 
     const material_columns = [
