@@ -27,7 +27,7 @@ import {
   updateSummitSponsorhipOrder,
   uploadSponsorshipBadgeImage
 } from "../../actions/sponsor-actions";
-import MuiTable from "../../components/mui/table/mui-table";
+import MuiTableSortable from "../../components/mui/sortable-table/mui-table-sortable";
 import EditTierPopup from "./popup/edit-tier-popup";
 
 const SummitSponsorshipListPage = ({
@@ -175,7 +175,7 @@ const SummitSponsorshipListPage = ({
       )}
 
       {sponsorships.length > 0 && (
-        <MuiTable
+        <MuiTableSortable
           data={tableData}
           columns={columns}
           totalRows={totalSponsorships}

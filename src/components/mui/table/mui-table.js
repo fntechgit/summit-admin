@@ -10,11 +10,9 @@ import TablePagination from "@mui/material/TablePagination";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { visuallyHidden } from "@mui/utils";
 
 import styles from "./mui-table.module.less";
@@ -38,10 +36,7 @@ const MuiTable = ({
   options = { sortCol: "", sortDir: "" },
   getName = (item) => item.name,
   onEdit,
-  onDelete,
-  onReorder,
-  idKey = "id",
-  updateOrderKey = "order"
+  onDelete
 }) => {
   const handleChangePage = (_, newPage) => {
     onPageChange(newPage + 1);
@@ -62,29 +57,6 @@ const MuiTable = ({
     : [...basePerPageOptions, perPage].sort((a, b) => a - b);
 
   const { sortCol, sortDir } = options;
-
-  const handleDragEnd = (result) => {
-    if (!result.destination || result.source.index === result.destination.index)
-      return;
-
-    const reordered = [...data];
-    const [movedItem] = reordered.splice(result.source.index, 1);
-    reordered.splice(result.destination.index, 0, movedItem);
-
-    // change value based on updateOrderKey
-    if (updateOrderKey) {
-      reordered.forEach((item, idx) => {
-        item[updateOrderKey] = idx + 1;
-      });
-    }
-
-    const movedItemId = movedItem.id;
-    const newOrder = reordered.find(
-      (item) => item[idKey || "id"] === movedItemId
-    )?.[updateOrderKey];
-
-    onReorder?.(reordered, movedItemId, newOrder);
-  };
 
   const handleDelete = async (item) => {
     const isConfirmed = await showConfirmDialog({
@@ -126,10 +98,8 @@ const MuiTable = ({
                       <TableSortLabel
                         active={sortCol === col.columnKey}
                         direction={
-                          sortCol === col.columnKey
-                            ? sortDir === 1
-                              ? "asc"
-                              : "desc"
+                          sortCol === col.columnKey && sortDir === "-1"
+                            ? "desc"
                             : "asc"
                         }
                         onClick={() => onSort(_, col.columnKey, sortDir * -1)}
@@ -150,121 +120,65 @@ const MuiTable = ({
                 ))}
                 {onEdit && <TableCell sx={{ width: 40 }} />}
                 {onDelete && <TableCell sx={{ width: 40 }} />}
-                {onReorder && <TableCell sx={{ width: 40 }} />}
               </TableRow>
             </TableHead>
 
             {/* TABLE BODY */}
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="mui-table-droppable">
-                {(droppableProvided) => (
-                  <TableBody
-                    ref={droppableProvided.innerRef}
-                    {...droppableProvided.droppableProps}
-                  >
-                    {data.map((row, rowIndex) => (
-                      <Draggable
-                        key={row[idKey] || rowIndex}
-                        draggableId={String(row[idKey] || rowIndex)}
-                        index={rowIndex}
+            <TableBody>
+              {data.map((row) => (
+                <TableRow>
+                  {/* Main content columns */}
+                  {columns.map((col) => (
+                    <TableCell
+                      key={col.columnKey}
+                      align={col.align ?? "left"}
+                      className={`${
+                        col.dottedBorder && styles.dottedBorderLeft
+                      } ${col.className}`}
+                      sx={{
+                        ...(row.cellStyle ? row.cellStyle : {})
+                      }}
+                    >
+                      {col.render?.(row) || row[col.columnKey]}
+                    </TableCell>
+                  ))}
+                  {/* Edit column */}
+                  {onEdit && (
+                    <TableCell
+                      align="center"
+                      sx={{ width: 40 }}
+                      className={styles.dottedBorderLeft}
+                    >
+                      <IconButton size="large" onClick={() => onEdit(row)}>
+                        <EditIcon fontSize="large" />
+                      </IconButton>
+                    </TableCell>
+                  )}
+                  {/* Delete column */}
+                  {onDelete && (
+                    <TableCell
+                      align="center"
+                      sx={{ width: 40 }}
+                      className={styles.dottedBorderLeft}
+                    >
+                      <IconButton
+                        size="large"
+                        onClick={() => handleDelete(row)}
                       >
-                        {(provided, snapshot) => (
-                          <TableRow
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            sx={{
-                              ...(snapshot.isDragging
-                                ? {
-                                    display: "table",
-                                    width: "100%",
-                                    tableLayout: "fixed",
-                                    backgroundColor: "#f0f0f0",
-                                    transform: "scale(1.01)",
-                                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                                    zIndex: 1,
-                                    position: "relative",
-                                    transition:
-                                      "transform 0.2s ease, background-color 0.2s ease"
-                                  }
-                                : {
-                                    transition: "background-color 0.2s ease"
-                                  })
-                            }}
-                          >
-                            {/* Main content columns */}
-                            {columns.map((col) => (
-                              <TableCell
-                                key={col.columnKey}
-                                align={col.align ?? "left"}
-                                className={`${
-                                  col.dottedBorder && styles.dottedBorderLeft
-                                } ${col.className}`}
-                                sx={{
-                                  ...(row.cellStyle ? row.cellStyle : {})
-                                }}
-                              >
-                                {col.render?.(row) || row[col.columnKey]}
-                              </TableCell>
-                            ))}
-                            {/* Edit column */}
-                            {onEdit && (
-                              <TableCell
-                                align="center"
-                                sx={{ width: 40 }}
-                                className={styles.dottedBorderLeft}
-                              >
-                                <IconButton
-                                  size="large"
-                                  onClick={() => onEdit(row)}
-                                >
-                                  <EditIcon fontSize="large" />
-                                </IconButton>
-                              </TableCell>
-                            )}
-                            {/* Delete column */}
-                            {onDelete && (
-                              <TableCell
-                                align="center"
-                                sx={{ width: 40 }}
-                                className={styles.dottedBorderLeft}
-                              >
-                                <IconButton
-                                  size="large"
-                                  onClick={() => handleDelete(row)}
-                                >
-                                  <DeleteIcon fontSize="large" />
-                                </IconButton>
-                              </TableCell>
-                            )}
-                            {/* Re order column */}
-                            {onReorder && (
-                              <TableCell
-                                align="center"
-                                sx={{ width: 40 }}
-                                className={styles.dottedBorderLeft}
-                                {...provided.dragHandleProps}
-                              >
-                                <IconButton size="large">
-                                  <UnfoldMoreIcon fontSize="large" />
-                                </IconButton>
-                              </TableCell>
-                            )}
-                          </TableRow>
-                        )}
-                      </Draggable>
-                    ))}
-                    {droppableProvided.placeholder}
-                    {data.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} align="center">
-                          {T.translate("mui_table.no_items")}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                )}
-              </Droppable>
-            </DragDropContext>
+                        <DeleteIcon fontSize="large" />
+                      </IconButton>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+              {data.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={columns.length} align="center">
+                    {T.translate("mui_table.no_items")}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
           </Table>
         </TableContainer>
 
