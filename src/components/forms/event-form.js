@@ -64,6 +64,7 @@ import {
   ONE_MINUTE
 } from "../../utils/constants";
 import CopyClipboard from "../buttons/copy-clipboard";
+import EventRsvpList from "../rsvp/event-rsvp-list";
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -1699,30 +1700,38 @@ class EventForm extends React.Component {
             )}
           </div>
           {entity.rsvp_type !== "None" && (
-            <div className="row form-group">
-              <div className="col-md-6">
-                <label> {T.translate("edit_event.rsvp_link")} </label>
-                <input
-                  className="form-control"
-                  id="rsvp_link"
-                  value={entity.rsvp_link}
-                  onChange={this.handleChange}
-                />
+            <>
+              <div className="row form-group">
+                <div className="col-md-6">
+                  <label> {T.translate("edit_event.rsvp_link")} </label>
+                  <input
+                    className="form-control"
+                    id="rsvp_link"
+                    value={entity.rsvp_link}
+                    onChange={this.handleChange}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label> {T.translate("edit_event.rsvp_template")} </label>
+                  <Dropdown
+                    id="rsvp_template_id"
+                    value={entity.rsvp_template_id}
+                    onChange={this.handleChange}
+                    placeholder={T.translate(
+                      "edit_event.placeholders.select_rsvp_template"
+                    )}
+                    options={rsvp_templates_ddl}
+                    clearable
+                  />
+                </div>
               </div>
-              <div className="col-md-6">
-                <label> {T.translate("edit_event.rsvp_template")} </label>
-                <Dropdown
-                  id="rsvp_template_id"
-                  value={entity.rsvp_template_id}
-                  onChange={this.handleChange}
-                  placeholder={T.translate(
-                    "edit_event.placeholders.select_rsvp_template"
-                  )}
-                  options={rsvp_templates_ddl}
-                  clearable
-                />
+              <hr />
+              <div className="row form-group">
+                <div className="col-md-12">
+                  <EventRsvpList />
+                </div>
               </div>
-            </div>
+            </>
           )}
         </Panel>
         {entity.id != 0 && this.isEventType(EVENT_TYPE_PRESENTATION) && (

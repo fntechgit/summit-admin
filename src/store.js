@@ -155,6 +155,7 @@ import formTemplateListReducer from "./reducers/sponsors_inventory/form-template
 import formTemplateItemReducer from "./reducers/sponsors_inventory/form-template-item-reducer.js";
 import formTemplateItemListReducer from "./reducers/sponsors_inventory/form-template-item-list-reducer.js";
 import sponsorSettingsReducer from "./reducers/sponsor_settings/sponsor-settings-reducer";
+import eventRSVPListReducer from "./reducers/rsvps/event-rsvp-list-reducer.js";
 
 // default: localStorage if web, AsyncStorage if react-native
 
@@ -201,6 +202,7 @@ const reducers = persistCombineReducers(config, {
   currentRsvpTemplateListState: rsvpTemplateListReducer,
   currentRsvpTemplateState: rsvpTemplateReducer,
   currentRsvpQuestionState: rsvpQuestionReducer,
+  currentEventRsvpListState: eventRSVPListReducer,
   currentTicketTypeListState: ticketTypeListReducer,
   currentTicketTypeState: ticketTypeReducer,
   currentTaxTypeListState: taxTypeListReducer,
