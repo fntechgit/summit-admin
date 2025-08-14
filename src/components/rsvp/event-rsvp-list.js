@@ -4,9 +4,14 @@ import {
   Table
 } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react";
+import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
 import { connect } from "react-redux";
-import { getEventRSVPS } from "../../actions/event-rsvp-actions";
+import {
+  deleteEventRSVP,
+  editEventRSVP,
+  getEventRSVPS
+} from "../../actions/event-rsvp-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const EventRSVPList = ({
@@ -17,18 +22,57 @@ const EventRSVPList = ({
   order,
   orderDir,
   eventRsvp,
-  getEventRSVPS
+  getEventRSVPS,
+  // editEventRSVP,
+  deleteEventRSVP
 }) => {
+  const handleEditEventRSVP = () => {};
+  const handleDeleteEventRSVP = (rsvpId) => {
+    const rsvp = eventRsvp.find((r) => r.id === rsvpId);
+
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("event_rsvp_list.delete_rsvp")} ${
+        rsvp.attendee_full_name
+      }`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then((result) => {
+      if (result.value) {
+        deleteEventRSVP(rsvpId);
+      }
+    });
+  };
+
   const rsvp_list_table_options = {
     sortCol: order,
     sortDir: orderDir,
-    actions: {}
+    actions: {
+      edit: { onClick: handleEditEventRSVP },
+      delete: { onClick: handleDeleteEventRSVP }
+    }
   };
 
   const rsvp_list_columns = [
     {
-      columnKey: "name",
-      value: T.translate("event_rsvp_list.name"),
+      columnKey: "attendee_full_name",
+      value: T.translate("event_rsvp_list.attendee_full_name"),
+      sortable: true
+    },
+    {
+      columnKey: "created",
+      value: T.translate("event_rsvp_list.created"),
+      sortable: true
+    },
+    {
+      columnKey: "seat_type",
+      value: T.translate("event_rsvp_list.seat_type"),
+      sortable: true
+    },
+    {
+      columnKey: "status",
+      value: T.translate("event_rsvp_list.status"),
       sortable: true
     }
   ];
@@ -104,5 +148,7 @@ const mapStateToProps = ({ currentEventRsvpListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getEventRSVPS
+  getEventRSVPS,
+  editEventRSVP,
+  deleteEventRSVP
 })(EventRSVPList);

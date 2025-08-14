@@ -46,9 +46,14 @@ const eventRSVPListReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_EVENT_RSVP: {
       const { current_page, total, last_page, data } = payload.response;
 
+      const eventRsvp = data.map((r) => ({
+        attendee_full_name: `${owner?.first_name} ${owner?.last_name}`,
+        ...r
+      }));
+
       return {
         ...state,
-        eventRsvp: data,
+        eventRsvp,
         currentPage: current_page,
         totalRsvpTemplates: total,
         lastPage: last_page
