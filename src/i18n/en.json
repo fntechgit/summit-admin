@@ -3482,5 +3482,13 @@
     "rows_per_page": "Rows per page",
     "sorted_desc": "sorted descending",
     "sorted_asc": "sorted ascending"
+  },
+  "event_rsvp_list": {
+    "name": "Name",
+    "no_rsvp": "No RSVP found.",
+    "add": "Add",
+    "placeholders": {
+      "search_term": "Search..."
+    }
   }
 }
