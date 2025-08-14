@@ -13,6 +13,8 @@
 
 import {
   getRequest,
+  putRequest,
+  deleteRequest,
   createAction,
   stopLoading,
   startLoading,
@@ -25,7 +27,7 @@ import { DEFAULT_PER_PAGE } from "../utils/constants";
 export const REQUEST_EVENT_RSVP = "REQUEST_EVENT_RSVP";
 export const RECEIVE_EVENT_RSVP = "RECEIVE_EVENT_RSVP";
 
-export const EVENT_RSVP_ADDED = "EVENT_RSVP_ADDED";
+export const UPDATE_EVENT_RSVP = "UPDATE_EVENT_RSVP";
 export const EVENT_RSVP_UPDATED = "EVENT_RSVP_UPDATED";
 export const EVENT_RSVP_DELETED = "EVENT_RSVP_DELETED";
 
@@ -75,3 +77,62 @@ export const getEventRSVPS =
       dispatch(stopLoading());
     });
   };
+
+export const editEventRSVP = (entity) => async (dispatch, getState) => {
+  const { currentSummitState, currentSummitEventState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: eventId }
+  } = currentSummitEventState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  const normalizedEntity = normalizeEntity(entity);
+
+  return putRequest(
+    createAction(UPDATE_EVENT_RSVP),
+    createAction(EVENT_RSVP_UPDATED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvps/${rsvpId}`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    dispatch(showSuccessMessage(T.translate("edit_attendee.attendee_saved")));
+  });
+};
+export const deleteEventRSVP = (rsvpId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSummitEventState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: eventId }
+  } = currentSummitEventState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return deleteRequest(
+    null,
+    createAction(EVENT_RSVP_DELETED)({ rsvpId }),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvps/${rsvpId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+const normalizeEntity = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  delete normalizedEntity.created;
+  delete normalizedEntity.last_edited;
+
+  return normalizedEntity;
+};
