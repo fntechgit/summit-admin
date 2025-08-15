@@ -522,6 +522,10 @@
     "head_count": "Head Count",
     "rsvp_link": "RSVP Link",
     "rsvp": "RSVP",
+    "rsvp_type": "RSVP Type",
+    "rsvp_type_none": "None",
+    "rsvp_type_public": "Public",
+    "rsvp_type_private": "Private",
     "rsvp_max_user_number": "RSVP Max",
     "rsvp_max_user_wait_list_number": "RSVP Wait Max",
     "rsvp_template": "RSVP Template",
@@ -609,6 +613,7 @@
       "select_event_type": "Select an Activity Type ...",
       "select_track": "Select an Activity Category ...",
       "select_level": "Select a Level ...",
+      "select_rsvp_type": "Select a RSVP Type ...",
       "select_rsvp_template": "Select a Template ...",
       "select_selection_plan": "Select a Selection Plan ...",
       "select_submitter": "Select Submitter ...",
@@ -3476,5 +3481,19 @@
     "rows_per_page": "Rows per page",
     "sorted_desc": "sorted descending",
     "sorted_asc": "sorted ascending"
+  },
+  "event_rsvp_list": {
+    "name": "Name",
+    "no_rsvp": "No RSVP found.",
+    "add": "Add",
+    "attendee_full_name": "Attende",
+    "created": "Created",
+    "seat_type": "Seat Type",
+    "status": "Status",
+    "rsvp_saved": "RSVP saved successfully.",
+    "delete_rsvp": "Are you sure you want to delete RSVP for ",
+    "placeholders": {
+      "search_term": "Search..."
+    }
   }
 }
