@@ -36,7 +36,7 @@ import CustomAlert from "../../../components/mui/components/custom-alert";
 import SearchInput from "../../../components/mui/components/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
-import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
+import MuiTable from "../../../components/mui/table/mui-table";
 
 const SponsorFormsListPage = ({
   match,
@@ -244,7 +244,7 @@ const SponsorFormsListPage = ({
 
       {sponsorForms.length > 0 && (
         <div>
-          <MuiTableEditable
+          <MuiTable
             columns={columns}
             data={tableData}
             options={tableOptions}
