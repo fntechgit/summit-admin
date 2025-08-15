@@ -132,7 +132,7 @@ const MuiTableSortable = ({
                               : "desc"
                             : "asc"
                         }
-                        onClick={() => onSort(_, col.columnKey, sortDir * -1)}
+                        onClick={() => onSort(col.columnKey, sortDir * -1)}
                       >
                         {col.header}
                         {sortCol === col.columnKey ? (
