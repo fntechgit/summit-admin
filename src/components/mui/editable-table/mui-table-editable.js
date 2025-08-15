@@ -10,12 +10,10 @@ import TablePagination from "@mui/material/TablePagination";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { IconButton } from "@mui/material";
+import { IconButton, TextField } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
-
-import styles from "./mui-table.module.less";
 
 import {
   DEFAULT_PER_PAGE,
@@ -24,7 +22,70 @@ import {
 } from "../../../utils/constants";
 import showConfirmDialog from "../components/showConfirmDialog";
 
-const MuiTable = ({
+// Updated component to handle editable cells with hover edit icon
+const EditableCell = ({ value, isEditing, onBlur }) => {
+  const [inputValue, setInputValue] = React.useState(value);
+  const [isHovering, setIsHovering] = React.useState(false);
+
+  React.useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      onBlur(inputValue);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <TextField
+        autoFocus
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onBlur={() => {
+          onBlur(inputValue);
+        }}
+        onKeyDown={handleKeyDown}
+        size="small"
+        fullWidth
+        variant="standard"
+      />
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        position: "relative",
+        width: "100%",
+        height: "100%"
+      }}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      <span style={{ flex: 1 }}>{value}</span>
+      {isHovering && (
+        <EditIcon
+          fontSize="small"
+          sx={{
+            opacity: 0.5,
+            position: "absolute",
+            right: 0,
+            "&:hover": {
+              opacity: 1
+            }
+          }}
+        />
+      )}
+    </Box>
+  );
+};
+
+const MuiTableEditable = ({
   columns = [],
   data = [],
   totalRows,
@@ -36,8 +97,12 @@ const MuiTable = ({
   options = { sortCol: "", sortDir: "" },
   getName = (item) => item.name,
   onEdit,
-  onDelete
+  onDelete,
+  onCellChange // New prop for handling cell value changes
 }) => {
+  // State to track which cell is currently being edited
+  const [editingCell, setEditingCell] = React.useState(null);
+
   const handleChangePage = (_, newPage) => {
     onPageChange(newPage + 1);
   };
@@ -71,6 +136,23 @@ const MuiTable = ({
     if (isConfirmed) {
       onDelete(item.id);
     }
+  };
+
+  // Handler for starting edit mode on a cell
+  const handleCellClick = (rowId, columnKey) => {
+    // Check if the column is editable
+    const column = columns.find((col) => col.columnKey === columnKey);
+    if (column && column.editable) {
+      setEditingCell({ rowId, columnKey });
+    }
+  };
+
+  // Handler for saving changes when editing is complete
+  const handleCellBlur = (rowId, columnKey, newValue) => {
+    if (onCellChange) {
+      onCellChange(rowId, columnKey, newValue);
+    }
+    setEditingCell(null);
   };
 
   return (
@@ -122,92 +204,78 @@ const MuiTable = ({
                 {onDelete && <TableCell sx={{ width: 40 }} />}
               </TableRow>
             </TableHead>
-
             {/* TABLE BODY */}
             <TableBody>
               {data.map((row) => (
-                <TableRow>
-                  {/* Main content columns */}
+                <TableRow key={row.id} hover>
                   {columns.map((col) => (
                     <TableCell
-                      key={col.columnKey}
-                      align={col.align ?? "left"}
-                      className={`${
-                        col.dottedBorder && styles.dottedBorderLeft
-                      } ${col.className}`}
+                      key={`${row.id}-${col.columnKey}`}
+                      onClick={() => handleCellClick(row.id, col.columnKey)}
                       sx={{
-                        ...(row.cellStyle ? row.cellStyle : {})
+                        cursor: col.editable ? "pointer" : "default",
+                        padding: col.editable ? "8px 16px" : undefined // Ensure enough space for the edit icon
                       }}
                     >
-                      {col.render?.(row) || row[col.columnKey]}
+                      {col.editable ? (
+                        <EditableCell
+                          value={row[col.columnKey]}
+                          isEditing={
+                            editingCell &&
+                            editingCell.rowId === row.id &&
+                            editingCell.columnKey === col.columnKey
+                          }
+                          onBlur={(newValue) =>
+                            handleCellBlur(row.id, col.columnKey, newValue)
+                          }
+                        />
+                      ) : col.render ? (
+                        col.render(row)
+                      ) : (
+                        row[col.columnKey]
+                      )}
                     </TableCell>
                   ))}
-                  {/* Edit column */}
                   {onEdit && (
-                    <TableCell
-                      align="center"
-                      sx={{ width: 40 }}
-                      className={styles.dottedBorderLeft}
-                    >
-                      <IconButton size="large" onClick={() => onEdit(row)}>
-                        <EditIcon fontSize="large" />
+                    <TableCell>
+                      <IconButton
+                        onClick={() => onEdit(row)}
+                        size="small"
+                        aria-label={T.translate("general.edit")}
+                      >
+                        <EditIcon />
                       </IconButton>
                     </TableCell>
                   )}
-                  {/* Delete column */}
                   {onDelete && (
-                    <TableCell
-                      align="center"
-                      sx={{ width: 40 }}
-                      className={styles.dottedBorderLeft}
-                    >
+                    <TableCell>
                       <IconButton
-                        size="large"
                         onClick={() => handleDelete(row)}
+                        size="small"
+                        aria-label={T.translate("general.delete")}
                       >
-                        <DeleteIcon fontSize="large" />
+                        <DeleteIcon />
                       </IconButton>
                     </TableCell>
                   )}
                 </TableRow>
               ))}
-              {data.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} align="center">
-                    {T.translate("mui_table.no_items")}
-                  </TableCell>
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </TableContainer>
-
-        {/* PAGINATION */}
         <TablePagination
-          component="div"
-          count={totalRows}
           rowsPerPageOptions={customPerPageOptions}
+          component="div"
+          count={totalRows ?? data.length}
           rowsPerPage={perPage}
           page={currentPage - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage={T.translate("mui_table.rows_per_page")}
-          sx={{
-            ".MuiTablePagination-toolbar": {
-              alignItems: "baseline",
-              marginTop: "1.6rem"
-            },
-            ".MuiTablePagination-spacer": {
-              display: "none"
-            },
-            ".MuiTablePagination-displayedRows": {
-              marginLeft: "auto"
-            }
-          }}
         />
       </Paper>
     </Box>
   );
 };
 
-export default MuiTable;
+export default MuiTableEditable;
