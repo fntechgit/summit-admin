@@ -1,0 +1,14 @@
+.dottedBorderLeft {
+  position: relative;
+  border-left: none;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    border-left: 1px dashed #e0e0e0;
+    height: auto;
+    margin: 20px 0;
+  }
+}

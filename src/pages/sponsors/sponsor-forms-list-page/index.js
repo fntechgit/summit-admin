@@ -32,11 +32,11 @@ import {
   unarchiveSponsorForm,
   deleteSponsorForm
 } from "../../../actions/sponsor-forms-actions";
-import MuiTable from "../../../components/mui/table/mui-table";
 import CustomAlert from "../../../components/mui/components/custom-alert";
 import SearchInput from "../../../components/mui/components/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
+import MuiTable from "../../../components/mui/table/mui-table";
 
 const SponsorFormsListPage = ({
   match,
