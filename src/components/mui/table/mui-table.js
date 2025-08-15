@@ -33,7 +33,7 @@ const MuiTable = ({
   onPageChange,
   onPerPageChange,
   onSort,
-  options = { sortCol: "", sortDir: "" },
+  options = { sortCol: "", sortDir: 1 },
   getName = (item) => item.name,
   onEdit,
   onDelete
@@ -98,7 +98,7 @@ const MuiTable = ({
                       <TableSortLabel
                         active={sortCol === col.columnKey}
                         direction={
-                          sortCol === col.columnKey && sortDir === "-1"
+                          sortCol === col.columnKey && sortDir === -1
                             ? "desc"
                             : "asc"
                         }
@@ -107,7 +107,7 @@ const MuiTable = ({
                         {col.header}
                         {sortCol === col.columnKey ? (
                           <Box component="span" sx={visuallyHidden}>
-                            {sortDir === "-1"
+                            {sortDir === -1
                               ? T.translate("mui_table.sorted_desc")
                               : T.translate("mui_table.sorted_asc")}
                           </Box>
@@ -125,8 +125,9 @@ const MuiTable = ({
 
             {/* TABLE BODY */}
             <TableBody>
-              {data.map((row) => (
-                <TableRow>
+              {data.map((row, idx) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <TableRow key={`row-${idx}`}>
                   {/* Main content columns */}
                   {columns.map((col) => (
                     <TableCell
