@@ -110,8 +110,7 @@ const SponsorFormsListPage = ({
     {
       columnKey: "name",
       header: T.translate("sponsor_forms.name_column_label"),
-      sortable: true,
-      editable: true
+      sortable: true
     },
     {
       columnKey: "items_qty",
@@ -256,7 +255,6 @@ const SponsorFormsListPage = ({
             onDelete={handleRowDelete}
             onPageChange={handlePageChange}
             onSort={handleSort}
-            onCellChange={console.log}
           />
         </div>
       )}
