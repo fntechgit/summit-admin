@@ -32,11 +32,11 @@ import {
   unarchiveSponsorForm,
   deleteSponsorForm
 } from "../../../actions/sponsor-forms-actions";
-import MuiTable from "../../../components/mui/table/mui-table";
 import CustomAlert from "../../../components/mui/components/custom-alert";
 import SearchInput from "../../../components/mui/components/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
+import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
 
 const SponsorFormsListPage = ({
   match,
@@ -110,7 +110,8 @@ const SponsorFormsListPage = ({
     {
       columnKey: "name",
       header: T.translate("sponsor_forms.name_column_label"),
-      sortable: true
+      sortable: true,
+      editable: true
     },
     {
       columnKey: "items_qty",
@@ -244,7 +245,7 @@ const SponsorFormsListPage = ({
 
       {sponsorForms.length > 0 && (
         <div>
-          <MuiTable
+          <MuiTableEditable
             columns={columns}
             data={tableData}
             options={tableOptions}
@@ -255,6 +256,7 @@ const SponsorFormsListPage = ({
             onDelete={handleRowDelete}
             onPageChange={handlePageChange}
             onSort={handleSort}
+            onCellChange={console.log}
           />
         </div>
       )}
