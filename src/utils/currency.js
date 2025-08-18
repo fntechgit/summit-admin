@@ -37,3 +37,13 @@ export const amountFromCents = (cents) => {
   }
   return (cents / CENTS_FACTOR).toFixed(DECIMAL_PLACES);
 };
+
+/**
+ * Converts a price string into cents.
+ * @param {string} priceString - The price (e.g., $0.30).
+ * @returns {number} - The amount converted to cents (e.g., 30).
+ */
+export const parsePrice = (priceString) => {
+  const float = parseFloat(priceString.replace(/[^0-9.-]/g, "")) || 0;
+  return parseFloat(float.toFixed(DECIMAL_PLACES));
+};

@@ -28,13 +28,15 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
-import MuiTable from "../../../components/mui/table/mui-table";
 import {
   deleteSponsorFormItem,
+  getSponsorFormItem,
   getSponsorFormItems,
-  getSponsorFormItem
+  updateSponsorFormItem
 } from "../../../actions/sponsor-forms-actions";
 import ItemPopup from "./components/item-popup";
+import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
+import { parsePrice } from "../../../utils/currency";
 
 const SponsorFormItemListPage = ({
   match,
@@ -47,7 +49,8 @@ const SponsorFormItemListPage = ({
   totalCount,
   getSponsorFormItems,
   getSponsorFormItem,
-  deleteSponsorFormItem
+  deleteSponsorFormItem,
+  updateSponsorFormItem
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const { form_id: formId } = match.params;
@@ -81,6 +84,11 @@ const SponsorFormItemListPage = ({
     });
   };
 
+  const handleCellEdit = (rowId, column, value) => {
+    const tmpEntity = { id: rowId, [column]: parsePrice(value) };
+    updateSponsorFormItem(formId, tmpEntity);
+  };
+
   const handleRowDelete = (itemId) => {
     deleteSponsorFormItem(formId, itemId);
   };
@@ -107,17 +115,20 @@ const SponsorFormItemListPage = ({
     {
       columnKey: "early_bird_rate",
       header: T.translate("sponsor_form_item_list.early_bird_rate"),
-      sortable: true
+      sortable: true,
+      editable: true
     },
     {
       columnKey: "standard_rate",
       header: T.translate("sponsor_form_item_list.standard_rate"),
-      sortable: true
+      sortable: true,
+      editable: true
     },
     {
       columnKey: "onsite_rate",
       header: T.translate("sponsor_form_item_list.onsite_rate"),
-      sortable: true
+      sortable: true,
+      editable: true
     },
     {
       columnKey: "default_quantity",
@@ -239,7 +250,7 @@ const SponsorFormItemListPage = ({
 
       {items.length > 0 && (
         <div>
-          <MuiTable
+          <MuiTableEditable
             columns={columns}
             data={items}
             options={tableOptions}
@@ -250,6 +261,7 @@ const SponsorFormItemListPage = ({
             onDelete={handleRowDelete}
             onPageChange={handlePageChange}
             onSort={handleSort}
+            onCellChange={handleCellEdit}
           />
         </div>
       )}
@@ -269,5 +281,6 @@ const mapStateToProps = ({ sponsorFormItemsListState }) => ({
 export default connect(mapStateToProps, {
   getSponsorFormItems,
   deleteSponsorFormItem,
-  getSponsorFormItem
+  getSponsorFormItem,
+  updateSponsorFormItem
 })(SponsorFormItemListPage);

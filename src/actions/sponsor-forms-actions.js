@@ -570,9 +570,9 @@ export const saveSponsorFormItem =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(({ response }) => {
-        const promises = [];
+        const promises = [Promise.resolve(0)];
 
-        if (normalizedEntity.images.length > 0) {
+        if (normalizedEntity.images?.length > 0) {
           const savingImages = saveItemImages(
             formId,
             response.id,
@@ -620,9 +620,9 @@ export const updateSponsorFormItem =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        const promises = [];
+        const promises = [Promise.resolve(0)];
 
-        if (normalizedEntity.images.length > 0) {
+        if (normalizedEntity.images?.length > 0) {
           const savingImages = saveItemImages(
             formId,
             entity.id,
@@ -642,7 +642,7 @@ export const updateSponsorFormItem =
           );
         });
       })
-      .catch(() => {}) // need to catch promise reject
+      .catch(console.log) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });
@@ -665,15 +665,22 @@ const normalizeItem = (entity) => {
     images
   } = entity;
 
-  normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
+  if (meta_fields) {
+    normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
+  }
 
-  normalizedEntity.images = images?.filter((img) => img.file_path);
+  if (images) {
+    normalizedEntity.images = images?.filter((img) => img.file_path);
+  }
 
-  if (early_bird_rate === "") delete normalizedEntity.early_bird_rate;
+  if (early_bird_rate === "" || typeof early_bird_rate === "undefined")
+    delete normalizedEntity.early_bird_rate;
   else normalizedEntity.early_bird_rate = early_bird_rate * CENTS_FACTOR;
-  if (standard_rate === "") delete normalizedEntity.standard_rate;
+  if (standard_rate === "" || typeof standard_rate === "undefined")
+    delete normalizedEntity.standard_rate;
   else normalizedEntity.standard_rate = standard_rate * CENTS_FACTOR;
-  if (onsite_rate === "") delete normalizedEntity.onsite_rate;
+  if (onsite_rate === "" || typeof onsite_rate === "undefined")
+    delete normalizedEntity.onsite_rate;
   else normalizedEntity.onsite_rate = onsite_rate * CENTS_FACTOR;
 
   if (quantity_limit_per_show === "")
