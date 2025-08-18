@@ -50,10 +50,8 @@ const sponsorListReducer = (state = DEFAULT_STATE, action) => {
       let sponsors = payload.response.data;
 
       sponsors = sponsors.map((s) => {
-        const sponsorship_name = s.sponsorship ? s.sponsorship.type.name : "";
         const company_name = s.company ? s.company.name : "";
-
-        return { ...s, sponsorship_name, company_name };
+        return { ...s, company_name };
       });
 
       return { ...state, lastPage: last_page, sponsors, totalSponsors: total };

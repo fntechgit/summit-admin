@@ -14,7 +14,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Button, Grid2, TextField } from "@mui/material";
+import {
+  Button,
+  Grid2,
+  TextField,
+  Typography,
+  Badge,
+  Tooltip
+} from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
@@ -109,28 +116,90 @@ const SponsorListPage = ({
     { columnKey: "id", header: T.translate("sponsor_list.id") },
     { columnKey: "company_name", header: T.translate("sponsor_list.company") },
     {
-      columnKey: "sponsorship_name",
-      header: T.translate("sponsor_list.sponsorship")
+      columnKey: "sponsorships",
+      header: T.translate("sponsor_list.sponsorship"),
+      render: (row) =>
+        row.sponsorships.map((s) => (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography
+              sx={{ fontSize: "1.4rem", mr: "15px", lineHeight: "2rem" }}
+            >
+              {s.type?.type?.name}
+            </Typography>
+            <Tooltip
+              title={
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontSize: "14px", fontWeight: "bold" }}
+                  >
+                    {T.translate("sponsor_list.add_ons")}
+                  </Typography>
+                  {s.add_ons.map((a) => (
+                    <Typography
+                      key={a.name}
+                      sx={{ fontSize: "12px", lineHeight: "20px" }}
+                    >
+                      {a.name}
+                    </Typography>
+                  ))}
+                </Box>
+              }
+              arrow
+              placement="top"
+            >
+              <Badge
+                badgeContent={s.add_ons.length}
+                slotProps={{
+                  badge: {
+                    sx: {
+                      backgroundColor: "#EAEDF4",
+                      color: "#000",
+                      minWidth: 20,
+                      height: 20,
+                      fontWeight: "500",
+                      fontSize: "1.2rem",
+                      borderRadius: "100px",
+                      ml: "10px"
+                    }
+                  }
+                }}
+              />
+            </Tooltip>
+          </Box>
+        ))
     },
     {
       columnKey: "documents",
       header: T.translate("sponsor_list.documents"),
-      render: (row) => `${row.documents?.length || 0}`
+      render: (row) =>
+        `${row.documents?.length || 0} ${T.translate(
+          "sponsor_list.documents"
+        ).toLowerCase()}`
     },
     {
       columnKey: "forms",
       header: T.translate("sponsor_list.forms"),
-      render: (row) => `${row.forms?.length || 0}`
+      render: (row) =>
+        `${row.forms?.length || 0} ${T.translate(
+          "sponsor_list.forms"
+        ).toLowerCase()}`
     },
     {
       columnKey: "purchases",
       header: T.translate("sponsor_list.purchases"),
-      render: (row) => `${row.purchases?.length || 0}`
+      render: (row) =>
+        `${row.purchases?.length || 0} ${T.translate(
+          "sponsor_list.purchases"
+        ).toLowerCase()}`
     },
     {
       columnKey: "pages",
       header: T.translate("sponsor_list.pages"),
-      render: (row) => `${row.pages?.length || 0}`
+      render: (row) =>
+        `${row.pages?.length || 0} ${T.translate(
+          "sponsor_list.pages"
+        ).toLowerCase()}`
     }
   ];
 
