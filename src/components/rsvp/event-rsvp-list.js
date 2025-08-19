@@ -7,12 +7,16 @@ import T from "i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
 import { connect } from "react-redux";
+import moment from "moment-timezone";
 import {
   deleteEventRSVP,
   editEventRSVP,
   getEventRSVPS
 } from "../../actions/event-rsvp-actions";
-import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  MILLISECONDS_IN_SECOND
+} from "../../utils/constants";
 
 const EventRSVPList = ({
   term,
@@ -24,7 +28,8 @@ const EventRSVPList = ({
   eventRsvp,
   getEventRSVPS,
   // editEventRSVP,
-  deleteEventRSVP
+  deleteEventRSVP,
+  currentSummit
 }) => {
   const handleEditEventRSVP = () => {};
   const handleDeleteEventRSVP = (rsvpId) => {
@@ -63,7 +68,11 @@ const EventRSVPList = ({
     {
       columnKey: "created",
       value: T.translate("event_rsvp_list.created"),
-      sortable: true
+      sortable: true,
+      render: (row) =>
+        moment(row.created * MILLISECONDS_IN_SECOND)
+          .tz(currentSummit.time_zone_id)
+          .format("MMMM Do YYYY, h:mm a (z)")
     },
     {
       columnKey: "seat_type",
@@ -143,7 +152,11 @@ const EventRSVPList = ({
   );
 };
 
-const mapStateToProps = ({ currentEventRsvpListState }) => ({
+const mapStateToProps = ({
+  currentSummitState,
+  currentEventRsvpListState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
   ...currentEventRsvpListState
 });
 

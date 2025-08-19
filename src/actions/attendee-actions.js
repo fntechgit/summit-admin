@@ -24,6 +24,8 @@ import {
   showSuccessMessage,
   authErrorHandler,
   escapeFilterValue,
+  fetchResponseHandler,
+  fetchErrorHandler,
   getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
 import history from "../history";
@@ -35,6 +37,7 @@ import {
   range
 } from "../utils/methods";
 import {
+  DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
@@ -311,7 +314,9 @@ export const getAttendee = (attendeeId) => async (dispatch, getState) => {
     createAction(RECEIVE_ATTENDEE),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/${attendeeId}`,
     authErrorHandler
-  )(params)(dispatch).then(({ response }) => getAttendeeOrders(response)(dispatch, getState));
+  )(params)(dispatch).then(({ response }) =>
+    getAttendeeOrders(response)(dispatch, getState)
+  );
 };
 
 export const getAttendeeOrders = (attendee) => async (dispatch) => {
@@ -688,3 +693,22 @@ const normalizeEntity = (entity) => {
 export const changeAttendeeListSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_ATTENDEE_SEARCH_TERM)({ term }));
 };
+
+export const queryPaidAttendees = _.debounce(
+  async (summitId, input, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    fetch(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/attendees?filter[]=full_name=@${input},email=@${input}&filter[]=has_tickets==true&filter[]=has_member==true&access_token=${accessToken}&order=first_name,last_name&page=1&per_page=${DEFAULT_PER_PAGE}`
+    )
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);

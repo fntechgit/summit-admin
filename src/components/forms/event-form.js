@@ -65,6 +65,7 @@ import {
 } from "../../utils/constants";
 import CopyClipboard from "../buttons/copy-clipboard";
 import EventRsvpList from "../rsvp/event-rsvp-list";
+import EventRsvpInvitationList from "../rsvp/event-rsvp-invitation-list";
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -921,11 +922,6 @@ class EventForm extends React.Component {
         .map((sp) => ({ label: sp.name, value: sp.id }));
     }
 
-    const rsvp_templates_ddl = rsvpTemplateOpts.map((t) => ({
-      label: t.title,
-      value: t.id
-    }));
-
     const rsvp_types_ddl = [
       { label: T.translate("edit_event.rsvp_type_none"), value: "None" },
       { label: T.translate("edit_event.rsvp_type_public"), value: "Public" },
@@ -1644,7 +1640,7 @@ class EventForm extends React.Component {
           handleClick={this.toggleSection.bind(this, "rsvp")}
         >
           <div className="row form-group">
-            <div className="col-md-3">
+            <div className="col-md-4">
               <label> {T.translate("edit_event.rsvp_type")} </label>
               <Dropdown
                 id="rsvp_type"
@@ -1656,19 +1652,11 @@ class EventForm extends React.Component {
                 options={rsvp_types_ddl}
               />
             </div>
-            {entity.rsvp_type !== "None" && (
-              <>
-                <div className="col-md-3">
-                  <label> {T.translate("edit_event.head_count")} </label>
-                  <input
-                    className="form-control"
-                    type="number"
-                    id="head_count"
-                    value={entity.head_count}
-                    onChange={this.handleChange}
-                  />
-                </div>
-                <div className="col-md-3">
+          </div>
+          {entity.rsvp_type !== "None" && (
+            <>
+              <div className="row form-group">
+                <div className="col-md-4">
                   <label>
                     {" "}
                     {T.translate("edit_event.rsvp_max_user_number")}{" "}
@@ -1681,7 +1669,9 @@ class EventForm extends React.Component {
                     onChange={this.handleChange}
                   />
                 </div>
-                <div className="col-md-3">
+              </div>
+              <div className="row form-group">
+                <div className="col-md-4">
                   <label>
                     {" "}
                     {T.translate(
@@ -1696,36 +1686,20 @@ class EventForm extends React.Component {
                     onChange={this.handleChange}
                   />
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
           {entity.rsvp_type !== "None" && (
             <>
-              <div className="row form-group">
-                <div className="col-md-6">
-                  <label> {T.translate("edit_event.rsvp_link")} </label>
-                  <input
-                    className="form-control"
-                    id="rsvp_link"
-                    value={entity.rsvp_link}
-                    onChange={this.handleChange}
-                  />
+              {entity.rsvp_type === "Private" && (
+                <div className="row form-group">
+                  <div className="col-md-12">
+                    <EventRsvpInvitationList
+                      rsvpTemplateOpts={rsvpTemplateOpts}
+                    />
+                  </div>
                 </div>
-                <div className="col-md-6">
-                  <label> {T.translate("edit_event.rsvp_template")} </label>
-                  <Dropdown
-                    id="rsvp_template_id"
-                    value={entity.rsvp_template_id}
-                    onChange={this.handleChange}
-                    placeholder={T.translate(
-                      "edit_event.placeholders.select_rsvp_template"
-                    )}
-                    options={rsvp_templates_ddl}
-                    clearable
-                  />
-                </div>
-              </div>
-              <hr />
+              )}
               <div className="row form-group">
                 <div className="col-md-12">
                   <EventRsvpList />
