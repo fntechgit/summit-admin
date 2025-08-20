@@ -38,6 +38,7 @@ const EventRSVPInvitationList = ({
   orderDir,
   eventRsvpInvitations,
   selectedCount,
+  selectedAll,
   currentEmailTemplate,
   getEventRSVPInvitations,
   addEventRSVPInvitation,
@@ -157,14 +158,17 @@ const EventRSVPInvitationList = ({
   };
 
   const handleBlastInvitations = (testRecipient, excerptRecipient) => {
-    sendEventRSVPInvitation(testRecipient, excerptRecipient).then(() =>
-      getEventRSVPInvitations(term, DEFAULT_CURRENT_PAGE, perPage, order)
-    );
+    sendEventRSVPInvitation(testRecipient, excerptRecipient).then(() => {
+      getEventRSVPInvitations(term, DEFAULT_CURRENT_PAGE, perPage, order);
+      setCurrentEmailTemplate("");
+      clearAllSelectedInvitations();
+    });
   };
 
   const rsvp_list_table_options = {
     sortCol: order,
     sortDir: orderDir,
+    selectedAll,
     actions: {
       edit: {
         onClick: () => {},
@@ -225,6 +229,15 @@ const EventRSVPInvitationList = ({
 
       {eventRsvpInvitations.length > 0 && (
         <>
+          {selectedCount > 0 && (
+            <span>
+              <b>
+                {T.translate("event_rsvp_list.items_qty", {
+                  qty: selectedCount
+                })}
+              </b>
+            </span>
+          )}
           <SelectableTable
             options={rsvp_list_table_options}
             data={eventRsvpInvitations}
