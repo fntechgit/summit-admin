@@ -179,6 +179,11 @@ const EventRSVPInvitationList = ({
     <>
       <div className="row form-group">
         <div className="col-md-6">
+          <strong>{T.translate("event_rsvp_list.rsvp_invitations")}</strong>
+        </div>
+      </div>
+      <div className="row form-group">
+        <div className="col-md-6">
           <FreeTextSearch
             value={term ?? ""}
             placeholder={T.translate(

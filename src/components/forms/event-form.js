@@ -123,6 +123,7 @@ class EventForm extends React.Component {
     this.handleSpeakersReordering = this.handleSpeakersReordering.bind(this);
     this.handleCloneEvent = this.handleCloneEvent.bind(this);
     this.handleEventTypeChange = this.handleEventTypeChange.bind(this);
+    this.handleRSVPTypeChange = this.handleRSVPTypeChange.bind(this);
   }
 
   componentDidMount() {
@@ -194,6 +195,18 @@ class EventForm extends React.Component {
     this.setState({ entity: newEntity }, () => {
       if (id === "type_id" && entity.id)
         this.handleEventTypeChange(entity, newEntity);
+    });
+  }
+
+  handleRSVPTypeChange(ev) {
+    const { entity } = this.state;
+    const { onUpdate } = this.props;
+    const newEntity = { ...entity };
+    const { value, id } = ev.target;
+
+    newEntity[id] = value;
+    this.setState({ entity: newEntity }, () => {
+      if (newEntity.id) onUpdate({ [id]: value });
     });
   }
 
@@ -1645,7 +1658,7 @@ class EventForm extends React.Component {
               <Dropdown
                 id="rsvp_type"
                 value={entity.rsvp_type}
-                onChange={this.handleChange}
+                onChange={this.handleRSVPTypeChange}
                 placeholder={T.translate(
                   "edit_event.placeholders.select_rsvp_type"
                 )}
