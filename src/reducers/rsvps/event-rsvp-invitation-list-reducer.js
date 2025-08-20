@@ -19,10 +19,11 @@ import {
   SELECT_EVENT_RSVP_INVITATION,
   UNSELECT_EVENT_RSVP_INVITATION,
   CLEAR_ALL_SELECTED_EVENT_RSVP_INVITATIONS,
-  SET_CURRENT_FLOW_EVENT,
+  SET_CURRENT_EMAIL_TEMPLATE,
   SET_SELECTED_ALL,
   EVENT_RSVP_INVITATION_DELETED,
-  EVENT_RSVP_INVITATION_ADDED
+  EVENT_RSVP_INVITATION_ADDED,
+  SEND_EVENT_RSVP_INVITATIONS_EMAILS
 } from "../../actions/event-rsvp-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -39,7 +40,7 @@ const DEFAULT_STATE = {
   selectedCount: 0,
   excludedInvitationsIds: [],
   selectedInvitationsIds: [],
-  currentFlowEvent: "",
+  currentEmailTemplate: "",
   selectedAll: false
 };
 
@@ -171,10 +172,40 @@ const eventRSVPInvitationListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case CLEAR_ALL_SELECTED_EVENT_RSVP_INVITATIONS: {
-      return { ...state, selectedInvitationsIds: [], selectedAll: false };
+      const eventRsvpInvitations = state.eventRsvpInvitations.map((i) => ({
+        ...i,
+        checked: false
+      }));
+      return {
+        ...state,
+        excludedInvitationsIds: [],
+        selectedInvitationsIds: [],
+        selectedAll: false,
+        selectedCount: 0,
+        eventRsvpInvitations
+      };
     }
-    case SET_CURRENT_FLOW_EVENT: {
-      return { ...state, currentFlowEvent: payload };
+    case SET_CURRENT_EMAIL_TEMPLATE: {
+      return { ...state, currentEmailTemplate: payload };
+    }
+    case SEND_EVENT_RSVP_INVITATIONS_EMAILS: {
+      const newState = {
+        ...state,
+        selectedAll: false,
+        selectedInvitationsIds: [],
+        excludedInvitationsIds: [],
+        selectedCount: 0,
+        currentFlowEvent: "",
+        currentSelectionPlanId: 0
+      };
+      newState.eventRsvpInvitations = newState.eventRsvpInvitations.map(
+        (a) => ({
+          ...a,
+          checked: false
+        })
+      );
+
+      return { ...newState };
     }
     case SET_SELECTED_ALL: {
       const selectedAll = payload;
