@@ -44,8 +44,10 @@ export const SELECT_EVENT_RSVP_INVITATION = "SELECT_EVENT_RSVP_INVITATION";
 export const UNSELECT_EVENT_RSVP_INVITATION = "UNSELECT_EVENT_RSVP_INVITATION";
 export const CLEAR_ALL_SELECTED_EVENT_RSVP_INVITATIONS =
   "CLEAR_ALL_SELECTED_EVENT_RSVP_INVITATIONS";
-export const SET_CURRENT_FLOW_EVENT = "SET_CURRENT_FLOW_EVENT";
+export const SET_CURRENT_EMAIL_TEMPLATE = "SET_CURRENT_EMAIL_TEMPLATE";
 export const SET_SELECTED_ALL = "SET_SELECTED_ALL";
+export const SEND_EVENT_RSVP_INVITATIONS_EMAILS =
+  "SEND_EVENT_RSVP_INVITATIONS_EMAILS";
 
 export const getEventRSVPS =
   (
@@ -240,8 +242,8 @@ export const clearAllSelectedInvitations = () => (dispatch) => {
   dispatch(createAction(CLEAR_ALL_SELECTED_EVENT_RSVP_INVITATIONS)());
 };
 
-export const setCurrentFlowEvent = (value) => (dispatch) => {
-  dispatch(createAction(SET_CURRENT_FLOW_EVENT)(value));
+export const setCurrentEmailTemplate = (value) => (dispatch) => {
+  dispatch(createAction(SET_CURRENT_EMAIL_TEMPLATE)(value));
 };
 
 export const setSelectedAll = (value) => (dispatch) => {
@@ -301,26 +303,56 @@ export const addEventRSVPInvitation =
   };
 
 export const sendEventRSVPInvitation =
-  (invitee_id) => async (dispatch, getState) => {
-    const { currentSummitState, currentSummitEventState } = getState();
+  (testRecipient = null, excerptRecipient = null) =>
+  async (dispatch, getState) => {
+    const {
+      currentSummitState,
+      currentSummitEventState,
+      currentEventRsvpInvitationListState
+    } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const {
       entity: { id: eventId }
     } = currentSummitEventState;
+    const {
+      excludedInvitationsIds,
+      selectedInvitationsIds,
+      currentEmailTemplate,
+      selectedAll
+    } = currentEventRsvpInvitationListState;
+
+    dispatch(startLoading());
 
     const params = {
       access_token: accessToken
     };
 
-    postRequest(
+    const payload = {
+      email_flow_event: currentEmailTemplate
+    };
+
+    if (!selectedAll && selectedInvitationsIds.length > 0) {
+      payload.invitations_ids = selectedInvitationsIds;
+    } else if (selectedAll && excludedInvitationsIds.length > 0) {
+      payload.excluded_invitations_ids = excludedInvitationsIds;
+    }
+
+    if (testRecipient) {
+      payload.test_email_recipient = testRecipient;
+    }
+
+    if (excerptRecipient) {
+      payload.outcome_email_recipient = excerptRecipient;
+    }
+
+    return putRequest(
       null,
-      createAction(EVENT_RSVP_INVITATIONS_IMPORTED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvp-invitations`,
-      { invitee_id },
+      createAction(SEND_EVENT_RSVP_INVITATIONS_EMAILS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvp-invitations/send`,
+      payload,
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
-      window.location.reload();
     });
   };
