@@ -3498,6 +3498,13 @@
     "status": "Status",
     "rsvp_saved": "RSVP saved successfully.",
     "delete_rsvp": "Are you sure you want to delete RSVP for ",
+    "excerpt_recipient": "Excerpt Recipient",
+    "blast_modal_title": "You are about to send an EMAIL BLAST to invitations !",
+    "select_template": "Select a Email Template to perform the action.",
+    "select_items": "Select at least one invitation to perform the action.",
+    "invalid_recipient_email": "Please use a valid email",
+    "send_email_warning": "You are about to send the {template} email template to {qty} attendees.",
+    "send_emails": "Send",
     "placeholders": {
       "search_term": "Search...",
       "test_recipient": "Optional Test Recipient"
