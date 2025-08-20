@@ -54,6 +54,7 @@ export const RESET_SPONSOR_FORM_ITEM = "RESET_SPONSOR_FORM_ITEM";
 export const SPONSOR_FORM_ITEM_DELETED = "SPONSOR_FORM_ITEM_DELETED";
 export const SPONSOR_FORM_ITEM_IMAGES_UPDATED =
   "SPONSOR_FORM_ITEM_IMAGES_UPDATED";
+export const SPONSOR_FORM_ITEMS_ADDED = "SPONSOR_FORM_ITEMS_ADDED";
 
 export const getSponsorForms =
   (
@@ -691,3 +692,39 @@ const normalizeItem = (entity) => {
 
   return normalizedEntity;
 };
+
+export const addInventoryItems =
+  (formId, itemIds) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_FORM_ITEMS_ADDED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/clone`,
+      { inventory_item_ids: itemIds },
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(getSponsorFormItems(formId));
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "sponsor_form_item_list.add_from_inventory.items_added"
+            )
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };

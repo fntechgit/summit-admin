@@ -35,6 +35,7 @@ import {
   updateSponsorFormItem
 } from "../../../actions/sponsor-forms-actions";
 import ItemPopup from "./components/item-popup";
+import InventoryPopup from "./components/inventory-popup";
 import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
 import { parsePrice } from "../../../utils/currency";
 
@@ -98,7 +99,7 @@ const SponsorFormItemListPage = ({
   };
 
   const handleNewInventoryItem = () => {
-    console.log("new item from inventory");
+    setOpenPopup("inventory");
   };
 
   const columns = [
@@ -268,6 +269,11 @@ const SponsorFormItemListPage = ({
       <ItemPopup
         formId={formId}
         open={openPopup === "crud"}
+        onClose={() => setOpenPopup(null)}
+      />
+      <InventoryPopup
+        formId={formId}
+        open={openPopup === "inventory"}
         onClose={() => setOpenPopup(null)}
       />
     </div>

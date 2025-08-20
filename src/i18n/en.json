@@ -2407,6 +2407,16 @@
       "save": "save changes",
       "created": "Item created successfully.",
       "updated": "Item {name} updated successfully."
+    },
+    "add_from_inventory": {
+      "title": "Select Items",
+      "code": "Code",
+      "name": "Name",
+      "early_bird_rate": "Early bird rate",
+      "standard_rate": "Standad rate",
+      "onsite_rate": "On site rate",
+      "save": "Add selected items",
+      "items_added": "Items added successfully."
     }
   },
   "sponsorship_list": {
