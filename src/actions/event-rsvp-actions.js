@@ -186,7 +186,9 @@ export const getEventRSVPInvitations =
       page,
       per_page: perPage,
       access_token: accessToken,
-      expand: "invitee"
+      expand: "invitee",
+      fields: "id,created,status,invitee.first_name,invitee.last_name",
+      relations: "invitee.none"
     };
 
     // order
@@ -259,6 +261,8 @@ export const importRSVPInvitationsCSV =
       entity: { id: eventId }
     } = currentSummitEventState;
 
+    dispatch(startLoading());
+
     const params = {
       access_token: accessToken
     };
@@ -271,8 +275,7 @@ export const importRSVPInvitationsCSV =
       {},
       authErrorHandler
     )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      window.location.reload();
+      dispatch(getEventRSVPInvitations());
     });
   };
 
