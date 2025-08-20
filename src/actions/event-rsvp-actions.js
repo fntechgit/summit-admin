@@ -11,6 +11,7 @@
  * limitations under the License.
  * */
 
+import T from "i18n-react/dist/i18n-react";
 import {
   getRequest,
   putRequest,
@@ -21,6 +22,7 @@ import {
   stopLoading,
   startLoading,
   authErrorHandler,
+  showMessage,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
@@ -350,6 +352,12 @@ export const sendEventRSVPInvitation =
       payload.outcome_email_recipient = excerptRecipient;
     }
 
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("event_rsvp_list.send_rsvp_invitations_done"),
+      type: "success"
+    };
+
     return putRequest(
       null,
       createAction(SEND_EVENT_RSVP_INVITATIONS_EMAILS),
@@ -358,5 +366,6 @@ export const sendEventRSVPInvitation =
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
+      dispatch(showMessage(success_message));
     });
   };
