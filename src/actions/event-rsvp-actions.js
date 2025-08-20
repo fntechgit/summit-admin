@@ -16,7 +16,7 @@ import {
   putRequest,
   postRequest,
   deleteRequest,
-  putFile,
+  postFile,
   createAction,
   stopLoading,
   startLoading,
@@ -263,11 +263,12 @@ export const importRSVPInvitationsCSV =
       access_token: accessToken
     };
 
-    putFile(
+    postFile(
       null,
       createAction(EVENT_RSVP_INVITATIONS_IMPORTED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvp-invitations/csv`,
       file,
+      {},
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
