@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  Dropdown,
   FreeTextSearch,
-  Input,
   AttendeeInput,
   SelectableTable,
   UploadInput
@@ -20,13 +18,16 @@ import {
   selectInvitation,
   unSelectInvitation,
   setSelectedAll,
-  clearAllSelectedInvitations
+  clearAllSelectedInvitations,
+  setCurrentEmailTemplate,
+  sendEventRSVPInvitation
 } from "../../actions/event-rsvp-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   MILLISECONDS_IN_SECOND
 } from "../../utils/constants";
 import { queryPaidAttendees } from "../../actions/attendee-actions";
+import EventRSVPInvitationBlast from "./event-rsvp-invitation-blast";
 
 const EventRSVPInvitationList = ({
   term,
@@ -36,14 +37,18 @@ const EventRSVPInvitationList = ({
   order,
   orderDir,
   eventRsvpInvitations,
+  selectedCount,
+  currentEmailTemplate,
   getEventRSVPInvitations,
   addEventRSVPInvitation,
   deleteEventRSVPInvitation,
   importRSVPInvitationsCSV,
+  sendEventRSVPInvitation,
   selectInvitation,
   unSelectInvitation,
   setSelectedAll,
   clearAllSelectedInvitations,
+  setCurrentEmailTemplate,
   currentSummit
 }) => {
   useEffect(() => {
@@ -54,10 +59,10 @@ const EventRSVPInvitationList = ({
       order,
       orderDir
     );
+    setCurrentEmailTemplate("");
+    clearAllSelectedInvitations();
   }, []);
 
-  const [testRecipient, setTestRecipient] = useState("");
-  const [flowEvent, setFlowEvent] = useState(null);
   const [newAttendee, setNewAttendee] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -151,29 +156,24 @@ const EventRSVPInvitationList = ({
     setShowImportModal(false);
   };
 
+  const handleBlastInvitations = (testRecipient, excerptRecipient) => {
+    sendEventRSVPInvitation(testRecipient, excerptRecipient).then(() =>
+      getEventRSVPInvitations(term, DEFAULT_CURRENT_PAGE, perPage, order)
+    );
+  };
+
   const rsvp_list_table_options = {
     sortCol: order,
     sortDir: orderDir,
     actions: {
       edit: {
+        onClick: () => {},
         onSelected: handleSelected,
         onSelectedAll: handleSelectedAll
       },
       delete: { onClick: handledeleteEventRSVPInvitation }
     }
   };
-
-  const flowEventsDDL = [
-    { label: "-- SELECT EMAIL EVENT --", value: "" },
-    {
-      label: "SUMMIT_REGISTRATION_INVITE_REGISTRATION",
-      value: "SUMMIT_REGISTRATION_INVITE_REGISTRATION"
-    },
-    {
-      label: "SUMMIT_REGISTRATION_REINVITE_REGISTRATION",
-      value: "SUMMIT_REGISTRATION_REINVITE_REGISTRATION"
-    }
-  ];
 
   return (
     <>
@@ -189,43 +189,28 @@ const EventRSVPInvitationList = ({
         </div>
       </div>
       <div className="row form-group">
-        <div className="col-md-5">
-          <Dropdown
-            id="flow_event"
-            value={flowEvent}
-            onChange={setFlowEvent}
-            options={flowEventsDDL}
-          />
-        </div>
-        <div className="col-md-3">
-          <Input
-            id="testRecipient"
-            value={testRecipient}
-            onChange={(ev) => setTestRecipient(ev.target.value)}
-            placeholder={T.translate(
-              "event_rsvp_list.placeholders.test_recipient"
-            )}
-            className="form-control"
-          />
-        </div>
-        <div className="col-md-4">
-          <button
-            className="btn btn-primary left-space pull-right"
-            type="button"
-            onClick={handleDisplayAddModal}
+        <div className="col-md-12">
+          <EventRSVPInvitationBlast
+            selectedCount={selectedCount}
+            onBlastInvitations={handleBlastInvitations}
+            currentEmailTemplate={currentEmailTemplate}
+            setCurrentEmailTemplate={setCurrentEmailTemplate}
           >
-            {T.translate("event_rsvp_list.add")}
-          </button>
-          <button
-            className="btn btn-primary left-space pull-right"
-            type="button"
-            onClick={handleDisplayImportModal}
-          >
-            {T.translate("event_rsvp_list.import")}
-          </button>
-          <button className="btn btn-primary pull-right" type="button">
-            {T.translate("event_rsvp_list.send_blast")}
-          </button>
+            <button
+              className="btn btn-primary left-space pull-right"
+              type="button"
+              onClick={handleDisplayAddModal}
+            >
+              {T.translate("event_rsvp_list.add")}
+            </button>
+            <button
+              className="btn btn-primary left-space pull-right"
+              type="button"
+              onClick={handleDisplayImportModal}
+            >
+              {T.translate("event_rsvp_list.import")}
+            </button>
+          </EventRSVPInvitationBlast>
         </div>
       </div>
 
@@ -346,8 +331,10 @@ export default connect(mapStateToProps, {
   deleteEventRSVPInvitation,
   importRSVPInvitationsCSV,
   addEventRSVPInvitation,
+  sendEventRSVPInvitation,
   selectInvitation,
   unSelectInvitation,
   setSelectedAll,
-  clearAllSelectedInvitations
+  clearAllSelectedInvitations,
+  setCurrentEmailTemplate
 })(EventRSVPInvitationList);
