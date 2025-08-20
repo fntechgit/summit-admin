@@ -3573,6 +3573,7 @@
     "no_rsvp": "No RSVP found.",
     "no_rsvp_invitation": "No RSVP Invitation found.",
     "rsvp_invitations": "RSVP Invitations",
+    "items_qty": "Selected {qty} RSVP Invitations",
     "rsvp": "RSVP",
     "send_blast": "Send Blast",
     "import": "Import",
@@ -3594,6 +3595,7 @@
     "invalid_recipient_email": "Please use a valid email",
     "send_email_warning": "You are about to send the {template} email template to {qty} attendees.",
     "send_emails": "Send",
+    "send_rsvp_invitations_done": "Emails sent successfully.",
     "placeholders": {
       "search_term": "Search...",
       "test_recipient": "Optional Test Recipient"
