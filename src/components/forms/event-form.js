@@ -64,6 +64,8 @@ import {
   ONE_MINUTE
 } from "../../utils/constants";
 import CopyClipboard from "../buttons/copy-clipboard";
+import EventRsvpList from "../rsvp/event-rsvp-list";
+import EventRsvpInvitationList from "../rsvp/event-rsvp-invitation-list";
 
 class EventForm extends React.Component {
   constructor(props) {
@@ -121,6 +123,7 @@ class EventForm extends React.Component {
     this.handleSpeakersReordering = this.handleSpeakersReordering.bind(this);
     this.handleCloneEvent = this.handleCloneEvent.bind(this);
     this.handleEventTypeChange = this.handleEventTypeChange.bind(this);
+    this.handleRSVPTypeChange = this.handleRSVPTypeChange.bind(this);
   }
 
   componentDidMount() {
@@ -192,6 +195,18 @@ class EventForm extends React.Component {
     this.setState({ entity: newEntity }, () => {
       if (id === "type_id" && entity.id)
         this.handleEventTypeChange(entity, newEntity);
+    });
+  }
+
+  handleRSVPTypeChange(ev) {
+    const { entity } = this.state;
+    const { onUpdate } = this.props;
+    const newEntity = { ...entity };
+    const { value, id } = ev.target;
+
+    newEntity[id] = value;
+    this.setState({ entity: newEntity }, () => {
+      if (newEntity.id) onUpdate({ [id]: value });
     });
   }
 
@@ -920,10 +935,11 @@ class EventForm extends React.Component {
         .map((sp) => ({ label: sp.name, value: sp.id }));
     }
 
-    const rsvp_templates_ddl = rsvpTemplateOpts.map((t) => ({
-      label: t.title,
-      value: t.id
-    }));
+    const rsvp_types_ddl = [
+      { label: T.translate("edit_event.rsvp_type_none"), value: "None" },
+      { label: T.translate("edit_event.rsvp_type_public"), value: "Public" },
+      { label: T.translate("edit_event.rsvp_type_private"), value: "Private" }
+    ];
 
     const material_columns = [
       { columnKey: "class_name", value: T.translate("edit_event.type") },
@@ -1638,63 +1654,72 @@ class EventForm extends React.Component {
         >
           <div className="row form-group">
             <div className="col-md-4">
-              <label> {T.translate("edit_event.head_count")} </label>
-              <input
-                className="form-control"
-                type="number"
-                id="head_count"
-                value={entity.head_count}
-                onChange={this.handleChange}
-              />
-            </div>
-            <div className="col-md-4">
-              <label> {T.translate("edit_event.rsvp_max_user_number")} </label>
-              <input
-                className="form-control"
-                type="number"
-                id="rsvp_max_user_number"
-                value={entity.rsvp_max_user_number}
-                onChange={this.handleChange}
-              />
-            </div>
-            <div className="col-md-4">
-              <label>
-                {" "}
-                {T.translate("edit_event.rsvp_max_user_wait_list_number")}{" "}
-              </label>
-              <input
-                className="form-control"
-                type="number"
-                id="rsvp_max_user_wait_list_number"
-                value={entity.rsvp_max_user_wait_list_number}
-                onChange={this.handleChange}
-              />
-            </div>
-          </div>
-          <div className="row form-group">
-            <div className="col-md-6">
-              <label> {T.translate("edit_event.rsvp_link")} </label>
-              <input
-                className="form-control"
-                id="rsvp_link"
-                value={entity.rsvp_link}
-                onChange={this.handleChange}
-              />
-            </div>
-            <div className="col-md-6">
-              <label> {T.translate("edit_event.rsvp_template")} </label>
+              <label> {T.translate("edit_event.rsvp_type")} </label>
               <Dropdown
-                id="rsvp_template_id"
-                value={entity.rsvp_template_id}
-                onChange={this.handleChange}
+                id="rsvp_type"
+                value={entity.rsvp_type}
+                onChange={this.handleRSVPTypeChange}
                 placeholder={T.translate(
-                  "edit_event.placeholders.select_rsvp_template"
+                  "edit_event.placeholders.select_rsvp_type"
                 )}
-                options={rsvp_templates_ddl}
-                clearable
+                options={rsvp_types_ddl}
               />
             </div>
           </div>
+          {entity.rsvp_type !== "None" && (
+            <>
+              <div className="row form-group">
+                <div className="col-md-4">
+                  <label>
+                    {" "}
+                    {T.translate("edit_event.rsvp_max_user_number")}{" "}
+                  </label>
+                  <input
+                    className="form-control"
+                    type="number"
+                    id="rsvp_max_user_number"
+                    value={entity.rsvp_max_user_number}
+                    onChange={this.handleChange}
+                  />
+                </div>
+              </div>
+              <div className="row form-group">
+                <div className="col-md-4">
+                  <label>
+                    {" "}
+                    {T.translate(
+                      "edit_event.rsvp_max_user_wait_list_number"
+                    )}{" "}
+                  </label>
+                  <input
+                    className="form-control"
+                    type="number"
+                    id="rsvp_max_user_wait_list_number"
+                    value={entity.rsvp_max_user_wait_list_number}
+                    onChange={this.handleChange}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+          {entity.rsvp_type !== "None" && (
+            <>
+              {entity.rsvp_type === "Private" && (
+                <div className="row form-group">
+                  <div className="col-md-12">
+                    <EventRsvpInvitationList
+                      rsvpTemplateOpts={rsvpTemplateOpts}
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="row form-group">
+                <div className="col-md-12">
+                  <EventRsvpList />
+                </div>
+              </div>
+            </>
+          )}
         </Panel>
         {entity.id != 0 && this.isEventType(EVENT_TYPE_PRESENTATION) && (
           <Panel
