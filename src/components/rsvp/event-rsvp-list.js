@@ -1,14 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  AttendeeInput,
   FreeTextSearch,
   Table
 } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react";
 import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
+import Select from "react-select";
+import { Modal, Pagination } from "react-bootstrap";
 import { connect } from "react-redux";
 import moment from "moment-timezone";
 import {
+  addEventRSVP,
   deleteEventRSVP,
   editEventRSVP,
   getEventRSVPS
@@ -17,6 +20,7 @@ import {
   DEFAULT_CURRENT_PAGE,
   MILLISECONDS_IN_SECOND
 } from "../../utils/constants";
+import { queryPaidAttendees } from "../../actions/attendee-actions";
 
 const EventRSVPList = ({
   term,
@@ -27,10 +31,13 @@ const EventRSVPList = ({
   orderDir,
   eventRsvp,
   getEventRSVPS,
-  // editEventRSVP,
+  addEventRSVP,
   deleteEventRSVP,
   currentSummit
 }) => {
+  const [newAttendee, setNewAttendee] = useState("");
+  const [newSeat, setNewSeat] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
   const handleEditEventRSVP = () => {};
   const handleDeleteEventRSVP = (rsvpId) => {
     const rsvp = eventRsvp.find((r) => r.id === rsvpId);
@@ -95,8 +102,28 @@ const EventRSVPList = ({
   };
 
   const handleSearch = (newTerm) => {
+    console.log("NEW term", newTerm);
     getEventRSVPS(newTerm, currentPage, perPage, order, orderDir);
   };
+
+  const handleDisplayAddModal = () => {
+    setNewAttendee("");
+    setNewSeat("");
+    setShowAddModal(true);
+  };
+
+  const handleNewRSVP = () => {
+    const rsvp = {
+      attendee_id: newAttendee.id,
+      seat_type: newSeat.value
+    };
+    addEventRSVP(rsvp).finally(() => setShowAddModal(false));
+  };
+
+  const seat_type_ddl = [
+    { label: T.translate("event_rsvp_list.seat_regular"), value: "Regular" },
+    { label: T.translate("event_rsvp_list.seat_wait"), value: "WaitList" }
+  ];
 
   useEffect(() => {
     getEventRSVPS(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
@@ -120,7 +147,11 @@ const EventRSVPList = ({
           />
         </div>
         <div className="col-md-offset-5 col-md-1">
-          <button className="btn btn-primary right-space" type="button">
+          <button
+            className="btn btn-primary right-space"
+            type="button"
+            onClick={handleDisplayAddModal}
+          >
             {T.translate("event_rsvp_list.add")}
           </button>
         </div>
@@ -153,6 +184,51 @@ const EventRSVPList = ({
           />
         </>
       )}
+
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {T.translate("event_rsvp_list.new_invitation")}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="row">
+            <div className="col-md-12">Attendee</div>
+            <div className="col-md-12 acceptance-criteria-wrapper">
+              <AttendeeInput
+                id="attendee_id"
+                summitId={currentSummit.id}
+                value={newAttendee}
+                getOptionLabel={(attendee) =>
+                  `${attendee.first_name || ""} ${attendee.last_name || ""} (${
+                    attendee.email || attendee.id
+                  })`
+                }
+                onChange={(ev) => setNewAttendee(ev.target.value)}
+                queryFunction={queryPaidAttendees}
+                isClearable
+              />
+            </div>
+            <div className="col-md-12 acceptance-criteria-wrapper">
+              <Select
+                id="seat_type"
+                value={newSeat}
+                options={seat_type_ddl}
+                onChange={setNewSeat}
+              />
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <button
+            disabled={!newAttendee || !newSeat}
+            className="btn btn-primary"
+            onClick={handleNewRSVP}
+          >
+            {T.translate("event_rsvp_list.add")}
+          </button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };
@@ -168,5 +244,6 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   getEventRSVPS,
   editEventRSVP,
-  deleteEventRSVP
+  deleteEventRSVP,
+  addEventRSVP
 })(EventRSVPList);

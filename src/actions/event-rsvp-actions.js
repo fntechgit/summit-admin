@@ -23,6 +23,7 @@ import {
   startLoading,
   authErrorHandler,
   showMessage,
+  showSuccessMessage,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
@@ -33,6 +34,7 @@ export const RECEIVE_EVENT_RSVP = "RECEIVE_EVENT_RSVP";
 
 export const UPDATE_EVENT_RSVP = "UPDATE_EVENT_RSVP";
 export const EVENT_RSVP_UPDATED = "EVENT_RSVP_UPDATED";
+export const EVENT_RSVP_ADDED = "EVENT_RSVP_ADDED";
 export const EVENT_RSVP_DELETED = "EVENT_RSVP_DELETED";
 
 export const RECEIVE_EVENT_RSVP_INVITATION = "RECEIVE_EVENT_RSVP_INVITATION";
@@ -72,7 +74,9 @@ export const getEventRSVPS =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      filter.push(`first_name=@${escapedTerm},last_name=@${escapedTerm}`);
+      filter.push(
+        `owner_first_name=@${escapedTerm},owner_last_name=@${escapedTerm}`
+      );
     }
 
     const params = {
@@ -86,6 +90,10 @@ export const getEventRSVPS =
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
       params.order = `${orderDirSign}${order}`;
+    }
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
     }
 
     return getRequest(
@@ -126,6 +134,32 @@ export const editEventRSVP = (entity) => async (dispatch, getState) => {
     dispatch(showSuccessMessage(T.translate("edit_attendee.attendee_saved")));
   });
 };
+
+export const addEventRSVP = (entity) => async (dispatch, getState) => {
+  const { currentSummitState, currentSummitEventState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: eventId }
+  } = currentSummitEventState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return postRequest(
+    createAction(UPDATE_EVENT_RSVP),
+    createAction(EVENT_RSVP_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvps`,
+    entity,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(showSuccessMessage(T.translate("event_rsvp_list.rsvp_added")));
+  });
+};
+
 export const deleteEventRSVP = (rsvpId) => async (dispatch, getState) => {
   const { currentSummitState, currentSummitEventState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -177,12 +211,12 @@ export const getEventRSVPInvitations =
 
     dispatch(startLoading());
 
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(`first_name=@${escapedTerm},last_name=@${escapedTerm}`);
-      filter.push(`email=@${escapedTerm}`);
-      filter.push(`status=@${escapedTerm}`);
-    }
+    // if (term) {
+    //   const escapedTerm = escapeFilterValue(term);
+    //   filter.push(`first_name=@${escapedTerm},last_name=@${escapedTerm}`);
+    //   filter.push(`email=@${escapedTerm}`);
+    //   filter.push(`status=@${escapedTerm}`);
+    // }
 
     const params = {
       page,
@@ -197,6 +231,10 @@ export const getEventRSVPInvitations =
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
       params.order = `${orderDirSign}${order}`;
+    }
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
     }
 
     return getRequest(

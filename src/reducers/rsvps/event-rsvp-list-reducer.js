@@ -15,7 +15,9 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_EVENT_RSVP,
-  REQUEST_EVENT_RSVP
+  REQUEST_EVENT_RSVP,
+  EVENT_RSVP_ADDED,
+  EVENT_RSVP_DELETED
 } from "../../actions/event-rsvp-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -57,6 +59,19 @@ const eventRSVPListReducer = (state = DEFAULT_STATE, action) => {
         currentPage: current_page,
         totalRsvpTemplates: total,
         lastPage: last_page
+      };
+    }
+    case EVENT_RSVP_ADDED: {
+      console.log("payload...", payload);
+      return { ...state };
+    }
+    case EVENT_RSVP_DELETED: {
+      const { rsvpId } = payload;
+      const updatedRSVP = state.eventRsvp.filter((e) => e.id !== rsvpId);
+      return {
+        ...state,
+        eventRsvp: updatedRSVP,
+        totalEventRsvp: state.totalEventRsvp - 1
       };
     }
     default:
