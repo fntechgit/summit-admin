@@ -62,7 +62,6 @@ const eventRSVPListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_RSVP_ADDED: {
-      console.log("payload...", payload);
       return { ...state };
     }
     case EVENT_RSVP_DELETED: {

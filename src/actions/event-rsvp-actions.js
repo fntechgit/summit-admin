@@ -156,7 +156,11 @@ export const addEventRSVP = (entity) => async (dispatch, getState) => {
     entity,
     authErrorHandler
   )(params)(dispatch).then(() => {
-    dispatch(showSuccessMessage(T.translate("event_rsvp_list.rsvp_added")));
+    dispatch(
+      showSuccessMessage(T.translate("event_rsvp_list.rsvp_added"), () =>
+        dispatch(getEventRSVPS())
+      )
+    );
   });
 };
 
