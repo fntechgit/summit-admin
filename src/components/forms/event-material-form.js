@@ -289,7 +289,6 @@ class EventMaterialForm extends React.Component {
                 postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
                 error={hasErrors("slide", errors)}
                 djsConfig={{ withCredentials: true }}
-                parallelChunkUploads
               />
             </div>
             <div className="col-md-7 text-center">
@@ -360,7 +359,6 @@ class EventMaterialForm extends React.Component {
                   postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
                   error={hasErrors(media_type.name, errors)}
                   djsConfig={{ withCredentials: true }}
-                  parallelChunkUploads
                 />
               </div>
             </div>
