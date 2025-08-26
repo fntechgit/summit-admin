@@ -209,3 +209,5 @@ export const METAFIELD_TYPES = [
   "DateTime",
   "Time"
 ];
+
+export const RSVP_STATUS = ["Pending", "Accepted", "Rejected"];

@@ -15,6 +15,7 @@ import {
   getEventRSVPInvitations,
   importRSVPInvitationsCSV,
   addEventRSVPInvitation,
+  exportEventRsvpInvitationCSV,
   selectInvitation,
   unSelectInvitation,
   setSelectedAll,
@@ -42,6 +43,7 @@ const EventRSVPInvitationList = ({
   currentEmailTemplate,
   getEventRSVPInvitations,
   addEventRSVPInvitation,
+  exportEventRsvpInvitationCSV,
   deleteEventRSVPInvitation,
   importRSVPInvitationsCSV,
   sendEventRSVPInvitation,
@@ -96,7 +98,6 @@ const EventRSVPInvitationList = ({
     {
       columnKey: "created",
       value: T.translate("event_rsvp_list.sent_date"),
-      sortable: true,
       render: (row) =>
         moment(row.created * MILLISECONDS_IN_SECOND)
           .tz(currentSummit.time_zone_id)
@@ -158,11 +159,15 @@ const EventRSVPInvitationList = ({
   };
 
   const handleBlastInvitations = (testRecipient, excerptRecipient) => {
-    sendEventRSVPInvitation(testRecipient, excerptRecipient).then(() => {
+    sendEventRSVPInvitation(testRecipient, excerptRecipient, term).then(() => {
       getEventRSVPInvitations(term, DEFAULT_CURRENT_PAGE, perPage, order);
       setCurrentEmailTemplate("");
       clearAllSelectedInvitations();
     });
+  };
+
+  const handleExportEventRSVPInvitations = () => {
+    exportEventRsvpInvitationCSV(term, order, orderDir);
   };
 
   const rsvp_list_table_options = {
@@ -205,6 +210,13 @@ const EventRSVPInvitationList = ({
             currentEmailTemplate={currentEmailTemplate}
             setCurrentEmailTemplate={setCurrentEmailTemplate}
           >
+            <button
+              className="btn btn-primary left-space pull-right"
+              type="button"
+              onClick={handleExportEventRSVPInvitations}
+            >
+              {T.translate("event_rsvp_list.export")}
+            </button>
             <button
               className="btn btn-primary left-space pull-right"
               type="button"
@@ -350,6 +362,7 @@ export default connect(mapStateToProps, {
   importRSVPInvitationsCSV,
   addEventRSVPInvitation,
   sendEventRSVPInvitation,
+  exportEventRsvpInvitationCSV,
   selectInvitation,
   unSelectInvitation,
   setSelectedAll,

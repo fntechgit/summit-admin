@@ -13,7 +13,7 @@ import moment from "moment-timezone";
 import {
   addEventRSVP,
   deleteEventRSVP,
-  editEventRSVP,
+  exportEventRsvpsCSV,
   getEventRSVPS
 } from "../../actions/event-rsvp-actions";
 import {
@@ -33,19 +33,20 @@ const EventRSVPList = ({
   getEventRSVPS,
   addEventRSVP,
   deleteEventRSVP,
+  exportEventRsvpsCSV,
   currentSummit
 }) => {
   const [newAttendee, setNewAttendee] = useState("");
   const [newSeat, setNewSeat] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
-  const handleEditEventRSVP = () => {};
+
   const handleDeleteEventRSVP = (rsvpId) => {
     const rsvp = eventRsvp.find((r) => r.id === rsvpId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
       text: `${T.translate("event_rsvp_list.delete_rsvp")} ${
-        rsvp.attendee_full_name
+        rsvp.owner_full_name
       }`,
       type: "warning",
       showCancelButton: true,
@@ -61,21 +62,19 @@ const EventRSVPList = ({
     sortCol: order,
     sortDir: orderDir,
     actions: {
-      edit: { onClick: handleEditEventRSVP },
       delete: { onClick: handleDeleteEventRSVP }
     }
   };
 
   const rsvp_list_columns = [
     {
-      columnKey: "attendee_full_name",
+      columnKey: "owner_full_name",
       value: T.translate("event_rsvp_list.attendee_full_name"),
       sortable: true
     },
     {
       columnKey: "created",
       value: T.translate("event_rsvp_list.created"),
-      sortable: true,
       render: (row) =>
         moment(row.created * MILLISECONDS_IN_SECOND)
           .tz(currentSummit.time_zone_id)
@@ -88,8 +87,23 @@ const EventRSVPList = ({
     },
     {
       columnKey: "status",
-      value: T.translate("event_rsvp_list.status"),
-      sortable: true
+      value: T.translate("event_rsvp_list.status")
+    },
+    {
+      columnKey: "confirmation_number",
+      value: T.translate("event_rsvp_list.confirmation_number")
+    },
+    {
+      columnKey: "action_source",
+      value: T.translate("event_rsvp_list.action_source")
+    },
+    {
+      columnKey: "action_date",
+      value: T.translate("event_rsvp_list.action_date"),
+      render: (row) =>
+        moment(row.action_date * MILLISECONDS_IN_SECOND)
+          .tz(currentSummit.time_zone_id)
+          .format("MMMM Do YYYY, h:mm a (z)")
     }
   ];
 
@@ -102,7 +116,6 @@ const EventRSVPList = ({
   };
 
   const handleSearch = (newTerm) => {
-    console.log("NEW term", newTerm);
     getEventRSVPS(newTerm, currentPage, perPage, order, orderDir);
   };
 
@@ -110,6 +123,10 @@ const EventRSVPList = ({
     setNewAttendee("");
     setNewSeat("");
     setShowAddModal(true);
+  };
+
+  const handleExportEventRSVPS = () => {
+    exportEventRsvpsCSV(term, order, orderDir);
   };
 
   const handleNewRSVP = () => {
@@ -126,7 +143,7 @@ const EventRSVPList = ({
   ];
 
   useEffect(() => {
-    getEventRSVPS(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    getEventRSVPS("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
   }, []);
 
   return (
@@ -146,9 +163,16 @@ const EventRSVPList = ({
             onSearch={handleSearch}
           />
         </div>
-        <div className="col-md-offset-5 col-md-1">
+        <div className="col-md-offset-3 col-md-3">
           <button
-            className="btn btn-primary right-space"
+            className="btn btn-primary left-space pull-right"
+            type="button"
+            onClick={handleExportEventRSVPS}
+          >
+            {T.translate("event_rsvp_list.export")}
+          </button>
+          <button
+            className="btn btn-primary pull-right"
             type="button"
             onClick={handleDisplayAddModal}
           >
@@ -243,7 +267,7 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getEventRSVPS,
-  editEventRSVP,
   deleteEventRSVP,
-  addEventRSVP
+  addEventRSVP,
+  exportEventRsvpsCSV
 })(EventRSVPList);
