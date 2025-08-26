@@ -197,7 +197,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
         />
       );
     },
-    render: (e) => e?.name ? e.name : "N/A"
+    render: (e) => (e?.name ? e.name : "N/A")
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
@@ -402,6 +402,7 @@ const defaultFilters = {
   level_filter: [],
   tags_filter: [],
   published_filter: null,
+  has_rsvp_filter: null,
   progress_flag: [],
   created_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null),
   modified_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null),
@@ -1072,6 +1073,11 @@ class SummitEventListPage extends React.Component {
       { label: "Submission", value: "Submission" }
     ];
 
+    const has_rsvp_ddl = [
+      { label: "Has RSVP", value: "yes" },
+      { label: "No RSVP", value: "no" }
+    ];
+
     const filters_ddl = [
       { label: "Activity Type Capacity", value: "event_type_capacity_filter" },
       { label: "Selection Plan", value: "selection_plan_id_filter" },
@@ -1108,7 +1114,8 @@ class SummitEventListPage extends React.Component {
       { label: "Review Status", value: "review_status_filter" },
       { label: "Created", value: "created_filter" },
       { label: "Modified", value: "modified_filter" },
-      { label: "Submission Source", value: "submission_source_filter" }
+      { label: "Submission Source", value: "submission_source_filter" },
+      { label: "Has RSVP?", value: "has_rsvp_filter" }
     ];
 
     const ddl_columns = [
@@ -1843,6 +1850,17 @@ class SummitEventListPage extends React.Component {
                   "event_list.placeholders.submission_source"
                 )}
                 options={submission_source_ddl}
+              />
+            </div>
+          )}
+          {enabledFilters.includes("has_rsvp_filter") && (
+            <div className="col-md-6">
+              <Dropdown
+                id="has_rsvp_filter"
+                value={eventFilters.has_rsvp_filter}
+                onChange={this.handleExtraFilterChange}
+                placeholder={T.translate("event_list.placeholders.has_rsvp")}
+                options={has_rsvp_ddl}
               />
             </div>
           )}

@@ -223,6 +223,12 @@ const parseFilters = (filters, term = null) => {
     );
   }
 
+  if (filters.has_rsvp_filter) {
+    filter.push(
+      `rsvp_type${filters.has_rsvp_filter === "yes" ? "<>" : "=="}None`
+    );
+  }
+
   if (filters.start_date_filter) {
     parseDateRangeFilter(filter, filters.start_date_filter, "start_date");
   }
