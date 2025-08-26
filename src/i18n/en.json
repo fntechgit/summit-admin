@@ -1137,6 +1137,7 @@
       "modified_from": "Filter Modified Date from",
       "modified_to": "Filter Modified Date to",
       "select_fields": "Select data to display",
+      "has_rsvp": "Has RSVP?",
       "submitters": "Filter by Submitter",
       "submitter_company": "Filter by Submitter Company",
       "streaming_url": "Filter by Stream URL",
