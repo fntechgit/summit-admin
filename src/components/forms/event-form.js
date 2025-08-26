@@ -1665,14 +1665,19 @@ class EventForm extends React.Component {
                 options={rsvp_types_ddl}
               />
             </div>
-          </div>
-          {entity.rsvp_type !== "None" && (
-            <>
-              <div className="row form-group">
+            {entity.rsvp_type !== "None" && (
+              <>
                 <div className="col-md-4">
                   <label>
                     {" "}
                     {T.translate("edit_event.rsvp_max_user_number")}{" "}
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_event.rsvp_max_user_number_info"
+                      )}
+                    />
                   </label>
                   <input
                     className="form-control"
@@ -1682,14 +1687,19 @@ class EventForm extends React.Component {
                     onChange={this.handleChange}
                   />
                 </div>
-              </div>
-              <div className="row form-group">
                 <div className="col-md-4">
                   <label>
                     {" "}
                     {T.translate(
                       "edit_event.rsvp_max_user_wait_list_number"
                     )}{" "}
+                    <i
+                      className="fa fa-info-circle"
+                      aria-hidden="true"
+                      title={T.translate(
+                        "edit_event.rsvp_max_user_wait_list_number_info"
+                      )}
+                    />
                   </label>
                   <input
                     className="form-control"
@@ -1699,9 +1709,9 @@ class EventForm extends React.Component {
                     onChange={this.handleChange}
                   />
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
           {entity.rsvp_type !== "None" && (
             <>
               {entity.rsvp_type === "Private" && (
