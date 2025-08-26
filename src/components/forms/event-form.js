@@ -61,7 +61,10 @@ import {
   EVENT_TYPE_GROUP_EVENTS,
   EVENT_TYPE_PRESENTATION,
   MILLISECONDS_TO_SECONDS,
-  ONE_MINUTE
+  ONE_MINUTE,
+  RSVP_TYPE_NONE,
+  RSVP_TYPE_PRIVATE,
+  RSVP_TYPE_PUBLIC
 } from "../../utils/constants";
 import CopyClipboard from "../buttons/copy-clipboard";
 import EventRsvpList from "../rsvp/event-rsvp-list";
@@ -936,9 +939,18 @@ class EventForm extends React.Component {
     }
 
     const rsvp_types_ddl = [
-      { label: T.translate("edit_event.rsvp_type_none"), value: "None" },
-      { label: T.translate("edit_event.rsvp_type_public"), value: "Public" },
-      { label: T.translate("edit_event.rsvp_type_private"), value: "Private" }
+      {
+        label: T.translate("edit_event.rsvp_type_none"),
+        value: RSVP_TYPE_NONE
+      },
+      {
+        label: T.translate("edit_event.rsvp_type_public"),
+        value: RSVP_TYPE_PUBLIC
+      },
+      {
+        label: T.translate("edit_event.rsvp_type_private"),
+        value: RSVP_TYPE_PUBLIC
+      }
     ];
 
     const material_columns = [
@@ -1665,7 +1677,7 @@ class EventForm extends React.Component {
                 options={rsvp_types_ddl}
               />
             </div>
-            {entity.rsvp_type !== "None" && (
+            {entity.rsvp_type !== RSVP_TYPE_NONE && (
               <>
                 <div className="col-md-4">
                   <label>
@@ -1712,9 +1724,9 @@ class EventForm extends React.Component {
               </>
             )}
           </div>
-          {entity.rsvp_type !== "None" && (
+          {entity.rsvp_type !== RSVP_TYPE_NONE && (
             <>
-              {entity.rsvp_type === "Private" && (
+              {entity.rsvp_type === RSVP_TYPE_PRIVATE && (
                 <div className="row form-group">
                   <div className="col-md-12">
                     <EventRsvpInvitationList
