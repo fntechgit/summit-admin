@@ -75,7 +75,7 @@ export const getEventRSVPS =
     if (term) {
       const escapedTerm = escapeFilterValue(term);
       filter.push(
-        `owner_first_name=@${escapedTerm},owner_last_name=@${escapedTerm}`
+        `owner_full_name=@${escapedTerm},owner_email=@${escapedTerm}`
       );
     }
 
@@ -175,7 +175,7 @@ export const exportEventRsvpsCSV =
     if (term) {
       const escapedTerm = escapeFilterValue(term);
       filter.push(
-        `owner_first_name=@${escapedTerm},owner_last_name=@${escapedTerm}`
+        `owner_full_name=@${escapedTerm},owner_email=@${escapedTerm}`
       );
     }
 
@@ -232,9 +232,8 @@ export const getEventRSVPInvitations =
         filter.push(`status==${matchedStatus}`);
       } else {
         filter.push(
-          `attendee_first_name=@${escapedTerm},attendee_last_name=@${escapedTerm}`
+          `attendee_full_name=@${escapedTerm},attendee_email=@${escapedTerm}`
         );
-        filter.push(`attendee_email=@${escapedTerm}`);
       }
     }
 
@@ -409,9 +408,8 @@ export const sendEventRSVPInvitation =
           filter.push(`status==${matchedStatus}`);
         } else {
           filter.push(
-            `attendee_first_name=@${escapedTerm},attendee_last_name=@${escapedTerm}`
+            `attendee_full_name=@${escapedTerm},attendee_email=@${escapedTerm}`
           );
-          filter.push(`attendee_email=@${escapedTerm}`);
         }
       }
 
@@ -474,9 +472,8 @@ export const exportEventRsvpInvitationCSV =
         filter.push(`status==${matchedStatus}`);
       } else {
         filter.push(
-          `attendee_first_name=@${escapedTerm},attendee_last_name=@${escapedTerm}`
+          `attendee_full_name=@${escapedTerm},attendee_email=@${escapedTerm}`
         );
-        filter.push(`attendee_email=@${escapedTerm}`);
       }
     }
 
