@@ -73,7 +73,7 @@ const EventRSVPInvitationBlast = ({
   return (
     <>
       <div className="row form-group">
-        <div className="col-md-5">
+        <div className="col-md-4">
           <Dropdown
             id="current_email_template"
             value={currentEmailTemplate}
@@ -92,7 +92,7 @@ const EventRSVPInvitationBlast = ({
             className="form-control"
           />
         </div>
-        <div className="col-md-4">
+        <div className="col-md-5">
           {children}
           <button
             className="btn btn-primary pull-right"
