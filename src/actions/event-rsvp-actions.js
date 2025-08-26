@@ -242,7 +242,7 @@ export const getEventRSVPInvitations =
       per_page: perPage,
       access_token: accessToken,
       expand: "invitee",
-      fields: "id,created,status,invitee.first_name,invitee.last_name",
+      fields: "id,is_sent,status,invitee.first_name,invitee.last_name",
       relations: "invitee.none"
     };
 

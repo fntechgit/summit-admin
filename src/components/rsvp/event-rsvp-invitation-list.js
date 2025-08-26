@@ -7,7 +7,6 @@ import {
 } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react";
 import Swal from "sweetalert2";
-import moment from "moment-timezone";
 import { Modal, Pagination } from "react-bootstrap";
 import { connect } from "react-redux";
 import {
@@ -23,10 +22,7 @@ import {
   setCurrentEmailTemplate,
   sendEventRSVPInvitation
 } from "../../actions/event-rsvp-actions";
-import {
-  DEFAULT_CURRENT_PAGE,
-  MILLISECONDS_IN_SECOND
-} from "../../utils/constants";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import { queryPaidAttendees } from "../../actions/attendee-actions";
 import EventRSVPInvitationBlast from "./event-rsvp-invitation-blast";
 
@@ -96,12 +92,9 @@ const EventRSVPInvitationList = ({
       sortable: true
     },
     {
-      columnKey: "created",
-      value: T.translate("event_rsvp_list.sent_date"),
-      render: (row) =>
-        moment(row.created * MILLISECONDS_IN_SECOND)
-          .tz(currentSummit.time_zone_id)
-          .format("MMMM Do YYYY, h:mm a (z)")
+      columnKey: "is_sent",
+      value: T.translate("event_rsvp_list.is_sent"),
+      render: (row) => (row.is_sent ? "Yes" : "No")
     },
     {
       columnKey: "status",
