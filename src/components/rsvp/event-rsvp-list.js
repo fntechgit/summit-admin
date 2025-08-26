@@ -14,6 +14,7 @@ import {
   addEventRSVP,
   deleteEventRSVP,
   exportEventRsvpsCSV,
+  getEventRSVPInvitations,
   getEventRSVPS
 } from "../../actions/event-rsvp-actions";
 import {
@@ -34,6 +35,7 @@ const EventRSVPList = ({
   addEventRSVP,
   deleteEventRSVP,
   exportEventRsvpsCSV,
+  getEventRSVPInvitations,
   currentSummit
 }) => {
   const [newAttendee, setNewAttendee] = useState("");
@@ -53,7 +55,7 @@ const EventRSVPList = ({
       confirmButtonText: T.translate("general.yes_delete")
     }).then((result) => {
       if (result.value) {
-        deleteEventRSVP(rsvpId);
+        deleteEventRSVP(rsvpId).then(() => getEventRSVPInvitations());
       }
     });
   };
@@ -269,5 +271,6 @@ export default connect(mapStateToProps, {
   getEventRSVPS,
   deleteEventRSVP,
   addEventRSVP,
-  exportEventRsvpsCSV
+  exportEventRsvpsCSV,
+  getEventRSVPInvitations
 })(EventRSVPList);
