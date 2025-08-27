@@ -3611,5 +3611,18 @@
       "search_term": "Search...",
       "test_recipient": "Optional Test Recipient"
     }
+  },
+  "edit_event_rsvp": {
+    "rsvp": "RSVP",
+    "attendee_full_name": "Attende",
+    "attendee_email": "Attendee Email",
+    "confirmation_number": "Confirmation Number",
+    "seat_type": "Seat Type",
+    "status": "Status",
+    "event_rsvp_saved": "Event RSVP saved successfully.",
+    "placeholders": {
+      "seat_type": "Select a Seat Type",
+      "status": "Select a Status"
+    }
   }
 }

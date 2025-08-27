@@ -1737,7 +1737,7 @@ class EventForm extends React.Component {
               )}
               <div className="row form-group">
                 <div className="col-md-12">
-                  <EventRsvpList />
+                  <EventRsvpList currentEvent={entity?.id} history={history} />
                 </div>
               </div>
             </>
