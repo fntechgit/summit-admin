@@ -3588,6 +3588,7 @@
     "seat_type": "Seat Type",
     "seat_regular": "Regular",
     "seat_wait": "WaitList",
+    "is_sent": "Is Sent?",
     "status": "Status",
     "confirmation_number": "Confirmation Number",
     "action_source": "Action Source",
