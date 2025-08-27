@@ -30,15 +30,20 @@ import {
 import { getAccessTokenSafely } from "../utils/methods";
 import { DEFAULT_PER_PAGE, RSVP_STATUS } from "../utils/constants";
 
+import history from "../history";
+
+export const REQUEST_EVENT_RSVPS = "REQUEST_EVENT_RSVPS";
+export const RECEIVE_EVENT_RSVPS = "RECEIVE_EVENT_RSVPS";
+
 export const REQUEST_EVENT_RSVP = "REQUEST_EVENT_RSVP";
 export const RECEIVE_EVENT_RSVP = "RECEIVE_EVENT_RSVP";
-
 export const UPDATE_EVENT_RSVP = "UPDATE_EVENT_RSVP";
 export const EVENT_RSVP_ADDED = "EVENT_RSVP_ADDED";
+export const EVENT_RSVP_UPDATED = "EVENT_RSVP_UPDATED";
 export const EVENT_RSVP_DELETED = "EVENT_RSVP_DELETED";
 
-export const RECEIVE_EVENT_RSVP_INVITATION = "RECEIVE_EVENT_RSVP_INVITATION";
-export const REQUEST_EVENT_RSVP_INVITATION = "REQUEST_EVENT_RSVP_INVITATION";
+export const RECEIVE_EVENT_RSVP_INVITATIONS = "RECEIVE_EVENT_RSVP_INVITATIONS";
+export const REQUEST_EVENT_RSVP_INVITATIONS = "REQUEST_EVENT_RSVP_INVITATIONS";
 export const EVENT_RSVP_INVITATION_DELETED = "EVENT_RSVP_INVITATION_DELETED";
 export const EVENT_RSVP_INVITATION_ADDED = "EVENT_RSVP_INVITATION_ADDED";
 export const EVENT_RSVP_INVITATIONS_IMPORTED =
@@ -97,8 +102,8 @@ export const getEventRSVPS =
     }
 
     return getRequest(
-      createAction(REQUEST_EVENT_RSVP),
-      createAction(RECEIVE_EVENT_RSVP),
+      createAction(REQUEST_EVENT_RSVPS),
+      createAction(RECEIVE_EVENT_RSVPS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvps`,
       authErrorHandler,
       { page, perPage, order, orderDir, term }
@@ -132,6 +137,71 @@ export const addEventRSVP = (entity) => async (dispatch, getState) => {
       showSuccessMessage(T.translate("event_rsvp_list.rsvp_added"), () =>
         dispatch(getEventRSVPS())
       )
+    );
+  });
+};
+
+export const getEventRSVPById = (eventRsvpId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSummitEventState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: eventId }
+  } = currentSummitEventState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken,
+    expand: "owner",
+    fields: "id,status,seat_type,confirmation_number,owner"
+  };
+
+  return getRequest(
+    createAction(REQUEST_EVENT_RSVP),
+    createAction(RECEIVE_EVENT_RSVP),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvps/${eventRsvpId}`,
+    authErrorHandler,
+    {}
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const saveEventRSVP = (entity) => async (dispatch, getState) => {
+  const { currentSummitState, currentSummitEventState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: eventId }
+  } = currentSummitEventState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken,
+    expand: "owner"
+  };
+
+  const normalizedEntity = normalizeEntity(entity);
+
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_event_rsvp.event_rsvp_saved"),
+    type: "success"
+  };
+
+  return putRequest(
+    null,
+    createAction(EVENT_RSVP_UPDATED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvps/${entity.id}`,
+    normalizedEntity,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(
+      showMessage(success_message, () => {
+        history.push(`/app/summits/${currentSummit.id}/events/${eventId}`);
+      })
     );
   });
 };
@@ -201,6 +271,13 @@ export const exportEventRsvpsCSV =
       )
     );
   };
+const normalizeEntity = (entity) => {
+  const { status, seat_type } = entity;
+
+  const normalizedEntity = { status, seat_type };
+
+  return normalizedEntity;
+};
 
 export const getEventRSVPInvitations =
   (
@@ -242,8 +319,8 @@ export const getEventRSVPInvitations =
       per_page: perPage,
       access_token: accessToken,
       expand: "invitee",
-      fields: "id,is_sent,status,invitee.first_name,invitee.last_name",
-      relations: "invitee.none"
+      relations: "invitee.none",
+      fields: "id,id,is_sent,status,invitee.first_name,invitee.last_name"
     };
 
     // order
@@ -257,8 +334,8 @@ export const getEventRSVPInvitations =
     }
 
     return getRequest(
-      createAction(REQUEST_EVENT_RSVP_INVITATION),
-      createAction(RECEIVE_EVENT_RSVP_INVITATION),
+      createAction(REQUEST_EVENT_RSVP_INVITATIONS),
+      createAction(RECEIVE_EVENT_RSVP_INVITATIONS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvp-invitations`,
       authErrorHandler,
       { page, perPage, order, orderDir, term }

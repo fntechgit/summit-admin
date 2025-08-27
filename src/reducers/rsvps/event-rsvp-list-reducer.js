@@ -14,8 +14,8 @@
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
-  RECEIVE_EVENT_RSVP,
-  REQUEST_EVENT_RSVP,
+  RECEIVE_EVENT_RSVPS,
+  REQUEST_EVENT_RSVPS,
   EVENT_RSVP_ADDED,
   EVENT_RSVP_DELETED
 } from "../../actions/event-rsvp-actions";
@@ -40,12 +40,12 @@ const eventRSVPListReducer = (state = DEFAULT_STATE, action) => {
     case LOGOUT_USER: {
       return DEFAULT_STATE;
     }
-    case REQUEST_EVENT_RSVP: {
+    case REQUEST_EVENT_RSVPS: {
       const { order, orderDir, term } = payload;
 
       return { ...state, order, orderDir, term };
     }
-    case RECEIVE_EVENT_RSVP: {
+    case RECEIVE_EVENT_RSVPS: {
       const { current_page, total, last_page, data } = payload.response;
 
       const eventRsvp = data.map((r) => ({

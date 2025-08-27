@@ -36,7 +36,9 @@ const EventRSVPList = ({
   deleteEventRSVP,
   exportEventRsvpsCSV,
   getEventRSVPInvitations,
-  currentSummit
+  currentSummit,
+  currentEvent,
+  history
 }) => {
   const [newAttendee, setNewAttendee] = useState("");
   const [newSeat, setNewSeat] = useState("");
@@ -60,10 +62,17 @@ const EventRSVPList = ({
     });
   };
 
+  const handleEventRSVPEdit = (rsvpId) => {
+    history.push(
+      `/app/summits/${currentSummit.id}/events/${currentEvent}/rsvp/${rsvpId}`
+    );
+  };
+
   const rsvp_list_table_options = {
     sortCol: order,
     sortDir: orderDir,
     actions: {
+      edit: { onClick: handleEventRSVPEdit },
       delete: { onClick: handleDeleteEventRSVP }
     }
   };
