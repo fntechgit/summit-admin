@@ -445,6 +445,7 @@ class SummitEventListPage extends React.Component {
     this.handleTagOrSpeakerFilterChange =
       this.handleTagOrSpeakerFilterChange.bind(this);
     this.handleSetPublishedFilter = this.handleSetPublishedFilter.bind(this);
+    this.handleSetRSVPFilter = this.handleSetRSVPFilter.bind(this);
     this.handleChangeDateFilter = this.handleChangeDateFilter.bind(this);
     this.handleApplyEventFilters = this.handleApplyEventFilters.bind(this);
     this.handleFiltersChange = this.handleFiltersChange.bind(this);
@@ -750,6 +751,15 @@ class SummitEventListPage extends React.Component {
     this.setState((prevState) => ({
       ...prevState,
       eventFilters: { ...eventFilters, published_filter: ev }
+    }));
+  }
+
+  handleSetRSVPFilter(ev) {
+    const { eventFilters } = this.state;
+    this.extraFilters.has_rsvp_filter = ev;
+    this.setState((prevState) => ({
+      ...prevState,
+      eventFilters: { ...eventFilters, has_rsvp_filter: ev }
     }));
   }
 
@@ -1071,11 +1081,6 @@ class SummitEventListPage extends React.Component {
     const submission_source_ddl = [
       { label: "Admin", value: "Admin" },
       { label: "Submission", value: "Submission" }
-    ];
-
-    const has_rsvp_ddl = [
-      { label: "Has RSVP", value: "yes" },
-      { label: "No RSVP", value: "no" }
     ];
 
     const filters_ddl = [
@@ -1855,12 +1860,32 @@ class SummitEventListPage extends React.Component {
           )}
           {enabledFilters.includes("has_rsvp_filter") && (
             <div className="col-md-6">
-              <Dropdown
-                id="has_rsvp_filter"
-                value={eventFilters.has_rsvp_filter}
-                onChange={this.handleExtraFilterChange}
-                placeholder={T.translate("event_list.placeholders.has_rsvp")}
-                options={has_rsvp_ddl}
+              <SegmentedControl
+                name="has_rsvp_filter"
+                options={[
+                  {
+                    label: "All",
+                    value: null,
+                    default: eventFilters.has_rsvp_filter === null
+                  },
+                  {
+                    label: "Has RSVP",
+                    value: "yes",
+                    default: eventFilters.has_rsvp_filter === "yes"
+                  },
+                  {
+                    label: "No RSVP",
+                    value: "no",
+                    default: eventFilters.has_rsvp_filter === "no"
+                  }
+                ]}
+                setValue={(newValue) => this.handleSetRSVPFilter(newValue)}
+                style={{
+                  width: "100%",
+                  height: 40,
+                  color: "#337ab7",
+                  fontSize: "10px"
+                }}
               />
             </div>
           )}
