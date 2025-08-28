@@ -11,116 +11,148 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import SponsorForm from "../../components/forms/sponsor-form";
+import { Box, Container, Tab, Tabs, Typography } from "@mui/material";
 import {
   saveSponsor,
   resetSponsorForm,
-  addMemberToSponsor,
-  removeMemberFromSponsor,
-  createCompany,
-  deleteSponsorAdvertisement,
-  deleteSponsorMaterial,
-  deleteSponsorSocialNetwork,
-  removeSponsorImage,
-  attachSponsorImage,
   getSponsorAdvertisements,
   getSponsorMaterials,
   getSponsorSocialNetworks,
-  updateSponsorAdsOrder,
-  updateSponsorMaterialOrder,
-  deleteExtraQuestion,
-  updateExtraQuestionOrder,
   getSponsorLeadReportSettingsMeta,
-  upsertSponsorLeadReportSettings
+  getSponsorTiers,
+  addTierToSponsor,
+  removeTierFromSponsor,
+  getSponsorshipAddons,
+  saveAddonsToSponsorship,
+  removeAddonToSponsorship,
+  setSelectedSponsorship
 } from "../../actions/sponsor-actions";
-import Member from "../../models/member";
-import AddNewButton from "../../components/buttons/add-new-button";
+import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 
-class EditSponsorPage extends React.Component {
-  componentDidMount() {
-    const { entity } = this.props;
+const CustomTabPanel = (props) => {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box>{children}</Box>}
+    </div>
+  );
+};
+
+const a11yProps = (index) => ({
+  id: `simple-tab-${index}`,
+  "aria-controls": `simple-tabpanel-${index}`
+});
+
+const EditSponsorPage = (props) => {
+  const {
+    entity,
+    currentSummit,
+    resetSponsorForm,
+    getSponsorAdvertisements,
+    getSponsorMaterials,
+    getSponsorSocialNetworks,
+    getSponsorLeadReportSettingsMeta,
+    getSponsorTiers,
+    addTierToSponsor,
+    removeTierFromSponsor,
+    getSponsorshipAddons,
+    saveAddonsToSponsorship,
+    removeAddonToSponsorship,
+    setSelectedSponsorship
+  } = props;
+
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setSelectedTab(newValue);
+  };
+
+  useEffect(() => {
     if (entity.id > 0) {
-      this.props.getSponsorAdvertisements(entity.id);
-      this.props.getSponsorMaterials(entity.id);
-      this.props.getSponsorSocialNetworks(entity.id);
-      this.props.getSponsorLeadReportSettingsMeta(entity.id);
+      getSponsorAdvertisements(entity.id);
+      getSponsorMaterials(entity.id);
+      getSponsorSocialNetworks(entity.id);
+      getSponsorLeadReportSettingsMeta(entity.id);
+      getSponsorTiers(entity.id);
+    } else {
+      resetSponsorForm();
     }
-  }
+  }, [entity.id]);
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const oldId = prevProps.entity.id;
-    const newId = this.props.entity.id;
+  const handleSponsorshipPaginate = (page, perPage, order, orderDir) => {
+    getSponsorTiers(entity.id, page, perPage, order, orderDir);
+  };
 
-    if (oldId !== newId) {
-      if (!newId) {
-        this.props.resetSponsorForm();
-      } else {
-        this.props.getSponsorAdvertisements(newId);
-        this.props.getSponsorMaterials(newId);
-        this.props.getSponsorSocialNetworks(newId);
-        this.props.getSponsorLeadReportSettingsMeta(newId);
-      }
-    }
-  }
+  const tabs = [
+    { label: T.translate("edit_sponsor.tab.general"), value: 0 },
+    { label: T.translate("edit_sponsor.tab.users"), value: 1 },
+    { label: T.translate("edit_sponsor.tab.pages"), value: 2 },
+    { label: T.translate("edit_sponsor.tab.media_uploads"), value: 3 },
+    { label: T.translate("edit_sponsor.tab.forms"), value: 4 },
+    { label: T.translate("edit_sponsor.tab.cart"), value: 5 },
+    { label: T.translate("edit_sponsor.tab.purchases"), value: 6 },
+    { label: T.translate("edit_sponsor.tab.badge_scans"), value: 7 }
+  ];
 
-  render() {
-    const { currentSummit, entity, errors, history, sponsorships, member } =
-      this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-    const memberObj = new Member(member);
-    const canEditSponsors = memberObj.canEditSponsors();
-    const canEditSponsorExtraQuestions =
-      memberObj.canEditSponsorExtraQuestions();
-    const canEditLeadReportSettings = memberObj.canEditLeadReportSettings();
-
-    return (
-      <div className="container">
-        <h3>
-          {title} {T.translate("edit_sponsor.sponsor")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        {currentSummit && (
-          <SponsorForm
-            history={history}
-            entity={entity}
-            currentSummit={currentSummit}
-            sponsorships={sponsorships}
-            errors={errors}
-            onCreateCompany={this.props.createCompany}
-            onAttachImage={this.props.attachSponsorImage}
-            onRemoveImage={this.props.removeSponsorImage}
-            onAddMember={this.props.addMemberToSponsor}
-            onRemoveMember={this.props.removeMemberFromSponsor}
-            onSponsorAdsOrderUpdate={this.props.updateSponsorAdsOrder}
-            onAdvertisementDelete={this.props.deleteSponsorAdvertisement}
-            onSponsorMaterialOrderUpdate={this.props.updateSponsorMaterialOrder}
-            onMaterialDelete={this.props.deleteSponsorMaterial}
-            onSocialNetworkDelete={this.props.deleteSponsorSocialNetwork}
-            onSubmit={this.props.saveSponsor}
-            getSponsorAdvertisements={this.props.getSponsorAdvertisements}
-            getSponsorMaterials={this.props.getSponsorMaterials}
-            getSponsorSocialNetworks={this.props.getSponsorSocialNetworks}
-            canEditSponsors={canEditSponsors}
-            canEditSponsorExtraQuestions={canEditSponsorExtraQuestions}
-            canEditLeadReportSettings={canEditLeadReportSettings}
-            deleteExtraQuestion={this.props.deleteExtraQuestion}
-            updateExtraQuestionOrder={this.props.updateExtraQuestionOrder}
-            availableLeadReportColumns={entity.available_lead_report_columns}
-            upsertSponsorLeadReportSettings={
-              this.props.upsertSponsorLeadReportSettings
-            }
+  return (
+    <Box>
+      <Container maxWidth="lg">
+        <Typography fontSize="3.4rem" variant="h4">
+          {entity.company?.name}
+        </Typography>
+        <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 2 }}>
+          <Tabs
+            value={selectedTab}
+            onChange={handleTabChange}
+            sx={{
+              minHeight: "36px"
+            }}
+          >
+            {tabs.map((t) => (
+              <Tab
+                key={t.value}
+                label={t.label}
+                value={t.value}
+                sx={{
+                  fontSize: "1.4rem",
+                  lineHeight: "1.8rem",
+                  height: "36px",
+                  minHeight: "36px",
+                  px: 2,
+                  py: 1
+                }}
+                {...a11yProps(t.value)}
+              />
+            ))}
+          </Tabs>
+        </Box>
+        <CustomTabPanel value={selectedTab} index={0}>
+          <SponsorGeneralForm
+            sponsor={entity}
+            summitId={currentSummit.id}
+            onSponsorshipPaginate={handleSponsorshipPaginate}
+            onSponsorshipAdd={addTierToSponsor}
+            onSponsorshipDelete={removeTierFromSponsor}
+            getSponsorshipAddons={getSponsorshipAddons}
+            onSponsorshipSelect={setSelectedSponsorship}
+            onSponsorshipAddonSave={saveAddonsToSponsorship}
+            onSponsorshipAddonRemove={removeAddonToSponsorship}
           />
-        )}
-      </div>
-    );
-  }
-}
+        </CustomTabPanel>
+      </Container>
+    </Box>
+  );
+};
 
 const mapStateToProps = ({
   loggedUserState,
@@ -137,21 +169,15 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   saveSponsor,
   resetSponsorForm,
-  addMemberToSponsor,
-  removeMemberFromSponsor,
-  createCompany,
-  deleteSponsorAdvertisement,
-  deleteSponsorMaterial,
-  deleteSponsorSocialNetwork,
-  removeSponsorImage,
-  attachSponsorImage,
   getSponsorAdvertisements,
   getSponsorMaterials,
   getSponsorSocialNetworks,
-  updateSponsorAdsOrder,
-  updateSponsorMaterialOrder,
-  deleteExtraQuestion,
-  updateExtraQuestionOrder,
   getSponsorLeadReportSettingsMeta,
-  upsertSponsorLeadReportSettings
+  getSponsorTiers,
+  addTierToSponsor,
+  removeTierFromSponsor,
+  getSponsorshipAddons,
+  saveAddonsToSponsorship,
+  removeAddonToSponsorship,
+  setSelectedSponsorship
 })(EditSponsorPage);

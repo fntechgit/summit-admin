@@ -70,6 +70,7 @@
     "copy_to_clipboard": "Copy to clipboard",
     "copied": "Copied!",
     "success": "Success!",
+    "error": "Error!",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
@@ -2248,6 +2249,12 @@
   },
   "edit_sponsor": {
     "sponsor": "Sponsor",
+    "general_information": "General Information",
+    "sponsor_name": "Sponsor Name",
+    "sponsor_address": "Sponsor Address",
+    "add_tier": "Add Tier",
+    "add_sponsor": "Add Sponsor",
+    "tiers": "Tiers",
     "name": "Name",
     "order": "Order",
     "company": "Company",
@@ -2303,10 +2310,31 @@
     "remove_warning_extra_question": "Are you sure you want to delete extra question ",
     "remove_value_warning": "Are you sure you want to delete value ",
     "lead_report_settings": "Lead Report Settings",
+    "sponsorship_added": "Tier added successfully.",
+    "sponsorship_removed": "Tier removed successfully.",
+    "sponsorship_addon_removed": "Add-on removed successfully",
+    "sponsorship_addons_saved": "Add-ons saved successfully",
+    "tier": "Tier",
+    "addons": "Add-ons",
+    "manage_addons": "Manage Add-ons",
+    "addon_type": "Add-on Type",
+    "addon_name": "Add-on Name",
+    "save_changes": "Save Changes",
+    "tab": {
+      "general": "general",
+      "users": "users",
+      "pages": "pages",
+      "media_uploads": "media uploads",
+      "forms": "forms",
+      "cart": "cart",
+      "purchases": "purchases",
+      "badge_scans": "badge scans"
+    },
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start typing to choose a Tier...",
-      "select_material_type": "Select Material Type"
+      "select_material_type": "Select Material Type",
+      "select": "Select..."
     }
   },
   "sponsor_forms": {
