@@ -116,6 +116,16 @@ class EventRSVPForm extends React.Component {
               disabled
             />
           </div>
+          <div className="col-md-6">
+            <label> {T.translate("edit_event_rsvp.action_source")}</label>
+            <Input
+              id="action_source"
+              value={entity.action_source}
+              onChange={this.handleChange}
+              className="form-control"
+              disabled
+            />
+          </div>
         </div>
         <div className="row form-group">
           <div className="col-md-4">

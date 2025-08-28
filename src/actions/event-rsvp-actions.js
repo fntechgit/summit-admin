@@ -155,7 +155,7 @@ export const getEventRSVPById = (eventRsvpId) => async (dispatch, getState) => {
     access_token: accessToken,
     expand: "owner",
     fields:
-      "id,status,seat_type,confirmation_number,owner.first_name,owner.last_name,owner.email",
+      "id,status,seat_type,action_source,confirmation_number,owner.first_name,owner.last_name,owner.email",
     relations: "owner.none,none"
   };
 

@@ -3614,9 +3614,10 @@
   },
   "edit_event_rsvp": {
     "rsvp": "RSVP",
-    "attendee_full_name": "Attende",
+    "attendee_full_name": "Attendee",
     "attendee_email": "Attendee Email",
     "confirmation_number": "Confirmation Number",
+    "action_source": "Action Source",
     "seat_type": "Seat Type",
     "status": "Status",
     "event_rsvp_saved": "Event RSVP saved successfully.",
