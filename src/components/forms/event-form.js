@@ -949,7 +949,7 @@ class EventForm extends React.Component {
       },
       {
         label: T.translate("edit_event.rsvp_type_private"),
-        value: RSVP_TYPE_PUBLIC
+        value: RSVP_TYPE_PRIVATE
       }
     ];
 
