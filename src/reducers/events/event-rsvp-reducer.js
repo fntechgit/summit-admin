@@ -17,11 +17,17 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 import {
   EVENT_RSVP_UPDATED,
-  RECEIVE_EVENT_RSVP
+  RECEIVE_EVENT_RSVP,
+  REQUEST_EVENT_RSVP
 } from "../../actions/event-rsvp-actions";
 
 export const DEFAULT_ENTITY = {
-  id: 0
+  id: 0,
+  attendee_full_name: "",
+  attendee_email: "",
+  status: null,
+  seat_type: null,
+  confirmation_number: ""
 };
 
 const DEFAULT_STATE = {
@@ -39,12 +45,14 @@ const eventRSVPReducer = (state = DEFAULT_STATE, action) => {
       }
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case SET_CURRENT_SUMMIT:
+    case REQUEST_EVENT_RSVP:
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case EVENT_RSVP_UPDATED:
     case RECEIVE_EVENT_RSVP: {
       const entity = { ...payload.response };
 
       entity.attendee_full_name = `${entity.owner?.first_name} ${entity.owner?.last_name}`;
+      entity.attendee_email = entity.owner?.email || "";
 
       return { ...state, entity, errors: {} };
     }
