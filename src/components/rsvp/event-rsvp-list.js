@@ -222,14 +222,12 @@ const EventRSVPList = ({
 
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>
-            {T.translate("event_rsvp_list.new_invitation")}
-          </Modal.Title>
+          <Modal.Title>{T.translate("event_rsvp_list.new_rsvp")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="row">
-            <div className="col-md-12">Attendee</div>
-            <div className="col-md-12 acceptance-criteria-wrapper">
+            <div className="col-md-12">
+              <label>{T.translate("event_rsvp_list.attendee_full_name")}</label>
               <AttendeeInput
                 id="attendee_id"
                 summitId={currentSummit.id}
@@ -241,15 +239,22 @@ const EventRSVPList = ({
                 }
                 onChange={(ev) => setNewAttendee(ev.target.value)}
                 queryFunction={queryPaidAttendees}
+                placeholder={T.translate(
+                  "event_rsvp_list.placeholders.attendee"
+                )}
                 isClearable
               />
             </div>
             <div className="col-md-12 acceptance-criteria-wrapper">
+              <label>{T.translate("event_rsvp_list.seat_type")}</label>
               <Select
                 id="seat_type"
                 value={newSeat}
                 options={seat_type_ddl}
                 onChange={setNewSeat}
+                placeholder={T.translate(
+                  "event_rsvp_list.placeholders.seat_type"
+                )}
               />
             </div>
           </div>

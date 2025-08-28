@@ -27,7 +27,8 @@ export const DEFAULT_ENTITY = {
   attendee_email: "",
   status: null,
   seat_type: null,
-  confirmation_number: ""
+  confirmation_number: "",
+  action_source: ""
 };
 
 const DEFAULT_STATE = {

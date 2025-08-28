@@ -88,7 +88,10 @@ export const getEventRSVPS =
       page,
       per_page: perPage,
       access_token: accessToken,
-      expand: "owner"
+      expand: "owner",
+      fields:
+        "id,created,seat_type,status,confirmation_number,action_source,action_date,owner.first_name,owner.last_name",
+      relations: "owner.none,none"
     };
 
     // order
@@ -123,7 +126,11 @@ export const addEventRSVP = (entity) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    expand: "owner",
+    fields:
+      "id,created,seat_type,status,confirmation_number,action_source,action_date,owner.first_name,owner.last_name",
+    relations: "owner.none,none"
   };
 
   return postRequest(
@@ -182,7 +189,10 @@ export const saveEventRSVP = (entity) => async (dispatch, getState) => {
 
   const params = {
     access_token: accessToken,
-    expand: "owner"
+    expand: "owner",
+    fields:
+      "id,created,seat_type,status,confirmation_number,action_source,action_date,owner.first_name,owner.last_name",
+    relations: "owner.none,none"
   };
 
   const normalizedEntity = normalizeEntity(entity);
