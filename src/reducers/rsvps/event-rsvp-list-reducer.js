@@ -62,7 +62,16 @@ const eventRSVPListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_RSVP_ADDED: {
-      return { ...state };
+      const newRSVP = {
+        ...payload.response,
+        owner_full_name: `${payload.response.owner?.first_name} ${payload.response.owner?.last_name}`
+      };
+      const updatedRSVP = [...state.eventRsvp, newRSVP];
+      return {
+        ...state,
+        eventRsvp: updatedRSVP,
+        totalEventRsvp: state.totalEventRsvp + 1
+      };
     }
     case EVENT_RSVP_DELETED: {
       const { rsvpId } = payload;
