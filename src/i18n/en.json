@@ -837,6 +837,7 @@
     "please_confirm": "Please confirm.",
     "invite_private_rsvp": "Invite to Private RSVP",
     "bulk_rsvp_invitations_done": "RSVP Invitations Added.",
+    "bulk_event_rsvp_warning": "You are about to send RSVP Invitations for {event} to {qty} attendees.",
     "placeholders": {
       "test_recipient": "Optional Test Recipient",
       "search_attendees": "Search Attendees by Name, Email, Company, Ticket Type or Badge Type",
@@ -847,7 +848,8 @@
       "checkin_date_to": "Filter Check In Date to",
       "tags": "Filter by tag",
       "company": "Filter by company",
-      "notes": "Filter by note"
+      "notes": "Filter by note",
+      "event_rsvp": "-- SELECT PRIVATE RSVP ACTIVITY --"
     }
   },
   "edit_attendee": {

@@ -47,9 +47,9 @@ export default class EventInput extends React.Component {
   }
 
   getTemplates(input, callback) {
-    const { summitId } = this.props;
+    const { summitId, defaultOptions } = this.props;
 
-    if (!input) {
+    if (!input && !defaultOptions) {
       return Promise.resolve({ options: [] });
     }
 

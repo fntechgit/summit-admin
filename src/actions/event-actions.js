@@ -1755,7 +1755,11 @@ export const queryEventsWithPrivateRSVP = _.debounce(
     input = escapeFilterValue(input);
 
     fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events?filter[]=title=@${input}&filter[]=rsvp_type==Private&access_token=${accessToken}`
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events${
+        input
+          ? `?filter[]=title=@${input}&filter[]=rsvp_type==Private`
+          : "?filter[]=rsvp_type==Private"
+      }&access_token=${accessToken}`
     )
       .then(fetchResponseHandler)
       .then((json) => {
