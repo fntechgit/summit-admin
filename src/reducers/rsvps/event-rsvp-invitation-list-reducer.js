@@ -196,6 +196,21 @@ const eventRSVPInvitationListReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, currentEmailTemplate: payload };
     }
     case SEND_EVENT_RSVP_INVITATIONS_EMAILS: {
+      const { excludedInvitationsIds, selectedInvitationsIds, selectedAll } =
+        payload;
+
+      const updatedInvitations = state.eventRsvpInvitations.map((inv) => {
+        const isSent = selectedAll
+          ? !excludedInvitationsIds.includes(inv.id)
+          : selectedInvitationsIds.includes(inv.id);
+
+        return {
+          ...inv,
+          checked: false,
+          is_sent: isSent ? true : inv.is_sent
+        };
+      });
+
       const newState = {
         ...state,
         selectedAll: false,
@@ -203,14 +218,9 @@ const eventRSVPInvitationListReducer = (state = DEFAULT_STATE, action) => {
         excludedInvitationsIds: [],
         selectedCount: 0,
         currentFlowEvent: "",
-        currentSelectionPlanId: 0
+        currentSelectionPlanId: 0,
+        eventRsvpInvitations: updatedInvitations
       };
-      newState.eventRsvpInvitations = newState.eventRsvpInvitations.map(
-        (a) => ({
-          ...a,
-          checked: false
-        })
-      );
 
       return { ...newState };
     }
