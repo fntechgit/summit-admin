@@ -62,7 +62,7 @@ const EventRSVPInvitationList = ({
     clearAllSelectedInvitations();
   }, []);
 
-  const [newAttendee, setNewAttendee] = useState("");
+  const [newAttendees, setNewAttendees] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCSVFile, setImportCSVFile] = useState(null);
@@ -133,11 +133,12 @@ const EventRSVPInvitationList = ({
   };
 
   const handleNewInvitation = () => {
-    addEventRSVPInvitation(newAttendee.id).then(() => setShowAddModal(false));
+    const attendeesIds = newAttendees.map((e) => e.id);
+    addEventRSVPInvitation(attendeesIds).then(() => setShowAddModal(false));
   };
 
   const handleDisplayAddModal = () => {
-    setNewAttendee("");
+    setNewAttendees([]);
     setShowAddModal(true);
   };
 
@@ -273,19 +274,20 @@ const EventRSVPInvitationList = ({
         </Modal.Header>
         <Modal.Body>
           <div className="row">
-            <div className="col-md-12">Attendee</div>
-            <div className="col-md-12 acceptance-criteria-wrapper">
+            <div className="col-md-12">
+              <label>{T.translate("event_rsvp_list.attendees")}</label>
               <AttendeeInput
                 id="attendee"
                 summitId={currentSummit.id}
-                value={newAttendee}
+                value={newAttendees}
                 getOptionLabel={(attendee) =>
                   `${attendee.first_name || ""} ${attendee.last_name || ""} (${
                     attendee.email || attendee.id
                   })`
                 }
-                onChange={(ev) => setNewAttendee(ev.target.value)}
+                onChange={(ev) => setNewAttendees(ev.target.value)}
                 queryFunction={queryPaidAttendees}
+                isMulti
                 isClearable
               />
             </div>
@@ -293,7 +295,7 @@ const EventRSVPInvitationList = ({
         </Modal.Body>
         <Modal.Footer>
           <button
-            disabled={!newAttendee}
+            disabled={newAttendees.length === 0}
             className="btn btn-primary"
             onClick={handleNewInvitation}
           >

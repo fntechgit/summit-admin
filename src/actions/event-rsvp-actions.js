@@ -45,7 +45,7 @@ export const EVENT_RSVP_DELETED = "EVENT_RSVP_DELETED";
 export const RECEIVE_EVENT_RSVP_INVITATIONS = "RECEIVE_EVENT_RSVP_INVITATIONS";
 export const REQUEST_EVENT_RSVP_INVITATIONS = "REQUEST_EVENT_RSVP_INVITATIONS";
 export const EVENT_RSVP_INVITATION_DELETED = "EVENT_RSVP_INVITATION_DELETED";
-export const EVENT_RSVP_INVITATION_ADDED = "EVENT_RSVP_INVITATION_ADDED";
+export const EVENT_RSVP_INVITATIONS_ADDED = "EVENT_RSVP_INVITATIONS_ADDED";
 export const EVENT_RSVP_INVITATIONS_IMPORTED =
   "EVENT_RSVP_INVITATIONS_IMPORTED";
 
@@ -332,7 +332,7 @@ export const getEventRSVPInvitations =
       access_token: accessToken,
       expand: "invitee",
       relations: "invitee.none",
-      fields: "id,id,is_sent,status,invitee.first_name,invitee.last_name"
+      fields: "id,is_sent,status,invitee.first_name,invitee.last_name"
     };
 
     // order
@@ -428,7 +428,7 @@ export const importRSVPInvitationsCSV =
   };
 
 export const addEventRSVPInvitation =
-  (invitee_id) => async (dispatch, getState) => {
+  (invitee_ids) => async (dispatch, getState) => {
     const { currentSummitState, currentSummitEventState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -440,14 +440,16 @@ export const addEventRSVPInvitation =
 
     const params = {
       access_token: accessToken,
-      expand: "invitee"
+      expand: "invitee",
+      fields: "id,is_sent,status,invitee.first_name,invitee.last_name",
+      relations: "invitee.none,none"
     };
 
     postRequest(
       null,
-      createAction(EVENT_RSVP_INVITATION_ADDED),
+      createAction(EVENT_RSVP_INVITATIONS_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvp-invitations`,
-      { invitee_id },
+      { invitee_ids },
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
