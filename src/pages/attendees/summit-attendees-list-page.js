@@ -212,12 +212,28 @@ class SummitAttendeeListPage extends React.Component {
 
   handleRSVPInvitationBulk = () => {
     const { attendeeFilters, eventRSVPInvitations } = this.state;
-    this.props
-      .sendRSPInvitationBulk(attendeeFilters, eventRSVPInvitations.id)
-      .then(() => {
-        this.props.clearAllSelectedAttendees();
-        this.setState({ ...this.state, eventRSVPInvitations: null });
-      });
+    const { selectedCount } = this.props;
+
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("attendee_list.bulk_event_rsvp_warning", {
+        qty: selectedCount,
+        event: eventRSVPInvitations.title
+      })}`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: T.translate("general.yes_send")
+    }).then((result) => {
+      if (result.value) {
+        this.props
+          .sendRSPInvitationBulk(attendeeFilters, eventRSVPInvitations.id)
+          .then(() => {
+            this.props.clearAllSelectedAttendees();
+            this.setState({ ...this.state, eventRSVPInvitations: null });
+          });
+      }
+    });
   };
 
   handleSendEmails = (excerpt) => {
@@ -1161,34 +1177,41 @@ class SummitAttendeeListPage extends React.Component {
             onSend={this.handleSendEmails}
           />
         </div>
-        <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
-          <div className="col-md-9">
-            <EventInput
-              id="event_rsvp"
-              summitId={currentSummit.id}
-              value={eventRSVPInvitations}
-              onChange={(ev) =>
-                this.setState({
-                  ...this.state,
-                  eventRSVPInvitations: ev.target.value
-                })
-              }
-              queryFunction={queryEventsWithPrivateRSVP}
-            />
-          </div>
-          <div className="col-md-3">
-            <button
-              className="btn btn-default left-space pull-right"
-              onClick={this.handleRSVPInvitationBulk}
-              disabled={
-                !eventRSVPInvitations || (!selectedAll && selectedCount === 0)
-              }
-            >
-              {T.translate("attendee_list.invite_private_rsvp")}
-            </button>
-          </div>
-        </div>
-
+        {attendeeFilters.memberFilter === "HAS_MEMBER" &&
+          attendeeFilters.ticketsFilter === HAS_TICKETS && (
+            <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
+              <div className="col-md-9">
+                <EventInput
+                  id="event_rsvp"
+                  summitId={currentSummit.id}
+                  value={eventRSVPInvitations}
+                  onChange={(ev) =>
+                    this.setState({
+                      ...this.state,
+                      eventRSVPInvitations: ev.target.value
+                    })
+                  }
+                  placeholder={T.translate(
+                    "attendee_list.placeholders.event_rsvp"
+                  )}
+                  queryFunction={queryEventsWithPrivateRSVP}
+                  defaultOptions
+                />
+              </div>
+              <div className="col-md-3">
+                <button
+                  className="btn btn-default left-space pull-right"
+                  onClick={this.handleRSVPInvitationBulk}
+                  disabled={
+                    !eventRSVPInvitations ||
+                    (!selectedAll && selectedCount === 0)
+                  }
+                >
+                  {T.translate("attendee_list.invite_private_rsvp")}
+                </button>
+              </div>
+            </div>
+          )}
         <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
           <div className="col-md-12">
             <label>{T.translate("event_list.select_fields")}</label>
