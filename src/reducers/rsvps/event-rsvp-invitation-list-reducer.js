@@ -22,7 +22,7 @@ import {
   SET_CURRENT_EMAIL_TEMPLATE,
   SET_SELECTED_ALL,
   EVENT_RSVP_INVITATION_DELETED,
-  EVENT_RSVP_INVITATION_ADDED,
+  EVENT_RSVP_INVITATIONS_ADDED,
   SEND_EVENT_RSVP_INVITATIONS_EMAILS
 } from "../../actions/event-rsvp-actions";
 
@@ -85,14 +85,21 @@ const eventRSVPInvitationListReducer = (state = DEFAULT_STATE, action) => {
         totalEventRsvpInvitations: state.totalEventRsvpInvitations - 1
       };
     }
-    case EVENT_RSVP_INVITATION_ADDED: {
-      const invitation = payload.response;
-      invitation.attendee_full_name = `${invitation.invitee?.first_name} ${invitation.invitee?.last_name}`;
-      const eventRsvpInvitations = [...state.eventRsvpInvitations, invitation];
+    case EVENT_RSVP_INVITATIONS_ADDED: {
+      let invitations = payload.response.data;
+      invitations = invitations.map((i) => {
+        i.attendee_full_name = `${i.invitee?.first_name} ${i.invitee?.last_name}`;
+        return i;
+      });
+      const eventRsvpInvitations = [
+        ...state.eventRsvpInvitations,
+        ...invitations
+      ];
       return {
         ...state,
         eventRsvpInvitations,
-        totalEventRsvpInvitations: state.totalEventRsvpInvitations + 1
+        totalEventRsvpInvitations:
+          state.totalEventRsvpInvitations + invitations.length
       };
     }
     case SELECT_EVENT_RSVP_INVITATION: {

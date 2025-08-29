@@ -3585,6 +3585,7 @@
     "export": "Export",
     "new_rsvp": "New RSVP",
     "new_invitation": "New RSVP Invitation",
+    "attendees": "Attendees",
     "attendee_full_name": "Attendee",
     "created": "Created",
     "seat_type": "Seat Type",
