@@ -154,7 +154,6 @@ const EventRSVPInvitationList = ({
 
   const handleBlastInvitations = (testRecipient, excerptRecipient) => {
     sendEventRSVPInvitation(testRecipient, excerptRecipient, term).then(() => {
-      getEventRSVPInvitations(term, DEFAULT_CURRENT_PAGE, perPage, order);
       setCurrentEmailTemplate("");
       clearAllSelectedInvitations();
     });

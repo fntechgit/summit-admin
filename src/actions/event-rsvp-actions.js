@@ -529,7 +529,11 @@ export const sendEventRSVPInvitation =
 
     return putRequest(
       null,
-      createAction(SEND_EVENT_RSVP_INVITATIONS_EMAILS),
+      createAction(SEND_EVENT_RSVP_INVITATIONS_EMAILS)({
+        excludedInvitationsIds,
+        selectedInvitationsIds,
+        selectedAll
+      }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvp-invitations/send`,
       payload,
       authErrorHandler

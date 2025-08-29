@@ -49,7 +49,6 @@ const EventRSVPInvitationBlast = ({
   };
 
   const handleBlastInvitations = () => {
-    console.log("1");
     onBlastInvitations(testEmailRecipient, excerptRecipient);
     setShowBlastModal(false);
   };
