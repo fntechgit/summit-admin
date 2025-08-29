@@ -191,7 +191,11 @@ export const MAX_INVENTORY_IMAGE_UPLOAD_SIZE = 512000;
 export const MAX_INVENTORY_IMAGES_UPLOAD_QTY = 5;
 export const ALLOWED_INVENTORY_IMAGE_FORMATS = ["jpg", "jpeg", "png"];
 
-export const METAFIELD_TYPES_WITH_OPTIONS = ["CheckBoxList", "ComboBox", "RadioButtonList"];
+export const METAFIELD_TYPES_WITH_OPTIONS = [
+  "CheckBoxList",
+  "ComboBox",
+  "RadioButtonList"
+];
 
 export const METAFIELD_TYPES = [
   "CheckBox",
@@ -202,3 +206,9 @@ export const METAFIELD_TYPES = [
   "DateTime",
   "Time"
 ];
+
+// RSVP
+export const RSVP_STATUS = ["Pending", "Accepted", "Rejected"];
+export const RSVP_TYPE_NONE = "None";
+export const RSVP_TYPE_PUBLIC = "Public";
+export const RSVP_TYPE_PRIVATE = "Private";

@@ -223,6 +223,12 @@ const parseFilters = (filters, term = null) => {
     );
   }
 
+  if (filters.has_rsvp_filter) {
+    filter.push(
+      `rsvp_type${filters.has_rsvp_filter === "yes" ? "<>" : "=="}None`
+    );
+  }
+
   if (filters.start_date_filter) {
     parseDateRangeFilter(filter, filters.start_date_filter, "start_date");
   }
@@ -1143,6 +1149,36 @@ export const saveEvent = (entity, publish) => async (dispatch, getState) => {
   });
 };
 
+export const saveEventFieldWithoutRefresh =
+  (field) => async (dispatch, getState) => {
+    const { currentSummitState, currentSummitEventState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const { entity } = currentSummitEventState;
+
+    dispatch(startLoading());
+
+    const normalizedEntity = { ...field };
+
+    const params = {
+      access_token: accessToken,
+      expand:
+        "creator,speakers,moderator,sponsors,groups,type,type.allowed_media_upload_types,type.allowed_media_upload_types.type, slides, links, videos, media_uploads, tags, media_uploads.media_upload_type, media_uploads.media_upload_type.type,extra_questions,selection_plan,selection_plan.track_chair_rating_types,selection_plan.track_chair_rating_types.score_types,selection_plan.extra_questions,selection_plan.extra_questions.values,created_by,track_chair_scores_avg.ranking_type,actions,allowed_ticket_types",
+      fields: "allowed_ticket_types.id,allowed_ticket_types.name"
+    };
+
+    return putRequest(
+      createAction(UPDATE_EVENT),
+      createAction(EVENT_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${entity.id}`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
 export const upgradeEvent = (entity) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -1711,6 +1747,30 @@ export const queryEvents = _.debounce(async (summitId, input, callback) => {
     })
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
+
+export const queryEventsWithPrivateRSVP = _.debounce(
+  async (summitId, input, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    fetch(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events${
+        input
+          ? `?filter[]=title=@${input}&filter[]=rsvp_type==Private`
+          : "?filter[]=rsvp_type==Private"
+      }&access_token=${accessToken}`
+    )
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);
 
 export const querySpeakerCompany = _.debounce(async (input, callback) => {
   input = escapeFilterValue(input);
