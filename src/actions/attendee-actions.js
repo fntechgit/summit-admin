@@ -67,6 +67,8 @@ export const SEND_ATTENDEES_EMAILS = "SEND_ATTENDEES_EMAILS";
 export const RECEIVE_ALLOWED_EXTRA_QUESTIONS =
   "RECEIVE_ALLOWED_EXTRA_QUESTIONS";
 export const CHANGE_ATTENDEE_SEARCH_TERM = "CHANGE_ATTENDEE_SEARCH_TERM";
+export const SEND_ATTENDEES_EVENT_RSVP_INVITATIONS_BULK =
+  "SEND_ATTENDEES_EVENT_RSVP_INVITATIONS_BULK";
 
 export const selectAttendee = (attendeeId) => (dispatch) => {
   dispatch(createAction(SELECT_ATTENDEE)(attendeeId));
@@ -655,6 +657,57 @@ export const sendEmails =
       dispatch(showMessage(success_message));
       dispatch(stopLoading());
       return payload;
+    });
+  };
+
+export const sendRSPInvitationBulk =
+  (filters, eventId) => async (dispatch, getState) => {
+    const { currentSummitState, currentAttendeeListState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const { term, selectedAll, selectedIds, excludedIds } =
+      currentAttendeeListState;
+    let filter = [];
+
+    dispatch(startLoading());
+
+    if (!selectedAll && selectedIds.length > 0) {
+      // we don't need the filter criteria, we have the ids
+      filter.push(`id==${selectedIds.join("||")}`);
+    } else {
+      filter = parseFilters(filters, term);
+
+      if (selectedAll && excludedIds.length > 0) {
+        filter.push(`not_id==${excludedIds.join("||")}`);
+      }
+    }
+
+    const params = {
+      access_token: accessToken
+    };
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    dispatch(stopLoading());
+
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("attendee_list.bulk_rsvp_invitations_done"),
+      type: "success"
+    };
+
+    postRequest(
+      null,
+      createAction(SEND_ATTENDEES_EVENT_RSVP_INVITATIONS_BULK),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvp-invitations/invite`,
+      {},
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(showMessage(success_message));
+      dispatch(stopLoading());
     });
   };
 

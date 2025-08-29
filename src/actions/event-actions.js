@@ -1748,6 +1748,26 @@ export const queryEvents = _.debounce(async (summitId, input, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
+export const queryEventsWithPrivateRSVP = _.debounce(
+  async (summitId, input, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    fetch(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events?filter[]=title=@${input}&filter[]=rsvp_type==Private&access_token=${accessToken}`
+    )
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);
+
 export const querySpeakerCompany = _.debounce(async (input, callback) => {
   input = escapeFilterValue(input);
 

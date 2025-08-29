@@ -38,6 +38,7 @@ import {
   setCurrentFlowEvent,
   setSelectedAll,
   sendEmails,
+  sendRSPInvitationBulk,
   exportAttendees,
   changeAttendeeListSearchTerm
 } from "../../actions/attendee-actions";
@@ -53,6 +54,8 @@ import {
 import OrAndFilter from "../../components/filters/or-and-filter";
 import { validateEmail } from "../../utils/methods";
 import SendEmailModal from "../../components/send-email-modal";
+import EventInput from "../../components/inputs/event-input";
+import { queryEventsWithPrivateRSVP } from "../../actions/event-actions";
 
 const fieldNames = [
   { columnKey: "member_id", value: "member_id", sortable: true },
@@ -129,6 +132,7 @@ class SummitAttendeeListPage extends React.Component {
     this.handleTermChange = this.handleTermChange.bind(this);
     this.handleOrAndFilter = this.handleOrAndFilter.bind(this);
     this.handleParseFilters = this.handleParseFilters.bind(this);
+    this.handleRSVPInvitationBulk = this.handleRSVPInvitationBulk.bind(this);
     this.state = {
       showModal: false,
       modalTitle: "",
@@ -137,7 +141,8 @@ class SummitAttendeeListPage extends React.Component {
       attendeeFilters: { ...FILTERS_DEFAULT_STATE },
       selectedColumns: [],
       testRecipient: "",
-      showEmailModal: false
+      showEmailModal: false,
+      eventRSVPInvitations: null
     };
   }
 
@@ -204,6 +209,16 @@ class SummitAttendeeListPage extends React.Component {
 
     return true;
   }
+
+  handleRSVPInvitationBulk = () => {
+    const { attendeeFilters, eventRSVPInvitations } = this.state;
+    this.props
+      .sendRSPInvitationBulk(attendeeFilters, eventRSVPInvitations.id)
+      .then(() => {
+        this.props.clearAllSelectedAttendees();
+        this.setState({ ...this.state, eventRSVPInvitations: null });
+      });
+  };
 
   handleSendEmails = (excerpt) => {
     const { attendeeFilters, testRecipient } = this.state;
@@ -515,7 +530,8 @@ class SummitAttendeeListPage extends React.Component {
       enabledFilters,
       attendeeFilters,
       testRecipient,
-      showEmailModal
+      showEmailModal,
+      eventRSVPInvitations
     } = this.state;
 
     const filters_ddl = [
@@ -1145,6 +1161,33 @@ class SummitAttendeeListPage extends React.Component {
             onSend={this.handleSendEmails}
           />
         </div>
+        <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
+          <div className="col-md-9">
+            <EventInput
+              id="event_rsvp"
+              summitId={currentSummit.id}
+              value={eventRSVPInvitations}
+              onChange={(ev) =>
+                this.setState({
+                  ...this.state,
+                  eventRSVPInvitations: ev.target.value
+                })
+              }
+              queryFunction={queryEventsWithPrivateRSVP}
+            />
+          </div>
+          <div className="col-md-3">
+            <button
+              className="btn btn-default left-space pull-right"
+              onClick={this.handleRSVPInvitationBulk}
+              disabled={
+                !eventRSVPInvitations || (!selectedAll && selectedCount === 0)
+              }
+            >
+              {T.translate("attendee_list.invite_private_rsvp")}
+            </button>
+          </div>
+        </div>
 
         <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
           <div className="col-md-12">
@@ -1226,6 +1269,7 @@ export default connect(mapStateToProps, {
   setCurrentFlowEvent,
   setSelectedAll,
   sendEmails,
+  sendRSPInvitationBulk,
   exportAttendees,
   getBadgeFeatures,
   getBadgeTypes,

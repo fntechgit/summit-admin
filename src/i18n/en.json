@@ -835,6 +835,8 @@
     "email_test_recipient": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
     "invalid_recipient_email": "Please use a valid email",
     "please_confirm": "Please confirm.",
+    "invite_private_rsvp": "Invite to Private RSVP",
+    "bulk_rsvp_invitations_done": "RSVP Invitations Added.",
     "placeholders": {
       "test_recipient": "Optional Test Recipient",
       "search_attendees": "Search Attendees by Name, Email, Company, Ticket Type or Badge Type",
