@@ -29,6 +29,7 @@ import {
 } from "../../actions/sponsor-actions";
 import MuiTableSortable from "../../components/mui/sortable-table/mui-table-sortable";
 import EditTierPopup from "./popup/edit-tier-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const SummitSponsorshipListPage = ({
   currentSummit,
@@ -74,7 +75,7 @@ const SummitSponsorshipListPage = ({
     getSummitSponsorships(page, perPage, order, orderDir);
   };
   const handlePerPageChange = (newPerPage) => {
-    getSummitSponsorships(currentPage, newPerPage, order, orderDir);
+    getSummitSponsorships(DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
 
   const handleNewSponsorship = () => {

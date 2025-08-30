@@ -67,7 +67,11 @@ const SnackbarNotification = ({
             error: <ErrorIcon fontSize="inherit" />
           }}
         >
-          <Typography variant="body1">{msgData.html}</Typography>
+          <Typography
+            variant="body1"
+            component="div"
+            dangerouslySetInnerHTML={{ __html: msgData.html }}
+          />
         </Alert>
       </Snackbar>
       {children}

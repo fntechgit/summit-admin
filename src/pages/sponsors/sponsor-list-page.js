@@ -94,7 +94,7 @@ const SponsorListPage = ({
     getSponsors(term, page, perPage, order, orderDir);
   };
   const handlePerPageChange = (newPerPage) => {
-    getSponsors(term, currentPage, newPerPage, order, orderDir);
+    getSponsors(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
   const handleSort = (index, key, dir) => {
     getSponsors(term, currentPage, perPage, key, dir);
