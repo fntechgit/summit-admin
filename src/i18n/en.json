@@ -56,6 +56,7 @@
     "yes_delete": "Yes, delete.",
     "yes_remove": "Yes, remove.",
     "yes_send": "Yes, send.",
+    "yes_add": "Yes, add.",
     "id": "Id",
     "label": "Label",
     "value": "Value",
@@ -837,7 +838,7 @@
     "please_confirm": "Please confirm.",
     "invite_private_rsvp": "Invite to Private RSVP",
     "bulk_rsvp_invitations_done": "RSVP Invitations Added.",
-    "bulk_event_rsvp_warning": "You are about to send RSVP Invitations for {event} to {qty} attendees.",
+    "bulk_event_rsvp_warning": "You are about to add RSVP Invitations for {event} to {qty} attendees.",
     "placeholders": {
       "test_recipient": "Optional Test Recipient",
       "search_attendees": "Search Attendees by Name, Email, Company, Ticket Type or Badge Type",

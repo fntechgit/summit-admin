@@ -223,7 +223,7 @@ class SummitAttendeeListPage extends React.Component {
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
-      confirmButtonText: T.translate("general.yes_send")
+      confirmButtonText: T.translate("general.yes_add")
     }).then((result) => {
       if (result.value) {
         this.props
