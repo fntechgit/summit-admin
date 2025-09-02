@@ -7,6 +7,7 @@ import {
   Divider,
   FormLabel,
   Grid2,
+  InputLabel,
   Typography
 } from "@mui/material";
 import T from "i18n-react";
@@ -18,6 +19,7 @@ import AdditionalInputList from "../../components/additional-input-list";
 import useScrollToError from "../../../../hooks/useScrollToError";
 import MuiFormikUpload from "../../../../components/inputs/mui-formik-upload";
 import MuiFormikPriceField from "../../../../components/inputs/mui-formik-pricefield";
+import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
 
 const buildInitialValues = (data) => {
   const normalized = { ...data };
@@ -85,15 +87,10 @@ const ItemForm = ({ initialValues, onSubmit }) => {
               />
             </Grid2>
             <Grid2 size={12}>
-              <MuiFormikTextField
-                name="description"
-                label={T.translate(
-                  "sponsor_form_item_list.edit_item.description"
-                )}
-                fullWidth
-                multiline
-                rows={4}
-              />
+              <InputLabel htmlFor="description">
+                {T.translate("sponsor_form_item_list.edit_item.description")} *
+              </InputLabel>
+              <FormikTextEditor name="description" />
             </Grid2>
             <Grid2 size={4}>
               <MuiFormikPriceField
