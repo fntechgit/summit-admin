@@ -80,6 +80,7 @@ import purchaseOrderReducer from "./reducers/orders/purchase-order-reducer";
 import sponsorListReducer from "./reducers/sponsors/sponsor-list-reducer";
 import sponsorReducer from "./reducers/sponsors/sponsor-reducer";
 import sponsorFormsListReducer from "./reducers/sponsors/sponsor-forms-list-reducer";
+import sponsorFormItemsListReducer from "./reducers/sponsors/sponsor-form-items-list-reducer";
 import sponsorPromocodeListReducer from "./reducers/sponsors/promocode-list-reducer";
 import sponsorExtraQuestionReducer from "./reducers/sponsors/sponsor-extra-question-reducer";
 import sponsorshipListReducer from "./reducers/sponsorships/sponsorship-list-reducer";
@@ -234,6 +235,7 @@ const reducers = persistCombineReducers(config, {
   currentSponsorListState: sponsorListReducer,
   currentSponsorState: sponsorReducer,
   sponsorFormsListState: sponsorFormsListReducer,
+  sponsorFormItemsListState: sponsorFormItemsListReducer,
   currentSponsorPromocodeListState: sponsorPromocodeListReducer,
   currentSponsorExtraQuestionState: sponsorExtraQuestionReducer,
   currentSponsorAdvertisementState: sponsorAdvertisementReducer,

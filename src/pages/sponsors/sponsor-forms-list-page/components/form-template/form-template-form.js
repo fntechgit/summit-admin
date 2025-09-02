@@ -16,7 +16,7 @@ import { addIssAfterDateFieldValidator } from "../../../../../utils/yup";
 import DropdownCheckbox from "../../../../../components/mui/components/dropdown-checkbox";
 import MuiFormikTextField from "../../../../../components/inputs/mui-formik-textfield";
 import MuiFormikDatepicker from "../../../../../components/inputs/mui-formik-datepicker";
-import AdditionalInputList from "./additional-input-list";
+import AdditionalInputList from "../../../components/additional-input-list";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 
 const buildInitialValues = (data, summitTZ) => {

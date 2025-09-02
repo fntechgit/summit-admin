@@ -64,10 +64,10 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          fontSize: "15px",
+          fontSize: "14px",
           fontWeight: 500,
-          lineHeight: "26px",
-          padding: "12px 22px"
+          lineHeight: "20px",
+          padding: "10px 20px"
         }
       }
     },

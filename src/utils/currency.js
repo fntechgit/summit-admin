@@ -11,8 +11,7 @@
  * limitations under the License.
  * */
 
-const CENTS_FACTOR = 100;
-const DECIMAL_PLACES = 2;
+import { CENTS_FACTOR, DECIMAL_PLACES } from "./constants";
 
 /**
  * Converts a decimal amount to cents.
@@ -37,4 +36,14 @@ export const amountFromCents = (cents) => {
     throw new Error("The provided value must be an integer.");
   }
   return (cents / CENTS_FACTOR).toFixed(DECIMAL_PLACES);
+};
+
+/**
+ * Converts a price string into cents.
+ * @param {string} priceString - The price (e.g., $0.30).
+ * @returns {number} - The amount converted to cents (e.g., 30).
+ */
+export const parsePrice = (priceString) => {
+  const float = parseFloat(priceString.replace(/[^0-9.-]/g, "")) || 0;
+  return parseFloat(float.toFixed(DECIMAL_PLACES));
 };

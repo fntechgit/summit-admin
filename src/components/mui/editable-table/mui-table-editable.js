@@ -273,6 +273,18 @@ const MuiTableEditable = ({
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage={T.translate("mui_table.rows_per_page")}
+          sx={{
+            ".MuiTablePagination-toolbar": {
+              alignItems: "baseline",
+              marginTop: "1.6rem"
+            },
+            ".MuiTablePagination-spacer": {
+              display: "none"
+            },
+            ".MuiTablePagination-displayedRows": {
+              marginLeft: "auto"
+            }
+          }}
         />
       </Paper>
     </Box>

@@ -2337,6 +2337,13 @@
       "select": "Select..."
     }
   },
+  "additional_inputs": {
+    "meta_field_title": "Field Title",
+    "meta_field_type": "Field Type",
+    "meta_field_required": "Required",
+    "delete_meta_field_warning": "Are you sure you want to delete meta field ",
+    "delete_value_warning": "Are you sure you want to delete meta field value "
+  },
   "sponsor_forms": {
     "forms": "Forms",
     "alert_info": "To add an order form, select Add Form to start the process. To edit an existing form, click on the form name. To edit the line items within the form click manage items on the form line you wish to edit.",
@@ -2390,6 +2397,56 @@
       "created": "Form created successfully.",
       "updated": "Form {formName} updated successfully.",
       "error": "There was a problem creating the forms, please try again."
+    }
+  },
+  "sponsor_form_item_list": {
+    "form_items": "Form Items",
+    "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit botton. You can also change only a rate by clicking on it.",
+    "code": "Code",
+    "name": "Name",
+    "early_bird_rate": "Early bird rate",
+    "standard_rate": "Standard rate",
+    "onsite_rate": "On site rate",
+    "default_quantity": "Default quantity",
+    "hide_archived": "Hide archived items",
+    "add_item": "Add Item",
+    "add_item_from_inventory": "Add Item from Inventory",
+    "archive_button": "Archive",
+    "unarchive_button": "Unarchive",
+    "delete_form_template_item_warning": "Are you sure you want to delete form template item ",
+    "item_delete_success": "Item successfully deleted.",
+    "add_inventory_item": "Add Inventory Item",
+    "add_form_template_item": "Create new Item",
+    "placeholders": {
+      "search_form_template_items": "Search"
+    },
+    "edit_item": {
+      "new": "Create Item",
+      "edit": "Edit Item",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "early_bird_rate": "Early bird rate",
+      "standard_rate": "Standard rate",
+      "onsite_rate": "On site rate",
+      "quantity_limit_per_show": "Limit total amount per show (empty = disabled)",
+      "quantity_limit_per_sponsor": "Limit total amount per sponsor (empty = disabled)",
+      "default_quantity": "Default quantity",
+      "additional_fields": "Additional Input Fields",
+      "images": "Images",
+      "save": "save changes",
+      "created": "Item created successfully.",
+      "updated": "Item {name} updated successfully."
+    },
+    "add_from_inventory": {
+      "title": "Select Items",
+      "code": "Code",
+      "name": "Name",
+      "early_bird_rate": "Early bird rate",
+      "standard_rate": "Standad rate",
+      "onsite_rate": "On site rate",
+      "save": "Add selected items",
+      "items_added": "Items added successfully."
     }
   },
   "sponsorship_list": {

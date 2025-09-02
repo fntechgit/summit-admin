@@ -14,11 +14,11 @@ import {
 import T from "i18n-react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import MetaFieldValues from "../../../../sponsors_inventory/popup/meta-field-values";
+import MetaFieldValues from "../../sponsors_inventory/popup/meta-field-values";
 import {
   METAFIELD_TYPES,
   METAFIELD_TYPES_WITH_OPTIONS
-} from "../../../../../utils/constants";
+} from "../../../utils/constants";
 
 const AdditionalInput = ({
   item,
@@ -45,9 +45,7 @@ const AdditionalInput = ({
           <Grid2 size={4}>
             <TextField
               name="fieldTitle"
-              label={T.translate(
-                "sponsor_forms.form_template_popup.meta_field_title"
-              )}
+              label={T.translate("additional_inputs.meta_field_title")}
               variant="outlined"
               value={item.name}
               onChange={(ev) => onChange(itemIdx, "name", ev.target.value)}
@@ -58,9 +56,7 @@ const AdditionalInput = ({
             <Select
               value={item.type}
               name="fieldType"
-              label={T.translate(
-                "sponsor_forms.form_template_popup.meta_field_type"
-              )}
+              label={T.translate("additional_inputs.meta_field_type")}
               fullWidth
               onChange={(ev) => onChange(itemIdx, "type", ev.target.value)}
             >
@@ -82,9 +78,7 @@ const AdditionalInput = ({
                     }
                   />
                 }
-                label={T.translate(
-                  "sponsor_forms.form_template_popup.meta_field_required"
-                )}
+                label={T.translate("additional_inputs.meta_field_required")}
               />
             </FormControl>
           </Grid2>
