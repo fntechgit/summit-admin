@@ -30,10 +30,17 @@ const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
       sponsorships: []
     },
     validationSchema: yup.object({
-      company: yup.object().shape({
-        id: yup.number().required(),
-        name: yup.string().required()
-      }),
+      company: yup
+        .mixed()
+        .test(
+          "company-required",
+          "Company is required",
+          (v) =>
+            !!v &&
+            Number.isInteger(v.id) &&
+            !!v.name &&
+            v.name.trim().length > 0
+        ),
       sponsorships: yup
         .array()
         .of(
