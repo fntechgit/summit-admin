@@ -55,6 +55,8 @@ export const SPONSOR_FORM_ITEM_DELETED = "SPONSOR_FORM_ITEM_DELETED";
 export const SPONSOR_FORM_ITEM_IMAGES_UPDATED =
   "SPONSOR_FORM_ITEM_IMAGES_UPDATED";
 export const SPONSOR_FORM_ITEMS_ADDED = "SPONSOR_FORM_ITEMS_ADDED";
+export const SPONSOR_FORM_ITEM_ARCHIVED = "SPONSOR_FORM_ITEM_ARCHIVED";
+export const SPONSOR_FORM_ITEM_UNARCHIVED = "SPONSOR_FORM_ITEM_UNARCHIVED";
 
 export const getSponsorForms =
   (
@@ -647,6 +649,42 @@ export const updateSponsorFormItem =
       .finally(() => {
         dispatch(stopLoading());
       });
+  };
+
+export const archiveSponsorFormItem =
+  (formId, itemId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const params = { access_token: accessToken };
+
+    return putRequest(
+      null,
+      createAction(SPONSOR_FORM_ITEM_ARCHIVED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${itemId}/archive`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch);
+  };
+
+export const unarchiveSponsorFormItem =
+  (formId, itemId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_FORM_ITEM_UNARCHIVED)({ itemId }),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items/${itemId}/archive`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
 
 export const resetSponsorFormItem = () => (dispatch) => {

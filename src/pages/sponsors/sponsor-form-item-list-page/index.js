@@ -32,7 +32,9 @@ import {
   deleteSponsorFormItem,
   getSponsorFormItem,
   getSponsorFormItems,
-  updateSponsorFormItem
+  updateSponsorFormItem,
+  archiveSponsorFormItem,
+  unarchiveSponsorFormItem
 } from "../../../actions/sponsor-forms-actions";
 import ItemPopup from "./components/item-popup";
 import InventoryPopup from "./components/inventory-popup";
@@ -51,7 +53,9 @@ const SponsorFormItemListPage = ({
   getSponsorFormItems,
   getSponsorFormItem,
   deleteSponsorFormItem,
-  updateSponsorFormItem
+  updateSponsorFormItem,
+  archiveSponsorFormItem,
+  unarchiveSponsorFormItem
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const { form_id: formId } = match.params;
@@ -89,6 +93,11 @@ const SponsorFormItemListPage = ({
     const tmpEntity = { id: rowId, [column]: parsePrice(value) };
     updateSponsorFormItem(formId, tmpEntity);
   };
+
+  const handleArchiveItem = (item) =>
+    item.is_archived
+      ? unarchiveSponsorFormItem(formId, item.id)
+      : archiveSponsorFormItem(formId, item.id);
 
   const handleRowDelete = (itemId) => {
     deleteSponsorFormItem(formId, itemId);
@@ -164,9 +173,16 @@ const SponsorFormItemListPage = ({
       header: "",
       width: 70,
       align: "center",
-      render: () => (
-        <Button variant="text" color="inherit" size="small">
-          {T.translate("sponsor_form_item_list.archive_button")}
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="medium"
+          onClick={() => handleArchiveItem(row)}
+        >
+          {row.is_archived
+            ? T.translate("sponsor_form_item_list.unarchive_button")
+            : T.translate("sponsor_form_item_list.archive_button")}
         </Button>
       ),
       dottedBorder: true
@@ -288,5 +304,7 @@ export default connect(mapStateToProps, {
   getSponsorFormItems,
   deleteSponsorFormItem,
   getSponsorFormItem,
-  updateSponsorFormItem
+  updateSponsorFormItem,
+  archiveSponsorFormItem,
+  unarchiveSponsorFormItem
 })(SponsorFormItemListPage);
