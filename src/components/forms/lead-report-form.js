@@ -11,21 +11,9 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Chip,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  OutlinedInput,
-  Select
-} from "@mui/material";
-import { ClearIcon } from "@mui/x-date-pickers";
 import Member from "../../models/member";
 import {
   getLeadReportSettingsMeta,
@@ -37,6 +25,7 @@ import {
   getSummitLeadReportSettings,
   renderOptions
 } from "../../models/lead-report-settings";
+import ChipSelectInput from "../inputs/chip-select-input";
 
 const LeadReportForm = ({
   currentSummit,
@@ -50,116 +39,24 @@ const LeadReportForm = ({
     currentSummit.available_lead_report_columns;
   const canAddSponsors = memberObj.canAddSponsors();
   const canEditLeadReportSettings = memberObj.canEditLeadReportSettings();
-  const [selectedColumns, setSelectedColumns] = useState([]);
-  const [isDirty, setIsDirty] = useState(false);
   const inputLabel = T.translate(
     "sponsor_list.placeholders.lead_report_columns"
   );
-
-  // get current selected options
-  useEffect(() => {
-    if (currentSummit) {
-      getLeadReportSettingsBySummit();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (currentSummit) {
-      getLeadReportSettingsMeta();
-      const settings = getSummitLeadReportSettings(currentSummit);
-      if (settings) {
-        const selectedColumnsTmp = renderOptions(
-          denormalizeLeadReportSettings(settings.columns)
-        ).map((c) => c.value);
-        setSelectedColumns(selectedColumnsTmp);
-      }
-    }
-  }, [currentSummit.lead_report_settings]);
-
-  const submitNewColumns = (newValue) => {
-    setSelectedColumns(newValue);
-    upsertLeadReportSettings(newValue);
-    setIsDirty(false);
-  };
-
-  const handleColumnChange = (value) => {
-    setSelectedColumns(value);
-    setIsDirty(true);
-  };
-
-  const handleRemoveItem = (value) => {
-    const newValues = selectedColumns.filter((c) => c !== value);
-    setSelectedColumns(newValues);
-    upsertLeadReportSettings(newValues);
-  };
-
-  if (
-    !canAddSponsors ||
-    !canEditLeadReportSettings ||
-    !availableLeadReportColumns.length > 0
-  )
-    return null;
+  const currentSettings = getSummitLeadReportSettings(currentSummit);
 
   return (
-    <Box>
-      <FormControl fullWidth>
-        <InputLabel id="lead-report-columns-label">{inputLabel}</InputLabel>
-        <Select
-          labelId="lead-report-columns-label"
-          id="lead-report-columns"
-          multiple
-          fullWidth
-          value={selectedColumns}
-          onChange={(ev) => handleColumnChange(ev.target.value)}
-          onClose={() => (isDirty ? submitNewColumns(selectedColumns) : null)}
-          input={<OutlinedInput label={inputLabel} />}
-          renderValue={(selected) => (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {selected.map((value) => {
-                const op = availableLeadReportColumns.find(
-                  (op) => op.value === value
-                );
-                return (
-                  <Chip
-                    key={op.value}
-                    label={op.label}
-                    onDelete={() => {
-                      handleRemoveItem(op.value);
-                    }}
-                    deleteIcon={
-                      <ClearIcon
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                        }}
-                      />
-                    }
-                  />
-                );
-              })}
-            </Box>
-          )}
-          endAdornment={
-            selectedColumns.length > 0 && (
-              <InputAdornment sx={{ marginRight: "10px" }} position="end">
-                <IconButton
-                  onClick={() => {
-                    submitNewColumns([]);
-                  }}
-                >
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            )
-          }
-        >
-          {availableLeadReportColumns.map(({ value, label }) => (
-            <MenuItem key={value} value={value}>
-              {label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Box>
+    <ChipSelectInput
+      availableOptions={availableLeadReportColumns}
+      canAdd={canAddSponsors}
+      canEdit={canEditLeadReportSettings}
+      inputLabel={inputLabel}
+      currentSettings={currentSettings}
+      onGetSettingsMeta={getLeadReportSettingsMeta}
+      onGetSettings={getLeadReportSettingsBySummit}
+      onUpsertSettings={upsertLeadReportSettings}
+      renderSelectedOptions={renderOptions}
+      denormalizeSettings={denormalizeLeadReportSettings}
+    />
   );
 };
 
