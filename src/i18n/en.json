@@ -2333,6 +2333,7 @@
     "addon_type": "Add-on Type",
     "addon_name": "Add-on Name",
     "save_changes": "Save Changes",
+    "badge_scan_settings": "Badge Scan Settings",
     "tab": {
       "general": "general",
       "users": "users",
@@ -2347,7 +2348,8 @@
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start typing to choose a Tier...",
       "select_material_type": "Select Material Type",
-      "select": "Select..."
+      "select": "Select...",
+      "badge_scan_settings": "Select Badge Scan Settings"
     }
   },
   "additional_inputs": {

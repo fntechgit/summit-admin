@@ -28,7 +28,8 @@ import {
   getSponsorshipAddons,
   saveAddonsToSponsorship,
   removeAddonToSponsorship,
-  setSelectedSponsorship
+  setSelectedSponsorship,
+  upsertSponsorLeadReportSettings
 } from "../../actions/sponsor-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 
@@ -56,6 +57,7 @@ const a11yProps = (index) => ({
 const EditSponsorPage = (props) => {
   const {
     entity,
+    member,
     currentSummit,
     resetSponsorForm,
     getSponsorAdvertisements,
@@ -68,7 +70,8 @@ const EditSponsorPage = (props) => {
     getSponsorshipAddons,
     saveAddonsToSponsorship,
     removeAddonToSponsorship,
-    setSelectedSponsorship
+    setSelectedSponsorship,
+    upsertSponsorLeadReportSettings
   } = props;
 
   const [selectedTab, setSelectedTab] = useState(0);
@@ -139,6 +142,7 @@ const EditSponsorPage = (props) => {
         <CustomTabPanel value={selectedTab} index={0}>
           <SponsorGeneralForm
             sponsor={entity}
+            member={member}
             summitId={currentSummit.id}
             onSponsorshipPaginate={handleSponsorshipPaginate}
             onSponsorshipAdd={addTierToSponsor}
@@ -147,6 +151,8 @@ const EditSponsorPage = (props) => {
             onSponsorshipSelect={setSelectedSponsorship}
             onSponsorshipAddonSave={saveAddonsToSponsorship}
             onSponsorshipAddonRemove={removeAddonToSponsorship}
+            getSponsorLeadReportSettingsMeta={getSponsorLeadReportSettingsMeta}
+            upsertSponsorLeadReportSettings={upsertSponsorLeadReportSettings}
           />
         </CustomTabPanel>
       </Container>
@@ -179,5 +185,6 @@ export default connect(mapStateToProps, {
   getSponsorshipAddons,
   saveAddonsToSponsorship,
   removeAddonToSponsorship,
-  setSelectedSponsorship
+  setSelectedSponsorship,
+  upsertSponsorLeadReportSettings
 })(EditSponsorPage);
