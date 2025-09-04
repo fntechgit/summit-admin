@@ -28,6 +28,7 @@ import {
   fetchErrorHandler,
   getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
+import URI from "urijs";
 import history from "../history";
 import {
   checkOrFilter,
@@ -751,11 +752,24 @@ export const queryPaidAttendees = _.debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
 
-    input = escapeFilterValue(input);
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/attendees`
+    );
 
-    fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/attendees?filter[]=full_name=@${input},email=@${input}&filter[]=has_tickets==true&filter[]=has_member==true&access_token=${accessToken}&order=first_name,last_name&page=1&per_page=${DEFAULT_PER_PAGE}`
-    )
+    input = escapeFilterValue(input);
+    endpoint.addQuery("access_token", accessToken);
+    endpoint.addQuery("order", "first_name,last_name");
+    endpoint.addQuery("page", 1);
+    endpoint.addQuery("per_page", DEFAULT_PER_PAGE);
+
+    if (input) {
+      endpoint.addQuery("filter[]", `full_name=@${input},email=@${input}`);
+    }
+
+    endpoint.addQuery("filter[]", "has_tickets==true");
+    endpoint.addQuery("filter[]", "has_member==true");
+
+    fetch(endpoint)
       .then(fetchResponseHandler)
       .then((json) => {
         const options = [...json.data];
