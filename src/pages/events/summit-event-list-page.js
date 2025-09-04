@@ -779,7 +779,10 @@ class SummitEventListPage extends React.Component {
           (e) => !value.includes(e)
         )[0];
         let defaultValue;
-        if (removedFilter === "published_filter") {
+        if (
+          removedFilter === "published_filter" ||
+          removedFilter === "has_rsvp_filter"
+        ) {
           defaultValue = null;
         } else if (Array.isArray(eventFilters[removedFilter])) {
           defaultValue = [];
