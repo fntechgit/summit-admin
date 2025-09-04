@@ -14,6 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import { Breadcrumb } from "react-breadcrumbs";
 import {
   Box,
   Button,
@@ -25,11 +26,11 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
   getSponsorUserRequests
 } from "../../../actions/sponsor-users-actions";
-import CustomAlert from "../../../components/mui/components/custom-alert";
 import SearchInput from "../../../components/mui/components/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
 
 const SponsorUsersListPage = ({
+  match,
   requests,
   currentPage,
   perPage,
@@ -49,7 +50,7 @@ const SponsorUsersListPage = ({
     getSponsorUserRequests(term, page, perPage, order, orderDir);
   };
 
-  const handleSort = (index, key, dir) => {
+  const handleSort = (key, dir) => {
     getSponsorUserRequests(term, currentPage, perPage, key, dir);
   };
 
@@ -67,24 +68,24 @@ const SponsorUsersListPage = ({
 
   const columns = [
     {
-      columnKey: "name",
+      columnKey: "requester_first_name",
       header: T.translate("sponsor_users.name"),
       sortable: true
     },
     {
-      columnKey: "email",
+      columnKey: "requester_email",
       header: T.translate("sponsor_users.email"),
       sortable: true
     },
     {
-      columnKey: "sponsor",
+      columnKey: "company_name",
       header: T.translate("sponsor_users.sponsor"),
-      sortable: false
+      sortable: true
     },
     {
-      columnKey: "request_time",
+      columnKey: "created",
       header: T.translate("sponsor_users.request_time"),
-      sortable: false
+      sortable: true
     },
     {
       columnKey: "process",
@@ -110,10 +111,15 @@ const SponsorUsersListPage = ({
 
   return (
     <div className="container">
+      <Breadcrumb
+        data={{
+          title: T.translate("sponsor_users.users"),
+          pathname: match.url
+        }}
+      />
       <h3>
-        {T.translate("sponsor_users.forms")} ({totalCount})
+        {T.translate("sponsor_users.users")}
       </h3>
-      <CustomAlert message={T.translate("sponsor_users.alert_info")} hideIcon />
       <Grid2
         container
         spacing={2}
@@ -123,33 +129,35 @@ const SponsorUsersListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={1}>
-          <Box component="span">{totalCount} forms</Box>
+        <Grid2 size={2}>
+          <Box component="span">{totalCount} {T.translate("sponsor_users.access_request")}</Box>
         </Grid2>
-        <Grid2 size={2} offset={3}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("sponsor_users.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={3}>
+        <Grid2
+          container
+          size={10}
+          sx={{
+            justifyContent: "flex-end",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={4}>
+            <SearchInput
+              term={term}
+              onSearch={handleSearch}
+            />
+          </Grid2>
           <Button
             variant="contained"
             size="medium"
-            fullWidth
             onClick={() => setOpenPopup("import")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
             {T.translate("sponsor_users.import_user")}
           </Button>
-        </Grid2>
-        <Grid2 size={3}>
           <Button
             variant="contained"
             size="medium"
-            fullWidth
             onClick={() => setOpenPopup("new")}
             startIcon={<SaveAltIcon />}
             sx={{ height: "36px" }}

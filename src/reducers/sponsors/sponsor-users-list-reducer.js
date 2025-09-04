@@ -12,6 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   REQUEST_SPONSOR_USER_REQUESTS,
   RECEIVE_SPONSOR_USER_REQUESTS,
@@ -59,10 +60,10 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
 
       const requests = payload.response.data.map(r => ({
         id: r.id,
-        name: r.name,
-        email: r.email,
-        sponsor: r.sponsor,
-        request_time: r.request_time,
+        requester_first_name: `${r.requester_first_name} ${r.requester_last_name}`,
+        requester_email: r.requester_email,
+        company_name: r.company_name,
+        created: epochToMoment(r.created).format("MMMM Do YYYY, h:mm:ss a"),
       }));
 
       return {
