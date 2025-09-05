@@ -836,7 +836,7 @@
     "email_test_recipient": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
     "invalid_recipient_email": "Please use a valid email",
     "please_confirm": "Please confirm.",
-    "invite_private_rsvp": "Invite to Private RSVP",
+    "invite_private_rsvp": "Add to Private RSVP Invitation List",
     "bulk_rsvp_invitations_done": "RSVP Invitations Added.",
     "bulk_event_rsvp_warning": "You are about to add RSVP Invitations for {event} to {qty} attendees.",
     "placeholders": {

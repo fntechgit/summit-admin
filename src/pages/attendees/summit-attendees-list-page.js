@@ -1180,7 +1180,7 @@ class SummitAttendeeListPage extends React.Component {
         {attendeeFilters.memberFilter === "HAS_MEMBER" &&
           attendeeFilters.ticketsFilter === HAS_TICKETS && (
             <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
-              <div className="col-md-9">
+              <div className="col-md-8">
                 <EventInput
                   id="event_rsvp"
                   summitId={currentSummit.id}
@@ -1198,7 +1198,7 @@ class SummitAttendeeListPage extends React.Component {
                   defaultOptions
                 />
               </div>
-              <div className="col-md-3">
+              <div className="col-md-4">
                 <button
                   className="btn btn-default left-space pull-right"
                   onClick={this.handleRSVPInvitationBulk}
