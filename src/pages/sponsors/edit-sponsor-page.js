@@ -29,7 +29,9 @@ import {
   saveAddonsToSponsorship,
   removeAddonToSponsorship,
   setSelectedSponsorship,
-  upsertSponsorLeadReportSettings
+  upsertSponsorLeadReportSettings,
+  deleteExtraQuestion,
+  updateExtraQuestionOrder
 } from "../../actions/sponsor-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 
@@ -71,7 +73,9 @@ const EditSponsorPage = (props) => {
     saveAddonsToSponsorship,
     removeAddonToSponsorship,
     setSelectedSponsorship,
-    upsertSponsorLeadReportSettings
+    upsertSponsorLeadReportSettings,
+    deleteExtraQuestion,
+    updateExtraQuestionOrder
   } = props;
 
   const [selectedTab, setSelectedTab] = useState(0);
@@ -153,6 +157,8 @@ const EditSponsorPage = (props) => {
             onSponsorshipAddonRemove={removeAddonToSponsorship}
             getSponsorLeadReportSettingsMeta={getSponsorLeadReportSettingsMeta}
             upsertSponsorLeadReportSettings={upsertSponsorLeadReportSettings}
+            onExtraQuestionDelete={deleteExtraQuestion}
+            onExtraQuestionReOrder={updateExtraQuestionOrder}
           />
         </CustomTabPanel>
       </Container>
@@ -186,5 +192,7 @@ export default connect(mapStateToProps, {
   saveAddonsToSponsorship,
   removeAddonToSponsorship,
   setSelectedSponsorship,
-  upsertSponsorLeadReportSettings
+  upsertSponsorLeadReportSettings,
+  deleteExtraQuestion,
+  updateExtraQuestionOrder
 })(EditSponsorPage);

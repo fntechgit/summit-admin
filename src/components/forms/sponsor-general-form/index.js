@@ -16,6 +16,7 @@ import { Box } from "@mui/material";
 import SponsorHeader from "./sponsor-header";
 import Sponsorship from "./sponsorship";
 import BadgeScanSettings from "./badge-scan-settings";
+import SponsorExtraQuestions from "./extra-questions";
 
 const SponsorGeneralForm = ({
   sponsor,
@@ -29,7 +30,9 @@ const SponsorGeneralForm = ({
   onSponsorshipAddonSave,
   onSponsorshipAddonRemove,
   getSponsorLeadReportSettingsMeta,
-  upsertSponsorLeadReportSettings
+  upsertSponsorLeadReportSettings,
+  onExtraQuestionDelete,
+  onExtraQuestionReOrder
 }) => (
   <Box sx={{ mt: 2 }}>
     <SponsorHeader sponsor={sponsor} />
@@ -49,6 +52,13 @@ const SponsorGeneralForm = ({
       member={member}
       upsertSponsorLeadReportSettings={upsertSponsorLeadReportSettings}
       getSponsorLeadReportSettingsMeta={getSponsorLeadReportSettingsMeta}
+    />
+    <SponsorExtraQuestions
+      summitId={summitId}
+      sponsorId={sponsor.id}
+      extraQuestions={sponsor.extra_questions}
+      onExtraQuestionDelete={onExtraQuestionDelete}
+      onExtraQuestionReOrder={onExtraQuestionReOrder}
     />
   </Box>
 );
