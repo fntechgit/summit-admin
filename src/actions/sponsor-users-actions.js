@@ -22,10 +22,8 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
-import moment from "moment-timezone";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
-  CENTS_FACTOR,
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
@@ -34,6 +32,9 @@ import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_SPONSOR_USER_REQUESTS = "REQUEST_SPONSOR_USER_REQUESTS";
 export const RECEIVE_SPONSOR_USER_REQUESTS = "RECEIVE_SPONSOR_USER_REQUESTS";
+export const REQUEST_SPONSOR_USERS = "REQUEST_SPONSOR_USERS";
+export const RECEIVE_SPONSOR_USERS = "RECEIVE_SPONSOR_USERS";
+export const SPONSOR_USER_ADDED = "SPONSOR_USER_ADDED";
 
 export const getSponsorUserRequests =
   (
@@ -77,9 +78,97 @@ export const getSponsorUserRequests =
       createAction(RECEIVE_SPONSOR_USER_REQUESTS),
       `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests`,
       authErrorHandler,
-      { order, orderDir, page, term }
+      { order, orderDir, page, term, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
 
+
+export const getSponsorUsers =
+  (
+    term = "",
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const { currentSummit } = currentSummitState;
+      const accessToken = await getAccessTokenSafely();
+      const filter = [`summit_id==${currentSummit.id}`];
+
+      dispatch(startLoading());
+
+      if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(`user_email=@${escapedTerm},user_first_name=@${escapedTerm},user_last_name=@${escapedTerm}`);
+      }
+
+      const params = {
+        page,
+        per_page: perPage,
+        access_token: accessToken
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "" : "-";
+        params.ordering = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_SPONSOR_USERS),
+        createAction(RECEIVE_SPONSOR_USERS),
+        `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
+        authErrorHandler,
+        { order, orderDir, page, term, perPage }
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
+    };
+
+
+export const addSponsorUser =
+  () => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_USER_ADDED),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
+      {
+        "user_email": "santipalenque@gmail.com",
+        "sponsor_id": 4,
+        "summit_id": currentSummit.id
+      },
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "sponsor_form_item_list.add_from_inventory.items_added"
+            )
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };

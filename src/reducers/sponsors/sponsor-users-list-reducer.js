@@ -16,19 +16,31 @@ import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   REQUEST_SPONSOR_USER_REQUESTS,
   RECEIVE_SPONSOR_USER_REQUESTS,
+  REQUEST_SPONSOR_USERS,
+  RECEIVE_SPONSOR_USERS
 } from "../../actions/sponsor-users-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
-  requests: [],
   term: "",
-  order: "name",
-  orderDir: 1,
-  currentPage: 1,
-  lastPage: 1,
-  perPage: 10,
-  totalCount: 0,
-  users: [],
+  requests: {
+    items: [],
+    order: "id",
+    orderDir: 1,
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 10,
+    totalCount: 0,
+  },
+  users: {
+    items: [],
+    order: "id",
+    orderDir: 1,
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 10,
+    totalCount: 0,
+  },
 };
 
 const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
@@ -40,15 +52,18 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_USER_REQUESTS: {
-      const { order, orderDir, page, term } = payload;
+      const { order, orderDir, page, term, perPage } = payload;
 
       return {
         ...state,
-        order,
-        orderDir,
-        requests: [],
-        currentPage: page,
-        term
+        term,
+        requests: {
+          items: [],
+          order,
+          orderDir,
+          currentPage: page,
+          perPage,
+        }
       };
     }
     case RECEIVE_SPONSOR_USER_REQUESTS: {
@@ -58,7 +73,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const requests = payload.response.data.map(r => ({
+      const items = payload.response.data.map(r => ({
         id: r.id,
         requester_first_name: `${r.requester_first_name} ${r.requester_last_name}`,
         requester_email: r.requester_email,
@@ -68,10 +83,55 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
-        requests,
-        currentPage,
-        totalCount: total,
-        lastPage
+        requests: {
+          ...state.requests,
+          items,
+          currentPage,
+          totalCount: total,
+          lastPage
+        },
+      };
+    }
+    case REQUEST_SPONSOR_USERS: {
+      const { order, orderDir, page, term, perPage } = payload;
+
+      return {
+        ...state,
+        term,
+        users: {
+          items: [],
+          order,
+          orderDir,
+          currentPage: page,
+          perPage,
+        }
+      };
+    }
+    case RECEIVE_SPONSOR_USERS: {
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
+
+      const items = payload.response.data.map(u => ({
+        id: u.id,
+        user_first_name: `${u.user_first_name} ${u.user_last_name}`,
+        user_email: u.user_email,
+        company_name: u.company_name,
+        access: u.access,
+        active: u.status
+      }));
+
+      return {
+        ...state,
+        users: {
+          ...state.users,
+          items,
+          currentPage,
+          totalCount: total,
+          lastPage
+        },
       };
     }
     default:
