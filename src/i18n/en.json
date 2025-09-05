@@ -147,6 +147,7 @@
     "sponsor_list": "Sponsor List",
     "sponsor_forms": "Forms",
     "sponsorship_list": "Tiers",
+    "sponsor_users": "Users",
     "sponsors_promocodes": "Promo Codes",
     "sponsor_settings": "Settings",
     "badge_scans": "Badge Scans",
@@ -2448,6 +2449,16 @@
       "save": "Add selected items",
       "items_added": "Items added successfully."
     }
+  },
+  "sponsor_users": {
+    "users": "Users",
+    "access_request": "access request",
+    "import_user": "import existing user",
+    "add_user": "add user",
+    "name": "Name",
+    "email": "Email",
+    "sponsor": "Sponsor",
+    "request_time": "Request time"
   },
   "sponsorship_list": {
     "sponsorships": "Sponsorships",
