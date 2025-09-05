@@ -15,16 +15,15 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import {
-  Box,
-  Button,
-  Grid2, IconButton
-} from "@mui/material";
+import { Box, Button, Grid2, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import {
-  getSponsorUserRequests
+  addSponsorUser,
+  getSponsorUserRequests,
+  getSponsorUsers
 } from "../../../actions/sponsor-users-actions";
 import SearchInput from "../../../components/mui/components/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
@@ -32,41 +31,66 @@ import MuiTable from "../../../components/mui/table/mui-table";
 const SponsorUsersListPage = ({
   match,
   requests,
-  currentPage,
-  perPage,
+  users,
   term,
-  order,
-  orderDir,
-  totalCount,
-  getSponsorUserRequests
+  getSponsorUserRequests,
+  getSponsorUsers,
+  addSponsorUser
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
     getSponsorUserRequests();
+    getSponsorUsers();
+    addSponsorUser(); // TODO: remove
   }, []);
 
-  const handlePageChange = (page) => {
+  const handleRequestsPageChange = (page) => {
+    const { perPage, order, orderDir } = requests;
     getSponsorUserRequests(term, page, perPage, order, orderDir);
   };
 
-  const handleSort = (key, dir) => {
+  const handleUsersPageChange = (page) => {
+    const { perPage, order, orderDir } = users;
+    getSponsorUsers(term, page, perPage, order, orderDir);
+  };
+
+  const handleRequestsSort = (key, dir) => {
+    const { currentPage, perPage } = requests;
     getSponsorUserRequests(term, currentPage, perPage, key, dir);
   };
 
+  const handleUsersSort = (key, dir) => {
+    const { currentPage, perPage } = users;
+    getSponsorUsers(term, currentPage, perPage, key, dir);
+  };
+
   const handleSearch = (searchTerm) => {
-    getSponsorUserRequests(searchTerm, currentPage, perPage, order, orderDir);
+    getSponsorUserRequests(searchTerm);
+    getSponsorUsers(searchTerm);
   };
 
   const handleProcessRequest = (row) => {
     console.log("PROCESS REQUEST", row);
   };
 
-  const handleRowDelete = (itemId) => {
+  const handleRequestDelete = (itemId) => {
     console.log("DELETE", itemId);
   };
 
-  const columns = [
+  const handleUserDelete = (itemId) => {
+    console.log("DELETE", itemId);
+  };
+
+  const handleUserEdit = (itemId) => {
+    console.log("DELETE", itemId);
+  };
+
+  const handleSendEmail = (item) => {
+    console.log("SEND EMAIL", item);
+  };
+
+  const requestsColumns = [
     {
       columnKey: "requester_first_name",
       header: T.translate("sponsor_users.name"),
@@ -93,10 +117,7 @@ const SponsorUsersListPage = ({
       width: 100,
       align: "center",
       render: (row) => (
-        <IconButton
-          size="large"
-          onClick={() => handleProcessRequest(row)}
-        >
+        <IconButton size="large" onClick={() => handleProcessRequest(row)}>
           <ArrowForwardIcon fontSize="large" />
         </IconButton>
       ),
@@ -104,9 +125,54 @@ const SponsorUsersListPage = ({
     }
   ];
 
-  const tableOptions = {
-    sortCol: order,
-    sortDir: orderDir
+  const requestsTableOptions = {
+    sortCol: requests.order,
+    sortDir: requests.orderDir
+  };
+
+  const usersColumns = [
+    {
+      columnKey: "user_first_name",
+      header: T.translate("sponsor_users.name"),
+      sortable: true
+    },
+    {
+      columnKey: "user_email",
+      header: T.translate("sponsor_users.email"),
+      sortable: true
+    },
+    {
+      columnKey: "company_name",
+      header: T.translate("sponsor_users.sponsor"),
+      sortable: true
+    },
+    {
+      columnKey: "access",
+      header: T.translate("sponsor_users.access"),
+      sortable: false
+    },
+    {
+      columnKey: "active",
+      header: T.translate("sponsor_users.active"),
+      sortable: false
+    },
+    {
+      columnKey: "send_email",
+      header: "",
+      width: 100,
+      align: "center",
+      render: (row) => (
+        <IconButton size="large" onClick={() => handleSendEmail(row)}>
+          <MailOutlineIcon fontSize="large" />
+        </IconButton>
+      ),
+      dottedBorder: true
+    }
+  ];
+
+  const usersTableOptions = {
+    sortCol: users.order,
+    sortDir: users.orderDir
   };
 
   return (
@@ -117,9 +183,7 @@ const SponsorUsersListPage = ({
           pathname: match.url
         }}
       />
-      <h3>
-        {T.translate("sponsor_users.users")}
-      </h3>
+      <h3>{T.translate("sponsor_users.users")}</h3>
       <Grid2
         container
         spacing={2}
@@ -130,7 +194,9 @@ const SponsorUsersListPage = ({
         }}
       >
         <Grid2 size={2}>
-          <Box component="span">{totalCount} {T.translate("sponsor_users.access_request")}</Box>
+          <Box component="span">
+            {requests.totalCount} {T.translate("sponsor_users.access_request")}
+          </Box>
         </Grid2>
         <Grid2
           container
@@ -141,10 +207,7 @@ const SponsorUsersListPage = ({
           }}
         >
           <Grid2 size={4}>
-            <SearchInput
-              term={term}
-              onSearch={handleSearch}
-            />
+            <SearchInput term={term} onSearch={handleSearch} />
           </Grid2>
           <Button
             variant="contained"
@@ -167,18 +230,39 @@ const SponsorUsersListPage = ({
         </Grid2>
       </Grid2>
 
-      {requests.length > 0 && (
+      {requests.items.length > 0 && (
         <div>
           <MuiTable
-            columns={columns}
-            data={requests}
-            options={tableOptions}
-            perPage={perPage}
-            totalRows={totalCount}
-            currentPage={currentPage}
-            onDelete={handleRowDelete}
-            onPageChange={handlePageChange}
-            onSort={handleSort}
+            columns={requestsColumns}
+            data={requests.items}
+            options={requestsTableOptions}
+            perPage={requests.perPage}
+            totalRows={requests.totalCount}
+            currentPage={requests.currentPage}
+            onDelete={handleRequestDelete}
+            onPageChange={handleRequestsPageChange}
+            onSort={handleRequestsSort}
+          />
+        </div>
+      )}
+
+      <Box component="span">
+        {users.totalCount} {T.translate("sponsor_users.users").toLowerCase()}
+      </Box>
+
+      {users.items.length > 0 && (
+        <div>
+          <MuiTable
+            columns={usersColumns}
+            data={users.items}
+            options={usersTableOptions}
+            perPage={users.perPage}
+            totalRows={users.totalCount}
+            currentPage={users.currentPage}
+            onDelete={handleUserDelete}
+            onEdit={handleUserEdit}
+            onPageChange={handleUsersPageChange}
+            onSort={handleUsersSort}
           />
         </div>
       )}
@@ -191,5 +275,7 @@ const mapStateToProps = ({ sponsorUsersListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSponsorUserRequests
+  getSponsorUserRequests,
+  getSponsorUsers,
+  addSponsorUser
 })(SponsorUsersListPage);
