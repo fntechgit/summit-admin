@@ -3612,6 +3612,7 @@
     "select_items": "Select at least one invitation to perform the action.",
     "invalid_recipient_email": "Please use a valid email",
     "send_email_warning": "You are about to send the {template} email template to {qty} attendees.",
+    "email_test_recipient": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
     "send_emails": "Send",
     "send_rsvp_invitations_done": "Emails sent successfully.",
     "placeholders": {

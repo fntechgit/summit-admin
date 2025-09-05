@@ -52,15 +52,45 @@ const eventRSVPInvitationListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_EVENT_RSVP_INVITATIONS: {
-      const { order, orderDir, term } = payload;
+      const { order, orderDir, page, ...rest } = payload;
 
-      return { ...state, order, orderDir, term };
+      if (
+        order !== state.order ||
+        orderDir !== state.orderDir ||
+        page !== state.currentPage
+      ) {
+        return {
+          ...state,
+          order,
+          orderDir,
+          currentPage: page,
+          ...rest
+        };
+      }
+
+      return {
+        ...state,
+        order,
+        orderDir,
+        eventRsvpInvitations: [],
+        currentPage: page,
+        excludedInvitationsIds: [],
+        selectedInvitationsIds: [],
+        selectedCount: 0,
+        selectedAll: false,
+        ...rest
+      };
     }
     case RECEIVE_EVENT_RSVP_INVITATIONS: {
       const { current_page, total, last_page, data } = payload.response;
+      const { selectedAll, selectedInvitationsIds, excludedInvitationsIds } =
+        state;
 
       const eventRsvpInvitations = data.map((r) => ({
         attendee_full_name: `${r.invitee?.first_name} ${r.invitee?.last_name}`,
+        checked: selectedAll
+          ? !excludedInvitationsIds.includes(r.id)
+          : selectedInvitationsIds.includes(r.id),
         ...r
       }));
 

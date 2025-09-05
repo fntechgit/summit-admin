@@ -117,6 +117,13 @@ const EventRSVPInvitationBlast = ({
                 qty: selectedCount
               })}
             </div>
+            {testEmailRecipient && (
+              <div className="col-md-12">
+                {T.translate("event_rsvp_list.email_test_recipient", {
+                  email: testEmailRecipient
+                })}
+              </div>
+            )}
             <div className="col-md-12 acceptance-criteria-wrapper">
               <label htmlFor="excerpt_recipient">
                 {T.translate("event_rsvp_list.excerpt_recipient")}
