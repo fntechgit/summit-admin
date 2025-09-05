@@ -2334,6 +2334,9 @@
     "addon_name": "Add-on Name",
     "save_changes": "Save Changes",
     "badge_scan_settings": "Badge Scan Settings",
+    "extra_questions_info": "Drag and Drop to sort Items.",
+    "add_question": "Add Question",
+    "no_extra_questions": "No extra questions found.",
     "tab": {
       "general": "general",
       "users": "users",

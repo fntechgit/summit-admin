@@ -267,28 +267,30 @@ const MuiTableSortable = ({
         </TableContainer>
 
         {/* PAGINATION */}
-        <TablePagination
-          component="div"
-          count={totalRows}
-          rowsPerPageOptions={customPerPageOptions}
-          rowsPerPage={perPage}
-          page={currentPage - 1}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage={T.translate("mui_table.rows_per_page")}
-          sx={{
-            ".MuiTablePagination-toolbar": {
-              alignItems: "baseline",
-              marginTop: "1.6rem"
-            },
-            ".MuiTablePagination-spacer": {
-              display: "none"
-            },
-            ".MuiTablePagination-displayedRows": {
-              marginLeft: "auto"
-            }
-          }}
-        />
+        {onPerPageChange && onPageChange && (
+          <TablePagination
+            component="div"
+            count={totalRows}
+            rowsPerPageOptions={customPerPageOptions}
+            rowsPerPage={perPage}
+            page={currentPage - 1}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage={T.translate("mui_table.rows_per_page")}
+            sx={{
+              ".MuiTablePagination-toolbar": {
+                alignItems: "baseline",
+                marginTop: "1.6rem"
+              },
+              ".MuiTablePagination-spacer": {
+                display: "none"
+              },
+              ".MuiTablePagination-displayedRows": {
+                marginLeft: "auto"
+              }
+            }}
+          />
+        )}
       </Paper>
     </Box>
   );
