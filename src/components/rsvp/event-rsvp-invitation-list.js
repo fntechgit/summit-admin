@@ -148,7 +148,7 @@ const EventRSVPInvitationList = ({
   };
 
   const handleImportInvitations = () => {
-    importRSVPInvitationsCSV(importCSVFile).then(() => {});
+    importRSVPInvitationsCSV(importCSVFile);
     setShowImportModal(false);
   };
 

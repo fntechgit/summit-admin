@@ -422,7 +422,7 @@ export const importRSVPInvitationsCSV =
       file,
       {},
       authErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(getEventRSVPInvitations());
     });
   };
