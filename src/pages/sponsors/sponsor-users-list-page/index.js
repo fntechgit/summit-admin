@@ -21,12 +21,12 @@ import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import {
-  addSponsorUser,
   getSponsorUserRequests,
   getSponsorUsers
 } from "../../../actions/sponsor-users-actions";
 import SearchInput from "../../../components/mui/components/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
+import ChipList from "../../../components/mui/components/chip-list";
 
 const SponsorUsersListPage = ({
   match,
@@ -34,15 +34,13 @@ const SponsorUsersListPage = ({
   users,
   term,
   getSponsorUserRequests,
-  getSponsorUsers,
-  addSponsorUser
+  getSponsorUsers
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
     getSponsorUserRequests();
     getSponsorUsers();
-    addSponsorUser(); // TODO: remove
   }, []);
 
   const handleRequestsPageChange = (page) => {
@@ -132,12 +130,12 @@ const SponsorUsersListPage = ({
 
   const usersColumns = [
     {
-      columnKey: "user_first_name",
+      columnKey: "first_name",
       header: T.translate("sponsor_users.name"),
       sortable: true
     },
     {
-      columnKey: "user_email",
+      columnKey: "email",
       header: T.translate("sponsor_users.email"),
       sortable: true
     },
@@ -147,9 +145,10 @@ const SponsorUsersListPage = ({
       sortable: true
     },
     {
-      columnKey: "access",
+      columnKey: "access_rights",
       header: T.translate("sponsor_users.access"),
-      sortable: false
+      sortable: false,
+      render: (row) => <ChipList chips={row.access_rights} maxLength={2} />
     },
     {
       columnKey: "active",
@@ -246,7 +245,7 @@ const SponsorUsersListPage = ({
         </div>
       )}
 
-      <Box component="span">
+      <Box component="div" sx={{mb: 2}}>
         {users.totalCount} {T.translate("sponsor_users.users").toLowerCase()}
       </Box>
 
@@ -276,6 +275,5 @@ const mapStateToProps = ({ sponsorUsersListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorUserRequests,
-  getSponsorUsers,
-  addSponsorUser
+  getSponsorUsers
 })(SponsorUsersListPage);

@@ -2471,7 +2471,9 @@
     "name": "Name",
     "email": "Email",
     "sponsor": "Sponsor",
-    "request_time": "Request time"
+    "request_time": "Request time",
+    "access": "Access",
+    "active": "Active"
   },
   "sponsorship_list": {
     "sponsorships": "Sponsorships",

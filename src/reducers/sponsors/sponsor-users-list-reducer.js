@@ -14,12 +14,13 @@
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import {
-  REQUEST_SPONSOR_USER_REQUESTS,
   RECEIVE_SPONSOR_USER_REQUESTS,
-  REQUEST_SPONSOR_USERS,
-  RECEIVE_SPONSOR_USERS
+  RECEIVE_SPONSOR_USERS,
+  REQUEST_SPONSOR_USER_REQUESTS,
+  REQUEST_SPONSOR_USERS
 } from "../../actions/sponsor-users-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { titleCase } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   term: "",
@@ -30,7 +31,7 @@ const DEFAULT_STATE = {
     currentPage: 1,
     lastPage: 1,
     perPage: 10,
-    totalCount: 0,
+    totalCount: 0
   },
   users: {
     items: [],
@@ -39,8 +40,8 @@ const DEFAULT_STATE = {
     currentPage: 1,
     lastPage: 1,
     perPage: 10,
-    totalCount: 0,
-  },
+    totalCount: 0
+  }
 };
 
 const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
@@ -62,7 +63,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
           order,
           orderDir,
           currentPage: page,
-          perPage,
+          perPage
         }
       };
     }
@@ -73,12 +74,12 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const items = payload.response.data.map(r => ({
+      const items = payload.response.data.map((r) => ({
         id: r.id,
         requester_first_name: `${r.requester_first_name} ${r.requester_last_name}`,
         requester_email: r.requester_email,
         company_name: r.company_name,
-        created: epochToMoment(r.created).format("MMMM Do YYYY, h:mm:ss a"),
+        created: epochToMoment(r.created).format("MMMM Do YYYY, h:mm:ss a")
       }));
 
       return {
@@ -89,7 +90,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
           currentPage,
           totalCount: total,
           lastPage
-        },
+        }
       };
     }
     case REQUEST_SPONSOR_USERS: {
@@ -103,7 +104,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
           order,
           orderDir,
           currentPage: page,
-          perPage,
+          perPage
         }
       };
     }
@@ -114,14 +115,20 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const items = payload.response.data.map(u => ({
-        id: u.id,
-        user_first_name: `${u.user_first_name} ${u.user_last_name}`,
-        user_email: u.user_email,
-        company_name: u.company_name,
-        access: u.access,
-        active: u.status
-      }));
+      const items = payload.response.data.map((u) => {
+        const accessRights = u.access_rights.reduce((res, it) => [
+          ...new Set([...res, ...it.groups.map((g) => titleCase(g.name))])
+        ], []);
+
+        return {
+          id: u.id,
+          first_name: `${u.first_name} ${u.last_name}`,
+          email: u.email,
+          company_name: u.company_name,
+          access_rights: accessRights,
+          active: u.active
+        };
+      });
 
       return {
         ...state,
@@ -131,7 +138,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
           currentPage,
           totalCount: total,
           lastPage
-        },
+        }
       };
     }
     default:

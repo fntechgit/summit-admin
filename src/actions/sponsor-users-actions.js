@@ -109,6 +109,9 @@ export const getSponsorUsers =
       const params = {
         page,
         per_page: perPage,
+        expand: "access_rights,access_rights.groups",
+        relations: "access_rights,access_rights.groups",
+        fields: "id,first_name,last_name,email,active,access_rights.groups.name",
         access_token: accessToken
       };
 
@@ -152,7 +155,7 @@ export const addSponsorUser =
       `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
       {
         "user_email": "santipalenque@gmail.com",
-        "sponsor_id": 4,
+        "sponsor_id": 359,
         "summit_id": currentSummit.id
       },
       snackbarErrorHandler
