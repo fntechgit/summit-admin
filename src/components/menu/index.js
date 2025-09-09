@@ -244,17 +244,6 @@ const getSummitItems = (summitId) => [
     accessRoute: "signage"
   },
   {
-    name: "rsvps",
-    iconClass: "fa-user-plus",
-    accessRoute: "rsvp",
-    childs: [
-      {
-        name: "rsvp_template_list",
-        linkUrl: `summits/${summitId}/rsvp-templates`
-      }
-    ]
-  },
-  {
     name: "purchase_orders",
     iconClass: "fa-money",
     accessRoute: "purchase-orders",

@@ -254,18 +254,18 @@ class RegistrationInvitationsListPage extends React.Component {
 
   handleSelected(invitation_id, isSelected) {
     if (isSelected) {
-      this.props.selectInvitation(invitation_id);
+      selectInvitation(invitation_id);
       return;
     }
-    this.props.unSelectInvitation(invitation_id);
+    unSelectInvitation(invitation_id);
   }
 
   handleSelectedAll(ev) {
     const selectedAllCb = ev.target.checked;
-    this.props.setSelectedAll(selectedAllCb);
+    setSelectedAll(selectedAllCb);
     if (!selectedAllCb) {
       // clear all selected
-      this.props.clearAllSelectedInvitations();
+      clearAllSelectedInvitations();
     }
   }
 

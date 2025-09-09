@@ -37,9 +37,12 @@ import {
   exportEvents,
   getEvents,
   importEventsCSV,
-  importMP4AssetsFromMUX
+  importMP4AssetsFromMUX,
+  queryAllCompanies,
+  querySpeakerCompany,
+  querySubmitterCompany
 } from "../../actions/event-actions";
-import { handleDDLSortByLabel, hasErrors, uuidv4 } from "../../utils/methods";
+import { handleDDLSortByLabel, hasErrors } from "../../utils/methods";
 import "../../styles/summit-event-list-page.less";
 import OrAndFilter from "../../components/filters/or-and-filter";
 import MediaTypeFilter from "../../components/filters/media-type-filter";
@@ -166,8 +169,10 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
       const track = allTracks.find((t) => t.id === extraProps.row?.track?.id);
 
       const selection_plans_per_track = allSelectionPlans
-        .filter((sp) =>
-          sp.track_groups.some((gr) => track.track_groups.includes(gr))
+        .filter(
+          (sp) =>
+            !track ||
+            sp.track_groups.some((gr) => track.track_groups.includes(gr))
         )
         ?.sort((a, b) => a.order - b.order)
         .map((sp) => ({ label: sp.name, value: sp.id }));
@@ -192,10 +197,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
         />
       );
     },
-    render: (e) => {
-      console.log(e);
-      return e?.name ? e.name : "N/A";
-    }
+    render: (e) => (e?.name ? e.name : "N/A")
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
@@ -400,6 +402,7 @@ const defaultFilters = {
   level_filter: [],
   tags_filter: [],
   published_filter: null,
+  has_rsvp_filter: null,
   progress_flag: [],
   created_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null),
   modified_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null),
@@ -442,6 +445,7 @@ class SummitEventListPage extends React.Component {
     this.handleTagOrSpeakerFilterChange =
       this.handleTagOrSpeakerFilterChange.bind(this);
     this.handleSetPublishedFilter = this.handleSetPublishedFilter.bind(this);
+    this.handleSetRSVPFilter = this.handleSetRSVPFilter.bind(this);
     this.handleChangeDateFilter = this.handleChangeDateFilter.bind(this);
     this.handleApplyEventFilters = this.handleApplyEventFilters.bind(this);
     this.handleFiltersChange = this.handleFiltersChange.bind(this);
@@ -750,6 +754,15 @@ class SummitEventListPage extends React.Component {
     }));
   }
 
+  handleSetRSVPFilter(ev) {
+    const { eventFilters } = this.state;
+    this.extraFilters.has_rsvp_filter = ev;
+    this.setState((prevState) => ({
+      ...prevState,
+      eventFilters: { ...eventFilters, has_rsvp_filter: ev }
+    }));
+  }
+
   handleFiltersChange(ev) {
     const { value } = ev.target;
     const { enabledFilters, eventFilters } = this.state;
@@ -766,7 +779,10 @@ class SummitEventListPage extends React.Component {
           (e) => !value.includes(e)
         )[0];
         let defaultValue;
-        if (removedFilter === "published_filter") {
+        if (
+          removedFilter === "published_filter" ||
+          removedFilter === "has_rsvp_filter"
+        ) {
           defaultValue = null;
         } else if (Array.isArray(eventFilters[removedFilter])) {
           defaultValue = [];
@@ -1106,7 +1122,8 @@ class SummitEventListPage extends React.Component {
       { label: "Review Status", value: "review_status_filter" },
       { label: "Created", value: "created_filter" },
       { label: "Modified", value: "modified_filter" },
-      { label: "Submission Source", value: "submission_source_filter" }
+      { label: "Submission Source", value: "submission_source_filter" },
+      { label: "Has RSVP?", value: "has_rsvp_filter" }
     ];
 
     const ddl_columns = [
@@ -1529,6 +1546,7 @@ class SummitEventListPage extends React.Component {
                   "event_list.placeholders.speaker_company"
                 )}
                 onChange={this.handleExtraFilterChange}
+                queryFunction={querySpeakerCompany}
                 multi
               />
             </div>
@@ -1578,23 +1596,17 @@ class SummitEventListPage extends React.Component {
                 placeholder={T.translate(
                   "event_list.placeholders.all_companies"
                 )}
+                queryFunction={queryAllCompanies}
                 onChange={this.handleExtraFilterChange}
                 multi
-                allowCreate
-                allowCreateWhileLoading
-                formatCreateLabel={(input) => `${input}`}
-                onCreate={(newCompanyName) => {
-                  const id = "all_companies";
-                  const currFilter = eventFilters[id];
-                  const value = { id: uuidv4(), name: newCompanyName };
-                  const newFilter = [...currFilter, value];
-                  this.setState((prevState) => ({
-                    ...prevState,
-                    eventFilters: {
-                      ...eventFilters,
-                      [id]: newFilter
-                    }
-                  }));
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+                styles={{
+                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  control: (base, state) => ({
+                    ...base,
+                    zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
+                  })
                 }}
               />
             </div>
@@ -1784,23 +1796,8 @@ class SummitEventListPage extends React.Component {
                   "event_list.placeholders.submitter_company"
                 )}
                 onChange={this.handleExtraFilterChange}
+                queryFunction={querySubmitterCompany}
                 multi
-                allowCreate
-                allowCreateWhileLoading
-                formatCreateLabel={(input) => `${input}`}
-                onCreate={(newCompanyName) => {
-                  const id = "submitter_company";
-                  const currFilter = eventFilters[id];
-                  const value = { id: uuidv4(), name: newCompanyName };
-                  const newFilter = [...currFilter, value];
-                  this.setState((prevState) => ({
-                    ...prevState,
-                    eventFilters: {
-                      ...eventFilters,
-                      [id]: newFilter
-                    }
-                  }));
-                }}
               />
             </div>
           )}
@@ -1861,6 +1858,37 @@ class SummitEventListPage extends React.Component {
                   "event_list.placeholders.submission_source"
                 )}
                 options={submission_source_ddl}
+              />
+            </div>
+          )}
+          {enabledFilters.includes("has_rsvp_filter") && (
+            <div className="col-md-6">
+              <SegmentedControl
+                name="has_rsvp_filter"
+                options={[
+                  {
+                    label: "All",
+                    value: null,
+                    default: eventFilters.has_rsvp_filter === null
+                  },
+                  {
+                    label: "Has RSVP",
+                    value: "yes",
+                    default: eventFilters.has_rsvp_filter === "yes"
+                  },
+                  {
+                    label: "No RSVP",
+                    value: "no",
+                    default: eventFilters.has_rsvp_filter === "no"
+                  }
+                ]}
+                setValue={(newValue) => this.handleSetRSVPFilter(newValue)}
+                style={{
+                  width: "100%",
+                  height: 40,
+                  color: "#337ab7",
+                  fontSize: "10px"
+                }}
               />
             </div>
           )}

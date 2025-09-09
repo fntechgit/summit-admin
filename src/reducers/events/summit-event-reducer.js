@@ -9,37 +9,37 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
-
-import {
-  RECEIVE_EVENT,
-  RESET_EVENT_FORM,
-  EVENT_UPDATED,
-  EVENT_ADDED,
-  EVENT_PUBLISHED,
-  IMAGE_ATTACHED,
-  IMAGE_DELETED,
-  REQUEST_EVENT_FEEDBACK,
-  RECEIVE_EVENT_FEEDBACK,
-  EVENT_FEEDBACK_DELETED,
-  REQUEST_EVENT_COMMENTS,
-  RECEIVE_EVENT_COMMENTS,
-  RECEIVE_ACTION_TYPES,
-  FLAG_CHANGED
-} from "../../actions/event-actions";
-import moment from "moment-timezone";
+ * */
 
 import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import moment from "moment-timezone";
+import {
+  EVENT_ADDED,
+  EVENT_FEEDBACK_DELETED,
+  EVENT_PUBLISHED,
+  EVENT_UPDATED,
+  FLAG_CHANGED,
+  IMAGE_ATTACHED,
+  IMAGE_DELETED,
+  RECEIVE_ACTION_TYPES,
+  RECEIVE_EVENT,
+  RECEIVE_EVENT_COMMENTS,
+  RECEIVE_EVENT_FEEDBACK,
+  REQUEST_EVENT_COMMENTS,
+  REQUEST_EVENT_FEEDBACK,
+  RESET_EVENT_FORM
+} from "../../actions/event-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { UNPUBLISHED_EVENT } from "../../actions/summit-builder-actions";
 import {
   EVENT_MATERIAL_ADDED,
-  EVENT_MATERIAL_UPDATED,
-  EVENT_MATERIAL_DELETED
+  EVENT_MATERIAL_DELETED,
+  EVENT_MATERIAL_UPDATED
 } from "../../actions/event-material-actions";
 import { EVENT_COMMENT_DELETED } from "../../actions/event-comment-actions";
 import { RECEIVE_QA_USERS_BY_SUMMIT_EVENT } from "../../actions/user-chat-roles-actions";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
 export const DEFAULT_ENTITY = {
   id: 0,
@@ -77,7 +77,8 @@ export const DEFAULT_ENTITY = {
   custom_order: 0,
   actions: [],
   allowed_ticket_types: [],
-  submission_source: "Admin"
+  submission_source: "Admin",
+  rsvp_type: "None"
 };
 
 const DEFAULT_STATE_FEEDBACK_STATE = {
@@ -119,7 +120,7 @@ const normalizeEventResponse = (entity) => {
   const slides = entity.links || [];
   let media_uploads = entity.media_uploads || [];
 
-  for (var key in entity) {
+  for (const key in entity) {
     if (entity.hasOwnProperty(key)) {
       entity[key] = entity[key] == null ? "" : entity[key];
     }
@@ -128,7 +129,7 @@ const normalizeEventResponse = (entity) => {
   if (!entity.rsvp_external) entity.rsvp_link = null;
   media_uploads = media_uploads.map((m) => ({
     ...m,
-    media_upload_type_id: m.media_upload_type.id
+    media_upload_type_id: m.media_upload_type?.id || 0
   }));
   entity.materials = [...media_uploads, ...links, ...videos, ...slides];
   entity.type_id = entity.type ? entity.type.id : null;
@@ -146,134 +147,106 @@ const normalizeEventResponse = (entity) => {
 const summitEventReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
-    case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
       }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
     case SET_CURRENT_SUMMIT:
-    case RESET_EVENT_FORM:
-      {
-        return DEFAULT_STATE;
-      }
-      break;
+    case RESET_EVENT_FORM: {
+      return DEFAULT_STATE;
+    }
     case EVENT_ADDED:
-    case RECEIVE_EVENT:
-      {
-        const entity = normalizeEventResponse(payload.response);
+    case RECEIVE_EVENT: {
+      const entity = normalizeEventResponse(payload.response);
 
-        return {
-          ...state,
-          entity: { ...DEFAULT_ENTITY, ...entity },
-          errors: {}
-        };
-      }
-      break;
-    case EVENT_PUBLISHED:
-      {
-        return {
-          ...state,
-          entity: { ...state.entity, is_published: true },
-          errors: {}
-        };
-      }
-      break;
-    case UNPUBLISHED_EVENT:
-      {
-        return {
-          ...state,
-          entity: { ...state.entity, is_published: false },
-          errors: {}
-        };
-      }
-      break;
-    case EVENT_UPDATED:
-      {
-        const entity = normalizeEventResponse(payload.response);
-        return { ...state, entity: entity, errors: {} };
-      }
-      break;
-    case EVENT_MATERIAL_DELETED:
-      {
-        let eventMaterialId = payload.eventMaterialId;
-        let materials = state.entity.materials.filter(
-          (m) => m.id !== eventMaterialId
-        );
+      return {
+        ...state,
+        entity: { ...DEFAULT_ENTITY, ...entity },
+        errors: {}
+      };
+    }
+    case EVENT_PUBLISHED: {
+      return {
+        ...state,
+        entity: { ...state.entity, is_published: true },
+        errors: {}
+      };
+    }
+    case UNPUBLISHED_EVENT: {
+      return {
+        ...state,
+        entity: { ...state.entity, is_published: false },
+        errors: {}
+      };
+    }
+    case EVENT_UPDATED: {
+      const entity = normalizeEventResponse(payload.response);
+      return { ...state, entity, errors: {} };
+    }
+    case EVENT_MATERIAL_DELETED: {
+      const { eventMaterialId } = payload;
+      const materials = state.entity.materials.filter(
+        (m) => m.id !== eventMaterialId
+      );
 
-        return {
-          ...state,
-          entity: { ...state.entity, materials: materials },
-          errors: {}
-        };
-      }
-      break;
-    case EVENT_MATERIAL_ADDED:
-      {
-        let newMaterial = { ...payload.response };
+      return {
+        ...state,
+        entity: { ...state.entity, materials },
+        errors: {}
+      };
+    }
+    case EVENT_MATERIAL_ADDED: {
+      const newMaterial = { ...payload.response };
 
-        newMaterial.display_on_site_label = newMaterial.display_on_site
-          ? "Yes"
-          : "No";
+      newMaterial.display_on_site_label = newMaterial.display_on_site
+        ? "Yes"
+        : "No";
 
-        let materials = [...state.entity.materials, newMaterial];
+      const materials = [...state.entity.materials, newMaterial];
 
-        return {
-          ...state,
-          entity: { ...state.entity, materials: materials },
-          errors: {}
-        };
-      }
-      break;
-    case EVENT_MATERIAL_UPDATED:
-      {
-        let newMaterial = { ...payload.response };
-        let oldMaterials = state.entity.materials.filter(
-          (m) => m.id !== newMaterial.id
-        );
+      return {
+        ...state,
+        entity: { ...state.entity, materials },
+        errors: {}
+      };
+    }
+    case EVENT_MATERIAL_UPDATED: {
+      const newMaterial = { ...payload.response };
+      const oldMaterials = state.entity.materials.filter(
+        (m) => m.id !== newMaterial.id
+      );
 
-        newMaterial.display_on_site_label = newMaterial.display_on_site
-          ? "Yes"
-          : "No";
+      newMaterial.display_on_site_label = newMaterial.display_on_site
+        ? "Yes"
+        : "No";
 
-        let materials = [...oldMaterials, newMaterial];
+      const materials = [...oldMaterials, newMaterial];
 
-        return {
-          ...state,
-          entity: { ...state.entity, materials: materials },
-          errors: {}
-        };
-      }
-      break;
-    case IMAGE_ATTACHED:
-      {
-        let image = { ...payload.response };
-        //let image = {...state.entity.image, url:  state.entity.image.url + '?' + new Date().getTime()};
-        return { ...state, entity: { ...state.entity, image: image.url } };
-      }
-      break;
-    case IMAGE_DELETED:
-      {
-        return { ...state, entity: { ...state.entity, image: null } };
-      }
-      break;
-    case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
-    case RECEIVE_QA_USERS_BY_SUMMIT_EVENT:
-      {
-        let qaUsers = payload.response;
-        return { ...state, entity: { ...state.entity, qa_users: qaUsers } };
-      }
-      break;
+      return {
+        ...state,
+        entity: { ...state.entity, materials },
+        errors: {}
+      };
+    }
+    case IMAGE_ATTACHED: {
+      const image = { ...payload.response };
+      return { ...state, entity: { ...state.entity, image: image.url } };
+    }
+    case IMAGE_DELETED: {
+      return { ...state, entity: { ...state.entity, image: null } };
+    }
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
+    case RECEIVE_QA_USERS_BY_SUMMIT_EVENT: {
+      const qaUsers = payload.response;
+      return { ...state, entity: { ...state.entity, qa_users: qaUsers } };
+    }
     case REQUEST_EVENT_FEEDBACK: {
-      let { order, orderDir, term, summitTZ } = payload;
+      const { order, orderDir, term, summitTZ } = payload;
       return {
         ...state,
         feedbackState: {
@@ -286,23 +259,21 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_EVENT_FEEDBACK: {
-      let { current_page, total, last_page } = payload.response;
+      const { current_page, total, last_page } = payload.response;
 
-      let items = payload.response.data.map((e) => {
-        return {
-          ...e,
-          owner_full_name: `${e.owner.first_name} ${e.owner.last_name}`,
-          created: moment(e.created_date * 1000)
-            .tz(state.feedbackState.summitTZ)
-            .format("MMMM Do YYYY, h:mm a")
-        };
-      });
+      const items = payload.response.data.map((e) => ({
+        ...e,
+        owner_full_name: `${e.owner.first_name} ${e.owner.last_name}`,
+        created: moment(e.created_date * MILLISECONDS_IN_SECOND)
+          .tz(state.feedbackState.summitTZ)
+          .format("MMMM Do YYYY, h:mm a")
+      }));
 
       return {
         ...state,
         feedbackState: {
           ...state.feedbackState,
-          items: items,
+          items,
           currentPage: current_page,
           totalEvents: total,
           lastPage: last_page
@@ -310,7 +281,7 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_FEEDBACK_DELETED: {
-      let { feedbackId } = payload;
+      const { feedbackId } = payload;
       return {
         ...state,
         feedbackState: {
@@ -320,35 +291,33 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case REQUEST_EVENT_COMMENTS: {
-      let { order, orderDir, summitTZ } = payload;
+      const { order, orderDir, summitTZ } = payload;
       return {
         ...state,
         commentState: { ...state.commentState, order, orderDir, summitTZ }
       };
     }
     case RECEIVE_EVENT_COMMENTS: {
-      let { current_page, total, last_page } = payload.response;
+      const { current_page, total, last_page } = payload.response;
 
-      let items = payload.response.data.map((e) => {
-        return {
-          ...e,
-          owner_full_name: `${e.creator.first_name} ${e.creator.last_name}`,
-          created: moment(e.created * 1000)
-            .tz(state.commentState.summitTZ)
-            .format("MMMM Do YYYY, h:mm a"),
-          last_edited: moment(e.last_edited * 1000)
-            .tz(state.commentState.summitTZ)
-            .format("MMMM Do YYYY, h:mm a"),
-          is_activity:
-            e.is_activity === null
-              ? "N/A"
-              : e.is_activity === true
-              ? "Yes"
-              : "No",
-          is_public:
-            e.is_public === null ? "N/A" : e.is_public === true ? "Yes" : "No"
-        };
-      });
+      const items = payload.response.data.map((e) => ({
+        ...e,
+        owner_full_name: `${e.creator.first_name} ${e.creator.last_name}`,
+        created: moment(e.created * MILLISECONDS_IN_SECOND)
+          .tz(state.commentState.summitTZ)
+          .format("MMMM Do YYYY, h:mm a"),
+        last_edited: moment(e.last_edited * MILLISECONDS_IN_SECOND)
+          .tz(state.commentState.summitTZ)
+          .format("MMMM Do YYYY, h:mm a"),
+        is_activity:
+          e.is_activity === null
+            ? "N/A"
+            : e.is_activity === true
+            ? "Yes"
+            : "No",
+        is_public:
+          e.is_public === null ? "N/A" : e.is_public === true ? "Yes" : "No"
+      }));
 
       return {
         ...state,
@@ -362,7 +331,7 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case EVENT_COMMENT_DELETED: {
-      let { commentId } = payload;
+      const { commentId } = payload;
       return {
         ...state,
         commentState: {
