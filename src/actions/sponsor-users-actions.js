@@ -29,6 +29,7 @@ import {
   DEFAULT_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
+import { RECEIVE_GLOBAL_SPONSORSHIPS } from "./sponsor-forms-actions";
 
 export const REQUEST_SPONSOR_USER_REQUESTS = "REQUEST_SPONSOR_USER_REQUESTS";
 export const RECEIVE_SPONSOR_USER_REQUESTS = "RECEIVE_SPONSOR_USER_REQUESTS";
@@ -138,6 +139,74 @@ export const getSponsorUsers =
 
 
 export const addSponsorUser =
+  () => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_USER_ADDED),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
+      {
+        "user_email": "santipalenque@gmail.com",
+        "sponsor_id": 359,
+        "summit_id": currentSummit.id
+      },
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "sponsor_form_item_list.add_from_inventory.items_added"
+            )
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const getSponsorships =
+  (page = 1, perPage = DEFAULT_PER_PAGE) =>
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const accessToken = await getAccessTokenSafely();
+      const { currentSummit } = currentSummitState;
+
+      dispatch(startLoading());
+
+      const params = {
+        page,
+        per_page: perPage,
+        access_token: accessToken,
+        sorting: "order",
+        expand: "type",
+        relations: "type",
+        fields: "id,type.id,type.name"
+      };
+
+      return getRequest(
+        null,
+        createAction(RECEIVE_GLOBAL_SPONSORSHIPS),
+        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
+        authErrorHandler
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
+    };
+
+export const processUserRequest =
   () => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();

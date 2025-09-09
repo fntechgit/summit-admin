@@ -8,7 +8,7 @@ const ChipList = ({ chips, maxLength }) => {
   return (
     <Box>
       {shownItems.map((chip) => (
-        <Chip label={chip} size="small" sx={{mr: 1}} />
+        <Chip key={`chip-${chip}`} label={chip} size="small" sx={{mr: 1}} />
       ))}
       {rest.length > 0 && (
         <Tooltip title={rest.map(r => <Typography variant="body1" component="div">{r}</Typography>)} arrow>
