@@ -9,25 +9,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { Switch, Route } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
+import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import EditSummitEventPage from "../pages/events/edit-summit-event-page";
 import EditEventMaterialPage from "../pages/events/edit-event-material-page";
 import EditEventCommentPage from "../pages/events/edit-event-comment-page";
+import EditEventRsvpPage from "../pages/events/edit-event-rsvp-page";
 import NoMatchPage from "../pages/no-match-page";
 import { getEvent, resetEventForm } from "../actions/event-actions";
 import { getRsvpTemplates } from "../actions/rsvp-template-actions";
-import { connect } from "react-redux";
 
 class EventIdLayout extends React.Component {
   constructor(props) {
     super(props);
 
-    let eventId = props.match.params.event_id;
+    const eventId = props.match.params.event_id;
 
     if (!eventId) {
       props.resetEventForm();
@@ -38,7 +39,7 @@ class EventIdLayout extends React.Component {
     props.getRsvpTemplates();
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.event_id;
     const newId = this.props.match.params.event_id;
 
@@ -53,8 +54,8 @@ class EventIdLayout extends React.Component {
 
   render() {
     const { match, entity } = this.props;
-    let eventId = this.props.match.params.event_id;
-    let breadcrumb = entity.id ? entity.title : T.translate("general.new");
+    const eventId = this.props.match.params.event_id;
+    const breadcrumb = entity.id ? entity.title : T.translate("general.new");
 
     if (eventId && entity.id !== parseInt(eventId)) return <div />;
 
@@ -97,6 +98,28 @@ class EventIdLayout extends React.Component {
                     exact
                     path={`${props.match.url}/:comment_id`}
                     component={EditEventCommentPage}
+                  />
+                  <Route component={NoMatchPage} />
+                </Switch>
+              </div>
+            )}
+          />
+          <Route
+            path={`${match.url}/rsvp`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_event.rsvp"),
+                    pathname: match.url
+                  }}
+                />
+                <Switch>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:rsvp_id`}
+                    component={EditEventRsvpPage}
                   />
                   <Route component={NoMatchPage} />
                 </Switch>

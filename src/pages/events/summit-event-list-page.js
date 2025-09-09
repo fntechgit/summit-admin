@@ -197,7 +197,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
         />
       );
     },
-    render: (e) => e?.name ? e.name : "N/A"
+    render: (e) => (e?.name ? e.name : "N/A")
   },
   { columnKey: "location", value: "location", sortable: true },
   { columnKey: "level", value: "level", sortable: true },
@@ -402,6 +402,7 @@ const defaultFilters = {
   level_filter: [],
   tags_filter: [],
   published_filter: null,
+  has_rsvp_filter: null,
   progress_flag: [],
   created_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null),
   modified_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null),
@@ -444,6 +445,7 @@ class SummitEventListPage extends React.Component {
     this.handleTagOrSpeakerFilterChange =
       this.handleTagOrSpeakerFilterChange.bind(this);
     this.handleSetPublishedFilter = this.handleSetPublishedFilter.bind(this);
+    this.handleSetRSVPFilter = this.handleSetRSVPFilter.bind(this);
     this.handleChangeDateFilter = this.handleChangeDateFilter.bind(this);
     this.handleApplyEventFilters = this.handleApplyEventFilters.bind(this);
     this.handleFiltersChange = this.handleFiltersChange.bind(this);
@@ -752,6 +754,15 @@ class SummitEventListPage extends React.Component {
     }));
   }
 
+  handleSetRSVPFilter(ev) {
+    const { eventFilters } = this.state;
+    this.extraFilters.has_rsvp_filter = ev;
+    this.setState((prevState) => ({
+      ...prevState,
+      eventFilters: { ...eventFilters, has_rsvp_filter: ev }
+    }));
+  }
+
   handleFiltersChange(ev) {
     const { value } = ev.target;
     const { enabledFilters, eventFilters } = this.state;
@@ -768,7 +779,10 @@ class SummitEventListPage extends React.Component {
           (e) => !value.includes(e)
         )[0];
         let defaultValue;
-        if (removedFilter === "published_filter") {
+        if (
+          removedFilter === "published_filter" ||
+          removedFilter === "has_rsvp_filter"
+        ) {
           defaultValue = null;
         } else if (Array.isArray(eventFilters[removedFilter])) {
           defaultValue = [];
@@ -1108,7 +1122,8 @@ class SummitEventListPage extends React.Component {
       { label: "Review Status", value: "review_status_filter" },
       { label: "Created", value: "created_filter" },
       { label: "Modified", value: "modified_filter" },
-      { label: "Submission Source", value: "submission_source_filter" }
+      { label: "Submission Source", value: "submission_source_filter" },
+      { label: "Has RSVP?", value: "has_rsvp_filter" }
     ];
 
     const ddl_columns = [
@@ -1843,6 +1858,37 @@ class SummitEventListPage extends React.Component {
                   "event_list.placeholders.submission_source"
                 )}
                 options={submission_source_ddl}
+              />
+            </div>
+          )}
+          {enabledFilters.includes("has_rsvp_filter") && (
+            <div className="col-md-6">
+              <SegmentedControl
+                name="has_rsvp_filter"
+                options={[
+                  {
+                    label: "All",
+                    value: null,
+                    default: eventFilters.has_rsvp_filter === null
+                  },
+                  {
+                    label: "Has RSVP",
+                    value: "yes",
+                    default: eventFilters.has_rsvp_filter === "yes"
+                  },
+                  {
+                    label: "No RSVP",
+                    value: "no",
+                    default: eventFilters.has_rsvp_filter === "no"
+                  }
+                ]}
+                setValue={(newValue) => this.handleSetRSVPFilter(newValue)}
+                style={{
+                  width: "100%",
+                  height: 40,
+                  color: "#337ab7",
+                  fontSize: "10px"
+                }}
               />
             </div>
           )}

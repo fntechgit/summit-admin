@@ -77,7 +77,8 @@ export const DEFAULT_ENTITY = {
   custom_order: 0,
   actions: [],
   allowed_ticket_types: [],
-  submission_source: "Admin"
+  submission_source: "Admin",
+  rsvp_type: "None"
 };
 
 const DEFAULT_STATE_FEEDBACK_STATE = {
@@ -186,7 +187,7 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, entity, errors: {} };
     }
     case EVENT_MATERIAL_DELETED: {
-      const {eventMaterialId} = payload;
+      const { eventMaterialId } = payload;
       const materials = state.entity.materials.filter(
         (m) => m.id !== eventMaterialId
       );

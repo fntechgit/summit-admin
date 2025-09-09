@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import AsyncSelect from "react-select/lib/Async";
@@ -47,9 +47,9 @@ export default class EventInput extends React.Component {
   }
 
   getTemplates(input, callback) {
-    const { summitId } = this.props;
+    const { summitId, defaultOptions } = this.props;
 
-    if (!input) {
+    if (!input && !defaultOptions) {
       return Promise.resolve({ options: [] });
     }
 
@@ -64,7 +64,9 @@ export default class EventInput extends React.Component {
       callback(newOptions);
     };
 
-    queryEvents(summitId, input, translateOptions);
+    const queryFn = this.props.queryFunction || queryEvents;
+
+    queryFn(summitId, input, translateOptions);
   }
 
   render() {
@@ -78,7 +80,7 @@ export default class EventInput extends React.Component {
 
     if (value) {
       theValue = plainValue
-        ? { value: value, label: value }
+        ? { value, label: value }
         : { value: value.id?.toString(), label: value.title };
     }
 
@@ -89,7 +91,7 @@ export default class EventInput extends React.Component {
           onChange={this.handleChange}
           loadOptions={this.getTemplates}
           isMulti={false}
-          isClearable={true}
+          isClearable
           {...rest}
         />
         {has_error && <p className="error-label">{error}</p>}
