@@ -18,15 +18,19 @@ import AddIcon from "@mui/icons-material/Add";
 import MuiTableSortable from "../../mui/sortable-table/mui-table-sortable";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 import history from "../../../history";
+import AddSponsorExtraQuestionPopup from "./add-extra-question-popup";
 
 const SponsorExtraQuestions = ({
   sponsorId,
   extraQuestions = [],
-  summitId,
+  summit,
+  saveSponsorExtraQuestion,
   onExtraQuestionReOrder,
   onExtraQuestionDelete
 }) => {
   const [tableData, setTableData] = useState(extraQuestions);
+  const [showAddExtraQuestionPopup, setShowAddExtraQuestionPopup] =
+    useState(false);
 
   useEffect(() => {
     const sortedExtraQuestions = extraQuestions.sort(
@@ -35,10 +39,12 @@ const SponsorExtraQuestions = ({
     setTableData(sortedExtraQuestions);
   }, [extraQuestions]);
 
-  const handleExtraQuestionAdd = () => {
-    history.push(
-      `/app/summits/${summitId}/sponsors/${sponsorId}/extra-questions/new`
-    );
+  const handleCloseExtraQuestionPopup = () => {
+    setShowAddExtraQuestionPopup(false);
+  };
+
+  const handleOpenExtraQuestionPopup = () => {
+    setShowAddExtraQuestionPopup(true);
   };
 
   const handleReorder = (newOrder, itemId, newItemOrder) => {
@@ -48,12 +54,18 @@ const SponsorExtraQuestions = ({
 
   const handleEditExtraQuestion = (extraQuestion) => {
     history.push(
-      `/app/summits/${summitId}/sponsors/${sponsorId}/extra-questions/${extraQuestion.id}`
+      `/app/summits/${summit.id}/sponsors/${sponsorId}/extra-questions/${extraQuestion.id}`
     );
   };
 
   const handleDeleteExtraQuestion = (extraQuestionId) => {
     onExtraQuestionDelete(sponsorId, extraQuestionId);
+  };
+
+  const handleSubmitExtraQuestion = (extraQuestion) => {
+    saveSponsorExtraQuestion(extraQuestion).then(() =>
+      setShowAddExtraQuestionPopup(false)
+    );
   };
 
   const columns = [
@@ -76,89 +88,110 @@ const SponsorExtraQuestions = ({
   ];
 
   return (
-    <Box sx={{ px: 2, py: 0, mt: 2, backgroundColor: "#FFF" }}>
-      <Grid2 container size={12} sx={{ height: "68px", alignItems: "center" }}>
-        <Grid2 size={12}>
-          <Typography
-            sx={{
-              fontWeight: "500",
-              letterSpacing: "0.15px",
-              fontSize: "2rem",
-              lineHeight: "1.6rem"
-            }}
-          >
-            {T.translate("edit_sponsor.extra_questions")}
-          </Typography>
+    <>
+      <Box sx={{ px: 2, py: 0, mt: 2, backgroundColor: "#FFF" }}>
+        <Grid2
+          container
+          size={12}
+          sx={{ height: "68px", alignItems: "center" }}
+        >
+          <Grid2 size={12}>
+            <Typography
+              sx={{
+                fontWeight: "500",
+                letterSpacing: "0.15px",
+                fontSize: "2rem",
+                lineHeight: "1.6rem"
+              }}
+            >
+              {T.translate("edit_sponsor.extra_questions")}
+            </Typography>
+          </Grid2>
         </Grid2>
-      </Grid2>
-      <Divider />
-      <Grid2
-        container
-        size={12}
-        sx={{ py: 2, height: "68px", alignItems: "center" }}
-      >
-        <Grid2 size={12}>
-          <Box
-            sx={{
-              p: 2,
-              fontSize: "1.2rem",
-              lineHeight: "1.5rem",
-              color: "#1E88E5",
-              backgroundColor: "#03A9F41A"
-            }}
-          >
-            {T.translate("edit_sponsor.extra_questions_info")}
-          </Box>
-        </Grid2>
-      </Grid2>
-      <Grid2 container size={12} sx={{ height: "68px", alignItems: "center" }}>
-        <Grid2 size={9}>
-          <Typography
-            sx={{
-              fontWeight: "400",
-              letterSpacing: "0.15px",
-              fontSize: "1.6rem",
-              lineHeight: "150%",
-              textTransform: "lowercase"
-            }}
-          >
-            {extraQuestions.length}{" "}
-            {T.translate("edit_sponsor.extra_questions")}
-          </Typography>
+        <Divider />
+        <Grid2
+          container
+          size={12}
+          sx={{ py: 2, height: "68px", alignItems: "center" }}
+        >
+          <Grid2 size={12}>
+            <Box
+              sx={{
+                p: 2,
+                fontSize: "1.2rem",
+                lineHeight: "1.5rem",
+                color: "#1E88E5",
+                backgroundColor: "#03A9F41A"
+              }}
+            >
+              {T.translate("edit_sponsor.extra_questions_info")}
+            </Box>
+          </Grid2>
         </Grid2>
         <Grid2
-          size={3}
-          sx={{ py: 3, display: "flex", justifyContent: "flex-end" }}
+          container
+          size={12}
+          sx={{ height: "68px", alignItems: "center" }}
         >
-          <Button
-            variant="contained"
-            onClick={handleExtraQuestionAdd}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
+          <Grid2 size={9}>
+            <Typography
+              sx={{
+                fontWeight: "400",
+                letterSpacing: "0.15px",
+                fontSize: "1.6rem",
+                lineHeight: "150%",
+                textTransform: "lowercase"
+              }}
+            >
+              {extraQuestions.length}{" "}
+              {T.translate("edit_sponsor.extra_questions")}
+            </Typography>
+          </Grid2>
+          <Grid2
+            size={3}
+            sx={{ py: 3, display: "flex", justifyContent: "flex-end" }}
           >
-            {T.translate("edit_sponsor.add_question")}
-          </Button>
+            <Button
+              variant="contained"
+              onClick={handleOpenExtraQuestionPopup}
+              startIcon={<AddIcon />}
+              sx={{ height: "36px" }}
+            >
+              {T.translate("edit_sponsor.add_question")}
+            </Button>
+          </Grid2>
         </Grid2>
-      </Grid2>
-      <Grid2 container size={12} sx={{ py: 3 }}>
-        {extraQuestions.length === 0 && (
-          <div>{T.translate("edit_sponsor.no_extra_questions")}</div>
-        )}
+        <Grid2 container size={12} sx={{ py: 3 }}>
+          {extraQuestions.length === 0 && (
+            <div>{T.translate("edit_sponsor.no_extra_questions")}</div>
+          )}
 
-        {extraQuestions.length > 0 && (
-          <MuiTableSortable
-            data={tableData}
-            columns={columns}
-            totalRows={tableData.length}
-            currentPage={DEFAULT_CURRENT_PAGE}
-            perPage={MAX_PER_PAGE}
-            onEdit={handleEditExtraQuestion}
-            onDelete={handleDeleteExtraQuestion}
-            onReorder={handleReorder}
-          />
-        )}
-      </Grid2>
-    </Box>
+          {extraQuestions.length > 0 && (
+            <MuiTableSortable
+              data={tableData}
+              columns={columns}
+              totalRows={tableData.length}
+              currentPage={DEFAULT_CURRENT_PAGE}
+              perPage={MAX_PER_PAGE}
+              onEdit={handleEditExtraQuestion}
+              onDelete={handleDeleteExtraQuestion}
+              onReorder={handleReorder}
+            />
+          )}
+        </Grid2>
+      </Box>
+      {showAddExtraQuestionPopup && (
+        <AddSponsorExtraQuestionPopup
+          open={showAddExtraQuestionPopup}
+          summit={summit}
+          onClose={handleCloseExtraQuestionPopup}
+          onSubmit={handleSubmitExtraQuestion}
+          shouldHideMandatory
+          shouldHideAllowedTicketTypes
+          shouldHideAllowedFeatures
+        />
+      )}
+    </>
   );
 };
 

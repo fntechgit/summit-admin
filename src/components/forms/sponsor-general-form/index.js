@@ -21,7 +21,7 @@ import SponsorExtraQuestions from "./extra-questions";
 const SponsorGeneralForm = ({
   sponsor,
   member,
-  summitId,
+  summit,
   onSponsorshipPaginate,
   onSponsorshipAdd,
   onSponsorshipDelete,
@@ -31,6 +31,7 @@ const SponsorGeneralForm = ({
   onSponsorshipAddonRemove,
   getSponsorLeadReportSettingsMeta,
   upsertSponsorLeadReportSettings,
+  saveSponsorExtraQuestion,
   onExtraQuestionDelete,
   onExtraQuestionReOrder
 }) => (
@@ -38,7 +39,7 @@ const SponsorGeneralForm = ({
     <SponsorHeader sponsor={sponsor} />
     <Sponsorship
       sponsor={sponsor}
-      summitId={summitId}
+      summitId={summit.id}
       onSponsorshipPaginate={onSponsorshipPaginate}
       onSponsorshipAdd={onSponsorshipAdd}
       onSponsorshipDelete={onSponsorshipDelete}
@@ -54,9 +55,10 @@ const SponsorGeneralForm = ({
       getSponsorLeadReportSettingsMeta={getSponsorLeadReportSettingsMeta}
     />
     <SponsorExtraQuestions
-      summitId={summitId}
+      summit={summit}
       sponsorId={sponsor.id}
       extraQuestions={sponsor.extra_questions}
+      saveSponsorExtraQuestion={saveSponsorExtraQuestion}
       onExtraQuestionDelete={onExtraQuestionDelete}
       onExtraQuestionReOrder={onExtraQuestionReOrder}
     />

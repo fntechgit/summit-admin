@@ -30,8 +30,10 @@ import {
   removeAddonToSponsorship,
   setSelectedSponsorship,
   upsertSponsorLeadReportSettings,
+  saveSponsorExtraQuestion,
   deleteExtraQuestion,
-  updateExtraQuestionOrder
+  updateExtraQuestionOrder,
+  getExtraQuestionMeta
 } from "../../actions/sponsor-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 
@@ -74,8 +76,10 @@ const EditSponsorPage = (props) => {
     removeAddonToSponsorship,
     setSelectedSponsorship,
     upsertSponsorLeadReportSettings,
+    saveSponsorExtraQuestion,
     deleteExtraQuestion,
-    updateExtraQuestionOrder
+    updateExtraQuestionOrder,
+    getExtraQuestionMeta
   } = props;
 
   const [selectedTab, setSelectedTab] = useState(0);
@@ -91,6 +95,7 @@ const EditSponsorPage = (props) => {
       getSponsorSocialNetworks(entity.id);
       getSponsorLeadReportSettingsMeta(entity.id);
       getSponsorTiers(entity.id);
+      getExtraQuestionMeta();
     } else {
       resetSponsorForm();
     }
@@ -147,7 +152,7 @@ const EditSponsorPage = (props) => {
           <SponsorGeneralForm
             sponsor={entity}
             member={member}
-            summitId={currentSummit.id}
+            summit={currentSummit}
             onSponsorshipPaginate={handleSponsorshipPaginate}
             onSponsorshipAdd={addTierToSponsor}
             onSponsorshipDelete={removeTierFromSponsor}
@@ -157,6 +162,7 @@ const EditSponsorPage = (props) => {
             onSponsorshipAddonRemove={removeAddonToSponsorship}
             getSponsorLeadReportSettingsMeta={getSponsorLeadReportSettingsMeta}
             upsertSponsorLeadReportSettings={upsertSponsorLeadReportSettings}
+            saveSponsorExtraQuestion={saveSponsorExtraQuestion}
             onExtraQuestionDelete={deleteExtraQuestion}
             onExtraQuestionReOrder={updateExtraQuestionOrder}
           />
@@ -193,6 +199,8 @@ export default connect(mapStateToProps, {
   removeAddonToSponsorship,
   setSelectedSponsorship,
   upsertSponsorLeadReportSettings,
+  saveSponsorExtraQuestion,
   deleteExtraQuestion,
-  updateExtraQuestionOrder
+  updateExtraQuestionOrder,
+  getExtraQuestionMeta
 })(EditSponsorPage);

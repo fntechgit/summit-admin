@@ -2337,6 +2337,16 @@
     "extra_questions_info": "Drag and Drop to sort Items.",
     "add_question": "Add Question",
     "no_extra_questions": "No extra questions found.",
+    "add_extra_question": "Add Extra Question",
+    "save_extra_question": "Save Extra Question",
+    "question_type": "Question Type",
+    "question_id": "Question Identifier",
+    "visible_question": "Visible Question (as appears on site)",
+    "values": "Values",
+    "mandatory": "Mandatory?",
+    "allowed_badge_features_types": "Allowed Badge Features",
+    "allowed_badge_features_types_info": "Allow to define question visible only available if attendee owns this feature type.",
+    "add_value": "Add a Value",
     "tab": {
       "general": "general",
       "users": "users",
@@ -2352,7 +2362,9 @@
       "sponsorship_type": "Start typing to choose a Tier...",
       "select_material_type": "Select Material Type",
       "select": "Select...",
-      "badge_scan_settings": "Select Badge Scan Settings"
+      "badge_scan_settings": "Select Badge Scan Settings",
+      "select_type": "Select a Type",
+      "select_allowed_badge_features_types": "Select Allowed Badge Features"
     }
   },
   "additional_inputs": {
