@@ -2317,6 +2317,7 @@
     "social_network_created": "Social Network created successfully",
     "extra_question_saved": "Extra Question saved successfully",
     "extra_question_created": "Extra Question created successfully",
+    "extra_question_deleted": "Extra Question deleted successfully",
     "remove_warning_ads": "Are you sure you want to delete advertisement ",
     "remove_warning_materials": "Are you sure you want to delete material ",
     "remove_warning_social_networks": "Are you sure you want to delete social network ",

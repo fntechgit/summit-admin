@@ -827,9 +827,15 @@ export const deleteExtraQuestion =
       createAction(SPONSOR_EXTRA_QUESTION_DELETED)({ questionId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("edit_sponsor.extra_question_deleted")
+        })
+      );
     });
   };
 
