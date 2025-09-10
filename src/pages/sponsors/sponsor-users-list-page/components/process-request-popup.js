@@ -33,7 +33,7 @@ const ProcessRequestPopup = ({request, sponsorships, currentSummit, onClose}) =>
   return (
     <Dialog open={!!request} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle
-        sx={{ display: "flex", justifyContent: "space-between" }}
+        sx={{ display: "flex", justifyContent: "space-between", p: 2 }}
         component="div"
       >
         <Typography variant="h5">

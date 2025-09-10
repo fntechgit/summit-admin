@@ -2473,7 +2473,28 @@
     "sponsor": "Sponsor",
     "request_time": "Request time",
     "access": "Access",
-    "active": "Active"
+    "active": "Active",
+    "process_request": {
+      "title": "Process Access Request",
+      "request_details": "Request details",
+      "request_time": "Request time",
+      "show": "Show",
+      "company": "Company",
+      "new_user": "New user",
+      "name": "Name",
+      "email": "Email",
+      "send_email": "Send Activation Email",
+      "sponsor_assignment": "Sponsor assignment",
+      "assign_to_existing": "Assign to existing Sponsor",
+      "assign_to_new": "Create new Sponsor",
+      "select_sponsor": "Select Sponsor",
+      "select_company": "Select Company",
+      "select_tier": "Select Tier",
+      "show_details": "Show details",
+      "tiers": "Tiers",
+      "access": "Access",
+      "save": "Process"
+    }
   },
   "sponsorship_list": {
     "sponsorships": "Sponsorships",
