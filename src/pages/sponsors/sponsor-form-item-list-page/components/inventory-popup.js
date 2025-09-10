@@ -19,7 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
 import Box from "@mui/material/Box";
-import SearchInput from "../../../../components/mui/components/search-input";
+import SearchInput from "../../../../components/mui/search-input";
 import MuiTable from "../../../../components/mui/table/mui-table";
 import { addInventoryItems } from "../../../../actions/sponsor-forms-actions";
 import { getInventoryItems } from "../../../../actions/inventory-item-actions";

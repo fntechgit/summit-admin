@@ -20,8 +20,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 
 import useScrollToError from "../../../hooks/useScrollToError";
-import CompanyInputMUI from "../../../components/inputs/company-input-mui";
-import SponsorshipsBySummitSelectMUI from "../../../components/inputs/sponsorship-summit-select-mui";
+import CompanyInputMUI from "../../../components/mui/formik-inputs/company-input-mui";
+import SponsorshipsBySummitSelectMUI from "../../../components/mui/formik-inputs/sponsorship-summit-select-mui";
 
 const AddSponsorDialog = ({ open, onClose, onSubmit, summitId }) => {
   const formik = useFormik({

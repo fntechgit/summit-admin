@@ -3,7 +3,7 @@ import _ from "lodash";
 import { useField } from "formik";
 import T from "i18n-react";
 import AdditionalInput from "./additional-input";
-import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
+import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 
 const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
   // eslint-disable-next-line no-unused-vars

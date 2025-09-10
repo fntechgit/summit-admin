@@ -31,8 +31,8 @@ import {
   unarchiveSponsorForm,
   deleteSponsorForm
 } from "../../../actions/sponsor-forms-actions";
-import CustomAlert from "../../../components/mui/components/custom-alert";
-import SearchInput from "../../../components/mui/components/search-input";
+import CustomAlert from "../../../components/mui/custom-alert";
+import SearchInput from "../../../components/mui/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
 import MuiTable from "../../../components/mui/table/mui-table";

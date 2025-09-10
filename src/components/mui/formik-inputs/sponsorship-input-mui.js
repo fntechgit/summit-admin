@@ -16,27 +16,25 @@ import PropTypes from "prop-types";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useField } from "formik";
-import { queryCompanies } from "../../actions/company-actions";
-import { DEBOUNCE_WAIT_250 } from "../../utils/constants";
+import { querySponsorships } from "../../../actions/sponsorship-actions";
+import { DEBOUNCE_WAIT_250 } from "../../../utils/constants";
 
-const CompanyInputMUI = ({
+const SponsorshipTypeInputMUI = ({
   id,
   name,
+  formik,
   placeholder,
   plainValue,
   isMulti = false,
   ...rest
 }) => {
-  const [field, meta, helpers] = useField(name);
   const [options, setOptions] = useState([]);
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { value } = field;
-  const error = meta.touched && meta.error;
+  const value = formik?.values[name];
+  const error = formik?.touched[name] && formik?.errors[name];
 
   const fetchOptions = async (input) => {
     if (!input) {
@@ -52,7 +50,7 @@ const CompanyInputMUI = ({
         label: r.name
       }));
 
-    await queryCompanies(input, (results) => {
+    await querySponsorships(input, (results) => {
       setOptions(normalize(results));
       setLoading(false);
     });
@@ -100,7 +98,7 @@ const CompanyInputMUI = ({
         : { id: parseInt(newValue.value), name: newValue.label };
     }
 
-    helpers.setValue(theValue);
+    formik.setFieldValue(name, theValue);
   };
 
   return (
@@ -119,11 +117,9 @@ const CompanyInputMUI = ({
       onChange={handleChange}
       loading={loading}
       fullWidth
-      popupIcon={<ExpandMoreIcon />}
       renderInput={(params) => (
         <TextField
           {...params}
-          name={field.name}
           placeholder={placeholder}
           variant="outlined"
           error={Boolean(error)}
@@ -151,12 +147,13 @@ const CompanyInputMUI = ({
   );
 };
 
-CompanyInputMUI.propTypes = {
+SponsorshipTypeInputMUI.propTypes = {
   id: PropTypes.string,
   name: PropTypes.string.isRequired,
+  formik: PropTypes.object.isRequired,
   placeholder: PropTypes.string,
   plainValue: PropTypes.bool,
   isMulti: PropTypes.bool
 };
 
-export default CompanyInputMUI;
+export default SponsorshipTypeInputMUI;
