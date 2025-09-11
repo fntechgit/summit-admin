@@ -25,10 +25,10 @@ import InfoIcon from "@mui/icons-material/Info";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useScrollToError from "../../../hooks/useScrollToError";
-import MuiFormikTextField from "../../inputs/mui-formik-textfield";
-import MuiFormikSelect from "../../inputs/mui-formik-select";
+import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
+import MuiFormikSelect from "../../mui/formik-inputs/mui-formik-select";
 import FormikTextEditor from "../../inputs/formik-text-editor";
-import MuiFormikCheckbox from "../../inputs/mui-formik-checkbox";
+import MuiFormikCheckbox from "../../mui/formik-inputs/mui-formik-checkbox";
 
 const AddSponsorExtraQuestionPopup = ({
   extraQuestion,
