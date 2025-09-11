@@ -526,6 +526,7 @@ class SummitAttendeeListPage extends React.Component {
     const {
       currentSummit,
       attendees,
+      filters,
       lastPage,
       currentPage,
       term,
@@ -1177,8 +1178,8 @@ class SummitAttendeeListPage extends React.Component {
             onSend={this.handleSendEmails}
           />
         </div>
-        {attendeeFilters.memberFilter === "HAS_MEMBER" &&
-          attendeeFilters.ticketsFilter === HAS_TICKETS && (
+        {filters.memberFilter === "HAS_MEMBER" &&
+          filters.ticketsFilter === HAS_TICKETS && (
             <div className="row" style={{ marginBottom: 15, marginTop: 15 }}>
               <div className="col-md-8">
                 <EventInput
