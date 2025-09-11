@@ -3,7 +3,7 @@ import T from "i18n-react";
 import { IconButton } from "@mui/material";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import MuiTable from "../../../../components/mui/table/mui-table";
-import ChipList from "../../../../components/mui/components/chip-list";
+import ChipList from "../../../../components/mui/chip-list";
 
 const UsersTable = ({ users, term, getUsers }) => {
 

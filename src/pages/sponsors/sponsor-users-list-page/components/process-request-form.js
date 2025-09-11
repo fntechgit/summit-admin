@@ -8,19 +8,18 @@ import {
   FormControlLabel,
   Grid2,
   InputLabel,
-  MenuItem,
   Switch,
   Typography
 } from "@mui/material";
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
-import MuiFormikTextField from "../../../../components/inputs/mui-formik-textfield";
+import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../../hooks/useScrollToError";
 import MuiFormikRadioGroup from "../../../../components/inputs/mui-formik-radio-group";
 import MuiFormikCheckboxGroup from "../../../../components/inputs/mui-formik-checkbox-group";
-import CompanyInputMUI from "../../../../components/inputs/company-input-mui";
-import SponsorshipTypeInputMUI from "../../../../components/inputs/sponsorship-input-mui";
+import CompanyInputMUI from "../../../../components/mui/formik-inputs/company-input-mui";
+import SponsorshipTypeInputMUI from "../../../../components/mui/formik-inputs/sponsorship-input-mui";
 import MuiSponsorInput from "../../../../components/inputs/mui-sponsor-input";
 
 const buildInitialValues = (data) => {

@@ -22,7 +22,7 @@ import {
   getSponsorUserRequests,
   getSponsorUsers
 } from "../../../actions/sponsor-users-actions";
-import SearchInput from "../../../components/mui/components/search-input";
+import SearchInput from "../../../components/mui/search-input";
 import RequestTable from "./components/request-table";
 import UsersTable from "./components/users-table";
 
