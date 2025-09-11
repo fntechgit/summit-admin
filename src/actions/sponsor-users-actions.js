@@ -29,13 +29,35 @@ import {
   DEFAULT_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
-import { RECEIVE_GLOBAL_SPONSORSHIPS } from "./sponsor-forms-actions";
 
+export const RECEIVE_SPONSOR_USER_GROUPS = "RECEIVE_SPONSOR_USER_GROUPS";
 export const REQUEST_SPONSOR_USER_REQUESTS = "REQUEST_SPONSOR_USER_REQUESTS";
 export const RECEIVE_SPONSOR_USER_REQUESTS = "RECEIVE_SPONSOR_USER_REQUESTS";
 export const REQUEST_SPONSOR_USERS = "REQUEST_SPONSOR_USERS";
 export const RECEIVE_SPONSOR_USERS = "RECEIVE_SPONSOR_USERS";
 export const SPONSOR_USER_ADDED = "SPONSOR_USER_ADDED";
+
+
+export const getUserGroups = (page = 1, perPage = DEFAULT_PER_PAGE) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    page,
+    per_page: perPage,
+    access_token: accessToken
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SPONSOR_USER_GROUPS),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/user-groups`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
 export const getSponsorUserRequests =
   (
@@ -176,35 +198,6 @@ export const addSponsorUser =
         dispatch(stopLoading());
       });
   };
-
-export const getSponsorships =
-  (page = 1, perPage = DEFAULT_PER_PAGE) =>
-    async (dispatch, getState) => {
-      const { currentSummitState } = getState();
-      const accessToken = await getAccessTokenSafely();
-      const { currentSummit } = currentSummitState;
-
-      dispatch(startLoading());
-
-      const params = {
-        page,
-        per_page: perPage,
-        access_token: accessToken,
-        sorting: "order",
-        expand: "type",
-        relations: "type",
-        fields: "id,type.id,type.name"
-      };
-
-      return getRequest(
-        null,
-        createAction(RECEIVE_GLOBAL_SPONSORSHIPS),
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
-        authErrorHandler
-      )(params)(dispatch).then(() => {
-        dispatch(stopLoading());
-      });
-    };
 
 export const processUserRequest =
   () => async (dispatch, getState) => {

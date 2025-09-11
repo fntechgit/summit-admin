@@ -11,15 +11,15 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
-  getSponsorships,
-  processUserRequest
+  processUserRequest,
+  getUserGroups
 } from "../../../../actions/sponsor-users-actions";
 import { MAX_PER_PAGE } from "../../../../utils/constants";
 import ProcessRequestForm from "./process-request-form";
 
-const ProcessRequestPopup = ({request, sponsorships, currentSummit, onClose}) => {
+const ProcessRequestPopup = ({request, currentSummit, userGroups, onClose, getUserGroups}) => {
   useEffect(() => {
-    getSponsorships(1, MAX_PER_PAGE);
+    getUserGroups(1, MAX_PER_PAGE);
   }, []);
 
   const handleClose = () => {
@@ -27,7 +27,7 @@ const ProcessRequestPopup = ({request, sponsorships, currentSummit, onClose}) =>
   };
 
   const handleProcess = (values) => {
-
+    console.log("SAVE: ", values);
   };
 
   return (
@@ -46,8 +46,7 @@ const ProcessRequestPopup = ({request, sponsorships, currentSummit, onClose}) =>
       <Divider />
       <ProcessRequestForm
         request={request}
-        sponsorships={[]}
-        userGroups={[]}
+        userGroups={userGroups}
         summit={currentSummit}
         onSubmit={handleProcess}
       />
@@ -61,11 +60,11 @@ ProcessRequestPopup.propTypes = {
 };
 
 const mapStateToProps = ({ sponsorFormsListState, currentSummitState }) => ({
-  sponsorships: sponsorFormsListState.sponsorships,
+  userGroups: sponsorFormsListState.userGroups,
   currentSummit: currentSummitState.currentSummit
 });
 
 export default connect(mapStateToProps, {
   processUserRequest,
-  getSponsorships
+  getUserGroups
 })(ProcessRequestPopup);

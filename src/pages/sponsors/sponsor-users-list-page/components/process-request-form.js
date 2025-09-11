@@ -33,7 +33,6 @@ const buildInitialValues = (data) => {
 
 const ProcessRequestForm = ({
   request,
-  sponsorships,
   userGroups,
   summit,
   onSubmit
@@ -198,7 +197,7 @@ const ProcessRequestForm = ({
           <Typography variant="h6">
             {T.translate("sponsor_users.process_request.access")}
           </Typography>
-          <MuiFormikCheckboxGroup name="access_rights" options={userGroups} />
+          <MuiFormikCheckboxGroup name="access_rights" options={userGroups.map(ug => ({value: ug.id, label: ug.name}))} />
         </DialogContent>
         <Divider sx={{ margin: "10px 0px 20px 0px" }} />
         <DialogActions>

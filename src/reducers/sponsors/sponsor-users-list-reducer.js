@@ -17,13 +17,15 @@ import {
   RECEIVE_SPONSOR_USER_REQUESTS,
   RECEIVE_SPONSOR_USERS,
   REQUEST_SPONSOR_USER_REQUESTS,
-  REQUEST_SPONSOR_USERS
+  REQUEST_SPONSOR_USERS,
+  RECEIVE_SPONSOR_USER_GROUPS
 } from "../../actions/sponsor-users-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { titleCase } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   term: "",
+  userGroups: [],
   requests: {
     items: [],
     order: "id",
@@ -51,6 +53,9 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
     case SET_CURRENT_SUMMIT:
     case LOGOUT_USER: {
       return DEFAULT_STATE;
+    }
+    case RECEIVE_SPONSOR_USER_GROUPS: {
+      return {...state, userGroups: payload.response.data}
     }
     case REQUEST_SPONSOR_USER_REQUESTS: {
       const { order, orderDir, page, term, perPage } = payload;
