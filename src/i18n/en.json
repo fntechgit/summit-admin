@@ -2493,7 +2493,8 @@
       "show_details": "Show details",
       "tiers": "Tiers",
       "access": "Access",
-      "save": "Process"
+      "save": "Process",
+      "request_accepted": "Request processed successfully."
     }
   },
   "sponsorship_list": {

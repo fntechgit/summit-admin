@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
@@ -12,14 +12,27 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import {
   processUserRequest,
-  getUserGroups
+  getUserGroups,
+  fetchSponsorByCompany,
+  processSponsorUserRequest
 } from "../../../../actions/sponsor-users-actions";
 import { MAX_PER_PAGE } from "../../../../utils/constants";
 import ProcessRequestForm from "./process-request-form";
 
-const ProcessRequestPopup = ({request, currentSummit, userGroups, onClose, getUserGroups}) => {
+const ProcessRequestPopup = ({
+  request,
+  currentSummit,
+  userGroups,
+  onClose,
+  getUserGroups,
+  processSponsorUserRequest
+}) => {
+  const [requestSponsor, setRequestSponsor] = useState(null);
   useEffect(() => {
     getUserGroups(1, MAX_PER_PAGE);
+    fetchSponsorByCompany(request.company_id).then((sponsor) =>
+      setRequestSponsor(sponsor)
+    );
   }, []);
 
   const handleClose = () => {
@@ -27,7 +40,7 @@ const ProcessRequestPopup = ({request, currentSummit, userGroups, onClose, getUs
   };
 
   const handleProcess = (values) => {
-    console.log("SAVE: ", values);
+    processSponsorUserRequest(values);
   };
 
   return (
@@ -45,7 +58,7 @@ const ProcessRequestPopup = ({request, currentSummit, userGroups, onClose, getUs
       </DialogTitle>
       <Divider />
       <ProcessRequestForm
-        request={request}
+        request={{ ...request, sponsor: requestSponsor }}
         userGroups={userGroups}
         summit={currentSummit}
         onSubmit={handleProcess}
@@ -55,16 +68,16 @@ const ProcessRequestPopup = ({request, currentSummit, userGroups, onClose, getUs
 };
 
 ProcessRequestPopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired
 };
 
-const mapStateToProps = ({ sponsorFormsListState, currentSummitState }) => ({
-  userGroups: sponsorFormsListState.userGroups,
+const mapStateToProps = ({ sponsorUsersListState, currentSummitState }) => ({
+  userGroups: sponsorUsersListState.userGroups,
   currentSummit: currentSummitState.currentSummit
 });
 
 export default connect(mapStateToProps, {
   processUserRequest,
-  getUserGroups
+  getUserGroups,
+  processSponsorUserRequest
 })(ProcessRequestPopup);

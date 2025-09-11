@@ -5,12 +5,12 @@ import {
   FormControlLabel,
   FormHelperText,
   FormLabel,
-  FormGroup,
-  Checkbox
+  Radio,
+  RadioGroup
 } from "@mui/material";
 import { useField } from "formik";
 
-const MuiFormikCheckboxGroup = ({ name, label, options, ...props }) => {
+const MuiFormikRadioGroup = ({ name, label, options, ...props }) => {
   const [field, meta] = useField({ name });
 
   return (
@@ -20,8 +20,8 @@ const MuiFormikCheckboxGroup = ({ name, label, options, ...props }) => {
       error={meta.touched && Boolean(meta.error)}
     >
       {label && <FormLabel id="radio-group-label">{label}</FormLabel>}
-      <FormGroup
-        aria-labelledby="checkbox-group-label"
+      <RadioGroup
+        aria-labelledby="radio-group-label"
         defaultValue={field.value}
         name={name}
         // eslint-disable-next-line react/jsx-props-no-spreading
@@ -30,9 +30,22 @@ const MuiFormikCheckboxGroup = ({ name, label, options, ...props }) => {
         {...props}
       >
         {options.map((op) => (
-          <FormControlLabel value={op.value} control={<Checkbox />} label={op.label} />
+          <FormControlLabel
+            key={`radio-box-${op.value}`}
+            value={op.value}
+            control={
+              <Radio
+                sx={{
+                  "& .MuiSvgIcon-root": {
+                    fontSize: 24
+                  }
+                }}
+              />
+            }
+            label={op.label}
+          />
         ))}
-      </FormGroup>
+      </RadioGroup>
       {meta.touched && meta.error && (
         <FormHelperText>{meta.error}</FormHelperText>
       )}
@@ -40,10 +53,10 @@ const MuiFormikCheckboxGroup = ({ name, label, options, ...props }) => {
   );
 };
 
-MuiFormikCheckboxGroup.propTypes = {
+MuiFormikRadioGroup.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string,
   options: PropTypes.array.isRequired
 };
 
-export default MuiFormikCheckboxGroup;
+export default MuiFormikRadioGroup;

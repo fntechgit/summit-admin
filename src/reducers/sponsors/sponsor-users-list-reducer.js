@@ -55,7 +55,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case RECEIVE_SPONSOR_USER_GROUPS: {
-      return {...state, userGroups: payload.response.data}
+      return { ...state, userGroups: payload.response.data };
     }
     case REQUEST_SPONSOR_USER_REQUESTS: {
       const { order, orderDir, page, term, perPage } = payload;
@@ -83,6 +83,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
         id: r.id,
         requester_first_name: `${r.requester_first_name} ${r.requester_last_name}`,
         requester_email: r.requester_email,
+        company_id: r.company_id,
         company_name: r.company_name,
         created: epochToMoment(r.created).format("MMMM Do YYYY, h:mm:ss a")
       }));
@@ -121,9 +122,12 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
       } = payload.response;
 
       const items = payload.response.data.map((u) => {
-        const accessRights = u.access_rights.reduce((res, it) => [
-          ...new Set([...res, ...it.groups.map((g) => titleCase(g.name))])
-        ], []);
+        const accessRights = u.access_rights.reduce(
+          (res, it) => [
+            ...new Set([...res, ...it.groups.map((g) => titleCase(g.name))])
+          ],
+          []
+        );
 
         return {
           id: u.id,

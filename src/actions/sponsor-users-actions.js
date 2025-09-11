@@ -14,12 +14,13 @@
 import {
   authErrorHandler,
   createAction,
-  deleteRequest,
   getRequest,
-  postRequest,
   putRequest,
+  postRequest,
   startLoading,
-  stopLoading
+  stopLoading,
+  fetchResponseHandler,
+  fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
@@ -36,28 +37,30 @@ export const RECEIVE_SPONSOR_USER_REQUESTS = "RECEIVE_SPONSOR_USER_REQUESTS";
 export const REQUEST_SPONSOR_USERS = "REQUEST_SPONSOR_USERS";
 export const RECEIVE_SPONSOR_USERS = "RECEIVE_SPONSOR_USERS";
 export const SPONSOR_USER_ADDED = "SPONSOR_USER_ADDED";
+export const SPONSOR_USER_REQUEST_ACCEPTED = "SPONSOR_USER_REQUEST_ACCEPTED";
 
+export const getUserGroups =
+  (page = 1, perPage = DEFAULT_PER_PAGE) =>
+  async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
 
-export const getUserGroups = (page = 1, perPage = DEFAULT_PER_PAGE) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
+    dispatch(startLoading());
 
-  dispatch(startLoading());
+    const params = {
+      page,
+      per_page: perPage,
+      access_token: accessToken
+    };
 
-  const params = {
-    page,
-    per_page: perPage,
-    access_token: accessToken
+    return getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_USER_GROUPS),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/user-groups`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
-
-  return getRequest(
-    null,
-    createAction(RECEIVE_SPONSOR_USER_GROUPS),
-    `${window.SPONSOR_USERS_API_URL}/api/v1/user-groups`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
 
 export const getSponsorUserRequests =
   (
@@ -77,7 +80,9 @@ export const getSponsorUserRequests =
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
-      filter.push(`requester_email=@${escapedTerm},requester_first_name=@${escapedTerm},requester_last_name=@${escapedTerm}`);
+      filter.push(
+        `requester_email=@${escapedTerm},requester_first_name=@${escapedTerm},requester_last_name=@${escapedTerm}`
+      );
     }
 
     const params = {
@@ -107,7 +112,6 @@ export const getSponsorUserRequests =
     });
   };
 
-
 export const getSponsorUsers =
   (
     term = "",
@@ -116,124 +120,180 @@ export const getSponsorUsers =
     order = "id",
     orderDir = DEFAULT_ORDER_DIR
   ) =>
-    async (dispatch, getState) => {
-      const { currentSummitState } = getState();
-      const { currentSummit } = currentSummitState;
-      const accessToken = await getAccessTokenSafely();
-      const filter = [`summit_id==${currentSummit.id}`];
-
-      dispatch(startLoading());
-
-      if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`user_email=@${escapedTerm},user_first_name=@${escapedTerm},user_last_name=@${escapedTerm}`);
-      }
-
-      const params = {
-        page,
-        per_page: perPage,
-        expand: "access_rights,access_rights.groups",
-        relations: "access_rights,access_rights.groups",
-        fields: "id,first_name,last_name,email,active,access_rights.groups.name",
-        access_token: accessToken
-      };
-
-      if (filter.length > 0) {
-        params["filter[]"] = filter;
-      }
-
-      // order
-      if (order != null && orderDir != null) {
-        const orderDirSign = orderDir === 1 ? "" : "-";
-        params.ordering = `${orderDirSign}${order}`;
-      }
-
-      return getRequest(
-        createAction(REQUEST_SPONSOR_USERS),
-        createAction(RECEIVE_SPONSOR_USERS),
-        `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
-        authErrorHandler,
-        { order, orderDir, page, term, perPage }
-      )(params)(dispatch).then(() => {
-        dispatch(stopLoading());
-      });
-    };
-
-
-export const addSponsorUser =
-  () => async (dispatch, getState) => {
+  async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+    const filter = [`summit_id==${currentSummit.id}`];
 
     dispatch(startLoading());
 
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(
+        `user_email=@${escapedTerm},user_first_name=@${escapedTerm},user_last_name=@${escapedTerm}`
+      );
+    }
+
     const params = {
+      page,
+      per_page: perPage,
+      expand: "access_rights,access_rights.groups",
+      relations: "access_rights,access_rights.groups",
+      fields: "id,first_name,last_name,email,active,access_rights.groups.name",
       access_token: accessToken
     };
 
-    return postRequest(
-      null,
-      createAction(SPONSOR_USER_ADDED),
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.ordering = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_USERS),
+      createAction(RECEIVE_SPONSOR_USERS),
       `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
-      {
-        "user_email": "santipalenque@gmail.com",
-        "sponsor_id": 359,
-        "summit_id": currentSummit.id
-      },
-      snackbarErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate(
-              "sponsor_form_item_list.add_from_inventory.items_added"
-            )
-          })
-        );
-      })
-      .catch(console.log) // need to catch promise reject
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+      authErrorHandler,
+      { order, orderDir, page, term, perPage }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
 
-export const processUserRequest =
-  () => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+export const addSponsorUser = () => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const params = {
-      access_token: accessToken
-    };
-
-    return postRequest(
-      null,
-      createAction(SPONSOR_USER_ADDED),
-      `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
-      {
-        "user_email": "santipalenque@gmail.com",
-        "sponsor_id": 359,
-        "summit_id": currentSummit.id
-      },
-      snackbarErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate(
-              "sponsor_form_item_list.add_from_inventory.items_added"
-            )
-          })
-        );
-      })
-      .catch(console.log) // need to catch promise reject
-      .finally(() => {
-        dispatch(stopLoading());
-      });
+  const params = {
+    access_token: accessToken
   };
+
+  return postRequest(
+    null,
+    createAction(SPONSOR_USER_ADDED),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
+    {
+      user_email: "santipalenque@gmail.com",
+      sponsor_id: 359,
+      summit_id: currentSummit.id
+    },
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate(
+            "sponsor_form_item_list.add_from_inventory.items_added"
+          )
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const processUserRequest = () => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return postRequest(
+    null,
+    createAction(SPONSOR_USER_ADDED),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
+    {
+      user_email: "santipalenque@gmail.com",
+      sponsor_id: 359,
+      summit_id: currentSummit.id
+    },
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate(
+            "sponsor_form_item_list.add_from_inventory.items_added"
+          )
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const fetchSponsorByCompany = async (companyId, summitId) => {
+  const accessToken = await getAccessTokenSafely();
+
+  return fetch(
+    `${window.API_BASE_URL}/api/v2/summits/${summitId}/sponsors?filter=company_id=@${companyId}&access_token=${accessToken}&fields=id,company.name,company.id&relations=company&expand=company`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => ({
+      id: json.data[0].id,
+      name: json.data[0].company.name
+    }))
+    .catch(fetchErrorHandler);
+};
+
+export const processSponsorUserRequest = (request) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  const payload = {
+    groups: request.access_rights,
+    send_activation_email: request.send_email
+  };
+
+  if (request.sponsor?.id) payload.sponsor_id = request.sponsor.id;
+  else {
+    if (request.company?.id) payload.company_id = request.company.id;
+    else payload.company_name = request.company.name;
+    payload.sponsorship_types = request.tiers.map((st) => st.id);
+  }
+
+  putRequest(
+    null,
+    createAction(SPONSOR_USER_REQUEST_ACCEPTED),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${request.id}/approve`,
+    payload,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(getSponsorUserRequests());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_users.process_request.request_accepted")
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};

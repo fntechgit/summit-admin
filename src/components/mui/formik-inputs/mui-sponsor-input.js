@@ -18,8 +18,8 @@ import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useField } from "formik";
-import { querySponsors } from "../../actions/sponsor-actions";
-import { DEBOUNCE_WAIT_250 } from "../../utils/constants";
+import { querySponsors } from "../../../actions/sponsor-actions";
+import { DEBOUNCE_WAIT_250 } from "../../../utils/constants";
 
 const MuiSponsorInput = ({
   id,
