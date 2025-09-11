@@ -23,7 +23,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
 import useScrollToError from "../../../hooks/useScrollToError";
-import MuiFormikTextField from "../../inputs/mui-formik-textfield";
+import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
 import SummitAddonSelect from "../../inputs/summit-addon-select";
 
 const ManageTierAddonsPopup = ({

@@ -5,8 +5,8 @@ import { Alert, Snackbar, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import SnackbarNotificationContext from "./Context";
-import { NOTIFICATION_TIMEOUT } from "../../../../utils/constants";
-import { clearSnackbarMessage } from "../../../../actions/base-actions";
+import { NOTIFICATION_TIMEOUT } from "../../../utils/constants";
+import { clearSnackbarMessage } from "../../../actions/base-actions";
 
 /*
  This component works in two ways:

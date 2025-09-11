@@ -20,8 +20,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 
 import useScrollToError from "../../../hooks/useScrollToError";
-import SponsorshipsBySummitSelectMUI from "../../inputs/sponsorship-summit-select-mui";
-import MuiFormikTextField from "../../inputs/mui-formik-textfield";
+import SponsorshipsBySummitSelectMUI from "../../mui/formik-inputs/sponsorship-summit-select-mui";
+import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
 
 const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
   const formik = useFormik({

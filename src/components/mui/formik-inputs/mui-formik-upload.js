@@ -8,7 +8,7 @@ import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
   MAX_INVENTORY_IMAGES_UPLOAD_QTY
-} from "../../utils/constants";
+} from "../../../utils/constants";
 
 const MuiFormikUpload = ({ id, name, onImageDeleted }) => {
   const [field, meta, helpers] = useField(name);

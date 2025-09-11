@@ -22,7 +22,7 @@ import "./styles/landing.css";
 import "./styles/general.less";
 import "openstack-uicore-foundation/lib/css/components/index.css";
 import CustomTheme from "./components/CustomTheme";
-import SnackbarNotification from "./components/mui/components/SnackbarNotification";
+import SnackbarNotification from "./components/mui/SnackbarNotification";
 
 const onBeforeLift = () => {
   console.log("reading state ...");

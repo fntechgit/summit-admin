@@ -24,7 +24,7 @@ import {
   FIFTY_PER_PAGE,
   TWENTY_PER_PAGE
 } from "../../../utils/constants";
-import showConfirmDialog from "../components/showConfirmDialog";
+import showConfirmDialog from "../showConfirmDialog";
 
 const MuiTableSortable = ({
   columns = [],

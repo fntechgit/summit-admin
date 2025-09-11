@@ -20,7 +20,7 @@ import {
   FIFTY_PER_PAGE,
   TWENTY_PER_PAGE
 } from "../../../utils/constants";
-import showConfirmDialog from "../components/showConfirmDialog";
+import showConfirmDialog from "../showConfirmDialog";
 
 // Updated component to handle editable cells with hover edit icon
 const EditableCell = ({ value, isEditing, onBlur }) => {

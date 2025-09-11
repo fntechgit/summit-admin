@@ -17,9 +17,9 @@ import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
 import { Box, Button, Grid2 } from "@mui/material";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import MuiFormikDatepicker from "../../inputs/mui-formik-datepicker";
-import MuiFormikTextField from "../../inputs/mui-formik-textfield";
-import MuiFormikCheckbox from "../../inputs/mui-formik-checkbox";
+import MuiFormikDatepicker from "../../mui/formik-inputs/mui-formik-datepicker";
+import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
+import MuiFormikCheckbox from "../../mui/formik-inputs/mui-formik-checkbox";
 import styles from "./styles.module.less";
 import {
   addEmailListValidator,

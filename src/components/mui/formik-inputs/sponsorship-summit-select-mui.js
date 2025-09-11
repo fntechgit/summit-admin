@@ -24,7 +24,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PropTypes from "prop-types";
 import { useField } from "formik";
-import { querySponsorshipsBySummit } from "../../actions/sponsorship-actions";
+import { querySponsorshipsBySummit } from "../../../actions/sponsorship-actions";
 
 const getCustomIcon = (loading) => {
   const Icon = () => (
