@@ -17,10 +17,10 @@ import useScrollToError from "../../../../hooks/useScrollToError";
 import MuiFormikRadioGroup from "../../../../components/mui/formik-inputs/mui-formik-radio-group";
 import MuiFormikCheckboxGroup from "../../../../components/mui/formik-inputs/mui-formik-checkbox-group";
 import CompanyInputMUI from "../../../../components/mui/formik-inputs/company-input-mui";
-import SponsorshipTypeInputMUI from "../../../../components/mui/formik-inputs/sponsorship-input-mui";
 import MuiSponsorInput from "../../../../components/mui/formik-inputs/mui-sponsor-input";
 import { titleCase } from "../../../../utils/methods";
 import MuiFormikSwitch from "../../../../components/mui/formik-inputs/mui-formik-switch";
+import SponsorshipsBySummitSelectMUI from "../../../../components/mui/formik-inputs/sponsorship-summit-select-mui";
 
 const buildInitialValues = (data) => {
   const normalized = { ...data };
@@ -218,8 +218,9 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
               <InputLabel htmlFor="tiers">
                 {T.translate("sponsor_users.process_request.tiers")}
               </InputLabel>
-              <SponsorshipTypeInputMUI
+              <SponsorshipsBySummitSelectMUI
                 name="tiers"
+                summitId={summit.id}
                 isMulti
                 placeholder={T.translate(
                   "sponsor_users.process_request.select_tier"
