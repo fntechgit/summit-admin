@@ -148,6 +148,7 @@
     "sponsor_list": "Sponsor List",
     "sponsor_forms": "Forms",
     "sponsorship_list": "Tiers",
+    "sponsor_users": "Users",
     "sponsors_promocodes": "Promo Codes",
     "sponsor_settings": "Settings",
     "badge_scans": "Badge Scans",
@@ -2460,6 +2461,40 @@
       "onsite_rate": "On site rate",
       "save": "Add selected items",
       "items_added": "Items added successfully."
+    }
+  },
+  "sponsor_users": {
+    "users": "Users",
+    "access_request": "access request",
+    "import_user": "import existing user",
+    "add_user": "add user",
+    "name": "Name",
+    "email": "Email",
+    "sponsor": "Sponsor",
+    "request_time": "Request time",
+    "access": "Access",
+    "active": "Active",
+    "process_request": {
+      "title": "Process Access Request",
+      "request_details": "Request details",
+      "request_time": "Request time",
+      "show": "Show",
+      "company": "Company",
+      "new_user": "New user",
+      "name": "Name",
+      "email": "Email",
+      "send_email": "Send Activation Email",
+      "sponsor_assignment": "Sponsor assignment",
+      "assign_to_existing": "Assign to existing Sponsor",
+      "assign_to_new": "Create new Sponsor",
+      "select_sponsor": "Select Sponsor",
+      "select_company": "Select Company",
+      "select_tier": "Select Tier",
+      "show_details": "Show details",
+      "tiers": "Tiers",
+      "access": "Access",
+      "save": "Process",
+      "request_accepted": "Request processed successfully."
     }
   },
   "sponsorship_list": {

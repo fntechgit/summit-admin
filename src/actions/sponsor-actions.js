@@ -41,6 +41,7 @@ import {
   HUNDRED_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
+import _ from "lodash";
 
 export const REQUEST_SPONSORS = "REQUEST_SPONSORS";
 export const RECEIVE_SPONSORS = "RECEIVE_SPONSORS";
@@ -169,6 +170,31 @@ export const RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META =
   "RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META";
 export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
   "SPONSOR_LEAD_REPORT_SETTINGS_UPDATED";
+
+
+
+/** ****************  FETCH *************************************** */
+
+export const querySponsors = _.debounce(async (input, summitId, callback) => {
+  const accessToken = await getAccessTokenSafely();
+
+  const escapedInput = escapeFilterValue(input);
+
+  fetch(
+    `${window.API_BASE_URL}/api/v2/summits/${summitId}/sponsors?filter=company_name=@${escapedInput}&access_token=${accessToken}&fields=id,company.name,company.id&relations=company&expand=company`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data].map(sp => ({
+        id: sp.id,
+        name: sp.company.name,
+      }));
+
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);
+
 
 /** ****************  SPONSORS *************************************** */
 

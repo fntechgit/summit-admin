@@ -26,7 +26,6 @@ const MuiFormikSelect = ({ name, children, ...rest }) => {
 
 MuiFormikSelect.propTypes = {
   name: PropTypes.string.isRequired,
-  formik: PropTypes.object.isRequired,
   children: PropTypes.node.isRequired
 };
 
