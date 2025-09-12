@@ -15,7 +15,7 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Divider, Grid2, Typography } from "@mui/material";
 import Member from "../../../models/member";
-import ChipSelectInput from "../../inputs/chip-select-input";
+import ChipSelectInput from "../../mui/chip-select-input";
 import {
   denormalizeLeadReportSettings,
   renderOptions

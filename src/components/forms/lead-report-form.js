@@ -25,7 +25,7 @@ import {
   getSummitLeadReportSettings,
   renderOptions
 } from "../../models/lead-report-settings";
-import ChipSelectInput from "../inputs/chip-select-input";
+import ChipSelectInput from "../mui/chip-select-input";
 
 const LeadReportForm = ({
   currentSummit,
