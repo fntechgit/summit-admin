@@ -17,7 +17,8 @@ import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   Dropdown,
-  MemberInput
+  MemberInput,
+  Input
 } from "openstack-uicore-foundation/lib/components";
 import Swal from "sweetalert2";
 import {
@@ -123,7 +124,7 @@ const RoomBookingForm = ({
       (e) => e.start_date === timeSlot
     );
 
-    const normalizedEntity = {
+    let normalizedEntity = {
       id: stateEntity.id || null,
       room_id: currentRoom.id,
       start_datetime: start_date,
@@ -132,6 +133,17 @@ const RoomBookingForm = ({
       currency: currentRoom.currency,
       amount: currentRoom.time_slot_cost
     };
+
+    if (!stateEntity.id) {
+      normalizedEntity = {
+        ...normalizedEntity,
+        quantity:
+          parseInt(stateEntity?.quantity) > 0
+            ? parseInt(stateEntity?.quantity)
+            : 1,
+        suppres_email: stateEntity?.suppres_email
+      };
+    }
 
     onSubmit(normalizedEntity);
   };
@@ -285,6 +297,36 @@ const RoomBookingForm = ({
               />
             </div>
           </div>
+          {!stateEntity.id && (
+            <div className="row form-group">
+              <div className="col-md-4">
+                <label>
+                  {T.translate("edit_room_booking.quantity_of_slots")}
+                </label>
+                <Input
+                  className="form-control"
+                  error={hasErrors("quantity", errors)}
+                  id="quantity"
+                  value={stateEntity.quantity}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="col-md-4 checkboxes-div">
+                <div className="form-check abc-checkbox">
+                  <input
+                    type="checkbox"
+                    id="suppres_email"
+                    checked={stateEntity.suppres_email}
+                    onChange={handleChange}
+                    className="form-check-input"
+                  />
+                  <label className="form-check-label" htmlFor="suppres_email">
+                    {T.translate("edit_room_booking.suppres_email")}
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
 

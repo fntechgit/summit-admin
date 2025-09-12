@@ -1435,6 +1435,8 @@
     "floor": "Floor",
     "room_booking_created": "Room Booking created successfully",
     "room_booking_saved": "Room Booking saved successfully",
+    "quantity_of_slots": "Slots Qty.",
+    "suppres_email": "Suppres email",
     "placeholders": {
       "available_slots": "Select Time",
       "select_currency": "Select Currency",

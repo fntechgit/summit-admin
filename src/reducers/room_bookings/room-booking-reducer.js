@@ -9,8 +9,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_ROOM_BOOKING,
   RESET_ROOM_BOOKING_FORM,
@@ -18,9 +21,6 @@ import {
   ROOM_BOOKING_ADDED,
   RECEIVE_ROOM_BOOKING_AVAILABILITY
 } from "../../actions/room-booking-actions";
-
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
@@ -33,6 +33,8 @@ export const DEFAULT_ENTITY = {
   owner_id: 0,
   payment_gateway_client_token: null,
   room_id: 0,
+  quantity: 1,
+  suppres_email: false,
   status: ""
 };
 
@@ -46,47 +48,33 @@ const roomBookingReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
       }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case SET_CURRENT_SUMMIT:
     case RESET_ROOM_BOOKING_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case ROOM_BOOKING_ADDED:
     case ROOM_BOOKING_UPDATED:
-    case RECEIVE_ROOM_BOOKING:
-      {
-        let entity = { ...payload.response };
+    case RECEIVE_ROOM_BOOKING: {
+      const entity = { ...payload.response };
 
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
         }
+      }
 
-        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-      }
-      break;
-    case RECEIVE_ROOM_BOOKING_AVAILABILITY:
-      {
-        const availableSlots = payload.response.data;
-        return { ...state, available_slots: availableSlots };
-      }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case RECEIVE_ROOM_BOOKING_AVAILABILITY: {
+      const availableSlots = payload.response.data;
+      return { ...state, available_slots: availableSlots };
+    }
     case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+      return { ...state, errors: payload.errors };
     default:
       return state;
   }
