@@ -14,49 +14,46 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from "react-breadcrumbs";
-import { Box, Button, Grid2 } from "@mui/material";
+import { Box, Button, Grid2, Alert } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import {
   getSponsorUserRequests,
-  getSponsorUsers,
-  deleteSponsorUserRequest
+  getSponsorUsers
 } from "../../../actions/sponsor-users-actions";
 import SearchInput from "../../../components/mui/search-input";
-import RequestTable from "./components/request-table";
-import UsersTable from "./components/users-table";
+import UsersTable from "../sponsor-users-list-page/components/users-table";
+import CustomAlert from "../../../components/mui/custom-alert";
+import ChipNotify from "../../../components/mui/chip-notify";
 
-const SponsorUsersListPage = ({
-  match,
+const SponsorUsersListPerSponsorPage = ({
+  sponsor,
   requests,
   users,
   term,
   getSponsorUserRequests,
-  getSponsorUsers,
-                                deleteSponsorUserRequest
+  getSponsorUsers
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
-    getSponsorUserRequests();
-    getSponsorUsers();
+    getSponsorUserRequests(sponsor.id);
+    getSponsorUsers(sponsor.id);
   }, []);
 
   const handleSearch = (searchTerm) => {
-    getSponsorUserRequests(null, searchTerm);
-    getSponsorUsers(null, searchTerm);
+    getSponsorUsers(sponsor.id, searchTerm);
   };
 
   return (
     <div className="container">
-      <Breadcrumb
-        data={{
-          title: T.translate("sponsor_users.users"),
-          pathname: match.url
-        }}
+      {requests.totalCount > 0 &&
+      <ChipNotify
+        label={`${requests.totalCount} ${T.translate("sponsor_users.access_request")}`}
+        sx={{position: "absolute", top: "8px", right: "5px"}}
       />
-      <h3>{T.translate("sponsor_users.users")}</h3>
+      }
+      <CustomAlert message={T.translate("sponsor_users.alert_info")} />
       <Grid2
         container
         spacing={2}
@@ -68,7 +65,7 @@ const SponsorUsersListPage = ({
       >
         <Grid2 size={2}>
           <Box component="span">
-            {requests.totalCount} {T.translate("sponsor_users.access_request")}
+            {users.totalCount} {T.translate("sponsor_users.users").toLowerCase()}
           </Box>
         </Grid2>
         <Grid2
@@ -103,17 +100,6 @@ const SponsorUsersListPage = ({
         </Grid2>
       </Grid2>
 
-      <RequestTable
-        requests={requests}
-        term={term}
-        getRequests={getSponsorUserRequests}
-        onRequestDelete={deleteSponsorUserRequest}
-      />
-
-      <Box component="div" sx={{ mb: 2 }}>
-        {users.totalCount} {T.translate("sponsor_users.users").toLowerCase()}
-      </Box>
-
       <UsersTable users={users} term={term} getUsers={getSponsorUsers} />
     </div>
   );
@@ -125,6 +111,5 @@ const mapStateToProps = ({ sponsorUsersListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorUserRequests,
-  getSponsorUsers,
-  deleteSponsorUserRequest
-})(SponsorUsersListPage);
+  getSponsorUsers
+})(SponsorUsersListPerSponsorPage);

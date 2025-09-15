@@ -21,12 +21,12 @@ const UsersTable = ({ users, term, getUsers }) => {
 
   const handleUsersPageChange = (page) => {
     const { perPage, order, orderDir } = users;
-    getUsers(term, page, perPage, order, orderDir);
+    getUsers(null, term, page, perPage, order, orderDir);
   };
 
   const handleUsersSort = (key, dir) => {
     const { currentPage, perPage } = users;
-    getUsers(term, currentPage, perPage, key, dir);
+    getUsers(null, term, currentPage, perPage, key, dir);
   };
 
   const usersColumns = [
