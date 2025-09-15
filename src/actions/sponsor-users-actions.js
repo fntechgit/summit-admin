@@ -66,6 +66,7 @@ export const getUserGroups =
 
 export const getSponsorUserRequests =
   (
+    sponsorId = null,
     term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
@@ -79,6 +80,10 @@ export const getSponsorUserRequests =
     const filter = [`summit_id==${currentSummit.id}`, "status==pending"];
 
     dispatch(startLoading());
+
+    if (sponsorId) {
+      filter.push(`sponsor_id==${sponsorId}`)
+    }
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
@@ -116,6 +121,7 @@ export const getSponsorUserRequests =
 
 export const getSponsorUsers =
   (
+    sponsorId = null,
     term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
@@ -129,6 +135,10 @@ export const getSponsorUsers =
     const filter = [`summit_id==${currentSummit.id}`];
 
     dispatch(startLoading());
+
+    if (sponsorId) {
+      filter.push(`sponsor_id==${sponsorId}`)
+    }
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);

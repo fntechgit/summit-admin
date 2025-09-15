@@ -2474,6 +2474,7 @@
     "request_time": "Request time",
     "access": "Access",
     "active": "Active",
+    "alert_info": "To add an existing User to this sponsor click the Import Existing User button. To invite a new user, send an invitation by click the Invite User button or see the Users page on the left side navigation menu.",
     "process_request": {
       "title": "Process Access Request",
       "request_details": "Request details",
