@@ -1,35 +1,20 @@
 import React, { useState } from "react";
-import { Dropdown, Input } from "openstack-uicore-foundation/lib/components";
+import { Input } from "openstack-uicore-foundation/lib/components";
 import Swal from "sweetalert2";
 import T from "i18n-react";
 import { Modal } from "react-bootstrap";
 import { validateEmail } from "../../utils/methods";
 
-const EventRSVPInvitationBlast = ({
-  children,
-  selectedCount,
-  currentEmailTemplate,
-  onBlastInvitations,
-  setCurrentEmailTemplate
-}) => {
+const EventRSVPReSend = ({ children, selectedCount, onReSend }) => {
   const [testEmailRecipient, setTestEmailRecipient] = useState("");
   const [excerptRecipient, setExcerptRecipient] = useState("");
   const [showBlastModal, setShowBlastModal] = useState(false);
 
   const handleDisplayBlastModal = () => {
-    if (!currentEmailTemplate) {
-      Swal.fire(
-        "Validation error",
-        T.translate("event_rsvp_list.select_template"),
-        "warning"
-      );
-      return false;
-    }
-
     if (selectedCount === 0) {
       Swal.fire(
         "Validation error",
-        T.translate("event_rsvp_list.select_invitation_warning"),
+        T.translate("event_rsvp_list.select_rsvp_warning"),
         "warning"
       );
       return false;
@@ -48,39 +33,15 @@ const EventRSVPInvitationBlast = ({
     setShowBlastModal(true);
   };
 
-  const handleBlastInvitations = () => {
-    onBlastInvitations(testEmailRecipient, excerptRecipient);
+  const handleReSend = () => {
+    onReSend(testEmailRecipient, excerptRecipient);
     setShowBlastModal(false);
   };
-
-  const handleEmailTemplateChange = (ev) => {
-    setCurrentEmailTemplate(ev.target.value);
-  };
-
-  const emailTemplateDDL = [
-    { label: "-- SELECT EMAIL EVENT --", value: "" },
-    {
-      label: "SUMMIT_REGISTRATION_INVITE_RSVP",
-      value: "SUMMIT_REGISTRATION_INVITE_RSVP"
-    },
-    {
-      label: "SUMMIT_REGISTRATION_REINVITE_RSVP",
-      value: "SUMMIT_REGISTRATION_REINVITE_RSVP"
-    }
-  ];
 
   return (
     <>
       <div className="row form-group">
-        <div className="col-md-4">
-          <Dropdown
-            id="current_email_template"
-            value={currentEmailTemplate}
-            onChange={handleEmailTemplateChange}
-            options={emailTemplateDDL}
-          />
-        </div>
-        <div className="col-md-3">
+        <div className="col-md-7">
           <Input
             id="test_email_recipient"
             value={testEmailRecipient}
@@ -98,7 +59,7 @@ const EventRSVPInvitationBlast = ({
             type="button"
             onClick={handleDisplayBlastModal}
           >
-            {T.translate("event_rsvp_list.send_blast")}
+            {T.translate("event_rsvp_list.re_send")}
           </button>
         </div>
       </div>
@@ -106,14 +67,13 @@ const EventRSVPInvitationBlast = ({
       <Modal show={showBlastModal} onHide={() => setShowBlastModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
-            {T.translate("event_rsvp_list.blast_modal_title")}
+            {T.translate("event_rsvp_list.re_send_modal_title")}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="row">
             <div className="col-md-12">
-              {T.translate("event_rsvp_list.send_email_warning", {
-                template: currentEmailTemplate,
+              {T.translate("event_rsvp_list.re_send_email_warning", {
                 qty: selectedCount
               })}
             </div>
@@ -129,11 +89,11 @@ const EventRSVPInvitationBlast = ({
                 {T.translate("event_rsvp_list.excerpt_recipient")}
               </label>
               <Input
-                id="test_email_recipient"
+                id="excerpt_email_recipient"
                 value={excerptRecipient}
                 onChange={(ev) => setExcerptRecipient(ev.target.value)}
                 placeholder={T.translate(
-                  "event_rsvp_list.placeholders.test_recipient"
+                  "event_rsvp_list.placeholders.excerpt_recipient"
                 )}
                 className="form-control"
               />
@@ -141,8 +101,8 @@ const EventRSVPInvitationBlast = ({
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <button className="btn btn-primary" onClick={handleBlastInvitations}>
-            {T.translate("event_rsvp_list.send_emails")}
+          <button className="btn btn-primary" onClick={handleReSend}>
+            {T.translate("event_rsvp_list.re_send_button")}
           </button>
           <button
             className="btn btn-default"
@@ -156,4 +116,4 @@ const EventRSVPInvitationBlast = ({
   );
 };
 
-export default EventRSVPInvitationBlast;
+export default EventRSVPReSend;

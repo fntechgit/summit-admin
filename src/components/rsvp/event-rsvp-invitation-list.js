@@ -237,7 +237,7 @@ const EventRSVPInvitationList = ({
           {selectedCount > 0 && (
             <span>
               <b>
-                {T.translate("event_rsvp_list.items_qty", {
+                {T.translate("event_rsvp_list.rsvp_invitations_qty", {
                   qty: selectedCount
                 })}
               </b>

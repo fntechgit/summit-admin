@@ -42,6 +42,12 @@ export const EVENT_RSVP_ADDED = "EVENT_RSVP_ADDED";
 export const EVENT_RSVP_UPDATED = "EVENT_RSVP_UPDATED";
 export const EVENT_RSVP_DELETED = "EVENT_RSVP_DELETED";
 
+export const SELECT_EVENT_RSVP = "SELECT_EVENT_RSVP";
+export const UNSELECT_EVENT_RSVP = "UNSELECT_EVENT_RSVP";
+export const CLEAR_ALL_SELECTED_EVENT_RSVP = "CLEAR_ALL_SELECTED_EVENT_RSVP";
+export const SET_SELECTED_ALL_RSVP = "SET_SELECTED_ALL_RSVP";
+export const RE_SEND_RSVP_CONFIRMATION = "RE_SEND_RSVP_CONFIRMATION";
+
 export const RECEIVE_EVENT_RSVP_INVITATIONS = "RECEIVE_EVENT_RSVP_INVITATIONS";
 export const REQUEST_EVENT_RSVP_INVITATIONS = "REQUEST_EVENT_RSVP_INVITATIONS";
 export const EVENT_RSVP_INVITATION_DELETED = "EVENT_RSVP_INVITATION_DELETED";
@@ -291,6 +297,97 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
+export const selectRSVP = (rsvpId) => (dispatch) => {
+  dispatch(createAction(SELECT_EVENT_RSVP)(rsvpId));
+};
+
+export const unSelectRSVP = (rsvpId) => (dispatch) => {
+  dispatch(createAction(UNSELECT_EVENT_RSVP)(rsvpId));
+};
+
+export const clearAllSelectedRSVP = () => (dispatch) => {
+  dispatch(createAction(CLEAR_ALL_SELECTED_EVENT_RSVP)());
+};
+
+export const setSelectedAllRSVP = (value) => (dispatch) => {
+  dispatch(createAction(SET_SELECTED_ALL_RSVP)(value));
+};
+
+export const reSendRSVPConfirmation =
+  (testRecipient = null, excerptRecipient = null) =>
+  async (dispatch, getState) => {
+    const {
+      currentSummitState,
+      currentSummitEventState,
+      currentEventRsvpListState
+    } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: eventId }
+    } = currentSummitEventState;
+    const { excludedRSVPIds, selectedRSVPIds, selectedAll } =
+      currentEventRsvpListState;
+    const filter = [];
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    const payload = {};
+
+    if (!selectedAll && selectedRSVPIds.length > 0) {
+      filter.push(`id==${selectedRSVPIds.join("||")}`);
+    } else {
+      if (term) {
+        const escapedTerm = escapeFilterValue(term);
+
+        filter.push(
+          `attendee_full_name=@${escapedTerm},attendee_email=@${escapedTerm}`
+        );
+      }
+
+      if (selectedAll && excludedRSVPIds.length > 0) {
+        filter.push(`not_id==${excludedRSVPIds.join("||")}`);
+      }
+    }
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    if (testRecipient) {
+      payload.test_email_recipient = testRecipient;
+    }
+
+    if (excerptRecipient) {
+      payload.outcome_email_recipient = excerptRecipient;
+    }
+
+    const success_message = {
+      title: T.translate("general.done"),
+      html: T.translate("event_rsvp_list.send_rsvp_invitations_done"),
+      type: "success"
+    };
+
+    return putRequest(
+      null,
+      createAction(RE_SEND_RSVP_CONFIRMATION)({
+        excludedRSVPIds,
+        selectedRSVPIds,
+        selectedAll
+      }),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvps/resend`,
+      payload,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+      dispatch(showMessage(success_message));
+    });
+  };
+
 export const getEventRSVPInvitations =
   (
     term = null,
@@ -529,11 +626,7 @@ export const sendEventRSVPInvitation =
 
     return putRequest(
       null,
-      createAction(SEND_EVENT_RSVP_INVITATIONS_EMAILS)({
-        excludedInvitationsIds,
-        selectedInvitationsIds,
-        selectedAll
-      }),
+      createAction(SEND_EVENT_RSVP_INVITATIONS_EMAILS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/rsvp-invitations/send`,
       payload,
       authErrorHandler
