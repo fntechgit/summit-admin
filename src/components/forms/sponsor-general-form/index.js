@@ -31,7 +31,10 @@ const SponsorGeneralForm = ({
   onSponsorshipAddonRemove,
   getSponsorLeadReportSettingsMeta,
   upsertSponsorLeadReportSettings,
+  getSponsorExtraQuestion,
   saveSponsorExtraQuestion,
+  saveSponsorExtraQuestionValue,
+  resetSponsorExtraQuestionForm,
   onExtraQuestionDelete,
   onExtraQuestionReOrder
 }) => (
@@ -58,7 +61,10 @@ const SponsorGeneralForm = ({
       summit={summit}
       sponsorId={sponsor.id}
       extraQuestions={sponsor.extra_questions}
+      getSponsorExtraQuestion={getSponsorExtraQuestion}
+      resetSponsorExtraQuestionForm={resetSponsorExtraQuestionForm}
       saveSponsorExtraQuestion={saveSponsorExtraQuestion}
+      saveSponsorExtraQuestionValue={saveSponsorExtraQuestionValue}
       onExtraQuestionDelete={onExtraQuestionDelete}
       onExtraQuestionReOrder={onExtraQuestionReOrder}
     />

@@ -30,7 +30,10 @@ import {
   removeAddonToSponsorship,
   setSelectedSponsorship,
   upsertSponsorLeadReportSettings,
+  getSponsorExtraQuestion,
   saveSponsorExtraQuestion,
+  saveSponsorExtraQuestionValue,
+  resetSponsorExtraQuestionForm,
   deleteExtraQuestion,
   updateExtraQuestionOrder,
   getExtraQuestionMeta
@@ -76,7 +79,10 @@ const EditSponsorPage = (props) => {
     removeAddonToSponsorship,
     setSelectedSponsorship,
     upsertSponsorLeadReportSettings,
+    getSponsorExtraQuestion,
     saveSponsorExtraQuestion,
+    saveSponsorExtraQuestionValue,
+    resetSponsorExtraQuestionForm,
     deleteExtraQuestion,
     updateExtraQuestionOrder,
     getExtraQuestionMeta
@@ -162,7 +168,10 @@ const EditSponsorPage = (props) => {
             onSponsorshipAddonRemove={removeAddonToSponsorship}
             getSponsorLeadReportSettingsMeta={getSponsorLeadReportSettingsMeta}
             upsertSponsorLeadReportSettings={upsertSponsorLeadReportSettings}
+            getSponsorExtraQuestion={getSponsorExtraQuestion}
             saveSponsorExtraQuestion={saveSponsorExtraQuestion}
+            saveSponsorExtraQuestionValue={saveSponsorExtraQuestionValue}
+            resetSponsorExtraQuestionForm={resetSponsorExtraQuestionForm}
             onExtraQuestionDelete={deleteExtraQuestion}
             onExtraQuestionReOrder={updateExtraQuestionOrder}
           />
@@ -199,7 +208,10 @@ export default connect(mapStateToProps, {
   removeAddonToSponsorship,
   setSelectedSponsorship,
   upsertSponsorLeadReportSettings,
+  getSponsorExtraQuestion,
   saveSponsorExtraQuestion,
+  saveSponsorExtraQuestionValue,
+  resetSponsorExtraQuestionForm,
   deleteExtraQuestion,
   updateExtraQuestionOrder,
   getExtraQuestionMeta

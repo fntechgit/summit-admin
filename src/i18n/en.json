@@ -2348,6 +2348,8 @@
     "allowed_badge_features_types": "Allowed Badge Features",
     "allowed_badge_features_types_info": "Allow to define question visible only available if attendee owns this feature type.",
     "add_value": "Add a Value",
+    "hidden_value": "Hidden Value",
+    "visible_value": "Visible Option (as appears on site)",
     "tab": {
       "general": "general",
       "users": "users",
@@ -2365,7 +2367,10 @@
       "select": "Select...",
       "badge_scan_settings": "Select Badge Scan Settings",
       "select_type": "Select a Type",
-      "select_allowed_badge_features_types": "Select Allowed Badge Features"
+      "select_allowed_badge_features_types": "Select Allowed Badge Features",
+      "add_value": "Add Value",
+      "hidden_value": "Hidden Value",
+      "visible_value": "Visible Option (as appears on site)"
     }
   },
   "additional_inputs": {

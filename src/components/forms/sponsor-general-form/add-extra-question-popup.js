@@ -17,8 +17,7 @@ import {
   InputLabel,
   Box,
   MenuItem,
-  Tooltip,
-  InputAdornment
+  Tooltip
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/Info";
@@ -29,16 +28,16 @@ import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
 import MuiFormikSelect from "../../mui/formik-inputs/mui-formik-select";
 import FormikTextEditor from "../../inputs/formik-text-editor";
 import MuiFormikCheckbox from "../../mui/formik-inputs/mui-formik-checkbox";
+import { deleteSponsorExtraQuestionValue } from "../../../actions/sponsor-actions";
 
 const AddSponsorExtraQuestionPopup = ({
-  extraQuestion,
+  entity: extraQuestion,
   summit,
   open,
   onClose,
   onSubmit,
   allClasses,
-  shouldHideMandatory = false,
-  shouldHideAllowedFeatures = false
+  deleteSponsorExtraQuestionValue
 }) => {
   const formik = useFormik({
     initialValues: {
@@ -48,7 +47,10 @@ const AddSponsorExtraQuestionPopup = ({
       type: extraQuestion?.type,
       mandatory: extraQuestion?.mandatory || false,
       placeholder: extraQuestion?.placeholder,
-      values: extraQuestion?.values || []
+      values: (extraQuestion?.values || []).map((value) => ({
+        ...value,
+        _shouldUpdate: false
+      }))
     },
     validationSchema: yup.object({
       id: yup.number(),
@@ -61,11 +63,22 @@ const AddSponsorExtraQuestionPopup = ({
         yup.object().shape({
           value: yup.string().required(),
           label: yup.string().required(),
-          is_default: yup.boolean()
+          is_default: yup.boolean(),
+          _shouldUpdate: yup.boolean()
         })
       )
     }),
-    onSubmit,
+    onSubmit: (values) => {
+      const valuesToSave = values.values
+        .filter((v) => v._shouldUpdate)
+        .map(({ _shouldUpdate, ...rest }) => rest);
+      const updatedValues = {
+        ...values,
+        values: values.values.map(({ _shouldUpdate, ...rest }) => rest),
+        valuesToSave
+      };
+      onSubmit(updatedValues);
+    },
     enableReinitialize: true
   });
 
@@ -93,7 +106,8 @@ const AddSponsorExtraQuestionPopup = ({
     const newValue = {
       value: "",
       label: "",
-      is_default: false
+      is_default: false,
+      _shouldUpdate: true
     };
 
     const updatedValues = [...formik.values.values, newValue];
@@ -104,18 +118,28 @@ const AddSponsorExtraQuestionPopup = ({
     const valueToRemove = formik.values.values[index];
 
     if (valueToRemove.id) {
-      // TODO: Remove value from db
+      deleteSponsorExtraQuestionValue(formik.values.id, valueToRemove.id);
     }
 
     const updatedValues = formik.values.values.filter((_, i) => i !== index);
     formik.setFieldValue("values", updatedValues);
   };
 
+  const handleValueChange = (index, field, value) => {
+    const currentValue = formik.values.values[index];
+    const fieldName = `values[${index}].${field}`;
+
+    formik.setFieldValue(fieldName, value);
+
+    if (currentValue.id) {
+      formik.setFieldValue(`values[${index}]._shouldUpdate`, true);
+    }
+  };
+
   const hideMandatory =
-    shouldHideMandatory &&
-    (formik.values.type === "CheckBox" ||
-      (formik.values.type === "CheckBoxList" &&
-        formik.values?.values?.length <= 1));
+    formik.values.type === "CheckBox" ||
+    (formik.values.type === "CheckBoxList" &&
+      formik.values?.values?.length <= 1);
 
   const shouldShowField = (field) => {
     const { type } = formik.values;
@@ -240,76 +264,101 @@ const AddSponsorExtraQuestionPopup = ({
                 <InputLabel htmlFor="values" sx={{ px: 2, pt: 2 }}>
                   {T.translate("question_form.values")}
                 </InputLabel>
-                <Box sx={{ width: "100%" }}>
-                  {formik.values.values.map((valueItem, index) => (
-                    <Box
+                <Grid2
+                  container
+                  spacing={2}
+                  sx={{
+                    mb: 1,
+                    px: 2,
+                    fontWeight: 500,
+                    fontSize: "14px",
+                    color: "#555"
+                  }}
+                  size={12}
+                >
+                  <Grid2 size={5}>
+                    {T.translate("edit_sponsor.hidden_value")}
+                  </Grid2>
+                  <Grid2 size={5}>
+                    {T.translate("edit_sponsor.visible_value")}
+                  </Grid2>
+                  <Grid2 size={2} />
+                </Grid2>
+                {formik.values.values.map((valueItem, index) => (
+                  <Grid2 container spacing={2} sx={{ mb: 1, px: 2 }} size={12}>
+                    <Grid2 size={5}>
+                      <MuiFormikTextField
+                        name={`values[${index}].value`}
+                        formik={formik}
+                        fullWidth
+                        margin="none"
+                        placeholder={T.translate("edit_sponsor.hidden_value")}
+                        onChange={(e) =>
+                          handleValueChange(index, "value", e.target.value)
+                        }
+                      />
+                    </Grid2>
+                    <Grid2 size={5}>
+                      <MuiFormikTextField
+                        name={`values[${index}].label`}
+                        formik={formik}
+                        fullWidth
+                        margin="none"
+                        placeholder={T.translate("edit_sponsor.visible_value")}
+                        onChange={(e) =>
+                          handleValueChange(index, "label", e.target.value)
+                        }
+                      />
+                    </Grid2>
+                    <Grid2
+                      size={1}
                       sx={{
                         display: "flex",
-                        alignItems: "flex-start",
-                        gap: 1,
-                        mb: 2,
-                        py: 0,
-                        px: 2
+                        justifyContent: "center",
+                        alignItems: "center"
                       }}
                     >
-                      <Box sx={{ flex: 1 }}>
-                        <MuiFormikTextField
-                          name={`values[${index}].value`}
-                          label="Value"
-                          formik={formik}
-                          fullWidth
-                          margin="none"
-                          placeholder="Enter value"
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton
-                                  onClick={() => handleRemoveValue(index)}
-                                  edge="end"
-                                  sx={{
-                                    color: "#666"
-                                  }}
-                                  disableRipple
-                                >
-                                  <CloseIcon />
-                                </IconButton>
-                              </InputAdornment>
-                            )
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  ))}
-                  <Button
-                    variant="text"
-                    startIcon={<AddIcon />}
-                    onClick={handleAddValue}
-                    sx={{
-                      color: "#666",
-                      textTransform: "none",
-                      fontSize: "14px",
-                      fontWeight: 400,
-                      "&:hover": {
-                        backgroundColor: "transparent",
-                        color: "#2196F3"
-                      },
-                      mb: 2
-                    }}
-                  >
-                    {T.translate("edit_sponsor.add_value")}
-                  </Button>
-                </Box>
+                      <IconButton
+                        onClick={() => handleRemoveValue(index)}
+                        edge="end"
+                        sx={{ color: "#666" }}
+                        disableRipple
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    </Grid2>
+                  </Grid2>
+                ))}
+
+                <Button
+                  variant="text"
+                  startIcon={<AddIcon />}
+                  onClick={handleAddValue}
+                  sx={{
+                    color: "#666",
+                    textTransform: "none",
+                    fontSize: "14px",
+                    fontWeight: 400,
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                      color: "#2196F3"
+                    },
+                    mb: 2
+                  }}
+                >
+                  {T.translate("edit_sponsor.add_value")}
+                </Button>
               </Grid2>
             )}
             <Divider />
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              {!hideMandatory && (
-                <Grid2
-                  container
-                  spacing={2}
-                  size={6}
-                  sx={{ alignItems: "baseline" }}
-                >
+              <Grid2
+                container
+                spacing={2}
+                size={6}
+                sx={{ alignItems: "baseline" }}
+              >
+                {!hideMandatory && (
                   <Box width="100%">
                     <MuiFormikCheckbox
                       name="mandatory"
@@ -319,9 +368,9 @@ const AddSponsorExtraQuestionPopup = ({
                       label={T.translate("edit_sponsor.mandatory")}
                     />
                   </Box>
-                </Grid2>
-              )}
-              {!shouldHideAllowedFeatures && badge_features_ddl.length >= 0 && (
+                )}
+              </Grid2>
+              {badge_features_ddl.length > 0 && (
                 <Grid2
                   container
                   spacing={2}
@@ -431,4 +480,6 @@ AddSponsorExtraQuestionPopup.propTypes = {
   onSubmit: PropTypes.func.isRequired
 };
 
-export default connect(mapStateToProps, {})(AddSponsorExtraQuestionPopup);
+export default connect(mapStateToProps, {
+  deleteSponsorExtraQuestionValue
+})(AddSponsorExtraQuestionPopup);

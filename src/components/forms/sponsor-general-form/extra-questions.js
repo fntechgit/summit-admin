@@ -17,14 +17,16 @@ import { Box, Button, Divider, Grid2, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTableSortable from "../../mui/sortable-table/mui-table-sortable";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
-import history from "../../../history";
 import AddSponsorExtraQuestionPopup from "./add-extra-question-popup";
 
 const SponsorExtraQuestions = ({
   sponsorId,
   extraQuestions = [],
   summit,
+  getSponsorExtraQuestion,
   saveSponsorExtraQuestion,
+  saveSponsorExtraQuestionValue,
+  resetSponsorExtraQuestionForm,
   onExtraQuestionReOrder,
   onExtraQuestionDelete
 }) => {
@@ -40,6 +42,7 @@ const SponsorExtraQuestions = ({
   }, [extraQuestions]);
 
   const handleCloseExtraQuestionPopup = () => {
+    resetSponsorExtraQuestionForm();
     setShowAddExtraQuestionPopup(false);
   };
 
@@ -53,8 +56,8 @@ const SponsorExtraQuestions = ({
   };
 
   const handleEditExtraQuestion = (extraQuestion) => {
-    history.push(
-      `/app/summits/${summit.id}/sponsors/${sponsorId}/extra-questions/${extraQuestion.id}`
+    getSponsorExtraQuestion(extraQuestion.id).then(() =>
+      setShowAddExtraQuestionPopup(true)
     );
   };
 
@@ -63,9 +66,20 @@ const SponsorExtraQuestions = ({
   };
 
   const handleSubmitExtraQuestion = (extraQuestion) => {
-    saveSponsorExtraQuestion(extraQuestion).then(() =>
-      setShowAddExtraQuestionPopup(false)
-    );
+    const { valuesToSave, ...extraQuestionToSave } = extraQuestion;
+    saveSponsorExtraQuestion(extraQuestionToSave).then(() => {
+      // after save question, check if values needs to be saved
+      if (valuesToSave && valuesToSave.length > 0) {
+        const saveValuePromises = valuesToSave.map((value) =>
+          saveSponsorExtraQuestionValue(extraQuestionToSave.id, value)
+        );
+        Promise.all(saveValuePromises).finally(() =>
+          setShowAddExtraQuestionPopup(false)
+        );
+      } else {
+        setShowAddExtraQuestionPopup(false);
+      }
+    });
   };
 
   const columns = [
@@ -186,9 +200,6 @@ const SponsorExtraQuestions = ({
           summit={summit}
           onClose={handleCloseExtraQuestionPopup}
           onSubmit={handleSubmitExtraQuestion}
-          shouldHideMandatory
-          shouldHideAllowedTicketTypes
-          shouldHideAllowedFeatures
         />
       )}
     </>
