@@ -314,7 +314,7 @@ export const setSelectedAllRSVP = (value) => (dispatch) => {
 };
 
 export const reSendRSVPConfirmation =
-  (testRecipient = null, excerptRecipient = null, term = null) =>
+  (testRecipient = null, excerptRecipient = null) =>
   async (dispatch, getState) => {
     const {
       currentSummitState,
@@ -340,18 +340,10 @@ export const reSendRSVPConfirmation =
 
     if (!selectedAll && selectedRSVPIds.length > 0) {
       filter.push(`id==${selectedRSVPIds.join("||")}`);
-    } else {
-      if (term) {
-        const escapedTerm = escapeFilterValue(term);
+    }
 
-        filter.push(
-          `attendee_full_name=@${escapedTerm},attendee_email=@${escapedTerm}`
-        );
-      }
-
-      if (selectedAll && excludedRSVPIds.length > 0) {
-        filter.push(`not_id==${excludedRSVPIds.join("||")}`);
-      }
+    if (selectedAll && excludedRSVPIds.length > 0) {
+      filter.push(`not_id==${excludedRSVPIds.join("||")}`);
     }
 
     if (filter.length > 0) {
