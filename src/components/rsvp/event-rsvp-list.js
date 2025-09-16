@@ -38,6 +38,7 @@ const EventRSVPList = ({
   orderDir,
   eventRsvp,
   selectedCount,
+  selectedAll,
   getEventRSVPS,
   addEventRSVP,
   deleteEventRSVP,
@@ -100,6 +101,7 @@ const EventRSVPList = ({
   const rsvp_list_table_options = {
     sortCol: order,
     sortDir: orderDir,
+    selectedAll,
     actions: {
       edit: {
         onClick: handleEventRSVPEdit,

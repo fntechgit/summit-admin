@@ -227,7 +227,7 @@ const eventRSVPInvitationListReducer = (state = DEFAULT_STATE, action) => {
     }
     case SEND_EVENT_RSVP_INVITATIONS_EMAILS: {
       const { excludedInvitationsIds, selectedInvitationsIds, selectedAll } =
-        payload;
+        state;
 
       const updatedInvitations = state.eventRsvpInvitations.map((inv) => {
         const isSent = selectedAll
