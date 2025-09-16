@@ -18,15 +18,25 @@ import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import CustomAlert from "../../../../components/mui/custom-alert";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
-import { sendSponsorUserInvite } from "../../../../actions/sponsor-users-actions";
+import {
+  sendSponsorUserInvite,
+  getSponsorUsers
+} from "../../../../actions/sponsor-users-actions";
 
-const NewUserPopup = ({ open, onClose, sendSponsorUserInvite }) => {
+const NewUserPopup = ({
+  open,
+  onClose,
+  sponsorId,
+  sendSponsorUserInvite,
+  getSponsorUsers
+}) => {
   const handleClose = () => {
     onClose();
   };
 
   const handleOnSave = (values) => {
     sendSponsorUserInvite(values.email).finally(() => {
+      getSponsorUsers(sponsorId);
       handleClose();
     });
   };
@@ -94,5 +104,6 @@ NewUserPopup.propTypes = {
 };
 
 export default connect(() => {}, {
-  sendSponsorUserInvite
+  sendSponsorUserInvite,
+  getSponsorUsers
 })(NewUserPopup);

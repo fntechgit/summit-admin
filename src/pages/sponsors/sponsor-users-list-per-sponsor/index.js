@@ -110,6 +110,7 @@ const SponsorUsersListPerSponsorPage = ({
         <NewUserPopup
           open={openPopup === "new"}
           onClose={() => setOpenPopup(null)}
+          sponsorId={sponsor.id}
         />
       )}
     </div>
