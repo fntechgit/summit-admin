@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   AttendeeInput,
   FreeTextSearch,
-  Table
+  SelectableTable
 } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react";
 import Swal from "sweetalert2";
@@ -15,13 +15,19 @@ import {
   deleteEventRSVP,
   exportEventRsvpsCSV,
   getEventRSVPInvitations,
-  getEventRSVPS
+  getEventRSVPS,
+  selectRSVP,
+  unSelectRSVP,
+  clearAllSelectedRSVP,
+  setSelectedAllRSVP,
+  reSendRSVPConfirmation
 } from "../../actions/event-rsvp-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   MILLISECONDS_IN_SECOND
 } from "../../utils/constants";
 import { queryPaidAttendees } from "../../actions/attendee-actions";
+import EventRSVPReSend from "./event-rsvp-resend";
 
 const EventRSVPList = ({
   term,
@@ -31,11 +37,18 @@ const EventRSVPList = ({
   order,
   orderDir,
   eventRsvp,
+  selectedCount,
+  selectedAll,
   getEventRSVPS,
   addEventRSVP,
   deleteEventRSVP,
   exportEventRsvpsCSV,
   getEventRSVPInvitations,
+  selectRSVP,
+  unSelectRSVP,
+  clearAllSelectedRSVP,
+  setSelectedAllRSVP,
+  reSendRSVPConfirmation,
   currentSummit,
   currentEvent,
   history
@@ -68,11 +81,33 @@ const EventRSVPList = ({
     );
   };
 
+  const handleSelected = (rsvp_id, isSelected) => {
+    if (isSelected) {
+      selectRSVP(rsvp_id);
+      return;
+    }
+    unSelectRSVP(rsvp_id);
+  };
+
+  const handleSelectedAll = (ev) => {
+    const selectedAllCb = ev.target.checked;
+    setSelectedAllRSVP(selectedAllCb);
+    if (!selectedAllCb) {
+      // clear all selected
+      clearAllSelectedRSVP();
+    }
+  };
+
   const rsvp_list_table_options = {
     sortCol: order,
     sortDir: orderDir,
+    selectedAll,
     actions: {
-      edit: { onClick: handleEventRSVPEdit },
+      edit: {
+        onClick: handleEventRSVPEdit,
+        onSelected: handleSelected,
+        onSelectedAll: handleSelectedAll
+      },
       delete: { onClick: handleDeleteEventRSVP }
     }
   };
@@ -134,6 +169,12 @@ const EventRSVPList = ({
     setNewAttendee("");
     setNewSeat("");
     setShowAddModal(true);
+  };
+
+  const handleReSend = (testRecipient, excerptRecipient) => {
+    reSendRSVPConfirmation(testRecipient, excerptRecipient, term).then(() => {
+      clearAllSelectedRSVP();
+    });
   };
 
   const handleExportEventRSVPS = () => {
@@ -198,7 +239,20 @@ const EventRSVPList = ({
 
       {eventRsvp.length > 0 && (
         <>
-          <Table
+          <EventRSVPReSend
+            selectedCount={selectedCount}
+            onReSend={handleReSend}
+          />
+          {selectedCount > 0 && (
+            <span>
+              <b>
+                {T.translate("event_rsvp_list.rsvp_qty", {
+                  qty: selectedCount
+                })}
+              </b>
+            </span>
+          )}
+          <SelectableTable
             options={rsvp_list_table_options}
             data={eventRsvp}
             columns={rsvp_list_columns}
@@ -286,5 +340,10 @@ export default connect(mapStateToProps, {
   deleteEventRSVP,
   addEventRSVP,
   exportEventRsvpsCSV,
-  getEventRSVPInvitations
+  getEventRSVPInvitations,
+  selectRSVP,
+  unSelectRSVP,
+  clearAllSelectedRSVP,
+  setSelectedAllRSVP,
+  reSendRSVPConfirmation
 })(EventRSVPList);
