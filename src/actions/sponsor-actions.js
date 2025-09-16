@@ -29,6 +29,7 @@ import {
   fetchErrorHandler,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
+import _ from "lodash";
 import { getAccessTokenSafely } from "../utils/methods";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
 import history from "../history";
@@ -41,7 +42,6 @@ import {
   HUNDRED_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
-import _ from "lodash";
 
 export const REQUEST_SPONSORS = "REQUEST_SPONSORS";
 export const RECEIVE_SPONSORS = "RECEIVE_SPONSORS";
@@ -171,8 +171,6 @@ export const RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META =
 export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
   "SPONSOR_LEAD_REPORT_SETTINGS_UPDATED";
 
-
-
 /** ****************  FETCH *************************************** */
 
 export const querySponsors = _.debounce(async (input, summitId, callback) => {
@@ -185,16 +183,15 @@ export const querySponsors = _.debounce(async (input, summitId, callback) => {
   )
     .then(fetchResponseHandler)
     .then((json) => {
-      const options = [...json.data].map(sp => ({
+      const options = [...json.data].map((sp) => ({
         id: sp.id,
-        name: sp.company.name,
+        name: sp.company.name
       }));
 
       callback(options);
     })
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
-
 
 /** ****************  SPONSORS *************************************** */
 

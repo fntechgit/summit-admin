@@ -28,7 +28,8 @@ import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  DUMMY_ACTION
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
@@ -82,7 +83,7 @@ export const getSponsorUserRequests =
     dispatch(startLoading());
 
     if (sponsorId) {
-      filter.push(`sponsor_id==${sponsorId}`)
+      filter.push(`sponsor_id==${sponsorId}`);
     }
 
     if (term) {
@@ -137,7 +138,7 @@ export const getSponsorUsers =
     dispatch(startLoading());
 
     if (sponsorId) {
-      filter.push(`sponsor_id==${sponsorId}`)
+      filter.push(`sponsor_id==${sponsorId}`);
     }
 
     if (term) {
@@ -311,27 +312,72 @@ export const processSponsorUserRequest = (request) => async (dispatch) => {
     });
 };
 
-export const deleteSponsorUserRequest = (requestId) => async (dispatch) => {
+export const deleteSponsorUserRequest =
+  (requestId) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_USER_REQUEST_DELETED)({ requestId }),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${requestId}/reject`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.process_request.request_deleted")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+
+/** ****************  SPONSOR USERS TAB  *************************************** */
+
+export const sendSponsorUserInvite = (email) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
   const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
+  const { currentSummit } = currentSummitState;
+  const { entity } = currentSponsorState;
+
+  const params = {
+    access_token: accessToken
+  };
 
   dispatch(startLoading());
 
-  return deleteRequest(
+  const payload = {
+    user_email: email,
+    sponsor_id: entity.id,
+    summit_id: currentSummit.id
+  };
+
+  return postRequest(
     null,
-    createAction(SPONSOR_USER_REQUEST_DELETED)({ requestId }),
-    `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${requestId}/reject`,
-    null,
-    snackbarErrorHandler
+    createAction(DUMMY_ACTION),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
+    payload,
+    snackbarErrorHandler,
+    entity
   )(params)(dispatch)
     .then(() => {
+      dispatch(stopLoading());
       dispatch(
         snackbarSuccessHandler({
           title: T.translate("general.success"),
-          html: T.translate("sponsor_users.process_request.request_deleted")
+          html: T.translate("sponsor_users.new_user.success")
         })
       );
     })
+    .catch(console.log) // need to catch promise reject
     .finally(() => {
       dispatch(stopLoading());
     });

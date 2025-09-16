@@ -2499,7 +2499,14 @@
       "request_deleted": "Request deleted successfully."
     },
     "request_delete_title": "Dismiss Access Request",
-    "request_delete_body": "You are going to permanently dismiss this user access request. Are you sure?"
+    "request_delete_body": "You are going to permanently dismiss this user access request. Are you sure?",
+    "new_user": {
+      "add_user": "Add User",
+      "invite": "Invite",
+      "email": "Email Address",
+      "alert": "An activation email will be sent to the user to confirm.",
+      "success": "Invite sent successfully."
+    }
   },
   "sponsorship_list": {
     "sponsorships": "Sponsorships",
