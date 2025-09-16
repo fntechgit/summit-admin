@@ -41,6 +41,7 @@ export const RECEIVE_SPONSOR_USERS = "RECEIVE_SPONSOR_USERS";
 export const SPONSOR_USER_ADDED = "SPONSOR_USER_ADDED";
 export const SPONSOR_USER_REQUEST_ACCEPTED = "SPONSOR_USER_REQUEST_ACCEPTED";
 export const SPONSOR_USER_REQUEST_DELETED = "SPONSOR_USER_REQUEST_DELETED";
+export const SPONSOR_USER_DELETED = "SPONSOR_USER_DELETED";
 
 export const getUserGroups =
   (page = 1, perPage = DEFAULT_PER_PAGE) =>
@@ -312,6 +313,7 @@ export const processSponsorUserRequest = (request) => async (dispatch) => {
     });
 };
 
+
 export const deleteSponsorUserRequest =
   (requestId) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
@@ -331,6 +333,36 @@ export const deleteSponsorUserRequest =
           snackbarSuccessHandler({
             title: T.translate("general.success"),
             html: T.translate("sponsor_users.process_request.request_deleted")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+
+export const deleteSponsorUser =
+  (sponsorId, userId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_USER_DELETED)({ userId }),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsorId}/sponsor-users/${userId}/permissions`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.user_delete_success")
           })
         );
       })
