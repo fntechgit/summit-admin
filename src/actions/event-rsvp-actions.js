@@ -314,7 +314,7 @@ export const setSelectedAllRSVP = (value) => (dispatch) => {
 };
 
 export const reSendRSVPConfirmation =
-  (testRecipient = null, excerptRecipient = null) =>
+  (testRecipient = null, excerptRecipient = null, term = null) =>
   async (dispatch, getState) => {
     const {
       currentSummitState,

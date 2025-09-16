@@ -170,7 +170,7 @@ const EventRSVPList = ({
   };
 
   const handleReSend = (testRecipient, excerptRecipient) => {
-    reSendRSVPConfirmation(testRecipient, excerptRecipient).then(() => {
+    reSendRSVPConfirmation(testRecipient, excerptRecipient, term).then(() => {
       clearAllSelectedRSVP();
     });
   };
