@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, Alert } from "@mui/material";
+import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import {
@@ -25,6 +25,7 @@ import SearchInput from "../../../components/mui/search-input";
 import UsersTable from "../sponsor-users-list-page/components/users-table";
 import CustomAlert from "../../../components/mui/custom-alert";
 import ChipNotify from "../../../components/mui/chip-notify";
+import NewUserPopup from "./components/new-user-popup";
 
 const SponsorUsersListPerSponsorPage = ({
   sponsor,
@@ -47,12 +48,14 @@ const SponsorUsersListPerSponsorPage = ({
 
   return (
     <div className="container">
-      {requests.totalCount > 0 &&
-      <ChipNotify
-        label={`${requests.totalCount} ${T.translate("sponsor_users.access_request")}`}
-        sx={{position: "absolute", top: "8px", right: "5px"}}
-      />
-      }
+      {requests.totalCount > 0 && (
+        <ChipNotify
+          label={`${requests.totalCount} ${T.translate(
+            "sponsor_users.access_request"
+          )}`}
+          sx={{ position: "absolute", top: "8px", right: "5px" }}
+        />
+      )}
       <CustomAlert message={T.translate("sponsor_users.alert_info")} />
       <Grid2
         container
@@ -65,7 +68,8 @@ const SponsorUsersListPerSponsorPage = ({
       >
         <Grid2 size={2}>
           <Box component="span">
-            {users.totalCount} {T.translate("sponsor_users.users").toLowerCase()}
+            {users.totalCount}{" "}
+            {T.translate("sponsor_users.users").toLowerCase()}
           </Box>
         </Grid2>
         <Grid2
@@ -83,7 +87,7 @@ const SponsorUsersListPerSponsorPage = ({
             variant="contained"
             size="medium"
             onClick={() => setOpenPopup("import")}
-            startIcon={<AddIcon />}
+            startIcon={<SaveAltIcon />}
             sx={{ height: "36px" }}
           >
             {T.translate("sponsor_users.import_user")}
@@ -92,7 +96,7 @@ const SponsorUsersListPerSponsorPage = ({
             variant="contained"
             size="medium"
             onClick={() => setOpenPopup("new")}
-            startIcon={<SaveAltIcon />}
+            startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
             {T.translate("sponsor_users.add_user")}
@@ -101,6 +105,13 @@ const SponsorUsersListPerSponsorPage = ({
       </Grid2>
 
       <UsersTable users={users} term={term} getUsers={getSponsorUsers} />
+
+      {openPopup === "new" && (
+        <NewUserPopup
+          open={openPopup === "new"}
+          onClose={() => setOpenPopup(null)}
+        />
+      )}
     </div>
   );
 };
