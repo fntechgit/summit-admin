@@ -39,7 +39,7 @@
     "clear": "Clear",
     "scan": "Scan",
     "remove": "Remove",
-    "row_remove_warning": "Are you sure you want to delete item ",
+    "row_remove_warning": "Are you sure you want to delete row ",
     "delete": "Delete",
     "clone": "Clone",
     "new": "New",
@@ -2495,7 +2495,8 @@
       "tiers": "Tiers",
       "access": "Access",
       "save": "Process",
-      "request_accepted": "Request processed successfully."
+      "request_accepted": "Request processed successfully.",
+      "user_delete_success": "User removed successfully."
     },
     "request_delete_title": "Dismiss Access Request",
     "request_delete_body": "You are going to permanently dismiss this user access request. Are you sure?",

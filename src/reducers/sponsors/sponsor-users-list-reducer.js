@@ -18,7 +18,8 @@ import {
   RECEIVE_SPONSOR_USERS,
   REQUEST_SPONSOR_USER_REQUESTS,
   REQUEST_SPONSOR_USERS,
-  RECEIVE_SPONSOR_USER_GROUPS
+  RECEIVE_SPONSOR_USER_GROUPS,
+  SPONSOR_USER_DELETED
 } from "../../actions/sponsor-users-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { titleCase } from "../../utils/methods";
@@ -149,6 +150,12 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
           lastPage
         }
       };
+    }
+    case SPONSOR_USER_DELETED: {
+      const { userId } = payload;
+      const users = state.users.filter((u) => u.id !== userId);
+
+      return { ...state, users };
     }
     default:
       return state;

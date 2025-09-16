@@ -19,7 +19,8 @@ import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import {
   getSponsorUserRequests,
-  getSponsorUsers
+  getSponsorUsers,
+  deleteSponsorUser
 } from "../../../actions/sponsor-users-actions";
 import SearchInput from "../../../components/mui/search-input";
 import UsersTable from "../sponsor-users-list-page/components/users-table";
@@ -33,7 +34,8 @@ const SponsorUsersListPerSponsorPage = ({
   users,
   term,
   getSponsorUserRequests,
-  getSponsorUsers
+  getSponsorUsers,
+  deleteSponsorUser
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -104,7 +106,13 @@ const SponsorUsersListPerSponsorPage = ({
         </Grid2>
       </Grid2>
 
-      <UsersTable users={users} term={term} getUsers={getSponsorUsers} />
+      <UsersTable
+        sponsorId={sponsor.id}
+        users={users}
+        term={term}
+        getUsers={getSponsorUsers}
+        deleteSponsorUser={deleteSponsorUser}
+      />
 
       {openPopup === "new" && (
         <NewUserPopup
@@ -123,5 +131,6 @@ const mapStateToProps = ({ sponsorUsersListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorUserRequests,
-  getSponsorUsers
+  getSponsorUsers,
+  deleteSponsorUser
 })(SponsorUsersListPerSponsorPage);
