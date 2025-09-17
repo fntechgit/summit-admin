@@ -1444,11 +1444,15 @@ export const saveBadgeScan = (entity) => async (dispatch, getState) => {
     createAction(BADGE_SCAN_UPDATED),
     `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans/${entity.id}`,
     normalizedEntity,
-    authErrorHandler,
+    snackbarErrorHandler,
     entity
   )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
     dispatch(
-      showSuccessMessage(T.translate("edit_badge_scan.badge_scan_saved"))
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_badge_scan.badge_scan_saved")
+      })
     );
   });
 };
