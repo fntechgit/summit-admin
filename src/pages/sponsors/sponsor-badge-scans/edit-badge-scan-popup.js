@@ -16,25 +16,77 @@ import {
   InputLabel,
   Box
 } from "@mui/material";
-
 import CloseIcon from "@mui/icons-material/Close";
+import ExtraQuestionsMUI from "openstack-uicore-foundation/lib/components/extra-questions-mui";
 
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
+import { getTypeValue, toSlug } from "../../../utils/extra-questions";
+
+const formatExtraQuestions = (extraQuestions, sponsorQuestions) => {
+  const values = {};
+
+  sponsorQuestions.forEach((q) => {
+    const slug = toSlug(q.name, q.id);
+    const answer =
+      extraQuestions.find((eq) => eq.question_id === q.id)?.value || "";
+    const formattedAnswer = getTypeValue(answer, q.type);
+
+    values[slug] = formattedAnswer;
+  });
+
+  return values;
+};
 
 const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
   const formik = useFormik({
     initialValues: {
+      id: badgeScan.id,
       attendee_full_name: badgeScan.attendee_full_name,
       attendee_company: badgeScan.attendee_company,
-      notes: badgeScan.notes
+      notes: badgeScan.notes,
+      ...formatExtraQuestions(
+        badgeScan.extra_questions,
+        badgeScan.sponsor_extra_questions
+      )
     },
     validationSchema: yup.object({
       attendee_full_name: yup.string().required(),
       attendee_company: yup.string().required(),
       notes: yup.string()
     }),
-    onSubmit,
+    onSubmit: (values) => {
+      const {
+        id,
+        attendee_full_name,
+        attendee_company,
+        notes,
+        ...extraValues
+      } = values;
+
+      // formatting extra questions before submit, and omit empty answers
+      const extra_questions = Object.entries(extraValues)
+        .map(([slug, value]) => {
+          const parts = slug.split("_").pop();
+          const question_id = parseInt(parts);
+
+          return {
+            question_id,
+            answer: Array.isArray(value)
+              ? value.filter((v) => v !== "").join(",")
+              : value
+          };
+        })
+        .filter((q) => q.answer);
+
+      onSubmit({
+        id,
+        attendee_full_name,
+        attendee_company,
+        notes,
+        extra_questions
+      });
+    },
     enableReinitialize: true
   });
 
@@ -59,7 +111,7 @@ const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
   }, [formik.values]);
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("edit_badge_scan.edit_badge_scan")}
@@ -138,11 +190,25 @@ const EditBadgeScanPopup = ({ badgeScan, open, onClose, onSubmit }) => {
                 </Box>
               </Grid2>
             </Grid2>
+            <Divider />
+            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
+              <Grid2 spacing={2} size={12} sx={{ alignItems: "baseline" }}>
+                <Typography>
+                  {T.translate("edit_badge_scan.extra_questions")}
+                </Typography>
+                <ExtraQuestionsMUI
+                  extraQuestions={badgeScan.sponsor_extra_questions.sort(
+                    (a, b) => a.order - b.order
+                  )}
+                  formik={formik}
+                  allowEdit
+                />
+              </Grid2>
+            </Grid2>
           </DialogContent>
-          <Divider />
           <DialogActions sx={{ p: 2 }}>
             <Button type="submit" fullWidth variant="contained">
-              {T.translate("edit_badge_scan.add_tier")}
+              {T.translate("general.save")}
             </Button>
           </DialogActions>
         </Box>

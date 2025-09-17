@@ -39,7 +39,7 @@ const SponsorBadgeScans = ({
   getBadgeScans,
   exportBadgeScans,
   getBadgeScan,
-  // saveBadgeScan,
+  saveBadgeScan,
   currentBadgeScan
 }) => {
   useEffect(() => {
@@ -83,7 +83,7 @@ const SponsorBadgeScans = ({
   };
 
   const handleBadgeScanSave = (badgeScan) => {
-    console.log("CHCEK save", badgeScan);
+    saveBadgeScan(badgeScan).then(() => setShowEditBadgeScanPopup(false));
   };
 
   const handleNewManualScan = () => {};
