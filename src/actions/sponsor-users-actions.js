@@ -14,14 +14,14 @@
 import {
   authErrorHandler,
   createAction,
-  getRequest,
-  putRequest,
-  postRequest,
   deleteRequest,
-  startLoading,
-  stopLoading,
+  fetchErrorHandler,
   fetchResponseHandler,
-  fetchErrorHandler
+  getRequest,
+  postRequest,
+  putRequest,
+  startLoading,
+  stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
@@ -313,34 +313,100 @@ export const processSponsorUserRequest = (request) => async (dispatch) => {
     });
 };
 
-
-export const deleteSponsorUserRequest =
-  (requestId) => async (dispatch) => {
+export const approveSponsorUserRequest =
+  (sponsorId, requestIds) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
+
+    const params = {
+      access_token: accessToken
+    };
 
     dispatch(startLoading());
 
-    return deleteRequest(
-      null,
-      createAction(SPONSOR_USER_REQUEST_DELETED)({ requestId }),
-      `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${requestId}/reject`,
-      null,
-      snackbarErrorHandler
-    )(params)(dispatch)
+    const promises = requestIds.map((reqId) =>
+      putRequest(
+        null,
+        createAction(SPONSOR_USER_REQUEST_ACCEPTED),
+        `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${reqId}/approve`,
+        { sponsor_id: sponsorId },
+        snackbarErrorHandler
+      )(params)(dispatch)
+    );
+
+    Promise.all(promises)
       .then(() => {
+        dispatch(getSponsorUserRequests());
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("sponsor_users.process_request.request_deleted")
+            html: T.translate("sponsor_users.process_request.request_accepted")
           })
         );
       })
+      .catch(console.log) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });
   };
 
+export const deleteSponsorUserRequest = (requestId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_USER_REQUEST_DELETED)({ requestId }),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${requestId}/reject`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_users.process_request.request_deleted")
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const denySponsorUserRequest = (requestIds) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  const promises = requestIds.map((reqId) =>
+    deleteRequest(
+      null,
+      createAction(SPONSOR_USER_REQUEST_DELETED)({ reqId }),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${reqId}/reject`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+  );
+
+  Promise.all(promises)
+    .then(() => {
+      dispatch(getSponsorUserRequests());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_users.process_request.request_deleted")
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
 
 export const deleteSponsorUser =
   (sponsorId, userId) => async (dispatch, getState) => {
@@ -370,7 +436,6 @@ export const deleteSponsorUser =
         dispatch(stopLoading());
       });
   };
-
 
 /** ****************  SPONSOR USERS TAB  *************************************** */
 

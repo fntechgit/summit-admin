@@ -47,6 +47,7 @@
     "drop_files": "Drop images or click to select files to upload.",
     "search": "Search",
     "save": "Save",
+    "confirm": "Confirm",
     "cancel": "Cancel",
     "ingest": "Ingest",
     "save_and_publish": "Save & Publish",
@@ -2497,10 +2498,16 @@
       "save": "Process",
       "request_accepted": "Request processed successfully.",
       "request_deleted": "Request deleted successfully.",
-      "user_delete_success": "User removed successfully."
+      "user_delete_success": "User removed successfully.",
+      "dismiss_users": "Dismiss Users",
+      "admit_users": "Admit Users",
+      "select_all_users": "Select All Users",
+      "select_users": "Select Users",
+      "admit_confirmation_title": "Admit Access Request",
+      "admit_confirmation_body": "You are going to admit this user access request. Are you sure?",
+      "delete_confirmation_title": "Dismiss Access Request",
+      "delete_confirmation_body": "You are going to permanently dismiss this user access request. Are you sure?"
     },
-    "request_delete_title": "Dismiss Access Request",
-    "request_delete_body": "You are going to permanently dismiss this user access request. Are you sure?",
     "new_user": {
       "add_user": "Add User",
       "invite": "Invite",

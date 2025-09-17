@@ -14,7 +14,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { getSponsorships } from "../../../../../actions/sponsor-forms-actions";
 import { DEFAULT_PER_PAGE } from "../../../../../utils/constants";
-import CheckBoxList from "../../../../../components/mui/infinite-checkbox-list";
+import CheckBoxList from "../../../../../components/mui/checkbox-list";
 
 const SelectSponsorshipsDialog = ({
   sponsorships,

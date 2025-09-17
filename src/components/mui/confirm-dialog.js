@@ -1,14 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
+  Divider,
   Typography
 } from "@mui/material";
-import { Warning, CheckCircle, Error, Info } from "@mui/icons-material";
+import { CheckCircle, Error, Info, Warning } from "@mui/icons-material";
 
 const iconMap = {
   warning: <Warning color="warning" />,
@@ -21,30 +22,43 @@ const ConfirmDialog = ({
   open,
   title,
   text,
-  iconType = "warning",
-  variant = "contained",
+  iconType = "",
   onConfirm,
   onCancel,
   confirmButtonText = "Confirm",
-  confirmButtonColor,
+  confirmButtonColor = "primary",
   cancelButtonText = "Cancel",
-  cancelButtonColor
+  cancelButtonColor = "primary"
 }) => (
   <Dialog open={open} onClose={onCancel}>
-    <DialogTitle>{title}</DialogTitle>
-    <DialogContent>
+    <DialogTitle sx={{ p: 2 }} component="div">
+      <Typography variant="h5">{title}</Typography>
+    </DialogTitle>
+    <Divider />
+    <DialogContent sx={{ p: 2 }}>
       <div style={{ display: "flex", alignItems: "center" }}>
         {iconMap[iconType] && (
           <div style={{ marginRight: 10 }}>{iconMap[iconType]}</div>
         )}
-        <Typography variant="body2">{text}</Typography>
+        <Typography variant="body1">{text}</Typography>
       </div>
     </DialogContent>
+    <Divider sx={{ margin: "10px 0px 10px 0px" }} />
     <DialogActions>
-      <Button onClick={onCancel} color={cancelButtonColor} variant={variant}>
+      <Button
+        fullWidth
+        onClick={onCancel}
+        color={cancelButtonColor}
+        variant="outlined"
+      >
         {cancelButtonText}
       </Button>
-      <Button onClick={onConfirm} color={confirmButtonColor} variant={variant}>
+      <Button
+        fullWidth
+        onClick={onConfirm}
+        color={confirmButtonColor}
+        variant="contained"
+      >
         {confirmButtonText}
       </Button>
     </DialogActions>
@@ -56,7 +70,6 @@ ConfirmDialog.propTypes = {
   title: PropTypes.string.isRequired,
   text: PropTypes.string.isRequired,
   iconType: PropTypes.string,
-  variant: PropTypes.string,
   onConfirm: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   confirmButtonText: PropTypes.string,
@@ -68,7 +81,6 @@ ConfirmDialog.propTypes = {
 ConfirmDialog.defaultProps = {
   open: false,
   iconType: "warning",
-  variant: "contained",
   confirmButtonText: "Confirm",
   confirmButtonColor: "primary",
   cancelButtonText: "Cancel",
