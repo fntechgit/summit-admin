@@ -20,7 +20,8 @@ import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import {
   getSponsorUserRequests,
-  getSponsorUsers
+  getSponsorUsers,
+  deleteSponsorUserRequest
 } from "../../../actions/sponsor-users-actions";
 import SearchInput from "../../../components/mui/search-input";
 import RequestTable from "./components/request-table";
@@ -32,7 +33,8 @@ const SponsorUsersListPage = ({
   users,
   term,
   getSponsorUserRequests,
-  getSponsorUsers
+  getSponsorUsers,
+                                deleteSponsorUserRequest
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -105,6 +107,7 @@ const SponsorUsersListPage = ({
         requests={requests}
         term={term}
         getRequests={getSponsorUserRequests}
+        onRequestDelete={deleteSponsorUserRequest}
       />
 
       <Box component="div" sx={{ mb: 2 }}>
@@ -122,5 +125,6 @@ const mapStateToProps = ({ sponsorUsersListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorUserRequests,
-  getSponsorUsers
+  getSponsorUsers,
+  deleteSponsorUserRequest
 })(SponsorUsersListPage);

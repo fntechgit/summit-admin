@@ -17,6 +17,7 @@ import {
   getRequest,
   putRequest,
   postRequest,
+  deleteRequest,
   startLoading,
   stopLoading,
   fetchResponseHandler,
@@ -38,6 +39,7 @@ export const REQUEST_SPONSOR_USERS = "REQUEST_SPONSOR_USERS";
 export const RECEIVE_SPONSOR_USERS = "RECEIVE_SPONSOR_USERS";
 export const SPONSOR_USER_ADDED = "SPONSOR_USER_ADDED";
 export const SPONSOR_USER_REQUEST_ACCEPTED = "SPONSOR_USER_REQUEST_ACCEPTED";
+export const SPONSOR_USER_REQUEST_DELETED = "SPONSOR_USER_REQUEST_DELETED";
 
 export const getUserGroups =
   (page = 1, perPage = DEFAULT_PER_PAGE) =>
@@ -297,3 +299,31 @@ export const processSponsorUserRequest = (request) => async (dispatch) => {
       dispatch(stopLoading());
     });
 };
+
+
+export const deleteSponsorUserRequest =
+  (requestId) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_USER_REQUEST_DELETED)({ requestId }),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${requestId}/reject`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.process_request.request_deleted")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };

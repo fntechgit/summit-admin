@@ -5,7 +5,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MuiTable from "../../../../components/mui/table/mui-table";
 import ProcessRequestPopup from "./process-request-popup";
 
-const RequestTable = ({ requests, term, getRequests }) => {
+const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
   const [processRequest, setProcessRequest] = useState(null);
 
   const handleRequestsPageChange = (page) => {
@@ -23,7 +23,9 @@ const RequestTable = ({ requests, term, getRequests }) => {
   };
 
   const handleRequestDelete = (itemId) => {
-    console.log("DELETE", itemId);
+    onRequestDelete(itemId).then(() => {
+      getRequests();
+    })
   };
 
   const requestsColumns = [
@@ -79,6 +81,8 @@ const RequestTable = ({ requests, term, getRequests }) => {
           onDelete={handleRequestDelete}
           onPageChange={handleRequestsPageChange}
           onSort={handleRequestsSort}
+          deleteDialogTitle={T.translate("sponsor_users.request_delete_title")}
+          deleteDialogBody={T.translate("sponsor_users.request_delete_body")}
         />
 
         {processRequest && (

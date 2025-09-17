@@ -2495,7 +2495,9 @@
       "access": "Access",
       "save": "Process",
       "request_accepted": "Request processed successfully."
-    }
+    },
+    "request_delete_title": "Dismiss Access Request",
+    "request_delete_body": "You are going to permanently dismiss this user access request. Are you sure?"
   },
   "sponsorship_list": {
     "sponsorships": "Sponsorships",
