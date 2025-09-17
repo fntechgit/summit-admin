@@ -27,6 +27,7 @@ import UsersTable from "../sponsor-users-list-page/components/users-table";
 import CustomAlert from "../../../components/mui/custom-alert";
 import ChipNotify from "../../../components/mui/chip-notify";
 import NewUserPopup from "./components/new-user-popup";
+import ProcessRequestPopup from "./components/process-request-popup";
 
 const SponsorUsersListPerSponsorPage = ({
   sponsor,
@@ -56,6 +57,7 @@ const SponsorUsersListPerSponsorPage = ({
             "sponsor_users.access_request"
           )}`}
           sx={{ position: "absolute", top: "8px", right: "5px" }}
+          onClick={() => setOpenPopup("access_request")}
         />
       )}
       <CustomAlert message={T.translate("sponsor_users.alert_info")} />
@@ -118,6 +120,15 @@ const SponsorUsersListPerSponsorPage = ({
         <NewUserPopup
           open={openPopup === "new"}
           onClose={() => setOpenPopup(null)}
+          sponsorId={sponsor.id}
+        />
+      )}
+
+      {openPopup === "access_request" && (
+        <ProcessRequestPopup
+          open={openPopup === "access_request"}
+          onClose={() => setOpenPopup(null)}
+          requests={requests}
           sponsorId={sponsor.id}
         />
       )}

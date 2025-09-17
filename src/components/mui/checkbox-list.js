@@ -21,7 +21,7 @@ const CheckBoxList = ({
   const handleScroll = (event) => {
     const { scrollTop, scrollHeight, clientHeight } = event.target;
     // eslint-disable-next-line no-magic-numbers
-    if (scrollTop + clientHeight >= scrollHeight - 20) {
+    if (scrollTop + clientHeight >= scrollHeight - 20 && loadMoreData) {
       loadMoreData();
     }
   };
@@ -68,13 +68,13 @@ const CheckBoxList = ({
             }
             label={allItemsLabel}
           />
-          <Divider />
+          <Divider sx={{ mb: 2 }} />
           {items.map((item) => (
             <FormControlLabel
               key={item.id}
               control={
                 <Checkbox
-                  checked={selectedItems.includes(item.id)}
+                  checked={selectedItems.includes(item.id) || isAllSelected}
                   onChange={() => handleItemChange(item.id)}
                 />
               }

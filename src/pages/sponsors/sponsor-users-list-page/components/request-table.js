@@ -25,7 +25,7 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
   const handleRequestDelete = (itemId) => {
     onRequestDelete(itemId).then(() => {
       getRequests();
-    })
+    });
   };
 
   const requestsColumns = [
@@ -81,8 +81,12 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
           onDelete={handleRequestDelete}
           onPageChange={handleRequestsPageChange}
           onSort={handleRequestsSort}
-          deleteDialogTitle={T.translate("sponsor_users.request_delete_title")}
-          deleteDialogBody={T.translate("sponsor_users.request_delete_body")}
+          deleteDialogTitle={T.translate(
+            "sponsor_users.process_request.delete_confirmation_title"
+          )}
+          deleteDialogBody={T.translate(
+            "sponsor_users.process_request.delete_confirmation_body"
+          )}
         />
 
         {processRequest && (
