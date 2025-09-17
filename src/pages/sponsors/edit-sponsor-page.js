@@ -31,6 +31,7 @@ import {
   setSelectedSponsorship
 } from "../../actions/sponsor-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
+import SponsorBadgeScans from "./sponsor-badge-scans";
 
 const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -148,6 +149,9 @@ const EditSponsorPage = (props) => {
             onSponsorshipAddonSave={saveAddonsToSponsorship}
             onSponsorshipAddonRemove={removeAddonToSponsorship}
           />
+        </CustomTabPanel>
+        <CustomTabPanel value={selectedTab} index={7}>
+          <SponsorBadgeScans sponsor={entity} />
         </CustomTabPanel>
       </Container>
     </Box>
