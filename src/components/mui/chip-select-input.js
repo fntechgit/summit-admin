@@ -66,7 +66,7 @@ const ChipSelectInput = ({
     onUpsertSettings(newValues);
   };
 
-  if (!canAdd || !canEdit || !availableOptions.length > 0) {
+  if (!canAdd || !canEdit || availableOptions.length === 0) {
     return null;
   }
 
