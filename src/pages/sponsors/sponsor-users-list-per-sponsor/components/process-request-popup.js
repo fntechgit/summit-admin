@@ -132,10 +132,7 @@ ProcessRequestPopup.propTypes = {
   onClose: PropTypes.func.isRequired
 };
 
-const mapStateToProps = ({ sponsorUsersListState, currentSummitState }) => ({
-  userGroups: sponsorUsersListState.userGroups,
-  currentSummit: currentSummitState.currentSummit
-});
+const mapStateToProps = () => ({});
 
 export default connect(mapStateToProps, {
   approveSponsorUserRequest,
