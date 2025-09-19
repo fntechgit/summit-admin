@@ -479,3 +479,52 @@ export const sendSponsorUserInvite = (email) => async (dispatch, getState) => {
       dispatch(stopLoading());
     });
 };
+
+export const fetchSponsorUsersBySummit = async (summitId, page) => {
+  const accessToken = await getAccessTokenSafely();
+
+  return fetch(
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users?filter=summit_id=@${summitId}&access_token=${accessToken}&page=${page}&per_page=10&order=first_name&order_dir=asc`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => json)
+    .catch(fetchErrorHandler);
+};
+
+export const importSponsorUsers =
+  (sponsorId, summitId, userIds) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    const payload = {
+      summit_id: summitId,
+      sponsor_id: sponsorId,
+      user_ids: userIds
+    };
+
+    return postRequest(
+      null,
+      createAction(DUMMY_ACTION),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users/import`,
+      payload,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(stopLoading());
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.import_users.success")
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };

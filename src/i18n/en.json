@@ -2514,6 +2514,13 @@
       "email": "Email Address",
       "alert": "An activation email will be sent to the user to confirm.",
       "success": "Invite sent successfully."
+    },
+    "import_users": {
+      "title": "Import Users",
+      "select_users": "Select Users",
+      "select_all_users": "Select All Users",
+      "import_users": "Import Users",
+      "success": "Users imported successfully."
     }
   },
   "sponsorship_list": {

@@ -1,5 +1,6 @@
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
+  RECEIVE_ALL_SUMMITS,
   RECEIVE_SUMMITS,
   SUMMIT_ADDED,
   SUMMIT_DELETED
@@ -7,6 +8,7 @@ import {
 
 const DEFAULT_STATE = {
   summits: [],
+  allSummits: [],
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
@@ -24,6 +26,13 @@ const directoryReducer = (state = DEFAULT_STATE, action) => {
         currentPage: current_page,
         lastPage: last_page,
         totalSummits: total
+      };
+    }
+    case RECEIVE_ALL_SUMMITS: {
+      const { data } = payload.response;
+      return {
+        ...state,
+        allSummits: data
       };
     }
     case SUMMIT_ADDED: {

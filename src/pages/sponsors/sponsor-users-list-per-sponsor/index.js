@@ -28,6 +28,7 @@ import CustomAlert from "../../../components/mui/custom-alert";
 import ChipNotify from "../../../components/mui/chip-notify";
 import NewUserPopup from "./components/new-user-popup";
 import ProcessRequestPopup from "./components/process-request-popup";
+import ImportUsersPopup from "./components/import-users-popup";
 
 const SponsorUsersListPerSponsorPage = ({
   sponsor,
@@ -129,6 +130,14 @@ const SponsorUsersListPerSponsorPage = ({
           open={openPopup === "access_request"}
           onClose={() => setOpenPopup(null)}
           requests={requests}
+          sponsorId={sponsor.id}
+        />
+      )}
+
+      {openPopup === "import" && (
+        <ImportUsersPopup
+          open={openPopup === "import"}
+          onClose={() => setOpenPopup(null)}
           sponsorId={sponsor.id}
         />
       )}
