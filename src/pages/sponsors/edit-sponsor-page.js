@@ -31,6 +31,7 @@ import {
   setSelectedSponsorship
 } from "../../actions/sponsor-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
+import SponsorUsersListPerSponsorPage from "./sponsor-users-list-per-sponsor";
 
 const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -106,7 +107,7 @@ const EditSponsorPage = (props) => {
 
   return (
     <Box>
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{position: "relative"}}>
         <Typography fontSize="3.4rem" variant="h4">
           {entity.company?.name}
         </Typography>
@@ -148,6 +149,9 @@ const EditSponsorPage = (props) => {
             onSponsorshipAddonSave={saveAddonsToSponsorship}
             onSponsorshipAddonRemove={removeAddonToSponsorship}
           />
+        </CustomTabPanel>
+        <CustomTabPanel value={selectedTab} index={1}>
+          <SponsorUsersListPerSponsorPage sponsor={entity} />
         </CustomTabPanel>
       </Container>
     </Box>

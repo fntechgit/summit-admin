@@ -14,49 +14,54 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Breadcrumb } from "react-breadcrumbs";
 import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import {
   getSponsorUserRequests,
   getSponsorUsers,
-  deleteSponsorUserRequest
+  deleteSponsorUser
 } from "../../../actions/sponsor-users-actions";
 import SearchInput from "../../../components/mui/search-input";
-import RequestTable from "./components/request-table";
-import UsersTable from "./components/users-table";
+import UsersTable from "../sponsor-users-list-page/components/users-table";
+import CustomAlert from "../../../components/mui/custom-alert";
+import ChipNotify from "../../../components/mui/chip-notify";
+import NewUserPopup from "./components/new-user-popup";
+import ProcessRequestPopup from "./components/process-request-popup";
+import ImportUsersPopup from "./components/import-users-popup";
 
-const SponsorUsersListPage = ({
-  match,
+const SponsorUsersListPerSponsorPage = ({
+  sponsor,
   requests,
   users,
   term,
   getSponsorUserRequests,
   getSponsorUsers,
-                                deleteSponsorUserRequest
+  deleteSponsorUser
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
-    getSponsorUserRequests();
-    getSponsorUsers();
+    getSponsorUserRequests(sponsor.id);
+    getSponsorUsers(sponsor.id);
   }, []);
 
   const handleSearch = (searchTerm) => {
-    getSponsorUserRequests(null, searchTerm);
-    getSponsorUsers(null, searchTerm);
+    getSponsorUsers(sponsor.id, searchTerm);
   };
 
   return (
     <div className="container">
-      <Breadcrumb
-        data={{
-          title: T.translate("sponsor_users.users"),
-          pathname: match.url
-        }}
-      />
-      <h3>{T.translate("sponsor_users.users")}</h3>
+      {requests.totalCount > 0 && (
+        <ChipNotify
+          label={`${requests.totalCount} ${T.translate(
+            "sponsor_users.access_request"
+          )}`}
+          sx={{ position: "absolute", top: "8px", right: "5px" }}
+          onClick={() => setOpenPopup("access_request")}
+        />
+      )}
+      <CustomAlert message={T.translate("sponsor_users.alert_info")} />
       <Grid2
         container
         spacing={2}
@@ -68,7 +73,8 @@ const SponsorUsersListPage = ({
       >
         <Grid2 size={2}>
           <Box component="span">
-            {requests.totalCount} {T.translate("sponsor_users.access_request")}
+            {users.totalCount}{" "}
+            {T.translate("sponsor_users.users").toLowerCase()}
           </Box>
         </Grid2>
         <Grid2
@@ -86,7 +92,7 @@ const SponsorUsersListPage = ({
             variant="contained"
             size="medium"
             onClick={() => setOpenPopup("import")}
-            startIcon={<AddIcon />}
+            startIcon={<SaveAltIcon />}
             sx={{ height: "36px" }}
           >
             {T.translate("sponsor_users.import_user")}
@@ -95,7 +101,7 @@ const SponsorUsersListPage = ({
             variant="contained"
             size="medium"
             onClick={() => setOpenPopup("new")}
-            startIcon={<SaveAltIcon />}
+            startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
             {T.translate("sponsor_users.add_user")}
@@ -103,18 +109,38 @@ const SponsorUsersListPage = ({
         </Grid2>
       </Grid2>
 
-      <RequestTable
-        requests={requests}
+      <UsersTable
+        sponsorId={sponsor.id}
+        users={users}
         term={term}
-        getRequests={getSponsorUserRequests}
-        onRequestDelete={deleteSponsorUserRequest}
+        getUsers={getSponsorUsers}
+        deleteSponsorUser={deleteSponsorUser}
       />
 
-      <Box component="div" sx={{ mb: 2 }}>
-        {users.totalCount} {T.translate("sponsor_users.users").toLowerCase()}
-      </Box>
+      {openPopup === "new" && (
+        <NewUserPopup
+          open={openPopup === "new"}
+          onClose={() => setOpenPopup(null)}
+          sponsorId={sponsor.id}
+        />
+      )}
 
-      <UsersTable users={users} term={term} getUsers={getSponsorUsers} />
+      {openPopup === "access_request" && (
+        <ProcessRequestPopup
+          open={openPopup === "access_request"}
+          onClose={() => setOpenPopup(null)}
+          requests={requests}
+          sponsorId={sponsor.id}
+        />
+      )}
+
+      {openPopup === "import" && (
+        <ImportUsersPopup
+          open={openPopup === "import"}
+          onClose={() => setOpenPopup(null)}
+          sponsorId={sponsor.id}
+        />
+      )}
     </div>
   );
 };
@@ -126,5 +152,5 @@ const mapStateToProps = ({ sponsorUsersListState }) => ({
 export default connect(mapStateToProps, {
   getSponsorUserRequests,
   getSponsorUsers,
-  deleteSponsorUserRequest
-})(SponsorUsersListPage);
+  deleteSponsorUser
+})(SponsorUsersListPerSponsorPage);

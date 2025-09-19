@@ -5,14 +5,19 @@ import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import MuiTable from "../../../../components/mui/table/mui-table";
 import ChipList from "../../../../components/mui/chip-list";
 
-const UsersTable = ({ users, term, getUsers }) => {
-
-  const handleUserDelete = (itemId) => {
-    console.log("DELETE", itemId);
+const UsersTable = ({
+  sponsorId = null,
+  users,
+  term,
+  getUsers,
+  deleteSponsorUser
+}) => {
+  const handleUserDelete = (userId) => {
+    deleteSponsorUser(sponsorId, userId);
   };
 
   const handleUserEdit = (itemId) => {
-    console.log("DELETE", itemId);
+    console.log("EDIT", itemId);
   };
 
   const handleSendEmail = (item) => {
@@ -21,12 +26,12 @@ const UsersTable = ({ users, term, getUsers }) => {
 
   const handleUsersPageChange = (page) => {
     const { perPage, order, orderDir } = users;
-    getUsers(term, page, perPage, order, orderDir);
+    getUsers(sponsorId, term, page, perPage, order, orderDir);
   };
 
   const handleUsersSort = (key, dir) => {
     const { currentPage, perPage } = users;
-    getUsers(term, currentPage, perPage, key, dir);
+    getUsers(sponsorId, term, currentPage, perPage, key, dir);
   };
 
   const usersColumns = [
@@ -85,6 +90,7 @@ const UsersTable = ({ users, term, getUsers }) => {
           perPage={users.perPage}
           totalRows={users.totalCount}
           currentPage={users.currentPage}
+          getName={(user) => user.email}
           onDelete={handleUserDelete}
           onEdit={handleUserEdit}
           onPageChange={handleUsersPageChange}

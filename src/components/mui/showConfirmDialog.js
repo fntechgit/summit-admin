@@ -5,11 +5,11 @@ import ConfirmDialog from "./confirm-dialog";
 const showConfirmDialog = ({
   title,
   text,
-  iconType = "warning",
+  iconType = "",
   confirmButtonText = "Confirm",
   cancelButtonText = "Cancel",
   confirmButtonColor = "primary",
-  cancelButtonColor = "default"
+  cancelButtonColor = "primary"
 }) =>
   new Promise((resolve) => {
     const container = document.createElement("div");

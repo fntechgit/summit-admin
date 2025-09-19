@@ -14,21 +14,22 @@
 import {
   authErrorHandler,
   createAction,
-  getRequest,
-  putRequest,
-  postRequest,
   deleteRequest,
-  startLoading,
-  stopLoading,
+  fetchErrorHandler,
   fetchResponseHandler,
-  fetchErrorHandler
+  getRequest,
+  postRequest,
+  putRequest,
+  startLoading,
+  stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  DUMMY_ACTION
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
@@ -40,6 +41,7 @@ export const RECEIVE_SPONSOR_USERS = "RECEIVE_SPONSOR_USERS";
 export const SPONSOR_USER_ADDED = "SPONSOR_USER_ADDED";
 export const SPONSOR_USER_REQUEST_ACCEPTED = "SPONSOR_USER_REQUEST_ACCEPTED";
 export const SPONSOR_USER_REQUEST_DELETED = "SPONSOR_USER_REQUEST_DELETED";
+export const SPONSOR_USER_DELETED = "SPONSOR_USER_DELETED";
 
 export const getUserGroups =
   (page = 1, perPage = DEFAULT_PER_PAGE) =>
@@ -66,6 +68,7 @@ export const getUserGroups =
 
 export const getSponsorUserRequests =
   (
+    sponsorId = null,
     term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
@@ -79,6 +82,10 @@ export const getSponsorUserRequests =
     const filter = [`summit_id==${currentSummit.id}`, "status==pending"];
 
     dispatch(startLoading());
+
+    if (sponsorId) {
+      filter.push(`sponsor_id==${sponsorId}`);
+    }
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
@@ -116,6 +123,7 @@ export const getSponsorUserRequests =
 
 export const getSponsorUsers =
   (
+    sponsorId = null,
     term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
@@ -129,6 +137,10 @@ export const getSponsorUsers =
     const filter = [`summit_id==${currentSummit.id}`];
 
     dispatch(startLoading());
+
+    if (sponsorId) {
+      filter.push(`sponsor_id==${sponsorId}`);
+    }
 
     if (term) {
       const escapedTerm = escapeFilterValue(term);
@@ -300,18 +312,114 @@ export const processSponsorUserRequest = (request) => async (dispatch) => {
     });
 };
 
-
-export const deleteSponsorUserRequest =
-  (requestId) => async (dispatch) => {
+export const approveSponsorUserRequest =
+  (sponsorId, requestIds) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    const promises = requestIds.map((reqId) =>
+      putRequest(
+        null,
+        createAction(SPONSOR_USER_REQUEST_ACCEPTED),
+        `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${reqId}/approve`,
+        { sponsor_id: sponsorId },
+        snackbarErrorHandler
+      )(params)(dispatch)
+    );
+
+    Promise.all(promises)
+      .then(() => {
+        dispatch(getSponsorUserRequests());
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.process_request.request_accepted")
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const deleteSponsorUserRequest = (requestId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_USER_REQUEST_DELETED)({ requestId }),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${requestId}/reject`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_users.process_request.request_deleted")
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const denySponsorUserRequest = (requestIds) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  const promises = requestIds.map((reqId) =>
+    deleteRequest(
+      null,
+      createAction(SPONSOR_USER_REQUEST_DELETED)({ reqId }),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${reqId}/reject`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+  );
+
+  Promise.all(promises)
+    .then(() => {
+      dispatch(getSponsorUserRequests());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_users.process_request.request_deleted")
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const deleteSponsorUser =
+  (sponsorId, userId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
     const params = { access_token: accessToken };
 
     dispatch(startLoading());
 
     return deleteRequest(
       null,
-      createAction(SPONSOR_USER_REQUEST_DELETED)({ requestId }),
-      `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${requestId}/reject`,
+      createAction(SPONSOR_USER_DELETED)({ userId }),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsorId}/sponsor-users/${userId}/permissions`,
       null,
       snackbarErrorHandler
     )(params)(dispatch)
@@ -319,10 +427,102 @@ export const deleteSponsorUserRequest =
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("sponsor_users.process_request.request_deleted")
+            html: T.translate("sponsor_users.user_delete_success")
           })
         );
       })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+/** ****************  SPONSOR USERS TAB  *************************************** */
+
+export const sendSponsorUserInvite = (email) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const { entity } = currentSponsorState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  const payload = {
+    user_email: email,
+    sponsor_id: entity.id,
+    summit_id: currentSummit.id
+  };
+
+  return postRequest(
+    null,
+    createAction(DUMMY_ACTION),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users`,
+    payload,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(stopLoading());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_users.new_user.success")
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const fetchSponsorUsersBySummit = async (summitId, page) => {
+  const accessToken = await getAccessTokenSafely();
+
+  return fetch(
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users?filter=summit_id=@${summitId}&access_token=${accessToken}&page=${page}&per_page=10&order=first_name&order_dir=asc`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => json)
+    .catch(fetchErrorHandler);
+};
+
+export const importSponsorUsers =
+  (sponsorId, summitId, userIds) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    const payload = {
+      summit_id: summitId,
+      sponsor_id: sponsorId,
+      user_ids: userIds
+    };
+
+    return postRequest(
+      null,
+      createAction(DUMMY_ACTION),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users/import`,
+      payload,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(stopLoading());
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.import_users.success")
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });
