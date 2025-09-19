@@ -56,6 +56,7 @@
     "yes_delete": "Yes, delete.",
     "yes_remove": "Yes, remove.",
     "yes_send": "Yes, send.",
+    "yes_add": "Yes, add.",
     "id": "Id",
     "label": "Label",
     "value": "Value",
@@ -523,8 +524,14 @@
     "head_count": "Head Count",
     "rsvp_link": "RSVP Link",
     "rsvp": "RSVP",
-    "rsvp_max_user_number": "RSVP Max",
-    "rsvp_max_user_wait_list_number": "RSVP Wait Max",
+    "rsvp_type": "RSVP Type",
+    "rsvp_type_none": "None",
+    "rsvp_type_public": "Public",
+    "rsvp_type_private": "Private",
+    "rsvp_max_user_number": "RSVP Capacity",
+    "rsvp_max_user_wait_list_number": "Waitlist Capacity",
+    "rsvp_max_user_number_info": "Maximum number of confirmed attendees before the event goes to waitlist.",
+    "rsvp_max_user_wait_list_number_info": "“Maximum number of people allowed on the waitlist.",
     "rsvp_template": "RSVP Template",
     "location": "Location",
     "event_type": "Activity Type",
@@ -610,6 +617,7 @@
       "select_event_type": "Select an Activity Type ...",
       "select_track": "Select an Activity Category ...",
       "select_level": "Select a Level ...",
+      "select_rsvp_type": "Select a RSVP Type ...",
       "select_rsvp_template": "Select a Template ...",
       "select_selection_plan": "Select a Selection Plan ...",
       "select_submitter": "Select Submitter ...",
@@ -828,6 +836,9 @@
     "email_test_recipient": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
     "invalid_recipient_email": "Please use a valid email",
     "please_confirm": "Please confirm.",
+    "invite_private_rsvp": "Add to Private RSVP Invitation List",
+    "bulk_rsvp_invitations_done": "RSVP Invitations Added.",
+    "bulk_event_rsvp_warning": "You are about to add RSVP Invitations for {event} to {qty} attendees.",
     "placeholders": {
       "test_recipient": "Optional Test Recipient",
       "search_attendees": "Search Attendees by Name, Email, Company, Ticket Type or Badge Type",
@@ -838,7 +849,8 @@
       "checkin_date_to": "Filter Check In Date to",
       "tags": "Filter by tag",
       "company": "Filter by company",
-      "notes": "Filter by note"
+      "notes": "Filter by note",
+      "event_rsvp": "-- SELECT PRIVATE RSVP ACTIVITY --"
     }
   },
   "edit_attendee": {
@@ -1130,6 +1142,7 @@
       "modified_from": "Filter Modified Date from",
       "modified_to": "Filter Modified Date to",
       "select_fields": "Select data to display",
+      "has_rsvp": "Has RSVP?",
       "submitters": "Filter by Submitter",
       "submitter_company": "Filter by Submitter Company",
       "streaming_url": "Filter by Stream URL",
@@ -1451,6 +1464,8 @@
     "floor": "Floor",
     "room_booking_created": "Room Booking created successfully",
     "room_booking_saved": "Room Booking saved successfully",
+    "quantity_of_slots": "Slots Qty.",
+    "suppres_email": "Suppres email",
     "placeholders": {
       "available_slots": "Select Time",
       "select_currency": "Select Currency",
@@ -2320,6 +2335,7 @@
     "addon_type": "Add-on Type",
     "addon_name": "Add-on Name",
     "save_changes": "Save Changes",
+    "badge_scan_settings": "Badge Scan Settings",
     "tab": {
       "general": "general",
       "users": "users",
@@ -2334,8 +2350,16 @@
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start typing to choose a Tier...",
       "select_material_type": "Select Material Type",
-      "select": "Select..."
+      "select": "Select...",
+      "badge_scan_settings": "Select Badge Scan Settings"
     }
+  },
+  "additional_inputs": {
+    "meta_field_title": "Field Title",
+    "meta_field_type": "Field Type",
+    "meta_field_required": "Required",
+    "delete_meta_field_warning": "Are you sure you want to delete meta field ",
+    "delete_value_warning": "Are you sure you want to delete meta field value "
   },
   "sponsor_forms": {
     "forms": "Forms",
@@ -2390,6 +2414,56 @@
       "created": "Form created successfully.",
       "updated": "Form {formName} updated successfully.",
       "error": "There was a problem creating the forms, please try again."
+    }
+  },
+  "sponsor_form_item_list": {
+    "form_items": "Form Items",
+    "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit botton. You can also change only a rate by clicking on it.",
+    "code": "Code",
+    "name": "Name",
+    "early_bird_rate": "Early bird rate",
+    "standard_rate": "Standard rate",
+    "onsite_rate": "On site rate",
+    "default_quantity": "Default quantity",
+    "hide_archived": "Hide archived items",
+    "add_item": "Add Item",
+    "add_item_from_inventory": "Add Item from Inventory",
+    "archive_button": "Archive",
+    "unarchive_button": "Unarchive",
+    "delete_form_template_item_warning": "Are you sure you want to delete form template item ",
+    "item_delete_success": "Item successfully deleted.",
+    "add_inventory_item": "Add Inventory Item",
+    "add_form_template_item": "Create new Item",
+    "placeholders": {
+      "search_form_template_items": "Search"
+    },
+    "edit_item": {
+      "new": "Create Item",
+      "edit": "Edit Item",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "early_bird_rate": "Early bird rate",
+      "standard_rate": "Standard rate",
+      "onsite_rate": "On site rate",
+      "quantity_limit_per_show": "Limit total amount per show (empty = disabled)",
+      "quantity_limit_per_sponsor": "Limit total amount per sponsor (empty = disabled)",
+      "default_quantity": "Default quantity",
+      "additional_fields": "Additional Input Fields",
+      "images": "Images",
+      "save": "save changes",
+      "created": "Item created successfully.",
+      "updated": "Item {name} updated successfully."
+    },
+    "add_from_inventory": {
+      "title": "Select Items",
+      "code": "Code",
+      "name": "Name",
+      "early_bird_rate": "Early bird rate",
+      "standard_rate": "Standad rate",
+      "onsite_rate": "On site rate",
+      "save": "Add selected items",
+      "items_added": "Items added successfully."
     }
   },
   "sponsorship_list": {
@@ -3505,5 +3579,74 @@
     "rows_per_page": "Rows per page",
     "sorted_desc": "sorted descending",
     "sorted_asc": "sorted ascending"
+  },
+  "event_rsvp_list": {
+    "name": "Name",
+    "no_rsvp": "No RSVP found.",
+    "no_rsvp_invitation": "No RSVP Invitation found.",
+    "rsvp_invitations": "RSVP Invitations",
+    "rsvp_invitations_qty": "Selected {qty} RSVP Invitations",
+    "rsvp_qty": "Selected {qty} RSVPs",
+    "rsvp": "RSVP",
+    "send_blast": "Send Blast",
+    "import": "Import",
+    "sent_date": "Sent Date",
+    "add": "Add",
+    "export": "Export",
+    "new_rsvp": "New RSVP",
+    "new_invitation": "New RSVP Invitation",
+    "attendees": "Attendees",
+    "attendee_full_name": "Attendee",
+    "created": "Created",
+    "seat_type": "Seat Type",
+    "seat_regular": "Regular",
+    "seat_wait": "WaitList",
+    "is_sent": "Is Sent?",
+    "status": "Status",
+    "confirmation_number": "Confirmation Number",
+    "action_source": "Action Source",
+    "action_date": "Action Date",
+    "rsvp_added": "RSVP added successfully.",
+    "rsvp_saved": "RSVP saved successfully.",
+    "re_send": "Resend Rsvp Confirmation",
+    "delete_rsvp": "Are you sure you want to delete RSVP for ",
+    "ingest": "Ingest",
+    "import_invitations": "Import RSVP Invitations Data",
+    "excerpt_recipient": "Excerpt Recipient",
+    "blast_modal_title": "You are about to send an EMAIL BLAST to invitations !",
+    "select_template": "Select a Email Template to perform the action.",
+    "select_invitation_warning": "Select at least one invitation to perform the action.",
+    "select_rsvp_warning": "Select at least one RSVP to perform the action.",
+    "invalid_recipient_email": "Please use a valid email",
+    "send_email_warning": "You are about to send the {template} email template to {qty} attendees.",
+    "email_test_recipient": "BLAST IS ON TEST MODE (All emails would be sent to {email})",
+    "send_emails": "Send",
+    "send_rsvp_invitations_done": "Emails sent successfully.",
+    "re_send_modal_title": "You are about to re send RSVP confirmations !",
+    "re_send_email_warning": "You are about to re send the RSVP email confirmation to {qty} attendees.",
+    "re_send_email_test_recipient": "RE SEND IS ON TEST MODE (All emails would be sent to {email})",
+    "re_send_button": "Re Send",
+    "re_send_rsvp_done": "Emails re sent successfully.",
+    "placeholders": {
+      "search_term": "Search...",
+      "attendee": "Select an Attendee",
+      "seat_type": "Select a Seat Type",
+      "excerpt_recipient": "Optional Excerpt Recipient",
+      "test_recipient": "Optional Test Recipient"
+    }
+  },
+  "edit_event_rsvp": {
+    "rsvp": "RSVP",
+    "attendee_full_name": "Attendee",
+    "attendee_email": "Attendee Email",
+    "confirmation_number": "Confirmation Number",
+    "action_source": "Action Source",
+    "seat_type": "Seat Type",
+    "status": "Status",
+    "event_rsvp_saved": "Event RSVP saved successfully.",
+    "placeholders": {
+      "seat_type": "Select a Seat Type",
+      "status": "Select a Status"
+    }
   }
 }

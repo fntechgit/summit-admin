@@ -15,9 +15,11 @@ import React from "react";
 import { Box } from "@mui/material";
 import SponsorHeader from "./sponsor-header";
 import Sponsorship from "./sponsorship";
+import BadgeScanSettings from "./badge-scan-settings";
 
 const SponsorGeneralForm = ({
   sponsor,
+  member,
   summitId,
   onSponsorshipPaginate,
   onSponsorshipAdd,
@@ -25,7 +27,9 @@ const SponsorGeneralForm = ({
   getSponsorshipAddons,
   onSponsorshipSelect,
   onSponsorshipAddonSave,
-  onSponsorshipAddonRemove
+  onSponsorshipAddonRemove,
+  getSponsorLeadReportSettingsMeta,
+  upsertSponsorLeadReportSettings
 }) => (
   <Box sx={{ mt: 2 }}>
     <SponsorHeader sponsor={sponsor} />
@@ -39,6 +43,12 @@ const SponsorGeneralForm = ({
       onSponsorshipSelect={onSponsorshipSelect}
       onSponsorshipAddonSave={onSponsorshipAddonSave}
       onSponsorshipAddonRemove={onSponsorshipAddonRemove}
+    />
+    <BadgeScanSettings
+      sponsor={sponsor}
+      member={member}
+      upsertSponsorLeadReportSettings={upsertSponsorLeadReportSettings}
+      getSponsorLeadReportSettingsMeta={getSponsorLeadReportSettingsMeta}
     />
   </Box>
 );

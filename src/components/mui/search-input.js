@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { TextField } from "@mui/material";
+import { TextField, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const SearchInput = ({ term, onSearch, placeholder = "Search" }) => {
   const [searchTerm, setSearchTerm] = useState(term);
@@ -11,6 +12,11 @@ const SearchInput = ({ term, onSearch, placeholder = "Search" }) => {
     }
   };
 
+  const handleClear = () => {
+    setSearchTerm("");
+    onSearch("");
+  };
+
   return (
     <TextField
       variant="outlined"
@@ -18,7 +24,15 @@ const SearchInput = ({ term, onSearch, placeholder = "Search" }) => {
       placeholder={placeholder}
       slotProps={{
         input: {
-          endAdornment: (
+          endAdornment: term ? (
+            <IconButton
+              size="small"
+              onClick={handleClear}
+              sx={{ position: "absolute", right: 0 }}
+            >
+              <ClearIcon sx={{ color: "#0000008F" }} />
+            </IconButton>
+          ) : (
             <SearchIcon
               sx={{ mr: 1, color: "#0000008F", position: "absolute", right: 0 }}
             />

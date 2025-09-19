@@ -6,6 +6,7 @@ import {
   DialogContent,
   Divider,
   Grid2,
+  InputLabel,
   Typography
 } from "@mui/material";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
@@ -13,11 +14,12 @@ import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import { addIssAfterDateFieldValidator } from "../../../../../utils/yup";
-import DropdownCheckbox from "../../../../../components/mui/components/dropdown-checkbox";
-import MuiFormikTextField from "../../../../../components/inputs/mui-formik-textfield";
-import MuiFormikDatepicker from "../../../../../components/inputs/mui-formik-datepicker";
-import AdditionalInputList from "./additional-input-list";
+import DropdownCheckbox from "../../../../../components/mui/dropdown-checkbox";
+import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikDatepicker from "../../../../../components/mui/formik-inputs/mui-formik-datepicker";
+import AdditionalInputList from "../../../components/additional-input-list";
 import useScrollToError from "../../../../../hooks/useScrollToError";
+import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
 
 const buildInitialValues = (data, summitTZ) => {
   const { opens_at, expires_at } = data;
@@ -125,15 +127,11 @@ const FormTemplateForm = ({
               />
             </Grid2>
             <Grid2 size={12}>
-              <MuiFormikTextField
-                name="instructions"
-                label={T.translate(
-                  "sponsor_forms.form_template_popup.instructions"
-                )}
-                fullWidth
-                multiline
-                rows={4}
-              />
+              <InputLabel htmlFor="instructions">
+                {T.translate("sponsor_forms.form_template_popup.instructions")}{" "}
+                *
+              </InputLabel>
+              <FormikTextEditor name="instructions" />
             </Grid2>
           </Grid2>
           <Typography variant="h5" sx={{ ml: "26px", mt: "20px" }}>

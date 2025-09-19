@@ -27,12 +27,12 @@ import {
   MAX_INVENTORY_IMAGES_UPLOAD_QTY,
   METAFIELD_TYPES
 } from "../../../utils/constants";
-import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
+import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
-import MuiFormikTextField from "../../../components/inputs/mui-formik-textfield";
+import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../hooks/useScrollToError";
-import MuiFormikSelect from "../../../components/inputs/mui-formik-select";
-import MuiFormikCheckbox from "../../../components/inputs/mui-formik-checkbox";
+import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
+import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 
 const SponsorItemDialog = ({

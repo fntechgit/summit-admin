@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
-import DragAndDropList from "../../../components/mui/components/dnd-list";
+import DragAndDropList from "../../../components/mui/dnd-list";
 
 const MetaFieldValues = ({
   field,

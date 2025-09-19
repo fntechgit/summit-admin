@@ -20,11 +20,11 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import { UploadInput } from "openstack-uicore-foundation/lib/components";
-import SponsorshipTypeInputMUI from "../../../components/inputs/sponsorship-input-mui";
-import MuiFormikTextField from "../../../components/inputs/mui-formik-textfield";
+import SponsorshipTypeInputMUI from "../../../components/mui/formik-inputs/sponsorship-input-mui";
+import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../hooks/useScrollToError";
-import MuiFormikSelect from "../../../components/inputs/mui-formik-select";
-import MuiFormikCheckbox from "../../../components/inputs/mui-formik-checkbox";
+import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
+import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
 
 const EditTierDialog = ({
   open,

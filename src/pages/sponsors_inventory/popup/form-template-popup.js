@@ -19,14 +19,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import { useFormik, FormikProvider, FieldArray } from "formik";
 import * as yup from "yup";
-import showConfirmDialog from "../../../components/mui/components/showConfirmDialog";
+import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
-import MuiFormikTextField from "../../../components/inputs/mui-formik-textfield";
+import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
-import MuiFormikSelect from "../../../components/inputs/mui-formik-select";
-import MuiFormikCheckbox from "../../../components/inputs/mui-formik-checkbox";
+import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
+import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
 import useScrollToError from "../../../hooks/useScrollToError";
-import { METAFIELD_TYPES, METAFIELD_TYPES_WITH_OPTIONS } from "../../../utils/constants";
+import {
+  METAFIELD_TYPES,
+  METAFIELD_TYPES_WITH_OPTIONS
+} from "../../../utils/constants";
 
 const FormTemplateDialog = ({
   open,
@@ -37,7 +40,6 @@ const FormTemplateDialog = ({
   onMetaFieldTypeValueDeleted,
   entity: initialEntity
 }) => {
-
   const formik = useFormik({
     initialValues: {
       ...initialEntity,
@@ -254,7 +256,9 @@ const FormTemplateDialog = ({
                                 />
                               </Grid2>
                             </Grid2>
-                            {METAFIELD_TYPES_WITH_OPTIONS.includes(field.type) && (
+                            {METAFIELD_TYPES_WITH_OPTIONS.includes(
+                              field.type
+                            ) && (
                               <>
                                 <Divider sx={{ mt: 2 }} />
                                 <MetaFieldValues

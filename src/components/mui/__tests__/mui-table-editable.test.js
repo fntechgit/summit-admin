@@ -7,7 +7,7 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 }));
 
 // Confirm dialog (exported mock we can control)
-jest.mock("../components/showConfirmDialog", () => {
+jest.mock("../showConfirmDialog", () => {
   const mockShowConfirmDialog = jest.fn();
   return { __esModule: true, default: mockShowConfirmDialog };
 });
@@ -24,7 +24,10 @@ jest.mock("@mui/material/IconButton", () => {
     )
   };
 });
-jest.mock("@mui/material/ButtonBase/TouchRipple", () => ({ __esModule: true, default: () => null }));
+jest.mock("@mui/material/ButtonBase/TouchRipple", () => ({
+  __esModule: true,
+  default: () => null
+}));
 
 // TablePagination shim
 jest.mock("@mui/material/TablePagination", () => {
@@ -107,7 +110,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import MuiTableEditable from "../editable-table/mui-table-editable";
-import showConfirmDialog from "../components/showConfirmDialog";
+import showConfirmDialog from "../showConfirmDialog";
 /* eslint-enable import/first */
 
 afterEach(() => {

@@ -13,7 +13,6 @@
 
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
 import {
   Box,
@@ -32,14 +31,13 @@ import {
   unarchiveSponsorForm,
   deleteSponsorForm
 } from "../../../actions/sponsor-forms-actions";
-import CustomAlert from "../../../components/mui/components/custom-alert";
-import SearchInput from "../../../components/mui/components/search-input";
+import CustomAlert from "../../../components/mui/custom-alert";
+import SearchInput from "../../../components/mui/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
 import MuiTable from "../../../components/mui/table/mui-table";
 
 const SponsorFormsListPage = ({
-  match,
   sponsorForms,
   currentPage,
   perPage,
@@ -82,7 +80,7 @@ const SponsorFormsListPage = ({
   };
 
   const handleManageItems = (form) => {
-    history.push(`/app/sponsors/forms/${form.id}`);
+    history.push(`forms/${form.id}/items`);
   };
 
   const handleArchiveItem = (item) =>
@@ -172,12 +170,6 @@ const SponsorFormsListPage = ({
 
   return (
     <div className="container">
-      <Breadcrumb
-        data={{
-          title: T.translate("sponsor_forms.forms"),
-          pathname: match.url
-        }}
-      />
       <h3>
         {T.translate("sponsor_forms.forms")} ({totalCount})
       </h3>

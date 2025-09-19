@@ -3,7 +3,7 @@ import _ from "lodash";
 import { useField } from "formik";
 import T from "i18n-react";
 import AdditionalInput from "./additional-input";
-import showConfirmDialog from "../../../../../components/mui/components/showConfirmDialog";
+import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 
 const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
   // eslint-disable-next-line no-unused-vars
@@ -18,9 +18,9 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
   const handleRemove = async (item, index) => {
     const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
-      text: `${T.translate(
-        "sponsor_forms.form_template_popup.delete_meta_field_warning"
-      )} ${item.name}`,
+      text: `${T.translate("additional_inputs.delete_meta_field_warning")} ${
+        item.name
+      }`,
       type: "warning",
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
@@ -54,9 +54,9 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue }) => {
   const handleRemoveValue = async (item, itemValue, valueIndex, itemIndex) => {
     const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
-      text: `${T.translate(
-        "sponsor_forms.form_template_popup.delete_value_warning"
-      )} ${itemValue.name}`,
+      text: `${T.translate("additional_inputs.delete_value_warning")} ${
+        itemValue.name
+      }`,
       type: "warning",
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")

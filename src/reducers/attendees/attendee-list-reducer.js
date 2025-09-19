@@ -24,7 +24,8 @@ import {
   SET_ATTENDEES_CURRENT_FLOW_EVENT,
   SET_SELECTED_ALL_ATTENDEES,
   SEND_ATTENDEES_EMAILS,
-  CHANGE_ATTENDEE_SEARCH_TERM
+  CHANGE_ATTENDEE_SEARCH_TERM,
+  SEND_ATTENDEES_EVENT_RSVP_INVITATIONS_BULK
 } from "../../actions/attendee-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -230,6 +231,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action = {}) => {
         selectedCount
       };
     }
+    case SEND_ATTENDEES_EVENT_RSVP_INVITATIONS_BULK:
     case SEND_ATTENDEES_EMAILS: {
       const newState = {
         ...state,
