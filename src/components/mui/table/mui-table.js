@@ -36,7 +36,9 @@ const MuiTable = ({
   options = { sortCol: "", sortDir: 1 },
   getName = (item) => item.name,
   onEdit,
-  onDelete
+  onDelete,
+  deleteDialogTitle = null,
+  deleteDialogBody = null
 }) => {
   const handleChangePage = (_, newPage) => {
     onPageChange(newPage + 1);
@@ -64,8 +66,8 @@ const MuiTable = ({
 
   const handleDelete = async (item) => {
     const isConfirmed = await showConfirmDialog({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("general.row_remove_warning")} ${getName(item)}`,
+      title: deleteDialogTitle || T.translate("general.are_you_sure"),
+      text: deleteDialogBody || `${T.translate("general.row_remove_warning")} ${getName(item)}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
