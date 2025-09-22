@@ -25,7 +25,9 @@ const MuiFormikCheckboxGroup = ({ name, label, options, ...props }) => {
       helpers.setValue([...values, parseInt(value, INT_BASE)]);
     } else {
       // Remove the value from the array if it's unchecked
-      helpers.setValue(values.filter((val) => val !== value));
+      helpers.setValue(
+        values.filter((val) => val !== parseInt(value, INT_BASE))
+      );
     }
   };
 

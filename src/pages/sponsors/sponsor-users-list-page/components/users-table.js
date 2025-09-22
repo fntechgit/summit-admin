@@ -6,12 +6,7 @@ import MuiTable from "../../../../components/mui/table/mui-table";
 import ChipList from "../../../../components/mui/chip-list";
 
 const UsersTable = ({ users, term, getUsers }) => {
-
   const handleUserDelete = (itemId) => {
-    console.log("DELETE", itemId);
-  };
-
-  const handleUserEdit = (itemId) => {
     console.log("DELETE", itemId);
   };
 
@@ -22,6 +17,11 @@ const UsersTable = ({ users, term, getUsers }) => {
   const handleUsersPageChange = (page) => {
     const { perPage, order, orderDir } = users;
     getUsers(term, page, perPage, order, orderDir);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    const { order, orderDir } = users;
+    getUsers(term, 1, newPerPage, order, orderDir);
   };
 
   const handleUsersSort = (key, dir) => {
@@ -86,8 +86,8 @@ const UsersTable = ({ users, term, getUsers }) => {
           totalRows={users.totalCount}
           currentPage={users.currentPage}
           onDelete={handleUserDelete}
-          onEdit={handleUserEdit}
           onPageChange={handleUsersPageChange}
+          onPerPageChange={handlePerPageChange}
           onSort={handleUsersSort}
         />
       </div>

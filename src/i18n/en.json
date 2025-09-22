@@ -2494,7 +2494,8 @@
       "tiers": "Tiers",
       "access": "Access",
       "save": "Process",
-      "request_accepted": "Request processed successfully."
+      "request_accepted": "Request processed successfully.",
+      "request_deleted": "Request deleted successfully."
     },
     "request_delete_title": "Dismiss Access Request",
     "request_delete_body": "You are going to permanently dismiss this user access request. Are you sure?"

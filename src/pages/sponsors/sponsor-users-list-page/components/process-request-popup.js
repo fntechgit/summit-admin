@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
-  processUserRequest,
   getUserGroups,
   fetchSponsorByCompany,
   processSponsorUserRequest
@@ -30,8 +29,8 @@ const ProcessRequestPopup = ({
   const [requestSponsor, setRequestSponsor] = useState(null);
   useEffect(() => {
     getUserGroups(1, MAX_PER_PAGE);
-    fetchSponsorByCompany(request.company_id).then((sponsor) =>
-      setRequestSponsor(sponsor)
+    fetchSponsorByCompany(request.company_id, currentSummit.id).then(
+      (sponsor) => setRequestSponsor(sponsor)
     );
   }, []);
 
@@ -77,7 +76,6 @@ const mapStateToProps = ({ sponsorUsersListState, currentSummitState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  processUserRequest,
   getUserGroups,
   processSponsorUserRequest
 })(ProcessRequestPopup);

@@ -13,6 +13,11 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
     getRequests(term, page, perPage, order, orderDir);
   };
 
+  const handlePerPageChange = (newPerPage) => {
+    const { order, orderDir } = requests;
+    getRequests(term, 1, newPerPage, order, orderDir);
+  };
+
   const handleRequestsSort = (key, dir) => {
     const { currentPage, perPage } = requests;
     getRequests(term, currentPage, perPage, key, dir);
@@ -25,7 +30,7 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
   const handleRequestDelete = (itemId) => {
     onRequestDelete(itemId).then(() => {
       getRequests();
-    })
+    });
   };
 
   const requestsColumns = [
@@ -80,6 +85,7 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
           currentPage={requests.currentPage}
           onDelete={handleRequestDelete}
           onPageChange={handleRequestsPageChange}
+          onPerPageChange={handlePerPageChange}
           onSort={handleRequestsSort}
           deleteDialogTitle={T.translate("sponsor_users.request_delete_title")}
           deleteDialogBody={T.translate("sponsor_users.request_delete_body")}

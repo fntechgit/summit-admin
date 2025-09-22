@@ -8,11 +8,18 @@ const ChipList = ({ chips, maxLength }) => {
   return (
     <Box>
       {shownItems.map((chip) => (
-        <Chip key={`chip-${chip}`} label={chip} size="small" sx={{mr: 1}} />
+        <Chip key={`chip-${chip}`} label={chip} size="small" sx={{ mr: 1 }} />
       ))}
       {rest.length > 0 && (
-        <Tooltip title={rest.map(r => <Typography variant="body1" component="div">{r}</Typography>)} arrow>
-          <Chip label="..." size="small" sx={{cursor: "pointer"}} />
+        <Tooltip
+          title={rest.map((r) => (
+            <Typography key={`cl-tt-${r}`} variant="body1" component="div">
+              {r}
+            </Typography>
+          ))}
+          arrow
+        >
+          <Chip label="..." size="small" sx={{ cursor: "pointer" }} />
         </Tooltip>
       )}
     </Box>

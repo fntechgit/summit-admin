@@ -194,6 +194,7 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
             <Grid2 size={6}>
               <MuiSponsorInput
                 name="sponsor"
+                disabled={formik.values.sponsor_type === "new"}
                 summitId={summit.id}
                 placeholder={T.translate(
                   "sponsor_users.process_request.select_sponsor"
@@ -203,6 +204,7 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
             <Grid2 size={6}>
               <CompanyInputMUI
                 name="company"
+                disabled={formik.values.sponsor_type === "existing"}
                 placeholder={T.translate(
                   "sponsor_users.process_request.select_company"
                 )}

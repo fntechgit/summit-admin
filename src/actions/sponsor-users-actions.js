@@ -142,7 +142,8 @@ export const getSponsorUsers =
       per_page: perPage,
       expand: "access_rights,access_rights.groups",
       relations: "access_rights,access_rights.groups",
-      fields: "id,first_name,last_name,email,active,access_rights.groups.name",
+      fields:
+        "id,first_name,last_name,email,active,access_rights.groups.name,company_name",
       access_token: accessToken
     };
 
@@ -247,7 +248,7 @@ export const fetchSponsorByCompany = async (companyId, summitId) => {
   const accessToken = await getAccessTokenSafely();
 
   return fetch(
-    `${window.API_BASE_URL}/api/v2/summits/${summitId}/sponsors?filter=company_id=@${companyId}&access_token=${accessToken}&fields=id,company.name,company.id&relations=company&expand=company`
+    `${window.API_BASE_URL}/api/v2/summits/${summitId}/sponsors?filter=company_id==${companyId}&access_token=${accessToken}&fields=id,company.name,company.id&relations=company&expand=company`
   )
     .then(fetchResponseHandler)
     .then((json) => ({
@@ -300,30 +301,28 @@ export const processSponsorUserRequest = (request) => async (dispatch) => {
     });
 };
 
+export const deleteSponsorUserRequest = (requestId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
 
-export const deleteSponsorUserRequest =
-  (requestId) => async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
+  dispatch(startLoading());
 
-    dispatch(startLoading());
-
-    return deleteRequest(
-      null,
-      createAction(SPONSOR_USER_REQUEST_DELETED)({ requestId }),
-      `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${requestId}/reject`,
-      null,
-      snackbarErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate("sponsor_users.process_request.request_deleted")
-          })
-        );
-      })
-      .finally(() => {
-        dispatch(stopLoading());
-      });
-  };
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_USER_REQUEST_DELETED)({ requestId }),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${requestId}/reject`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_users.process_request.request_deleted")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
