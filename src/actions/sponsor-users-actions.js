@@ -42,6 +42,7 @@ export const SPONSOR_USER_ADDED = "SPONSOR_USER_ADDED";
 export const SPONSOR_USER_REQUEST_ACCEPTED = "SPONSOR_USER_REQUEST_ACCEPTED";
 export const SPONSOR_USER_REQUEST_DELETED = "SPONSOR_USER_REQUEST_DELETED";
 export const SPONSOR_USER_DELETED = "SPONSOR_USER_DELETED";
+export const SPONSOR_USER_UPDATED = "SPONSOR_USER_UPDATED";
 
 export const getUserGroups =
   (page = 1, perPage = DEFAULT_PER_PAGE) =>
@@ -152,10 +153,11 @@ export const getSponsorUsers =
     const params = {
       page,
       per_page: perPage,
-      expand: "access_rights,access_rights.groups",
-      relations: "access_rights,access_rights.groups",
+      expand: "access_rights,access_rights.groups,access_rights.sponsor",
+      relations:
+        "access_rights,access_rights.groups,access_rights.sponsor.none",
       fields:
-        "id,first_name,last_name,email,active,access_rights.groups.name,company_name",
+        "id,first_name,last_name,email,is_active,access_rights.groups.name,access_rights.groups.id,access_rights.sponsor.id,access_rights.sponsor.company_name",
       access_token: accessToken
     };
 
@@ -528,3 +530,43 @@ export const importSponsorUsers =
         dispatch(stopLoading());
       });
   };
+
+export const updateSponsorUser = (user) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+
+  const accessToken = await getAccessTokenSafely();
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  const payload = {
+    is_active: user.active,
+    groups: user.access_rights
+  };
+
+  putRequest(
+    null,
+    createAction(SPONSOR_USER_UPDATED),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsor.id}/sponsor_users/${user.id}`,
+    payload,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(getSponsorUserRequests());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_users.edit_user.success")
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};

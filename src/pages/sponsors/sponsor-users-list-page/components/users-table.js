@@ -4,11 +4,13 @@ import { IconButton } from "@mui/material";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import MuiTable from "../../../../components/mui/table/mui-table";
 import ChipList from "../../../../components/mui/chip-list";
+import { titleCase } from "../../../../utils/methods";
 
 const UsersTable = ({
   sponsorId = null,
   users,
   term,
+  onEdit,
   getUsers,
   deleteSponsorUser
 }) => {
@@ -35,7 +37,7 @@ const UsersTable = ({
     getUsers(sponsorId, term, currentPage, perPage, key, dir);
   };
 
-  const usersColumns = [
+  let usersColumns = [
     {
       columnKey: "first_name",
       header: T.translate("sponsor_users.name"),
@@ -47,18 +49,19 @@ const UsersTable = ({
       sortable: true
     },
     {
-      columnKey: "company_name",
+      columnKey: "sponsors",
       header: T.translate("sponsor_users.sponsor"),
-      sortable: true
+      sortable: false,
+      render: (row) => <ChipList chips={row.sponsors_str} maxLength={2} />
     },
     {
-      columnKey: "access_rights",
+      columnKey: "access_rights_str",
       header: T.translate("sponsor_users.access"),
       sortable: false,
-      render: (row) => <ChipList chips={row.access_rights} maxLength={2} />
+      render: (row) => <ChipList chips={row.access_rights_str} maxLength={2} />
     },
     {
-      columnKey: "active",
+      columnKey: "is_active",
       header: T.translate("sponsor_users.active"),
       sortable: false
     },
@@ -76,22 +79,55 @@ const UsersTable = ({
     }
   ];
 
+  // remove sponsor col if is a sponsor list
+  if (sponsorId) {
+    usersColumns = usersColumns.filter((col) => col.columnKey !== "sponsors");
+  }
+
   const usersTableOptions = {
     sortCol: users.order,
     sortDir: users.orderDir
   };
+
+  const userData = users.items.map((u) => {
+    const sponsorAccessRights = u.access_rights.filter(
+      (ar) => !sponsorId || ar.sponsor_id === sponsorId
+    );
+
+    const accessRights = sponsorAccessRights.reduce((res, it) => {
+      it.groups?.forEach((group) => {
+        if (!res.find((g) => g.id === group.id))
+          res.push({ name: titleCase(group.name), id: group.id });
+      });
+      return res;
+    }, []);
+
+    const sponsors = sponsorAccessRights.reduce(
+      (res, it) => [...new Set([...res, it.sponsor.company_name])],
+      []
+    );
+
+    return {
+      ...u,
+      access_rights: sponsorAccessRights,
+      access_rights_str: accessRights.map((a) => a.name),
+      access_rights_id: accessRights.map((a) => a.id),
+      sponsors_str: sponsors
+    };
+  });
 
   return (
     users.items.length > 0 && (
       <div>
         <MuiTable
           columns={usersColumns}
-          data={users.items}
+          data={userData}
           options={usersTableOptions}
           perPage={users.perPage}
           totalRows={users.totalCount}
           currentPage={users.currentPage}
           getName={(user) => user.email}
+          onEdit={onEdit}
           onDelete={handleUserDelete}
           onPageChange={handleUsersPageChange}
           onPerPageChange={handlePerPageChange}

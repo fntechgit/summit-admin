@@ -14,15 +14,14 @@
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import {
+  RECEIVE_SPONSOR_USER_GROUPS,
   RECEIVE_SPONSOR_USER_REQUESTS,
   RECEIVE_SPONSOR_USERS,
   REQUEST_SPONSOR_USER_REQUESTS,
   REQUEST_SPONSOR_USERS,
-  RECEIVE_SPONSOR_USER_GROUPS,
   SPONSOR_USER_DELETED
 } from "../../actions/sponsor-users-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { titleCase } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   term: "",
@@ -122,23 +121,13 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const items = payload.response.data.map((u) => {
-        const accessRights = u.access_rights.reduce(
-          (res, it) => [
-            ...new Set([...res, ...it.groups.map((g) => titleCase(g.name))])
-          ],
-          []
-        );
-
-        return {
-          id: u.id,
-          first_name: `${u.first_name} ${u.last_name}`,
-          email: u.email,
-          company_name: u.company_name,
-          access_rights: accessRights,
-          active: u.active
-        };
-      });
+      const items = payload.response.data.map((u) => ({
+        id: u.id,
+        first_name: `${u.first_name} ${u.last_name}`,
+        email: u.email,
+        access_rights: u.access_rights,
+        is_active: u.is_active
+      }));
 
       return {
         ...state,

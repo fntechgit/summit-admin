@@ -29,6 +29,7 @@ import ChipNotify from "../../../components/mui/chip-notify";
 import NewUserPopup from "./components/new-user-popup";
 import ProcessRequestPopup from "./components/process-request-popup";
 import ImportUsersPopup from "./components/import-users-popup";
+import EditUserPopup from "./components/edit-user-popup";
 
 const SponsorUsersListPerSponsorPage = ({
   sponsor,
@@ -40,6 +41,7 @@ const SponsorUsersListPerSponsorPage = ({
   deleteSponsorUser
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
+  const [userEdit, setUserEdit] = useState(null);
 
   useEffect(() => {
     getSponsorUserRequests(sponsor.id);
@@ -48,6 +50,11 @@ const SponsorUsersListPerSponsorPage = ({
 
   const handleSearch = (searchTerm) => {
     getSponsorUsers(sponsor.id, searchTerm);
+  };
+
+  const handleUserEdit = (user) => {
+    console.log("EDIT: ", user);
+    setUserEdit(user);
   };
 
   return (
@@ -100,7 +107,7 @@ const SponsorUsersListPerSponsorPage = ({
           <Button
             variant="contained"
             size="medium"
-            onClick={() => setOpenPopup("new")}
+            onClick={() => setOpenPopup("new_user")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -113,16 +120,22 @@ const SponsorUsersListPerSponsorPage = ({
         sponsorId={sponsor.id}
         users={users}
         term={term}
+        onEdit={handleUserEdit}
         getUsers={getSponsorUsers}
         deleteSponsorUser={deleteSponsorUser}
       />
 
-      {openPopup === "new" && (
+      {openPopup === "new_user" && (
         <NewUserPopup
-          open={openPopup === "new"}
+          open={openPopup === "new_user"}
           onClose={() => setOpenPopup(null)}
           sponsorId={sponsor.id}
+          user={userEdit}
         />
+      )}
+
+      {userEdit && (
+        <EditUserPopup user={userEdit} onClose={() => setUserEdit(null)} />
       )}
 
       {openPopup === "access_request" && (

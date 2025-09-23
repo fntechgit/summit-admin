@@ -2515,6 +2515,16 @@
       "alert": "An activation email will be sent to the user to confirm.",
       "success": "Invite sent successfully."
     },
+    "edit_user": {
+      "title": "Edit User",
+      "name": "Name",
+      "email": "Email",
+      "sponsor": "Sponsor",
+      "active": "Active",
+      "access": "Access",
+      "save": "Save",
+      "success": "User saved successfully."
+    },
     "import_users": {
       "title": "Import Users",
       "select_users": "Select Users",
