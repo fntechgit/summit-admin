@@ -21,21 +21,34 @@ import {
   importSponsorUsers
 } from "../../../../actions/sponsor-users-actions";
 
-const ImportUsersPopup = ({ open, sponsorId, onClose, importSponsorUsers }) => {
+const ImportUsersPopup = ({
+  open,
+  currentSummit,
+  sponsorId,
+  companyId,
+  onClose,
+  importSponsorUsers
+}) => {
   const [selectedSummit, setSelectedSummit] = useState(null);
   const [userOptions, setUserOptions] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
 
   useEffect(() => {
-    fetchSponsorUsersBySummit(selectedSummit, 1).then((userData) => {
-      setUserOptions(userData);
-    });
+    if (selectedSummit) {
+      fetchSponsorUsersBySummit(selectedSummit, companyId, 1).then(
+        (userData) => {
+          setUserOptions(userData);
+          setSelectedUsers([]);
+        }
+      );
+    }
   }, [selectedSummit]);
 
   const handleLoadMoreUsers = () => {
     if (userOptions.current_page < userOptions.last_page) {
       fetchSponsorUsersBySummit(
         selectedSummit,
+        companyId,
         userOptions.current_page + 1
       ).then((userData) => {
         setUserOptions((value) => ({
@@ -51,14 +64,19 @@ const ImportUsersPopup = ({ open, sponsorId, onClose, importSponsorUsers }) => {
   };
 
   const handleImport = async () => {
-    importSponsorUsers(sponsorId, selectedSummit, selectedUsers).then(() => {
+    importSponsorUsers(
+      sponsorId,
+      companyId,
+      selectedSummit,
+      selectedUsers
+    ).then(() => {
       onClose();
     });
   };
 
   const handleSelectOnChange = (items, all = false) => {
     if (all) {
-      setSelectedUsers(userOptions.data.map((it) => it.id));
+      setSelectedUsers("all");
     } else {
       setSelectedUsers(items);
     }
@@ -79,8 +97,11 @@ const ImportUsersPopup = ({ open, sponsorId, onClose, importSponsorUsers }) => {
       </DialogTitle>
       <Divider />
       <DialogContent sx={{ p: 2 }}>
-        <SummitsDropdown onChange={setSelectedSummit} />
-        {selectedSummit && (
+        <SummitsDropdown
+          onChange={setSelectedSummit}
+          excludeSummitIds={[currentSummit.id]}
+        />
+        {selectedSummit && userOptions && (
           <>
             <Typography
               variant="body1"
@@ -111,7 +132,12 @@ const ImportUsersPopup = ({ open, sponsorId, onClose, importSponsorUsers }) => {
       </DialogContent>
       <Divider sx={{ margin: "10px 0px 20px 0px" }} />
       <DialogActions>
-        <Button fullWidth variant="contained" onClick={handleImport}>
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={handleImport}
+          disabled={selectedUsers.length === 0}
+        >
           {T.translate("sponsor_users.import_users.import_users")}
         </Button>
       </DialogActions>

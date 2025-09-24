@@ -17,6 +17,7 @@ const CheckBoxList = ({
 }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
+  const allItemIds = items.map((item) => item.id);
 
   const handleScroll = (event) => {
     const { scrollTop, scrollHeight, clientHeight } = event.target;
@@ -28,7 +29,9 @@ const CheckBoxList = ({
 
   const handleItemChange = (itemId) => {
     let selected = [];
-    if (selectedItems.includes(itemId)) {
+    if (isAllSelected) {
+      selected = allItemIds.filter((id) => id !== itemId);
+    } else if (selectedItems.includes(itemId)) {
       selected = selectedItems.filter((id) => id !== itemId);
     } else {
       selected = [...selectedItems, itemId];
@@ -44,7 +47,7 @@ const CheckBoxList = ({
     // if user selects all, we should remove all other selections
     setSelectedItems([]);
     setIsAllSelected(!isAllSelected);
-    onChange([], true);
+    onChange([], !isAllSelected);
   };
 
   return (

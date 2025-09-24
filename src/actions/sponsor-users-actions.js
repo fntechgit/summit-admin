@@ -482,11 +482,11 @@ export const sendSponsorUserInvite = (email) => async (dispatch, getState) => {
     });
 };
 
-export const fetchSponsorUsersBySummit = async (summitId, page) => {
+export const fetchSponsorUsersBySummit = async (summitId, companyId, page) => {
   const accessToken = await getAccessTokenSafely();
 
   return fetch(
-    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users?filter=summit_id=@${summitId}&access_token=${accessToken}&page=${page}&per_page=10&order=first_name&order_dir=asc`
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users?filter[]=summit_id==${summitId}&filter[]=company_id==${companyId}&access_token=${accessToken}&page=${page}&per_page=10&order=first_name&order_dir=asc`
   )
     .then(fetchResponseHandler)
     .then((json) => json)
@@ -494,8 +494,9 @@ export const fetchSponsorUsersBySummit = async (summitId, page) => {
 };
 
 export const importSponsorUsers =
-  (sponsorId, summitId, userIds) => async (dispatch) => {
+  (sponsorId, companyId, summitId, userIds) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
+    let payload;
 
     const params = {
       access_token: accessToken
@@ -503,11 +504,19 @@ export const importSponsorUsers =
 
     dispatch(startLoading());
 
-    const payload = {
-      summit_id: summitId,
-      sponsor_id: sponsorId,
-      user_ids: userIds
-    };
+    if (userIds === "all") {
+      payload = {
+        apply_to_all_users: true,
+        source_company_id: companyId,
+        source_summit_id: summitId
+      };
+    } else {
+      payload = {
+        summit_id: summitId,
+        sponsor_id: sponsorId,
+        user_ids: userIds
+      };
+    }
 
     return postRequest(
       null,

@@ -152,6 +152,7 @@ const SponsorUsersListPerSponsorPage = ({
           open={openPopup === "import"}
           onClose={() => setOpenPopup(null)}
           sponsorId={sponsor.id}
+          companyId={sponsor.company?.id}
         />
       )}
     </div>

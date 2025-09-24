@@ -10,6 +10,7 @@ const SummitsDropdown = ({
   label = "Search by show",
   onChange,
   summits,
+  excludeSummitIds = [],
   getAllSummits
 }) => {
   useEffect(() => {
@@ -17,6 +18,10 @@ const SummitsDropdown = ({
       getAllSummits(onlyActive);
     }
   }, []);
+
+  const summitOptions = summits.filter(
+    (s) => excludeSummitIds.indexOf(s.id) === -1
+  );
 
   return (
     <FormControl fullWidth>
@@ -27,7 +32,7 @@ const SummitsDropdown = ({
         variant="outlined"
         onChange={(ev) => onChange(ev.target.value)}
       >
-        {summits.map((s) => (
+        {summitOptions.map((s) => (
           <MenuItem key={`summits-ddl-${s.id}`} value={s.id}>
             {s.name}
           </MenuItem>
