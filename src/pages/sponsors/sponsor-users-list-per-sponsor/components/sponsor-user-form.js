@@ -19,6 +19,7 @@ import MuiFormikSwitch from "../../../../components/mui/formik-inputs/mui-formik
 const buildInitialValues = (data) => {
   const normalized = { ...data };
   normalized.sponsor = data.sponsors_str[0];
+  normalized.access_rights = data.access_rights_id;
   return normalized;
 };
 
@@ -31,8 +32,6 @@ const SponsorUserForm = ({ user, userGroups, onSubmit }) => {
 
   // SCROLL TO ERROR
   useScrollToError(formik);
-
-  console.log("USER: ", user);
 
   return (
     <FormikProvider value={formik}>

@@ -545,7 +545,7 @@ export const updateSponsorUser = (user) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const payload = {
-    is_active: user.active,
+    is_active: user.is_active,
     groups: user.access_rights
   };
 

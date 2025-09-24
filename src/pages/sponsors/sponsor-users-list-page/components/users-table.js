@@ -52,7 +52,7 @@ const UsersTable = ({
       columnKey: "sponsors",
       header: T.translate("sponsor_users.sponsor"),
       sortable: false,
-      render: (row) => <ChipList chips={row.sponsors_str} maxLength={2} />
+      render: (row) => row.sponsors_str.map((s) => <div>{s}</div>)
     },
     {
       columnKey: "access_rights_str",
