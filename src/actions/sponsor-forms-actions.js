@@ -45,6 +45,10 @@ export const GLOBAL_TEMPLATE_CLONED = "GLOBAL_TEMPLATE_CLONED";
 export const TEMPLATE_FORM_CREATED = "TEMPLATE_FORM_CREATED";
 export const RESET_TEMPLATE_FORM = "RESET_TEMPLATE_FORM";
 
+export const REQUEST_SPONSOR_MANAGED_FORMS = "REQUEST_SPONSOR_MANAGED_FORMS";
+export const RECEIVE_SPONSOR_MANAGED_FORMS = "RECEIVE_SPONSOR_MANAGED_FORMS";
+export const SPONSOR_MANAGED_FORMS_ADDED = "SPONSOR_MANAGED_FORMS_ADDED";
+
 // ITEMS
 export const REQUEST_SPONSOR_FORM_ITEMS = "REQUEST_SPONSOR_FORM_ITEMS";
 export const RECEIVE_SPONSOR_FORM_ITEMS = "RECEIVE_SPONSOR_FORM_ITEMS";
@@ -415,6 +419,89 @@ const normalizeFormTemplate = (entity, summitTZ) => {
 
   return normalizedEntity;
 };
+
+/* ************************************************************************ */
+/*         MANAGED FORMS       */
+/* ************************************************************************ */
+
+export const getSponsorManagedForms =
+  (
+    term = "",
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+    const filter = [];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
+    }
+
+    const params = {
+      page,
+      relations: "items",
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    if (hideArchived) filter.push("is_archived==0");
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.ordering = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_FORMS),
+      createAction(RECEIVE_SPONSOR_FORMS),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/managed-forms`,
+      authErrorHandler,
+      { order, orderDir, page, term }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const saveSponsorManagedForm =
+  (entity) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const accessToken = await getAccessTokenSafely();
+
+    // {
+    // "show_form_ids": [1, 2, 3],
+    // "all_add_ons": true,
+    // "add_ons": ["addon1", "addon2"]
+    // }
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_MANAGED_FORMS_ADDED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms`,
+      entity,
+      snackbarErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 /* ************************************************************************ */
 /*         ITEMS       */

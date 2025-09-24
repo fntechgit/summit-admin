@@ -2267,6 +2267,24 @@ export const querySummitAddons = _.debounce(
   DEBOUNCE_WAIT
 );
 
+export const querySponsorAddons = _.debounce(
+  async (input, summitId, sponsorId, sponsorshipId, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    fetch(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/add-ons?access_token=${accessToken}`
+    )
+      .then(fetchResponseHandler)
+      .then((data) => {
+        callback(data);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);
+
 /** ****************  SPONSOR PROMOCODES  *************************************** */
 
 export const selectPromocode = (promocodeId) => (dispatch) => {
