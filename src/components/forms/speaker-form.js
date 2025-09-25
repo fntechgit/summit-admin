@@ -29,7 +29,6 @@ import {
   shallowEqual,
   stripTags
 } from "../../utils/methods";
-import { mustReplaceSpeakerFieldsWithMemberInfo } from "../../models/app-config";
 import CopyClipboard from "../buttons/copy-clipboard";
 
 class SpeakerForm extends React.Component {
@@ -82,7 +81,7 @@ class SpeakerForm extends React.Component {
 
     if (ev.target.type === "memberinput") {
       entity.email = "";
-      if (value && mustReplaceSpeakerFieldsWithMemberInfo()) {
+      if (value && entity.id === 0) {
         entity.affiliations = [...value.affiliations];
         entity.first_name = !isEmptyString(value.first_name)
           ? value.first_name
