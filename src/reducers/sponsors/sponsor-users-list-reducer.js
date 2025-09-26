@@ -55,7 +55,11 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case RECEIVE_SPONSOR_USER_GROUPS: {
-      return { ...state, userGroups: payload.response.data };
+      // filter out sponsors-services
+      const userGroups = payload.response.data.filter(
+        (ug) => ug.slug !== "sponsors-services"
+      );
+      return { ...state, userGroups };
     }
     case REQUEST_SPONSOR_USER_REQUESTS: {
       const { order, orderDir, page, term, perPage } = payload;

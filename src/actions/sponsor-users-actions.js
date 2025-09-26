@@ -563,12 +563,12 @@ export const updateSponsorUser = (user) => async (dispatch, getState) => {
   putRequest(
     null,
     createAction(SPONSOR_USER_UPDATED),
-    `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsor.id}/sponsor_users/${user.id}`,
+    `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsor.id}/sponsor-users/${user.id}`,
     payload,
     snackbarErrorHandler
   )(params)(dispatch)
     .then(() => {
-      dispatch(getSponsorUserRequests());
+      dispatch(getSponsorUsers(sponsor.id));
       dispatch(
         snackbarSuccessHandler({
           title: T.translate("general.success"),

@@ -34,7 +34,7 @@ const EditUserPopup = ({
   };
 
   const handleSave = (values) => {
-    updateSponsorUser(values);
+    updateSponsorUser(values).then(() => handleClose());
   };
 
   return (
