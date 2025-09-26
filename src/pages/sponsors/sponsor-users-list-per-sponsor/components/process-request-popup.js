@@ -24,6 +24,7 @@ import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
 const ProcessRequestPopup = ({
   open,
   sponsorId,
+  companyId,
   requests,
   onClose,
   approveSponsorUserRequest,
@@ -44,7 +45,9 @@ const ProcessRequestPopup = ({
     });
 
     if (isConfirmed) {
-      approveSponsorUserRequest(sponsorId, selected);
+      approveSponsorUserRequest(selected, sponsorId, companyId).then(() => {
+        handleClose();
+      });
     }
   };
 
@@ -59,13 +62,15 @@ const ProcessRequestPopup = ({
     });
 
     if (isConfirmed) {
-      denySponsorUserRequest(selected);
+      denySponsorUserRequest(selected, companyId).then(() => {
+        handleClose();
+      });
     }
   };
 
   const handleSelectOnChange = (items, all = false) => {
     if (all) {
-      setSelected(requests.items);
+      setSelected(requests.items.map((it) => it.id));
     } else {
       setSelected(items);
     }

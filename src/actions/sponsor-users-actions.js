@@ -69,7 +69,7 @@ export const getUserGroups =
 
 export const getSponsorUserRequests =
   (
-    sponsorId = null,
+    companyId = null,
     term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
@@ -84,8 +84,8 @@ export const getSponsorUserRequests =
 
     dispatch(startLoading());
 
-    if (sponsorId) {
-      filter.push(`sponsor_id==${sponsorId}`);
+    if (companyId) {
+      filter.push(`company_id==${companyId}`);
     }
 
     if (term) {
@@ -316,7 +316,7 @@ export const processSponsorUserRequest = (request) => async (dispatch) => {
 };
 
 export const approveSponsorUserRequest =
-  (sponsorId, requestIds) => async (dispatch) => {
+  (requestIds, sponsorId, companyId) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     const params = {
@@ -335,13 +335,47 @@ export const approveSponsorUserRequest =
       )(params)(dispatch)
     );
 
-    Promise.all(promises)
+    return Promise.all(promises)
       .then(() => {
-        dispatch(getSponsorUserRequests());
+        dispatch(getSponsorUserRequests(companyId));
+        dispatch(getSponsorUsers(sponsorId));
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
             html: T.translate("sponsor_users.process_request.request_accepted")
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const denySponsorUserRequest =
+  (requestIds, companyId) => async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    const promises = requestIds.map((reqId) =>
+      deleteRequest(
+        null,
+        createAction(SPONSOR_USER_REQUEST_DELETED)({ reqId }),
+        `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${reqId}/reject`,
+        null,
+        snackbarErrorHandler
+      )(params)(dispatch)
+    );
+
+    return Promise.all(promises)
+      .then(() => {
+        dispatch(getSponsorUserRequests(companyId));
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.process_request.request_deleted")
           })
         );
       })
@@ -365,38 +399,6 @@ export const deleteSponsorUserRequest = (requestId) => async (dispatch) => {
     snackbarErrorHandler
   )(params)(dispatch)
     .then(() => {
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("sponsor_users.process_request.request_deleted")
-        })
-      );
-    })
-    .catch(console.log) // need to catch promise reject
-    .finally(() => {
-      dispatch(stopLoading());
-    });
-};
-
-export const denySponsorUserRequest = (requestIds) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
-
-  dispatch(startLoading());
-
-  const promises = requestIds.map((reqId) =>
-    deleteRequest(
-      null,
-      createAction(SPONSOR_USER_REQUEST_DELETED)({ reqId }),
-      `${window.SPONSOR_USERS_API_URL}/api/v1/access-requests/${reqId}/reject`,
-      null,
-      snackbarErrorHandler
-    )(params)(dispatch)
-  );
-
-  Promise.all(promises)
-    .then(() => {
-      dispatch(getSponsorUserRequests());
       dispatch(
         snackbarSuccessHandler({
           title: T.translate("general.success"),

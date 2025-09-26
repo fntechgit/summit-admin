@@ -44,7 +44,7 @@ const SponsorUsersListPerSponsorPage = ({
   const [userEdit, setUserEdit] = useState(null);
 
   useEffect(() => {
-    getSponsorUserRequests(sponsor.id);
+    getSponsorUserRequests(sponsor.company.id);
     getSponsorUsers(sponsor.id);
   }, []);
 
@@ -144,6 +144,7 @@ const SponsorUsersListPerSponsorPage = ({
           onClose={() => setOpenPopup(null)}
           requests={requests}
           sponsorId={sponsor.id}
+          companyId={sponsor.company.id}
         />
       )}
 
