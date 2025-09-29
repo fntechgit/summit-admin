@@ -49,8 +49,8 @@ import OrAndFilter from "../../components/filters/or-and-filter";
 import {
   ALL_FILTER,
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_EXPORT_PAGE_SIZE,
   DEFAULT_PER_PAGE,
+  EXPORT_PAGE_SIZE_100,
   LETTERS_IN_ALPHABET,
   UPPERCASE_A_IN_ASCII
 } from "../../utils/constants";
@@ -302,7 +302,7 @@ class TicketListPage extends React.Component {
 
     exportTicketsCSV(
       term,
-      DEFAULT_EXPORT_PAGE_SIZE,
+      EXPORT_PAGE_SIZE_100,
       order,
       orderDir,
       ticketFilters,
