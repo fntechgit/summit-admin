@@ -15,7 +15,9 @@ const UsersTable = ({
   deleteSponsorUser
 }) => {
   const handleUserDelete = (userId) => {
-    deleteSponsorUser(sponsorId, userId);
+    deleteSponsorUser(sponsorId, userId).then(() => {
+      getUsers(sponsorId);
+    });
   };
 
   const handleSendEmail = (item) => {

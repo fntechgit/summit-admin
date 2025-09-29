@@ -19,7 +19,6 @@ import {
   RECEIVE_SPONSOR_USERS,
   REQUEST_SPONSOR_USER_REQUESTS,
   REQUEST_SPONSOR_USERS,
-  SPONSOR_USER_DELETED
 } from "../../actions/sponsor-users-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
@@ -143,12 +142,6 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
           lastPage
         }
       };
-    }
-    case SPONSOR_USER_DELETED: {
-      const { userId } = payload;
-      const users = state.users.filter((u) => u.id !== userId);
-
-      return { ...state, users };
     }
     default:
       return state;

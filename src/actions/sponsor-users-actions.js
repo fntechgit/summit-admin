@@ -418,13 +418,20 @@ export const deleteSponsorUser =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const params = { access_token: accessToken };
+    let endpoint = `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}`
+
+    if (sponsorId) {
+      endpoint = `${endpoint}/sponsors/${sponsorId}`;
+    }
+
+    endpoint = `${endpoint}/sponsor-users/${userId}/permissions`;
 
     dispatch(startLoading());
 
     return deleteRequest(
       null,
-      createAction(SPONSOR_USER_DELETED)({ userId }),
-      `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsorId}/sponsor-users/${userId}/permissions`,
+      createAction(SPONSOR_USER_DELETED),
+      endpoint,
       null,
       snackbarErrorHandler
     )(params)(dispatch)

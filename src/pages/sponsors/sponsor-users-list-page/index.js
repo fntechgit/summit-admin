@@ -19,9 +19,10 @@ import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import {
+  deleteSponsorUser,
+  deleteSponsorUserRequest,
   getSponsorUserRequests,
-  getSponsorUsers,
-  deleteSponsorUserRequest
+  getSponsorUsers
 } from "../../../actions/sponsor-users-actions";
 import SearchInput from "../../../components/mui/search-input";
 import RequestTable from "./components/request-table";
@@ -34,7 +35,8 @@ const SponsorUsersListPage = ({
   term,
   getSponsorUserRequests,
   getSponsorUsers,
-                                deleteSponsorUserRequest
+  deleteSponsorUserRequest,
+  deleteSponsorUser
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -114,7 +116,12 @@ const SponsorUsersListPage = ({
         {users.totalCount} {T.translate("sponsor_users.users").toLowerCase()}
       </Box>
 
-      <UsersTable users={users} term={term} getUsers={getSponsorUsers} />
+      <UsersTable
+        users={users}
+        term={term}
+        getUsers={getSponsorUsers}
+        deleteSponsorUser={deleteSponsorUser}
+      />
     </div>
   );
 };
@@ -126,5 +133,6 @@ const mapStateToProps = ({ sponsorUsersListState }) => ({
 export default connect(mapStateToProps, {
   getSponsorUserRequests,
   getSponsorUsers,
-  deleteSponsorUserRequest
+  deleteSponsorUserRequest,
+  deleteSponsorUser
 })(SponsorUsersListPage);

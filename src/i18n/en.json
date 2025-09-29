@@ -2476,6 +2476,7 @@
     "access": "Access",
     "active": "Active",
     "alert_info": "To add an existing User to this sponsor click the Import Existing User button. To invite a new user, send an invitation by click the Invite User button or see the Users page on the left side navigation menu.",
+    "user_delete_success": "User removed successfully.",
     "process_request": {
       "title": "Process Access Request",
       "request_details": "Request details",
@@ -2498,7 +2499,6 @@
       "save": "Process",
       "request_accepted": "Request processed successfully.",
       "request_deleted": "Request deleted successfully.",
-      "user_delete_success": "User removed successfully.",
       "dismiss_users": "Dismiss Users",
       "admit_users": "Admit Users",
       "select_all_users": "Select All Users",
