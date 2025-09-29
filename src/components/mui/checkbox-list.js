@@ -17,18 +17,21 @@ const CheckBoxList = ({
 }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
+  const allItemIds = items.map((item) => item.id);
 
   const handleScroll = (event) => {
     const { scrollTop, scrollHeight, clientHeight } = event.target;
     // eslint-disable-next-line no-magic-numbers
-    if (scrollTop + clientHeight >= scrollHeight - 20) {
+    if (scrollTop + clientHeight >= scrollHeight - 20 && loadMoreData) {
       loadMoreData();
     }
   };
 
   const handleItemChange = (itemId) => {
     let selected = [];
-    if (selectedItems.includes(itemId)) {
+    if (isAllSelected) {
+      selected = allItemIds.filter((id) => id !== itemId);
+    } else if (selectedItems.includes(itemId)) {
       selected = selectedItems.filter((id) => id !== itemId);
     } else {
       selected = [...selectedItems, itemId];
@@ -44,7 +47,7 @@ const CheckBoxList = ({
     // if user selects all, we should remove all other selections
     setSelectedItems([]);
     setIsAllSelected(!isAllSelected);
-    onChange([], true);
+    onChange([], !isAllSelected);
   };
 
   return (
@@ -68,13 +71,13 @@ const CheckBoxList = ({
             }
             label={allItemsLabel}
           />
-          <Divider />
+          <Divider sx={{ mb: 2 }} />
           {items.map((item) => (
             <FormControlLabel
               key={item.id}
               control={
                 <Checkbox
-                  checked={selectedItems.includes(item.id)}
+                  checked={selectedItems.includes(item.id) || isAllSelected}
                   onChange={() => handleItemChange(item.id)}
                 />
               }

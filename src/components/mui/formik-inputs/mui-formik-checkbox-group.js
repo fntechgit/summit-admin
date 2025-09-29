@@ -38,7 +38,12 @@ const MuiFormikCheckboxGroup = ({ name, label, options, ...props }) => {
       error={meta.touched && Boolean(meta.error)}
     >
       {label && <FormLabel id="checkbox-group-label">{label}</FormLabel>}
-      <FormGroup aria-labelledby="checkbox-group-label" name={name} {...props}>
+      <FormGroup
+        aria-labelledby="checkbox-group-label"
+        row
+        name={name}
+        {...props}
+      >
         {options.map((op) => (
           <FormControlLabel
             key={`chk-box-${op.value}`}

@@ -87,8 +87,12 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
           onPageChange={handleRequestsPageChange}
           onPerPageChange={handlePerPageChange}
           onSort={handleRequestsSort}
-          deleteDialogTitle={T.translate("sponsor_users.request_delete_title")}
-          deleteDialogBody={T.translate("sponsor_users.request_delete_body")}
+          deleteDialogTitle={T.translate(
+            "sponsor_users.process_request.delete_confirmation_title"
+          )}
+          deleteDialogBody={T.translate(
+            "sponsor_users.process_request.delete_confirmation_body"
+          )}
         />
 
         {processRequest && (
