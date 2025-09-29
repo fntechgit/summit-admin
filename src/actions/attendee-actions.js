@@ -26,7 +26,8 @@ import {
   escapeFilterValue,
   fetchResponseHandler,
   fetchErrorHandler,
-  getCSV
+  getRawCSV,
+  downloadFileByContent
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import history from "../history";
@@ -34,12 +35,14 @@ import {
   checkOrFilter,
   getAccessTokenSafely,
   isNumericString,
+  joinCVSChunks,
   parseDateRangeFilter,
   range
 } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,
   DEFAULT_CURRENT_PAGE,
+  DEFAULT_EXPORT_PAGE_SIZE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
   FIVE_PER_PAGE
@@ -268,35 +271,55 @@ export const getAttendees =
 export const exportAttendees =
   (term = null, order = "id", orderDir = 1, filters = {}) =>
   async (dispatch, getState) => {
-    const { currentSummitState } = getState();
+    const { currentSummitState, currentAttendeeListState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
+    const { totalRealAttendees } = currentAttendeeListState;
     const filename = `${currentSummit.name}-Attendees.csv`;
+    const csvMIME = "text/csv;charset=utf-8";
 
-    const params = {
-      expand: "",
-      access_token: accessToken
-    };
+    dispatch(startLoading());
+
+    const totalPages = Math.ceil(totalRealAttendees / DEFAULT_EXPORT_PAGE_SIZE);
+
+    const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/csv`;
+
+    // create the params for the promises all ( only diff is the page nbr)
 
     const filter = parseFilters(filters, term);
 
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
+    const params = Array.from({ length: totalPages }, (_, i) => {
+      const res = {
+        page: i + DEFAULT_CURRENT_PAGE,
+        access_token: accessToken,
+        per_page: DEFAULT_EXPORT_PAGE_SIZE
+      };
 
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "+" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
+      if (filter.length > 0) {
+        res["filter[]"] = filter;
+      }
 
-    dispatch(
-      getCSV(
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/attendees/csv`,
-        params,
-        filename
-      )
-    );
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "+" : "-";
+        res.order = `${orderDirSign}${order}`;
+      }
+
+      return res;
+    });
+
+    // export CSV file by chunks ...
+    Promise.all(params.map((p) => getRawCSV(endpoint, p)))
+      .then((files) => {
+        if (files.length > 0) {
+          const cvs = joinCVSChunks(files);
+          // then simulate the file download
+          downloadFileByContent(filename, cvs, csvMIME);
+        }
+        dispatch(stopLoading());
+      })
+      .catch(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const getAttendee = (attendeeId) => async (dispatch, getState) => {
