@@ -42,8 +42,8 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_EXPORT_PAGE_SIZE,
-  ERROR_CODE_412
+  ERROR_CODE_412,
+  EXPORT_PAGE_SIZE_100
 } from "../utils/constants";
 
 export const REQUEST_TICKETS = "REQUEST_TICKETS";
@@ -624,7 +624,7 @@ export const importTicketsCSV = (file) => async (dispatch, getState) => {
 export const exportTicketsCSV =
   (
     term = "",
-    pageSize = DEFAULT_EXPORT_PAGE_SIZE,
+    pageSize = EXPORT_PAGE_SIZE_100,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
     filters = {}
