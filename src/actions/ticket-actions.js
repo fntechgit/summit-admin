@@ -12,6 +12,7 @@
  */
 
 import T from "i18n-react/dist/i18n-react";
+import pLimit from "p-limit";
 import {
   authErrorHandler,
   createAction,
@@ -43,7 +44,8 @@ import {
   DEFAULT_PER_PAGE,
   DEFAULT_ORDER_DIR,
   ERROR_CODE_412,
-  EXPORT_PAGE_SIZE_100
+  EXPORT_PAGE_SIZE_100,
+  TEN
 } from "../utils/constants";
 
 export const REQUEST_TICKETS = "REQUEST_TICKETS";
@@ -630,6 +632,8 @@ export const exportTicketsCSV =
     filters = {}
   ) =>
   async (dispatch, getState) => {
+    const limit = pLimit(TEN);
+
     dispatch(startLoading());
     const csvMIME = "text/csv;charset=utf-8";
     const accessToken = await getAccessTokenSafely();
@@ -667,7 +671,7 @@ export const exportTicketsCSV =
     });
 
     // export CSV file by chunks ...
-    Promise.all(params.map((p) => getRawCSV(endpoint, p)))
+    Promise.all(params.map((p) => limit(() => getRawCSV(endpoint, p))))
       .then((files) => {
         if (files.length > 0) {
           const cvs = joinCVSChunks(files);
