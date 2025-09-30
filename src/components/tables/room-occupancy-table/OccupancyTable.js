@@ -106,7 +106,21 @@ const OccupancyTable = ({
               );
             })}
             {options.actions && (
-              <OccupancyTableHeading key="actions_heading">
+              <OccupancyTableHeading
+                className="action-header"
+                onSort={onSort}
+                sortDir={getSortDir(
+                  "occupancy",
+                  columns.length + 1,
+                  sortCol,
+                  sortDir
+                )}
+                sortFunc={sortFunc}
+                sortable
+                columnIndex={columns.length + 1}
+                columnKey="occupancy"
+                key="actions_heading"
+              >
                 &nbsp;
               </OccupancyTableHeading>
             )}

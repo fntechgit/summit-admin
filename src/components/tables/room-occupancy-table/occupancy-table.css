@@ -119,6 +119,10 @@ table.occupancyTable > tbody > tr.child ul li:last-child {
   border-bottom: none;
 }
 
+table.occupancyTable > thead > tr > th.action-header {
+  text-align: right;
+}
+
 table.occupancyTable > tbody > tr > td.actions {
   width: 202px;
 }
