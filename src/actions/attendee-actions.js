@@ -12,6 +12,7 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
+import pLimit from "p-limit";
 import {
   getRequest,
   putRequest,
@@ -45,7 +46,8 @@ import {
   DEFAULT_EXPORT_PAGE_SIZE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
-  FIVE_PER_PAGE
+  FIVE_PER_PAGE,
+  TEN
 } from "../utils/constants";
 
 export const REQUEST_ATTENDEES = "REQUEST_ATTENDEES";
@@ -278,6 +280,8 @@ export const exportAttendees =
     const filename = `${currentSummit.name}-Attendees.csv`;
     const csvMIME = "text/csv;charset=utf-8";
 
+    const limit = pLimit(TEN);
+
     dispatch(startLoading());
 
     const totalPages = Math.ceil(totalRealAttendees / DEFAULT_EXPORT_PAGE_SIZE);
@@ -308,7 +312,7 @@ export const exportAttendees =
     });
 
     // export CSV file by chunks ...
-    Promise.all(params.map((p) => getRawCSV(endpoint, p)))
+    Promise.all(params.map((p) => limit(() => getRawCSV(endpoint, p))))
       .then((files) => {
         if (files.length > 0) {
           const cvs = joinCVSChunks(files);
