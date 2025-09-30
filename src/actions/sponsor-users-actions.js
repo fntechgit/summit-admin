@@ -182,6 +182,48 @@ export const getSponsorUsers =
     });
   };
 
+export const updateShowSponsorUser = (user) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const accessToken = await getAccessTokenSafely();
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  const payload = {
+    is_active: user.is_active,
+    access_rights: user.access_rights.map((ar) => ({
+      summit_id: currentSummit.id,
+      sponsor_id: ar.sponsor.id,
+      groups: ar.groups
+    }))
+  };
+
+  putRequest(
+    null,
+    createAction(SPONSOR_USER_UPDATED),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users/${user.id}`,
+    payload,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(getSponsorUsers());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_users.edit_user.success")
+        })
+      );
+    })
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
 export const addSponsorUser = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -418,7 +460,7 @@ export const deleteSponsorUser =
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const params = { access_token: accessToken };
-    let endpoint = `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}`
+    let endpoint = `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}`;
 
     if (sponsorId) {
       endpoint = `${endpoint}/sponsors/${sponsorId}`;

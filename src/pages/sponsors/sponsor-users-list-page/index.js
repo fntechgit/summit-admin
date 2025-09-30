@@ -27,6 +27,7 @@ import {
 import SearchInput from "../../../components/mui/search-input";
 import RequestTable from "./components/request-table";
 import UsersTable from "./components/users-table";
+import EditUserPopup from "./components/edit-user-popup";
 
 const SponsorUsersListPage = ({
   match,
@@ -39,6 +40,7 @@ const SponsorUsersListPage = ({
   deleteSponsorUser
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
+  const [userEdit, setUserEdit] = useState(null);
 
   useEffect(() => {
     getSponsorUserRequests();
@@ -48,6 +50,10 @@ const SponsorUsersListPage = ({
   const handleSearch = (searchTerm) => {
     getSponsorUserRequests(null, searchTerm);
     getSponsorUsers(null, searchTerm);
+  };
+
+  const handleUserEdit = (user) => {
+    setUserEdit(user);
   };
 
   return (
@@ -121,7 +127,16 @@ const SponsorUsersListPage = ({
         term={term}
         getUsers={getSponsorUsers}
         deleteSponsorUser={deleteSponsorUser}
+        onEdit={handleUserEdit}
       />
+
+      {openPopup === "new" && <div />}
+
+      {openPopup === "import" && <div />}
+
+      {userEdit && (
+        <EditUserPopup user={userEdit} onClose={() => setUserEdit(null)} />
+      )}
     </div>
   );
 };

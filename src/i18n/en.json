@@ -2476,6 +2476,7 @@
     "access": "Access",
     "active": "Active",
     "alert_info": "To add an existing User to this sponsor click the Import Existing User button. To invite a new user, send an invitation by click the Invite User button or see the Users page on the left side navigation menu.",
+    "delete_user_sponsor_warning": "Are you sure you want to delete access rights for sponsor ",
     "user_delete_success": "User removed successfully.",
     "process_request": {
       "title": "Process Access Request",

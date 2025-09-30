@@ -18,9 +18,9 @@ import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import {
+  deleteSponsorUser,
   getSponsorUserRequests,
-  getSponsorUsers,
-  deleteSponsorUser
+  getSponsorUsers
 } from "../../../actions/sponsor-users-actions";
 import SearchInput from "../../../components/mui/search-input";
 import UsersTable from "../sponsor-users-list-page/components/users-table";
@@ -53,7 +53,6 @@ const SponsorUsersListPerSponsorPage = ({
   };
 
   const handleUserEdit = (user) => {
-    console.log("EDIT: ", user);
     setUserEdit(user);
   };
 
@@ -130,7 +129,6 @@ const SponsorUsersListPerSponsorPage = ({
           open={openPopup === "new_user"}
           onClose={() => setOpenPopup(null)}
           sponsorId={sponsor.id}
-          user={userEdit}
         />
       )}
 
