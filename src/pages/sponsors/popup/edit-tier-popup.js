@@ -162,7 +162,6 @@ const EditTierDialog = ({
                   <Box width="100%">
                     <SponsorshipTypeInputMUI
                       name="type"
-                      formik={formik}
                       placeholder={T.translate(
                         "edit_sponsor.placeholders.sponsorship_type"
                       )}

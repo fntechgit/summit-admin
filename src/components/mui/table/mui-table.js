@@ -1,28 +1,31 @@
 import * as React from "react";
 import T from "i18n-react/dist/i18n-react";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import { IconButton } from "@mui/material";
+import { isBoolean } from "lodash";
+import {
+  Box,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import { visuallyHidden } from "@mui/utils";
-
-import styles from "./mui-table.module.less";
-
 import {
   DEFAULT_PER_PAGE,
   FIFTY_PER_PAGE,
   TWENTY_PER_PAGE
 } from "../../../utils/constants";
 import showConfirmDialog from "../showConfirmDialog";
+import styles from "./mui-table.module.less";
 
 const MuiTable = ({
   columns = [],
@@ -36,7 +39,9 @@ const MuiTable = ({
   options = { sortCol: "", sortDir: 1 },
   getName = (item) => item.name,
   onEdit,
-  onDelete
+  onDelete,
+  deleteDialogTitle = null,
+  deleteDialogBody = null
 }) => {
   const handleChangePage = (_, newPage) => {
     onPageChange(newPage + 1);
@@ -64,8 +69,10 @@ const MuiTable = ({
 
   const handleDelete = async (item) => {
     const isConfirmed = await showConfirmDialog({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("general.row_remove_warning")} ${getName(item)}`,
+      title: deleteDialogTitle || T.translate("general.are_you_sure"),
+      text:
+        deleteDialogBody ||
+        `${T.translate("general.row_remove_warning")} ${getName(item)}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -75,6 +82,22 @@ const MuiTable = ({
     if (isConfirmed) {
       onDelete(item.id);
     }
+  };
+
+  const renderCell = (row, col) => {
+    if (col.render) {
+      return col.render(row);
+    }
+
+    if (isBoolean(row[col.columnKey])) {
+      return row[col.columnKey] ? (
+        <CheckIcon fontSize="large" />
+      ) : (
+        <CloseIcon fontSize="large" />
+      );
+    }
+
+    return row[col.columnKey];
   };
 
   return (
@@ -144,7 +167,7 @@ const MuiTable = ({
                         ...(row.cellStyle ? row.cellStyle : {})
                       }}
                     >
-                      {col.render?.(row) || row[col.columnKey]}
+                      {renderCell(row, col)}
                     </TableCell>
                   ))}
                   {/* Edit column */}
