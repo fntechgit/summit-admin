@@ -1,17 +1,31 @@
 import { Modal } from "react-bootstrap";
+import { connect } from "react-redux";
 import T from "i18n-react";
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { getCurrentEventForOccupancy } from "../../../../actions/event-actions";
 
-function OverflowModal({ event, show, onHide, onSave, onDelete }) {
+function OverflowModal({
+  event,
+  show,
+  onHide,
+  onSave,
+  onDelete,
+  getCurrentEventForOccupancy
+}) {
   const [streamUrl, setStreamUrl] = useState("");
   const [isSecure, setIsSecure] = useState(false);
 
   useEffect(() => {
-    if (event) {
-      setIsSecure(event.overflow_stream_is_secure || false);
-      setStreamUrl(event.overflow_streaming_url || "");
-    }
+    setStreamUrl("");
+    setIsSecure(false);
+    if (event)
+      getCurrentEventForOccupancy(event.roomId, event.id).then(
+        (currentEvent) => {
+          setStreamUrl(currentEvent.overflow_streaming_url);
+          setIsSecure(currentEvent.overflow_stream_is_secure);
+        }
+      );
   }, [event]);
 
   return (
@@ -73,4 +87,6 @@ OverflowModal.propTypes = {
   onDelete: PropTypes.func
 };
 
-export default OverflowModal;
+export default connect(null, {
+  getCurrentEventForOccupancy
+})(OverflowModal);

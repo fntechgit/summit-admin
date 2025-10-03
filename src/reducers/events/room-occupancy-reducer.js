@@ -76,6 +76,7 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
           .tz(state.summitTZ)
           .format("ddd h:mm a"),
         room: e.location ? e.location.name : "",
+        roomId: e.location ? e.location.id : null,
         occupancy: e.occupancy || "EMPTY",
         speakers: e.speakers
           ? e.speakers.map((s) => `${s.first_name} ${s.last_name}`).join(",")
@@ -122,7 +123,9 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
             ? payloadEvent.speakers
                 .map((s) => `${s.first_name} ${s.last_name}`)
                 .join(",")
-            : ""
+            : "",
+          overflow_stream_is_secure: payloadEvent.overflow_stream_is_secure,
+          overflow_streaming_url: payloadEvent.overflow_streaming_url || ""
         };
       }
 
