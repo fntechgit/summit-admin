@@ -20,8 +20,9 @@ import {
   RECEIVE_EVENTS_FOR_OCCUPANCY,
   REQUEST_CURRENT_EVENT_FOR_OCCUPANCY,
   REQUEST_EVENTS_FOR_OCCUPANCY,
-  UPDATE_EVENT
-} from "../../actions/event-actions";
+  UPDATE_EVENT_OCCUPANCY
+} from "../../actions/room-occupancy-actions";
+import { UPDATE_EVENT } from "../../actions/event-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
@@ -165,6 +166,25 @@ const roomOccupancyReducer = (state = DEFAULT_STATE, action) => {
       });
 
       return { ...state, events: newEvents };
+    }
+    case UPDATE_EVENT_OCCUPANCY: {
+      const { data } = payload;
+      const currentEvent = { ...state.currentEvent };
+
+      const events = state.events.map((ev) => {
+        if (ev.id === data.eventId) {
+          return { ...ev, occupancy: data.occupancy };
+        }
+
+        return ev;
+      });
+
+      // also update current event just in case
+      if (currentEvent.id === data.eventId) {
+        currentEvent.occupancy = data.occupancy;
+      }
+
+      return { ...state, events, currentEvent };
     }
     default:
       return state;
