@@ -839,8 +839,9 @@ export const getCurrentEventForOccupancy =
       endPoint,
       authErrorHandler,
       { summitTZ }
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).then(({ response }) => {
       dispatch(stopLoading());
+      return response;
     });
   };
 
