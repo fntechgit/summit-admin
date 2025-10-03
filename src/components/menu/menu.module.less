@@ -25,9 +25,9 @@
 
   &.closed {
     overflow-y: hidden;
-
     .burgerButton {
       display: block;
+      pointer-events: auto;
 
       @media (min-width: 768px) {
         display: none;
@@ -52,6 +52,9 @@
           display: flex;
         }
       }
+    }
+    @media (max-width: 768px) {
+      pointer-events: none;
     }
   }
 
