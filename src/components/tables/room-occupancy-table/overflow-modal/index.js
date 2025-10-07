@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import T from "i18n-react";
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { getCurrentEventForOccupancy } from "../../../../actions/event-actions";
+import { getCurrentEventForOccupancy } from "../../../../actions/room-occupancy-actions";
 
 function OverflowModal({
   event,

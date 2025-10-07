@@ -206,3 +206,12 @@ export const RSVP_STATUS = ["Pending", "Accepted", "Rejected"];
 export const RSVP_TYPE_NONE = "None";
 export const RSVP_TYPE_PUBLIC = "Public";
 export const RSVP_TYPE_PRIVATE = "Private";
+
+export const ROOM_OCCUPANCY_OPTIONS = [
+  "EMPTY",
+  "25%",
+  "50%",
+  "75%",
+  "FULL",
+  "OVERFLOW"
+];
