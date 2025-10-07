@@ -1,4 +1,4 @@
-/**
+/* *
  * Copyright 2022 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import {
   getRequest,
@@ -24,15 +24,13 @@ import {
   fetchErrorHandler,
   showSuccessMessage
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
-import Ably from "ably";
-import moment from "moment-timezone";
 import T from "i18n-react";
-import Swal from "sweetalert2";
+import moment from "moment-timezone";
+import { getAccessTokenSafely } from "../utils/methods";
+import { publishToAblyChannel } from "./ably-actions";
 
 export const REQUEST_SIGN = "REQUEST_SIGN";
 export const RECEIVE_SIGN = "RECEIVE_SIGN";
-export const UPDATE_SIGN = "UPDATE_SIGN";
 export const SIGN_UPDATED = "SIGN_UPDATED";
 export const SIGN_ADDED = "SIGN_ADDED";
 export const REQUEST_SIGNAGE_EVENTS = "REQUEST_SIGNAGE_EVENTS";
@@ -46,31 +44,10 @@ export const UPDATE_SIGNAGE_BANNER = "UPDATE_SIGNAGE_BANNER";
 export const SIGNAGE_BANNER_UPDATED = "SIGNAGE_BANNER_UPDATED";
 export const SIGNAGE_BANNER_ADDED = "SIGNAGE_BANNER_ADDED";
 export const SIGNAGE_BANNER_DELETED = "SIGNAGE_BANNER_DELETED";
-export const SIGNAGE_UPDATED = "SIGNAGE_UPDATED";
 export const SIGNAGE_STATIC_BANNER_UPDATED = "SIGNAGE_STATIC_BANNER_UPDATED";
-
-const AblyApiKey = process.env["SIGNAGE_ABLY_API_KEY"];
-const realtimeAbly = AblyApiKey ? new Ably.Realtime(AblyApiKey) : null;
 
 const getAblyChannel = (summitId, locationId) =>
   `SIGNAGE:${summitId}:${locationId}`;
-
-const publishToAblyChannel = async (channel, key, message) => {
-  if (!realtimeAbly) {
-    Swal.fire("Publish failed", "No Ably API key found", "warning");
-    return false;
-  }
-
-  const ablyChannel = realtimeAbly.channels.get(channel);
-
-  ablyChannel.subscribe((msg) => {
-    console.log("Received: " + JSON.stringify(msg.data));
-  });
-
-  ablyChannel.publish(key, message);
-
-  return true;
-};
 
 export const getSign = (locationId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
@@ -138,7 +115,7 @@ export const getSignEvents =
     }
 
     const params = {
-      page: page,
+      page,
       per_page: 10,
       expand: "speakers,location,location.floor",
       access_token: accessToken
@@ -150,7 +127,7 @@ export const getSignEvents =
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
       const translateOrder = order === "start_date_str" ? "start_date" : order;
-      params["order"] = `${orderDirSign}${translateOrder}`;
+      params.order = `${orderDirSign}${translateOrder}`;
     }
 
     return getRequest(
@@ -187,7 +164,7 @@ export const getSignBanners =
     }
 
     const params = {
-      page: page,
+      page,
       per_page: 10,
       expand: "type,location,location.floor",
       access_token: accessToken
@@ -199,7 +176,7 @@ export const getSignBanners =
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
       const translateOrder = order === "start_date_str" ? "start_date" : order;
-      params["order"] = `${orderDirSign}${translateOrder}`;
+      params.order = `${orderDirSign}${translateOrder}`;
     }
 
     return getRequest(
@@ -311,7 +288,7 @@ export const saveStaticBanner = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("signage.static_saved")));
     });
   }
@@ -347,15 +324,15 @@ export const saveSignTemplate =
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/signs`,
         { location_id: locationId, template: templateFile },
         authErrorHandler
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         dispatch(stopLoading());
       });
     }
   };
 
-/********************************************************************************************************************/
-/*              BANNERS
-/********************************************************************************************************************/
+/* *************************************************************************** */
+/*              BANNERS                                                        */
+/* *************************************************************************** */
 export const getLocations = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -414,7 +391,7 @@ export const saveBanner = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   }
@@ -446,9 +423,9 @@ export const deleteBanner = (bannerId) => async (dispatch, getState) => {
 const normalizeBanner = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["modified"];
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.modified;
 
   return normalizedEntity;
 };
