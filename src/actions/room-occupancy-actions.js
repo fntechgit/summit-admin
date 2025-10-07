@@ -238,7 +238,7 @@ export const getCurrentEventForOccupancy =
       endPoint,
       authErrorHandler,
       { summitTZ }
-    )(params)(dispatch).then(({response}) => {
+    )(params)(dispatch).then(({ response }) => {
       dispatch(stopLoading());
       return response;
     });
@@ -286,7 +286,9 @@ export const saveOverflowOccupancy =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${eventId}/overflow`,
       payload,
       authErrorHandler
-    )(params)(dispatch);
+    )(params)(dispatch).then(() => {
+      publishOccupancy("OVERFLOW", eventId)(dispatch, getState);
+    });
   };
 
 export const deleteOverflowOccupancy =
@@ -308,5 +310,6 @@ export const deleteOverflowOccupancy =
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
+      publishOccupancy(newOccupancy, eventId)(dispatch, getState);
     });
   };
