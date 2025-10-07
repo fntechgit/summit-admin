@@ -167,9 +167,9 @@ class RoomManifestReport extends React.Component {
         "h:mm a"
       )} - ${momentEndDate.format("h:mm a")}`;
       const capacity = forExport ? (
-        it.location.venueroom.capacity
+        it.location?.venueroom?.capacity
       ) : (
-        <div className="text-center">{`${it.location.venueroom.capacity}`}</div>
+        <div className="text-center">{`${it.location?.venueroom?.capacity}`}</div>
       );
       const speakerCount = forExport ? (
         it.speakerCount
@@ -204,8 +204,8 @@ class RoomManifestReport extends React.Component {
         date_simple,
         time,
         event: it.title,
-        room: it.location.venueroom.name,
-        venue: it.location.venueroom.venue.name,
+        room: it.location?.venueroom?.name,
+        venue: it.location?.venueroom?.venue?.name,
         capacity,
         speakerCount,
         type: it.type.type,
