@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -37,7 +37,7 @@ const ReportListPage = ({ currentSummit, history }) => {
             className="btn btn-default"
             onClick={() => handleClick("presentation_report")}
           >
-            {T.translate(`reports.presentation_report`)}
+            {T.translate("reports.presentation_report")}
           </button>
         </div>
         <div className="col-md-6">
@@ -45,7 +45,7 @@ const ReportListPage = ({ currentSummit, history }) => {
             className="btn btn-default"
             onClick={() => handleClick("speaker_report#published_in=true")}
           >
-            {T.translate(`reports.speaker_report`)}
+            {T.translate("reports.speaker_report")}
           </button>
         </div>
         <div className="col-md-6">
@@ -53,17 +53,29 @@ const ReportListPage = ({ currentSummit, history }) => {
             className="btn btn-default"
             onClick={() => handleClick("rsvp_report")}
           >
-            {T.translate(`reports.rsvp_report`)}
+            {T.translate("reports.rsvp_report")}
           </button>
         </div>
         <div className="col-md-6">
           <button
             className="btn btn-default"
             onClick={() =>
-              handleClick(`room_report#sort=time&sortdir=1${typeFilterQS}`)
+              handleClick(
+                `room_metrics_report#sort=time&sortdir=1${typeFilterQS}`
+              )
             }
           >
-            {T.translate(`reports.room_report`)}
+            {T.translate("reports.room_metrics_report")}
+          </button>
+        </div>
+        <div className="col-md-6">
+          <button
+            className="btn btn-default"
+            onClick={() =>
+              handleClick("room_manifest_report#sort=time&sortdir=1")
+            }
+          >
+            {T.translate("reports.room_manifest_report")}
           </button>
         </div>
         <div className="col-md-6">
@@ -71,7 +83,7 @@ const ReportListPage = ({ currentSummit, history }) => {
             className="btn btn-default"
             onClick={() => handleClick("presentation_video_report")}
           >
-            {T.translate(`reports.presentation_video_report`)}
+            {T.translate("reports.presentation_video_report")}
           </button>
         </div>
         <div className="col-md-6">
@@ -79,7 +91,7 @@ const ReportListPage = ({ currentSummit, history }) => {
             className="btn btn-default"
             onClick={() => handleClick("feedback_report")}
           >
-            {T.translate(`reports.feedback_report`)}
+            {T.translate("reports.feedback_report")}
           </button>
         </div>
         <div className="col-md-6">
@@ -87,7 +99,7 @@ const ReportListPage = ({ currentSummit, history }) => {
             className="btn btn-default"
             onClick={() => handleClick("tag_report")}
           >
-            {T.translate(`reports.tag_report`)}
+            {T.translate("reports.tag_report")}
           </button>
         </div>
         <div className="col-md-6">
@@ -95,7 +107,7 @@ const ReportListPage = ({ currentSummit, history }) => {
             className="btn btn-default"
             onClick={() => handleClick("metrics_report")}
           >
-            {T.translate(`reports.metrics_report`)}
+            {T.translate("reports.metrics_report")}
           </button>
         </div>
         <div className="col-md-6">
@@ -103,7 +115,7 @@ const ReportListPage = ({ currentSummit, history }) => {
             className="btn btn-default"
             onClick={() => handleClick("attendee_report")}
           >
-            {T.translate(`reports.attendee_report`)}
+            {T.translate("reports.attendee_report")}
           </button>
         </div>
       </div>
