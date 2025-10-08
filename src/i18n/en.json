@@ -1266,7 +1266,7 @@
     "color": "Color",
     "description": "Description",
     "class": "Class",
-    "tracks": "Tracks",
+    "tracks": "Categories",
     "begin_attendee_voting_period_date": "Attendee Voting Period Start",
     "end_attendee_voting_period_date": "Attendee Voting Period End",
     "max_attendee_votes": "Max Attendee Votes",
