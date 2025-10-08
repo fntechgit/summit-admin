@@ -9,13 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import SingleTagReport from "./tag-single-report";
 import TagReport from "./tag-report";
 import RsvpReport from "./rsvp-report";
 import RsvpEventReport from "./rsvp-event-report";
 import RoomReport from "./room-report";
+import RoomManifestReport from "./room-manifest-report";
 import PresentationVideoReport from "./presentation-video-report";
 import FeedbackReport from "./feedback-report";
 import FeedbackGroupReport from "./feedback-group-report";
@@ -28,6 +29,7 @@ export {
   RsvpReport,
   RsvpEventReport,
   RoomReport,
+  RoomManifestReport,
   PresentationVideoReport,
   FeedbackReport,
   FeedbackGroupReport,
