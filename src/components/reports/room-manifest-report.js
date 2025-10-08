@@ -119,7 +119,7 @@ class RoomManifestReport extends React.Component {
   }
 
   getName() {
-    return "Room Report";
+    return "Room Manifest Report";
   }
 
   handleAttendeeList(eventId) {
