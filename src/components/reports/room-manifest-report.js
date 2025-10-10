@@ -19,9 +19,11 @@ import { groupByDate } from "../../utils/methods";
 
 const Query = require("graphql-query-builder");
 
-const formatSpeaker = (s) => {
+const formatSpeaker = (s, forExport) => {
   if (!s) return "";
-  return `${s.title} ${s.fullName} (${s.emails}) - ${s.phoneNumber} - ${s.currentCompany}`;
+
+  const br = forExport ? "\n" : "<br />";
+  return `${s.fullName} ${br} ${s.title}, ${s.currentCompany} ${br} ${s.emails} ${br} ${s.phoneNumber}`;
 };
 
 class RoomManifestReport extends React.Component {
@@ -177,7 +179,7 @@ class RoomManifestReport extends React.Component {
         <div className="text-center">{`${it.speakerCount}`}</div>
       );
 
-      const speakers = it.speakers?.map(formatSpeaker);
+      const speakers = it.speakers?.map((sp) => formatSpeaker(sp, forExport));
 
       const materials = it.materials
         ?.filter((m) => m.mediaupload)
@@ -213,7 +215,7 @@ class RoomManifestReport extends React.Component {
         speaker_1: speakers[0] || "",
         speaker_2: speakers[1] || "",
         speaker_3: speakers[2] || "",
-        moderator: formatSpeaker(it.moderator)
+        moderator: formatSpeaker(it.moderator, forExport)
       };
     });
 
