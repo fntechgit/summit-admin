@@ -30,7 +30,7 @@ import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
 const DEFAULT_STATE = {
   events: [],
   currentEvent: {},
-  term: null,
+  term: "",
   roomId: null,
   currentEvents: false,
   order: "start_date",
