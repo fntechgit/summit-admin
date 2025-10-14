@@ -39,7 +39,7 @@ const RoomOccupancyPage = ({
   term,
   order,
   orderDir,
-  page,
+  currentPage,
   perPage,
   lastPage,
   roomId,
@@ -89,7 +89,7 @@ const RoomOccupancyPage = ({
       term,
       roomId,
       currentEvents,
-      page,
+      currentPage,
       perPage,
       keyTranslated,
       dir
@@ -101,7 +101,7 @@ const RoomOccupancyPage = ({
       newTerm,
       roomId,
       currentEvents,
-      page,
+      1,
       perPage,
       order,
       orderDir
@@ -118,7 +118,7 @@ const RoomOccupancyPage = ({
       term,
       newRoomId,
       currentEvents,
-      page,
+      1,
       perPage,
       order,
       orderDir
@@ -131,7 +131,15 @@ const RoomOccupancyPage = ({
     fragmentParser.setParam("current", value);
     window.location.hash = fragmentParser.serialize();
 
-    getEventsForOccupancy(term, roomId, value, page, perPage, order, orderDir);
+    getEventsForOccupancy(
+      term,
+      roomId,
+      value,
+      currentPage,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const changeOccupancy = (eventId, add) => {
@@ -297,7 +305,7 @@ const RoomOccupancyPage = ({
               boundaryLinks
               maxButtons={10}
               items={lastPage}
-              activePage={page}
+              activePage={currentPage}
               onSelect={handlePageChange}
             />
           </div>
