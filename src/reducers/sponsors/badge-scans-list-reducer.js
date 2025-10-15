@@ -23,7 +23,7 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
   badgeScans: [],
-  sponsorId: null,
+  sponsor: null,
   order: "attendee_last_name",
   orderDir: 1,
   currentPage: 1,
@@ -42,8 +42,8 @@ const badgeScansListReducer = (state = DEFAULT_STATE, action = {}) => {
       return DEFAULT_STATE;
     }
     case REQUEST_BADGE_SCANS: {
-      const { order, orderDir, sponsorId, summitTZ } = payload;
-      return { ...state, order, orderDir, sponsorId, summitTZ };
+      const { order, orderDir, sponsor, summitTZ } = payload;
+      return { ...state, order, orderDir, sponsor, summitTZ };
     }
     case RECEIVE_BADGE_SCANS: {
       const {
