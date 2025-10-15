@@ -29,7 +29,7 @@ import {
   fetchErrorHandler,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
+import { fetchPaginatedData, getAccessTokenSafely } from "../utils/methods";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
 import history from "../history";
 import {
@@ -153,13 +153,7 @@ export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
 /** ****************  SPONSORS *************************************** */
 
 export const getSponsors =
-  (
-    term = null,
-    page = 1,
-    perPage = HUNDRED_PER_PAGE,
-    order = "order",
-    orderDir = 1
-  ) =>
+  (term = null, order = "order", orderDir = 1) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -176,12 +170,12 @@ export const getSponsors =
     }
 
     const params = {
-      page,
-      per_page: perPage,
       expand: "company,sponsorship,sponsorship.type",
       relations: "company.none,sponsorship.none,sponsorship.type.none,none",
       fields: "id,company.name,company.id,sponsorship.id,sponsorship.type.name",
-      access_token: accessToken
+      access_token: accessToken,
+      page: 1,
+      per_page: 20
     };
 
     if (filter.length > 0) {
@@ -194,15 +188,12 @@ export const getSponsors =
       params.order = `${orderDirSign}${order}`;
     }
 
-    return getRequest(
-      createAction(REQUEST_SPONSORS),
-      createAction(RECEIVE_SPONSORS),
+    return fetchPaginatedData(
+      REQUEST_SPONSORS,
+      RECEIVE_SPONSORS,
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors`,
-      authErrorHandler,
-      { page, perPage, order, orderDir, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+      authErrorHandler
+    )(params)(dispatch);
   };
 
 export const getSponsorsWithBadgeScans = () => async (dispatch, getState) => {

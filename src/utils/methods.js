@@ -20,6 +20,15 @@ import {
 import Swal from "sweetalert2";
 import * as Sentry from "@sentry/react";
 import T from "i18n-react/dist/i18n-react";
+
+import pLimit from "p-limit";
+import {
+  getRequest,
+  createAction,
+  startLoading,
+  stopLoading
+} from "openstack-uicore-foundation/lib/utils/actions";
+
 import {
   ERROR_CODE_401,
   ERROR_CODE_403,
@@ -30,7 +39,8 @@ import {
   ONE_MINUTE,
   INT_BASE,
   OR_FILTER,
-  MARKETING_SETTING_TYPE_HEX_COLOR
+  MARKETING_SETTING_TYPE_HEX_COLOR,
+  TWO
 } from "./constants";
 
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
@@ -504,3 +514,85 @@ export const arrayToString = (array, join = ",") => {
 
 export const capitalizeFirstLetter = (val) =>
   String(val).charAt(0).toUpperCase() + String(val).slice(1);
+
+export const fetchPaginatedData =
+  (
+    requestActionName,
+    receiveActionName,
+    endpoint,
+    errorHandler,
+    requestActionPayload = {},
+    config = {
+      useEtag: false,
+      concurrency: 5, // Limit concurrent requests
+      incrementalReceive: false // Collect all data and dispatch at the end
+    }
+  ) =>
+  (params = {}) =>
+  async (dispatch) => {
+    const { useEtag, incrementalReceive, concurrency } = config;
+    const limit = pLimit(concurrency);
+
+    const receiveAction = incrementalReceive
+      ? createAction(receiveActionName)
+      : createAction("DUMMY");
+
+    let allData = [];
+
+    try {
+      dispatch(startLoading());
+
+      const initialPayload = await getRequest(
+        createAction(requestActionName),
+        receiveAction,
+        endpoint,
+        errorHandler,
+        requestActionPayload,
+        useEtag
+      )(params)(dispatch);
+
+      const {
+        response: { last_page: lastPage, data: initialData }
+      } = initialPayload;
+
+      allData = [...initialData];
+
+      if (lastPage === 1) {
+        if (!incrementalReceive)
+          dispatch(createAction(receiveActionName)(allData));
+        return allData;
+      }
+
+      const remainingPages = Array.from(
+        { length: lastPage - 1 },
+        (_, i) => i + TWO
+      );
+      const requests = remainingPages.map((page) =>
+        limit(() =>
+          getRequest(
+            null, // Skip dispatching request action for subsequent pages
+            receiveAction,
+            endpoint,
+            errorHandler,
+            {}, // Empty request action payload
+            useEtag
+          )({ ...params, page })(dispatch)
+        )
+      );
+
+      const responses = await Promise.all(requests);
+
+      responses.forEach((payload) => {
+        allData = [...allData, ...payload.response.data];
+      });
+
+      if (!incrementalReceive)
+        dispatch(createAction(receiveActionName)(allData));
+      return allData;
+    } catch (error) {
+      console.error("Error in fetchPaginatedData:", error);
+      throw error;
+    } finally {
+      dispatch(stopLoading());
+    }
+  };
