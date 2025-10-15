@@ -440,7 +440,7 @@ const EditTicketPage = ({
         </Panel>
       )}
 
-      {entity?.id > 0 && (
+      {entity?.id && entity?.owner?.id && (
         <Panel
           show={showSection === "admin_notes"}
           title={T.translate("edit_ticket.admin_notes")}
