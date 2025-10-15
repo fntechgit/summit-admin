@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -45,6 +45,8 @@ const BadgeScansListPage = ({
     }
   }, []);
 
+  const [currentSponsor, setCurrentSponsor] = useState(null);
+
   const handlePageChange = (page) => {
     props.getBadgeScans(sponsorId, page, perPage, order, orderDir);
   };
@@ -55,13 +57,13 @@ const BadgeScansListPage = ({
 
   const handleSponsorChange = (ev) => {
     const { value } = ev.target;
+    setCurrentSponsor(value);
     props.getBadgeScans(value.id, currentPage, perPage, order, orderDir);
   };
 
   const handleExport = (ev) => {
     ev.preventDefault();
-    const sponsor = allSponsors.find((s) => s.id === sponsorId);
-    props.exportBadgeScans(sponsor, order, orderDir);
+    props.exportBadgeScans(currentSponsor, order, orderDir);
   };
 
   const handleEditBadgeScan = (id) => {
