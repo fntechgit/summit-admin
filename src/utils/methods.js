@@ -30,7 +30,8 @@ import {
   ONE_MINUTE,
   INT_BASE,
   OR_FILTER,
-  MARKETING_SETTING_TYPE_HEX_COLOR
+  MARKETING_SETTING_TYPE_HEX_COLOR,
+  TWO
 } from "./constants";
 
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
@@ -504,3 +505,18 @@ export const arrayToString = (array, join = ",") => {
 
 export const capitalizeFirstLetter = (val) =>
   String(val).charAt(0).toUpperCase() + String(val).slice(1);
+
+export const formatBadgeQR = (code, summit) => {
+  const qrCodeArray = code.split(summit.qr_registry_field_delimiter);
+
+  if (qrCodeArray.length > TWO && qrCodeArray[0] === summit.badge_qr_prefix) {
+    return {
+      badgePrefix: qrCodeArray[0],
+      ticketNumber: qrCodeArray[1],
+      email: qrCodeArray[2],
+      fullName: qrCodeArray[3]
+    };
+  }
+
+  return false;
+};
