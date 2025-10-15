@@ -27,7 +27,7 @@ import Member from "../../models/member";
 const BadgeScansListPage = ({
   currentSummit,
   history,
-  sponsorId,
+  sponsor,
   allSponsors,
   badgeScans,
   order,
@@ -40,27 +40,26 @@ const BadgeScansListPage = ({
   ...props
 }) => {
   useEffect(() => {
-    if (sponsorId) {
-      props.getBadgeScans(sponsorId);
+    if (sponsor) {
+      props.getBadgeScans(sponsor);
     }
   }, []);
 
   const handlePageChange = (page) => {
-    props.getBadgeScans(sponsorId, page, perPage, order, orderDir);
+    props.getBadgeScans(sponsor, page, perPage, order, orderDir);
   };
 
   const handleSort = (index, key, dir) => {
-    props.getBadgeScans(sponsorId, currentPage, perPage, key, dir);
+    props.getBadgeScans(sponsor, currentPage, perPage, key, dir);
   };
 
   const handleSponsorChange = (ev) => {
     const { value } = ev.target;
-    props.getBadgeScans(value.id, currentPage, perPage, order, orderDir);
+    props.getBadgeScans(value, currentPage, perPage, order, orderDir);
   };
 
   const handleExport = (ev) => {
     ev.preventDefault();
-    const sponsor = allSponsors.find((s) => s.id === sponsorId);
     props.exportBadgeScans(sponsor, order, orderDir);
   };
 
@@ -135,14 +134,14 @@ const BadgeScansListPage = ({
           <button
             className="btn btn-default right-space pull-right"
             onClick={handleExport}
-            disabled={!sponsorId}
+            disabled={!sponsor}
           >
             {T.translate("general.export")}
           </button>
           <div className="col-md-6 pull-right">
             <SponsorInput
               id="sponsor"
-              value={sponsorId}
+              value={sponsor}
               onChange={handleSponsorChange}
               summitId={currentSummit?.id}
               placeholder={T.translate(
@@ -155,7 +154,7 @@ const BadgeScansListPage = ({
         </div>
       </div>
 
-      {!sponsorId ? (
+      {!sponsor ? (
         <div>{T.translate("badge_scan_list.select_sponsor")}</div>
       ) : (
         <>

@@ -1281,7 +1281,7 @@ const normalizeEntity = (entity) => {
 
 export const getBadgeScans =
   (
-    sponsorId = null,
+    sponsor = null,
     page = 1,
     perPage = DEFAULT_PER_PAGE,
     order = "attendee_last_name",
@@ -1296,8 +1296,8 @@ export const getBadgeScans =
 
     dispatch(startLoading());
 
-    if (sponsorId) {
-      filter.push(`sponsor_id==${sponsorId}`);
+    if (sponsor) {
+      filter.push(`sponsor_id==${sponsor.id}`);
     }
 
     const params = {
@@ -1327,7 +1327,7 @@ export const getBadgeScans =
       createAction(RECEIVE_BADGE_SCANS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans`,
       authErrorHandler,
-      { page, perPage, order, orderDir, sponsorId, summitTZ }
+      { page, perPage, order, orderDir, sponsor, summitTZ }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
