@@ -74,6 +74,8 @@ T.setTexts(require("./i18n/en.json"));
 
 window.IDP_BASE_URL = process.env.IDP_BASE_URL;
 window.API_BASE_URL = process.env.API_BASE_URL;
+window.AUDIT_LOG_API_BASE_URL =
+  process.env.AUDIT_LOG_API_BASE_URL || window.API_BASE_URL;
 window.REPORT_API_BASE_URL = process.env.REPORT_API_BASE_URL;
 window.MARKETING_API_BASE_URL = process.env.MARKETING_API_BASE_URL;
 window.EMAIL_API_BASE_URL = process.env.EMAIL_API_BASE_URL;
