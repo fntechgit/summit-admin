@@ -60,7 +60,9 @@ const auditLogReducer = (state = DEFAULT_STATE, action) => {
         return {
           ...e,
           event: e.event_id,
-          user: `${e.user.first_name} ${e.user.last_name} (${e.user.id})`,
+          user: `${e.user?.first_name ?? ""} ${e.user?.last_name ?? ""} ${
+            e.user?.id ? `(${e.user.id})` : ""
+          }`,
           created: moment(
             epochToMomentTimeZone(e.created, state.summitTZ)
           ).format("MMMM Do YYYY, h:mm a"),
