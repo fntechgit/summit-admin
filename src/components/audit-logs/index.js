@@ -34,6 +34,8 @@ const AuditLogs = function ({
   clearAuditLogParams,
   filters
 }) {
+  const [page, setPage] = useState(currentPage);
+  const [searchTerm, setSearchTerm] = useState(term);
   const defaultFilters = {
     user_id_filter: [],
     created_date_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null)
@@ -85,11 +87,12 @@ const AuditLogs = function ({
     ? audit_log_columns.filter((c) => columns.includes(c.columnKey))
     : audit_log_columns;
 
-  const handleSort = (index, key, dir, func) => {
+  const handleSort = (_index, key, dir) => {
+    setPage(1);
     getAuditLog(
       entityFilter,
-      term,
-      currentPage,
+      searchTerm,
+      1,
       perPage,
       key,
       dir,
@@ -98,9 +101,10 @@ const AuditLogs = function ({
   };
 
   const handlePageChange = (page) => {
+    setPage(page);
     getAuditLog(
       entityFilter,
-      term,
+      searchTerm,
       page,
       perPage,
       order,
@@ -110,10 +114,12 @@ const AuditLogs = function ({
   };
 
   const handleSearch = (newTerm) => {
+    setSearchTerm(newTerm);
+    setPage(1);
     getAuditLog(
       entityFilter,
       newTerm,
-      currentPage,
+      1,
       perPage,
       order,
       orderDir,
@@ -167,10 +173,11 @@ const AuditLogs = function ({
   };
 
   const handleApplyAuditLogFilters = () => {
+    setPage(1);
     getAuditLog(
       entityFilter,
-      term,
-      currentPage,
+      searchTerm,
+      1,
       perPage,
       order,
       orderDir,
@@ -181,7 +188,7 @@ const AuditLogs = function ({
   useEffect(() => {
     getAuditLog(
       entityFilter,
-      term,
+      searchTerm,
       DEFAULT_CURRENT_PAGE,
       perPage,
       order,
@@ -199,7 +206,7 @@ const AuditLogs = function ({
       <div className="row">
         <div className="col-md-8">
           <FreeTextSearch
-            value={term ?? ""}
+            value={searchTerm ?? ""}
             placeholder={T.translate("audit_log.placeholders.search_log")}
             onSearch={handleSearch}
           />
@@ -312,7 +319,7 @@ const AuditLogs = function ({
             boundaryLinks
             maxButtons={10}
             items={lastPage}
-            activePage={currentPage}
+            activePage={page}
             onSelect={handlePageChange}
           />
         </>
