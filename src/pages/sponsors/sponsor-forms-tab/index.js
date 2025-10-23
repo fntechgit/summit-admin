@@ -23,7 +23,10 @@ import {
   Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { getSponsorManagedForms } from "../../../actions/sponsor-forms-actions";
+import {
+  getSponsorManagedForms,
+  saveSponsorManagedForm
+} from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
@@ -38,25 +41,49 @@ const SponsorFormsTab = ({
   order,
   orderDir,
   totalCount,
+  sponsor,
+  summitId,
   // TODO: WIP FUNCTION
-  getSponsorManagedForms
+  getSponsorManagedForms,
+  saveSponsorManagedForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
-    getSponsorManagedForms();
+    // getSponsorManagedForms(sponsor.sponsorships);
   }, []);
 
   const handlePageChange = (page) => {
-    getSponsorManagedForms(term, page, perPage, order, orderDir);
+    getSponsorManagedForms(
+      sponsor.sponsorships,
+      term,
+      page,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const handleSort = (index, key, dir) => {
-    getSponsorManagedForms(term, currentPage, perPage, key, dir);
+    getSponsorManagedForms(
+      sponsor.sponsorships,
+      term,
+      currentPage,
+      perPage,
+      key,
+      dir
+    );
   };
 
   const handleSearch = (searchTerm) => {
-    getSponsorManagedForms(searchTerm, currentPage, perPage, order, orderDir);
+    getSponsorManagedForms(
+      sponsor.sponsorships,
+      searchTerm,
+      currentPage,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const handleCustomizeForm = (item) => {
@@ -65,6 +92,7 @@ const SponsorFormsTab = ({
 
   const handleHideArchivedForms = (ev) => {
     getSponsorManagedForms(
+      sponsor.sponsorships,
       term,
       currentPage,
       perPage,
@@ -101,7 +129,7 @@ const SponsorFormsTab = ({
       sortable: true
     },
     {
-      columnKey: "items",
+      columnKey: "items_qty",
       header: T.translate("edit_sponsor.forms_tab.items"),
       sortable: true
     },
@@ -229,26 +257,28 @@ const SponsorFormsTab = ({
           />
         </div>
       )}
-      {sponsorManagedForms.length > 0 && (
-        <div>
-          <MuiTable
-            columns={buildColumns(
-              T.translate("edit_sponsor.forms_tab.managed_forms")
-            )}
-            data={sponsorManagedForms}
-            options={tableOptions}
-            perPage={perPage}
-            totalRows={totalCount}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-            onSort={handleSort}
-          />
-        </div>
-      )}
+
+      <div>
+        <MuiTable
+          columns={buildColumns(
+            T.translate("edit_sponsor.forms_tab.managed_forms")
+          )}
+          data={sponsorManagedForms}
+          options={tableOptions}
+          perPage={perPage}
+          totalRows={totalCount}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onSort={handleSort}
+        />
+      </div>
 
       <AddSponsorFormTemplatePopup
         open={openPopup === "template"}
         onClose={() => setOpenPopup(null)}
+        onSubmit={saveSponsorManagedForm}
+        sponsor={sponsor}
+        summitId={summitId}
       />
       {/* <AddFormTemplate
         open={openPopup === "new"}
@@ -263,5 +293,6 @@ const mapStateToProps = ({ sponsorManagedFormsListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSponsorManagedForms
+  getSponsorManagedForms,
+  saveSponsorManagedForm
 })(SponsorFormsTab);

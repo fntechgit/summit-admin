@@ -426,6 +426,7 @@ const normalizeFormTemplate = (entity, summitTZ) => {
 
 export const getSponsorManagedForms =
   (
+    sponsorshipTypesId = [],
     term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
@@ -437,6 +438,7 @@ export const getSponsorManagedForms =
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
     const accessToken = await getAccessTokenSafely();
+    const summitTZ = currentSummit.time_zone.name;
     const filter = [];
 
     dispatch(startLoading());
@@ -448,12 +450,19 @@ export const getSponsorManagedForms =
 
     const params = {
       page,
-      relations: "items",
+      fields: "id,code,name,is_archived,opens_at,expires_at",
+      relations: "items,sponsorships",
       per_page: perPage,
       access_token: accessToken
     };
 
     if (hideArchived) filter.push("is_archived==0");
+
+    if (sponsorshipTypesId.length > 0) {
+      const formattedSponsorships = sponsorshipTypesId.join("&&");
+      filter.push("applies_to_all_tiers==0");
+      filter.push(`sponsorship_type_id_not_in==${formattedSponsorships}`);
+    }
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -468,9 +477,9 @@ export const getSponsorManagedForms =
     return getRequest(
       createAction(REQUEST_SPONSOR_FORMS),
       createAction(RECEIVE_SPONSOR_FORMS),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/managed-forms`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
       authErrorHandler,
-      { order, orderDir, page, term }
+      { order, orderDir, page, term, summitTZ }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -478,15 +487,12 @@ export const getSponsorManagedForms =
 
 export const saveSponsorManagedForm =
   (entity) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
+    const { currentSummitState, currentSponsorState } = getState();
     const { currentSummit } = currentSummitState;
+    const { id: sponsorId } = currentSponsorState;
     const accessToken = await getAccessTokenSafely();
 
-    // {
-    // "show_form_ids": [1, 2, 3],
-    // "all_add_ons": true,
-    // "add_ons": ["addon1", "addon2"]
-    // }
+    const normalizedEntity = normalizeSponsorManagedForm(entity);
 
     const params = {
       access_token: accessToken
@@ -496,12 +502,22 @@ export const saveSponsorManagedForm =
       null,
       createAction(SPONSOR_MANAGED_FORMS_ADDED),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms`,
-      entity,
+      normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
+
+const normalizeSponsorManagedForm = (entity) => {
+  const normalizedEntity = {
+    show_form_ids: entity.forms,
+    all_add_ons: true,
+    add_ons: entity.add_ons.map((a) => a.id)
+  };
+
+  return normalizedEntity;
+};
 
 /* ************************************************************************ */
 /*         ITEMS       */

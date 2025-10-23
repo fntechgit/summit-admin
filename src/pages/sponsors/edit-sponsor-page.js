@@ -161,7 +161,7 @@ const EditSponsorPage = (props) => {
           <SponsorUsersListPerSponsorPage sponsor={entity} />
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={4}>
-          <SponsorFormsTab />
+          <SponsorFormsTab sponsor={entity} summitId={currentSummit.id} />
         </CustomTabPanel>
       </Container>
     </Box>

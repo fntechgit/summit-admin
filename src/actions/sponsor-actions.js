@@ -2267,23 +2267,34 @@ export const querySummitAddons = _.debounce(
   DEBOUNCE_WAIT
 );
 
-export const querySponsorAddons = _.debounce(
-  async (input, summitId, sponsorId, sponsorshipId, callback) => {
-    const accessToken = await getAccessTokenSafely();
+export const querySponsorAddons = async (
+  summitId,
+  sponsorId,
+  sponsorshipIds,
+  callback
+) => {
+  const accessToken = await getAccessTokenSafely();
 
-    input = escapeFilterValue(input);
+  try {
+    const promises = sponsorshipIds.map((sponsorshipId) => {
+      const url = `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/add-ons?access_token=${accessToken}&fields=id,name,sponsorship.id,sponsorship.type.id,sponsorship.type.widget_title&expand=sponsorship,sponsorship.type&relations=sponsorship.none`;
 
-    fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/add-ons?access_token=${accessToken}`
-    )
-      .then(fetchResponseHandler)
-      .then((data) => {
-        callback(data);
-      })
-      .catch(fetchErrorHandler);
-  },
-  DEBOUNCE_WAIT
-);
+      return fetch(url)
+        .then(fetchResponseHandler)
+        .then((json) => json.data)
+        .catch((error) => {
+          fetchErrorHandler(error);
+          return [];
+        });
+    });
+
+    const results = await Promise.all(promises);
+    const allAddons = results.flat();
+    callback(allAddons);
+  } catch (error) {
+    fetchErrorHandler(error);
+  }
+};
 
 /** ****************  SPONSOR PROMOCODES  *************************************** */
 

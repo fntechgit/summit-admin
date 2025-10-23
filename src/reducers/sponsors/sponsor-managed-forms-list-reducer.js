@@ -12,6 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   REQUEST_SPONSOR_MANAGED_FORMS,
   RECEIVE_SPONSOR_MANAGED_FORMS
@@ -26,7 +27,8 @@ const DEFAULT_STATE = {
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
-  totalCount: 0
+  totalCount: 0,
+  summitTZ: ""
 };
 
 const sponsorManagedFormsListReducer = (state = DEFAULT_STATE, action) => {
@@ -38,15 +40,16 @@ const sponsorManagedFormsListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_MANAGED_FORMS: {
-      const { order, orderDir, page, term } = payload;
+      const { order, orderDir, page, term, summitTZ } = payload;
 
       return {
         ...state,
         order,
         orderDir,
-        sponsorForms: [],
+        sponsorManagedForms: [],
         currentPage: page,
-        term
+        term,
+        summitTZ
       };
     }
     case RECEIVE_SPONSOR_MANAGED_FORMS: {
@@ -56,19 +59,34 @@ const sponsorManagedFormsListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const sponsorForms = payload.response.data.map((a) => ({
-        id: a.id,
-        code: a.code,
-        name: a.name,
-        items_qty: `${a.items.length} ${
-          a.items.length === 1 ? "Item" : "Items"
-        }`,
-        is_archived: a.is_archived
-      }));
+      const sponsorManagedForms = payload.response.data.map((a) => {
+        const opens_at = a.opens_at
+          ? epochToMomentTimeZone(a.opens_at, state.summitTZ)?.format(
+              "YYYY/MM/DD"
+            )
+          : "N/A";
+        const expires_at = a.expires_at
+          ? epochToMomentTimeZone(a.expires_at, state.summitTZ)?.format(
+              "YYYY/MM/DD"
+            )
+          : "N/A";
+
+        return {
+          id: a.id,
+          code: a.code,
+          name: a.name,
+          items_qty: `${a.items.length} ${
+            a.items.length === 1 ? "Item" : "Items"
+          }`,
+          is_archived: a.is_archived,
+          opens_at,
+          expires_at
+        };
+      });
 
       return {
         ...state,
-        sponsorForms,
+        sponsorManagedForms,
         currentPage,
         totalCount: total,
         lastPage

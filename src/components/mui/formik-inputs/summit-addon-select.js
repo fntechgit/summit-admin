@@ -3,7 +3,7 @@ import { MenuItem, CircularProgress, Select, Box } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PropTypes from "prop-types";
 import { useField } from "formik";
-import { querySummitAddons } from "../../actions/sponsor-actions";
+import { querySummitAddons } from "../../../actions/sponsor-actions";
 
 const getCustomIcon = (loading) => {
   const Icon = () => (
