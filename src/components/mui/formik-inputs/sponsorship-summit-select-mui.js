@@ -35,6 +35,7 @@ const getCustomIcon = (loading) => {
   );
   return Icon;
 };
+
 const SponsorshipsBySummitSelectMUI = ({
   name,
   summitId,

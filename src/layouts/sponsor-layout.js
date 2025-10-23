@@ -24,6 +24,7 @@ import EditPromocodePage from "../pages/promocodes/edit-promocode-page";
 import SponsorSettingsPage from "../pages/sponsor_settings/sponsor-settings-page";
 import SponsorFormsListPage from "../pages/sponsors/sponsor-forms-list-page";
 import SponsorFormItemListPage from "../pages/sponsors/sponsor-form-item-list-page";
+import SponsorUsersListPage from "../pages/sponsors/sponsor-users-list-page";
 
 const SponsorLayout = ({ match }) => (
   <div>
@@ -61,6 +62,12 @@ const SponsorLayout = ({ match }) => (
             </Switch>
           </div>
         )}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/users`}
+        component={SponsorUsersListPage}
       />
       <Route
         strict

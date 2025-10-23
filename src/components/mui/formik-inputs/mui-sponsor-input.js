@@ -16,16 +16,18 @@ import PropTypes from "prop-types";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useField } from "formik";
-import { querySponsorships } from "../../../actions/sponsorship-actions";
+import { querySponsors } from "../../../actions/sponsor-actions";
 import { DEBOUNCE_WAIT_250 } from "../../../utils/constants";
 
-const SponsorshipTypeInputMUI = ({
+const MuiSponsorInput = ({
   id,
   name,
   placeholder,
   plainValue,
   isMulti = false,
+  summitId,
   ...rest
 }) => {
   const [field, meta, helpers] = useField(name);
@@ -51,7 +53,7 @@ const SponsorshipTypeInputMUI = ({
         label: r.name
       }));
 
-    await querySponsorships(input, (results) => {
+    await querySponsors(input, summitId, (results) => {
       setOptions(normalize(results));
       setLoading(false);
     });
@@ -118,9 +120,11 @@ const SponsorshipTypeInputMUI = ({
       onChange={handleChange}
       loading={loading}
       fullWidth
+      popupIcon={<ExpandMoreIcon />}
       renderInput={(params) => (
         <TextField
           {...params}
+          name={field.name}
           placeholder={placeholder}
           variant="outlined"
           error={Boolean(error)}
@@ -148,7 +152,7 @@ const SponsorshipTypeInputMUI = ({
   );
 };
 
-SponsorshipTypeInputMUI.propTypes = {
+MuiSponsorInput.propTypes = {
   id: PropTypes.string,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
@@ -156,4 +160,4 @@ SponsorshipTypeInputMUI.propTypes = {
   isMulti: PropTypes.bool
 };
 
-export default SponsorshipTypeInputMUI;
+export default MuiSponsorInput;

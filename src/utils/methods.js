@@ -434,6 +434,13 @@ export const capitalize = (string) => {
     : "";
 };
 
+export const titleCase = (str) =>
+  str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.substring(1))
+    .join(" ");
+
 export const parseDateRangeFilter = (
   filterObject,
   filterToParse,
