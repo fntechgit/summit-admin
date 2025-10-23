@@ -56,11 +56,14 @@ const auditLogReducer = (state = DEFAULT_STATE, action) => {
         const logEntryAction = e.action.startsWith("Speaker")
           ? parseSpeakerAuditLog(e.action)
           : e.action;
+        const userFullName = `${e.user?.first_name ?? ""} ${
+          e.user?.last_name ?? ""
+        }`.trim();
 
         return {
           ...e,
           event: e.event_id,
-          user: `${e.user?.first_name ?? ""} ${e.user?.last_name ?? ""} ${
+          user: `${userFullName || e.user.email} ${
             e.user?.id ? `(${e.user.id})` : ""
           }`,
           created: moment(
