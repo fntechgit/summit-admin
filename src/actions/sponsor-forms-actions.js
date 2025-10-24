@@ -69,7 +69,8 @@ export const getSponsorForms =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    hideArchived = false,
+    sponsorshipTypesId
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -96,6 +97,12 @@ export const getSponsorForms =
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
+    }
+
+    if (sponsorshipTypesId.length > 0) {
+      const formattedSponsorships = sponsorshipTypesId.join("&&");
+      filter.push("applies_to_all_tiers==0");
+      filter.push(`sponsorship_type_id_not_in==${formattedSponsorships}`);
     }
 
     // order
@@ -426,7 +433,6 @@ const normalizeFormTemplate = (entity, summitTZ) => {
 
 export const getSponsorManagedForms =
   (
-    sponsorshipTypesId = [],
     term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
@@ -458,12 +464,6 @@ export const getSponsorManagedForms =
 
     if (hideArchived) filter.push("is_archived==0");
 
-    if (sponsorshipTypesId.length > 0) {
-      const formattedSponsorships = sponsorshipTypesId.join("&&");
-      filter.push("applies_to_all_tiers==0");
-      filter.push(`sponsorship_type_id_not_in==${formattedSponsorships}`);
-    }
-
     if (filter.length > 0) {
       params["filter[]"] = filter;
     }
@@ -475,9 +475,9 @@ export const getSponsorManagedForms =
     }
 
     return getRequest(
-      createAction(REQUEST_SPONSOR_FORMS),
-      createAction(RECEIVE_SPONSOR_FORMS),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
+      createAction(REQUEST_SPONSOR_MANAGED_FORMS),
+      createAction(RECEIVE_SPONSOR_MANAGED_FORMS),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/managed-forms`,
       authErrorHandler,
       { order, orderDir, page, term, summitTZ }
     )(params)(dispatch).then(() => {
@@ -489,8 +489,12 @@ export const saveSponsorManagedForm =
   (entity) => async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
     const { currentSummit } = currentSummitState;
-    const { id: sponsorId } = currentSponsorState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
     const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
 
     const normalizedEntity = normalizeSponsorManagedForm(entity);
 

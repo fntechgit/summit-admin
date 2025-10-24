@@ -25,7 +25,7 @@ import { FormikProvider, useFormik } from "formik";
 import MuiTable from "../../../../../components/mui/table/mui-table";
 import MenuButton from "../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../actions/sponsor-actions";
-import { getSponsorManagedForms } from "../../../../../actions/sponsor-forms-actions";
+import { getSponsorForms } from "../../../../../actions/sponsor-forms-actions";
 import { FIVE_PER_PAGE } from "../../../../../utils/constants";
 import MuiFormikSelectGroup from "../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
@@ -40,7 +40,7 @@ const AddSponsorFormTemplatePopup = ({
   orderDir,
   totalCount,
   term = "",
-  getSponsorManagedForms,
+  getSponsorForms,
   sponsor,
   summitId
 }) => {
@@ -67,51 +67,55 @@ const AddSponsorFormTemplatePopup = ({
   });
 
   useEffect(() => {
-    getSponsorManagedForms(
-      sponsor.sponsorships,
+    getSponsorForms(
       term,
       currentPage,
       FIVE_PER_PAGE,
       order,
-      orderDir
+      orderDir,
+      false,
+      sponsor.sponsorships
     );
   }, []);
 
   const handlePageChange = (page) => {
-    getSponsorManagedForms(
-      sponsor.sponsorships,
+    getSponsorForms(
       term,
       page,
       FIVE_PER_PAGE,
       order,
-      orderDir
+      orderDir,
+      false,
+      sponsor.sponsorships
     );
   };
 
   // const handlePerPageChange = (newPerPage) => {
-  //   getSponsorManagedForms(sponsor.sponsorships, term, currentPage, newPerPage, order, orderDir);
+  //   getSponsorForms(sponsor.sponsorships, term, currentPage, newPerPage, order, orderDir);
   // };
 
   const handleSort = (key, dir) => {
-    getSponsorManagedForms(
-      sponsor.sponsorships,
+    getSponsorForms(
       term,
       currentPage,
       FIVE_PER_PAGE,
       key,
-      dir
+      dir,
+      false,
+      sponsor.sponsorships
     );
   };
 
   const handleOnSearch = (ev) => {
     if (ev.key === "Enter")
-      getSponsorManagedForms(
-        sponsor.sponsorships,
+      getSponsorForms(
         searchTerm,
         currentPage,
         perPage,
         order,
-        orderDir
+        orderDir,
+        false,
+        sponsor.sponsorships
       );
   };
 
@@ -293,5 +297,5 @@ const mapStateToProps = ({ sponsorFormsListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSponsorManagedForms
+  getSponsorForms
 })(AddSponsorFormTemplatePopup);

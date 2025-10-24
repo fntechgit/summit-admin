@@ -50,40 +50,19 @@ const SponsorFormsTab = ({
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
-    // getSponsorManagedForms(sponsor.sponsorships);
+    // getSponsorManagedForms();
   }, []);
 
   const handlePageChange = (page) => {
-    getSponsorManagedForms(
-      sponsor.sponsorships,
-      term,
-      page,
-      perPage,
-      order,
-      orderDir
-    );
+    getSponsorManagedForms(term, page, perPage, order, orderDir);
   };
 
   const handleSort = (index, key, dir) => {
-    getSponsorManagedForms(
-      sponsor.sponsorships,
-      term,
-      currentPage,
-      perPage,
-      key,
-      dir
-    );
+    getSponsorManagedForms(term, currentPage, perPage, key, dir);
   };
 
   const handleSearch = (searchTerm) => {
-    getSponsorManagedForms(
-      sponsor.sponsorships,
-      searchTerm,
-      currentPage,
-      perPage,
-      order,
-      orderDir
-    );
+    getSponsorManagedForms(searchTerm, currentPage, perPage, order, orderDir);
   };
 
   const handleCustomizeForm = (item) => {
@@ -92,7 +71,6 @@ const SponsorFormsTab = ({
 
   const handleHideArchivedForms = (ev) => {
     getSponsorManagedForms(
-      sponsor.sponsorships,
       term,
       currentPage,
       perPage,
