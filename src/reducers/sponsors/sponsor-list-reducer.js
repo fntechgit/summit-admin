@@ -14,6 +14,7 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_SPONSORS,
   REQUEST_SPONSORS,
+  RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS,
   SPONSOR_DELETED,
   SPONSOR_ORDER_UPDATED
 } from "../../actions/sponsor-actions";
@@ -22,6 +23,7 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
   sponsors: [],
+  sponsorLeadReportsSettings: [],
   order: "order",
   orderDir: 1,
   totalSponsors: 0
@@ -67,6 +69,9 @@ const sponsorListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         sponsors: state.sponsors.filter((t) => t.id !== sponsorId)
       };
+    }
+    case RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS: {
+      return { ...state, sponsorLeadReportsSettings: payload.response[0] };
     }
     default:
       return state;
