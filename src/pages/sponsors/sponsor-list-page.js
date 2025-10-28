@@ -56,8 +56,7 @@ const SponsorListPage = ({
   useEffect(() => {
     if (currentSummit) {
       getSponsors();
-      getLeadReportSettingsMeta();
-      getSummitLeadReportSettings();
+      getLeadReportSettingsMeta().then(() => getSummitLeadReportSettings());
     }
   }, []);
 
