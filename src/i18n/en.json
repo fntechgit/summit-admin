@@ -2348,6 +2348,8 @@
     "allowed_badge_features_types": "Allowed Badge Features",
     "allowed_badge_features_types_info": "Allow to define question visible only available if attendee owns this feature type.",
     "add_value": "Add a Value",
+    "hint": "Text Input Hint",
+    "max_selected_values": "Max Selected Values",
     "hidden_value": "Hidden Value",
     "visible_value": "Visible Option (as appears on site)",
     "tab": {

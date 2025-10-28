@@ -67,11 +67,12 @@ const SponsorExtraQuestions = ({
 
   const handleSubmitExtraQuestion = (extraQuestion) => {
     const { valuesToSave, ...extraQuestionToSave } = extraQuestion;
-    saveSponsorExtraQuestion(extraQuestionToSave).then(() => {
+    saveSponsorExtraQuestion(extraQuestionToSave).then((eq) => {
       // after save question, check if values needs to be saved
       if (valuesToSave && valuesToSave.length > 0) {
+        const extraQuestionId = extraQuestionToSave.id || eq.id;
         const saveValuePromises = valuesToSave.map((value) =>
-          saveSponsorExtraQuestionValue(extraQuestionToSave.id, value)
+          saveSponsorExtraQuestionValue(extraQuestionId, value)
         );
         Promise.all(saveValuePromises).finally(() =>
           setShowAddExtraQuestionPopup(false)

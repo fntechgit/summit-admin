@@ -890,7 +890,7 @@ export const saveSponsorExtraQuestion =
       normalizedEntity,
       snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).then(({ response }) => {
       dispatch(stopLoading());
       dispatch(
         snackbarSuccessHandler({
@@ -898,6 +898,7 @@ export const saveSponsorExtraQuestion =
           html: T.translate("edit_sponsor.extra_question_created")
         })
       );
+      return response;
     });
   };
 
@@ -1001,7 +1002,7 @@ export const updateSponsorExtraQuestionValueOrder =
 
     return putRequest(
       null,
-      createAction(SPONSOR_EXTRA_QUESTION_VALUE_UPDATED),
+      createAction(""),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}/values/${valueId}`,
       { order: newOrder },
       authErrorHandler,

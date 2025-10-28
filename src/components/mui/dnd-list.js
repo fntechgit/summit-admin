@@ -30,14 +30,18 @@ const DragAndDropList = ({
       result.destination.index,
       updateOrderKey
     );
-    onReorder(newItems);
+    onReorder(newItems, result);
   };
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <Droppable droppableId={droppableId}>
         {(provided) => (
-          <Box ref={provided.innerRef} {...provided.droppableProps}>
+          <Box
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            sx={{ width: "100%" }}
+          >
             {items.map((item, index) => (
               <Draggable
                 key={String(item[idKey] || `new-${index}`)}

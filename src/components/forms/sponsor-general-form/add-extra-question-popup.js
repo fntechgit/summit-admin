@@ -23,12 +23,17 @@ import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/Info";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
 import MuiFormikSelect from "../../mui/formik-inputs/mui-formik-select";
 import FormikTextEditor from "../../inputs/formik-text-editor";
 import MuiFormikCheckbox from "../../mui/formik-inputs/mui-formik-checkbox";
-import { deleteSponsorExtraQuestionValue } from "../../../actions/sponsor-actions";
+import DragAndDropList from "../../mui/dnd-list";
+import {
+  deleteSponsorExtraQuestionValue,
+  updateSponsorExtraQuestionValueOrder
+} from "../../../actions/sponsor-actions";
 
 const AddSponsorExtraQuestionPopup = ({
   entity: extraQuestion,
@@ -37,7 +42,8 @@ const AddSponsorExtraQuestionPopup = ({
   onClose,
   onSubmit,
   allClasses,
-  deleteSponsorExtraQuestionValue
+  deleteSponsorExtraQuestionValue,
+  updateSponsorExtraQuestionValueOrder
 }) => {
   const formik = useFormik({
     initialValues: {
@@ -47,6 +53,7 @@ const AddSponsorExtraQuestionPopup = ({
       type: extraQuestion?.type,
       mandatory: extraQuestion?.mandatory || false,
       placeholder: extraQuestion?.placeholder,
+      max_selected_values: extraQuestion?.max_selected_values,
       values: (extraQuestion?.values || []).map((value) => ({
         ...value,
         _shouldUpdate: false
@@ -59,11 +66,13 @@ const AddSponsorExtraQuestionPopup = ({
       type: yup.string().required(),
       mandatory: yup.boolean(),
       placeholder: yup.string(),
+      max_selected_values: yup.number(),
       values: yup.array().of(
         yup.object().shape({
           value: yup.string().required(),
           label: yup.string().required(),
           is_default: yup.boolean(),
+          order: yup.number(),
           _shouldUpdate: yup.boolean()
         })
       )
@@ -153,6 +162,88 @@ const AddSponsorExtraQuestionPopup = ({
     value: c.type
   }));
 
+  const handleReorder = (newValues, result) => {
+    if (result.source.index === result.destination.index) {
+      return;
+    }
+
+    formik.setFieldValue("values", newValues);
+
+    const movedItem = newValues[result.destination.index];
+
+    if (movedItem.id) {
+      updateSponsorExtraQuestionValueOrder(
+        newValues,
+        movedItem.id,
+        movedItem.order
+      );
+    }
+  };
+
+  const renderValueItem = (valueItem, index, provided, snapshot) => (
+    <Grid2
+      container
+      spacing={2}
+      sx={{
+        mb: 1,
+        px: 2,
+        background: snapshot.isDragging ? "#f5f5f5" : "inherit",
+        borderRadius: snapshot.isDragging ? "4px" : "0",
+        transition: "background 0.2s ease"
+      }}
+      size={12}
+    >
+      <Grid2 size={5}>
+        <MuiFormikTextField
+          name={`values[${index}].value`}
+          formik={formik}
+          fullWidth
+          margin="none"
+          placeholder={T.translate("edit_sponsor.hidden_value")}
+          onChange={(e) => handleValueChange(index, "value", e.target.value)}
+        />
+      </Grid2>
+      <Grid2 size={5}>
+        <MuiFormikTextField
+          name={`values[${index}].label`}
+          formik={formik}
+          fullWidth
+          margin="none"
+          placeholder={T.translate("edit_sponsor.visible_value")}
+          onChange={(e) => handleValueChange(index, "label", e.target.value)}
+        />
+      </Grid2>
+      <Grid2
+        size={1}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+        <IconButton
+          onClick={() => handleRemoveValue(index)}
+          edge="end"
+          sx={{ color: "#666" }}
+          disableRipple
+        >
+          <CloseIcon />
+        </IconButton>
+      </Grid2>
+      <Grid2
+        size="auto"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          cursor: "grab",
+          "&:active": { cursor: "grabbing" }
+        }}
+      >
+        <DragIndicatorIcon sx={{ color: "#666" }} />
+      </Grid2>
+    </Grid2>
+  );
+
   const badge_features_ddl =
     summit && summit.badge_features && summit.badge_features.length > 0
       ? summit.badge_features.map((f) => ({
@@ -238,6 +329,29 @@ const AddSponsorExtraQuestionPopup = ({
                 </Box>
               </Grid2>
             </Grid2>
+            {formik.values.type === "CheckBoxList" && (
+              <Grid2 container spacing={2} size={6} sx={{ p: 2 }}>
+                <Grid2
+                  container
+                  spacing={2}
+                  size={12}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <InputLabel htmlFor="max_selected_values">
+                    {T.translate("edit_sponsor.max_selected_values")}
+                  </InputLabel>
+                  <Box width="100%">
+                    <MuiFormikTextField
+                      name="max_selected_values"
+                      formik={formik}
+                      fullWidth
+                      type="number"
+                      margin="none"
+                    />
+                  </Box>
+                </Grid2>
+              </Grid2>
+            )}
             <Divider />
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
               <Grid2
@@ -259,16 +373,12 @@ const AddSponsorExtraQuestionPopup = ({
                 </Box>
               </Grid2>
             </Grid2>
-            {shouldShowField("values") && formik.values.id !== 0 && (
-              <Grid2 container spacing={2} size={12}>
-                <InputLabel htmlFor="values" sx={{ px: 2, pt: 2 }}>
-                  {T.translate("question_form.values")}
-                </InputLabel>
+            {shouldShowField("values") && (
+              <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
                 <Grid2
                   container
                   spacing={2}
                   sx={{
-                    mb: 1,
                     px: 2,
                     fontWeight: 500,
                     fontSize: "14px",
@@ -284,51 +394,18 @@ const AddSponsorExtraQuestionPopup = ({
                   </Grid2>
                   <Grid2 size={2} />
                 </Grid2>
-                {formik.values.values.map((valueItem, index) => (
-                  <Grid2 container spacing={2} sx={{ mb: 1, px: 2 }} size={12}>
-                    <Grid2 size={5}>
-                      <MuiFormikTextField
-                        name={`values[${index}].value`}
-                        formik={formik}
-                        fullWidth
-                        margin="none"
-                        placeholder={T.translate("edit_sponsor.hidden_value")}
-                        onChange={(e) =>
-                          handleValueChange(index, "value", e.target.value)
-                        }
-                      />
-                    </Grid2>
-                    <Grid2 size={5}>
-                      <MuiFormikTextField
-                        name={`values[${index}].label`}
-                        formik={formik}
-                        fullWidth
-                        margin="none"
-                        placeholder={T.translate("edit_sponsor.visible_value")}
-                        onChange={(e) =>
-                          handleValueChange(index, "label", e.target.value)
-                        }
-                      />
-                    </Grid2>
-                    <Grid2
-                      size={1}
-                      sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center"
-                      }}
-                    >
-                      <IconButton
-                        onClick={() => handleRemoveValue(index)}
-                        edge="end"
-                        sx={{ color: "#666" }}
-                        disableRipple
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    </Grid2>
-                  </Grid2>
-                ))}
+                <Grid2 container spacing={2} size={12}>
+                  <DragAndDropList
+                    items={formik.values.values.sort(
+                      (a, b) => a.order - b.order
+                    )}
+                    onReorder={handleReorder}
+                    renderItem={renderValueItem}
+                    idKey="id"
+                    updateOrderKey="order"
+                    droppableId="sponsor-extra-question-values"
+                  />
+                </Grid2>
 
                 <Button
                   variant="text"
@@ -351,6 +428,28 @@ const AddSponsorExtraQuestionPopup = ({
               </Grid2>
             )}
             <Divider />
+            {formik.values.type === "Text" && (
+              <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
+                <Grid2
+                  container
+                  spacing={2}
+                  size={6}
+                  sx={{ alignItems: "baseline" }}
+                >
+                  <InputLabel htmlFor="placeholder">
+                    {T.translate("edit_sponsor.hint")}
+                  </InputLabel>
+                  <Box width="100%">
+                    <MuiFormikTextField
+                      name="placeholder"
+                      formik={formik}
+                      fullWidth
+                      margin="none"
+                    />
+                  </Box>
+                </Grid2>
+              </Grid2>
+            )}
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
               <Grid2
                 container
@@ -481,5 +580,6 @@ AddSponsorExtraQuestionPopup.propTypes = {
 };
 
 export default connect(mapStateToProps, {
-  deleteSponsorExtraQuestionValue
+  deleteSponsorExtraQuestionValue,
+  updateSponsorExtraQuestionValueOrder
 })(AddSponsorExtraQuestionPopup);
