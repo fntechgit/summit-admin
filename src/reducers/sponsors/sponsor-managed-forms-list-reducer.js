@@ -75,9 +75,8 @@ const sponsorManagedFormsListReducer = (state = DEFAULT_STATE, action) => {
           id: a.id,
           code: a.code,
           name: a.name,
-          items_qty: `${a.items.length} ${
-            a.items.length === 1 ? "Item" : "Items"
-          }`,
+          items_count: a.items_count,
+          add_ons: a.add_ons,
           is_archived: a.is_archived,
           opens_at,
           expires_at

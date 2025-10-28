@@ -441,8 +441,11 @@ export const getSponsorManagedForms =
     hideArchived = false
   ) =>
   async (dispatch, getState) => {
-    const { currentSummitState } = getState();
+    const { currentSummitState, currentSponsorState } = getState();
     const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
     const accessToken = await getAccessTokenSafely();
     const summitTZ = currentSummit.time_zone.name;
     const filter = [];
@@ -456,8 +459,8 @@ export const getSponsorManagedForms =
 
     const params = {
       page,
-      fields: "id,code,name,is_archived,opens_at,expires_at",
-      relations: "items,sponsorships",
+      fields:
+        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
       per_page: perPage,
       access_token: accessToken
     };
@@ -477,7 +480,7 @@ export const getSponsorManagedForms =
     return getRequest(
       createAction(REQUEST_SPONSOR_MANAGED_FORMS),
       createAction(RECEIVE_SPONSOR_MANAGED_FORMS),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/managed-forms`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms`,
       authErrorHandler,
       { order, orderDir, page, term, summitTZ }
     )(params)(dispatch).then(() => {

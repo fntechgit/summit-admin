@@ -50,7 +50,7 @@ const SponsorFormsTab = ({
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
-    // getSponsorManagedForms();
+    getSponsorManagedForms();
   }, []);
 
   const handlePageChange = (page) => {
@@ -94,7 +94,11 @@ const SponsorFormsTab = ({
     {
       columnKey: "add_ons",
       header: T.translate("edit_sponsor.forms_tab.add_ons"),
-      sortable: true
+      sortable: true,
+      render: (row) =>
+        row.add_ons.length > 0
+          ? row.add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
+          : "None"
     },
     {
       columnKey: "opens_at",
@@ -109,7 +113,9 @@ const SponsorFormsTab = ({
     {
       columnKey: "items_qty",
       header: T.translate("edit_sponsor.forms_tab.items"),
-      sortable: true
+      sortable: true,
+      render: (row) =>
+        `${row.items_count} ${row.items_count === 1 ? "Item" : "Items"}`
     },
     {
       columnKey: "manage_items",
