@@ -60,7 +60,6 @@ const AddSponsorFormTemplatePopup = ({
         forms: selectedForms,
         add_ons
       };
-      console.log("CHECK", entity);
       onSubmit(entity);
     },
     enableReinitialize: true

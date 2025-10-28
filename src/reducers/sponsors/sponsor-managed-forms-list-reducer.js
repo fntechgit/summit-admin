@@ -15,7 +15,8 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   REQUEST_SPONSOR_MANAGED_FORMS,
-  RECEIVE_SPONSOR_MANAGED_FORMS
+  RECEIVE_SPONSOR_MANAGED_FORMS,
+  SPONSOR_MANAGED_FORMS_ADDED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
@@ -89,6 +90,31 @@ const sponsorManagedFormsListReducer = (state = DEFAULT_STATE, action) => {
         currentPage,
         totalCount: total,
         lastPage
+      };
+    }
+    case SPONSOR_MANAGED_FORMS_ADDED: {
+      const newSponsorManagedForm = payload.response;
+
+      newSponsorManagedForm.opens_at = payload.response.opens_at
+        ? epochToMomentTimeZone(
+            payload.response.opens_at,
+            state.summitTZ
+          )?.format("YYYY/MM/DD")
+        : "N/A";
+      newSponsorManagedForm.expires_at = payload.response.expires_at
+        ? epochToMomentTimeZone(
+            payload.response.expires_at,
+            state.summitTZ
+          )?.format("YYYY/MM/DD")
+        : "N/A";
+
+      return {
+        ...state,
+        sponsorManagedForms: [
+          ...state.sponsorManagedForms,
+          newSponsorManagedForm
+        ],
+        totalCount: state.totalCount + 1
       };
     }
     default:

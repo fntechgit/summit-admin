@@ -96,7 +96,7 @@ const SponsorFormsTab = ({
       header: T.translate("edit_sponsor.forms_tab.add_ons"),
       sortable: true,
       render: (row) =>
-        row.add_ons.length > 0
+        row.add_ons?.length > 0
           ? row.add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
           : "None"
     },
@@ -264,10 +264,6 @@ const SponsorFormsTab = ({
         sponsor={sponsor}
         summitId={summitId}
       />
-      {/* <AddFormTemplate
-        open={openPopup === "new"}
-        onClose={() => setOpenPopup(null)}
-      /> */}
     </Box>
   );
 };

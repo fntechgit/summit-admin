@@ -502,7 +502,10 @@ export const saveSponsorManagedForm =
     const normalizedEntity = normalizeSponsorManagedForm(entity);
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      fields:
+        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
+      relations: "add_ons"
     };
 
     return postRequest(
