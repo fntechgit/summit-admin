@@ -83,7 +83,7 @@ const InventoryListPage = ({
     getInventoryItems(term, currentPage, newPerPage, order, orderDir);
   };
 
-  const handleSort = (index, key, dir) => {
+  const handleSort = (key, dir) => {
     getInventoryItems(term, currentPage, perPage, key, dir);
   };
 

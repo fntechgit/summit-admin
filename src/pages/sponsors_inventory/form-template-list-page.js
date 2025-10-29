@@ -85,7 +85,7 @@ const FormTemplateListPage = ({
     getFormTemplates(term, currentPage, newPerPage, order, orderDir);
   };
 
-  const handleSort = (index, key, dir) => {
+  const handleSort = (key, dir) => {
     getFormTemplates(term, currentPage, perPage, key, dir);
   };
 

@@ -41,6 +41,7 @@ const AddFormTemplateItemDialog = ({
   selectInventoryItem,
   unSelectInventoryItem,
   inventoryItems,
+  totalInventoryItems,
   currentPage,
   perPage,
   order,
@@ -246,6 +247,7 @@ const AddFormTemplateItemDialog = ({
               options={tableOptions}
               currentPage={currentPage}
               perPage={perPage}
+              totalRows={totalInventoryItems}
               onSort={handleSort}
               onPageChange={handlePageChange}
               onPerPageChange={handlePerPageChange}

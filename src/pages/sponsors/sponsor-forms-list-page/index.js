@@ -61,7 +61,7 @@ const SponsorFormsListPage = ({
     getSponsorForms(term, page, perPage, order, orderDir);
   };
 
-  const handleSort = (index, key, dir) => {
+  const handleSort = (key, dir) => {
     getSponsorForms(term, currentPage, perPage, key, dir);
   };
 
