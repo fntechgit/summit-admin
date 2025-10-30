@@ -2349,12 +2349,33 @@
       "purchases": "purchases",
       "badge_scans": "badge scans"
     },
+    "forms_tab": {
+      "alert_info": "To add a Sponsor Specific Form for this show's sponsor, click Add Form Template or Create New Form button. Note: this form will be visible only to this sponsor for this show. The General Forms can only be managed on the Show's Forms page.",
+      "hide_archived": "Hide archived Forms",
+      "using_template": "Using Template",
+      "new_form": "New Form",
+      "forms": "forms",
+      "sponsor_customized_forms": "Sponsor Customized Forms",
+      "code": "Code",
+      "name": "Name",
+      "add_ons": "Add-ons",
+      "opens_at": "Opens at",
+      "expires_at": "Expires at",
+      "items": "Items",
+      "managed_forms": "Managed Forms",
+      "manage_items": "Manage Items",
+      "customize": "Customize",
+      "add_form_using_template": "Add Form Using Template",
+      "add_selected_form_template": "Add Selected Form Template"
+    },
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start typing to choose a Tier...",
       "select_material_type": "Select Material Type",
       "select": "Select...",
-      "badge_scan_settings": "Select Badge Scan Settings"
+      "badge_scan_settings": "Select Badge Scan Settings",
+      "search": "Search...",
+      "select_add_ons": "Select Add-ons..."
     }
   },
   "additional_inputs": {

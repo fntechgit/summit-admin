@@ -24,7 +24,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
-import SummitAddonSelect from "../../inputs/summit-addon-select";
+import SummitAddonSelect from "../../mui/formik-inputs/summit-addon-select";
 
 const ManageTierAddonsPopup = ({
   sponsorship,
