@@ -144,7 +144,8 @@ export const SET_SELECTED_ALL_SPONSOR_PROMOCODES =
 export const UNSELECT_SPONSOR_PROMOCODE = "UNSELECT_SPONSOR_PROMOCODE";
 export const CHANGE_SPONSOR_PROMOCODES_SEARCH_TERM =
   "CHANGE_SPONSOR_PROMOCODES_SEARCH_TERM";
-
+export const RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS =
+  "RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS";
 export const RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META =
   "RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS_META";
 export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
@@ -2107,6 +2108,27 @@ export const sendEmails =
   };
 
 /** ****************  LEAD REPORT SETTINGS  *************************************** */
+
+export const getSummitLeadReportSettings = () => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SPONSOR_LEAD_REPORT_SETTINGS),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/lead-report-settings`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
 export const getSponsorLeadReportSettingsMeta =
   (sponsorId) => async (dispatch, getState) => {
