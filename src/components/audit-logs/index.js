@@ -11,15 +11,15 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import { Pagination } from "react-bootstrap";
 import { connect } from "react-redux";
 import {
-  clearAuditLogParams,
-  getAuditLog
+  clearAuditLogParams as clearAuditLogParamsAction,
+  getAuditLog as getAuditLogAction
 } from "../../actions/audit-log-actions";
 import {
   DATE_FILTER_ARRAY_SIZE,
   DEFAULT_CURRENT_PAGE
 } from "../../utils/constants";
 
-const AuditLogs = function ({
+const AuditLogs = ({
   entityFilter = [],
   currentSummit,
   term,
@@ -33,7 +33,9 @@ const AuditLogs = function ({
   getAuditLog,
   clearAuditLogParams,
   filters
-}) {
+}) => {
+  const [page, setPage] = useState(currentPage);
+  const [searchTerm, setSearchTerm] = useState(term);
   const defaultFilters = {
     user_id_filter: [],
     created_date_filter: Array(DATE_FILTER_ARRAY_SIZE).fill(null)
@@ -42,7 +44,7 @@ const AuditLogs = function ({
   const [enabledFilters, setEnabledFilters] = useState(
     Object.keys(filters).filter((e) =>
       Array.isArray(filters[e])
-        ? filters[e]?.some((e) => e !== null)
+        ? filters[e]?.some((a) => a !== null)
         : filters[e]?.length > 0
     )
   );
@@ -51,25 +53,25 @@ const AuditLogs = function ({
     ...filters
   });
 
-  const filters_ddl = [
+  const filtersDdl = [
     { label: "Created", value: "created_date_filter" },
     { label: "Member", value: "user_id_filter" }
   ];
 
-  const audit_log_table_options = {
+  const auditLogTableOptions = {
     sortCol: order,
     sortDir: orderDir,
     actions: {}
   };
 
-  const audit_log_columns = [
+  const auditLogColumns = [
     {
       columnKey: "created",
       value: T.translate("audit_log.date"),
       sortable: true
     },
     {
-      columnKey: "action",
+      columnKey: "action_description",
       value: T.translate("audit_log.action"),
       sortable: false
     },
@@ -81,15 +83,16 @@ const AuditLogs = function ({
     { columnKey: "user", value: T.translate("audit_log.user"), sortable: false }
   ];
 
-  const show_columns = columns
-    ? audit_log_columns.filter((c) => columns.includes(c.columnKey))
-    : audit_log_columns;
+  const showColumns = columns
+    ? auditLogColumns.filter((c) => columns.includes(c.columnKey))
+    : auditLogColumns;
 
-  const handleSort = (index, key, dir, func) => {
+  const handleSort = (_index, key, dir) => {
+    setPage(1);
     getAuditLog(
       entityFilter,
-      term,
-      currentPage,
+      searchTerm,
+      1,
       perPage,
       key,
       dir,
@@ -97,11 +100,12 @@ const AuditLogs = function ({
     );
   };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
     getAuditLog(
       entityFilter,
-      term,
-      page,
+      searchTerm,
+      newPage,
       perPage,
       order,
       orderDir,
@@ -110,10 +114,12 @@ const AuditLogs = function ({
   };
 
   const handleSearch = (newTerm) => {
+    setSearchTerm(newTerm);
+    setPage(1);
     getAuditLog(
       entityFilter,
       newTerm,
-      currentPage,
+      1,
       perPage,
       order,
       orderDir,
@@ -167,10 +173,11 @@ const AuditLogs = function ({
   };
 
   const handleApplyAuditLogFilters = () => {
+    setPage(1);
     getAuditLog(
       entityFilter,
-      term,
-      currentPage,
+      searchTerm,
+      1,
       perPage,
       order,
       orderDir,
@@ -178,10 +185,15 @@ const AuditLogs = function ({
     );
   };
 
+  const getUserFieldValue = (member) =>
+    `${member.first_name ?? ""} ${member.last_name ?? ""} (${
+      member.email ?? member.id
+    })`;
+
   useEffect(() => {
     getAuditLog(
       entityFilter,
-      term,
+      searchTerm,
       DEFAULT_CURRENT_PAGE,
       perPage,
       order,
@@ -199,7 +211,7 @@ const AuditLogs = function ({
       <div className="row">
         <div className="col-md-8">
           <FreeTextSearch
-            value={term ?? ""}
+            value={searchTerm ?? ""}
             placeholder={T.translate("audit_log.placeholders.search_log")}
             onSearch={handleSearch}
           />
@@ -215,7 +227,7 @@ const AuditLogs = function ({
             placeholder="Enabled Filters"
             value={enabledFilters}
             onChange={handleFiltersChange}
-            options={handleDDLSortByLabel(filters_ddl)}
+            options={handleDDLSortByLabel(filtersDdl)}
             isClearable
             isMulti
           />
@@ -235,11 +247,7 @@ const AuditLogs = function ({
           <div className="col-md-6">
             <MemberInput
               id="user_id_filter"
-              getOptionLabel={(member) =>
-                member.hasOwnProperty("email")
-                  ? `${member.first_name} ${member.last_name} (${member.email})`
-                  : `${member.first_name} ${member.last_name} (${member.id})`
-              }
+              getOptionLabel={getUserFieldValue}
               placeholder={T.translate("audit_log.placeholders.user_id")}
               value={auditLogFilters.user_id_filter}
               isMulti
@@ -297,9 +305,9 @@ const AuditLogs = function ({
       {logEntries.length > 0 && (
         <>
           <Table
-            options={audit_log_table_options}
+            options={auditLogTableOptions}
             data={logEntries}
-            columns={show_columns}
+            columns={showColumns}
             onSort={handleSort}
           />
           <Pagination
@@ -312,7 +320,7 @@ const AuditLogs = function ({
             boundaryLinks
             maxButtons={10}
             items={lastPage}
-            activePage={currentPage}
+            activePage={page}
             onSelect={handlePageChange}
           />
         </>
@@ -327,6 +335,6 @@ const mapStateToProps = ({ currentSummitState, auditLogState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getAuditLog,
-  clearAuditLogParams
+  getAuditLog: getAuditLogAction,
+  clearAuditLogParams: clearAuditLogParamsAction
 })(AuditLogs);

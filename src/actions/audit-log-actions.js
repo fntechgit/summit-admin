@@ -108,7 +108,7 @@ export const getAuditLog =
     return getRequest(
       createAction(REQUEST_LOG),
       createAction(RECEIVE_LOG),
-      `${window.API_BASE_URL}/api/v1/audit-logs`,
+      `${window.AUDIT_LOG_API_BASE_URL}/api/v1/audit-logs`,
       authErrorHandler,
       { page, perPage, order, orderDir, term, summitTZ, filters }
     )(params)(dispatch).then(() => {
