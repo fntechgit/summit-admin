@@ -61,7 +61,7 @@ const Sponsorship = ({
   const handlePerPageChange = (newPerPage) => {
     onSponsorshipPaginate(currentPage, newPerPage, order, orderDir);
   };
-  const handleSort = (index, key, dir) => {
+  const handleSort = (key, dir) => {
     onSponsorshipPaginate(currentPage, perPage, key, dir);
   };
 

@@ -67,7 +67,7 @@ const SummitSponsorshipListPage = ({
     deleteSummitSponsorship(sponsorshipId);
   };
 
-  const handleSort = (index, key, dir) => {
+  const handleSort = (key, dir) => {
     getSummitSponsorships(key, dir);
   };
 

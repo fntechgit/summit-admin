@@ -87,7 +87,7 @@ const FormTemplateItemListPage = ({
     getFormTemplateItems(formTemplateId, term, page, perPage, order, orderDir);
   };
 
-  const handleSort = (index, key, dir) => {
+  const handleSort = (key, dir) => {
     getFormTemplateItems(formTemplateId, term, currentPage, perPage, key, dir);
   };
 
@@ -276,6 +276,7 @@ const FormTemplateItemListPage = ({
             data={formTemplateItems}
             options={tableOptions}
             perPage={perPage}
+            totalRows={totalFormTemplateItems}
             currentPage={currentPage}
             onEdit={handleRowEdit}
             onPageChange={handlePageChange}

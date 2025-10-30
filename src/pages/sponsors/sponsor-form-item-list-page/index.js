@@ -68,7 +68,7 @@ const SponsorFormItemListPage = ({
     getSponsorFormItems(formId, page, perPage, order, orderDir, hideArchived);
   };
 
-  const handleSort = (index, key, dir) => {
+  const handleSort = (key, dir) => {
     getSponsorFormItems(formId, currentPage, perPage, key, dir, hideArchived);
   };
 
