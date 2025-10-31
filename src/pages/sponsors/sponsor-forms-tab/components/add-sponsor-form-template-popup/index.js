@@ -47,6 +47,10 @@ const AddSponsorFormTemplatePopup = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedForms, setSelectedForms] = useState([]);
 
+  const sponsorships = sponsor.sponsorships_collection.sponsorships.map(
+    (e) => e.id
+  );
+
   const formik = useFormik({
     initialValues: {
       add_ons: []
@@ -196,10 +200,10 @@ const AddSponsorFormTemplatePopup = ({
                 formik={formik}
                 queryFunction={querySponsorAddons}
                 // params for function, except input
-                queryParams={[summitId, sponsor.id, sponsor.sponsorships]}
+                queryParams={[summitId, sponsor.id, sponsorships]}
                 showSelectAll
                 getGroupId={(addon) => addon.sponsorship.type.id}
-                getGroupLabel={(addon) => addon.sponsorship.type.widget_title}
+                getGroupLabel={(addon) => addon.sponsorship.type.type.name}
                 placeholder={T.translate(
                   "edit_sponsor.placeholders.select_add_ons"
                 )}
@@ -219,7 +223,6 @@ const AddSponsorFormTemplatePopup = ({
                   <MenuButton
                     buttonId="sort-button"
                     menuId="sort-menu"
-                    buttonSx={{ color: "#000" }}
                     menuItems={[
                       { label: "A-Z", onClick: () => handleSort("name", 1) },
                       { label: "Z-A", onClick: () => handleSort("name", 0) }

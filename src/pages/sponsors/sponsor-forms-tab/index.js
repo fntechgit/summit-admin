@@ -30,7 +30,7 @@ import {
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
-import AddSponsorFormTemplatePopup from "./components/add-sponor-form-template-popup";
+import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
 
 const SponsorFormsTab = ({
   sponsorManagedForms,
@@ -43,15 +43,14 @@ const SponsorFormsTab = ({
   totalCount,
   sponsor,
   summitId,
-  // TODO: WIP FUNCTION
   getSponsorManagedForms,
   saveSponsorManagedForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
-    getSponsorManagedForms();
-  }, []);
+    if (openPopup) getSponsorManagedForms();
+  }, [openPopup]);
 
   const handlePageChange = (page) => {
     getSponsorManagedForms(term, page, perPage, order, orderDir);
