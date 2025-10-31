@@ -2277,7 +2277,7 @@ export const querySponsorAddons = async (
 
   try {
     const promises = sponsorshipIds.map((sponsorshipId) => {
-      const url = `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/add-ons?access_token=${accessToken}&fields=id,name,sponsorship.id,sponsorship.type.id,sponsorship.type.widget_title&expand=sponsorship,sponsorship.type&relations=sponsorship.none`;
+      const url = `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/add-ons?access_token=${accessToken}&fields=id,name,sponsorship.type,sponsorship.type.id,sponsorship.type.type.name&expand=sponsorship,sponsorship.type,sponsorship.type.type&relations=sponsorship.none`;
 
       return fetch(url)
         .then(fetchResponseHandler)

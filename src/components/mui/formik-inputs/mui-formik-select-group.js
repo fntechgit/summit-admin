@@ -91,11 +91,9 @@ const MuiFormikSelectGroup = ({
             }
           ]);
         }
-
         setLoading(false);
       });
     } catch (error) {
-      console.log("Error fetching options:", error);
       setLoading(false);
     }
   };
@@ -219,7 +217,11 @@ const MuiFormikSelectGroup = ({
         disabled={disabled || loading}
         renderValue={(selected) => {
           if (!selected || selected.length === 0) {
-            return <span style={{ color: "#aaa" }}>{placeholder}</span>;
+            return (
+              <span style={{ color: "#aaa" }}>
+                {loading ? "Loading..." : placeholder}
+              </span>
+            );
           }
           return selected
             .map((val) => {
