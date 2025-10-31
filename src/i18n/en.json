@@ -2352,6 +2352,7 @@
     "max_selected_values": "Max Selected Values",
     "hidden_value": "Hidden Value",
     "visible_value": "Visible Option (as appears on site)",
+    "is_default": "Is Default",
     "tab": {
       "general": "general",
       "users": "users",

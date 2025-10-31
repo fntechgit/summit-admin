@@ -193,7 +193,7 @@ const AddSponsorExtraQuestionPopup = ({
       }}
       size={12}
     >
-      <Grid2 size={5}>
+      <Grid2 size={4.5}>
         <MuiFormikTextField
           name={`values[${index}].value`}
           formik={formik}
@@ -203,7 +203,7 @@ const AddSponsorExtraQuestionPopup = ({
           onChange={(e) => handleValueChange(index, "value", e.target.value)}
         />
       </Grid2>
-      <Grid2 size={5}>
+      <Grid2 size={4.5}>
         <MuiFormikTextField
           name={`values[${index}].label`}
           formik={formik}
@@ -214,7 +214,26 @@ const AddSponsorExtraQuestionPopup = ({
         />
       </Grid2>
       <Grid2
-        size={1}
+        size={2}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+        <MuiFormikCheckbox
+          name={`values[${index}].is_default`}
+          formik={formik}
+          fullWidth
+          margin="none"
+          onChange={(e) =>
+            handleValueChange(index, "is_default", e.target.checked)
+          }
+          label={T.translate("edit_sponsor.is_default")}
+        />
+      </Grid2>
+      <Grid2
+        size={0.5}
         sx={{
           display: "flex",
           justifyContent: "center",
@@ -231,7 +250,7 @@ const AddSponsorExtraQuestionPopup = ({
         </IconButton>
       </Grid2>
       <Grid2
-        size="auto"
+        size={0.5}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -386,10 +405,10 @@ const AddSponsorExtraQuestionPopup = ({
                   }}
                   size={12}
                 >
-                  <Grid2 size={5}>
+                  <Grid2 size={4.5}>
                     {T.translate("edit_sponsor.hidden_value")}
                   </Grid2>
-                  <Grid2 size={5}>
+                  <Grid2 size={4.5}>
                     {T.translate("edit_sponsor.visible_value")}
                   </Grid2>
                   <Grid2 size={2} />
