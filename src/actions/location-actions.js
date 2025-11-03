@@ -26,10 +26,12 @@ import {
   showMessage,
   showSuccessMessage,
   getCSV,
-  geoCodeAddress,
-  geoCodeLatLng,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import {
+  geoCodeAddress,
+  geoCodeLatLng
+} from "openstack-uicore-foundation/lib/utils/query-actions";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 
