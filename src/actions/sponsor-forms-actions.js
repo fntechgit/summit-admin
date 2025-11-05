@@ -70,7 +70,7 @@ export const getSponsorForms =
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
     hideArchived = false,
-    sponsorshipTypesId
+    sponsorshipTypesId = []
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
