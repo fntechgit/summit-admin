@@ -75,7 +75,8 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
       const { sponsorshipId } = payload;
       return {
         ...state,
-        sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId)
+        sponsorships: state.sponsorships.filter((t) => t.id !== sponsorshipId),
+        totalSponsorships: state.totalSponsorships - 1
       };
     }
     case SUMMIT_SPONSORSHIP_UPDATED: {
@@ -111,7 +112,8 @@ const summitSponsorshipListReducer = (state = DEFAULT_STATE, action) => {
       };
       return {
         ...state,
-        sponsorships: [...state.sponsorships, sponsorship]
+        sponsorships: [...state.sponsorships, sponsorship],
+        totalSponsorships: state.totalSponsorships + 1
       };
     }
     default:
