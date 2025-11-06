@@ -56,7 +56,7 @@ const AddSponsorExtraQuestionPopup = ({
       max_selected_values: extraQuestion?.max_selected_values,
       values: (extraQuestion?.values || []).map((value) => ({
         ...value,
-        _shouldUpdate: false
+        _shouldSave: false
       }))
     },
     validationSchema: yup.object({
@@ -73,17 +73,17 @@ const AddSponsorExtraQuestionPopup = ({
           label: yup.string().required(),
           is_default: yup.boolean(),
           order: yup.number(),
-          _shouldUpdate: yup.boolean()
+          _shouldSave: yup.boolean()
         })
       )
     }),
     onSubmit: (values) => {
       const valuesToSave = values.values
-        .filter((v) => v._shouldUpdate)
-        .map(({ _shouldUpdate, ...rest }) => rest);
+        .filter((v) => v._shouldSave)
+        .map(({ _shouldSave, ...rest }) => rest);
       const updatedValues = {
         ...values,
-        values: values.values.map(({ _shouldUpdate, ...rest }) => rest),
+        values: values.values.map(({ _shouldSave, ...rest }) => rest),
         valuesToSave
       };
       onSubmit(updatedValues);
@@ -116,7 +116,7 @@ const AddSponsorExtraQuestionPopup = ({
       value: "",
       label: "",
       is_default: false,
-      _shouldUpdate: true
+      _shouldSave: true
     };
 
     const updatedValues = [...formik.values.values, newValue];
@@ -135,13 +135,38 @@ const AddSponsorExtraQuestionPopup = ({
   };
 
   const handleValueChange = (index, field, value) => {
+    if (field === "is_default" && value === true) {
+      const updatedValues = formik.values.values.map((v, i) => {
+        // new selected option
+        if (i === index) {
+          return {
+            ...v,
+            is_default: true,
+            _shouldSave: true
+          };
+        }
+
+        // uncheck previous marked option
+        if (i !== index && v.is_default === true) {
+          return {
+            ...v,
+            is_default: false
+          };
+        }
+        return v;
+      });
+
+      formik.setFieldValue("values", updatedValues);
+      return;
+    }
+
     const currentValue = formik.values.values[index];
     const fieldName = `values[${index}].${field}`;
 
     formik.setFieldValue(fieldName, value);
 
     if (currentValue.id) {
-      formik.setFieldValue(`values[${index}]._shouldUpdate`, true);
+      formik.setFieldValue(`values[${index}]._shouldSave`, true);
     }
   };
 
