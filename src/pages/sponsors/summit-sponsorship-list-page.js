@@ -119,11 +119,7 @@ const SummitSponsorshipListPage = ({
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("summit_sponsorship_list.summit_sponsorship_list")} (
-        {totalSponsorships})
-      </h3>
+      <h3> {T.translate("summit_sponsorship_list.tiers")}</h3>
 
       <Alert
         severity="info"

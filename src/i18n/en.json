@@ -2621,6 +2621,7 @@
   },
   "summit_sponsorship_list": {
     "summit_sponsorship_list": "Summit Tier List",
+    "tiers": "Tiers",
     "add_sponsorship": "Add Summit Tier",
     "alert_info": "Drag and Drop to sort items.",
     "no_sponsorships": "No summit tiers found for current search criteria.",
