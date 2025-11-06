@@ -49,6 +49,13 @@ export const REQUEST_SPONSOR_MANAGED_FORMS = "REQUEST_SPONSOR_MANAGED_FORMS";
 export const RECEIVE_SPONSOR_MANAGED_FORMS = "RECEIVE_SPONSOR_MANAGED_FORMS";
 export const SPONSOR_MANAGED_FORMS_ADDED = "SPONSOR_MANAGED_FORMS_ADDED";
 
+export const RESET_SPONSOR_CUSTOMIZED_FORM = "RESET_SPONSOR_CUSTOMIZED_FORM";
+export const SPONSOR_CUSTOMIZED_FORM_ADDED = "SPONSOR_CUSTOMIZED_FORM_ADDED";
+export const SPONSOR_CUSTOMIZED_FORM_UPDATED =
+  "SPONSOR_CUSTOMIZED_FORM_UPDATED";
+export const RECEIVE_SPONSOR_CUSTOMIZED_FORM =
+  "RECEIVE_SPONSOR_CUSTOMIZED_FORM";
+
 // ITEMS
 export const REQUEST_SPONSOR_FORM_ITEMS = "REQUEST_SPONSOR_FORM_ITEMS";
 export const RECEIVE_SPONSOR_FORM_ITEMS = "RECEIVE_SPONSOR_FORM_ITEMS";
@@ -99,7 +106,7 @@ export const getSponsorForms =
       params["filter[]"] = filter;
     }
 
-    if (sponsorshipTypesId.length > 0) {
+    if (sponsorshipTypesId?.length > 0) {
       const formattedSponsorships = sponsorshipTypesId.join("&&");
       filter.push("applies_to_all_tiers==0");
       filter.push(`sponsorship_type_id_not_in==${formattedSponsorships}`);
@@ -525,6 +532,121 @@ const normalizeSponsorManagedForm = (entity) => {
     all_add_ons: true,
     add_ons: entity.add_ons.map((a) => a.id)
   };
+
+  return normalizedEntity;
+};
+
+export const saveSponsorCustomizedForm =
+  (entity) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeSponsorCustomizedForm(
+      entity,
+      currentSummit.time_zone.id
+    );
+
+    const params = {
+      access_token: accessToken,
+      fields:
+        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
+      relations: "add_ons"
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_CUSTOMIZED_FORM_ADDED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms`,
+      normalizedEntity,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_sponsor.forms_tab.customized_form.created")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const updateSponsorCustomizedForm =
+  (entity) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeSponsorCustomizedForm(
+      entity,
+      currentSummit.time_zone.id
+    );
+
+    const params = {
+      access_token: accessToken,
+      fields:
+        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
+      relations: "add_ons"
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_CUSTOMIZED_FORM_UPDATED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms`,
+      normalizedEntity,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_sponsor.forms_tab.customized_form.updated")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const resetSponsorCustomizedForm = () => (dispatch) => {
+  dispatch(createAction(RESET_SPONSOR_CUSTOMIZED_FORM)({}));
+};
+
+const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
+  const {
+    id,
+    opens_at,
+    expires_at,
+    add_ons,
+    meta_fields,
+    ...normalizedEntity
+  } = entity;
+
+  normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
+  normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
+  normalizedEntity.apply_to_all_add_ons = false;
+  normalizedEntity.allowed_add_ons = add_ons.map((ao) => ao.id);
+
+  if (add_ons.includes("all")) {
+    normalizedEntity.apply_to_all_add_ons = true;
+    delete normalizedEntity.allowed_add_ons;
+  }
+
+  normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
 
   return normalizedEntity;
 };

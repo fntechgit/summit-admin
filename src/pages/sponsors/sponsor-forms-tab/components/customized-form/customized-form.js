@@ -14,12 +14,13 @@ import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import { addIssAfterDateFieldValidator } from "../../../../../utils/yup";
-import DropdownCheckbox from "../../../../../components/mui/dropdown-checkbox";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikDatepicker from "../../../../../components/mui/formik-inputs/mui-formik-datepicker";
 import AdditionalInputList from "../../../components/additional-input-list";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
+import { querySponsorAddons } from "../../../../../actions/sponsor-actions";
+import MuiFormikSelectGroup from "../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
 const buildInitialValues = (data, summitTZ) => {
   const { opens_at, expires_at } = data;
@@ -36,12 +37,17 @@ const buildInitialValues = (data, summitTZ) => {
 
 addIssAfterDateFieldValidator();
 
-const FormTemplateForm = ({
+const CustomizedForm = ({
   initialValues,
-  sponsorships,
+  sponsor,
+  summitId,
   summitTZ,
   onSubmit
 }) => {
+  const sponsorships = sponsor.sponsorships_collection.sponsorships.map(
+    (e) => e.id
+  );
+
   const formik = useFormik({
     initialValues: buildInitialValues(initialValues, summitTZ),
     validationSchema: yup.object({
@@ -57,8 +63,12 @@ const FormTemplateForm = ({
         .isAfterDateField(
           yup.ref("opens_at"),
           T.translate("validation.after", {
-            field1: T.translate("sponsor_forms.form_template_popup.expires_at"),
-            field2: T.translate("sponsor_forms.form_template_popup.opens_at")
+            field1: T.translate(
+              "edit_sponsor.forms_tab.customized_form.expires_at"
+            ),
+            field2: T.translate(
+              "edit_sponsor.forms_tab.customized_form.opens_at"
+            )
           })
         )
     }),
@@ -82,7 +92,9 @@ const FormTemplateForm = ({
             <Grid2 size={4}>
               <MuiFormikTextField
                 name="code"
-                label={T.translate("sponsor_forms.form_template_popup.code")}
+                label={T.translate(
+                  "edit_sponsor.forms_tab.customized_form.code"
+                )}
                 fullWidth
                 required
               />
@@ -90,31 +102,31 @@ const FormTemplateForm = ({
             <Grid2 size={4}>
               <MuiFormikTextField
                 name="name"
-                label={T.translate("sponsor_forms.form_template_popup.name")}
+                label={T.translate(
+                  "edit_sponsor.forms_tab.customized_form.name"
+                )}
                 fullWidth
               />
             </Grid2>
             <Grid2 size={4} sx={{ pt: "16px" }}>
-              <DropdownCheckbox
-                name="sponsorship_types"
-                allName="apply_to_all_types"
-                label={T.translate(
-                  "sponsor_forms.form_template_popup.sponsorship"
+              <MuiFormikSelectGroup
+                name="add_ons"
+                queryFunction={querySponsorAddons}
+                // params for function, except input
+                queryParams={[summitId, sponsor.id, sponsorships]}
+                showSelectAll
+                getGroupId={(addon) => addon.sponsorship.type.id}
+                getGroupLabel={(addon) => addon.sponsorship.type.type.name}
+                placeholder={T.translate(
+                  "edit_sponsor.placeholders.select_add_ons"
                 )}
-                allLabel={T.translate(
-                  "sponsor_forms.form_template_popup.all_tiers"
-                )}
-                value={formik.values.sponsorship_types}
-                allValue={formik.values.apply_to_all_types}
-                options={sponsorships.items}
-                onChange={formik.handleChange}
               />
             </Grid2>
             <Grid2 size={4}>
               <MuiFormikDatepicker
                 name="opens_at"
                 label={T.translate(
-                  "sponsor_forms.form_template_popup.opens_at"
+                  "edit_sponsor.forms_tab.customized_form.opens_at"
                 )}
               />
             </Grid2>
@@ -122,20 +134,24 @@ const FormTemplateForm = ({
               <MuiFormikDatepicker
                 name="expires_at"
                 label={T.translate(
-                  "sponsor_forms.form_template_popup.expires_at"
+                  "edit_sponsor.forms_tab.customized_form.expires_at"
                 )}
               />
             </Grid2>
             <Grid2 size={12}>
               <InputLabel htmlFor="instructions">
-                {T.translate("sponsor_forms.form_template_popup.instructions")}{" "}
+                {T.translate(
+                  "edit_sponsor.forms_tab.customized_form.instructions"
+                )}{" "}
                 *
               </InputLabel>
               <FormikTextEditor name="instructions" />
             </Grid2>
           </Grid2>
           <Typography variant="h6" sx={{ ml: "26px", mt: "20px" }}>
-            {T.translate("sponsor_forms.form_template_popup.additional_fields")}
+            {T.translate(
+              "edit_sponsor.forms_tab.customized_form.additional_fields"
+            )}
           </Typography>
           <Box sx={{ px: 3 }}>
             <AdditionalInputList name="meta_fields" />
@@ -144,7 +160,7 @@ const FormTemplateForm = ({
         <Divider />
         <DialogActions>
           <Button type="submit" fullWidth variant="contained">
-            {T.translate("sponsor_forms.form_template_popup.save")}
+            {T.translate("edit_sponsor.forms_tab.customized_form.save")}
           </Button>
         </DialogActions>
       </Box>
@@ -152,4 +168,4 @@ const FormTemplateForm = ({
   );
 };
 
-export default FormTemplateForm;
+export default CustomizedForm;

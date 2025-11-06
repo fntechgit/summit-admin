@@ -31,6 +31,7 @@ import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
 import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
+import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
 
 const SponsorFormsTab = ({
   sponsorManagedForms,
@@ -260,6 +261,13 @@ const SponsorFormsTab = ({
         open={openPopup === "template"}
         onClose={() => setOpenPopup(null)}
         onSubmit={saveSponsorManagedForm}
+        sponsor={sponsor}
+        summitId={summitId}
+      />
+
+      <CustomizedFormPopup
+        open={openPopup === "new"}
+        onClose={() => setOpenPopup(null)}
         sponsor={sponsor}
         summitId={summitId}
       />

@@ -2366,7 +2366,26 @@
       "manage_items": "Manage Items",
       "customize": "Customize",
       "add_form_using_template": "Add Form Using Template",
-      "add_selected_form_template": "Add Selected Form Template"
+      "add_selected_form_template": "Add Selected Form Template",
+      "customized_form": {
+        "title": "Create New Form",
+        "code": "Code",
+        "name": "Name",
+        "addons": "Add-ons",
+        "opens_at": "Opens at",
+        "expires_at": "Expires at",
+        "instructions": "Instructions",
+        "additional_fields": "Additional Input Fields",
+        "meta_field_title": "Field Title",
+        "meta_field_type": "Field Type",
+        "meta_field_required": "Required",
+        "delete_meta_field_warning": "Are you sure you want to delete meta field ",
+        "delete_value_warning": "Are you sure you want to delete meta field value ",
+        "save": "Save Form",
+        "created": "Form created successfully.",
+        "updated": "Form {formName} updated successfully.",
+        "error": "There was a problem creating the forms, please try again."
+      }
     },
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
