@@ -22,8 +22,10 @@ import {
   FormGroup,
   Grid2
 } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AddIcon from "@mui/icons-material/Add";
 import {
+  getSponsorCustomizedForms,
   getSponsorManagedForms,
   saveSponsorManagedForm
 } from "../../../actions/sponsor-forms-actions";
@@ -34,56 +36,105 @@ import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-
 import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
 
 const SponsorFormsTab = ({
-  sponsorManagedForms,
-  sponsorCustomizedForms = [],
-  currentPage,
-  perPage,
   term,
-  order,
-  orderDir,
-  totalCount,
+  hideArchived,
+  managedForms,
+  customizedForms,
   sponsor,
   summitId,
   getSponsorManagedForms,
+  getSponsorCustomizedForms,
   saveSponsorManagedForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
-    if (openPopup) getSponsorManagedForms();
-  }, [openPopup]);
+    getSponsorManagedForms();
+    getSponsorCustomizedForms();
+  }, []);
 
-  const handlePageChange = (page) => {
-    getSponsorManagedForms(term, page, perPage, order, orderDir);
+  const handleManagedPageChange = (page) => {
+    const { perPage, order, orderDir } = managedForms;
+    getSponsorManagedForms(term, page, perPage, order, orderDir, hideArchived);
   };
 
-  const handleSort = (index, key, dir) => {
-    getSponsorManagedForms(term, currentPage, perPage, key, dir);
+  const handleManagedSort = (index, key, dir) => {
+    const { currentPage, perPage } = managedForms;
+    getSponsorManagedForms(term, currentPage, perPage, key, dir, hideArchived);
+  };
+
+  const handleCustomizedPageChange = (page) => {
+    const { perPage, order, orderDir } = customizedForms;
+    getSponsorCustomizedForms(
+      term,
+      page,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
+  };
+
+  const handleCustomizedSort = (index, key, dir) => {
+    const { currentPage, perPage } = customizedForms;
+    getSponsorCustomizedForms(
+      term,
+      currentPage,
+      perPage,
+      key,
+      dir,
+      hideArchived
+    );
   };
 
   const handleSearch = (searchTerm) => {
-    getSponsorManagedForms(searchTerm, currentPage, perPage, order, orderDir);
+    getSponsorManagedForms(searchTerm);
+    getSponsorCustomizedForms(searchTerm);
   };
 
   const handleCustomizeForm = (item) => {
-    console.log("CUSTOMIZe : ", item);
+    console.log("CUSTOMIZE : ", item);
+  };
+
+  const handleArchiveForm = (item) => {
+    console.log("ARCHIVE : ", item);
+  };
+
+  const handleManageItems = (item) => {
+    console.log("MANAGE ITEMS : ", item);
+  };
+
+  const handleCustomizedEdit = (item) => {
+    console.log("EDIT : ", item);
+  };
+
+  const handleCustomizedDelete = (item) => {
+    console.log("DELETE : ", item);
   };
 
   const handleHideArchivedForms = (ev) => {
     getSponsorManagedForms(
       term,
-      currentPage,
-      perPage,
-      order,
-      orderDir,
+      managedForms.currentPage,
+      managedForms.perPage,
+      managedForms.order,
+      managedForms.orderDir,
+      ev.target.checked
+    );
+    getSponsorCustomizedForms(
+      term,
+      customizedForms.currentPage,
+      customizedForms.perPage,
+      customizedForms.order,
+      customizedForms.orderDir,
       ev.target.checked
     );
   };
 
-  const buildColumns = (firstColumn) => [
+  const baseColumns = (name) => [
     {
       columnKey: "name",
-      header: firstColumn,
+      header: name,
       sortable: true
     },
     {
@@ -133,11 +184,21 @@ const SponsorFormsTab = ({
         </Button>
       ),
       dottedBorder: true
+    }
+  ];
+
+  const managedFormsColumns = [
+    ...baseColumns(T.translate("edit_sponsor.forms_tab.managed_forms")),
+    {
+      columnKey: "archive",
+      header: "",
+      width: 150,
+      render: () => null
     },
     {
       columnKey: "customize",
       header: "",
-      width: 70,
+      width: 156,
       align: "center",
       render: (row) => (
         <Button
@@ -147,16 +208,35 @@ const SponsorFormsTab = ({
           onClick={() => handleCustomizeForm(row)}
         >
           {T.translate("edit_sponsor.forms_tab.customize")}
+          <ArrowForwardIcon fontSize="large" sx={{ marginLeft: 1 }} />
         </Button>
       ),
       dottedBorder: true
     }
   ];
 
-  const tableOptions = {
-    sortCol: order,
-    sortDir: orderDir
-  };
+  const customizedFormsColumns = [
+    ...baseColumns(
+      T.translate("edit_sponsor.forms_tab.sponsor_customized_forms")
+    ),
+    {
+      columnKey: "archive",
+      header: "",
+      width: 150,
+      align: "center",
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="medium"
+          onClick={() => handleArchiveForm(row)}
+        >
+          {T.translate("edit_sponsor.forms_tab.archive")}
+        </Button>
+      ),
+      dottedBorder: true
+    }
+  ];
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -174,13 +254,16 @@ const SponsorFormsTab = ({
         }}
       >
         <Grid2 size={1}>
-          <Box component="span">{totalCount} forms</Box>
+          <Box component="span">
+            {managedForms.totalCount + customizedForms.totalCount} forms
+          </Box>
         </Grid2>
         <Grid2 size={2} offset={1}>
           <FormGroup>
             <FormControlLabel
               control={
                 <Checkbox
+                  value={hideArchived}
                   onChange={handleHideArchivedForms}
                   inputProps={{
                     "aria-label": T.translate(
@@ -225,35 +308,37 @@ const SponsorFormsTab = ({
           </Button>
         </Grid2>
       </Grid2>
-      {sponsorCustomizedForms.length > 0 && (
-        <div>
-          <MuiTable
-            columns={buildColumns(
-              T.translate("edit_sponsor.forms_tab.sponsor_managed_forms")
-            )}
-            data={sponsorCustomizedForms}
-            options={tableOptions}
-            perPage={perPage}
-            totalRows={totalCount}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-            onSort={handleSort}
-          />
-        </div>
-      )}
+      <div>
+        <MuiTable
+          columns={customizedFormsColumns}
+          data={customizedForms.forms}
+          options={{
+            sortCol: customizedForms.order,
+            sortDir: customizedForms.orderDir
+          }}
+          perPage={customizedForms.perPage}
+          totalRows={customizedForms.totalCount}
+          currentPage={customizedForms.currentPage}
+          onPageChange={handleCustomizedPageChange}
+          onSort={handleCustomizedSort}
+          onEdit={handleCustomizedEdit}
+          onDelete={handleCustomizedDelete}
+        />
+      </div>
 
       <div>
         <MuiTable
-          columns={buildColumns(
-            T.translate("edit_sponsor.forms_tab.managed_forms")
-          )}
-          data={sponsorManagedForms}
-          options={tableOptions}
-          perPage={perPage}
-          totalRows={totalCount}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-          onSort={handleSort}
+          columns={managedFormsColumns}
+          data={managedForms.forms}
+          options={{
+            sortCol: managedForms.order,
+            sortDir: managedForms.orderDir
+          }}
+          perPage={managedForms.perPage}
+          totalRows={managedForms.totalCount}
+          currentPage={managedForms.currentPage}
+          onPageChange={handleManagedPageChange}
+          onSort={handleManagedSort}
         />
       </div>
 
@@ -275,11 +360,12 @@ const SponsorFormsTab = ({
   );
 };
 
-const mapStateToProps = ({ sponsorManagedFormsListState }) => ({
-  ...sponsorManagedFormsListState
+const mapStateToProps = ({ sponsorPageFormsListState }) => ({
+  ...sponsorPageFormsListState
 });
 
 export default connect(mapStateToProps, {
   getSponsorManagedForms,
-  saveSponsorManagedForm
+  saveSponsorManagedForm,
+  getSponsorCustomizedForms
 })(SponsorFormsTab);

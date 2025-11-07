@@ -47,9 +47,9 @@ const AddSponsorFormTemplatePopup = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedForms, setSelectedForms] = useState([]);
 
-  const sponsorships = sponsor.sponsorships_collection.sponsorships.map(
-    (e) => e.id
-  );
+  const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
+
+  const sponsorshipTypeIds = sponsor.sponsorships.map((e) => e.type.id);
 
   const formik = useFormik({
     initialValues: {
@@ -70,16 +70,18 @@ const AddSponsorFormTemplatePopup = ({
   });
 
   useEffect(() => {
-    getSponsorForms(
-      term,
-      currentPage,
-      FIVE_PER_PAGE,
-      order,
-      orderDir,
-      false,
-      sponsor.sponsorships
-    );
-  }, []);
+    if (open) {
+      getSponsorForms(
+        term,
+        currentPage,
+        FIVE_PER_PAGE,
+        order,
+        orderDir,
+        false,
+        sponsorshipTypeIds
+      );
+    }
+  }, [open]);
 
   const handlePageChange = (page) => {
     getSponsorForms(
@@ -89,13 +91,9 @@ const AddSponsorFormTemplatePopup = ({
       order,
       orderDir,
       false,
-      sponsor.sponsorships
+      sponsorshipTypeIds
     );
   };
-
-  // const handlePerPageChange = (newPerPage) => {
-  //   getSponsorForms(sponsor.sponsorships, term, currentPage, newPerPage, order, orderDir);
-  // };
 
   const handleSort = (key, dir) => {
     getSponsorForms(
@@ -105,7 +103,7 @@ const AddSponsorFormTemplatePopup = ({
       key,
       dir,
       false,
-      sponsor.sponsorships
+      sponsorshipTypeIds
     );
   };
 
@@ -118,7 +116,7 @@ const AddSponsorFormTemplatePopup = ({
         order,
         orderDir,
         false,
-        sponsor.sponsorships
+        sponsorshipTypeIds
       );
   };
 
@@ -200,7 +198,7 @@ const AddSponsorFormTemplatePopup = ({
                 formik={formik}
                 queryFunction={querySponsorAddons}
                 // params for function, except input
-                queryParams={[summitId, sponsor.id, sponsorships]}
+                queryParams={[summitId, sponsor.id, sponsorshipIds]}
                 showSelectAll
                 getGroupId={(addon) => addon.sponsorship.type.id}
                 getGroupLabel={(addon) => addon.sponsorship.type.type.name}
@@ -267,7 +265,6 @@ const AddSponsorFormTemplatePopup = ({
                   totalRows={totalCount}
                   onSort={handleSort}
                   onPageChange={handlePageChange}
-                  // onPerPageChange={handlePerPageChange}
                 />
               </Box>
             )}

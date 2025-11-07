@@ -534,6 +534,13 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         entity: {
           ...state.entity,
+          sponsorships: [
+            ...state.entity.sponsorships,
+            ...newSponsorships.map((s) => ({
+              id: s.id,
+              type: { id: s.type.id }
+            }))
+          ],
           sponsorships_collection: {
             ...state.entity.sponsorships_collection,
             sponsorships: [
@@ -557,6 +564,10 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         entity: {
           ...state.entity,
+          sponsorships: newSponsorships.map((s) => ({
+            id: s.id,
+            type: { id: s.type.id }
+          })),
           sponsorships_collection: {
             ...state.entity.sponsorships_collection,
             sponsorships: newSponsorships,
@@ -567,7 +578,6 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SET_SELECTED_SPONSORSHIP: {
-      console.log("CHECK PAYLOAD...", payload);
       const { sponsorship } = payload;
       return {
         ...state,
@@ -575,7 +585,6 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SPONSOR_SPONSORSHIPS_ADDON_ADDED: {
-      console.log("CHJECK>>>", payload);
       const newAddon = payload.response;
 
       const updatedSponsorships =
@@ -600,7 +609,6 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
     }
     case SPONSOR_SPONSORSHIPS_ADDON_UPDATED: {
       const updatedAddon = payload.response;
-      console.log("UPDATED", updatedAddon);
       const { id: addonId } = updatedAddon;
 
       const updatedSponsorships =
@@ -611,15 +619,11 @@ const sponsorReducer = (state = DEFAULT_STATE, action) => {
             addon.id === addonId ? updatedAddon : addon
           );
 
-          console.log("UPDATED ADDONS...", updatedAddons);
-
           return {
             ...s,
             add_ons: updatedAddons
           };
         });
-
-      console.log("CHECK NEW SPONSORSHIP", updatedSponsorships);
 
       return {
         ...state,

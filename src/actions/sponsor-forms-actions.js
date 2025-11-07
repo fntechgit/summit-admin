@@ -49,6 +49,10 @@ export const REQUEST_SPONSOR_MANAGED_FORMS = "REQUEST_SPONSOR_MANAGED_FORMS";
 export const RECEIVE_SPONSOR_MANAGED_FORMS = "RECEIVE_SPONSOR_MANAGED_FORMS";
 export const SPONSOR_MANAGED_FORMS_ADDED = "SPONSOR_MANAGED_FORMS_ADDED";
 
+export const REQUEST_SPONSOR_CUSTOMIZED_FORMS =
+  "REQUEST_SPONSOR_CUSTOMIZED_FORMS";
+export const RECEIVE_SPONSOR_CUSTOMIZED_FORMS =
+  "RECEIVE_SPONSOR_CUSTOMIZED_FORMS";
 export const RESET_SPONSOR_CUSTOMIZED_FORM = "RESET_SPONSOR_CUSTOMIZED_FORM";
 export const SPONSOR_CUSTOMIZED_FORM_ADDED = "SPONSOR_CUSTOMIZED_FORM_ADDED";
 export const SPONSOR_CUSTOMIZED_FORM_UPDATED =
@@ -102,14 +106,14 @@ export const getSponsorForms =
 
     if (hideArchived) filter.push("is_archived==0");
 
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
     if (sponsorshipTypesId?.length > 0) {
       const formattedSponsorships = sponsorshipTypesId.join("&&");
       filter.push("applies_to_all_tiers==0");
       filter.push(`sponsorship_type_id_not_in==${formattedSponsorships}`);
+    }
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
     }
 
     // order
@@ -535,6 +539,67 @@ const normalizeSponsorManagedForm = (entity) => {
 
   return normalizedEntity;
 };
+
+/* ************************************************************************ */
+/*         CUSTOMIZED FORMS       */
+/* ************************************************************************ */
+
+export const getSponsorCustomizedForms =
+  (
+    term = "",
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const summitTZ = currentSummit.time_zone.name;
+    const filter = [];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
+    }
+
+    const params = {
+      page,
+      fields:
+        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    if (hideArchived) filter.push("is_archived==0");
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.ordering = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_CUSTOMIZED_FORMS),
+      createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORMS),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms`,
+      authErrorHandler,
+      { order, orderDir, page, term, summitTZ }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 export const saveSponsorCustomizedForm =
   (entity) => async (dispatch, getState) => {

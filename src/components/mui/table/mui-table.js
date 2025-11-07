@@ -59,11 +59,14 @@ const MuiTable = ({
 
   const initialPerPage = React.useRef(perPage);
 
-  const customPerPageOptions = basePerPageOptions.includes(
-    initialPerPage.current
-  )
+  let customPerPageOptions = basePerPageOptions.includes(initialPerPage.current)
     ? basePerPageOptions
     : [...basePerPageOptions, initialPerPage.current].sort((a, b) => a - b);
+
+  // remove per page selection if no action passed
+  if (!onPerPageChange) {
+    customPerPageOptions = [initialPerPage.current];
+  }
 
   const { sortCol, sortDir } = options;
 
