@@ -22,6 +22,8 @@ import {
   FormGroup,
   Grid2
 } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import history from "../../../history";
 import {
@@ -129,6 +131,18 @@ const SponsorFormsListPage = ({
         >
           Manage&nbsp;Items
         </Button>
+      ),
+      dottedBorder: true
+    },
+    {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row) => (
+        <IconButton size="large" onClick={() => handleRowEdit(row)}>
+          <EditIcon fontSize="large" />
+        </IconButton>
       ),
       dottedBorder: true
     },
@@ -243,7 +257,6 @@ const SponsorFormsListPage = ({
             perPage={perPage}
             totalRows={totalCount}
             currentPage={currentPage}
-            onEdit={handleRowEdit}
             onDelete={handleRowDelete}
             onPageChange={handlePageChange}
             onSort={handleSort}
