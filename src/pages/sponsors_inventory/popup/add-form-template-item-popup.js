@@ -30,7 +30,7 @@ import {
   setSelectedAll,
   unSelectInventoryItem
 } from "../../../actions/inventory-item-actions";
-import { DECIMAL_DIGITS } from "../../../utils/constants";
+import { DECIMAL_DIGITS, DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const AddFormTemplateItemDialog = ({
   open,
@@ -61,7 +61,7 @@ const AddFormTemplateItemDialog = ({
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getInventoryItems(term, currentPage, newPerPage, order, orderDir);
+    getInventoryItems(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
 
   const handleSort = (key, dir) => {

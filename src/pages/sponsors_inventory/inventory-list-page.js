@@ -43,6 +43,7 @@ import {
 } from "../../actions/inventory-item-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import SponsorInventoryDialog from "./popup/sponsor-inventory-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const InventoryListPage = ({
   inventoryItems,
@@ -80,7 +81,7 @@ const InventoryListPage = ({
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getInventoryItems(term, currentPage, newPerPage, order, orderDir);
+    getInventoryItems(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
 
   const handleSort = (key, dir) => {
