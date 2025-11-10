@@ -25,7 +25,6 @@ import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import ImageIcon from "@mui/icons-material/Image";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
@@ -182,18 +181,6 @@ const InventoryListPage = ({
             ? T.translate("inventory_item_list.unarchive_button")
             : T.translate("inventory_item_list.archive_button")}
         </Button>
-      ),
-      dottedBorder: true
-    },
-    {
-      columnKey: "more",
-      header: "",
-      width: 40,
-      align: "center",
-      render: () => (
-        <IconButton size="small">
-          <UnfoldMoreIcon fontSize="small" />
-        </IconButton>
       ),
       dottedBorder: true
     }
