@@ -112,12 +112,29 @@ const SponsorItemDialog = ({
 
     if (!isConfirmed) return;
 
+    const removeOrResetField = () => {
+      if (formik.values.meta_fields.length === 1) {
+        formik.setFieldValue("meta_fields", [
+          {
+            name: "",
+            type: "Text",
+            is_required: false,
+            minimum_quantity: 0,
+            maximum_quantity: 0,
+            values: []
+          }
+        ]);
+      } else {
+        removeFormik(index);
+      }
+    };
+
     if (fieldType.id) {
       onMetaFieldTypeDeleted(initialEntity.id, fieldType.id)
-        .then(() => removeFormik(index))
+        .then(() => removeOrResetField(index))
         .catch((err) => console.log("Error at delete field from API", err));
     } else {
-      removeFormik(index);
+      removeOrResetField();
     }
   };
 
