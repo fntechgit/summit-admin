@@ -22,6 +22,8 @@ import {
   TextField
 } from "@mui/material";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import { connect } from "react-redux";
@@ -177,6 +179,18 @@ const FormTemplateListPage = ({
       dottedBorder: true
     },
     {
+      columnKey: "edit",
+      header: "",
+      width: 40,
+      align: "center",
+      render: (row) => (
+        <IconButton size="large" onClick={() => handleRowEdit(row)}>
+          <EditIcon fontSize="large" />
+        </IconButton>
+      ),
+      dottedBorder: true
+    },
+    {
       columnKey: "archive",
       header: "",
       width: 70,
@@ -316,7 +330,6 @@ const FormTemplateListPage = ({
             perPage={perPage}
             currentPage={currentPage}
             totalRows={totalFormTemplates}
-            onEdit={handleRowEdit}
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
