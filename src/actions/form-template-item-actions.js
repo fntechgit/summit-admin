@@ -75,7 +75,8 @@ export const getFormTemplateItems =
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = DEFAULT_ORDER_DIR
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
   ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
@@ -99,6 +100,8 @@ export const getFormTemplateItems =
     if (filter.length > 0) {
       params["filter[]"] = filter;
     }
+
+    if (hideArchived) filter.push("is_archived==0");
 
     // order
     if (order != null && orderDir != null) {

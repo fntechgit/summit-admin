@@ -43,6 +43,7 @@ import { getFormTemplate } from "../../actions/form-template-actions";
 import AddFormTemplateItemDialog from "./popup/add-form-template-item-popup";
 import SponsorItemDialog from "./popup/sponsor-inventory-popup";
 import { getInventoryItems } from "../../actions/inventory-item-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
@@ -122,6 +123,18 @@ const FormTemplateItemListPage = ({
       .finally(() => {
         setShowAddInventoryItemsModal(false);
       });
+  };
+
+  const handleHideArchivedForms = (ev) => {
+    getFormTemplateItems(
+      formTemplateId,
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      ev.target.checked
+    );
   };
 
   const handleFormTemplateSave = (item) => {
@@ -242,9 +255,7 @@ const FormTemplateItemListPage = ({
               <FormControlLabel
                 control={
                   <Checkbox
-                    onChange={(ev) =>
-                      console.log("CHECK BOX", ev.target.checked)
-                    }
+                    onChange={handleHideArchivedForms}
                     inputProps={{
                       "aria-label": T.translate(
                         "form_template_item_list.hide_archived"
