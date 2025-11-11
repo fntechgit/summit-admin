@@ -3628,6 +3628,7 @@
     "hide_archived": "Hide archived items",
     "add_item": "Add Item",
     "archive_button": "Archive",
+    "unarchive_button": "Unarchive",
     "delete_form_template_item_warning": "Are you sure you want to delete form template item ",
     "add_inventory_item": "Add Inventory Item",
     "add_form_template_item": "Create new Item",

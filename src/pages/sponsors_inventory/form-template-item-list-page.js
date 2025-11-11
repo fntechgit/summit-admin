@@ -37,7 +37,9 @@ import {
   saveFormTemplateItem,
   deleteItemMetaFieldType,
   deleteItemMetaFieldTypeValue,
-  deleteItemImage
+  deleteItemImage,
+  unarchiveFormTemplateItem,
+  archiveFormTemplateItem
 } from "../../actions/form-template-item-actions";
 import { getFormTemplate } from "../../actions/form-template-actions";
 import AddFormTemplateItemDialog from "./popup/add-form-template-item-popup";
@@ -65,7 +67,9 @@ const FormTemplateItemListPage = ({
   saveFormTemplateItem,
   deleteItemMetaFieldType,
   deleteItemMetaFieldTypeValue,
-  deleteItemImage
+  deleteItemImage,
+  unarchiveFormTemplateItem,
+  archiveFormTemplateItem
 }) => {
   const [showAddInventoryItemsModal, setShowAddInventoryItemsModal] =
     useState(false);
@@ -124,6 +128,11 @@ const FormTemplateItemListPage = ({
         setShowAddInventoryItemsModal(false);
       });
   };
+
+  const handleArchiveItem = (item) =>
+    item.is_archived
+      ? unarchiveFormTemplateItem(formTemplateId, item)
+      : archiveFormTemplateItem(formTemplateId, item);
 
   const handleHideArchivedForms = (ev) => {
     getFormTemplateItems(
@@ -190,9 +199,16 @@ const FormTemplateItemListPage = ({
       header: "",
       width: 70,
       align: "center",
-      render: () => (
-        <Button variant="text" color="inherit" size="small">
-          {T.translate("form_template_item_list.archive_button")}
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="small"
+          onClick={() => handleArchiveItem(row)}
+        >
+          {row.is_archived
+            ? T.translate("form_template_item_list.unarchive_button")
+            : T.translate("form_template_item_list.archive_button")}
         </Button>
       ),
       dottedBorder: true
@@ -335,5 +351,7 @@ export default connect(mapStateToProps, {
   saveFormTemplateItem,
   deleteItemMetaFieldType,
   deleteItemMetaFieldTypeValue,
-  deleteItemImage
+  deleteItemImage,
+  unarchiveFormTemplateItem,
+  archiveFormTemplateItem
 })(FormTemplateItemListPage);
