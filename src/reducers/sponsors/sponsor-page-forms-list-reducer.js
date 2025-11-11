@@ -19,7 +19,9 @@ import {
   SPONSOR_MANAGED_FORMS_ADDED,
   RECEIVE_SPONSOR_CUSTOMIZED_FORMS,
   REQUEST_SPONSOR_CUSTOMIZED_FORMS,
-  SPONSOR_CUSTOMIZED_FORM_ADDED
+  SPONSOR_CUSTOMIZED_FORM_ADDED,
+  SPONSOR_CUSTOMIZED_FORM_DELETED,
+  SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
@@ -220,6 +222,41 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           ...state.customizedForms,
           forms: [...state.customizedForms.forms, newForm],
           totalCount: state.totalCount + 1
+        }
+      };
+    }
+    case SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED: {
+      const { formId, isArchived } = payload;
+      const forms = state.customizedForms.forms.map((form) => {
+        if (form.id === formId) {
+          return {
+            ...form,
+            is_archived: isArchived
+          };
+        }
+        return form;
+      });
+
+      return {
+        ...state,
+        customizedForms: {
+          ...state.customizedForms,
+          forms
+        }
+      };
+    }
+    case SPONSOR_CUSTOMIZED_FORM_DELETED: {
+      const { formId } = payload;
+      const forms = state.customizedForms.forms.filter(
+        (form) => form.id !== formId
+      );
+
+      return {
+        ...state,
+        customizedForms: {
+          ...state.customizedForms,
+          forms,
+          totalCount: state.customizedForms.totalCount - 1
         }
       };
     }

@@ -2366,6 +2366,7 @@
       "manage_items": "Manage Items",
       "customize": "Customize",
       "archive": "Archive",
+      "unarchive": "Unarchive",
       "add_form_using_template": "Add Form Using Template",
       "add_selected_form_template": "Add Selected Form Template",
       "customized_form": {
@@ -2385,7 +2386,9 @@
         "save": "Save Form",
         "created": "Form created successfully.",
         "updated": "Form {formName} updated successfully.",
-        "error": "There was a problem creating the forms, please try again."
+        "error": "There was a problem creating the forms, please try again.",
+        "archived": "Form successfully archived.",
+        "unarchived": "Form successfully unarchived."
       }
     },
     "placeholders": {

@@ -25,9 +25,12 @@ import {
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AddIcon from "@mui/icons-material/Add";
 import {
+  archiveSponsorCustomizedForm,
+  deleteSponsorCustomizedForm,
   getSponsorCustomizedForms,
   getSponsorManagedForms,
-  saveSponsorManagedForm
+  saveSponsorManagedForm,
+  unarchiveSponsorCustomizedForm
 } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
@@ -44,7 +47,10 @@ const SponsorFormsTab = ({
   summitId,
   getSponsorManagedForms,
   getSponsorCustomizedForms,
-  saveSponsorManagedForm
+  saveSponsorManagedForm,
+  archiveSponsorCustomizedForm,
+  unarchiveSponsorCustomizedForm,
+  deleteSponsorCustomizedForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -97,9 +103,10 @@ const SponsorFormsTab = ({
     console.log("CUSTOMIZE : ", item);
   };
 
-  const handleArchiveForm = (item) => {
-    console.log("ARCHIVE : ", item);
-  };
+  const handleArchiveForm = (item) =>
+    item.is_archived
+      ? unarchiveSponsorCustomizedForm(item.id)
+      : archiveSponsorCustomizedForm(item.id);
 
   const handleManageItems = (item) => {
     console.log("MANAGE ITEMS : ", item);
@@ -109,8 +116,8 @@ const SponsorFormsTab = ({
     console.log("EDIT : ", item);
   };
 
-  const handleCustomizedDelete = (item) => {
-    console.log("DELETE : ", item);
+  const handleCustomizedDelete = (itemId) => {
+    deleteSponsorCustomizedForm(itemId);
   };
 
   const handleHideArchivedForms = (ev) => {
@@ -232,7 +239,9 @@ const SponsorFormsTab = ({
           size="medium"
           onClick={() => handleArchiveForm(row)}
         >
-          {T.translate("edit_sponsor.forms_tab.archive")}
+          {row.is_archived
+            ? T.translate("edit_sponsor.forms_tab.unarchive")
+            : T.translate("edit_sponsor.forms_tab.archive")}
         </Button>
       ),
       dottedBorder: true
@@ -315,7 +324,8 @@ const SponsorFormsTab = ({
           data={customizedForms.forms}
           options={{
             sortCol: customizedForms.order,
-            sortDir: customizedForms.orderDir
+            sortDir: customizedForms.orderDir,
+            disableProp: "is_archived"
           }}
           perPage={customizedForms.perPage}
           totalRows={customizedForms.totalCount}
@@ -368,5 +378,8 @@ const mapStateToProps = ({ sponsorPageFormsListState }) => ({
 export default connect(mapStateToProps, {
   getSponsorManagedForms,
   saveSponsorManagedForm,
-  getSponsorCustomizedForms
+  getSponsorCustomizedForms,
+  archiveSponsorCustomizedForm,
+  unarchiveSponsorCustomizedForm,
+  deleteSponsorCustomizedForm
 })(SponsorFormsTab);
