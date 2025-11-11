@@ -58,7 +58,7 @@ const SponsorFormsTab = ({
     getSponsorManagedForms(term, page, perPage, order, orderDir, hideArchived);
   };
 
-  const handleManagedSort = (index, key, dir) => {
+  const handleManagedSort = (key, dir) => {
     const { currentPage, perPage } = managedForms;
     getSponsorManagedForms(term, currentPage, perPage, key, dir, hideArchived);
   };
@@ -75,8 +75,9 @@ const SponsorFormsTab = ({
     );
   };
 
-  const handleCustomizedSort = (index, key, dir) => {
+  const handleCustomizedSort = (key, dir) => {
     const { currentPage, perPage } = customizedForms;
+
     getSponsorCustomizedForms(
       term,
       currentPage,
