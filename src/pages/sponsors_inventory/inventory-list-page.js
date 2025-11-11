@@ -43,6 +43,7 @@ import {
 } from "../../actions/inventory-item-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import SponsorInventoryDialog from "./popup/sponsor-inventory-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const InventoryListPage = ({
   inventoryItems,
@@ -91,6 +92,17 @@ const InventoryListPage = ({
     if (ev.key === "Enter") {
       getInventoryItems(searchTerm, currentPage, perPage, order, orderDir);
     }
+  };
+
+  const handleHideArchivedForms = (ev) => {
+    getInventoryItems(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      ev.target.checked
+    );
   };
 
   const handleRowEdit = (row) => {
@@ -235,7 +247,7 @@ const InventoryListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={(ev) => console.log("CHECK BOX", ev.target.checked)}
+                  onChange={handleHideArchivedForms}
                   inputProps={{
                     "aria-label": T.translate(
                       "inventory_item_list.hide_archived"
