@@ -44,6 +44,9 @@ const SponsorItemDialog = ({
   onMetaFieldTypeValueDeleted,
   entity: initialEntity
 }) => {
+  const numberValidation = () =>
+    yup.number().typeError(T.translate("validation.number"));
+
   const formik = useFormik({
     initialValues: {
       ...initialEntity,
@@ -66,6 +69,18 @@ const SponsorItemDialog = ({
       name: yup.string().required(T.translate("validation.required")),
       description: yup.string().required(T.translate("validation.required")),
       images: yup.array().min(1, T.translate("validation.required")),
+      early_bird_rate: numberValidation(),
+      standard_rate: numberValidation(),
+      onsite_rate: numberValidation(),
+      default_quantity: numberValidation().integer(
+        T.translate("validation.integer")
+      ),
+      quantity_limit_per_sponsor: numberValidation().integer(
+        T.translate("validation.integer")
+      ),
+      quantity_limit_per_show: numberValidation().integer(
+        T.translate("validation.integer")
+      ),
       meta_fields: yup.array().of(
         yup.object().shape({
           name: yup.string().trim(),
