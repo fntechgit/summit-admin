@@ -21,7 +21,8 @@ import {
   REQUEST_SPONSOR_CUSTOMIZED_FORMS,
   SPONSOR_CUSTOMIZED_FORM_ADDED,
   SPONSOR_CUSTOMIZED_FORM_DELETED,
-  SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED
+  SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED,
+  SPONSOR_CUSTOMIZED_FORM_UPDATED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
@@ -115,7 +116,7 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           code: a.code,
           name: a.name,
           items_count: a.items_count,
-          add_ons: a.add_ons,
+          allowed_add_ons: a.allowed_add_ons,
           is_archived: a.is_archived,
           opens_at: opensAt,
           expires_at: expiresAt
@@ -157,7 +158,7 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           code: a.code,
           name: a.name,
           items_count: a.items_count || 0,
-          add_ons: a.add_ons,
+          allowed_add_ons: a.allowed_add_ons,
           is_archived: a.is_archived,
           opens_at: opensAt,
           expires_at: expiresAt
@@ -221,6 +222,38 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
         customizedForms: {
           ...state.customizedForms,
           forms: [...state.customizedForms.forms, newForm],
+          totalCount: state.totalCount + 1
+        }
+      };
+    }
+    case SPONSOR_CUSTOMIZED_FORM_UPDATED: {
+      const newForm = payload.response;
+
+      newForm.opens_at = payload.response.opens_at
+        ? epochToMomentTimeZone(
+            payload.response.opens_at,
+            state.summitTZ
+          )?.format("YYYY/MM/DD")
+        : "N/A";
+      newForm.expires_at = payload.response.expires_at
+        ? epochToMomentTimeZone(
+            payload.response.expires_at,
+            state.summitTZ
+          )?.format("YYYY/MM/DD")
+        : "N/A";
+
+      const forms = state.customizedForms.forms.map((form) => {
+        if (form.id === newForm.id) {
+          return newForm;
+        }
+        return form;
+      });
+
+      return {
+        ...state,
+        customizedForms: {
+          ...state.customizedForms,
+          forms,
           totalCount: state.totalCount + 1
         }
       };

@@ -48,33 +48,36 @@ const CustomizedForm = ({
     (e) => e.id
   );
 
-  const formik = useFormik({
-    initialValues: buildInitialValues(initialValues, summitTZ),
-    validationSchema: yup.object({
-      code: yup
-        .string(T.translate("validation.string"))
-        .required(T.translate("validation.required")),
-      opens_at: yup
-        .date(T.translate("validation.date"))
-        .required(T.translate("validation.required")),
-      expires_at: yup
-        .date(T.translate("validation.date"))
-        .required(T.translate("validation.required"))
-        .isAfterDateField(
-          yup.ref("opens_at"),
-          T.translate("validation.after", {
-            field1: T.translate(
-              "edit_sponsor.forms_tab.customized_form.expires_at"
-            ),
-            field2: T.translate(
-              "edit_sponsor.forms_tab.customized_form.opens_at"
-            )
-          })
-        )
-    }),
-    onSubmit,
-    enableReinitialize: true
-  });
+  const formik = useFormik(
+    {
+      initialValues: buildInitialValues(initialValues, summitTZ),
+      validationSchema: yup.object({
+        code: yup
+          .string(T.translate("validation.string"))
+          .required(T.translate("validation.required")),
+        opens_at: yup
+          .date(T.translate("validation.date"))
+          .required(T.translate("validation.required")),
+        expires_at: yup
+          .date(T.translate("validation.date"))
+          .required(T.translate("validation.required"))
+          .isAfterDateField(
+            yup.ref("opens_at"),
+            T.translate("validation.after", {
+              field1: T.translate(
+                "edit_sponsor.forms_tab.customized_form.expires_at"
+              ),
+              field2: T.translate(
+                "edit_sponsor.forms_tab.customized_form.opens_at"
+              )
+            })
+          )
+      }),
+      onSubmit,
+      enableReinitialize: true
+    },
+    [initialValues]
+  );
 
   // SCROLL TO ERROR
   useScrollToError(formik);
@@ -110,7 +113,7 @@ const CustomizedForm = ({
             </Grid2>
             <Grid2 size={4} sx={{ pt: "16px" }}>
               <MuiFormikSelectGroup
-                name="add_ons"
+                name="allowed_add_ons"
                 queryFunction={querySponsorAddons}
                 // params for function, except input
                 queryParams={[summitId, sponsor.id, sponsorships]}

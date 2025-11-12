@@ -53,6 +53,7 @@ const SponsorFormsTab = ({
   deleteSponsorCustomizedForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
+  const [customFormEdit, setCustomFormEdit] = useState(null);
 
   useEffect(() => {
     getSponsorManagedForms();
@@ -113,7 +114,7 @@ const SponsorFormsTab = ({
   };
 
   const handleCustomizedEdit = (item) => {
-    console.log("EDIT : ", item);
+    setCustomFormEdit(item);
   };
 
   const handleCustomizedDelete = (itemId) => {
@@ -151,12 +152,12 @@ const SponsorFormsTab = ({
       sortable: true
     },
     {
-      columnKey: "add_ons",
+      columnKey: "allowed_add_ons",
       header: T.translate("edit_sponsor.forms_tab.add_ons"),
       sortable: true,
       render: (row) =>
-        row.add_ons?.length > 0
-          ? row.add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
+        row.allowed_add_ons?.length > 0
+          ? row.allowed_add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
           : "None"
     },
     {
@@ -310,7 +311,7 @@ const SponsorFormsTab = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setOpenPopup("new")}
+            onClick={() => setCustomFormEdit("new")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -362,8 +363,9 @@ const SponsorFormsTab = ({
       />
 
       <CustomizedFormPopup
-        open={openPopup === "new"}
-        onClose={() => setOpenPopup(null)}
+        formId={customFormEdit?.id || null}
+        open={!!customFormEdit}
+        onClose={() => setCustomFormEdit(null)}
         sponsor={sponsor}
         summitId={summitId}
       />

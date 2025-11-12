@@ -475,7 +475,7 @@ export const getSponsorManagedForms =
     const params = {
       page,
       fields:
-        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
+        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
       per_page: perPage,
       access_token: accessToken
     };
@@ -519,8 +519,8 @@ export const saveSponsorManagedForm =
     const params = {
       access_token: accessToken,
       fields:
-        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
-      relations: "add_ons"
+        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+      relations: "allowed_add_ons"
     };
 
     return postRequest(
@@ -537,8 +537,8 @@ export const saveSponsorManagedForm =
 const normalizeSponsorManagedForm = (entity) => {
   const normalizedEntity = {
     show_form_ids: entity.forms,
-    all_add_ons: true,
-    add_ons: entity.add_ons.map((a) => a.id)
+    apply_to_all_add_ons: true,
+    allowed_add_ons: entity.add_ons.map((a) => a.id)
   };
 
   return normalizedEntity;
@@ -577,7 +577,7 @@ export const getSponsorCustomizedForms =
     const params = {
       page,
       fields:
-        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
+        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
       per_page: perPage,
       access_token: accessToken
     };
@@ -605,6 +605,33 @@ export const getSponsorCustomizedForms =
     });
   };
 
+export const getSponsorCustomizedForm =
+  (formId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      fields:
+        "id,code,name,is_archived,opens_at,instructions,expires_at,items_count,allowed_add_ons,meta_fields",
+      access_token: accessToken
+    };
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
 export const saveSponsorCustomizedForm =
   (entity) => async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -624,8 +651,8 @@ export const saveSponsorCustomizedForm =
     const params = {
       access_token: accessToken,
       fields:
-        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
-      relations: "add_ons"
+        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+      relations: "allowed_add_ons"
     };
 
     return postRequest(
@@ -667,14 +694,14 @@ export const updateSponsorCustomizedForm =
     const params = {
       access_token: accessToken,
       fields:
-        "id,code,name,is_archived,opens_at,expires_at,items_count,add_ons",
-      relations: "add_ons"
+        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+      relations: "allowed_add_ons"
     };
 
-    return postRequest(
+    return putRequest(
       null,
       createAction(SPONSOR_CUSTOMIZED_FORM_UPDATED),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${entity.id}`,
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)
@@ -700,7 +727,7 @@ const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
     id,
     opens_at,
     expires_at,
-    add_ons,
+    allowed_add_ons,
     meta_fields,
     ...normalizedEntity
   } = entity;
@@ -708,9 +735,9 @@ const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
   normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
   normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
   normalizedEntity.apply_to_all_add_ons = false;
-  normalizedEntity.allowed_add_ons = add_ons.map((ao) => ao.id);
+  normalizedEntity.allowed_add_ons = allowed_add_ons.map((ao) => ao.id);
 
-  if (add_ons.includes("all")) {
+  if (allowed_add_ons.includes("all")) {
     normalizedEntity.apply_to_all_add_ons = true;
     delete normalizedEntity.allowed_add_ons;
   }

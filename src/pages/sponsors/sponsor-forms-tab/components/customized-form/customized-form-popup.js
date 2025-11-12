@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
+  getSponsorCustomizedForm,
   resetSponsorCustomizedForm,
   saveSponsorCustomizedForm,
   updateSponsorCustomizedForm
@@ -18,12 +19,14 @@ import {
 import CustomizedForm from "./customized-form";
 
 const CustomizedFormPopup = ({
+  formId,
   entity,
   sponsor,
   summitId,
   summitTZ,
   open,
   onClose,
+  getSponsorCustomizedForm,
   resetSponsorCustomizedForm,
   saveSponsorCustomizedForm,
   updateSponsorCustomizedForm
@@ -39,12 +42,16 @@ const CustomizedFormPopup = ({
       ? updateSponsorCustomizedForm
       : saveSponsorCustomizedForm;
 
-    console.log(values);
-
     save(values).finally(() => {
       handleClose();
     });
   };
+
+  useEffect(() => {
+    if (formId) {
+      getSponsorCustomizedForm(formId);
+    }
+  }, [formId]);
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -86,6 +93,7 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   resetSponsorCustomizedForm,
+  getSponsorCustomizedForm,
   saveSponsorCustomizedForm,
   updateSponsorCustomizedForm
 })(CustomizedFormPopup);

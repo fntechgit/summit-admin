@@ -22,7 +22,7 @@ const DEFAULT_ENTITY = {
   id: 0,
   code: "",
   name: "",
-  add_ons: [],
+  allowed_add_ons: [],
   opens_at: "",
   expires_at: "",
   instructions: "",
