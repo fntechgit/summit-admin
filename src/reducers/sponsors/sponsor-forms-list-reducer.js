@@ -168,7 +168,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
       const { formId } = payload;
       const sponsorForms = state.sponsorForms.filter((it) => it.id !== formId);
 
-      return { ...state, sponsorForms };
+      return { ...state, sponsorForms, totalCount: state.totalCount - 1 };
     }
     case REQUEST_GLOBAL_TEMPLATES: {
       const { order, orderDir, page, term } = payload;
