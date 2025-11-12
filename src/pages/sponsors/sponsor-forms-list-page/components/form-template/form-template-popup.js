@@ -49,7 +49,15 @@ const FormTemplatePopup = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableEnforceFocus
+      disableAutoFocus
+      disableRestoreFocus
+    >
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"

@@ -123,11 +123,24 @@ const FormTemplateDialog = ({
 
   const buildFieldName = (base, index, field) => `${base}[${index}].${field}`;
 
+  const handleClose = () => {
+    formik.resetForm();
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableEnforceFocus
+      disableAutoFocus
+      disableRestoreFocus
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         Edit Item
-        <IconButton size="small" onClick={() => onClose()} sx={{ mr: 1 }}>
+        <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -170,7 +183,10 @@ const FormTemplateDialog = ({
                 <InputLabel htmlFor="instructions">
                   {T.translate("edit_form_template.instructions")} *
                 </InputLabel>
-                <FormikTextEditor name="instructions" />
+                <FormikTextEditor
+                  name="instructions"
+                  options={{ zIndex: 9999999 }}
+                />
               </Grid2>
             </Grid2>
 
