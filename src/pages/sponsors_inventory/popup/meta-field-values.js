@@ -15,6 +15,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DragAndDropList from "../../../components/mui/dnd-list";
+import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 
 const MetaFieldValues = ({
   field,
