@@ -82,7 +82,7 @@ const FormTemplateListPage = ({
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getFormTemplates(term, currentPage, newPerPage, order, orderDir);
+    getFormTemplates(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
 
   const handleSort = (key, dir) => {

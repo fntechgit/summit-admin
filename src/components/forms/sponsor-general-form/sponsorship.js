@@ -18,6 +18,7 @@ import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
 import ManageTierAddonsPopup from "./manage-tier-addons-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const Sponsorship = ({
   sponsor,
@@ -59,7 +60,7 @@ const Sponsorship = ({
     onSponsorshipPaginate(page, perPage, order, orderDir);
   };
   const handlePerPageChange = (newPerPage) => {
-    onSponsorshipPaginate(currentPage, newPerPage, order, orderDir);
+    onSponsorshipPaginate(DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
   const handleSort = (key, dir) => {
     onSponsorshipPaginate(currentPage, perPage, key, dir);

@@ -23,6 +23,7 @@ import SearchInput from "../../../../components/mui/search-input";
 import MuiTable from "../../../../components/mui/table/mui-table";
 import { addInventoryItems } from "../../../../actions/sponsor-forms-actions";
 import { getInventoryItems } from "../../../../actions/inventory-item-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
 const InventoryPopup = ({
   formId,
@@ -74,7 +75,7 @@ const InventoryPopup = ({
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getInventoryItems(term, currentPage, newPerPage, order, orderDir);
+    getInventoryItems(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
 
   useEffect(() => {
