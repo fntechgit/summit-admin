@@ -176,11 +176,24 @@ const SponsorItemDialog = ({
         }))
       : [];
 
+  const handleClose = () => {
+    formik.resetForm();
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableEnforceFocus
+      disableAutoFocus
+      disableRestoreFocus
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         Edit Item
-        <IconButton size="small" onClick={() => onClose()} sx={{ mr: 1 }}>
+        <IconButton size="small" onClick={handleClose} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -223,7 +236,10 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="description">
                   {T.translate("edit_inventory_item.description")} *
                 </InputLabel>
-                <FormikTextEditor name="description" />
+                <FormikTextEditor
+                  name="description"
+                  options={{ zIndex: 9999999 }}
+                />
               </Grid2>
             </Grid2>
 

@@ -131,7 +131,10 @@ const FormTemplateForm = ({
                 {T.translate("sponsor_forms.form_template_popup.instructions")}{" "}
                 *
               </InputLabel>
-              <FormikTextEditor name="instructions" />
+              <FormikTextEditor
+                name="instructions"
+                options={{ zIndex: 9999999 }}
+              />
             </Grid2>
           </Grid2>
           <Typography variant="h5" sx={{ ml: "26px", mt: "20px" }}>

@@ -90,7 +90,10 @@ const ItemForm = ({ initialValues, onSubmit }) => {
               <InputLabel htmlFor="description">
                 {T.translate("sponsor_form_item_list.edit_item.description")} *
               </InputLabel>
-              <FormikTextEditor name="description" />
+              <FormikTextEditor
+                name="description"
+                options={{ zIndex: 9999999 }}
+              />
             </Grid2>
             <Grid2 size={4}>
               <MuiFormikPriceField
