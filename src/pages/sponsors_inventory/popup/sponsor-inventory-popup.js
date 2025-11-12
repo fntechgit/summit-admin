@@ -535,7 +535,7 @@ const SponsorItemDialog = ({
             >
               <Grid2 size={12}>
                 <InputLabel htmlFor="image" id="images">
-                  {T.translate("edit_inventory_item.images")}
+                  {T.translate("edit_inventory_item.images")} *
                 </InputLabel>
                 {formik.touched.images && formik.errors.images && (
                   <FormHelperText error>{formik.errors.images}</FormHelperText>
