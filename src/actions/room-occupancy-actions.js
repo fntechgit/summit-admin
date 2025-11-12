@@ -3,14 +3,15 @@ import {
   createAction,
   deleteRequest,
   escapeFilterValue,
-  getCSV,
   getRequest,
   putRequest,
   startLoading,
-  stopLoading
+  stopLoading,
+  getRawCSV,
+  downloadFileByContent
 } from "openstack-uicore-foundation/lib/utils/actions";
 import moment from "moment-timezone";
-import { getAccessTokenSafely } from "../utils/methods";
+import { getAccessTokenSafely, joinCVSChunks } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -143,11 +144,17 @@ export const getEventsForOccupancyCSV =
     orderDir = DEFAULT_ORDER_DIR
   ) =>
   async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
+    const { currentSummitState, currentRoomOccupancyState } = getState();
+    const { totalEvents } = currentRoomOccupancyState;
+    const csvMIME = "text/csv;charset=utf-8";
+    const pageSize = 500;
+    const totalPages = Math.ceil(totalEvents / pageSize);
     const { currentSummit } = currentSummitState;
     const filter = [];
     const summitTZ = currentSummit.time_zone.name;
+    const cvsFiles = [];
+    const endpoint = `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`;
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -174,7 +181,8 @@ export const getEventsForOccupancyCSV =
     }
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      per_page: pageSize
     };
 
     if (filter.length > 0) {
@@ -192,13 +200,22 @@ export const getEventsForOccupancyCSV =
 
     const filename = `summit-${currentSummit.slug}-rooms-occupancy.csv`;
 
-    dispatch(
-      getCSV(
-        `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/csv`,
-        params,
-        filename
-      )
-    );
+    for (let i = 1; i <= totalPages; i++) {
+      cvsFiles.push(getRawCSV(endpoint, { ...params, page: i }));
+    }
+
+    Promise.all(cvsFiles)
+      .then((files) => {
+        if (files.length > 0) {
+          const cvs = joinCVSChunks(files);
+          // then simulate the file download
+          downloadFileByContent(filename, cvs, csvMIME);
+        }
+        dispatch(stopLoading());
+      })
+      .catch(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const getCurrentEventForOccupancy =
