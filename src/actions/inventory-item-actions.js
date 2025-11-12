@@ -101,7 +101,8 @@ export const getInventoryItems =
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = DEFAULT_ORDER_DIR
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
   ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
@@ -113,6 +114,8 @@ export const getInventoryItems =
       const escapedTerm = escapeFilterValue(term);
       filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
     }
+
+    if (hideArchived) filter.push("is_archived==0");
 
     const params = {
       page,

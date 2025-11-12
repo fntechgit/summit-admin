@@ -94,6 +94,17 @@ const InventoryListPage = ({
     }
   };
 
+  const handleHideArchivedForms = (ev) => {
+    getInventoryItems(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      ev.target.checked
+    );
+  };
+
   const handleRowEdit = (row) => {
     if (row) getInventoryItem(row.id);
     setOpen(true);
@@ -232,7 +243,7 @@ const InventoryListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={(ev) => console.log("CHECK BOX", ev.target.checked)}
+                  onChange={handleHideArchivedForms}
                   inputProps={{
                     "aria-label": T.translate(
                       "inventory_item_list.hide_archived"

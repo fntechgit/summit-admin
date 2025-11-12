@@ -38,7 +38,9 @@ import {
   saveMetaFieldValues,
   deleteMetaFieldTypeValue,
   saveFiles,
-  deleteFile
+  deleteFile,
+  archiveItem,
+  unarchiveItem
 } from "./inventory-shared-actions";
 import { amountToCents } from "../utils/currency";
 
@@ -67,6 +69,8 @@ export const FORM_TEMPLATE_ITEM_META_FIELD_VALUE_DELETED =
 export const FORM_TEMPLATE_ITEM_IMAGE_SAVED = "FORM_TEMPLATE_ITEM_IMAGE_SAVED";
 export const FORM_TEMPLATE_ITEM_IMAGE_DELETED =
   "FORM_TEMPLATE_ITEM_IMAGE_DELETED";
+export const FORM_TEMPLATE_ITEM_ARCHIVED = "FORM_TEMPLATE_ITEM_ARCHIVED";
+export const FORM_TEMPLATE_ITEM_UNARCHIVED = "FORM_TEMPLATE_ITEM_UNARCHIVED";
 
 export const getFormTemplateItems =
   (
@@ -75,7 +79,8 @@ export const getFormTemplateItems =
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = DEFAULT_ORDER_DIR
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
   ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
@@ -90,7 +95,7 @@ export const getFormTemplateItems =
 
     const params = {
       page,
-      fields: "id,code,name,images,images.file_url",
+      fields: "id,code,name,is_archived,images,images.file_url",
       expand: "images",
       per_page: perPage,
       access_token: accessToken
@@ -99,6 +104,8 @@ export const getFormTemplateItems =
     if (filter.length > 0) {
       params["filter[]"] = filter;
     }
+
+    if (hideArchived) filter.push("is_archived==0");
 
     // order
     if (order != null && orderDir != null) {
@@ -395,4 +402,22 @@ export const deleteItemImage = (
     deletedActionName: FORM_TEMPLATE_ITEM_IMAGE_DELETED
   };
   return deleteFile(imageId, settings);
+};
+
+/* **************************************  ARCHIVE  ************************************** */
+
+export const archiveFormTemplateItem = (formTemplateId, formTemplateItem) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
+    updatedActionName: FORM_TEMPLATE_ITEM_ARCHIVED
+  };
+  return archiveItem(formTemplateItem, settings);
+};
+
+export const unarchiveFormTemplateItem = (formTemplateId, formTemplateItem) => {
+  const settings = {
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItem.id}/archive`,
+    deletedActionName: FORM_TEMPLATE_ITEM_UNARCHIVED
+  };
+  return unarchiveItem(formTemplateItem, settings);
 };
