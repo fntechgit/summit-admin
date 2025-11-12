@@ -47,6 +47,15 @@ const SponsorItemDialog = ({
   const numberValidation = () =>
     yup.number().typeError(T.translate("validation.number"));
 
+  const decimalValidation = () =>
+    yup
+      .number()
+      .typeError(T.translate("validation.number"))
+      .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
+        if (value === undefined || value === null) return true;
+        return /^\d+(\.\d{1,2})?$/.test(value.toString());
+      });
+
   const formik = useFormik({
     initialValues: {
       ...initialEntity,
@@ -69,9 +78,9 @@ const SponsorItemDialog = ({
       name: yup.string().required(T.translate("validation.required")),
       description: yup.string().required(T.translate("validation.required")),
       images: yup.array().min(1, T.translate("validation.required")),
-      early_bird_rate: numberValidation(),
-      standard_rate: numberValidation(),
-      onsite_rate: numberValidation(),
+      early_bird_rate: decimalValidation(),
+      standard_rate: decimalValidation(),
+      onsite_rate: decimalValidation(),
       default_quantity: numberValidation().integer(
         T.translate("validation.integer")
       ),
