@@ -195,11 +195,7 @@ const InventoryListPage = ({
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("inventory_item_list.inventory_items")} (
-        {totalInventoryItems}){" "}
-      </h3>
+      <h3> {T.translate("inventory_item_list.inventory_items")}</h3>
       <Alert
         severity="info"
         sx={{
