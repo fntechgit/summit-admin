@@ -131,7 +131,7 @@ const SponsorItemDialog = ({
 
     if (fieldType.id) {
       onMetaFieldTypeDeleted(initialEntity.id, fieldType.id)
-        .then(() => removeOrResetField(index))
+        .then(() => removeOrResetField())
         .catch((err) => console.log("Error at delete field from API", err));
     } else {
       removeOrResetField();
