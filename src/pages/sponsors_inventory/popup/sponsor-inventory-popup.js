@@ -56,6 +56,8 @@ const SponsorItemDialog = ({
         return /^\d+(\.\d{1,2})?$/.test(value.toString());
       });
 
+  const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
+
   const formik = useFormik({
     initialValues: {
       ...initialEntity,
@@ -66,8 +68,8 @@ const SponsorItemDialog = ({
               name: "",
               type: "Text",
               is_required: false,
-              minimum_quantity: 0,
-              maximum_quantity: 0,
+              minimum_quantity: null,
+              maximum_quantity: null,
               values: []
             }
           ],
@@ -92,11 +94,30 @@ const SponsorItemDialog = ({
       ),
       meta_fields: yup.array().of(
         yup.object().shape({
-          name: yup.string().trim(),
+          name: yup
+            .string()
+            .trim()
+            .required(T.translate("validation.required")),
           type: yup.string().oneOf(METAFIELD_TYPES),
           is_required: yup.boolean(),
-          minimum_quantity: yup.number().optional(),
-          maximum_quantity: yup.number().optional(),
+          minimum_quantity: yup
+            .number()
+            .nullable()
+            .when("type", {
+              is: (type) => type === "Quantity",
+              then: (schema) =>
+                schema.required(T.translate("validation.required")),
+              otherwise: (schema) => schema
+            }),
+          maximum_quantity: yup
+            .number()
+            .nullable()
+            .when("type", {
+              is: (type) => type === "Quantity",
+              then: (schema) =>
+                schema.required(T.translate("validation.required")),
+              otherwise: (schema) => schema
+            }),
           values: yup.array().of(
             yup.object().shape({
               value: yup.string().trim(),
@@ -110,8 +131,6 @@ const SponsorItemDialog = ({
     enableReinitialize: true,
     onSubmit: (values) => onSave(values)
   });
-
-  const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
 
   const mediaType = {
     max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
@@ -179,6 +198,14 @@ const SponsorItemDialog = ({
   const handleClose = () => {
     formik.resetForm();
     onClose();
+  };
+
+  const isMetafieldIncomplete = (field) => {
+    if (formik.errors.meta_fields) return true;
+    if (field.name === "") return true;
+    if (fieldTypesWithOptions.includes(field.type))
+      return field.values.some((f) => f.name === "" || f.value === "");
+    return false;
   };
 
   return (
@@ -499,6 +526,7 @@ const SponsorItemDialog = ({
                             <Button
                               variant="contained"
                               aria-label="add"
+                              disabled={isMetafieldIncomplete(field)}
                               sx={{
                                 width: 40,
                                 height: 40,
@@ -512,8 +540,8 @@ const SponsorItemDialog = ({
                                   type: "Text",
                                   is_required: false,
                                   values: [],
-                                  minimum_quantity: 0,
-                                  maximum_quantity: 0
+                                  minimum_quantity: null,
+                                  maximum_quantity: null
                                 })
                               }
                             >
