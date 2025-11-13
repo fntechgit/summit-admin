@@ -25,7 +25,6 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
-import EditIcon from "@mui/icons-material/Edit";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "../../components/mui/table/mui-table";
@@ -193,37 +192,6 @@ const FormTemplateItemListPage = ({
             </IconButton>
           </Tooltip>
         ) : null
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row) => (
-        <IconButton size="large" onClick={() => handleRowEdit(row)}>
-          <EditIcon fontSize="large" />
-        </IconButton>
-      ),
-      dottedBorder: true
-    },
-    {
-      columnKey: "archive",
-      header: "",
-      width: 70,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="small"
-          onClick={() => handleArchiveItem(row)}
-        >
-          {row.is_archived
-            ? T.translate("form_template_item_list.unarchive_button")
-            : T.translate("form_template_item_list.archive_button")}
-        </Button>
-      ),
-      dottedBorder: true
     }
   ];
 
@@ -307,6 +275,8 @@ const FormTemplateItemListPage = ({
             currentPage={currentPage}
             onPageChange={handlePageChange}
             onSort={handleSort}
+            onEdit={handleRowEdit}
+            onArchive={handleArchiveItem}
           />
         </div>
       )}
