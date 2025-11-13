@@ -177,7 +177,6 @@ const MuiFormikSelectGroup = ({
                     fontSize: 24
                   }
                 }}
-                onClick={(e) => e.stopPropagation()}
               />
               <ListItemText
                 primary={getOptionLabel(option)}
@@ -265,8 +264,6 @@ const MuiFormikSelectGroup = ({
                         fontSize: 24
                       }
                     }}
-                    // onChange is triggered by menu item on click
-                    onClick={(e) => e.stopPropagation()}
                   />
                   <ListItemText
                     primary={selectAllLabel}
