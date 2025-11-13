@@ -25,7 +25,6 @@ import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
-import EditIcon from "@mui/icons-material/Edit";
 import ImageIcon from "@mui/icons-material/Image";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
@@ -159,43 +158,6 @@ const InventoryListPage = ({
             />
           </IconButton>
         ) : null
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row) => (
-        <IconButton size="large" onClick={() => handleRowEdit(row)}>
-          <EditIcon fontSize="large" />
-        </IconButton>
-      ),
-      dottedBorder: true
-    },
-    {
-      columnKey: "archive",
-      header: "",
-      width: 70,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="small"
-          onClick={() => handleArchiveItem(row)}
-          sx={{
-            fontSize: "1.3rem",
-            fontWeight: 500,
-            lineHeight: "2.2rem",
-            padding: "4px 5px"
-          }}
-        >
-          {row.is_archived
-            ? T.translate("inventory_item_list.unarchive_button")
-            : T.translate("inventory_item_list.archive_button")}
-        </Button>
-      ),
-      dottedBorder: true
     }
   ];
 
@@ -302,6 +264,8 @@ const InventoryListPage = ({
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
+            onEdit={handleRowEdit}
+            onArchive={handleArchiveItem}
           />
         </div>
       )}

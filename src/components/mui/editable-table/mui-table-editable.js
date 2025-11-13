@@ -1,6 +1,7 @@
 import * as React from "react";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -97,6 +98,7 @@ const MuiTableEditable = ({
   options = { sortCol: "", sortDir: 1 },
   getName = (item) => item.name,
   onEdit,
+  onArchive,
   onDelete,
   onCellChange // New prop for handling cell value changes
 }) => {
@@ -201,6 +203,7 @@ const MuiTableEditable = ({
                   </TableCell>
                 ))}
                 {onEdit && <TableCell sx={{ width: 40 }} />}
+                {onArchive && <TableCell sx={{ width: 80 }} />}
                 {onDelete && <TableCell sx={{ width: 40 }} />}
               </TableRow>
             </TableHead>
@@ -246,6 +249,26 @@ const MuiTableEditable = ({
                       >
                         <EditIcon />
                       </IconButton>
+                    </TableCell>
+                  )}
+                  {onArchive && (
+                    <TableCell align="center" sx={{ width: 80 }}>
+                      <Button
+                        variant="text"
+                        color="inherit"
+                        size="small"
+                        onClick={() => onArchive(row)}
+                        sx={{
+                          fontSize: "1.3rem",
+                          fontWeight: 500,
+                          lineHeight: "2.2rem",
+                          padding: "4px 5px"
+                        }}
+                      >
+                        {row.is_archived
+                          ? T.translate("general.unarchive")
+                          : T.translate("general.archive")}
+                      </Button>
                     </TableCell>
                   )}
                   {onDelete && (
