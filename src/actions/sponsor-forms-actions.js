@@ -709,7 +709,10 @@ export const updateSponsorCustomizedForm =
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("edit_sponsor.forms_tab.customized_form.updated")
+            html: T.translate(
+              "edit_sponsor.forms_tab.customized_form.updated",
+              { formName: entity.name }
+            )
           })
         );
       })

@@ -197,7 +197,7 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
         managedForms: {
           ...state.managedForms,
           forms: [...state.managedForms.forms, newForm],
-          totalCount: state.totalCount + 1
+          totalCount: state.managedForms.totalCount + 1
         }
       };
     }
@@ -222,7 +222,7 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
         customizedForms: {
           ...state.customizedForms,
           forms: [...state.customizedForms.forms, newForm],
-          totalCount: state.totalCount + 1
+          totalCount: state.customizedForms.totalCount + 1
         }
       };
     }
@@ -253,8 +253,7 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         customizedForms: {
           ...state.customizedForms,
-          forms,
-          totalCount: state.totalCount + 1
+          forms
         }
       };
     }

@@ -55,6 +55,7 @@ const CustomizedForm = ({
         code: yup
           .string(T.translate("validation.string"))
           .required(T.translate("validation.required")),
+        instructions: yup.string().required(T.translate("validation.required")),
         opens_at: yup
           .date(T.translate("validation.date"))
           .required(T.translate("validation.required")),

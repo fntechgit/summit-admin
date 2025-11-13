@@ -49,7 +49,7 @@ const AddSponsorFormTemplatePopup = ({
 
   const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
 
-  const sponsorshipTypeIds = sponsor.sponsorships.map((e) => e.type.id);
+  const sponsorshipTypeIds = sponsor.sponsorships.map((e) => e.type.type_id);
 
   const formik = useFormik({
     initialValues: {
