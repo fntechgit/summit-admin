@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { Switch, Route, withRouter } from "react-router-dom";
@@ -20,42 +20,46 @@ import Restrict from "../routes/restrict";
 import PaymentProfileListPage from "../pages/tickets/payment-profile-list-page";
 import EditPaymentProfilePage from "../pages/tickets/edit-payment-profile-page";
 import NoMatchPage from "../pages/no-match-page";
+import EditPaymentFeeTypePage from "../pages/tickets/edit-payment-fee-type-page";
 
-class PaymentProfileLayout extends React.Component {
-  render() {
-    const { match } = this.props;
-    return (
-      <div>
-        <Breadcrumb
-          data={{
-            title: T.translate("payment_profiles.payment_profiles"),
-            pathname: match.url
-          }}
-        />
-        <Switch>
-          <Route
-            strict
-            exact
-            path={match.url}
-            component={PaymentProfileListPage}
-          />
-          <Route
-            strict
-            exact
-            path={`${match.url}/new`}
-            component={EditPaymentProfilePage}
-          />
-          <Route
-            strict
-            exact
-            path={`${match.url}/:payment_profile_id(\\d+)`}
-            component={EditPaymentProfilePage}
-          />
-          <Route component={NoMatchPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
+const PaymentProfileLayout = ({ match }) => (
+  <div>
+    <Breadcrumb
+      data={{
+        title: T.translate("payment_profiles.payment_profiles"),
+        pathname: match.url
+      }}
+    />
+    <Switch>
+      <Route strict exact path={match.url} component={PaymentProfileListPage} />
+      <Route
+        strict
+        exact
+        path={`${match.url}/new`}
+        component={EditPaymentProfilePage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/:payment_profile_id(\\d+)`}
+        component={EditPaymentProfilePage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/:payment_profile_id(\\d+)/payment-fee-type/new`}
+        component={EditPaymentFeeTypePage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/:payment_profile_id(\\d+)/payment-fee-type/:payment_fee_type_id(\\d+)`}
+        component={EditPaymentFeeTypePage}
+      />
+
+      <Route component={NoMatchPage} />
+    </Switch>
+  </div>
+);
 
 export default Restrict(withRouter(PaymentProfileLayout), "tickets");
