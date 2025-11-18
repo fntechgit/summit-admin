@@ -850,9 +850,15 @@ export const deleteExtraQuestion =
       createAction(SPONSOR_EXTRA_QUESTION_DELETED)({ questionId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("edit_sponsor.extra_question_deleted")
+        })
+      );
     });
   };
 
@@ -887,35 +893,35 @@ export const saveSponsorExtraQuestion =
         createAction(SPONSOR_EXTRA_QUESTION_UPDATED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${entity.id}`,
         normalizedEntity,
-        authErrorHandler,
+        snackbarErrorHandler,
         entity
       )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
         dispatch(
-          showSuccessMessage(T.translate("edit_sponsor.extra_question_saved"))
+          snackbarSuccessHandler({
+            title: T.translate("general.done"),
+            html: T.translate("edit_sponsor.extra_question_saved")
+          })
         );
       });
     }
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_sponsor.extra_question_created"),
-      type: "success"
-    };
 
     return postRequest(
       createAction(UPDATE_SPONSOR_EXTRA_QUESTION),
       createAction(SPONSOR_EXTRA_QUESTION_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(({ response }) => {
+      dispatch(stopLoading());
       dispatch(
-        showMessage(success_message, () => {
-          history.push(
-            `/app/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${payload.response.id}`
-          );
+        snackbarSuccessHandler({
+          title: T.translate("general.done"),
+          html: T.translate("edit_sponsor.extra_question_created")
         })
       );
+      return response;
     });
   };
 
@@ -1019,7 +1025,7 @@ export const updateSponsorExtraQuestionValueOrder =
 
     return putRequest(
       null,
-      createAction(SPONSOR_EXTRA_QUESTION_VALUE_UPDATED),
+      createAction(""),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}/values/${valueId}`,
       { order: newOrder },
       authErrorHandler,
