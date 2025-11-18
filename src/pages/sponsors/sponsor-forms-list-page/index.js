@@ -155,18 +155,9 @@ const SponsorFormsListPage = ({
 
   const tableOptions = {
     sortCol: order,
-    sortDir: orderDir
+    sortDir: orderDir,
+    disableProp: "is_archived"
   };
-
-  const tableData = sponsorForms.map((sf) => ({
-    ...sf,
-    cellStyle: sf.is_archived
-      ? {
-          backgroundColor: "background.light",
-          color: "text.disabled"
-        }
-      : {}
-  }));
 
   return (
     <div className="container">
@@ -238,7 +229,7 @@ const SponsorFormsListPage = ({
         <div>
           <MuiTable
             columns={columns}
-            data={tableData}
+            data={sponsorForms}
             options={tableOptions}
             perPage={perPage}
             totalRows={totalCount}

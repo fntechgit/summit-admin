@@ -36,7 +36,7 @@ const MuiTable = ({
   onPageChange,
   onPerPageChange,
   onSort,
-  options = { sortCol: "", sortDir: 1 },
+  options = { sortCol: "", sortDir: 1, disableProp: null }, // disableProp is the prop that will disable the row
   getName = (item) => item.name,
   onEdit,
   onDelete,
@@ -59,11 +59,14 @@ const MuiTable = ({
 
   const initialPerPage = React.useRef(perPage);
 
-  const customPerPageOptions = basePerPageOptions.includes(
-    initialPerPage.current
-  )
+  let customPerPageOptions = basePerPageOptions.includes(initialPerPage.current)
     ? basePerPageOptions
     : [...basePerPageOptions, initialPerPage.current].sort((a, b) => a - b);
+
+  // remove per page selection if no action passed
+  if (!onPerPageChange) {
+    customPerPageOptions = [initialPerPage.current];
+  }
 
   const { sortCol, sortDir } = options;
 
@@ -164,7 +167,12 @@ const MuiTable = ({
                         col.dottedBorder && styles.dottedBorderLeft
                       } ${col.className}`}
                       sx={{
-                        ...(row.cellStyle ? row.cellStyle : {})
+                        ...(options.disableProp && row[options.disableProp]
+                          ? {
+                              backgroundColor: "background.light",
+                              color: "text.disabled"
+                            }
+                          : {})
                       }}
                     >
                       {renderCell(row, col)}
@@ -174,8 +182,16 @@ const MuiTable = ({
                   {onEdit && (
                     <TableCell
                       align="center"
-                      sx={{ width: 40 }}
                       className={styles.dottedBorderLeft}
+                      sx={{
+                        width: 40,
+                        ...(options.disableProp && row[options.disableProp]
+                          ? {
+                              backgroundColor: "background.light",
+                              color: "text.disabled"
+                            }
+                          : {})
+                      }}
                     >
                       <IconButton size="large" onClick={() => onEdit(row)}>
                         <EditIcon fontSize="large" />
@@ -186,8 +202,16 @@ const MuiTable = ({
                   {onDelete && (
                     <TableCell
                       align="center"
-                      sx={{ width: 40 }}
                       className={styles.dottedBorderLeft}
+                      sx={{
+                        width: 40,
+                        ...(options.disableProp && row[options.disableProp]
+                          ? {
+                              backgroundColor: "background.light",
+                              color: "text.disabled"
+                            }
+                          : {})
+                      }}
                     >
                       <IconButton
                         size="large"

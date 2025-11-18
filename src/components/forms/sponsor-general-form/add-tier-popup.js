@@ -121,9 +121,7 @@ const AddTierPopup = ({ sponsor, open, onClose, onSubmit, summitId }) => {
                   summitId={summitId}
                   isMulti
                   placeholder={T.translate("edit_sponsor.placeholders.select")}
-                  hiddenOptions={sponsor.sponsorships_collection.sponsorships.map(
-                    (e) => e.type.id
-                  )}
+                  hiddenOptions={sponsor.sponsorships.map((e) => e.type.id)}
                 />
               </Grid2>
             </Grid2>
