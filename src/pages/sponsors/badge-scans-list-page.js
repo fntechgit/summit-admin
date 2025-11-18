@@ -46,16 +46,16 @@ const BadgeScansListPage = ({
   }, []);
 
   const handlePageChange = (page) => {
-    props.getBadgeScans(sponsorId, page, perPage, order, orderDir);
+    props.getBadgeScans(sponsorId, _, page, perPage, order, orderDir);
   };
 
   const handleSort = (index, key, dir) => {
-    props.getBadgeScans(sponsorId, currentPage, perPage, key, dir);
+    props.getBadgeScans(sponsorId, _, currentPage, perPage, key, dir);
   };
 
   const handleSponsorChange = (ev) => {
     const { value } = ev.target;
-    props.getBadgeScans(value.id, currentPage, perPage, order, orderDir);
+    props.getBadgeScans(value.id, _, currentPage, perPage, order, orderDir);
   };
 
   const handleExport = (ev) => {

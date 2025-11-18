@@ -2427,6 +2427,20 @@
       "visible_value": "Visible Option (as appears on site)"
     }
   },
+  "sponsor_badge_scans": {
+    "badge_scanned": "badges scanned",
+    "add_manual_scan": "Add Manual Scan",
+    "export": "Export",
+    "id": "ID",
+    "scanned": "Scanned",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email",
+    "company": "Company",
+    "placeholders": {
+      "search": "Search..."
+    }
+  },
   "additional_inputs": {
     "meta_field_title": "Field Title",
     "meta_field_type": "Field Type",
@@ -2723,6 +2737,7 @@
     }
   },
   "edit_badge_scan": {
+    "edit_badge_scan": "Edit Badge Scan",
     "badge_scan": "Badge Scan",
     "attendee_name": "Attendee Full Name",
     "attendee_company": "Attendee Company",

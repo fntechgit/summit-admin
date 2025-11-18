@@ -41,6 +41,7 @@ import {
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 import SponsorUsersListPerSponsorPage from "./sponsor-users-list-per-sponsor";
 import SponsorFormsTab from "./sponsor-forms-tab";
+import SponsorBadgeScans from "./sponsor-badge-scans";
 
 const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -183,6 +184,9 @@ const EditSponsorPage = (props) => {
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={4}>
           <SponsorFormsTab sponsor={entity} summitId={currentSummit.id} />
+        </CustomTabPanel>
+        <CustomTabPanel value={selectedTab} index={7}>
+          <SponsorBadgeScans sponsor={entity} />
         </CustomTabPanel>
       </Container>
     </Box>
