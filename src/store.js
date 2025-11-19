@@ -96,6 +96,8 @@ import badgeScansListReducer from "./reducers/sponsors/badge-scans-list-reducer"
 import marketingSettingListReducer from "./reducers/marketing/marketing-setting-list-reducer";
 import marketingSettingReducer from "./reducers/marketing/marketing-setting-reducer";
 import paymentProfileReducer from "./reducers/payment_profiles/payment-profile-reducer";
+import paymentFeeTypeReducer from "./reducers/payment_profiles/payment-fee-type-reducer.js";
+import paymentFeeTypesListReducer from "./reducers/payment_profiles/payment-fee-types-list-reducer.js";
 import emailTemplateReducer from "./reducers/emails/email-template-reducer";
 import emailTemplateListReducer from "./reducers/emails/email-template-list-reducer";
 import emailLogListReducer from "./reducers/emails/email-log-list-reducer";
@@ -259,6 +261,8 @@ const reducers = persistCombineReducers(config, {
   currentSponsorshipState: sponsorshipReducer,
   currentRefundPolicyListState: refundPolicyListReducer,
   currentPaymentProfileListState: paymentProfileListReducer,
+  currentPaymentFeeTypeState: paymentFeeTypeReducer,
+  currentPaymentFeeListTypeState: paymentFeeTypesListReducer,
   currentPaymentProfileState: paymentProfileReducer,
   currentTicketListState: ticketListReducer,
   currentTicketState: ticketReducer,

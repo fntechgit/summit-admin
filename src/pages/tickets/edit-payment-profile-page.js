@@ -15,12 +15,15 @@ import React from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
+import Swal from "sweetalert2";
 import PaymentProfile from "../../components/forms/payment-profile-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getPaymentProfile,
   resetPaymentProfileForm,
-  savePaymentProfile
+  savePaymentProfile,
+  getPaymentFeeTypes,
+  deletePaymentFeeType
 } from "../../actions/ticket-actions";
 import AddNewButton from "../../components/buttons/add-new-button";
 
@@ -32,11 +35,16 @@ class EditPaymentProfilePage extends React.Component {
     if (!paymentProfileId) {
       props.resetPaymentProfileForm();
     } else {
-      props.getPaymentProfile(paymentProfileId);
+      props
+        .getPaymentProfile(paymentProfileId)
+        .then(props.getPaymentFeeTypes(paymentProfileId));
     }
+
+    this.handleDeletePaymentFeeType =
+      this.handleDeletePaymentFeeType.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.payment_profile_id;
     const newId = this.props.match.params.payment_profile_id;
 
@@ -49,8 +57,31 @@ class EditPaymentProfilePage extends React.Component {
     }
   }
 
+  handleDeletePaymentFeeType(feeTypeId) {
+    const { paymentFeeTypes, deletePaymentFeeType } = this.props;
+    const feeType = paymentFeeTypes.paymentFeeTypes.find(
+      (r) => r.id === feeTypeId
+    );
+
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("edit_location.remove_room_warning")} ${
+        feeType.name
+      }`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    }).then((result) => {
+      if (result.value) {
+        deletePaymentFeeType(feeTypeId);
+      }
+    });
+  }
+
   render() {
-    const { currentSummit, entity, errors, match } = this.props;
+    const { currentSummit, paymentFeeTypes, history, entity, errors, match } =
+      this.props;
     const title = entity.id
       ? T.translate("general.edit")
       : T.translate("general.add");
@@ -69,7 +100,10 @@ class EditPaymentProfilePage extends React.Component {
             entity={entity}
             errors={errors}
             currentSummit={currentSummit}
+            history={history}
+            paymentFeeTypes={paymentFeeTypes}
             onSubmit={this.props.savePaymentProfile}
+            onDeleteFeeType={this.handleDeletePaymentFeeType}
           />
         )}
       </div>
@@ -79,9 +113,11 @@ class EditPaymentProfilePage extends React.Component {
 
 const mapStateToProps = ({
   currentSummitState,
-  currentPaymentProfileState
+  currentPaymentProfileState,
+  currentPaymentFeeListTypeState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
+  paymentFeeTypes: currentPaymentFeeListTypeState,
   ...currentPaymentProfileState
 });
 
@@ -89,5 +125,7 @@ export default connect(mapStateToProps, {
   getSummitById,
   getPaymentProfile,
   resetPaymentProfileForm,
-  savePaymentProfile
+  savePaymentProfile,
+  getPaymentFeeTypes,
+  deletePaymentFeeType
 })(EditPaymentProfilePage);

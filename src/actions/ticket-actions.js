@@ -88,7 +88,16 @@ export const PAYMENT_PROFILE_UPDATED = "PAYMENT_PROFILE_UPDATED";
 export const PAYMENT_PROFILE_DELETED = "PAYMENT_PROFILE_DELETED";
 export const RECEIVE_PAYMENT_PROFILE = "RECEIVE_PAYMENT_PROFILE";
 
+export const REQUEST_PAYMENT_FEE_TYPES = "REQUEST_PAYMENT_FEE_TYPES";
+export const RECEIVE_PAYMENT_FEE_TYPES = "RECEIVE_PAYMENT_FEE_TYPES";
+export const UPDATE_PAYMENT_FEE_TYPE = "UPDATE_PAYMENT_FEE_TYPE";
+export const PAYMENT_FEE_TYPE_UPDATED = "PAYMENT_FEE_TYPE_UPDATED";
+export const PAYMENT_FEE_TYPE_ADDED = "PAYMENT_FEE_TYPE_ADDED";
+export const PAYMENT_FEE_TYPE_DELETED = "PAYMENT_FEE_TYPE_DELETED";
+export const RECEIVE_PAYMENT_FEE_TYPE = "RECEIVE_PAYMENT_FEE_TYPE";
+
 export const RESET_PAYMENT_PROFILE_FORM = "RESET_PAYMENT_PROFILE_FORM";
+export const RESET_PAYMENT_FEE_TYPE_FORM = "RESET_PAYMENT_FEE_TYPE_FORM";
 
 // selection
 export const SELECT_TICKET = "SELECT_TICKET";
@@ -1200,7 +1209,8 @@ export const getPaymentProfiles =
     return getRequest(
       createAction(REQUEST_PAYMENT_PROFILES),
       createAction(RECEIVE_PAYMENT_PROFILES),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/payment-gateway-profiles`,
+
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles`,
       authErrorHandler,
       { page, perPage, order, orderDir }
     )(params)(dispatch).then(() => {
@@ -1221,7 +1231,7 @@ export const savePaymentProfile = (entity) => async (dispatch, getState) => {
     putRequest(
       createAction(UPDATE_PAYMENT_PROFILE),
       createAction(PAYMENT_PROFILE_UPDATED),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/payment-gateway-profiles/${entity.id}`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${entity.id}`,
       entity,
       authErrorHandler,
       entity
@@ -1244,7 +1254,7 @@ export const savePaymentProfile = (entity) => async (dispatch, getState) => {
   postRequest(
     createAction(UPDATE_PAYMENT_PROFILE),
     createAction(PAYMENT_PROFILE_ADDED),
-    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/payment-gateway-profiles`,
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles`,
     entity,
     authErrorHandler
   )(params)(dispatch).then((payload) => {
@@ -1271,7 +1281,7 @@ export const deletePaymentProfile =
     return deleteRequest(
       null,
       createAction(PAYMENT_PROFILE_DELETED)({ paymentProfileId }),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/payment-gateway-profiles/${paymentProfileId}`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}`,
       null,
       authErrorHandler
     )(params)(dispatch).then(() => {
@@ -1294,7 +1304,148 @@ export const getPaymentProfile =
     return getRequest(
       null,
       createAction(RECEIVE_PAYMENT_PROFILE),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/payment-gateway-profiles/${paymentProfileId}`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const getPaymentFeeTypes =
+  (
+    paymentProfileId,
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      page,
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === DEFAULT_ORDER_DIR ? "+" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_PAYMENT_FEE_TYPES),
+      createAction(RECEIVE_PAYMENT_FEE_TYPES),
+
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types`,
+      authErrorHandler,
+      { page, perPage, order, orderDir }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const savePaymentFeeType = (entity) => async (dispatch, getState) => {
+  const { currentSummitState, currentPaymentProfileState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: paymentProfileId }
+  } = currentPaymentProfileState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  if (entity.id) {
+    putRequest(
+      createAction(UPDATE_PAYMENT_FEE_TYPE),
+      createAction(PAYMENT_FEE_TYPE_UPDATED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types/${entity.id}`,
+      entity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then(() => {
+      dispatch(
+        showSuccessMessage(
+          T.translate("edit_payment_fee_type.payment_fee_type_saved")
+        )
+      );
+    });
+    return;
+  }
+
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_payment_fee_type.payment_fee_type_created"),
+    type: "success"
+  };
+
+  postRequest(
+    createAction(UPDATE_PAYMENT_FEE_TYPE),
+    createAction(PAYMENT_FEE_TYPE_ADDED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types`,
+    entity,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(
+      showMessage(success_message, () => {
+        history.push(
+          `/app/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}`
+        );
+      })
+    );
+  });
+};
+
+export const deletePaymentFeeType =
+  (paymentFeeTypeId) => async (dispatch, getState) => {
+    const { currentSummitState, currentPaymentProfileState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: paymentProfileId }
+    } = currentPaymentProfileState;
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return deleteRequest(
+      null,
+      createAction(PAYMENT_FEE_TYPE_DELETED)({ paymentFeeTypeId }),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types/${paymentFeeTypeId}`,
+      null,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const getPaymentFeeType =
+  (paymentFeeTypeId) => async (dispatch, getState) => {
+    const { currentSummitState, currentPaymentProfileState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: paymentProfileId }
+    } = currentPaymentProfileState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_PAYMENT_FEE_TYPE),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/${paymentProfileId}/fee-types/${paymentFeeTypeId}`,
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -1303,4 +1454,8 @@ export const getPaymentProfile =
 
 export const resetPaymentProfileForm = () => (dispatch) => {
   dispatch(createAction(RESET_PAYMENT_PROFILE_FORM)({}));
+};
+
+export const resetPaymentFeeTypeForm = () => (dispatch) => {
+  dispatch(createAction(RESET_PAYMENT_FEE_TYPE_FORM)({}));
 };

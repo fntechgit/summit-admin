@@ -9,12 +9,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Input, Dropdown } from "openstack-uicore-foundation/lib/components";
+import {
+  Input,
+  Dropdown,
+  Panel,
+  Table
+} from "openstack-uicore-foundation/lib/components";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
+import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 
 class PaymentProfileForm extends React.Component {
   constructor(props) {
@@ -27,9 +33,12 @@ class PaymentProfileForm extends React.Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleNewFeeType = this.handleNewFeeType.bind(this);
+    this.handleEditFeeType = this.handleEditFeeType.bind(this);
+    this.handleDeleteFeeType = this.handleDeleteFeeType.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -48,8 +57,8 @@ class PaymentProfileForm extends React.Component {
   }
 
   handleChange(ev) {
-    let entity = { ...this.state.entity };
-    let errors = { ...this.state.errors };
+    const entity = { ...this.state.entity };
+    const errors = { ...this.state.errors };
     let { value, id } = ev.target;
 
     if (ev.target.type === "checkbox") {
@@ -57,23 +66,21 @@ class PaymentProfileForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / 1000;
+      value = value.valueOf() / MILLISECONDS_IN_SECOND;
     }
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
-    let entity = { ...this.state.entity };
     ev.preventDefault();
-
     this.props.onSubmit(this.state.entity);
   }
 
   hasErrors(field) {
-    let { errors } = this.state;
+    const { errors } = this.state;
     if (field in errors) {
       return errors[field];
     }
@@ -81,17 +88,72 @@ class PaymentProfileForm extends React.Component {
     return "";
   }
 
+  handleNewFeeType() {
+    const { currentSummit, entity, history } = this.props;
+    history.push(
+      `/app/summits/${currentSummit.id}/payment-profiles/${entity.id}/payment-fee-type/new`
+    );
+  }
+
+  handleEditFeeType(valueId) {
+    const { currentSummit, entity, history } = this.props;
+    history.push(
+      `/app/summits/${currentSummit.id}/payment-profiles/${entity.id}/payment-fee-type/${valueId}`
+    );
+  }
+
+  handleDeleteFeeType(valueId) {
+    this.props.onDeleteFeeType(valueId);
+  }
+
   render() {
     const { entity } = this.state;
-    const { currentSummit } = this.props;
-    let application_type_ddl = [
+    const { paymentFeeTypes } = this.props;
+    const application_type_ddl = [
       { label: "Registration", value: "Registration" },
-      { label: "Bookable Rooms", value: "BookableRooms" }
+      { label: "Bookable Rooms", value: "BookableRooms" },
+      { label: "Sponsor Services", value: "SponsorServices" }
     ];
 
-    let provider_ddl = [
+    const provider_ddl = [
       { label: "Stripe", value: "Stripe" },
       { label: "LawPay", value: "LawPay" }
+    ];
+
+    const fee_types_options = {
+      sortCol: paymentFeeTypes.order,
+      sortDir: paymentFeeTypes.orderDir,
+      actions: {
+        edit: { onClick: this.handleEditFeeType },
+        delete: { onClick: this.handleDeleteFeeType }
+      }
+    };
+
+    const fee_types_columns = [
+      {
+        columnKey: "name",
+        value: T.translate("edit_payment_profile.payment_type_fee_name")
+      },
+      {
+        columnKey: "kind",
+        value: T.translate("edit_payment_profile.payment_type_fee_kind")
+      },
+      {
+        columnKey: "payment_method",
+        value: T.translate("edit_payment_profile.payment_type_fee_method")
+      },
+      {
+        columnKey: "value",
+        value: T.translate("edit_payment_profile.payment_type_fee_value")
+      },
+      {
+        columnKey: "max_cents",
+        value: T.translate("edit_payment_profile.payment_type_fee_max_cents")
+      },
+      {
+        columnKey: "min_cents",
+        value: T.translate("edit_payment_profile.payment_type_fee_min_cents")
+      }
     ];
 
     return (
@@ -106,6 +168,7 @@ class PaymentProfileForm extends React.Component {
             <Dropdown
               id="application_type"
               value={entity.application_type}
+              isDisabled={entity.id !== 0}
               onChange={this.handleChange}
               options={application_type_ddl}
             />
@@ -125,12 +188,12 @@ class PaymentProfileForm extends React.Component {
             <div className="form-check abc-checkbox">
               <input
                 type="checkbox"
-                id="active"
-                checked={entity.active}
+                id="is_active"
+                checked={entity.is_active}
                 onChange={this.handleChange}
                 className="form-check-input"
               />
-              <label className="form-check-label" htmlFor="active">
+              <label className="form-check-label" htmlFor="is_active">
                 {T.translate("edit_payment_profile.active")}
               </label>
             </div>
@@ -280,6 +343,32 @@ class PaymentProfileForm extends React.Component {
             />
           </div>
         </div>
+        {entity.id !== 0 &&
+          entity.provider === "Stripe" &&
+          entity.application_type === "SponsorServices" && (
+            <Panel
+              title={T.translate("edit_payment_profile.payment_type_fee")}
+              show
+            >
+              <div className="row form-group">
+                <div className="col-md-12 submit-buttons">
+                  <input
+                    type="button"
+                    onClick={this.handleNewFeeType}
+                    className="btn btn-primary pull-right"
+                    value={T.translate("edit_payment_profile.new_fee_type")}
+                  />
+                </div>
+              </div>
+              <div className="row form-group col-md-12">
+                <Table
+                  options={fee_types_options}
+                  data={paymentFeeTypes.paymentFeeTypes}
+                  columns={fee_types_columns}
+                />
+              </div>
+            </Panel>
+          )}
         <hr />
         <div className="row">
           <div className="col-md-12 submit-buttons">

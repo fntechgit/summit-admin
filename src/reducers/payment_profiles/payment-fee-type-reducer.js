@@ -15,25 +15,21 @@ import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
-  RECEIVE_PAYMENT_PROFILE,
+  RECEIVE_PAYMENT_FEE_TYPE,
   RESET_PAYMENT_PROFILE_FORM,
-  PAYMENT_PROFILE_UPDATED,
-  PAYMENT_PROFILE_ADDED
+  RESET_PAYMENT_FEE_TYPE_FORM,
+  PAYMENT_FEE_TYPE_UPDATED
 } from "../../actions/ticket-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
   id: 0,
-  is_active: false,
-  application_type: null,
-  provider: "Stripe",
-  test_mode_enabled: false,
-  live_secret_key: "",
-  live_publishable_key: "",
-  test_secret_key: "",
-  test_publishable_key: "",
-  send_email_receipt: false,
-  merchant_account_id: ""
+  name: "",
+  kind: null,
+  payment_method: null,
+  value: null,
+  min_cents: null,
+  max_cents: null
 };
 
 const DEFAULT_STATE = {
@@ -41,7 +37,7 @@ const DEFAULT_STATE = {
   errors: {}
 };
 
-const paymentProfileReducer = (state = DEFAULT_STATE, action) => {
+const paymentFeeTypeReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
@@ -53,8 +49,7 @@ const paymentProfileReducer = (state = DEFAULT_STATE, action) => {
     case SET_CURRENT_SUMMIT:
     case RESET_PAYMENT_PROFILE_FORM:
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-    case PAYMENT_PROFILE_ADDED:
-    case RECEIVE_PAYMENT_PROFILE: {
+    case RECEIVE_PAYMENT_FEE_TYPE: {
       const entity = { ...payload.response };
 
       for (const key in entity) {
@@ -65,9 +60,12 @@ const paymentProfileReducer = (state = DEFAULT_STATE, action) => {
 
       return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
     }
-    case PAYMENT_PROFILE_UPDATED: {
+    case PAYMENT_FEE_TYPE_UPDATED: {
       const entity = payload.response;
       return { ...state, entity };
+    }
+    case RESET_PAYMENT_FEE_TYPE_FORM: {
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     }
     case VALIDATE:
       return { ...state, errors: payload.errors };
@@ -76,4 +74,4 @@ const paymentProfileReducer = (state = DEFAULT_STATE, action) => {
   }
 };
 
-export default paymentProfileReducer;
+export default paymentFeeTypeReducer;

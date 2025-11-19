@@ -1886,7 +1886,20 @@
     "payment_profile_saved": "Payment Profile saved successfully.",
     "payment_profile_created": "Payment Profile created successfully.",
     "send_email_receipt": "Send Stripe Email receipt?",
-    "merchant_account_id": "Merchant Account Id"
+    "merchant_account_id": "Merchant Account Id",
+    "payment_type_fee": "Payment Type Fee",
+    "new_fee_type": "Add New Fee Type",
+    "payment_type_fee_name": "Name",
+    "payment_type_fee_kind": "Kind",
+    "payment_type_fee_method": "Method",
+    "payment_type_fee_value": "Value",
+    "payment_type_fee_max_cents": "Max Cents",
+    "payment_type_fee_min_cents": "Min Cents"
+  },
+  "edit_payment_fee_type": {
+    "payment_fee_type": "Payment Fee Type",
+    "payment_fee_type_saved": "Payment Fee Type saved successfully.",
+    "payment_fee_type_created": "Payment Fee Type created successfully."
   },
   "registration_invitations": {
     "registration_invitations_list": "InvitationsList",
