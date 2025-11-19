@@ -73,6 +73,8 @@
     "copied": "Copied!",
     "success": "Success!",
     "error": "Error!",
+    "unarchive": "Unarchive",
+    "archive": "Archive",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",

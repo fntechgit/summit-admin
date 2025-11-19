@@ -131,25 +131,6 @@ const SponsorFormsListPage = ({
         </Button>
       ),
       dottedBorder: true
-    },
-    {
-      columnKey: "archive",
-      header: "",
-      width: 70,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="medium"
-          onClick={() => handleArchiveItem(row)}
-        >
-          {row.is_archived
-            ? T.translate("sponsor_forms.unarchive_button")
-            : T.translate("sponsor_forms.archive_button")}
-        </Button>
-      ),
-      dottedBorder: true
     }
   ];
 
@@ -234,10 +215,11 @@ const SponsorFormsListPage = ({
             perPage={perPage}
             totalRows={totalCount}
             currentPage={currentPage}
-            onEdit={handleRowEdit}
             onDelete={handleRowDelete}
             onPageChange={handlePageChange}
             onSort={handleSort}
+            onEdit={handleRowEdit}
+            onArchive={handleArchiveItem}
           />
         </div>
       )}
