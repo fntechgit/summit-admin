@@ -227,26 +227,7 @@ const SponsorFormsTab = ({
   const customizedFormsColumns = [
     ...baseColumns(
       T.translate("edit_sponsor.forms_tab.sponsor_customized_forms")
-    ),
-    {
-      columnKey: "archive",
-      header: "",
-      width: 150,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="medium"
-          onClick={() => handleArchiveForm(row)}
-        >
-          {row.is_archived
-            ? T.translate("edit_sponsor.forms_tab.unarchive")
-            : T.translate("edit_sponsor.forms_tab.archive")}
-        </Button>
-      ),
-      dottedBorder: true
-    }
+    )
   ];
 
   return (
@@ -335,6 +316,7 @@ const SponsorFormsTab = ({
           onSort={handleCustomizedSort}
           onEdit={handleCustomizedEdit}
           onDelete={handleCustomizedDelete}
+          onArchive={handleArchiveForm}
         />
       </div>
 
