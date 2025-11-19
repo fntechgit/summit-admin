@@ -1313,18 +1313,16 @@ export const getPaymentProfile =
 
 export const getPaymentFeeTypes =
   (
+    paymentProfileId,
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR
   ) =>
   async (dispatch, getState) => {
-    const { currentSummitState, currentPaymentProfileState } = getState();
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const {
-      entity: { id: paymentProfileId }
-    } = currentPaymentProfileState;
 
     dispatch(startLoading());
 

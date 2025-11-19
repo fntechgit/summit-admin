@@ -187,12 +187,12 @@ class PaymentProfileForm extends React.Component {
             <div className="form-check abc-checkbox">
               <input
                 type="checkbox"
-                id="active"
-                checked={entity.active}
+                id="is_active"
+                checked={entity.is_active}
                 onChange={this.handleChange}
                 className="form-check-input"
               />
-              <label className="form-check-label" htmlFor="active">
+              <label className="form-check-label" htmlFor="is_active">
                 {T.translate("edit_payment_profile.active")}
               </label>
             </div>

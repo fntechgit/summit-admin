@@ -9,7 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_PAYMENT_PROFILE,
@@ -18,14 +21,11 @@ import {
   PAYMENT_PROFILE_UPDATED,
   PAYMENT_PROFILE_ADDED
 } from "../../actions/ticket-actions";
-
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
   id: 0,
-  active: false,
+  is_active: false,
   application_type: null,
   provider: "Stripe",
   test_mode_enabled: false,
@@ -46,50 +46,32 @@ const paymentProfileReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
-      }
-      break;
-    case SET_CURRENT_SUMMIT:
-    case RESET_PAYMENT_PROFILE_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case UPDATE_PAYMENT_PROFILE:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
-    case PAYMENT_PROFILE_ADDED:
-    case RECEIVE_PAYMENT_PROFILE:
-      {
-        let entity = { ...payload.response };
-
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
-        }
-
-        return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
-      }
-      break;
-    case PAYMENT_PROFILE_UPDATED:
-      {
+      // we need this in case the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
         return state;
       }
-      break;
-    case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    case SET_CURRENT_SUMMIT:
+    case RESET_PAYMENT_PROFILE_FORM:
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    case UPDATE_PAYMENT_PROFILE:
+      return { ...state, entity: { ...payload }, errors: {} };
+    case PAYMENT_PROFILE_ADDED:
+    case RECEIVE_PAYMENT_PROFILE: {
+      const entity = { ...payload.response };
+
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
+        }
       }
-      break;
+
+      return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
+    }
+    case PAYMENT_PROFILE_UPDATED:
+      return state;
+    case VALIDATE:
+      return { ...state, errors: payload.errors };
     default:
       return state;
   }

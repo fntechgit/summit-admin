@@ -37,7 +37,7 @@ class EditPaymentProfilePage extends React.Component {
     } else {
       props
         .getPaymentProfile(paymentProfileId)
-        .then(props.getPaymentFeeTypes());
+        .then(props.getPaymentFeeTypes(paymentProfileId));
     }
 
     this.handleDeletePaymentFeeType =
