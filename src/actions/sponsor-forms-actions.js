@@ -1152,13 +1152,17 @@ const normalizeItem = (entity) => {
 
   if (early_bird_rate === "" || typeof early_bird_rate === "undefined")
     delete normalizedEntity.early_bird_rate;
-  else normalizedEntity.early_bird_rate = early_bird_rate * CENTS_FACTOR;
+  else
+    normalizedEntity.early_bird_rate = Math.round(
+      early_bird_rate * CENTS_FACTOR
+    );
   if (standard_rate === "" || typeof standard_rate === "undefined")
     delete normalizedEntity.standard_rate;
-  else normalizedEntity.standard_rate = standard_rate * CENTS_FACTOR;
+  else
+    normalizedEntity.standard_rate = Math.round(standard_rate * CENTS_FACTOR);
   if (onsite_rate === "" || typeof onsite_rate === "undefined")
     delete normalizedEntity.onsite_rate;
-  else normalizedEntity.onsite_rate = onsite_rate * CENTS_FACTOR;
+  else normalizedEntity.onsite_rate = Math.round(onsite_rate * CENTS_FACTOR);
 
   if (quantity_limit_per_show === "")
     delete normalizedEntity.quantity_limit_per_show;
