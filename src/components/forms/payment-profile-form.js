@@ -342,7 +342,7 @@ class PaymentProfileForm extends React.Component {
             />
           </div>
         </div>
-        {entity.id && entity.provider === "Stripe" && (
+        {entity.id !== 0 && entity.provider === "Stripe" && (
           <Panel
             title={T.translate("edit_payment_profile.payment_type_fee")}
             show
