@@ -84,6 +84,7 @@
     "string": "Must be a string.",
     "number": "Must be a number.",
     "integer": "Must be a integer",
+    "one_option_required": "Must have one option",
     "two_decimals": "Max 2 decimal places",
     "email": "Wrong email format.",
     "date": "Wrong date format.",

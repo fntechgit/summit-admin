@@ -50,11 +50,9 @@ const MetaFieldValues = ({
   };
 
   const isMetafieldValueIncomplete = (index) => {
-    const newFields = [...values.meta_fields];
-    if (newFields[index].values.length > 0) {
-      return newFields[index].values.some(
-        (f) => f.name === "" || f.value === ""
-      );
+    const metafield = values.meta_fields[index];
+    if (metafield.values.length > 0) {
+      return metafield.values.some((f) => f.name === "" || f.value === "");
     }
     return false;
   };
@@ -190,7 +188,7 @@ const MetaFieldValues = ({
     <Box>
       <DragAndDropList
         items={sortedValues}
-        onReorder={(values) => onReorder(fieldIndex, values)}
+        onReorder={onReorder}
         renderItem={renderMetaFieldValue}
         idKey="id"
         updateOrder="order"

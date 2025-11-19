@@ -96,8 +96,17 @@ const SponsorItemDialog = ({
         yup.object().shape({
           name: yup
             .string()
-            .trim()
-            .required(T.translate("validation.required")),
+            .when(["values", "minimum_quantity", "maximum_quantity"], {
+              is: (values, minQty, maxQty) => {
+                // required only if has values or quantities
+                const hasValues = values && values.length > 0;
+                const hasQuantities = minQty !== null || maxQty !== null;
+                return hasValues || hasQuantities;
+              },
+              then: (schema) =>
+                schema.trim().required(T.translate("validation.required")),
+              otherwise: (schema) => schema
+            }),
           type: yup.string().oneOf(METAFIELD_TYPES),
           is_required: yup.boolean(),
           minimum_quantity: yup
@@ -118,13 +127,24 @@ const SponsorItemDialog = ({
                 schema.required(T.translate("validation.required")),
               otherwise: (schema) => schema
             }),
-          values: yup.array().of(
-            yup.object().shape({
-              value: yup.string().trim(),
-              is_default: yup.boolean(),
-              name: yup.string()
-            })
-          )
+          values: yup.array().when("type", {
+            is: (type) => fieldTypesWithOptions.includes(type),
+            then: (schema) =>
+              schema.min(1, T.translate("validation.one_option_required")).of(
+                yup.object().shape({
+                  value: yup
+                    .string()
+                    .trim()
+                    .required(T.translate("validation.required")),
+                  name: yup
+                    .string()
+                    .trim()
+                    .required(T.translate("validation.required")),
+                  is_default: yup.boolean()
+                })
+              ),
+            otherwise: (schema) => schema
+          })
         })
       )
     }),
@@ -203,8 +223,6 @@ const SponsorItemDialog = ({
   const isMetafieldIncomplete = (field) => {
     if (formik.errors.meta_fields) return true;
     if (field.name === "") return true;
-    if (fieldTypesWithOptions.includes(field.type))
-      return field.values.some((f) => f.name === "" || f.value === "");
     return false;
   };
 
@@ -438,13 +456,24 @@ const SponsorItemDialog = ({
                                     onMetaFieldTypeValueDeleted
                                   }
                                 />
+                                {formik.touched.meta_fields?.[fieldIndex]
+                                  ?.values &&
+                                  formik.errors.meta_fields?.[fieldIndex]
+                                    ?.values && (
+                                    <FormHelperText error>
+                                      {
+                                        formik.errors.meta_fields[fieldIndex]
+                                          .values
+                                      }
+                                    </FormHelperText>
+                                  )}
                               </>
                             )}
                             {field.type === "Quantity" && (
                               <Grid2
                                 container
                                 spacing={2}
-                                sx={{ alignItems: "end", my: 2 }}
+                                sx={{ alignItems: "start", my: 2 }}
                               >
                                 <Grid2 size={4}>
                                   <Box
