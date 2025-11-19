@@ -168,6 +168,7 @@ class PaymentProfileForm extends React.Component {
             <Dropdown
               id="application_type"
               value={entity.application_type}
+              isDisabled={entity.id !== 0}
               onChange={this.handleChange}
               options={application_type_ddl}
             />
@@ -342,30 +343,32 @@ class PaymentProfileForm extends React.Component {
             />
           </div>
         </div>
-        {entity.id !== 0 && entity.provider === "Stripe" && (
-          <Panel
-            title={T.translate("edit_payment_profile.payment_type_fee")}
-            show
-          >
-            <div className="row form-group">
-              <div className="col-md-12 submit-buttons">
-                <input
-                  type="button"
-                  onClick={this.handleNewFeeType}
-                  className="btn btn-primary pull-right"
-                  value={T.translate("edit_payment_profile.new_fee_type")}
+        {entity.id !== 0 &&
+          entity.provider === "Stripe" &&
+          entity.application_type === "SponsorServices" && (
+            <Panel
+              title={T.translate("edit_payment_profile.payment_type_fee")}
+              show
+            >
+              <div className="row form-group">
+                <div className="col-md-12 submit-buttons">
+                  <input
+                    type="button"
+                    onClick={this.handleNewFeeType}
+                    className="btn btn-primary pull-right"
+                    value={T.translate("edit_payment_profile.new_fee_type")}
+                  />
+                </div>
+              </div>
+              <div className="row form-group col-md-12">
+                <Table
+                  options={fee_types_options}
+                  data={paymentFeeTypes.paymentFeeTypes}
+                  columns={fee_types_columns}
                 />
               </div>
-            </div>
-            <div className="row form-group col-md-12">
-              <Table
-                options={fee_types_options}
-                data={paymentFeeTypes.paymentFeeTypes}
-                columns={fee_types_columns}
-              />
-            </div>
-          </Panel>
-        )}
+            </Panel>
+          )}
         <hr />
         <div className="row">
           <div className="col-md-12 submit-buttons">
