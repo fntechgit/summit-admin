@@ -17,7 +17,6 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_PAYMENT_PROFILE,
   RESET_PAYMENT_PROFILE_FORM,
-  UPDATE_PAYMENT_PROFILE,
   PAYMENT_PROFILE_UPDATED,
   PAYMENT_PROFILE_ADDED
 } from "../../actions/ticket-actions";
@@ -54,8 +53,6 @@ const paymentProfileReducer = (state = DEFAULT_STATE, action) => {
     case SET_CURRENT_SUMMIT:
     case RESET_PAYMENT_PROFILE_FORM:
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-    case UPDATE_PAYMENT_PROFILE:
-      return { ...state, entity: { ...payload }, errors: {} };
     case PAYMENT_PROFILE_ADDED:
     case RECEIVE_PAYMENT_PROFILE: {
       const entity = { ...payload.response };
@@ -68,8 +65,10 @@ const paymentProfileReducer = (state = DEFAULT_STATE, action) => {
 
       return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
     }
-    case PAYMENT_PROFILE_UPDATED:
-      return state;
+    case PAYMENT_PROFILE_UPDATED: {
+      const entity = payload.response;
+      return { ...state, entity };
+    }
     case VALIDATE:
       return { ...state, errors: payload.errors };
     default:

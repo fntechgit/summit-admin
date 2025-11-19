@@ -17,8 +17,8 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_PAYMENT_FEE_TYPE,
   RESET_PAYMENT_PROFILE_FORM,
-  PAYMENT_PROFILE_UPDATED,
-  RESET_PAYMENT_FEE_TYPE_FORM
+  RESET_PAYMENT_FEE_TYPE_FORM,
+  PAYMENT_FEE_TYPE_UPDATED
 } from "../../actions/ticket-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
@@ -60,8 +60,10 @@ const paymentFeeTypeReducer = (state = DEFAULT_STATE, action) => {
 
       return { ...state, entity: { ...DEFAULT_ENTITY, ...entity } };
     }
-    case PAYMENT_PROFILE_UPDATED:
-      return state;
+    case PAYMENT_FEE_TYPE_UPDATED: {
+      const entity = payload.response;
+      return { ...state, entity };
+    }
     case RESET_PAYMENT_FEE_TYPE_FORM: {
       return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     }
