@@ -9,8 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_PAYMENT_PROFILES,
   REQUEST_PAYMENT_PROFILES,
@@ -20,7 +21,6 @@ import {
 } from "../../actions/ticket-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 const DEFAULT_STATE = {
   paymentProfiles: [],
@@ -37,52 +37,47 @@ const paymentProfileListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_PAYMENT_PROFILES: {
-      let { order, orderDir } = payload;
+      const { order, orderDir } = payload;
       return { ...state, order, orderDir };
     }
     case RECEIVE_PAYMENT_PROFILES: {
-      let { total } = payload.response;
-      let paymentProfiles = payload.response.data.map((p) => ({
-        ...p,
-        active_nice: p.active ? "Yes" : "No"
-      }));
+      const { total } = payload.response;
+      const paymentProfiles = payload.response.data;
 
       return {
         ...state,
-        paymentProfiles: paymentProfiles,
+        paymentProfiles,
         totalPaymentProfiles: total
       };
     }
     case PAYMENT_PROFILE_ADDED: {
-      let { response } = payload;
+      const { response } = payload;
       return {
         ...state,
-        paymentProfiles: [
-          ...state.paymentProfiles,
-          { ...response, active_nice: response.active ? "Yes" : "No" }
-        ]
+        paymentProfiles: [...state.paymentProfiles, response],
+        totalPaymentProfiles: state.totalPaymentProfiles + 1
       };
     }
     case PAYMENT_PROFILE_UPDATED: {
-      let updatedEntity = { ...payload.response };
-      let paymentProfiles = state.paymentProfiles.map((pp) => {
+      const updatedEntity = { ...payload.response };
+      const paymentProfiles = state.paymentProfiles.map((pp) => {
         if (pp.id === updatedEntity.id)
           return {
-            ...updatedEntity,
-            active_nice: updatedEntity.active ? "Yes" : "No"
+            ...updatedEntity
           };
         return pp;
       });
 
-      return { ...state, paymentProfiles: paymentProfiles };
+      return { ...state, paymentProfiles };
     }
     case PAYMENT_PROFILE_DELETED: {
-      let { paymentProfileId } = payload;
+      const { paymentProfileId } = payload;
       return {
         ...state,
         paymentProfiles: state.paymentProfiles.filter(
           (pp) => pp.id !== paymentProfileId
-        )
+        ),
+        totalPaymentProfiles: state.totalPaymentProfiles - 1
       };
     }
     default:

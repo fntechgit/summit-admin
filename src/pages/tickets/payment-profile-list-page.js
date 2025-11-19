@@ -9,18 +9,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import { Table } from "openstack-uicore-foundation/lib/components";
+import Swal from "sweetalert2";
 import {
   getPaymentProfiles,
   savePaymentProfile,
   deletePaymentProfile
 } from "../../actions/ticket-actions";
-import { Table } from "openstack-uicore-foundation/lib/components";
-import Swal from "sweetalert2";
+import { MAX_PER_PAGE } from "../../utils/constants";
 
 class PaymentProfileListPage extends React.Component {
   constructor(props) {
@@ -32,6 +33,13 @@ class PaymentProfileListPage extends React.Component {
     this.state = {};
   }
 
+  componentDidMount() {
+    const { currentSummit } = this.props;
+    if (currentSummit) {
+      this.props.getPaymentProfiles(1, MAX_PER_PAGE);
+    }
+  }
+
   handleEdit(paymentProfileId) {
     const { currentSummit, history } = this.props;
     history.push(
@@ -40,10 +48,7 @@ class PaymentProfileListPage extends React.Component {
   }
 
   handleDelete(paymentProfileId) {
-    const { deletePaymentProfile, paymentProfiles } = this.props;
-    let paymentProfile = paymentProfiles.find(
-      (pp) => parseInt(pp.id) === parseInt(paymentProfileId)
-    );
+    const { deletePaymentProfile } = this.props;
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
@@ -52,27 +57,20 @@ class PaymentProfileListPage extends React.Component {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         deletePaymentProfile(paymentProfileId);
       }
     });
   }
 
-  handleSort(index, key, dir, func) {
-    this.props.getPaymentProfiles(1, 100, key, dir);
+  handleSort(index, key, dir) {
+    this.props.getPaymentProfiles(1, MAX_PER_PAGE, key, dir);
   }
 
-  handleNewPaymentProfile(ev) {
+  handleNewPaymentProfile() {
     const { currentSummit, history } = this.props;
     history.push(`/app/summits/${currentSummit.id}/payment-profiles/new`);
-  }
-
-  componentDidMount() {
-    const { currentSummit } = this.props;
-    if (currentSummit) {
-      this.props.getPaymentProfiles(1, 100);
-    }
   }
 
   render() {
@@ -81,8 +79,7 @@ class PaymentProfileListPage extends React.Component {
       paymentProfiles,
       order,
       orderDir,
-      totalPaymentProfiles,
-      match
+      totalPaymentProfiles
     } = this.props;
 
     const columns = [
@@ -100,8 +97,9 @@ class PaymentProfileListPage extends React.Component {
         value: T.translate("payment_profiles.provider")
       },
       {
-        columnKey: "active_nice",
-        value: T.translate("payment_profiles.active")
+        columnKey: "is_active",
+        value: T.translate("payment_profiles.active"),
+        render: (row) => (row.is_active ? "Yes" : "No")
       }
     ];
 
@@ -123,7 +121,7 @@ class PaymentProfileListPage extends React.Component {
           {T.translate("payment_profiles.payment_profiles_list")} (
           {totalPaymentProfiles})
         </h3>
-        <div className={"row"}>
+        <div className="row">
           <div className="col-md-6 text-right col-md-offset-6">
             <button
               className="btn btn-primary right-space"
