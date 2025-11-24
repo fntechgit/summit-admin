@@ -44,6 +44,7 @@ const SponsorFormsListPage = ({
   term,
   order,
   orderDir,
+  hideArchived,
   totalCount,
   getSponsorForms,
   getSponsorForm,
@@ -58,15 +59,22 @@ const SponsorFormsListPage = ({
   }, []);
 
   const handlePageChange = (page) => {
-    getSponsorForms(term, page, perPage, order, orderDir);
+    getSponsorForms(term, page, perPage, order, orderDir, hideArchived);
   };
 
   const handleSort = (key, dir) => {
-    getSponsorForms(term, currentPage, perPage, key, dir);
+    getSponsorForms(term, currentPage, perPage, key, dir, hideArchived);
   };
 
   const handleSearch = (searchTerm) => {
-    getSponsorForms(searchTerm, currentPage, perPage, order, orderDir);
+    getSponsorForms(
+      searchTerm,
+      currentPage,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
   };
 
   const handleRowEdit = (row) => {

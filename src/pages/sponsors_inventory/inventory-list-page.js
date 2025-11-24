@@ -54,6 +54,7 @@ const InventoryListPage = ({
   term,
   order,
   orderDir,
+  hideArchived,
   totalInventoryItems,
   saveInventoryItem,
   deleteInventoryItemImage,
@@ -73,24 +74,38 @@ const InventoryListPage = ({
   };
 
   useEffect(() => {
-    getInventoryItems(term, 1, perPage, order, orderDir);
+    getInventoryItems(term, 1, perPage, order, orderDir, hideArchived);
   }, []);
 
   const handlePageChange = (page) => {
-    getInventoryItems(term, page, perPage, order, orderDir);
+    getInventoryItems(term, page, perPage, order, orderDir, hideArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getInventoryItems(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+    getInventoryItems(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
   };
 
   const handleSort = (key, dir) => {
-    getInventoryItems(term, currentPage, perPage, key, dir);
+    getInventoryItems(term, currentPage, perPage, key, dir, hideArchived);
   };
 
   const handleSearch = (ev) => {
     if (ev.key === "Enter") {
-      getInventoryItems(searchTerm, currentPage, perPage, order, orderDir);
+      getInventoryItems(
+        searchTerm,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
     }
   };
 
@@ -117,7 +132,14 @@ const InventoryListPage = ({
 
   const handleInventorySave = (item) => {
     saveInventoryItem(item).then(() =>
-      getInventoryItems(term, currentPage, perPage, order, orderDir)
+      getInventoryItems(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      )
     );
     setOpen(false);
   };

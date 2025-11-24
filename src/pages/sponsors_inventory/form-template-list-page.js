@@ -51,6 +51,7 @@ const FormTemplateListPage = ({
   term,
   order,
   orderDir,
+  hideArchived,
   totalFormTemplates,
   currentFormTemplate,
   currentFormTemplateErrors,
@@ -73,29 +74,50 @@ const FormTemplateListPage = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    getFormTemplates("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    getFormTemplates(
+      "",
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
     resetFormTemplateForm();
   }, []);
 
   const handlePageChange = (page) => {
-    getFormTemplates(term, page, perPage, order, orderDir);
+    getFormTemplates(term, page, perPage, order, orderDir, hideArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getFormTemplates(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+    getFormTemplates(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
   };
 
   const handleSort = (key, dir) => {
-    getFormTemplates(term, currentPage, perPage, key, dir);
+    getFormTemplates(term, currentPage, perPage, key, dir, hideArchived);
   };
 
   const handleSearch = (ev) => {
     if (ev.key === "Enter") {
-      getFormTemplates(searchTerm, currentPage, perPage, order, orderDir);
+      getFormTemplates(
+        searchTerm,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
     }
     // search on duplicate popup
     if (typeof ev === "string")
-      getFormTemplates(ev, currentPage, perPage, order, orderDir);
+      getFormTemplates(ev, currentPage, perPage, order, orderDir, hideArchived);
   };
 
   const handleRowEdit = (row) => {
@@ -125,7 +147,14 @@ const FormTemplateListPage = ({
   };
 
   const handleDuplicatePopupClose = () => {
-    getFormTemplates("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    getFormTemplates(
+      "",
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
     setFormTemplateDuplicate(false);
     setFormTemplateFromDuplicatePopupOpen(false);
   };

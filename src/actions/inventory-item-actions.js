@@ -141,7 +141,7 @@ export const getInventoryItems =
       createAction(RECEIVE_INVENTORY_ITEMS),
       `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term }
+      { order, orderDir, page, perPage, term, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

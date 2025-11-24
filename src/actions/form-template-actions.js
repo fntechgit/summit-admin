@@ -114,7 +114,7 @@ export const getFormTemplates =
       createAction(RECEIVE_FORM_TEMPLATES),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term }
+      { order, orderDir, page, perPage, term, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

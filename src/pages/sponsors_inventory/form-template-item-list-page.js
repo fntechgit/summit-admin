@@ -56,6 +56,7 @@ const FormTemplateItemListPage = ({
   term,
   order,
   orderDir,
+  hideArchived,
   getInventoryItems,
   totalFormTemplateItems,
   cloneFromInventoryItem,
@@ -83,17 +84,34 @@ const FormTemplateItemListPage = ({
         currentPage,
         perPage,
         order,
-        orderDir
+        orderDir,
+        hideArchived
       );
     });
   }, []);
 
   const handlePageChange = (page) => {
-    getFormTemplateItems(formTemplateId, term, page, perPage, order, orderDir);
+    getFormTemplateItems(
+      formTemplateId,
+      term,
+      page,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
   };
 
   const handleSort = (key, dir) => {
-    getFormTemplateItems(formTemplateId, term, currentPage, perPage, key, dir);
+    getFormTemplateItems(
+      formTemplateId,
+      term,
+      currentPage,
+      perPage,
+      key,
+      dir,
+      hideArchived
+    );
   };
 
   const handleRowEdit = (row) => {
@@ -118,7 +136,8 @@ const FormTemplateItemListPage = ({
           currentPage,
           perPage,
           order,
-          orderDir
+          orderDir,
+          hideArchived
         );
       })
       .catch((error) => {
@@ -154,7 +173,8 @@ const FormTemplateItemListPage = ({
         currentPage,
         perPage,
         order,
-        orderDir
+        orderDir,
+        hideArchived
       )
     );
     setShowInventoryItemModal(false);

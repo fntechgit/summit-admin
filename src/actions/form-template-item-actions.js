@@ -118,7 +118,7 @@ export const getFormTemplateItems =
       createAction(RECEIVE_FORM_TEMPLATE_ITEMS),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items`,
       authErrorHandler,
-      { order, orderDir, page, term }
+      { order, orderDir, page, term, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
