@@ -51,6 +51,7 @@ const SponsorItemDialog = ({
     yup
       .number()
       .typeError(T.translate("validation.number"))
+      .min(0, T.translate("validation.number_positive"))
       .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
         if (value === undefined || value === null) return true;
         return /^\d+(\.\d{1,2})?$/.test(value.toString());
@@ -81,15 +82,15 @@ const SponsorItemDialog = ({
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),
       onsite_rate: decimalValidation(),
-      default_quantity: numberValidation().integer(
-        T.translate("validation.integer")
-      ),
-      quantity_limit_per_sponsor: numberValidation().integer(
-        T.translate("validation.integer")
-      ),
-      quantity_limit_per_show: numberValidation().integer(
-        T.translate("validation.integer")
-      ),
+      default_quantity: numberValidation()
+        .integer(T.translate("validation.integer"))
+        .min(0, T.translate("validation.number_positive")),
+      quantity_limit_per_sponsor: numberValidation()
+        .integer(T.translate("validation.integer"))
+        .min(0, T.translate("validation.number_positive")),
+      quantity_limit_per_show: numberValidation()
+        .integer(T.translate("validation.integer"))
+        .min(0, T.translate("validation.number_positive")),
       meta_fields: yup.array().of(
         yup.object().shape({
           name: yup.string().trim(),
