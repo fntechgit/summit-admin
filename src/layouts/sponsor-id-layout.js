@@ -2,9 +2,9 @@ import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Switch, Route } from "react-router-dom";
+import { Breadcrumb } from "react-breadcrumbs";
 import EditSponsorPage from "../pages/sponsors/edit-sponsor-page";
 import { getSponsor, resetSponsorForm } from "../actions/sponsor-actions";
-import { Breadcrumb } from "react-breadcrumbs";
 import EditAdSponsorPage from "../pages/sponsors/edit-advertisement-sponsor-page";
 import EditMaterialSponsorPage from "../pages/sponsors/edit-material-sponsor-page";
 import EditSocialNetworkSponsorPage from "../pages/sponsors/edit-social-network-sponsor-page";
@@ -23,7 +23,7 @@ class SponsorIdLayout extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const oldId = prevProps.match.params.sponsor_id;
     const newId = this.props.match.params.sponsor_id;
 
@@ -38,7 +38,7 @@ class SponsorIdLayout extends React.Component {
 
   render() {
     const { match, currentSponsor } = this.props;
-    let sponsorId = this.props.match.params.sponsor_id;
+    const sponsorId = this.props.match.params.sponsor_id;
     const breadcrumb = currentSponsor.id
       ? currentSponsor.company.name
       : T.translate("general.new");
@@ -141,7 +141,13 @@ class SponsorIdLayout extends React.Component {
               </div>
             )}
           />
-          <Route strict exact path={match.url} component={EditSponsorPage} />
+          <Switch>
+            <Route strict exact path={match.url} component={EditSponsorPage} />
+            <Route
+              path={`${match.url}/sponsor-forms/:form_id/items`}
+              component={EditSponsorPage}
+            />
+          </Switch>
           <Route component={NoMatchPage} />
         </Switch>
       </div>
