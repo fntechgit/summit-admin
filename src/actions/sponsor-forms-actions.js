@@ -65,6 +65,23 @@ export const SPONSOR_CUSTOMIZED_FORM_DELETED =
 export const SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED =
   "SPONSOR_CUSTOMIZED_FORM_ARCHIVED_CHANGED";
 
+export const RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS =
+  "RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS";
+export const REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS =
+  "REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS";
+export const SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED =
+  "SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED";
+export const SPONSOR_CUSTOMIZED_FORM_ITEM_ARCHIVED =
+  "SPONSOR_CUSTOMIZED_FORM_ITEM_ARCHIVED";
+export const SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED =
+  "SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED";
+export const UPDATE_SPONSOR_FORM_MANAGED_ITEM =
+  "UPDATE_SPONSOR_FORM_MANAGED_ITEM";
+export const SPONSOR_FORM_MANAGED_ITEM_UPDATED =
+  "SPONSOR_FORM_MANAGED_ITEM_UPDATED";
+export const SPONSOR_FORM_MANAGED_ITEM_ADDED =
+  "SPONSOR_FORM_MANAGED_ITEM_ADDED";
+
 // ITEMS
 export const REQUEST_SPONSOR_FORM_ITEMS = "REQUEST_SPONSOR_FORM_ITEMS";
 export const RECEIVE_SPONSOR_FORM_ITEMS = "RECEIVE_SPONSOR_FORM_ITEMS";
@@ -627,6 +644,60 @@ export const getSponsorCustomizedForm =
       null,
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const getSponsorCustomizedFormItems =
+  (
+    formId,
+    term = "",
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const filter = [];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
+    }
+
+    const params = {
+      page,
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    if (hideArchived) filter.push("is_archived==0");
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS),
+      createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items`,
       authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -1204,4 +1275,166 @@ export const addInventoryItems =
       .finally(() => {
         dispatch(stopLoading());
       });
+  };
+
+export const saveSponsorFormManagedItem =
+  (formId, entity) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    if (entity.id) {
+      putRequest(
+        createAction(UPDATE_SPONSOR_FORM_MANAGED_ITEM),
+        createAction(SPONSOR_FORM_MANAGED_ITEM_UPDATED),
+        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${entity.id}`,
+        entity,
+        snackbarErrorHandler,
+        entity
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "edit_sponsor.forms_tab.form_manage_items.item_updated"
+            )
+          })
+        );
+      });
+    } else {
+      const successMessage = {
+        title: T.translate("general.done"),
+        html: T.translate(
+          "edit_sponsor.forms_tab.form_manage_items.item_created"
+        ),
+        type: "success"
+      };
+
+      postRequest(
+        createAction(UPDATE_SPONSOR_FORM_MANAGED_ITEM),
+        createAction(SPONSOR_FORM_MANAGED_ITEM_ADDED),
+        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${entity.id}`,
+        entity,
+        snackbarErrorHandler,
+        entity
+      )(params)(dispatch).then(() => {
+        dispatch(showMessage(successMessage));
+      });
+    }
+  };
+
+export const getSponsorFormManagedItem =
+  (formId, itemId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${itemId}`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const addSponsorFormItems =
+  (formId, itemIds) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_FORM_ITEMS_ADDED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/clone`,
+      { inventory_item_ids: itemIds },
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(getSponsorCustomizedFormItems(formId));
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "sponsor_form_item_list.add_from_inventory.items_added"
+            )
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const archiveSponsorCustomizedFormItem =
+  (formId, itemId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const params = { access_token: accessToken };
+
+    return putRequest(
+      null,
+      createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_ARCHIVED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${itemId}/archive`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch);
+  };
+
+export const unarchiveSponsorCustomizedFormItem =
+  (formId, itemId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED)({ itemId }),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${itemId}/archive`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
