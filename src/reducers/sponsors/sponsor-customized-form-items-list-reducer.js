@@ -1,0 +1,214 @@
+/**
+ * Copyright 2019 OpenStack Foundation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import {
+  RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS,
+  REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS,
+  RECEIVE_SPONSOR_CUSTOMIZED_FORM,
+  // RECEIVE_SPONSOR_FORM_ITEM,
+  // RESET_SPONSOR_FORM_ITEM,
+  SPONSOR_CUSTOMIZED_FORM_ITEM_ARCHIVED,
+  SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED,
+  SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED,
+  SPONSOR_FORM_MANAGED_ITEM_UPDATED
+} from "../../actions/sponsor-forms-actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { CENTS_FACTOR, DECIMAL_DIGITS } from "../../utils/constants";
+
+const DEFAULT_STATE = {
+  items: [],
+  hideArchived: false,
+  order: "name",
+  orderDir: 1,
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  totalCount: 0,
+  currentItem: {
+    code: "",
+    name: "",
+    description: "",
+    early_bird_rate: "",
+    standard_rate: "",
+    onsite_rate: "",
+    quantity_limit_per_show: "",
+    quantity_limit_per_sponsor: "",
+    default_quantity: "",
+    images: [],
+    meta_fields: [
+      {
+        name: "",
+        type: "Text",
+        is_required: false,
+        values: []
+      }
+    ]
+  }
+};
+
+const sponsorCustomizedFormItemsListReducer = (
+  state = DEFAULT_STATE,
+  action
+) => {
+  const { type, payload } = action;
+
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
+    }
+    case REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS: {
+      const { order, orderDir, page, hideArchived } = payload;
+
+      return {
+        ...state,
+        order,
+        orderDir,
+        items: [],
+        currentPage: page,
+        hideArchived
+      };
+    }
+    case RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS: {
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
+
+      const items = payload.response.data.map((a) => ({
+        id: a.id,
+        code: a.code,
+        name: a.name,
+        early_bird_rate: `$${(a.early_bird_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        )}`,
+        standard_rate: `$${(a.standard_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        )}`,
+        onsite_rate: `$${(a.onsite_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        )}`,
+        default_quantity: a.default_quantity,
+        is_archived: a.is_archived,
+        images: a.images
+      }));
+
+      return {
+        ...state,
+        items,
+        currentPage,
+        totalCount: total,
+        lastPage
+      };
+    }
+    case RECEIVE_SPONSOR_CUSTOMIZED_FORM: {
+      const item = payload.response;
+
+      const currentItem = {
+        ...item,
+        early_bird_rate: `$${(item.early_bird_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        )}`,
+        standard_rate: `$${(item.standard_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        )}`,
+        onsite_rate: `$${(item.onsite_rate / CENTS_FACTOR).toFixed(
+          DECIMAL_DIGITS
+        )}`,
+        meta_fields:
+          item.meta_fields.length > 0
+            ? item.meta_fields
+            : [
+                {
+                  name: "",
+                  type: "Text",
+                  is_required: false,
+                  values: []
+                }
+              ]
+      };
+      return { ...state, currentItem };
+    }
+    case SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED: {
+      const { itemId } = payload;
+      const items = state.items.filter((it) => it.id !== itemId);
+
+      return { ...state, items };
+    }
+    case SPONSOR_CUSTOMIZED_FORM_ITEM_ARCHIVED: {
+      const { id: itemId } = payload.response;
+
+      const items = state.items.map((item) =>
+        item.id === itemId ? { ...item, is_archived: true } : item
+      );
+
+      return { ...state, items };
+    }
+    case SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED: {
+      const { itemId } = payload;
+
+      const items = state.items.map((item) =>
+        item.id === itemId ? { ...item, is_archived: false } : item
+      );
+
+      return { ...state, items };
+    }
+    case SPONSOR_FORM_MANAGED_ITEM_UPDATED: {
+      const updatedItem = payload.response;
+      const items = state.items.map((item) =>
+        item.id === updatedItem.id
+          ? {
+              id: updatedItem.id,
+              code: updatedItem.code,
+              name: updatedItem.name,
+              early_bird_rate: `$${(
+                updatedItem.early_bird_rate / CENTS_FACTOR
+              ).toFixed(DECIMAL_DIGITS)}`,
+              standard_rate: `$${(
+                updatedItem.standard_rate / CENTS_FACTOR
+              ).toFixed(DECIMAL_DIGITS)}`,
+              onsite_rate: `$${(updatedItem.onsite_rate / CENTS_FACTOR).toFixed(
+                DECIMAL_DIGITS
+              )}`,
+              default_quantity: updatedItem.default_quantity,
+              is_archived: updatedItem.is_archived,
+              images: updatedItem.images
+            }
+          : {
+              id: item.id,
+              code: item.code,
+              name: item.name,
+              early_bird_rate: `$${(
+                item.early_bird_rate / CENTS_FACTOR
+              ).toFixed(DECIMAL_DIGITS)}`,
+              standard_rate: `$${(item.standard_rate / CENTS_FACTOR).toFixed(
+                DECIMAL_DIGITS
+              )}`,
+              onsite_rate: `$${(item.onsite_rate / CENTS_FACTOR).toFixed(
+                DECIMAL_DIGITS
+              )}`,
+              default_quantity: item.default_quantity,
+              is_archived: item.is_archived,
+              images: item.images
+            }
+      );
+      return { ...state, items };
+    }
+    default:
+      return state;
+  }
+};
+
+export default sponsorCustomizedFormItemsListReducer;

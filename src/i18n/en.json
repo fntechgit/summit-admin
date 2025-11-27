@@ -2432,6 +2432,24 @@
         "error": "There was a problem creating the forms, please try again.",
         "archived": "Form successfully archived.",
         "unarchived": "Form successfully unarchived."
+      },
+      "form_manage_items": {
+        "add_item": "Add Item",
+        "add_item_inventory": "Add Item from Inventory",
+        "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit botton. You can also change only a rate by clicking on it.",
+        "select_items": "Select items",
+        "code": "Code",
+        "name": "Name",
+        "early_bird_rate": "Early Bird Rate",
+        "standard_rate": "Standard Rate",
+        "onsite_rate": "On site rate",
+        "default_quantity": "Default Quantity",
+        "add_selected": "Add Selected Items",
+        "item_updated": "Form item created successfully",
+        "item_created": "Form item {item} updated successfully",
+        "placeholder": {
+          "search": "Search..."
+        }
       }
     },
     "cart_tab": {
@@ -2584,7 +2602,7 @@
       "code": "Code",
       "name": "Name",
       "early_bird_rate": "Early bird rate",
-      "standard_rate": "Standad rate",
+      "standard_rate": "Standard rate",
       "onsite_rate": "On site rate",
       "save": "Add selected items",
       "items_added": "Items added successfully."
