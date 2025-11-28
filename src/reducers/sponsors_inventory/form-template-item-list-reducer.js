@@ -30,7 +30,7 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalFormTemplateItems: 0,
-  filters: {}
+  hideArchived: false
 };
 
 const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
