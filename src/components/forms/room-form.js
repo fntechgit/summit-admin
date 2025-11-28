@@ -166,17 +166,22 @@ class RoomForm extends React.Component {
       }
     };
 
-    const roomAttributes = entity.attributes.map((attr) => {
-      const attributeTypes =
-        currentSummit.meeting_booking_room_allowed_attributes;
-      const type = attributeTypes.find((at) => at.id === attr.type_id);
+    const roomAttributes = entity.attributes
+      .map((attr) => {
+        const attributeTypes =
+          currentSummit.meeting_booking_room_allowed_attributes;
+        const type = attributeTypes.find((at) => at.id === attr.type_id);
 
-      return {
-        ...attr,
-        label: `${type.type}: ${attr.value}`,
-        type_name: type.type
-      };
-    });
+        if (!type) return null;
+
+        return {
+          ...attr,
+          label: `${type.type}: ${attr.value}`,
+          type_name: type.type
+        };
+      })
+      // filter null values
+      .filter(Boolean);
 
     const class_ddl = [
       { label: "Room", value: "SummitVenueRoom" },
