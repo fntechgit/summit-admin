@@ -127,7 +127,7 @@ const EditTierDialog = ({
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {`${initialEntity.id ? "Edit" : "Add"} ${T.translate(
-            "edit_summit_sponsorship.sponsorship"
+            "edit_summit_sponsorship.tier"
           )}`}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
