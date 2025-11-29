@@ -177,16 +177,18 @@ const EditTierDialog = ({
                   <InputLabel htmlFor="widget_title">
                     {T.translate("edit_summit_sponsorship.widget_title")}
                   </InputLabel>
-                  <MuiFormikTextField
-                    formik={formik}
-                    name="widget_title"
-                    variant="outlined"
-                    margin="none"
-                    placeholder={T.translate(
-                      "edit_summit_sponsorship.placeholders.widget_title"
-                    )}
-                    fullWidth
-                  />
+                  <Box width="100%">
+                    <MuiFormikTextField
+                      formik={formik}
+                      name="widget_title"
+                      variant="outlined"
+                      margin="none"
+                      placeholder={T.translate(
+                        "edit_summit_sponsorship.placeholders.widget_title"
+                      )}
+                      fullWidth
+                    />
+                  </Box>
                 </Grid2>
               </Grid2>
               <Grid2
