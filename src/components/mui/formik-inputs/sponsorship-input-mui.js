@@ -37,6 +37,9 @@ const SponsorshipTypeInputMUI = ({
   const { value } = field;
   const error = meta.touched && meta.error;
 
+  const errorMessage =
+    typeof error === "object" ? error?.id || error?.name || "" : error;
+
   const fetchOptions = async (input) => {
     if (!input) {
       setOptions([]);
@@ -124,7 +127,7 @@ const SponsorshipTypeInputMUI = ({
           placeholder={placeholder}
           variant="outlined"
           error={Boolean(error)}
-          helperText={error || ""}
+          helperText={errorMessage || ""}
           slotProps={{
             ...params.InputProps,
             inputLabel: { shrink: false },
