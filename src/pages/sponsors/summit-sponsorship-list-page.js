@@ -181,6 +181,9 @@ const SummitSponsorshipListPage = ({
           getName={(item) => item.sponsorship_type}
           onEdit={handleEditSponsorship}
           onDelete={handleDelete}
+          deleteDialogBody={(name) =>
+            T.translate("summit_sponsorship_list.remove_tier_warning", { name })
+          }
           onSort={handleSort}
           onReorder={handleReorder}
           onPageChange={handlePageChange}
