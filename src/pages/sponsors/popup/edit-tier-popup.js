@@ -127,7 +127,7 @@ const EditTierDialog = ({
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {`${initialEntity.id ? "Edit" : "Add"} ${T.translate(
-            "edit_summit_sponsorship.sponsorship"
+            "edit_summit_sponsorship.tier"
           )}`}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
@@ -177,16 +177,18 @@ const EditTierDialog = ({
                   <InputLabel htmlFor="widget_title">
                     {T.translate("edit_summit_sponsorship.widget_title")}
                   </InputLabel>
-                  <MuiFormikTextField
-                    formik={formik}
-                    name="widget_title"
-                    variant="outlined"
-                    margin="none"
-                    placeholder={T.translate(
-                      "edit_summit_sponsorship.placeholders.widget_title"
-                    )}
-                    fullWidth
-                  />
+                  <Box width="100%">
+                    <MuiFormikTextField
+                      formik={formik}
+                      name="widget_title"
+                      variant="outlined"
+                      margin="none"
+                      placeholder={T.translate(
+                        "edit_summit_sponsorship.placeholders.widget_title"
+                      )}
+                      fullWidth
+                    />
+                  </Box>
                 </Grid2>
               </Grid2>
               <Grid2
@@ -208,6 +210,7 @@ const EditTierDialog = ({
                     name="lobby_template"
                     formik={formik}
                     IconComponent={ExpandMoreIcon}
+                    isClearable
                     renderValue={(selected) => {
                       if (!selected) {
                         return (
@@ -247,6 +250,7 @@ const EditTierDialog = ({
                     name="expo_hall_template"
                     formik={formik}
                     IconComponent={ExpandMoreIcon}
+                    isClearable
                     renderValue={(selected) => {
                       if (!selected) {
                         return (
@@ -293,6 +297,7 @@ const EditTierDialog = ({
                     name="event_page_template"
                     formik={formik}
                     IconComponent={ExpandMoreIcon}
+                    isClearable
                     renderValue={(selected) => {
                       if (!selected) {
                         return (
@@ -334,6 +339,7 @@ const EditTierDialog = ({
                     name="sponsor_page_template"
                     formik={formik}
                     IconComponent={ExpandMoreIcon}
+                    isClearable
                     renderValue={(selected) => {
                       if (!selected) {
                         return (

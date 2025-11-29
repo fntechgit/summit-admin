@@ -2705,10 +2705,11 @@
     "tier_deleted": "Tier deleted successfully.",
     "sponsorship_type": "Summit Tier",
     "label": "Label",
-    "size": "Size"
+    "size": "Size",
+    "remove_tier_warning": "Please verify you want to delete {name}"
   },
   "edit_summit_sponsorship": {
-    "sponsorship": "Sponsorship",
+    "tier": "Tier",
     "widget_title": "Widget Title",
     "sponsorship_type": "Tier",
     "lobby_template": "Lobby Template",
