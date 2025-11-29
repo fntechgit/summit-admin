@@ -39,6 +39,8 @@ const MuiTableSortable = ({
   getName = (item) => item.name,
   onEdit,
   onDelete,
+  deleteDialogTitle = null,
+  deleteDialogBody = null,
   onReorder,
   idKey = "id",
   updateOrderKey = "order"
@@ -88,8 +90,12 @@ const MuiTableSortable = ({
 
   const handleDelete = async (item) => {
     const isConfirmed = await showConfirmDialog({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("general.row_remove_warning")} ${getName(item)}`,
+      title: deleteDialogTitle || T.translate("general.are_you_sure"),
+      text:
+        typeof deleteDialogBody === "function"
+          ? deleteDialogBody(getName(item))
+          : deleteDialogBody ||
+            `${T.translate("general.row_remove_warning")} ${getName(item)}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
