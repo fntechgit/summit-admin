@@ -2708,7 +2708,7 @@
     "size": "Size"
   },
   "edit_summit_sponsorship": {
-    "sponsorship": "Sponsorship",
+    "tier": "Tier",
     "widget_title": "Widget Title",
     "sponsorship_type": "Tier",
     "lobby_template": "Lobby Template",
