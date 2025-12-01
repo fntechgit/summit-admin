@@ -204,31 +204,6 @@ const FormTemplateListPage = ({
         </Button>
       ),
       dottedBorder: true
-    },
-    {
-      columnKey: "archive",
-      header: "",
-      width: 70,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="small"
-          onClick={() => handleArchiveItem(row)}
-          sx={{
-            fontSize: "1.3rem",
-            fontWeight: 500,
-            lineHeight: "2.2rem",
-            padding: "4px 5px"
-          }}
-        >
-          {row.is_archived
-            ? T.translate("inventory_item_list.unarchive_button")
-            : T.translate("inventory_item_list.archive_button")}
-        </Button>
-      ),
-      dottedBorder: true
     }
   ];
 
@@ -345,10 +320,11 @@ const FormTemplateListPage = ({
             perPage={perPage}
             currentPage={currentPage}
             totalRows={totalFormTemplates}
-            onEdit={handleRowEdit}
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
+            onEdit={handleRowEdit}
+            onArchive={handleArchiveItem}
           />
         </div>
       )}

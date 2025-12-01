@@ -5,6 +5,7 @@ import {
   Box,
   IconButton,
   Paper,
+  Button,
   Table,
   TableBody,
   TableCell,
@@ -39,6 +40,7 @@ const MuiTable = ({
   options = { sortCol: "", sortDir: 1, disableProp: null }, // disableProp is the prop that will disable the row
   getName = (item) => item.name,
   onEdit,
+  onArchive,
   onDelete,
   deleteDialogTitle = null,
   deleteDialogBody = null
@@ -149,6 +151,7 @@ const MuiTable = ({
                   </TableCell>
                 ))}
                 {onEdit && <TableCell sx={{ width: 40 }} />}
+                {onArchive && <TableCell sx={{ width: 80 }} />}
                 {onDelete && <TableCell sx={{ width: 40 }} />}
               </TableRow>
             </TableHead>
@@ -196,6 +199,31 @@ const MuiTable = ({
                       <IconButton size="large" onClick={() => onEdit(row)}>
                         <EditIcon fontSize="large" />
                       </IconButton>
+                    </TableCell>
+                  )}
+                  {/* Archive column */}
+                  {onArchive && (
+                    <TableCell
+                      align="center"
+                      sx={{ width: 80 }}
+                      className={styles.dottedBorderLeft}
+                    >
+                      <Button
+                        variant="text"
+                        color="inherit"
+                        size="small"
+                        onClick={() => onArchive(row)}
+                        sx={{
+                          fontSize: "1.3rem",
+                          fontWeight: 500,
+                          lineHeight: "2.2rem",
+                          padding: "4px 5px"
+                        }}
+                      >
+                        {row.is_archived
+                          ? T.translate("general.unarchive")
+                          : T.translate("general.archive")}
+                      </Button>
                     </TableCell>
                   )}
                   {/* Delete column */}
