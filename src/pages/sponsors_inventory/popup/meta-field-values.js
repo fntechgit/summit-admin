@@ -46,8 +46,16 @@ const MetaFieldValues = ({
 
   const handleAddValue = (index) => {
     const newFields = [...values.meta_fields];
-    newFields[index].values.push({ value: "", is_default: false });
+    newFields[index].values.push({ value: "", name: "", is_default: false });
     setFieldValue("meta_fields", newFields);
+  };
+
+  const isMetafieldValueIncomplete = (index) => {
+    const metafield = values.meta_fields[index];
+    if (metafield.values.length > 0) {
+      return metafield.values.some((f) => f.name === "" || f.value === "");
+    }
+    return false;
   };
 
   const handleRemoveValue = async (
@@ -181,7 +189,7 @@ const MetaFieldValues = ({
     <Box>
       <DragAndDropList
         items={sortedValues}
-        onReorder={(values) => onReorder(fieldIndex, values)}
+        onReorder={onReorder}
         renderItem={renderMetaFieldValue}
         idKey="id"
         updateOrder="order"
@@ -190,6 +198,7 @@ const MetaFieldValues = ({
       <Grid2 container spacing={2} sx={{ mt: 2 }} offset={4}>
         <Button
           startIcon={<AddIcon />}
+          disabled={isMetafieldValueIncomplete(fieldIndex)}
           onClick={() => handleAddValue(fieldIndex)}
         >
           {T.translate("edit_inventory_item.meta_field_add_value")}

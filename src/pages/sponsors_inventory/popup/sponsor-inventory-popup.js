@@ -56,6 +56,8 @@ const SponsorItemDialog = ({
         return /^\d+(\.\d{1,2})?$/.test(value.toString());
       });
 
+  const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
+
   const formik = useFormik({
     initialValues: {
       ...initialEntity,
@@ -66,8 +68,8 @@ const SponsorItemDialog = ({
               name: "",
               type: "Text",
               is_required: false,
-              minimum_quantity: 0,
-              maximum_quantity: 0,
+              minimum_quantity: null,
+              maximum_quantity: null,
               values: []
             }
           ],
@@ -92,26 +94,63 @@ const SponsorItemDialog = ({
       ),
       meta_fields: yup.array().of(
         yup.object().shape({
-          name: yup.string().trim(),
+          name: yup
+            .string()
+            .when(["values", "minimum_quantity", "maximum_quantity"], {
+              is: (values, minQty, maxQty) => {
+                // required only if has values or quantities
+                const hasValues = values && values.length > 0;
+                const hasQuantities = minQty !== null || maxQty !== null;
+                return hasValues || hasQuantities;
+              },
+              then: (schema) =>
+                schema.trim().required(T.translate("validation.required")),
+              otherwise: (schema) => schema
+            }),
           type: yup.string().oneOf(METAFIELD_TYPES),
           is_required: yup.boolean(),
-          minimum_quantity: yup.number().optional(),
-          maximum_quantity: yup.number().optional(),
-          values: yup.array().of(
-            yup.object().shape({
-              value: yup.string().trim(),
-              is_default: yup.boolean(),
-              name: yup.string()
-            })
-          )
+          minimum_quantity: yup
+            .number()
+            .nullable()
+            .when("type", {
+              is: (type) => type === "Quantity",
+              then: (schema) =>
+                schema.required(T.translate("validation.required")),
+              otherwise: (schema) => schema
+            }),
+          maximum_quantity: yup
+            .number()
+            .nullable()
+            .when("type", {
+              is: (type) => type === "Quantity",
+              then: (schema) =>
+                schema.required(T.translate("validation.required")),
+              otherwise: (schema) => schema
+            }),
+          values: yup.array().when("type", {
+            is: (type) => fieldTypesWithOptions.includes(type),
+            then: (schema) =>
+              schema.min(1, T.translate("validation.one_option_required")).of(
+                yup.object().shape({
+                  value: yup
+                    .string()
+                    .trim()
+                    .required(T.translate("validation.required")),
+                  name: yup
+                    .string()
+                    .trim()
+                    .required(T.translate("validation.required")),
+                  is_default: yup.boolean()
+                })
+              ),
+            otherwise: (schema) => schema
+          })
         })
       )
     }),
     enableReinitialize: true,
     onSubmit: (values) => onSave(values)
   });
-
-  const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
 
   const mediaType = {
     max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
@@ -196,6 +235,12 @@ const SponsorItemDialog = ({
   const handleClose = () => {
     formik.resetForm();
     onClose();
+  };
+
+  const isMetafieldIncomplete = (field) => {
+    if (formik.errors.meta_fields) return true;
+    if (field.name === "") return true;
+    return false;
   };
 
   return (
@@ -428,13 +473,24 @@ const SponsorItemDialog = ({
                                     onMetaFieldTypeValueDeleted
                                   }
                                 />
+                                {formik.touched.meta_fields?.[fieldIndex]
+                                  ?.values &&
+                                  formik.errors.meta_fields?.[fieldIndex]
+                                    ?.values && (
+                                    <FormHelperText error>
+                                      {
+                                        formik.errors.meta_fields[fieldIndex]
+                                          .values
+                                      }
+                                    </FormHelperText>
+                                  )}
                               </>
                             )}
                             {field.type === "Quantity" && (
                               <Grid2
                                 container
                                 spacing={2}
-                                sx={{ alignItems: "end", my: 2 }}
+                                sx={{ alignItems: "start", my: 2 }}
                               >
                                 <Grid2 size={4}>
                                   <Box
@@ -516,6 +572,7 @@ const SponsorItemDialog = ({
                             <Button
                               variant="contained"
                               aria-label="add"
+                              disabled={isMetafieldIncomplete(field)}
                               sx={{
                                 width: 40,
                                 height: 40,
@@ -529,8 +586,8 @@ const SponsorItemDialog = ({
                                   type: "Text",
                                   is_required: false,
                                   values: [],
-                                  minimum_quantity: 0,
-                                  maximum_quantity: 0
+                                  minimum_quantity: null,
+                                  maximum_quantity: null
                                 })
                               }
                             >
