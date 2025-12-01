@@ -210,6 +210,7 @@ const EditTierDialog = ({
                     name="lobby_template"
                     formik={formik}
                     IconComponent={ExpandMoreIcon}
+                    isClearable
                     renderValue={(selected) => {
                       if (!selected) {
                         return (
@@ -249,6 +250,7 @@ const EditTierDialog = ({
                     name="expo_hall_template"
                     formik={formik}
                     IconComponent={ExpandMoreIcon}
+                    isClearable
                     renderValue={(selected) => {
                       if (!selected) {
                         return (
@@ -295,6 +297,7 @@ const EditTierDialog = ({
                     name="event_page_template"
                     formik={formik}
                     IconComponent={ExpandMoreIcon}
+                    isClearable
                     renderValue={(selected) => {
                       if (!selected) {
                         return (
@@ -336,6 +339,7 @@ const EditTierDialog = ({
                     name="sponsor_page_template"
                     formik={formik}
                     IconComponent={ExpandMoreIcon}
+                    isClearable
                     renderValue={(selected) => {
                       if (!selected) {
                         return (
