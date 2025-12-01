@@ -83,6 +83,7 @@
     "required": "This field is required.",
     "string": "Must be a string.",
     "number": "Must be a number.",
+    "number_positive": "Must be a positive number.",
     "integer": "Must be a integer",
     "one_option_required": "Must have one option",
     "two_decimals": "Max 2 decimal places",
