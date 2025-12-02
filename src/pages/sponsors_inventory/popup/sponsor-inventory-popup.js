@@ -238,10 +238,9 @@ const SponsorItemDialog = ({
     onClose();
   };
 
-  const isMetafieldIncomplete = (field) => {
+  const areMetafieldsIncomplete = () => {
     if (formik.errors.meta_fields) return true;
-    if (field.name === "") return true;
-    return false;
+    return formik.values.meta_fields.some((f) => f.name?.trim() === "");
   };
 
   return (
@@ -494,48 +493,34 @@ const SponsorItemDialog = ({
                                 sx={{ alignItems: "start", my: 2 }}
                               >
                                 <Grid2 size={4}>
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center"
-                                    }}
-                                  >
-                                    <MuiFormikTextField
-                                      formik={formik}
-                                      name={buildFieldName(
-                                        "meta_fields",
-                                        fieldIndex,
-                                        "minimum_quantity"
-                                      )}
-                                      placeholder={T.translate(
-                                        "edit_inventory_item.placeholders.meta_field_minimum_quantity"
-                                      )}
-                                      type="number"
-                                      fullWidth
-                                    />
-                                  </Box>
+                                  <MuiFormikTextField
+                                    formik={formik}
+                                    name={buildFieldName(
+                                      "meta_fields",
+                                      fieldIndex,
+                                      "minimum_quantity"
+                                    )}
+                                    placeholder={T.translate(
+                                      "edit_inventory_item.placeholders.meta_field_minimum_quantity"
+                                    )}
+                                    type="number"
+                                    fullWidth
+                                  />
                                 </Grid2>
                                 <Grid2 size={4}>
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center"
-                                    }}
-                                  >
-                                    <MuiFormikTextField
-                                      formik={formik}
-                                      name={buildFieldName(
-                                        "meta_fields",
-                                        fieldIndex,
-                                        "maximum_quantity"
-                                      )}
-                                      placeholder={T.translate(
-                                        "edit_inventory_item.placeholders.meta_field_maximum_quantity"
-                                      )}
-                                      type="number"
-                                      fullWidth
-                                    />
-                                  </Box>
+                                  <MuiFormikTextField
+                                    formik={formik}
+                                    name={buildFieldName(
+                                      "meta_fields",
+                                      fieldIndex,
+                                      "maximum_quantity"
+                                    )}
+                                    placeholder={T.translate(
+                                      "edit_inventory_item.placeholders.meta_field_maximum_quantity"
+                                    )}
+                                    type="number"
+                                    fullWidth
+                                  />
                                 </Grid2>
                               </Grid2>
                             )}
@@ -573,7 +558,7 @@ const SponsorItemDialog = ({
                             <Button
                               variant="contained"
                               aria-label="add"
-                              disabled={isMetafieldIncomplete(field)}
+                              disabled={areMetafieldsIncomplete()}
                               sx={{
                                 width: 40,
                                 height: 40,
