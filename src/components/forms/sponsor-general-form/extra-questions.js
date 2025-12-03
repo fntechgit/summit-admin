@@ -75,10 +75,10 @@ const SponsorExtraQuestions = ({
           saveSponsorExtraQuestionValue(extraQuestionId, value)
         );
         Promise.all(saveValuePromises).finally(() =>
-          setShowAddExtraQuestionPopup(false)
+          handleCloseExtraQuestionPopup()
         );
       } else {
-        setShowAddExtraQuestionPopup(false);
+        handleCloseExtraQuestionPopup();
       }
     });
   };
