@@ -64,7 +64,9 @@ const SummitSponsorshipListPage = ({
   }, [sponsorships]);
 
   const handleDelete = (sponsorshipId) => {
-    deleteSummitSponsorship(sponsorshipId);
+    deleteSummitSponsorship(sponsorshipId).then(() =>
+      getSummitSponsorships(DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
   };
 
   const handleSort = (key, dir) => {
