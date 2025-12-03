@@ -2349,6 +2349,7 @@
     "remove_value_warning": "Are you sure you want to delete value ",
     "lead_report_settings": "Lead Report Settings",
     "sponsorship_added": "Tier added successfully.",
+    "sponsorship_remove_warning": "Please verify you want to delete {name}",
     "sponsorship_removed": "Tier removed successfully.",
     "sponsorship_addon_removed": "Add-on removed successfully",
     "sponsorship_addons_saved": "Add-ons saved successfully",
