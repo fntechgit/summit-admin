@@ -188,6 +188,10 @@ const Sponsorship = ({
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}
           onSort={handleSort}
+          getName={(row) => row.tier}
+          deleteDialogBody={(name) =>
+            T.translate("edit_sponsor.sponsorship_remove_warning", { name })
+          }
         />
       </div>
     </>
