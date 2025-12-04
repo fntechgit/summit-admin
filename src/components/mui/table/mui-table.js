@@ -76,8 +76,10 @@ const MuiTable = ({
     const isConfirmed = await showConfirmDialog({
       title: deleteDialogTitle || T.translate("general.are_you_sure"),
       text:
-        deleteDialogBody ||
-        `${T.translate("general.row_remove_warning")} ${getName(item)}`,
+        typeof deleteDialogBody === "function"
+          ? deleteDialogBody(getName(item))
+          : deleteDialogBody ||
+            `${T.translate("general.row_remove_warning")} ${getName(item)}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
