@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 
 const SearchInput = ({ term, onSearch, placeholder = "Search..." }) => {
   const [searchTerm, setSearchTerm] = useState(term);
+
+  useEffect(() => {
+    setSearchTerm(term || "");
+  }, [term]);
 
   const handleSearch = (ev) => {
     if (ev.key === "Enter") {
