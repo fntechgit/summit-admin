@@ -15,16 +15,40 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS,
   REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS,
-  RECEIVE_SPONSOR_CUSTOMIZED_FORM,
+  RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM,
   // RECEIVE_SPONSOR_FORM_ITEM,
   // RESET_SPONSOR_FORM_ITEM,
   SPONSOR_CUSTOMIZED_FORM_ITEM_ARCHIVED,
   SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED,
   SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED,
-  SPONSOR_FORM_MANAGED_ITEM_UPDATED
+  SPONSOR_FORM_MANAGED_ITEM_UPDATED,
+  SPONSOR_CUSTOMIZED_FORM_ITEMS_ADDED,
+  RESET_SPONSOR_FORM_MANAGED_ITEM
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { CENTS_FACTOR, DECIMAL_DIGITS } from "../../utils/constants";
+import { amountFromCents } from "../../utils/currency";
+
+const DEFAULT_ITEM_ENTITY = {
+  code: "",
+  name: "",
+  description: "",
+  early_bird_rate: 0,
+  standard_rate: 0,
+  onsite_rate: 0,
+  quantity_limit_per_show: 0,
+  quantity_limit_per_sponsor: 0,
+  default_quantity: 0,
+  images: [],
+  meta_fields: [
+    {
+      name: "",
+      type: "Text",
+      is_required: false,
+      values: []
+    }
+  ]
+};
 
 const DEFAULT_STATE = {
   items: [],
@@ -35,26 +59,7 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  currentItem: {
-    code: "",
-    name: "",
-    description: "",
-    early_bird_rate: "",
-    standard_rate: "",
-    onsite_rate: "",
-    quantity_limit_per_show: "",
-    quantity_limit_per_sponsor: "",
-    default_quantity: "",
-    images: [],
-    meta_fields: [
-      {
-        name: "",
-        type: "Text",
-        is_required: false,
-        values: []
-      }
-    ]
-  }
+  currentItem: DEFAULT_ITEM_ENTITY
 };
 
 const sponsorCustomizedFormItemsListReducer = (
@@ -113,20 +118,14 @@ const sponsorCustomizedFormItemsListReducer = (
         lastPage
       };
     }
-    case RECEIVE_SPONSOR_CUSTOMIZED_FORM: {
+    case RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM: {
       const item = payload.response;
 
       const currentItem = {
         ...item,
-        early_bird_rate: `$${(item.early_bird_rate / CENTS_FACTOR).toFixed(
-          DECIMAL_DIGITS
-        )}`,
-        standard_rate: `$${(item.standard_rate / CENTS_FACTOR).toFixed(
-          DECIMAL_DIGITS
-        )}`,
-        onsite_rate: `$${(item.onsite_rate / CENTS_FACTOR).toFixed(
-          DECIMAL_DIGITS
-        )}`,
+        early_bird_rate: amountFromCents(item.early_bird_rate),
+        standard_rate: amountFromCents(item.standard_rate),
+        onsite_rate: amountFromCents(item.onsite_rate),
         meta_fields:
           item.meta_fields.length > 0
             ? item.meta_fields
@@ -190,15 +189,9 @@ const sponsorCustomizedFormItemsListReducer = (
               id: item.id,
               code: item.code,
               name: item.name,
-              early_bird_rate: `$${(
-                item.early_bird_rate / CENTS_FACTOR
-              ).toFixed(DECIMAL_DIGITS)}`,
-              standard_rate: `$${(item.standard_rate / CENTS_FACTOR).toFixed(
-                DECIMAL_DIGITS
-              )}`,
-              onsite_rate: `$${(item.onsite_rate / CENTS_FACTOR).toFixed(
-                DECIMAL_DIGITS
-              )}`,
+              early_bird_rate: item.early_bird_rate,
+              standard_rate: item.standard_rate,
+              onsite_rate: item.onsite_rate,
               default_quantity: item.default_quantity,
               is_archived: item.is_archived,
               images: item.images
@@ -206,6 +199,11 @@ const sponsorCustomizedFormItemsListReducer = (
       );
       return { ...state, items };
     }
+    case SPONSOR_CUSTOMIZED_FORM_ITEMS_ADDED: {
+      return { ...state };
+    }
+    case RESET_SPONSOR_FORM_MANAGED_ITEM:
+      return { ...state, currentItem: DEFAULT_ITEM_ENTITY };
     default:
       return state;
   }

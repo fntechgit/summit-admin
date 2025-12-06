@@ -2445,7 +2445,7 @@
         "onsite_rate": "On site rate",
         "default_quantity": "Default Quantity",
         "add_selected": "Add Selected Items",
-        "item_updated": "Form item created successfully",
+        "item_updated": "Form item updated successfully",
         "item_created": "Form item {item} updated successfully",
         "placeholder": {
           "search": "Search..."

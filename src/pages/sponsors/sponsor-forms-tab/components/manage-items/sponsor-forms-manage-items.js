@@ -27,21 +27,22 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ImageIcon from "@mui/icons-material/Image";
 import {
-  addSponsorFormItems,
+  addSponsorManagedFormItems,
   archiveSponsorCustomizedFormItem,
   getSponsorCustomizedFormItems,
   saveSponsorFormManagedItem,
+  deleteSponsorFormManagedItem,
+  resetSponsorFormManagedItem,
   unarchiveSponsorCustomizedFormItem,
   getSponsorFormManagedItem
 } from "../../../../../actions/sponsor-forms-actions";
-import { resetInventoryItemForm } from "../../../../../actions/inventory-item-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import SearchInput from "../../../../../components/mui/search-input";
 import MuiTableEditable from "../../../../../components/mui/editable-table/mui-table-editable";
 import SponsorInventoryDialog from "../../../../sponsors_inventory/popup/sponsor-inventory-popup";
 import SponsorFormItemFromInventoryPopup from "./sponsor-form-item-from-inventory";
 import { parsePrice } from "../../../../../utils/currency";
-import { ONE_HUNDRED } from "../../../../../utils/constants";
+import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
 // import FormTemplateDialog from "../../../../sponsors_inventory/popup/form-template-popup";
 
 const SponsorFormsManageItems = ({
@@ -56,9 +57,10 @@ const SponsorFormsManageItems = ({
   totalCount,
   getSponsorCustomizedFormItems,
   currentInventoryItem,
-  resetInventoryItemForm,
-  addSponsorFormItems,
+  resetSponsorFormManagedItem,
+  addSponsorManagedFormItems,
   saveSponsorFormManagedItem,
+  deleteSponsorFormManagedItem,
   archiveSponsorCustomizedFormItem,
   unarchiveSponsorCustomizedFormItem,
   getSponsorFormManagedItem
@@ -114,7 +116,7 @@ const SponsorFormsManageItems = ({
   };
 
   const handleItemSave = (item) => {
-    saveSponsorFormManagedItem(formId, item).then(() =>
+    saveSponsorFormManagedItem(formId, item).then(() => {
       getSponsorCustomizedFormItems(
         formId,
         term,
@@ -123,13 +125,14 @@ const SponsorFormsManageItems = ({
         order,
         orderDir,
         hideArchived
-      )
-    );
+      );
+      resetSponsorFormManagedItem();
+    });
     setOpenPopup(null);
   };
 
   const handleOpenItemPopup = () => {
-    resetInventoryItemForm();
+    resetSponsorFormManagedItem();
     setOpenPopup("add_item");
   };
 
@@ -151,13 +154,13 @@ const SponsorFormsManageItems = ({
   };
 
   const handleAddFromInventory = (itemsId) => {
-    addSponsorFormItems(formId, itemsId).then(() => handleClose());
+    addSponsorManagedFormItems(formId, itemsId).then(() => handleClose());
   };
 
   const handleCellEdit = (rowId, column, value) => {
     const tmpEntity = {
       id: rowId,
-      [column]: Math.round(parsePrice(value) * ONE_HUNDRED)
+      [column]: parsePrice(value)
     };
     saveSponsorFormManagedItem(formId, tmpEntity);
   };
@@ -165,6 +168,20 @@ const SponsorFormsManageItems = ({
   const handleRowEdit = (row) => {
     getSponsorFormManagedItem(formId, row.id).then(() =>
       setOpenPopup("add_item")
+    );
+  };
+
+  const handleRowDelete = (rowId) => {
+    deleteSponsorFormManagedItem(formId, rowId).then(() =>
+      getSponsorCustomizedFormItems(
+        formId,
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      )
     );
   };
 
@@ -271,7 +288,7 @@ const SponsorFormsManageItems = ({
           mb: 2
         }}
       >
-        <Grid2 size={3}>
+        <Grid2 size={2}>
           <Box component="span">{totalCount} items</Box>
         </Grid2>
         <Grid2 size={2} offset={1}>
@@ -311,7 +328,7 @@ const SponsorFormsManageItems = ({
             {T.translate("edit_sponsor.forms_tab.form_manage_items.add_item")}
           </Button>
         </Grid2>
-        <Grid2 size={2}>
+        <Grid2 size={3}>
           <Button
             variant="contained"
             size="medium"
@@ -342,6 +359,7 @@ const SponsorFormsManageItems = ({
           onSort={handleManagedSort}
           onArchive={handleArchiveItem}
           onEdit={handleRowEdit}
+          onDelete={handleRowDelete}
           onCellChange={handleCellEdit}
         />
       </div>
@@ -374,9 +392,10 @@ const mapStateToProps = ({ sponsorCustomizedFormItemsListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorCustomizedFormItems,
-  resetInventoryItemForm,
-  addSponsorFormItems,
+  resetSponsorFormManagedItem,
+  addSponsorManagedFormItems,
   saveSponsorFormManagedItem,
+  deleteSponsorFormManagedItem,
   getSponsorFormManagedItem,
   archiveSponsorCustomizedFormItem,
   unarchiveSponsorCustomizedFormItem
