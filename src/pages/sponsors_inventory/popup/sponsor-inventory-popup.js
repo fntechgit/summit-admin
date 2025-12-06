@@ -243,7 +243,9 @@ const SponsorItemDialog = ({
       disableRestoreFocus
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        Edit Item
+        {initialEntity.id
+          ? T.translate("edit_inventory_item.edit_item")
+          : T.translate("edit_inventory_item.new_item")}
         <IconButton size="small" onClick={handleClose} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
