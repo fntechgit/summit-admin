@@ -1228,7 +1228,6 @@ const normalizeItem = (entity) => {
 
   if (images) {
     normalizedEntity.images = images?.filter((img) => img.file_path);
-    console.log("CHECK!", normalizedEntity);
   }
 
   if (early_bird_rate === "" || typeof early_bird_rate === "undefined")
@@ -1306,8 +1305,6 @@ export const saveSponsorFormManagedItem =
     };
 
     const normalizedEntity = normalizeManagedItem(entity);
-
-    console.log("TO SAVE ENTITY NORMALIZED", normalizedEntity);
 
     if (entity.id) {
       putRequest(
