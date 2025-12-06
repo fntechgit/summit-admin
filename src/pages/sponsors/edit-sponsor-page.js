@@ -42,6 +42,8 @@ import SponsorGeneralForm from "../../components/forms/sponsor-general-form/inde
 import SponsorUsersListPerSponsorPage from "./sponsor-users-list-per-sponsor";
 import SponsorFormsTab from "./sponsor-forms-tab";
 import SponsorBadgeScans from "./sponsor-badge-scans";
+import SponsorFormsManageItems from "./sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items";
+import { FOUR } from "../../utils/constants";
 
 const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -68,6 +70,9 @@ const EditSponsorPage = (props) => {
   const {
     entity,
     member,
+    history,
+    location,
+    match,
     currentSummit,
     resetSponsorForm,
     getSponsorAdvertisements,
@@ -91,10 +96,16 @@ const EditSponsorPage = (props) => {
     getExtraQuestionMeta
   } = props;
 
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState(
+    location.pathname.includes("/sponsor-forms/") &&
+      location.pathname.includes("/items")
+      ? FOUR
+      : 0
+  );
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
+    history.push(`/app/summits/${currentSummit.id}/sponsors/${entity.id}`);
   };
 
   useEffect(() => {
@@ -125,9 +136,13 @@ const EditSponsorPage = (props) => {
     { label: T.translate("edit_sponsor.tab.badge_scans"), value: 7 }
   ];
 
+  const sponsorFormItemRoute =
+    location.pathname.includes("/sponsor-forms/") &&
+    location.pathname.includes("/items");
+
   return (
     <Box>
-      <Container maxWidth="lg" sx={{position: "relative"}}>
+      <Container maxWidth="lg" sx={{ position: "relative" }}>
         <Typography fontSize="3.4rem" variant="h4">
           {entity.company?.name}
         </Typography>
@@ -144,6 +159,7 @@ const EditSponsorPage = (props) => {
                 key={t.value}
                 label={t.label}
                 value={t.value}
+                onClick={() => handleTabChange(null, t.value)}
                 sx={{
                   fontSize: "1.4rem",
                   lineHeight: "1.8rem",
@@ -183,7 +199,15 @@ const EditSponsorPage = (props) => {
           <SponsorUsersListPerSponsorPage sponsor={entity} />
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={4}>
-          <SponsorFormsTab sponsor={entity} summitId={currentSummit.id} />
+          {sponsorFormItemRoute ? (
+            <SponsorFormsManageItems match={match} />
+          ) : (
+            <SponsorFormsTab
+              sponsor={entity}
+              summitId={currentSummit.id}
+              history={history}
+            />
+          )}
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={7}>
           <SponsorBadgeScans sponsor={entity} />
