@@ -3649,6 +3649,8 @@
     "inventory_item": "Item",
     "inventory_item_created": "Inventory Item created successfully.",
     "inventory_item_saved": "Inventory Item saved successfully.",
+    "new_item": "New Item",
+    "edit_item": "Edit Item",
     "code": "Code",
     "name": "Name",
     "default_quantity": "Default Quantity",
