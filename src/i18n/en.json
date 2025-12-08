@@ -2378,6 +2378,7 @@
     "hidden_value": "Hidden Value",
     "visible_value": "Visible Option (as appears on site)",
     "is_default": "Is Default",
+    "remove_sponsor_user_warning": "Please verify you want to delete {user}",
     "tab": {
       "general": "general",
       "users": "users",

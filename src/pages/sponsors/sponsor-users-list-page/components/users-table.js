@@ -131,6 +131,9 @@ const UsersTable = ({
           getName={(user) => user.email}
           onEdit={onEdit}
           onDelete={handleUserDelete}
+          deleteDialogBody={(user) =>
+            T.translate("edit_sponsor.remove_sponsor_user_warning", { user })
+          }
           onPageChange={handleUsersPageChange}
           onPerPageChange={handlePerPageChange}
           onSort={handleUsersSort}
