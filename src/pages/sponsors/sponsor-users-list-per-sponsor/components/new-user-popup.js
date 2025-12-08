@@ -50,6 +50,7 @@ const NewUserPopup = ({
         .required(T.translate("validation.required"))
     }),
     onSubmit: handleOnSave,
+    validateOnBlur: false,
     enableReinitialize: true
   });
 
