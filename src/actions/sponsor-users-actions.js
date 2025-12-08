@@ -146,7 +146,7 @@ export const getSponsorUsers =
     if (term) {
       const escapedTerm = escapeFilterValue(term);
       filter.push(
-        `user_email=@${escapedTerm},user_first_name=@${escapedTerm},user_last_name=@${escapedTerm}`
+        `email=@${escapedTerm},first_name=@${escapedTerm},last_name=@${escapedTerm}`
       );
     }
 
