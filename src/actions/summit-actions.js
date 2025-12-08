@@ -23,11 +23,13 @@ import {
   showSuccessMessage,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import moment from "moment-timezone";
 import {
   DEFAULT_CURRENT_PAGE,
   DUMMY_ACTION,
   DEFAULT_PER_PAGE,
-  ERROR_CODE_404
+  ERROR_CODE_404,
+  MAX_PER_PAGE
 } from "../utils/constants";
 import { getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
@@ -37,6 +39,7 @@ export const REQUEST_SUMMIT = "REQUEST_SUMMIT";
 export const RECEIVE_SUMMIT = "RECEIVE_SUMMIT";
 export const REQUEST_SUMMITS = "REQUEST_SUMMITS";
 export const RECEIVE_SUMMITS = "RECEIVE_SUMMITS";
+export const RECEIVE_ALL_SUMMITS = "RECEIVE_ALL_SUMMITS";
 export const SET_CURRENT_SUMMIT = "SET_CURRENT_SUMMIT";
 export const RESET_SUMMIT_FORM = "RESET_SUMMIT_FORM";
 export const UPDATE_SUMMIT = "UPDATE_SUMMIT";
@@ -50,6 +53,7 @@ export const REGISTRATION_KEY_GENERATED = "REGISTRATION_KEY_GENERATED";
 export const RECEIVE_LEAD_REPORT_SETTINGS_META =
   "RECEIVE_LEAD_REPORT_SETTINGS_META";
 export const LEAD_REPORT_SETTINGS_UPDATED = "LEAD_REPORT_SETTINGS_UPDATED";
+export const RECEIVE_LEAD_REPORT_SETTINGS = "RECEIVE_LEAD_REPORT_SETTINGS";
 
 export const getSummitById = (summitId) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
@@ -151,6 +155,36 @@ export const loadSummits =
       dispatch(stopLoading());
     });
   };
+
+export const getAllSummits = (onlyActive) => async (dispatch, getState) => {
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken,
+    fields: "id,name,start_date,end_date",
+    expand: "none",
+    relations: "none",
+    page: 1,
+    per_page: MAX_PER_PAGE,
+    order: "-start_date"
+  };
+
+  if (onlyActive) {
+    const now = moment().tz("UTC").unix();
+    params["filter[]"] = `end_date<=${now}`;
+  }
+
+  getRequest(
+    null,
+    createAction(RECEIVE_ALL_SUMMITS),
+    `${window.API_BASE_URL}/api/v1/summits/all`,
+    authErrorHandler
+  )(params)(dispatch, getState).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
 export const resetSummitForm = () => (dispatch) => {
   dispatch(createAction(RESET_SUMMIT_FORM)({}));
@@ -391,6 +425,28 @@ export const getLeadReportSettingsMeta = () => async (dispatch, getState) => {
     dispatch(stopLoading());
   });
 };
+
+export const getLeadReportSettingsBySummit =
+  () => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_LEAD_REPORT_SETTINGS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/lead-report-settings`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 export const upsertLeadReportSettings =
   (allowed_columns) => async (dispatch, getState) => {

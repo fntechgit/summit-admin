@@ -39,7 +39,7 @@ const DEFAULT_STATE = {
   selectedIds: [],
   excludedIds: [],
   selectedAll: false,
-  filters: {}
+  hideArchived: false
 };
 
 const inventoryItemListReducer = (state = DEFAULT_STATE, action = {}) => {

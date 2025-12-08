@@ -66,6 +66,7 @@
     "file-loader": "^6.2.0",
     "file-saver": "^2.0.2",
     "final-form": "^4.20.7",
+    "formik": "^2.4.6",
     "font-awesome": "^4.7.0",
     "fs": "^0.0.2",
     "graphql-query-builder": "^1.0.7",
@@ -88,7 +89,7 @@
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.33",
     "node-sass": "^7.0.1",
-    "openstack-uicore-foundation": "4.2.13",
+    "openstack-uicore-foundation": "4.2.14",
     "p-limit": "^6.1.0",
     "path-browserify": "^1.0.1",
     "postcss-loader": "^6.2.1",
@@ -165,7 +166,8 @@
     "jodit-react": "^5.0.10",
     "lint-staged": "^15.1.0",
     "prettier": "^2.0.5",
-    "redux-mock-store": "^1.5.4"
+    "redux-mock-store": "^1.5.4",
+    "yup": "^1.4.0"
   },
   "jest": {
     "collectCoverageFrom": [

@@ -25,25 +25,24 @@ import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import EditIcon from "@mui/icons-material/Edit";
 import ImageIcon from "@mui/icons-material/Image";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
-  getInventoryItems,
-  getInventoryItem,
-  saveInventoryItem,
+  archiveInventoryItem,
   deleteInventoryItem,
   deleteInventoryItemImage,
-  resetInventoryItemForm,
   deleteInventoryItemMetaFieldType,
   deleteInventoryItemMetaFieldTypeValue,
-  archiveInventoryItem,
+  getInventoryItem,
+  getInventoryItems,
+  resetInventoryItemForm,
+  saveInventoryItem,
   unarchiveInventoryItem
 } from "../../actions/inventory-item-actions";
 import MuiTable from "../../components/mui/table/mui-table";
 import SponsorInventoryDialog from "./popup/sponsor-inventory-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const InventoryListPage = ({
   inventoryItems,
@@ -54,6 +53,7 @@ const InventoryListPage = ({
   term,
   order,
   orderDir,
+  hideArchived,
   totalInventoryItems,
   saveInventoryItem,
   deleteInventoryItemImage,
@@ -73,25 +73,50 @@ const InventoryListPage = ({
   };
 
   useEffect(() => {
-    getInventoryItems(term, 1, perPage, order, orderDir);
+    getInventoryItems(term, 1, perPage, order, orderDir, hideArchived);
   }, []);
 
   const handlePageChange = (page) => {
-    getInventoryItems(term, page, perPage, order, orderDir);
+    getInventoryItems(term, page, perPage, order, orderDir, hideArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getInventoryItems(term, currentPage, newPerPage, order, orderDir);
+    getInventoryItems(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
   };
 
-  const handleSort = (index, key, dir) => {
-    getInventoryItems(term, currentPage, perPage, key, dir);
+  const handleSort = (key, dir) => {
+    getInventoryItems(term, currentPage, perPage, key, dir, hideArchived);
   };
 
   const handleSearch = (ev) => {
     if (ev.key === "Enter") {
-      getInventoryItems(searchTerm, currentPage, perPage, order, orderDir);
+      getInventoryItems(
+        searchTerm,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
     }
+  };
+
+  const handleHideArchivedForms = (ev) => {
+    getInventoryItems(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      ev.target.checked
+    );
   };
 
   const handleRowEdit = (row) => {
@@ -106,7 +131,14 @@ const InventoryListPage = ({
 
   const handleInventorySave = (item) => {
     saveInventoryItem(item).then(() =>
-      getInventoryItems(term, currentPage, perPage, order, orderDir)
+      getInventoryItems(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      )
     );
     setOpen(false);
   };
@@ -148,64 +180,17 @@ const InventoryListPage = ({
             />
           </IconButton>
         ) : null
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row, { onRowEdit }) => (
-        <IconButton size="small" onClick={() => onRowEdit(row)}>
-          <EditIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
-    },
-    {
-      columnKey: "archive",
-      header: "",
-      width: 70,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="small"
-          onClick={() => handleArchiveItem(row)}
-        >
-          {row.is_archived
-            ? T.translate("inventory_item_list.unarchive_button")
-            : T.translate("inventory_item_list.archive_button")}
-        </Button>
-      ),
-      className: "dottedBorderLeft"
-    },
-    {
-      columnKey: "more",
-      header: "",
-      width: 40,
-      align: "center",
-      render: () => (
-        <IconButton size="small">
-          <UnfoldMoreIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
     }
   ];
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
     sortDir: orderDir
   };
 
   return (
     <div className="container">
-      <h3>
-        {" "}
-        {T.translate("inventory_item_list.inventory_items")} (
-        {totalInventoryItems}){" "}
-      </h3>
+      <h3> {T.translate("inventory_item_list.inventory_items")}</h3>
       <Alert
         severity="info"
         sx={{
@@ -225,69 +210,67 @@ const InventoryListPage = ({
           mb: 2
         }}
       >
-        <Grid2 size={6}>
+        <Grid2 size={2}>
           <Box component="span">{totalInventoryItems} items</Box>
         </Grid2>
         <Grid2
           container
-          size={6}
+          size={10}
           spacing={1}
+          gap={1}
           sx={{
-            justifyContent: "center",
+            justifyContent: "flex-end",
             alignItems: "center"
           }}
         >
-          <Grid2 size={4}>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    onChange={(ev) =>
-                      console.log("CHECK BOX", ev.target.checked)
-                    }
-                    inputProps={{
-                      "aria-label": T.translate(
-                        "inventory_item_list.hide_archived"
-                      )
-                    }}
-                  />
-                }
-                label={T.translate("inventory_item_list.hide_archived")}
-              />
-            </FormGroup>
-          </Grid2>
-          <Grid2 size={4}>
-            <TextField
-              variant="outlined"
-              value={searchTerm}
-              placeholder={T.translate(
-                "inventory_item_list.placeholders.search_inventory_items"
-              )}
-              slotProps={{
-                input: {
-                  startAdornment: <SearchIcon sx={{ mr: 1 }} />
-                }
-              }}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              onKeyDown={handleSearch}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  height: "36px"
-                }
-              }}
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  onChange={handleHideArchivedForms}
+                  inputProps={{
+                    "aria-label": T.translate(
+                      "inventory_item_list.hide_archived"
+                    )
+                  }}
+                />
+              }
+              label={T.translate("inventory_item_list.hide_archived")}
             />
-          </Grid2>
-          <Grid2 size={4}>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => handleNewInventoryItem()}
-              startIcon={<AddIcon />}
-              sx={{ height: "36px" }}
-            >
-              {T.translate("inventory_item_list.add_inventory_item")}
-            </Button>
-          </Grid2>
+          </FormGroup>
+          <TextField
+            variant="outlined"
+            value={searchTerm}
+            placeholder={T.translate(
+              "inventory_item_list.placeholders.search_inventory_items"
+            )}
+            slotProps={{
+              input: {
+                startAdornment: <SearchIcon sx={{ mr: 1 }} />
+              }
+            }}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            onKeyDown={handleSearch}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: "36px"
+              }
+            }}
+          />
+          <Button
+            variant="contained"
+            onClick={() => handleNewInventoryItem()}
+            startIcon={<AddIcon />}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
+          >
+            {T.translate("inventory_item_list.add_inventory_item")}
+          </Button>
         </Grid2>
       </Grid2>
 
@@ -296,13 +279,15 @@ const InventoryListPage = ({
           <MuiTable
             columns={columns}
             data={inventoryItems}
-            options={table_options}
+            options={tableOptions}
             perPage={perPage}
             currentPage={currentPage}
-            onRowEdit={handleRowEdit}
+            totalRows={totalInventoryItems}
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
+            onEdit={handleRowEdit}
+            onArchive={handleArchiveItem}
           />
         </div>
       )}

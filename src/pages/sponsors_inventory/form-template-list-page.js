@@ -24,20 +24,18 @@ import {
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import EditIcon from "@mui/icons-material/Edit";
-import IconButton from "@mui/material/IconButton";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
-  getFormTemplates,
-  deleteFormTemplate,
-  getFormTemplate,
-  saveFormTemplate,
-  deleteFormTemplateMaterial,
-  deleteFormTemplateMetaFieldTypeValue,
-  deleteFormTemplateMetaFieldType,
-  resetFormTemplateForm,
   archiveFormTemplate,
+  deleteFormTemplate,
+  deleteFormTemplateMaterial,
+  deleteFormTemplateMetaFieldType,
+  deleteFormTemplateMetaFieldTypeValue,
+  getFormTemplate,
+  getFormTemplates,
+  resetFormTemplateForm,
+  saveFormTemplate,
   unarchiveFormTemplate
 } from "../../actions/form-template-actions";
 import MuiTable from "../../components/mui/table/mui-table";
@@ -53,6 +51,7 @@ const FormTemplateListPage = ({
   term,
   order,
   orderDir,
+  hideArchived,
   totalFormTemplates,
   currentFormTemplate,
   currentFormTemplateErrors,
@@ -75,25 +74,50 @@ const FormTemplateListPage = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    getFormTemplates("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    getFormTemplates(
+      "",
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
     resetFormTemplateForm();
   }, []);
 
   const handlePageChange = (page) => {
-    getFormTemplates(term, page, perPage, order, orderDir);
+    getFormTemplates(term, page, perPage, order, orderDir, hideArchived);
   };
 
-  const handleSort = (index, key, dir) => {
-    getFormTemplates(term, currentPage, perPage, key, dir);
+  const handlePerPageChange = (newPerPage) => {
+    getFormTemplates(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
+  };
+
+  const handleSort = (key, dir) => {
+    getFormTemplates(term, currentPage, perPage, key, dir, hideArchived);
   };
 
   const handleSearch = (ev) => {
     if (ev.key === "Enter") {
-      getFormTemplates(searchTerm, currentPage, perPage, order, orderDir);
+      getFormTemplates(
+        searchTerm,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
     }
     // search on duplicate popup
     if (typeof ev === "string")
-      getFormTemplates(ev, currentPage, perPage, order, orderDir);
+      getFormTemplates(ev, currentPage, perPage, order, orderDir, hideArchived);
   };
 
   const handleRowEdit = (row) => {
@@ -123,7 +147,14 @@ const FormTemplateListPage = ({
   };
 
   const handleDuplicatePopupClose = () => {
-    getFormTemplates("", DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+    getFormTemplates(
+      "",
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
     setFormTemplateDuplicate(false);
     setFormTemplateFromDuplicatePopupOpen(false);
   };
@@ -154,7 +185,7 @@ const FormTemplateListPage = ({
     {
       columnKey: "manage_items",
       header: "",
-      width: 100,
+      width: 150,
       align: "center",
       render: (row) => (
         <Button
@@ -162,45 +193,21 @@ const FormTemplateListPage = ({
           color="inherit"
           size="small"
           onClick={() => handleManageItems(row)}
+          sx={{
+            fontSize: "1.3rem",
+            fontWeight: 500,
+            lineHeight: "2.2rem",
+            padding: "4px 5px"
+          }}
         >
           Manage Items
         </Button>
-      )
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row, { onRowEdit }) => (
-        <IconButton size="small" onClick={() => onRowEdit(row)}>
-          <EditIcon fontSize="small" />
-        </IconButton>
       ),
-      className: "dottedBorderLeft"
-    },
-    {
-      columnKey: "archive",
-      header: "",
-      width: 70,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="medium"
-          onClick={() => handleArchiveItem(row)}
-        >
-          {row.is_archived
-            ? T.translate("inventory_item_list.unarchive_button")
-            : T.translate("inventory_item_list.archive_button")}
-        </Button>
-      ),
-      className: "dottedBorderLeft"
+      dottedBorder: true
     }
   ];
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
     sortDir: orderDir
   };
@@ -225,7 +232,7 @@ const FormTemplateListPage = ({
 
       <Grid2
         container
-        spacing={2}
+        spacing={1}
         sx={{
           justifyContent: "center",
           alignItems: "center",
@@ -235,7 +242,7 @@ const FormTemplateListPage = ({
         <Grid2 size={1}>
           <Box component="span">{totalFormTemplates} forms</Box>
         </Grid2>
-        <Grid2 size={2} offset={3}>
+        <Grid2 size={11} justifyContent="flex-end" gap={1} container>
           <FormGroup>
             <FormControlLabel
               control={
@@ -251,8 +258,7 @@ const FormTemplateListPage = ({
               label={T.translate("form_template_list.hide_archived")}
             />
           </FormGroup>
-        </Grid2>
-        <Grid2 size={2}>
+
           <TextField
             variant="outlined"
             value={searchTerm}
@@ -266,34 +272,39 @@ const FormTemplateListPage = ({
             }}
             onChange={(event) => setSearchTerm(event.target.value)}
             onKeyDown={handleSearch}
-            fullWidth
             sx={{
               "& .MuiOutlinedInput-root": {
                 height: "36px"
               }
             }}
           />
-        </Grid2>
-        <Grid2 size={2}>
           <Button
             variant="contained"
             size="medium"
-            fullWidth
             onClick={() => handleNewFromDuplicate()}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
           >
             {T.translate("form_template_list.using_duplicate")}
           </Button>
-        </Grid2>
-        <Grid2 size={2}>
           <Button
             variant="contained"
             size="medium"
-            fullWidth
             onClick={() => handleNewFormTemplate()}
             startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
           >
             {T.translate("form_template_list.add_form_template")}
           </Button>
@@ -305,12 +316,15 @@ const FormTemplateListPage = ({
           <MuiTable
             columns={columns}
             data={formTemplates}
-            options={table_options}
+            options={tableOptions}
             perPage={perPage}
             currentPage={currentPage}
-            onRowEdit={handleRowEdit}
+            totalRows={totalFormTemplates}
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
+            onEdit={handleRowEdit}
+            onArchive={handleArchiveItem}
           />
         </div>
       )}
@@ -327,11 +341,16 @@ const FormTemplateListPage = ({
       />
       <FormTemplateFromDuplicateDialog
         open={formTemplateFromDuplicatePopupOpen}
-        options={table_options}
+        options={tableOptions}
         onClose={handleDuplicatePopupClose}
         onDuplicate={handleDuplicateForm}
         onSearch={handleSearch}
         onSort={handleSort}
+        perPage={perPage}
+        currentPage={currentPage}
+        totalRows={totalFormTemplates}
+        onPageChange={handlePageChange}
+        onPerPageChange={handlePerPageChange}
         formTemplates={formTemplates}
       />
     </div>

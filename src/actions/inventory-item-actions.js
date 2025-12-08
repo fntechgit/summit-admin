@@ -101,7 +101,8 @@ export const getInventoryItems =
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
-    orderDir = DEFAULT_ORDER_DIR
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
   ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
@@ -113,6 +114,8 @@ export const getInventoryItems =
       const escapedTerm = escapeFilterValue(term);
       filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
     }
+
+    if (hideArchived) filter.push("is_archived==0");
 
     const params = {
       page,
@@ -130,7 +133,7 @@ export const getInventoryItems =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params.ordering = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -138,7 +141,7 @@ export const getInventoryItems =
       createAction(RECEIVE_INVENTORY_ITEMS),
       `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term }
+      { order, orderDir, page, perPage, term, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

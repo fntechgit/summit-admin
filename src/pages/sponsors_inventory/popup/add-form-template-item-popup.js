@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import {
+  Box,
+  Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  TextField,
-  Checkbox,
-  FormControlLabel,
-  Box,
-  IconButton,
   Divider,
+  FormControlLabel,
   Grid2,
+  IconButton,
+  TextField,
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
@@ -22,7 +22,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "../../../components/mui/table/mui-table";
-import MenuButton from "../../../components/mui/components/menu-button";
+import MenuButton from "../../../components/mui/menu-button";
 import {
   clearAllSelectedInventoryItems,
   getInventoryItems,
@@ -30,7 +30,7 @@ import {
   setSelectedAll,
   unSelectInventoryItem
 } from "../../../actions/inventory-item-actions";
-import { DECIMAL_DIGITS } from "../../../utils/constants";
+import { DECIMAL_DIGITS, DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const AddFormTemplateItemDialog = ({
   open,
@@ -41,6 +41,7 @@ const AddFormTemplateItemDialog = ({
   selectInventoryItem,
   unSelectInventoryItem,
   inventoryItems,
+  totalInventoryItems,
   currentPage,
   perPage,
   order,
@@ -60,7 +61,7 @@ const AddFormTemplateItemDialog = ({
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getInventoryItems(term, currentPage, newPerPage, order, orderDir);
+    getInventoryItems(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
 
   const handleSort = (key, dir) => {
@@ -90,7 +91,7 @@ const AddFormTemplateItemDialog = ({
     clearAllSelectedInventoryItems();
   };
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
     sortDir: orderDir
   };
@@ -243,9 +244,10 @@ const AddFormTemplateItemDialog = ({
             <MuiTable
               columns={columns}
               data={inventoryItems}
-              options={table_options}
+              options={tableOptions}
               currentPage={currentPage}
               perPage={perPage}
+              totalRows={totalInventoryItems}
               onSort={handleSort}
               onPageChange={handlePageChange}
               onPerPageChange={handlePerPageChange}

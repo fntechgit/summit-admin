@@ -16,19 +16,21 @@ import {
   RECEIVE_FORM_TEMPLATE_ITEMS,
   REQUEST_FORM_TEMPLATE_ITEMS,
   FORM_TEMPLATE_ITEM_DELETED,
-  CHANGE_FORM_TEMPLATE_ITEM_SEARCH_TERM
+  CHANGE_FORM_TEMPLATE_ITEM_SEARCH_TERM,
+  FORM_TEMPLATE_ITEM_ARCHIVED,
+  FORM_TEMPLATE_ITEM_UNARCHIVED
 } from "../../actions/form-template-item-actions";
 
 const DEFAULT_STATE = {
   formTemplateItems: [],
-  term: null,
+  term: "",
   order: "name",
   orderDir: 1,
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
   totalFormTemplateItems: 0,
-  filters: {}
+  hideArchived: false
 };
 
 const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
@@ -71,6 +73,7 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
         id: a.id,
         code: a.code,
         name: a.name,
+        is_archived: a.is_archived,
         images: a.images
       }));
 
@@ -94,6 +97,26 @@ const formTemplateItemListReducer = (state = DEFAULT_STATE, action = {}) => {
     case CHANGE_FORM_TEMPLATE_ITEM_SEARCH_TERM: {
       const { term } = payload;
       return { ...state, term };
+    }
+    case FORM_TEMPLATE_ITEM_ARCHIVED: {
+      const updatedFormTemplateItem = payload.response;
+
+      const updatedFormTemplatesItems = state.formTemplateItems.map((item) =>
+        item.id === updatedFormTemplateItem.id
+          ? { ...item, is_archived: true }
+          : item
+      );
+      return { ...state, formTemplateItems: updatedFormTemplatesItems };
+    }
+    case FORM_TEMPLATE_ITEM_UNARCHIVED: {
+      const updatedFormTemplateItemId = payload;
+
+      const updatedFormTemplatesItems = state.formTemplateItems.map((item) =>
+        item.id === updatedFormTemplateItemId
+          ? { ...item, is_archived: false }
+          : item
+      );
+      return { ...state, formTemplateItems: updatedFormTemplatesItems };
     }
     default:
       return state;

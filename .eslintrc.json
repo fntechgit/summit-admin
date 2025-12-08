@@ -85,5 +85,13 @@
     "no-unsafe-optional-chaining": "warn",
     "no-await-in-loop": "warn"
   },
-  "ignorePatterns": ["src/__mocks__"]
+  "ignorePatterns": ["src/__mocks__"],
+  "overrides": [
+    {
+      "files": ["**/*.test.js", "**/*.test.jsx"],
+      "rules": {
+        "no-magic-numbers": "off"
+      }
+    }
+  ]
 }

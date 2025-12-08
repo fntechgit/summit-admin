@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -28,7 +27,9 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_SPONSORSHIPS = "REQUEST_SPONSORSHIPS";
 export const RECEIVE_SPONSORSHIPS = "RECEIVE_SPONSORSHIPS";
@@ -39,17 +40,17 @@ export const SPONSORSHIP_UPDATED = "SPONSORSHIP_UPDATED";
 export const SPONSORSHIP_ADDED = "SPONSORSHIP_ADDED";
 export const SPONSORSHIP_DELETED = "SPONSORSHIP_DELETED";
 
-/******************  SPONSORS ****************************************/
+/** ****************  SPONSORS *************************************** */
 
 export const getSponsorships =
-  (page = 1, perPage = 10, order = "name", orderDir = 1) =>
-  async (dispatch, getState) => {
+  (page = 1, perPage = DEFAULT_PER_PAGE, order = "name", orderDir = 1) =>
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -57,7 +58,7 @@ export const getSponsorships =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -71,7 +72,7 @@ export const getSponsorships =
     });
   };
 
-export const getSponsorship = (sponsorshipId) => async (dispatch, getState) => {
+export const getSponsorship = (sponsorshipId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -90,14 +91,12 @@ export const getSponsorship = (sponsorshipId) => async (dispatch, getState) => {
   });
 };
 
-export const resetSponsorshipForm = () => (dispatch, getState) => {
+export const resetSponsorshipForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSORSHIP_FORM)({}));
 };
 
-export const saveSponsorship = (entity) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
+export const saveSponsorship = (entity) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
 
   const params = {
     access_token: accessToken
@@ -115,7 +114,7 @@ export const saveSponsorship = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(
         showSuccessMessage(T.translate("edit_sponsorship.sponsorship_saved"))
       );
@@ -144,26 +143,23 @@ export const saveSponsorship = (entity) => async (dispatch, getState) => {
   }
 };
 
-export const deleteSponsorship =
-  (sponsorshipId) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+export const deleteSponsorship = (sponsorshipId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(SPONSORSHIP_DELETED)({ sponsorshipId }),
-      `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken
   };
+
+  return deleteRequest(
+    null,
+    createAction(SPONSORSHIP_DELETED)({ sponsorshipId }),
+    `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
 const normalizeSponsorship = (entity) => {
   const normalizedEntity = { ...entity };
@@ -186,4 +182,28 @@ export const querySponsorships = _.debounce(async (input, callback) => {
       callback(options);
     })
     .catch(fetchErrorHandler);
-}, 500);
+}, DEBOUNCE_WAIT);
+
+export const querySponsorshipsBySummit = _.debounce(
+  async (input, summitId, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    const url = `${
+      window.API_BASE_URL
+    }/api/v1/summits/${summitId}/sponsorships-types?page=1&per_page=100&access_token=${accessToken}&expand=type&order=%2Bname${
+      input ? `&filter=name=@${input}` : ""
+    }`;
+
+    fetch(url)
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);

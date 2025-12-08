@@ -215,3 +215,7 @@ export const ROOM_OCCUPANCY_OPTIONS = [
   "FULL",
   "OVERFLOW"
 ];
+
+export const NOTIFICATION_TIMEOUT = 2000;
+export const MAX_PER_PAGE = 100;
+export const DEBOUNCE_WAIT_250 = 250;

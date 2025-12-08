@@ -1,45 +1,111 @@
 import * as React from "react";
 import T from "i18n-react/dist/i18n-react";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
+import { isBoolean } from "lodash";
+import {
+  Box,
+  IconButton,
+  Paper,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import { visuallyHidden } from "@mui/utils";
-
-import styles from "./mui-table.module.less";
-
 import {
   DEFAULT_PER_PAGE,
-  TWENTY_PER_PAGE,
-  FIFTY_PER_PAGE
+  FIFTY_PER_PAGE,
+  TWENTY_PER_PAGE
 } from "../../../utils/constants";
+import showConfirmDialog from "../showConfirmDialog";
+import styles from "./mui-table.module.less";
 
 const MuiTable = ({
   columns = [],
   data = [],
+  totalRows,
   perPage,
   currentPage,
-  onRowEdit,
   onPageChange,
   onPerPageChange,
   onSort,
-  options = { sortCol: "", sortDir: "" }
+  options = { sortCol: "", sortDir: 1, disableProp: null }, // disableProp is the prop that will disable the row
+  getName = (item) => item.name,
+  onEdit,
+  onArchive,
+  onDelete,
+  deleteDialogTitle = null,
+  deleteDialogBody = null
 }) => {
   const handleChangePage = (_, newPage) => {
-    onPageChange(newPage);
+    onPageChange(newPage + 1);
   };
 
   const handleChangeRowsPerPage = (ev) => {
     onPerPageChange(ev.target.value);
   };
 
+  const basePerPageOptions = [
+    DEFAULT_PER_PAGE,
+    TWENTY_PER_PAGE,
+    FIFTY_PER_PAGE
+  ];
+
+  const initialPerPage = React.useRef(perPage);
+
+  let customPerPageOptions = basePerPageOptions.includes(initialPerPage.current)
+    ? basePerPageOptions
+    : [...basePerPageOptions, initialPerPage.current].sort((a, b) => a - b);
+
+  // remove per page selection if no action passed
+  if (!onPerPageChange) {
+    customPerPageOptions = [initialPerPage.current];
+  }
+
   const { sortCol, sortDir } = options;
+
+  const handleDelete = async (item) => {
+    const isConfirmed = await showConfirmDialog({
+      title: deleteDialogTitle || T.translate("general.are_you_sure"),
+      text:
+        typeof deleteDialogBody === "function"
+          ? deleteDialogBody(getName(item))
+          : deleteDialogBody ||
+            `${T.translate("general.row_remove_warning")} ${getName(item)}`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    });
+
+    if (isConfirmed) {
+      onDelete(item.id);
+    }
+  };
+
+  const renderCell = (row, col) => {
+    if (col.render) {
+      return col.render(row);
+    }
+
+    if (isBoolean(row[col.columnKey])) {
+      return row[col.columnKey] ? (
+        <CheckIcon fontSize="large" />
+      ) : (
+        <CloseIcon fontSize="large" />
+      );
+    }
+
+    return row[col.columnKey];
+  };
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -66,18 +132,16 @@ const MuiTable = ({
                       <TableSortLabel
                         active={sortCol === col.columnKey}
                         direction={
-                          sortCol === col.columnKey
-                            ? sortDir === 1
-                              ? "asc"
-                              : "desc"
+                          sortCol === col.columnKey && sortDir === -1
+                            ? "desc"
                             : "asc"
                         }
-                        onClick={() => onSort(_, col.columnKey, sortDir * -1)}
+                        onClick={() => onSort(col.columnKey, sortDir * -1)}
                       >
                         {col.header}
                         {sortCol === col.columnKey ? (
                           <Box component="span" sx={visuallyHidden}>
-                            {sortDir === "-1"
+                            {sortDir === -1
                               ? T.translate("mui_table.sorted_desc")
                               : T.translate("mui_table.sorted_asc")}
                           </Box>
@@ -88,36 +152,107 @@ const MuiTable = ({
                     )}
                   </TableCell>
                 ))}
+                {onEdit && <TableCell sx={{ width: 40 }} />}
+                {onArchive && <TableCell sx={{ width: 80 }} />}
+                {onDelete && <TableCell sx={{ width: 40 }} />}
               </TableRow>
             </TableHead>
 
             {/* TABLE BODY */}
             <TableBody>
-              {data.map((row, rowIndex) => (
-                <TableRow key={row.id || rowIndex}>
-                  {columns.map((col) => {
-                    const cellContent = col.render
-                      ? col.render(row, { onRowEdit })
-                      : row[col.columnKey];
-
-                    const cellClassName = col.className
-                      ? styles[col.className] || col.className
-                      : "";
-
-                    return (
-                      <TableCell
-                        key={col.columnKey}
-                        align={col.align ?? "left"}
-                        className={cellClassName}
+              {data.map((row, idx) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <TableRow key={`row-${idx}`}>
+                  {/* Main content columns */}
+                  {columns.map((col) => (
+                    <TableCell
+                      key={col.columnKey}
+                      align={col.align ?? "left"}
+                      className={`${
+                        col.dottedBorder && styles.dottedBorderLeft
+                      } ${col.className}`}
+                      sx={{
+                        ...(options.disableProp && row[options.disableProp]
+                          ? {
+                              backgroundColor: "background.light",
+                              color: "text.disabled"
+                            }
+                          : {})
+                      }}
+                    >
+                      {renderCell(row, col)}
+                    </TableCell>
+                  ))}
+                  {/* Edit column */}
+                  {onEdit && (
+                    <TableCell
+                      align="center"
+                      className={styles.dottedBorderLeft}
+                      sx={{
+                        width: 40,
+                        ...(options.disableProp && row[options.disableProp]
+                          ? {
+                              backgroundColor: "background.light",
+                              color: "text.disabled"
+                            }
+                          : {})
+                      }}
+                    >
+                      <IconButton size="large" onClick={() => onEdit(row)}>
+                        <EditIcon fontSize="large" />
+                      </IconButton>
+                    </TableCell>
+                  )}
+                  {/* Archive column */}
+                  {onArchive && (
+                    <TableCell
+                      align="center"
+                      sx={{ width: 80 }}
+                      className={styles.dottedBorderLeft}
+                    >
+                      <Button
+                        variant="text"
+                        color="inherit"
+                        size="small"
+                        onClick={() => onArchive(row)}
+                        sx={{
+                          fontSize: "1.3rem",
+                          fontWeight: 500,
+                          lineHeight: "2.2rem",
+                          padding: "4px 5px"
+                        }}
                       >
-                        {cellContent}
-                      </TableCell>
-                    );
-                  })}
+                        {row.is_archived
+                          ? T.translate("general.unarchive")
+                          : T.translate("general.archive")}
+                      </Button>
+                    </TableCell>
+                  )}
+                  {/* Delete column */}
+                  {onDelete && (
+                    <TableCell
+                      align="center"
+                      className={styles.dottedBorderLeft}
+                      sx={{
+                        width: 40,
+                        ...(options.disableProp && row[options.disableProp]
+                          ? {
+                              backgroundColor: "background.light",
+                              color: "text.disabled"
+                            }
+                          : {})
+                      }}
+                    >
+                      <IconButton
+                        size="large"
+                        onClick={() => handleDelete(row)}
+                      >
+                        <DeleteIcon fontSize="large" />
+                      </IconButton>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
-
-              {/* No items */}
               {data.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={columns.length} align="center">
@@ -132,17 +267,11 @@ const MuiTable = ({
         {/* PAGINATION */}
         <TablePagination
           component="div"
-          count={data.length}
-          rowsPerPageOptions={[
-            DEFAULT_PER_PAGE,
-            TWENTY_PER_PAGE,
-            FIFTY_PER_PAGE
-          ]}
+          count={totalRows}
+          rowsPerPageOptions={customPerPageOptions}
           rowsPerPage={perPage}
           page={currentPage - 1}
-          onPageChange={(_, newPage) => {
-            handleChangePage(newPage + 1);
-          }}
+          onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage={T.translate("mui_table.rows_per_page")}
           sx={{

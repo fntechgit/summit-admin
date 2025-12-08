@@ -25,9 +25,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import Tooltip from "@mui/material/Tooltip";
-import EditIcon from "@mui/icons-material/Edit";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "../../components/mui/table/mui-table";
 import {
@@ -38,12 +36,15 @@ import {
   saveFormTemplateItem,
   deleteItemMetaFieldType,
   deleteItemMetaFieldTypeValue,
-  deleteItemImage
+  deleteItemImage,
+  unarchiveFormTemplateItem,
+  archiveFormTemplateItem
 } from "../../actions/form-template-item-actions";
 import { getFormTemplate } from "../../actions/form-template-actions";
 import AddFormTemplateItemDialog from "./popup/add-form-template-item-popup";
 import SponsorItemDialog from "./popup/sponsor-inventory-popup";
 import { getInventoryItems } from "../../actions/inventory-item-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const FormTemplateItemListPage = ({
   formTemplateId,
@@ -54,6 +55,7 @@ const FormTemplateItemListPage = ({
   term,
   order,
   orderDir,
+  hideArchived,
   getInventoryItems,
   totalFormTemplateItems,
   cloneFromInventoryItem,
@@ -62,9 +64,12 @@ const FormTemplateItemListPage = ({
   getFormTemplateItem,
   currentFormTemplateItem,
   currentFormTemplateItemErrors,
+  saveFormTemplateItem,
   deleteItemMetaFieldType,
   deleteItemMetaFieldTypeValue,
-  deleteItemImage
+  deleteItemImage,
+  unarchiveFormTemplateItem,
+  archiveFormTemplateItem
 }) => {
   const [showAddInventoryItemsModal, setShowAddInventoryItemsModal] =
     useState(false);
@@ -78,17 +83,34 @@ const FormTemplateItemListPage = ({
         currentPage,
         perPage,
         order,
-        orderDir
+        orderDir,
+        hideArchived
       );
     });
   }, []);
 
   const handlePageChange = (page) => {
-    getFormTemplateItems(formTemplateId, term, page, perPage, order, orderDir);
+    getFormTemplateItems(
+      formTemplateId,
+      term,
+      page,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
   };
 
-  const handleSort = (index, key, dir) => {
-    getFormTemplateItems(formTemplateId, term, currentPage, perPage, key, dir);
+  const handleSort = (key, dir) => {
+    getFormTemplateItems(
+      formTemplateId,
+      term,
+      currentPage,
+      perPage,
+      key,
+      dir,
+      hideArchived
+    );
   };
 
   const handleRowEdit = (row) => {
@@ -113,7 +135,8 @@ const FormTemplateItemListPage = ({
           currentPage,
           perPage,
           order,
-          orderDir
+          orderDir,
+          hideArchived
         );
       })
       .catch((error) => {
@@ -124,9 +147,34 @@ const FormTemplateItemListPage = ({
       });
   };
 
+  const handleArchiveItem = (item) =>
+    item.is_archived
+      ? unarchiveFormTemplateItem(formTemplateId, item)
+      : archiveFormTemplateItem(formTemplateId, item);
+
+  const handleHideArchivedForms = (ev) => {
+    getFormTemplateItems(
+      formTemplateId,
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      ev.target.checked
+    );
+  };
+
   const handleFormTemplateSave = (item) => {
-    saveFormTemplateItem(item).then(() =>
-      getFormTemplateItems(term, currentPage, perPage, order, orderDir)
+    saveFormTemplateItem(formTemplateId, item).then(() =>
+      getFormTemplateItems(
+        formTemplateId,
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      )
     );
     setShowInventoryItemModal(false);
   };
@@ -164,46 +212,10 @@ const FormTemplateItemListPage = ({
             </IconButton>
           </Tooltip>
         ) : null
-    },
-    {
-      columnKey: "edit",
-      header: "",
-      width: 40,
-      align: "center",
-      render: (row, { onRowEdit }) => (
-        <IconButton size="small" onClick={() => onRowEdit(row)}>
-          <EditIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
-    },
-    {
-      columnKey: "archive",
-      header: "",
-      width: 70,
-      align: "center",
-      render: () => (
-        <Button variant="text" color="inherit" size="small">
-          {T.translate("form_template_item_list.archive_button")}
-        </Button>
-      ),
-      className: "dottedBorderLeft"
-    },
-    {
-      columnKey: "more",
-      header: "",
-      width: 40,
-      align: "center",
-      render: () => (
-        <IconButton size="small">
-          <UnfoldMoreIcon fontSize="small" />
-        </IconButton>
-      ),
-      className: "dottedBorderLeft"
     }
   ];
 
-  const table_options = {
+  const tableOptions = {
     sortCol: order,
     sortDir: orderDir
   };
@@ -247,9 +259,7 @@ const FormTemplateItemListPage = ({
               <FormControlLabel
                 control={
                   <Checkbox
-                    onChange={(ev) =>
-                      console.log("CHECK BOX", ev.target.checked)
-                    }
+                    onChange={handleHideArchivedForms}
                     inputProps={{
                       "aria-label": T.translate(
                         "form_template_item_list.hide_archived"
@@ -279,12 +289,14 @@ const FormTemplateItemListPage = ({
           <MuiTable
             columns={columns}
             data={formTemplateItems}
-            options={table_options}
+            options={tableOptions}
             perPage={perPage}
+            totalRows={totalFormTemplateItems}
             currentPage={currentPage}
-            onRowEdit={handleRowEdit}
             onPageChange={handlePageChange}
             onSort={handleSort}
+            onEdit={handleRowEdit}
+            onArchive={handleArchiveItem}
           />
         </div>
       )}
@@ -328,5 +340,7 @@ export default connect(mapStateToProps, {
   saveFormTemplateItem,
   deleteItemMetaFieldType,
   deleteItemMetaFieldTypeValue,
-  deleteItemImage
+  deleteItemImage,
+  unarchiveFormTemplateItem,
+  archiveFormTemplateItem
 })(FormTemplateItemListPage);

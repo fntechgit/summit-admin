@@ -2176,3 +2176,41 @@ export const upsertSponsorLeadReportSettings =
       dispatch(stopLoading());
     });
   };
+
+export const querySummitAddons = _.debounce(
+  async (input, summitId, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    input = escapeFilterValue(input);
+
+    fetch(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/add-ons/metadata?access_token=${accessToken}`
+    )
+      .then(fetchResponseHandler)
+      .then((data) => {
+        callback(data);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);
+
+export const querySponsors = _.debounce(async (input, summitId, callback) => {
+  const accessToken = await getAccessTokenSafely();
+
+  const escapedInput = escapeFilterValue(input);
+
+  fetch(
+    `${window.API_BASE_URL}/api/v2/summits/${summitId}/sponsors?filter=company_name=@${escapedInput}&access_token=${accessToken}&fields=id,company.name,company.id&relations=company&expand=company`
+  )
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data].map((sp) => ({
+        id: sp.id,
+        name: sp.company.name
+      }));
+
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);
