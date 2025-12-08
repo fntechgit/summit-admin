@@ -31,7 +31,7 @@ const UsersTable = ({
 
   const handlePerPageChange = (newPerPage) => {
     const { order, orderDir } = users;
-    getUsers(term, 1, newPerPage, order, orderDir);
+    getUsers(sponsorId, term, 1, newPerPage, order, orderDir);
   };
 
   const handleUsersSort = (key, dir) => {
