@@ -30,7 +30,7 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalFormTemplates: 0,
-  filters: {}
+  hideArchived: false
 };
 
 const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
@@ -40,7 +40,7 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
       return DEFAULT_STATE;
     }
     case REQUEST_FORM_TEMPLATES: {
-      const { order, orderDir, page, ...rest } = payload;
+      const { order, orderDir, page, perPage, ...rest } = payload;
 
       if (
         order !== state.order ||
@@ -63,6 +63,7 @@ const formTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
         orderDir,
         formTemplates: [],
         currentPage: page,
+        perPage,
         ...rest
       };
     }

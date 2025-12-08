@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import {
   START_LOADING,
@@ -18,12 +18,22 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { RECEIVE_COUNTRIES } from "openstack-uicore-foundation/lib/utils/query-actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { RECEIVE_TIMEZONES } from "../actions/base-actions";
+import {
+  RECEIVE_TIMEZONES,
+  SET_SNACKBAR_MESSAGE,
+  CLEAR_SNACKBAR_MESSAGE
+} from "../actions/base-actions";
 
 const DEFAULT_STATE = {
   loading: 0,
   countries: [],
-  timezones: []
+  timezones: [],
+  snackbarMessage: {
+    title: "",
+    html: "",
+    type: "",
+    httpCode: ""
+  }
 };
 
 const baseReducer = (state = DEFAULT_STATE, action) => {
@@ -33,30 +43,27 @@ const baseReducer = (state = DEFAULT_STATE, action) => {
     case LOGOUT_USER:
       return DEFAULT_STATE;
     case START_LOADING:
-      {
-        //let loadingCount = state.loading + 1;
-        return { ...state, loading: 1 };
-      }
-      break;
+      // let loadingCount = state.loading + 1;
+      return { ...state, loading: 1 };
     case STOP_LOADING:
-      {
-        //let loadingCount = state.loading <= 1 ? 0 : (state.loading - 1);
-        return { ...state, loading: 0 };
-      }
-      break;
+      // let loadingCount = state.loading <= 1 ? 0 : (state.loading - 1);
+      return { ...state, loading: 0 };
     case RESET_LOADING:
-      {
-        return { ...state, loading: 0 };
-      }
-      break;
+      return { ...state, loading: 0 };
     case RECEIVE_COUNTRIES:
       return { ...state, countries: payload };
-    case RECEIVE_TIMEZONES:
+    case RECEIVE_TIMEZONES: {
       const { data } = payload.response;
       return { ...state, timezones: data };
+    }
+    case SET_SNACKBAR_MESSAGE: {
+      return { ...state, snackbarMessage: payload };
+    }
+    case CLEAR_SNACKBAR_MESSAGE: {
+      return { ...state, snackbarMessage: DEFAULT_STATE.snackbarMessage };
+    }
     default:
       return state;
-      break;
   }
 };
 

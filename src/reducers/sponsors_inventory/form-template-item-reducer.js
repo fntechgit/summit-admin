@@ -38,7 +38,8 @@ export const DEFAULT_ENTITY = {
   standard_rate: 0,
   onsite_rate: 0,
   materials: [],
-  meta_fields: []
+  meta_fields: [],
+  images: []
 };
 
 const DEFAULT_STATE = {

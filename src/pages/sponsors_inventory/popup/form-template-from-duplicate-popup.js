@@ -2,25 +2,25 @@ import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import {
+  Box,
+  Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  TextField,
-  Checkbox,
-  FormControlLabel,
-  Box,
-  IconButton,
   Divider,
+  FormControlLabel,
   Grid2,
+  IconButton,
+  TextField,
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiTable from "../../../components/mui/table/mui-table";
-import MenuButton from "../../../components/mui/components/menu-button";
+import MenuButton from "../../../components/mui/menu-button";
 
 const FormTemplateFromDuplicateDialog = ({
   open,
@@ -29,7 +29,12 @@ const FormTemplateFromDuplicateDialog = ({
   onDuplicate,
   onSearch,
   onSort,
-  formTemplates
+  formTemplates,
+  perPage,
+  currentPage,
+  totalRows,
+  onPageChange,
+  onPerPageChange
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
@@ -153,6 +158,11 @@ const FormTemplateFromDuplicateDialog = ({
               data={formTemplates}
               options={options}
               onSort={handleSort}
+              perPage={perPage}
+              currentPage={currentPage}
+              totalRows={totalRows}
+              onPageChange={onPageChange}
+              onPerPageChange={onPerPageChange}
             />
           </Box>
         )}

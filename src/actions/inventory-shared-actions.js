@@ -66,7 +66,7 @@ export const saveMetaFieldTypes =
         return putRequest(
           null,
           createAction(settings.updatedActionName),
-          `${settings.url}${metaFieldType.id}/`,
+          `${settings.url}/${metaFieldType.id}`,
           normalizedEntity,
           authErrorHandler,
           metaFieldType
@@ -127,7 +127,7 @@ export const deleteMetaFieldType =
     return deleteRequest(
       null,
       createAction(settings.deletedActionName)({ metaFieldId }),
-      `${settings.url}${metaFieldId}/`,
+      `${settings.url}/${metaFieldId}`,
       null,
       authErrorHandler
     )(params)(dispatch).then(() => {
@@ -166,7 +166,7 @@ export const saveMetaFieldValues =
         await putRequest(
           null,
           createAction(settings.updatedActionName),
-          `${settings.url}${value.id}/`,
+          `${settings.url}/${value.id}`,
           normalizedEntity,
           authErrorHandler,
           value

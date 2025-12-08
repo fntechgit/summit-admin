@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 import {
   getRequest,
   createAction,
@@ -18,6 +18,8 @@ import {
 
 export const REQUEST_TIMEZONES = "REQUEST_TIMEZONES";
 export const RECEIVE_TIMEZONES = "RECEIVE_TIMEZONES";
+export const SET_SNACKBAR_MESSAGE = "SET_SNACKBAR_MESSAGE";
+export const CLEAR_SNACKBAR_MESSAGE = "CLEAR_SNACKBAR_MESSAGE";
 
 export const getTimezones = () => (dispatch, getState) => {
   const { baseState } = getState();
@@ -30,3 +32,21 @@ export const getTimezones = () => (dispatch, getState) => {
     authErrorHandler
   )({})(dispatch);
 };
+
+export const clearSnackbarMessage = () => (dispatch) => {
+  dispatch(createAction(CLEAR_SNACKBAR_MESSAGE)({}));
+};
+
+export const setSnackbarMessage = (message) => (dispatch) => {
+  dispatch(createAction(SET_SNACKBAR_MESSAGE)(message));
+};
+
+export const snackbarErrorHandler = (err, res) => (dispatch, state) => {
+  authErrorHandler(err, res, setSnackbarMessage)(dispatch, state);
+};
+
+export const snackbarSuccessHandler = (message) => (dispatch, state) =>
+  setSnackbarMessage({ ...message, type: "success", code: CODE_200 })(
+    dispatch,
+    state
+  );
