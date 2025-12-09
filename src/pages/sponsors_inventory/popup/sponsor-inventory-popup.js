@@ -34,6 +34,7 @@ import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
 import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
+import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield";
 
 const SponsorItemDialog = ({
   open,
@@ -101,7 +102,7 @@ const SponsorItemDialog = ({
               is: (values, minQty, maxQty) => {
                 // required only if has values or quantities
                 const hasValues = values && values.length > 0;
-                const hasQuantities = minQty !== null || maxQty !== null;
+                const hasQuantities = minQty != null || maxQty != null;
                 return hasValues || hasQuantities;
               },
               then: (schema) =>
@@ -183,8 +184,8 @@ const SponsorItemDialog = ({
             name: "",
             type: "Text",
             is_required: false,
-            minimum_quantity: 0,
-            maximum_quantity: 0,
+            minimum_quantity: null,
+            maximum_quantity: null,
             values: []
           }
         ]);
@@ -315,7 +316,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="early_bird_rate">
                   {T.translate("edit_inventory_item.early_bird_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="early_bird_rate"
                   formik={formik}
@@ -326,7 +327,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="standard_rate">
                   {T.translate("edit_inventory_item.standard_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="standard_rate"
                   formik={formik}
@@ -337,7 +338,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="onsite_rate">
                   {T.translate("edit_inventory_item.onsite_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="onsite_rate"
                   formik={formik}
