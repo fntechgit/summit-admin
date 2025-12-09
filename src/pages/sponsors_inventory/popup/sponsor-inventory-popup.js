@@ -69,8 +69,8 @@ const SponsorItemDialog = ({
               name: "",
               type: "Text",
               is_required: false,
-              minimum_quantity: null,
-              maximum_quantity: null,
+              minimum_quantity: 0,
+              maximum_quantity: 0,
               values: []
             }
           ],
@@ -97,11 +97,12 @@ const SponsorItemDialog = ({
         yup.object().shape({
           name: yup
             .string()
-            .when(["values", "minimum_quantity", "maximum_quantity"], {
-              is: (values, minQty, maxQty) => {
+            .when(["type", "values", "minimum_quantity", "maximum_quantity"], {
+              is: (type, values, minQty, maxQty) => {
                 // required only if has values or quantities
                 const hasValues = values && values.length > 0;
-                const hasQuantities = minQty !== null || maxQty !== null;
+                const hasQuantities =
+                  type === "Quantity" && (minQty != null || maxQty != null);
                 return hasValues || hasQuantities;
               },
               then: (schema) =>
@@ -149,7 +150,6 @@ const SponsorItemDialog = ({
         })
       )
     }),
-    enableReinitialize: true,
     onSubmit: (values) => onSave(values)
   });
 
@@ -395,7 +395,7 @@ const SponsorItemDialog = ({
                         spacing={2}
                         sx={{ alignItems: "center" }}
                         // eslint-disable-next-line
-                        key={`meta-field-${fieldIndex}`}
+                        key={field}
                       >
                         <Grid2 size={11}>
                           <Box
@@ -573,8 +573,8 @@ const SponsorItemDialog = ({
                                   type: "Text",
                                   is_required: false,
                                   values: [],
-                                  minimum_quantity: null,
-                                  maximum_quantity: null
+                                  minimum_quantity: 0,
+                                  maximum_quantity: 0
                                 })
                               }
                             >
