@@ -34,6 +34,7 @@ import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
 import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
+import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield";
 
 const SponsorItemDialog = ({
   open,
@@ -69,8 +70,8 @@ const SponsorItemDialog = ({
               name: "",
               type: "Text",
               is_required: false,
-              minimum_quantity: null,
-              maximum_quantity: null,
+              minimum_quantity: 0,
+              maximum_quantity: 0,
               values: []
             }
           ],
@@ -97,11 +98,12 @@ const SponsorItemDialog = ({
         yup.object().shape({
           name: yup
             .string()
-            .when(["values", "minimum_quantity", "maximum_quantity"], {
-              is: (values, minQty, maxQty) => {
+            .when(["type", "values", "minimum_quantity", "maximum_quantity"], {
+              is: (type, values, minQty, maxQty) => {
                 // required only if has values or quantities
                 const hasValues = values && values.length > 0;
-                const hasQuantities = minQty !== null || maxQty !== null;
+                const hasQuantities =
+                  type === "Quantity" && (minQty != null || maxQty != null);
                 return hasValues || hasQuantities;
               },
               then: (schema) =>
@@ -193,7 +195,7 @@ const SponsorItemDialog = ({
       }
     };
 
-    if (fieldType.id) {
+    if (fieldType.id && onMetaFieldTypeDeleted) {
       onMetaFieldTypeDeleted(initialEntity.id, fieldType.id)
         .then(() => removeOrResetField())
         .catch((err) => console.log("Error at delete field from API", err));
@@ -255,7 +257,9 @@ const SponsorItemDialog = ({
       disableRestoreFocus
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        Edit Item
+        {initialEntity.id
+          ? T.translate("edit_inventory_item.edit_item")
+          : T.translate("edit_inventory_item.new_item")}
         <IconButton size="small" onClick={handleClose} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -313,7 +317,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="early_bird_rate">
                   {T.translate("edit_inventory_item.early_bird_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="early_bird_rate"
                   formik={formik}
@@ -324,7 +328,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="standard_rate">
                   {T.translate("edit_inventory_item.standard_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="standard_rate"
                   formik={formik}
@@ -335,7 +339,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="onsite_rate">
                   {T.translate("edit_inventory_item.onsite_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="onsite_rate"
                   formik={formik}
@@ -587,8 +591,8 @@ const SponsorItemDialog = ({
                                   type: "Text",
                                   is_required: false,
                                   values: [],
-                                  minimum_quantity: null,
-                                  maximum_quantity: null
+                                  minimum_quantity: 0,
+                                  maximum_quantity: 0
                                 })
                               }
                             >
