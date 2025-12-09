@@ -28,6 +28,19 @@ const buildInitialValues = (data) => {
 
 addIssAfterDateFieldValidator();
 
+const numberValidation = () =>
+  yup.number().typeError(T.translate("validation.number"));
+
+const decimalValidation = () =>
+  yup
+    .number()
+    .typeError(T.translate("validation.number"))
+    .min(0, T.translate("validation.number_positive"))
+    .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
+      if (value === undefined || value === null) return true;
+      return /^\d+(\.\d{1,2})?$/.test(value.toString());
+    });
+
 const ItemForm = ({ initialValues, onSubmit }) => {
   const formik = useFormik({
     initialValues: buildInitialValues(initialValues),
@@ -41,18 +54,18 @@ const ItemForm = ({ initialValues, onSubmit }) => {
       description: yup
         .string(T.translate("validation.string"))
         .required(T.translate("validation.required")),
-      early_bird_rate: yup
-        .number(T.translate("validation.number"))
-        .required(T.translate("validation.required")),
-      standard_rate: yup
-        .number(T.translate("validation.number"))
-        .required(T.translate("validation.required")),
-      onsite_rate: yup
-        .number(T.translate("validation.number"))
-        .required(T.translate("validation.required")),
-      default_quantity: yup
-        .number(T.translate("validation.number"))
-        .required(T.translate("validation.required"))
+      early_bird_rate: decimalValidation(),
+      standard_rate: decimalValidation(),
+      onsite_rate: decimalValidation(),
+      default_quantity: numberValidation()
+        .integer(T.translate("validation.integer"))
+        .min(0, T.translate("validation.number_positive")),
+      quantity_limit_per_sponsor: numberValidation()
+        .integer(T.translate("validation.integer"))
+        .min(0, T.translate("validation.number_positive")),
+      quantity_limit_per_show: numberValidation()
+        .integer(T.translate("validation.integer"))
+        .min(0, T.translate("validation.number_positive"))
     }),
     onSubmit,
     enableReinitialize: true
