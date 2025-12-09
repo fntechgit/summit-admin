@@ -14,6 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import * as yup from "yup";
 import {
   Box,
   Button,
@@ -185,6 +186,37 @@ const SponsorFormsManageItems = ({
     );
   };
 
+  const rateCellValidation = () =>
+    yup
+      .number()
+      // allow $ at the start
+      .transform((value, originalValue) => {
+        if (typeof originalValue === "string") {
+          const cleaned = originalValue.replace(/^\$/, "");
+          return cleaned === "" ? undefined : parseFloat(cleaned);
+        }
+        return value;
+      })
+      // check if there's letters or characters
+      .test({
+        name: "valid-format",
+        message: T.translate("validation.number"),
+        test: (value, { originalValue }) => {
+          if (
+            originalValue === undefined ||
+            originalValue === null ||
+            originalValue === ""
+          )
+            return true;
+          return /^\$?-?\d+(\.\d+)?$/.test(originalValue);
+        }
+      })
+      .min(0, T.translate("validation.number_positive"))
+      .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
+        if (value === undefined || value === null) return true;
+        return /^\d+(\.\d{1,2})?$/.test(value.toString());
+      });
+
   const sponsorItemColumns = [
     {
       columnKey: "code",
@@ -202,7 +234,10 @@ const SponsorFormsManageItems = ({
         "edit_sponsor.forms_tab.form_manage_items.early_bird_rate"
       ),
       sortable: false,
-      editable: true
+      editable: true,
+      validation: {
+        schema: rateCellValidation()
+      }
     },
     {
       columnKey: "standard_rate",
@@ -210,7 +245,10 @@ const SponsorFormsManageItems = ({
         "edit_sponsor.forms_tab.form_manage_items.standard_rate"
       ),
       sortable: false,
-      editable: true
+      editable: true,
+      validation: {
+        schema: rateCellValidation()
+      }
     },
     {
       columnKey: "onsite_rate",
@@ -218,7 +256,10 @@ const SponsorFormsManageItems = ({
         "edit_sponsor.forms_tab.form_manage_items.onsite_rate"
       ),
       sortable: false,
-      editable: true
+      editable: true,
+      validation: {
+        schema: rateCellValidation()
+      }
     },
     {
       columnKey: "default_quantity",
