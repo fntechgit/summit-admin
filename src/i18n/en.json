@@ -2479,6 +2479,7 @@
     "form_delete_success": "Form successfully deleted.",
     "unarchive_button": "Unarchive",
     "archive_button": "Archive",
+    "remove_form_warning": "Please verify you want to delete {name}",
     "placeholders": {
       "search": "Search..."
     },
