@@ -290,25 +290,6 @@ const SponsorFormsManageItems = ({
             </IconButton>
           </Tooltip>
         ) : null
-    },
-    {
-      columnKey: "archive",
-      header: "",
-      width: 70,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="medium"
-          onClick={() => handleArchiveItem(row)}
-        >
-          {row.is_archived
-            ? T.translate("sponsor_form_item_list.unarchive_button")
-            : T.translate("sponsor_form_item_list.archive_button")}
-        </Button>
-      ),
-      dottedBorder: true
     }
   ];
 

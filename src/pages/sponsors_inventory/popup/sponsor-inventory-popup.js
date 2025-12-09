@@ -172,8 +172,8 @@ const SponsorItemDialog = ({
             name: "",
             type: "Text",
             is_required: false,
-            minimum_quantity: null,
-            maximum_quantity: null,
+            minimum_quantity: 0,
+            maximum_quantity: 0,
             values: []
           }
         ]);
@@ -182,7 +182,7 @@ const SponsorItemDialog = ({
       }
     };
 
-    if (fieldType.id) {
+    if (fieldType.id && onMetaFieldTypeDeleted) {
       onMetaFieldTypeDeleted(initialEntity.id, fieldType.id)
         .then(() => removeOrResetField())
         .catch((err) => console.log("Error at delete field from API", err));
