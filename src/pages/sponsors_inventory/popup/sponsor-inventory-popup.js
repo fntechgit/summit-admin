@@ -394,7 +394,8 @@ const SponsorItemDialog = ({
                         container
                         spacing={2}
                         sx={{ alignItems: "center" }}
-                        key={field}
+                        // eslint-disable-next-line
+                        key={`meta-field-${fieldIndex}`}
                       >
                         <Grid2 size={11}>
                           <Box
