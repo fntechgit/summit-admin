@@ -30,7 +30,7 @@ import {
 import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield.js";
+import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
 import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
@@ -172,8 +172,8 @@ const SponsorItemDialog = ({
             name: "",
             type: "Text",
             is_required: false,
-            minimum_quantity: 0,
-            maximum_quantity: 0,
+            minimum_quantity: null,
+            maximum_quantity: null,
             values: []
           }
         ]);
