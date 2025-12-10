@@ -163,7 +163,14 @@ const FormTemplateListPage = ({
     item.is_archived ? unarchiveFormTemplate(item) : archiveFormTemplate(item);
 
   const handleHideArchivedForms = (value) => {
-    getFormTemplates(term, currentPage, perPage, order, orderDir, value);
+    getFormTemplates(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      value
+    );
   };
 
   const columns = [

@@ -36,6 +36,7 @@ import SearchInput from "../../../components/mui/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
 import MuiTable from "../../../components/mui/table/mui-table";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const SponsorFormsListPage = ({
   sponsorForms,
@@ -99,7 +100,7 @@ const SponsorFormsListPage = ({
   const handleHideArchivedForms = (ev) => {
     getSponsorForms(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,

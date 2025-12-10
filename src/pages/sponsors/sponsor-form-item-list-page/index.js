@@ -40,6 +40,7 @@ import ItemPopup from "./components/item-popup";
 import InventoryPopup from "./components/inventory-popup";
 import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
 import { parsePrice } from "../../../utils/currency";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const SponsorFormItemListPage = ({
   match,
@@ -75,7 +76,7 @@ const SponsorFormItemListPage = ({
   const handleHideArchivedForms = (ev) => {
     getSponsorFormItems(
       formId,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
