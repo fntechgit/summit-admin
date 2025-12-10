@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { FormikProvider, useFormik } from "formik";
+import { FieldArray, FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import PropTypes from "prop-types";
 import {
@@ -61,16 +61,16 @@ const AddSponsorExtraQuestionPopup = ({
     },
     validationSchema: yup.object({
       id: yup.number(),
-      name: yup.string().required(),
-      label: yup.string().required(),
-      type: yup.string().required(),
+      name: yup.string().required(T.translate("validation.required")),
+      label: yup.string().required(T.translate("validation.required")),
+      type: yup.string().required(T.translate("validation.required")),
       mandatory: yup.boolean(),
       placeholder: yup.string(),
       max_selected_values: yup.number(),
       values: yup.array().of(
         yup.object().shape({
-          value: yup.string().required(),
-          label: yup.string().required(),
+          value: yup.string().required(T.translate("validation.required")),
+          label: yup.string().required(T.translate("validation.required")),
           is_default: yup.boolean(),
           order: yup.number(),
           _shouldSave: yup.boolean()
@@ -110,29 +110,6 @@ const AddSponsorExtraQuestionPopup = ({
       console.log("Validation values:", formik.values);
     }
   }, [formik.values]);
-
-  const handleAddValue = () => {
-    const newValue = {
-      value: "",
-      label: "",
-      is_default: false,
-      _shouldSave: true
-    };
-
-    const updatedValues = [...formik.values.values, newValue];
-    formik.setFieldValue("values", updatedValues);
-  };
-
-  const handleRemoveValue = async (index) => {
-    const valueToRemove = formik.values.values[index];
-
-    if (valueToRemove.id) {
-      deleteSponsorExtraQuestionValue(formik.values.id, valueToRemove.id);
-    }
-
-    const updatedValues = formik.values.values.filter((_, i) => i !== index);
-    formik.setFieldValue("values", updatedValues);
-  };
 
   const handleValueChange = (index, field, value) => {
     if (field === "is_default" && value === true) {
@@ -205,7 +182,14 @@ const AddSponsorExtraQuestionPopup = ({
     }
   };
 
-  const renderValueItem = (valueItem, index, provided, snapshot) => (
+  const areExtraQuestionsIncomplete = () => {
+    if (formik.errors.values) return true;
+    return formik.values.values.some(
+      (eq) => eq.name?.trim() === "" || eq.label?.trim() === ""
+    );
+  };
+
+  const renderValueItem = (valueItem, index, provided, snapshot, remove) => (
     <Grid2
       container
       spacing={2}
@@ -266,10 +250,16 @@ const AddSponsorExtraQuestionPopup = ({
         }}
       >
         <IconButton
-          onClick={() => handleRemoveValue(index)}
-          edge="end"
-          sx={{ color: "#666" }}
-          disableRipple
+          onClick={() => {
+            const valueToRemove = formik.values.values[index];
+            if (valueToRemove.id) {
+              deleteSponsorExtraQuestionValue(
+                formik.values.id,
+                valueToRemove.id
+              );
+            }
+            remove(index);
+          }}
         >
           <CloseIcon />
         </IconButton>
@@ -315,7 +305,12 @@ const AddSponsorExtraQuestionPopup = ({
           autoComplete="off"
         >
           <DialogContent sx={{ p: 1 }}>
-            <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
+            <Grid2
+              container
+              spacing={2}
+              size={12}
+              sx={{ p: 2, alignItems: "flex-start" }}
+            >
               <Grid2
                 container
                 spacing={2}
@@ -438,37 +433,58 @@ const AddSponsorExtraQuestionPopup = ({
                   </Grid2>
                   <Grid2 size={2} />
                 </Grid2>
-                <Grid2 container spacing={2} size={12}>
-                  <DragAndDropList
-                    items={formik.values.values.sort(
-                      (a, b) => a.order - b.order
-                    )}
-                    onReorder={handleReorder}
-                    renderItem={renderValueItem}
-                    idKey="id"
-                    updateOrderKey="order"
-                    droppableId="sponsor-extra-question-values"
-                  />
-                </Grid2>
-
-                <Button
-                  variant="text"
-                  startIcon={<AddIcon />}
-                  onClick={handleAddValue}
-                  sx={{
-                    color: "#666",
-                    textTransform: "none",
-                    fontSize: "14px",
-                    fontWeight: 400,
-                    "&:hover": {
-                      backgroundColor: "transparent",
-                      color: "#2196F3"
-                    },
-                    mb: 2
-                  }}
-                >
-                  {T.translate("edit_sponsor.add_value")}
-                </Button>
+                <FieldArray name="values">
+                  {({ push, remove }) => (
+                    <>
+                      <Grid2 container spacing={2} size={12}>
+                        <DragAndDropList
+                          items={formik.values.values.sort(
+                            (a, b) => a.order - b.order
+                          )}
+                          onReorder={handleReorder}
+                          renderItem={(valueItem, index, provided, snapshot) =>
+                            renderValueItem(
+                              valueItem,
+                              index,
+                              provided,
+                              snapshot,
+                              remove
+                            )
+                          }
+                          idKey="id"
+                          updateOrderKey="order"
+                          droppableId="sponsor-extra-question-values"
+                        />
+                      </Grid2>
+                      <Button
+                        variant="text"
+                        startIcon={<AddIcon />}
+                        onClick={() =>
+                          push({
+                            value: "",
+                            label: "",
+                            is_default: false,
+                            _shouldSave: true
+                          })
+                        }
+                        disabled={areExtraQuestionsIncomplete()}
+                        sx={{
+                          color: "#666",
+                          textTransform: "none",
+                          fontSize: "14px",
+                          fontWeight: 400,
+                          "&:hover": {
+                            backgroundColor: "transparent",
+                            color: "#2196F3"
+                          },
+                          mb: 2
+                        }}
+                      >
+                        {T.translate("edit_sponsor.add_value")}
+                      </Button>
+                    </>
+                  )}
+                </FieldArray>
               </Grid2>
             )}
             <Divider />
