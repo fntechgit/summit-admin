@@ -191,6 +191,11 @@ const SponsorExtraQuestions = ({
               onEdit={handleEditExtraQuestion}
               onDelete={handleDeleteExtraQuestion}
               onReorder={handleReorder}
+              deleteDialogBody={(name) =>
+                T.translate("edit_sponsor.extra_question_remove_warning", {
+                  name
+                })
+              }
             />
           )}
         </Grid2>
