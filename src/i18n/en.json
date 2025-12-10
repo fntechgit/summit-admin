@@ -2364,6 +2364,7 @@
     "add_question": "Add Question",
     "no_extra_questions": "No extra questions found.",
     "add_extra_question": "Add Extra Question",
+    "edit_extra_question": "Edit Extra Question",
     "save_extra_question": "Save Extra Question",
     "question_type": "Question Type",
     "question_id": "Question Identifier",
