@@ -40,8 +40,11 @@ const BadgeScanSettings = ({
 
   const selectedCount =
     currentSettings && currentSettings.columns
-      ? renderOptions(denormalizeLeadReportSettings(currentSettings.columns))
-          .length
+      ? renderOptions(
+          denormalizeLeadReportSettings(currentSettings.columns)
+        ).filter((option) =>
+          availableLeadReportColumns.some((col) => col.value === option.value)
+        ).length
       : 0;
 
   const handleUpsertSettings = (newValues) => {
