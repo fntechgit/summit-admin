@@ -86,7 +86,8 @@ const ChipSelectInput = ({
           renderValue={(selected) => (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
               {selected.map((value) => {
-                const op = availableOptions.find((op) => op.value === value);
+                const op = availableOptions.find((opt) => opt.value === value);
+                if (!op) return null;
                 return (
                   <Chip
                     key={op.value}
