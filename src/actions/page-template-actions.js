@@ -34,8 +34,6 @@ import {
 } from "../utils/constants";
 import { snackbarErrorHandler } from "./base-actions";
 
-
-
 export const ADD_PAGE_TEMPLATE = "ADD_PAGE_TEMPLATE";
 export const PAGE_TEMPLATE_ADDED = "PAGE_TEMPLATE_ADDED";
 export const PAGE_TEMPLATE_DELETED = "PAGE_TEMPLATE_DELETED";
@@ -70,11 +68,10 @@ export const getPageTemplates =
 
     const params = {
       page,
-      /*
       expand: "modules",
-      fields: "id,code,name,modules,is_archived,modules.kind,modules.id,modules.content",
+      fields:
+        "id,code,name,modules,is_archived,modules.kind,modules.id,modules.content",
       relations: "modules,modules.none",
-      */
       per_page: perPage,
       access_token: accessToken
     };
