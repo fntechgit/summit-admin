@@ -158,6 +158,7 @@ import formTemplateReducer from "./reducers/sponsors_inventory/form-template-red
 import formTemplateListReducer from "./reducers/sponsors_inventory/form-template-list-reducer.js";
 import formTemplateItemReducer from "./reducers/sponsors_inventory/form-template-item-reducer.js";
 import formTemplateItemListReducer from "./reducers/sponsors_inventory/form-template-item-list-reducer.js";
+import pageTemplateListReducer from "./reducers/sponsors_inventory/page-template-list-reducer.js";
 import sponsorSettingsReducer from "./reducers/sponsor_settings/sponsor-settings-reducer";
 import eventRSVPListReducer from "./reducers/rsvps/event-rsvp-list-reducer.js";
 import eventRSVPInvitationListReducer from "./reducers/rsvps/event-rsvp-invitation-list-reducer.js";
@@ -326,7 +327,8 @@ const reducers = persistCombineReducers(config, {
   currentFormTemplateListState: formTemplateListReducer,
   currentFormTemplateItemState: formTemplateItemReducer,
   currentFormTemplateItemListState: formTemplateItemListReducer,
-  sponsorSettingsState: sponsorSettingsReducer
+  sponsorSettingsState: sponsorSettingsReducer,
+  pageTemplateListState: pageTemplateListReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
