@@ -187,7 +187,8 @@
     "submission_invitations": "Submission Invitations",
     "sponsors_inventory": "Sponsors",
     "form_templates": "Form Templates",
-    "inventory": "Inventory"
+    "inventory": "Inventory",
+    "page_templates": "Pages"
   },
   "schedule": {
     "schedule": "Schedule",
@@ -3827,6 +3828,26 @@
     "placeholders": {
       "seat_type": "Select a Seat Type",
       "status": "Select a Status"
+    }
+  },
+  "page_template_list": {
+    "page_templates": "Page Templates",
+    "alert_info": "You can create or archive Pages from the list. To edit a Page click on the item's Edit botton.",
+    "code": "Code",
+    "name": "Name",
+    "info_mod": "Info Mod",
+    "upload_mod": "Upload Mod",
+    "download_mod": "Download Mod",
+    "hide_archived": "Hide archived pages",
+    "no_pages": "No pages found.",
+    "add_new": "New Page",
+    "add_template": "Using Template",
+    "delete_form_template_warning": "Are you sure you want to delete form template ",
+    "using_duplicate": "Using Duplicate",
+    "add_form_template": "New Form",
+    "add_using_global_template": "Using Global Template",
+    "placeholders": {
+      "search": "Search"
     }
   }
 }
