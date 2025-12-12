@@ -3907,7 +3907,9 @@
       "add_doc": "Add Document Download",
       "add_media": "Add Media Request",
       "no_modules": "No modules added yet.",
-      "save": "Save Page"
+      "save": "Save Page",
+      "page_saved": "Page saved successfully.",
+      "page_created": "Page created successfully."
     }
   }
 }
