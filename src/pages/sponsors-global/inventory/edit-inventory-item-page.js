@@ -15,7 +15,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import InventoryItemForm from "../../components/forms/inventory-item-form";
+import InventoryItemForm from "../../../components/forms/inventory-item-form";
 import {
   getInventoryItem,
   resetInventoryItemForm,
@@ -23,7 +23,7 @@ import {
   deleteInventoryItemMetaFieldType,
   deleteInventoryItemMetaFieldTypeValue,
   deleteInventoryItemImage
-} from "../../actions/inventory-item-actions";
+} from "../../../actions/inventory-item-actions";
 
 const EditInventoryItemPage = (props) => {
   const {

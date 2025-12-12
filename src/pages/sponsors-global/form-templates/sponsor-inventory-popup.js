@@ -28,7 +28,7 @@ import {
   METAFIELD_TYPES
 } from "../../../utils/constants";
 import showConfirmDialog from "../../../components/mui/showConfirmDialog";
-import MetaFieldValues from "./meta-field-values";
+import MetaFieldValues from "../shared/meta-field-values";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
