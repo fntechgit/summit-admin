@@ -15,7 +15,7 @@ import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
-import InventoryListPage from "../pages/sponsors_inventory/inventory-list-page";
+import InventoryListPage from "../pages/sponsors-global/inventory/inventory-list-page";
 import NoMatchPage from "../pages/no-match-page";
 
 const InventoryItemLayout = ({ match }) => (

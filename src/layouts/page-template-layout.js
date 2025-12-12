@@ -17,8 +17,8 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
 import NoMatchPage from "../pages/no-match-page";
-import EditPageTemplatePage from "../pages/sponsors_inventory/edit-page-template-page";
-import PageTemplateListPage from "../pages/sponsors_inventory/page-template-list-page";
+import EditPageTemplatePage from "../pages/sponsors-global/page-templates/edit-page-template-page";
+import PageTemplateListPage from "../pages/sponsors-global/page-templates/page-template-list-page";
 
 const PageTemplateLayout = ({ match }) => (
   <div>

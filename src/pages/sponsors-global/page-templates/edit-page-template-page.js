@@ -15,7 +15,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import FormTemplateForm from "../../components/forms/form-template-form";
+import FormTemplateForm from "../../../components/forms/form-template-form";
 import {
   getFormTemplate,
   resetFormTemplateForm,
@@ -23,7 +23,7 @@ import {
   deleteFormTemplateMetaFieldType,
   deleteFormTemplateMetaFieldTypeValue,
   deleteFormTemplateMaterial
-} from "../../actions/form-template-actions";
+} from "../../../actions/form-template-actions";
 
 const EditPageTemplatePage = (props) => {
   const {

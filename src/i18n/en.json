@@ -3900,6 +3900,14 @@
     "add_using_global_template": "Using Global Template",
     "placeholders": {
       "search": "Search"
+    },
+    "page_crud": {
+      "title": "Create New Page",
+      "add_info": "Add Info",
+      "add_doc": "Add Document Download",
+      "add_media": "Add Media Request",
+      "no_modules": "No modules added yet.",
+      "save": "Save Page"
     }
   }
 }
