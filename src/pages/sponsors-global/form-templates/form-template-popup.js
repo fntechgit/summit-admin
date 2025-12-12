@@ -20,7 +20,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useFormik, FormikProvider, FieldArray } from "formik";
 import * as yup from "yup";
 import showConfirmDialog from "../../../components/mui/showConfirmDialog";
-import MetaFieldValues from "./meta-field-values";
+import MetaFieldValues from "../shared/meta-field-values";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";

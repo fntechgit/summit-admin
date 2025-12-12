@@ -20,19 +20,16 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
-import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
-import { snackbarErrorHandler } from "./base-actions";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const ADD_PAGE_TEMPLATE = "ADD_PAGE_TEMPLATE";
 export const PAGE_TEMPLATE_ADDED = "PAGE_TEMPLATE_ADDED";
@@ -145,20 +142,16 @@ export const resetPageTemplateForm = () => (dispatch) => {
 
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
-  normalizedEntity.meta_fields = normalizedEntity.meta_fields?.filter(
-    (mf) => mf.name
-  );
-  normalizedEntity.materials = normalizedEntity.materials?.filter(
-    (mat) => mat.file_path
-  );
+
+  normalizedEntity.modules = [];
+
   return normalizedEntity;
 };
 
-export const savePageTemplate = (entity) => async (dispatch) => {
+export const savePageTemplate = (entity) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
   const params = {
-    access_token: accessToken,
-    expand: "materials,meta_fields,meta_fields.values"
+    access_token: accessToken
   };
 
   dispatch(startLoading());
@@ -171,15 +164,17 @@ export const savePageTemplate = (entity) => async (dispatch) => {
       createAction(PAGE_TEMPLATE_UPDATED),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch)
       .then(() => {
         dispatch(
-          showSuccessMessage(
-            T.translate("edit_form_template.form_template_saved")
-          )
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("page_template_list.page_crud.page_saved")
+          })
         );
+        getPageTemplates()(dispatch, getState);
       })
       .catch((err) => {
         console.error(err);
@@ -189,26 +184,22 @@ export const savePageTemplate = (entity) => async (dispatch) => {
       });
   }
 
-  const success_message = {
-    title: T.translate("general.done"),
-    html: T.translate("edit_form_template.form_template_created"),
-    type: "success"
-  };
-
   return postRequest(
     createAction(ADD_PAGE_TEMPLATE),
     createAction(PAGE_TEMPLATE_ADDED),
     `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates`,
     normalizedEntity,
-    authErrorHandler,
+    snackbarErrorHandler,
     entity
   )(params)(dispatch)
     .then(() => {
       dispatch(
-        showMessage(success_message, () => {
-          history.push("/app/page-templates");
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("page_template_list.page_crud.page_created")
         })
       );
+      getPageTemplates()(dispatch, getState);
     })
     .catch((err) => {
       console.error(err);

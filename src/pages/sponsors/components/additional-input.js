@@ -14,7 +14,7 @@ import {
 import T from "i18n-react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import MetaFieldValues from "../../sponsors_inventory/popup/meta-field-values";
+import MetaFieldValues from "../../sponsors-global/shared/meta-field-values";
 import {
   METAFIELD_TYPES,
   METAFIELD_TYPES_WITH_OPTIONS
