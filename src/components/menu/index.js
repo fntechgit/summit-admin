@@ -61,6 +61,10 @@ const getGlobalItems = () => [
       {
         name: "form_templates",
         linkUrl: "form-templates"
+      },
+      {
+        name: "page_templates",
+        linkUrl: "page-templates"
       }
     ]
   },

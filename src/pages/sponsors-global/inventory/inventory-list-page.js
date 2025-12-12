@@ -39,10 +39,10 @@ import {
   resetInventoryItemForm,
   saveInventoryItem,
   unarchiveInventoryItem
-} from "../../actions/inventory-item-actions";
-import MuiTable from "../../components/mui/table/mui-table";
-import SponsorInventoryDialog from "./popup/sponsor-inventory-popup";
-import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+} from "../../../actions/inventory-item-actions";
+import MuiTable from "../../../components/mui/table/mui-table";
+import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const InventoryListPage = ({
   inventoryItems,

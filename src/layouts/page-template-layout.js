@@ -16,16 +16,15 @@ import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
-import FormTemplateListPage from "../pages/sponsors-global/form-templates/form-template-list-page";
-import EditFormTemplatePage from "../pages/sponsors-global/form-templates/edit-form-template-page";
-import FormTemplateItemLayout from "./form-template-item-layout";
 import NoMatchPage from "../pages/no-match-page";
+import EditPageTemplatePage from "../pages/sponsors-global/page-templates/edit-page-template-page";
+import PageTemplateListPage from "../pages/sponsors-global/page-templates/page-template-list-page";
 
-const FormTemplateLayout = ({ match }) => (
+const PageTemplateLayout = ({ match }) => (
   <div>
     <Breadcrumb
       data={{
-        title: T.translate("form_template_list.form_templates"),
+        title: T.translate("page_template_list.page_templates"),
         pathname: match.url
       }}
     />
@@ -34,28 +33,23 @@ const FormTemplateLayout = ({ match }) => (
         strict
         exact
         path={`${match.url}/new`}
-        component={EditFormTemplatePage}
+        component={EditPageTemplatePage}
       />
       <Route
         strict
         exact
-        path={`${match.url}/:form_template_id(\\d+)`}
-        component={EditFormTemplatePage}
-      />
-      <Route
-        strict
-        path={`${match.url}/:form_template_id(\\d+)/items`}
-        component={FormTemplateItemLayout}
+        path={`${match.url}/:page_template_id(\\d+)`}
+        component={EditPageTemplatePage}
       />
       <Route
         strict
         exact
         path={`${match.url}`}
-        component={FormTemplateListPage}
+        component={PageTemplateListPage}
       />
       <Route component={NoMatchPage} />
     </Switch>
   </div>
 );
 
-export default Restrict(withRouter(FormTemplateLayout), "form-template");
+export default Restrict(withRouter(PageTemplateLayout), "page-template");

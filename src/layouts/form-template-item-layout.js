@@ -16,8 +16,8 @@ import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
-import EditFormTemplateItemPage from "../pages/sponsors_inventory/edit-form-template-item-page";
-import FormTemplateItemListPage from "../pages/sponsors_inventory/form-template-item-list-page";
+import EditFormTemplateItemPage from "../pages/sponsors-global/form-templates/edit-form-template-item-page";
+import FormTemplateItemListPage from "../pages/sponsors-global/form-templates/form-template-item-list-page";
 import NoMatchPage from "../pages/no-match-page";
 
 const FormTemplateItemLayout = ({ match }) => (
