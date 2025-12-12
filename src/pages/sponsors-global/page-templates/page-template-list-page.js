@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -27,11 +27,13 @@ import T from "i18n-react/dist/i18n-react";
 import {
   archivePageTemplate,
   getPageTemplates,
+  savePageTemplate,
   unarchivePageTemplate
-} from "../../actions/page-template-actions";
-import MuiTable from "../../components/mui/table/mui-table";
-import SearchInput from "../../components/mui/search-input";
-import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+} from "../../../actions/page-template-actions";
+import MuiTable from "../../../components/mui/table/mui-table";
+import SearchInput from "../../../components/mui/search-input";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import PageTemplatePopup from "./page-template-popup";
 
 const PageTemplateListPage = ({
   pageTemplates,
@@ -44,8 +46,11 @@ const PageTemplateListPage = ({
   totalPageTemplates,
   getPageTemplates,
   archivePageTemplate,
-  unarchivePageTemplate
+  unarchivePageTemplate,
+  savePageTemplate
 }) => {
+  const [pageTemplateId, setPageTemplateId] = useState(null);
+
   useEffect(() => {
     getPageTemplates();
   }, []);
@@ -92,7 +97,7 @@ const PageTemplateListPage = ({
   };
 
   const handleNewPageTemplate = () => {
-    console.log("NEW PAGE");
+    setPageTemplateId("new");
   };
 
   const handleClonePageTemplate = () => {
@@ -242,6 +247,11 @@ const PageTemplateListPage = ({
           </div>
         )}
       </Box>
+      <PageTemplatePopup
+        open={!!pageTemplateId}
+        onClose={() => setPageTemplateId(null)}
+        onSave={savePageTemplate}
+      />
     </div>
   );
 };
@@ -253,5 +263,6 @@ const mapStateToProps = ({ pageTemplateListState }) => ({
 export default connect(mapStateToProps, {
   getPageTemplates,
   archivePageTemplate,
-  unarchivePageTemplate
+  unarchivePageTemplate,
+  savePageTemplate
 })(PageTemplateListPage);
