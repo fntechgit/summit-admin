@@ -69,6 +69,7 @@ const InventoryListPage = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleClose = () => {
+    resetInventoryItemForm();
     setOpen(false);
   };
 
@@ -119,13 +120,13 @@ const InventoryListPage = ({
     );
   };
 
-  const handleRowEdit = (row) => {
-    if (row) getInventoryItem(row.id);
-    setOpen(true);
+  const handleRowEdit = async (row) => {
+    if (row) {
+      getInventoryItem(row.id).then(() => setOpen(true));
+    }
   };
 
   const handleNewInventoryItem = () => {
-    resetInventoryItemForm();
     setOpen(true);
   };
 
@@ -292,16 +293,18 @@ const InventoryListPage = ({
         </div>
       )}
 
-      <SponsorInventoryDialog
-        entity={currentInventoryItem}
-        errors={currentInventoryItemErrors}
-        open={open}
-        onSave={handleInventorySave}
-        onClose={handleClose}
-        onMetaFieldTypeDeleted={deleteInventoryItemMetaFieldType}
-        onMetaFieldTypeValueDeleted={deleteInventoryItemMetaFieldTypeValue}
-        onImageDeleted={deleteInventoryItemImage}
-      />
+      {open && (
+        <SponsorInventoryDialog
+          entity={currentInventoryItem}
+          errors={currentInventoryItemErrors}
+          open={open}
+          onSave={handleInventorySave}
+          onClose={handleClose}
+          onMetaFieldTypeDeleted={deleteInventoryItemMetaFieldType}
+          onMetaFieldTypeValueDeleted={deleteInventoryItemMetaFieldTypeValue}
+          onImageDeleted={deleteInventoryItemImage}
+        />
+      )}
     </div>
   );
 };
