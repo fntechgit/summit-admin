@@ -10342,10 +10342,10 @@ open@^8.0.9:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openstack-uicore-foundation@4.2.14:
-  version "4.2.14"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.14.tgz#d759a6358ede869f356fdf387065632b341bcf6a"
-  integrity sha512-ECwPZ7QOUrhW/fKbyWUfsYx/x207WPuLx9VfDLS2i46p3CoD+z6XT2a4AoUzYBoOa9iRdhXAtJUsymN8sGIzYA==
+openstack-uicore-foundation@4.2.17:
+  version "4.2.17"
+  resolved "https://registry.npmjs.org/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.17.tgz#f4519aae7fd92a939b259bd2e8dc4e8bf5b1e716"
+  integrity sha512-fK+SrVESdmadAlyOxVTHXr+T3gqVUDJvyd6s1BTcbRrww174FN3OKUOWxnGsPvG3hJrNecJDo/At269zYHRH2A==
 
 optionator@^0.9.1:
   version "0.9.4"
@@ -12511,6 +12511,11 @@ sourcemapped-stacktrace@^1.1.6:
   integrity sha512-O0pcWjJqzQFVsisPlPXuNawJHHg9N9UgpJ/aDmvi9+vnS3x1C0NhwkVFzzZ1VN0Xo+bekyweoqYvBw5ZBKiNnQ==
   dependencies:
     source-map "0.5.6"
+
+spark-md5@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.npmjs.org/spark-md5/-/spark-md5-3.0.2.tgz#7952c4a30784347abcee73268e473b9c0167e3fc"
+  integrity sha512-wcFzz9cDfbuqe0FZzfi2or1sgyIrsDwmPwfZC4hiNidPdPINjeUwNfv5kldczoEAcjl9Y1L3SM7Uz2PUEQzxQw==
 
 spdx-correct@^3.0.0:
   version "3.2.0"
