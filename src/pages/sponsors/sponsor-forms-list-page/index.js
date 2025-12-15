@@ -224,6 +224,9 @@ const SponsorFormsListPage = ({
             totalRows={totalCount}
             currentPage={currentPage}
             onDelete={handleRowDelete}
+            deleteDialogBody={(name) =>
+              T.translate("sponsor_forms.remove_form_warning", { name })
+            }
             onPageChange={handlePageChange}
             onSort={handleSort}
             onEdit={handleRowEdit}
