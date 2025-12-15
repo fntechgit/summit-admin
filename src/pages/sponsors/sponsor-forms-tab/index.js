@@ -37,6 +37,7 @@ import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
 import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
 import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const SponsorFormsTab = ({
   term,
@@ -124,7 +125,7 @@ const SponsorFormsTab = ({
   const handleHideArchivedForms = (ev) => {
     getSponsorManagedForms(
       term,
-      managedForms.currentPage,
+      DEFAULT_CURRENT_PAGE,
       managedForms.perPage,
       managedForms.order,
       managedForms.orderDir,
@@ -132,7 +133,7 @@ const SponsorFormsTab = ({
     );
     getSponsorCustomizedForms(
       term,
-      customizedForms.currentPage,
+      DEFAULT_CURRENT_PAGE,
       customizedForms.perPage,
       customizedForms.order,
       customizedForms.orderDir,
