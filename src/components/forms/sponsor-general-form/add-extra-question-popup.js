@@ -300,7 +300,9 @@ const AddSponsorExtraQuestionPopup = ({
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
-          {T.translate("edit_sponsor.add_extra_question")}
+          {extraQuestion.id
+            ? T.translate("edit_sponsor.edit_extra_question")
+            : T.translate("edit_sponsor.add_extra_question")}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
