@@ -10342,10 +10342,10 @@ open@^8.0.9:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openstack-uicore-foundation@4.2.17:
-  version "4.2.17"
-  resolved "https://registry.npmjs.org/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.17.tgz#f4519aae7fd92a939b259bd2e8dc4e8bf5b1e716"
-  integrity sha512-fK+SrVESdmadAlyOxVTHXr+T3gqVUDJvyd6s1BTcbRrww174FN3OKUOWxnGsPvG3hJrNecJDo/At269zYHRH2A==
+openstack-uicore-foundation@4.2.18:
+  version "4.2.18"
+  resolved "https://registry.npmjs.org/openstack-uicore-foundation/-/openstack-uicore-foundation-4.2.18.tgz#762fe648e44dc9e178d4429d6aa1130b03708221"
+  integrity sha512-bD0IRaH4qqAhYclx4uePQPqgmh2Iyn5hbQQi4Ab79JFe4wK/MTjCXzCJ4/AhSJfJkmOowovUyjJyfZY9SXvgfA==
 
 optionator@^0.9.1:
   version "0.9.4"
