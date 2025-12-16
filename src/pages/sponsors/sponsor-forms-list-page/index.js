@@ -62,7 +62,16 @@ const SponsorFormsListPage = ({
   const handlePageChange = (page) => {
     getSponsorForms(term, page, perPage, order, orderDir, hideArchived);
   };
-
+  const handlePerPageChange = (newPerPage) => {
+    getSponsorForms(
+      term,
+      currentPage,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
+  };
   const handleSort = (key, dir) => {
     getSponsorForms(term, currentPage, perPage, key, dir, hideArchived);
   };
@@ -229,6 +238,7 @@ const SponsorFormsListPage = ({
               T.translate("sponsor_forms.remove_form_warning", { name })
             }
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
             onEdit={handleRowEdit}
             onArchive={handleArchiveItem}
