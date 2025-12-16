@@ -2436,7 +2436,7 @@
       "form_manage_items": {
         "add_item": "Add Item",
         "add_item_inventory": "Add Item from Inventory",
-        "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit botton. You can also change only a rate by clicking on it.",
+        "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit button. You can also change only a rate by clicking on it.",
         "select_items": "Select items",
         "code": "Code",
         "name": "Name",
@@ -2446,7 +2446,7 @@
         "default_quantity": "Default Quantity",
         "add_selected": "Add Selected Items",
         "item_updated": "Form item updated successfully",
-        "item_created": "Form item {item} updated successfully",
+        "item_created": "Form item {item} created successfully",
         "placeholder": {
           "search": "Search..."
         }
@@ -2560,7 +2560,7 @@
   },
   "sponsor_form_item_list": {
     "form_items": "Form Items",
-    "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit botton. You can also change only a rate by clicking on it.",
+    "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit button. You can also change only a rate by clicking on it.",
     "code": "Code",
     "name": "Name",
     "early_bird_rate": "Early bird rate",

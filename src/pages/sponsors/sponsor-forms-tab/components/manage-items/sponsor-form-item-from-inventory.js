@@ -259,7 +259,16 @@ const SponsorFormItemFromInventoryPopup = ({
 
 SponsorFormItemFromInventoryPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
+  inventoryItems: PropTypes.array.isRequired,
+  term: PropTypes.string,
+  order: PropTypes.string,
+  perPage: PropTypes.number,
+  orderDir: PropTypes.string,
+  currentPage: PropTypes.number,
+  totalInventoryItems: PropTypes.number,
+  getInventoryItems: PropTypes.func.isRequired
 };
 
 const mapStateToProps = ({ currentInventoryItemListState }) => ({

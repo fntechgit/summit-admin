@@ -1357,27 +1357,21 @@ const normalizeManagedItem = (entity) => {
     (img) => img.file_path
   );
 
-  if (
-    entity.early_bird_rate === "" ||
-    typeof entity.early_bird_rate === "undefined"
-  )
+  if (entity.early_bird_rate === "" || entity.early_bird_rate === undefined)
     delete normalizedEntity.early_bird_rate;
   else
     normalizedEntity.early_bird_rate = amountToCents(
       normalizedEntity.early_bird_rate
     );
 
-  if (
-    entity.standard_rate === "" ||
-    typeof entity.standard_rate === "undefined"
-  )
+  if (entity.standard_rate === "" || entity.standard_rate === undefined)
     delete normalizedEntity.standard_rate;
   else
     normalizedEntity.standard_rate = amountToCents(
       normalizedEntity.standard_rate
     );
 
-  if (entity.onsite_rate === "" || typeof entity.onsite_rate === "undefined")
+  if (entity.onsite_rate === "" || entity.onsite_rate === undefined)
     delete normalizedEntity.onsite_rate;
   else
     normalizedEntity.onsite_rate = amountToCents(normalizedEntity.onsite_rate);
@@ -1478,7 +1472,7 @@ export const addSponsorManagedFormItems =
           })
         );
       })
-      .catch(console.log) // need to catch promise reject
+      .catch(snackbarErrorHandler) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });

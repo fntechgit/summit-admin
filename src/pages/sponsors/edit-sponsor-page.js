@@ -44,7 +44,7 @@ import SponsorFormsTab from "./sponsor-forms-tab";
 import SponsorBadgeScans from "./sponsor-badge-scans";
 import SponsorCartTab from "./sponsor-cart-tab";
 import SponsorFormsManageItems from "./sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items";
-import { FOUR } from "../../utils/constants";
+import { SPONSOR_TABS } from "../../utils/constants";
 
 const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -100,7 +100,7 @@ const EditSponsorPage = (props) => {
   const [selectedTab, setSelectedTab] = useState(
     location.pathname.includes("/sponsor-forms/") &&
       location.pathname.includes("/items")
-      ? FOUR
+      ? SPONSOR_TABS.FORMS
       : 0
   );
 
@@ -127,14 +127,26 @@ const EditSponsorPage = (props) => {
   };
 
   const tabs = [
-    { label: T.translate("edit_sponsor.tab.general"), value: 0 },
-    { label: T.translate("edit_sponsor.tab.users"), value: 1 },
-    { label: T.translate("edit_sponsor.tab.pages"), value: 2 },
-    { label: T.translate("edit_sponsor.tab.media_uploads"), value: 3 },
-    { label: T.translate("edit_sponsor.tab.forms"), value: 4 },
-    { label: T.translate("edit_sponsor.tab.cart"), value: 5 },
-    { label: T.translate("edit_sponsor.tab.purchases"), value: 6 },
-    { label: T.translate("edit_sponsor.tab.badge_scans"), value: 7 }
+    {
+      label: T.translate("edit_sponsor.tab.general"),
+      value: SPONSOR_TABS.GENERAL
+    },
+    { label: T.translate("edit_sponsor.tab.users"), value: SPONSOR_TABS.USERS },
+    { label: T.translate("edit_sponsor.tab.pages"), value: SPONSOR_TABS.PAGES },
+    {
+      label: T.translate("edit_sponsor.tab.media_uploads"),
+      value: SPONSOR_TABS.MEDIA_UPLOADS
+    },
+    { label: T.translate("edit_sponsor.tab.forms"), value: SPONSOR_TABS.FORMS },
+    { label: T.translate("edit_sponsor.tab.cart"), value: SPONSOR_TABS.CART },
+    {
+      label: T.translate("edit_sponsor.tab.purchases"),
+      value: SPONSOR_TABS.PURCHASES
+    },
+    {
+      label: T.translate("edit_sponsor.tab.badge_scans"),
+      value: SPONSOR_TABS.BADGE_SCANS
+    }
   ];
 
   const sponsorFormItemRoute =
