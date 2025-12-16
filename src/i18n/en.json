@@ -154,6 +154,7 @@
     "sponsors": "Sponsors",
     "sponsor_list": "Sponsor List",
     "sponsor_forms": "Forms",
+    "sponsor_pages": "Pages",
     "sponsorship_list": "Tiers",
     "sponsor_users": "Users",
     "sponsors_promocodes": "Promo Codes",
@@ -2621,6 +2622,40 @@
       "onsite_rate": "On site rate",
       "save": "Add selected items",
       "items_added": "Items added successfully."
+    }
+  },
+  "sponsor_pages": {
+    "pages": "Pages",
+    "alert_info": "Note: These Pages will be visible to all sponsors of the selected level in this program.",
+    "using_template": "Using Template",
+    "new_page": "New Page",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
+    "tier_column_label": "Tier",
+    "info_mod_column_label": "Info Mod",
+    "upload_mod_column_label": "Upload Mod",
+    "download_mod_column_label": "Download Mod",
+    "hide_archived": "Hide archived Pages",
+    "filter": "Filter",
+    "sort_by": "Sort By",
+    "no_sponsors_pages": "No pages found for this search criteria.",
+    "placeholders": {
+      "search": "Search..."
+    },
+    "global_page_popup": {
+      "title": "Add Page Template",
+      "items_selected": "items selected",
+      "code": "Code",
+      "name": "name",
+      "info_mod": "Info Mod",
+      "download_mod": "Download Mod",
+      "upload_mod": "Upload Mod",
+      "add_selected": "Add Selected Page Template",
+      "success": "Page created successfully.",
+      "error": "There was a problem creating the forms, please try again.",
+      "placeholders": {
+        "search": "Search..."
+      }
     }
   },
   "sponsor_users": {
