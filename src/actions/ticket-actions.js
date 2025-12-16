@@ -184,7 +184,7 @@ const parseFilters = (filters, term = null) => {
   }
 
   if (filters?.noPromocodeFilter) {
-    filter.push("not_promo_code_id==1");
+    filter.push("has_promo_code==0");
   }
 
   if (filters?.hasOwnerFilter) {
