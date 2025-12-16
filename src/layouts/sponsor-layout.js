@@ -25,6 +25,7 @@ import SponsorSettingsPage from "../pages/sponsor_settings/sponsor-settings-page
 import SponsorFormsListPage from "../pages/sponsors/sponsor-forms-list-page";
 import SponsorFormItemListPage from "../pages/sponsors/sponsor-form-item-list-page";
 import SponsorUsersListPage from "../pages/sponsors/sponsor-users-list-page";
+import sponsorPagesListPage from "../pages/sponsors/sponsor-pages-list-page";
 
 const SponsorLayout = ({ match }) => (
   <div>
@@ -58,6 +59,27 @@ const SponsorLayout = ({ match }) => (
                 exact
                 path={`${props.match.url}/:form_id(\\d+)/items`}
                 component={SponsorFormItemListPage}
+              />
+            </Switch>
+          </div>
+        )}
+      />
+      <Route
+        path={`${match.url}/pages`}
+        render={(props) => (
+          <div>
+            <Breadcrumb
+              data={{
+                title: T.translate("sponsor_pages.pages"),
+                pathname: props.match.url
+              }}
+            />
+            <Switch>
+              <Route
+                strict
+                exact
+                path={props.match.url}
+                component={sponsorPagesListPage}
               />
             </Switch>
           </div>
