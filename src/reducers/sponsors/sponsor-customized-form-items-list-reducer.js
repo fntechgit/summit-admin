@@ -16,8 +16,6 @@ import {
   RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS,
   REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS,
   RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM,
-  // RECEIVE_SPONSOR_FORM_ITEM,
-  // RESET_SPONSOR_FORM_ITEM,
   SPONSOR_CUSTOMIZED_FORM_ITEM_ARCHIVED,
   SPONSOR_CUSTOMIZED_FORM_ITEM_DELETED,
   SPONSOR_CUSTOMIZED_FORM_ITEM_UNARCHIVED,
@@ -185,17 +183,7 @@ const sponsorCustomizedFormItemsListReducer = (
               is_archived: updatedItem.is_archived,
               images: updatedItem.images
             }
-          : {
-              id: item.id,
-              code: item.code,
-              name: item.name,
-              early_bird_rate: item.early_bird_rate,
-              standard_rate: item.standard_rate,
-              onsite_rate: item.onsite_rate,
-              default_quantity: item.default_quantity,
-              is_archived: item.is_archived,
-              images: item.images
-            }
+          : item
       );
       return { ...state, items };
     }

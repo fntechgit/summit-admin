@@ -226,3 +226,14 @@ export const ROOM_OCCUPANCY_OPTIONS = [
   "FULL",
   "OVERFLOW"
 ];
+
+export const SPONSOR_TABS = {
+  GENERAL: 0,
+  USERS: 1,
+  PAGES: 2,
+  MEDIA_UPLOADS: 3,
+  FORMS: 4,
+  CART: 5,
+  PURCHASES: 6,
+  BADGE_SCANS: 7
+};

@@ -44,7 +44,6 @@ import SponsorInventoryDialog from "../../../../sponsors_inventory/popup/sponsor
 import SponsorFormItemFromInventoryPopup from "./sponsor-form-item-from-inventory";
 import { parsePrice } from "../../../../../utils/currency";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
-// import FormTemplateDialog from "../../../../sponsors_inventory/popup/form-template-popup";
 
 const SponsorFormsManageItems = ({
   term,
@@ -318,7 +317,7 @@ const SponsorFormsManageItems = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  value={hideArchived}
+                  checked={hideArchived}
                   onChange={handleHideArchivedItens}
                   inputProps={{
                     "aria-label": T.translate(
@@ -389,13 +388,9 @@ const SponsorFormsManageItems = ({
       {/* ADD ITEM */}
       <SponsorInventoryDialog
         entity={currentInventoryItem}
-        // errors={currentInventoryItemErrors}
         open={openPopup === "add_item"}
         onSave={handleItemSave}
         onClose={handleClose}
-        // onMetaFieldTypeDeleted={deleteInventoryItemMetaFieldType}
-        // onMetaFieldTypeValueDeleted={deleteInventoryItemMetaFieldTypeValue}
-        // onImageDeleted={deleteInventoryItemImage}
       />
 
       <SponsorFormItemFromInventoryPopup
