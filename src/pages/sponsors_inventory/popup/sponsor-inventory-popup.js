@@ -69,7 +69,7 @@ const SponsorItemDialog = ({
       code: yup.string().required(T.translate("validation.required")),
       name: yup.string().required(T.translate("validation.required")),
       description: yup.string().required(T.translate("validation.required")),
-      images: yup.array().min(1, T.translate("validation.required")),
+      images: yup.array(),
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),
       onsite_rate: decimalValidation(),
