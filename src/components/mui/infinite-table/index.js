@@ -12,6 +12,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import TableRow from "@mui/material/TableRow";
 import styles from "./styles.module.less";
+import { MILLISECONDS_TO_SECONDS } from "../../../utils/constants";
 
 const MuiInfiniteTable = ({
   boxHeight = "400px",
@@ -24,11 +25,20 @@ const MuiInfiniteTable = ({
 }) => {
   const { sortCol, sortDir } = options;
 
+  const isLoadingRef = React.useRef(false);
+
   const handleScroll = (event) => {
+    if (isLoadingRef.current) return;
+
     const { scrollTop, scrollHeight, clientHeight } = event.target;
     // eslint-disable-next-line no-magic-numbers
     if (scrollTop + clientHeight >= scrollHeight - 20) {
+      isLoadingRef.current = true;
       loadMoreData();
+
+      setTimeout(() => {
+        isLoadingRef.current = false;
+      }, MILLISECONDS_TO_SECONDS);
     }
   };
 
