@@ -1304,7 +1304,7 @@ export const saveSponsorFormManagedItem =
     const normalizedEntity = normalizeManagedItem(entity);
 
     if (entity.id) {
-      putRequest(
+      return putRequest(
         createAction(UPDATE_SPONSOR_FORM_MANAGED_ITEM),
         createAction(SPONSOR_FORM_MANAGED_ITEM_UPDATED),
         `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items/${entity.id}`,
@@ -1322,26 +1322,26 @@ export const saveSponsorFormManagedItem =
           })
         );
       });
-    } else {
-      const successMessage = {
-        title: T.translate("general.done"),
-        html: T.translate(
-          "edit_sponsor.forms_tab.form_manage_items.item_created"
-        ),
-        type: "success"
-      };
-
-      postRequest(
-        createAction(UPDATE_SPONSOR_FORM_MANAGED_ITEM),
-        createAction(SPONSOR_FORM_MANAGED_ITEM_ADDED),
-        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items`,
-        normalizedEntity,
-        snackbarErrorHandler,
-        entity
-      )(params)(dispatch).then(() => {
-        dispatch(snackbarSuccessHandler(successMessage));
-      });
     }
+
+    const successMessage = {
+      title: T.translate("general.done"),
+      html: T.translate(
+        "edit_sponsor.forms_tab.form_manage_items.item_created"
+      ),
+      type: "success"
+    };
+
+    return postRequest(
+      createAction(UPDATE_SPONSOR_FORM_MANAGED_ITEM),
+      createAction(SPONSOR_FORM_MANAGED_ITEM_ADDED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items`,
+      normalizedEntity,
+      snackbarErrorHandler,
+      entity
+    )(params)(dispatch).then(() => {
+      dispatch(snackbarSuccessHandler(successMessage));
+    });
   };
 
 export const resetSponsorFormManagedItem = () => (dispatch) => {
