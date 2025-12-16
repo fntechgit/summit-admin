@@ -192,6 +192,10 @@ const parseFilters = (filters, term = null) => {
     filter.push("exclude_is_printable_free_unassigned==1");
   }
 
+  if (filters?.noPromocodeFilter) {
+    filter.push("has_promo_code==0");
+  }
+
   if (filters?.hasOwnerFilter) {
     if (filters.hasOwnerFilter === "HAS_OWNER") filter.push("has_owner==1");
     if (filters.hasOwnerFilter === "HAS_NO_OWNER") filter.push("has_owner==0");

@@ -1621,6 +1621,7 @@
     "show_printable": "Show Printable Tickets",
     "show_printable_info": "Active assigned ticket with the access level of IN_PERSON",
     "exclude_free_unassigned": "Exclude ALL free unassigned tickets?",
+    "no_promo_code": "Exclude ALL tickets with promo codes?",
     "items_qty": "Selected {qty} Tickets",
     "select_view_2_print": "Select a View Type to Print",
     "select_fields": "Show Columns",
