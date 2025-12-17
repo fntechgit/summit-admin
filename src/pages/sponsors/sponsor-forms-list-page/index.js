@@ -151,9 +151,7 @@ const SponsorFormsListPage = ({
 
   return (
     <div className="container">
-      <h3>
-        {T.translate("sponsor_forms.forms")} ({totalCount})
-      </h3>
+      <h3>{T.translate("sponsor_forms.forms")}</h3>
       <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
       <Grid2
         container
