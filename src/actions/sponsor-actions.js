@@ -436,7 +436,7 @@ export const removeTierFromSponsor =
 
     dispatch(startLoading());
 
-    deleteRequest(
+    return deleteRequest(
       null,
       createAction(SPONSOR_TIER_DELETED)({ sponsorshipId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}`,
