@@ -33,7 +33,7 @@ const Sponsorship = ({
 }) => {
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
   const [showManageTierAddonsPopup, setShowManageTierAddons] = useState(false);
-  const [selectedSponsorship, setSelectedSponsorship] = useState(null);
+  const [selectedSponsorshipId, setSelectedSponsorshipId] = useState(null);
 
   const {
     sponsorships,
@@ -43,6 +43,9 @@ const Sponsorship = ({
     order,
     orderDir
   } = sponsor.sponsorships_collection;
+
+  const selectedSponsorship =
+    sponsorships.find((s) => s.id === selectedSponsorshipId) || null;
 
   const handleCloseAddTierPopup = () => {
     setShowAddTierPopup(false);
@@ -67,7 +70,7 @@ const Sponsorship = ({
   };
 
   const handleOpenManageAddonsPopup = (sponsorship) => {
-    setSelectedSponsorship(sponsorship);
+    setSelectedSponsorshipId(sponsorship.id);
     onSponsorshipSelect(sponsorship);
     setShowManageTierAddons(true);
   };
@@ -75,7 +78,7 @@ const Sponsorship = ({
   const handleCloseManageAddonsPopup = () => {
     setShowManageTierAddons(false);
     onSponsorshipSelect(null);
-    setSelectedSponsorship(null);
+    setSelectedSponsorshipId(null);
   };
 
   const handleAddSponsorshipAddon = (addons, sponsorshipId) => {
