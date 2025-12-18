@@ -34,6 +34,7 @@ import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
 import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
+import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield";
 
 const SponsorItemDialog = ({
   open,
@@ -80,7 +81,7 @@ const SponsorItemDialog = ({
       code: yup.string().required(T.translate("validation.required")),
       name: yup.string().required(T.translate("validation.required")),
       description: yup.string().required(T.translate("validation.required")),
-      images: yup.array().min(1, T.translate("validation.required")),
+      images: yup.array(),
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),
       onsite_rate: decimalValidation(),
@@ -193,7 +194,7 @@ const SponsorItemDialog = ({
       }
     };
 
-    if (fieldType.id) {
+    if (fieldType.id && onMetaFieldTypeDeleted) {
       onMetaFieldTypeDeleted(initialEntity.id, fieldType.id)
         .then(() => removeOrResetField())
         .catch((err) => console.log("Error at delete field from API", err));
@@ -254,7 +255,9 @@ const SponsorItemDialog = ({
       disableRestoreFocus
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        Edit Item
+        {initialEntity.id
+          ? T.translate("edit_inventory_item.edit_item")
+          : T.translate("edit_inventory_item.new_item")}
         <IconButton size="small" onClick={handleClose} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -312,7 +315,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="early_bird_rate">
                   {T.translate("edit_inventory_item.early_bird_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="early_bird_rate"
                   formik={formik}
@@ -323,7 +326,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="standard_rate">
                   {T.translate("edit_inventory_item.standard_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="standard_rate"
                   formik={formik}
@@ -334,7 +337,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="onsite_rate">
                   {T.translate("edit_inventory_item.onsite_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="onsite_rate"
                   formik={formik}

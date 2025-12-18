@@ -41,6 +41,7 @@ import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const SponsorFormsTab = ({
   term,
+  history,
   hideArchived,
   managedForms,
   customizedForms,
@@ -111,7 +112,9 @@ const SponsorFormsTab = ({
       : archiveSponsorCustomizedForm(item.id);
 
   const handleManageItems = (item) => {
-    console.log("MANAGE ITEMS : ", item);
+    history.push(
+      `/app/summits/${summitId}/sponsors/${sponsor.id}/sponsor-forms/${item.id}/items`
+    );
   };
 
   const handleCustomizedEdit = (item) => {

@@ -141,7 +141,13 @@ class SponsorIdLayout extends React.Component {
               </div>
             )}
           />
-          <Route strict exact path={match.url} component={EditSponsorPage} />
+          <Switch>
+            <Route exact path={match.url} component={EditSponsorPage} />
+            <Route
+              path={`${match.url}/sponsor-forms/:form_id/items`}
+              component={EditSponsorPage}
+            />
+          </Switch>
           <Route component={NoMatchPage} />
         </Switch>
       </div>
