@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { Switch, Route } from "react-router-dom";
-import { Breadcrumb } from "react-breadcrumbs";
 import EditSponsorPage from "../pages/sponsors/edit-sponsor-page";
 import { getSponsor, resetSponsorForm } from "../actions/sponsor-actions";
 import EditAdSponsorPage from "../pages/sponsors/edit-advertisement-sponsor-page";
