@@ -101,6 +101,8 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
       cart_checkout_cancel_policy: yup.string(T.translate("validation.string"))
     }),
     onSubmit,
+    validateOnBlur: false,
+    validateOnChange: false,
     enableReinitialize: true
   });
 
