@@ -20,6 +20,19 @@ const MuiFormikDatepicker = ({ name, label }) => {
             helperText: meta.touched && meta.error,
             fullWidth: true,
             margin: "normal"
+          },
+          day: {
+            sx: {
+              fontSize: "1.2rem",
+              fontWeight: 600
+            }
+          },
+          layout: {
+            sx: {
+              "& .MuiDayCalendar-weekDayLabel": {
+                fontSize: "1rem"
+              }
+            }
           }
         }}
       />

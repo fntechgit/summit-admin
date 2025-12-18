@@ -2257,7 +2257,7 @@
     "cart_checkout_cancel_policy": "Checkout Cancel Policy",
     "support_email": "Support e-mail",
     "is_access_request_enabled": "Enable access requests",
-    "access_request_notification_email": "Send access request notification to e-mail addresses (multiple ;- seperated allowed)",
+    "access_request_notification_email": "Send access request notification to email addresses - separate multiple addresses with a semicolon (;) with no spacing in between",
     "settings_saved": "Settings saved successfully!"
   },
   "sponsor_list": {
