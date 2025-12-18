@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import * as yup from "yup";
 import {
   Alert,
   Box,
@@ -112,6 +113,37 @@ const SponsorFormItemListPage = ({
     setOpenPopup("inventory");
   };
 
+  const rateCellValidation = () =>
+    yup
+      .number()
+      // allow $ at the start
+      .transform((value, originalValue) => {
+        if (typeof originalValue === "string") {
+          const cleaned = originalValue.replace(/^\$/, "");
+          return cleaned === "" ? undefined : parseFloat(cleaned);
+        }
+        return value;
+      })
+      // check if there's letters or characters
+      .test({
+        name: "valid-format",
+        message: T.translate("validation.number"),
+        test: (value, { originalValue }) => {
+          if (
+            originalValue === undefined ||
+            originalValue === null ||
+            originalValue === ""
+          )
+            return true;
+          return /^\$?-?\d+(\.\d+)?$/.test(originalValue);
+        }
+      })
+      .min(0, T.translate("validation.number_positive"))
+      .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
+        if (value === undefined || value === null) return true;
+        return /^\d+(\.\d{1,2})?$/.test(value.toString());
+      });
+
   const columns = [
     {
       columnKey: "code",
@@ -127,19 +159,28 @@ const SponsorFormItemListPage = ({
       columnKey: "early_bird_rate",
       header: T.translate("sponsor_form_item_list.early_bird_rate"),
       sortable: true,
-      editable: true
+      editable: true,
+      validation: {
+        schema: rateCellValidation()
+      }
     },
     {
       columnKey: "standard_rate",
       header: T.translate("sponsor_form_item_list.standard_rate"),
       sortable: true,
-      editable: true
+      editable: true,
+      validation: {
+        schema: rateCellValidation()
+      }
     },
     {
       columnKey: "onsite_rate",
       header: T.translate("sponsor_form_item_list.onsite_rate"),
       sortable: true,
-      editable: true
+      editable: true,
+      validation: {
+        schema: rateCellValidation()
+      }
     },
     {
       columnKey: "default_quantity",

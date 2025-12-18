@@ -23,19 +23,51 @@ import {
 } from "../../../utils/constants";
 import showConfirmDialog from "../showConfirmDialog";
 
+const validateValue = (value, validation) => {
+  if (!validation) return { isValid: true };
+
+  // validate with yup schema
+  if (
+    validation.schema &&
+    typeof validation.schema.validateSync === "function"
+  ) {
+    try {
+      validation.schema.validateSync(value);
+      return { isValid: true, message: null };
+    } catch (err) {
+      return { isValid: false, message: err.message };
+    }
+  }
+
+  return { isValid: true };
+};
+
 // Updated component to handle editable cells with hover edit icon
-const EditableCell = ({ value, isEditing, onBlur }) => {
+const EditableCell = ({ value, isEditing, onBlur, validation }) => {
   const [inputValue, setInputValue] = React.useState(value);
   const [isHovering, setIsHovering] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
     setInputValue(value);
+    setError(null);
   }, [value]);
+
+  const handleValidationAndSave = (newValue) => {
+    const { isValid, message } = validateValue(newValue, validation);
+
+    if (isValid) {
+      setError(null);
+      onBlur(newValue, true);
+    } else {
+      setError(message);
+    }
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      onBlur(inputValue);
+      handleValidationAndSave(inputValue);
     }
   };
 
@@ -44,14 +76,19 @@ const EditableCell = ({ value, isEditing, onBlur }) => {
       <TextField
         autoFocus
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={(e) => {
+          setInputValue(e.target.value);
+          if (error) setError(null);
+        }}
         onBlur={() => {
-          onBlur(inputValue);
+          handleValidationAndSave(inputValue);
         }}
         onKeyDown={handleKeyDown}
         size="small"
         fullWidth
         variant="standard"
+        error={!!error}
+        helperText={error}
       />
     );
   }
@@ -150,8 +187,8 @@ const MuiTableEditable = ({
   };
 
   // Handler for saving changes when editing is complete
-  const handleCellBlur = (rowId, columnKey, newValue) => {
-    if (onCellChange) {
+  const handleCellBlur = (rowId, columnKey, newValue, isValid) => {
+    if (onCellChange && isValid) {
       onCellChange(rowId, columnKey, newValue);
     }
     setEditingCell(null);
@@ -229,9 +266,15 @@ const MuiTableEditable = ({
                             editingCell.rowId === row.id &&
                             editingCell.columnKey === col.columnKey
                           }
-                          onBlur={(newValue) =>
-                            handleCellBlur(row.id, col.columnKey, newValue)
+                          onBlur={(newValue, isValid) =>
+                            handleCellBlur(
+                              row.id,
+                              col.columnKey,
+                              newValue,
+                              isValid
+                            )
                           }
+                          validation={col.validation}
                         />
                       ) : col.render ? (
                         col.render(row)
