@@ -116,6 +116,8 @@ const ManageTierAddonsPopup = ({
 
       onSubmit(valuesToSave, sponsorship.id);
     },
+    validateOnBlur: false,
+    validateOnChange: false,
     enableReinitialize: true
   });
 
