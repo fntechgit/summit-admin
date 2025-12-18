@@ -117,7 +117,7 @@ const SponsorListPage = ({
     { columnKey: "company_name", header: T.translate("sponsor_list.company") },
     {
       columnKey: "sponsorships",
-      header: T.translate("sponsor_list.sponsorship"),
+      header: T.translate("sponsor_list.sponsorships"),
       render: (row) =>
         row.sponsorships.map((s) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
