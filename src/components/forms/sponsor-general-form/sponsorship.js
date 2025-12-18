@@ -66,6 +66,12 @@ const Sponsorship = ({
     onSponsorshipPaginate(currentPage, perPage, key, dir);
   };
 
+  const handleSponsorshipDelete = (sponsorshipId) => {
+    onSponsorshipDelete(sponsorshipId).then(() =>
+      onSponsorshipPaginate(DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
+  };
+
   const handleOpenManageAddonsPopup = (sponsorship) => {
     setSelectedSponsorship(sponsorship);
     onSponsorshipSelect(sponsorship);
@@ -184,7 +190,7 @@ const Sponsorship = ({
           orderField="order"
           perPage={perPage}
           currentPage={currentPage}
-          onDelete={onSponsorshipDelete}
+          onDelete={handleSponsorshipDelete}
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}
           onSort={handleSort}
