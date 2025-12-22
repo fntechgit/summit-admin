@@ -89,7 +89,7 @@ const SponsorFormsListPage = ({
 
   const handleRowEdit = (row) => {
     getSponsorForm(row.id).then(() => {
-      setOpenPopup("new");
+      setOpenPopup("edit");
     });
   };
 
@@ -250,8 +250,9 @@ const SponsorFormsListPage = ({
         onClose={() => setOpenPopup(null)}
       />
       <FormTemplatePopup
-        open={openPopup === "new"}
+        open={openPopup === "new" || openPopup === "edit"}
         onClose={() => setOpenPopup(null)}
+        edit={openPopup === "edit"}
       />
     </div>
   );
