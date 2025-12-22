@@ -303,6 +303,9 @@ const SponsorFormItemListPage = ({
             onCellChange={handleCellEdit}
             onEdit={handleRowEdit}
             onArchive={handleArchiveItem}
+            deleteDialogBody={(name) => T.translate("sponsor_form_item_list.delete_dialog_body", {
+                name
+              })}
           />
         </div>
       )}
