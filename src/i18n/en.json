@@ -2543,6 +2543,7 @@
     "item_delete_success": "Item successfully deleted.",
     "add_inventory_item": "Add Inventory Item",
     "add_form_template_item": "Create new Item",
+    "delete_dialog_body": "Please verify you want to delete {name}",
     "placeholders": {
       "search_form_template_items": "Search"
     },
