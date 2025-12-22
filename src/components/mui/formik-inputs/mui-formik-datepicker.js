@@ -7,7 +7,7 @@ import { useField } from "formik";
 
 const MuiFormikDatepicker = ({ name, label, required }) => {
   const [field, meta, helpers] = useField(name);
-  const requiredLabel = `${label  } *`;
+  const requiredLabel = `${label} *`;
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
       <DatePicker
@@ -30,7 +30,8 @@ const MuiFormikDatepicker = ({ name, label, required }) => {
 
 MuiFormikDatepicker.propTypes = {
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired
+  label: PropTypes.string.isRequired,
+  required: PropTypes.bool
 };
 
 export default MuiFormikDatepicker;
