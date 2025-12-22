@@ -28,7 +28,8 @@ const FormTemplatePopup = ({
   getSponsorships,
   resetFormTemplate,
   saveFormTemplate,
-  updateFormTemplate
+  updateFormTemplate,
+  edit
 }) => {
   useEffect(() => {
     getSponsorships(1, MAX_PER_PAGE);
@@ -63,7 +64,11 @@ const FormTemplatePopup = ({
         component="div"
       >
         <Typography variant="h5">
-          {T.translate("sponsor_forms.form_template_popup.title")}
+          {T.translate(
+            edit
+              ? "sponsor_forms.form_template_popup.title.edit"
+              : "sponsor_forms.form_template_popup.title.new"
+          )}
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
           <CloseIcon fontSize="large" />
@@ -82,7 +87,8 @@ const FormTemplatePopup = ({
 
 FormTemplatePopup.propTypes = {
   open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  edit: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = ({ sponsorFormsListState, currentSummitState }) => ({
