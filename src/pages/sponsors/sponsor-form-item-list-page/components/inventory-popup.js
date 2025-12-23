@@ -45,6 +45,7 @@ const InventoryPopup = ({
   const [selectedRows, setSelectedRows] = useState([]);
 
   const handleClose = () => {
+    setSelectedRows([]);
     onClose();
   };
 
