@@ -11,7 +11,12 @@ const FormikTextEditor = ({ name, ...props }) => {
       name={name}
       id={name}
       value={values[name]}
-      onChange={(e) => setFieldValue(name, e.target.value)}
+      onChange={(e) => {
+        const stringValue =
+          e.target.value === "<p><br></p>" ? "" : e.target.value;
+
+        setFieldValue(name, stringValue);
+      }}
       onBlur={() => setFieldTouched(name, true)}
       error={touched?.[name] && errors?.[name] ? errors?.[name] : ""}
       license={process.env.JODIT_LICENSE_KEY}
