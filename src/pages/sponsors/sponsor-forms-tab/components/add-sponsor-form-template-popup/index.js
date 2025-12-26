@@ -56,7 +56,13 @@ const AddSponsorFormTemplatePopup = ({
       add_ons: []
     },
     validationSchema: yup.object({
-      add_ons: yup.array().min(1, "Select at least one add-on")
+      add_ons: yup
+        .array()
+        .test(
+          "add_ons-required",
+          "Select at least one add-on",
+          (value) => value?.includes("all") || value?.length > 0
+        )
     }),
     onSubmit: (values) => {
       const { add_ons } = values;
