@@ -11,6 +11,7 @@
  * limitations under the License.
  * */
 
+import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_SPONSOR_FORM_ITEM,
@@ -22,7 +23,7 @@ import {
   SPONSOR_FORM_ITEM_UNARCHIVED
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { CENTS_FACTOR, DECIMAL_DIGITS } from "../../utils/constants";
+import { DECIMAL_DIGITS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   items: [],
@@ -86,13 +87,13 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         id: a.id,
         code: a.code,
         name: a.name,
-        early_bird_rate: `$${(a.early_bird_rate / CENTS_FACTOR).toFixed(
+        early_bird_rate: `$${amountFromCents(a.early_bird_rate).toFixed(
           DECIMAL_DIGITS
         )}`,
-        standard_rate: `$${(a.standard_rate / CENTS_FACTOR).toFixed(
+        standard_rate: `$${amountFromCents(a.standard_rate).toFixed(
           DECIMAL_DIGITS
         )}`,
-        onsite_rate: `$${(a.onsite_rate / CENTS_FACTOR).toFixed(
+        onsite_rate: `$${amountFromCents(a.onsite_rate).toFixed(
           DECIMAL_DIGITS
         )}`,
         default_quantity: a.default_quantity,
@@ -113,13 +114,13 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
 
       const currentItem = {
         ...item,
-        early_bird_rate: (item.early_bird_rate / CENTS_FACTOR).toFixed(
+        early_bird_rate: amountFromCents(item.early_bird_rate).toFixed(
           DECIMAL_DIGITS
         ),
-        standard_rate: (item.standard_rate / CENTS_FACTOR).toFixed(
+        standard_rate: amountFromCents(item.standard_rate).toFixed(
           DECIMAL_DIGITS
         ),
-        onsite_rate: (item.onsite_rate / CENTS_FACTOR).toFixed(DECIMAL_DIGITS),
+        onsite_rate: amountFromCents(item.onsite_rate).toFixed(DECIMAL_DIGITS),
         meta_fields:
           item.meta_fields.length > 0
             ? item.meta_fields
