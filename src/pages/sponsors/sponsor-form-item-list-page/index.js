@@ -29,6 +29,7 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
+import { parsePrice } from "openstack-uicore-foundation/lib/utils/money";
 import {
   deleteSponsorFormItem,
   getSponsorFormItem,
@@ -40,7 +41,6 @@ import {
 import ItemPopup from "./components/item-popup";
 import InventoryPopup from "./components/inventory-popup";
 import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
-import { parsePrice } from "../../../utils/currency";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const SponsorFormItemListPage = ({

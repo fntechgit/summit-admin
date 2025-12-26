@@ -109,9 +109,6 @@ export const EXPORT_PAGE_SIZE_200 = 200;
 
 export const DATE_FILTER_ARRAY_SIZE = 2;
 
-export const CENTS_FACTOR = 100;
-export const DECIMAL_PLACES = 2;
-
 export const MILLISECONDS_TO_SECONDS = 1000;
 
 export const INDEX_NOT_FOUND = -1;
