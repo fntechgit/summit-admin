@@ -25,6 +25,7 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
+import { amountToCents } from "openstack-uicore-foundation/lib/utils/money";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
@@ -42,7 +43,6 @@ import {
   archiveItem,
   unarchiveItem
 } from "./inventory-shared-actions";
-import { amountToCents } from "../utils/currency";
 
 export const ADD_INVENTORY_ITEM = "ADD_INVENTORY_ITEM";
 export const CHANGE_INVENTORY_ITEM_SEARCH_TERM =

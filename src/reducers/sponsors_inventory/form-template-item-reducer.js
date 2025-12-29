@@ -12,6 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import {
   RECEIVE_FORM_TEMPLATE_ITEM,
   RESET_FORM_TEMPLATE_ITEM_FORM,
@@ -24,7 +25,6 @@ import {
   FORM_TEMPLATE_ITEM_IMAGE_SAVED,
   FORM_TEMPLATE_ITEM_IMAGE_DELETED
 } from "../../actions/form-template-item-actions";
-import { amountFromCents } from "../../utils/currency";
 
 export const DEFAULT_ENTITY = {
   id: 0,
