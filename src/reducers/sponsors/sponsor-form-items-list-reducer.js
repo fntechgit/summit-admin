@@ -131,9 +131,8 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
     case SPONSOR_FORM_ITEM_DELETED: {
       const { itemId } = payload;
       const items = state.items.filter((it) => it.id !== itemId);
-      const totalCount = items.length;
 
-      return { ...state, items, totalCount };
+      return { ...state, items };
     }
     case SPONSOR_FORM_ITEM_ARCHIVED: {
       const { id: itemId } = payload.response;
