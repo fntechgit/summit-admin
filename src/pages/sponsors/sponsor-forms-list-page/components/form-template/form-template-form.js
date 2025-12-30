@@ -116,6 +116,7 @@ const FormTemplateForm = ({
                 label={T.translate(
                   "sponsor_forms.form_template_popup.opens_at"
                 )}
+                required
               />
             </Grid2>
             <Grid2 size={4}>
@@ -124,6 +125,7 @@ const FormTemplateForm = ({
                 label={T.translate(
                   "sponsor_forms.form_template_popup.expires_at"
                 )}
+                required
               />
             </Grid2>
             <Grid2 size={12}>
