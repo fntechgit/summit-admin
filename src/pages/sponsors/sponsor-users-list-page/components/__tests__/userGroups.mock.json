@@ -1,0 +1,1037 @@
+{
+  "term": "",
+  "userGroups": [],
+  "requests": {
+    "items": [
+      {
+        "id": 29,
+        "requester_first_name": "cespin101 Espinoza",
+        "requester_email": "cespin+101@gmail.com",
+        "company_id": 179,
+        "company_name": "Accelink Technologies",
+        "created": "December 29th 2025, 1:27:29 am"
+      }
+    ],
+    "order": "id",
+    "orderDir": 1,
+    "currentPage": 1,
+    "perPage": 10,
+    "totalCount": 1,
+    "lastPage": 1
+  },
+  "users": {
+    "items": [
+      {
+        "id": 5,
+        "first_name": "Clinter Espinoza",
+        "email": "cespin@gmail.com",
+        "access_rights": [
+          {
+            "id": 80,
+            "sponsor": {
+              "id": 591,
+              "company_id": 4237,
+              "company_name": "tipit la dos",
+              "sponsorships": [
+                {
+                  "id": 538,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [],
+                  "sponsor_id": 591
+                },
+                {
+                  "id": 539,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [],
+                  "sponsor_id": 591
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 21,
+                "slug": "sponsors",
+                "name": "Badge Scans"
+              },
+              {
+                "id": 22,
+                "slug": "sponsors-external-users",
+                "name": "API Access"
+              },
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 5,
+            "sponsor_id": 591,
+            "summit_id": 69
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": 7,
+        "first_name": "Sebastian German Marset",
+        "email": "smarcet@gmail.com",
+        "access_rights": [
+          {
+            "id": 78,
+            "sponsor": {
+              "id": 590,
+              "company_id": 3,
+              "company_name": "Tipit , LLC",
+              "sponsorships": [
+                {
+                  "id": 537,
+                  "type_id": 27,
+                  "type_name": "OCP Booth Sponsor",
+                  "addons": [
+                    {
+                      "id": 28,
+                      "type": "Booth",
+                      "name": "B11",
+                      "sponsorship_id": 537
+                    },
+                    {
+                      "id": 29,
+                      "type": "Meeting_Room",
+                      "name": "M1",
+                      "sponsorship_id": 537
+                    },
+                    {
+                      "id": 30,
+                      "type": "Schedule_Spot",
+                      "name": "S1",
+                      "sponsorship_id": 537
+                    }
+                  ],
+                  "sponsor_id": 590
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 7,
+            "sponsor_id": 590,
+            "summit_id": 69
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": 8,
+        "first_name": "Roman Gutierrez",
+        "email": "roman.gutierrez@gmail.com",
+        "access_rights": [
+          {
+            "id": 43,
+            "sponsor": {
+              "id": 359,
+              "company_id": 0,
+              "company_name": "FNTECH",
+              "sponsorships": [
+                {
+                  "id": 307,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [
+                    {
+                      "id": 4,
+                      "type": "Booth",
+                      "name": "B9",
+                      "sponsorship_id": 307
+                    }
+                  ],
+                  "sponsor_id": 359
+                },
+                {
+                  "id": 532,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [
+                    {
+                      "id": 5,
+                      "type": "Meeting_Room",
+                      "name": "MR1 SOUTH",
+                      "sponsorship_id": 532
+                    }
+                  ],
+                  "sponsor_id": 359
+                }
+              ]
+            },
+            "groups": [],
+            "user_id": 8,
+            "sponsor_id": 359,
+            "summit_id": 63
+          },
+          {
+            "id": 57,
+            "sponsor": {
+              "id": 497,
+              "company_id": 179,
+              "company_name": "Accelink Technologies",
+              "sponsorships": [
+                {
+                  "id": 543,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 546,
+                  "type_id": 13,
+                  "type_name": "Middle-Tier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 547,
+                  "type_id": 21,
+                  "type_name": "Nonprofit",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 607,
+                  "type_id": 1,
+                  "type_name": "Jacki",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 618,
+                  "type_id": 27,
+                  "type_name": "OCP Booth Sponsor",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 625,
+                  "type_id": 5,
+                  "type_name": "Presenting",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 626,
+                  "type_id": 4,
+                  "type_name": "Premier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 627,
+                  "type_id": 18,
+                  "type_name": "Ruby",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 628,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 630,
+                  "type_id": 25,
+                  "type_name": "RDC Booth",
+                  "addons": [],
+                  "sponsor_id": 497
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 21,
+                "slug": "sponsors",
+                "name": "Badge Scans"
+              },
+              {
+                "id": 22,
+                "slug": "sponsors-external-users",
+                "name": "API Access"
+              },
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 8,
+            "sponsor_id": 497,
+            "summit_id": 69
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": 19,
+        "first_name": "cespin103 Espinoza",
+        "email": "cespin+103@gmail.com",
+        "access_rights": [
+          {
+            "id": 65,
+            "sponsor": {
+              "id": 359,
+              "company_id": 0,
+              "company_name": "FNTECH",
+              "sponsorships": [
+                {
+                  "id": 307,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [
+                    {
+                      "id": 4,
+                      "type": "Booth",
+                      "name": "B9",
+                      "sponsorship_id": 307
+                    }
+                  ],
+                  "sponsor_id": 359
+                },
+                {
+                  "id": 532,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [
+                    {
+                      "id": 5,
+                      "type": "Meeting_Room",
+                      "name": "MR1 SOUTH",
+                      "sponsorship_id": 532
+                    }
+                  ],
+                  "sponsor_id": 359
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 19,
+            "sponsor_id": 359,
+            "summit_id": 63
+          },
+          {
+            "id": 73,
+            "sponsor": {
+              "id": 497,
+              "company_id": 179,
+              "company_name": "Accelink Technologies",
+              "sponsorships": [
+                {
+                  "id": 543,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 546,
+                  "type_id": 13,
+                  "type_name": "Middle-Tier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 547,
+                  "type_id": 21,
+                  "type_name": "Nonprofit",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 607,
+                  "type_id": 1,
+                  "type_name": "Jacki",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 618,
+                  "type_id": 27,
+                  "type_name": "OCP Booth Sponsor",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 625,
+                  "type_id": 5,
+                  "type_name": "Presenting",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 626,
+                  "type_id": 4,
+                  "type_name": "Premier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 627,
+                  "type_id": 18,
+                  "type_name": "Ruby",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 628,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 630,
+                  "type_id": 25,
+                  "type_name": "RDC Booth",
+                  "addons": [],
+                  "sponsor_id": 497
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 19,
+            "sponsor_id": 497,
+            "summit_id": 69
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": 20,
+        "first_name": "Clint Espinoza 1",
+        "email": "clint@tipit.net",
+        "access_rights": [
+          {
+            "id": 49,
+            "sponsor": {
+              "id": 497,
+              "company_id": 179,
+              "company_name": "Accelink Technologies",
+              "sponsorships": [
+                {
+                  "id": 543,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 546,
+                  "type_id": 13,
+                  "type_name": "Middle-Tier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 547,
+                  "type_id": 21,
+                  "type_name": "Nonprofit",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 607,
+                  "type_id": 1,
+                  "type_name": "Jacki",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 618,
+                  "type_id": 27,
+                  "type_name": "OCP Booth Sponsor",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 625,
+                  "type_id": 5,
+                  "type_name": "Presenting",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 626,
+                  "type_id": 4,
+                  "type_name": "Premier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 627,
+                  "type_id": 18,
+                  "type_name": "Ruby",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 628,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 630,
+                  "type_id": 25,
+                  "type_name": "RDC Booth",
+                  "addons": [],
+                  "sponsor_id": 497
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 21,
+                "slug": "sponsors",
+                "name": "Badge Scans"
+              },
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 20,
+            "sponsor_id": 497,
+            "summit_id": 69
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": 22,
+        "first_name": "Eddie Aguilar",
+        "email": "eddie@fntech.com",
+        "access_rights": [
+          {
+            "id": 51,
+            "sponsor": {
+              "id": 497,
+              "company_id": 179,
+              "company_name": "Accelink Technologies",
+              "sponsorships": [
+                {
+                  "id": 543,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 546,
+                  "type_id": 13,
+                  "type_name": "Middle-Tier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 547,
+                  "type_id": 21,
+                  "type_name": "Nonprofit",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 607,
+                  "type_id": 1,
+                  "type_name": "Jacki",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 618,
+                  "type_id": 27,
+                  "type_name": "OCP Booth Sponsor",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 625,
+                  "type_id": 5,
+                  "type_name": "Presenting",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 626,
+                  "type_id": 4,
+                  "type_name": "Premier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 627,
+                  "type_id": 18,
+                  "type_name": "Ruby",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 628,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 630,
+                  "type_id": 25,
+                  "type_name": "RDC Booth",
+                  "addons": [],
+                  "sponsor_id": 497
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 22,
+            "sponsor_id": 497,
+            "summit_id": 69
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": 26,
+        "first_name": "cespin163 Espinoza",
+        "email": "cespin+163@gmail.com",
+        "access_rights": [
+          {
+            "id": 56,
+            "sponsor": {
+              "id": 497,
+              "company_id": 179,
+              "company_name": "Accelink Technologies",
+              "sponsorships": [
+                {
+                  "id": 543,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 546,
+                  "type_id": 13,
+                  "type_name": "Middle-Tier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 547,
+                  "type_id": 21,
+                  "type_name": "Nonprofit",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 607,
+                  "type_id": 1,
+                  "type_name": "Jacki",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 618,
+                  "type_id": 27,
+                  "type_name": "OCP Booth Sponsor",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 625,
+                  "type_id": 5,
+                  "type_name": "Presenting",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 626,
+                  "type_id": 4,
+                  "type_name": "Premier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 627,
+                  "type_id": 18,
+                  "type_name": "Ruby",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 628,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 630,
+                  "type_id": 25,
+                  "type_name": "RDC Booth",
+                  "addons": [],
+                  "sponsor_id": 497
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 21,
+                "slug": "sponsors",
+                "name": "Badge Scans"
+              },
+              {
+                "id": 22,
+                "slug": "sponsors-external-users",
+                "name": "API Access"
+              },
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 26,
+            "sponsor_id": 497,
+            "summit_id": 69
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": 27,
+        "first_name": "JP Maxwell",
+        "email": "jpmaxman@gmail.com",
+        "access_rights": [
+          {
+            "id": 59,
+            "sponsor": {
+              "id": 497,
+              "company_id": 179,
+              "company_name": "Accelink Technologies",
+              "sponsorships": [
+                {
+                  "id": 543,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 546,
+                  "type_id": 13,
+                  "type_name": "Middle-Tier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 547,
+                  "type_id": 21,
+                  "type_name": "Nonprofit",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 607,
+                  "type_id": 1,
+                  "type_name": "Jacki",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 618,
+                  "type_id": 27,
+                  "type_name": "OCP Booth Sponsor",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 625,
+                  "type_id": 5,
+                  "type_name": "Presenting",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 626,
+                  "type_id": 4,
+                  "type_name": "Premier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 627,
+                  "type_id": 18,
+                  "type_name": "Ruby",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 628,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 630,
+                  "type_id": 25,
+                  "type_name": "RDC Booth",
+                  "addons": [],
+                  "sponsor_id": 497
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 27,
+            "sponsor_id": 497,
+            "summit_id": 69
+          }
+        ],
+        "is_active": false
+      },
+      {
+        "id": 28,
+        "first_name": "Nando Caban-Mendez",
+        "email": "nando@tipit.net",
+        "access_rights": [
+          {
+            "id": 60,
+            "sponsor": {
+              "id": 497,
+              "company_id": 179,
+              "company_name": "Accelink Technologies",
+              "sponsorships": [
+                {
+                  "id": 543,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 546,
+                  "type_id": 13,
+                  "type_name": "Middle-Tier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 547,
+                  "type_id": 21,
+                  "type_name": "Nonprofit",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 607,
+                  "type_id": 1,
+                  "type_name": "Jacki",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 618,
+                  "type_id": 27,
+                  "type_name": "OCP Booth Sponsor",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 625,
+                  "type_id": 5,
+                  "type_name": "Presenting",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 626,
+                  "type_id": 4,
+                  "type_name": "Premier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 627,
+                  "type_id": 18,
+                  "type_name": "Ruby",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 628,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 630,
+                  "type_id": 25,
+                  "type_name": "RDC Booth",
+                  "addons": [],
+                  "sponsor_id": 497
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 28,
+            "sponsor_id": 497,
+            "summit_id": 69
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": 29,
+        "first_name": "Jeremy Muir",
+        "email": "jeremy@fntech.com",
+        "access_rights": [
+          {
+            "id": 61,
+            "sponsor": {
+              "id": 497,
+              "company_id": 179,
+              "company_name": "Accelink Technologies",
+              "sponsorships": [
+                {
+                  "id": 543,
+                  "type_id": 3,
+                  "type_name": "Gold",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 546,
+                  "type_id": 13,
+                  "type_name": "Middle-Tier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 547,
+                  "type_id": 21,
+                  "type_name": "Nonprofit",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 607,
+                  "type_id": 1,
+                  "type_name": "Jacki",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 618,
+                  "type_id": 27,
+                  "type_name": "OCP Booth Sponsor",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 625,
+                  "type_id": 5,
+                  "type_name": "Presenting",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 626,
+                  "type_id": 4,
+                  "type_name": "Premier",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 627,
+                  "type_id": 18,
+                  "type_name": "Ruby",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 628,
+                  "type_id": 9,
+                  "type_name": "Silver",
+                  "addons": [],
+                  "sponsor_id": 497
+                },
+                {
+                  "id": 630,
+                  "type_id": 25,
+                  "type_name": "RDC Booth",
+                  "addons": [],
+                  "sponsor_id": 497
+                }
+              ]
+            },
+            "groups": [
+              {
+                "id": 23,
+                "slug": "sponsors-services",
+                "name": "Sponsors Services"
+              }
+            ],
+            "user_id": 29,
+            "sponsor_id": 497,
+            "summit_id": 69
+          }
+        ],
+        "is_active": true
+      }
+    ],
+    "order": "id",
+    "orderDir": 1,
+    "currentPage": 1,
+    "perPage": 10,
+    "totalCount": 15,
+    "lastPage": 2
+  }
+}

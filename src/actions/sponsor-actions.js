@@ -29,7 +29,7 @@ import {
   fetchErrorHandler,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
-import _ from "lodash";
+import * as _ from "lodash";
 import { getAccessTokenSafely } from "../utils/methods";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
 import history from "../history";

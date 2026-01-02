@@ -38,8 +38,9 @@ const ProcessRequestPopup = ({
     onClose();
   };
 
-  const handleProcess = (values) => {
-    processSponsorUserRequest(values);
+  const handleProcess = async (values) => {
+    await processSponsorUserRequest(values);
+    handleClose();
   };
 
   return (
