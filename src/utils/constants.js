@@ -224,3 +224,5 @@ export const ROOM_OCCUPANCY_OPTIONS = [
   "FULL",
   "OVERFLOW"
 ];
+
+export const BADGE_QR_MINIMUN_EXPECTED_FIELDS = 2;

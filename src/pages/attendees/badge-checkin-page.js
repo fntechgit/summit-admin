@@ -32,6 +32,16 @@ const BadgeCheckinPage = ({ match, currentSummit, checkInBadge }) => {
       checkInBadge(data)
         .then(() => {
           const badgeData = formatBadgeQR(data, currentSummit);
+
+          if (!badgeData) {
+            Swal.fire(
+              T.translate("general.error"),
+              T.translate("badge_checkin.error_invalid_qr"),
+              "warning"
+            );
+            return;
+          }
+
           Swal.fire(
             T.translate("badge_checkin.checked_in"),
             `${badgeData.fullName} (${badgeData.email}) checked in!`,
@@ -46,8 +56,8 @@ const BadgeCheckinPage = ({ match, currentSummit, checkInBadge }) => {
 
   const handleError = () => {
     Swal.fire({
-      title: "Error",
-      text: "cannot read QR code, please try again",
+      title: T.translate("general.error"),
+      text: T.translate("badge_checkin.error_qr"),
       type: "warning"
     });
   };
