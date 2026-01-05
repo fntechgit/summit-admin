@@ -9,16 +9,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import { checkInBadge } from "../../actions/badge-actions";
 import QrReader from "modern-react-qr-reader";
 import { isMobile } from "react-device-detect";
 import Swal from "sweetalert2";
+import { checkInBadge } from "../../actions/badge-actions";
+import { formatBadgeQR } from "../../utils/methods";
 import styles from "../../styles/badge-checkin-page.module.less";
 
 const BadgeCheckinPage = ({ match, currentSummit, checkInBadge }) => {
@@ -27,12 +28,21 @@ const BadgeCheckinPage = ({ match, currentSummit, checkInBadge }) => {
 
   const handleCheckIn = (data) => {
     if (data && !scanning) {
+      const badgeData = formatBadgeQR(data, currentSummit);
+      if (!badgeData) {
+        Swal.fire(
+          T.translate("general.error"),
+          T.translate("badge_checkin.error_invalid_qr"),
+          "warning"
+        );
+        return;
+      }
       setScanning(true);
       checkInBadge(data)
         .then(() => {
           Swal.fire(
             T.translate("badge_checkin.checked_in"),
-            `${qrValid[3]} (${qrValid[2]}) checked in!`,
+            `${badgeData.fullName} (${badgeData.email}) checked in!`,
             "success"
           );
         })
@@ -44,8 +54,8 @@ const BadgeCheckinPage = ({ match, currentSummit, checkInBadge }) => {
 
   const handleError = () => {
     Swal.fire({
-      title: "Error",
-      text: "cannot read QR code, please try again",
+      title: T.translate("general.error"),
+      text: T.translate("badge_checkin.error_qr"),
       type: "warning"
     });
   };
@@ -77,6 +87,7 @@ const BadgeCheckinPage = ({ match, currentSummit, checkInBadge }) => {
           onClick={() =>
             setCamera(camera === "environment" ? "user" : "environment")
           }
+          type="button"
         >
           <i
             className="fa fa-camera"
