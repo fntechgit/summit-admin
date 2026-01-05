@@ -82,7 +82,10 @@ class SpeakerForm extends React.Component {
 
     if (ev.target.type === "memberinput") {
       entity.email = "";
-      if (value && mustReplaceSpeakerFieldsWithMemberInfo()) {
+      if (
+        (value && mustReplaceSpeakerFieldsWithMemberInfo()) ||
+        (value && !mustReplaceSpeakerFieldsWithMemberInfo() && entity.id === 0)
+      ) {
         entity.affiliations = [...value.affiliations];
         entity.first_name = !isEmptyString(value.first_name)
           ? value.first_name
