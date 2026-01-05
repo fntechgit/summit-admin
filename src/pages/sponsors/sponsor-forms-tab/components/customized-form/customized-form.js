@@ -16,7 +16,7 @@ import { FormikProvider, useFormik } from "formik";
 import { addIssAfterDateFieldValidator } from "../../../../../utils/yup";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikDatepicker from "../../../../../components/mui/formik-inputs/mui-formik-datepicker";
-import AdditionalInputList from "../../../components/additional-input-list";
+import AdditionalInputList from "../../../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
 import { querySponsorAddons } from "../../../../../actions/sponsor-actions";
