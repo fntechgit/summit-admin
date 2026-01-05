@@ -54,12 +54,19 @@ const ItemForm = ({ initialValues, onSubmit }) => {
       description: yup
         .string(T.translate("validation.string"))
         .required(T.translate("validation.required")),
-      early_bird_rate: decimalValidation(),
-      standard_rate: decimalValidation(),
-      onsite_rate: decimalValidation(),
+      early_bird_rate: decimalValidation().required(
+        T.translate("validation.required")
+      ),
+      standard_rate: decimalValidation().required(
+        T.translate("validation.required")
+      ),
+      onsite_rate: decimalValidation().required(
+        T.translate("validation.required")
+      ),
       default_quantity: numberValidation()
         .integer(T.translate("validation.integer"))
-        .min(0, T.translate("validation.number_positive")),
+        .min(0, T.translate("validation.number_positive"))
+        .required(T.translate("validation.required")),
       quantity_limit_per_sponsor: numberValidation()
         .integer(T.translate("validation.integer"))
         .min(0, T.translate("validation.number_positive")),
@@ -97,6 +104,7 @@ const ItemForm = ({ initialValues, onSubmit }) => {
                 name="name"
                 label={T.translate("sponsor_form_item_list.edit_item.name")}
                 fullWidth
+                required
               />
             </Grid2>
             <Grid2 size={12}>
@@ -115,6 +123,7 @@ const ItemForm = ({ initialValues, onSubmit }) => {
                   "sponsor_form_item_list.edit_item.early_bird_rate"
                 )}
                 fullWidth
+                required
               />
             </Grid2>
             <Grid2 size={4}>
@@ -124,6 +133,7 @@ const ItemForm = ({ initialValues, onSubmit }) => {
                   "sponsor_form_item_list.edit_item.standard_rate"
                 )}
                 fullWidth
+                required
               />
             </Grid2>
             <Grid2 size={4}>
@@ -133,6 +143,7 @@ const ItemForm = ({ initialValues, onSubmit }) => {
                   "sponsor_form_item_list.edit_item.onsite_rate"
                 )}
                 fullWidth
+                required
               />
             </Grid2>
             <Grid2 size={4}>
@@ -166,6 +177,7 @@ const ItemForm = ({ initialValues, onSubmit }) => {
                 fullWidth
                 type="number"
                 inputProps={{ min: 0 }}
+                required
               />
             </Grid2>
           </Grid2>
