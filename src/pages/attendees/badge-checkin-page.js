@@ -28,20 +28,18 @@ const BadgeCheckinPage = ({ match, currentSummit, checkInBadge }) => {
 
   const handleCheckIn = (data) => {
     if (data && !scanning) {
+      const badgeData = formatBadgeQR(data, currentSummit);
+      if (!badgeData) {
+        Swal.fire(
+          T.translate("general.error"),
+          T.translate("badge_checkin.error_invalid_qr"),
+          "warning"
+        );
+        return;
+      }
       setScanning(true);
       checkInBadge(data)
         .then(() => {
-          const badgeData = formatBadgeQR(data, currentSummit);
-
-          if (!badgeData) {
-            Swal.fire(
-              T.translate("general.error"),
-              T.translate("badge_checkin.error_invalid_qr"),
-              "warning"
-            );
-            return;
-          }
-
           Swal.fire(
             T.translate("badge_checkin.checked_in"),
             `${badgeData.fullName} (${badgeData.email}) checked in!`,
