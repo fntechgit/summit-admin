@@ -137,7 +137,8 @@ const MuiTableEditable = ({
   onEdit,
   onArchive,
   onDelete,
-  onCellChange // New prop for handling cell value changes
+  onCellChange, // New prop for handling cell value changes
+  deleteDialogBody
 }) => {
   // State to track which cell is currently being edited
   const [editingCell, setEditingCell] = React.useState(null);
@@ -165,7 +166,9 @@ const MuiTableEditable = ({
   const handleDelete = async (item) => {
     const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
-      text: `${T.translate("general.row_remove_warning")} ${getName(item)}`,
+      text: deleteDialogBody
+        ? deleteDialogBody(getName(item))
+        : `${T.translate("general.row_remove_warning")} ${getName(item)}`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
