@@ -20,6 +20,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
+import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import SearchInput from "../../../../../components/mui/search-input";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -28,7 +29,6 @@ import {
 
 import { getInventoryItems } from "../../../../../actions/inventory-item-actions";
 import MuiTable from "../../../../../components/mui/table/mui-table";
-import { amountFromCents } from "../../../../../utils/currency";
 import MenuButton from "../../../../../components/mui/menu-button";
 
 const SponsorFormItemFromInventoryPopup = ({
@@ -117,7 +117,7 @@ const SponsorFormItemFromInventoryPopup = ({
         "edit_sponsor.forms_tab.form_manage_items.early_bird_rate"
       ),
       sortable: false,
-      render: (row) => `$ ${amountFromCents(row.early_bird_rate)}`
+      render: (row) => currencyAmountFromCents(row.early_bird_rate)
     },
     {
       columnKey: "standard_rate",
@@ -125,7 +125,7 @@ const SponsorFormItemFromInventoryPopup = ({
         "edit_sponsor.forms_tab.form_manage_items.standard_rate"
       ),
       sortable: false,
-      render: (row) => `$ ${amountFromCents(row.standard_rate)}`
+      render: (row) => currencyAmountFromCents(row.standard_rate)
     },
     {
       columnKey: "onsite_rate",
@@ -133,7 +133,7 @@ const SponsorFormItemFromInventoryPopup = ({
         "edit_sponsor.forms_tab.form_manage_items.onsite_rate"
       ),
       sortable: false,
-      render: (row) => `$ ${amountFromCents(row.onsite_rate)}`
+      render: (row) => currencyAmountFromCents(row.onsite_rate)
     },
     {
       columnKey: "default_quantity",
@@ -207,20 +207,28 @@ const SponsorFormItemFromInventoryPopup = ({
                 buttonId="sort-button"
                 menuId="sort-menu"
                 menuItems={[
-                  { label: "A-Z", onClick: () => handleSort("name", 1) },
-                  { label: "Z-A", onClick: () => handleSort("name", 0) }
+                  {
+                    label: T.translate(
+                      "edit_sponsor.forms_tab.form_manage_items.sort_asc_label"
+                    ),
+                    onClick: () => handleSort("name", 1)
+                  },
+                  {
+                    label: T.translate(
+                      "edit_sponsor.forms_tab.form_manage_items.sort_desc_label"
+                    ),
+                    onClick: () => handleSort("name", 0)
+                  }
                 ]}
               >
                 <SwapVertIcon fontSize="large" sx={{ mr: 1 }} /> sort by
               </MenuButton>
             </Grid2>
-            <Grid2 size={6}>
+            <Grid2 size={9}>
               <SearchInput
                 onSearch={handleOnSearch}
                 term={term}
-                placeholder={T.translate(
-                  "edit_sponsor.forms_tab.placeholders.search"
-                )}
+                placeholder={T.translate("edit_sponsor.placeholders.search")}
               />
             </Grid2>
           </Grid2>

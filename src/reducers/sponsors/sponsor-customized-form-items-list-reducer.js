@@ -13,6 +13,10 @@
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
+  amountFromCents,
+  currencyAmountFromCents
+} from "openstack-uicore-foundation/lib/utils/money";
+import {
   RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS,
   REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS,
   RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEM,
@@ -24,8 +28,6 @@ import {
   RESET_SPONSOR_FORM_MANAGED_ITEM
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { CENTS_FACTOR, DECIMAL_DIGITS } from "../../utils/constants";
-import { amountFromCents } from "../../utils/currency";
 
 const DEFAULT_ITEM_ENTITY = {
   code: "",
@@ -51,6 +53,7 @@ const DEFAULT_ITEM_ENTITY = {
 const DEFAULT_STATE = {
   items: [],
   hideArchived: false,
+  term: "",
   order: "name",
   orderDir: 1,
   currentPage: 1,
@@ -72,10 +75,11 @@ const sponsorCustomizedFormItemsListReducer = (
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS: {
-      const { order, orderDir, page, hideArchived } = payload;
+      const { term, order, orderDir, page, hideArchived } = payload;
 
       return {
         ...state,
+        term,
         order,
         orderDir,
         items: [],
@@ -94,15 +98,9 @@ const sponsorCustomizedFormItemsListReducer = (
         id: a.id,
         code: a.code,
         name: a.name,
-        early_bird_rate: `$${(a.early_bird_rate / CENTS_FACTOR).toFixed(
-          DECIMAL_DIGITS
-        )}`,
-        standard_rate: `$${(a.standard_rate / CENTS_FACTOR).toFixed(
-          DECIMAL_DIGITS
-        )}`,
-        onsite_rate: `$${(a.onsite_rate / CENTS_FACTOR).toFixed(
-          DECIMAL_DIGITS
-        )}`,
+        early_bird_rate: currencyAmountFromCents(a.early_bird_rate),
+        standard_rate: currencyAmountFromCents(a.standard_rate),
+        onsite_rate: currencyAmountFromCents(a.onsite_rate),
         default_quantity: a.default_quantity,
         is_archived: a.is_archived,
         images: a.images
@@ -170,15 +168,11 @@ const sponsorCustomizedFormItemsListReducer = (
               id: updatedItem.id,
               code: updatedItem.code,
               name: updatedItem.name,
-              early_bird_rate: `$${(
-                updatedItem.early_bird_rate / CENTS_FACTOR
-              ).toFixed(DECIMAL_DIGITS)}`,
-              standard_rate: `$${(
-                updatedItem.standard_rate / CENTS_FACTOR
-              ).toFixed(DECIMAL_DIGITS)}`,
-              onsite_rate: `$${(updatedItem.onsite_rate / CENTS_FACTOR).toFixed(
-                DECIMAL_DIGITS
-              )}`,
+              early_bird_rate: currencyAmountFromCents(
+                updatedItem.early_bird_rate
+              ),
+              standard_rate: currencyAmountFromCents(updatedItem.standard_rate),
+              onsite_rate: currencyAmountFromCents(updatedItem.onsite_rate),
               default_quantity: updatedItem.default_quantity,
               is_archived: updatedItem.is_archived,
               images: updatedItem.images

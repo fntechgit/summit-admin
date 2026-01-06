@@ -32,7 +32,6 @@ import {
   DEFAULT_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
-import { amountToCents } from "../utils/currency";
 
 export const REQUEST_SPONSOR_FORMS = "REQUEST_SPONSOR_FORMS";
 export const RECEIVE_SPONSOR_FORMS = "RECEIVE_SPONSOR_FORMS";
@@ -707,7 +706,8 @@ export const getSponsorCustomizedFormItems =
       createAction(REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS),
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items`,
-      authErrorHandler
+      authErrorHandler,
+      { term, order, orderDir, page, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -1311,17 +1311,20 @@ export const saveSponsorFormManagedItem =
         normalizedEntity,
         snackbarErrorHandler,
         entity
-      )(params)(dispatch).then(() => {
-        dispatch(stopLoading());
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate(
-              "edit_sponsor.forms_tab.form_manage_items.item_updated"
-            )
-          })
-        );
-      });
+      )(params)(dispatch)
+        .then(() => {
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate(
+                "edit_sponsor.forms_tab.form_manage_items.item_updated"
+              )
+            })
+          );
+        })
+        .finally(() => {
+          dispatch(stopLoading());
+        });
     }
 
     const successMessage = {
@@ -1339,9 +1342,13 @@ export const saveSponsorFormManagedItem =
       normalizedEntity,
       snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(snackbarSuccessHandler(successMessage));
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(snackbarSuccessHandler(successMessage));
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const resetSponsorFormManagedItem = () => (dispatch) => {
@@ -1472,7 +1479,6 @@ export const addSponsorManagedFormItems =
           })
         );
       })
-      .catch(snackbarErrorHandler) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });

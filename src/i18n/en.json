@@ -2446,7 +2446,9 @@
         "default_quantity": "Default Quantity",
         "add_selected": "Add Selected Items",
         "item_updated": "Form item updated successfully",
-        "item_created": "Form item {item} created successfully",
+        "item_created": "Form item created successfully",
+        "sort_asc_label": "A-Z",
+        "sort_desc_label": "Z-A",
         "placeholder": {
           "search": "Search..."
         }
