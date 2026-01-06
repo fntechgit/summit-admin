@@ -37,15 +37,15 @@ const EditPageTemplatePage = (props) => {
     deleteFormTemplateMetaFieldTypeValue,
     deleteFormTemplateMaterial
   } = props;
-  const formTemplateId = match.params.form_template_id;
+  const pageTemplateId = match.params.page_template_id;
 
   useEffect(() => {
-    if (!formTemplateId) {
+    if (!pageTemplateId) {
       resetFormTemplateForm();
     } else {
-      getFormTemplate(formTemplateId);
+      getFormTemplate(pageTemplateId);
     }
-  }, [formTemplateId, getFormTemplate, resetFormTemplateForm]);
+  }, [pageTemplateId, getFormTemplate, resetFormTemplateForm]);
 
   const title = entity.id
     ? T.translate("general.edit")
