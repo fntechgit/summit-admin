@@ -139,8 +139,6 @@ export const DECIMAL_DIGITS = 2;
 
 export const TWO = 2;
 
-export const FOUR = 4;
-
 export const TEN = 10;
 
 export const ONE_HUNDRED = 100;

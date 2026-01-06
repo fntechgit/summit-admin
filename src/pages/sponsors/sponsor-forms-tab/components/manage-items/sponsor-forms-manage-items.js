@@ -14,7 +14,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import * as yup from "yup";
 import {
   Box,
   Button,
@@ -42,8 +41,8 @@ import SearchInput from "../../../../../components/mui/search-input";
 import MuiTableEditable from "../../../../../components/mui/editable-table/mui-table-editable";
 import SponsorInventoryDialog from "../../../../sponsors_inventory/popup/sponsor-inventory-popup";
 import SponsorFormItemFromInventoryPopup from "./sponsor-form-item-from-inventory";
-import { parsePrice } from "../../../../../utils/currency";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
+import { rateCellValidation } from "../../../../../utils/yup";
 
 const SponsorFormsManageItems = ({
   term,
@@ -158,9 +157,10 @@ const SponsorFormsManageItems = ({
   };
 
   const handleCellEdit = (rowId, column, value) => {
+    const valueWithNoSign = String(value).replace(/^[^\d.-]+/, "");
     const tmpEntity = {
       id: rowId,
-      [column]: parsePrice(value)
+      [column]: valueWithNoSign
     };
     saveSponsorFormManagedItem(formId, tmpEntity);
   };
@@ -184,37 +184,6 @@ const SponsorFormsManageItems = ({
       )
     );
   };
-
-  const rateCellValidation = () =>
-    yup
-      .number()
-      // allow $ at the start
-      .transform((value, originalValue) => {
-        if (typeof originalValue === "string") {
-          const cleaned = originalValue.replace(/^\$/, "");
-          return cleaned === "" ? undefined : parseFloat(cleaned);
-        }
-        return value;
-      })
-      // check if there's letters or characters
-      .test({
-        name: "valid-format",
-        message: T.translate("validation.number"),
-        test: (value, { originalValue }) => {
-          if (
-            originalValue === undefined ||
-            originalValue === null ||
-            originalValue === ""
-          )
-            return true;
-          return /^\$?-?\d+(\.\d+)?$/.test(originalValue);
-        }
-      })
-      .min(0, T.translate("validation.number_positive"))
-      .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
-        if (value === undefined || value === null) return true;
-        return /^\d+(\.\d{1,2})?$/.test(value.toString());
-      });
 
   const sponsorItemColumns = [
     {
@@ -386,12 +355,14 @@ const SponsorFormsManageItems = ({
       </div>
 
       {/* ADD ITEM */}
-      <SponsorInventoryDialog
-        entity={currentInventoryItem}
-        open={openPopup === "add_item"}
-        onSave={handleItemSave}
-        onClose={handleClose}
-      />
+      {openPopup === "add_item" && (
+        <SponsorInventoryDialog
+          entity={currentInventoryItem}
+          open={openPopup === "add_item"}
+          onSave={handleItemSave}
+          onClose={handleClose}
+        />
+      )}
 
       <SponsorFormItemFromInventoryPopup
         open={openPopup === "add_item_inventory"}
