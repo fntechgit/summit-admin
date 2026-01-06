@@ -13,6 +13,12 @@ const MuiFormikPriceField = ({ name, label, ...props }) => (
         startAdornment: <InputAdornment position="start">$</InputAdornment>
       }
     }}
+    onKeyDown={(e) => {
+      if (e.key === "e" || e.key === "E") {
+        e.nativeEvent.preventDefault();
+        e.nativeEvent.stopImmediatePropagation();
+      }
+    }}
     inputProps={{
       min: 0,
       inputMode: "decimal",
