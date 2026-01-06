@@ -80,11 +80,6 @@ const MetaFieldValues = ({
     };
 
     if (field.id && metaFieldValue.id && onMetaFieldTypeValueDeleted) {
-      console.log("Delete params:", {
-        entityId,
-        fieldId: field.id,
-        valueId: metaFieldValue.id
-      });
       onMetaFieldTypeValueDeleted(entityId, field.id, metaFieldValue.id).then(
         () => removeValueFromFields()
       );
@@ -167,7 +162,7 @@ const MetaFieldValues = ({
         onReorder={onReorder}
         renderItem={renderMetaFieldValue}
         idKey="id"
-        updateOrder="order"
+        updateOrderKey="order"
         droppableId={`droppable-values-${fieldIndex}`}
       />
       <Grid2 container spacing={2} sx={{ mt: 2 }} offset={4}>

@@ -61,6 +61,7 @@ const MuiFormikSelect = ({
 MuiFormikSelect.propTypes = {
   name: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
+  placeholder: PropTypes.string,
   isClearable: PropTypes.bool
 };
 
