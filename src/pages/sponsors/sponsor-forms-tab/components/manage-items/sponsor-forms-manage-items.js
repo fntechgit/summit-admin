@@ -138,7 +138,7 @@ const SponsorFormsManageItems = ({
       ? unarchiveSponsorCustomizedFormItem(formId, item.id)
       : archiveSponsorCustomizedFormItem(formId, item.id);
 
-  const handleHideArchivedItens = (ev) => {
+  const handleHideArchivedItems = (ev) => {
     getSponsorCustomizedFormItems(
       formId,
       term,
@@ -285,7 +285,7 @@ const SponsorFormsManageItems = ({
               control={
                 <Checkbox
                   checked={hideArchived}
-                  onChange={handleHideArchivedItens}
+                  onChange={handleHideArchivedItems}
                   inputProps={{
                     "aria-label": T.translate(
                       "edit_sponsor.forms_tab.hide_archived"
