@@ -207,7 +207,7 @@ export const deleteMetaFieldTypeValue =
         metaFieldId,
         valueId
       }),
-      `${settings.url}${valueId}/`,
+      `${settings.url}${valueId}`,
       null,
       authErrorHandler
     )(params)(dispatch).then(() => {

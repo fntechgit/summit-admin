@@ -7,29 +7,20 @@ import {
   DialogContent,
   DialogTitle,
   Button,
-  MenuItem,
   InputLabel,
   Box,
   IconButton,
   Divider,
   Grid2
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import { useFormik, FormikProvider, FieldArray } from "formik";
+import { useFormik, FormikProvider } from "formik";
 import * as yup from "yup";
-import showConfirmDialog from "../../../components/mui/showConfirmDialog";
-import MetaFieldValues from "./meta-field-values";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
-import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
-import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
+import AdditionalInputList from "../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import useScrollToError from "../../../hooks/useScrollToError";
-import {
-  METAFIELD_TYPES,
-  METAFIELD_TYPES_WITH_OPTIONS
-} from "../../../utils/constants";
+import { METAFIELD_TYPES } from "../../../utils/constants";
 
 const FormTemplateDialog = ({
   open,
@@ -98,30 +89,6 @@ const FormTemplateDialog = ({
   });
 
   useScrollToError(formik);
-
-  const handleRemoveFieldType = async (fieldType, index, removeFormik) => {
-    const isConfirmed = await showConfirmDialog({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("edit_form_template.delete_meta_field_warning")} ${
-        fieldType.name
-      }`,
-      type: "warning",
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    });
-
-    if (!isConfirmed) return;
-
-    if (fieldType.id) {
-      onMetaFieldTypeDeleted(initialEntity.id, fieldType.id).then(() =>
-        removeFormik(index)
-      );
-    } else {
-      removeFormik(index);
-    }
-  };
-
-  const buildFieldName = (base, index, field) => `${base}[${index}].${field}`;
 
   const handleClose = () => {
     formik.resetForm();
@@ -196,210 +163,12 @@ const FormTemplateDialog = ({
             </DialogTitle>
 
             <Box sx={{ px: 3 }}>
-              <FieldArray name="meta_fields">
-                {({ push, remove }) => (
-                  <>
-                    {formik.values.meta_fields.map((field, fieldIndex) => (
-                      <Grid2
-                        container
-                        spacing={2}
-                        sx={{ alignItems: "center" }}
-                        key={field}
-                      >
-                        <Grid2 size={11}>
-                          <Box
-                            sx={{
-                              border: "1px solid #0000001F",
-                              borderRadius: "4px",
-                              p: 2,
-                              my: 2
-                            }}
-                          >
-                            <Grid2
-                              container
-                              spacing={2}
-                              sx={{ alignItems: "start" }}
-                            >
-                              <Grid2 size={4}>
-                                <InputLabel htmlFor="fieldTitle">
-                                  {T.translate(
-                                    "edit_form_template.meta_field_title"
-                                  )}
-                                </InputLabel>
-                                <MuiFormikTextField
-                                  name={buildFieldName(
-                                    "meta_fields",
-                                    fieldIndex,
-                                    "name"
-                                  )}
-                                  margin="none"
-                                  formik={formik}
-                                  fullWidth
-                                />
-                              </Grid2>
-                              <Grid2 size={4}>
-                                <InputLabel htmlFor="fieldType">
-                                  {T.translate(
-                                    "edit_form_template.meta_field_type"
-                                  )}
-                                </InputLabel>
-                                <MuiFormikSelect
-                                  formik={formik}
-                                  name={buildFieldName(
-                                    "meta_fields",
-                                    fieldIndex,
-                                    "type"
-                                  )}
-                                >
-                                  {METAFIELD_TYPES.map((field_type) => (
-                                    <MenuItem value={field_type}>
-                                      {field_type}
-                                    </MenuItem>
-                                  ))}
-                                </MuiFormikSelect>
-                              </Grid2>
-                              <Grid2 size={4} sx={{ alignSelf: "end" }}>
-                                <MuiFormikCheckbox
-                                  formik={formik}
-                                  name={buildFieldName(
-                                    "meta_fields",
-                                    fieldIndex,
-                                    "is_required"
-                                  )}
-                                  label={T.translate(
-                                    "edit_form_template.meta_field_required"
-                                  )}
-                                />
-                              </Grid2>
-                            </Grid2>
-                            {METAFIELD_TYPES_WITH_OPTIONS.includes(
-                              field.type
-                            ) && (
-                              <>
-                                <Divider sx={{ mt: 2 }} />
-                                <MetaFieldValues
-                                  field={field}
-                                  fieldIndex={fieldIndex}
-                                  initialEntity={initialEntity}
-                                  onMetaFieldTypeValueDeleted={
-                                    onMetaFieldTypeValueDeleted
-                                  }
-                                />
-                              </>
-                            )}
-                            {field.type === "Quantity" && (
-                              <Grid2
-                                container
-                                spacing={2}
-                                sx={{ alignItems: "end", my: 2 }}
-                              >
-                                <Grid2 size={4}>
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center"
-                                    }}
-                                  >
-                                    <MuiFormikTextField
-                                      formik={formik}
-                                      name={buildFieldName(
-                                        "meta_fields",
-                                        fieldIndex,
-                                        "minimum_quantity"
-                                      )}
-                                      placeholder={T.translate(
-                                        "edit_form_template.placeholders.meta_field_minimum_quantity"
-                                      )}
-                                      type="number"
-                                      fullWidth
-                                    />
-                                  </Box>
-                                </Grid2>
-                                <Grid2 size={4}>
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center"
-                                    }}
-                                  >
-                                    <MuiFormikTextField
-                                      formik={formik}
-                                      name={buildFieldName(
-                                        "meta_fields",
-                                        fieldIndex,
-                                        "maximum_quantity"
-                                      )}
-                                      placeholder={T.translate(
-                                        "edit_form_template.placeholders.meta_field_maximum_quantity"
-                                      )}
-                                      type="number"
-                                      fullWidth
-                                    />
-                                  </Box>
-                                </Grid2>
-                              </Grid2>
-                            )}
-                          </Box>
-                        </Grid2>
-                        <Grid2 size={1}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              gap: 1
-                            }}
-                          >
-                            <Button
-                              variant="outlined"
-                              aria-label="delete"
-                              sx={{
-                                width: 40,
-                                height: 40,
-                                minWidth: "auto",
-                                borderRadius: "50%",
-                                padding: 0
-                              }}
-                              onClick={() =>
-                                handleRemoveFieldType(
-                                  formik.values.meta_fields[fieldIndex],
-                                  fieldIndex,
-                                  remove
-                                )
-                              }
-                            >
-                              <DeleteIcon />
-                            </Button>
-                            <Button
-                              variant="contained"
-                              aria-label="add"
-                              sx={{
-                                width: 40,
-                                height: 40,
-                                minWidth: "auto",
-                                borderRadius: "50%",
-                                padding: 0
-                              }}
-                              onClick={() =>
-                                push({
-                                  name: "",
-                                  type: "Text",
-                                  is_required: false,
-                                  values: [],
-                                  minimum_quantity: 0,
-                                  maximum_quantity: 0
-                                })
-                              }
-                            >
-                              <AddIcon />
-                            </Button>
-                          </Box>
-                        </Grid2>
-                      </Grid2>
-                    ))}
-                  </>
-                )}
-              </FieldArray>
+              <AdditionalInputList
+                entityId={initialEntity.id}
+                name="meta_fields"
+                onDelete={onMetaFieldTypeDeleted}
+                onDeleteValue={onMetaFieldTypeValueDeleted}
+              />
             </Box>
           </DialogContent>
           <Divider />
