@@ -166,6 +166,9 @@ class RoomForm extends React.Component {
       }
     };
 
+    const attributeTypes =
+      currentSummit.meeting_booking_room_allowed_attributes;
+
     const typeById = new Map(attributeTypes.map((t) => [t.id, t]));
 
     const roomAttributes = (entity.attributes ?? []).reduce((acc, attr) => {
