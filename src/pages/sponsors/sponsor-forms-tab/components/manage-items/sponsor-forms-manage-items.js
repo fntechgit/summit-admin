@@ -77,7 +77,6 @@ const SponsorFormsManageItems = ({
   }, []);
 
   const handleManagedPageChange = (page) => {
-    const { perPage, order, orderDir } = items;
     getSponsorCustomizedFormItems(
       formId,
       term,
@@ -90,7 +89,6 @@ const SponsorFormsManageItems = ({
   };
 
   const handleManagedSort = (key, dir) => {
-    const { currentPage, perPage } = items;
     getSponsorCustomizedFormItems(
       formId,
       term,
@@ -144,10 +142,10 @@ const SponsorFormsManageItems = ({
     getSponsorCustomizedFormItems(
       formId,
       term,
-      items.currentPage,
-      items.perPage,
-      items.order,
-      items.orderDir,
+      currentPage,
+      perPage,
+      order,
+      orderDir,
       ev.target.checked
     );
   };
