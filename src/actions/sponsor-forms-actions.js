@@ -1214,9 +1214,6 @@ const normalizeItem = (entity) => {
   const normalizedEntity = { ...entity };
   const {
     meta_fields,
-    early_bird_rate,
-    standard_rate,
-    onsite_rate,
     quantity_limit_per_show,
     quantity_limit_per_sponsor,
     default_quantity,
@@ -1231,15 +1228,7 @@ const normalizeItem = (entity) => {
     normalizedEntity.images = images?.filter((img) => img.file_path);
   }
 
-  if (early_bird_rate === "" || typeof early_bird_rate === "undefined")
-    delete normalizedEntity.early_bird_rate;
-  else normalizedEntity.early_bird_rate = amountToCents(early_bird_rate);
-  if (standard_rate === "" || typeof standard_rate === "undefined")
-    delete normalizedEntity.standard_rate;
-  else normalizedEntity.standard_rate = amountToCents(standard_rate);
-  if (onsite_rate === "" || typeof onsite_rate === "undefined")
-    delete normalizedEntity.onsite_rate;
-  else normalizedEntity.onsite_rate = amountToCents(onsite_rate);
+  normalizeRates(entity, normalizedEntity);
 
   if (quantity_limit_per_show === "")
     delete normalizedEntity.quantity_limit_per_show;
@@ -1364,26 +1353,25 @@ const normalizeManagedItem = (entity) => {
     (img) => img.file_path
   );
 
-  if (entity.early_bird_rate === "" || entity.early_bird_rate === undefined)
-    delete normalizedEntity.early_bird_rate;
-  else
-    normalizedEntity.early_bird_rate = amountToCents(
-      normalizedEntity.early_bird_rate
-    );
-
-  if (entity.standard_rate === "" || entity.standard_rate === undefined)
-    delete normalizedEntity.standard_rate;
-  else
-    normalizedEntity.standard_rate = amountToCents(
-      normalizedEntity.standard_rate
-    );
-
-  if (entity.onsite_rate === "" || entity.onsite_rate === undefined)
-    delete normalizedEntity.onsite_rate;
-  else
-    normalizedEntity.onsite_rate = amountToCents(normalizedEntity.onsite_rate);
+  normalizeRates(entity, normalizedEntity);
 
   return normalizedEntity;
+};
+
+const normalizeRates = (entity, normalizedEntity) => {
+  const { early_bird_rate, standard_rate, onsite_rate } = entity;
+
+  if (early_bird_rate === "" || early_bird_rate === undefined)
+    delete normalizedEntity.early_bird_rate;
+  else normalizedEntity.early_bird_rate = amountToCents(early_bird_rate);
+
+  if (standard_rate === "" || standard_rate === undefined)
+    delete normalizedEntity.standard_rate;
+  else normalizedEntity.standard_rate = amountToCents(standard_rate);
+
+  if (onsite_rate === "" || onsite_rate === undefined)
+    delete normalizedEntity.onsite_rate;
+  else normalizedEntity.onsite_rate = amountToCents(onsite_rate);
 };
 
 export const deleteSponsorFormManagedItem =
