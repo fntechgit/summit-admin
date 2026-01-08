@@ -42,6 +42,7 @@ import SponsorGeneralForm from "../../components/forms/sponsor-general-form/inde
 import SponsorUsersListPerSponsorPage from "./sponsor-users-list-per-sponsor";
 import SponsorFormsTab from "./sponsor-forms-tab";
 import SponsorBadgeScans from "./sponsor-badge-scans";
+import SponsorCartTab from "./sponsor-cart-tab";
 
 const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -127,7 +128,7 @@ const EditSponsorPage = (props) => {
 
   return (
     <Box>
-      <Container maxWidth="lg" sx={{position: "relative"}}>
+      <Container maxWidth="lg" sx={{ position: "relative" }}>
         <Typography fontSize="3.4rem" variant="h4">
           {entity.company?.name}
         </Typography>
@@ -184,6 +185,9 @@ const EditSponsorPage = (props) => {
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={4}>
           <SponsorFormsTab sponsor={entity} summitId={currentSummit.id} />
+        </CustomTabPanel>
+        <CustomTabPanel value={selectedTab} index={5}>
+          <SponsorCartTab sponsor={entity} summitId={currentSummit.id} />
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={7}>
           <SponsorBadgeScans sponsor={entity} />

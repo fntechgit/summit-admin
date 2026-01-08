@@ -3,9 +3,9 @@ import T from "i18n-react/dist/i18n-react";
 import { isBoolean } from "lodash";
 import {
   Box,
+  Button,
   IconButton,
   Paper,
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -31,6 +31,7 @@ import styles from "./mui-table.module.less";
 const MuiTable = ({
   columns = [],
   data = [],
+  children,
   totalRows,
   perPage,
   currentPage,
@@ -253,6 +254,8 @@ const MuiTable = ({
                   )}
                 </TableRow>
               ))}
+              {/* Here we inject extra rows passed as children */}
+              {children}
               {data.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={columns.length} align="center">
@@ -265,28 +268,30 @@ const MuiTable = ({
         </TableContainer>
 
         {/* PAGINATION */}
-        <TablePagination
-          component="div"
-          count={totalRows}
-          rowsPerPageOptions={customPerPageOptions}
-          rowsPerPage={perPage}
-          page={currentPage - 1}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage={T.translate("mui_table.rows_per_page")}
-          sx={{
-            ".MuiTablePagination-toolbar": {
-              alignItems: "baseline",
-              marginTop: "1.6rem"
-            },
-            ".MuiTablePagination-spacer": {
-              display: "none"
-            },
-            ".MuiTablePagination-displayedRows": {
-              marginLeft: "auto"
-            }
-          }}
-        />
+        {perPage && currentPage && (
+          <TablePagination
+            component="div"
+            count={totalRows}
+            rowsPerPageOptions={customPerPageOptions}
+            rowsPerPage={perPage}
+            page={currentPage - 1}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage={T.translate("mui_table.rows_per_page")}
+            sx={{
+              ".MuiTablePagination-toolbar": {
+                alignItems: "baseline",
+                marginTop: "1.6rem"
+              },
+              ".MuiTablePagination-spacer": {
+                display: "none"
+              },
+              ".MuiTablePagination-displayedRows": {
+                marginLeft: "auto"
+              }
+            }}
+          />
+        )}
       </Paper>
     </Box>
   );

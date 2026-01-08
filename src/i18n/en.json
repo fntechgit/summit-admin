@@ -2434,6 +2434,19 @@
         "unarchived": "Form successfully unarchived."
       }
     },
+    "cart_tab": {
+      "new_form": "New Form",
+      "forms": "forms",
+      "code": "Code",
+      "name": "Name",
+      "add_ons": "Add-ons",
+      "discount": "Discount",
+      "amount": "Amount",
+      "add_form": "Add Form",
+      "no_cart": "No cart found.",
+      "pay_cc": "pay with credit card or ach",
+      "pay_invoice": "pay with invoice"
+    },
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start typing to choose a Tier...",
@@ -3762,7 +3775,8 @@
     "no_items": "No items found.",
     "rows_per_page": "Rows per page",
     "sorted_desc": "sorted descending",
-    "sorted_asc": "sorted ascending"
+    "sorted_asc": "sorted ascending",
+    "total": "Total"
   },
   "event_rsvp_list": {
     "name": "Name",

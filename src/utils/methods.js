@@ -21,17 +21,19 @@ import Swal from "sweetalert2";
 import * as Sentry from "@sentry/react";
 import T from "i18n-react/dist/i18n-react";
 import {
+  BADGE_QR_MINIMUM_EXPECTED_FIELDS,
+  CENTS_FOR_DOLLAR,
+  DECIMAL_DIGITS,
   ERROR_CODE_401,
   ERROR_CODE_403,
   ERROR_CODE_412,
   ERROR_CODE_500,
   HEX_RADIX,
+  INT_BASE,
+  MARKETING_SETTING_TYPE_HEX_COLOR,
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE,
-  INT_BASE,
-  OR_FILTER,
-  MARKETING_SETTING_TYPE_HEX_COLOR,
-  BADGE_QR_MINIMUM_EXPECTED_FIELDS
+  OR_FILTER
 } from "./constants";
 
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
@@ -530,3 +532,6 @@ export const formatBadgeQR = (code, summit) => {
 
   return null;
 };
+
+export const centsToDollar = (cents) =>
+  `$${(cents / CENTS_FOR_DOLLAR).toFixed(DECIMAL_DIGITS)}`;
