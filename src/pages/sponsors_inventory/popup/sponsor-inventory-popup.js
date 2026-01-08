@@ -30,7 +30,7 @@ import {
 import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield.js";
+import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
 import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
@@ -69,7 +69,7 @@ const SponsorItemDialog = ({
       code: yup.string().required(T.translate("validation.required")),
       name: yup.string().required(T.translate("validation.required")),
       description: yup.string().required(T.translate("validation.required")),
-      images: yup.array().min(1, T.translate("validation.required")),
+      images: yup.array(),
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),
       onsite_rate: decimalValidation(),
@@ -182,7 +182,7 @@ const SponsorItemDialog = ({
       }
     };
 
-    if (fieldType.id) {
+    if (fieldType.id && onMetaFieldTypeDeleted) {
       onMetaFieldTypeDeleted(initialEntity.id, fieldType.id)
         .then(() => removeOrResetField())
         .catch((err) => console.log("Error at delete field from API", err));
@@ -243,7 +243,9 @@ const SponsorItemDialog = ({
       disableRestoreFocus
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        Edit Item
+        {initialEntity.id
+          ? T.translate("edit_inventory_item.edit_item")
+          : T.translate("edit_inventory_item.new_item")}
         <IconButton size="small" onClick={handleClose} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -582,7 +584,7 @@ const SponsorItemDialog = ({
             >
               <Grid2 size={12}>
                 <InputLabel htmlFor="image" id="images">
-                  {T.translate("edit_inventory_item.images")} *
+                  {T.translate("edit_inventory_item.images")}
                 </InputLabel>
                 {formik.touched.images && formik.errors.images && (
                   <FormHelperText error>{formik.errors.images}</FormHelperText>

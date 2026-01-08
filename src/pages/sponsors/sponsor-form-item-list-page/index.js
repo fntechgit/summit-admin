@@ -15,7 +15,6 @@ import React, { useEffect, useState } from "react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import * as yup from "yup";
 import {
   Alert,
   Box,
@@ -29,7 +28,6 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
-import { parsePrice } from "openstack-uicore-foundation/lib/utils/money";
 import {
   deleteSponsorFormItem,
   getSponsorFormItem,
@@ -42,6 +40,7 @@ import ItemPopup from "./components/item-popup";
 import InventoryPopup from "./components/inventory-popup";
 import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { rateCellValidation } from "../../../utils/yup";
 
 const SponsorFormItemListPage = ({
   match,
@@ -92,7 +91,8 @@ const SponsorFormItemListPage = ({
   };
 
   const handleCellEdit = (rowId, column, value) => {
-    const tmpEntity = { id: rowId, [column]: parsePrice(value) };
+    const valueWithNoSign = String(value).replace(/^[^\d.-]+/, "");
+    const tmpEntity = { id: rowId, [column]: valueWithNoSign };
     updateSponsorFormItem(formId, tmpEntity);
   };
 
@@ -112,37 +112,6 @@ const SponsorFormItemListPage = ({
   const handleNewInventoryItem = () => {
     setOpenPopup("inventory");
   };
-
-  const rateCellValidation = () =>
-    yup
-      .number()
-      // allow $ at the start
-      .transform((value, originalValue) => {
-        if (typeof originalValue === "string") {
-          const cleaned = originalValue.replace(/^\$/, "");
-          return cleaned === "" ? undefined : parseFloat(cleaned);
-        }
-        return value;
-      })
-      // check if there's letters or characters
-      .test({
-        name: "valid-format",
-        message: T.translate("validation.number"),
-        test: (value, { originalValue }) => {
-          if (
-            originalValue === undefined ||
-            originalValue === null ||
-            originalValue === ""
-          )
-            return true;
-          return /^\$?-?\d+(\.\d+)?$/.test(originalValue);
-        }
-      })
-      .min(0, T.translate("validation.number_positive"))
-      .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
-        if (value === undefined || value === null) return true;
-        return /^\d+(\.\d{1,2})?$/.test(value.toString());
-      });
 
   const columns = [
     {
