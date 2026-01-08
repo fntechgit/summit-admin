@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
 import MuiFormikTextField from "./mui-formik-textfield";
 
+const BLOCKED_KEYS = ["e", "E", "+", "-"];
+
 const MuiFormikPriceField = ({ name, label, ...props }) => (
   <MuiFormikTextField
     name={name}
@@ -11,6 +13,12 @@ const MuiFormikPriceField = ({ name, label, ...props }) => (
     slotProps={{
       input: {
         startAdornment: <InputAdornment position="start">$</InputAdornment>
+      }
+    }}
+    onKeyDown={(e) => {
+      if (BLOCKED_KEYS.includes(e.key)) {
+        e.nativeEvent.preventDefault();
+        e.nativeEvent.stopImmediatePropagation();
       }
     }}
     inputProps={{

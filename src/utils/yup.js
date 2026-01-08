@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import T from "i18n-react";
 
 export const addEmailListValidator = () => {
   yup.addMethod(yup.string, "emailList", function (errorMessage) {
@@ -36,3 +37,16 @@ export const addIssAfterDateFieldValidator = () => {
     });
   });
 };
+
+export const numberValidation = () =>
+  yup.number().typeError(T.translate("validation.number"));
+
+export const decimalValidation = () =>
+  yup
+    .number()
+    .typeError(T.translate("validation.number"))
+    .min(0, T.translate("validation.number_positive"))
+    .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
+      if (value === undefined || value === null) return true;
+      return /^\d+(\.\d{1,2})?$/.test(value.toString());
+    });
