@@ -76,7 +76,7 @@ const SponsorFormsManageItems = ({
     getSponsorCustomizedFormItems(formId);
   }, []);
 
-  const handleManagedPageChange = (page) => {
+  const handlePageChange = (page) => {
     getSponsorCustomizedFormItems(
       formId,
       term,
@@ -88,11 +88,23 @@ const SponsorFormsManageItems = ({
     );
   };
 
-  const handleManagedSort = (key, dir) => {
+  const handlePerPageChange = (newPerPage) => {
     getSponsorCustomizedFormItems(
       formId,
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
+  };
+
+  const handleSort = (key, dir) => {
+    getSponsorCustomizedFormItems(
+      formId,
+      term,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       key,
       dir,
@@ -104,7 +116,7 @@ const SponsorFormsManageItems = ({
     getSponsorCustomizedFormItems(
       formId,
       searchTerm,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
@@ -117,7 +129,7 @@ const SponsorFormsManageItems = ({
       getSponsorCustomizedFormItems(
         formId,
         term,
-        currentPage,
+        DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
@@ -142,7 +154,7 @@ const SponsorFormsManageItems = ({
     getSponsorCustomizedFormItems(
       formId,
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
@@ -345,8 +357,9 @@ const SponsorFormsManageItems = ({
           perPage={perPage}
           totalRows={totalCount}
           currentPage={currentPage}
-          onPageChange={handleManagedPageChange}
-          onSort={handleManagedSort}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
           onArchive={handleArchiveItem}
           onEdit={handleRowEdit}
           onDelete={handleRowDelete}

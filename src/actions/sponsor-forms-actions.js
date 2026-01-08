@@ -707,7 +707,7 @@ export const getSponsorCustomizedFormItems =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items`,
       authErrorHandler,
-      { term, order, orderDir, page, hideArchived }
+      { term, order, orderDir, page, perPage, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

@@ -75,7 +75,7 @@ const sponsorCustomizedFormItemsListReducer = (
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS: {
-      const { term, order, orderDir, page, hideArchived } = payload;
+      const { term, order, orderDir, page, perPage, hideArchived } = payload;
 
       return {
         ...state,
@@ -84,6 +84,7 @@ const sponsorCustomizedFormItemsListReducer = (
         orderDir,
         items: [],
         currentPage: page,
+        perPage,
         hideArchived
       };
     }
