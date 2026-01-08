@@ -136,8 +136,8 @@ const SponsorFormsManageItems = ({
         hideArchived
       );
       resetSponsorFormManagedItem();
+      setOpenPopup(null);
     });
-    setOpenPopup(null);
   };
 
   const handleOpenItemPopup = () => {
