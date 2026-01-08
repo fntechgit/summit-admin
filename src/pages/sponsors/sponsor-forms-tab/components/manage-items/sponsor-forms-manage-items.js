@@ -288,12 +288,14 @@ const SponsorFormsManageItems = ({
                   onChange={handleHideArchivedItems}
                   inputProps={{
                     "aria-label": T.translate(
-                      "edit_sponsor.forms_tab.hide_archived"
+                      "edit_sponsor.forms_tab.form_manage_items.hide_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("edit_sponsor.forms_tab.hide_archived")}
+              label={T.translate(
+                "edit_sponsor.forms_tab.form_manage_items.hide_archived"
+              )}
             />
           </FormGroup>
         </Grid2>
