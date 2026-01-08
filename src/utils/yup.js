@@ -45,7 +45,8 @@ export const decimalValidation = () =>
   yup
     .number()
     .typeError(T.translate("validation.number"))
-    .min(0, T.translate("validation.number_positive"))
+    .positive(T.translate("validation.number_positive"))
+    .required(T.translate("validation.required"))
     .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
       if (value === undefined || value === null) return true;
       return /^\d+(\.\d{1,2})?$/.test(value.toString());
