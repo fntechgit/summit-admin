@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import { FieldArray, FormikProvider, useFormik } from "formik";
@@ -149,13 +149,6 @@ const SponsorItemDialog = ({
       allowed_extensions: ALLOWED_INVENTORY_IMAGE_FORMATS
     }
   };
-
-  useEffect(() => {
-    formik.validateForm();
-    console.log("ERRORES", formik.errors);
-
-    return () => {};
-  }, [formik.values]);
 
   useScrollToError(formik);
 
