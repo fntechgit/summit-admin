@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
 import MuiFormikTextField from "./mui-formik-textfield";
 
+const BLOCKED_KEYS = ["e", "E", "+", "-"];
+
 const MuiFormikPriceField = ({ name, label, ...props }) => (
   <MuiFormikTextField
     name={name}
@@ -14,7 +16,7 @@ const MuiFormikPriceField = ({ name, label, ...props }) => (
       }
     }}
     onKeyDown={(e) => {
-      if (e.key === "e" || e.key === "E") {
+      if (BLOCKED_KEYS.includes(e.key)) {
         e.nativeEvent.preventDefault();
         e.nativeEvent.stopImmediatePropagation();
       }
