@@ -37,12 +37,12 @@ import {
   resetFormTemplateForm,
   saveFormTemplate,
   unarchiveFormTemplate
-} from "../../actions/form-template-actions";
-import MuiTable from "../../components/mui/table/mui-table";
-import FormTemplateDialog from "./popup/form-template-popup";
-import history from "../../history";
-import FormTemplateFromDuplicateDialog from "./popup/form-template-from-duplicate-popup";
-import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+} from "../../../actions/form-template-actions";
+import MuiTable from "../../../components/mui/table/mui-table";
+import FormTemplateDialog from "./form-template-popup";
+import history from "../../../history";
+import FormTemplateFromDuplicateDialog from "./form-template-from-duplicate-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const FormTemplateListPage = ({
   formTemplates,

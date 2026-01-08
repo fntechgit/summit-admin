@@ -29,6 +29,7 @@ import MediaFileTypeLayout from "./media-file-type-layout";
 import SponsoredProjectLayout from "./sponsored-project-layout";
 import TagLayout from "./tag-layout";
 import SponsorshipLayout from "./sponsorship-layout";
+import PageTemplateLayout from "./page-template-layout";
 
 const PrimaryLayout = ({ match, currentSummit, location, member }) => {
   let extraClass = "container";
@@ -65,6 +66,7 @@ const PrimaryLayout = ({ match, currentSummit, location, member }) => {
           <Route path="/app/companies" component={CompanyLayout} />
           <Route path="/app/inventory" component={InventoryItemLayout} />
           <Route path="/app/form-templates" component={FormTemplateLayout} />
+          <Route path="/app/page-templates" component={PageTemplateLayout} />
           <Route path="/app/sponsorship-types" component={SponsorshipLayout} />
           <Route path="/app/tags" component={TagLayout} />
           <Route
