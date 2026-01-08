@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import { FieldArray, FormikProvider, useFormik } from "formik";
@@ -30,10 +30,12 @@ import {
 import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 import MetaFieldValues from "./meta-field-values";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield.js";
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikSelect from "../../../components/mui/formik-inputs/mui-formik-select";
 import MuiFormikCheckbox from "../../../components/mui/formik-inputs/mui-formik-checkbox";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
+import { numberValidation, decimalValidation } from "../../../utils/yup";
 
 const SponsorItemDialog = ({
   open,
@@ -44,19 +46,6 @@ const SponsorItemDialog = ({
   onMetaFieldTypeValueDeleted,
   entity: initialEntity
 }) => {
-  const numberValidation = () =>
-    yup.number().typeError(T.translate("validation.number"));
-
-  const decimalValidation = () =>
-    yup
-      .number()
-      .typeError(T.translate("validation.number"))
-      .min(0, T.translate("validation.number_positive"))
-      .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
-        if (value === undefined || value === null) return true;
-        return /^\d+(\.\d{1,2})?$/.test(value.toString());
-      });
-
   const fieldTypesWithOptions = ["CheckBoxList", "ComboBox", "RadioButtonList"];
 
   const formik = useFormik({
@@ -160,6 +149,13 @@ const SponsorItemDialog = ({
       allowed_extensions: ALLOWED_INVENTORY_IMAGE_FORMATS
     }
   };
+
+  useEffect(() => {
+    formik.validateForm();
+    console.log("ERRORES", formik.errors);
+
+    return () => {};
+  }, [formik.values]);
 
   useScrollToError(formik);
 
@@ -312,10 +308,9 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="early_bird_rate">
                   {T.translate("edit_inventory_item.early_bird_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="early_bird_rate"
-                  formik={formik}
                   fullWidth
                 />
               </Grid2>
@@ -323,10 +318,9 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="standard_rate">
                   {T.translate("edit_inventory_item.standard_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="standard_rate"
-                  formik={formik}
                   fullWidth
                 />
               </Grid2>
@@ -334,10 +328,9 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="onsite_rate">
                   {T.translate("edit_inventory_item.onsite_rate")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   variant="outlined"
                   name="onsite_rate"
-                  formik={formik}
                   fullWidth
                 />
               </Grid2>
