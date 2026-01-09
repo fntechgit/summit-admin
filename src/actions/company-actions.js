@@ -27,6 +27,7 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import URI from "urijs";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
@@ -35,6 +36,8 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
+
+URI.escapeQuerySpace = false;
 
 export const REQUEST_COMPANIES = "REQUEST_COMPANIES";
 export const RECEIVE_COMPANIES = "RECEIVE_COMPANIES";
@@ -268,16 +271,18 @@ const normalizeEntity = (entity) => {
 
 export const queryCompanies = _.debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
-
+  const endpoint = URI(`${window.API_BASE_URL}/api/v1/companies`);
   input = escapeFilterValue(input);
-
-  fetch(
-    `${window.API_BASE_URL}/api/v1/companies?filter=name=@${input}&access_token=${accessToken}&fields=id,name&relations=none`
-  )
+  endpoint.addQuery("access_token", accessToken);
+  endpoint.addQuery("fields", "id,name");
+  endpoint.addQuery("relations", "none");
+  if (input) {
+    endpoint.addQuery("filter", `name=@${input}`);
+  }
+  fetch(endpoint)
     .then(fetchResponseHandler)
     .then((json) => {
       const options = [...json.data];
-
       callback(options);
     })
     .catch(fetchErrorHandler);
