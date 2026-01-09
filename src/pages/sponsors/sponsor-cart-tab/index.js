@@ -105,7 +105,7 @@ const SponsorCartTab = ({
           size="small"
           onClick={() => handleManageItems(row)}
         >
-          Manage&nbsp;Items
+          {T.translate("edit_sponsor.cart_tab.manage_items")}
         </Button>
       )
     },
