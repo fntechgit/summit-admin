@@ -224,3 +224,14 @@ export const ROOM_OCCUPANCY_OPTIONS = [
   "FULL",
   "OVERFLOW"
 ];
+
+export const PAGES_MODULE_KINDS = {
+  INFO: "Info",
+  DOCUMENT: "Document",
+  MEDIA: "Media"
+};
+
+export const PAGE_MODULES_MEDIA_TYPES = {
+  FILE: "file",
+  TEXT: "text"
+};
