@@ -34,6 +34,8 @@ import {
   FIFTEEN_PER_PAGE
 } from "../utils/constants";
 
+URI.escapeQuerySpace = false;
+
 export const FILTER_CRITERIA_ADDED = "FILTER_CRITERIA_ADDED";
 export const FILTER_CRITERIA_DELETED = "FILTER_CRITERIA_DELETED";
 

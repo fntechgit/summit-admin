@@ -33,6 +33,7 @@ import {
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import URI from "urijs";
 import history from "../history";
 import {
   checkOrFilter,
@@ -49,10 +50,13 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
   EXPORT_PAGE_SIZE_200,
+  FIVE_PER_PAGE,
   HOUR_AND_HALF,
   SECONDS_TO_MINUTES
 } from "../utils/constants";
 import { getIdValue } from "../utils/summitUtils";
+
+URI.escapeQuerySpace = false;
 
 export const REQUEST_EVENTS = "REQUEST_EVENTS";
 export const RECEIVE_EVENTS = "RECEIVE_EVENTS";
@@ -1481,16 +1485,18 @@ export const getEventComments =
 
 export const queryEvents = _.debounce(async (summitId, input, callback) => {
   const accessToken = await getAccessTokenSafely();
-
+  const endpoint = URI(
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/events`
+  );
   input = escapeFilterValue(input);
-
-  fetch(
-    `${window.API_BASE_URL}/api/v1/summits/${summitId}/events?filter=title=@${input}&access_token=${accessToken}`
-  )
+  endpoint.addQuery("access_token", accessToken);
+  if (input) {
+    endpoint.addQuery("filter", `title=@${input}`);
+  }
+  fetch(endpoint)
     .then(fetchResponseHandler)
     .then((json) => {
       const options = [...json.data];
-
       callback(options);
     })
     .catch(fetchErrorHandler);
@@ -1499,20 +1505,19 @@ export const queryEvents = _.debounce(async (summitId, input, callback) => {
 export const queryEventsWithPrivateRSVP = _.debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
-
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events`
+    );
     input = escapeFilterValue(input);
-
-    fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/events${
-        input
-          ? `?filter[]=title=@${input}&filter[]=rsvp_type==Private`
-          : "?filter[]=rsvp_type==Private"
-      }&access_token=${accessToken}`
-    )
+    endpoint.addQuery("access_token", accessToken);
+    endpoint.addQuery("filter[]", "rsvp_type==Private");
+    if (input) {
+      endpoint.addQuery("filter[]", `title=@${input}`);
+    }
+    fetch(endpoint)
       .then(fetchResponseHandler)
       .then((json) => {
         const options = [...json.data];
-
         callback(options);
       })
       .catch(fetchErrorHandler);
@@ -1521,11 +1526,15 @@ export const queryEventsWithPrivateRSVP = _.debounce(
 );
 
 export const querySpeakerCompany = _.debounce(async (input, callback) => {
+  const endpoint = URI(
+    `${window.API_BASE_URL}/api/public/v1/speakers/all/companies`
+  );
   input = escapeFilterValue(input);
-
-  fetch(
-    `${window.API_BASE_URL}/api/public/v1/speakers/all/companies?filter[]=company@@${input}&order=company`
-  )
+  endpoint.addQuery("order", "company");
+  if (input) {
+    endpoint.addQuery("filter[]", `company@@${input}`);
+  }
+  fetch(endpoint)
     .then(fetchResponseHandler)
     .then((json) => {
       const options = [...json.data].map(({ company }) => ({
@@ -1538,11 +1547,15 @@ export const querySpeakerCompany = _.debounce(async (input, callback) => {
 }, DEBOUNCE_WAIT);
 
 export const querySubmitterCompany = _.debounce(async (input, callback) => {
+  const endpoint = URI(
+    `${window.API_BASE_URL}/api/public/v1/members/all/companies`
+  );
   input = escapeFilterValue(input);
-
-  fetch(
-    `${window.API_BASE_URL}/api/public/v1/members/all/companies?filter[]=company@@${input}&order=company`
-  )
+  endpoint.addQuery("order", "company");
+  if (input) {
+    endpoint.addQuery("filter[]", `company@@${input}`);
+  }
+  fetch(endpoint)
     .then(fetchResponseHandler)
     .then((json) => {
       const options = [...json.data].map(({ company }) => ({
@@ -1559,10 +1572,35 @@ export const queryAllCompanies = _.debounce(async (input, callback) => {
 
   const accessToken = await getAccessTokenSafely();
 
+  const speakerEndpoint = URI(
+    `${window.API_BASE_URL}/api/public/v1/speakers/all/companies`
+  );
+  speakerEndpoint.addQuery("order", "company");
+  if (input) {
+    speakerEndpoint.addQuery("filter[]", `company@@${input}`);
+  }
+
+  const submitterEndpoint = URI(
+    `${window.API_BASE_URL}/api/public/v1/members/all/companies`
+  );
+  submitterEndpoint.addQuery("order", "company");
+  if (input) {
+    submitterEndpoint.addQuery("filter[]", `company@@${input}`);
+  }
+
+  const companyEndpoint = URI(`${window.API_BASE_URL}/api/v1/companies`);
+  companyEndpoint.addQuery("access_token", accessToken);
+  companyEndpoint.addQuery("order", "name");
+  companyEndpoint.addQuery("page", 1);
+  companyEndpoint.addQuery("per_page", FIVE_PER_PAGE);
+  if (input) {
+    companyEndpoint.addQuery("filter[]", `name@@${input}`);
+  }
+
   const urls = [
-    `${window.API_BASE_URL}/api/public/v1/speakers/all/companies?filter[]=company@@${input}&order=company`,
-    `${window.API_BASE_URL}/api/public/v1/members/all/companies?filter[]=company@@${input}&order=company`,
-    `${window.API_BASE_URL}/api/v1/companies?filter[]=name@@${input}&order=name&page=1&per_page=5&access_token=${accessToken}`
+    speakerEndpoint.toString(),
+    speakerEndpoint.toString(),
+    submitterEndpoint.toString()
   ];
 
   try {
