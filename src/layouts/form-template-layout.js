@@ -17,7 +17,6 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
 import FormTemplateListPage from "../pages/sponsors_inventory/form-template-list-page";
-import EditFormTemplatePage from "../pages/sponsors_inventory/edit-form-template-page";
 import FormTemplateItemLayout from "./form-template-item-layout";
 import NoMatchPage from "../pages/no-match-page";
 
@@ -30,18 +29,6 @@ const FormTemplateLayout = ({ match }) => (
       }}
     />
     <Switch>
-      <Route
-        strict
-        exact
-        path={`${match.url}/new`}
-        component={EditFormTemplatePage}
-      />
-      <Route
-        strict
-        exact
-        path={`${match.url}/:form_template_id(\\d+)`}
-        component={EditFormTemplatePage}
-      />
       <Route
         strict
         path={`${match.url}/:form_template_id(\\d+)/items`}

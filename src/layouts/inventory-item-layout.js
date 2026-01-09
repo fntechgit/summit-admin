@@ -10,14 +10,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
-
 import React from "react";
 import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
 import InventoryListPage from "../pages/sponsors_inventory/inventory-list-page";
-import EditInventoryItemPage from "../pages/sponsors_inventory/edit-inventory-item-page";
 import NoMatchPage from "../pages/no-match-page";
 
 const InventoryItemLayout = ({ match }) => (
@@ -29,18 +27,6 @@ const InventoryItemLayout = ({ match }) => (
       }}
     />
     <Switch>
-      <Route
-        strict
-        exact
-        path={`${match.url}/new`}
-        component={EditInventoryItemPage}
-      />
-      <Route
-        strict
-        exact
-        path={`${match.url}/:inventory_item_id(\\d+)`}
-        component={EditInventoryItemPage}
-      />
       <Route path={`${match.url}`} component={InventoryListPage} />
       <Route component={NoMatchPage} />
     </Switch>
