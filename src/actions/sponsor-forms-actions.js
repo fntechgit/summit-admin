@@ -932,7 +932,7 @@ export const getSponsorFormItem =
 
 export const deleteSponsorFormItem =
   (formId, itemId) => async (dispatch, getState) => {
-    const { currentSummitState, sponsorFormItemsListState } = getState();
+    const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
     const params = { access_token: accessToken };
@@ -946,18 +946,6 @@ export const deleteSponsorFormItem =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        const { currentPage, perPage, order, orderDir, hideArchived } =
-          sponsorFormItemsListState;
-        dispatch(
-          getSponsorFormItems(
-            formId,
-            currentPage,
-            perPage,
-            order,
-            orderDir,
-            hideArchived
-          )
-        );
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
