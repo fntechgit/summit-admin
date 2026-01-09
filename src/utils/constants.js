@@ -223,5 +223,3 @@ export const ROOM_OCCUPANCY_OPTIONS = [
 ];
 
 export const BADGE_QR_MINIMUM_EXPECTED_FIELDS = 3;
-
-export const CENTS_FOR_DOLLAR = 1000;

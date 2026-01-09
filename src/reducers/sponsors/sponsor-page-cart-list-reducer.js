@@ -12,14 +12,13 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_SPONSOR_CART,
   RECEIVE_SPONSOR_CART,
   SPONSOR_CART_FORM_DELETED
 } from "../../actions/sponsor-cart-actions";
-import { centsToDollar } from "../../utils/methods";
 
 const DEFAULT_STATE = {
   cart: null,
@@ -49,10 +48,10 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
       const cart = payload.response;
       cart.forms = cart.forms.map((form) => ({
         ...form,
-        amount: centsToDollar(form.net_amount),
-        discount: centsToDollar(form.discount_amount)
+        amount: amountFromCents(form.net_amount),
+        discount: amountFromCents(form.discount_amount)
       }));
-      cart.total = centsToDollar(cart.net_amount);
+      cart.total = amountFromCents(cart.net_amount);
 
       return {
         ...state,
@@ -61,9 +60,7 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
     }
     case SPONSOR_CART_FORM_DELETED: {
       const { formId } = payload;
-      const forms = state.cart.forms.filter(
-        (form) => form.id !== formId
-      );
+      const forms = state.cart.forms.filter((form) => form.id !== formId);
 
       return {
         ...state,
