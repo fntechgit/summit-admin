@@ -411,6 +411,11 @@ class LocationForm extends React.Component {
                 />
                 <label className="form-check-label" htmlFor="is_main">
                   {T.translate("edit_location.is_main")}
+                  <i
+                    className="fa fa-info-circle info-left-space"
+                    aria-hidden="true"
+                    title={T.translate("edit_location.is_main_info")}
+                  />
                 </label>
               </div>
             </div>
