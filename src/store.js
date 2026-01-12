@@ -165,6 +165,7 @@ import eventRSVPReducer from "./reducers/events/event-rsvp-reducer.js";
 import sponsorPageFormsListReducer from "./reducers/sponsors/sponsor-page-forms-list-reducer.js";
 import sponsorCustomizedFormReducer from "./reducers/sponsors/sponsor-customized-form-reducer.js";
 import sponsorPageCartListReducer from "./reducers/sponsors/sponsor-page-cart-list-reducer";
+import sponsorCustomizedFormItemsListReducer from "./reducers/sponsors/sponsor-customized-form-items-list-reducer.js";
 
 // default: localStorage if web, AsyncStorage if react-native
 
@@ -252,6 +253,7 @@ const reducers = persistCombineReducers(config, {
   sponsorPageFormsListState: sponsorPageFormsListReducer,
   sponsorPageCartListState: sponsorPageCartListReducer,
   sponsorCustomizedFormState: sponsorCustomizedFormReducer,
+  sponsorCustomizedFormItemsListState: sponsorCustomizedFormItemsListReducer,
   currentSponsorPromocodeListState: sponsorPromocodeListReducer,
   currentSponsorExtraQuestionState: sponsorExtraQuestionReducer,
   currentSponsorAdvertisementState: sponsorAdvertisementReducer,
@@ -302,7 +304,7 @@ const reducers = persistCombineReducers(config, {
   sponsoredProjectState: sponsoredProjectReducer,
   sponsoredProjectSponsorshipTypeState: sponsoredProjectSponsorshipTypeReducer,
   sponsoredProjectSponsorshipTypeSupportingCompanyState:
-    sponsoredProjectSponsorshipTypeSupportingCompanyReducer,
+  sponsoredProjectSponsorshipTypeSupportingCompanyReducer,
   scheduleSettingsState: scheduleSettingsReducer,
   scheduleSettingsListState: scheduleSettingsListReducer,
   currentSelectionPlanExtraQuestionState: selectionPlanExtraQuestionReducer,
