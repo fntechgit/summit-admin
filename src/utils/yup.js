@@ -47,6 +47,10 @@ export const decimalValidation = () =>
     .typeError(T.translate("validation.number"))
     .positive(T.translate("validation.number_positive"))
     .required(T.translate("validation.required"))
+    .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
+      if (value === undefined || value === null) return true;
+      return /^\d+(\.\d{1,2})?$/.test(value.toString());
+    });
 
 export const rateCellValidation = () =>
   yup
