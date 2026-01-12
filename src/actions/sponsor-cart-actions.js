@@ -84,39 +84,37 @@ export const getSponsorCart =
       });
   };
 
+export const deleteSponsorCartForm = (formId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: sponsorId }
+  } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
 
-export const deleteSponsorCartForm =
-  (formId) => async (dispatch, getState) => {
-    const { currentSummitState, currentSponsorState } = getState();
-    const { currentSummit } = currentSummitState;
-    const {
-      entity: { id: sponsorId }
-    } = currentSponsorState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
+  dispatch(startLoading());
 
-    dispatch(startLoading());
-
-    return deleteRequest(
-      null,
-      createAction(SPONSOR_CART_FORM_DELETED)({ formId }),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}`,
-      null,
-      snackbarErrorHandler
-    )(params)(dispatch)
-      .then(() => {
-        dispatch(
-          snackbarSuccessHandler({
-            title: T.translate("general.success"),
-            html: T.translate("sponsor_forms.form_delete_success")
-          })
-        );
-      })
-      .finally(() => {
-        dispatch(stopLoading());
-      });
-  };
-
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_CART_FORM_DELETED)({ formId }),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/carts/current/forms/${formId}`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      getSponsorCart()(dispatch, getState);
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_forms.form_delete_success")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
 
 export const lockSponsorCartForm = (formId) => async (dispatch, getState) => {
   const { currentSummitState, currentSponsorState } = getState();
@@ -144,26 +142,24 @@ export const lockSponsorCartForm = (formId) => async (dispatch, getState) => {
     });
 };
 
+export const unlockSponsorCartForm = (formId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
 
-export const unlockSponsorCartForm =
-  (formId) => async (dispatch, getState) => {
-    const { currentSummitState, currentSponsorState } = getState();
-    const { currentSummit } = currentSummitState;
-    const { entity: sponsor } = currentSponsorState;
-    const accessToken = await getAccessTokenSafely();
-    const params = { access_token: accessToken };
+  dispatch(startLoading());
 
-    dispatch(startLoading());
-
-    return deleteRequest(
-      null,
-      createAction(SPONSOR_CART_FORM_LOCKED)({ formId, locked: false }),
-      `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms/${formId}/lock`,
-      null,
-      snackbarErrorHandler
-    )(params)(dispatch)
-      .catch(console.log) // need to catch promise reject
-      .finally(() => {
-        dispatch(stopLoading());
-      });
-  };
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_CART_FORM_LOCKED)({ formId, locked: false }),
+    `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms/${formId}/lock`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .catch(console.log) // need to catch promise reject
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
