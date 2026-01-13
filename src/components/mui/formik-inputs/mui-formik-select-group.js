@@ -53,7 +53,9 @@ const MuiFormikSelectGroup = ({
   const [groupedOptions, setGroupedOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const value = field.value || [];
+  const isAllSelected =
+    Array.isArray(field.value) && field.value.includes("all");
+  const value = isAllSelected ? options : field.value || [];
   const error = meta.touched && meta.error;
 
   const fetchOptions = async () => {
@@ -106,13 +108,14 @@ const MuiFormikSelectGroup = ({
     const selectedValues = event.target.value;
 
     if (selectedValues.includes("selectAll")) {
-      const allValues = options.map(getOptionValue);
-      const currentValues = value.map(getOptionValue);
+      const currentValues = Array.isArray(value)
+        ? value.map(getOptionValue)
+        : [];
 
-      if (currentValues.length === allValues.length) {
+      if (isAllSelected || currentValues.length === options.length) {
         helpers.setValue([]);
       } else {
-        helpers.setValue(options);
+        helpers.setValue(["all"]);
       }
       return;
     }
@@ -129,10 +132,11 @@ const MuiFormikSelectGroup = ({
     helpers.setValue(selectedItems);
   };
 
-  const selectedValues = value.map((item) => getOptionValue(item));
-
-  const isAllSelected = () =>
-    selectedValues.length === options.length && options.length > 0;
+  const selectedValues = isAllSelected
+    ? options.map(getOptionValue)
+    : Array.isArray(value)
+    ? value.map((item) => getOptionValue(item))
+    : [];
 
   const renderGroupedOptions = () =>
     groupedOptions
@@ -163,9 +167,16 @@ const MuiFormikSelectGroup = ({
               value={optionValue}
               sx={{ pl: 2 }}
               onClick={() => {
-                const newValues = isChecked
-                  ? selectedValues.filter((v) => v !== optionValue)
-                  : [...selectedValues, optionValue];
+                let newValues;
+                if (isAllSelected) {
+                  newValues = options
+                    .filter((opt) => getOptionValue(opt) !== optionValue)
+                    .map(getOptionValue);
+                } else {
+                  newValues = isChecked
+                    ? selectedValues.filter((v) => v !== optionValue)
+                    : [...selectedValues, optionValue];
+                }
                 handleChange({ target: { value: newValues } });
               }}
             >
@@ -254,10 +265,8 @@ const MuiFormikSelectGroup = ({
                   }}
                 >
                   <Checkbox
-                    checked={isAllSelected()}
-                    indeterminate={
-                      selectedValues.length > 0 && !isAllSelected()
-                    }
+                    checked={isAllSelected}
+                    indeterminate={selectedValues.length > 0 && !isAllSelected}
                     sx={{
                       p: 1,
                       "& svg": {

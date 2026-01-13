@@ -563,9 +563,14 @@ export const saveSponsorManagedForm =
 const normalizeSponsorManagedForm = (entity) => {
   const normalizedEntity = {
     show_form_ids: entity.forms,
-    apply_to_all_add_ons: true,
-    allowed_add_ons: entity.add_ons.map((a) => a.id)
+    allowed_add_ons: entity.add_ons.map((a) => a.id),
+    apply_to_all_add_ons: false
   };
+
+  if (entity.add_ons.includes("all")) {
+    normalizedEntity.apply_to_all_add_ons = true;
+    normalizedEntity.allowed_add_ons = [];
+  }
 
   return normalizedEntity;
 };
