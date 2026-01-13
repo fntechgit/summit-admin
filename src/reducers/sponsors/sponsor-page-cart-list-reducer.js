@@ -17,7 +17,8 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   REQUEST_SPONSOR_CART,
   RECEIVE_SPONSOR_CART,
-  SPONSOR_CART_FORM_DELETED
+  SPONSOR_CART_FORM_DELETED,
+  SPONSOR_CART_FORM_LOCKED
 } from "../../actions/sponsor-cart-actions";
 
 const DEFAULT_STATE = {
@@ -61,6 +62,24 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
     case SPONSOR_CART_FORM_DELETED: {
       const { formId } = payload;
       const forms = state.cart.forms.filter((form) => form.id !== formId);
+
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          forms
+        }
+      };
+    }
+    case SPONSOR_CART_FORM_LOCKED: {
+      const { formId, locked } = payload;
+
+      const forms = state.cart.forms.map((form) => {
+        if (form.form_id === formId) {
+          return {...form, locked};
+        }
+        return form;
+      });
 
       return {
         ...state,
