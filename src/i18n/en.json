@@ -2541,7 +2541,10 @@
       "apply": "Apply"
     },
     "form_template_popup": {
-      "title": "Create New Form Template",
+      "title": {
+        "new": "Create New Form Template",
+        "edit": "Edit Form"
+      },
       "code": "Code",
       "name": "Name",
       "sponsorship": "Always apply to",
