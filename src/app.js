@@ -32,8 +32,8 @@ import T from "i18n-react";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 // eslint-disable-next-line
-import exclusiveSections from "js-yaml-loader!./exclusive-sections.yml";
 import * as Sentry from "@sentry/react";
+import exclusiveSections from "./exclusive-sections.yml";
 import CustomErrorPage from "./pages/custom-error-page";
 import history from "./history";
 import PrimaryLayout from "./layouts/primary-layout";
