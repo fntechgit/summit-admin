@@ -13,7 +13,12 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
-import { addIssAfterDateFieldValidator } from "../../../../../utils/yup";
+import {
+  addIssAfterDateFieldValidator,
+  formMetafieldsValidation,
+  opensAtValidation,
+  requiredStringValidation
+} from "../../../../../utils/yup";
 import DropdownCheckbox from "../../../../../components/mui/dropdown-checkbox";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikDatepicker from "../../../../../components/mui/formik-inputs/mui-formik-datepicker";
@@ -45,12 +50,8 @@ const FormTemplateForm = ({
   const formik = useFormik({
     initialValues: buildInitialValues(initialValues, summitTZ),
     validationSchema: yup.object({
-      code: yup
-        .string(T.translate("validation.string"))
-        .required(T.translate("validation.required")),
-      opens_at: yup
-        .date(T.translate("validation.date"))
-        .required(T.translate("validation.required")),
+      code: requiredStringValidation(),
+      opens_at: opensAtValidation(),
       expires_at: yup
         .date(T.translate("validation.date"))
         .required(T.translate("validation.required"))
@@ -60,7 +61,8 @@ const FormTemplateForm = ({
             field1: T.translate("sponsor_forms.form_template_popup.expires_at"),
             field2: T.translate("sponsor_forms.form_template_popup.opens_at")
           })
-        )
+        ),
+      meta_fields: formMetafieldsValidation()
     }),
     onSubmit,
     enableReinitialize: true

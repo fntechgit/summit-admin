@@ -147,3 +147,8 @@ export const formMetafieldsValidation = () =>
       })
     })
   );
+
+export const opensAtValidation = () =>
+  yup
+    .date(T.translate("validation.date"))
+    .required(T.translate("validation.required"));

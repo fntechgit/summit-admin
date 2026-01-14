@@ -13,7 +13,12 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
-import { addIssAfterDateFieldValidator } from "../../../../../utils/yup";
+import {
+  addIssAfterDateFieldValidator,
+  formMetafieldsValidation,
+  opensAtValidation,
+  requiredStringValidation
+} from "../../../../../utils/yup";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikDatepicker from "../../../../../components/mui/formik-inputs/mui-formik-datepicker";
 import AdditionalInputList from "../../../../../components/mui/formik-inputs/additional-input/additional-input-list";
@@ -51,14 +56,10 @@ const CustomizedForm = ({
   const formik = useFormik(
     {
       initialValues: buildInitialValues(initialValues, summitTZ),
-      validationSchema: yup.object({
-        code: yup
-          .string(T.translate("validation.string"))
-          .required(T.translate("validation.required")),
-        instructions: yup.string().required(T.translate("validation.required")),
-        opens_at: yup
-          .date(T.translate("validation.date"))
-          .required(T.translate("validation.required")),
+      validationSchema: yup.object().shape({
+        code: requiredStringValidation(),
+        instructions: requiredStringValidation(),
+        opens_at: opensAtValidation(),
         expires_at: yup
           .date(T.translate("validation.date"))
           .required(T.translate("validation.required"))
@@ -72,7 +73,8 @@ const CustomizedForm = ({
                 "edit_sponsor.forms_tab.customized_form.opens_at"
               )
             })
-          )
+          ),
+        meta_fields: formMetafieldsValidation()
       }),
       onSubmit,
       enableReinitialize: true

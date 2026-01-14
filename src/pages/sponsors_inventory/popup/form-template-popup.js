@@ -20,7 +20,10 @@ import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 import AdditionalInputList from "../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import useScrollToError from "../../../hooks/useScrollToError";
-import { METAFIELD_TYPES } from "../../../utils/constants";
+import {
+  formMetafieldsValidation,
+  requiredStringValidation
+} from "../../../utils/yup";
 
 const FormTemplateDialog = ({
   open,
@@ -48,25 +51,10 @@ const FormTemplateDialog = ({
           ]
     },
     validationSchema: yup.object().shape({
-      code: yup.string().required(T.translate("validation.required")),
-      name: yup.string().required(T.translate("validation.required")),
-      instructions: yup.string().required(T.translate("validation.required")),
-      meta_fields: yup.array().of(
-        yup.object().shape({
-          name: yup.string().trim(),
-          type: yup.string().oneOf(METAFIELD_TYPES),
-          is_required: yup.boolean(),
-          minimum_quantity: yup.number().optional(),
-          maximum_quantity: yup.number().optional(),
-          values: yup.array().of(
-            yup.object().shape({
-              value: yup.string().trim(),
-              is_default: yup.boolean(),
-              name: yup.string()
-            })
-          )
-        })
-      )
+      code: requiredStringValidation(),
+      name: requiredStringValidation(),
+      instructions: requiredStringValidation(),
+      meta_fields: formMetafieldsValidation()
     }),
     enableReinitialize: true,
     onSubmit: (values) => {
