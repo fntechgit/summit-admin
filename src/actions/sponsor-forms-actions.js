@@ -1023,7 +1023,6 @@ export const deleteSponsorFormItem =
     const params = { access_token: accessToken };
 
     dispatch(startLoading());
-
     return deleteRequest(
       null,
       createAction(SPONSOR_FORM_ITEM_DELETED)({ itemId }),
