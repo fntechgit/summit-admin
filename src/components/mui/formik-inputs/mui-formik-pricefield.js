@@ -33,7 +33,7 @@ const MuiFormikPriceField = ({ name, label, ...props }) => (
 
 MuiFormikPriceField.propTypes = {
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired
+  label: PropTypes.string
 };
 
 export default MuiFormikPriceField;

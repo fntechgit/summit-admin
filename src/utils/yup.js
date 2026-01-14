@@ -1,5 +1,6 @@
 import * as yup from "yup";
 import T from "i18n-react";
+import { METAFIELD_TYPES, fieldTypesWithOptions } from "./constants";
 
 export const addEmailListValidator = () => {
   yup.addMethod(yup.string, "emailList", function (errorMessage) {
@@ -82,3 +83,72 @@ export const rateCellValidation = () =>
       if (value === undefined || value === null) return true;
       return /^\d+(\.\d{1,2})?$/.test(value.toString());
     });
+
+export const requiredStringValidation = () =>
+  yup.string().required(T.translate("validation.required"));
+
+export const positiveNumberValidation = () =>
+  numberValidation()
+    .integer(T.translate("validation.integer"))
+    .min(0, T.translate("validation.number_positive"));
+
+export const formMetafieldsValidation = () =>
+  yup.array().of(
+    yup.object().shape({
+      name: yup
+        .string()
+        .when(["type", "values", "minimum_quantity", "maximum_quantity"], {
+          is: (type, values, minQty, maxQty) => {
+            // required only if has values or quantities
+            const hasValues = values && values.length > 0;
+            const hasQuantities =
+              type === "Quantity" && (minQty != null || maxQty != null);
+            return hasValues || hasQuantities;
+          },
+          then: (schema) =>
+            schema.trim().required(T.translate("validation.required")),
+          otherwise: (schema) => schema
+        }),
+      type: yup.string().oneOf(METAFIELD_TYPES),
+      is_required: yup.boolean(),
+      minimum_quantity: yup
+        .number()
+        .nullable()
+        .when("type", {
+          is: (type) => type === "Quantity",
+          then: (schema) => schema.required(T.translate("validation.required")),
+          otherwise: (schema) => schema
+        }),
+      maximum_quantity: yup
+        .number()
+        .nullable()
+        .when("type", {
+          is: (type) => type === "Quantity",
+          then: (schema) => schema.required(T.translate("validation.required")),
+          otherwise: (schema) => schema
+        }),
+      values: yup.array().when("type", {
+        is: (type) => fieldTypesWithOptions.includes(type),
+        then: (schema) =>
+          schema.min(1, T.translate("validation.one_option_required")).of(
+            yup.object().shape({
+              value: yup
+                .string()
+                .trim()
+                .required(T.translate("validation.required")),
+              name: yup
+                .string()
+                .trim()
+                .required(T.translate("validation.required")),
+              is_default: yup.boolean()
+            })
+          ),
+        otherwise: (schema) => schema
+      })
+    })
+  );
+
+export const opensAtValidation = () =>
+  yup
+    .date(T.translate("validation.date"))
+    .required(T.translate("validation.required"));

@@ -234,3 +234,9 @@ export const SPONSOR_TABS = {
   PURCHASES: 6,
   BADGE_SCANS: 7
 };
+
+export const fieldTypesWithOptions = [
+  "CheckBoxList",
+  "ComboBox",
+  "RadioButtonList"
+];

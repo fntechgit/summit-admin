@@ -36,8 +36,8 @@ import {
   archiveSponsorFormItem,
   unarchiveSponsorFormItem
 } from "../../../actions/sponsor-forms-actions";
-import ItemPopup from "./components/item-popup";
-import InventoryPopup from "./components/inventory-popup";
+import SponsorFormItemPopup from "./components/sponsor-form-item-popup";
+import SponsorFormAddItemFromInventoryPopup from "./components/sponsor-form-add-item-from-inventory-popup";
 import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import { rateCellValidation } from "../../../utils/yup";
@@ -272,18 +272,20 @@ const SponsorFormItemListPage = ({
             onCellChange={handleCellEdit}
             onEdit={handleRowEdit}
             onArchive={handleArchiveItem}
-            deleteDialogBody={(name) => T.translate("sponsor_form_item_list.delete_dialog_body", {
+            deleteDialogBody={(name) =>
+              T.translate("sponsor_form_item_list.delete_dialog_body", {
                 name
-              })}
+              })
+            }
           />
         </div>
       )}
-      <ItemPopup
+      <SponsorFormItemPopup
         formId={formId}
         open={openPopup === "crud"}
         onClose={() => setOpenPopup(null)}
       />
-      <InventoryPopup
+      <SponsorFormAddItemFromInventoryPopup
         formId={formId}
         open={openPopup === "inventory"}
         onClose={() => setOpenPopup(null)}

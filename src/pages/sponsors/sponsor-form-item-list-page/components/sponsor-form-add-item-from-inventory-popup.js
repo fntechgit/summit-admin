@@ -25,7 +25,7 @@ import { addInventoryItems } from "../../../../actions/sponsor-forms-actions";
 import { getInventoryItems } from "../../../../actions/inventory-item-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
-const InventoryPopup = ({
+const SponsorFormAddItemFromInventoryPopup = ({
   formId,
   open,
   onClose,
@@ -224,9 +224,12 @@ const InventoryPopup = ({
   );
 };
 
-InventoryPopup.propTypes = {
+SponsorFormAddItemFromInventoryPopup.propTypes = {
   open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  formId: PropTypes.string.isRequired,
+  addInventoryItems: PropTypes.func.isRequired,
+  getInventoryItems: PropTypes.func.isRequired
 };
 
 const mapStateToProps = ({ currentInventoryItemListState }) => ({
@@ -236,4 +239,4 @@ const mapStateToProps = ({ currentInventoryItemListState }) => ({
 export default connect(mapStateToProps, {
   addInventoryItems,
   getInventoryItems
-})(InventoryPopup);
+})(SponsorFormAddItemFromInventoryPopup);
