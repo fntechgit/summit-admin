@@ -50,6 +50,8 @@ import {
   TEN
 } from "../utils/constants";
 
+URI.escapeQuerySpace = false;
+
 export const REQUEST_ATTENDEES = "REQUEST_ATTENDEES";
 export const RECEIVE_ATTENDEES = "RECEIVE_ATTENDEES";
 export const RECEIVE_ATTENDEE = "RECEIVE_ATTENDEE";

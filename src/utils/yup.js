@@ -51,3 +51,34 @@ export const decimalValidation = () =>
       if (value === undefined || value === null) return true;
       return /^\d+(\.\d{1,2})?$/.test(value.toString());
     });
+
+export const rateCellValidation = () =>
+  yup
+    .number()
+    // allow $ at the start
+    .transform((value, originalValue) => {
+      if (typeof originalValue === "string") {
+        const cleaned = originalValue.replace(/^\$/, "");
+        return cleaned === "" ? undefined : parseFloat(cleaned);
+      }
+      return value;
+    })
+    // check if there's letters or characters
+    .test({
+      name: "valid-format",
+      message: T.translate("validation.number"),
+      test: (value, { originalValue }) => {
+        if (
+          originalValue === undefined ||
+          originalValue === null ||
+          originalValue === ""
+        )
+          return true;
+        return /^\$?-?\d+(\.\d+)?$/.test(originalValue);
+      }
+    })
+    .positive(T.translate("validation.number_positive"))
+    .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
+      if (value === undefined || value === null) return true;
+      return /^\d+(\.\d{1,2})?$/.test(value.toString());
+    });

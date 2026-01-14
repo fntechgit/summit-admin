@@ -26,6 +26,7 @@ import {
   authErrorHandler,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
+import URI from "urijs";
 import history from "../history";
 import {
   getAccessTokenSafely,
@@ -34,7 +35,9 @@ import {
   fetchErrorHandler
 } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
-import { DEFAULT_PER_PAGE } from "../utils/constants";
+import { DEBOUNCE_WAIT, DEFAULT_PER_PAGE } from "../utils/constants";
+
+URI.escapeQuerySpace = false;
 
 export const REQUEST_SELECTION_PLANS = "REQUEST_SELECTION_PLANS";
 export const RECEIVE_SELECTION_PLANS = "RECEIVE_SELECTION_PLANS";
@@ -61,8 +64,6 @@ export const SELECTION_PLAN_PROGRESS_FLAG_REMOVED =
   "SELECTION_PLAN_PROGRESS_FLAG_REMOVED";
 export const SELECTION_PLAN_PROGRESS_FLAG_ORDER_UPDATED =
   "SELECTION_PLAN_PROGRESS_FLAG_ORDER_UPDATED";
-
-const callDelay = 500; // milliseconds
 
 export const getSelectionPlans =
   (term = "", page = 1, order = "id", orderDir = 1) =>
@@ -698,21 +699,23 @@ export const deleteRatingType =
 export const querySelectionPlanExtraQuestions = _.debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plan-extra-questions`
+    );
     input = escapeFilterValue(input);
-    const filters = encodeURIComponent(`name=@${input}`);
-
-    fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/selection-plan-extra-questions?filter=${filters}&&access_token=${accessToken}`
-    )
+    endpoint.addQuery("access_token", accessToken);
+    if (input) {
+      endpoint.addQuery("filter", `name=@${input}`);
+    }
+    fetch(endpoint)
       .then(fetchResponseHandler)
       .then((json) => {
         const options = [...json.data];
-
         callback(options);
       })
       .catch(fetchErrorHandler);
   },
-  callDelay
+  DEBOUNCE_WAIT
 );
 
 export const assignExtraQuestion2SelectionPlan =
