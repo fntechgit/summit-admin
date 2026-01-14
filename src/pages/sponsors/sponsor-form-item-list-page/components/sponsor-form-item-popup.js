@@ -65,9 +65,9 @@ SponsorFormItemPopup.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   formId: PropTypes.string.isRequired,
-  resetSponsorFormItem: propTypes.func.isRequired,
-  saveSponsorFormItem: propTypes.func.isRequired,
-  updateSponsorFormItem: propTypes.func.isRequired
+  resetSponsorFormItem: PropTypes.func.isRequired,
+  saveSponsorFormItem: PropTypes.func.isRequired,
+  updateSponsorFormItem: PropTypes.func.isRequired
 };
 
 const mapStateToProps = ({
