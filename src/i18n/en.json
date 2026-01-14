@@ -2465,7 +2465,13 @@
     "meta_field_type": "Field Type",
     "meta_field_required": "Required",
     "delete_meta_field_warning": "Are you sure you want to delete meta field ",
-    "delete_value_warning": "Are you sure you want to delete meta field value "
+    "delete_value_warning": "Are you sure you want to delete meta field value ",
+    "placeholders": {
+      "meta_field_title": "Field Title",
+      "meta_field_type": "Select...",
+      "meta_field_maximum_quantity": "Maximum",
+      "meta_field_minimum_quantity": "Minimum"
+    }
   },
   "sponsor_forms": {
     "forms": "Forms",

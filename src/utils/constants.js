@@ -219,3 +219,21 @@ export const ROOM_OCCUPANCY_OPTIONS = [
 export const NOTIFICATION_TIMEOUT = 2000;
 export const MAX_PER_PAGE = 100;
 export const DEBOUNCE_WAIT_250 = 250;
+export const BADGE_QR_MINIMUM_EXPECTED_FIELDS = 3;
+
+export const SPONSOR_TABS = {
+  GENERAL: 0,
+  USERS: 1,
+  PAGES: 2,
+  MEDIA_UPLOADS: 3,
+  FORMS: 4,
+  CART: 5,
+  PURCHASES: 6,
+  BADGE_SCANS: 7
+};
+
+export const fieldTypesWithOptions = [
+  "CheckBoxList",
+  "ComboBox",
+  "RadioButtonList"
+];

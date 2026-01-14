@@ -36,7 +36,7 @@ const MuiFormikTextField = ({ name, label, maxLength, ...props }) => {
 
 MuiFormikTextField.propTypes = {
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   maxLength: PropTypes.number
 };
 

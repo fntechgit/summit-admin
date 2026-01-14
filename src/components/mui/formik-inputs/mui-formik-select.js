@@ -10,7 +10,13 @@ import {
 import ClearIcon from "@mui/icons-material/Clear";
 import { useField } from "formik";
 
-const MuiFormikSelect = ({ name, children, isClearable, ...rest }) => {
+const MuiFormikSelect = ({
+  name,
+  placeholder,
+  children,
+  isClearable,
+  ...rest
+}) => {
   const [field, meta, helpers] = useField(name);
 
   const handleClear = (ev) => {
@@ -25,6 +31,12 @@ const MuiFormikSelect = ({ name, children, isClearable, ...rest }) => {
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...field}
         displayEmpty
+        renderValue={(selected) => {
+          if (!selected || selected === "") {
+            return <span style={{ color: "#aaa" }}>{placeholder}</span>;
+          }
+          return selected;
+        }}
         endAdornment={
           isClearable && field.value ? (
             <InputAdornment position="end" sx={{ mr: 2 }}>
@@ -49,6 +61,7 @@ const MuiFormikSelect = ({ name, children, isClearable, ...rest }) => {
 MuiFormikSelect.propTypes = {
   name: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
+  placeholder: PropTypes.string,
   isClearable: PropTypes.bool
 };
 
