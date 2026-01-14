@@ -2474,6 +2474,15 @@
       "pay_cc": "pay with credit card or ach",
       "pay_invoice": "pay with invoice"
     },
+    "purchase_tab": {
+      "order": "Order",
+      "purchased": "Purchased",
+      "payment_method": "Payment Method",
+      "status": "Status",
+      "amount": "Amount",
+      "details": "Details",
+      "purchases": "purchases"
+    },
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
       "sponsorship_type": "Start typing to choose a Tier...",
