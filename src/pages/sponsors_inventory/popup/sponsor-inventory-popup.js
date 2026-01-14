@@ -63,7 +63,7 @@ const SponsorItemDialog = ({
       images: initialEntity?.images ?? []
     },
     validationSchema: yup.object().shape({
-      code: requiredStringValidation,
+      code: requiredStringValidation(),
       name: requiredStringValidation(),
       description: requiredStringValidation(),
       images: yup.array(),
