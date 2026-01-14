@@ -10,27 +10,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
+
 import React from "react";
 import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
-import InventoryListPage from "../pages/sponsors-global/inventory/inventory-list-page";
 import NoMatchPage from "../pages/no-match-page";
+import EditPageTemplatePage from "../pages/sponsors-global/page-templates/edit-page-template-page";
+import PageTemplateListPage from "../pages/sponsors-global/page-templates/page-template-list-page";
 
-const InventoryItemLayout = ({ match }) => (
+const PageTemplateLayout = ({ match }) => (
   <div>
     <Breadcrumb
       data={{
-        title: T.translate("inventory_item_list.inventory_items"),
+        title: T.translate("page_template_list.page_templates"),
         pathname: match.url
       }}
     />
     <Switch>
-      <Route path={`${match.url}`} component={InventoryListPage} />
+      <Route
+        strict
+        exact
+        path={`${match.url}/new`}
+        component={EditPageTemplatePage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/:page_template_id(\\d+)`}
+        component={EditPageTemplatePage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}`}
+        component={PageTemplateListPage}
+      />
       <Route component={NoMatchPage} />
     </Switch>
   </div>
 );
 
-export default Restrict(withRouter(InventoryItemLayout), "inventory-item");
+export default Restrict(withRouter(PageTemplateLayout), "page-template");

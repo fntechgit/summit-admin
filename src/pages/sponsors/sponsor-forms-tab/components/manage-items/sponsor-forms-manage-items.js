@@ -39,7 +39,7 @@ import {
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import SearchInput from "../../../../../components/mui/search-input";
 import MuiTableEditable from "../../../../../components/mui/editable-table/mui-table-editable";
-import SponsorInventoryDialog from "../../../../sponsors_inventory/popup/sponsor-inventory-popup";
+import SponsorInventoryDialog from "../../../../sponsors-global/form-templates/sponsor-inventory-popup";
 import SponsorFormItemFromInventoryPopup from "./sponsor-form-item-from-inventory";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
 import { rateCellValidation } from "../../../../../utils/yup";
