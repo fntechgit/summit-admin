@@ -134,7 +134,7 @@ module.exports = {
         use: "file-loader?name=svg/[name].[ext]!svgo-loader"
       },
       {
-        test: /\.yaml$/,
+        test: /\.ya?ml$/,
         use: "js-yaml-loader"
       },
       // word around for react dnd
