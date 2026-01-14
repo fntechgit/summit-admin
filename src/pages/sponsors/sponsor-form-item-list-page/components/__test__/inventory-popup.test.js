@@ -2,7 +2,7 @@ import React from "react";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithRedux } from "../../../../../utils/test-utils";
-import InventoryPopup from "../inventory-popup";
+import InventoryPopup from "../sponsor-form-add-item-from-inventory-popup";
 
 jest.mock("../../../../../actions/inventory-item-actions", () => ({
   getInventoryItems: jest.fn(() => ({

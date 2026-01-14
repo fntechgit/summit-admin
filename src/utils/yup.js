@@ -92,7 +92,7 @@ export const positiveNumberValidation = () =>
     .integer(T.translate("validation.integer"))
     .min(0, T.translate("validation.number_positive"));
 
-export const formMetafielsValidation = () =>
+export const formMetafieldsValidation = () =>
   yup.array().of(
     yup.object().shape({
       name: yup

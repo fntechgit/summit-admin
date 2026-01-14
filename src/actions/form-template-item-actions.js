@@ -375,7 +375,7 @@ export const deleteItemMetaFieldTypeValue = (
   valueId
 ) => {
   const settings = {
-    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}/meta-field-types/${metaFieldId}/values/`,
+    url: `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}/meta-field-types/${metaFieldId}/values`,
     deletedActionName: FORM_TEMPLATE_ITEM_META_FIELD_VALUE_DELETED
   };
   return deleteMetaFieldTypeValue(metaFieldId, valueId, settings);

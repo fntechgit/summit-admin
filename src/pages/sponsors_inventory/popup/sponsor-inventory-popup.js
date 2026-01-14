@@ -32,7 +32,7 @@ import {
   decimalValidation,
   requiredStringValidation,
   positiveNumberValidation,
-  formMetafielsValidation
+  formMetafieldsValidation
 } from "../../../utils/yup";
 import AdditionalInputList from "../../../components/mui/formik-inputs/additional-input/additional-input-list";
 
@@ -73,7 +73,7 @@ const SponsorItemDialog = ({
       default_quantity: positiveNumberValidation(),
       quantity_limit_per_sponsor: positiveNumberValidation(),
       quantity_limit_per_show: positiveNumberValidation(),
-      meta_fields: formMetafielsValidation()
+      meta_fields: formMetafieldsValidation()
     }),
     onSubmit: (values) => onSave(values)
   });
