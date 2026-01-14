@@ -3922,6 +3922,8 @@
     "alert_info": "You can create or archive Pages from the list. To edit a Page click on the item's Edit botton.",
     "code": "Code",
     "name": "Name",
+    "sponsorship": "Always apply to",
+    "all_tiers": "All Tiers",
     "info_mod": "Info Mod",
     "upload_mod": "Upload Mod",
     "download_mod": "Download Mod",
@@ -3934,7 +3936,8 @@
     "add_form_template": "New Form",
     "add_using_global_template": "Using Global Template",
     "placeholders": {
-      "search": "Search"
+      "search": "Search",
+      "sponsorship_type": "Always apply to"
     },
     "page_crud": {
       "title": "Create New Page",
@@ -3944,7 +3947,21 @@
       "no_modules": "No modules added yet.",
       "save": "Save Page",
       "page_saved": "Page saved successfully.",
-      "page_created": "Page created successfully."
+      "page_created": "Page created successfully.",
+      "info_module": "Info Module",
+      "info_content": "Info Content",
+      "document_module": "Document Download Module",
+      "document_name": "Document Name",
+      "description": "Description",
+      "external_url": "External URL",
+      "upload_file": "Upload File",
+      "text_input": "Text input",
+      "media_module": "Media Request Module",
+      "name": "Name",
+      "upload_deadline": "Upload Deadline",
+      "max_file_size": "Max File Size (MB)",
+      "allowed_formats": "Allowed Formats",
+      "module_remove_warning": "Are you sure you want to delete {name}"
     }
   }
 }
