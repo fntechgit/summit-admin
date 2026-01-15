@@ -46,7 +46,7 @@ import SponsorCartTab from "./sponsor-cart-tab";
 import SponsorFormsManageItems from "./sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items";
 import { SPONSOR_TABS } from "../../utils/constants";
 
-const tabsToFragmentMap = [
+export const tabsToFragmentMap = [
   "general",
   "users",
   "pages",
@@ -57,16 +57,16 @@ const tabsToFragmentMap = [
   "badge_scans"
 ];
 
-const getFragmentFromValue = (index) => tabsToFragmentMap[index];
+export const getFragmentFromValue = (index) => tabsToFragmentMap[index];
 
-const getTabFromUrlFragment = () => {
+export const getTabFromUrlFragment = () => {
   const result = tabsToFragmentMap.indexOf(
     window.location.hash.replace("#", "")
   );
   return result > -1 ? result : 0;
 };
 
-const CustomTabPanel = (props) => {
+export const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
 
   return (
@@ -74,6 +74,7 @@ const CustomTabPanel = (props) => {
       role="tabpanel"
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
+      data-testid={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
