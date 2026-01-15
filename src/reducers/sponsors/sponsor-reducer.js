@@ -132,7 +132,7 @@ export const DEFAULT_ENTITY = {
   sponsorships_collection: DEFAULT_SPONSORHIPS_STATE
 };
 
-const DEFAULT_STATE = {
+export const DEFAULT_STATE = {
   entity: DEFAULT_ENTITY,
   selectedSponsorship: null,
   errors: {}
