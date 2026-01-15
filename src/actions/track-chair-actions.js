@@ -23,6 +23,7 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
+import _ from "lodash";
 import {
   fetchErrorHandler,
   fetchResponseHandler,
