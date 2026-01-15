@@ -214,7 +214,7 @@ const DEFAULT_PRINT_APP_MARKETING_SETTINGS = {
   PRINT_APP_HIDE_FIND_TICKET_BY_FULLNAME: { id: 0, value: false }
 };
 
-const DEFAULT_STATE = {
+export const DEFAULT_STATE = {
   currentSummit: DEFAULT_ENTITY,
   errors: {},
   loading: true,
