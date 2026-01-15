@@ -25,6 +25,7 @@ import {
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
+import _ from "lodash";
 import {
   getLeadReportSettingsMeta,
   getSummitById,
