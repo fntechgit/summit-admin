@@ -27,9 +27,12 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import _ from "lodash";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import { DEBOUNCE_WAIT, DEFAULT_PER_PAGE } from "../utils/constants";
+
+URI.escapeQuerySpace = false;
 
 export const REQUEST_MEDIA_UPLOADS = "REQUEST_MEDIA_UPLOADS";
 export const RECEIVE_MEDIA_UPLOADS = "RECEIVE_MEDIA_UPLOADS";

@@ -15,7 +15,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import FormTemplateForm from "../../components/forms/form-template-form";
+import FormTemplateForm from "../../../components/forms/form-template-form";
 import {
   getFormTemplate,
   resetFormTemplateForm,
@@ -23,9 +23,9 @@ import {
   deleteFormTemplateMetaFieldType,
   deleteFormTemplateMetaFieldTypeValue,
   deleteFormTemplateMaterial
-} from "../../actions/form-template-actions";
+} from "../../../actions/form-template-actions";
 
-const EditFormTemplatePage = (props) => {
+const EditPageTemplatePage = (props) => {
   const {
     match,
     entity,
@@ -37,15 +37,15 @@ const EditFormTemplatePage = (props) => {
     deleteFormTemplateMetaFieldTypeValue,
     deleteFormTemplateMaterial
   } = props;
-  const formTemplateId = match.params.form_template_id;
+  const pageTemplateId = match.params.page_template_id;
 
   useEffect(() => {
-    if (!formTemplateId) {
+    if (!pageTemplateId) {
       resetFormTemplateForm();
     } else {
-      getFormTemplate(formTemplateId);
+      getFormTemplate(pageTemplateId);
     }
-  }, [formTemplateId, getFormTemplate, resetFormTemplateForm]);
+  }, [pageTemplateId, getFormTemplate, resetFormTemplateForm]);
 
   const title = entity.id
     ? T.translate("general.edit")
@@ -82,4 +82,4 @@ export default connect(mapStateToProps, {
   deleteFormTemplateMetaFieldType,
   deleteFormTemplateMetaFieldTypeValue,
   deleteFormTemplateMaterial
-})(EditFormTemplatePage);
+})(EditPageTemplatePage);

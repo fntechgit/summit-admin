@@ -158,12 +158,15 @@ import formTemplateReducer from "./reducers/sponsors_inventory/form-template-red
 import formTemplateListReducer from "./reducers/sponsors_inventory/form-template-list-reducer.js";
 import formTemplateItemReducer from "./reducers/sponsors_inventory/form-template-item-reducer.js";
 import formTemplateItemListReducer from "./reducers/sponsors_inventory/form-template-item-list-reducer.js";
+import pageTemplateListReducer from "./reducers/sponsors_inventory/page-template-list-reducer.js";
 import sponsorSettingsReducer from "./reducers/sponsor_settings/sponsor-settings-reducer";
 import eventRSVPListReducer from "./reducers/rsvps/event-rsvp-list-reducer.js";
 import eventRSVPInvitationListReducer from "./reducers/rsvps/event-rsvp-invitation-list-reducer.js";
 import eventRSVPReducer from "./reducers/events/event-rsvp-reducer.js";
 import sponsorPageFormsListReducer from "./reducers/sponsors/sponsor-page-forms-list-reducer.js";
 import sponsorCustomizedFormReducer from "./reducers/sponsors/sponsor-customized-form-reducer.js";
+import sponsorPageCartListReducer from "./reducers/sponsors/sponsor-page-cart-list-reducer";
+import sponsorCustomizedFormItemsListReducer from "./reducers/sponsors/sponsor-customized-form-items-list-reducer.js";
 
 // default: localStorage if web, AsyncStorage if react-native
 
@@ -249,7 +252,9 @@ const reducers = persistCombineReducers(config, {
   sponsorFormItemsListState: sponsorFormItemsListReducer,
   sponsorUsersListState: sponsorUsersListReducer,
   sponsorPageFormsListState: sponsorPageFormsListReducer,
+  sponsorPageCartListState: sponsorPageCartListReducer,
   sponsorCustomizedFormState: sponsorCustomizedFormReducer,
+  sponsorCustomizedFormItemsListState: sponsorCustomizedFormItemsListReducer,
   currentSponsorPromocodeListState: sponsorPromocodeListReducer,
   currentSponsorExtraQuestionState: sponsorExtraQuestionReducer,
   currentSponsorAdvertisementState: sponsorAdvertisementReducer,
@@ -300,7 +305,7 @@ const reducers = persistCombineReducers(config, {
   sponsoredProjectState: sponsoredProjectReducer,
   sponsoredProjectSponsorshipTypeState: sponsoredProjectSponsorshipTypeReducer,
   sponsoredProjectSponsorshipTypeSupportingCompanyState:
-    sponsoredProjectSponsorshipTypeSupportingCompanyReducer,
+  sponsoredProjectSponsorshipTypeSupportingCompanyReducer,
   scheduleSettingsState: scheduleSettingsReducer,
   scheduleSettingsListState: scheduleSettingsListReducer,
   currentSelectionPlanExtraQuestionState: selectionPlanExtraQuestionReducer,
@@ -322,7 +327,8 @@ const reducers = persistCombineReducers(config, {
   currentFormTemplateListState: formTemplateListReducer,
   currentFormTemplateItemState: formTemplateItemReducer,
   currentFormTemplateItemListState: formTemplateItemListReducer,
-  sponsorSettingsState: sponsorSettingsReducer
+  sponsorSettingsState: sponsorSettingsReducer,
+  pageTemplateListState: pageTemplateListReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

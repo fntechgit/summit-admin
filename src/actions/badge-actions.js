@@ -28,7 +28,9 @@ import {
   fetchErrorHandler,
   getCSV
 } from "openstack-uicore-foundation/lib/utils/actions";
+import URI from "urijs";
 import pLimit from "p-limit";
+import _ from "lodash";
 import history from "../history";
 import { saveMarketingSetting } from "./marketing-actions";
 import { getAccessTokenSafely } from "../utils/methods";
@@ -40,6 +42,8 @@ import {
   HUNDRED_PER_PAGE,
   TEN
 } from "../utils/constants";
+
+URI.escapeQuerySpace = false;
 
 export const BADGE_DELETED = "BADGE_DELETED";
 export const FEATURE_BADGE_REMOVED = "FEATURE_BADGE_REMOVED";
@@ -889,12 +893,15 @@ const normalizeBadgeType = (entity) => {
 export const queryBadgeFeatures = _.debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
-
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/badge-feature-types`
+    );
     input = escapeFilterValue(input);
-
-    fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/badge-feature-types?filter=name=@${input}&access_token=${accessToken}`
-    )
+    endpoint.addQuery("access_token", accessToken);
+    if (input) {
+      endpoint.addQuery("filter", `name=@${input}`);
+    }
+    fetch(endpoint)
       .then(fetchResponseHandler)
       .then((json) => {
         const options = [...json.data];

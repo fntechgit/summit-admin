@@ -15,9 +15,9 @@ import {
   saveSponsorFormItem,
   updateSponsorFormItem
 } from "../../../../actions/sponsor-forms-actions";
-import ItemForm from "./item-form";
+import SponsorFormItemForm from "./sponsor-form-item-form";
 
-const ItemPopup = ({
+const SponsorFormItemPopup = ({
   formId,
   item,
   open,
@@ -56,14 +56,18 @@ const ItemPopup = ({
         </IconButton>
       </DialogTitle>
       <Divider />
-      <ItemForm initialValues={item} onSubmit={handleOnSave} />
+      <SponsorFormItemForm initialValues={item} onSubmit={handleOnSave} />
     </Dialog>
   );
 };
 
-ItemPopup.propTypes = {
+SponsorFormItemPopup.propTypes = {
   open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  formId: PropTypes.string.isRequired,
+  resetSponsorFormItem: PropTypes.func.isRequired,
+  saveSponsorFormItem: PropTypes.func.isRequired,
+  updateSponsorFormItem: PropTypes.func.isRequired
 };
 
 const mapStateToProps = ({
@@ -78,4 +82,4 @@ export default connect(mapStateToProps, {
   resetSponsorFormItem,
   saveSponsorFormItem,
   updateSponsorFormItem
-})(ItemPopup);
+})(SponsorFormItemPopup);

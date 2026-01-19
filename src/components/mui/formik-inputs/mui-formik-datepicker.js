@@ -5,8 +5,9 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useField } from "formik";
 
-const MuiFormikDatepicker = ({ name, label }) => {
+const MuiFormikDatepicker = ({ name, label, required }) => {
   const [field, meta, helpers] = useField(name);
+  const requiredLabel = `${label} *`;
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
       <DatePicker
@@ -15,11 +16,24 @@ const MuiFormikDatepicker = ({ name, label }) => {
         slotProps={{
           textField: {
             name,
-            label,
+            label: required ? requiredLabel : label,
             error: meta.touched && Boolean(meta.error),
             helperText: meta.touched && meta.error,
             fullWidth: true,
             margin: "normal"
+          },
+          day: {
+            sx: {
+              fontSize: "1.2rem",
+              fontWeight: 600
+            }
+          },
+          layout: {
+            sx: {
+              "& .MuiDayCalendar-weekDayLabel": {
+                fontSize: "1rem"
+              }
+            }
           }
         }}
       />
@@ -29,7 +43,8 @@ const MuiFormikDatepicker = ({ name, label }) => {
 
 MuiFormikDatepicker.propTypes = {
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired
+  label: PropTypes.string.isRequired,
+  required: PropTypes.bool
 };
 
 export default MuiFormikDatepicker;

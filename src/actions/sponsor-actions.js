@@ -30,6 +30,7 @@ import {
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
 import * as _ from "lodash";
+import URI from "urijs";
 import { getAccessTokenSafely } from "../utils/methods";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
 import history from "../history";
@@ -42,6 +43,8 @@ import {
   HUNDRED_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
+
+URI.escapeQuerySpace = false;
 
 export const REQUEST_SPONSORS = "REQUEST_SPONSORS";
 export const RECEIVE_SPONSORS = "RECEIVE_SPONSORS";
@@ -175,19 +178,24 @@ export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
 
 export const querySponsors = _.debounce(async (input, summitId, callback) => {
   const accessToken = await getAccessTokenSafely();
-
+  const endpoint = URI(
+    `${window.API_BASE_URL}/api/v2/summits/${summitId}/sponsors`
+  );
   const escapedInput = escapeFilterValue(input);
-
-  fetch(
-    `${window.API_BASE_URL}/api/v2/summits/${summitId}/sponsors?filter=company_name=@${escapedInput}&access_token=${accessToken}&fields=id,company.name,company.id&relations=company&expand=company`
-  )
+  endpoint.addQuery("access_token", accessToken);
+  endpoint.addQuery("fields", "id,company.name,company.id");
+  endpoint.addQuery("relations", "company");
+  endpoint.addQuery("expand", "company");
+  if (escapedInput) {
+    endpoint.addQuery("filter", `company_name=@${escapedInput}`);
+  }
+  fetch(endpoint)
     .then(fetchResponseHandler)
     .then((json) => {
       const options = [...json.data].map((sp) => ({
         id: sp.id,
         name: sp.company.name
       }));
-
       callback(options);
     })
     .catch(fetchErrorHandler);
@@ -2251,16 +2259,19 @@ export const deleteSponsorSocialNetwork =
 export const querySummitSponsorships = _.debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
-
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsorships-types`
+    );
     input = escapeFilterValue(input);
-
-    fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsorships-types?filter=name=@${input}&access_token=${accessToken}&expand=type`
-    )
+    endpoint.addQuery("access_token", accessToken);
+    endpoint.addQuery("expand", "type");
+    if (input) {
+      endpoint.addQuery("filter", `name=@${input}`);
+    }
+    fetch(endpoint)
       .then(fetchResponseHandler)
       .then((json) => {
         const options = [...json.data];
-
         callback(options);
       })
       .catch(fetchErrorHandler);
@@ -2271,12 +2282,11 @@ export const querySummitSponsorships = _.debounce(
 export const querySummitAddons = _.debounce(
   async (input, summitId, callback) => {
     const accessToken = await getAccessTokenSafely();
-
-    input = escapeFilterValue(input);
-
-    fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/add-ons/metadata?access_token=${accessToken}`
-    )
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/add-ons/metadata`
+    );
+    endpoint.addQuery("access_token", accessToken);
+    fetch(endpoint)
       .then(fetchResponseHandler)
       .then((data) => {
         callback(data);
@@ -2293,12 +2303,22 @@ export const querySponsorAddons = async (
   callback
 ) => {
   const accessToken = await getAccessTokenSafely();
-
   try {
     const promises = sponsorshipIds.map((sponsorshipId) => {
-      const url = `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/add-ons?access_token=${accessToken}&fields=id,name,sponsorship.type,sponsorship.type.id,sponsorship.type.type.name&expand=sponsorship,sponsorship.type,sponsorship.type.type&relations=sponsorship.none`;
-
-      return fetch(url)
+      const endpoint = URI(
+        `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsors/${sponsorId}/sponsorships/${sponsorshipId}/add-ons`
+      );
+      endpoint.addQuery("access_token", accessToken);
+      endpoint.addQuery(
+        "fields",
+        "id,name,sponsorship.type,sponsorship.type.id,sponsorship.type.type.name"
+      );
+      endpoint.addQuery(
+        "expand",
+        "sponsorship,sponsorship.type,sponsorship.type.type"
+      );
+      endpoint.addQuery("relations", "sponsorship.none");
+      return fetch(endpoint)
         .then(fetchResponseHandler)
         .then((json) => json.data)
         .catch((error) => {
@@ -2306,7 +2326,6 @@ export const querySponsorAddons = async (
           return [];
         });
     });
-
     const results = await Promise.all(promises);
     const allAddons = results.flat();
     callback(allAddons);

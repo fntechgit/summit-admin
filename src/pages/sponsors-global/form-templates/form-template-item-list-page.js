@@ -27,7 +27,7 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
-import MuiTable from "../../components/mui/table/mui-table";
+import MuiTable from "../../../components/mui/table/mui-table";
 import {
   cloneFromInventoryItem,
   deleteFormTemplateItem,
@@ -39,12 +39,12 @@ import {
   deleteItemImage,
   unarchiveFormTemplateItem,
   archiveFormTemplateItem
-} from "../../actions/form-template-item-actions";
-import { getFormTemplate } from "../../actions/form-template-actions";
-import AddFormTemplateItemDialog from "./popup/add-form-template-item-popup";
-import SponsorItemDialog from "./popup/sponsor-inventory-popup";
-import { getInventoryItems } from "../../actions/inventory-item-actions";
-import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+} from "../../../actions/form-template-item-actions";
+import { getFormTemplate } from "../../../actions/form-template-actions";
+import AddFormTemplateItemDialog from "./add-form-template-item-popup";
+import SponsorItemDialog from "./sponsor-inventory-popup";
+import { getInventoryItems } from "../../../actions/inventory-item-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const FormTemplateItemListPage = ({
   formTemplateId,

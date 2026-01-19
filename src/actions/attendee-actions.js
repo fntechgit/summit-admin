@@ -31,6 +31,7 @@ import {
   downloadFileByContent
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
+import _ from "lodash";
 import history from "../history";
 import {
   checkOrFilter,
@@ -49,6 +50,8 @@ import {
   FIVE_PER_PAGE,
   TEN
 } from "../utils/constants";
+
+URI.escapeQuerySpace = false;
 
 export const REQUEST_ATTENDEES = "REQUEST_ATTENDEES";
 export const RECEIVE_ATTENDEES = "RECEIVE_ATTENDEES";

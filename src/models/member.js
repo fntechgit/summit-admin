@@ -9,9 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import access from "js-yaml-loader!../access-routes.yml";
+import access from "../access-routes.yml";
 
 class Member {
   constructor(member) {
@@ -23,7 +23,7 @@ class Member {
 
     if (!this._member) return false;
 
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access[accessRoute].includes(this._member.groups[i].code))
         return true;
     }
@@ -32,7 +32,7 @@ class Member {
   }
 
   canEditSummit() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["summit-edit"].includes(this._member.groups[i].code))
         return true;
     }
@@ -41,7 +41,7 @@ class Member {
   }
 
   canAddSummits() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["summit-add"].includes(this._member.groups[i].code))
         return true;
     }
@@ -49,7 +49,7 @@ class Member {
   }
 
   canDeleteSummits() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["summit-delete"].includes(this._member.groups[i].code))
         return true;
     }
@@ -57,7 +57,7 @@ class Member {
   }
 
   canDeleteSpeakers() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["speakers-delete"].includes(this._member.groups[i].code))
         return true;
     }
@@ -65,7 +65,7 @@ class Member {
   }
 
   canEditSpeakers() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["speakers-edit"].includes(this._member.groups[i].code))
         return true;
     }
@@ -73,7 +73,7 @@ class Member {
   }
 
   canAddSpeakers() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["speakers-add"].includes(this._member.groups[i].code))
         return true;
     }
@@ -81,7 +81,7 @@ class Member {
   }
 
   canAddSponsors() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["sponsors-add"].includes(this._member.groups[i].code))
         return true;
     }
@@ -89,7 +89,7 @@ class Member {
   }
 
   canEditSponsors() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["sponsors-edit"].includes(this._member.groups[i].code))
         return true;
     }
@@ -97,7 +97,7 @@ class Member {
   }
 
   canDeleteSponsors() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["sponsors-delete"].includes(this._member.groups[i].code))
         return true;
     }
@@ -105,7 +105,7 @@ class Member {
   }
 
   canEditBadgeScans() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (access["badge-scans-edit"].includes(this._member.groups[i].code))
         return true;
     }
@@ -113,7 +113,7 @@ class Member {
   }
 
   canEditSponsorExtraQuestions() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (
         access["sponsors-extra-questions-edit"].includes(
           this._member.groups[i].code
@@ -125,7 +125,7 @@ class Member {
   }
 
   canEditLeadReportSettings() {
-    for (var i in this._member.groups) {
+    for (const i in this._member.groups) {
       if (
         access["lead-report-settings-edit"].includes(
           this._member.groups[i].code

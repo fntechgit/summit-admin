@@ -89,11 +89,12 @@
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.33",
     "node-sass": "^7.0.1",
-    "openstack-uicore-foundation": "4.2.21",
+    "openstack-uicore-foundation": "4.2.22",
     "p-limit": "^6.1.0",
     "path-browserify": "^1.0.1",
     "postcss-loader": "^6.2.1",
     "process": "^0.11.10",
+    "prop-types": "^15.8.1",
     "qr-scanner": "^1.4.2",
     "react": "^16.13.1",
     "react-accessible-treeview": "^2.6.2",
@@ -130,7 +131,7 @@
     "style-loader": "^3.3.1",
     "superagent": "^6.1.0",
     "sweetalert2": "^8.15.2",
-    "urijs": "^1.19.1",
+    "urijs": "1.19.11",
     "url-loader": "^4.1.1",
     "validator": "^9.4.1",
     "video.js": "^7.8.2",
@@ -138,7 +139,8 @@
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4",
     "webpack-merge": "^5.8.0",
-    "xlsx": "^0.17.0"
+    "xlsx": "^0.17.0",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.24.7",
@@ -187,7 +189,7 @@
     ],
     "transform": {
       "\\.[jt]sx?$": "babel-jest",
-      ".+\\.(css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$": "jest-transform-stub"
+      ".+\\.(css|styl|less|sass|scss|png|jpg|ttf|woff|woff2|yml)$": "jest-transform-stub"
     },
     "moduleDirectories": [
       "node_modules",

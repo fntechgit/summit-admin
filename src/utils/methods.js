@@ -21,16 +21,17 @@ import Swal from "sweetalert2";
 import * as Sentry from "@sentry/react";
 import T from "i18n-react/dist/i18n-react";
 import {
+  BADGE_QR_MINIMUM_EXPECTED_FIELDS,
   ERROR_CODE_401,
   ERROR_CODE_403,
   ERROR_CODE_412,
   ERROR_CODE_500,
   HEX_RADIX,
+  INT_BASE,
+  MARKETING_SETTING_TYPE_HEX_COLOR,
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE,
-  INT_BASE,
-  OR_FILTER,
-  MARKETING_SETTING_TYPE_HEX_COLOR
+  OR_FILTER
 } from "./constants";
 
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
@@ -511,3 +512,21 @@ export const arrayToString = (array, join = ",") => {
 
 export const capitalizeFirstLetter = (val) =>
   String(val).charAt(0).toUpperCase() + String(val).slice(1);
+
+export const formatBadgeQR = (code, summit) => {
+  const qrCodeArray = code.split(summit.qr_registry_field_delimiter);
+
+  if (
+    qrCodeArray.length >= BADGE_QR_MINIMUM_EXPECTED_FIELDS &&
+    qrCodeArray[0] === summit.badge_qr_prefix
+  ) {
+    return {
+      badgePrefix: qrCodeArray[0],
+      ticketNumber: qrCodeArray[1],
+      email: qrCodeArray[2] || "",
+      fullName: qrCodeArray[3] || ""
+    };
+  }
+
+  return null;
+};

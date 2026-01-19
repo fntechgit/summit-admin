@@ -28,9 +28,17 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
+import _ from "lodash";
+import URI from "urijs";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
-import { DEBOUNCE_WAIT, DEFAULT_PER_PAGE } from "../utils/constants";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_PER_PAGE,
+  MAX_PER_PAGE
+} from "../utils/constants";
+
+URI.escapeQuerySpace = false;
 
 export const REQUEST_SPONSORSHIPS = "REQUEST_SPONSORSHIPS";
 export const RECEIVE_SPONSORSHIPS = "RECEIVE_SPONSORSHIPS";
@@ -170,16 +178,16 @@ const normalizeSponsorship = (entity) => {
 
 export const querySponsorships = _.debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
-
+  const endpoint = URI(`${window.API_BASE_URL}/api/v1/sponsorship-types`);
   input = escapeFilterValue(input);
-
-  fetch(
-    `${window.API_BASE_URL}/api/v1/sponsorship-types?filter=name=@${input}&access_token=${accessToken}`
-  )
+  endpoint.addQuery("access_token", accessToken);
+  if (input) {
+    endpoint.addQuery("filter", `name=@${input}`);
+  }
+  fetch(endpoint)
     .then(fetchResponseHandler)
     .then((json) => {
       const options = [...json.data];
-
       callback(options);
     })
     .catch(fetchErrorHandler);
@@ -188,20 +196,22 @@ export const querySponsorships = _.debounce(async (input, callback) => {
 export const querySponsorshipsBySummit = _.debounce(
   async (input, summitId, callback) => {
     const accessToken = await getAccessTokenSafely();
-
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/sponsorships-types`
+    );
     input = escapeFilterValue(input);
-
-    const url = `${
-      window.API_BASE_URL
-    }/api/v1/summits/${summitId}/sponsorships-types?page=1&per_page=100&access_token=${accessToken}&expand=type&order=%2Bname${
-      input ? `&filter=name=@${input}` : ""
-    }`;
-
-    fetch(url)
+    endpoint.addQuery("access_token", accessToken);
+    endpoint.addQuery("page", 1);
+    endpoint.addQuery("per_page", MAX_PER_PAGE);
+    endpoint.addQuery("expand", "type");
+    endpoint.addQuery("order", "+name");
+    if (input) {
+      endpoint.addQuery("filter", `name=@${input}`);
+    }
+    fetch(endpoint)
       .then(fetchResponseHandler)
       .then((json) => {
         const options = [...json.data];
-
         callback(options);
       })
       .catch(fetchErrorHandler);

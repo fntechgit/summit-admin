@@ -13,59 +13,38 @@ import {
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
-import { addIssAfterDateFieldValidator } from "../../../../utils/yup";
+import {
+  addIssAfterDateFieldValidator,
+  decimalValidation,
+  formMetafieldsValidation,
+  positiveNumberValidation,
+  requiredStringValidation
+} from "../../../../utils/yup";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
-import AdditionalInputList from "../../components/additional-input-list";
+import AdditionalInputList from "../../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import useScrollToError from "../../../../hooks/useScrollToError";
 import MuiFormikUpload from "../../../../components/mui/formik-inputs/mui-formik-upload";
 import MuiFormikPriceField from "../../../../components/mui/formik-inputs/mui-formik-pricefield";
 import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
 
-const buildInitialValues = (data) => {
-  const normalized = { ...data };
-  return normalized;
-};
+const buildInitialValues = (data) => ({ ...data });
 
 addIssAfterDateFieldValidator();
 
-const numberValidation = () =>
-  yup.number().typeError(T.translate("validation.number"));
-
-const decimalValidation = () =>
-  yup
-    .number()
-    .typeError(T.translate("validation.number"))
-    .min(0, T.translate("validation.number_positive"))
-    .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
-      if (value === undefined || value === null) return true;
-      return /^\d+(\.\d{1,2})?$/.test(value.toString());
-    });
-
-const ItemForm = ({ initialValues, onSubmit }) => {
+const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
   const formik = useFormik({
     initialValues: buildInitialValues(initialValues),
     validationSchema: yup.object({
-      code: yup
-        .string(T.translate("validation.string"))
-        .required(T.translate("validation.required")),
-      name: yup
-        .string(T.translate("validation.string"))
-        .required(T.translate("validation.required")),
-      description: yup
-        .string(T.translate("validation.string"))
-        .required(T.translate("validation.required")),
+      code: requiredStringValidation(),
+      name: requiredStringValidation(),
+      description: requiredStringValidation(),
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),
       onsite_rate: decimalValidation(),
-      default_quantity: numberValidation()
-        .integer(T.translate("validation.integer"))
-        .min(0, T.translate("validation.number_positive")),
-      quantity_limit_per_sponsor: numberValidation()
-        .integer(T.translate("validation.integer"))
-        .min(0, T.translate("validation.number_positive")),
-      quantity_limit_per_show: numberValidation()
-        .integer(T.translate("validation.integer"))
-        .min(0, T.translate("validation.number_positive"))
+      default_quantity: positiveNumberValidation(),
+      quantity_limit_per_sponsor: positiveNumberValidation(),
+      quantity_limit_per_show: positiveNumberValidation(),
+      meta_fields: formMetafieldsValidation()
     }),
     onSubmit,
     enableReinitialize: true
@@ -199,4 +178,4 @@ const ItemForm = ({ initialValues, onSubmit }) => {
   );
 };
 
-export default ItemForm;
+export default SponsorFormItemForm;

@@ -39,10 +39,10 @@ import {
   resetInventoryItemForm,
   saveInventoryItem,
   unarchiveInventoryItem
-} from "../../actions/inventory-item-actions";
-import MuiTable from "../../components/mui/table/mui-table";
-import SponsorInventoryDialog from "./popup/sponsor-inventory-popup";
-import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+} from "../../../actions/inventory-item-actions";
+import MuiTable from "../../../components/mui/table/mui-table";
+import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const InventoryListPage = ({
   inventoryItems,
@@ -131,17 +131,18 @@ const InventoryListPage = ({
   };
 
   const handleInventorySave = (item) => {
-    saveInventoryItem(item).then(() =>
-      getInventoryItems(
-        term,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        hideArchived
+    saveInventoryItem(item)
+      .then(() =>
+        getInventoryItems(
+          term,
+          currentPage,
+          perPage,
+          order,
+          orderDir,
+          hideArchived
+        )
       )
-    );
-    setOpen(false);
+      .finally(() => setOpen(false));
   };
 
   const handleArchiveItem = (item) =>

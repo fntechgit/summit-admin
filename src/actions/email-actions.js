@@ -29,6 +29,7 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
+import _ from "lodash";
 import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
@@ -38,6 +39,8 @@ import {
   ERROR_CODE_412,
   HUNDRED_PER_PAGE
 } from "../utils/constants";
+
+URI.escapeQuerySpace = false;
 
 export const REQUEST_TEMPLATES = "REQUEST_TEMPLATES";
 export const RECEIVE_TEMPLATES = "RECEIVE_TEMPLATES";
@@ -334,7 +337,8 @@ export const getSentEmails =
     });
   };
 
-export const updateTemplateJsonData = (data) => async (dispatch) => dispatch(createAction(UPDATE_JSON_DATA)(data));
+export const updateTemplateJsonData = (data) => async (dispatch) =>
+  dispatch(createAction(UPDATE_JSON_DATA)(data));
 
 /** ********************************************************************************************************* */
 /*                          CLIENTS                                                                     */
@@ -391,7 +395,8 @@ export const getMarketingEmailSettings =
   };
 
 export const saveMarketingEmailSettings =
-  (emailMarketingSettings) => async (dispatch) => Promise.all(
+  (emailMarketingSettings) => async (dispatch) =>
+    Promise.all(
       Object.keys(emailMarketingSettings).map((m) => {
         let value = emailMarketingSettings[m].value ?? "";
         const file = emailMarketingSettings[m].file ?? null;
@@ -421,15 +426,15 @@ export const customErrorHandler = (err, res) => (dispatch) => {
     case ERROR_CODE_412:
       if (Array.isArray(err.response.body)) {
         err.response.body.forEach((er) => {
-          msg += `${er  }<br>`;
+          msg += `${er}<br>`;
         });
       } else {
         for (const [key, value] of Object.entries(err.response.body)) {
           if (isNaN(key)) {
-            msg += `${key  }: `;
+            msg += `${key}: `;
           }
 
-          msg += `${value  }<br>`;
+          msg += `${value}<br>`;
         }
       }
 

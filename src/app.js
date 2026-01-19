@@ -32,8 +32,8 @@ import T from "i18n-react";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 // eslint-disable-next-line
-import exclusiveSections from "js-yaml-loader!./exclusive-sections.yml";
 import * as Sentry from "@sentry/react";
+import exclusiveSections from "./exclusive-sections.yml";
 import CustomErrorPage from "./pages/custom-error-page";
 import history from "./history";
 import PrimaryLayout from "./layouts/primary-layout";
@@ -81,6 +81,7 @@ window.MARKETING_API_BASE_URL = process.env.MARKETING_API_BASE_URL;
 window.EMAIL_API_BASE_URL = process.env.EMAIL_API_BASE_URL;
 window.PURCHASES_API_URL = process.env.PURCHASES_API_URL;
 window.SPONSOR_USERS_API_URL = process.env.SPONSOR_USERS_API_URL;
+window.SPONSOR_PAGES_API_URL = process.env.SPONSOR_PAGES_API_URL;
 window.FILE_UPLOAD_API_BASE_URL = process.env.FILE_UPLOAD_API_BASE_URL;
 window.SIGNAGE_BASE_URL = process.env.SIGNAGE_BASE_URL;
 window.INVENTORY_API_BASE_URL = process.env.INVENTORY_API_BASE_URL;

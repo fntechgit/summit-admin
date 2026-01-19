@@ -187,7 +187,8 @@
     "submission_invitations": "Submission Invitations",
     "sponsors_inventory": "Sponsors",
     "form_templates": "Form Templates",
-    "inventory": "Inventory"
+    "inventory": "Inventory",
+    "page_templates": "Pages"
   },
   "schedule": {
     "schedule": "Schedule",
@@ -1621,6 +1622,7 @@
     "show_printable": "Show Printable Tickets",
     "show_printable_info": "Active assigned ticket with the access level of IN_PERSON",
     "exclude_free_unassigned": "Exclude ALL free unassigned tickets?",
+    "no_promo_code": "Exclude ALL tickets with promo codes?",
     "items_qty": "Selected {qty} Tickets",
     "select_view_2_print": "Select a View Type to Print",
     "select_fields": "Show Columns",
@@ -2257,7 +2259,7 @@
     "cart_checkout_cancel_policy": "Checkout Cancel Policy",
     "support_email": "Support e-mail",
     "is_access_request_enabled": "Enable access requests",
-    "access_request_notification_email": "Send access request notification to e-mail addresses (multiple ;- seperated allowed)",
+    "access_request_notification_email": "Send access request notification to email addresses - separate multiple addresses with a semicolon (;) with no spacing in between",
     "settings_saved": "Settings saved successfully!"
   },
   "sponsor_list": {
@@ -2431,7 +2433,42 @@
         "error": "There was a problem creating the forms, please try again.",
         "archived": "Form successfully archived.",
         "unarchived": "Form successfully unarchived."
+      },
+      "form_manage_items": {
+        "add_item": "Add Item",
+        "add_item_inventory": "Add Item from Inventory",
+        "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit button. You can also change only a rate by clicking on it.",
+        "hide_archived": "Hide archived items",
+        "select_items": "Select items",
+        "code": "Code",
+        "name": "Name",
+        "early_bird_rate": "Early Bird Rate",
+        "standard_rate": "Standard Rate",
+        "onsite_rate": "On site rate",
+        "default_quantity": "Default Quantity",
+        "add_selected": "Add Selected Items",
+        "item_updated": "Form item updated successfully",
+        "item_created": "Form item created successfully",
+        "sort_asc_label": "A-Z",
+        "sort_desc_label": "Z-A",
+        "placeholder": {
+          "search": "Search..."
+        }
       }
+    },
+    "cart_tab": {
+      "new_form": "New Form",
+      "forms": "forms",
+      "code": "Code",
+      "name": "Name",
+      "add_ons": "Add-ons",
+      "discount": "Discount",
+      "amount": "Amount",
+      "manage_items": "Manage Items",
+      "add_form": "Add Form",
+      "no_cart": "No cart found.",
+      "pay_cc": "pay with credit card or ach",
+      "pay_invoice": "pay with invoice"
     },
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",
@@ -2467,7 +2504,13 @@
     "meta_field_type": "Field Type",
     "meta_field_required": "Required",
     "delete_meta_field_warning": "Are you sure you want to delete meta field ",
-    "delete_value_warning": "Are you sure you want to delete meta field value "
+    "delete_value_warning": "Are you sure you want to delete meta field value ",
+    "placeholders": {
+      "meta_field_title": "Field Title",
+      "meta_field_type": "Select...",
+      "meta_field_maximum_quantity": "Maximum",
+      "meta_field_minimum_quantity": "Minimum"
+    }
   },
   "sponsor_forms": {
     "forms": "Forms",
@@ -2505,7 +2548,10 @@
       "apply": "Apply"
     },
     "form_template_popup": {
-      "title": "Create New Form Template",
+      "title": {
+        "new": "Create New Form Template",
+        "edit": "Edit Form"
+      },
       "code": "Code",
       "name": "Name",
       "sponsorship": "Always apply to",
@@ -2527,7 +2573,7 @@
   },
   "sponsor_form_item_list": {
     "form_items": "Form Items",
-    "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit botton. You can also change only a rate by clicking on it.",
+    "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit button. You can also change only a rate by clicking on it.",
     "code": "Code",
     "name": "Name",
     "early_bird_rate": "Early bird rate",
@@ -2543,6 +2589,7 @@
     "item_delete_success": "Item successfully deleted.",
     "add_inventory_item": "Add Inventory Item",
     "add_form_template_item": "Create new Item",
+    "delete_dialog_body": "Please verify you want to delete {name}",
     "placeholders": {
       "search_form_template_items": "Search"
     },
@@ -2569,7 +2616,7 @@
       "code": "Code",
       "name": "Name",
       "early_bird_rate": "Early bird rate",
-      "standard_rate": "Standad rate",
+      "standard_rate": "Standard rate",
       "onsite_rate": "On site rate",
       "save": "Add selected items",
       "items_added": "Items added successfully."
@@ -3616,6 +3663,8 @@
     "inventory_item": "Item",
     "inventory_item_created": "Inventory Item created successfully.",
     "inventory_item_saved": "Inventory Item saved successfully.",
+    "new_item": "New Item",
+    "edit_item": "Edit Item",
     "code": "Code",
     "name": "Name",
     "default_quantity": "Default Quantity",
@@ -3761,7 +3810,8 @@
     "no_items": "No items found.",
     "rows_per_page": "Rows per page",
     "sorted_desc": "sorted descending",
-    "sorted_asc": "sorted ascending"
+    "sorted_asc": "sorted ascending",
+    "total": "Total"
   },
   "event_rsvp_list": {
     "name": "Name",
@@ -3830,6 +3880,36 @@
     "placeholders": {
       "seat_type": "Select a Seat Type",
       "status": "Select a Status"
+    }
+  },
+  "page_template_list": {
+    "page_templates": "Page Templates",
+    "alert_info": "You can create or archive Pages from the list. To edit a Page click on the item's Edit botton.",
+    "code": "Code",
+    "name": "Name",
+    "info_mod": "Info Mod",
+    "upload_mod": "Upload Mod",
+    "download_mod": "Download Mod",
+    "hide_archived": "Hide archived pages",
+    "no_pages": "No pages found.",
+    "add_new": "New Page",
+    "add_template": "Using Template",
+    "delete_form_template_warning": "Are you sure you want to delete form template ",
+    "using_duplicate": "Using Duplicate",
+    "add_form_template": "New Form",
+    "add_using_global_template": "Using Global Template",
+    "placeholders": {
+      "search": "Search"
+    },
+    "page_crud": {
+      "title": "Create New Page",
+      "add_info": "Add Info",
+      "add_doc": "Add Document Download",
+      "add_media": "Add Media Request",
+      "no_modules": "No modules added yet.",
+      "save": "Save Page",
+      "page_saved": "Page saved successfully.",
+      "page_created": "Page created successfully."
     }
   }
 }

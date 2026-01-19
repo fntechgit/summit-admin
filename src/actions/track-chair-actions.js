@@ -22,16 +22,21 @@ import {
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
+import URI from "urijs";
+import _ from "lodash";
 import {
   fetchErrorHandler,
   fetchResponseHandler,
   getAccessTokenSafely
 } from "../utils/methods";
 import {
+  DEBOUNCE_WAIT,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
   DOUBLE_PER_PAGE
 } from "../utils/constants";
+
+URI.escapeQuerySpace = false;
 
 export const REQUEST_TRACK_CHAIRS = "REQUEST_TRACK_CHAIRS";
 export const RECEIVE_TRACK_CHAIRS = "RECEIVE_TRACK_CHAIRS";
@@ -54,8 +59,6 @@ export const RECEIVE_TEAM_LIST = "RECEIVE_TEAM_LIST";
 export const REORDER_LIST = "REORDER_LIST";
 export const REVERT_LISTS = "REVERT_LISTS";
 export const TEAM_LIST_UPDATED = "TEAM_LIST_UPDATED";
-
-const callDelay = 500; // miliseconds
 
 export const getTrackChairs =
   (
@@ -284,21 +287,23 @@ export const getProgressFlags = () => async (dispatch, getState) => {
 export const querySummitProgressFlags = _.debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/presentation-action-types`
+    );
     input = escapeFilterValue(input);
-    const filters = encodeURIComponent(`label=@${input}`);
-
-    fetch(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/presentation-action-types?filter=${filters}&&access_token=${accessToken}`
-    )
+    endpoint.addQuery("access_token", accessToken);
+    if (input) {
+      endpoint.addQuery("filter", `label=@${input}`);
+    }
+    fetch(endpoint)
       .then(fetchResponseHandler)
       .then((json) => {
         const options = [...json.data.map((d) => ({ ...d, name: d.label }))];
-
         callback(options);
       })
       .catch(fetchErrorHandler);
   },
-  callDelay
+  DEBOUNCE_WAIT
 );
 
 export const addProgressFlag = (flagName) => async (dispatch, getState) => {

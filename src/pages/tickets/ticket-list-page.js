@@ -131,6 +131,7 @@ const defaultFilters = {
   isActiveFilter: null,
   showOnlyPrintable: false,
   excludeFreeUnassigned: false,
+  noPromocodeFilter: false,
   promocodesFilter: [],
   promocodeTagsFilter: [],
   accessLevelFilter: [],
@@ -412,6 +413,7 @@ class TicketListPage extends React.Component {
           isActiveFilter: null,
           showOnlyPrintable: false,
           excludeFreeUnassigned: false,
+          noPromocodeFilter: false,
           promocodesFilter: [],
           promocodeTagsFilter: [],
           badgeTypesFilter: [],
@@ -731,6 +733,10 @@ class TicketListPage extends React.Component {
       {
         label: T.translate("ticket_list.exclude_free_unassigned"),
         value: "excludeFreeUnassigned"
+      },
+      {
+        label: T.translate("ticket_list.no_promo_code"),
+        value: "noPromocodeFilter"
       },
       {
         label: T.translate("ticket_list.badge_type"),
@@ -1255,6 +1261,30 @@ class TicketListPage extends React.Component {
                     htmlFor="excludeFreeUnassigned"
                   >
                     {T.translate("ticket_list.exclude_free_unassigned")} &nbsp;
+                  </label>
+                </div>
+              </div>
+            )}
+            {enabledFilters.includes("noPromocodeFilter") && (
+              <div className="col-md-6">
+                <div className="form-check abc-checkbox">
+                  <input
+                    type="checkbox"
+                    id="noPromocodeFilter"
+                    checked={ticketFilters.noPromocodeFilter}
+                    onChange={(ev) =>
+                      this.handleFilterChange(
+                        "noPromocodeFilter",
+                        ev.target.checked
+                      )
+                    }
+                    className="form-check-input"
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="noPromocodeFilter"
+                  >
+                    {T.translate("ticket_list.no_promo_code")} &nbsp;
                   </label>
                 </div>
               </div>
