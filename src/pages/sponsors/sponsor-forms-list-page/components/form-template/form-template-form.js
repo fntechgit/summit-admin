@@ -115,17 +115,19 @@ const FormTemplateForm = ({
             <Grid2 size={4}>
               <MuiFormikDatepicker
                 name="opens_at"
-                label={`${T.translate(
+                required
+                label={T.translate(
                   "sponsor_forms.form_template_popup.opens_at"
-                )} *`}
+                )}
               />
             </Grid2>
             <Grid2 size={4}>
               <MuiFormikDatepicker
+                required
                 name="expires_at"
-                label={`${T.translate(
+                label={T.translate(
                   "sponsor_forms.form_template_popup.expires_at"
-                )} *`}
+                )}
               />
             </Grid2>
             <Grid2 size={12}>
