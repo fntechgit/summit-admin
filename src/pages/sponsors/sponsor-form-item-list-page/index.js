@@ -102,7 +102,16 @@ const SponsorFormItemListPage = ({
       : archiveSponsorFormItem(formId, item.id);
 
   const handleRowDelete = (itemId) => {
-    deleteSponsorFormItem(formId, itemId);
+    deleteSponsorFormItem(formId, itemId).then(() => {
+      getSponsorFormItems(
+        formId,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
+    });
   };
 
   const handleNewItem = () => {
