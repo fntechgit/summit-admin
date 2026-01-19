@@ -105,7 +105,7 @@ const SponsorFormItemListPage = ({
     deleteSponsorFormItem(formId, itemId).then(() => {
       getSponsorFormItems(
         formId,
-        currentPage,
+        DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
