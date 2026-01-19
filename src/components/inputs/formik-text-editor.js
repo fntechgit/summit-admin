@@ -1,6 +1,7 @@
 import React from "react";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { useFormikContext } from "formik";
+import normalizeJoditEmpty from "./utils/normalizeJoditEmpty";
 
 const FormikTextEditor = ({ name, ...props }) => {
   const { values, errors, touched, setFieldValue, setFieldTouched } =
@@ -12,8 +13,7 @@ const FormikTextEditor = ({ name, ...props }) => {
       id={name}
       value={values[name]}
       onChange={(e) => {
-        const stringValue =
-          e.target.value === "<p><br></p>" ? "" : e.target.value;
+        const stringValue = normalizeJoditEmpty(e.target.value);
 
         setFieldValue(name, stringValue);
       }}
