@@ -60,13 +60,10 @@ export const tabsToFragmentMap = [
 export const getFragmentFromValue = (index) => tabsToFragmentMap[index];
 
 export const getTabFromUrlFragment = () => {
-  const result = tabsToFragmentMap.indexOf(
-    window.location.hash.replace("#", "")
-  );
-
+  const currentHash = window.location.hash.replace("#", "");
+  const result = tabsToFragmentMap.indexOf(currentHash);
   if (result > -1) return result;
-
-  if (!window.location.hash) window.location.hash = "#general";
+  return 0;
 };
 
 export const CustomTabPanel = (props) => {
@@ -123,16 +120,18 @@ const EditSponsorPage = (props) => {
 
   const [selectedTab, setSelectedTab] = useState(getTabFromUrlFragment());
 
-  useEffect(() => {
-    const onHashChange = () => setSelectedTab(getTabFromUrlFragment());
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
     window.location.hash = getFragmentFromValue(newValue);
   };
+
+  useEffect(() => {
+    const onHashChange = () => setSelectedTab(getTabFromUrlFragment());
+    window.addEventListener("hashchange", onHashChange);
+    // default call
+    if (!window.location.hash) handleTabChange(null, getTabFromUrlFragment());
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   useEffect(() => {
     if (entity.id > 0) {
