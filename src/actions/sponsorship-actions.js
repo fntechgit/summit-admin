@@ -28,7 +28,6 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import _ from "lodash";
 import URI from "urijs";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
