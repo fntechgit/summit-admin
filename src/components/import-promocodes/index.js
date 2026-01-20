@@ -78,6 +78,12 @@ const ImportPromocodesBtn = ({
                 <li>
                   <b>notes:</b> text (optional)
                 </li>
+                <li>
+                  <b>allows_to_reassign:</b> true/false (optional, default true)
+                </li>
+                <li>
+                  <b>allows_to_delegate:</b> true/false (optional, default true)
+                </li>
               </ul>
             </div>
             <div className="col-md-12 ticket-import-upload-wrapper">
