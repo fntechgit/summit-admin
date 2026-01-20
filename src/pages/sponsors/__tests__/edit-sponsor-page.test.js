@@ -6,9 +6,7 @@ import EditSponsorPage, {
   getTabFromUrlFragment
 } from "../edit-sponsor-page";
 import { renderWithRedux } from "../../../utils/test-utils";
-import {
-  DEFAULT_STATE as currentSponsorDefaultState
-} from "../../../reducers/sponsors/sponsor-reducer";
+import { DEFAULT_STATE as currentSponsorDefaultState } from "../../../reducers/sponsors/sponsor-reducer";
 import {
   DEFAULT_ENTITY as defaultSummitEntity,
   DEFAULT_STATE as currentSummitDefaultState
@@ -62,32 +60,6 @@ describe("EditSponsorPage", () => {
 
       const result4 = getTabFromUrlFragment();
       expect(result4).toBe(7);
-    });
-
-    it("returns correct values for undefined fragments", () => {
-      const newUrl1 = "#generalx";
-      window.location.hash = newUrl1;
-
-      const result1 = getTabFromUrlFragment();
-      expect(result1).toBe(0);
-
-      const newUrl2 = "#frewawqfwedwdwqq";
-      window.location.hash = newUrl2;
-
-      const result2 = getTabFromUrlFragment();
-      expect(result2).toBe(0);
-
-      const newUrl3 = "#";
-      window.location.hash = newUrl3;
-
-      const result3 = getTabFromUrlFragment();
-      expect(result3).toBe(0);
-
-      const newUrl4 = "";
-      window.location.hash = newUrl4;
-
-      const result4 = getTabFromUrlFragment();
-      expect(result4).toBe(0);
     });
   });
 

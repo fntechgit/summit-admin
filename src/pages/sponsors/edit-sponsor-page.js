@@ -63,7 +63,10 @@ export const getTabFromUrlFragment = () => {
   const result = tabsToFragmentMap.indexOf(
     window.location.hash.replace("#", "")
   );
-  return result > -1 ? result : 0;
+
+  if (result > -1) return result;
+
+  if (!window.location.hash) window.location.hash = "#general";
 };
 
 export const CustomTabPanel = (props) => {
@@ -121,8 +124,10 @@ const EditSponsorPage = (props) => {
   const [selectedTab, setSelectedTab] = useState(getTabFromUrlFragment());
 
   useEffect(() => {
-    setSelectedTab(getTabFromUrlFragment());
-  }, [window.location.hash]);
+    const onHashChange = () => setSelectedTab(getTabFromUrlFragment());
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
