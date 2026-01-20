@@ -46,7 +46,27 @@ import SponsorCartTab from "./sponsor-cart-tab";
 import SponsorFormsManageItems from "./sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items";
 import { SPONSOR_TABS } from "../../utils/constants";
 
-const CustomTabPanel = (props) => {
+export const tabsToFragmentMap = [
+  "general",
+  "users",
+  "pages",
+  "media_uploads",
+  "forms",
+  "cart",
+  "purchases",
+  "badge_scans"
+];
+
+export const getFragmentFromValue = (index) => tabsToFragmentMap[index];
+
+export const getTabFromUrlFragment = () => {
+  const currentHash = window.location.hash.replace("#", "");
+  const result = tabsToFragmentMap.indexOf(currentHash);
+  if (result > -1) return result;
+  return 0;
+};
+
+export const CustomTabPanel = (props) => {
   const { children, value, index, ...other } = props;
 
   return (
@@ -54,6 +74,7 @@ const CustomTabPanel = (props) => {
       role="tabpanel"
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
+      data-testid={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
@@ -97,17 +118,20 @@ const EditSponsorPage = (props) => {
     getExtraQuestionMeta
   } = props;
 
-  const [selectedTab, setSelectedTab] = useState(
-    location.pathname.includes("/sponsor-forms/") &&
-      location.pathname.includes("/items")
-      ? SPONSOR_TABS.FORMS
-      : 0
-  );
+  const [selectedTab, setSelectedTab] = useState(getTabFromUrlFragment());
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
-    history.push(`/app/summits/${currentSummit.id}/sponsors/${entity.id}`);
+    window.location.hash = getFragmentFromValue(newValue);
   };
+
+  useEffect(() => {
+    const onHashChange = () => setSelectedTab(getTabFromUrlFragment());
+    window.addEventListener("hashchange", onHashChange);
+    // default call
+    if (!window.location.hash) handleTabChange(null, getTabFromUrlFragment());
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   useEffect(() => {
     if (entity.id > 0) {
