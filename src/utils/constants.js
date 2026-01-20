@@ -240,3 +240,9 @@ export const fieldTypesWithOptions = [
   "ComboBox",
   "RadioButtonList"
 ];
+
+export const PURCHASE_STATUS = {
+  PENDING: "Pending",
+  PAID: "Paid",
+  CANCELLED: "Cancelled"
+};
