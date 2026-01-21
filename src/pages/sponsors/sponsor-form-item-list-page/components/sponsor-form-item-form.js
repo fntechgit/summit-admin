@@ -76,6 +76,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 name="name"
                 label={T.translate("sponsor_form_item_list.edit_item.name")}
                 fullWidth
+                required
               />
             </Grid2>
             <Grid2 size={12}>
@@ -94,6 +95,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                   "sponsor_form_item_list.edit_item.early_bird_rate"
                 )}
                 fullWidth
+                required
               />
             </Grid2>
             <Grid2 size={4}>
@@ -103,6 +105,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                   "sponsor_form_item_list.edit_item.standard_rate"
                 )}
                 fullWidth
+                required
               />
             </Grid2>
             <Grid2 size={4}>
@@ -112,6 +115,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                   "sponsor_form_item_list.edit_item.onsite_rate"
                 )}
                 fullWidth
+                required
               />
             </Grid2>
             <Grid2 size={4}>
@@ -145,6 +149,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 fullWidth
                 type="number"
                 inputProps={{ min: 0 }}
+                required
               />
             </Grid2>
           </Grid2>
