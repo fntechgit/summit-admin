@@ -7,7 +7,11 @@ const MuiFormikTextField = ({ name, label, maxLength, required, ...props }) => {
   const [field, meta] = useField(name);
   const currentLength = field.value?.length || 0;
 
-  const finalLabel = required ? `${label} *` : label;
+  let finalLabel = "";
+
+  if (label) {
+    finalLabel = required ? `${label} *` : label;
+  }
 
   return (
     <Box>
