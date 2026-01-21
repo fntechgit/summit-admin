@@ -3,15 +3,17 @@ import PropTypes from "prop-types";
 import { Box, TextField, Typography } from "@mui/material";
 import { useField } from "formik";
 
-const MuiFormikTextField = ({ name, label, maxLength, ...props }) => {
+const MuiFormikTextField = ({ name, label, maxLength, required, ...props }) => {
   const [field, meta] = useField(name);
   const currentLength = field.value?.length || 0;
+
+  const finalLabel = required ? `${label} *` : label;
 
   return (
     <Box>
       <TextField
         name={name}
-        label={label}
+        label={finalLabel}
         {...field}
         onBlur={field.onBlur}
         margin="normal"
