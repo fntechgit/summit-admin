@@ -3,7 +3,13 @@ import PropTypes from "prop-types";
 import { Box, TextField, Typography } from "@mui/material";
 import { useField } from "formik";
 
-const MuiFormikTextField = ({ name, label, maxLength, required, ...props }) => {
+const MuiFormikTextField = ({
+  name,
+  label,
+  maxLength,
+  required = false,
+  ...props
+}) => {
   const [field, meta] = useField(name);
   const currentLength = field.value?.length || 0;
 
@@ -43,7 +49,8 @@ const MuiFormikTextField = ({ name, label, maxLength, required, ...props }) => {
 MuiFormikTextField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string,
-  maxLength: PropTypes.number
+  maxLength: PropTypes.number,
+  required: PropTypes.bool
 };
 
 export default MuiFormikTextField;
