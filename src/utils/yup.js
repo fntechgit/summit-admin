@@ -53,6 +53,13 @@ export const decimalValidation = () =>
       return /^\d+(\.\d{1,2})?$/.test(value.toString());
     });
 
+export const quantityValidation = () =>
+  yup
+    .number()
+    .typeError(T.translate("validation.number"))
+    .positive(T.translate("validation.number_positive"))
+    .required(T.translate("validation.required"));
+
 export const rateCellValidation = () =>
   yup
     .number()
