@@ -35,6 +35,7 @@ import {
   formMetafieldsValidation
 } from "../../../utils/yup";
 import AdditionalInputList from "../../../components/mui/formik-inputs/additional-input/additional-input-list";
+import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
 
 const SponsorItemDialog = ({
   open,
@@ -226,7 +227,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="default_quantity">
                   {T.translate("edit_inventory_item.default_quantity")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikQuantityField
                   variant="outlined"
                   name="default_quantity"
                   formik={formik}
@@ -239,7 +240,7 @@ const SponsorItemDialog = ({
                     "edit_inventory_item.quantity_limit_per_sponsor"
                   )}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikQuantityField
                   variant="outlined"
                   name="quantity_limit_per_sponsor"
                   formik={formik}
@@ -250,7 +251,7 @@ const SponsorItemDialog = ({
                 <InputLabel htmlFor="quantity_limit_per_show">
                   {T.translate("edit_inventory_item.quantity_limit_per_show")}
                 </InputLabel>
-                <MuiFormikTextField
+                <MuiFormikQuantityField
                   variant="outlined"
                   name="quantity_limit_per_show"
                   formik={formik}
