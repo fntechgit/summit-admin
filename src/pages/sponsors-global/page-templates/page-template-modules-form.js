@@ -128,6 +128,7 @@ const PageModules = ({ name = "modules" }) => {
             />
             <IconButton
               size="small"
+              aria-label={T.translate("general.delete")}
               onClick={() => handleDeleteModule(index, module)}
             >
               <DeleteIcon />

@@ -149,8 +149,15 @@ const normalizeEntity = (entity) => {
     const normalizedModule = { ...module };
 
     if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.upload_deadline) {
-      normalizedModule.upload_deadline = moment(module.upload_deadline).unix();
+      normalizedModule.upload_deadline = moment
+        .utc(module.upload_deadline)
+        .unix();
     }
+
+    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT && module.file) {
+      normalizedModule.file = module.file[0] || null;
+    }
+
     delete normalizedModule._tempId;
 
     return normalizedModule;

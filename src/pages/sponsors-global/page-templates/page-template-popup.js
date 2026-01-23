@@ -53,7 +53,7 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
       name: "",
       description: "",
       external_url: "",
-      file: {}
+      file: []
     });
   };
 

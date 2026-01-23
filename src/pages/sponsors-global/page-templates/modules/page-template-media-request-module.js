@@ -74,7 +74,7 @@ const MediaRequestModule = ({ baseName, index }) => {
             />
           </Grid2>
           <Grid2 size={6}>
-            <InputLabel htmlFor={buildFieldName("max_file_size")}>
+            <InputLabel htmlFor={buildFieldName("file_type_id")}>
               {T.translate("page_template_list.page_crud.allowed_formats")}
             </InputLabel>
             <MuiFormikSelect

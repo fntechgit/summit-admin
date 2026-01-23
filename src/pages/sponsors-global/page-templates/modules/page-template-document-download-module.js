@@ -48,7 +48,7 @@ const DocumentDownloadModule = ({ baseName, index }) => {
         <MuiFormikUpload
           id={`document-module-upload-${index}`}
           name={buildFieldName("file")}
-          singleFile
+          maxFiles={1}
         />
       </Grid2>
     </Grid2>

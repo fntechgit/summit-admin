@@ -28,6 +28,7 @@ import {
   archivePageTemplate,
   getPageTemplates,
   savePageTemplate,
+  deletePageTemplate,
   unarchivePageTemplate
 } from "../../../actions/page-template-actions";
 import MuiTable from "../../../components/mui/table/mui-table";
@@ -47,7 +48,8 @@ const PageTemplateListPage = ({
   getPageTemplates,
   archivePageTemplate,
   unarchivePageTemplate,
-  savePageTemplate
+  savePageTemplate,
+  deletePageTemplate
 }) => {
   const [pageTemplateId, setPageTemplateId] = useState(null);
 
@@ -104,6 +106,10 @@ const PageTemplateListPage = ({
     console.log("CLONE PAGE");
   };
 
+  const handleSavePageTemplate = (entity) => {
+    savePageTemplate(entity).then(() => setPageTemplateId(null));
+  };
+
   const handleArchive = (item) =>
     item.is_archived
       ? unarchivePageTemplate(item.id)
@@ -114,7 +120,16 @@ const PageTemplateListPage = ({
   };
 
   const handleDelete = (row) => {
-    console.log("DELETE", row);
+    deletePageTemplate(row).then(() =>
+      getPageTemplates(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      )
+    );
   };
 
   const columns = [
@@ -250,7 +265,7 @@ const PageTemplateListPage = ({
       <PageTemplatePopup
         open={!!pageTemplateId}
         onClose={() => setPageTemplateId(null)}
-        onSave={savePageTemplate}
+        onSave={(entity) => handleSavePageTemplate(entity)}
       />
     </div>
   );
@@ -264,5 +279,6 @@ export default connect(mapStateToProps, {
   getPageTemplates,
   archivePageTemplate,
   unarchivePageTemplate,
-  savePageTemplate
+  savePageTemplate,
+  deletePageTemplate
 })(PageTemplateListPage);
