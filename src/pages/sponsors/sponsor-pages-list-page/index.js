@@ -55,6 +55,17 @@ const SponsorPagesListPage = ({
     getSponsorPages(term, currentPage, perPage, key, dir, hideArchived);
   };
 
+  const handlePerPageChange = (newPerPage) => {
+    getSponsorPages(
+      term,
+      currentPage,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
+  };
+
   const handleRowEdit = (row) => {
     getSponsorForm(row.id).then(() => {
       setOpenPopup("new");
@@ -197,6 +208,7 @@ const SponsorPagesListPage = ({
             currentPage={currentPage}
             onDelete={handleRowDelete}
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
             onEdit={handleRowEdit}
             onArchive={handleArchiveItem}

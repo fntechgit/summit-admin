@@ -265,7 +265,7 @@ const PageTemplateListPage = ({
       <PageTemplatePopup
         open={!!pageTemplateId}
         onClose={() => setPageTemplateId(null)}
-        onSave={(entity) => handleSavePageTemplate(entity)}
+        onSave={handleSavePageTemplate}
       />
     </div>
   );

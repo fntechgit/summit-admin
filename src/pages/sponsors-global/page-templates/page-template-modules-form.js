@@ -97,6 +97,7 @@ const PageModules = ({ name = "modules" }) => {
         "&:first-of-type": { borderRadius: 0 },
         "&:last-of-type": { borderRadius: 0 }
       }}
+      key={module._tempId || `module-${index}`}
     >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}

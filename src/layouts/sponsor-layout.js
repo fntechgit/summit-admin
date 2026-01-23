@@ -74,14 +74,11 @@ const SponsorLayout = ({ match }) => (
                 pathname: props.match.url
               }}
             />
-            <Route
-              strict
-              exact
-              path={props.match.url}
-              component={SponsorPagesListPage}
-            />
           </div>
         )}
+        strict
+        exact
+        component={SponsorPagesListPage}
       />
       <Route
         strict
