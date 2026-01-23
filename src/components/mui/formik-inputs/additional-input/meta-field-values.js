@@ -61,9 +61,7 @@ const MetaFieldValues = ({
   const handleRemoveValue = async (metaFieldValue, valueIndex) => {
     const isConfirmed = await showConfirmDialog({
       title: T.translate("general.are_you_sure"),
-      text: `${T.translate("meta_field_values_list.delete_value_warning")} ${
-        metaFieldValue.name
-      }`,
+      text: T.translate("meta_field_values_list.delete_value_warning"),
       type: "warning",
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
