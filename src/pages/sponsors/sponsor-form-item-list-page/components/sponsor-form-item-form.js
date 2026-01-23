@@ -18,8 +18,7 @@ import {
   decimalValidation,
   formMetafieldsValidation,
   positiveNumberValidation,
-  requiredStringValidation,
-  quantityValidation
+  requiredStringValidation
 } from "../../../../utils/yup";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import AdditionalInputList from "../../../../components/mui/formik-inputs/additional-input/additional-input-list";
@@ -43,7 +42,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),
       onsite_rate: decimalValidation(),
-      default_quantity: quantityValidation(),
+      default_quantity: positiveNumberValidation(),
       quantity_limit_per_sponsor: positiveNumberValidation(),
       quantity_limit_per_show: positiveNumberValidation(),
       meta_fields: formMetafieldsValidation()
