@@ -38,6 +38,7 @@ const MuiFormikSelect = ({
       )}
       <Select
         name={name}
+        id={name}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...field}
         labelId={`${name}-label`}
