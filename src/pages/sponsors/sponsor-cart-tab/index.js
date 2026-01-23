@@ -27,7 +27,9 @@ import LockClosedIcon from "@mui/icons-material/Lock";
 import AddIcon from "@mui/icons-material/Add";
 import {
   deleteSponsorCartForm,
-  getSponsorCart
+  getSponsorCart,
+  lockSponsorCartForm,
+  unlockSponsorCartForm
 } from "../../../actions/sponsor-cart-actions";
 import SearchInput from "../../../components/mui/search-input";
 import { TotalRow } from "../../../components/mui/table/extra-rows";
@@ -39,7 +41,9 @@ const SponsorCartTab = ({
   sponsor,
   summitId,
   getSponsorCart,
-  deleteSponsorCartForm
+  deleteSponsorCartForm,
+  lockSponsorCartForm,
+  unlockSponsorCartForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const [formEdit, setFormEdit] = useState(null);
@@ -64,8 +68,12 @@ const SponsorCartTab = ({
     deleteSponsorCartForm(itemId);
   };
 
-  const handleLock = (item) => {
-    console.log("LOCK : ", item);
+  const handleLock = (form) => {
+    if (form.is_locked) {
+      unlockSponsorCartForm(form.id);
+    } else {
+      lockSponsorCartForm(form.id);
+    }
   };
 
   const handlePayCreditCard = () => {
@@ -227,5 +235,7 @@ const mapStateToProps = ({ sponsorPageCartListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorCart,
-  deleteSponsorCartForm
+  deleteSponsorCartForm,
+  lockSponsorCartForm,
+  unlockSponsorCartForm
 })(SponsorCartTab);
