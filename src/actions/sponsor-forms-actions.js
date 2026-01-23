@@ -106,7 +106,7 @@ export const SPONSOR_FORM_ITEM_UNARCHIVED = "SPONSOR_FORM_ITEM_UNARCHIVED";
 export const getSponsorForms =
   (
     term = "",
-    page = DEFAULT_CURRENT_PAGE,
+    currentPage = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
@@ -114,8 +114,9 @@ export const getSponsorForms =
     sponsorshipTypesId = []
   ) =>
   async (dispatch, getState) => {
-    const { currentSummitState } = getState();
+    const { currentSummitState, sponsorFormsListState } = getState();
     const { currentSummit } = currentSummitState;
+    const { totalCount } = sponsorFormsListState;
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 
@@ -125,6 +126,9 @@ export const getSponsorForms =
       const escapedTerm = escapeFilterValue(term);
       filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
     }
+
+    // Resets page to avoid backend error.
+    const page = perPage > totalCount ? 1 : currentPage;
 
     const params = {
       page,
