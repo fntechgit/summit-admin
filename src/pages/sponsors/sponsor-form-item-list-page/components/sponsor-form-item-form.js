@@ -42,7 +42,9 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),
       onsite_rate: decimalValidation(),
-      default_quantity: positiveNumberValidation(),
+      default_quantity: positiveNumberValidation().required(
+        T.translate("validation.required")
+      ),
       quantity_limit_per_sponsor: positiveNumberValidation(),
       quantity_limit_per_show: positiveNumberValidation(),
       meta_fields: formMetafieldsValidation()
