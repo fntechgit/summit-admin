@@ -5,7 +5,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useField } from "formik";
 
-const MuiFormikDatepicker = ({ name, label, required }) => {
+const MuiFormikDatepicker = ({ name, label, required, ...props }) => {
   const [field, meta, helpers] = useField(name);
   const requiredLabel = `${label} *`;
   return (

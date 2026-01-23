@@ -19,6 +19,7 @@ import {
   PAGE_TEMPLATE_ARCHIVED,
   PAGE_TEMPLATE_UNARCHIVED
 } from "../../actions/page-template-actions";
+import { PAGES_MODULE_KINDS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   pageTemplates: [],
@@ -73,9 +74,13 @@ const pageTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
         id: a.id,
         code: a.code,
         name: a.name,
-        info_mod: a.modules.filter((m) => m.kind === "Info").length,
-        upload_mod: a.modules.filter((m) => m.kind === "Upload").length,
-        download_mod: a.modules.filter((m) => m.kind === "Download").length,
+        info_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.INFO)
+          .length,
+        upload_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.MEDIA)
+          .length,
+        download_mod: a.modules.filter(
+          (m) => m.kind === PAGES_MODULE_KINDS.DOCUMENT
+        ).length,
         is_archived: a.is_archived
       }));
 

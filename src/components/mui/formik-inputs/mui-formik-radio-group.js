@@ -13,7 +13,7 @@ import { useField } from "formik";
 const MuiFormikRadioGroup = ({
   name,
   label,
-  margin = "normal",
+  marginWrapper = "normal",
   options,
   ...props
 }) => {
@@ -22,7 +22,7 @@ const MuiFormikRadioGroup = ({
   return (
     <FormControl
       fullWidth
-      margin={margin}
+      margin={marginWrapper}
       error={meta.touched && Boolean(meta.error)}
     >
       {label && <FormLabel id="radio-group-label">{label}</FormLabel>}
@@ -62,7 +62,7 @@ const MuiFormikRadioGroup = ({
 MuiFormikRadioGroup.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string,
-  margin: PropTypes.string,
+  marginWrapper: PropTypes.string,
   options: PropTypes.array.isRequired
 };
 

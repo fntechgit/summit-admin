@@ -13,7 +13,7 @@ import { useField } from "formik";
 
 const MuiFormikSelect = ({
   name,
-                           label,
+  label,
   placeholder,
   children,
   isClearable,
@@ -26,13 +26,13 @@ const MuiFormikSelect = ({
     helpers.setValue("");
   };
 
-  const hasValue =
-    field.value !== "" && field.value !== undefined && field.value !== null;
+  const hasValue = field?.value && field.value !== "";
+  const shouldShrink = hasValue || Boolean(placeholder);
 
   return (
     <FormControl fullWidth error={meta.touched && Boolean(meta.error)}>
       {label && (
-        <InputLabel htmlFor={name} id={`${name}-label`} shrink={hasValue}>
+        <InputLabel htmlFor={name} id={`${name}-label`} shrink={shouldShrink}>
           {label}
         </InputLabel>
       )}
@@ -42,7 +42,7 @@ const MuiFormikSelect = ({
         {...field}
         labelId={`${name}-label`}
         label={label}
-        notched={hasValue}
+        notched={shouldShrink}
         displayEmpty
         renderValue={(selected) => {
           if (!selected || selected === "") {

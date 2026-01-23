@@ -29,7 +29,7 @@ const GlobalPagePopup = ({ open, onClose, cloneGlobalPage }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth={dialogSize} fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth={dialogSize} fullWidth>
       {stage === "pages" && (
         <SelectPagesDialog
           onSave={handleOnSelectTemplates}

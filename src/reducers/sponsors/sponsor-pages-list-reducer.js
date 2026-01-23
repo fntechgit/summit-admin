@@ -17,6 +17,7 @@ import {
   REQUEST_SPONSOR_PAGES
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { PAGES_MODULE_KINDS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   sponsorPages: [],
@@ -63,9 +64,13 @@ const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
         code: a.code,
         name: a.name,
         tier: a.sponsorship_types.map((s) => s.name).join(", "),
-        info_mod: a.modules.filter((m) => m.kind === "Info").length,
-        upload_mod: a.modules.filter((m) => m.kind === "Upload").length,
-        download_mod: a.modules.filter((m) => m.kind === "Download").length,
+        info_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.INFO)
+          .length,
+        upload_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.MEDIA)
+          .length,
+        download_mod: a.modules.filter(
+          (m) => m.kind === PAGES_MODULE_KINDS.DOCUMENT
+        ).length,
         is_archived: a.is_archived
       }));
 

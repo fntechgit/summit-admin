@@ -21,6 +21,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
+import { getSponsorForms } from "./sponsor-forms-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -130,5 +131,5 @@ export const cloneGlobalPage =
           })
         );
       })
-      .catch(() => {}); // need to catch promise reject
+      .finally(() => dispatch(stopLoading()));
   };

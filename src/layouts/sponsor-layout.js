@@ -25,7 +25,7 @@ import SponsorSettingsPage from "../pages/sponsor_settings/sponsor-settings-page
 import SponsorFormsListPage from "../pages/sponsors/sponsor-forms-list-page";
 import SponsorFormItemListPage from "../pages/sponsors/sponsor-form-item-list-page";
 import SponsorUsersListPage from "../pages/sponsors/sponsor-users-list-page";
-import sponsorPagesListPage from "../pages/sponsors/sponsor-pages-list-page";
+import SponsorPagesListPage from "../pages/sponsors/sponsor-pages-list-page";
 
 const SponsorLayout = ({ match }) => (
   <div>
@@ -74,14 +74,12 @@ const SponsorLayout = ({ match }) => (
                 pathname: props.match.url
               }}
             />
-            <Switch>
-              <Route
-                strict
-                exact
-                path={props.match.url}
-                component={sponsorPagesListPage}
-              />
-            </Switch>
+            <Route
+              strict
+              exact
+              path={props.match.url}
+              component={SponsorPagesListPage}
+            />
           </div>
         )}
       />
