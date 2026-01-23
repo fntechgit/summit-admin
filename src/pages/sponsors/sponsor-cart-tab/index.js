@@ -70,9 +70,9 @@ const SponsorCartTab = ({
 
   const handleLock = (form) => {
     if (form.is_locked) {
-      unlockSponsorCartForm(form.form_id);
+      unlockSponsorCartForm(form.id);
     } else {
-      lockSponsorCartForm(form.form_id);
+      lockSponsorCartForm(form.id);
     }
   };
 

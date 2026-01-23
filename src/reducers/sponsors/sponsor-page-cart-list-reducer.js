@@ -72,11 +72,11 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case SPONSOR_CART_FORM_LOCKED: {
-      const { formId, locked } = payload;
+      const { formId, is_locked } = payload;
 
       const forms = state.cart.forms.map((form) => {
-        if (form.form_id === formId) {
-          return {...form, locked};
+        if (form.id === formId) {
+          return {...form, is_locked};
         }
         return form;
       });
