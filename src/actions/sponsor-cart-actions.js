@@ -132,7 +132,7 @@ export const lockSponsorCartForm = (formId) => async (dispatch, getState) => {
   putRequest(
     null,
     createAction(SPONSOR_CART_FORM_LOCKED)({ formId, is_locked: true }),
-    `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms/${formId}/lock`,
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms/${formId}/lock`,
     {},
     snackbarErrorHandler
   )(params)(dispatch)
@@ -154,7 +154,7 @@ export const unlockSponsorCartForm = (formId) => async (dispatch, getState) => {
   return deleteRequest(
     null,
     createAction(SPONSOR_CART_FORM_LOCKED)({ formId, is_locked: false }),
-    `${window.SPONSOR_USERS_API_URL}/api/v1/shows/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms/${formId}/lock`,
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms/${formId}/lock`,
     null,
     snackbarErrorHandler
   )(params)(dispatch)
