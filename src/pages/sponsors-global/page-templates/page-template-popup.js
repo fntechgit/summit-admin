@@ -158,7 +158,7 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
             </Grid2>
             <Divider gutterBottom />
             <Box sx={{ py: 2 }}>
-              <PageModules formik={formik} />
+              <PageModules name="modules" />
             </Box>
           </DialogContent>
           <Divider />
