@@ -16,47 +16,59 @@ import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import SelectionPlanForm from "../../components/forms/selection-plan-form";
 import {
-  saveSelectionPlan,
-  addTrackGroupToSelectionPlan,
-  removeTrackGroupFromSelectionPlan,
-  deleteSelectionPlanExtraQuestion,
-  updateSelectionPlanExtraQuestionOrder,
+  addAllowedMemberToSelectionPlan,
   addEventTypeSelectionPlan,
-  deleteEventTypeSelectionPlan,
-  updateRatingTypeOrder,
-  deleteRatingType,
+  addTrackGroupToSelectionPlan,
   assignExtraQuestion2SelectionPlan,
   assignProgressFlag2SelectionPlan,
-  updateProgressFlagOrder,
-  unassignProgressFlagFromSelectionPlan,
-  addAllowedMemberToSelectionPlan,
-  removeAllowedMemberFromSelectionPlan,
+  deleteEventTypeSelectionPlan,
+  deleteRatingType,
+  deleteSelectionPlanExtraQuestion,
   getAllowedMembers,
   importAllowedMembersCSV,
-  saveSelectionPlanSettings
+  removeAllowedMemberFromSelectionPlan,
+  removeTrackGroupFromSelectionPlan,
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
+  unassignProgressFlagFromSelectionPlan,
+  updateProgressFlagOrder,
+  updateRatingTypeOrder,
+  updateSelectionPlanExtraQuestionOrder
 } from "../../actions/selection-plan-actions";
 import AddNewButton from "../../components/buttons/add-new-button";
 
-class EditSelectionPlanPage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.onAddNewExtraQuestion = this.onAddNewExtraQuestion.bind(this);
-    this.onDeleteExtraQuestion = this.onDeleteExtraQuestion.bind(this);
-    this.onEditExtraQuestion = this.onEditExtraQuestion.bind(this);
-    this.onUpdateExtraQuestionOrder =
-      this.onUpdateExtraQuestionOrder.bind(this);
-    this.onAddRatingType = this.onAddRatingType.bind(this);
-    this.onEditRatingType = this.onEditRatingType.bind(this);
-    this.onDeleteRatingType = this.onDeleteRatingType.bind(this);
-    this.onUpdateRatingTypeOrder = this.onUpdateRatingTypeOrder.bind(this);
-    this.onAddProgressFlag = this.onAddProgressFlag.bind(this);
-    this.onEditProgressFlag = this.onEditProgressFlag.bind(this);
-    this.onUnassignProgressFlag = this.onUnassignProgressFlag.bind(this);
-    this.onUpdateProgressFlagOrder = this.onUpdateProgressFlagOrder.bind(this);
-  }
+const EditSelectionPlanPage = ({
+  currentSummit,
+  entity,
+  allowedMembers,
+  errors,
+  history,
+  extraQuestionsOrder,
+  extraQuestionsOrderDir,
+  updateSelectionPlanExtraQuestionOrder,
+  unassignProgressFlagFromSelectionPlan,
+  deleteSelectionPlanExtraQuestion,
+  updateRatingTypeOrder,
+  deleteRatingType,
+  updateProgressFlagOrder,
+  addTrackGroupToSelectionPlan,
+  removeTrackGroupFromSelectionPlan,
+  saveSelectionPlan,
+  saveSelectionPlanSettings,
+  addAllowedMemberToSelectionPlan,
+  addEventTypeSelectionPlan,
+  assignExtraQuestion2SelectionPlan,
+  assignProgressFlag2SelectionPlan,
+  deleteEventTypeSelectionPlan,
+  getAllowedMembers,
+  importAllowedMembersCSV,
+  removeAllowedMemberFromSelectionPlan
+}) => {
+  const title = entity.id
+    ? T.translate("general.edit")
+    : T.translate("general.add");
 
-  onDeleteExtraQuestion(questionId) {
-    const { deleteSelectionPlanExtraQuestion, entity } = this.props;
+  const onDeleteExtraQuestion = (questionId) => {
     const extraQuestion = entity.extra_questions.find(
       (t) => t.id === questionId
     );
@@ -74,58 +86,46 @@ class EditSelectionPlanPage extends React.Component {
         deleteSelectionPlanExtraQuestion(entity.id, questionId);
       }
     });
-  }
+  };
 
-  onUpdateExtraQuestionOrder(questions, questionId, newOrder) {
-    const { entity } = this.props;
-    this.props.updateSelectionPlanExtraQuestionOrder(
+  const onUpdateExtraQuestionOrder = (questions, questionId, newOrder) => {
+    updateSelectionPlanExtraQuestionOrder(
       entity.id,
       questions,
       questionId,
       newOrder
     );
-  }
+  };
 
-  onEditExtraQuestion(questionId) {
-    const { currentSummit, history, entity } = this.props;
+  const onEditExtraQuestion = (questionId) => {
     history.push(
       `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/extra-questions/${questionId}`
     );
-  }
+  };
 
-  onAddNewExtraQuestion() {
-    const { currentSummit, history, entity } = this.props;
+  const onAddNewExtraQuestion = () => {
     history.push(
       `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/extra-questions/new`
     );
-  }
+  };
 
-  onAddRatingType() {
-    const { currentSummit, history, entity } = this.props;
+  const onAddRatingType = () => {
     history.push(
       `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/rating-types/new`
     );
-  }
+  };
 
-  onEditRatingType(ratingTypeId) {
-    const { currentSummit, history, entity } = this.props;
+  const onEditRatingType = (ratingTypeId) => {
     history.push(
       `/app/summits/${currentSummit.id}/selection-plans/${entity.id}/rating-types/${ratingTypeId}`
     );
-  }
+  };
 
-  onUpdateRatingTypeOrder(ratingTypes, ratingTypeId, newOrder) {
-    const { entity } = this.props;
-    this.props.updateRatingTypeOrder(
-      entity.id,
-      ratingTypes,
-      ratingTypeId,
-      newOrder
-    );
-  }
+  const onUpdateRatingTypeOrder = (ratingTypes, ratingTypeId, newOrder) => {
+    updateRatingTypeOrder(entity.id, ratingTypes, ratingTypeId, newOrder);
+  };
 
-  onDeleteRatingType(ratingTypeId) {
-    const { deleteRatingType, entity } = this.props;
+  const onDeleteRatingType = (ratingTypeId) => {
     const ratingType = entity.track_chair_rating_types.find(
       (t) => t.id === ratingTypeId
     );
@@ -143,32 +143,27 @@ class EditSelectionPlanPage extends React.Component {
         deleteRatingType(entity.id, ratingTypeId);
       }
     });
-  }
+  };
 
-  onAddProgressFlag() {
-    const { currentSummit, history } = this.props;
+  const onAddProgressFlag = () => {
     history.push(`/app/summits/${currentSummit.id}/progress-flags`);
-  }
+  };
 
-  onEditProgressFlag(progressFlagId) {
-    const { currentSummit, history } = this.props;
+  const onEditProgressFlag = (progressFlagId) => {
     history.push(
       `/app/summits/${currentSummit.id}/progress-flags#flag_id=${progressFlagId}`
     );
-  }
+  };
 
-  onUpdateProgressFlagOrder(progressFlags, progressFlagId, newOrder) {
-    const { entity } = this.props;
-    this.props.updateProgressFlagOrder(
-      entity.id,
-      progressFlags,
-      progressFlagId,
-      newOrder
-    );
-  }
+  const onUpdateProgressFlagOrder = (
+    progressFlags,
+    progressFlagId,
+    newOrder
+  ) => {
+    updateProgressFlagOrder(entity.id, progressFlags, progressFlagId, newOrder);
+  };
 
-  onUnassignProgressFlag(progressFlagId) {
-    const { unassignProgressFlagFromSelectionPlan, entity } = this.props;
+  const onUnassignProgressFlag = (progressFlagId) => {
     const ratingType = entity.allowed_presentation_action_types.find(
       (t) => t.id === progressFlagId
     );
@@ -186,70 +181,50 @@ class EditSelectionPlanPage extends React.Component {
         unassignProgressFlagFromSelectionPlan(entity.id, progressFlagId);
       }
     });
-  }
+  };
 
-  render() {
-    const {
-      currentSummit,
-      entity,
-      allowedMembers,
-      errors,
-      extraQuestionsOrder,
-      extraQuestionsOrderDir
-    } = this.props;
-    const title = entity.id
-      ? T.translate("general.edit")
-      : T.translate("general.add");
-
-    return (
-      <div className="container">
-        <h3>
-          {title} {T.translate("edit_selection_plan.selection_plan")}
-          <AddNewButton entity={entity} />
-        </h3>
-        <hr />
-        <SelectionPlanForm
-          entity={entity}
-          allowedMembers={allowedMembers}
-          currentSummit={currentSummit}
-          errors={errors}
-          extraQuestionsOrder={extraQuestionsOrder}
-          extraQuestionsOrderDir={extraQuestionsOrderDir}
-          onTrackGroupLink={this.props.addTrackGroupToSelectionPlan}
-          onTrackGroupUnLink={this.props.removeTrackGroupFromSelectionPlan}
-          onSubmit={this.props.saveSelectionPlan}
-          saveSelectionPlanSettings={this.props.saveSelectionPlanSettings}
-          updateExtraQuestionOrder={this.onUpdateExtraQuestionOrder}
-          onAddNewExtraQuestion={this.onAddNewExtraQuestion}
-          onDeleteExtraQuestion={this.onDeleteExtraQuestion}
-          onAddEventType={this.props.addEventTypeSelectionPlan}
-          onDeleteEventType={this.props.deleteEventTypeSelectionPlan}
-          onEditExtraQuestion={this.onEditExtraQuestion}
-          onAddRatingType={this.onAddRatingType}
-          onEditRatingType={this.onEditRatingType}
-          onUpdateRatingTypeOrder={this.onUpdateRatingTypeOrder}
-          onDeleteRatingType={this.onDeleteRatingType}
-          onAssignExtraQuestion2SelectionPlan={
-            this.props.assignExtraQuestion2SelectionPlan
-          }
-          onAddProgressFlag={this.onAddProgressFlag}
-          onEditProgressFlag={this.onEditProgressFlag}
-          onAssignProgressFlag2SelectionPlan={
-            this.props.assignProgressFlag2SelectionPlan
-          }
-          onUnassignProgressFlag={this.onUnassignProgressFlag}
-          onUpdateProgressFlagOrder={this.onUpdateProgressFlagOrder}
-          onAllowedMemberAdd={this.props.addAllowedMemberToSelectionPlan}
-          onAllowedMemberDelete={
-            this.props.removeAllowedMemberFromSelectionPlan
-          }
-          onAllowedMembersPageChange={this.props.getAllowedMembers}
-          onImportAllowedMembers={this.props.importAllowedMembersCSV}
-        />
-      </div>
-    );
-  }
-}
+  return (
+    <div className="container">
+      <h3>
+        {title} {T.translate("edit_selection_plan.selection_plan")}
+        <AddNewButton entity={entity} />
+      </h3>
+      <hr />
+      <SelectionPlanForm
+        entity={entity}
+        allowedMembers={allowedMembers}
+        currentSummit={currentSummit}
+        errors={errors}
+        extraQuestionsOrder={extraQuestionsOrder}
+        extraQuestionsOrderDir={extraQuestionsOrderDir}
+        onTrackGroupLink={addTrackGroupToSelectionPlan}
+        onTrackGroupUnLink={removeTrackGroupFromSelectionPlan}
+        onSubmit={saveSelectionPlan}
+        saveSelectionPlanSettings={saveSelectionPlanSettings}
+        updateExtraQuestionOrder={onUpdateExtraQuestionOrder}
+        onAddNewExtraQuestion={onAddNewExtraQuestion}
+        onDeleteExtraQuestion={onDeleteExtraQuestion}
+        onAddEventType={addEventTypeSelectionPlan}
+        onDeleteEventType={deleteEventTypeSelectionPlan}
+        onEditExtraQuestion={onEditExtraQuestion}
+        onAddRatingType={onAddRatingType}
+        onEditRatingType={onEditRatingType}
+        onUpdateRatingTypeOrder={onUpdateRatingTypeOrder}
+        onDeleteRatingType={onDeleteRatingType}
+        onAssignExtraQuestion2SelectionPlan={assignExtraQuestion2SelectionPlan}
+        onAddProgressFlag={onAddProgressFlag}
+        onEditProgressFlag={onEditProgressFlag}
+        onAssignProgressFlag2SelectionPlan={assignProgressFlag2SelectionPlan}
+        onUnassignProgressFlag={onUnassignProgressFlag}
+        onUpdateProgressFlagOrder={onUpdateProgressFlagOrder}
+        onAllowedMemberAdd={addAllowedMemberToSelectionPlan}
+        onAllowedMemberDelete={removeAllowedMemberFromSelectionPlan}
+        onAllowedMembersPageChange={getAllowedMembers}
+        onImportAllowedMembers={importAllowedMembersCSV}
+      />
+    </div>
+  );
+};
 
 const mapStateToProps = ({
   currentSummitState,
