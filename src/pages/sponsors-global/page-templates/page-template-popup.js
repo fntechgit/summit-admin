@@ -65,9 +65,48 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
       description: "",
       upload_deadline: null,
       max_file_size: 0,
-      file_type_id: 0
+      file_type_id: null
     });
   };
+
+  const infoModuleSchema = yup.object().shape({
+    kind: yup.string().equals([PAGES_MODULE_KINDS.INFO]),
+    content: yup.string().required(T.translate("validation.required"))
+  });
+
+  const documentModuleSchema = yup.object().shape({
+    kind: yup.string().equals([PAGES_MODULE_KINDS.DOCUMENT]),
+    name: yup.string().required(T.translate("validation.required")),
+    description: yup.string().required(T.translate("validation.required")),
+    external_url: yup.string(),
+    file: yup.array().min(1, T.translate("validation.file_required"))
+  });
+
+  const mediaModuleSchema = yup.object().shape({
+    kind: yup.string().equals([PAGES_MODULE_KINDS.MEDIA]),
+    name: yup.string().required(T.translate("validation.required")),
+    type: yup.string().required(T.translate("validation.required")),
+    upload_deadline: yup.date().required(T.translate("validation.required")),
+    description: yup.string().required(T.translate("validation.required")),
+    file_type_id: yup.object().when("type", {
+      is: PAGE_MODULES_MEDIA_TYPES.FILE,
+      then: (schema) => schema.required(T.translate("validation.required")),
+      otherwise: (schema) => schema.nullable()
+    })
+  });
+
+  const moduleSchema = yup.lazy((value) => {
+    switch (value?.kind) {
+      case PAGES_MODULE_KINDS.INFO:
+        return infoModuleSchema;
+      case PAGES_MODULE_KINDS.DOCUMENT:
+        return documentModuleSchema;
+      case PAGES_MODULE_KINDS.MEDIA:
+        return mediaModuleSchema;
+      default:
+        return yup.object();
+    }
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -76,7 +115,8 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
     },
     validationSchema: yup.object().shape({
       code: yup.string().required(T.translate("validation.required")),
-      name: yup.string().required(T.translate("validation.required"))
+      name: yup.string().required(T.translate("validation.required")),
+      modules: yup.array().of(moduleSchema)
     }),
     enableReinitialize: true,
     onSubmit: (values) => {

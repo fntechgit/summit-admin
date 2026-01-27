@@ -2,12 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { useFormikContext, getIn } from "formik";
-import { Grid2, Divider, InputLabel, MenuItem } from "@mui/material";
+import { Grid2, Divider, InputLabel } from "@mui/material";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikSelect from "../../../../components/mui/formik-inputs/mui-formik-select";
 import MuiFormikDatepicker from "../../../../components/mui/formik-inputs/mui-formik-datepicker";
 import MuiFormikRadioGroup from "../../../../components/mui/formik-inputs/mui-formik-radio-group";
 import { PAGE_MODULES_MEDIA_TYPES } from "../../../../utils/constants";
+import MuiFormikAsyncAutocomplete from "../../../../components/mui/formik-inputs/mui-formik-async-select";
+import { queryMediaFileTypes } from "../../../../actions/media-file-type-actions";
 
 const MediaRequestModule = ({ baseName, index }) => {
   const { values } = useFormikContext();
@@ -77,14 +78,14 @@ const MediaRequestModule = ({ baseName, index }) => {
             <InputLabel htmlFor={buildFieldName("file_type_id")}>
               {T.translate("page_template_list.page_crud.allowed_formats")}
             </InputLabel>
-            <MuiFormikSelect
+            <MuiFormikAsyncAutocomplete
               name={buildFieldName("file_type_id")}
-              margin="none"
-              fullWidth
-            >
-              {/* WIP DDL Options */}
-              <MenuItem value="PDF">PDF</MenuItem>
-            </MuiFormikSelect>
+              queryFunction={queryMediaFileTypes}
+              formatOption={(item) => ({
+                value: item.id,
+                label: `${item.name} (${item.allowed_extensions?.join(", ")})`
+              })}
+            />
           </Grid2>
         </>
       )}

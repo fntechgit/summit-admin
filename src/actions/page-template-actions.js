@@ -154,6 +154,11 @@ const normalizeEntity = (entity) => {
         .unix();
     }
 
+    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.file_type_id) {
+      normalizedModule.file_type_id =
+        module.file_type_id?.value || module.file_type_id;
+    }
+
     if (module.kind === PAGES_MODULE_KINDS.DOCUMENT && module.file) {
       normalizedModule.file = module.file[0] || null;
     }
