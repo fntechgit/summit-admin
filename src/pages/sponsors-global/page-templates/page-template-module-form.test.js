@@ -61,7 +61,15 @@ jest.mock(
     }
 );
 
-// Mock DragAndDropList que captura onReorder
+jest.mock(
+  "../../../components/mui/formik-inputs/mui-formik-async-select",
+  () =>
+    function MockMuiFormikAsyncSelect({ name }) {
+      return <select data-testid={`async-select-${name}`} />;
+    }
+);
+
+// Mock DragAndDropList to capture onReorder
 let capturedOnReorder = null;
 jest.mock(
   "../../../components/mui/dnd-list",
