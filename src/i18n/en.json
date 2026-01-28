@@ -3694,7 +3694,7 @@
     "required_error": "This field is required."
   },
   "meta_field_values_list": {
-    "delete_value_warning": "Are you sure you want to delete meta field value ",
+    "delete_value_warning": "Please verify you want to delete the added value",
     "name": "Name",
     "value": "Value",
     "is_default": "Is Default?",
