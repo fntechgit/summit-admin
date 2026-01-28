@@ -53,7 +53,7 @@ const MuiFormikAsyncAutocomplete = ({
     }
   }, [searchTerm]);
 
-  // precargar con vacío
+  // preload empty
   useEffect(() => {
     fetchOptions("");
   }, []);

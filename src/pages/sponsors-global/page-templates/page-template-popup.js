@@ -19,35 +19,112 @@ import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
+import PageModules from "./page-template-modules-form";
+import {
+  PAGES_MODULE_KINDS,
+  PAGE_MODULES_MEDIA_TYPES
+} from "../../../utils/constants";
 
 const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
   const handleClose = () => {
     onClose();
   };
 
+  const addModule = (moduleData) => {
+    const modules = formik.values.modules || [];
+    const newModule = {
+      ...moduleData,
+      _tempId: `temp-${Date.now()}`,
+      custom_order: modules.length
+    };
+    formik.setFieldValue("modules", [...modules, newModule]);
+  };
+
   const handleAddInfo = () => {
-    console.log("ADD INFO");
+    addModule({
+      kind: PAGES_MODULE_KINDS.INFO,
+      content: ""
+    });
   };
 
   const handleAddDocument = () => {
-    console.log("ADD DOCUMENT");
+    addModule({
+      kind: PAGES_MODULE_KINDS.DOCUMENT,
+      name: "",
+      description: "",
+      external_url: "",
+      file: []
+    });
   };
 
   const handleAddMedia = () => {
-    console.log("ADD MEDIA");
+    addModule({
+      kind: PAGES_MODULE_KINDS.MEDIA,
+      type: PAGE_MODULES_MEDIA_TYPES.FILE,
+      name: "",
+      description: "",
+      upload_deadline: null,
+      max_file_size: 0,
+      file_type_id: null
+    });
   };
+
+  const infoModuleSchema = yup.object().shape({
+    kind: yup.string().equals([PAGES_MODULE_KINDS.INFO]),
+    content: yup.string().required(T.translate("validation.required"))
+  });
+
+  const documentModuleSchema = yup.object().shape({
+    kind: yup.string().equals([PAGES_MODULE_KINDS.DOCUMENT]),
+    name: yup.string().required(T.translate("validation.required")),
+    description: yup.string().required(T.translate("validation.required")),
+    external_url: yup.string(),
+    file: yup.array().min(1, T.translate("validation.file_required"))
+  });
+
+  const mediaModuleSchema = yup.object().shape({
+    kind: yup.string().equals([PAGES_MODULE_KINDS.MEDIA]),
+    name: yup.string().required(T.translate("validation.required")),
+    type: yup.string().required(T.translate("validation.required")),
+    upload_deadline: yup.date().required(T.translate("validation.required")),
+    description: yup.string().required(T.translate("validation.required")),
+    file_type_id: yup.object().when("type", {
+      is: PAGE_MODULES_MEDIA_TYPES.FILE,
+      then: (schema) => schema.required(T.translate("validation.required")),
+      otherwise: (schema) => schema.nullable()
+    })
+  });
+
+  const moduleSchema = yup.lazy((value) => {
+    switch (value?.kind) {
+      case PAGES_MODULE_KINDS.INFO:
+        return infoModuleSchema;
+      case PAGES_MODULE_KINDS.DOCUMENT:
+        return documentModuleSchema;
+      case PAGES_MODULE_KINDS.MEDIA:
+        return mediaModuleSchema;
+      default:
+        return yup.object();
+    }
+  });
 
   const formik = useFormik({
     initialValues: {
-      ...pageTemplate
+      ...pageTemplate,
+      modules: pageTemplate?.modules || []
     },
     validationSchema: yup.object().shape({
       code: yup.string().required(T.translate("validation.required")),
-      name: yup.string().required(T.translate("validation.required"))
+      name: yup.string().required(T.translate("validation.required")),
+      modules: yup.array().of(moduleSchema)
     }),
     enableReinitialize: true,
     onSubmit: (values) => {
-      onSave(values);
+      const modulesWithOrder = values.modules.map((m, idx) => ({
+        ...m,
+        custom_order: idx
+      }));
+      onSave({ ...values, modules: modulesWithOrder });
     }
   });
 
@@ -120,14 +197,9 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
               </Grid2>
             </Grid2>
             <Divider gutterBottom />
-            <Typography
-              variant="body2"
-              component="div"
-              color="text.secondary"
-              sx={{ m: 2 }}
-            >
-              {T.translate("page_template_list.page_crud.no_modules")}
-            </Typography>
+            <Box sx={{ py: 2 }}>
+              <PageModules name="modules" />
+            </Box>
           </DialogContent>
           <Divider />
           <DialogActions>

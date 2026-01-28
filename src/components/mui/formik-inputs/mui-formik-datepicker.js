@@ -5,7 +5,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useField } from "formik";
 
-const MuiFormikDatepicker = ({ name, label, required }) => {
+const MuiFormikDatepicker = ({ name, label, required, ...props }) => {
   const [field, meta, helpers] = useField(name);
   const requiredLabel = `${label} *`;
   return (
@@ -19,8 +19,7 @@ const MuiFormikDatepicker = ({ name, label, required }) => {
             label: required ? requiredLabel : label,
             error: meta.touched && Boolean(meta.error),
             helperText: meta.touched && meta.error,
-            fullWidth: true,
-            margin: "normal"
+            fullWidth: true
           },
           day: {
             sx: {
@@ -36,6 +35,9 @@ const MuiFormikDatepicker = ({ name, label, required }) => {
             }
           }
         }}
+        margin="normal"
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...props}
       />
     </LocalizationProvider>
   );

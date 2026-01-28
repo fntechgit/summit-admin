@@ -83,6 +83,7 @@
   },
   "validation": {
     "required": "This field is required.",
+    "file_required": "File is required",
     "string": "Must be a string.",
     "number": "Must be a number.",
     "number_positive": "Must be a positive number.",
@@ -90,6 +91,7 @@
     "one_option_required": "Must have one option",
     "two_decimals": "Max 2 decimal places",
     "email": "Wrong email format.",
+    "url": "Wrong URL format",
     "date": "Wrong date format.",
     "after": "'{field1}' must be after '{field2}'.",
     "boolean": "Must be a boolean."
@@ -154,6 +156,7 @@
     "sponsors": "Sponsors",
     "sponsor_list": "Sponsor List",
     "sponsor_forms": "Forms",
+    "sponsor_pages": "Pages",
     "sponsorship_list": "Tiers",
     "sponsor_users": "Users",
     "sponsors_promocodes": "Promo Codes",
@@ -2623,6 +2626,40 @@
       "items_added": "Items added successfully."
     }
   },
+  "sponsor_pages": {
+    "pages": "Pages",
+    "alert_info": "Note: These Pages will be visible to all sponsors of the selected level in this program.",
+    "using_template": "Using Template",
+    "new_page": "New Page",
+    "code_column_label": "Code",
+    "name_column_label": "Name",
+    "tier_column_label": "Tier",
+    "info_mod_column_label": "Info Mod",
+    "upload_mod_column_label": "Upload Mod",
+    "download_mod_column_label": "Download Mod",
+    "hide_archived": "Hide archived Pages",
+    "filter": "Filter",
+    "sort_by": "Sort By",
+    "no_sponsors_pages": "No pages found for this search criteria.",
+    "placeholders": {
+      "search": "Search..."
+    },
+    "global_page_popup": {
+      "title": "Add Page Template",
+      "items_selected": "items selected",
+      "code": "Code",
+      "name": "name",
+      "info_mod": "Info Mod",
+      "download_mod": "Download Mod",
+      "upload_mod": "Upload Mod",
+      "add_selected": "Add Selected Page Template",
+      "success": "Page created successfully.",
+      "error": "There was a problem creating the forms, please try again.",
+      "placeholders": {
+        "search": "Search..."
+      }
+    }
+  },
   "sponsor_users": {
     "users": "Users",
     "access_request": "access request",
@@ -3888,6 +3925,8 @@
     "alert_info": "You can create or archive Pages from the list. To edit a Page click on the item's Edit botton.",
     "code": "Code",
     "name": "Name",
+    "sponsorship": "Always apply to",
+    "all_tiers": "All Tiers",
     "info_mod": "Info Mod",
     "upload_mod": "Upload Mod",
     "download_mod": "Download Mod",
@@ -3900,7 +3939,8 @@
     "add_form_template": "New Form",
     "add_using_global_template": "Using Global Template",
     "placeholders": {
-      "search": "Search"
+      "search": "Search",
+      "sponsorship_type": "Always apply to"
     },
     "page_crud": {
       "title": "Create New Page",
@@ -3910,7 +3950,21 @@
       "no_modules": "No modules added yet.",
       "save": "Save Page",
       "page_saved": "Page saved successfully.",
-      "page_created": "Page created successfully."
+      "page_created": "Page created successfully.",
+      "info_module": "Info Module",
+      "info_content": "Info Content",
+      "document_module": "Document Download Module",
+      "document_name": "Document Name",
+      "description": "Description",
+      "external_url": "External URL",
+      "upload_file": "Upload File",
+      "text_input": "Text input",
+      "media_module": "Media Request Module",
+      "name": "Name",
+      "upload_deadline": "Upload Deadline",
+      "max_file_size": "Max File Size (MB)",
+      "allowed_formats": "Allowed Formats",
+      "module_remove_warning": "Are you sure you want to delete {name}"
     }
   }
 }

@@ -5,13 +5,15 @@ import {
   FormHelperText,
   FormControl,
   InputAdornment,
-  IconButton
+  IconButton,
+  InputLabel
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useField } from "formik";
 
 const MuiFormikSelect = ({
   name,
+  label,
   placeholder,
   children,
   isClearable,
@@ -24,12 +26,24 @@ const MuiFormikSelect = ({
     helpers.setValue("");
   };
 
+  const hasValue = field?.value && field.value !== "";
+  const shouldShrink = hasValue || Boolean(placeholder);
+
   return (
     <FormControl fullWidth error={meta.touched && Boolean(meta.error)}>
+      {label && (
+        <InputLabel htmlFor={name} id={`${name}-label`} shrink={shouldShrink}>
+          {label}
+        </InputLabel>
+      )}
       <Select
         name={name}
+        id={name}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...field}
+        labelId={`${name}-label`}
+        label={label}
+        notched={shouldShrink}
         displayEmpty
         renderValue={(selected) => {
           if (!selected || selected === "") {
