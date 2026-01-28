@@ -106,23 +106,19 @@ const SponsorPagesListPage = ({
     },
     {
       columnKey: "tier",
-      header: T.translate("sponsor_pages.tier_column_label"),
-      sortable: false
+      header: T.translate("sponsor_pages.tier_column_label")
     },
     {
       columnKey: "info_mod",
-      header: T.translate("sponsor_pages.info_mod_column_label"),
-      sortable: false
+      header: T.translate("sponsor_pages.info_mod_column_label")
     },
     {
       columnKey: "upload_mod",
-      header: T.translate("sponsor_pages.upload_mod_column_label"),
-      sortable: false
+      header: T.translate("sponsor_pages.upload_mod_column_label")
     },
     {
       columnKey: "download_mod",
-      header: T.translate("sponsor_pages.download_mod_column_label"),
-      sortable: false
+      header: T.translate("sponsor_pages.download_mod_column_label")
     }
   ];
 

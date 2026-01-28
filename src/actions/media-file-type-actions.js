@@ -12,7 +12,7 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
-import _ from "lodash";
+import { debounce } from "lodash";
 import {
   getRequest,
   putRequest,
@@ -216,7 +216,7 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const queryMediaFileTypes = _.debounce(async (input, callback) => {
+export const queryMediaFileTypes = debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
   const apiUrl = URI(`${window.API_BASE_URL}/api/v1/summit-media-file-types`);
 
