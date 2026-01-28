@@ -26,6 +26,7 @@ import useScrollToError from "../../../../hooks/useScrollToError";
 import MuiFormikUpload from "../../../../components/mui/formik-inputs/mui-formik-upload";
 import MuiFormikPriceField from "../../../../components/mui/formik-inputs/mui-formik-pricefield";
 import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
+import MuiFormikQuantityField from "../../../../components/mui/formik-inputs/mui-formik-quantity-field";
 
 const buildInitialValues = (data) => ({ ...data });
 
@@ -41,7 +42,9 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),
       onsite_rate: decimalValidation(),
-      default_quantity: positiveNumberValidation(),
+      default_quantity: positiveNumberValidation().required(
+        T.translate("validation.required")
+      ),
       quantity_limit_per_sponsor: positiveNumberValidation(),
       quantity_limit_per_show: positiveNumberValidation(),
       meta_fields: formMetafieldsValidation()
@@ -119,7 +122,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
               />
             </Grid2>
             <Grid2 size={4}>
-              <MuiFormikTextField
+              <MuiFormikQuantityField
                 name="quantity_limit_per_show"
                 label={T.translate(
                   "sponsor_form_item_list.edit_item.quantity_limit_per_show"
@@ -130,7 +133,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
               />
             </Grid2>
             <Grid2 size={4}>
-              <MuiFormikTextField
+              <MuiFormikQuantityField
                 name="quantity_limit_per_sponsor"
                 label={T.translate(
                   "sponsor_form_item_list.edit_item.quantity_limit_per_sponsor"
@@ -141,7 +144,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
               />
             </Grid2>
             <Grid2 size={4}>
-              <MuiFormikTextField
+              <MuiFormikQuantityField
                 name="default_quantity"
                 label={T.translate(
                   "sponsor_form_item_list.edit_item.default_quantity"
