@@ -3648,7 +3648,7 @@
   },
   "inventory_item_list": {
     "inventory_items": "Inventory",
-    "alert_info": "You can create or archive items from the list. To edit an item click on it.",
+    "alert_info": "You can create or archive items from the list. To edit an item, click pencil icon.",
     "code_column_label": "Code",
     "name_column_label": "Name",
     "archive_button": "Archive",
