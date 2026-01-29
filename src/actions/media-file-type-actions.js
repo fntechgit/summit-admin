@@ -9,9 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
+import { debounce } from "lodash";
 import {
   getRequest,
   putRequest,
@@ -23,9 +24,18 @@ import {
   showMessage,
   showSuccessMessage,
   authErrorHandler,
+  fetchResponseHandler,
+  fetchErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
+import URI from "urijs";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_PER_PAGE,
+  FIVE_PER_PAGE
+} from "../utils/constants";
 
 export const REQUEST_MEDIA_FILE_TYPES = "REQUEST_MEDIA_FILE_TYPES";
 export const RECEIVE_MEDIA_FILE_TYPES = "RECEIVE_MEDIA_FILE_TYPES";
@@ -39,15 +49,21 @@ export const MEDIA_FILE_TYPE_ADDED = "MEDIA_FILE_TYPE_ADDED";
 export const MEDIA_FILE_TYPE_DELETED = "MEDIA_FILE_TYPE_DELETED";
 
 export const getMediaFileTypes =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
-  async (dispatch, getState) => {
+  (
+    term = null,
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 
     dispatch(startLoading());
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -64,7 +80,7 @@ export const getMediaFileTypes =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -78,7 +94,7 @@ export const getMediaFileTypes =
     });
   };
 
-export const getAllMediaFileTypes = () => async (dispatch, getState) => {
+export const getAllMediaFileTypes = () => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -100,33 +116,32 @@ export const getAllMediaFileTypes = () => async (dispatch, getState) => {
   });
 };
 
-export const getMediaFileType =
-  (mediaFileTypeId) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+export const getMediaFileType = (mediaFileTypeId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const params = {
-      access_token: accessToken
-    };
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_MEDIA_FILE_TYPE),
-      `${window.API_BASE_URL}/api/v1/summit-media-file-types/${mediaFileTypeId}`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken
   };
 
-export const resetMediaFileTypeForm = () => (dispatch, getState) => {
+  return getRequest(
+    null,
+    createAction(RECEIVE_MEDIA_FILE_TYPE),
+    `${window.API_BASE_URL}/api/v1/summit-media-file-types/${mediaFileTypeId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const resetMediaFileTypeForm = () => (dispatch) => {
   dispatch(createAction(RESET_MEDIA_FILE_TYPE_FORM)({}));
 };
 
 export const saveMediaFileType =
   (entity, noAlert = false) =>
-  async (dispatch, getState) => {
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
@@ -142,7 +157,7 @@ export const saveMediaFileType =
         normalizedEntity,
         authErrorHandler,
         entity
-      )(params)(dispatch).then((payload) => {
+      )(params)(dispatch).then(() => {
         if (!noAlert)
           dispatch(showSuccessMessage(T.translate("media_file_type.saved")));
         else dispatch(stopLoading());
@@ -171,33 +186,54 @@ export const saveMediaFileType =
     }
   };
 
-export const deleteMediaFileType =
-  (mediaFileTypeId) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+export const deleteMediaFileType = (mediaFileTypeId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const params = {
-      access_token: accessToken
-    };
-
-    return deleteRequest(
-      null,
-      createAction(MEDIA_FILE_TYPE_DELETED)({ mediaFileTypeId }),
-      `${window.API_BASE_URL}/api/v1/summit-media-file-types/${mediaFileTypeId}`,
-      null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken
   };
+
+  return deleteRequest(
+    null,
+    createAction(MEDIA_FILE_TYPE_DELETED)({ mediaFileTypeId }),
+    `${window.API_BASE_URL}/api/v1/summit-media-file-types/${mediaFileTypeId}`,
+    null,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["id"];
-  delete normalizedEntity["created"];
-  delete normalizedEntity["modified"];
+  delete normalizedEntity.id;
+  delete normalizedEntity.created;
+  delete normalizedEntity.modified;
 
   normalizedEntity.allowed_extensions = entity.allowed_extensions.split(",");
 
   return normalizedEntity;
 };
+
+export const queryMediaFileTypes = debounce(async (input, callback) => {
+  const accessToken = await getAccessTokenSafely();
+  const apiUrl = URI(`${window.API_BASE_URL}/api/v1/summit-media-file-types`);
+
+  apiUrl.addQuery("access_token", accessToken);
+  apiUrl.addQuery("order", "name");
+  apiUrl.addQuery("per_page", FIVE_PER_PAGE);
+
+  if (input) {
+    input = escapeFilterValue(input);
+    apiUrl.addQuery("filter[]", `name=@${input}`);
+  }
+
+  fetch(apiUrl.toString())
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data];
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);

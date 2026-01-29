@@ -10,13 +10,19 @@ import {
 } from "@mui/material";
 import { useField } from "formik";
 
-const MuiFormikRadioGroup = ({ name, label, options, ...props }) => {
+const MuiFormikRadioGroup = ({
+  name,
+  label,
+  marginWrapper = "normal",
+  options,
+  ...props
+}) => {
   const [field, meta] = useField({ name });
 
   return (
     <FormControl
       fullWidth
-      margin="normal"
+      margin={marginWrapper}
       error={meta.touched && Boolean(meta.error)}
     >
       {label && <FormLabel id="radio-group-label">{label}</FormLabel>}
@@ -56,6 +62,7 @@ const MuiFormikRadioGroup = ({ name, label, options, ...props }) => {
 MuiFormikRadioGroup.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string,
+  marginWrapper: PropTypes.string,
   options: PropTypes.array.isRequired
 };
 
