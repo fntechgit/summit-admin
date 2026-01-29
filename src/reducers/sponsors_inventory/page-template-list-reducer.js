@@ -112,12 +112,10 @@ const pageTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {
       return { ...state, pageTemplates: updatedPageTemplates };
     }
     case PAGE_TEMPLATE_UNARCHIVED: {
-      const updatedFormTemplateId = payload;
+      const { pageTemplateId } = payload;
 
       const updatedPageTemplates = state.pageTemplates.map((item) =>
-        item.id === updatedFormTemplateId
-          ? { ...item, is_archived: false }
-          : item
+        item.id === pageTemplateId ? { ...item, is_archived: false } : item
       );
       return { ...state, pageTemplates: updatedPageTemplates };
     }

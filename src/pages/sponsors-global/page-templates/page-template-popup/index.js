@@ -18,12 +18,12 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import PageModules from "./page-template-modules-form";
 import {
   PAGES_MODULE_KINDS,
   PAGE_MODULES_MEDIA_TYPES
-} from "../../../utils/constants";
+} from "../../../../utils/constants";
 
 const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
   const handleClose = () => {

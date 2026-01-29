@@ -32,6 +32,7 @@ import {
   PAGES_MODULE_KINDS
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
+import { GLOBAL_PAGE_CLONED } from "./sponsor-pages-actions";
 
 export const ADD_PAGE_TEMPLATE = "ADD_PAGE_TEMPLATE";
 export const PAGE_TEMPLATE_ADDED = "PAGE_TEMPLATE_ADDED";
@@ -171,7 +172,7 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const savePageTemplate = (entity) => async (dispatch, getState) => {
+export const savePageTemplate = (entity) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
   const params = {
     access_token: accessToken
@@ -197,7 +198,7 @@ export const savePageTemplate = (entity) => async (dispatch, getState) => {
             html: T.translate("page_template_list.page_crud.page_saved")
           })
         );
-        getPageTemplates()(dispatch, getState);
+        getPageTemplates()(dispatch);
       })
       .catch((err) => {
         console.error(err);
@@ -222,7 +223,7 @@ export const savePageTemplate = (entity) => async (dispatch, getState) => {
           html: T.translate("page_template_list.page_crud.page_created")
         })
       );
-      getPageTemplates()(dispatch, getState);
+      getPageTemplates()(dispatch);
     })
     .catch((err) => {
       console.error(err);
@@ -262,4 +263,33 @@ export const unarchivePageTemplate = (pageTemplateId) => async (dispatch) => {
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
+};
+
+export const clonePageTemplate = (templateId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return postRequest(
+    null,
+    createAction(GLOBAL_PAGE_CLONED),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${templateId}/clone`,
+    {},
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      getPageTemplates()(dispatch);
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("page_template_list.clone_success")
+        })
+      );
+    })
+    .catch(console.error)
+    .finally(() => dispatch(stopLoading()));
 };

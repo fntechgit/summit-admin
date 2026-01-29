@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { Grid2, InputLabel } from "@mui/material";
 
-import MuiFormikUpload from "../../../../components/mui/formik-inputs/mui-formik-upload";
-import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
+import MuiFormikUpload from "../../../../../components/mui/formik-inputs/mui-formik-upload";
+import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 
 const DocumentDownloadModule = ({ baseName, index }) => {
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;

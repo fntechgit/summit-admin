@@ -21,7 +21,6 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
-import { getSponsorForms } from "./sponsor-forms-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -123,7 +122,7 @@ export const cloneGlobalPage =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        dispatch(getSponsorForms());
+        dispatch(getSponsorPages());
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
