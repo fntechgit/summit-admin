@@ -51,6 +51,7 @@ const FormTemplateForm = ({
     initialValues: buildInitialValues(initialValues, summitTZ),
     validationSchema: yup.object({
       code: requiredStringValidation(),
+      instructions: requiredStringValidation(),
       opens_at: opensAtValidation(),
       expires_at: yup
         .date(T.translate("validation.date"))
