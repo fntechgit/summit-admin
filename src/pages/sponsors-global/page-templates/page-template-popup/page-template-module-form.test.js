@@ -4,17 +4,17 @@ import userEvent from "@testing-library/user-event";
 import { Formik, Form, useFormikContext } from "formik";
 import "@testing-library/jest-dom";
 import PageModules from "./page-template-modules-form";
-import showConfirmDialog from "../../../components/mui/showConfirmDialog";
+import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
 import {
   PAGES_MODULE_KINDS,
   PAGE_MODULES_MEDIA_TYPES
-} from "../../../utils/constants";
+} from "../../../../utils/constants";
 
 // Mocks
-jest.mock("../../../components/mui/showConfirmDialog", () => jest.fn());
+jest.mock("../../../../components/mui/showConfirmDialog", () => jest.fn());
 
 jest.mock(
-  "../../../components/inputs/formik-text-editor",
+  "../../../../components/inputs/formik-text-editor",
   () =>
     function MockFormikTextEditor({ name }) {
       return <textarea data-testid={`text-editor-${name}`} />;
@@ -22,7 +22,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../components/mui/formik-inputs/mui-formik-upload",
+  "../../../../components/mui/formik-inputs/mui-formik-upload",
   () =>
     function MockMuiFormikUpload({ name }) {
       return <div data-testid={`upload-${name}`}>Upload</div>;
@@ -30,7 +30,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../components/mui/formik-inputs/mui-formik-textfield",
+  "../../../../components/mui/formik-inputs/mui-formik-textfield",
   () =>
     function MockMuiFormikTextField({ name }) {
       return <input data-testid={`textfield-${name}`} />;
@@ -38,7 +38,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../components/mui/formik-inputs/mui-formik-select",
+  "../../../../components/mui/formik-inputs/mui-formik-select",
   () =>
     function MockMuiFormikSelect({ name, children }) {
       return <select data-testid={`select-${name}`}>{children}</select>;
@@ -46,7 +46,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../components/mui/formik-inputs/mui-formik-datepicker",
+  "../../../../components/mui/formik-inputs/mui-formik-datepicker",
   () =>
     function MockMuiFormikDatepicker({ name }) {
       return <input data-testid={`datepicker-${name}`} type="date" />;
@@ -54,7 +54,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../components/mui/formik-inputs/mui-formik-radio-group",
+  "../../../../components/mui/formik-inputs/mui-formik-radio-group",
   () =>
     function MockMuiFormikRadioGroup({ name }) {
       return <div data-testid={`radio-group-${name}`} />;
@@ -62,7 +62,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../components/mui/formik-inputs/mui-formik-async-select",
+  "../../../../components/mui/formik-inputs/mui-formik-async-select",
   () =>
     function MockMuiFormikAsyncSelect({ name }) {
       return <select data-testid={`async-select-${name}`} />;
@@ -72,7 +72,7 @@ jest.mock(
 // Mock DragAndDropList to capture onReorder
 let capturedOnReorder = null;
 jest.mock(
-  "../../../components/mui/dnd-list",
+  "../../../../components/mui/dnd-list",
   () =>
     function MockDragAndDropList({ items, renderItem, onReorder }) {
       capturedOnReorder = onReorder;

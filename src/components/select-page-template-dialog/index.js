@@ -13,17 +13,17 @@ import {
   FormControlLabel,
   Grid2,
   IconButton,
+  Radio,
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import SearchInput from "../../../../../components/mui/search-input";
-import { getPageTemplates } from "../../../../../actions/page-template-actions";
-import { DEFAULT_PER_PAGE } from "../../../../../utils/constants";
-import MuiInfiniteTable from "../../../../../components/mui/infinite-table";
+import SearchInput from "../mui/search-input";
+import { getPageTemplates } from "../../actions/page-template-actions";
+import { DEFAULT_PER_PAGE } from "../../utils/constants";
+import MuiInfiniteTable from "../mui/infinite-table";
 
-const SelectPagesDialog = ({
+const SelectPageTemplateDialog = ({
   pageTemplates,
-  items,
   currentPage,
   term,
   order,
@@ -31,6 +31,7 @@ const SelectPagesDialog = ({
   total,
   onSave,
   onClose,
+  isMulti = false,
   getPageTemplates
 }) => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -44,7 +45,7 @@ const SelectPagesDialog = ({
   };
 
   const handleLoadMore = () => {
-    if (total > items.length) {
+    if (total > pageTemplates.length) {
       getPageTemplates(
         term,
         currentPage + 1,
@@ -62,10 +63,15 @@ const SelectPagesDialog = ({
   };
 
   const handleOnCheck = (rowId, checked) => {
-    if (checked) {
-      setSelectedRows([...selectedRows, rowId]);
+    if (isMulti) {
+      if (checked) {
+        setSelectedRows([...selectedRows, rowId]);
+      } else {
+        setSelectedRows(selectedRows.filter((r) => r !== rowId));
+      }
     } else {
-      setSelectedRows(selectedRows.filter((r) => r !== rowId));
+      // For single selection (radio), always set to the selected row
+      setSelectedRows(checked ? [rowId] : []);
     }
   };
 
@@ -83,17 +89,28 @@ const SelectPagesDialog = ({
       header: "",
       width: 30,
       align: "center",
-      render: (row) => (
-        <FormControlLabel
-          label=""
-          control={
-            <Checkbox
-              checked={selectedRows.includes(row.id)}
-              onChange={(ev) => handleOnCheck(row.id, ev.target.checked)}
-            />
-          }
-        />
-      )
+      render: (row) =>
+        isMulti ? (
+          <FormControlLabel
+            label=""
+            control={
+              <Checkbox
+                checked={selectedRows.includes(row.id)}
+                onChange={(ev) => handleOnCheck(row.id, ev.target.checked)}
+              />
+            }
+          />
+        ) : (
+          <FormControlLabel
+            label=""
+            control={
+              <Radio
+                checked={selectedRows.includes(row.id)}
+                onChange={(ev) => handleOnCheck(row.id, ev.target.checked)}
+              />
+            }
+          />
+        )
     },
     {
       columnKey: "code",
@@ -177,7 +194,7 @@ const SelectPagesDialog = ({
   );
 };
 
-SelectPagesDialog.propTypes = {
+SelectPageTemplateDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired
 };
@@ -188,4 +205,4 @@ const mapStateToProps = ({ pageTemplateListState }) => ({
 
 export default connect(mapStateToProps, {
   getPageTemplates
-})(SelectPagesDialog);
+})(SelectPageTemplateDialog);
