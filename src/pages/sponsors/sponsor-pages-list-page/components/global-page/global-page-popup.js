@@ -4,9 +4,17 @@ import { connect } from "react-redux";
 import { Dialog } from "@mui/material";
 import SelectPagesDialog from "./select-pages-dialog";
 import SelectSponsorshipsDialog from "../../../sponsor-forms-list-page/components/global-template/select-sponsorships-dialog";
-import { cloneGlobalPage } from "../../../../../actions/sponsor-pages-actions";
+import {
+  cloneGlobalPage,
+  getSponsorPages
+} from "../../../../../actions/sponsor-pages-actions";
 
-const GlobalPagePopup = ({ open, onClose, cloneGlobalPage }) => {
+const GlobalPagePopup = ({
+  open,
+  onClose,
+  cloneGlobalPage,
+  getSponsorPages
+}) => {
   const [stage, setStage] = useState("pages");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
   const dialogSize = stage === "pages" ? "md" : "sm";
@@ -24,6 +32,7 @@ const GlobalPagePopup = ({ open, onClose, cloneGlobalPage }) => {
 
   const handleOnSave = (selectedTiers, allTiers) => {
     cloneGlobalPage(selectedTemplates, selectedTiers, allTiers).finally(() => {
+      getSponsorPages();
       handleClose();
     });
   };
@@ -51,5 +60,6 @@ GlobalPagePopup.propTypes = {
 const mapStateToProps = () => ({});
 
 export default connect(mapStateToProps, {
-  cloneGlobalPage
+  cloneGlobalPage,
+  getSponsorPages
 })(GlobalPagePopup);
