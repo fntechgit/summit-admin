@@ -34,6 +34,14 @@ export const RECEIVE_SPONSOR_PAGES = "RECEIVE_SPONSOR_PAGES";
 
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
 
+export const REQUEST_SPONSOR_MANAGED_PAGES = "REQUEST_SPONSOR_MANAGED_PAGES";
+export const RECEIVE_SPONSOR_MANAGED_PAGES = "RECEIVE_SPONSOR_MANAGED_PAGES";
+
+export const REQUEST_SPONSOR_CUSTOMIZED_PAGES =
+  "REQUEST_SPONSOR_CUSTOMIZED_PAGES";
+export const RECEIVE_SPONSOR_CUSTOMIZED_PAGES =
+  "RECEIVE_SPONSOR_CUSTOMIZED_PAGES";
+
 export const getSponsorPages =
   (
     term = "",
@@ -132,4 +140,124 @@ export const cloneGlobalPage =
         );
       })
       .finally(() => dispatch(stopLoading()));
+  };
+
+/* ************************************************************************ */
+/*         MANAGED PAGES       */
+/* ************************************************************************ */
+
+export const getSponsorManagedPages =
+  (
+    term = "",
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const summitTZ = currentSummit.time_zone.name;
+    const filter = [];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
+    }
+
+    const params = {
+      page,
+      fields: "id,code,name,kind,modules_count,allowed_add_ons",
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    if (hideArchived) filter.push("is_archived==0");
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_MANAGED_PAGES),
+      createAction(RECEIVE_SPONSOR_MANAGED_PAGES),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
+      authErrorHandler,
+      { order, orderDir, page, term, summitTZ }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+/* ************************************************************************ */
+/*         CUSTOMIZED PAGES       */
+/* ************************************************************************ */
+
+export const getSponsorCustomizedPages =
+  (
+    term = "",
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+    hideArchived = false
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const summitTZ = currentSummit.time_zone.name;
+    const filter = [];
+
+    dispatch(startLoading());
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
+    }
+
+    const params = {
+      page,
+      fields: "id,code,name,kind,modules_count,allowed_add_ons",
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    if (hideArchived) filter.push("is_archived==0");
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_CUSTOMIZED_PAGES),
+      createAction(RECEIVE_SPONSOR_CUSTOMIZED_PAGES),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages`,
+      authErrorHandler,
+      { order, orderDir, page, term, summitTZ }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
