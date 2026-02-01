@@ -305,7 +305,7 @@ const SponsorPagesTab = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => console.log("open popup new")}
+            onClick={() => setCustomFormEdit("new")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
