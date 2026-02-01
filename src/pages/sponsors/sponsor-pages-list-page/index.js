@@ -26,12 +26,14 @@ import AddIcon from "@mui/icons-material/Add";
 import {
   getSponsorPages,
   archiveSponsorPage,
-  unarchiveSponsorPage
+  unarchiveSponsorPage,
+  getSponsorPage,
+  saveSponsorPage
 } from "../../../actions/sponsor-pages-actions";
-import { getSponsorForm } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
+import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
 
 const SponsorPagesListPage = ({
   sponsorPages,
@@ -42,10 +44,12 @@ const SponsorPagesListPage = ({
   orderDir,
   hideArchived,
   totalCount,
+  currentSponsorPage,
   getSponsorPages,
   archiveSponsorPage,
   unarchiveSponsorPage,
-  getSponsorForm
+  getSponsorPage,
+  saveSponsorPage
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -73,7 +77,7 @@ const SponsorPagesListPage = ({
   };
 
   const handleRowEdit = (row) => {
-    getSponsorForm(row.id).then(() => {
+    getSponsorPage(row.id).then(() => {
       setOpenPopup("new");
     });
   };
@@ -97,6 +101,13 @@ const SponsorPagesListPage = ({
       orderDir,
       ev.target.checked
     );
+  };
+
+  const handleSaveSponsorPage = (entity) => {
+    saveSponsorPage(entity).then(() => {
+      setOpenPopup(null);
+      getSponsorPages();
+    });
   };
 
   const columns = [
@@ -222,10 +233,12 @@ const SponsorPagesListPage = ({
         open={openPopup === "clone"}
         onClose={() => setOpenPopup(null)}
       />
-      {/* <FormPagePopup
+      <PageTemplatePopup
         open={openPopup === "new"}
+        pageTemplate={currentSponsorPage}
         onClose={() => setOpenPopup(null)}
-      /> */}
+        onSave={handleSaveSponsorPage}
+      />
     </div>
   );
 };
@@ -238,5 +251,6 @@ export default connect(mapStateToProps, {
   getSponsorPages,
   archiveSponsorPage,
   unarchiveSponsorPage,
-  getSponsorForm
+  getSponsorPage,
+  saveSponsorPage
 })(SponsorPagesListPage);

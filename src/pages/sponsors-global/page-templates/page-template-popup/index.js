@@ -18,6 +18,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import PageModules from "./page-template-modules-form";
 import {
@@ -25,7 +26,13 @@ import {
   PAGE_MODULES_MEDIA_TYPES
 } from "../../../../utils/constants";
 
-const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
+const PageTemplatePopup = ({
+  pageTemplate,
+  open,
+  onClose,
+  onSave,
+  summitTZ
+}) => {
   const handleClose = () => {
     onClose();
   };
@@ -108,10 +115,21 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
     }
   });
 
+  const normalizeModules = (modules = [], summitTZ = "UTC") =>
+    modules.map((m) => {
+      if (m.kind === PAGES_MODULE_KINDS.MEDIA && m.upload_deadline) {
+        return {
+          ...m,
+          upload_deadline: epochToMomentTimeZone(m.upload_deadline, summitTZ)
+        };
+      }
+      return m;
+    });
+
   const formik = useFormik({
     initialValues: {
       ...pageTemplate,
-      modules: pageTemplate?.modules || []
+      modules: normalizeModules(pageTemplate?.modules, summitTZ) || []
     },
     validationSchema: yup.object().shape({
       code: yup.string().required(T.translate("validation.required")),

@@ -22,17 +22,22 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
+import moment from "moment-timezone";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  PAGES_MODULE_KINDS
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_SPONSOR_PAGES = "REQUEST_SPONSOR_PAGES";
 export const RECEIVE_SPONSOR_PAGES = "RECEIVE_SPONSOR_PAGES";
 
+export const RECEIVE_SPONSOR_PAGE = "RECEIVE_SPONSOR_PAGE";
+export const SPONSOR_PAGE_UPDATED = "SPONSOR_PAGE_UPDATED";
+export const SPONSOR_PAGE_ADDED = "SPONSOR_PAGE_ADDED";
 export const SPONSOR_PAGE_ARCHIVED = "SPONSOR_PAGE_ARCHIVED";
 export const SPONSOR_PAGE_UNARCHIVED = "SPONSOR_PAGE_UNARCHIVED";
 
@@ -96,6 +101,118 @@ export const getSponsorPages =
       dispatch(stopLoading());
     });
   };
+
+export const getSponsorPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SPONSOR_PAGE),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+const normalizeSponsorPage = (entity) => {
+  const normalizedEntity = { ...entity };
+
+  normalizedEntity.modules = entity.modules.map((module) => {
+    const normalizedModule = { ...module };
+
+    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.upload_deadline) {
+      normalizedModule.upload_deadline = moment
+        .utc(module.upload_deadline)
+        .unix();
+    }
+
+    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.file_type_id) {
+      normalizedModule.file_type_id =
+        module.file_type_id?.value || module.file_type_id;
+    }
+
+    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT && module.file) {
+      normalizedModule.file = module.file[0] || null;
+    }
+
+    delete normalizedModule._tempId;
+
+    return normalizedModule;
+  });
+
+  return normalizedEntity;
+};
+
+export const saveSponsorPage = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  const normalizedSponsorPage = normalizeSponsorPage(entity);
+
+  if (entity.id) {
+    return putRequest(
+      null,
+      createAction(SPONSOR_PAGE_UPDATED),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${entity.id}`,
+      normalizedSponsorPage,
+      snackbarErrorHandler,
+      entity
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_pages.page_saved")
+          })
+        );
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  }
+
+  return postRequest(
+    null,
+    createAction(SPONSOR_PAGE_ADDED),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages`,
+    normalizedSponsorPage,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_pages.page_created")
+        })
+      );
+    })
+    .catch((err) => {
+      console.error(err);
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
 
 export const cloneGlobalPage =
   (pagesIds, sponsorIds, allSponsors) => async (dispatch, getState) => {

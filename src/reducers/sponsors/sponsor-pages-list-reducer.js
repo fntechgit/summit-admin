@@ -13,6 +13,7 @@
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
+  RECEIVE_SPONSOR_PAGE,
   RECEIVE_SPONSOR_PAGES,
   REQUEST_SPONSOR_PAGES,
   SPONSOR_PAGE_ARCHIVED,
@@ -30,7 +31,9 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  hideArchived: false
+  hideArchived: false,
+  currentSponsorPage: null,
+  summitTZ: null
 };
 
 const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
@@ -42,7 +45,7 @@ const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_PAGES: {
-      const { order, orderDir, page, term, hideArchived } = payload;
+      const { order, orderDir, page, term, hideArchived, summitTZ } = payload;
 
       return {
         ...state,
@@ -51,7 +54,8 @@ const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
         sponsorPages: [],
         currentPage: page,
         term,
-        hideArchived
+        hideArchived,
+        summitTZ
       };
     }
     case RECEIVE_SPONSOR_PAGES: {
@@ -103,6 +107,11 @@ const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         sponsorPages: [...pages]
       };
+    }
+    case RECEIVE_SPONSOR_PAGE: {
+      const sponsorPage = payload.response;
+
+      return { ...state, currentSponsorPage: sponsorPage };
     }
     default:
       return state;
