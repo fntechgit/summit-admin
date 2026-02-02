@@ -252,7 +252,7 @@ const SponsorPagesTab = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  value={hideArchived}
+                  checked={hideArchived}
                   onChange={handleHideArchived}
                   inputProps={{
                     "aria-label": T.translate(
