@@ -53,7 +53,8 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_MANAGED_PAGES: {
-      const { order, orderDir, page, term, summitTZ, hideArchived } = payload;
+      const { order, orderDir, page, perPage, term, summitTZ, hideArchived } =
+        payload;
 
       return {
         ...state,
@@ -61,8 +62,9 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
           ...state.managedPages,
           order,
           orderDir,
-          forms: [],
-          currentPage: page
+          pages: [],
+          currentPage: page,
+          perPage
         },
         term,
         summitTZ,
@@ -70,7 +72,8 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case REQUEST_SPONSOR_CUSTOMIZED_PAGES: {
-      const { order, orderDir, page, term, summitTZ, hideArchived } = payload;
+      const { order, orderDir, page, perPage, term, summitTZ, hideArchived } =
+        payload;
 
       return {
         ...state,
@@ -78,8 +81,9 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
           ...state.customizedPages,
           order,
           orderDir,
-          forms: [],
-          currentPage: page
+          pages: [],
+          currentPage: page,
+          perPage
         },
         term,
         summitTZ,
@@ -97,6 +101,7 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         id: a.id,
         code: a.code,
         name: a.name,
+        allowed_add_ons: a.allowed_add_ons,
         info_mod: a.modules_count.info_modules_count,
         upload_mod: a.modules_count.document_download_modules_count,
         download_mod: a.modules_count.media_request_modules_count
@@ -126,8 +131,8 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         name: a.name,
         allowed_add_ons: a.allowed_add_ons,
         info_mod: a.modules_count.info_modules_count,
-        upload_mod: a.modules_count.document_download_modules_count,
-        download_mod: a.modules_count.media_request_modules_count
+        upload_mod: a.modules_count.media_request_modules_count,
+        download_mod: a.modules_count.document_download_modules_count
       }));
 
       return {

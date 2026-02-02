@@ -129,7 +129,7 @@ export const getSponsorManagedPages =
       createAction(RECEIVE_SPONSOR_MANAGED_PAGES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ }
+      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -189,7 +189,7 @@ export const getSponsorCustomizedPages =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_PAGES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ }
+      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
