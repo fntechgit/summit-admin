@@ -17,10 +17,17 @@ import {
   RECEIVE_SPONSOR_PAGES,
   REQUEST_SPONSOR_PAGES,
   SPONSOR_PAGE_ARCHIVED,
-  SPONSOR_PAGE_UNARCHIVED
+  SPONSOR_PAGE_UNARCHIVED,
+  RESET_SPONSOR_PAGE_FORM
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { PAGES_MODULE_KINDS } from "../../utils/constants";
+
+const DEFAULT_SPONSOR_PAGE = {
+  code: "",
+  name: "",
+  modules: []
+};
 
 const DEFAULT_STATE = {
   sponsorPages: [],
@@ -32,7 +39,7 @@ const DEFAULT_STATE = {
   perPage: 10,
   totalCount: 0,
   hideArchived: false,
-  currentSponsorPage: null,
+  currentSponsorPage: DEFAULT_SPONSOR_PAGE,
   summitTZ: null
 };
 
@@ -112,6 +119,9 @@ const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
       const sponsorPage = payload.response;
 
       return { ...state, currentSponsorPage: sponsorPage };
+    }
+    case RESET_SPONSOR_PAGE_FORM: {
+      return { ...state, currentSponsorPage: DEFAULT_SPONSOR_PAGE };
     }
     default:
       return state;

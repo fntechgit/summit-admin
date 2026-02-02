@@ -28,7 +28,8 @@ import {
   archiveSponsorPage,
   unarchiveSponsorPage,
   getSponsorPage,
-  saveSponsorPage
+  saveSponsorPage,
+  resetSponsorPageForm
 } from "../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
@@ -49,7 +50,8 @@ const SponsorPagesListPage = ({
   archiveSponsorPage,
   unarchiveSponsorPage,
   getSponsorPage,
-  saveSponsorPage
+  saveSponsorPage,
+  resetSponsorPageForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -108,6 +110,11 @@ const SponsorPagesListPage = ({
       setOpenPopup(null);
       getSponsorPages();
     });
+  };
+
+  const handleTemplatePopupClose = () => {
+    resetSponsorPageForm();
+    setOpenPopup(null);
   };
 
   const columns = [
@@ -236,7 +243,7 @@ const SponsorPagesListPage = ({
       <PageTemplatePopup
         open={openPopup === "new"}
         pageTemplate={currentSponsorPage}
-        onClose={() => setOpenPopup(null)}
+        onClose={handleTemplatePopupClose}
         onSave={handleSaveSponsorPage}
       />
     </div>
@@ -252,5 +259,6 @@ export default connect(mapStateToProps, {
   archiveSponsorPage,
   unarchiveSponsorPage,
   getSponsorPage,
-  saveSponsorPage
+  saveSponsorPage,
+  resetSponsorPageForm
 })(SponsorPagesListPage);

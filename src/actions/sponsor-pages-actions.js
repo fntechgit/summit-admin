@@ -40,6 +40,7 @@ export const SPONSOR_PAGE_UPDATED = "SPONSOR_PAGE_UPDATED";
 export const SPONSOR_PAGE_ADDED = "SPONSOR_PAGE_ADDED";
 export const SPONSOR_PAGE_ARCHIVED = "SPONSOR_PAGE_ARCHIVED";
 export const SPONSOR_PAGE_UNARCHIVED = "SPONSOR_PAGE_UNARCHIVED";
+export const RESET_SPONSOR_PAGE_FORM = "RESET_SPONSOR_PAGE_FORM";
 
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
 
@@ -213,6 +214,10 @@ export const saveSponsorPage = (entity) => async (dispatch, getState) => {
     .finally(() => {
       dispatch(stopLoading());
     });
+};
+
+export const resetSponsorPageForm = () => (dispatch) => {
+  dispatch(createAction(RESET_SPONSOR_PAGE_FORM)({}));
 };
 
 export const cloneGlobalPage =
