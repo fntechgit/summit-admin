@@ -110,7 +110,8 @@ export const getSponsorPage = (pageId) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    expand: "modules.file_type"
   };
 
   return getRequest(

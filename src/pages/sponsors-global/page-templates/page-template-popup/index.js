@@ -117,11 +117,21 @@ const PageTemplatePopup = ({
 
   const normalizeModules = (modules = [], summitTZ = "UTC") =>
     modules.map((m) => {
-      if (m.kind === PAGES_MODULE_KINDS.MEDIA && m.upload_deadline) {
-        return {
-          ...m,
-          upload_deadline: epochToMomentTimeZone(m.upload_deadline, summitTZ)
-        };
+      if (m.kind === PAGES_MODULE_KINDS.MEDIA) {
+        const normalizeModule = { ...m };
+        if (m.upload_deadline) {
+          normalizeModule.upload_deadline = epochToMomentTimeZone(
+            m.upload_deadline,
+            summitTZ
+          );
+        }
+        if (m.file_type) {
+          normalizeModule.file_type_id = {
+            value: m.file_type.id,
+            label: `${m.file_type.name} (${m.file_type.allowed_extensions})`
+          };
+        }
+        return normalizeModule;
       }
       return m;
     });
