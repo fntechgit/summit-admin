@@ -212,7 +212,10 @@ const SponsorPagesListPage = ({
         </div>
       )}
 
-      <GlobalPagePopup open={openPopup === "clone"} onClose={setOpenPopup} />
+      <GlobalPagePopup
+        open={openPopup === "clone"}
+        onClose={() => setOpenPopup(null)}
+      />
       {/* <FormPagePopup
         open={openPopup === "new"}
         onClose={() => setOpenPopup(null)}
