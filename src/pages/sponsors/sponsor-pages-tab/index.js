@@ -113,8 +113,32 @@ const SponsorPagesTab = ({
   };
 
   const handleSearch = (searchTerm) => {
-    getSponsorManagedPages(searchTerm);
-    getSponsorCustomizedPages(searchTerm);
+    const {
+      perPage: perPageManaged,
+      order: orderManaged,
+      orderDir: orderDirManaged
+    } = managedPages;
+    const {
+      perPage: perPageCustomized,
+      order: orderCustomized,
+      orderDir: orderDirCustomized
+    } = customizedPages;
+    getSponsorManagedPages(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPageManaged,
+      orderManaged,
+      orderDirManaged,
+      hideArchived
+    );
+    getSponsorCustomizedPages(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPageCustomized,
+      orderCustomized,
+      orderDirCustomized,
+      hideArchived
+    );
   };
 
   const handleArchiveCustomizedPage = (item) =>
@@ -193,7 +217,7 @@ const SponsorPagesTab = ({
   ];
 
   const managedPagesColumns = [
-    ...baseColumns(T.translate("edit_sponsor.pages_tab.managed_forms"))
+    ...baseColumns(T.translate("edit_sponsor.pages_tab.managed_pages"))
   ];
 
   const customizedPagesColumns = [
@@ -253,7 +277,7 @@ const SponsorPagesTab = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setOpenPopup("template")}
+            onClick={() => console.log("open popup template")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -265,7 +289,7 @@ const SponsorPagesTab = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setCustomFormEdit("new")}
+            onClick={() => console.log("open popup new")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -313,22 +337,6 @@ const SponsorPagesTab = ({
           onArchive={handleArchiveManagedPage}
         />
       </div>
-
-      {/* <AddSponsorFormTemplatePopup
-        open={openPopup === "template"}
-        onClose={() => setOpenPopup(null)}
-        onSubmit={saveSponsorManagedForm}
-        sponsor={sponsor}
-        summitId={summitId}
-      />
-
-      <CustomizedFormPopup
-        formId={customFormEdit?.id || null}
-        open={!!customFormEdit}
-        onClose={() => setCustomFormEdit(null)}
-        sponsor={sponsor}
-        summitId={summitId}
-      /> */}
     </Box>
   );
 };
