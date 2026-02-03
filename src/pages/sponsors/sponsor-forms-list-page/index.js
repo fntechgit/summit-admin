@@ -65,7 +65,7 @@ const SponsorFormsListPage = ({
   const handlePerPageChange = (newPerPage) => {
     getSponsorForms(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       newPerPage,
       order,
       orderDir,
@@ -73,13 +73,20 @@ const SponsorFormsListPage = ({
     );
   };
   const handleSort = (key, dir) => {
-    getSponsorForms(term, currentPage, perPage, key, dir, hideArchived);
+    getSponsorForms(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      key,
+      dir,
+      hideArchived
+    );
   };
 
   const handleSearch = (searchTerm) => {
     getSponsorForms(
       searchTerm,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,

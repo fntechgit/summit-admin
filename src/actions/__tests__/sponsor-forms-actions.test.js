@@ -1,66 +1,94 @@
-import * as OpenStackUiCoreActions from "openstack-uicore-foundation/lib/utils/actions";
-import { deleteSponsorFormItem } from "../sponsor-forms-actions";
-import * as UtilsMethods from "../../utils/methods";
-import * as BaseActions from "../base-actions";
+/**
+ * @jest-environment jsdom
+ */
+import { expect, jest, describe, it } from "@jest/globals";
+import configureStore from "redux-mock-store";
+import thunk from "redux-thunk";
+import flushPromises from "flush-promises";
+import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
+import { getSponsorForms } from "../sponsor-forms-actions";
+import * as methods from "../../utils/methods";
 
-jest.mock("openstack-uicore-foundation/lib/utils/actions", () => {
-  const originalModule = jest.requireActual(
-    "openstack-uicore-foundation/lib/utils/actions"
-  );
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  postRequest: jest.fn(),
+  getRequest: jest.fn()
+}));
 
-  return {
-    __esModule: true,
-    ...originalModule,
-    deleteRequest: jest.fn(() => () => () => Promise.resolve())
-  };
-});
+describe("Sponsor Forms Actions", () => {
+  describe("GetSponsorForms", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
 
-describe("SponsorFormActions", () => {
-  describe("DeleteSponsorFormItem", () => {
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+
+      getRequest.mockImplementation(
+        (
+            requestActionCreator,
+            receiveActionCreator,
+            endpoint, // eslint-disable-line no-unused-vars
+            payload, // eslint-disable-line no-unused-vars
+            errorHandler = null, // eslint-disable-line no-unused-vars
+            requestActionPayload = {}
+          ) =>
+          (
+            params = {} // eslint-disable-line no-unused-vars
+          ) =>
+          (dispatch) => {
+            if (
+              requestActionCreator &&
+              typeof requestActionCreator === "function"
+            )
+              dispatch(requestActionCreator(requestActionPayload));
+
+            return new Promise((resolve) => {
+              if (typeof receiveActionCreator === "function") {
+                dispatch(receiveActionCreator({ response: {} }));
+                resolve({ response: {} });
+              }
+              dispatch(receiveActionCreator);
+              resolve({ response: {} });
+            });
+          }
+      );
+    });
+
     afterEach(() => {
       // restore the spy created with spyOn
       jest.restoreAllMocks();
     });
+    describe("On perPage change", () => {
+      it("should request page specified", async () => {
+        const store = mockStore({
+          currentSummitState: {
+            currentSummit: {}
+          },
+          sponsorFormsListState: {
+            totalCount: 13
+          }
+        });
 
-    it("execute", async () => {
-      const mockedDispatch = jest.fn();
-      const mockedGetState = jest.fn(() => ({
-        currentSummitState: {
-          currentSummit: "SSS"
-        },
-        sponsorFormItemsListState: {
-          currentPage: 1,
-          perPage: 10,
-          order: "asc",
-          orderDir: 1,
-          hideArchived: false
-        }
-      }));
+        store.dispatch(getSponsorForms("", 2, 50, "id", 1, false, []));
+        await flushPromises();
 
-      const params = {
-        formId: "AAA",
-        itemId: "III"
-      };
-
-      const spyOnGetAccessTokenSafely = jest
-        .spyOn(UtilsMethods, "getAccessTokenSafely")
-        .mockImplementation(() => "access _token");
-      const spyOnSnackbarSuccessHandler = jest.spyOn(
-        BaseActions,
-        "snackbarSuccessHandler"
-      );
-
-      await deleteSponsorFormItem(params.formId, params.itemId)(
-        mockedDispatch,
-        mockedGetState
-      );
-
-      // gets acces token safely
-      expect(spyOnGetAccessTokenSafely).toHaveBeenCalled();
-      // calls delete request
-      expect(OpenStackUiCoreActions.deleteRequest).toHaveBeenCalled();
-      // shows snackbar
-      expect(spyOnSnackbarSuccessHandler).toHaveBeenCalled();
+        expect(getRequest).toHaveBeenCalled();
+        expect(getRequest).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          {
+            hideArchived: false,
+            order: "id",
+            orderDir: 1,
+            currentPage: 2,
+            perPage: 50,
+            term: ""
+          }
+        );
+      });
     });
   });
 });

@@ -106,7 +106,7 @@ export const SPONSOR_FORM_ITEM_UNARCHIVED = "SPONSOR_FORM_ITEM_UNARCHIVED";
 export const getSponsorForms =
   (
     term = "",
-    page = DEFAULT_CURRENT_PAGE,
+    currentPage = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
@@ -127,7 +127,7 @@ export const getSponsorForms =
     }
 
     const params = {
-      page,
+      page: currentPage,
       fields: "id,code,name,level,expire_date,is_archived",
       relations: "items",
       per_page: perPage,
@@ -157,7 +157,7 @@ export const getSponsorForms =
       createAction(RECEIVE_SPONSOR_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term, hideArchived }
+      { order, orderDir, currentPage, perPage, term, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
