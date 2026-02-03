@@ -144,6 +144,21 @@ const SponsorFormsTab = ({
     );
   };
 
+  const handleSaveFormFromTemplate = (entity) => {
+    saveSponsorManagedForm(entity).then(() => {
+      const { perPage, order, orderDir } = managedForms;
+      getSponsorManagedForms(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
+      setOpenPopup(null);
+    });
+  };
+
   const baseColumns = (name) => [
     {
       columnKey: "name",
@@ -340,13 +355,14 @@ const SponsorFormsTab = ({
         />
       </div>
 
-      <AddSponsorFormTemplatePopup
-        open={openPopup === "template"}
-        onClose={() => setOpenPopup(null)}
-        onSubmit={saveSponsorManagedForm}
-        sponsor={sponsor}
-        summitId={summitId}
-      />
+      {openPopup === "template" && (
+        <AddSponsorFormTemplatePopup
+          onClose={() => setOpenPopup(null)}
+          onSubmit={handleSaveFormFromTemplate}
+          sponsor={sponsor}
+          summitId={summitId}
+        />
+      )}
 
       <CustomizedFormPopup
         formId={customFormEdit?.id || null}
