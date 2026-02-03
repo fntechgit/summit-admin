@@ -110,12 +110,16 @@ const SponsorItemDialog = ({
     }
   };
 
-  const getMediaInputValue = () =>
-    initialEntity.images?.length > 0
-      ? initialEntity.images.map((img) => ({
-          ...img,
-          filename: img.filename ?? img.file_path ?? img.file_url
-        }))
+  const getMediaInputValue = () => initialEntity.images?.length > 0
+      ? initialEntity.images.map((img) => {
+          const selectedFilename =
+            img.filename ?? img.file_path ?? img.file_url;
+          const filename = `${selectedFilename}?buster=${Date.now()}`;
+          return {
+            ...img,
+            filename
+          };
+        })
       : [];
 
   const handleClose = () => {
