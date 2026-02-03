@@ -104,6 +104,9 @@ const MuiSponsorInput = ({
     helpers.setValue(theValue);
   };
 
+  const errorMessage =
+    error && (typeof error === "string" ? error : error[Object.keys(error)[0]]);
+
   return (
     <Autocomplete
       open={open}
@@ -128,7 +131,7 @@ const MuiSponsorInput = ({
           placeholder={placeholder}
           variant="outlined"
           error={Boolean(error)}
-          helperText={error || ""}
+          helperText={errorMessage || ""}
           slotProps={{
             ...params.InputProps,
             inputLabel: { shrink: false },
