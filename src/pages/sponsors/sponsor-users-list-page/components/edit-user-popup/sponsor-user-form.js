@@ -40,10 +40,14 @@ const SponsorUserForm = ({ user, summitId, userGroups, onSubmit }) => {
           id: yup.number(),
           sponsor: yup
             .object({
-              id: yup.number().required(),
-              name: yup.string().required()
+              id: yup
+                .number()
+                .required(T.translate("sponsor_users.error_misssing_sponsor")),
+              name: yup
+                .string()
+                .required(T.translate("sponsor_users.error_misssing_sponsor"))
             })
-            .required("Must provide"),
+            .required(T.translate("sponsor_users.error_misssing_sponsor")),
           groups: yup.array().of(yup.number())
         })
       ),
