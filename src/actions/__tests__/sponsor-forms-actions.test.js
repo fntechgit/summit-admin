@@ -10,11 +10,11 @@ import { getSponsorForms } from "../sponsor-forms-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
-    __esModule: true,
-    ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
-    postRequest: jest.fn(),
-    getRequest: jest.fn()
-  }));
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  postRequest: jest.fn(),
+  getRequest: jest.fn()
+}));
 
 describe("Sponsor Forms Actions", () => {
   describe("GetSponsorForms", () => {
@@ -60,7 +60,7 @@ describe("Sponsor Forms Actions", () => {
       jest.restoreAllMocks();
     });
     describe("On perPage change", () => {
-      it("should request first page if perPage is greater than the total items count", async () => {
+      it("should request page specified", async () => {
         const store = mockStore({
           currentSummitState: {
             currentSummit: {}
@@ -83,38 +83,8 @@ describe("Sponsor Forms Actions", () => {
             hideArchived: false,
             order: "id",
             orderDir: 1,
-            page: 1,
+            currentPage: 2,
             perPage: 50,
-            term: ""
-          }
-        );
-      });
-
-      it("should request user selected page if perPage is lower than the total items count", async () => {
-        const store = mockStore({
-          currentSummitState: {
-            currentSummit: {}
-          },
-          sponsorFormsListState: {
-            totalCount: 50
-          }
-        });
-
-        store.dispatch(getSponsorForms("", 2, 20, "id", 1, false, []));
-        await flushPromises();
-
-        expect(getRequest).toHaveBeenCalled();
-        expect(getRequest).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-          {
-            hideArchived: false,
-            order: "id",
-            orderDir: 1,
-            page: 2,
-            perPage: 20,
             term: ""
           }
         );
