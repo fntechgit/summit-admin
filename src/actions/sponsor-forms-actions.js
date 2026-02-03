@@ -114,9 +114,8 @@ export const getSponsorForms =
     sponsorshipTypesId = []
   ) =>
   async (dispatch, getState) => {
-    const { currentSummitState, sponsorFormsListState } = getState();
+    const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
-    const { totalCount } = sponsorFormsListState;
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 
@@ -127,11 +126,8 @@ export const getSponsorForms =
       filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
     }
 
-    // Resets page to avoid backend error.
-    const page = perPage > totalCount ? 1 : currentPage;
-
     const params = {
-      page,
+      page: currentPage,
       fields: "id,code,name,level,expire_date,is_archived",
       relations: "items",
       per_page: perPage,
@@ -161,7 +157,7 @@ export const getSponsorForms =
       createAction(RECEIVE_SPONSOR_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term, hideArchived }
+      { order, orderDir, currentPage, perPage, term, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
