@@ -111,22 +111,16 @@ export const formMetafieldsValidation = () =>
         }),
       type: yup.string().oneOf(METAFIELD_TYPES),
       is_required: yup.boolean(),
-      minimum_quantity: yup
-        .number()
-        .nullable()
-        .when("type", {
-          is: (type) => type === "Quantity",
-          then: (schema) => schema.required(T.translate("validation.required")),
-          otherwise: (schema) => schema
-        }),
-      maximum_quantity: yup
-        .number()
-        .nullable()
-        .when("type", {
-          is: (type) => type === "Quantity",
-          then: (schema) => schema.required(T.translate("validation.required")),
-          otherwise: (schema) => schema
-        }),
+      minimum_quantity: positiveNumberValidation().when("type", {
+        is: (type) => type === "Quantity",
+        then: (schema) => schema.required(T.translate("validation.required")),
+        otherwise: (schema) => schema
+      }),
+      maximum_quantity: positiveNumberValidation().when("type", {
+        is: (type) => type === "Quantity",
+        then: (schema) => schema.required(T.translate("validation.required")),
+        otherwise: (schema) => schema
+      }),
       values: yup.array().when("type", {
         is: (type) => fieldTypesWithOptions.includes(type),
         then: (schema) =>

@@ -32,7 +32,16 @@ export const DEFAULT_ENTITY = {
   instructions: "",
   items: [],
   materials: [],
-  meta_fields: []
+  meta_fields: [
+    {
+      name: "",
+      type: "Text",
+      is_required: false,
+      minimum_quantity: 0,
+      maximum_quantity: 0,
+      values: []
+    }
+  ]
 };
 
 const DEFAULT_STATE = {
