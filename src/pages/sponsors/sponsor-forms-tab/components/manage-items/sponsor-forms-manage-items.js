@@ -377,11 +377,13 @@ const SponsorFormsManageItems = ({
         />
       )}
 
-      <SponsorFormItemFromInventoryPopup
-        open={openPopup === "add_item_inventory"}
-        onSave={handleAddFromInventory}
-        onClose={handleClose}
-      />
+      {openPopup === "add_item_inventory" && (
+        <SponsorFormItemFromInventoryPopup
+          open={openPopup === "add_item_inventory"}
+          onSave={handleAddFromInventory}
+          onClose={handleClose}
+        />
+      )}
     </Box>
   );
 };
