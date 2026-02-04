@@ -35,6 +35,7 @@ import MuiTable from "../../../components/mui/table/mui-table";
 import SearchInput from "../../../components/mui/search-input";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import PageTemplatePopup from "./page-template-popup";
+import PageTemplateClonePopup from "./page-template-clone-popup";
 
 const PageTemplateListPage = ({
   pageTemplates,
@@ -52,6 +53,7 @@ const PageTemplateListPage = ({
   deletePageTemplate
 }) => {
   const [pageTemplateId, setPageTemplateId] = useState(null);
+  const [openCloneDialog, setOpenCloneDialog] = useState(false);
 
   useEffect(() => {
     getPageTemplates();
@@ -103,7 +105,7 @@ const PageTemplateListPage = ({
   };
 
   const handleClonePageTemplate = () => {
-    console.log("CLONE PAGE");
+    setOpenCloneDialog(true);
   };
 
   const handleSavePageTemplate = (entity) => {
@@ -266,6 +268,10 @@ const PageTemplateListPage = ({
         open={!!pageTemplateId}
         onClose={() => setPageTemplateId(null)}
         onSave={handleSavePageTemplate}
+      />
+      <PageTemplateClonePopup
+        open={openCloneDialog}
+        onClose={() => setOpenCloneDialog(false)}
       />
     </div>
   );

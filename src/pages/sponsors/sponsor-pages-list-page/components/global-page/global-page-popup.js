@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Dialog } from "@mui/material";
-import SelectPagesDialog from "./select-pages-dialog";
+import SelectPageTemplateDialog from "../../../../../components/select-page-template-dialog";
 import SelectSponsorshipsDialog from "../../../sponsor-forms-list-page/components/global-template/select-sponsorships-dialog";
 import {
   cloneGlobalPage,
@@ -40,9 +40,10 @@ const GlobalPagePopup = ({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth={dialogSize} fullWidth>
       {stage === "pages" && (
-        <SelectPagesDialog
+        <SelectPageTemplateDialog
           onSave={handleOnSelectTemplates}
           onClose={handleClose}
+          isMulti
         />
       )}
       {stage === "sponsorships" && (

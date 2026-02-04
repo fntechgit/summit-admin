@@ -13,9 +13,9 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import DragAndDropList from "../../../components/mui/dnd-list";
-import showConfirmDialog from "../../../components/mui/showConfirmDialog";
-import { PAGES_MODULE_KINDS } from "../../../utils/constants";
+import DragAndDropList from "../../../../components/mui/dnd-list";
+import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
+import { PAGES_MODULE_KINDS } from "../../../../utils/constants";
 import InfoModule from "./modules/page-template-info-module";
 import DocumentDownloadModule from "./modules/page-template-document-download-module";
 import MediaRequestModule from "./modules/page-template-media-request-module";

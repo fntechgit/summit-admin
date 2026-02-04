@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { Grid2, Box, InputLabel } from "@mui/material";
 
-import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
+import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
 
 const InfoModule = ({ baseName, index }) => {
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;

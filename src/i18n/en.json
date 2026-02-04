@@ -3965,6 +3965,7 @@
       "max_file_size": "Max File Size (MB)",
       "allowed_formats": "Allowed Formats",
       "module_remove_warning": "Are you sure you want to delete {name}"
-    }
+    },
+    "clone_success": "Page template cloned successfully."
   }
 }
