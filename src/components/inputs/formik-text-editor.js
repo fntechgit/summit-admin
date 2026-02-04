@@ -1,18 +1,24 @@
 import React from "react";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
-import { useField } from "formik";
+import { useFormikContext } from "formik";
+import normalizeJoditEmpty from "./utils/normalizeJoditEmpty";
 
 const FormikTextEditor = ({ name, ...props }) => {
-  const [field, meta, helpers] = useField(name);
+  const { values, errors, touched, setFieldValue, setFieldTouched } =
+    useFormikContext();
 
   return (
     <TextEditorV3
       name={name}
       id={name}
-      value={field.value}
-      onChange={(e) => helpers.setValue(e.target.value)}
-      onBlur={() => helpers.setTouched(true)}
-      error={meta.touched && Boolean(meta.error) ? meta.error : ""}
+      value={values[name]}
+      onChange={(e) => {
+        const stringValue = normalizeJoditEmpty(e.target.value);
+
+        setFieldValue(name, stringValue);
+      }}
+      onBlur={() => setFieldTouched(name, true)}
+      error={touched?.[name] && errors?.[name] ? errors?.[name] : ""}
       license={process.env.JODIT_LICENSE_KEY}
       {...props}
     />
