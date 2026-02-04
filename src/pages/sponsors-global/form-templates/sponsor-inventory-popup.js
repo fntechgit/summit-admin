@@ -116,7 +116,7 @@ const SponsorItemDialog = ({
           const filename = img.filename ?? img.file_path ?? img.file_url;
           return {
             ...img,
-            filename: filename.concat("?buster=", Date.now())
+            filename: filename.concat("?t=", Date?.now())
           };
         })
       : [];
