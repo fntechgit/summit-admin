@@ -25,7 +25,7 @@ const DEFAULT_STATE = {
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
-  order: "start_date",
+  order: "id",
   orderDir: 1,
   totalSelectionPlans: 0,
   term: ""
