@@ -22,6 +22,7 @@ import AdditionalInputList from "../../../components/mui/formik-inputs/additiona
 import useScrollToError from "../../../hooks/useScrollToError";
 import {
   formMetafieldsValidation,
+  requiredHTMLValidation,
   requiredStringValidation
 } from "../../../utils/yup";
 
@@ -53,7 +54,7 @@ const FormTemplateDialog = ({
     validationSchema: yup.object().shape({
       code: requiredStringValidation(),
       name: requiredStringValidation(),
-      instructions: requiredStringValidation(),
+      instructions: requiredHTMLValidation(),
       meta_fields: formMetafieldsValidation()
     }),
     enableReinitialize: true,

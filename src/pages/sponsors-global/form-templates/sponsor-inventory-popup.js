@@ -32,7 +32,8 @@ import {
   decimalValidation,
   requiredStringValidation,
   positiveNumberValidation,
-  formMetafieldsValidation
+  formMetafieldsValidation,
+  requiredHTMLValidation
 } from "../../../utils/yup";
 import AdditionalInputList from "../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
@@ -66,7 +67,7 @@ const SponsorItemDialog = ({
     validationSchema: yup.object().shape({
       code: requiredStringValidation(),
       name: requiredStringValidation(),
-      description: requiredStringValidation(),
+      description: requiredHTMLValidation(),
       images: yup.array(),
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),

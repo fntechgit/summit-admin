@@ -18,6 +18,7 @@ import {
   decimalValidation,
   formMetafieldsValidation,
   positiveNumberValidation,
+  requiredHTMLValidation,
   requiredStringValidation
 } from "../../../../utils/yup";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
@@ -38,7 +39,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
     validationSchema: yup.object({
       code: requiredStringValidation(),
       name: requiredStringValidation(),
-      description: requiredStringValidation(),
+      description: requiredHTMLValidation(),
       early_bird_rate: decimalValidation(),
       standard_rate: decimalValidation(),
       onsite_rate: decimalValidation(),
