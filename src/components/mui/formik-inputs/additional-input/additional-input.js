@@ -55,7 +55,7 @@ const AdditionalInput = ({
             my: 2
           }}
         >
-          <Grid2 container spacing={2} sx={{ alignItems: "end" }}>
+          <Grid2 container spacing={2} sx={{ alignItems: "start" }}>
             <Grid2 size={4}>
               <InputLabel htmlFor={buildFieldName("name")}>
                 {T.translate("additional_inputs.meta_field_title")}
