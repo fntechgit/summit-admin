@@ -30,7 +30,6 @@ import { FIVE_PER_PAGE } from "../../../../../utils/constants";
 import MuiFormikSelectGroup from "../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
 const AddSponsorFormTemplatePopup = ({
-  open,
   onClose,
   onSubmit,
   sponsorForms,
@@ -180,7 +179,7 @@ const AddSponsorFormTemplatePopup = ({
   ];
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("edit_sponsor.forms_tab.add_form_using_template")}
@@ -293,7 +292,6 @@ const AddSponsorFormTemplatePopup = ({
 };
 
 AddSponsorFormTemplatePopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired
 };
 
