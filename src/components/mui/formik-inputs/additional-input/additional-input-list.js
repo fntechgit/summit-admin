@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormikContext, getIn } from "formik";
 import T from "i18n-react";
 import AdditionalInput from "./additional-input";
@@ -19,8 +19,19 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue, entityId }) => {
 
   const metaFields = values[name] || [];
 
+  useEffect(() => {
+    if (metaFields.length === 0) {
+      setFieldValue(name, [
+        { ...DEFAULT_META_FIELD, _key: `draft_${Date.now()}` }
+      ]);
+    }
+  }, [metaFields.length]);
+
   const handleAddItem = () => {
-    setFieldValue(name, [...metaFields, { ...DEFAULT_META_FIELD }]);
+    setFieldValue(name, [
+      ...metaFields,
+      { ...DEFAULT_META_FIELD, _key: `draft_${Date.now()}` }
+    ]);
   };
 
   const handleRemove = async (item, index) => {
@@ -39,7 +50,7 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue, entityId }) => {
     const removeFromUI = () => {
       const newValues = metaFields.filter((_, idx) => idx !== index);
       if (newValues.length === 0) {
-        newValues.push({ ...DEFAULT_META_FIELD });
+        newValues.push({ ...DEFAULT_META_FIELD, _key: `draft_${Date.now()}` });
       }
       setFieldValue(name, newValues);
     };
@@ -80,7 +91,7 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue, entityId }) => {
     <>
       {metaFields.map((item, itemIdx) => (
         <AdditionalInput
-          key={item.id || `additional_input_${itemIdx}`}
+          key={item.id || item._key}
           item={item}
           itemIdx={itemIdx}
           baseName={name}

@@ -51,16 +51,7 @@ const SponsorItemDialog = ({
       ...initialEntity,
       meta_fields: initialEntity?.meta_fields?.length
         ? initialEntity.meta_fields
-        : [
-            {
-              name: "",
-              type: "Text",
-              is_required: false,
-              minimum_quantity: 0,
-              maximum_quantity: 0,
-              values: []
-            }
-          ],
+        : [],
       images: initialEntity?.images ?? []
     },
     validationSchema: yup.object().shape({

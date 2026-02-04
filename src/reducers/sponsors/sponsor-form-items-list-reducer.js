@@ -44,14 +44,7 @@ const DEFAULT_STATE = {
     quantity_limit_per_sponsor: "",
     default_quantity: "",
     images: [],
-    meta_fields: [
-      {
-        name: "",
-        type: "Text",
-        is_required: false,
-        values: []
-      }
-    ]
+    meta_fields: []
   }
 };
 
@@ -110,17 +103,7 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         early_bird_rate: amountFromCents(item.early_bird_rate),
         standard_rate: amountFromCents(item.standard_rate),
         onsite_rate: amountFromCents(item.onsite_rate),
-        meta_fields:
-          item.meta_fields.length > 0
-            ? item.meta_fields
-            : [
-                {
-                  name: "",
-                  type: "Text",
-                  is_required: false,
-                  values: []
-                }
-              ]
+        meta_fields: item.meta_fields.length > 0 ? item.meta_fields : []
       };
 
       return { ...state, currentItem };

@@ -26,16 +26,7 @@ const DEFAULT_ENTITY = {
   opens_at: "",
   expires_at: "",
   instructions: "",
-  meta_fields: [
-    {
-      name: "",
-      type: "Text",
-      is_required: false,
-      minimum_quantity: 0,
-      maximum_quantity: 0,
-      values: []
-    }
-  ]
+  meta_fields: []
 };
 
 const DEFAULT_STATE = {

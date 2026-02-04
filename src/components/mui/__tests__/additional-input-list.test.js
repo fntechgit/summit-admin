@@ -97,12 +97,13 @@ describe("AdditionalInputList", () => {
       expect(screen.getByTestId("item-name-2")).toHaveTextContent("Field 3");
     });
 
-    test("renders nothing when meta_fields is empty", () => {
+    test("renders a default metafield when meta_fields is empty", () => {
       renderWithFormik(defaultProps, { meta_fields: [] });
 
-      expect(
-        screen.queryByTestId("additional-input-0")
-      ).not.toBeInTheDocument();
+      // Should render one default empty field
+      expect(screen.getByTestId("additional-input-0")).toBeInTheDocument();
+      expect(screen.getByTestId("item-name-0")).toHaveTextContent("");
+      expect(screen.getByTestId("item-type-0")).toHaveTextContent("");
     });
   });
 

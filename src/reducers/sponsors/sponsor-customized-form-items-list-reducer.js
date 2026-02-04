@@ -40,14 +40,7 @@ const DEFAULT_ITEM_ENTITY = {
   quantity_limit_per_sponsor: 0,
   default_quantity: 0,
   images: [],
-  meta_fields: [
-    {
-      name: "",
-      type: "Text",
-      is_required: false,
-      values: []
-    }
-  ]
+  meta_fields: []
 };
 
 const DEFAULT_STATE = {
@@ -123,17 +116,7 @@ const sponsorCustomizedFormItemsListReducer = (
         early_bird_rate: amountFromCents(item.early_bird_rate),
         standard_rate: amountFromCents(item.standard_rate),
         onsite_rate: amountFromCents(item.onsite_rate),
-        meta_fields:
-          item.meta_fields.length > 0
-            ? item.meta_fields
-            : [
-                {
-                  name: "",
-                  type: "Text",
-                  is_required: false,
-                  values: []
-                }
-              ]
+        meta_fields: item.meta_fields.length > 0 ? item.meta_fields : []
       };
       return { ...state, currentItem };
     }
