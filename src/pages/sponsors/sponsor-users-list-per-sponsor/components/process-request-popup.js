@@ -122,10 +122,16 @@ const ProcessRequestPopup = ({
           variant="outlined"
           color="error"
           onClick={handleDelete}
+          disabled={!selected.length}
         >
           {T.translate("sponsor_users.process_request.dismiss_users")}
         </Button>
-        <Button fullWidth variant="contained" onClick={handleAdmit}>
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={handleAdmit}
+          disabled={!selected.length}
+        >
           {T.translate("sponsor_users.process_request.admit_users")}
         </Button>
       </DialogActions>
