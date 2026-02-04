@@ -19,8 +19,15 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue, entityId }) => {
 
   const metaFields = values[name] || [];
 
+  const uiMetaFields = metaFields.length
+    ? metaFields
+    : [{ ...DEFAULT_META_FIELD, _key: `draft_${Date.now()}` }];
+
   const handleAddItem = () => {
-    setFieldValue(name, [...metaFields, { ...DEFAULT_META_FIELD }]);
+    setFieldValue(name, [
+      ...metaFields,
+      { ...DEFAULT_META_FIELD, _key: `draft_${Date.now()}` }
+    ]);
   };
 
   const handleRemove = async (item, index) => {
@@ -39,7 +46,7 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue, entityId }) => {
     const removeFromUI = () => {
       const newValues = metaFields.filter((_, idx) => idx !== index);
       if (newValues.length === 0) {
-        newValues.push({ ...DEFAULT_META_FIELD });
+        newValues.push({ ...DEFAULT_META_FIELD, _key: `draft_${Date.now()}` });
       }
       setFieldValue(name, newValues);
     };
@@ -78,9 +85,9 @@ const AdditionalInputList = ({ name, onDelete, onDeleteValue, entityId }) => {
 
   return (
     <>
-      {metaFields.map((item, itemIdx) => (
+      {uiMetaFields.map((item, itemIdx) => (
         <AdditionalInput
-          key={item.id || `additional_input_${itemIdx}`}
+          key={item.id || item._key}
           item={item}
           itemIdx={itemIdx}
           baseName={name}
