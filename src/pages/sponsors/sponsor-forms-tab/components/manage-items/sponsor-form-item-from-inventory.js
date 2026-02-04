@@ -32,7 +32,6 @@ import MuiTable from "../../../../../components/mui/table/mui-table";
 import MenuButton from "../../../../../components/mui/menu-button";
 
 const SponsorFormItemFromInventoryPopup = ({
-  open,
   inventoryItems,
   term,
   order,
@@ -174,7 +173,7 @@ const SponsorFormItemFromInventoryPopup = ({
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={handleClose}
       maxWidth="md"
       fullWidth
@@ -268,7 +267,6 @@ const SponsorFormItemFromInventoryPopup = ({
 SponsorFormItemFromInventoryPopup.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
   inventoryItems: PropTypes.array.isRequired,
   term: PropTypes.string,
   order: PropTypes.string,
