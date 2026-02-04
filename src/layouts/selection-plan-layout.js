@@ -16,7 +16,6 @@ import { connect } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import EditSelectionPlanPage from "../pages/selection-plans/edit-selection-plan-page";
 import SelectionPlanListPage from "../pages/selection-plans/selection-plan-list-page";
 import SelectionPlanIdLayout from "./selection-plan-id-layout";
 
@@ -39,7 +38,7 @@ const SelectionPlanLayout = ({ match, currentSummit }) => (
         strict
         exact
         path={`${match.url}/new`}
-        component={EditSelectionPlanPage}
+        component={SelectionPlanIdLayout}
       />
       <Route
         path={`${match.url}/:selection_plan_id(\\d+)`}
