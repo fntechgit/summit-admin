@@ -58,16 +58,7 @@ const DEFAULT_STATE = {
     opens_at: null,
     expires_at: null,
     instructions: "",
-    meta_fields: [
-      {
-        name: "",
-        type: "Text",
-        is_required: false,
-        minimum_quantity: 0,
-        maximum_quantity: 0,
-        values: []
-      }
-    ]
+    meta_fields: []
   }
 };
 
@@ -133,19 +124,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         opens_at: form.opens_at,
         expires_at: form.expires_at,
         instructions: form.instructions,
-        meta_fields:
-          form.meta_fields.length > 0
-            ? form.meta_fields
-            : [
-                {
-                  name: "",
-                  type: "Text",
-                  is_required: false,
-                  minimum_quantity: 0,
-                  maximum_quantity: 0,
-                  values: []
-                }
-              ]
+        meta_fields: form.meta_fields.length > 0 ? form.meta_fields : []
       };
 
       return { ...state, formTemplate };

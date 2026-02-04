@@ -32,16 +32,7 @@ function createDefaultState() {
       quantity_limit_per_sponsor: "",
       default_quantity: "",
       images: [],
-      meta_fields: [
-        {
-          name: "",
-          type: "Text",
-          is_required: false,
-          minimum_quantity: 0,
-          maximum_quantity: 0,
-          values: []
-        }
-      ]
+      meta_fields: []
     }
   };
 }
@@ -195,16 +186,7 @@ describe("SponsorFormItemsListReducer", () => {
           early_bird_rate: "1.00",
           standard_rate: "1.00",
           onsite_rate: "1.00",
-          meta_fields: [
-            {
-              name: "",
-              type: "Text",
-              is_required: false,
-              minimum_quantity: 0,
-              maximum_quantity: 0,
-              values: []
-            }
-          ]
+          meta_fields: []
         }
       });
     });
