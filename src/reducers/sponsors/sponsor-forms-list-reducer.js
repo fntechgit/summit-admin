@@ -141,6 +141,8 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
                   name: "",
                   type: "Text",
                   is_required: false,
+                  minimum_quantity: 0,
+                  maximum_quantity: 0,
                   values: []
                 }
               ]

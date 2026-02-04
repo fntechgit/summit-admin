@@ -26,7 +26,16 @@ import {
   INVENTORY_ITEM_IMAGE_DELETED
 } from "../../actions/inventory-item-actions";
 
-export const DEFAULT_ENTITY = {
+const createDefaultMetaField = () => ({
+  name: "",
+  type: "Text",
+  is_required: false,
+  minimum_quantity: 0,
+  maximum_quantity: 0,
+  values: []
+});
+
+export const createDefaultEntity = () => ({
   id: 0,
   code: "",
   name: "",
@@ -38,20 +47,11 @@ export const DEFAULT_ENTITY = {
   standard_rate: 0,
   onsite_rate: 0,
   images: [],
-  meta_fields: [
-    {
-      name: "",
-      type: "Text",
-      is_required: false,
-      minimum_quantity: 0,
-      maximum_quantity: 0,
-      values: []
-    }
-  ]
-};
+  meta_fields: [createDefaultMetaField()]
+});
 
 const DEFAULT_STATE = {
-  entity: DEFAULT_ENTITY,
+  entity: createDefaultEntity(),
   errors: {}
 };
 
@@ -66,7 +66,7 @@ const inventoryItemReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case RESET_INVENTORY_ITEM_FORM: {
-      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+      return { ...state, entity: { ...createDefaultEntity() }, errors: {} };
     }
     case RECEIVE_INVENTORY_ITEM: {
       const entity = { ...payload.response };
@@ -84,7 +84,7 @@ const inventoryItemReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         entity: {
-          ...DEFAULT_ENTITY,
+          ...createDefaultEntity(),
           ...entity
         }
       };
@@ -106,7 +106,7 @@ const inventoryItemReducer = (state = DEFAULT_STATE, action) => {
       return {
         ...state,
         entity: {
-          ...DEFAULT_ENTITY,
+          ...createDefaultEntity(),
           ...entity,
           meta_fields: entity.meta_fields
         }
