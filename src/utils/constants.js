@@ -264,3 +264,9 @@ export const SPONSOR_USER_ASSIGNMENT_TYPE = {
   EXISTING: "existing",
   NEW: "new"
 };
+
+export const SPONSOR_MEDIA_UPLOAD_STATUS = {
+  PENDING: "PENDING",
+  DEADLINE: "DEADLINE ALERT",
+  COMPLETE: "COMPLETE"
+};

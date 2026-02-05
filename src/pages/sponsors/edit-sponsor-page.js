@@ -47,6 +47,7 @@ import SponsorPagesTab from "./sponsor-pages-tab";
 import SponsorFormsManageItems from "./sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items";
 import { SPONSOR_TABS } from "../../utils/constants";
 import SponsorPurchasesTab from "./sponsor-purchases-tab";
+import SponsorMediaUploadTab from "./sponsor-media-upload-tab";
 
 export const tabsToFragmentMap = [
   "general",
@@ -255,6 +256,9 @@ const EditSponsorPage = (props) => {
             summitId={currentSummit.id}
             history={history}
           />
+        </CustomTabPanel>
+        <CustomTabPanel value={selectedTab} index={3}>
+          <SponsorMediaUploadTab sponsor={entity} summitId={currentSummit.id} />
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={4}>
           {isNestedFormItemRoute ? (
