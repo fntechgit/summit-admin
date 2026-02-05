@@ -26,7 +26,7 @@ import {
 } from "../../actions/sponsor-forms-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
-const DEFAULT_STATE = {
+export const DEFAULT_STATE = {
   managedForms: {
     forms: [],
     order: "name",

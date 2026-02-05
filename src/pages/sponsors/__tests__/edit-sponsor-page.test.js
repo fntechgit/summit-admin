@@ -7,6 +7,7 @@ import EditSponsorPage, {
 } from "../edit-sponsor-page";
 import { renderWithRedux } from "../../../utils/test-utils";
 import { DEFAULT_STATE as currentSponsorDefaultState } from "../../../reducers/sponsors/sponsor-reducer";
+import { DEFAULT_STATE as currentSponsorFormsDefaultState } from "../../../reducers/sponsors/sponsor-page-forms-list-reducer";
 import {
   DEFAULT_ENTITY as defaultSummitEntity,
   DEFAULT_STATE as currentSummitDefaultState
@@ -17,6 +18,17 @@ jest.mock(
   "../sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items.js"
 );
 jest.mock("../sponsor-users-list-per-sponsor/index.js");
+
+jest.mock("../../../actions/sponsor-actions", () => ({
+  ...jest.requireActual("../../../actions/sponsor-actions"),
+  getSponsorAdvertisements: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  getSponsorMaterials: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  getSponsorSocialNetworks: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  getSponsorLeadReportSettingsMeta: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  getSponsorTiers: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  getExtraQuestionMeta: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  resetSponsorForm: jest.fn(() => ({ type: "MOCK_ACTION" }))
+}));
 
 describe("EditSponsorPage", () => {
   describe("getFragmentFromValue", () => {
@@ -65,7 +77,7 @@ describe("EditSponsorPage", () => {
 
   describe("Component", () => {
     const originalWindowLocation = window.location;
-    it("should change the url fragment on tab click", async () => {
+    it("should change the url fragment on tab click (same path)", async () => {
       delete window.location;
 
       Object.defineProperty(window, "location", {
@@ -73,23 +85,26 @@ describe("EditSponsorPage", () => {
         writable: true,
         value: {
           ...originalWindowLocation,
-          hash: "#general"
+          hash: "#general",
+          pathname: "/app/summits/12/sponsors/123"
         }
       });
 
+      const mockHistory = { push: jest.fn() };
+
       renderWithRedux(
         <EditSponsorPage
-          history={{}}
+          history={mockHistory}
           location={{
-            pathname: "/sponsor-forms/items"
+            pathname: "/app/summits/12/sponsors/123"
           }}
           match={{}}
         />,
         {
           initialState: {
             currentSummitState: {
-              currentSummit: defaultSummitEntity,
-              ...currentSummitDefaultState
+              ...currentSummitDefaultState,
+              currentSummit: { ...defaultSummitEntity, id: 12 }
             },
             loggedUserState: {
               member: {
@@ -97,17 +112,22 @@ describe("EditSponsorPage", () => {
               }
             },
             currentSummitSponsorshipListState: {
-              sponsorships: [],
-              currentPage: 1,
-              lastPage: 1,
-              perPage: 100,
-              order: "order",
-              orderDir: 1,
-              totalSponsorships: 0
+              sponsorships: {
+                sponsorships: [],
+                currentPage: 1,
+                lastPage: 1,
+                perPage: 100,
+                order: "order",
+                orderDir: 1,
+                totalSponsorships: 0
+              }
             },
             currentSponsorState: {
-              sponsorships: [],
-              ...currentSponsorDefaultState
+              ...currentSponsorDefaultState,
+              entity: { ...currentSponsorDefaultState.entity, id: 123 }
+            },
+            sponsorPageFormsListState: {
+              ...currentSponsorFormsDefaultState
             }
           }
         }
@@ -120,6 +140,69 @@ describe("EditSponsorPage", () => {
       });
 
       expect(window.location.hash).toBe("forms");
+      expect(mockHistory.push).not.toHaveBeenCalled();
+    });
+
+    it("should call history.push on tab click when on nested route", async () => {
+      delete window.location;
+
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        writable: true,
+        value: {
+          ...originalWindowLocation,
+          hash: "#forms",
+          pathname: "/app/summits/12/sponsors/44/sponsor-forms/15/items",
+          replace: jest.fn()
+        }
+      });
+
+      const mockHistory = { push: jest.fn() };
+
+      renderWithRedux(
+        <EditSponsorPage
+          history={mockHistory}
+          location={{
+            pathname: "/app/summits/12/sponsors/44/sponsor-forms/15/items"
+          }}
+          match={{}}
+        />,
+        {
+          initialState: {
+            currentSummitState: {
+              ...currentSummitDefaultState,
+              currentSummit: { ...defaultSummitEntity, id: 12 }
+            },
+            loggedUserState: {
+              member: { groups: {} }
+            },
+            currentSummitSponsorshipListState: {
+              sponsorships: [],
+              currentPage: 1,
+              lastPage: 1,
+              perPage: 100,
+              order: "order",
+              orderDir: 1,
+              totalSponsorships: 0
+            },
+            currentSponsorState: {
+              ...currentSponsorDefaultState,
+              entity: { ...currentSponsorDefaultState.entity, id: 44 }
+            }
+          }
+        }
+      );
+
+      const usersTab = screen.getByText("edit_sponsor.tab.users");
+
+      await act(async () => {
+        await userEvent.click(usersTab);
+      });
+
+      // nested route, so uses history.push
+      expect(mockHistory.push).toHaveBeenCalledWith(
+        "/app/summits/12/sponsors/44#users"
+      );
     });
 
     it("should change the tab rendered on fragment change", async () => {
