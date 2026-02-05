@@ -186,7 +186,7 @@ const SponsorItemDialog = ({
             <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
               <Grid2 size={4}>
                 <InputLabel htmlFor="early_bird_rate">
-                  {T.translate("edit_inventory_item.early_bird_rate")}
+                  {T.translate("edit_inventory_item.early_bird_rate")} *
                 </InputLabel>
                 <MuiFormikPriceField
                   variant="outlined"
@@ -196,7 +196,7 @@ const SponsorItemDialog = ({
               </Grid2>
               <Grid2 size={4}>
                 <InputLabel htmlFor="standard_rate">
-                  {T.translate("edit_inventory_item.standard_rate")}
+                  {T.translate("edit_inventory_item.standard_rate")} *
                 </InputLabel>
                 <MuiFormikPriceField
                   variant="outlined"
@@ -206,7 +206,7 @@ const SponsorItemDialog = ({
               </Grid2>
               <Grid2 size={4}>
                 <InputLabel htmlFor="onsite_rate">
-                  {T.translate("edit_inventory_item.onsite_rate")}
+                  {T.translate("edit_inventory_item.onsite_rate")} *
                 </InputLabel>
                 <MuiFormikPriceField
                   variant="outlined"
