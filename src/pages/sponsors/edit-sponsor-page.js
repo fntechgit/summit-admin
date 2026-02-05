@@ -122,7 +122,16 @@ const EditSponsorPage = (props) => {
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
-    window.location.hash = getFragmentFromValue(newValue);
+
+    const basePath = `/app/summits/${currentSummit.id}/sponsors/${entity.id}`;
+    const fragment = getFragmentFromValue(newValue);
+
+    // restore location if it comes from a nested route
+    if (location.pathname !== basePath) {
+      history.push(`${basePath}#${fragment}`);
+    } else {
+      window.location.hash = fragment;
+    }
   };
 
   useEffect(() => {
