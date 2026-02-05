@@ -1,6 +1,7 @@
 import * as yup from "yup";
 import T from "i18n-react";
 import { METAFIELD_TYPES, fieldTypesWithOptions } from "./constants";
+import normalizeHtmlString from "./normalize-html-string";
 
 export const addEmailListValidator = () => {
   yup.addMethod(yup.string, "emailList", function (errorMessage) {
@@ -87,17 +88,13 @@ export const rateCellValidation = () =>
 export const requiredStringValidation = () =>
   yup.string().required(T.translate("validation.required"));
 
-const stripHtmlTags = (htmlString) => htmlString.replace(/<[^>]*>/g, "");
-
 export const requiredHTMLValidation = () =>
   yup
     .string()
     .transform((value, originalValue) => {
       // If the value is a string, strip HTML tags
       if (typeof originalValue === "string") {
-        const strippedValue = stripHtmlTags(originalValue);
-        // Return the stripped value for subsequent validation
-        return strippedValue.trim(); // Also trim whitespace
+        return normalizeHtmlString(originalValue);
       }
       return value; // Handle non-string values appropriately
     })
