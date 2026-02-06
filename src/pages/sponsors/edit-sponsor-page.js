@@ -59,8 +59,8 @@ export const tabsToFragmentMap = [
 
 export const getFragmentFromValue = (index) => tabsToFragmentMap[index];
 
-export const getTabFromUrlFragment = () => {
-  const currentHash = window.location.hash.replace("#", "");
+export const getTabFromFragment = (location) => {
+  const currentHash = (location.hash || "").replace("#", "");
   const result = tabsToFragmentMap.indexOf(currentHash);
   if (result > -1) return result;
   return 0;
@@ -118,28 +118,36 @@ const EditSponsorPage = (props) => {
     getExtraQuestionMeta
   } = props;
 
-  const [selectedTab, setSelectedTab] = useState(getTabFromUrlFragment());
+  const [selectedTab, setSelectedTab] = useState(getTabFromFragment(location));
+
+  const isNestedFormItemRoute = !!match.params?.form_id;
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
-
-    const basePath = `/app/summits/${currentSummit.id}/sponsors/${entity.id}`;
     const fragment = getFragmentFromValue(newValue);
-
-    // restore location if it comes from a nested route
-    if (location.pathname !== basePath) {
-      history.push(`${basePath}#${fragment}`);
+    if (isNestedFormItemRoute) {
+      history.push(
+        `/app/summits/${currentSummit.id}/sponsors/${entity.id}#${fragment}`
+      );
     } else {
-      window.location.hash = fragment;
+      history.replace({ ...location, hash: `#${fragment}` });
     }
   };
 
   useEffect(() => {
-    const onHashChange = () => setSelectedTab(getTabFromUrlFragment());
-    window.addEventListener("hashchange", onHashChange);
-    // default call
-    if (!window.location.hash) handleTabChange(null, getTabFromUrlFragment());
-    return () => window.removeEventListener("hashchange", onHashChange);
+    setSelectedTab(getTabFromFragment(location));
+  }, [location.hash]);
+
+  useEffect(() => {
+    if (!location.hash) {
+      const defaultTab = isNestedFormItemRoute
+        ? SPONSOR_TABS.FORMS
+        : SPONSOR_TABS.GENERAL;
+      history.replace({
+        ...location,
+        hash: `#${getFragmentFromValue(defaultTab)}`
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -182,9 +190,7 @@ const EditSponsorPage = (props) => {
     }
   ];
 
-  const sponsorFormItemRoute =
-    location.pathname.includes("/sponsor-forms/") &&
-    location.pathname.includes("/items");
+  const sponsorFormItemRoute = !!match.params?.form_id;
 
   return (
     <Box>
@@ -205,7 +211,6 @@ const EditSponsorPage = (props) => {
                 key={t.value}
                 label={t.label}
                 value={t.value}
-                onClick={() => handleTabChange(null, t.value)}
                 sx={{
                   fontSize: "1.4rem",
                   lineHeight: "1.8rem",

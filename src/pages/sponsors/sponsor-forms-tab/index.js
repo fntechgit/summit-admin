@@ -113,7 +113,7 @@ const SponsorFormsTab = ({
 
   const handleManageItems = (item) => {
     history.push(
-      `/app/summits/${summitId}/sponsors/${sponsor.id}/sponsor-forms/${item.id}/items`
+      `/app/summits/${summitId}/sponsors/${sponsor.id}/sponsor-forms/${item.id}/items#forms`
     );
   };
 
