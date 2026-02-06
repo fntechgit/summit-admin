@@ -14,7 +14,9 @@
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   RECEIVE_SPONSOR_PAGES,
-  REQUEST_SPONSOR_PAGES
+  REQUEST_SPONSOR_PAGES,
+  SPONSOR_PAGE_ARCHIVED,
+  SPONSOR_PAGE_UNARCHIVED
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { PAGES_MODULE_KINDS } from "../../utils/constants";
@@ -80,6 +82,26 @@ const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
         currentPage,
         totalCount: total,
         lastPage
+      };
+    }
+    case SPONSOR_PAGE_ARCHIVED: {
+      const { pageId } = payload;
+      const pages = state.sponsorPages.map((page) =>
+        page.id === pageId ? { ...page, is_archived: true } : page
+      );
+      return {
+        ...state,
+        sponsorPages: [...pages]
+      };
+    }
+    case SPONSOR_PAGE_UNARCHIVED: {
+      const { pageId } = payload;
+      const pages = state.sponsorPages.map((page) =>
+        page.id === pageId ? { ...page, is_archived: false } : page
+      );
+      return {
+        ...state,
+        sponsorPages: [...pages]
       };
     }
     default:

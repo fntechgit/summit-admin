@@ -16,6 +16,8 @@ import {
   createAction,
   getRequest,
   postRequest,
+  putRequest,
+  deleteRequest,
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
@@ -30,6 +32,9 @@ import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_SPONSOR_PAGES = "REQUEST_SPONSOR_PAGES";
 export const RECEIVE_SPONSOR_PAGES = "RECEIVE_SPONSOR_PAGES";
+
+export const SPONSOR_PAGE_ARCHIVED = "SPONSOR_PAGE_ARCHIVED";
+export const SPONSOR_PAGE_UNARCHIVED = "SPONSOR_PAGE_UNARCHIVED";
 
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
 
@@ -132,3 +137,59 @@ export const cloneGlobalPage =
       })
       .finally(() => dispatch(stopLoading()));
   };
+
+export const archiveSponsorPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return putRequest(
+    null,
+    createAction(SPONSOR_PAGE_ARCHIVED)({ pageId }),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}/archive`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_pages.archived")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const unarchiveSponsorPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_PAGE_UNARCHIVED)({ pageId }),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}/archive`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("sponsor_pages.unarchived")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};

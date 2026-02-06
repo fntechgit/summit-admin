@@ -23,7 +23,11 @@ import {
   Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { getSponsorPages } from "../../../actions/sponsor-pages-actions";
+import {
+  getSponsorPages,
+  archiveSponsorPage,
+  unarchiveSponsorPage
+} from "../../../actions/sponsor-pages-actions";
 import { getSponsorForm } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
@@ -39,6 +43,8 @@ const SponsorPagesListPage = ({
   hideArchived,
   totalCount,
   getSponsorPages,
+  archiveSponsorPage,
+  unarchiveSponsorPage,
   getSponsorForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
@@ -77,10 +83,10 @@ const SponsorPagesListPage = ({
     // deleteSponsorForm(itemId);
   };
 
-  const handleArchiveItem = (item) => console.log("archive ITEM...", item);
-  // item.is_archived
-  //   ? unarchiveSponsorForm(item.id)
-  //   : archiveSponsorForm(item.id);
+  const handleArchiveItem = (item) =>
+    item.is_archived
+      ? unarchiveSponsorPage(item.id)
+      : archiveSponsorPage(item.id);
 
   const handleHideArchivedForms = (ev) => {
     getSponsorPages(
@@ -230,5 +236,7 @@ const mapStateToProps = ({ sponsorPagesListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorPages,
+  archiveSponsorPage,
+  unarchiveSponsorPage,
   getSponsorForm
 })(SponsorPagesListPage);
