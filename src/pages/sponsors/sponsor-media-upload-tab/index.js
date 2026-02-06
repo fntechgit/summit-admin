@@ -19,14 +19,23 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import DownloadIcon from "@mui/icons-material/Download";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { getSponsorMURequests } from "../../../actions/sponsor-mu-actions";
+import {
+  getSponsorMURequests,
+  getGeneralMURequests
+} from "../../../actions/sponsor-mu-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
 import { SPONSOR_MEDIA_UPLOAD_STATUS } from "../../../utils/constants";
 
-const SponsorMediaUploadTab = ({ sponsorRequests, getSponsorMURequests }) => {
+const SponsorMediaUploadTab = ({
+  sponsorRequests,
+  generalRequests,
+  getSponsorMURequests,
+  getGeneralMURequests
+}) => {
   useEffect(() => {
     getSponsorMURequests();
+    getGeneralMURequests();
   }, []);
 
   const handleSponsorPageChange = (page) => {
@@ -55,98 +64,134 @@ const SponsorMediaUploadTab = ({ sponsorRequests, getSponsorMURequests }) => {
     console.log("DOWNLOAD : ", item);
   };
 
-  const sponsorColumns = [
-    {
-      columnKey: "name",
-      header: T.translate("edit_sponsor.mu_tab.sponsor_request"),
-      sortable: true
-    },
-    {
-      columnKey: "add_on",
-      header: T.translate("edit_sponsor.mu_tab.add_on")
-    },
-    {
-      columnKey: "max_size",
-      header: T.translate("edit_sponsor.mu_tab.max_size")
-    },
-    {
-      columnKey: "format",
-      header: T.translate("edit_sponsor.mu_tab.format")
-    },
-    {
-      columnKey: "deadline",
-      header: T.translate("edit_sponsor.mu_tab.deadline"),
-      sortable: true
-    },
-    {
-      columnKey: "status",
-      header: T.translate("edit_sponsor.mu_tab.status"),
-      sortable: true,
-      render: (row) => (
-        <Chip
-          color={
-            row.status === SPONSOR_MEDIA_UPLOAD_STATUS.PENDING
-              ? "warning"
-              : "success"
+  const handleGeneralPageChange = (page) => {
+    const { perPage, order, orderDir } = sponsorRequests;
+    getSponsorMURequests(page, perPage, order, orderDir);
+  };
+
+  const handleGeneralSort = (key, dir) => {
+    const { currentPage, perPage } = sponsorRequests;
+    getSponsorMURequests(currentPage, perPage, key, dir);
+  };
+
+  const handleGeneralDelete = (itemId) => {
+    console.log("DELETE : ", itemId);
+  };
+
+  const handleGeneralView = (item) => {
+    console.log("VIEW : ", item);
+  };
+
+  const handleGeneralUpload = (item) => {
+    console.log("UPLOAD : ", item);
+  };
+
+  const handleGeneralDownload = (item) => {
+    console.log("DOWNLOAD : ", item);
+  };
+
+  const getTableColumns = (type) => {
+    const isSponsor = type === "sponsor";
+    const nameLabel = isSponsor
+      ? T.translate("edit_sponsor.mu_tab.sponsor_request")
+      : T.translate("edit_sponsor.mu_tab.general_request");
+    const onView = isSponsor ? handleSponsorView : handleGeneralView;
+    const onDownload = isSponsor
+      ? handleSponsorDownload
+      : handleGeneralDownload;
+    const onDelete = isSponsor ? handleSponsorDelete : handleGeneralDelete;
+    const onUpload = isSponsor ? handleSponsorUpload : handleGeneralUpload;
+
+    return [
+      {
+        columnKey: "name",
+        header: nameLabel,
+        sortable: true
+      },
+      {
+        columnKey: "add_on",
+        header: T.translate("edit_sponsor.mu_tab.add_on")
+      },
+      {
+        columnKey: "max_size",
+        header: T.translate("edit_sponsor.mu_tab.max_size")
+      },
+      {
+        columnKey: "format",
+        header: T.translate("edit_sponsor.mu_tab.format")
+      },
+      {
+        columnKey: "deadline",
+        header: T.translate("edit_sponsor.mu_tab.deadline"),
+        sortable: true
+      },
+      {
+        columnKey: "status",
+        header: T.translate("edit_sponsor.mu_tab.status"),
+        sortable: true,
+        render: (row) => (
+          <Chip
+            color={
+              row.status === SPONSOR_MEDIA_UPLOAD_STATUS.PENDING
+                ? "warning"
+                : "success"
+            }
+            label={row.status}
+          />
+        )
+      },
+      {
+        columnKey: "view",
+        header: "",
+        width: 80,
+        align: "center",
+        render: (row) => (
+          <IconButton
+            size="large"
+            disabled={!!row.file}
+            onClick={() => onView(row)}
+          >
+            <EditIcon fontSize="large" />
+          </IconButton>
+        )
+      },
+      {
+        columnKey: "download",
+        header: "",
+        width: 80,
+        align: "center",
+        render: (row) => (
+          <IconButton
+            size="large"
+            disabled={!!row.file}
+            onClick={() => onDownload(row)}
+          >
+            <DownloadIcon fontSize="large" />
+          </IconButton>
+        )
+      },
+      {
+        columnKey: "upload_delete",
+        header: "",
+        width: 80,
+        align: "center",
+        render: (row) => {
+          if (row.file) {
+            return (
+              <IconButton size="large" onClick={() => onDelete(row.id)}>
+                <DeleteIcon fontSize="large" />
+              </IconButton>
+            );
           }
-          label={row.status}
-        />
-      )
-    },
-    {
-      columnKey: "view",
-      header: "",
-      width: 80,
-      align: "center",
-      render: (row) => (
-        <IconButton
-          size="large"
-          disabled={!!row.file}
-          onClick={() => handleSponsorView(row)}
-        >
-          <EditIcon fontSize="large" />
-        </IconButton>
-      )
-    },
-    {
-      columnKey: "download",
-      header: "",
-      width: 80,
-      align: "center",
-      render: (row) => (
-        <IconButton
-          size="large"
-          disabled={!!row.file}
-          onClick={() => handleSponsorDownload(row)}
-        >
-          <DownloadIcon fontSize="large" />
-        </IconButton>
-      )
-    },
-    {
-      columnKey: "upload_delete",
-      header: "",
-      width: 80,
-      align: "center",
-      render: (row) => {
-        if (row.file) {
           return (
-            <IconButton
-              size="large"
-              onClick={() => handleSponsorDelete(row.id)}
-            >
-              <DeleteIcon fontSize="large" />
+            <IconButton size="large" onClick={() => onUpload(row)}>
+              <ArrowUpwardIcon fontSize="large" />
             </IconButton>
           );
         }
-        return (
-          <IconButton size="large" onClick={() => handleSponsorUpload(row)}>
-            <ArrowUpwardIcon fontSize="large" />
-          </IconButton>
-        );
       }
-    }
-  ];
+    ];
+  };
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -155,13 +200,13 @@ const SponsorMediaUploadTab = ({ sponsorRequests, getSponsorMURequests }) => {
         hideIcon
       />
       <div>
-        <Box component="span" sx={{ mb: 2 }}>
+        <Box component="div" sx={{ mb: 2 }}>
           {sponsorRequests.totalCount}{" "}
           {T.translate("edit_sponsor.mu_tab.media_upload")}
           {sponsorRequests.totalCount === 1 ? "" : "s"}
         </Box>
         <MuiTable
-          columns={sponsorColumns}
+          columns={getTableColumns("sponsor")}
           data={sponsorRequests.requests}
           options={{
             sortCol: sponsorRequests.order,
@@ -174,6 +219,26 @@ const SponsorMediaUploadTab = ({ sponsorRequests, getSponsorMURequests }) => {
           onSort={handleSponsorSort}
         />
       </div>
+      <div>
+        <Box component="div" sx={{ mb: 2 }}>
+          {generalRequests.totalCount}{" "}
+          {T.translate("edit_sponsor.mu_tab.media_upload")}
+          {generalRequests.totalCount === 1 ? "" : "s"}
+        </Box>
+        <MuiTable
+          columns={getTableColumns("general")}
+          data={generalRequests.requests}
+          options={{
+            sortCol: generalRequests.order,
+            sortDir: generalRequests.orderDir
+          }}
+          perPage={generalRequests.perPage}
+          totalRows={generalRequests.totalCount}
+          currentPage={generalRequests.currentPage}
+          onPageChange={handleGeneralPageChange}
+          onSort={handleGeneralSort}
+        />
+      </div>
     </Box>
   );
 };
@@ -183,5 +248,6 @@ const mapStateToProps = ({ sponsorPageMUListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSponsorMURequests
+  getSponsorMURequests,
+  getGeneralMURequests
 })(SponsorMediaUploadTab);
