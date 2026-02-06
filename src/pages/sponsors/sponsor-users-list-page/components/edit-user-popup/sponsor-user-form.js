@@ -8,6 +8,7 @@ import {
   Grid2
 } from "@mui/material";
 import T from "i18n-react";
+import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../../../hooks/useScrollToError";
@@ -29,7 +30,30 @@ const SponsorUserForm = ({ user, summitId, userGroups, onSubmit }) => {
   const formik = useFormik({
     initialValues: buildInitialValues(user),
     onSubmit,
-    enableReinitialize: true
+    enableReinitialize: true,
+    validationSchema: yup.object().shape({
+      id: yup.number(),
+      first_name: yup.string(),
+      email: yup.string(),
+      access_rights: yup.array().of(
+        yup.object({
+          id: yup.number(),
+          sponsor: yup
+            .mixed()
+            .test(
+              "sponsor-required",
+              T.translate("sponsor_users.error_missing_sponsor"),
+              (value) => value && value.id && value.name
+            ),
+          groups: yup.array().of(yup.number())
+        })
+      ),
+      is_active: yup.bool(),
+      access_rights_str: yup.array().of(yup.string()),
+      access_rights_id: yup.array().of(yup.number()),
+      sponsors_str: yup.array().of(yup.string()),
+      sponsor: yup.string()
+    })
   });
 
   // SCROLL TO ERROR
