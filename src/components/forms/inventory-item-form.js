@@ -267,7 +267,7 @@ const InventoryItemForm = ({
 
       <div className="row form-group">
         <div className="col-md-4">
-          <label>{T.translate("edit_inventory_item.early_bird_rate")}</label>
+          <label>{T.translate("edit_inventory_item.early_bird_rate")} *</label>
           <Input
             id="early_bird_rate"
             className="form-control"
@@ -278,7 +278,7 @@ const InventoryItemForm = ({
           />
         </div>
         <div className="col-md-4">
-          <label>{T.translate("edit_inventory_item.standard_rate")}</label>
+          <label>{T.translate("edit_inventory_item.standard_rate")} *</label>
           <Input
             id="standard_rate"
             className="form-control"
@@ -289,7 +289,7 @@ const InventoryItemForm = ({
           />
         </div>
         <div className="col-md-4">
-          <label>{T.translate("edit_inventory_item.onsite_rate")}</label>
+          <label>{T.translate("edit_inventory_item.onsite_rate")} *</label>
           <Input
             id="onsite_rate"
             className="form-control"
