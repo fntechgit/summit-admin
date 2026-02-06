@@ -81,15 +81,13 @@ describe("EditSponsorPage", () => {
               }
             },
             currentSummitSponsorshipListState: {
-              sponsorships: {
-                sponsorships: [],
-                currentPage: 1,
-                lastPage: 1,
-                perPage: 100,
-                order: "order",
-                orderDir: 1,
-                totalSponsorships: 0
-              }
+              sponsorships: [],
+              currentPage: 1,
+              lastPage: 1,
+              perPage: 100,
+              order: "order",
+              orderDir: 1,
+              totalSponsorships: 0
             },
             currentSponsorState: {
               ...currentSponsorDefaultState,
