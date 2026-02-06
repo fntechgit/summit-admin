@@ -46,8 +46,8 @@ export const getSponsorMURequests =
 
     const params = {
       page: currentPage,
-      // fields: "id,code,name,level,expire_date",
-      // relations: "add_ons",
+      // fields: "id,name,max_file_size,media_upload,file_type",
+      // relations: "media_upload,file_type",
       per_page: perPage,
       access_token: accessToken
     };
