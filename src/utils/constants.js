@@ -222,7 +222,6 @@ export const ROOM_OCCUPANCY_OPTIONS = [
   "OVERFLOW"
 ];
 
-
 export const BADGE_QR_MINIMUM_EXPECTED_FIELDS = 3;
 
 export const SPONSOR_TABS = {
@@ -251,4 +250,10 @@ export const PAGES_MODULE_KINDS = {
 export const PAGE_MODULES_MEDIA_TYPES = {
   FILE: "file",
   TEXT: "text"
+};
+
+export const SPONSOR_MEDIA_UPLOAD_STATUS = {
+  PENDING: "PENDING",
+  DEADLINE: "DEADLINE ALERT",
+  COMPLETE: "COMPLETE"
 };
