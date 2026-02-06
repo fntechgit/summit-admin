@@ -45,6 +45,7 @@ import SponsorBadgeScans from "./sponsor-badge-scans";
 import SponsorCartTab from "./sponsor-cart-tab";
 import SponsorFormsManageItems from "./sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items";
 import { SPONSOR_TABS } from "../../utils/constants";
+import SponsorPurchasesTab from "./sponsor-purchases-tab";
 
 export const tabsToFragmentMap = [
   "general",
@@ -248,6 +249,9 @@ const EditSponsorPage = (props) => {
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={5}>
           <SponsorCartTab sponsor={entity} summitId={currentSummit.id} />
+        </CustomTabPanel>
+        <CustomTabPanel value={selectedTab} index={6}>
+          <SponsorPurchasesTab sponsor={entity} summitId={currentSummit.id} />
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={7}>
           <SponsorBadgeScans sponsor={entity} />
