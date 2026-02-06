@@ -14,12 +14,14 @@
 import React, { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useField } from "formik";
 import { queryCompanies } from "../../../actions/company-actions";
 import { DEBOUNCE_WAIT_250 } from "../../../utils/constants";
+
+const filter = createFilterOptions();
 
 const CompanyInputMUI = ({
   id,
@@ -27,6 +29,7 @@ const CompanyInputMUI = ({
   placeholder,
   plainValue,
   isMulti = false,
+  allowCreate = false,
   ...rest
 }) => {
   const [field, meta, helpers] = useField(name);
@@ -34,6 +37,7 @@ const CompanyInputMUI = ({
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isDebouncing, setIsDebouncing] = useState(false);
 
   const { value } = field;
   const error = meta.touched && meta.error;
@@ -44,6 +48,7 @@ const CompanyInputMUI = ({
       return;
     }
 
+    setIsDebouncing(false);
     setLoading(true);
 
     const normalize = (results) =>
@@ -60,11 +65,13 @@ const CompanyInputMUI = ({
 
   useEffect(() => {
     if (inputValue) {
+      setIsDebouncing(true);
       const delayDebounce = setTimeout(() => {
         fetchOptions(inputValue);
       }, DEBOUNCE_WAIT_250);
       return () => clearTimeout(delayDebounce);
     }
+    setIsDebouncing(false);
   }, [inputValue]);
 
   const selectedValue = useMemo(() => {
@@ -96,11 +103,41 @@ const CompanyInputMUI = ({
           }));
     } else {
       theValue = plainValue
-        ? newValue.label
-        : { id: parseInt(newValue.value), name: newValue.label };
+        ? newValue.inputValue || newValue.label
+        : {
+            id: newValue.inputValue ? 0 : parseInt(newValue.value),
+            name: newValue.inputValue || newValue.label
+          };
     }
 
     helpers.setValue(theValue);
+  };
+
+  const handleFilterOptions = (options, params) => {
+    const filtered = filter(options, params);
+
+    if (!allowCreate || loading || isDebouncing) return filtered;
+
+    const { inputValue } = params;
+    const isExisting = options.some(
+      (option) => inputValue.toLowerCase() === option.label.toLowerCase()
+    );
+
+    if (inputValue !== "" && !isExisting) {
+      filtered.push({
+        inputValue,
+        value: null,
+        label: `Create "${inputValue}"`
+      });
+    }
+    return filtered;
+  };
+
+  const getOptionLabel = (option) => {
+    if (option.inputValue) {
+      return option.inputValue;
+    }
+    return option.label || "";
   };
 
   return (
@@ -110,16 +147,22 @@ const CompanyInputMUI = ({
       onClose={() => setOpen(false)}
       options={options}
       value={selectedValue}
-      getOptionLabel={(option) => option.label}
+      getOptionLabel={getOptionLabel}
       isOptionEqualToValue={(option, value) => option.value === value.value}
       onInputChange={(_, newInputValue) => {
         setInputValue(newInputValue);
       }}
+      filterOptions={handleFilterOptions}
       multiple={isMulti}
       onChange={handleChange}
       loading={loading}
       fullWidth
       popupIcon={<ExpandMoreIcon />}
+      renderOption={(props, option) => (
+        <li {...props} key={option.value ?? `create-${option.inputValue}`}>
+          {option.label}
+        </li>
+      )}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -156,7 +199,8 @@ CompanyInputMUI.propTypes = {
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   plainValue: PropTypes.bool,
-  isMulti: PropTypes.bool
+  isMulti: PropTypes.bool,
+  allowCreate: PropTypes.bool
 };
 
 export default CompanyInputMUI;

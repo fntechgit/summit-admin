@@ -216,6 +216,7 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
                 placeholder={T.translate(
                   "sponsor_users.process_request.select_company"
                 )}
+                allowCreate
               />
             </Grid2>
           </Grid2>
