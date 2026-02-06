@@ -155,9 +155,10 @@ const SponsorMediaUploadTab = ({ sponsorRequests, getSponsorMURequests }) => {
         hideIcon
       />
       <div>
-        <Box component="span">
+        <Box component="span" sx={{ mb: 2 }}>
           {sponsorRequests.totalCount}{" "}
           {T.translate("edit_sponsor.mu_tab.media_upload")}
+          {sponsorRequests.totalCount === 1 ? "" : "s"}
         </Box>
         <MuiTable
           columns={sponsorColumns}
