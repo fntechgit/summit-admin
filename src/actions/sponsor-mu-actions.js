@@ -27,6 +27,8 @@ import { snackbarErrorHandler } from "./base-actions";
 
 export const REQUEST_SPONSOR_MEDIA_UPLOADS = "REQUEST_SPONSOR_MEDIA_UPLOADS";
 export const RECEIVE_SPONSOR_MEDIA_UPLOADS = "RECEIVE_SPONSOR_MEDIA_UPLOADS";
+export const REQUEST_GENERAL_MEDIA_UPLOADS = "REQUEST_GENERAL_MEDIA_UPLOADS";
+export const RECEIVE_GENERAL_MEDIA_UPLOADS = "RECEIVE_GENERAL_MEDIA_UPLOADS";
 
 export const getSponsorMURequests =
   (
@@ -62,6 +64,47 @@ export const getSponsorMURequests =
       createAction(REQUEST_SPONSOR_MEDIA_UPLOADS),
       createAction(RECEIVE_SPONSOR_MEDIA_UPLOADS),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/custom-media-request-modules`,
+      snackbarErrorHandler,
+      { order, orderDir, currentPage, perPage, summitTZ }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const getGeneralMURequests =
+  (
+    currentPage = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const summitTZ = currentSummit.time_zone.name;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      page: currentPage,
+      // fields: "id,name,max_file_size,media_upload,file_type",
+      expand: "media_upload,file_type",
+      per_page: perPage,
+      access_token: accessToken
+    };
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_GENERAL_MEDIA_UPLOADS),
+      createAction(RECEIVE_GENERAL_MEDIA_UPLOADS),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/managed-media-request-modules`,
       snackbarErrorHandler,
       { order, orderDir, currentPage, perPage, summitTZ }
     )(params)(dispatch).then(() => {

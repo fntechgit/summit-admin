@@ -15,12 +15,23 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
+  RECEIVE_GENERAL_MEDIA_UPLOADS,
   RECEIVE_SPONSOR_MEDIA_UPLOADS,
+  REQUEST_GENERAL_MEDIA_UPLOADS,
   REQUEST_SPONSOR_MEDIA_UPLOADS
 } from "../../actions/sponsor-mu-actions";
 
 const DEFAULT_STATE = {
   sponsorRequests: {
+    requests: [],
+    order: "name",
+    orderDir: 1,
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 10,
+    totalCount: 0
+  },
+  generalRequests: {
     requests: [],
     order: "name",
     orderDir: 1,
@@ -82,6 +93,55 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         sponsorRequests: {
           ...state.sponsorRequests,
+          requests,
+          currentPage,
+          totalCount: total,
+          lastPage
+        }
+      };
+    }
+    case REQUEST_GENERAL_MEDIA_UPLOADS: {
+      const { order, orderDir, page, summitTZ } = payload;
+
+      return {
+        ...state,
+        generalRequests: {
+          ...state.generalRequests,
+          order,
+          orderDir,
+          requests: [],
+          currentPage: page
+        },
+        summitTZ
+      };
+    }
+    case RECEIVE_GENERAL_MEDIA_UPLOADS: {
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
+
+      const requests = payload.response.data.map((a) => {
+        const expiresAt = a.expires_at
+          ? epochToMomentTimeZone(a.expires_at, state.summitTZ)?.format(
+              "YYYY/MM/DD"
+            )
+          : "N/A";
+
+        return {
+          id: a.id,
+          code: a.code,
+          name: a.name,
+          items_count: a.items_count,
+          expires_at: expiresAt
+        };
+      });
+
+      return {
+        ...state,
+        generalRequests: {
+          ...state.generalRequests,
           requests,
           currentPage,
           totalCount: total,
