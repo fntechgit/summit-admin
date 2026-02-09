@@ -36,6 +36,7 @@ import {
 } from "../../../utils/yup";
 import AdditionalInputList from "../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
+import { getMediaInputValue } from "../../../utils/methods";
 
 const SponsorItemDialog = ({
   open,
@@ -100,17 +101,6 @@ const SponsorItemDialog = ({
       onImageDeleted(initialEntity.id, imageFile.id);
     }
   };
-
-  const getMediaInputValue = () =>
-    initialEntity.images?.length > 0
-      ? initialEntity.images.map((img) => {
-          const filename = img.filename ?? img.file_path ?? img.file_url;
-          return {
-            ...img,
-            filename: filename.concat("?t=", Date?.now())
-          };
-        })
-      : [];
 
   const handleClose = () => {
     formik.resetForm();
@@ -283,7 +273,7 @@ const SponsorItemDialog = ({
                   id="image-upload"
                   name="image"
                   onUploadComplete={handleImageUploadComplete}
-                  value={getMediaInputValue()}
+                  value={getMediaInputValue(initialEntity)}
                   mediaType={mediaType}
                   onRemove={handleRemoveImage}
                   postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
