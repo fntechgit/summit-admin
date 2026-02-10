@@ -17,6 +17,7 @@ import {
   addIssAfterDateFieldValidator,
   formMetafieldsValidation,
   opensAtValidation,
+  requiredHTMLValidation,
   requiredStringValidation
 } from "../../../../../utils/yup";
 import DropdownCheckbox from "../../../../../components/mui/dropdown-checkbox";
@@ -51,7 +52,7 @@ const FormTemplateForm = ({
     initialValues: buildInitialValues(initialValues, summitTZ),
     validationSchema: yup.object({
       code: requiredStringValidation(),
-      instructions: requiredStringValidation(),
+      instructions: requiredHTMLValidation(),
       opens_at: opensAtValidation(),
       expires_at: yup
         .date(T.translate("validation.date"))

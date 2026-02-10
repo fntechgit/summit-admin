@@ -1,14 +1,14 @@
 import { expect, describe, it } from "@jest/globals";
-import normalizeJoditEmpty from "../normalizeJoditEmpty";
+import normalizeHtmlString from "../index";
 
-describe("normalizeJoditEmpty", () => {
+describe("normalizeHtmlString", () => {
   it("normalizes an empty string that is surrounded by html tags", () => {
     const inputString = "<p><br></p>";
-    expect(normalizeJoditEmpty(inputString)).toBe("");
+    expect(normalizeHtmlString(inputString)).toBe("");
   });
 
   it("normalizes a string with content is returned without modifications", () => {
     const inputString = "<p>This is a content strign</p>";
-    expect(normalizeJoditEmpty(inputString)).toBe(inputString);
+    expect(normalizeHtmlString(inputString)).toBe(inputString);
   });
 });
