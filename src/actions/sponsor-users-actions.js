@@ -344,6 +344,7 @@ export const processSponsorUserRequest = (request) => async (dispatch) => {
   )(params)(dispatch)
     .then(() => {
       dispatch(getSponsorUserRequests());
+      dispatch(getSponsorUsers());
       dispatch(
         snackbarSuccessHandler({
           title: T.translate("general.success"),
