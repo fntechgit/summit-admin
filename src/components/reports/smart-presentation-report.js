@@ -9,16 +9,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { Table } from "openstack-uicore-foundation/lib/components";
 import Select from "react-select";
-const Query = require("graphql-query-builder");
 import wrapReport from "./report-wrapper";
 import { flattenData } from "../../actions/report-actions";
 import { htmlToString, parseAndFormat } from "../../utils/methods";
+
+const Query = require("graphql-query-builder");
 
 const fieldNames = [
   { label: "Id", key: "id", simple: true },
@@ -72,25 +73,25 @@ class SmartPresentationReport extends React.Component {
     if (sortKey) {
       const querySortKey = this.translateSortKey(sortKey);
       const order = sortDir == 1 ? "" : "-";
-      filters.ordering = order + "" + querySortKey;
+      filters.ordering = `${order  }${  querySortKey}`;
     }
 
     if (showFields.includes("type_type")) {
       const type = new Query("type");
       type.find(["id", "type"]);
-      reportData.push({ type: type });
+      reportData.push({ type });
     }
 
     if (showFields.includes("category_title")) {
       const category = new Query("category");
       category.find(["id", "code", "title"]);
-      reportData.push({ category: category });
+      reportData.push({ category });
     }
 
     if (showFields.includes("speakers_currentCompany")) {
       const speakers = new Query("speakers");
       speakers.find(["currentCompany"]);
-      reportData.push({ speakers: speakers });
+      reportData.push({ speakers });
     }
 
     const allSimpleFields = fieldNames
@@ -104,7 +105,7 @@ class SmartPresentationReport extends React.Component {
     categoryStats.find(["key", "value"]);
 
     query.find([
-      { results: results },
+      { results },
       "totalCount",
       { extraStat: categoryStats }
     ]);
@@ -133,10 +134,10 @@ class SmartPresentationReport extends React.Component {
   }
 
   preProcessData(data, extraData, forExport = false) {
-    let { showFields } = this.state;
+    const { showFields } = this.state;
     const { currentSummit } = this.props;
 
-    let flatData = flattenData(data);
+    const flatData = flattenData(data);
 
     flatData.forEach((d) => {
       if (d.startDate)
@@ -160,7 +161,9 @@ class SmartPresentationReport extends React.Component {
         d.created = parseAndFormat(
           d.created,
           "YYYY-MM-DDTHH:mm:ss+00:00",
-          "America/Chicago"
+          "MM/DD/YYYY h:mma",
+          "America/Chicago",
+          currentSummit.time_zone_id
         );
 
       if (forExport) {
@@ -175,7 +178,7 @@ class SmartPresentationReport extends React.Component {
       { columnKey: "title", value: "Presentation" }
     ];
 
-    let showColumns = fieldNames
+    const showColumns = fieldNames
       .filter((f) => showFields.includes(f.key))
       .map((f2) => ({
         columnKey: f2.key,
@@ -188,29 +191,29 @@ class SmartPresentationReport extends React.Component {
   }
 
   render() {
-    let { data, totalCount, extraStat, sortKey, sortDir } = this.props;
-    let { showFields } = this.state;
-    let storedDataName = this.props.name;
+    const { data, totalCount, extraStat, sortKey, sortDir } = this.props;
+    const { showFields } = this.state;
+    const storedDataName = this.props.name;
 
     if (!data || storedDataName !== this.getName()) return <div />;
 
-    let report_options = {
+    const report_options = {
       sortCol: sortKey,
-      sortDir: sortDir,
+      sortDir,
       actions: {}
     };
 
-    let { reportData, tableColumns } = this.preProcessData(data, null);
+    const { reportData, tableColumns } = this.preProcessData(data, null);
 
-    let showFieldOptions = fieldNames.map((f) => ({
+    const showFieldOptions = fieldNames.map((f) => ({
       label: f.label,
       value: f.key
     }));
-    let showFieldSelection = fieldNames
+    const showFieldSelection = fieldNames
       .filter((f) => showFields.includes(f.key))
       .map((f2) => ({ label: f2.label, value: f2.key }));
 
-    let categoryStats = extraStat ? extraStat : [];
+    const categoryStats = extraStat || [];
 
     return (
       <div>
@@ -248,8 +251,8 @@ class SmartPresentationReport extends React.Component {
             </div>
           </div>
           <div className="row">
-            {categoryStats.map((cat, idx) => (
-              <div className="col-md-2" key={"cat_stat_" + idx}>
+            {categoryStats.map((cat) => (
+              <div className="col-md-2" key={`cat_stat_${  cat.key}`}>
                 {cat.key}: {cat.value}
               </div>
             ))}
