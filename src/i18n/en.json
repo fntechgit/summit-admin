@@ -2713,7 +2713,7 @@
       "admit_confirmation_title": "Admit Access Request",
       "admit_confirmation_body": "You are going to admit this user access request. Are you sure?",
       "delete_confirmation_title": "Dismiss Access Request",
-      "delete_confirmation_body": "You are going to permanently dismiss this user access request. Are you sure?"
+      "delete_confirmation_body": "Please verify you want to dismiss the selected user access request(s)."
     },
     "new_user": {
       "add_user": "Add User",
