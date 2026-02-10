@@ -67,7 +67,10 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
           is: SPONSOR_USER_ASSIGNMENT_TYPE.NEW,
           then: (schema) =>
             schema.required(T.translate("validation.required")).shape({
-              id: yup.number().required(),
+              id: yup
+                .number()
+                .min(0, T.translate("validation.required"))
+                .required(),
               name: yup.string().required()
             }),
           otherwise: (schema) => schema.notRequired()
