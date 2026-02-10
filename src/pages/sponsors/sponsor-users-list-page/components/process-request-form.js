@@ -33,6 +33,7 @@ const buildInitialValues = (data) => {
   normalized.access_rights = [];
   normalized.send_email = true;
 
+  normalized.sponsor_type = SPONSOR_USER_ASSIGNMENT_TYPE.NEW;
   if (data.company_id !== 0 && data.sponsor)
     normalized.sponsor_type = SPONSOR_USER_ASSIGNMENT_TYPE.EXISTING;
   else if (data.company_name)
