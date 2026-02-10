@@ -190,8 +190,6 @@ const EditSponsorPage = (props) => {
     }
   ];
 
-  const sponsorFormItemRoute = !!match.params?.form_id;
-
   return (
     <Box>
       <Container maxWidth="lg" sx={{ position: "relative" }}>
@@ -250,7 +248,7 @@ const EditSponsorPage = (props) => {
           <SponsorUsersListPerSponsorPage sponsor={entity} />
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={4}>
-          {sponsorFormItemRoute ? (
+          {isNestedFormItemRoute ? (
             <SponsorFormsManageItems match={match} />
           ) : (
             <SponsorFormsTab
