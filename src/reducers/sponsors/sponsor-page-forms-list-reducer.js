@@ -46,7 +46,7 @@ const DEFAULT_STATE = {
     totalCount: 0
   },
   term: "",
-  hideArchived: false,
+  showArchived: false,
   summitTZ: ""
 };
 
@@ -59,7 +59,7 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_MANAGED_FORMS: {
-      const { order, orderDir, page, term, summitTZ, hideArchived } = payload;
+      const { order, orderDir, page, term, summitTZ, showArchived } = payload;
 
       return {
         ...state,
@@ -72,11 +72,11 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
         },
         term,
         summitTZ,
-        hideArchived
+        showArchived
       };
     }
     case REQUEST_SPONSOR_CUSTOMIZED_FORMS: {
-      const { order, orderDir, page, term, summitTZ, hideArchived } = payload;
+      const { order, orderDir, page, term, summitTZ, showArchived } = payload;
 
       return {
         ...state,
@@ -89,7 +89,7 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
         },
         term,
         summitTZ,
-        hideArchived
+        showArchived
       };
     }
     case RECEIVE_SPONSOR_MANAGED_FORMS: {

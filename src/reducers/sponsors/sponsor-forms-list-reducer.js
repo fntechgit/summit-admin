@@ -35,7 +35,7 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  hideArchived: false,
+  showArchived: false,
   globalTemplates: {
     items: [],
     currentPage: 0,
@@ -71,7 +71,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_FORMS: {
-      const { order, orderDir, page, perPage, term, hideArchived } = payload;
+      const { order, orderDir, page, perPage, term, showArchived } = payload;
 
       return {
         ...state,
@@ -81,7 +81,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         currentPage: page,
         perPage,
         term,
-        hideArchived
+        showArchived
       };
     }
     case RECEIVE_SPONSOR_FORMS: {

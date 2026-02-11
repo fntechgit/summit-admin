@@ -230,6 +230,7 @@ const InventoryListPage = ({
               control={
                 <Checkbox
                   onChange={handleShowArchivedForms}
+                  checked={showArchived}
                   inputProps={{
                     "aria-label": T.translate(
                       "inventory_item_list.show_archived"

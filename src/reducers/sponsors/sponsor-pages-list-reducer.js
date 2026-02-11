@@ -30,7 +30,7 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  hideArchived: false
+  showArchived: false
 };
 
 const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
@@ -42,7 +42,7 @@ const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_PAGES: {
-      const { order, orderDir, page, term, hideArchived } = payload;
+      const { order, orderDir, page, term, showArchived } = payload;
 
       return {
         ...state,
@@ -51,7 +51,7 @@ const sponsorPagesListReducer = (state = DEFAULT_STATE, action) => {
         sponsorPages: [],
         currentPage: page,
         term,
-        hideArchived
+        showArchived
       };
     }
     case RECEIVE_SPONSOR_PAGES: {

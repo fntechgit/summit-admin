@@ -116,7 +116,7 @@ describe("SelectPageTemplateDialog", () => {
 
       renderWithStore();
 
-      expect(getPageTemplates).toHaveBeenCalledWith("", 1, 10, "id", 1, true);
+      expect(getPageTemplates).toHaveBeenCalledWith("", 1, 10, "id", 1);
     });
 
     test("displays initial selection count as 0", () => {
@@ -305,8 +305,7 @@ describe("SelectPageTemplateDialog", () => {
           1,
           10,
           "id",
-          1,
-          true
+          1
         );
       });
     });
@@ -363,7 +362,7 @@ describe("SelectPageTemplateDialog", () => {
       renderWithStore();
 
       // Initial call on mount
-      expect(getPageTemplates).toHaveBeenCalledWith("", 1, 10, "id", 1, true);
+      expect(getPageTemplates).toHaveBeenCalledWith("", 1, 10, "id", 1);
 
       // The actual sort interaction would be handled by MuiInfiniteTable
       // This test verifies the component is initialized with correct sort params
