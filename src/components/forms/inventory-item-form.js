@@ -22,7 +22,12 @@ import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/edit
 import Swal from "sweetalert2";
 import FormRepeater from "../form-repeater";
 import InventoryItemMetaFieldForm from "./inventory-item-meta-field-form";
-import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
+import {
+  scrollToError,
+  shallowEqual,
+  hasErrors,
+  getMediaInputValue
+} from "../../utils/methods";
 import {
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
   MAX_INVENTORY_IMAGES_UPLOAD_QTY,
@@ -99,14 +104,6 @@ const InventoryItemForm = ({
       onImageDeleted(entity.id, imageFile.id);
     }
   };
-
-  const getMediaInputValue = () =>
-    entity.images.length > 0
-      ? entity.images.map((img) => ({
-          ...img,
-          filename: img.filename ?? img.file_path ?? img.file_url
-        }))
-      : [];
 
   const handleSubmit = (ev) => {
     ev.preventDefault();
@@ -323,7 +320,7 @@ const InventoryItemForm = ({
           <UploadInputV2
             id="image"
             onUploadComplete={handleImageUploadComplete}
-            value={getMediaInputValue()}
+            value={getMediaInputValue(entity)}
             mediaType={mediaType}
             onRemove={handleRemoveImage}
             postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}

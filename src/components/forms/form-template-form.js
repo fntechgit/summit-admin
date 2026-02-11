@@ -22,7 +22,12 @@ import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/edit
 import Swal from "sweetalert2";
 import FormRepeater from "../form-repeater";
 import FormTemplateMetaFieldForm from "./form-template-meta-field-form";
-import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
+import {
+  scrollToError,
+  shallowEqual,
+  hasErrors,
+  getMediaInputValue
+} from "../../utils/methods";
 import {
   MAX_FORM_TEMPLATE_MATERIALS_UPLOAD_SIZE,
   MAX_FORM_TEMPLATE_MATERIALS_UPLOAD_QTY,
@@ -99,14 +104,6 @@ const FormTemplateForm = ({
       onMaterialDeleted(entity.id, materialFile.id);
     }
   };
-
-  const getMediaInputValue = () =>
-    entity.materials.length > 0
-      ? entity.materials.map((material) => ({
-          ...material,
-          filename: material.filename ?? material.file_path ?? material.file_url
-        }))
-      : [];
 
   const handleSubmit = (ev) => {
     ev.preventDefault();
@@ -247,7 +244,7 @@ const FormTemplateForm = ({
           <UploadInputV2
             id="material"
             onUploadComplete={handleMaterialUploadComplete}
-            value={getMediaInputValue()}
+            value={getMediaInputValue(entity, "materials")}
             mediaType={mediaType}
             onRemove={handleRemoveMaterial}
             postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
