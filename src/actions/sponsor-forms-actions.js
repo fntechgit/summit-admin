@@ -523,7 +523,7 @@ export const getSponsorManagedForms =
       createAction(RECEIVE_SPONSOR_MANAGED_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ }
+      { order, orderDir, page, term, summitTZ, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -630,7 +630,7 @@ export const getSponsorCustomizedForms =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ }
+      { order, orderDir, page, term, summitTZ, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
