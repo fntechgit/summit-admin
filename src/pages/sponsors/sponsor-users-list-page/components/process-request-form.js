@@ -21,6 +21,7 @@ import MuiSponsorInput from "../../../../components/mui/formik-inputs/mui-sponso
 import { titleCase } from "../../../../utils/methods";
 import MuiFormikSwitch from "../../../../components/mui/formik-inputs/mui-formik-switch";
 import SponsorshipsBySummitSelectMUI from "../../../../components/mui/formik-inputs/sponsorship-summit-select-mui";
+import { SPONSOR_USER_ASSIGNMENT_TYPE } from "../../../../utils/constants";
 
 const buildInitialValues = (data) => {
   const normalized = { ...data };
@@ -32,9 +33,11 @@ const buildInitialValues = (data) => {
   normalized.access_rights = [];
   normalized.send_email = true;
 
+  normalized.sponsor_type = SPONSOR_USER_ASSIGNMENT_TYPE.NEW;
   if (data.company_id !== 0 && data.sponsor)
-    normalized.sponsor_type = "existing";
-  else if (data.company_name) normalized.sponsor_type = "new";
+    normalized.sponsor_type = SPONSOR_USER_ASSIGNMENT_TYPE.EXISTING;
+  else if (data.company_name)
+    normalized.sponsor_type = SPONSOR_USER_ASSIGNMENT_TYPE.NEW;
 
   return normalized;
 };
@@ -50,7 +53,7 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
         .object()
         .nullable()
         .when("sponsor_type", {
-          is: "existing",
+          is: SPONSOR_USER_ASSIGNMENT_TYPE.EXISTING,
           then: (schema) =>
             schema.required(T.translate("validation.required")).shape({
               id: yup.number().required(),
@@ -62,10 +65,13 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
         .object()
         .nullable()
         .when("sponsor_type", {
-          is: "new",
+          is: SPONSOR_USER_ASSIGNMENT_TYPE.NEW,
           then: (schema) =>
             schema.required(T.translate("validation.required")).shape({
-              id: yup.number().required(),
+              id: yup
+                .number()
+                .min(0, T.translate("validation.required"))
+                .required(),
               name: yup.string().required()
             }),
           otherwise: (schema) => schema.notRequired()
@@ -79,7 +85,7 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
           })
         )
         .when("sponsor_type", {
-          is: "new",
+          is: SPONSOR_USER_ASSIGNMENT_TYPE.NEW,
           then: (schema) =>
             schema
               .min(1, T.translate("validation.required", { count: 1 }))
@@ -177,13 +183,13 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
             }}
             options={[
               {
-                value: "existing",
+                value: SPONSOR_USER_ASSIGNMENT_TYPE.EXISTING,
                 label: T.translate(
                   "sponsor_users.process_request.assign_to_existing"
                 )
               },
               {
-                value: "new",
+                value: SPONSOR_USER_ASSIGNMENT_TYPE.NEW,
                 label: T.translate(
                   "sponsor_users.process_request.assign_to_new"
                 )
@@ -194,7 +200,10 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
             <Grid2 size={6}>
               <MuiSponsorInput
                 name="sponsor"
-                disabled={formik.values.sponsor_type === "new"}
+                disabled={
+                  formik.values.sponsor_type ===
+                  SPONSOR_USER_ASSIGNMENT_TYPE.NEW
+                }
                 summitId={summit.id}
                 placeholder={T.translate(
                   "sponsor_users.process_request.select_sponsor"
@@ -204,15 +213,19 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
             <Grid2 size={6}>
               <CompanyInputMUI
                 name="company"
-                disabled={formik.values.sponsor_type === "existing"}
+                disabled={
+                  formik.values.sponsor_type ===
+                  SPONSOR_USER_ASSIGNMENT_TYPE.EXISTING
+                }
                 placeholder={T.translate(
                   "sponsor_users.process_request.select_company"
                 )}
+                allowCreate
               />
             </Grid2>
           </Grid2>
           <Divider sx={{ margin: "10px -16px 20px -16px" }} />
-          {formik.values.sponsor_type === "new" && (
+          {formik.values.sponsor_type === SPONSOR_USER_ASSIGNMENT_TYPE.NEW && (
             <>
               <Typography variant="h6" gutterBottom>
                 {T.translate("sponsor_users.process_request.show_details")}

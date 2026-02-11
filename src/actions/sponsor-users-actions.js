@@ -29,7 +29,8 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
-  DUMMY_ACTION
+  DUMMY_ACTION,
+  SPONSOR_USER_ASSIGNMENT_TYPE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
@@ -328,9 +329,11 @@ export const processSponsorUserRequest = (request) => async (dispatch) => {
     send_activation_email: request.send_email
   };
 
-  if (request.sponsor?.id) payload.sponsor_id = request.sponsor.id;
-  else {
-    if (request.company?.id) payload.company_id = request.company.id;
+  if (request.sponsor_type === SPONSOR_USER_ASSIGNMENT_TYPE.EXISTING)
+    payload.sponsor_id = request.sponsor.id;
+
+  if (request.sponsor_type === SPONSOR_USER_ASSIGNMENT_TYPE.NEW) {
+    if (request.company?.id > 0) payload.company_id = request.company.id;
     else payload.company_name = request.company.name;
     payload.sponsorship_types = request.tiers.map((st) => st.id);
   }
