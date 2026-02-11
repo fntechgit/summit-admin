@@ -13,6 +13,7 @@
 import {
   getRequest,
   createAction,
+  stopLoading,
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { CODE_200 } from "../utils/constants";
@@ -43,8 +44,20 @@ export const setSnackbarMessage = (message) => (dispatch) => {
 };
 
 export const snackbarErrorHandler = (err, res) => (dispatch, state) => {
+  const errors = err.response?.body?.errors;
+
+  if (Array.isArray(errors) && errors.length > 0) {
+    dispatch(stopLoading());
+
+    return setSnackbarMessage({
+      type: "warning",
+      html: errors.join("<br>"),
+      code: err.status || 0
+    })(dispatch, state);
+  }
+
   authErrorHandler(err, res, setSnackbarMessage)(dispatch, state);
-}
+};
 
 export const snackbarSuccessHandler = (message) => (dispatch, state) =>
   setSnackbarMessage({ ...message, type: "success", code: CODE_200 })(
