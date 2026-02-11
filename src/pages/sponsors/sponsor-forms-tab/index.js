@@ -86,7 +86,6 @@ const SponsorFormsTab = ({
 
   const handleCustomizedSort = (key, dir) => {
     const { currentPage, perPage } = customizedForms;
-
     getSponsorCustomizedForms(
       term,
       currentPage,
