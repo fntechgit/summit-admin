@@ -50,7 +50,7 @@ const SponsorFormsListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   totalCount,
   getSponsorForms,
   getSponsorForm,
@@ -69,7 +69,7 @@ const SponsorFormsListPage = ({
   }, [getSponsorForms, getSponsorships]);
 
   const handlePageChange = (page) => {
-    getSponsorForms(term, page, perPage, order, orderDir, hideArchived);
+    getSponsorForms(term, page, perPage, order, orderDir, showArchived);
   };
   const handlePerPageChange = (newPerPage) => {
     getSponsorForms(
@@ -78,7 +78,7 @@ const SponsorFormsListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
   const handleSort = (key, dir) => {
@@ -88,7 +88,7 @@ const SponsorFormsListPage = ({
       perPage,
       key,
       dir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -99,7 +99,7 @@ const SponsorFormsListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -122,7 +122,7 @@ const SponsorFormsListPage = ({
       ? unarchiveSponsorForm(item.id)
       : archiveSponsorForm(item.id);
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getSponsorForms(
       term,
       DEFAULT_CURRENT_PAGE,
@@ -364,13 +364,14 @@ const SponsorFormsListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={handleHideArchivedForms}
+                  checked={showArchived}
+                  onChange={handleShowArchivedForms}
                   inputProps={{
-                    "aria-label": T.translate("sponsor_forms.hide_archived")
+                    "aria-label": T.translate("sponsor_forms.show_archived")
                   }}
                 />
               }
-              label={T.translate("sponsor_forms.hide_archived")}
+              label={T.translate("sponsor_forms.show_archived")}
             />
           </FormGroup>
         </Grid2>

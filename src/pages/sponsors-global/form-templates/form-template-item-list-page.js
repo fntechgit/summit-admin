@@ -55,7 +55,7 @@ const FormTemplateItemListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   getInventoryItems,
   totalFormTemplateItems,
   cloneFromInventoryItem,
@@ -84,7 +84,7 @@ const FormTemplateItemListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
   }, []);
@@ -97,7 +97,7 @@ const FormTemplateItemListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -109,7 +109,7 @@ const FormTemplateItemListPage = ({
       perPage,
       key,
       dir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -137,7 +137,7 @@ const FormTemplateItemListPage = ({
           perPage,
           order,
           orderDir,
-          hideArchived
+          showArchived
         );
       })
       .catch((error) => {
@@ -153,7 +153,7 @@ const FormTemplateItemListPage = ({
       ? unarchiveFormTemplateItem(formTemplateId, item)
       : archiveFormTemplateItem(formTemplateId, item);
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getFormTemplateItems(
       formTemplateId,
       term,
@@ -174,7 +174,7 @@ const FormTemplateItemListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       )
     );
     setShowInventoryItemModal(false);
@@ -260,15 +260,16 @@ const FormTemplateItemListPage = ({
               <FormControlLabel
                 control={
                   <Checkbox
-                    onChange={handleHideArchivedForms}
+                    checked={showArchived}
+                    onChange={handleShowArchivedForms}
                     inputProps={{
                       "aria-label": T.translate(
-                        "form_template_item_list.hide_archived"
+                        "form_template_item_list.show_archived"
                       )
                     }}
                   />
                 }
-                label={T.translate("form_template_item_list.hide_archived")}
+                label={T.translate("form_template_item_list.show_archived")}
               />
             </FormGroup>
           </Grid2>

@@ -51,7 +51,7 @@ const FormTemplateListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   totalFormTemplates,
   currentFormTemplate,
   currentFormTemplateErrors,
@@ -80,13 +80,13 @@ const FormTemplateListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
     resetFormTemplateForm();
   }, []);
 
   const handlePageChange = (page) => {
-    getFormTemplates(term, page, perPage, order, orderDir, hideArchived);
+    getFormTemplates(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
@@ -96,12 +96,12 @@ const FormTemplateListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
   const handleSort = (key, dir) => {
-    getFormTemplates(term, currentPage, perPage, key, dir, hideArchived);
+    getFormTemplates(term, currentPage, perPage, key, dir, showArchived);
   };
 
   const handleSearch = (ev) => {
@@ -112,12 +112,12 @@ const FormTemplateListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     }
     // search on duplicate popup
     if (typeof ev === "string")
-      getFormTemplates(ev, currentPage, perPage, order, orderDir, hideArchived);
+      getFormTemplates(ev, currentPage, perPage, order, orderDir, showArchived);
   };
 
   const handleRowEdit = (row) => {
@@ -153,7 +153,7 @@ const FormTemplateListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
     setFormTemplateDuplicate(false);
     setFormTemplateFromDuplicatePopupOpen(false);
@@ -162,7 +162,7 @@ const FormTemplateListPage = ({
   const handleArchiveItem = (item) =>
     item.is_archived ? unarchiveFormTemplate(item) : archiveFormTemplate(item);
 
-  const handleHideArchivedForms = (value) => {
+  const handleShowArchivedForms = (value) => {
     getFormTemplates(
       term,
       DEFAULT_CURRENT_PAGE,
@@ -254,15 +254,16 @@ const FormTemplateListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={(ev) => handleHideArchivedForms(ev.target.checked)}
+                  onChange={(ev) => handleShowArchivedForms(ev.target.checked)}
+                  checked={showArchived}
                   inputProps={{
                     "aria-label": T.translate(
-                      "form_template_list.hide_archived"
+                      "form_template_list.show_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("form_template_list.hide_archived")}
+              label={T.translate("form_template_list.show_archived")}
             />
           </FormGroup>
 
