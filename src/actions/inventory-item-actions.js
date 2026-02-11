@@ -102,7 +102,7 @@ export const getInventoryItems =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    showArchived = false
   ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
@@ -115,7 +115,7 @@ export const getInventoryItems =
       filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
     }
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     const params = {
       page,
@@ -141,31 +141,41 @@ export const getInventoryItems =
       createAction(RECEIVE_INVENTORY_ITEMS),
       `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term, hideArchived }
+      { order, orderDir, page, perPage, term, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
 
-export const getInventoryItem = (inventoryItemId) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
+export const getInventoryItem =
+  (inventoryItemId, showArchived = false) =>
+  async (dispatch) => {
+    const accessToken = await getAccessTokenSafely();
 
-  dispatch(startLoading());
+    dispatch(startLoading());
 
-  const params = {
-    access_token: accessToken,
-    expand: "images,meta_fields,meta_fields.values"
+    const filter = [];
+
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
+
+    const params = {
+      access_token: accessToken,
+      expand: "images,meta_fields,meta_fields.values"
+    };
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_INVENTORY_ITEM),
+      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
   };
-
-  return getRequest(
-    null,
-    createAction(RECEIVE_INVENTORY_ITEM),
-    `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
 
 export const deleteInventoryItem = (inventoryItemId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();

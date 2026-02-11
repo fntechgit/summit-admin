@@ -14,7 +14,7 @@ import {
 function createDefaultState() {
   return {
     items: [],
-    hideArchived: false,
+    showArchived: false,
     order: "name",
     orderDir: 1,
     currentPage: 1,
@@ -70,7 +70,7 @@ describe("SponsorFormItemsListReducer", () => {
           order: "date",
           orderDir: 2,
           page: 10,
-          hideArchived: true
+          showArchived: true
         }
       });
 
@@ -79,7 +79,7 @@ describe("SponsorFormItemsListReducer", () => {
         order: "date",
         orderDir: 2,
         currentPage: 10,
-        hideArchived: true,
+        showArchived: true,
         items: []
       });
     });
@@ -204,13 +204,13 @@ describe("SponsorFormItemsListReducer", () => {
       result = SponsorFormItemsListReducer(
         {
           ...initialState,
-          hideArchived: true
+          showArchived: true
         },
         { type: RESET_SPONSOR_FORM_ITEM }
       );
       expect(result).toStrictEqual({
         ...initialState,
-        hideArchived: true
+        showArchived: true
       });
     });
   });

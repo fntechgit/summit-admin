@@ -44,7 +44,7 @@ const PageTemplateListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   totalPageTemplates,
   getPageTemplates,
   archivePageTemplate,
@@ -60,7 +60,7 @@ const PageTemplateListPage = ({
   }, []);
 
   const handlePageChange = (page) => {
-    getPageTemplates(term, page, perPage, order, orderDir, hideArchived);
+    getPageTemplates(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
@@ -70,12 +70,12 @@ const PageTemplateListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
   const handleSort = (key, dir) => {
-    getPageTemplates(term, currentPage, perPage, key, dir, hideArchived);
+    getPageTemplates(term, currentPage, perPage, key, dir, showArchived);
   };
 
   const handleSearch = (searchTerm) => {
@@ -85,11 +85,11 @@ const PageTemplateListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
-  const handleHideArchived = (ev) => {
+  const handleShowArchived = (ev) => {
     getPageTemplates(
       term,
       currentPage,
@@ -129,7 +129,7 @@ const PageTemplateListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       )
     );
   };
@@ -206,8 +206,13 @@ const PageTemplateListPage = ({
         >
           <FormGroup>
             <FormControlLabel
-              control={<Checkbox onChange={handleHideArchived} />}
-              label={T.translate("page_template_list.hide_archived")}
+              control={
+                <Checkbox
+                  checked={showArchived}
+                  onChange={handleShowArchived}
+                />
+              }
+              label={T.translate("page_template_list.show_archived")}
             />
           </FormGroup>
           <Grid2 size={4}>

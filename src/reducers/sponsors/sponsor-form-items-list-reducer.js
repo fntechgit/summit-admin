@@ -26,7 +26,7 @@ import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
   items: [],
-  hideArchived: false,
+  showArchived: false,
   order: "name",
   orderDir: 1,
   currentPage: 1,
@@ -57,7 +57,7 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_FORM_ITEMS: {
-      const { order, orderDir, page, hideArchived } = payload;
+      const { order, orderDir, page, showArchived } = payload;
 
       return {
         ...state,
@@ -65,7 +65,7 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         orderDir,
         items: [],
         currentPage: page,
-        hideArchived
+        showArchived
       };
     }
     case RECEIVE_SPONSOR_FORM_ITEMS: {

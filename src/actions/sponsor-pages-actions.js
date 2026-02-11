@@ -45,7 +45,7 @@ export const getSponsorPages =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false,
+    showArchived = false,
     sponsorshipTypesId = []
   ) =>
   async (dispatch, getState) => {
@@ -68,7 +68,7 @@ export const getSponsorPages =
       expand: "sponsorship_types"
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (sponsorshipTypesId?.length > 0) {
       const formattedSponsorships = sponsorshipTypesId.join("&&");
@@ -91,7 +91,7 @@ export const getSponsorPages =
       createAction(RECEIVE_SPONSOR_PAGES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages`,
       authErrorHandler,
-      { order, orderDir, page, term, hideArchived }
+      { order, orderDir, page, term, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

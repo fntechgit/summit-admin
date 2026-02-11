@@ -110,7 +110,7 @@ export const getSponsorForms =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false,
+    showArchived = false,
     sponsorshipTypesId = []
   ) =>
   async (dispatch, getState) => {
@@ -134,7 +134,7 @@ export const getSponsorForms =
       access_token: accessToken
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (sponsorshipTypesId?.length > 0) {
       const formattedSponsorships = sponsorshipTypesId.join("&&");
@@ -157,7 +157,7 @@ export const getSponsorForms =
       createAction(RECEIVE_SPONSOR_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
       authErrorHandler,
-      { order, orderDir, currentPage, perPage, term, hideArchived }
+      { order, orderDir, currentPage, perPage, term, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -257,7 +257,7 @@ export const getGlobalTemplates =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    showArchived = false
   ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
@@ -278,7 +278,7 @@ export const getGlobalTemplates =
       access_token: accessToken
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -479,7 +479,7 @@ export const getSponsorManagedForms =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    showArchived = false
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -506,7 +506,7 @@ export const getSponsorManagedForms =
       access_token: accessToken
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -523,7 +523,7 @@ export const getSponsorManagedForms =
       createAction(RECEIVE_SPONSOR_MANAGED_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ }
+      { order, orderDir, page, term, summitTZ, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -586,7 +586,7 @@ export const getSponsorCustomizedForms =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    showArchived = false
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -613,7 +613,7 @@ export const getSponsorCustomizedForms =
       access_token: accessToken
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -630,7 +630,7 @@ export const getSponsorCustomizedForms =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms`,
       authErrorHandler,
-      { order, orderDir, page, term, summitTZ }
+      { order, orderDir, page, term, summitTZ, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -671,7 +671,7 @@ export const getSponsorCustomizedFormItems =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    showArchived = false
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -695,7 +695,7 @@ export const getSponsorCustomizedFormItems =
       access_token: accessToken
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -712,7 +712,7 @@ export const getSponsorCustomizedFormItems =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-forms/${formId}/items`,
       authErrorHandler,
-      { term, order, orderDir, page, perPage, hideArchived }
+      { term, order, orderDir, page, perPage, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -951,7 +951,7 @@ export const getSponsorFormItems =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    showArchived = false
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -970,7 +970,7 @@ export const getSponsorFormItems =
       access_token: accessToken
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -987,7 +987,7 @@ export const getSponsorFormItems =
       createAction(RECEIVE_SPONSOR_FORM_ITEMS),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}/items`,
       authErrorHandler,
-      { order, orderDir, page, hideArchived }
+      { order, orderDir, page, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

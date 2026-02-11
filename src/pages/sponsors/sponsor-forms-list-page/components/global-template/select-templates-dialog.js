@@ -31,11 +31,11 @@ const SelectTemplatesDialog = ({
   const [selectedRows, setSelectedRows] = useState([]);
 
   useEffect(() => {
-    getGlobalTemplates("", 1, DEFAULT_PER_PAGE, "id", 1, true);
+    getGlobalTemplates("", 1, DEFAULT_PER_PAGE, "id", 1);
   }, []);
 
   const handleSort = (key, dir) => {
-    getGlobalTemplates(term, 1, DEFAULT_PER_PAGE, key, dir, true);
+    getGlobalTemplates(term, 1, DEFAULT_PER_PAGE, key, dir);
   };
 
   const handleLoadMore = () => {
@@ -45,8 +45,7 @@ const SelectTemplatesDialog = ({
         currentPage + 1,
         DEFAULT_PER_PAGE,
         order,
-        orderDir,
-        true
+        orderDir
       );
     }
   };
@@ -65,7 +64,7 @@ const SelectTemplatesDialog = ({
   };
 
   const handleOnSearch = (searchTerm) => {
-    getGlobalTemplates(searchTerm, 1, DEFAULT_PER_PAGE, "id", 1, true);
+    getGlobalTemplates(searchTerm, 1, DEFAULT_PER_PAGE, "id", 1);
   };
 
   const handleOnSave = () => {

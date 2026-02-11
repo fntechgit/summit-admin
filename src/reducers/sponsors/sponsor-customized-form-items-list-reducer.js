@@ -45,7 +45,7 @@ const DEFAULT_ITEM_ENTITY = {
 
 const DEFAULT_STATE = {
   items: [],
-  hideArchived: false,
+  showArchived: false,
   term: "",
   order: "name",
   orderDir: 1,
@@ -68,7 +68,7 @@ const sponsorCustomizedFormItemsListReducer = (
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS: {
-      const { term, order, orderDir, page, perPage, hideArchived } = payload;
+      const { term, order, orderDir, page, perPage, showArchived } = payload;
 
       return {
         ...state,
@@ -78,7 +78,7 @@ const sponsorCustomizedFormItemsListReducer = (
         items: [],
         currentPage: page,
         perPage,
-        hideArchived
+        showArchived
       };
     }
     case RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS: {

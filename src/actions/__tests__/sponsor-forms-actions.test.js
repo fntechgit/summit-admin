@@ -80,7 +80,7 @@ describe("Sponsor Forms Actions", () => {
           expect.anything(),
           expect.anything(),
           {
-            hideArchived: false,
+            showArchived: false,
             order: "id",
             orderDir: 1,
             currentPage: 2,
