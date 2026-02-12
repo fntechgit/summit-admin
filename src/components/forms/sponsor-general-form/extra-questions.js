@@ -82,7 +82,7 @@ const SponsorExtraQuestions = ({
         const saveValuePromises = valuesToSave.map((value) =>
           saveSponsorExtraQuestionValue(eq.id, value)
         );
-        Promise.all(saveValuePromises).finally(() =>
+        Promise.all(saveValuePromises).then(() =>
           handleCloseExtraQuestionPopup()
         );
       });
