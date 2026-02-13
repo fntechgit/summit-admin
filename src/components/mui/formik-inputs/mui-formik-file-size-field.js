@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
-import { useField, useFormikContext } from "formik";
+import { useField, useFormikContext, getIn } from "formik";
 import MuiFormikTextField from "./mui-formik-textfield";
 
 const BLOCKED_KEYS = ["e", "E", "+", "-", ".", ","];
@@ -12,11 +12,11 @@ const MuiFormikFilesizeField = ({ name, label, ...props }) => {
   const { initialValues } = useFormikContext();
 
   const displayValue =
-    field.value !== null && field.value !== ""
+    field.value !== null && field.value !== "" && field.value !== undefined
       ? Math.floor(field.value / BYTES_PER_MB)
       : "";
 
-  const emptyValue = initialValues[name] === null ? null : "";
+  const emptyValue = getIn(initialValues, name) === null ? null : "";
 
   const handleChange = (e) => {
     const mbValue = e.target.value;
