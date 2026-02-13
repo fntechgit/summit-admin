@@ -25,7 +25,7 @@ import SponsorSettingsPage from "../pages/sponsor_settings/sponsor-settings-page
 import SponsorFormsListPage from "../pages/sponsors/sponsor-forms-list-page";
 import SponsorFormItemListPage from "../pages/sponsors/sponsor-form-item-list-page";
 import SponsorUsersListPage from "../pages/sponsors/sponsor-users-list-page";
-import SponsorPagesListPage from "../pages/sponsors/sponsor-pages-list-page";
+import ShowPagesListPage from "../pages/sponsors/show-pages-list-page";
 
 const SponsorLayout = ({ match }) => (
   <div>
@@ -70,7 +70,7 @@ const SponsorLayout = ({ match }) => (
           <div>
             <Breadcrumb
               data={{
-                title: T.translate("sponsor_pages.pages"),
+                title: T.translate("show_pages.pages"),
                 pathname: props.match.url
               }}
             />
@@ -78,7 +78,7 @@ const SponsorLayout = ({ match }) => (
         )}
         strict
         exact
-        component={SponsorPagesListPage}
+        component={ShowPagesListPage}
       />
       <Route
         strict

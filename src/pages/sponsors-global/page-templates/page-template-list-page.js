@@ -50,7 +50,8 @@ const PageTemplateListPage = ({
   archivePageTemplate,
   unarchivePageTemplate,
   savePageTemplate,
-  deletePageTemplate
+  deletePageTemplate,
+  summitTZ
 }) => {
   const [pageTemplateId, setPageTemplateId] = useState(null);
   const [openCloneDialog, setOpenCloneDialog] = useState(false);
@@ -268,6 +269,7 @@ const PageTemplateListPage = ({
         open={!!pageTemplateId}
         onClose={() => setPageTemplateId(null)}
         onSave={handleSavePageTemplate}
+        summitTZ={summitTZ}
       />
       <PageTemplateClonePopup
         open={openCloneDialog}

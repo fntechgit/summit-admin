@@ -55,7 +55,10 @@ export const getPageTemplates =
     orderDir = DEFAULT_ORDER_DIR,
     hideArchived = false
   ) =>
-  async (dispatch) => {
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
+    const summitTZ = currentSummit.time_zone.name;
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 
@@ -93,7 +96,7 @@ export const getPageTemplates =
       createAction(RECEIVE_PAGE_TEMPLATES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term, hideArchived }
+      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
