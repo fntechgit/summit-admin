@@ -10,17 +10,17 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
 
   const handleRequestsPageChange = (page) => {
     const { perPage, order, orderDir } = requests;
-    getRequests(term, page, perPage, order, orderDir);
+    getRequests(null, term, page, perPage, order, orderDir);
   };
 
   const handlePerPageChange = (newPerPage) => {
     const { order, orderDir } = requests;
-    getRequests(term, 1, newPerPage, order, orderDir);
+    getRequests(null, term, 1, newPerPage, order, orderDir);
   };
 
   const handleRequestsSort = (key, dir) => {
     const { currentPage, perPage } = requests;
-    getRequests(term, currentPage, perPage, key, dir);
+    getRequests(null, term, currentPage, perPage, key, dir);
   };
 
   const handleProcessRequest = (row) => {
