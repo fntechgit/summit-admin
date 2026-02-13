@@ -105,7 +105,7 @@ describe("SelectPageTemplateDialog", () => {
       renderWithStore();
 
       expect(
-        screen.getByText("sponsor_pages.global_page_popup.title")
+        screen.getByText("show_pages.global_page_popup.title")
       ).toBeInTheDocument();
     });
 
@@ -136,7 +136,7 @@ describe("SelectPageTemplateDialog", () => {
       renderWithStore();
 
       expect(
-        screen.getByPlaceholderText("sponsor_pages.placeholders.search")
+        screen.getByPlaceholderText("show_pages.placeholders.search")
       ).toBeInTheDocument();
     });
 
@@ -144,7 +144,7 @@ describe("SelectPageTemplateDialog", () => {
       renderWithStore();
 
       const saveButton = screen.getByRole("button", {
-        name: "sponsor_pages.global_page_popup.add_selected"
+        name: "show_pages.global_page_popup.add_selected"
       });
       expect(saveButton).toBeDisabled();
     });
@@ -199,7 +199,7 @@ describe("SelectPageTemplateDialog", () => {
 
       const checkboxes = screen.getAllByRole("checkbox");
       const saveButton = screen.getByRole("button", {
-        name: "sponsor_pages.global_page_popup.add_selected"
+        name: "show_pages.global_page_popup.add_selected"
       });
 
       expect(saveButton).toBeDisabled();
@@ -220,7 +220,7 @@ describe("SelectPageTemplateDialog", () => {
       await userEvent.click(checkboxes[2]);
 
       const saveButton = screen.getByRole("button", {
-        name: "sponsor_pages.global_page_popup.add_selected"
+        name: "show_pages.global_page_popup.add_selected"
       });
       await userEvent.click(saveButton);
 
@@ -258,7 +258,7 @@ describe("SelectPageTemplateDialog", () => {
 
       const radioButtons = screen.getAllByRole("radio");
       const saveButton = screen.getByRole("button", {
-        name: "sponsor_pages.global_page_popup.add_selected"
+        name: "show_pages.global_page_popup.add_selected"
       });
 
       expect(saveButton).toBeDisabled();
@@ -277,7 +277,7 @@ describe("SelectPageTemplateDialog", () => {
       await userEvent.click(radioButtons[1]);
 
       const saveButton = screen.getByRole("button", {
-        name: "sponsor_pages.global_page_popup.add_selected"
+        name: "show_pages.global_page_popup.add_selected"
       });
       await userEvent.click(saveButton);
 
@@ -293,7 +293,7 @@ describe("SelectPageTemplateDialog", () => {
       renderWithStore();
 
       const searchInput = screen.getByPlaceholderText(
-        "sponsor_pages.placeholders.search"
+        "show_pages.placeholders.search"
       );
 
       await userEvent.type(searchInput, "Template");
