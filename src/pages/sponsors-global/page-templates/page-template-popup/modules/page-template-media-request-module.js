@@ -6,6 +6,7 @@ import { Grid2, Divider, InputLabel } from "@mui/material";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikDatepicker from "../../../../../components/mui/formik-inputs/mui-formik-datepicker";
 import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
+import MuiFormikFilesizeField from "../../../../../components/mui/formik-inputs/mui-formik-file-size-field";
 import { PAGE_MODULES_MEDIA_TYPES } from "../../../../../utils/constants";
 import MuiFormikAsyncAutocomplete from "../../../../../components/mui/formik-inputs/mui-formik-async-select";
 import { queryMediaFileTypes } from "../../../../../actions/media-file-type-actions";
@@ -67,9 +68,8 @@ const MediaRequestModule = ({ baseName, index }) => {
             <InputLabel htmlFor={buildFieldName("max_file_size")}>
               {T.translate("page_template_list.page_crud.max_file_size")}
             </InputLabel>
-            <MuiFormikTextField
+            <MuiFormikFilesizeField
               name={buildFieldName("max_file_size")}
-              type="number"
               margin="none"
               fullWidth
             />
