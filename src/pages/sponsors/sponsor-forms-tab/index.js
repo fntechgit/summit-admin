@@ -110,10 +110,14 @@ const SponsorFormsTab = ({
       ? unarchiveSponsorCustomizedForm(item.id)
       : archiveSponsorCustomizedForm(item.id);
 
-  const handleManageItems = (item) => {
+  const handleCustomizedFormManageItems = (item) => {
     history.push(
       `/app/summits/${summitId}/sponsors/${sponsor.id}/sponsor-forms/${item.id}/items#forms`
     );
+  };
+
+  const handleManagedFormManageItems = (item) => {
+    console.log("Managed Form Item Edit : ", item);
   };
 
   const handleCustomizedEdit = (item) => {
@@ -168,7 +172,7 @@ const SponsorFormsTab = ({
     });
   };
 
-  const baseColumns = (name) => [
+  const baseColumns = (name, manageItemsFn) => [
     {
       columnKey: "name",
       header: name,
@@ -215,7 +219,7 @@ const SponsorFormsTab = ({
           variant="text"
           color="inherit"
           size="small"
-          onClick={() => handleManageItems(row)}
+          onClick={() => manageItemsFn(row)}
         >
           Manage&nbsp;Items
         </Button>
@@ -225,7 +229,10 @@ const SponsorFormsTab = ({
   ];
 
   const managedFormsColumns = [
-    ...baseColumns(T.translate("edit_sponsor.forms_tab.managed_forms")),
+    ...baseColumns(
+      T.translate("edit_sponsor.forms_tab.managed_forms"),
+      handleManagedFormManageItems
+    ),
     {
       columnKey: "archive",
       header: "",
@@ -254,7 +261,8 @@ const SponsorFormsTab = ({
 
   const customizedFormsColumns = [
     ...baseColumns(
-      T.translate("edit_sponsor.forms_tab.sponsor_customized_forms")
+      T.translate("edit_sponsor.forms_tab.sponsor_customized_forms"),
+      handleCustomizedFormManageItems
     )
   ];
 
