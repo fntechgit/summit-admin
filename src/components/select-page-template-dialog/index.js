@@ -114,27 +114,27 @@ const SelectPageTemplateDialog = ({
     },
     {
       columnKey: "code",
-      header: T.translate("sponsor_pages.global_page_popup.code"),
+      header: T.translate("show_pages.global_page_popup.code"),
       sortable: true
     },
     {
       columnKey: "name",
-      header: T.translate("sponsor_pages.global_page_popup.name"),
+      header: T.translate("show_pages.global_page_popup.name"),
       sortable: true
     },
     {
       columnKey: "info_mod",
-      header: T.translate("sponsor_pages.global_page_popup.info_mod"),
+      header: T.translate("show_pages.global_page_popup.info_mod"),
       sortable: false
     },
     {
       columnKey: "download_mod",
-      header: T.translate("sponsor_pages.global_page_popup.download_mod"),
+      header: T.translate("show_pages.global_page_popup.download_mod"),
       sortable: false
     },
     {
       columnKey: "upload_mod",
-      header: T.translate("sponsor_pages.global_page_popup.upload_mod"),
+      header: T.translate("show_pages.global_page_popup.upload_mod"),
       sortable: false
     }
   ];
@@ -146,7 +146,7 @@ const SelectPageTemplateDialog = ({
         component="div"
       >
         <Typography variant="h5">
-          {T.translate("sponsor_pages.global_page_popup.title")}
+          {T.translate("show_pages.global_page_popup.title")}
         </Typography>
         <IconButton size="large" sx={{ p: 0 }} onClick={() => handleClose()}>
           <CloseIcon fontSize="large" />
@@ -162,7 +162,7 @@ const SelectPageTemplateDialog = ({
             <SearchInput
               onSearch={handleOnSearch}
               term={term}
-              placeholder={T.translate("sponsor_pages.placeholders.search")}
+              placeholder={T.translate("show_pages.placeholders.search")}
             />
           </Grid2>
         </Grid2>
@@ -187,7 +187,7 @@ const SelectPageTemplateDialog = ({
           fullWidth
           variant="contained"
         >
-          {T.translate("sponsor_pages.global_page_popup.add_selected")}
+          {T.translate("show_pages.global_page_popup.add_selected")}
         </Button>
       </DialogActions>
     </>

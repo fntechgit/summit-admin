@@ -2635,7 +2635,7 @@
       "items_added": "Items added successfully."
     }
   },
-  "sponsor_pages": {
+  "show_pages": {
     "pages": "Pages",
     "alert_info": "Note: These Pages will be visible to all sponsors of the selected level in this program.",
     "using_template": "Using Template",
