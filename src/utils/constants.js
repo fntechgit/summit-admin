@@ -163,6 +163,8 @@ export const LANGUAGE_CODE_LENGTH = 2;
 
 export const SLICE_TICKET_NUMBER = -15;
 
+export const BYTES_PER_MB = 1_048_576; // 1024 * 1024
+
 export const MARKETING_SETTING_TYPE_TEXT = "TEXT";
 export const MARKETING_SETTING_TYPE_TEXTAREA = "TEXTAREA";
 export const MARKETING_SETTING_TYPE_FILE = "FILE";
@@ -256,7 +258,7 @@ export const PURCHASE_STATUS = {
   PENDING: "Pending",
   PAID: "Paid",
   CANCELLED: "Cancelled"
-}
+};
 
 export const SPONSOR_USER_ASSIGNMENT_TYPE = {
   EXISTING: "existing",
