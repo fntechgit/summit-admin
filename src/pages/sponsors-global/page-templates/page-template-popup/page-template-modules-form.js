@@ -10,6 +10,7 @@ import {
   IconButton,
   Typography
 } from "@mui/material";
+import { connect } from "react-redux";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -19,8 +20,9 @@ import { PAGES_MODULE_KINDS } from "../../../../utils/constants";
 import InfoModule from "./modules/page-template-info-module";
 import DocumentDownloadModule from "./modules/page-template-document-download-module";
 import MediaRequestModule from "./modules/page-template-media-request-module";
+import { getAllMediaFileTypes } from "../../../../actions/media-file-type-actions";
 
-const PageModules = ({ name = "modules" }) => {
+const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
   const { values, setFieldValue } = useFormikContext();
   const modules = getIn(values, name) || [];
 
@@ -34,6 +36,10 @@ const PageModules = ({ name = "modules" }) => {
     }
     prevModulesLength.current = modules.length;
   }, [modules.length]);
+
+  useEffect(() => {
+    getAllMediaFileTypes();
+  }, []);
 
   const getModuleTitle = (kind) => {
     switch (kind) {
@@ -173,4 +179,6 @@ PageModules.propTypes = {
   name: PropTypes.string
 };
 
-export default PageModules;
+const mapStateToProps = () => {};
+
+export default connect(mapStateToProps, { getAllMediaFileTypes })(PageModules);

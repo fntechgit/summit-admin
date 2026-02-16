@@ -254,6 +254,11 @@ export const PAGE_MODULES_MEDIA_TYPES = {
   TEXT: "text"
 };
 
+export const PAGE_MODULES_DOWNLOAD = {
+  FILE: "file",
+  URL: "url"
+};
+
 export const PURCHASE_STATUS = {
   PENDING: "Pending",
   PAID: "Paid",
