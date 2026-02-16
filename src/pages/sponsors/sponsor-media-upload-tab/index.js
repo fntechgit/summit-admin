@@ -18,10 +18,10 @@ import { Box, Chip, IconButton } from "@mui/material";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import DownloadIcon from "@mui/icons-material/Download";
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
-  getSponsorMURequests,
-  getGeneralMURequests
+  getGeneralMURequests,
+  getSponsorMURequests
 } from "../../../actions/sponsor-mu-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
@@ -102,6 +102,19 @@ const SponsorMediaUploadTab = ({
     const onDelete = isSponsor ? handleSponsorDelete : handleGeneralDelete;
     const onUpload = isSponsor ? handleSponsorUpload : handleGeneralUpload;
 
+    const getChipColor = (status) => {
+      switch (status) {
+        case SPONSOR_MEDIA_UPLOAD_STATUS.DEADLINE_ALERT:
+          return "warning";
+        case SPONSOR_MEDIA_UPLOAD_STATUS.DEADLINE_MISSED:
+          return "error";
+        case SPONSOR_MEDIA_UPLOAD_STATUS.COMPLETE:
+          return "success";
+        default:
+          return "default";
+      }
+    };
+
     return [
       {
         columnKey: "name",
@@ -131,11 +144,8 @@ const SponsorMediaUploadTab = ({
         sortable: true,
         render: (row) => (
           <Chip
-            color={
-              row.status === SPONSOR_MEDIA_UPLOAD_STATUS.PENDING
-                ? "warning"
-                : "success"
-            }
+            variant="outlined"
+            color={getChipColor(row.status)}
             label={row.status}
           />
         )
@@ -148,10 +158,10 @@ const SponsorMediaUploadTab = ({
         render: (row) => (
           <IconButton
             size="large"
-            disabled={!!row.file}
+            disabled={!row.media_upload}
             onClick={() => onView(row)}
           >
-            <EditIcon fontSize="large" />
+            <VisibilityIcon fontSize="large" />
           </IconButton>
         )
       },
@@ -163,7 +173,7 @@ const SponsorMediaUploadTab = ({
         render: (row) => (
           <IconButton
             size="large"
-            disabled={!!row.file}
+            disabled={!row.media_upload}
             onClick={() => onDownload(row)}
           >
             <DownloadIcon fontSize="large" />
@@ -176,7 +186,7 @@ const SponsorMediaUploadTab = ({
         width: 80,
         align: "center",
         render: (row) => {
-          if (row.file) {
+          if (row.media_upload) {
             return (
               <IconButton size="large" onClick={() => onDelete(row.id)}>
                 <DeleteIcon fontSize="large" />

@@ -11,6 +11,7 @@
  * limitations under the License.
  * */
 
+import moment from "moment-timezone";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -20,6 +21,11 @@ import {
   REQUEST_GENERAL_MEDIA_UPLOADS,
   REQUEST_SPONSOR_MEDIA_UPLOADS
 } from "../../actions/sponsor-mu-actions";
+import { bytesToMb } from "../../utils/methods";
+import {
+  DEADLINE_ALERT_DAYS,
+  SPONSOR_MEDIA_UPLOAD_STATUS
+} from "../../utils/constants";
 
 const DEFAULT_STATE = {
   sponsorRequests: {
@@ -41,6 +47,39 @@ const DEFAULT_STATE = {
     totalCount: 0
   },
   summitTZ: ""
+};
+
+const mapMediaObject = (mediaObject, summitTZ) => {
+  const deadline = mediaObject.upload_deadline
+    ? epochToMomentTimeZone(mediaObject.upload_deadline, summitTZ)?.format(
+        "YYYY/MM/DD"
+      )
+    : "N/A";
+
+  let status = SPONSOR_MEDIA_UPLOAD_STATUS.COMPLETE;
+  if (!mediaObject.media_upload) {
+    if (mediaObject.upload_deadline < moment().unix()) {
+      status = SPONSOR_MEDIA_UPLOAD_STATUS.DEADLINE_MISSED;
+    } else if (
+      mediaObject.upload_deadline <
+      moment().add(DEADLINE_ALERT_DAYS, "days").unix()
+    ) {
+      status = SPONSOR_MEDIA_UPLOAD_STATUS.DEADLINE_ALERT;
+    } else {
+      status = SPONSOR_MEDIA_UPLOAD_STATUS.PENDING;
+    }
+  }
+
+  return {
+    id: mediaObject.id,
+    name: mediaObject.name,
+    add_on: mediaObject.add_ons.map((a) => a.name).join(", "),
+    max_size: `${bytesToMb(mediaObject.max_file_size)} MB`,
+    format: mediaObject.file_type?.allowed_extensions || "N/A",
+    media_upload: mediaObject.media_upload,
+    deadline,
+    status
+  };
 };
 
 const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
@@ -73,21 +112,9 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const requests = payload.response.data.map((a) => {
-        const expiresAt = a.expires_at
-          ? epochToMomentTimeZone(a.expires_at, state.summitTZ)?.format(
-              "YYYY/MM/DD"
-            )
-          : "N/A";
-
-        return {
-          id: a.id,
-          code: a.code,
-          name: a.name,
-          items_count: a.items_count,
-          expires_at: expiresAt
-        };
-      });
+      const requests = payload.response.data.map((a) =>
+        mapMediaObject(a, state.summitTZ)
+      );
 
       return {
         ...state,
@@ -122,21 +149,9 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const requests = payload.response.data.map((a) => {
-        const expiresAt = a.expires_at
-          ? epochToMomentTimeZone(a.expires_at, state.summitTZ)?.format(
-              "YYYY/MM/DD"
-            )
-          : "N/A";
-
-        return {
-          id: a.id,
-          code: a.code,
-          name: a.name,
-          items_count: a.items_count,
-          expires_at: expiresAt
-        };
-      });
+      const requests = payload.response.data.map((a) =>
+        mapMediaObject(a, state.summitTZ)
+      );
 
       return {
         ...state,

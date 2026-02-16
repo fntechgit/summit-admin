@@ -2505,6 +2505,7 @@
       "alert_info": "Here you can see the status of this Sponsor's Media Uploads. If an additional file upload is required, it must be requested from the specific page where it is needed.",
       "media_upload": "media upload",
       "sponsor_request": "Sponsor Specific Request",
+      "general_request": "General Media Request",
       "add_on": "Add-on",
       "max_size": "Max Size",
       "format": "Format",
