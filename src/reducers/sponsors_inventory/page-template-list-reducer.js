@@ -23,7 +23,7 @@ import { PAGES_MODULE_KINDS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   pageTemplates: [],
-  term: null,
+  term: "",
   order: "name",
   orderDir: 1,
   currentPage: 1,

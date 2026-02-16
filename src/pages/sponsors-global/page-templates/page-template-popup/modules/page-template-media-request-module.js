@@ -1,16 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { useFormikContext, getIn } from "formik";
-import { Grid2, Divider, InputLabel } from "@mui/material";
+import { connect } from "react-redux";
+import { getIn, useFormikContext } from "formik";
+import { Divider, Grid2, InputLabel, MenuItem } from "@mui/material";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikDatepicker from "../../../../../components/mui/formik-inputs/mui-formik-datepicker";
 import MuiFormikRadioGroup from "../../../../../components/mui/formik-inputs/mui-formik-radio-group";
 import { PAGE_MODULES_MEDIA_TYPES } from "../../../../../utils/constants";
-import MuiFormikAsyncAutocomplete from "../../../../../components/mui/formik-inputs/mui-formik-async-select";
-import { queryMediaFileTypes } from "../../../../../actions/media-file-type-actions";
+import MuiFormikSelect from "../../../../../components/mui/formik-inputs/mui-formik-select";
 
-const MediaRequestModule = ({ baseName, index }) => {
+const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
   const { values } = useFormikContext();
   const buildFieldName = (field) => `${baseName}[${index}].${field}`;
 
@@ -27,6 +27,11 @@ const MediaRequestModule = ({ baseName, index }) => {
       label: T.translate("page_template_list.page_crud.text_input")
     }
   ];
+
+  const fileTypeOptions = mediaFileTypes.map((ft) => ({
+    value: ft.id,
+    label: `${ft.name} (${ft.allowed_extensions?.join(", ")})`
+  }));
 
   return (
     <Grid2 container spacing={2} size={12}>
@@ -78,14 +83,24 @@ const MediaRequestModule = ({ baseName, index }) => {
             <InputLabel htmlFor={buildFieldName("file_type_id")}>
               {T.translate("page_template_list.page_crud.allowed_formats")}
             </InputLabel>
-            <MuiFormikAsyncAutocomplete
+            <MuiFormikSelect
               name={buildFieldName("file_type_id")}
-              queryFunction={queryMediaFileTypes}
-              formatOption={(item) => ({
-                value: item.id,
-                label: `${item.name} (${item.allowed_extensions?.join(", ")})`
-              })}
-            />
+              renderValue={(selected) => {
+                if (!selected || selected === "") {
+                  return <span style={{ color: "#aaa" }}>{placeholder}</span>;
+                }
+                const selectedOption = fileTypeOptions.find(
+                  (t) => t.value === selected
+                );
+                return selectedOption?.label || selected;
+              }}
+            >
+              {fileTypeOptions.map(({ value, label }) => (
+                <MenuItem key={`file-type-${value}`} value={value}>
+                  {label}
+                </MenuItem>
+              ))}
+            </MuiFormikSelect>
           </Grid2>
         </>
       )}
@@ -111,4 +126,8 @@ MediaRequestModule.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-export default MediaRequestModule;
+const mapStateToProps = ({ mediaUploadState }) => ({
+  mediaFileTypes: mediaUploadState.media_file_types
+});
+
+export default connect(mapStateToProps, {})(MediaRequestModule);
