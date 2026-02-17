@@ -4,6 +4,7 @@ import { IconButton } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MuiTable from "../../../../components/mui/table/mui-table";
 import ProcessRequestPopup from "./process-request-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
 const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
   const [processRequest, setProcessRequest] = useState(null);
@@ -15,7 +16,7 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
 
   const handlePerPageChange = (newPerPage) => {
     const { order, orderDir } = requests;
-    getRequests(null, term, 1, newPerPage, order, orderDir);
+    getRequests(null, term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
 
   const handleRequestsSort = (key, dir) => {
@@ -29,7 +30,8 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
 
   const handleRequestDelete = (itemId) => {
     onRequestDelete(itemId).then(() => {
-      getRequests();
+      const { perPage, order, orderDir } = requests;
+      getRequests(null, term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
     });
   };
 
