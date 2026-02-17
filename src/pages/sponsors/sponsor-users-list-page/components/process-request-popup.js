@@ -29,9 +29,11 @@ const ProcessRequestPopup = ({
   const [requestSponsor, setRequestSponsor] = useState(null);
   useEffect(() => {
     getUserGroups(1, MAX_PER_PAGE);
-    fetchSponsorByCompany(request.company_id, currentSummit.id).then(
-      (sponsor) => setRequestSponsor(sponsor)
-    );
+    if (request.company_id) {
+      fetchSponsorByCompany(request.company_id, currentSummit.id).then(
+        (sponsor) => setRequestSponsor(sponsor)
+      );
+    }
   }, []);
 
   const handleClose = () => {

@@ -28,7 +28,7 @@ const buildInitialValues = (data) => {
 
   normalized.name = data.requester_first_name;
   normalized.email = data.requester_email;
-  normalized.company = { id: data.company_id, name: data.company_name };
+  normalized.company = { id: data.company_id ?? 0, name: data.company_name };
   normalized.tiers = [];
   normalized.access_rights = [];
   normalized.send_email = true;
