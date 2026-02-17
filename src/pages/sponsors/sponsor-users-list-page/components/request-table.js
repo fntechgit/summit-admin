@@ -4,23 +4,24 @@ import { IconButton } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MuiTable from "../../../../components/mui/table/mui-table";
 import ProcessRequestPopup from "./process-request-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 
 const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
   const [processRequest, setProcessRequest] = useState(null);
 
   const handleRequestsPageChange = (page) => {
     const { perPage, order, orderDir } = requests;
-    getRequests(term, page, perPage, order, orderDir);
+    getRequests(null, term, page, perPage, order, orderDir);
   };
 
   const handlePerPageChange = (newPerPage) => {
     const { order, orderDir } = requests;
-    getRequests(term, 1, newPerPage, order, orderDir);
+    getRequests(null, term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
   };
 
   const handleRequestsSort = (key, dir) => {
     const { currentPage, perPage } = requests;
-    getRequests(term, currentPage, perPage, key, dir);
+    getRequests(null, term, currentPage, perPage, key, dir);
   };
 
   const handleProcessRequest = (row) => {
@@ -29,7 +30,8 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
 
   const handleRequestDelete = (itemId) => {
     onRequestDelete(itemId).then(() => {
-      getRequests();
+      const { perPage, order, orderDir } = requests;
+      getRequests(null, term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
     });
   };
 
