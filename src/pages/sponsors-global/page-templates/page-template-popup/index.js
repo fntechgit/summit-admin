@@ -88,6 +88,14 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
     type: yup.string().required(T.translate("validation.required")),
     upload_deadline: yup.date().required(T.translate("validation.required")),
     description: yup.string().required(T.translate("validation.required")),
+    max_file_size: yup.number().when("type", {
+      is: PAGE_MODULES_MEDIA_TYPES.FILE,
+      then: (schema) =>
+        schema
+          .min(1, T.translate("validation.number_positive"))
+          .required(T.translate("validation.required")),
+      otherwise: (schema) => schema.nullable()
+    }),
     file_type_id: yup.object().when("type", {
       is: PAGE_MODULES_MEDIA_TYPES.FILE,
       then: (schema) => schema.required(T.translate("validation.required")),
