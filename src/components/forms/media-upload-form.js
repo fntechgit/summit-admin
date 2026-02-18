@@ -14,7 +14,7 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import { Input, Dropdown } from "openstack-uicore-foundation/lib/components";
+import { Dropdown, Input } from "openstack-uicore-foundation/lib/components";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
@@ -103,6 +103,11 @@ class MediaUploadForm extends React.Component {
       .filter((t) => t.class_name === "PresentationType")
       .map((t) => ({ value: t.id, label: t.name }));
 
+    const mediaFileTypesDDL = mediaFileTypes.map((mft) => ({
+      value: mft.id,
+      label: mft.name
+    }));
+
     return (
       <form className="media-upload-form">
         <input type="hidden" id="id" value={entity.id} />
@@ -183,7 +188,7 @@ class MediaUploadForm extends React.Component {
               className="right-space"
               value={entity.type_id}
               placeholder={T.translate("media_upload.placeholders.select_type")}
-              options={mediaFileTypes}
+              options={mediaFileTypesDDL}
               onChange={this.handleChange}
             />
           </div>

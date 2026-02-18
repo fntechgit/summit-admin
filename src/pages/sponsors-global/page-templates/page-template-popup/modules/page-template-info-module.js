@@ -6,20 +6,16 @@ import { Grid2, Box, InputLabel } from "@mui/material";
 import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
 
 const InfoModule = ({ baseName, index }) => {
-  const buildFieldName = (field) => `${baseName}[${index}].${field}`;
+  const name = `${baseName}[${index}].content`;
 
   return (
     <Grid2 container spacing={2} size={12}>
-      <InputLabel htmlFor={buildFieldName("content")}>
+      <InputLabel htmlFor={name}>
         {T.translate("page_template_list.page_crud.info_content")}
       </InputLabel>
       <Grid2 size={12}>
         <Box width="100%">
-          <FormikTextEditor
-            name={buildFieldName("content")}
-            fullWidth
-            margin="none"
-          />
+          <FormikTextEditor name={name} fullWidth margin="none" />
         </Box>
       </Grid2>
     </Grid2>

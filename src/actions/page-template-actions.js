@@ -29,6 +29,7 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
+  PAGE_MODULES_DOWNLOAD,
   PAGES_MODULE_KINDS
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
@@ -48,7 +49,7 @@ export const PAGE_TEMPLATE_UNARCHIVED = "PAGE_TEMPLATE_UNARCHIVED";
 
 export const getPageTemplates =
   (
-    term = null,
+    term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
@@ -106,7 +107,7 @@ export const getPageTemplate = (formTemplateId) => async (dispatch) => {
 
   const params = {
     access_token: accessToken,
-    expand: "materials,meta_fields,meta_fields.values"
+    expand: "modules"
   };
 
   return getRequest(
@@ -160,8 +161,14 @@ const normalizeEntity = (entity) => {
         module.file_type_id?.value || module.file_type_id;
     }
 
-    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT && module.file) {
-      normalizedModule.file = module.file[0] || null;
+    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
+      if (module.type === PAGE_MODULES_DOWNLOAD.FILE) {
+        normalizedModule.file = module.file[0] || null;
+        delete normalizedModule.external_url;
+      } else {
+        delete normalizedModule.file;
+        delete normalizedModule.file_id;
+      }
     }
 
     delete normalizedModule._tempId;

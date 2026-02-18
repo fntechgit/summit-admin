@@ -45,7 +45,7 @@ const MuiFormikDatepicker = ({ name, label, required, ...props }) => {
 
 MuiFormikDatepicker.propTypes = {
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   required: PropTypes.bool
 };
 
