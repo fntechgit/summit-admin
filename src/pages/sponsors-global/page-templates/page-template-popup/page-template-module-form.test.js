@@ -2,6 +2,9 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Formik, Form, useFormikContext } from "formik";
+import { Provider } from "react-redux";
+import configureStore from "redux-mock-store";
+import thunk from "redux-thunk";
 import "@testing-library/jest-dom";
 import PageModules from "./page-template-modules-form";
 import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
@@ -10,8 +13,13 @@ import {
   PAGE_MODULES_MEDIA_TYPES
 } from "../../../../utils/constants";
 
+const mockStore = configureStore([thunk]);
+
 // Mocks
 jest.mock("../../../../components/mui/showConfirmDialog", () => jest.fn());
+jest.mock("../../../../actions/media-file-type-actions", () => ({
+  getAllMediaFileTypes: jest.fn(() => () => Promise.resolve())
+}));
 
 jest.mock(
   "../../../../components/inputs/formik-text-editor",
@@ -88,15 +96,23 @@ jest.mock(
     }
 );
 
-// Helper function to render the component with Formik
-const renderWithFormik = (initialValues = { modules: [] }) =>
-  render(
-    <Formik initialValues={initialValues} onSubmit={jest.fn()}>
-      <Form>
-        <PageModules name="modules" />
-      </Form>
-    </Formik>
+// Helper function to render the component with Formik and Redux
+const renderWithFormik = (initialValues = { modules: [] }) => {
+  const store = mockStore({
+    mediaUploadState: {
+      media_file_types: []
+    }
+  });
+  return render(
+    <Provider store={store}>
+      <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+        <Form>
+          <PageModules name="modules" />
+        </Form>
+      </Formik>
+    </Provider>
   );
+};
 
 describe("PageModules", () => {
   const createModule = (kind, order, id) => ({
@@ -167,10 +183,15 @@ describe("PageModules", () => {
 
       renderWithFormik({ modules });
 
+      // INFO module has content field
       expect(
         screen.getByTestId("text-editor-modules[0].content")
       ).toBeInTheDocument();
-      expect(screen.getByTestId("upload-modules[1].file")).toBeInTheDocument();
+      // DOCUMENT module has name field
+      expect(
+        screen.getByTestId("textfield-modules[1].name")
+      ).toBeInTheDocument();
+      // MEDIA module has upload_deadline field
       expect(
         screen.getByTestId("datepicker-modules[2].upload_deadline")
       ).toBeInTheDocument();
@@ -200,12 +221,19 @@ describe("PageModules", () => {
         createModule(PAGES_MODULE_KINDS.MEDIA, 2, 3)
       ];
 
+      const store = mockStore({
+        mediaUploadState: {
+          media_file_types: []
+        }
+      });
       render(
-        <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
-          <Form>
-            <TestWrapper />
-          </Form>
-        </Formik>
+        <Provider store={store}>
+          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+            <Form>
+              <TestWrapper />
+            </Form>
+          </Formik>
+        </Provider>
       );
 
       expect(screen.getByTestId("order-0")).toHaveTextContent("0");
@@ -234,12 +262,19 @@ describe("PageModules", () => {
         createModule(PAGES_MODULE_KINDS.MEDIA, 2, 3)
       ];
 
+      const store = mockStore({
+        mediaUploadState: {
+          media_file_types: []
+        }
+      });
       render(
-        <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
-          <Form>
-            <TestWrapper />
-          </Form>
-        </Formik>
+        <Provider store={store}>
+          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+            <Form>
+              <TestWrapper />
+            </Form>
+          </Formik>
+        </Provider>
       );
 
       expect(screen.getByTestId("module-ids")).toHaveTextContent(
@@ -273,12 +308,19 @@ describe("PageModules", () => {
         createModule(PAGES_MODULE_KINDS.DOCUMENT, 1, 2)
       ];
 
+      const store = mockStore({
+        mediaUploadState: {
+          media_file_types: []
+        }
+      });
       render(
-        <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
-          <Form>
-            <TestWrapper />
-          </Form>
-        </Formik>
+        <Provider store={store}>
+          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+            <Form>
+              <TestWrapper />
+            </Form>
+          </Formik>
+        </Provider>
       );
 
       expect(screen.getByTestId("first-module-kind")).toHaveTextContent(
@@ -315,12 +357,13 @@ describe("PageModules", () => {
       const expandIcon = screen.getByTestId("ExpandMoreIcon");
       const accordionSummary = expandIcon.closest(".MuiAccordionSummary-root");
 
+      // Initially should be expanded
+      expect(accordionSummary).toHaveAttribute("aria-expanded", "true");
+
       await userEvent.click(accordionSummary);
 
       await waitFor(() => {
-        expect(
-          screen.getByTestId("text-editor-modules[0].content")
-        ).not.toBeVisible();
+        expect(accordionSummary).toHaveAttribute("aria-expanded", "false");
       });
     });
 
@@ -361,17 +404,22 @@ describe("PageModules", () => {
       const firstAccordionSummary = expandIcons[0].closest(
         ".MuiAccordionSummary-root"
       );
+      const secondAccordionSummary = expandIcons[1].closest(
+        ".MuiAccordionSummary-root"
+      );
+
+      // Both should be expanded initially
+      expect(firstAccordionSummary).toHaveAttribute("aria-expanded", "true");
+      expect(secondAccordionSummary).toHaveAttribute("aria-expanded", "true");
 
       // close first module
       await userEvent.click(firstAccordionSummary);
 
       await waitFor(() => {
         // first module should be closed
-        expect(
-          screen.getByTestId("text-editor-modules[0].content")
-        ).not.toBeVisible();
-        // second module should be expanded
-        expect(screen.getByTestId("upload-modules[1].file")).toBeVisible();
+        expect(firstAccordionSummary).toHaveAttribute("aria-expanded", "false");
+        // second module should still be expanded
+        expect(secondAccordionSummary).toHaveAttribute("aria-expanded", "true");
       });
     });
   });
@@ -383,7 +431,7 @@ describe("PageModules", () => {
       const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
       renderWithFormik({ modules });
 
-      const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
+      const deleteButton = screen.getByTestId("delete-module-btn");
       await userEvent.click(deleteButton);
 
       expect(showConfirmDialog).toHaveBeenCalledWith(
@@ -413,12 +461,19 @@ describe("PageModules", () => {
         createModule(PAGES_MODULE_KINDS.DOCUMENT, 1, 2)
       ];
 
+      const store = mockStore({
+        mediaUploadState: {
+          media_file_types: []
+        }
+      });
       render(
-        <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
-          <Form>
-            <TestWrapper />
-          </Form>
-        </Formik>
+        <Provider store={store}>
+          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+            <Form>
+              <TestWrapper />
+            </Form>
+          </Formik>
+        </Provider>
       );
 
       expect(screen.getByTestId("module-count")).toHaveTextContent("2");
@@ -446,12 +501,19 @@ describe("PageModules", () => {
 
       const modules = [createModule(PAGES_MODULE_KINDS.INFO, 0, 1)];
 
+      const store = mockStore({
+        mediaUploadState: {
+          media_file_types: []
+        }
+      });
       render(
-        <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
-          <Form>
-            <TestWrapper />
-          </Form>
-        </Formik>
+        <Provider store={store}>
+          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+            <Form>
+              <TestWrapper />
+            </Form>
+          </Formik>
+        </Provider>
       );
 
       const deleteButton = screen.getByTestId("DeleteIcon").closest("button");
@@ -483,12 +545,19 @@ describe("PageModules", () => {
         createModule(PAGES_MODULE_KINDS.MEDIA, 2, 3)
       ];
 
+      const store = mockStore({
+        mediaUploadState: {
+          media_file_types: []
+        }
+      });
       render(
-        <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
-          <Form>
-            <TestWrapper />
-          </Form>
-        </Formik>
+        <Provider store={store}>
+          <Formik initialValues={{ modules }} onSubmit={jest.fn()}>
+            <Form>
+              <TestWrapper />
+            </Form>
+          </Formik>
+        </Provider>
       );
 
       // deletes middle module

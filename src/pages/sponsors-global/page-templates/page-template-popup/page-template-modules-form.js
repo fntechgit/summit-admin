@@ -136,6 +136,7 @@ const PageModules = ({ name = "modules", getAllMediaFileTypes }) => {
             <IconButton
               size="small"
               aria-label={T.translate("general.delete")}
+              data-testid="delete-module-btn"
               onClick={() => handleDeleteModule(index, module)}
             >
               <DeleteIcon />
@@ -179,6 +180,6 @@ PageModules.propTypes = {
   name: PropTypes.string
 };
 
-const mapStateToProps = () => {};
+const mapStateToProps = () => ({});
 
 export default connect(mapStateToProps, { getAllMediaFileTypes })(PageModules);
