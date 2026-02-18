@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Chip, IconButton } from "@mui/material";
@@ -21,18 +21,26 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   getGeneralMURequests,
-  getSponsorMURequests
+  getSponsorMURequests,
+  removeFileForSponsorMU,
+  uploadFileForSponsorMU
 } from "../../../actions/sponsor-mu-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
 import { SPONSOR_MEDIA_UPLOAD_STATUS } from "../../../utils/constants";
+import UploadDialog from "../../../components/upload-dialog";
+import showConfirmDialog from "../../../components/mui/showConfirmDialog";
 
 const SponsorMediaUploadTab = ({
   sponsorRequests,
   generalRequests,
   getSponsorMURequests,
-  getGeneralMURequests
+  getGeneralMURequests,
+  uploadFileForSponsorMU,
+  removeFileForSponsorMU
 }) => {
+  const [uploadModule, setUploadModule] = useState(null);
+
   useEffect(() => {
     getSponsorMURequests();
     getGeneralMURequests();
@@ -48,20 +56,39 @@ const SponsorMediaUploadTab = ({
     getSponsorMURequests(currentPage, perPage, key, dir);
   };
 
-  const handleSponsorDelete = (itemId) => {
-    console.log("DELETE : ", itemId);
+  const handleUpload = (item) => {
+    setUploadModule(item);
   };
 
-  const handleSponsorView = (item) => {
+  const handleUploadFile = (file) => {
+    uploadFileForSponsorMU(uploadModule.page_id, uploadModule.id, file).then(
+      () => {
+        setUploadModule(null);
+      }
+    );
+  };
+
+  const handleView = (item) => {
     console.log("VIEW : ", item);
   };
 
-  const handleSponsorUpload = (item) => {
-    console.log("UPLOAD : ", item);
+  const handleDownload = (item) => {
+    console.log("DOWNLOAD : ", item);
   };
 
-  const handleSponsorDownload = (item) => {
-    console.log("DOWNLOAD : ", item);
+  const handleDelete = async (item) => {
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: `${T.translate("general.row_remove_warning")} ${item.name}`,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("general.yes_delete")
+    });
+
+    if (isConfirmed) {
+      removeFileForSponsorMU(item.page_id, item.id);
+    }
   };
 
   const handleGeneralPageChange = (page) => {
@@ -74,33 +101,11 @@ const SponsorMediaUploadTab = ({
     getSponsorMURequests(currentPage, perPage, key, dir);
   };
 
-  const handleGeneralDelete = (itemId) => {
-    console.log("DELETE : ", itemId);
-  };
-
-  const handleGeneralView = (item) => {
-    console.log("VIEW : ", item);
-  };
-
-  const handleGeneralUpload = (item) => {
-    console.log("UPLOAD : ", item);
-  };
-
-  const handleGeneralDownload = (item) => {
-    console.log("DOWNLOAD : ", item);
-  };
-
   const getTableColumns = (type) => {
     const isSponsor = type === "sponsor";
     const nameLabel = isSponsor
       ? T.translate("edit_sponsor.mu_tab.sponsor_request")
       : T.translate("edit_sponsor.mu_tab.general_request");
-    const onView = isSponsor ? handleSponsorView : handleGeneralView;
-    const onDownload = isSponsor
-      ? handleSponsorDownload
-      : handleGeneralDownload;
-    const onDelete = isSponsor ? handleSponsorDelete : handleGeneralDelete;
-    const onUpload = isSponsor ? handleSponsorUpload : handleGeneralUpload;
 
     const getChipColor = (status) => {
       switch (status) {
@@ -159,7 +164,7 @@ const SponsorMediaUploadTab = ({
           <IconButton
             size="large"
             disabled={!row.media_upload}
-            onClick={() => onView(row)}
+            onClick={() => handleView(row)}
           >
             <VisibilityIcon fontSize="large" />
           </IconButton>
@@ -174,7 +179,7 @@ const SponsorMediaUploadTab = ({
           <IconButton
             size="large"
             disabled={!row.media_upload}
-            onClick={() => onDownload(row)}
+            onClick={() => handleDownload(row)}
           >
             <DownloadIcon fontSize="large" />
           </IconButton>
@@ -188,13 +193,13 @@ const SponsorMediaUploadTab = ({
         render: (row) => {
           if (row.media_upload) {
             return (
-              <IconButton size="large" onClick={() => onDelete(row.id)}>
+              <IconButton size="large" onClick={() => handleDelete(row)}>
                 <DeleteIcon fontSize="large" />
               </IconButton>
             );
           }
           return (
-            <IconButton size="large" onClick={() => onUpload(row)}>
+            <IconButton size="large" onClick={() => handleUpload(row)}>
               <ArrowUpwardIcon fontSize="large" />
             </IconButton>
           );
@@ -249,6 +254,18 @@ const SponsorMediaUploadTab = ({
           onSort={handleGeneralSort}
         />
       </div>
+      <UploadDialog
+        name={uploadModule?.name}
+        open={!!uploadModule}
+        onClose={() => setUploadModule(null)}
+        onUpload={handleUploadFile}
+        value={uploadModule?.media_upload}
+        fileMeta={{
+          ...(uploadModule?.file_type || {}),
+          max_file_size: uploadModule?.max_file_size
+        }}
+        maxFiles={1}
+      />
     </Box>
   );
 };
@@ -259,5 +276,7 @@ const mapStateToProps = ({ sponsorPageMUListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorMURequests,
-  getGeneralMURequests
+  getGeneralMURequests,
+  uploadFileForSponsorMU,
+  removeFileForSponsorMU
 })(SponsorMediaUploadTab);

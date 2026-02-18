@@ -19,7 +19,9 @@ import {
   RECEIVE_GENERAL_MEDIA_UPLOADS,
   RECEIVE_SPONSOR_MEDIA_UPLOADS,
   REQUEST_GENERAL_MEDIA_UPLOADS,
-  REQUEST_SPONSOR_MEDIA_UPLOADS
+  REQUEST_SPONSOR_MEDIA_UPLOADS,
+  SPONSOR_MEDIA_UPLOAD_FILE_DELETED,
+  SPONSOR_MEDIA_UPLOAD_FILE_UPLOADED
 } from "../../actions/sponsor-mu-actions";
 import { bytesToMb } from "../../utils/methods";
 import {
@@ -49,13 +51,7 @@ const DEFAULT_STATE = {
   summitTZ: ""
 };
 
-const mapMediaObject = (mediaObject, summitTZ) => {
-  const deadline = mediaObject.upload_deadline
-    ? epochToMomentTimeZone(mediaObject.upload_deadline, summitTZ)?.format(
-        "YYYY/MM/DD"
-      )
-    : "N/A";
-
+const getStatus = (mediaObject) => {
   let status = SPONSOR_MEDIA_UPLOAD_STATUS.COMPLETE;
   if (!mediaObject.media_upload) {
     if (mediaObject.upload_deadline < moment().unix()) {
@@ -70,15 +66,23 @@ const mapMediaObject = (mediaObject, summitTZ) => {
     }
   }
 
+  return status;
+};
+
+const mapMediaObject = (mediaObject, summitTZ) => {
+  const deadline = mediaObject.upload_deadline
+    ? epochToMomentTimeZone(mediaObject.upload_deadline, summitTZ)?.format(
+        "YYYY/MM/DD"
+      )
+    : "N/A";
+
   return {
-    id: mediaObject.id,
-    name: mediaObject.name,
+    ...mediaObject,
     add_on: mediaObject.add_ons.map((a) => a.name).join(", "),
     max_size: `${bytesToMb(mediaObject.max_file_size)} MB`,
     format: mediaObject.file_type?.allowed_extensions || "N/A",
-    media_upload: mediaObject.media_upload,
     deadline,
-    status
+    status: getStatus(mediaObject)
   };
 };
 
@@ -161,6 +165,66 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
           currentPage,
           totalCount: total,
           lastPage
+        }
+      };
+    }
+    case SPONSOR_MEDIA_UPLOAD_FILE_UPLOADED: {
+      const { moduleId, ...file } = payload;
+      return {
+        ...state,
+        sponsorRequests: {
+          ...state.sponsorRequests,
+          requests: state.sponsorRequests.requests.map((r) =>
+            r.id === moduleId
+              ? {
+                  ...r,
+                  media_upload: file,
+                  status: getStatus({ ...r, media_upload: true })
+                }
+              : r
+          )
+        },
+        generalRequests: {
+          ...state.generalRequests,
+          requests: state.generalRequests.requests.map((r) =>
+            r.id === moduleId
+              ? {
+                  ...r,
+                  media_upload: file,
+                  status: getStatus({ ...r, media_upload: true })
+                }
+              : r
+          )
+        }
+      };
+    }
+    case SPONSOR_MEDIA_UPLOAD_FILE_DELETED: {
+      const { moduleId } = payload;
+      return {
+        ...state,
+        sponsorRequests: {
+          ...state.sponsorRequests,
+          requests: state.sponsorRequests.requests.map((r) =>
+            r.id === moduleId
+              ? {
+                  ...r,
+                  media_upload: null,
+                  status: getStatus({ ...r, media_upload: false })
+                }
+              : r
+          )
+        },
+        generalRequests: {
+          ...state.generalRequests,
+          requests: state.generalRequests.requests.map((r) =>
+            r.id === moduleId
+              ? {
+                  ...r,
+                  media_upload: null,
+                  status: getStatus({ ...r, media_upload: false })
+                }
+              : r
+          )
         }
       };
     }

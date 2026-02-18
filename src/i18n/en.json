@@ -2510,7 +2510,11 @@
       "max_size": "Max Size",
       "format": "Format",
       "deadline": "Deadline",
-      "status": "Status"
+      "status": "Status",
+      "upload_input": {
+        "complete": "Complete",
+        "upload_file": "Upload file"
+      }
     },
     "placeholders": {
       "select_sponsorship": "Select a Sponsorship",

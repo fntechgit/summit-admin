@@ -14,6 +14,8 @@
 import {
   createAction,
   getRequest,
+  putRequest,
+  deleteRequest,
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
@@ -29,6 +31,10 @@ export const REQUEST_SPONSOR_MEDIA_UPLOADS = "REQUEST_SPONSOR_MEDIA_UPLOADS";
 export const RECEIVE_SPONSOR_MEDIA_UPLOADS = "RECEIVE_SPONSOR_MEDIA_UPLOADS";
 export const REQUEST_GENERAL_MEDIA_UPLOADS = "REQUEST_GENERAL_MEDIA_UPLOADS";
 export const RECEIVE_GENERAL_MEDIA_UPLOADS = "RECEIVE_GENERAL_MEDIA_UPLOADS";
+export const SPONSOR_MEDIA_UPLOAD_FILE_UPLOADED =
+  "SPONSOR_MEDIA_UPLOAD_FILE_UPLOADED";
+export const SPONSOR_MEDIA_UPLOAD_FILE_DELETED =
+  "SPONSOR_MEDIA_UPLOAD_FILE_DELETED";
 
 export const getSponsorMURequests =
   (
@@ -108,6 +114,61 @@ export const getGeneralMURequests =
       snackbarErrorHandler,
       { order, orderDir, currentPage, perPage, summitTZ }
     )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const uploadFileForSponsorMU =
+  (pageId, moduleId, fileObj) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return putRequest(
+      null,
+      createAction("DUMMY_ACTION"),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/available-pages/${pageId}/modules/${moduleId}/file`,
+      fileObj,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(({ response }) => {
+        dispatch(
+          createAction(SPONSOR_MEDIA_UPLOAD_FILE_UPLOADED)({
+            ...response,
+            moduleId
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const removeFileForSponsorMU =
+  (pageId, moduleId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_MEDIA_UPLOAD_FILE_DELETED)({ moduleId }),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/available-pages/${pageId}/modules/${moduleId}/file`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
