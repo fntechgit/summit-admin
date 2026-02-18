@@ -18,6 +18,7 @@ import {
   REQUEST_SHOW_PAGES,
   SHOW_PAGE_ARCHIVED,
   SHOW_PAGE_UNARCHIVED,
+  SHOW_PAGE_DELETED,
   RESET_SHOW_PAGE_FORM
 } from "../../actions/show-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -119,6 +120,12 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
       const showPage = payload.response;
 
       return { ...state, currentShowPage: showPage };
+    }
+    case SHOW_PAGE_DELETED: {
+      const { pageId } = payload;
+      const showPages = state.showPages.filter((it) => it.id !== pageId);
+
+      return { ...state, showPages, totalCount: state.totalCount - 1 };
     }
     case RESET_SHOW_PAGE_FORM: {
       return { ...state, currentShowPage: DEFAULT_SHOW_PAGE };

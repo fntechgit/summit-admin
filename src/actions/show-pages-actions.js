@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,8 +41,7 @@ export const SHOW_PAGE_ADDED = "SHOW_PAGE_ADDED";
 export const SHOW_PAGE_ARCHIVED = "SHOW_PAGE_ARCHIVED";
 export const SHOW_PAGE_UNARCHIVED = "SHOW_PAGE_UNARCHIVED";
 export const RESET_SHOW_PAGE_FORM = "RESET_SHOW_PAGE_FORM";
-
-export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
+export const SHOW_PAGE_DELETED = "SHOW_PAGE_DELETED";
 
 export const getShowPages =
   (
@@ -57,6 +56,7 @@ export const getShowPages =
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
+    const summitTZ = currentSummit.time_zone?.name;
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 
@@ -97,7 +97,7 @@ export const getShowPages =
       createAction(RECEIVE_SHOW_PAGES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages`,
       authErrorHandler,
-      { order, orderDir, page, term, hideArchived }
+      { order, orderDir, page, term, hideArchived, summitTZ }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -212,6 +212,34 @@ export const saveShowPage = (entity) => async (dispatch, getState) => {
 
 export const resetShowPageForm = () => (dispatch) => {
   dispatch(createAction(RESET_SHOW_PAGE_FORM)({}));
+};
+
+export const deleteShowPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(SHOW_PAGE_DELETED)({ pageId }),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("show_pages.page_delete_success")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const archiveShowPage = (pageId) => async (dispatch, getState) => {

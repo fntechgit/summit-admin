@@ -58,7 +58,7 @@ export const getPageTemplates =
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
-    const summitTZ = currentSummit.time_zone.name;
+    const summitTZ = currentSummit.time_zone?.name;
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 

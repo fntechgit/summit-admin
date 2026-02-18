@@ -24,10 +24,9 @@ const GlobalPagePopup = ({ open, onClose, cloneGlobalPage, getShowPages }) => {
   };
 
   const handleOnSave = (selectedTiers, allTiers) => {
-    cloneGlobalPage(selectedTemplates, selectedTiers, allTiers).finally(() => {
-      getShowPages();
-      handleClose();
-    });
+    cloneGlobalPage(selectedTemplates, selectedTiers, allTiers)
+      .then(() => getShowPages())
+      .finally(() => handleClose());
   };
 
   return (

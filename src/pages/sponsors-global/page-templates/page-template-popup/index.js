@@ -26,6 +26,27 @@ import {
   PAGE_MODULES_MEDIA_TYPES
 } from "../../../../utils/constants";
 
+const normalizeModules = (modules = [], summitTZ = "UTC") =>
+  modules.map((m) => {
+    if (m.kind === PAGES_MODULE_KINDS.MEDIA) {
+      const normalizeModule = { ...m };
+      if (m.upload_deadline) {
+        normalizeModule.upload_deadline = epochToMomentTimeZone(
+          m.upload_deadline,
+          summitTZ
+        );
+      }
+      if (m.file_type) {
+        normalizeModule.file_type_id = {
+          value: m.file_type.id,
+          label: `${m.file_type.name} (${m.file_type.allowed_extensions})`
+        };
+      }
+      return normalizeModule;
+    }
+    return m;
+  });
+
 const PageTemplatePopup = ({
   pageTemplate,
   open,
@@ -114,27 +135,6 @@ const PageTemplatePopup = ({
         return yup.object();
     }
   });
-
-  const normalizeModules = (modules = [], summitTZ = "UTC") =>
-    modules.map((m) => {
-      if (m.kind === PAGES_MODULE_KINDS.MEDIA) {
-        const normalizeModule = { ...m };
-        if (m.upload_deadline) {
-          normalizeModule.upload_deadline = epochToMomentTimeZone(
-            m.upload_deadline,
-            summitTZ
-          );
-        }
-        if (m.file_type) {
-          normalizeModule.file_type_id = {
-            value: m.file_type.id,
-            label: `${m.file_type.name} (${m.file_type.allowed_extensions})`
-          };
-        }
-        return normalizeModule;
-      }
-      return m;
-    });
 
   const formik = useFormik({
     initialValues: {
@@ -244,7 +244,8 @@ const PageTemplatePopup = ({
 PageTemplatePopup.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
+  summitTZ: PropTypes.string.isRequired
 };
 
 const mapStateToProps = ({ currentPageTemplateState }) => ({

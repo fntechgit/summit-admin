@@ -20,7 +20,6 @@ import {
 import T from "i18n-react/dist/i18n-react";
 import { getAccessTokenSafely } from "../utils/methods";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
-import { getShowPages } from "./show-pages-actions";
 
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
 
@@ -54,7 +53,6 @@ export const cloneGlobalPage =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        dispatch(getShowPages());
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),

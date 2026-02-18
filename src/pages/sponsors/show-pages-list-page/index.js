@@ -29,12 +29,14 @@ import {
   unarchiveShowPage,
   getShowPage,
   saveShowPage,
+  deleteShowPage,
   resetShowPageForm
 } from "../../../actions/show-pages-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const ShowPagesListPage = ({
   showPages,
@@ -45,12 +47,14 @@ const ShowPagesListPage = ({
   orderDir,
   hideArchived,
   totalCount,
+  summitTZ,
   currentShowPage,
   getShowPages,
   archiveShowPage,
   unarchiveShowPage,
   getShowPage,
   saveShowPage,
+  deleteShowPage,
   resetShowPageForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
@@ -73,13 +77,21 @@ const ShowPagesListPage = ({
 
   const handleRowEdit = (row) => {
     getShowPage(row.id).then(() => {
-      setOpenPopup("new");
+      setOpenPopup("pageTemplate");
     });
   };
 
   const handleRowDelete = (itemId) => {
-    console.log("DELETE ITEM ID...", itemId);
-    // deleteSponsorForm(itemId);
+    deleteShowPage(itemId).then(() =>
+      getShowPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      )
+    );
   };
 
   const handleArchiveItem = (item) =>
@@ -183,7 +195,7 @@ const ShowPagesListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setOpenPopup("clone")}
+            onClick={() => setOpenPopup("cloneTemplate")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -195,7 +207,7 @@ const ShowPagesListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setOpenPopup("new")}
+            onClick={() => setOpenPopup("pageTemplate")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -228,14 +240,15 @@ const ShowPagesListPage = ({
       )}
 
       <GlobalPagePopup
-        open={openPopup === "clone"}
+        open={openPopup === "cloneTemplate"}
         onClose={() => setOpenPopup(null)}
       />
       <PageTemplatePopup
-        open={openPopup === "new"}
+        open={openPopup === "pageTemplate"}
         pageTemplate={currentShowPage}
         onClose={handleTemplatePopupClose}
         onSave={handleSaveShowPage}
+        summitTZ={summitTZ}
       />
     </div>
   );
@@ -251,5 +264,6 @@ export default connect(mapStateToProps, {
   unarchiveShowPage,
   getShowPage,
   saveShowPage,
+  deleteShowPage,
   resetShowPageForm
 })(ShowPagesListPage);
