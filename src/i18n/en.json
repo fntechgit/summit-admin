@@ -94,7 +94,8 @@
     "url": "Wrong URL format",
     "date": "Wrong date format.",
     "after": "'{field1}' must be after '{field2}'.",
-    "boolean": "Must be a boolean."
+    "boolean": "Must be a boolean.",
+    "mib_aligned": "Must be a MiB aligned value"
   },
   "landing": {
     "os_summit_admin": "Show Admin",

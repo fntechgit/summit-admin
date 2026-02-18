@@ -21,6 +21,7 @@ import * as yup from "yup";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import PageModules from "./page-template-modules-form";
 import {
+  BYTES_PER_MB,
   PAGES_MODULE_KINDS,
   PAGE_MODULES_MEDIA_TYPES
 } from "../../../../utils/constants";
@@ -92,8 +93,13 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
       is: PAGE_MODULES_MEDIA_TYPES.FILE,
       then: (schema) =>
         schema
-          .min(1, T.translate("validation.number_positive"))
-          .required(T.translate("validation.required")),
+          .min(BYTES_PER_MB, T.translate("validation.number_positive"))
+          .required(T.translate("validation.required"))
+          .test(
+            "mib-aligned",
+            T.translate("validation.mib_aligned"),
+            (value) => value == null || value % BYTES_PER_MB === 0
+          ),
       otherwise: (schema) => schema.nullable()
     }),
     file_type_id: yup.object().when("type", {
