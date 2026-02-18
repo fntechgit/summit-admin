@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -24,30 +24,29 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import {
-  archiveSponsorCustomizedForm,
-  deleteSponsorCustomizedForm,
-  saveSponsorManagedForm,
-  unarchiveSponsorCustomizedForm
-} from "../../../actions/sponsor-forms-actions";
-import {
   getSponsorManagedPages,
-  getSponsorCustomizedPages
+  getSponsorCustomizedPages,
+  saveSponsorManagedPage
 } from "../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
-// import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
-// import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import AddSponsorPageTemplatePopup from "./components/add-sponsor-page-template-popup";
 
 const SponsorPagesTab = ({
+  sponsor,
+  summitId,
   term,
   hideArchived,
   managedPages,
   customizedPages,
   getSponsorManagedPages,
-  getSponsorCustomizedPages
+  getSponsorCustomizedPages,
+  saveSponsorManagedPage
 }) => {
+  const [openPopup, setOpenPopup] = useState(null);
+
   useEffect(() => {
     getSponsorManagedPages();
     getSponsorCustomizedPages();
@@ -141,6 +140,10 @@ const SponsorPagesTab = ({
     );
   };
 
+  const handleUsingTemplate = () => {
+    setOpenPopup("template");
+  };
+
   const handleArchiveCustomizedPage = (item) =>
     console.log("ARCHIVE CUSTOMIZED ", item);
 
@@ -180,6 +183,13 @@ const SponsorPagesTab = ({
       customizedPages.orderDir,
       ev.target.checked
     );
+  };
+
+  const handleSaveManagedPageFromTemplate = (entity) => {
+    saveSponsorManagedPage(entity).then(() => {
+      setOpenPopup(null);
+      getSponsorManagedPages();
+    });
   };
 
   const baseColumns = (name) => [
@@ -277,7 +287,7 @@ const SponsorPagesTab = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => console.log("open popup template")}
+            onClick={handleUsingTemplate}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -337,6 +347,15 @@ const SponsorPagesTab = ({
           onArchive={handleArchiveManagedPage}
         />
       </div>
+
+      {openPopup === "template" && (
+        <AddSponsorPageTemplatePopup
+          sponsor={sponsor}
+          summitId={summitId}
+          onSubmit={handleSaveManagedPageFromTemplate}
+          onClose={() => setOpenPopup(null)}
+        />
+      )}
     </Box>
   );
 };
@@ -347,9 +366,6 @@ const mapStateToProps = ({ sponsorPagePagesListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorManagedPages,
-  saveSponsorManagedForm,
-  getSponsorCustomizedPages,
-  archiveSponsorCustomizedForm,
-  unarchiveSponsorCustomizedForm,
-  deleteSponsorCustomizedForm
+  saveSponsorManagedPage,
+  getSponsorCustomizedPages
 })(SponsorPagesTab);
