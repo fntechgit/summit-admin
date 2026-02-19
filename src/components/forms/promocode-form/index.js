@@ -217,8 +217,6 @@ class PromocodeForm extends React.Component {
     } = this.props;
     const typeScope = this.fragmentParser.getParam("type");
 
-    console.log("CHECKING...", entity);
-
     let promocode_class_ddl = allClasses.map((c) => ({
       label: c.class_name,
       value: c.class_name
