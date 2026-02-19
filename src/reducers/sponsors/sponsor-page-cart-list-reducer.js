@@ -15,8 +15,10 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
-  REQUEST_SPONSOR_CART,
+  RECEIVE_CART_AVAILABLE_FORMS,
   RECEIVE_SPONSOR_CART,
+  REQUEST_CART_AVAILABLE_FORMS,
+  REQUEST_SPONSOR_CART,
   SPONSOR_CART_FORM_DELETED,
   SPONSOR_CART_FORM_LOCKED
 } from "../../actions/sponsor-cart-actions";
@@ -24,8 +26,24 @@ import {
 const DEFAULT_STATE = {
   cart: null,
   term: "",
-  summitTZ: ""
+  summitTZ: "",
+  availableForms: {
+    forms: [],
+    lastPage: 1,
+    total: 0,
+    currentPage: 1,
+    term: "",
+    order: "id",
+    orderDir: 1
+  }
 };
+
+const mapForms = (formData) => ({
+  id: formData.id,
+  code: formData.code,
+  name: formData.name,
+  items: `${formData.items.length} items`
+});
 
 const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
@@ -76,7 +94,7 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
 
       const forms = state.cart.forms.map((form) => {
         if (form.id === formId) {
-          return {...form, is_locked};
+          return { ...form, is_locked };
         }
         return form;
       });
@@ -88,6 +106,36 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
           forms
         }
       };
+    }
+    case REQUEST_CART_AVAILABLE_FORMS: {
+      const { term, order, orderDir } = payload;
+      return {
+        ...state,
+        availableForms: { ...state.availableForms, term, order, orderDir }
+      };
+    }
+    case RECEIVE_CART_AVAILABLE_FORMS: {
+      const {
+        data,
+        last_page: lastPage,
+        total,
+        current_page: currentPage
+      } = payload.response;
+
+      const forms =
+        currentPage === 1
+          ? data.map(mapForms)
+          : [...state.availableForms.forms, ...data.map(mapForms)];
+
+      const availableForms = {
+        ...state.availableForms,
+        forms,
+        lastPage,
+        total,
+        currentPage
+      };
+
+      return { ...state, availableForms };
     }
     default:
       return state;
