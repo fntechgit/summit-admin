@@ -53,7 +53,8 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SHOW_PAGES: {
-      const { order, orderDir, page, term, hideArchived, summitTZ } = payload;
+      const { order, orderDir, page, perPage, term, hideArchived, summitTZ } =
+        payload;
 
       return {
         ...state,
@@ -61,6 +62,7 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
         orderDir,
         showPages: [],
         currentPage: page,
+        perPage,
         term,
         hideArchived,
         summitTZ

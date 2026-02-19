@@ -97,7 +97,7 @@ export const getShowPages =
       createAction(RECEIVE_SHOW_PAGES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages`,
       authErrorHandler,
-      { order, orderDir, page, term, hideArchived, summitTZ }
+      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
