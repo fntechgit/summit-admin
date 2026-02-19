@@ -17,6 +17,7 @@ import {
   getRequest,
   deleteRequest,
   putRequest,
+  postRequest,
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
@@ -24,12 +25,20 @@ import {
 import T from "i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
-import { ERROR_CODE_404 } from "../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE,
+  ERROR_CODE_404
+} from "../utils/constants";
 
 export const REQUEST_SPONSOR_CART = "REQUEST_SPONSOR_CART";
 export const RECEIVE_SPONSOR_CART = "RECEIVE_SPONSOR_CART";
 export const SPONSOR_CART_FORM_DELETED = "SPONSOR_CART_FORM_DELETED";
 export const SPONSOR_CART_FORM_LOCKED = "SPONSOR_CART_FORM_LOCKED";
+export const REQUEST_CART_AVAILABLE_FORMS = "REQUEST_CART_AVAILABLE_FORMS";
+export const RECEIVE_CART_AVAILABLE_FORMS = "RECEIVE_CART_AVAILABLE_FORMS";
+export const FORM_CART_SAVED = "FORM_CART_SAVED";
 
 const customErrorHandler = (err, res) => (dispatch, state) => {
   const code = err.status;
@@ -162,4 +171,91 @@ export const unlockSponsorCartForm = (formId) => async (dispatch, getState) => {
     .finally(() => {
       dispatch(stopLoading());
     });
+};
+
+
+export const getSponsorFormsForCart =
+  (
+    term = "",
+    currentPage = DEFAULT_CURRENT_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR,
+  ) =>
+    async (dispatch, getState) => {
+      const { currentSummitState } = getState();
+      const { currentSummit } = currentSummitState;
+      const accessToken = await getAccessTokenSafely();
+      const filter = ["has_items==1"];
+
+      dispatch(startLoading());
+
+      if (term) {
+        const escapedTerm = escapeFilterValue(term);
+        filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
+      }
+
+      const params = {
+        page: currentPage,
+        fields: "id,code,name",
+        relations: "items",
+        per_page: DEFAULT_PER_PAGE,
+        access_token: accessToken
+      };
+
+      if (filter.length > 0) {
+        params["filter[]"] = filter;
+      }
+
+      // order
+      if (order != null && orderDir != null) {
+        const orderDirSign = orderDir === 1 ? "" : "-";
+        params.order = `${orderDirSign}${order}`;
+      }
+
+      return getRequest(
+        createAction(REQUEST_CART_AVAILABLE_FORMS),
+        createAction(RECEIVE_CART_AVAILABLE_FORMS),
+        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
+        authErrorHandler,
+        {term, order, orderDir, currentPage}
+      )(params)(dispatch).then(() => {
+        dispatch(stopLoading());
+      });
+    };
+
+export const saveCartForm = (formId, addOnId, items) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  const params = {
+    access_token: accessToken
+  };
+
+  dispatch(startLoading());
+
+  const normalizedEntity = {
+    form_id: formId,
+    add_on_id: addOnId,
+    items: items.map((item) => ({
+      quantity: item.quantity,
+      add_on_item_id: item.id
+    }))
+  }
+
+  return postRequest(
+    null,
+    createAction(FORM_CART_SAVED),
+    `${window.API_BASE_URL}/api/v2/summits/${currentSummit.id}/sponsors`,
+    normalizedEntity,
+    snackbarErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("sponsor_list.sponsor_added")
+      })
+    );
+  });
 };

@@ -2467,13 +2467,17 @@
       "code": "Code",
       "name": "Name",
       "add_ons": "Add-ons",
+      "items": "Items",
       "discount": "Discount",
       "amount": "Amount",
       "manage_items": "Manage Items",
       "add_form": "Add Form",
       "no_cart": "No cart found.",
       "pay_cc": "pay with credit card or ach",
-      "pay_invoice": "pay with invoice"
+      "pay_invoice": "pay with invoice",
+      "add_form_to_cart": "Add Form to Cart",
+      "add_selected_form": "Add selected form",
+      "select_addon": "Select Add-on..."
     },
     "purchase_tab": {
       "order": "Order",

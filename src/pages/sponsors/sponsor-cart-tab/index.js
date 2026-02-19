@@ -11,231 +11,41 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
-import { connect } from "react-redux";
-import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Button,
-  Grid2,
-  IconButton,
-  Paper,
-  Typography
-} from "@mui/material";
-import LockOpenIcon from "@mui/icons-material/LockOpen";
-import LockClosedIcon from "@mui/icons-material/Lock";
-import AddIcon from "@mui/icons-material/Add";
-import {
-  deleteSponsorCartForm,
-  getSponsorCart,
-  lockSponsorCartForm,
-  unlockSponsorCartForm
-} from "../../../actions/sponsor-cart-actions";
-import SearchInput from "../../../components/mui/search-input";
-import { TotalRow } from "../../../components/mui/table/extra-rows";
-import MuiTable from "../../../components/mui/table/mui-table";
+import React, { useState } from "react";
+import { Box } from "@mui/material";
+import SelectFormDialog from "./components/select-form-dialog";
+import CartView from "./components/cart-view";
+import EditForm from "./components/edit-form";
 
 const SponsorCartTab = ({
-  cart,
-  term,
   sponsor,
   summitId,
-  getSponsorCart,
-  deleteSponsorCartForm,
-  lockSponsorCartForm,
-  unlockSponsorCartForm
 }) => {
-  const [openPopup, setOpenPopup] = useState(null);
+  const [openAddFormDialog, setOpenAddFormDialog] = useState(false);
   const [formEdit, setFormEdit] = useState(null);
 
-  useEffect(() => {
-    getSponsorCart();
-  }, []);
-
-  const handleSearch = (searchTerm) => {
-    getSponsorCart(searchTerm);
+  const handleAddForm = (form, addOnId) => {
+    setFormEdit({ form, addOnId });
   };
-
-  const handleManageItems = (item) => {
-    console.log("MANAGE ITEMS : ", item);
-  };
-
-  const handleEdit = (item) => {
-    setFormEdit(item);
-  };
-
-  const handleDelete = (itemId) => {
-    deleteSponsorCartForm(itemId);
-  };
-
-  const handleLock = (form) => {
-    if (form.is_locked) {
-      unlockSponsorCartForm(form.id);
-    } else {
-      lockSponsorCartForm(form.id);
-    }
-  };
-
-  const handlePayCreditCard = () => {
-    console.log("PAY CREDIT CARD");
-  };
-
-  const handlePayInvoice = () => {
-    console.log("PAY INVOICE");
-  };
-
-  const tableColumns = [
-    {
-      columnKey: "code",
-      header: T.translate("edit_sponsor.cart_tab.code")
-    },
-    {
-      columnKey: "name",
-      header: T.translate("edit_sponsor.cart_tab.name")
-    },
-    {
-      columnKey: "allowed_add_ons",
-      header: T.translate("edit_sponsor.cart_tab.add_ons"),
-      render: (row) =>
-        row.allowed_add_ons?.length > 0
-          ? row.allowed_add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
-          : "None"
-    },
-    {
-      columnKey: "manage_items",
-      header: "",
-      width: 100,
-      align: "center",
-      render: (row) => (
-        <Button
-          variant="text"
-          color="inherit"
-          size="small"
-          onClick={() => handleManageItems(row)}
-        >
-          {T.translate("edit_sponsor.cart_tab.manage_items")}
-        </Button>
-      )
-    },
-    {
-      columnKey: "discount",
-      header: T.translate("edit_sponsor.cart_tab.discount")
-    },
-    {
-      columnKey: "amount",
-      header: T.translate("edit_sponsor.cart_tab.amount")
-    },
-    {
-      columnKey: "lock",
-      header: "",
-      render: (row) => (
-        <IconButton size="large" onClick={() => handleLock(row)}>
-          {row.is_locked ? (
-            <LockClosedIcon fontSize="large" />
-          ) : (
-            <LockOpenIcon fontSize="large" />
-          )}
-        </IconButton>
-      )
-    }
-  ];
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Grid2
-        container
-        spacing={2}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}
-      >
-        <Grid2 size={2}>
-          {cart && (
-            <Box component="span">{cart?.forms.length} forms in Cart</Box>
-          )}
-        </Grid2>
-        <Grid2 size={2} offset={6}>
-          <SearchInput
-            term={term}
-            onSearch={handleSearch}
-            placeholder={T.translate("edit_sponsor.placeholders.search")}
-          />
-        </Grid2>
-        <Grid2 size={2}>
-          <Button
-            variant="contained"
-            size="medium"
-            fullWidth
-            onClick={() => setFormEdit("new")}
-            startIcon={<AddIcon />}
-            sx={{ height: "36px" }}
-          >
-            {T.translate("edit_sponsor.cart_tab.add_form")}
-          </Button>
-        </Grid2>
-      </Grid2>
-      {!cart && (
-        <Typography variant="h6" textAlign="center">
-          {T.translate("edit_sponsor.cart_tab.no_cart")}
-        </Typography>
+      {formEdit && <EditForm form={formEdit} />}
+      {!formEdit && (
+        <CartView
+          onEdit={setFormEdit}
+          onAddForm={() => setOpenAddFormDialog(true)}
+        />
       )}
-      {!!cart && (
-        <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
-          <MuiTable
-            columns={tableColumns}
-            data={cart?.forms}
-            options={{}}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          >
-            <TotalRow
-              columns={tableColumns}
-              total={cart?.total}
-              targetCol="amount"
-              trailing={2}
-            />
-          </MuiTable>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              mt: 4,
-              pb: 4,
-              gap: "10px"
-            }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ minWidth: 250 }}
-              onClick={handlePayCreditCard}
-            >
-              {T.translate("edit_sponsor.cart_tab.pay_cc")}
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ minWidth: 250 }}
-              onClick={handlePayInvoice}
-            >
-              {T.translate("edit_sponsor.cart_tab.pay_invoice")}
-            </Button>
-          </Box>
-        </Paper>
-      )}
+      <SelectFormDialog
+        open={!!openAddFormDialog}
+        summitId={summitId}
+        sponsor={sponsor}
+        onSave={handleAddForm}
+        onClose={() => setOpenAddFormDialog(false)}
+      />
     </Box>
   );
 };
 
-const mapStateToProps = ({ sponsorPageCartListState }) => ({
-  ...sponsorPageCartListState
-});
-
-export default connect(mapStateToProps, {
-  getSponsorCart,
-  deleteSponsorCartForm,
-  lockSponsorCartForm,
-  unlockSponsorCartForm
-})(SponsorCartTab);
+export default SponsorCartTab;
