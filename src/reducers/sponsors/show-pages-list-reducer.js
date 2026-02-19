@@ -30,7 +30,7 @@ const DEFAULT_SHOW_PAGE = {
   modules: []
 };
 
-const DEFAULT_STATE = {
+export const DEFAULT_STATE = {
   showPages: [],
   term: "",
   order: "name",
