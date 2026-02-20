@@ -53,7 +53,6 @@ const normalizeModules = (modules = [], summitTZ = "UTC") =>
 
 const PageTemplatePopup = ({
   pageTemplate,
-  open,
   onClose,
   onSave,
   summitTZ,
@@ -183,7 +182,7 @@ const PageTemplatePopup = ({
   });
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("page_template_list.page_crud.title")}
@@ -282,11 +281,10 @@ const PageTemplatePopup = ({
 };
 
 PageTemplatePopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   summitTZ: PropTypes.string,
-  sponsorships: PropTypes.array
+  sponsorships: PropTypes.object
 };
 
 const mapStateToProps = ({ currentPageTemplateState }) => ({

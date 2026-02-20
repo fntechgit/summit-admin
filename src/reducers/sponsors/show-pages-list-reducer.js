@@ -126,7 +126,14 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_SHOW_PAGE: {
       const showPage = payload.response;
 
-      return { ...state, currentShowPage: showPage };
+      const sponsorshipTypeIds = showPage.apply_to_all_types
+        ? ["all"]
+        : [...showPage.sponsorship_types];
+
+      return {
+        ...state,
+        currentShowPage: { ...showPage, sponsorship_types: sponsorshipTypeIds }
+      };
     }
     case SHOW_PAGE_DELETED: {
       const { pageId } = payload;

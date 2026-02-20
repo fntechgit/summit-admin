@@ -265,12 +265,13 @@ const PageTemplateListPage = ({
           </div>
         )}
       </Box>
-      <PageTemplatePopup
-        open={!!pageTemplateId}
-        onClose={() => setPageTemplateId(null)}
-        onSave={handleSavePageTemplate}
-        summitTZ={summitTZ}
-      />
+      {!!pageTemplateId && (
+        <PageTemplatePopup
+          onClose={() => setPageTemplateId(null)}
+          onSave={handleSavePageTemplate}
+          summitTZ={summitTZ}
+        />
+      )}
       <PageTemplateClonePopup
         open={openCloneDialog}
         onClose={() => setOpenCloneDialog(false)}

@@ -244,14 +244,15 @@ const ShowPagesListPage = ({
         open={openPopup === "cloneTemplate"}
         onClose={() => setOpenPopup(null)}
       />
-      <PageTemplatePopup
-        open={openPopup === "pageTemplate"}
-        pageTemplate={currentShowPage}
-        onClose={handleTemplatePopupClose}
-        onSave={handleSaveShowPage}
-        summitTZ={summitTZ}
-        sponsorships={sponsorships}
-      />
+      {openPopup === "pageTemplate" && (
+        <PageTemplatePopup
+          pageTemplate={currentShowPage}
+          onClose={handleTemplatePopupClose}
+          onSave={handleSaveShowPage}
+          summitTZ={summitTZ}
+          sponsorships={sponsorships}
+        />
+      )}
     </div>
   );
 };
