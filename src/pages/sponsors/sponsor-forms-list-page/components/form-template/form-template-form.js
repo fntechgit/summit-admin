@@ -109,7 +109,6 @@ const FormTemplateForm = ({
                   "sponsor_forms.form_template_popup.all_tiers"
                 )}
                 value={formik.values.sponsorship_types}
-                allValue={formik.values.apply_to_all_types}
                 options={sponsorships.items}
                 onChange={formik.handleChange}
               />
