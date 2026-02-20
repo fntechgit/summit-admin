@@ -22,7 +22,6 @@ import {
   RESET_SHOW_PAGE_FORM
 } from "../../actions/show-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { PAGES_MODULE_KINDS } from "../../utils/constants";
 
 const DEFAULT_SHOW_PAGE = {
   code: "",
@@ -80,13 +79,9 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
         code: a.code,
         name: a.name,
         tier: a.sponsorship_types.map((s) => s.name).join(", "),
-        info_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.INFO)
-          .length,
-        upload_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.MEDIA)
-          .length,
-        download_mod: a.modules.filter(
-          (m) => m.kind === PAGES_MODULE_KINDS.DOCUMENT
-        ).length,
+        info_mod: a.modules_count.info_modules_count,
+        upload_mod: a.modules_count.media_request_modules_count,
+        download_mod: a.modules_count.document_download_modules_count,
         is_archived: a.is_archived
       }));
 
