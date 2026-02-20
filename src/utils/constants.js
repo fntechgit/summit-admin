@@ -285,3 +285,8 @@ export const SPONSOR_MEDIA_UPLOAD_STATUS = {
 export const BYTES_IN_MEGABYTE = 1024 * 1024;
 
 export const DEADLINE_ALERT_DAYS = 3;
+
+export const FORM_DISCOUNT_OPTIONS = {
+  PERCENTAGE: "Percentage",
+  RATE: "Rate"
+};

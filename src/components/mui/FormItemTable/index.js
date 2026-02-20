@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import {
   IconButton,
+  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -16,9 +17,14 @@ import ErrorIcon from "@mui/icons-material/Error";
 import T from "i18n-react/dist/i18n-react";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import { MILLISECONDS_IN_SECOND } from "../../../utils/constants";
+import {
+  FORM_DISCOUNT_OPTIONS,
+  MILLISECONDS_IN_SECOND
+} from "../../../utils/constants";
 import GlobalQuantityField from "./components/GlobalQuantityField";
 import ItemTableField from "./components/ItemTableField";
+import MuiFormikSelect from "../formik-inputs/mui-formik-select";
+import MuiFormikTextField from "../formik-inputs/mui-formik-textfield";
 
 const FormItemTable = ({
   data,
@@ -106,42 +112,42 @@ const FormItemTable = ({
       <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: "#EAEDF4" }}>
-            <TableCell>{T.translate("edit_form.code")}</TableCell>
-            <TableCell>{T.translate("edit_form.description")}</TableCell>
-            <TableCell>{T.translate("edit_form.early_bird_rate")}</TableCell>
-            <TableCell>{T.translate("edit_form.standard_rate")}</TableCell>
-            <TableCell>{T.translate("edit_form.onsite_rate")}</TableCell>
+            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.code")}</TableCell>
+            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.description")}</TableCell>
+            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.early_bird_rate")}</TableCell>
+            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.standard_rate")}</TableCell>
+            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.onsite_rate")}</TableCell>
             {extraColumns.map((exc) => (
               <TableCell key={`colhead-${exc.type_id}`}>{exc.name}</TableCell>
             ))}
-            <TableCell>{T.translate("edit_form.qty")}</TableCell>
-            <TableCell />
+            <TableCell sx={{ minWidth: 200 }}>{T.translate("edit_sponsor.cart_tab.edit_form.qty")}</TableCell>
+            <TableCell sx={{ minWidth: 40 }} />
             {/* item level extra field */}
-            <TableCell>{T.translate("edit_form.total")}</TableCell>
-            <TableCell>{T.translate("edit_form.notes")}</TableCell>
+            <TableCell sx={{ minWidth: 100 }}>{T.translate("edit_sponsor.cart_tab.edit_form.total")}</TableCell>
+            <TableCell sx={{ minWidth: 40 }}>{T.translate("edit_sponsor.cart_tab.edit_form.notes")}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {data.map((row) => (
             <TableRow key={`datarow-${row.form_item_id}`}>
               <TableCell>{row.code}</TableCell>
-              <TableCell>
+              <TableCell sx={{position: "relative"}}>
                 <div>{row.name}</div>
                 {hasItemFields(row) && (
                   <Typography
                     variant="body2"
                     component="p"
-                    sx={{ color: "warning.main", fontSize: "0.8rem" }}
+                    sx={{ color: "warning.main", fontSize: "0.6em", position: "absolute" }}
                   >
                     <ErrorIcon
                       color="warning"
                       sx={{
-                        fontSize: "1rem",
-                        top: "0.2rem",
+                        fontSize: "1.4em",
+                        top: "0.2em",
                         position: "relative"
                       }}
                     />{" "}
-                    {T.translate("edit_form.additional_info")}
+                    {T.translate("edit_sponsor.cart_tab.edit_form.additional_info")}
                   </Typography>
                 )}
               </TableCell>
@@ -180,29 +186,70 @@ const FormItemTable = ({
                   value={calculateQuantity(row)}
                 />
               </TableCell>
-              <TableCell align="center" sx={{ width: 40 }}>
+              <TableCell align="center" sx={{ minWidth: 40 }}>
                 {hasItemFields(row) && (
                   <IconButton
-                    size="large"
+                    size="small"
                     onClick={() => handleEditItemFields(row)}
                   >
-                    <SettingsIcon color="warning" />
+                    <SettingsIcon fontSize="large" color="warning" />
                   </IconButton>
                 )}
               </TableCell>
               <TableCell>
                 {currencyAmountFromCents(calculateTotal(row))}
               </TableCell>
-              <TableCell align="center" sx={{ width: 40 }}>
+              <TableCell align="center" sx={{ minWidth: 40 }}>
                 <IconButton size="large" onClick={() => handleEdit(row)}>
-                  <EditIcon />
+                  <EditIcon fontSize="large" />
                 </IconButton>
               </TableCell>
             </TableRow>
           ))}
           <TableRow>
             <TableCell sx={{ fontWeight: 500 }}>
-              {T.translate("edit_form.total_on_caps")}
+              {T.translate("edit_sponsor.cart_tab.edit_form.discount")}
+            </TableCell>
+            {/* eslint-disable-next-line */}
+            {new Array(totalColumns - 5).fill(0).map((_, i) => (
+              <TableCell
+                // eslint-disable-next-line
+                key={`${i}-discountcell`}
+              />
+            ))}
+            <TableCell sx={{ minWidth: 200 }}>
+              <MuiFormikSelect
+                name="discount_type"
+                label=""
+                size="small"
+              >
+                {Object.values(FORM_DISCOUNT_OPTIONS).map((p) => (
+                  <MenuItem key={`ddopt-${p}`} value={p}>
+                    {p}
+                  </MenuItem>
+                ))}
+              </MuiFormikSelect>
+            </TableCell>
+            <TableCell />
+            <TableCell sx={{ minWidth: 100 }}>
+              <MuiFormikTextField
+                name="discount"
+                fullWidth
+                label=""
+                size="small"
+                type="number"
+                slotProps={{
+                  input: {
+                    min: 0
+                  }
+                }}
+              />
+            </TableCell>
+            <TableCell />
+          </TableRow>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 500 }}>
+              {T.translate("edit_sponsor.cart_tab.edit_form.total_on_caps")}
             </TableCell>
             {/* eslint-disable-next-line */}
             {new Array(totalColumns - 3).fill(0).map((_, i) => (

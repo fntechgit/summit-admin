@@ -11,32 +11,44 @@
  * limitations under the License.
  * */
 
-import React from "react";
-import {connect} from "react-redux";
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
 import {
-  updateCartForm,
-  getCartForm
+  addCartForm,
+  getSponsorForm
 } from "../../../../../actions/sponsor-cart-actions";
-import EditForm from "./edit-form";
+import EditForm from "./index";
 
-const EditCartForm = ({
-  form,
-  getCartForm,
-  updateCartForm
+const NewCartForm = ({
+  formId,
+  addOn,
+  sponsorForm,
+  onCancel,
+  getSponsorForm,
+  addCartForm
 }) => {
+  useEffect(() => {
+    getSponsorForm(formId);
+  }, []);
 
-  const getForm = () => getCartForm(form.id);
+  const saveForm = (values) => addCartForm(formId, addOn?.addon_id, values);
 
-  const saveForm = (values) => updateCartForm(form_id, values);
+  if (!sponsorForm) return null;
 
   return (
-    <EditForm getForm={getForm} saveForm={saveForm} />
+    <EditForm
+      form={{ ...sponsorForm, ...addOn }}
+      saveForm={saveForm}
+      onCancel={onCancel}
+    />
   );
 };
 
-const mapStateToProps = () => ({});
+const mapStateToProps = ({ sponsorPageCartListState }) => ({
+  sponsorForm: sponsorPageCartListState.sponsorForm
+});
 
 export default connect(mapStateToProps, {
-  getCartForm,
-  updateCartForm
-})(EditCartForm);
+  getSponsorForm,
+  addCartForm
+})(NewCartForm);

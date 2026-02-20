@@ -11,19 +11,22 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useMemo, useState } from "react";
+import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import { Button, Card, CardContent, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
-import { useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import FormItemTable from "../../../../../components/FormItemTable";
-import { MILLISECONDS_IN_SECOND } from "../../../../../utils/constants";
-import { saveCartForm } from "../../../../../actions/sponsor-cart-actions";
+import FormItemTable from "../../../../../components/mui/FormItemTable";
+import {
+  FORM_DISCOUNT_OPTIONS,
+  MILLISECONDS_IN_SECOND
+} from "../../../../../utils/constants";
+import NotesModal from "../../../../../components/mui/NotesModal";
+import ItemSettingsModal from "../../../../../components/mui/ItemSettingsModal";
 
 const parseValue = (item, timeZone) => {
   switch (item.type) {
@@ -54,44 +57,44 @@ const parseValue = (item, timeZone) => {
   }
 };
 
-const getYupValidation = (field, t) => {
+const getYupValidation = (field) => {
   let schema;
 
   switch (field.type) {
     case "Quantity": {
-      schema = yup.number(t("validation.number"));
+      schema = yup.number(T.translate("validation.number"));
       if (field.minimum_quantity > 0) {
         schema = schema.min(
           field.minimum_quantity,
-          t("validation.minimum", { minimum: field.minimum_quantity })
+          T.translate("validation.minimum", { minimum: field.minimum_quantity })
         );
       }
       if (field.maximum_quantity > 0) {
         schema = schema.max(
           field.maximum_quantity,
-          t("validation.maximum", { maximum: field.maximum_quantity })
+          T.translate("validation.maximum", { maximum: field.maximum_quantity })
         );
       }
       if (field.is_required) {
-        schema = schema.required(t("validation.required"));
+        schema = schema.required(T.translate("validation.required"));
       }
       break;
     }
     case "Text":
     case "TextArea": {
-      schema = yup.string(t("validation.string"));
+      schema = yup.string(T.translate("validation.string"));
 
       if (field.is_required) {
-        schema = schema.required(t("validation.required"));
+        schema = schema.required(T.translate("validation.required"));
       }
       break;
     }
     case "Time":
     case "DateTime": {
-      schema = yup.date(t("validation.date"));
+      schema = yup.date(T.translate("validation.date"));
 
       if (field.is_required) {
-        schema = schema.required(t("validation.required"));
+        schema = schema.required(T.translate("validation.required"));
       } else {
         schema = schema.nullable();
       }
@@ -101,18 +104,18 @@ const getYupValidation = (field, t) => {
       schema = yup
         .array()
         .of(yup.string())
-        .typeError(t("validation.wrong_format"));
+        .typeError(T.translate("validation.wrong_format"));
 
       if (field.is_required) {
-        schema = schema.required(t("validation.required"));
+        schema = schema.required(T.translate("validation.required"));
       }
       break;
     }
     default: {
-      schema = yup.string(t("validation.wrong_format"));
+      schema = yup.string(T.translate("validation.wrong_format"));
 
       if (field.is_required) {
-        schema = schema.required(t("validation.required"));
+        schema = schema.required(T.translate("validation.required"));
       }
       break;
     }
@@ -121,8 +124,10 @@ const getYupValidation = (field, t) => {
   return schema;
 };
 
-const buildInitialValues = (items, timeZone) =>
-  items.reduce((acc, item) => {
+const buildInitialValues = (form, timeZone) => {
+  const items = form?.items || [];
+
+  const initialValues = items.reduce((acc, item) => {
     item.meta_fields.map((f) => {
       acc[`i-${item.form_item_id}-c-${f.class_field}-f-${f.type_id}`] =
         parseValue(f, timeZone);
@@ -132,46 +137,65 @@ const buildInitialValues = (items, timeZone) =>
     // if no quantity inputs we add the global quantity input
     acc[`i-${item.form_item_id}-c-global-f-quantity`] =
       item.quantity || item.default_quantity || 0;
+    // discount
     return acc;
   }, {});
 
-const buildValidationSchema = (items, t) =>
-  items.reduce((acc, item) => {
+  initialValues.discount = form.discount || 0;
+  initialValues.discount_type = form.discount_type || FORM_DISCOUNT_OPTIONS.PERCENTAGE;
+
+  return initialValues;
+}
+
+const buildValidationSchema = (form) => {
+  const items = form.items || [];
+
+  const schema = items.reduce((acc, item) => {
     item.meta_fields
       .filter((f) => f.class_field === "Form")
       .map((f) => {
         acc[`i-${item.form_item_id}-c-${f.class_field}-f-${f.type_id}`] =
-          getYupValidation(f, t);
+          getYupValidation(f);
       });
     // notes
     acc[`i-${item.form_item_id}-c-global-f-notes`] = yup.string(
-      t("validation.string")
+      T.translate("validation.string")
     );
     // validation for the global quantity input
     let globalQtySchema = yup
-      .number(t("validation.number"))
-      .min(1, `${t("validation.minimum")} 1`);
+      .number(T.translate("validation.number"))
+      .min(1, `${T.translate("validation.minimum")} 1`);
     if (item.quantity_limit_per_sponsor > 0) {
       globalQtySchema = globalQtySchema.max(
         item.quantity_limit_per_sponsor,
-        t("validation.maximum", { maximum: item.quantity_limit_per_sponsor })
+        T.translate("validation.maximum", {
+          maximum: item.quantity_limit_per_sponsor
+        })
       );
     }
-    globalQtySchema = globalQtySchema.required(t("validation.required"));
+    globalQtySchema = globalQtySchema.required(
+      T.translate("validation.required")
+    );
     acc[`i-${item.form_item_id}-c-global-f-quantity`] = globalQtySchema;
     return acc;
   }, {});
 
+  schema.discount = yup.number(T.translate("validation.number"))
+  schema.discount_type = yup.string(T.translate("validation.string")).nullable();
+
+  return schema;
+}
+
 const EditForm = ({
   form,
-  addOnId,
-  cartFormId,
   showMetadata,
   showTimeZone,
-  saveCartForm
+  onSaveForm,
+  onCancel
 }) => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+  console.log("METADATA: ", showMetadata);
+  console.log("FORM : ", form);
+
   const [notesItem, setNotesItem] = useState(null);
   const [settingsItem, setSettingsItem] = useState(null);
   const hasRateExpired = useMemo(() => {
@@ -187,14 +211,8 @@ const EditForm = ({
     return true;
   }, [showMetadata, showTimeZone]);
 
-  useEffect(() => {
-    if (cartFormId) {
-      console.log("GET CART FORM ", cartFormId);
-    }
-  }, [cartFormId]);
-
   const handleCancel = () => {
-    navigate(-1);
+    onCancel();
   };
 
   const handleSave = (values) => {
@@ -242,9 +260,9 @@ const EditForm = ({
 
   const formik = useFormik(
     {
-      initialValues: buildInitialValues(form?.items || [], showTimeZone),
+      initialValues: buildInitialValues(form, showTimeZone),
       validationSchema: yup.object({
-        ...buildValidationSchema(form?.items || [], t)
+        ...buildValidationSchema(form?.items || [])
       }),
       onSubmit: (values) => {
         handleSave(values);
@@ -258,74 +276,68 @@ const EditForm = ({
   if (!form || Object.keys(formik.values).length === 0) return null;
 
   return (
-    <Card variant="outlined">
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          {form.tier_name}
-          {form.addon_name ? ` - ${form.addon_name}` : ""}
-        </Typography>
-        <FormikProvider value={formik}>
+    <>
+      <Typography variant="h5" sx={{mt: 4, mb: 2}}>
+        {form.code} - {form.name}
+        {form.addon_name ? ` - ${form.addon_name}` : ""}
+      </Typography>
+      <Box component="div" sx={{ mb: 2 }}>
+        {form?.items.length} {T.translate("general.items")}
+      </Box>
+      <FormikProvider value={formik}>
+        <Box component="form" onSubmit={formik.handleSubmit} autoComplete="off">
+          <FormItemTable
+            data={form.items}
+            rateDates={showMetadata}
+            values={formik.values}
+            timeZone={showTimeZone}
+            onNotesClick={setNotesItem}
+            onSettingsClick={setSettingsItem}
+          />
           <Box
-            component="form"
-            onSubmit={formik.handleSubmit}
-            autoComplete="off"
+            component="div"
+            sx={{ display: "flex", justifyContent: "end", marginTop: 4 }}
           >
-            <FormItemTable
-              data={form.items}
-              rateDates={showMetadata}
-              values={formik.values}
-              timeZone={showTimeZone}
-              onNotesClick={setNotesItem}
-              onSettingsClick={setSettingsItem}
-            />
-            <Box
-              component="div"
-              sx={{ display: "flex", justifyContent: "end", marginTop: 4 }}
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleCancel}
+              size="large"
+              sx={{ minWidth: 150, marginRight: 1 }}
             >
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={handleCancel}
-                size="large"
-                sx={{ minWidth: 150, marginRight: 1 }}
-              >
-                {t("general.cancel")}
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                disabled={hasRateExpired}
-                size="large"
-                sx={{ minWidth: 150 }}
-              >
-                {t("general.save")}
-              </Button>
-            </Box>
+              {T.translate("general.cancel")}
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              disabled={hasRateExpired}
+              size="large"
+              sx={{ minWidth: 150 }}
+            >
+              {T.translate("general.save")}
+            </Button>
           </Box>
-          <NotesModal
-            item={notesItem}
-            open={!!notesItem}
-            onClose={() => setNotesItem(null)}
-            onSave={formik.handleSubmit}
-          />
-          <ItemSettingsModal
-            item={settingsItem}
-            open={!!settingsItem}
-            onClose={() => setSettingsItem(null)}
-          />
-        </FormikProvider>
-      </CardContent>
-    </Card>
+        </Box>
+        <NotesModal
+          item={notesItem}
+          open={!!notesItem}
+          onClose={() => setNotesItem(null)}
+          onSave={formik.handleSubmit}
+        />
+        <ItemSettingsModal
+          item={settingsItem}
+          open={!!settingsItem}
+          onClose={() => setSettingsItem(null)}
+        />
+      </FormikProvider>
+    </>
   );
 };
 
-const mapStateToProps = ({ sponsorFormState, showAccessState }) => ({
-  ...sponsorFormState,
-  showMetadata: showAccessState.showMetadata,
-  showTimeZone: showAccessState.showAccess.summit.time_zone_id
+const mapStateToProps = ({ currentSummitState, sponsorSettingsState }) => ({
+  showMetadata: sponsorSettingsState.settings,
+  showTimeZone: currentSummitState.currentSummit.time_zone_id
 });
 
-export default connect(mapStateToProps, {
-  saveCartForm
-})(EditForm);
+export default connect(mapStateToProps, {})(EditForm);

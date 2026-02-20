@@ -38,6 +38,7 @@ export const SPONSOR_CART_FORM_DELETED = "SPONSOR_CART_FORM_DELETED";
 export const SPONSOR_CART_FORM_LOCKED = "SPONSOR_CART_FORM_LOCKED";
 export const REQUEST_CART_AVAILABLE_FORMS = "REQUEST_CART_AVAILABLE_FORMS";
 export const RECEIVE_CART_AVAILABLE_FORMS = "RECEIVE_CART_AVAILABLE_FORMS";
+export const RECEIVE_CART_SPONSOR_FORM = "RECEIVE_CART_SPONSOR_FORM";
 export const FORM_CART_SAVED = "FORM_CART_SAVED";
 
 const customErrorHandler = (err, res) => (dispatch, state) => {
@@ -196,8 +197,7 @@ export const getSponsorFormsForCart =
 
       const params = {
         page: currentPage,
-        fields: "id,code,name",
-        relations: "items",
+        fields: "id,code,name,items",
         per_page: DEFAULT_PER_PAGE,
         access_token: accessToken
       };
@@ -223,7 +223,29 @@ export const getSponsorFormsForCart =
       });
     };
 
-export const saveCartForm = (formId, addOnId, items) => async (dispatch, getState) => {
+// get sponsor show form by id USING V2 API
+export const getSponsorForm = (formId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_CART_SPONSOR_FORM),
+    `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/show-forms/${formId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const addCartForm = (formId, addOnId, items) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
   const { currentSummit } = currentSummitState;

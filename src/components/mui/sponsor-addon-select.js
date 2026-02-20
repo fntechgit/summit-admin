@@ -16,7 +16,6 @@ const SponsorAddonSelect = ({
 
   useEffect(() => {
     querySponsorAddons(summitId, sponsor.id, sponsorshipIds,(results) => {
-      console.log("RESULTS: ", results);
       const normalized = results.map((r) => ({
         value: r.id,
         label: r.name
@@ -25,8 +24,8 @@ const SponsorAddonSelect = ({
     });
   }, []);
 
-  const handleChange = (event) => {
-    onChange(event.target.value);
+  const handleChange = (ev) => {
+    onChange({id: ev.target.value, name: ev.target.label});
   };
 
   return (

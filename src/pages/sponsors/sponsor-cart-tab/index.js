@@ -15,22 +15,26 @@ import React, { useState } from "react";
 import { Box } from "@mui/material";
 import SelectFormDialog from "./components/select-form-dialog";
 import CartView from "./components/cart-view";
-import EditForm from "./components/edit-form";
+import NewCartForm from "./components/edit-form/new-cart-form";
 
-const SponsorCartTab = ({
-  sponsor,
-  summitId,
-}) => {
+const SponsorCartTab = ({ sponsor, summitId }) => {
   const [openAddFormDialog, setOpenAddFormDialog] = useState(false);
-  const [formEdit, setFormEdit] = useState(null);
+  const [formEdit, setFormEdit] = useState({formId: 19, addon: null});
 
-  const handleAddForm = (form, addOnId) => {
-    setFormEdit({ form, addOnId });
+  const handleAddForm = (form, addOn) => {
+    setFormEdit({ formId: form.id, addon: addOn });
+    setOpenAddFormDialog(false);
   };
 
   return (
     <Box sx={{ mt: 2 }}>
-      {formEdit && <EditForm form={formEdit} />}
+      {formEdit && (
+        <NewCartForm
+          formId={formEdit.formId}
+          addOn={{addon_name: formEdit.addon?.name, addon_id: formEdit.addon?.id}}
+          onCancel={() => setFormEdit(null)}
+        />
+      )}
       {!formEdit && (
         <CartView
           onEdit={setFormEdit}
