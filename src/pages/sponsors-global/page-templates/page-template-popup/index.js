@@ -39,7 +39,7 @@ const PageTemplatePopup = ({
   }, []);
 
   const COLUMN_4 = 4;
-  const COLUMN_8 = 4;
+  const COLUMN_8 = 8;
 
   const addModule = (moduleData) => {
     const modules = formik.values.modules || [];
@@ -200,7 +200,6 @@ const PageTemplatePopup = ({
                     label={T.translate("page_template_list.sponsorship")}
                     allLabel={T.translate("page_template_list.all_tiers")}
                     value={formik.values.sponsorship_types}
-                    allValue={formik.values.apply_to_all_types}
                     options={sponsorships.items}
                     onChange={formik.handleChange}
                   />
