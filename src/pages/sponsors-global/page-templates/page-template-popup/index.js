@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import {
@@ -21,12 +21,27 @@ import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-for
 import PageModules from "./page-template-modules-form";
 import {
   BYTES_PER_MB,
+  MAX_PER_PAGE,
   PAGES_MODULE_KINDS,
   PAGE_MODULES_MEDIA_TYPES,
   PAGE_MODULES_DOWNLOAD
 } from "../../../../utils/constants";
+import DropdownCheckbox from "../../../../components/mui/dropdown-checkbox";
 
-const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
+const PageTemplatePopup = ({
+  pageTemplate,
+  open,
+  onClose,
+  onSave,
+  sponsorships
+}) => {
+  useEffect(() => {
+    if (sponsorships) getSponsorships(1, MAX_PER_PAGE);
+  }, []);
+
+  const COLUMN_4 = 4;
+  const COLUMN_8 = 4;
+
   const addModule = (moduleData) => {
     const modules = formik.values.modules || [];
     const newModule = {
@@ -171,13 +186,27 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
                   fullWidth
                 />
               </Grid2>
-              <Grid2 size={8}>
+              <Grid2 spacing={2} size={sponsorships ? COLUMN_4 : COLUMN_8}>
                 <MuiFormikTextField
                   name="name"
                   label={T.translate("page_template_list.name")}
                   fullWidth
                 />
               </Grid2>
+              {sponsorships && (
+                <Grid2 spacing={2} size={4}>
+                  <DropdownCheckbox
+                    name="sponsorship_types"
+                    allName="apply_to_all_types"
+                    label={T.translate("page_template_list.sponsorship")}
+                    allLabel={T.translate("page_template_list.all_tiers")}
+                    value={formik.values.sponsorship_types}
+                    allValue={formik.values.apply_to_all_types}
+                    options={sponsorships.items}
+                    onChange={formik.handleChange}
+                  />
+                </Grid2>
+              )}
             </Grid2>
             <Divider sx={{ mb: 2 }} />
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
@@ -232,7 +261,8 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
 PageTemplatePopup.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
+  sponsorships: PropTypes.array
 };
 
 export default PageTemplatePopup;

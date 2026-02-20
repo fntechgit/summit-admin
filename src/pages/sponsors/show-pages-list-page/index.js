@@ -48,6 +48,7 @@ const ShowPagesListPage = ({
   hideArchived,
   totalCount,
   currentShowPage,
+  sponsorships,
   getShowPages,
   archiveShowPage,
   unarchiveShowPage,
@@ -252,6 +253,7 @@ const ShowPagesListPage = ({
         pageTemplate={currentShowPage}
         onClose={handleTemplatePopupClose}
         onSave={handleSaveShowPage}
+        sponsorships={sponsorships}
       />
     </div>
   );
