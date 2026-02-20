@@ -71,7 +71,7 @@ export const getShowPages =
       page,
       per_page: perPage,
       access_token: accessToken,
-      fields: "code, name,id,modules_count,sponsorship_types",
+      fields: "code,name,id,modules_count,sponsorship_types,is_archived",
       expand: "sponsorship_types"
     };
 
