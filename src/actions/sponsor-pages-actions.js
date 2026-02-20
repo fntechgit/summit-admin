@@ -12,90 +12,16 @@
  * */
 
 import {
-  authErrorHandler,
   createAction,
-  getRequest,
   postRequest,
-  putRequest,
-  deleteRequest,
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
-import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
-import {
-  DEFAULT_CURRENT_PAGE,
-  DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
-} from "../utils/constants";
+import { getAccessTokenSafely } from "../utils/methods";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
-export const REQUEST_SPONSOR_PAGES = "REQUEST_SPONSOR_PAGES";
-export const RECEIVE_SPONSOR_PAGES = "RECEIVE_SPONSOR_PAGES";
-
-export const SPONSOR_PAGE_ARCHIVED = "SPONSOR_PAGE_ARCHIVED";
-export const SPONSOR_PAGE_UNARCHIVED = "SPONSOR_PAGE_UNARCHIVED";
-
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
-
-export const getSponsorPages =
-  (
-    term = "",
-    page = DEFAULT_CURRENT_PAGE,
-    perPage = DEFAULT_PER_PAGE,
-    order = "id",
-    orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false,
-    sponsorshipTypesId = []
-  ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const { currentSummit } = currentSummitState;
-    const accessToken = await getAccessTokenSafely();
-    const filter = [];
-
-    dispatch(startLoading());
-
-    if (term) {
-      const escapedTerm = escapeFilterValue(term);
-      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
-    }
-
-    const params = {
-      page,
-      per_page: perPage,
-      access_token: accessToken,
-      expand: "sponsorship_types"
-    };
-
-    if (hideArchived) filter.push("is_archived==0");
-
-    if (sponsorshipTypesId?.length > 0) {
-      const formattedSponsorships = sponsorshipTypesId.join("&&");
-      filter.push("applies_to_all_tiers==0");
-      filter.push(`sponsorship_type_id_not_in==${formattedSponsorships}`);
-    }
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    // order
-    if (order != null && orderDir != null) {
-      const orderDirSign = orderDir === 1 ? "" : "-";
-      params.order = `${orderDirSign}${order}`;
-    }
-
-    return getRequest(
-      createAction(REQUEST_SPONSOR_PAGES),
-      createAction(RECEIVE_SPONSOR_PAGES),
-      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages`,
-      authErrorHandler,
-      { order, orderDir, page, term, hideArchived }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
 
 export const cloneGlobalPage =
   (pagesIds, sponsorIds, allSponsors) => async (dispatch, getState) => {
@@ -127,69 +53,12 @@ export const cloneGlobalPage =
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        dispatch(getSponsorPages());
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("sponsor_pages.global_page_popup.success")
+            html: T.translate("show_pages.global_page_popup.success")
           })
         );
       })
       .finally(() => dispatch(stopLoading()));
   };
-
-export const archiveSponsorPage = (pageId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const { currentSummit } = currentSummitState;
-  const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
-
-  dispatch(startLoading());
-
-  return putRequest(
-    null,
-    createAction(SPONSOR_PAGE_ARCHIVED)({ pageId }),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}/archive`,
-    null,
-    snackbarErrorHandler
-  )(params)(dispatch)
-    .then(() => {
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("sponsor_pages.archived")
-        })
-      );
-    })
-    .finally(() => {
-      dispatch(stopLoading());
-    });
-};
-
-export const unarchiveSponsorPage = (pageId) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
-  const { currentSummit } = currentSummitState;
-  const accessToken = await getAccessTokenSafely();
-  const params = { access_token: accessToken };
-
-  dispatch(startLoading());
-
-  return deleteRequest(
-    null,
-    createAction(SPONSOR_PAGE_UNARCHIVED)({ pageId }),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}/archive`,
-    null,
-    snackbarErrorHandler
-  )(params)(dispatch)
-    .then(() => {
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("sponsor_pages.unarchived")
-        })
-      );
-    })
-    .finally(() => {
-      dispatch(stopLoading());
-    });
-};

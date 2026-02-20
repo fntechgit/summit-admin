@@ -18,6 +18,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import PageModules from "./page-template-modules-form";
 import {
@@ -26,7 +27,34 @@ import {
   PAGE_MODULES_MEDIA_TYPES
 } from "../../../../utils/constants";
 
-const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
+const normalizeModules = (modules = [], summitTZ = "UTC") =>
+  modules.map((m) => {
+    if (m.kind === PAGES_MODULE_KINDS.MEDIA) {
+      const normalizeModule = { ...m };
+      if (m.upload_deadline) {
+        normalizeModule.upload_deadline = epochToMomentTimeZone(
+          m.upload_deadline,
+          summitTZ
+        );
+      }
+      if (m.file_type) {
+        normalizeModule.file_type_id = {
+          value: m.file_type.id,
+          label: `${m.file_type.name} (${m.file_type.allowed_extensions})`
+        };
+      }
+      return normalizeModule;
+    }
+    return m;
+  });
+
+const PageTemplatePopup = ({
+  pageTemplate,
+  open,
+  onClose,
+  onSave,
+  summitTZ
+}) => {
   const handleClose = () => {
     onClose();
   };
@@ -125,7 +153,7 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
   const formik = useFormik({
     initialValues: {
       ...pageTemplate,
-      modules: pageTemplate?.modules || []
+      modules: normalizeModules(pageTemplate?.modules, summitTZ) || []
     },
     validationSchema: yup.object().shape({
       code: yup.string().required(T.translate("validation.required")),
@@ -230,7 +258,8 @@ const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
 PageTemplatePopup.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
+  summitTZ: PropTypes.string.isRequired
 };
 
 const mapStateToProps = ({ currentPageTemplateState }) => ({

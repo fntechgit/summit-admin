@@ -24,17 +24,22 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import {
-  getSponsorPages,
-  archiveSponsorPage,
-  unarchiveSponsorPage
-} from "../../../actions/sponsor-pages-actions";
-import { getSponsorForm } from "../../../actions/sponsor-forms-actions";
+  getShowPages,
+  archiveShowPage,
+  unarchiveShowPage,
+  getShowPage,
+  saveShowPage,
+  deleteShowPage,
+  resetShowPageForm
+} from "../../../actions/show-pages-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
+import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
-const SponsorPagesListPage = ({
-  sponsorPages,
+const ShowPagesListPage = ({
+  showPages,
   currentPage,
   perPage,
   term,
@@ -42,54 +47,58 @@ const SponsorPagesListPage = ({
   orderDir,
   hideArchived,
   totalCount,
-  getSponsorPages,
-  archiveSponsorPage,
-  unarchiveSponsorPage,
-  getSponsorForm
+  summitTZ,
+  currentShowPage,
+  getShowPages,
+  archiveShowPage,
+  unarchiveShowPage,
+  getShowPage,
+  saveShowPage,
+  deleteShowPage,
+  resetShowPageForm
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
-    getSponsorPages();
+    getShowPages();
   }, []);
 
   const handlePageChange = (page) => {
-    getSponsorPages(term, page, perPage, order, orderDir, hideArchived);
+    getShowPages(term, page, perPage, order, orderDir, hideArchived);
   };
 
   const handleSort = (key, dir) => {
-    getSponsorPages(term, currentPage, perPage, key, dir, hideArchived);
+    getShowPages(term, currentPage, perPage, key, dir, hideArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getSponsorPages(
-      term,
-      currentPage,
-      newPerPage,
-      order,
-      orderDir,
-      hideArchived
-    );
+    getShowPages(term, currentPage, newPerPage, order, orderDir, hideArchived);
   };
 
   const handleRowEdit = (row) => {
-    getSponsorForm(row.id).then(() => {
-      setOpenPopup("new");
+    getShowPage(row.id).then(() => {
+      setOpenPopup("pageTemplate");
     });
   };
 
   const handleRowDelete = (itemId) => {
-    console.log("DELETE ITEM ID...", itemId);
-    // deleteSponsorForm(itemId);
+    deleteShowPage(itemId).then(() =>
+      getShowPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      )
+    );
   };
 
   const handleArchiveItem = (item) =>
-    item.is_archived
-      ? unarchiveSponsorPage(item.id)
-      : archiveSponsorPage(item.id);
+    item.is_archived ? unarchiveShowPage(item.id) : archiveShowPage(item.id);
 
   const handleHideArchivedForms = (ev) => {
-    getSponsorPages(
+    getShowPages(
       term,
       currentPage,
       perPage,
@@ -99,32 +108,44 @@ const SponsorPagesListPage = ({
     );
   };
 
+  const handleSaveShowPage = (entity) => {
+    saveShowPage(entity).then(() => {
+      setOpenPopup(null);
+      getShowPages();
+    });
+  };
+
+  const handleTemplatePopupClose = () => {
+    resetShowPageForm();
+    setOpenPopup(null);
+  };
+
   const columns = [
     {
       columnKey: "code",
-      header: T.translate("sponsor_pages.code_column_label"),
+      header: T.translate("show_pages.code_column_label"),
       sortable: true
     },
     {
       columnKey: "name",
-      header: T.translate("sponsor_pages.name_column_label"),
+      header: T.translate("show_pages.name_column_label"),
       sortable: true
     },
     {
       columnKey: "tier",
-      header: T.translate("sponsor_pages.tier_column_label")
+      header: T.translate("show_pages.tier_column_label")
     },
     {
       columnKey: "info_mod",
-      header: T.translate("sponsor_pages.info_mod_column_label")
+      header: T.translate("show_pages.info_mod_column_label")
     },
     {
       columnKey: "upload_mod",
-      header: T.translate("sponsor_pages.upload_mod_column_label")
+      header: T.translate("show_pages.upload_mod_column_label")
     },
     {
       columnKey: "download_mod",
-      header: T.translate("sponsor_pages.download_mod_column_label")
+      header: T.translate("show_pages.download_mod_column_label")
     }
   ];
 
@@ -136,8 +157,8 @@ const SponsorPagesListPage = ({
 
   return (
     <div className="container">
-      <h3>{T.translate("sponsor_pages.pages")}</h3>
-      <CustomAlert message={T.translate("sponsor_pages.alert_info")} hideIcon />
+      <h3>{T.translate("show_pages.pages")}</h3>
+      <CustomAlert message={T.translate("show_pages.alert_info")} hideIcon />
       <Grid2
         container
         spacing={2}
@@ -149,7 +170,7 @@ const SponsorPagesListPage = ({
       >
         <Grid2 size={1}>
           <Box component="span">
-            {totalCount} {T.translate("sponsor_pages.pages")}
+            {totalCount} {T.translate("show_pages.pages")}
           </Box>
         </Grid2>
         <Grid2 size={2} offset={1}>
@@ -160,11 +181,11 @@ const SponsorPagesListPage = ({
                   onChange={handleHideArchivedForms}
                   checked={hideArchived}
                   inputProps={{
-                    "aria-label": T.translate("sponsor_pages.hide_archived")
+                    "aria-label": T.translate("show_pages.hide_archived")
                   }}
                 />
               }
-              label={T.translate("sponsor_pages.hide_archived")}
+              label={T.translate("show_pages.hide_archived")}
             />
           </FormGroup>
         </Grid2>
@@ -174,11 +195,11 @@ const SponsorPagesListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setOpenPopup("clone")}
+            onClick={() => setOpenPopup("cloneTemplate")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
-            {T.translate("sponsor_pages.using_template")}
+            {T.translate("show_pages.using_template")}
           </Button>
         </Grid2>
         <Grid2 size={3}>
@@ -186,24 +207,24 @@ const SponsorPagesListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setOpenPopup("new")}
+            onClick={() => setOpenPopup("pageTemplate")}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
-            {T.translate("sponsor_pages.new_page")}
+            {T.translate("show_pages.new_page")}
           </Button>
         </Grid2>
       </Grid2>
 
-      {sponsorPages.length === 0 && (
-        <div>{T.translate("sponsor_pages.no_sponsors_pages")}</div>
+      {showPages.length === 0 && (
+        <div>{T.translate("show_pages.no_sponsors_pages")}</div>
       )}
 
-      {sponsorPages.length > 0 && (
+      {showPages.length > 0 && (
         <div>
           <MuiTable
             columns={columns}
-            data={sponsorPages}
+            data={showPages}
             options={tableOptions}
             perPage={perPage}
             totalRows={totalCount}
@@ -219,24 +240,30 @@ const SponsorPagesListPage = ({
       )}
 
       <GlobalPagePopup
-        open={openPopup === "clone"}
+        open={openPopup === "cloneTemplate"}
         onClose={() => setOpenPopup(null)}
       />
-      {/* <FormPagePopup
-        open={openPopup === "new"}
-        onClose={() => setOpenPopup(null)}
-      /> */}
+      <PageTemplatePopup
+        open={openPopup === "pageTemplate"}
+        pageTemplate={currentShowPage}
+        onClose={handleTemplatePopupClose}
+        onSave={handleSaveShowPage}
+        summitTZ={summitTZ}
+      />
     </div>
   );
 };
 
-const mapStateToProps = ({ sponsorPagesListState }) => ({
-  ...sponsorPagesListState
+const mapStateToProps = ({ showPagesListState }) => ({
+  ...showPagesListState
 });
 
 export default connect(mapStateToProps, {
-  getSponsorPages,
-  archiveSponsorPage,
-  unarchiveSponsorPage,
-  getSponsorForm
-})(SponsorPagesListPage);
+  getShowPages,
+  archiveShowPage,
+  unarchiveShowPage,
+  getShowPage,
+  saveShowPage,
+  deleteShowPage,
+  resetShowPageForm
+})(ShowPagesListPage);

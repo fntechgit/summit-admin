@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,20 +11,19 @@
  * limitations under the License.
  * */
 
+import {
+  authErrorHandler,
+  createAction,
+  getRequest,
+  postRequest,
+  putRequest,
+  deleteRequest,
+  startLoading,
+  stopLoading
+} from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
-import {
-  getRequest,
-  putRequest,
-  postRequest,
-  deleteRequest,
-  createAction,
-  stopLoading,
-  startLoading,
-  authErrorHandler,
-  escapeFilterValue
-} from "openstack-uicore-foundation/lib/utils/actions";
-import { getAccessTokenSafely } from "../utils/methods";
+import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -32,28 +31,27 @@ import {
   PAGES_MODULE_KINDS
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
-import { GLOBAL_PAGE_CLONED } from "./sponsor-pages-actions";
 
-export const ADD_PAGE_TEMPLATE = "ADD_PAGE_TEMPLATE";
-export const PAGE_TEMPLATE_ADDED = "PAGE_TEMPLATE_ADDED";
-export const PAGE_TEMPLATE_DELETED = "PAGE_TEMPLATE_DELETED";
-export const PAGE_TEMPLATE_UPDATED = "PAGE_TEMPLATE_UPDATED";
-export const RECEIVE_PAGE_TEMPLATE = "RECEIVE_PAGE_TEMPLATE";
-export const RECEIVE_PAGE_TEMPLATES = "RECEIVE_PAGE_TEMPLATES";
-export const REQUEST_PAGE_TEMPLATES = "REQUEST_PAGE_TEMPLATES";
-export const RESET_PAGE_TEMPLATE_FORM = "RESET_PAGE_TEMPLATE_FORM";
-export const UPDATE_PAGE_TEMPLATE = "UPDATE_PAGE_TEMPLATE";
-export const PAGE_TEMPLATE_ARCHIVED = "PAGE_TEMPLATE_ARCHIVED";
-export const PAGE_TEMPLATE_UNARCHIVED = "PAGE_TEMPLATE_UNARCHIVED";
+export const REQUEST_SHOW_PAGES = "REQUEST_SHOW_PAGES";
+export const RECEIVE_SHOW_PAGES = "RECEIVE_SHOW_PAGES";
 
-export const getPageTemplates =
+export const RECEIVE_SHOW_PAGE = "RECEIVE_SHOW_PAGE";
+export const SHOW_PAGE_UPDATED = "SHOW_PAGE_UPDATED";
+export const SHOW_PAGE_ADDED = "SHOW_PAGE_ADDED";
+export const SHOW_PAGE_ARCHIVED = "SHOW_PAGE_ARCHIVED";
+export const SHOW_PAGE_UNARCHIVED = "SHOW_PAGE_UNARCHIVED";
+export const RESET_SHOW_PAGE_FORM = "RESET_SHOW_PAGE_FORM";
+export const SHOW_PAGE_DELETED = "SHOW_PAGE_DELETED";
+
+export const getShowPages =
   (
-    term = null,
+    term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    hideArchived = false,
+    sponsorshipTypesId = []
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
@@ -71,15 +69,18 @@ export const getPageTemplates =
 
     const params = {
       page,
-      expand: "modules",
-      fields:
-        "id,code,name,modules,is_archived,modules.kind,modules.id,modules.content",
-      relations: "modules,modules.none",
       per_page: perPage,
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "sponsorship_types"
     };
 
     if (hideArchived) filter.push("is_archived==0");
+
+    if (sponsorshipTypesId?.length > 0) {
+      const formattedSponsorships = sponsorshipTypesId.join("&&");
+      filter.push("applies_to_all_tiers==0");
+      filter.push(`sponsorship_type_id_not_in==${formattedSponsorships}`);
+    }
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -92,9 +93,9 @@ export const getPageTemplates =
     }
 
     return getRequest(
-      createAction(REQUEST_PAGE_TEMPLATES),
-      createAction(RECEIVE_PAGE_TEMPLATES),
-      `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates`,
+      createAction(REQUEST_SHOW_PAGES),
+      createAction(RECEIVE_SHOW_PAGES),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages`,
       authErrorHandler,
       { order, orderDir, page, perPage, term, hideArchived, summitTZ }
     )(params)(dispatch).then(() => {
@@ -102,51 +103,29 @@ export const getPageTemplates =
     });
   };
 
-export const getPageTemplate = (formTemplateId) => async (dispatch) => {
+export const getShowPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
 
   const params = {
     access_token: accessToken,
-    expand: "materials,meta_fields,meta_fields.values"
+    expand: "modules,modules.file_type"
   };
 
   return getRequest(
     null,
-    createAction(RECEIVE_PAGE_TEMPLATE),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${formTemplateId}`,
+    createAction(RECEIVE_SHOW_PAGE),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}`,
     authErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
 };
 
-export const deletePageTemplate = (formTemplateId) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-
-  dispatch(startLoading());
-
-  const params = {
-    access_token: accessToken
-  };
-
-  return deleteRequest(
-    null,
-    createAction(PAGE_TEMPLATE_DELETED)({ formTemplateId }),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${formTemplateId}`,
-    null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
-
-export const resetPageTemplateForm = () => (dispatch) => {
-  dispatch(createAction(RESET_PAGE_TEMPLATE_FORM)({}));
-};
-
-const normalizeEntity = (entity) => {
+const normalizeShowPage = (entity) => {
   const normalizedEntity = { ...entity };
 
   normalizedEntity.modules = entity.modules.map((module) => {
@@ -175,22 +154,25 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const savePageTemplate = (entity) => async (dispatch) => {
+export const saveShowPage = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
   const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
   const params = {
     access_token: accessToken
   };
 
-  dispatch(startLoading());
-
-  const normalizedEntity = normalizeEntity(entity);
+  const normalizedShowPage = normalizeShowPage(entity);
 
   if (entity.id) {
     return putRequest(
-      createAction(UPDATE_PAGE_TEMPLATE),
-      createAction(PAGE_TEMPLATE_UPDATED),
-      `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${entity.id}`,
-      normalizedEntity,
+      null,
+      createAction(SHOW_PAGE_UPDATED),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${entity.id}`,
+      normalizedShowPage,
       snackbarErrorHandler,
       entity
     )(params)(dispatch)
@@ -198,13 +180,9 @@ export const savePageTemplate = (entity) => async (dispatch) => {
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("page_template_list.page_crud.page_saved")
+            html: T.translate("show_pages.page_saved")
           })
         );
-        getPageTemplates()(dispatch);
-      })
-      .catch((err) => {
-        console.error(err);
       })
       .finally(() => {
         dispatch(stopLoading());
@@ -212,10 +190,10 @@ export const savePageTemplate = (entity) => async (dispatch) => {
   }
 
   return postRequest(
-    createAction(ADD_PAGE_TEMPLATE),
-    createAction(PAGE_TEMPLATE_ADDED),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates`,
-    normalizedEntity,
+    null,
+    createAction(SHOW_PAGE_ADDED),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages`,
+    normalizedShowPage,
     snackbarErrorHandler,
     entity
   )(params)(dispatch)
@@ -223,35 +201,78 @@ export const savePageTemplate = (entity) => async (dispatch) => {
       dispatch(
         snackbarSuccessHandler({
           title: T.translate("general.success"),
-          html: T.translate("page_template_list.page_crud.page_created")
+          html: T.translate("show_pages.page_created")
         })
       );
-      getPageTemplates()(dispatch);
-    })
-    .catch((err) => {
-      console.error(err);
     })
     .finally(() => {
       dispatch(stopLoading());
     });
 };
 
-/* **************************************  ARCHIVE  ************************************** */
+export const resetShowPageForm = () => (dispatch) => {
+  dispatch(createAction(RESET_SHOW_PAGE_FORM)({}));
+};
 
-export const archivePageTemplate = (pageTemplateId) => async (dispatch) => {
+export const deleteShowPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(SHOW_PAGE_DELETED)({ pageId }),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("show_pages.page_delete_success")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const archiveShowPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
   const accessToken = await getAccessTokenSafely();
   const params = { access_token: accessToken };
 
+  dispatch(startLoading());
+
   return putRequest(
     null,
-    createAction(PAGE_TEMPLATE_ARCHIVED),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
+    createAction(SHOW_PAGE_ARCHIVED)({ pageId }),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}/archive`,
     null,
     snackbarErrorHandler
-  )(params)(dispatch);
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("show_pages.archived")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
-export const unarchivePageTemplate = (pageTemplateId) => async (dispatch) => {
+export const unarchiveShowPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
   const accessToken = await getAccessTokenSafely();
   const params = { access_token: accessToken };
 
@@ -259,40 +280,20 @@ export const unarchivePageTemplate = (pageTemplateId) => async (dispatch) => {
 
   return deleteRequest(
     null,
-    createAction(PAGE_TEMPLATE_UNARCHIVED)({ pageTemplateId }),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${pageTemplateId}/archive`,
+    createAction(SHOW_PAGE_UNARCHIVED)({ pageId }),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}/archive`,
     null,
-    snackbarErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
-};
-
-export const clonePageTemplate = (templateId) => async (dispatch) => {
-  const accessToken = await getAccessTokenSafely();
-
-  dispatch(startLoading());
-
-  const params = {
-    access_token: accessToken
-  };
-
-  return postRequest(
-    null,
-    createAction(GLOBAL_PAGE_CLONED),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates/${templateId}/clone`,
-    {},
     snackbarErrorHandler
   )(params)(dispatch)
     .then(() => {
-      getPageTemplates()(dispatch);
       dispatch(
         snackbarSuccessHandler({
           title: T.translate("general.success"),
-          html: T.translate("page_template_list.clone_success")
+          html: T.translate("show_pages.unarchived")
         })
       );
     })
-    .catch(console.error)
-    .finally(() => dispatch(stopLoading()));
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
