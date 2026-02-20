@@ -327,7 +327,7 @@ class SelectionPlanForm extends React.Component {
       allowedMembers
     } = this.props;
 
-    const timezoneDdl = timezones.map((tz) => ({ label: tz, value: tz }));
+    const timezoneDdl = (timezones || []).map((tz) => ({ label: tz, value: tz }));
 
     const trackGroupsColumns = [
       { columnKey: "name", value: T.translate("edit_selection_plan.name") },
