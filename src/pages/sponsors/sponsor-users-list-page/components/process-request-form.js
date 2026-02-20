@@ -55,10 +55,13 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
         .when("sponsor_type", {
           is: SPONSOR_USER_ASSIGNMENT_TYPE.EXISTING,
           then: (schema) =>
-            schema.required(T.translate("validation.required")).shape({
-              id: yup.number().required(),
-              name: yup.string().required()
-            }),
+            schema
+              .test(
+                "sponsor-required",
+                T.translate("validation.required"),
+                (value) => value && value.id && value.name
+              )
+              .required(T.translate("validation.required")),
           otherwise: (schema) => schema.notRequired()
         }),
       company: yup
@@ -67,13 +70,13 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
         .when("sponsor_type", {
           is: SPONSOR_USER_ASSIGNMENT_TYPE.NEW,
           then: (schema) =>
-            schema.required(T.translate("validation.required")).shape({
-              id: yup
-                .number()
-                .min(0, T.translate("validation.required"))
-                .required(),
-              name: yup.string().required()
-            }),
+            schema
+              .test(
+                "company-required",
+                T.translate("validation.required"),
+                (value) => value && value.id && value.name
+              )
+              .required(T.translate("validation.required")),
           otherwise: (schema) => schema.notRequired()
         }),
       tiers: yup
@@ -98,7 +101,7 @@ const ProcessRequestForm = ({ request, userGroups, summit, onSubmit }) => {
   });
 
   // SCROLL TO ERROR
-  useScrollToError(formik);
+  useScrollToError(formik, true);
 
   return (
     <FormikProvider value={formik}>
