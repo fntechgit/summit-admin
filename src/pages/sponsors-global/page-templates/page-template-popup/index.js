@@ -30,7 +30,6 @@ import DropdownCheckbox from "../../../../components/mui/dropdown-checkbox";
 
 const PageTemplatePopup = ({
   pageTemplate,
-  open,
   onClose,
   onSave,
   sponsorships
@@ -259,7 +258,6 @@ const PageTemplatePopup = ({
 };
 
 PageTemplatePopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   sponsorships: PropTypes.array

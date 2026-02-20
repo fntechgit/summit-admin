@@ -98,7 +98,7 @@ const FormTemplateForm = ({
                 fullWidth
               />
             </Grid2>
-            <Grid2 size={4} sx={{ pt: "16px" }}>
+            <Grid2 size={4}>
               <DropdownCheckbox
                 name="sponsorship_types"
                 allName="apply_to_all_types"

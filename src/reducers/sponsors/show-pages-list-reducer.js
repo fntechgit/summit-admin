@@ -127,6 +127,10 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_SHOW_PAGE: {
       const pageData = payload.response;
 
+      const sponsorshipTypeIds = pageData.apply_to_all_types
+        ? ["all"]
+        : [...pageData.sponsorship_types];
+
       const currentShowPage = {
         ...pageData,
         modules: pageData.modules.map((m) => ({
@@ -139,10 +143,11 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
                 )
               }
             : {})
-        }))
+        })),
+        sponsorship_types: sponsorshipTypeIds
       };
 
-      return { ...state, currentShowPage };
+      return { ...state, currentShowPage };      
     }
     case SHOW_PAGE_DELETED: {
       const { pageId } = payload;
