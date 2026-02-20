@@ -49,6 +49,7 @@ const ShowPagesListPage = ({
   totalCount,
   summitTZ,
   currentShowPage,
+  sponsorships,
   getShowPages,
   archiveShowPage,
   unarchiveShowPage,
@@ -249,6 +250,7 @@ const ShowPagesListPage = ({
         onClose={handleTemplatePopupClose}
         onSave={handleSaveShowPage}
         summitTZ={summitTZ}
+        sponsorships={sponsorships}
       />
     </div>
   );

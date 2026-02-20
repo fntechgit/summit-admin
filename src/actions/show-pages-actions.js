@@ -71,7 +71,8 @@ export const getShowPages =
       page,
       per_page: perPage,
       access_token: accessToken,
-      fields: "code,name,id,modules_count,sponsorship_types,is_archived",
+      fields:
+        "code,name,id,modules_count,sponsorship_types,is_archived,apply_to_all_types",
       expand: "sponsorship_types"
     };
 
@@ -128,6 +129,14 @@ export const getShowPage = (pageId) => async (dispatch, getState) => {
 
 const normalizeShowPage = (entity) => {
   const normalizedEntity = { ...entity };
+
+  normalizedEntity.apply_to_all_types = false;
+  normalizedEntity.sponsorship_types = entity.sponsorship_types;
+
+  if (entity.sponsorship_types.includes("all")) {
+    normalizedEntity.apply_to_all_types = true;
+    delete normalizedEntity.sponsorship_types;
+  }
 
   normalizedEntity.modules = entity.modules.map((module) => {
     const normalizedModule = { ...module };
