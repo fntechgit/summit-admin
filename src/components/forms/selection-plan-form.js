@@ -145,6 +145,7 @@ class SelectionPlanForm extends React.Component {
     if (!shallowEqual(prevProps.entity, this.props.entity)) {
       state.entity = { ...this.props.entity };
       state.errors = {};
+      state.selectedTimezone = this.props.currentSummit.time_zone_id;
     }
 
     if (!shallowEqual(prevProps.errors, this.props.errors)) {
