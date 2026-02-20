@@ -15,7 +15,7 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
-  RECEIVE_CART_AVAILABLE_FORMS,
+  RECEIVE_CART_AVAILABLE_FORMS, RECEIVE_CART_SPONSOR_FORM,
   RECEIVE_SPONSOR_CART,
   REQUEST_CART_AVAILABLE_FORMS,
   REQUEST_SPONSOR_CART,
@@ -35,14 +35,13 @@ const DEFAULT_STATE = {
     term: "",
     order: "id",
     orderDir: 1
-  }
+  },
+  sponsorForm: null,
 };
 
-const mapForms = (formData) => ({
-  id: formData.id,
-  code: formData.code,
-  name: formData.name,
-  items: `${formData.items.length} items`
+const mapForm = (formData) => ({
+  ...formData,
+  item_count: `${formData.items.length} items`
 });
 
 const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
@@ -111,7 +110,8 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
       const { term, order, orderDir } = payload;
       return {
         ...state,
-        availableForms: { ...state.availableForms, term, order, orderDir }
+        availableForms: { ...state.availableForms, term, order, orderDir },
+        sponsorForm: null
       };
     }
     case RECEIVE_CART_AVAILABLE_FORMS: {
@@ -124,8 +124,8 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
 
       const forms =
         currentPage === 1
-          ? data.map(mapForms)
-          : [...state.availableForms.forms, ...data.map(mapForms)];
+          ? data.map(mapForm)
+          : [...state.availableForms.forms, ...data.map(mapForm)];
 
       const availableForms = {
         ...state.availableForms,
@@ -136,6 +136,10 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
       };
 
       return { ...state, availableForms };
+    }
+    case RECEIVE_CART_SPONSOR_FORM: {
+      const sponsorForm = payload.response;
+      return { ...state, sponsorForm };
     }
     default:
       return state;

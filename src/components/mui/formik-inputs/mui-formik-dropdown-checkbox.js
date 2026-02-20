@@ -8,10 +8,9 @@ import {
   Select
 } from "@mui/material";
 import { useField } from "formik";
-import { useTranslation } from "react-i18next";
+import T from "i18n-react/dist/i18n-react";
 
 const MuiFormikDropdownCheckbox = ({ name, options, ...rest }) => {
-  const { t } = useTranslation();
   const [field, meta, helpers] = useField(name);
   const allSelected = options.every(({ value }) =>
     field.value?.includes(value)
@@ -49,7 +48,7 @@ const MuiFormikDropdownCheckbox = ({ name, options, ...rest }) => {
             return rest.placeholder || "";
           }
           if (allSelected) {
-            return t("general.all");
+            return T.translate("general.all");
           }
           const selectedNames = options
             .filter(({ value }) => selected?.includes(value))
@@ -59,7 +58,7 @@ const MuiFormikDropdownCheckbox = ({ name, options, ...rest }) => {
       >
         <MenuItem key="all" value="all">
           <Checkbox checked={allSelected} />
-          <ListItemText primary={t("general.all")} />
+          <ListItemText primary={T.translate("general.all")} />
         </MenuItem>
         <Divider />
         {options.map(({ label, value }) => (

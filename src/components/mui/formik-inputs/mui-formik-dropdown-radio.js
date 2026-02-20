@@ -7,11 +7,10 @@ import {
   Select
 } from "@mui/material";
 import { useField } from "formik";
-import { useTranslation } from "react-i18next";
+import T from "i18n-react/dist/i18n-react";
 
 const MuiFormikDropdownRadio = ({ name, options, placeholder, ...rest }) => {
-  const { t } = useTranslation();
-  const finalPlaceholder = placeholder || t("general.select_an_option");
+  const finalPlaceholder = placeholder || T.translate("general.select_an_option");
   const [field, meta, helpers] = useField(name);
 
   const handleChange = (event) => {

@@ -43,6 +43,7 @@
     "delete": "Delete",
     "clone": "Clone",
     "new": "New",
+    "all": "All",
     "new_summit": "New Event",
     "drop_files": "Drop images or click to select files to upload.",
     "search": "Search",
@@ -75,6 +76,7 @@
     "error": "Error!",
     "unarchive": "Unarchive",
     "archive": "Archive",
+    "items": "items",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
@@ -2477,7 +2479,21 @@
       "pay_invoice": "pay with invoice",
       "add_form_to_cart": "Add Form to Cart",
       "add_selected_form": "Add selected form",
-      "select_addon": "Select Add-on..."
+      "select_addon": "Select Add-on...",
+      "edit_form": {
+        "code": "Code",
+        "description": "Description",
+        "early_bird_rate": "Early Bird Rate",
+        "standard_rate": "Standard Rate",
+        "onsite_rate": "Onsite Rate",
+        "qty": "Quantity",
+        "total": "Total",
+        "notes": "Notes",
+        "notes_placeholder": "Enter your notes here...",
+        "additional_info": "Additional Info",
+        "discount": "Discount",
+        "total_on_caps": "TOTAL"
+      }
     },
     "purchase_tab": {
       "order": "Order",

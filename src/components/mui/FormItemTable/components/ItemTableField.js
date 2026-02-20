@@ -6,6 +6,9 @@ import MuiFormikDatepicker from "../../formik-inputs/mui-formik-datepicker";
 import MuiFormikTimepicker from "../../formik-inputs/mui-formik-timepicker";
 import MuiFormikTextField from "../../formik-inputs/mui-formik-textfield";
 import MuiFormikSelect from "../../formik-inputs/mui-formik-select";
+import T from "i18n-react";
+import { METAFIELD_TYPES } from "../../../../utils/constants";
+import { MenuItem } from "@mui/material";
 
 const ItemTableField = ({ rowId, field, timeZone, label = "" }) => {
   const name = `i-${rowId}-c-${field.class_field}-f-${field.type_id}`;
@@ -18,6 +21,7 @@ const ItemTableField = ({ rowId, field, timeZone, label = "" }) => {
         <MuiFormikDropdownCheckbox
           name={name}
           label={label}
+          size="small"
           options={field.values.map((v) => ({ value: v.id, label: v.value }))}
         />
       );
@@ -26,6 +30,7 @@ const ItemTableField = ({ rowId, field, timeZone, label = "" }) => {
         <MuiFormikDropdownRadio
           name={name}
           label={label}
+          size="small"
           options={field.values.map((v) => ({ value: v.id, label: v.value }))}
         />
       );
@@ -55,11 +60,17 @@ const ItemTableField = ({ rowId, field, timeZone, label = "" }) => {
       );
     case "ComboBox":
       return (
-        <MuiFormikSelect
-          name={name}
-          label={label}
-          options={field.values.map((v) => ({ value: v.id, label: v.value }))}
-        />
+      <MuiFormikSelect
+        name={name}
+        label={label}
+        size="small"
+      >
+        {field.values.map((v) => (
+          <MenuItem key={`ddopt-${v.id}`} value={v.id}>
+            {v.value}
+          </MenuItem>
+        ))}
+      </MuiFormikSelect>
       );
     case "Text":
       return (

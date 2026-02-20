@@ -101,8 +101,8 @@ const SelectFormDialog = ({
       sortable: true
     },
     {
-      columnKey: "items",
-      header: T.translate("edit_sponsor.cart_tab.items"),
+      columnKey: "item_count",
+      header: T.translate("general.items"),
       sortable: false
     }
   ];
@@ -124,7 +124,7 @@ const SelectFormDialog = ({
       <DialogContent sx={{ p: 0 }}>
         <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
           <SponsorAddonSelect
-            value={selectedAddon || null}
+            value={selectedAddon?.id || null}
             summitId={summitId}
             sponsor={sponsor}
             onChange={setSelectedAddon}

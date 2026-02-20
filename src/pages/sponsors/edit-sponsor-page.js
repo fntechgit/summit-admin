@@ -38,6 +38,7 @@ import {
   updateExtraQuestionOrder,
   getExtraQuestionMeta
 } from "../../actions/sponsor-actions";
+import {getSponsorPurchasesMeta} from "../../actions/sponsor-settings-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 import SponsorUsersListPerSponsorPage from "./sponsor-users-list-per-sponsor";
 import SponsorFormsTab from "./sponsor-forms-tab";
@@ -116,7 +117,8 @@ const EditSponsorPage = (props) => {
     resetSponsorExtraQuestionForm,
     deleteExtraQuestion,
     updateExtraQuestionOrder,
-    getExtraQuestionMeta
+    getExtraQuestionMeta,
+    getSponsorPurchasesMeta
   } = props;
 
   const [selectedTab, setSelectedTab] = useState(getTabFromFragment(location));
@@ -159,6 +161,7 @@ const EditSponsorPage = (props) => {
       getSponsorLeadReportSettingsMeta(entity.id);
       getSponsorTiers(entity.id);
       getExtraQuestionMeta();
+      getSponsorPurchasesMeta();
     } else {
       resetSponsorForm();
     }
@@ -260,7 +263,7 @@ const EditSponsorPage = (props) => {
           )}
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={5}>
-          <SponsorCartTab sponsor={entity} summitId={currentSummit.id} />
+          <SponsorCartTab sponsor={entity} summitId={currentSummit.id} history={history} />
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={6}>
           <SponsorPurchasesTab sponsor={entity} summitId={currentSummit.id} />
@@ -306,5 +309,6 @@ export default connect(mapStateToProps, {
   resetSponsorExtraQuestionForm,
   deleteExtraQuestion,
   updateExtraQuestionOrder,
-  getExtraQuestionMeta
+  getExtraQuestionMeta,
+  getSponsorPurchasesMeta
 })(EditSponsorPage);

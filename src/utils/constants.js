@@ -264,3 +264,8 @@ export const SPONSOR_USER_ASSIGNMENT_TYPE = {
   EXISTING: "existing",
   NEW: "new"
 };
+
+export const FORM_DISCOUNT_OPTIONS = {
+  PERCENTAGE: "Percentage",
+  RATE: "Rate"
+};
