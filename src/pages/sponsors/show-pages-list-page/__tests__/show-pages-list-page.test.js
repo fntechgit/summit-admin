@@ -32,14 +32,14 @@ jest.mock("../../../../components/mui/showConfirmDialog", () => jest.fn());
 jest.mock(
   "../../../sponsors-global/page-templates/page-template-popup",
   () =>
-    function MockPageTemplatePopup({ open, onClose, onSave, pageTemplate }) {
-      return open ? (
+    function MockPageTemplatePopup({ onClose, onSave, pageTemplate }) {
+      return (
         <div data-testid="page-template-popup">
           <span data-testid="popup-page-id">{pageTemplate?.id}</span>
           <button onClick={onClose}>Close</button>
           <button onClick={() => onSave({ id: 1, name: "Test" })}>Save</button>
         </div>
-      ) : null;
+      );
     }
 );
 
