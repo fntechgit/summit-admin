@@ -59,10 +59,10 @@ const SponsorPagesTab = ({
   };
 
   const handleManagedPerPageChange = (newPerPage) => {
-    const { currentPage, order, orderDir } = managedPages;
+    const { order, orderDir } = managedPages;
     getSponsorManagedPages(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       newPerPage,
       order,
       orderDir,
@@ -71,8 +71,15 @@ const SponsorPagesTab = ({
   };
 
   const handleManagedSort = (key, dir) => {
-    const { currentPage, perPage } = managedPages;
-    getSponsorManagedPages(term, currentPage, perPage, key, dir, hideArchived);
+    const { perPage } = managedPages;
+    getSponsorManagedPages(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      key,
+      dir,
+      hideArchived
+    );
   };
 
   const handleCustomizedPageChange = (page) => {
@@ -88,10 +95,10 @@ const SponsorPagesTab = ({
   };
 
   const handleCustomizedPerPageChange = (newPerPage) => {
-    const { currentPage, order, orderDir } = customizedPages;
+    const { order, orderDir } = customizedPages;
     getSponsorCustomizedPages(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       newPerPage,
       order,
       orderDir,
@@ -100,11 +107,11 @@ const SponsorPagesTab = ({
   };
 
   const handleCustomizedSort = (key, dir) => {
-    const { currentPage, perPage } = customizedPages;
+    const { perPage } = customizedPages;
 
     getSponsorCustomizedPages(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       key,
       dir,

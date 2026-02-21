@@ -103,8 +103,8 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         name: a.name,
         allowed_add_ons: a.allowed_add_ons,
         info_mod: a.modules_count.info_modules_count,
-        upload_mod: a.modules_count.document_download_modules_count,
-        download_mod: a.modules_count.media_request_modules_count
+        upload_mod: a.modules_count.media_request_modules_count,
+        download_mod: a.modules_count.document_download_modules_count
       }));
 
       return {
