@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import {
@@ -21,7 +21,8 @@ import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-for
 import PageModules from "./page-template-modules-form";
 import {
   BYTES_PER_MB,
-  MAX_PER_PAGE,
+  COLUMN_4,
+  COLUMN_8,
   PAGES_MODULE_KINDS,
   PAGE_MODULES_MEDIA_TYPES,
   PAGE_MODULES_DOWNLOAD
@@ -34,51 +35,8 @@ const PageTemplatePopup = ({
   onSave,
   sponsorships
 }) => {
-  useEffect(() => {
-    if (sponsorships) getSponsorships(1, MAX_PER_PAGE);
-  }, []);
-
-  const COLUMN_4 = 4;
-  const COLUMN_8 = 8;
-
-  const addModule = (moduleData) => {
-    const modules = formik.values.modules || [];
-    const newModule = {
-      ...moduleData,
-      _tempId: `temp-${Date.now()}`,
-      custom_order: modules.length
-    };
-    formik.setFieldValue("modules", [...modules, newModule]);
-  };
-
-  const handleAddInfo = () => {
-    addModule({
-      kind: PAGES_MODULE_KINDS.INFO,
-      content: ""
-    });
-  };
-
-  const handleAddDocument = () => {
-    addModule({
-      kind: PAGES_MODULE_KINDS.DOCUMENT,
-      name: "",
-      description: "",
-      external_url: "",
-      file: []
-    });
-  };
-
-  const handleAddMedia = () => {
-    addModule({
-      kind: PAGES_MODULE_KINDS.MEDIA,
-      type: PAGE_MODULES_MEDIA_TYPES.FILE,
-      name: "",
-      description: "",
-      upload_deadline: null,
-      max_file_size: 0,
-      file_type_id: null
-    });
-  };
+  const showSponsorships =
+    Array.isArray(sponsorships) && sponsorships.length > 0;
 
   const infoModuleSchema = yup.object().shape({
     kind: yup.string().equals([PAGES_MODULE_KINDS.INFO]),
@@ -158,6 +116,45 @@ const PageTemplatePopup = ({
     }
   });
 
+  const addModule = (moduleData) => {
+    const modules = formik.values.modules || [];
+    const newModule = {
+      ...moduleData,
+      _tempId: `temp-${Date.now()}`,
+      custom_order: modules.length
+    };
+    formik.setFieldValue("modules", [...modules, newModule]);
+  };
+
+  const handleAddInfo = () => {
+    addModule({
+      kind: PAGES_MODULE_KINDS.INFO,
+      content: ""
+    });
+  };
+
+  const handleAddDocument = () => {
+    addModule({
+      kind: PAGES_MODULE_KINDS.DOCUMENT,
+      name: "",
+      description: "",
+      external_url: "",
+      file: []
+    });
+  };
+
+  const handleAddMedia = () => {
+    addModule({
+      kind: PAGES_MODULE_KINDS.MEDIA,
+      type: PAGE_MODULES_MEDIA_TYPES.FILE,
+      name: "",
+      description: "",
+      upload_deadline: null,
+      max_file_size: 0,
+      file_type_id: null
+    });
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -185,14 +182,14 @@ const PageTemplatePopup = ({
                   fullWidth
                 />
               </Grid2>
-              <Grid2 spacing={2} size={sponsorships ? COLUMN_4 : COLUMN_8}>
+              <Grid2 spacing={2} size={showSponsorships ? COLUMN_4 : COLUMN_8}>
                 <MuiFormikTextField
                   name="name"
                   label={T.translate("page_template_list.name")}
                   fullWidth
                 />
               </Grid2>
-              {sponsorships && (
+              {showSponsorships && (
                 <Grid2 spacing={2} size={4}>
                   <DropdownCheckbox
                     name="sponsorship_types"
@@ -200,7 +197,7 @@ const PageTemplatePopup = ({
                     label={T.translate("page_template_list.sponsorship")}
                     allLabel={T.translate("page_template_list.all_tiers")}
                     value={formik.values.sponsorship_types}
-                    options={sponsorships.items}
+                    options={sponsorships}
                     onChange={formik.handleChange}
                   />
                 </Grid2>
