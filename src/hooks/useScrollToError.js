@@ -27,7 +27,7 @@ function smoothScrollTo(targetScrollTop, duration) {
   requestAnimationFrame(animationStep);
 }
 
-const useScrollToError = (formik) => {
+const useScrollToError = (formik, relative = false) => {
   const { errors, isValid, isSubmitting } = formik;
   const errorArray = Object.keys(errors);
   const errorCount = errorArray.length;
@@ -56,7 +56,11 @@ const useScrollToError = (formik) => {
     const duration = 500; // 500ms scroll duration
     const scrollToY = target.top - offset;
 
-    smoothScrollTo(scrollToY, duration);
+    if (relative) {
+      target?.element.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      smoothScrollTo(scrollToY, duration);
+    }
   }, [isSubmitting]);
 };
 
