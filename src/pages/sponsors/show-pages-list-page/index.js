@@ -32,11 +32,12 @@ import {
   deleteShowPage,
   resetShowPageForm
 } from "../../../actions/show-pages-actions";
+import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
-import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 
 const ShowPagesListPage = ({
   showPages,
@@ -56,7 +57,8 @@ const ShowPagesListPage = ({
   getShowPage,
   saveShowPage,
   deleteShowPage,
-  resetShowPageForm
+  resetShowPageForm,
+  getSponsorships
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -74,12 +76,6 @@ const ShowPagesListPage = ({
 
   const handlePerPageChange = (newPerPage) => {
     getShowPages(term, currentPage, newPerPage, order, orderDir, hideArchived);
-  };
-
-  const handleRowEdit = (row) => {
-    getShowPage(row.id).then(() => {
-      setOpenPopup("pageTemplate");
-    });
   };
 
   const handleRowDelete = (itemId) => {
@@ -114,6 +110,12 @@ const ShowPagesListPage = ({
       setOpenPopup(null);
       getShowPages();
     });
+  };
+
+  const handleOpenPageTemplatePopup = async (row) => {
+    await getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE);
+    if (row?.id) await getShowPage(row.id);
+    setOpenPopup("pageTemplate");
   };
 
   const handleTemplatePopupClose = () => {
@@ -208,7 +210,7 @@ const ShowPagesListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setOpenPopup("pageTemplate")}
+            onClick={handleOpenPageTemplatePopup}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -234,7 +236,7 @@ const ShowPagesListPage = ({
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
-            onEdit={handleRowEdit}
+            onEdit={handleOpenPageTemplatePopup}
             onArchive={handleArchiveItem}
           />
         </div>
@@ -250,7 +252,7 @@ const ShowPagesListPage = ({
           onClose={handleTemplatePopupClose}
           onSave={handleSaveShowPage}
           summitTZ={summitTZ}
-          sponsorships={sponsorships}
+          sponsorships={sponsorships.items}
         />
       )}
     </div>
@@ -268,5 +270,6 @@ export default connect(mapStateToProps, {
   getShowPage,
   saveShowPage,
   deleteShowPage,
-  resetShowPageForm
+  resetShowPageForm,
+  getSponsorships
 })(ShowPagesListPage);

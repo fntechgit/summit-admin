@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -23,12 +22,12 @@ import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-for
 import PageModules from "./page-template-modules-form";
 import {
   BYTES_PER_MB,
-  MAX_PER_PAGE,
+  COLUMN_4,
+  COLUMN_8,
   PAGES_MODULE_KINDS,
   PAGE_MODULES_MEDIA_TYPES
 } from "../../../../utils/constants";
 import DropdownCheckbox from "../../../../components/mui/dropdown-checkbox";
-import { getSponsorships } from "../../../../actions/sponsor-forms-actions";
 
 const normalizeModules = (modules = [], summitTZ = "UTC") =>
   modules.map((m) => {
@@ -56,15 +55,10 @@ const PageTemplatePopup = ({
   onClose,
   onSave,
   summitTZ,
-  getSponsorships,
   sponsorships
 }) => {
-  useEffect(() => {
-    if (sponsorships) getSponsorships(1, MAX_PER_PAGE);
-  }, []);
-
-  const COLUMN_4 = 4;
-  const COLUMN_8 = 8;
+  const showSponsorships =
+    Array.isArray(sponsorships) && sponsorships.length > 0;
 
   const handleClose = () => {
     onClose();
@@ -208,14 +202,14 @@ const PageTemplatePopup = ({
                   fullWidth
                 />
               </Grid2>
-              <Grid2 spacing={2} size={sponsorships ? COLUMN_4 : COLUMN_8}>
+              <Grid2 spacing={2} size={showSponsorships ? COLUMN_4 : COLUMN_8}>
                 <MuiFormikTextField
                   name="name"
                   label={T.translate("page_template_list.name")}
                   fullWidth
                 />
               </Grid2>
-              {sponsorships && (
+              {showSponsorships && (
                 <Grid2 spacing={2} size={4}>
                   <DropdownCheckbox
                     name="sponsorship_types"
@@ -223,7 +217,7 @@ const PageTemplatePopup = ({
                     label={T.translate("page_template_list.sponsorship")}
                     allLabel={T.translate("page_template_list.all_tiers")}
                     value={formik.values.sponsorship_types}
-                    options={sponsorships.items}
+                    options={sponsorships}
                     onChange={formik.handleChange}
                   />
                 </Grid2>
@@ -283,13 +277,7 @@ PageTemplatePopup.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   summitTZ: PropTypes.string,
-  sponsorships: PropTypes.object
+  sponsorships: PropTypes.array
 };
 
-const mapStateToProps = ({ currentPageTemplateState }) => ({
-  ...currentPageTemplateState
-});
-
-export default connect(mapStateToProps, {
-  getSponsorships
-})(PageTemplatePopup);
+export default PageTemplatePopup;

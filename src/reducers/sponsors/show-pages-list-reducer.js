@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * */
+import T from "i18n-react/dist/i18n-react";
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
@@ -87,7 +88,7 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
         code: a.code,
         name: a.name,
         tier: a.apply_to_all_types
-          ? "All Tiers"
+          ? T.translate("show_pages.all_tiers")
           : a.sponsorship_types.map((s) => s.name).join(", "),
         info_mod: a.modules_count.info_modules_count,
         upload_mod: a.modules_count.media_request_modules_count,

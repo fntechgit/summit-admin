@@ -143,6 +143,10 @@ export const TEN = 10;
 
 export const ONE_HUNDRED = 100;
 
+export const COLUMN_4 = 4;
+
+export const COLUMN_8 = 8;
+
 export const DEFAULT_Z_INDEX = 1;
 
 export const HIGH_Z_INDEX = 9999;
