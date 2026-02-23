@@ -33,7 +33,6 @@ import {
 import { DECIMAL_DIGITS, DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const AddFormTemplateItemDialog = ({
-  open,
   onClose,
   onAddItems,
   clearAllSelectedInventoryItems,
@@ -176,7 +175,7 @@ const AddFormTemplateItemDialog = ({
   ];
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("inventory_items_list_modal.select_items")}
@@ -271,7 +270,6 @@ const AddFormTemplateItemDialog = ({
 };
 
 AddFormTemplateItemDialog.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onAddItems: PropTypes.func.isRequired
 };
