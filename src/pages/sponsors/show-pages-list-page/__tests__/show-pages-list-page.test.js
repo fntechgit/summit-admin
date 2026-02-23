@@ -12,6 +12,11 @@ import {
   archiveShowPage,
   unarchiveShowPage
 } from "../../../../actions/show-pages-actions";
+import { getSponsorships } from "../../../../actions/sponsor-forms-actions";
+import {
+  DEFAULT_CURRENT_PAGE,
+  MAX_PER_PAGE
+} from "../../../../utils/constants";
 
 // Mocks
 
@@ -54,6 +59,10 @@ jest.mock("../../../../actions/show-pages-actions", () => ({
   archiveShowPage: jest.fn(() => () => Promise.resolve()),
   unarchiveShowPage: jest.fn(() => () => Promise.resolve()),
   resetShowPageForm: jest.fn(() => ({ type: "MOCK_ACTION" }))
+}));
+
+jest.mock("../../../../actions/sponsor-forms-actions", () => ({
+  getSponsorships: jest.fn(() => () => Promise.resolve({ items: [] }))
 }));
 
 // Helper to create show page data
@@ -117,6 +126,10 @@ describe("ShowPagesListPage", () => {
       await act(async () => {
         await userEvent.click(editButton);
       });
+      expect(getSponsorships).toHaveBeenCalledWith(
+        DEFAULT_CURRENT_PAGE,
+        MAX_PER_PAGE
+      );
       expect(getShowPage).toHaveBeenCalledWith(1);
       await waitFor(() => {
         expect(screen.getByTestId("page-template-popup")).toBeInTheDocument();
@@ -137,6 +150,10 @@ describe("ShowPagesListPage", () => {
       await act(async () => {
         await userEvent.click(editButton);
       });
+      expect(getSponsorships).toHaveBeenCalledWith(
+        DEFAULT_CURRENT_PAGE,
+        MAX_PER_PAGE
+      );
       await waitFor(() => {
         expect(screen.getByTestId("page-template-popup")).toBeInTheDocument();
       });
