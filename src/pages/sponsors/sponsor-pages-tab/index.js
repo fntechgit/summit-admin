@@ -24,20 +24,12 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import {
-  archiveSponsorCustomizedForm,
-  deleteSponsorCustomizedForm,
-  saveSponsorManagedForm,
-  unarchiveSponsorCustomizedForm
-} from "../../../actions/sponsor-forms-actions";
-import {
   getSponsorManagedPages,
   getSponsorCustomizedPages
 } from "../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
-// import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
-// import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const SponsorPagesTab = ({
@@ -250,7 +242,7 @@ const SponsorPagesTab = ({
       >
         <Grid2 size={1}>
           <Box component="span">
-            {managedPages.totalCount + customizedPages.totalCount}{" "}
+            {managedPages.totalItems + customizedPages.totalItems}{" "}
             {T.translate("edit_sponsor.pages_tab.pages")}
           </Box>
         </Grid2>
@@ -314,7 +306,7 @@ const SponsorPagesTab = ({
             disableProp: "is_archived"
           }}
           perPage={customizedPages.perPage}
-          totalRows={customizedPages.totalCount}
+          totalRows={customizedPages.totalItems}
           currentPage={customizedPages.currentPage}
           onPageChange={handleCustomizedPageChange}
           onPerPageChange={handleCustomizedPerPageChange}
@@ -334,7 +326,7 @@ const SponsorPagesTab = ({
             sortDir: managedPages.orderDir
           }}
           perPage={managedPages.perPage}
-          totalRows={managedPages.totalCount}
+          totalRows={managedPages.totalItems}
           currentPage={managedPages.currentPage}
           onPageChange={handleManagedPageChange}
           onPerPageChange={handleManagedPerPageChange}
@@ -354,9 +346,5 @@ const mapStateToProps = ({ sponsorPagePagesListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorManagedPages,
-  saveSponsorManagedForm,
-  getSponsorCustomizedPages,
-  archiveSponsorCustomizedForm,
-  unarchiveSponsorCustomizedForm,
-  deleteSponsorCustomizedForm
+  getSponsorCustomizedPages
 })(SponsorPagesTab);

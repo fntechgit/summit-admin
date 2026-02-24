@@ -28,7 +28,7 @@ const DEFAULT_STATE = {
     currentPage: 1,
     lastPage: 1,
     perPage: 10,
-    totalCount: 0
+    totalItems: 0
   },
   customizedPages: {
     pages: [],
@@ -37,7 +37,7 @@ const DEFAULT_STATE = {
     currentPage: 1,
     lastPage: 1,
     perPage: 10,
-    totalCount: 0
+    totalItems: 0
   },
   term: "",
   hideArchived: false,
@@ -113,7 +113,7 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
           ...state.managedPages,
           pages,
           currentPage,
-          totalCount: total,
+          totalItems: total,
           lastPage
         }
       };
@@ -141,7 +141,7 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
           ...state.customizedPages,
           pages,
           currentPage,
-          totalCount: total,
+          totalItems: total,
           lastPage
         }
       };
