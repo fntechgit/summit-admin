@@ -227,14 +227,12 @@ export const saveFormTemplateItem =
           return Promise.all(promises)
             .then(() => {
               dispatch(
-                dispatch(
-                  snackbarSuccessHandler({
-                    title: T.translate("general.success"),
-                    html: T.translate(
-                      "edit_form_template_item.form_template_item_saved"
-                    )
-                  })
-                )
+                snackbarSuccessHandler({
+                  title: T.translate("general.success"),
+                  html: T.translate(
+                    "edit_form_template_item.form_template_item_saved"
+                  )
+                })
               );
             })
             .catch((err) => {
