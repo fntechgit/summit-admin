@@ -20,13 +20,10 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
-  authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { amountToCents } from "openstack-uicore-foundation/lib/utils/money";
-import history from "../history";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -117,7 +114,7 @@ export const getFormTemplateItems =
       createAction(REQUEST_FORM_TEMPLATE_ITEMS),
       createAction(RECEIVE_FORM_TEMPLATE_ITEMS),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items`,
-      authErrorHandler,
+      snackbarErrorHandler,
       { order, orderDir, page, term, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -139,7 +136,7 @@ export const getFormTemplateItem =
       null,
       createAction(RECEIVE_FORM_TEMPLATE_ITEM),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}`,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -163,7 +160,7 @@ export const deleteFormTemplateItem =
       }),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${formTemplateItemId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -209,7 +206,7 @@ export const saveFormTemplateItem =
         createAction(FORM_TEMPLATE_ITEM_UPDATED),
         `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/${entity.id}`,
         normalizedEntity,
-        authErrorHandler,
+        snackbarErrorHandler,
         entity
       )(params)(dispatch)
         .then(() => {
@@ -230,10 +227,13 @@ export const saveFormTemplateItem =
           return Promise.all(promises)
             .then(() => {
               dispatch(
-                showSuccessMessage(
-                  T.translate(
-                    "edit_form_template_item.form_template_item_saved"
-                  )
+                dispatch(
+                  snackbarSuccessHandler({
+                    title: T.translate("general.success"),
+                    html: T.translate(
+                      "edit_form_template_item.form_template_item_saved"
+                    )
+                  })
                 )
               );
             })
@@ -249,18 +249,12 @@ export const saveFormTemplateItem =
         });
     }
 
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_form_template_item.form_template_item_created"),
-      type: "success"
-    };
-
     return postRequest(
       createAction(ADD_FORM_TEMPLATE_ITEM),
       createAction(FORM_TEMPLATE_ITEM_ADDED),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch)
       .then(({ response }) => {
@@ -282,8 +276,11 @@ export const saveFormTemplateItem =
         return Promise.all(promises)
           .then(() => {
             dispatch(
-              showMessage(success_message, () => {
-                history.push("/app/form-templates");
+              snackbarSuccessHandler({
+                title: T.translate("general.done"),
+                html: T.translate(
+                  "edit_form_template_item.form_template_item_created"
+                )
               })
             );
           })
@@ -318,7 +315,7 @@ export const cloneFromInventoryItem =
       createAction(FORM_TEMPLATE_ITEM_ADDED),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates/${formTemplateId}/items/clone`,
       payload,
-      authErrorHandler,
+      snackbarErrorHandler,
       payload
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
