@@ -114,6 +114,7 @@ const FormTemplateItemListPage = ({
   };
 
   const handleRowEdit = (row) => {
+    if (!row) return;
     getFormTemplateItem(formTemplateId, row.id).then(() =>
       setShowInventoryItemModal(true)
     );
