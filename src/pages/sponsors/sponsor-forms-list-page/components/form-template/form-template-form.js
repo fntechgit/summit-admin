@@ -101,7 +101,6 @@ const FormTemplateForm = ({
             <Grid2 size={4}>
               <DropdownCheckbox
                 name="sponsorship_types"
-                allName="apply_to_all_types"
                 label={T.translate(
                   "sponsor_forms.form_template_popup.sponsorship"
                 )}
