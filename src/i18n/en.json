@@ -75,6 +75,8 @@
     "error": "Error!",
     "unarchive": "Unarchive",
     "archive": "Archive",
+    "sort_asc_label": "A-Z",
+    "sort_desc_label": "Z-A",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",

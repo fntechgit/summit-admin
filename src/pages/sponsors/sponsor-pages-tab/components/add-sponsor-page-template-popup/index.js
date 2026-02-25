@@ -26,13 +26,16 @@ import MuiTable from "../../../../../components/mui/table/mui-table";
 import MenuButton from "../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../actions/sponsor-actions";
 import { getShowPages } from "../../../../../actions/show-pages-actions";
-import { FIVE_PER_PAGE } from "../../../../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  FIVE_PER_PAGE
+} from "../../../../../utils/constants";
 import MuiFormikSelectGroup from "../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
 const AddSponsorPageTemplatePopup = ({
   onClose,
   onSubmit,
-  sponsorPages,
+  showPages,
   currentPage,
   perPage,
   order,
@@ -77,7 +80,7 @@ const AddSponsorPageTemplatePopup = ({
   useEffect(() => {
     getShowPages(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       FIVE_PER_PAGE,
       order,
       orderDir,
@@ -101,7 +104,7 @@ const AddSponsorPageTemplatePopup = ({
   const handleSort = (key, dir) => {
     getShowPages(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       FIVE_PER_PAGE,
       key,
       dir,
@@ -114,7 +117,7 @@ const AddSponsorPageTemplatePopup = ({
     if (ev.key === "Enter")
       getShowPages(
         searchTerm,
-        currentPage,
+        DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
@@ -234,8 +237,14 @@ const AddSponsorPageTemplatePopup = ({
                     buttonId="sort-button"
                     menuId="sort-menu"
                     menuItems={[
-                      { label: "A-Z", onClick: () => handleSort("name", 1) },
-                      { label: "Z-A", onClick: () => handleSort("name", 0) }
+                      {
+                        label: T.translate("general.sort_asc_label"),
+                        onClick: () => handleSort("name", 1)
+                      },
+                      {
+                        label: T.translate("general.sort_desc_label"),
+                        onClick: () => handleSort("name", 0)
+                      }
                     ]}
                   >
                     <SwapVertIcon fontSize="large" sx={{ mr: 1 }} /> sort by
@@ -266,11 +275,11 @@ const AddSponsorPageTemplatePopup = ({
               </Grid2>
             </Grid2>
 
-            {sponsorPages.length > 0 && (
+            {showPages.length > 0 && (
               <Box sx={{ p: 2 }}>
                 <MuiTable
                   columns={columns}
-                  data={sponsorPages}
+                  data={showPages}
                   options={tableOptions}
                   currentPage={currentPage}
                   perPage={perPage}
@@ -302,8 +311,8 @@ AddSponsorPageTemplatePopup.propTypes = {
   onClose: PropTypes.func.isRequired
 };
 
-const mapStateToProps = ({ sponsorPagesListState }) => ({
-  ...sponsorPagesListState
+const mapStateToProps = ({ showPagesListState }) => ({
+  ...showPagesListState
 });
 
 export default connect(mapStateToProps, {
