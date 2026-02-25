@@ -113,8 +113,10 @@ const ShowPagesListPage = ({
   };
 
   const handleOpenPageTemplatePopup = async (row) => {
-    await getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE);
-    if (row?.id) await getShowPage(row.id);
+    await Promise.all([
+      getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE),
+      row?.id ? getShowPage(row.id) : Promise.resolve()
+    ]);
     setOpenPopup("pageTemplate");
   };
 

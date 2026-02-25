@@ -131,7 +131,6 @@ const normalizeShowPage = (entity) => {
   const normalizedEntity = { ...entity };
 
   normalizedEntity.apply_to_all_types = false;
-  normalizedEntity.sponsorship_types = entity.sponsorship_types;
 
   if (entity.sponsorship_types.includes("all")) {
     normalizedEntity.apply_to_all_types = true;

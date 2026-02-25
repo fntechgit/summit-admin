@@ -213,7 +213,6 @@ const PageTemplatePopup = ({
                 <Grid2 spacing={2} size={4}>
                   <DropdownCheckbox
                     name="sponsorship_types"
-                    allName="apply_to_all_types"
                     label={T.translate("page_template_list.sponsorship")}
                     allLabel={T.translate("page_template_list.all_tiers")}
                     value={formik.values.sponsorship_types}
