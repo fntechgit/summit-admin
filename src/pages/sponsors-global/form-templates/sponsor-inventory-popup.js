@@ -39,7 +39,6 @@ import AdditionalInputList from "../../../components/mui/formik-inputs/additiona
 import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
 
 const SponsorItemDialog = ({
-  open,
   onClose,
   onSave,
   onImageDeleted,
@@ -120,7 +119,7 @@ const SponsorItemDialog = ({
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={handleClose}
       maxWidth="md"
       fullWidth
@@ -313,7 +312,6 @@ const SponsorItemDialog = ({
 };
 
 SponsorItemDialog.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   entity: PropTypes.object

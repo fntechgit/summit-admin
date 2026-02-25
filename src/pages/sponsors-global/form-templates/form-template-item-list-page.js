@@ -114,13 +114,14 @@ const FormTemplateItemListPage = ({
   };
 
   const handleRowEdit = (row) => {
-    if (row) getFormTemplateItem(formTemplateId, row.id);
-    setShowInventoryItemModal(true);
+    if (!row) return;
+    getFormTemplateItem(formTemplateId, row.id).then(() =>
+      setShowInventoryItemModal(true)
+    );
   };
 
   const handleNewInventoryItem = () => {
-    getInventoryItems();
-    setShowAddInventoryItemsModal(true);
+    getInventoryItems().then(() => setShowAddInventoryItemsModal(true));
   };
 
   const handleAddSelectedItems = (items) => {
@@ -300,21 +301,23 @@ const FormTemplateItemListPage = ({
           />
         </div>
       )}
-      <AddFormTemplateItemDialog
-        open={showAddInventoryItemsModal}
-        onClose={() => setShowAddInventoryItemsModal(false)}
-        onAddItems={handleAddSelectedItems}
-      />
-      <SponsorItemDialog
-        entity={currentFormTemplateItem}
-        errors={currentFormTemplateItemErrors}
-        open={showInventoryItemModal}
-        onSave={handleFormTemplateSave}
-        onClose={() => setShowInventoryItemModal(false)}
-        onMetaFieldTypeDeleted={deleteItemMetaFieldType}
-        onMetaFieldTypeValueDeleted={deleteItemMetaFieldTypeValue}
-        onImageDeleted={deleteItemImage}
-      />
+      {showAddInventoryItemsModal && (
+        <AddFormTemplateItemDialog
+          onClose={() => setShowAddInventoryItemsModal(false)}
+          onAddItems={handleAddSelectedItems}
+        />
+      )}
+      {showInventoryItemModal && (
+        <SponsorItemDialog
+          entity={currentFormTemplateItem}
+          errors={currentFormTemplateItemErrors}
+          onSave={handleFormTemplateSave}
+          onClose={() => setShowInventoryItemModal(false)}
+          onMetaFieldTypeDeleted={deleteItemMetaFieldType}
+          onMetaFieldTypeValueDeleted={deleteItemMetaFieldTypeValue}
+          onImageDeleted={deleteItemImage}
+        />
+      )}
     </div>
   );
 };
