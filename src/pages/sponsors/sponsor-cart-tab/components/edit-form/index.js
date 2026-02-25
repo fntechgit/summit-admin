@@ -137,19 +137,21 @@ const buildInitialValues = (form, timeZone) => {
     // if no quantity inputs we add the global quantity input
     acc[`i-${item.form_item_id}-c-global-f-quantity`] =
       item.quantity || item.default_quantity || 0;
-    // discount
+    // custom rate
+    acc[`i-${item.form_item_id}-c-global-f-custom_rate`] =
+      item.custom_rate || 0;
+
     return acc;
   }, {});
 
-  initialValues.discount = form.discount || 0;
-  initialValues.discount_type = form.discount_type || FORM_DISCOUNT_OPTIONS.PERCENTAGE;
+  initialValues.discount_amount = form.discount_amount || 0;
+  initialValues.discount_type =
+    form.discount_type || FORM_DISCOUNT_OPTIONS.AMOUNT;
 
   return initialValues;
-}
+};
 
-const buildValidationSchema = (form) => {
-  const items = form.items || [];
-
+const buildValidationSchema = (items) => {
   const schema = items.reduce((acc, item) => {
     item.meta_fields
       .filter((f) => f.class_field === "Form")
@@ -177,14 +179,21 @@ const buildValidationSchema = (form) => {
       T.translate("validation.required")
     );
     acc[`i-${item.form_item_id}-c-global-f-quantity`] = globalQtySchema;
+    // custom rate
+    acc[`i-${item.form_item_id}-c-global-f-custom_rate`] = yup.number(
+      T.translate("validation.number")
+    );
+
     return acc;
   }, {});
 
-  schema.discount = yup.number(T.translate("validation.number"))
-  schema.discount_type = yup.string(T.translate("validation.string")).nullable();
+  schema.discount = yup.number(T.translate("validation.number"));
+  schema.discount_type = yup
+    .string(T.translate("validation.string"))
+    .nullable();
 
   return schema;
-}
+};
 
 const EditForm = ({
   form,
@@ -193,9 +202,6 @@ const EditForm = ({
   onSaveForm,
   onCancel
 }) => {
-  console.log("METADATA: ", showMetadata);
-  console.log("FORM : ", form);
-
   const [notesItem, setNotesItem] = useState(null);
   const [settingsItem, setSettingsItem] = useState(null);
   const hasRateExpired = useMemo(() => {
@@ -216,14 +222,17 @@ const EditForm = ({
   };
 
   const handleSave = (values) => {
+    const { discount_amount, discount_type, ...itemValues } = values;
     // re-format form values to match the API format
-    const items = Object.entries(values).reduce((res, [key, val]) => {
+    const items = Object.entries(itemValues).reduce((res, [key, val]) => {
       const match = key.split("-");
       if (match) {
         const formItemId = parseInt(match[1]);
         const itemClass = match[3]; // quantity or notes
         const itemTypeId = match[5];
-        const isItemProp = !["quantity", "notes"].includes(itemTypeId);
+        const isItemProp = !["quantity", "notes", "custom_rate"].includes(
+          itemTypeId
+        );
         let current_value = val;
 
         let resItem = res.find((i) => i.form_item_id === formItemId);
@@ -236,14 +245,15 @@ const EditForm = ({
             .find((i) => i.form_item_id === formItemId)
             ?.meta_fields.find((mf) => mf.type_id === parseInt(itemTypeId));
 
-          if (metaField.type === "DateTime") {
-            current_value = moment(val).unix();
-          } else if (metaField.type === "Time") {
-            current_value = moment(val).format("HH:mm");
+          if (metaField?.type === "DateTime") {
+            current_value = val ? moment(val).unix() : null;
+          } else if (metaField?.type === "Time") {
+            current_value = val ? moment(val).format("HH:mm") : null;
           }
 
           resItem.meta_fields.push({
             type_id: parseInt(itemTypeId),
+            type_name: metaField?.type,
             class_field: itemClass,
             current_value
           });
@@ -255,7 +265,7 @@ const EditForm = ({
       return res;
     }, []);
 
-    saveCartForm(formId, addOnId, items);
+    onSaveForm({ discount_amount, discount_type, items });
   };
 
   const formik = useFormik(
@@ -277,7 +287,7 @@ const EditForm = ({
 
   return (
     <>
-      <Typography variant="h5" sx={{mt: 4, mb: 2}}>
+      <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
         {form.code} - {form.name}
         {form.addon_name ? ` - ${form.addon_name}` : ""}
       </Typography>

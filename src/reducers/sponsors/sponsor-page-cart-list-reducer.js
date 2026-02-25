@@ -15,9 +15,11 @@ import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
-  RECEIVE_CART_AVAILABLE_FORMS, RECEIVE_CART_SPONSOR_FORM,
+  RECEIVE_CART_AVAILABLE_FORMS,
+  RECEIVE_CART_SPONSOR_FORM,
   RECEIVE_SPONSOR_CART,
   REQUEST_CART_AVAILABLE_FORMS,
+  REQUEST_CART_SPONSOR_FORM,
   REQUEST_SPONSOR_CART,
   SPONSOR_CART_FORM_DELETED,
   SPONSOR_CART_FORM_LOCKED
@@ -36,7 +38,7 @@ const DEFAULT_STATE = {
     order: "id",
     orderDir: 1
   },
-  sponsorForm: null,
+  sponsorForm: null
 };
 
 const mapForm = (formData) => ({
@@ -66,8 +68,13 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
       const cart = payload.response;
       cart.forms = cart.forms.map((form) => ({
         ...form,
+        addon_name: form.addon_name || "None",
         amount: amountFromCents(form.net_amount),
-        discount: amountFromCents(form.discount_amount)
+        discount: amountFromCents(form.discount_amount),
+        items: form.items.map((it) => ({
+          ...it,
+          custom_rate: amountFromCents(it.custom_rate || 0)
+        }))
       }));
       cart.total = amountFromCents(cart.net_amount);
 
@@ -136,6 +143,9 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
       };
 
       return { ...state, availableForms };
+    }
+    case REQUEST_CART_SPONSOR_FORM: {
+      return { ...state, sponsorForm: null };
     }
     case RECEIVE_CART_SPONSOR_FORM: {
       const sponsorForm = payload.response;

@@ -24,6 +24,7 @@ const NewCartForm = ({
   addOn,
   sponsorForm,
   onCancel,
+  onSaveCallback,
   getSponsorForm,
   addCartForm
 }) => {
@@ -31,14 +32,18 @@ const NewCartForm = ({
     getSponsorForm(formId);
   }, []);
 
-  const saveForm = (values) => addCartForm(formId, addOn?.addon_id, values);
+  const saveForm = (values) => {
+    addCartForm(formId, addOn?.addon_id, values).then(() => {
+      onSaveCallback();
+    });
+  };
 
   if (!sponsorForm) return null;
 
   return (
     <EditForm
       form={{ ...sponsorForm, ...addOn }}
-      saveForm={saveForm}
+      onSaveForm={saveForm}
       onCancel={onCancel}
     />
   );
