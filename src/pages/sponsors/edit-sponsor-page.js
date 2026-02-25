@@ -43,6 +43,7 @@ import SponsorUsersListPerSponsorPage from "./sponsor-users-list-per-sponsor";
 import SponsorFormsTab from "./sponsor-forms-tab";
 import SponsorBadgeScans from "./sponsor-badge-scans";
 import SponsorCartTab from "./sponsor-cart-tab";
+import SponsorPagesTab from "./sponsor-pages-tab";
 import SponsorFormsManageItems from "./sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items";
 import { SPONSOR_TABS } from "../../utils/constants";
 import SponsorPurchasesTab from "./sponsor-purchases-tab";
@@ -247,6 +248,13 @@ const EditSponsorPage = (props) => {
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={1}>
           <SponsorUsersListPerSponsorPage sponsor={entity} />
+        </CustomTabPanel>
+        <CustomTabPanel value={selectedTab} index={2}>
+          <SponsorPagesTab
+            sponsor={entity}
+            summitId={currentSummit.id}
+            history={history}
+          />
         </CustomTabPanel>
         <CustomTabPanel value={selectedTab} index={4}>
           {isNestedFormItemRoute ? (

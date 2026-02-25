@@ -1,0 +1,154 @@
+/**
+ * Copyright 2019 OpenStack Foundation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import {
+  REQUEST_SPONSOR_MANAGED_PAGES,
+  RECEIVE_SPONSOR_MANAGED_PAGES,
+  RECEIVE_SPONSOR_CUSTOMIZED_PAGES,
+  REQUEST_SPONSOR_CUSTOMIZED_PAGES
+} from "../../actions/sponsor-pages-actions";
+import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+
+const DEFAULT_STATE = {
+  managedPages: {
+    pages: [],
+    order: "name",
+    orderDir: 1,
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 10,
+    totalItems: 0
+  },
+  customizedPages: {
+    pages: [],
+    order: "name",
+    orderDir: 1,
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 10,
+    totalItems: 0
+  },
+  term: "",
+  hideArchived: false,
+  summitTZ: ""
+};
+
+const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
+  const { type, payload } = action;
+
+  switch (type) {
+    case SET_CURRENT_SUMMIT:
+    case LOGOUT_USER: {
+      return DEFAULT_STATE;
+    }
+    case REQUEST_SPONSOR_MANAGED_PAGES: {
+      const { order, orderDir, page, perPage, term, summitTZ, hideArchived } =
+        payload;
+
+      return {
+        ...state,
+        managedPages: {
+          ...state.managedPages,
+          order,
+          orderDir,
+          pages: [],
+          currentPage: page,
+          perPage
+        },
+        term,
+        summitTZ,
+        hideArchived
+      };
+    }
+    case REQUEST_SPONSOR_CUSTOMIZED_PAGES: {
+      const { order, orderDir, page, perPage, term, summitTZ, hideArchived } =
+        payload;
+
+      return {
+        ...state,
+        customizedPages: {
+          ...state.customizedPages,
+          order,
+          orderDir,
+          pages: [],
+          currentPage: page,
+          perPage
+        },
+        term,
+        summitTZ,
+        hideArchived
+      };
+    }
+    case RECEIVE_SPONSOR_MANAGED_PAGES: {
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
+
+      const pages = payload.response.data.map((a) => ({
+        id: a.id,
+        code: a.code,
+        name: a.name,
+        allowed_add_ons: a.allowed_add_ons,
+        info_mod: a.modules_count.info_modules_count,
+        upload_mod: a.modules_count.media_request_modules_count,
+        download_mod: a.modules_count.document_download_modules_count
+      }));
+
+      return {
+        ...state,
+        managedPages: {
+          ...state.managedPages,
+          pages,
+          currentPage,
+          totalItems: total,
+          lastPage
+        }
+      };
+    }
+    case RECEIVE_SPONSOR_CUSTOMIZED_PAGES: {
+      const {
+        current_page: currentPage,
+        total,
+        last_page: lastPage
+      } = payload.response;
+
+      const pages = payload.response.data.map((a) => ({
+        id: a.id,
+        code: a.code,
+        name: a.name,
+        allowed_add_ons: a.allowed_add_ons,
+        info_mod: a.modules_count.info_modules_count,
+        upload_mod: a.modules_count.media_request_modules_count,
+        download_mod: a.modules_count.document_download_modules_count
+      }));
+
+      return {
+        ...state,
+        customizedPages: {
+          ...state.customizedPages,
+          pages,
+          currentPage,
+          totalItems: total,
+          lastPage
+        }
+      };
+    }
+    default:
+      return state;
+  }
+};
+
+export default sponsorPagePagesListReducer;
