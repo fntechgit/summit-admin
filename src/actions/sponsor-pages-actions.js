@@ -23,12 +23,17 @@ import {
 import T from "i18n-react/dist/i18n-react";
 import { getAccessTokenSafely } from "../utils/methods";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
-import { DEFAULT_CURRENT_PAGE, DEFAULT_ORDER_DIR, DEFAULT_PER_PAGE } from "../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE
+} from "../utils/constants";
 
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
 
 export const REQUEST_SPONSOR_MANAGED_PAGES = "REQUEST_SPONSOR_MANAGED_PAGES";
 export const RECEIVE_SPONSOR_MANAGED_PAGES = "RECEIVE_SPONSOR_MANAGED_PAGES";
+export const SPONSOR_MANAGED_PAGE_ADDED = "SPONSOR_MANAGED_PAGE_ADDED";
 
 export const REQUEST_SPONSOR_CUSTOMIZED_PAGES =
   "REQUEST_SPONSOR_CUSTOMIZED_PAGES";
@@ -135,6 +140,49 @@ export const getSponsorManagedPages =
     });
   };
 
+export const saveSponsorManagedPage =
+  (entity) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeSponsorManagedPage(entity);
+
+    const params = {
+      access_token: accessToken,
+      fields: "id,code,name,kind,modules_count,allowed_add_ons"
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_MANAGED_PAGE_ADDED),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
+      normalizedEntity,
+      snackbarErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+const normalizeSponsorManagedPage = (entity) => {
+  const normalizedEntity = {
+    show_page_ids: entity.pages,
+    allowed_add_ons: entity.add_ons.map((a) => a.id),
+    apply_to_all_add_ons: false
+  };
+
+  if (entity.add_ons.includes("all")) {
+    normalizedEntity.apply_to_all_add_ons = true;
+    normalizedEntity.allowed_add_ons = [];
+  }
+
+  return normalizedEntity;
+};
 /* ************************************************************************ */
 /*         CUSTOMIZED PAGES       */
 /* ************************************************************************ */

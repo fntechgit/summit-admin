@@ -2476,7 +2476,10 @@
       "upload_mod": "Upload Mod",
       "download_mod": "Download Mod",
       "archive": "Archive",
-      "unarchive": "Unarchive"
+      "unarchive": "Unarchive",
+      "no_add_ons": "No Add-ons Available",
+      "add_page_using_template": "Add Page Template",
+      "add_selected_page_template": "Add Selected Page Template"
     },
     "cart_tab": {
       "new_form": "New Form",
