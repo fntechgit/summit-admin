@@ -55,7 +55,6 @@ const SponsorListPage = ({
   term,
   order,
   orderDir,
-  lastPage,
   addSponsorToSummit
 }) => {
   const [searchTerm, setSearchTerm] = useState(term);
@@ -87,7 +86,7 @@ const SponsorListPage = ({
   const handleNewSponsor = (sponsor) => {
     addSponsorToSummit(sponsor).then(() => {
       setShowAddSponsorModal(false);
-      getSponsors(term, lastPage, perPage, order, orderDir);
+      getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
     });
   };
 
