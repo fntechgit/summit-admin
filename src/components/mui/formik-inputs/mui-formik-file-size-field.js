@@ -10,8 +10,9 @@ const BLOCKED_KEYS = ["e", "E", "+", "-", ".", ","];
 const MuiFormikFilesizeField = ({ name, label, ...props }) => {
   const [field, meta, helpers] = useField(name);
 
-  const displayValue =
-    field.value != null ? Math.floor(field.value / BYTES_PER_MB) : 0;
+  const displayValue = field.value
+    ? Math.floor(field.value / BYTES_PER_MB)
+    : "";
 
   const emptyValue = meta.initialValue === null ? null : 0;
 
