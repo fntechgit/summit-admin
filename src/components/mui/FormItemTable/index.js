@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import {
   IconButton,
+  InputAdornment,
   MenuItem,
   Paper,
   Table,
@@ -15,7 +16,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ErrorIcon from "@mui/icons-material/Error";
 import T from "i18n-react/dist/i18n-react";
-import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
+import {
+  currencyAmountFromCents,
+  amountFromCents,
+  amountToCents
+} from "openstack-uicore-foundation/lib/utils/money";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   FORM_DISCOUNT_OPTIONS,
@@ -37,7 +42,7 @@ const FormItemTable = ({
   const valuesStr = JSON.stringify(values);
   const extraColumns =
     data[0]?.meta_fields?.filter((mf) => mf.class_field === "Form") || [];
-  const fixedColumns = 9;
+  const fixedColumns = 10;
   const totalColumns = extraColumns.length + fixedColumns;
 
   const currentApplicableRate = useMemo(() => {
@@ -88,16 +93,25 @@ const FormItemTable = ({
       values[`i-${row.form_item_id}-c-global-f-quantity`] ||
       calculateQuantity(row);
     if (currentApplicableRate === "expired") return 0;
-    return qty * row.rates[currentApplicableRate];
+    const customRate = amountToCents(
+      values[`i-${row.form_item_id}-c-global-f-custom_rate`] || 0
+    );
+    const rate = customRate || row.rates[currentApplicableRate];
+    return qty * rate;
   };
 
   const hasItemFields = (row) =>
     row.meta_fields.filter((mf) => mf.class_field === "Item").length > 0;
 
-  const totalAmount = useMemo(
-    () => data.reduce((acc, row) => acc + calculateTotal(row), 0),
-    [data, valuesStr]
-  );
+  const totalAmount = useMemo(() => {
+    const subtotal = data.reduce((acc, row) => acc + calculateTotal(row), 0);
+    const discount =
+      values.discount_type === FORM_DISCOUNT_OPTIONS.AMOUNT
+        ? amountToCents(values.discount_amount || 0)
+        : subtotal * amountFromCents(values.discount_amount || 0);
+
+    return subtotal - discount;
+  }, [data, valuesStr]);
 
   const handleEdit = (row) => {
     onNotesClick(row);
@@ -112,32 +126,55 @@ const FormItemTable = ({
       <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: "#EAEDF4" }}>
-            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.code")}</TableCell>
-            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.description")}</TableCell>
-            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.early_bird_rate")}</TableCell>
-            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.standard_rate")}</TableCell>
-            <TableCell>{T.translate("edit_sponsor.cart_tab.edit_form.onsite_rate")}</TableCell>
+            <TableCell>
+              {T.translate("edit_sponsor.cart_tab.edit_form.code")}
+            </TableCell>
+            <TableCell>
+              {T.translate("edit_sponsor.cart_tab.edit_form.description")}
+            </TableCell>
+            <TableCell sx={{ minWidth: 80 }}>
+              {T.translate("edit_sponsor.cart_tab.edit_form.custom_rate")}
+            </TableCell>
+            <TableCell>
+              {T.translate("edit_sponsor.cart_tab.edit_form.early_bird_rate")}
+            </TableCell>
+            <TableCell>
+              {T.translate("edit_sponsor.cart_tab.edit_form.standard_rate")}
+            </TableCell>
+            <TableCell>
+              {T.translate("edit_sponsor.cart_tab.edit_form.onsite_rate")}
+            </TableCell>
             {extraColumns.map((exc) => (
               <TableCell key={`colhead-${exc.type_id}`}>{exc.name}</TableCell>
             ))}
-            <TableCell sx={{ minWidth: 200 }}>{T.translate("edit_sponsor.cart_tab.edit_form.qty")}</TableCell>
+            <TableCell sx={{ minWidth: 120 }}>
+              {T.translate("edit_sponsor.cart_tab.edit_form.qty")}
+            </TableCell>
             <TableCell sx={{ minWidth: 40 }} />
             {/* item level extra field */}
-            <TableCell sx={{ minWidth: 100 }}>{T.translate("edit_sponsor.cart_tab.edit_form.total")}</TableCell>
-            <TableCell sx={{ minWidth: 40 }}>{T.translate("edit_sponsor.cart_tab.edit_form.notes")}</TableCell>
+            <TableCell sx={{ minWidth: 120 }}>
+              {T.translate("edit_sponsor.cart_tab.edit_form.total")}
+            </TableCell>
+            <TableCell sx={{ minWidth: 120 }}>
+              {T.translate("edit_sponsor.cart_tab.edit_form.notes")}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {data.map((row) => (
             <TableRow key={`datarow-${row.form_item_id}`}>
               <TableCell>{row.code}</TableCell>
-              <TableCell sx={{position: "relative"}}>
+              <TableCell sx={{ position: "relative" }}>
                 <div>{row.name}</div>
                 {hasItemFields(row) && (
                   <Typography
                     variant="body2"
                     component="p"
-                    sx={{ color: "warning.main", fontSize: "0.6em", position: "absolute" }}
+                    sx={{
+                      color: "warning.main",
+                      fontSize: "0.6em",
+                      position: "absolute"
+                    }}
                   >
                     <ErrorIcon
                       color="warning"
@@ -147,9 +184,28 @@ const FormItemTable = ({
                         position: "relative"
                       }}
                     />{" "}
-                    {T.translate("edit_sponsor.cart_tab.edit_form.additional_info")}
+                    {T.translate(
+                      "edit_sponsor.cart_tab.edit_form.additional_info"
+                    )}
                   </Typography>
                 )}
+              </TableCell>
+              <TableCell>
+                <MuiFormikTextField
+                  name={`i-${row.form_item_id}-c-global-f-custom_rate`}
+                  fullWidth
+                  label=""
+                  size="small"
+                  type="number"
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      endAdornment: (
+                        <InputAdornment position="end">$</InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </TableCell>
               <TableCell
                 sx={{
@@ -186,7 +242,7 @@ const FormItemTable = ({
                   value={calculateQuantity(row)}
                 />
               </TableCell>
-              <TableCell align="center" sx={{ minWidth: 40 }}>
+              <TableCell align="center">
                 {hasItemFields(row) && (
                   <IconButton
                     size="small"
@@ -199,7 +255,7 @@ const FormItemTable = ({
               <TableCell>
                 {currencyAmountFromCents(calculateTotal(row))}
               </TableCell>
-              <TableCell align="center" sx={{ minWidth: 40 }}>
+              <TableCell align="center">
                 <IconButton size="large" onClick={() => handleEdit(row)}>
                   <EditIcon fontSize="large" />
                 </IconButton>
@@ -217,12 +273,8 @@ const FormItemTable = ({
                 key={`${i}-discountcell`}
               />
             ))}
-            <TableCell sx={{ minWidth: 200 }}>
-              <MuiFormikSelect
-                name="discount_type"
-                label=""
-                size="small"
-              >
+            <TableCell>
+              <MuiFormikSelect name="discount_type" label="" size="small">
                 {Object.values(FORM_DISCOUNT_OPTIONS).map((p) => (
                   <MenuItem key={`ddopt-${p}`} value={p}>
                     {p}
@@ -231,16 +283,26 @@ const FormItemTable = ({
               </MuiFormikSelect>
             </TableCell>
             <TableCell />
-            <TableCell sx={{ minWidth: 100 }}>
+            <TableCell>
               <MuiFormikTextField
-                name="discount"
+                name="discount_amount"
                 fullWidth
                 label=""
                 size="small"
                 type="number"
                 slotProps={{
                   input: {
-                    min: 0
+                    min: 0,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        {values.discount_type === FORM_DISCOUNT_OPTIONS.RATE
+                          ? "%"
+                          : "$"}
+                      </InputAdornment>
+                    ),
+                    ...(values.discount_type === FORM_DISCOUNT_OPTIONS.RATE
+                      ? { max: 100 }
+                      : {})
                   }
                 }}
               />

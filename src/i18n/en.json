@@ -97,7 +97,11 @@
     "date": "Wrong date format.",
     "after": "'{field1}' must be after '{field2}'.",
     "boolean": "Must be a boolean.",
-    "mib_aligned": "Must be a MiB aligned value"
+    "mib_aligned": "Must be a MiB aligned value",
+    "minimum": "Must be at least {minimum}",
+    "maximum": "Must be at most {maximum}",
+    "time": "Wrong time format.",
+    "wrong_format": "Wrong format."
   },
   "landing": {
     "os_summit_admin": "Show Admin",
@@ -2483,6 +2487,7 @@
       "edit_form": {
         "code": "Code",
         "description": "Description",
+        "custom_rate": "Custom Rate",
         "early_bird_rate": "Early Bird Rate",
         "standard_rate": "Standard Rate",
         "onsite_rate": "Onsite Rate",
@@ -2492,7 +2497,8 @@
         "notes_placeholder": "Enter your notes here...",
         "additional_info": "Additional Info",
         "discount": "Discount",
-        "total_on_caps": "TOTAL"
+        "total_on_caps": "TOTAL",
+        "no_forms_found": "No forms found."
       }
     },
     "purchase_tab": {

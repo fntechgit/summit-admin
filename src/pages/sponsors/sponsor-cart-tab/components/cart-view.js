@@ -30,7 +30,7 @@ const CartView = ({
   lockSponsorCartForm,
   unlockSponsorCartForm,
   onEdit,
-  onAddForm,
+  onAddForm
 }) => {
   useEffect(() => {
     getSponsorCart();
@@ -74,12 +74,8 @@ const CartView = ({
       header: T.translate("edit_sponsor.cart_tab.name")
     },
     {
-      columnKey: "allowed_add_ons",
-      header: T.translate("edit_sponsor.cart_tab.add_ons"),
-      render: (row) =>
-        row.allowed_add_ons?.length > 0
-          ? row.allowed_add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
-          : "None"
+      columnKey: "addon_name",
+      header: T.translate("edit_sponsor.cart_tab.add_ons")
     },
     {
       columnKey: "manage_items",

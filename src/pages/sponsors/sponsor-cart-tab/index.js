@@ -19,11 +19,15 @@ import NewCartForm from "./components/edit-form/new-cart-form";
 
 const SponsorCartTab = ({ sponsor, summitId }) => {
   const [openAddFormDialog, setOpenAddFormDialog] = useState(false);
-  const [formEdit, setFormEdit] = useState({formId: 19, addon: null});
+  const [formEdit, setFormEdit] = useState(null);
 
-  const handleAddForm = (form, addOn) => {
+  const handleFormSelected = (form, addOn) => {
     setFormEdit({ formId: form.id, addon: addOn });
     setOpenAddFormDialog(false);
+  };
+
+  const handleOnFormAdded = () => {
+    setFormEdit(null);
   };
 
   return (
@@ -31,8 +35,12 @@ const SponsorCartTab = ({ sponsor, summitId }) => {
       {formEdit && (
         <NewCartForm
           formId={formEdit.formId}
-          addOn={{addon_name: formEdit.addon?.name, addon_id: formEdit.addon?.id}}
+          addOn={{
+            addon_name: formEdit.addon?.name,
+            addon_id: formEdit.addon?.id
+          }}
           onCancel={() => setFormEdit(null)}
+          onSaveCallback={handleOnFormAdded}
         />
       )}
       {!formEdit && (
@@ -45,7 +53,7 @@ const SponsorCartTab = ({ sponsor, summitId }) => {
         open={!!openAddFormDialog}
         summitId={summitId}
         sponsor={sponsor}
-        onSave={handleAddForm}
+        onSave={handleFormSelected}
         onClose={() => setOpenAddFormDialog(false)}
       />
     </Box>

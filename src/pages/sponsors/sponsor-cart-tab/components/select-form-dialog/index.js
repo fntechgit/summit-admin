@@ -36,8 +36,10 @@ const SelectFormDialog = ({
   const { forms, currentPage, term, order, orderDir, total } = availableForms;
 
   useEffect(() => {
-    getSponsorFormsForCart();
-  }, []);
+    if (open) {
+      getSponsorFormsForCart();
+    }
+  }, [open]);
 
   const handleSort = (key, dir) => {
     getSponsorFormsForCart(term, 1, key, dir);
@@ -45,17 +47,13 @@ const SelectFormDialog = ({
 
   const handleLoadMore = () => {
     if (total > forms.length) {
-      getSponsorFormsForCart(
-        term,
-        currentPage + 1,
-        order,
-        orderDir
-      );
+      getSponsorFormsForCart(term, currentPage + 1, order, orderDir);
     }
   };
 
   const handleClose = () => {
     setSelectedRows([]);
+    setSelectedAddon(null);
     onClose();
   };
 
@@ -70,6 +68,10 @@ const SelectFormDialog = ({
   const handleOnSave = () => {
     const form = forms.find((f) => f.id === selectedRows[0]);
     onSave(form, selectedAddon);
+
+    // reset dialog
+    setSelectedRows([]);
+    setSelectedAddon(null);
   };
 
   const columns = [
@@ -136,13 +138,14 @@ const SelectFormDialog = ({
             {selectedRows.length} items selected
           </Grid2>
           <Grid2 size={6} offset={2}>
-            <SearchInput
-              onSearch={handleOnSearch}
-              term={term}
-            />
+            <SearchInput onSearch={handleOnSearch} term={term} />
           </Grid2>
         </Grid2>
-
+        {forms.length === 0 && (
+          <Typography variant="body1" sx={{ p: 2 }}>
+            {T.translate("edit_sponsor.cart_tab.edit_form.no_forms_found")}
+          </Typography>
+        )}
         {forms.length > 0 && (
           <Box sx={{ p: 2 }}>
             <MuiInfiniteTable
@@ -177,7 +180,7 @@ SelectFormDialog.propTypes = {
 };
 
 const mapStateToProps = ({ sponsorPageCartListState }) => ({
-  availableForms: sponsorPageCartListState.availableForms,
+  availableForms: sponsorPageCartListState.availableForms
 });
 
 export default connect(mapStateToProps, {

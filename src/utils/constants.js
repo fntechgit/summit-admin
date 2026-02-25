@@ -266,6 +266,6 @@ export const SPONSOR_USER_ASSIGNMENT_TYPE = {
 };
 
 export const FORM_DISCOUNT_OPTIONS = {
-  PERCENTAGE: "Percentage",
+  AMOUNT: "Amount",
   RATE: "Rate"
 };
