@@ -3,7 +3,7 @@
     "user_not_authz": "Hold on. Your user is not authorized!.",
     "user_not_set": "Hold on. Can not get any valid user.",
     "session_expired": "Hold on. Your session expired!.",
-    "empty_list": "there not are any item that match your criteria.",
+    "empty_list": "there not are any {item} that match your criteria.",
     "server_error": "There was a problem with our server, please contact admin.",
     "empty_list_schedule_events": "Please select a Day and a Location ...",
     "not_allowed": "You are not allowed here, please login with another user to access this page.",
@@ -2480,6 +2480,7 @@
       "archive": "Archive",
       "unarchive": "Unarchive",
       "no_add_ons": "No Add-ons Available",
+      "no_pages": "There is no pages that match the criteria",
       "add_page_using_template": "Add Page Template",
       "add_selected_page_template": "Add Selected Page Template"
     },

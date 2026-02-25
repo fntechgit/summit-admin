@@ -114,7 +114,9 @@ const AddSponsorPageTemplatePopup = ({
   };
 
   const handleOnSearch = (ev) => {
-    if (ev.key === "Enter")
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      ev.stopPropagation();
       getShowPages(
         searchTerm,
         DEFAULT_CURRENT_PAGE,
@@ -124,6 +126,7 @@ const AddSponsorPageTemplatePopup = ({
         false,
         sponsorshipTypeIds
       );
+    }
   };
 
   const handleSelected = (id, isSelected) => {
@@ -287,6 +290,11 @@ const AddSponsorPageTemplatePopup = ({
                   onSort={handleSort}
                   onPageChange={handlePageChange}
                 />
+              </Box>
+            )}
+            {showPages.length === 0 && (
+              <Box sx={{ p: 2 }}>
+                {T.translate("errors.pages_tab.no_pages")}
               </Box>
             )}
           </DialogContent>
