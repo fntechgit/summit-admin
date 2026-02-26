@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import {
   IconButton,
-  InputAdornment,
   MenuItem,
   Paper,
   Table,
@@ -16,20 +15,18 @@ import EditIcon from "@mui/icons-material/Edit";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ErrorIcon from "@mui/icons-material/Error";
 import T from "i18n-react/dist/i18n-react";
-import {
-  currencyAmountFromCents,
-  amountFromCents,
-  amountToCents
-} from "openstack-uicore-foundation/lib/utils/money";
+import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
-  FORM_DISCOUNT_OPTIONS,
-  MILLISECONDS_IN_SECOND
+  DISCOUNT_TYPES,
+  MILLISECONDS_IN_SECOND,
+  ONE_HUNDRED
 } from "../../../utils/constants";
 import GlobalQuantityField from "./components/GlobalQuantityField";
 import ItemTableField from "./components/ItemTableField";
 import MuiFormikSelect from "../formik-inputs/mui-formik-select";
-import MuiFormikTextField from "../formik-inputs/mui-formik-textfield";
+import MuiFormikPriceField from "../formik-inputs/mui-formik-pricefield";
+import MuiFormikDiscountField from "../formik-inputs/mui-formik-discountfield";
 
 const FormItemTable = ({
   data,
@@ -88,14 +85,12 @@ const FormItemTable = ({
     [valuesStr]
   );
 
-  const calculateTotal = (row) => {
+  const calculateRowTotal = (row) => {
     const qty =
       values[`i-${row.form_item_id}-c-global-f-quantity`] ||
       calculateQuantity(row);
     if (currentApplicableRate === "expired") return 0;
-    const customRate = amountToCents(
-      values[`i-${row.form_item_id}-c-global-f-custom_rate`] || 0
-    );
+    const customRate = values[`i-${row.form_item_id}-c-global-f-custom_rate`];
     const rate = customRate || row.rates[currentApplicableRate];
     return qty * rate;
   };
@@ -104,13 +99,13 @@ const FormItemTable = ({
     row.meta_fields.filter((mf) => mf.class_field === "Item").length > 0;
 
   const totalAmount = useMemo(() => {
-    const subtotal = data.reduce((acc, row) => acc + calculateTotal(row), 0);
+    const subtotal = data.reduce((acc, row) => acc + calculateRowTotal(row), 0);
     const discount =
-      values.discount_type === FORM_DISCOUNT_OPTIONS.AMOUNT
-        ? amountToCents(values.discount_amount || 0)
-        : subtotal * amountFromCents(values.discount_amount || 0);
+      values.discount_type === DISCOUNT_TYPES.AMOUNT
+        ? values.discount_amount
+        : subtotal * (values.discount_amount / ONE_HUNDRED / ONE_HUNDRED); // bps to fraction
 
-    return subtotal - discount;
+    return subtotal - Math.round(discount);
   }, [data, valuesStr]);
 
   const handleEdit = (row) => {
@@ -191,20 +186,13 @@ const FormItemTable = ({
                 )}
               </TableCell>
               <TableCell>
-                <MuiFormikTextField
+                <MuiFormikPriceField
                   name={`i-${row.form_item_id}-c-global-f-custom_rate`}
                   fullWidth
                   label=""
                   size="small"
-                  type="number"
-                  slotProps={{
-                    input: {
-                      min: 0,
-                      endAdornment: (
-                        <InputAdornment position="end">$</InputAdornment>
-                      )
-                    }
-                  }}
+                  inCents
+                  inputProps={{ step: 1 }}
                 />
               </TableCell>
               <TableCell
@@ -253,7 +241,7 @@ const FormItemTable = ({
                 )}
               </TableCell>
               <TableCell>
-                {currencyAmountFromCents(calculateTotal(row))}
+                {currencyAmountFromCents(calculateRowTotal(row))}
               </TableCell>
               <TableCell align="center">
                 <IconButton size="large" onClick={() => handleEdit(row)}>
@@ -275,7 +263,7 @@ const FormItemTable = ({
             ))}
             <TableCell>
               <MuiFormikSelect name="discount_type" label="" size="small">
-                {Object.values(FORM_DISCOUNT_OPTIONS).map((p) => (
+                {Object.values(DISCOUNT_TYPES).map((p) => (
                   <MenuItem key={`ddopt-${p}`} value={p}>
                     {p}
                   </MenuItem>
@@ -284,27 +272,13 @@ const FormItemTable = ({
             </TableCell>
             <TableCell />
             <TableCell>
-              <MuiFormikTextField
+              <MuiFormikDiscountField
                 name="discount_amount"
+                discountType={values.discount_type}
                 fullWidth
                 label=""
                 size="small"
-                type="number"
-                slotProps={{
-                  input: {
-                    min: 0,
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        {values.discount_type === FORM_DISCOUNT_OPTIONS.RATE
-                          ? "%"
-                          : "$"}
-                      </InputAdornment>
-                    ),
-                    ...(values.discount_type === FORM_DISCOUNT_OPTIONS.RATE
-                      ? { max: 100 }
-                      : {})
-                  }
-                }}
+                inCents
               />
             </TableCell>
             <TableCell />

@@ -22,7 +22,7 @@ import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import FormItemTable from "../../../../../components/mui/FormItemTable";
 import {
-  FORM_DISCOUNT_OPTIONS,
+  DISCOUNT_TYPES,
   MILLISECONDS_IN_SECOND
 } from "../../../../../utils/constants";
 import NotesModal from "../../../../../components/mui/NotesModal";
@@ -145,8 +145,7 @@ const buildInitialValues = (form, timeZone) => {
   }, {});
 
   initialValues.discount_amount = form.discount_amount || 0;
-  initialValues.discount_type =
-    form.discount_type || FORM_DISCOUNT_OPTIONS.AMOUNT;
+  initialValues.discount_type = form.discount_type || DISCOUNT_TYPES.AMOUNT;
 
   return initialValues;
 };
