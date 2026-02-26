@@ -35,7 +35,7 @@ import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
-import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 import AddSponsorPageTemplatePopup from "./components/add-sponsor-page-template-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
 
@@ -53,7 +53,8 @@ const SponsorPagesTab = ({
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
-  resetSponsorPage
+  resetSponsorPage,
+  getSponsorships
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -162,7 +163,7 @@ const SponsorPagesTab = ({
   };
 
   const handleAddPage = () => {
-    setOpenPopup("pagePopup");
+    getSponsorships(1, MAX_PER_PAGE).then(() => setOpenPopup("pagePopup"));
   };
 
   const handleArchiveCustomizedPage = (item) =>
@@ -434,5 +435,5 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   getSponsorships,
-  resetSponsorPage
+  resetSponsorPage  
 })(SponsorPagesTab);
