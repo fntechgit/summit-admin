@@ -165,7 +165,7 @@ export const saveSponsorManagedPage =
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeSponsorManagedPage(entity);
+    const normalizedEntity = normalizeSponsorPage(entity);
 
     const params = {
       access_token: accessToken,
