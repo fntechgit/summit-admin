@@ -257,8 +257,14 @@ const FormItemTableWrapper = ({
   onNotesClick,
   onSettingsClick
 }) => {
+  const defaultValues = {
+    discount_type: "AMOUNT",
+    discount_amount: 0,
+    ...initialValues
+  };
+
   const formik = useFormik({
-    initialValues: initialValues || {},
+    initialValues: defaultValues,
     onSubmit: () => {}
   });
 
