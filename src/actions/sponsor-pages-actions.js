@@ -39,6 +39,7 @@ export const REQUEST_SPONSOR_CUSTOMIZED_PAGES =
   "REQUEST_SPONSOR_CUSTOMIZED_PAGES";
 export const RECEIVE_SPONSOR_CUSTOMIZED_PAGES =
   "RECEIVE_SPONSOR_CUSTOMIZED_PAGES";
+export const SPONSOR_CUSTOMIZED_PAGE_ADDED = "SPONSOR_CUSTOMIZED_PAGE_ADDED";
 
 export const cloneGlobalPage =
   (pagesIds, sponsorIds, allSponsors) => async (dispatch, getState) => {
@@ -151,7 +152,7 @@ export const saveSponsorManagedPage =
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeSponsorManagedPage(entity);
+    const normalizedEntity = normalizeSponsorPage(entity);
 
     const params = {
       access_token: accessToken,
@@ -169,7 +170,7 @@ export const saveSponsorManagedPage =
     });
   };
 
-const normalizeSponsorManagedPage = (entity) => {
+const normalizeSponsorPage = (entity) => {
   const normalizedEntity = {
     show_page_ids: entity.pages,
     allowed_add_ons: entity.add_ons.map((a) => a.id),
@@ -238,6 +239,35 @@ export const getSponsorCustomizedPages =
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages`,
       authErrorHandler,
       { order, orderDir, page, perPage, term, hideArchived, summitTZ }
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+export const saveSponsorCustomizedPage =
+  (entity) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeSponsorPage(entity);
+
+    const params = {
+      access_token: accessToken,
+      fields: "id,code,name,kind,modules_count,allowed_add_ons"
+    };
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_CUSTOMIZED_PAGE_ADDED),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages`,
+      normalizedEntity,
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
