@@ -7,14 +7,15 @@ import {
   amountToCents
 } from "openstack-uicore-foundation/lib/utils/money";
 import MuiFormikTextField from "./mui-formik-textfield";
+import { DISCOUNT_TYPES } from "../../../utils/constants";
 
 const BLOCKED_KEYS = ["e", "E", "+", "-"];
 
-const MuiFormikPriceField = ({
+const MuiFormikDiscountField = ({
   name,
   label,
+  discountType,
   inCents = false,
-  inputProps = { step: 0.01 },
   ...props
 }) => {
   // eslint-disable-next-line no-unused-vars
@@ -23,6 +24,20 @@ const MuiFormikPriceField = ({
     ? amountFromCents(field.value || 0)
     : field.value;
   const [value, setValue] = useState(initialValue);
+
+  const adornment =
+    discountType === DISCOUNT_TYPES.RATE
+      ? {
+          endAdornment: <InputAdornment position="end">%</InputAdornment>
+        }
+      : {
+          startAdornment: <InputAdornment position="start">$</InputAdornment>
+        };
+
+  const inputProps =
+    discountType === DISCOUNT_TYPES.RATE
+      ? { max: 100, inputMode: "numeric", step: 1 }
+      : { inputMode: "decimal", step: 1 };
 
   const handleChange = () => {
     const val = parseFloat(value) || 0;
@@ -41,7 +56,9 @@ const MuiFormikPriceField = ({
       type="number"
       slotProps={{
         input: {
-          startAdornment: <InputAdornment position="start">$</InputAdornment>
+          ...adornment,
+          min: 0,
+          ...inputProps
         }
       }}
       onKeyDown={(e) => {
@@ -50,20 +67,15 @@ const MuiFormikPriceField = ({
           e.nativeEvent.stopImmediatePropagation();
         }
       }}
-      inputProps={{
-        min: 0,
-        inputMode: "decimal",
-        ...inputProps
-      }}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}
     />
   );
 };
 
-MuiFormikPriceField.propTypes = {
+MuiFormikDiscountField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string
 };
 
-export default MuiFormikPriceField;
+export default MuiFormikDiscountField;

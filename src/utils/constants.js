@@ -265,7 +265,7 @@ export const SPONSOR_USER_ASSIGNMENT_TYPE = {
   NEW: "new"
 };
 
-export const FORM_DISCOUNT_OPTIONS = {
+export const DISCOUNT_TYPES = {
   AMOUNT: "Amount",
   RATE: "Rate"
 };

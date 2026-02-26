@@ -12,7 +12,10 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
+import {
+  amountFromCents,
+  currencyAmountFromCents
+} from "openstack-uicore-foundation/lib/utils/money";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   RECEIVE_CART_AVAILABLE_FORMS,
@@ -24,6 +27,7 @@ import {
   SPONSOR_CART_FORM_DELETED,
   SPONSOR_CART_FORM_LOCKED
 } from "../../actions/sponsor-cart-actions";
+import { DISCOUNT_TYPES } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   cart: null,
@@ -66,17 +70,26 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
     }
     case RECEIVE_SPONSOR_CART: {
       const cart = payload.response;
-      cart.forms = cart.forms.map((form) => ({
-        ...form,
-        addon_name: form.addon_name || "None",
-        amount: amountFromCents(form.net_amount),
-        discount: amountFromCents(form.discount_amount),
-        items: form.items.map((it) => ({
-          ...it,
-          custom_rate: amountFromCents(it.custom_rate || 0)
-        }))
-      }));
-      cart.total = amountFromCents(cart.net_amount);
+      cart.forms = cart.forms.map((form) => {
+        const discountAmount = amountFromCents(form.discount_amount); // this works also for rate from bps
+        const discountStr =
+          form.discount_type === DISCOUNT_TYPES.RATE
+            ? `${discountAmount} %`
+            : `$${discountAmount}`;
+        const discount = form.discount_amount ? discountStr : "";
+
+        return {
+          ...form,
+          addon_name: form.addon_name || "None",
+          amount: currencyAmountFromCents(form.net_amount),
+          discount,
+          items: form.items.map((it) => ({
+            ...it,
+            custom_rate: currencyAmountFromCents(it.custom_rate || 0)
+          }))
+        };
+      });
+      cart.total = currencyAmountFromCents(cart.net_amount);
 
       return {
         ...state,

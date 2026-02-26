@@ -21,7 +21,6 @@ import {
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { amountToCents } from "openstack-uicore-foundation/lib/utils/money";
 import T from "i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
@@ -258,7 +257,7 @@ const normalizeItems = (items) =>
     return {
       ...normalizedItem,
       ...(hasQtyFields ? {} : { quantity }),
-      ...(custom_rate > 0 ? { custom_rate: amountToCents(custom_rate) } : {}),
+      ...(custom_rate > 0 ? { custom_rate } : {}),
       meta_fields: metaFields
     };
   });
@@ -280,7 +279,7 @@ export const addCartForm =
       form_id: formId,
       addon_id: addOnId,
       discount_type: formValues.discount_type,
-      discount_value: formValues.discount_amount,
+      discount_amount: formValues.discount_amount,
       items: normalizeItems(formValues.items)
     };
 
