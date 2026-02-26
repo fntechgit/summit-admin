@@ -164,7 +164,7 @@ export const saveSponsorManagedPage =
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
       normalizedEntity,
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };

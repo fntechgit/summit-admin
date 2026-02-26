@@ -232,7 +232,10 @@ const AddSponsorPageTemplatePopup = ({
                 size={6}
                 sx={{ alignItems: "baseline" }}
               >
-                <Grid2 size={4}>{selectedPages.length} items selected</Grid2>
+                <Grid2 size={4}>
+                  {selectedPages.length}{" "}
+                  {T.translate("edit_sponsor.pages_tab.items_selected")}
+                </Grid2>
               </Grid2>
               <Grid2 container spacing={2} size={6}>
                 <Grid2 size={4}>
@@ -250,7 +253,8 @@ const AddSponsorPageTemplatePopup = ({
                       }
                     ]}
                   >
-                    <SwapVertIcon fontSize="large" sx={{ mr: 1 }} /> sort by
+                    <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
+                    {T.translate("general.sort_by")}
                   </MenuButton>
                 </Grid2>
                 <Grid2 size={8}>
@@ -294,7 +298,7 @@ const AddSponsorPageTemplatePopup = ({
             )}
             {showPages.length === 0 && (
               <Box sx={{ p: 2 }}>
-                {T.translate("errors.pages_tab.no_pages")}
+                {T.translate("edit_sponsor.pages_tab.no_pages")}
               </Box>
             )}
           </DialogContent>

@@ -227,11 +227,18 @@ const AddSponsorFormTemplatePopup = ({
                     buttonId="sort-button"
                     menuId="sort-menu"
                     menuItems={[
-                      { label: "A-Z", onClick: () => handleSort("name", 1) },
-                      { label: "Z-A", onClick: () => handleSort("name", 0) }
+                      {
+                        label: T.translate("general.sort_asc_label"),
+                        onClick: () => handleSort("name", 1)
+                      },
+                      {
+                        label: T.translate("general.sort_desc_label"),
+                        onClick: () => handleSort("name", 0)
+                      }
                     ]}
                   >
-                    <SwapVertIcon fontSize="large" sx={{ mr: 1 }} /> sort by
+                    <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
+                    {T.translate("general.sort_by")}
                   </MenuButton>
                 </Grid2>
                 <Grid2 size={8}>

@@ -75,6 +75,7 @@
     "error": "Error!",
     "unarchive": "Unarchive",
     "archive": "Archive",
+    "sort_by": "Sort By",
     "sort_asc_label": "A-Z",
     "sort_desc_label": "Z-A",
     "placeholders": {
@@ -2480,6 +2481,7 @@
       "download_mod": "Download Mod",
       "archive": "Archive",
       "unarchive": "Unarchive",
+      "items_selected": "items selected",
       "no_add_ons": "No Add-ons Available",
       "no_pages": "There is no pages that match the criteria",
       "add_page_using_template": "Add Page Template",

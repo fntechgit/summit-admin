@@ -220,7 +220,8 @@ const SponsorFormItemFromInventoryPopup = ({
                   }
                 ]}
               >
-                <SwapVertIcon fontSize="large" sx={{ mr: 1 }} /> sort by
+                <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
+                {T.translate("general.sort_by")}
               </MenuButton>
             </Grid2>
             <Grid2 size={9}>
