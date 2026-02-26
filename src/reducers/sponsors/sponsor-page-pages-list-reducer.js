@@ -19,6 +19,7 @@ import {
   REQUEST_SPONSOR_CUSTOMIZED_PAGES
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
 
 const DEFAULT_STATE = {
   managedPages: {
@@ -38,6 +39,12 @@ const DEFAULT_STATE = {
     lastPage: 1,
     perPage: 10,
     totalItems: 0
+  },
+  sponsorships: {
+    items: [],
+    currentPage: 0,
+    lastPage: 0,
+    total: 0
   },
   term: "",
   hideArchived: false,
@@ -143,6 +150,34 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
           currentPage,
           totalItems: total,
           lastPage
+        }
+      };
+    }
+    case RECEIVE_GLOBAL_SPONSORSHIPS: {
+      const {
+        current_page: currentPage,
+        last_page: lastPage,
+        total,
+        data
+      } = payload.response;
+
+      const newSponsorships = data.map((s) => ({
+        id: s.id,
+        name: s.type.name
+      }));
+
+      const items =
+        currentPage === 1
+          ? newSponsorships
+          : [...state.sponsorships.items, ...newSponsorships];
+
+      return {
+        ...state,
+        sponsorships: {
+          items,
+          currentPage,
+          lastPage,
+          total
         }
       };
     }

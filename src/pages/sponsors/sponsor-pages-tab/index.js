@@ -26,13 +26,16 @@ import AddIcon from "@mui/icons-material/Add";
 import {
   getSponsorManagedPages,
   getSponsorCustomizedPages,
-  saveSponsorManagedPage
+  saveSponsorManagedPage,
+  saveSponsorCustomizedPage
 } from "../../../actions/sponsor-pages-actions";
+import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
-import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 import AddSponsorPageTemplatePopup from "./components/add-sponsor-page-template-popup";
+import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
 
 const SponsorPagesTab = ({
   sponsor,
@@ -41,9 +44,13 @@ const SponsorPagesTab = ({
   hideArchived,
   managedPages,
   customizedPages,
+  summitTZ,
+  sponsorships,
   getSponsorManagedPages,
+  saveSponsorManagedPage,
   getSponsorCustomizedPages,
-  saveSponsorManagedPage
+  saveSponsorCustomizedPage,
+  getSponsorships
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -151,6 +158,10 @@ const SponsorPagesTab = ({
     setOpenPopup("template");
   };
 
+  const handleAddPage = () => {
+    getSponsorships(1, MAX_PER_PAGE).then(() => setOpenPopup("new"));
+  };
+
   const handleArchiveCustomizedPage = (item) =>
     console.log("ARCHIVE CUSTOMIZED ", item);
 
@@ -194,8 +205,30 @@ const SponsorPagesTab = ({
 
   const handleSaveManagedPageFromTemplate = (entity) => {
     saveSponsorManagedPage(entity)
-      .then(() => getSponsorManagedPages())
-      .finally(() => setOpenPopup(null));
+      .then(() => {
+        const { perPage, order, orderDir } = managedPages;
+        getSponsorManagedPages(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          perPage,
+          order,
+          orderDir
+        );
+      }).finally(() => setOpenPopup(null));
+  };
+
+  const handleSaveCustomizedPage = (entity) => {
+    saveSponsorCustomizedPage(entity)
+      .then(() => {
+        const { perPage, order, orderDir } = customizedPages;
+        getSponsorCustomizedPages(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          perPage,
+          order,
+          orderDir
+        );
+      }).finally(() => setOpenPopup(null));;
   };
 
   const baseColumns = (name) => [
@@ -305,7 +338,7 @@ const SponsorPagesTab = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => console.log("open popup new")}
+            onClick={handleAddPage}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -362,6 +395,15 @@ const SponsorPagesTab = ({
           onClose={() => setOpenPopup(null)}
         />
       )}
+
+      {openPopup === "new" && (
+        <PageTemplatePopup
+          onSave={handleSaveCustomizedPage}
+          onClose={() => setOpenPopup(null)}
+          sponsorships={sponsorships.items}
+          summitTZ={summitTZ}
+        />
+      )}
     </Box>
   );
 };
@@ -373,5 +415,7 @@ const mapStateToProps = ({ sponsorPagePagesListState }) => ({
 export default connect(mapStateToProps, {
   getSponsorManagedPages,
   saveSponsorManagedPage,
-  getSponsorCustomizedPages
+  getSponsorCustomizedPages,
+  saveSponsorCustomizedPage,
+  getSponsorships
 })(SponsorPagesTab);
