@@ -1,13 +1,23 @@
 /* eslint-env jest */
+
+// ---- Mocks must come first ----
+
+// i18n translate: echo the key
+jest.mock("i18n-react/dist/i18n-react", () => ({
+  __esModule: true,
+  default: { translate: (key) => key }
+}));
+
+// ---- Now imports ----
+/* eslint-disable import/first */
 import React from "react";
 import PropTypes from "prop-types";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen, render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { FormikProvider, useFormik } from "formik";
 import FormItemTable from "../index";
-import { renderWithProviders } from "../../../utils/test-utils";
-import { MOCK_FORM_A } from "../../../utils/mock-data/mock-forms";
 import ItemTableField from "../components/ItemTableField";
+/* eslint-enable import/first */
 
 const EARLY_BIRD_DATE = 1751035704;
 const STANDARD_DATE = 1851035704;
@@ -15,23 +25,114 @@ const ONSITE_DATE = 1951035704;
 const MOCK_TIME_BEFORE_EARLY_BIRD = 1650000000000;
 const MILLISECONDS_MULTIPLIER = 1000;
 const TIME_OFFSET = 100;
-const TWO_ITEMS = 2;
+const TWO_ITEMS = 4;
 const MOCK_RATE_DATES = {
   early_bird_end_date: EARLY_BIRD_DATE,
   standard_price_end_date: STANDARD_DATE,
   onsite_end_date: ONSITE_DATE
 };
 
-jest.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (str) => str,
-    i18n: { changeLanguage: jest.fn() }
-  }),
-  initReactI18next: {
-    type: "3rdParty",
-    init: jest.fn()
-  }
-}));
+// Mock form data
+const MOCK_FORM_A = {
+  items: [
+    {
+      form_item_id: 1,
+      code: "INST",
+      name: "Installation",
+      rates: {
+        early_bird: 15000,
+        standard: 18800,
+        onsite: 22400
+      },
+      meta_fields: [
+        {
+          type_id: 1,
+          class_field: "Form",
+          name: "Qty of People",
+          type: "Quantity",
+          minimum_quantity: 1,
+          maximum_quantity: 4
+        },
+        {
+          type_id: 2,
+          class_field: "Form",
+          name: "Hour x Person",
+          type: "Quantity",
+          minimum_quantity: 1,
+          maximum_quantity: 8
+        },
+        {
+          type_id: 3,
+          class_field: "Form",
+          name: "Arrival Time",
+          type: "Time"
+        },
+        {
+          type_id: 4,
+          class_field: "Item",
+          name: "Special Instructions",
+          type: "Text"
+        }
+      ]
+    },
+    {
+      form_item_id: 2,
+      code: "DISMANTLE",
+      name: "Dismantle",
+      rates: {
+        early_bird: 15000,
+        standard: 18800,
+        onsite: 22400
+      },
+      meta_fields: [
+        {
+          type_id: 1,
+          class_field: "Form",
+          name: "Qty of People",
+          type: "Quantity",
+          minimum_quantity: 1,
+          maximum_quantity: 4
+        },
+        {
+          type_id: 2,
+          class_field: "Form",
+          name: "Hour x Person",
+          type: "Quantity",
+          minimum_quantity: 1,
+          maximum_quantity: 8
+        },
+        {
+          type_id: 3,
+          class_field: "Form",
+          name: "Arrival Time",
+          type: "Time"
+        }
+      ]
+    },
+    {
+      form_item_id: 3,
+      code: "INST-MAN",
+      name: "Installation Manpower",
+      rates: {
+        early_bird: 15000,
+        standard: 18800,
+        onsite: 22400
+      },
+      meta_fields: []
+    },
+    {
+      form_item_id: 4,
+      code: "DIS-MAN",
+      name: "Dismantle Manpower",
+      rates: {
+        early_bird: 15000,
+        standard: 18800,
+        onsite: 22400
+      },
+      meta_fields: []
+    }
+  ]
+};
 
 jest.mock("../../formik-inputs/mui-formik-textfield", () => {
   const { useField } = require("formik");
@@ -89,11 +190,12 @@ jest.mock("../../formik-inputs/mui-formik-select", () => ({
   default: ({ name, label, options }) => (
     <select data-testid={`select-${name}`} name={name}>
       <option value="">{label}</option>
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
+      {options &&
+        options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
     </select>
   )
 }));
@@ -115,13 +217,14 @@ jest.mock("../../formik-inputs/mui-formik-dropdown-checkbox", () => ({
   default: ({ name, label, options }) => (
     <div data-testid={`dropdown-checkbox-${name}`}>
       <span>{label}</span>
-      {options.map((opt) => (
-        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-        <label key={opt.value}>
-          <input type="checkbox" value={opt.value} />
-          {opt.label}
-        </label>
-      ))}
+      {options &&
+        options.map((opt) => (
+          // eslint-disable-next-line jsx-a11y/label-has-associated-control
+          <label key={opt.value}>
+            <input type="checkbox" value={opt.value} />
+            {opt.label}
+          </label>
+        ))}
     </div>
   )
 }));
@@ -131,18 +234,19 @@ jest.mock("../../formik-inputs/mui-formik-dropdown-radio", () => ({
   default: ({ name, label, options }) => (
     <div data-testid={`dropdown-radio-${name}`}>
       <span>{label}</span>
-      {options.map((opt) => (
-        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-        <label key={opt.value}>
-          <input type="radio" name={name} value={opt.value} />
-          {opt.label}
-        </label>
-      ))}
+      {options &&
+        options.map((opt) => (
+          // eslint-disable-next-line jsx-a11y/label-has-associated-control
+          <label key={opt.value}>
+            <input type="radio" name={name} value={opt.value} />
+            {opt.label}
+          </label>
+        ))}
     </div>
   )
 }));
 
-afterEach(cleanup);
+// ---- Helpers ----
 
 // Wrapper component with Formik
 const FormItemTableWrapper = ({
@@ -185,6 +289,7 @@ FormItemTableWrapper.defaultProps = {
   initialValues: {}
 };
 
+// ---- Tests ----
 describe("FormItemTable Component", () => {
   const mockOnNotesClick = jest.fn();
   const mockOnSettingsClick = jest.fn();
@@ -198,11 +303,12 @@ describe("FormItemTable Component", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    cleanup();
   });
 
   describe("Rendering", () => {
     it("renders the table with correct structure", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -212,18 +318,34 @@ describe("FormItemTable Component", () => {
         />
       );
 
-      expect(screen.getByText("edit_form.code")).toBeInTheDocument();
-      expect(screen.getByText("edit_form.description")).toBeInTheDocument();
-      expect(screen.getByText("edit_form.early_bird_rate")).toBeInTheDocument();
-      expect(screen.getByText("edit_form.standard_rate")).toBeInTheDocument();
-      expect(screen.getByText("edit_form.onsite_rate")).toBeInTheDocument();
-      expect(screen.getByText("edit_form.qty")).toBeInTheDocument();
-      expect(screen.getByText("edit_form.total")).toBeInTheDocument();
-      expect(screen.getByText("edit_form.notes")).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.code")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.description")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.early_bird_rate")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.standard_rate")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.onsite_rate")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.qty")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.total")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.notes")
+      ).toBeInTheDocument();
     });
 
     it("renders all items from mock data", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -240,7 +362,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("renders dynamic columns from meta_fields", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -256,7 +378,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("displays rate values in cents to dollar format", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -275,7 +397,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("renders TOTAL row at the bottom", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -285,13 +407,15 @@ describe("FormItemTable Component", () => {
         />
       );
 
-      expect(screen.getByText("edit_form.total_on_caps")).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.total_on_caps")
+      ).toBeInTheDocument();
     });
   });
 
   describe("ITEM Class Fields", () => {
     it("shows warning icon for items with ITEM class fields", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -301,11 +425,13 @@ describe("FormItemTable Component", () => {
         />
       );
 
-      expect(screen.getByText("edit_form.additional_info")).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.additional_info")
+      ).toBeInTheDocument();
     });
 
     it("renders settings button only for items with ITEM class fields", () => {
-      const { container } = renderWithProviders(
+      const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -322,7 +448,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("calls onSettingsClick when settings button is clicked", () => {
-      const { container } = renderWithProviders(
+      const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -344,7 +470,7 @@ describe("FormItemTable Component", () => {
 
   describe("Form Inputs", () => {
     it("renders Quantity input fields with correct attributes", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -361,7 +487,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("renders Time input fields with timezone", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -377,7 +503,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("renders correct number of form inputs per item", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -415,7 +541,7 @@ describe("FormItemTable Component", () => {
         "i-1-c-Form-f-2": 4
       };
 
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -453,7 +579,7 @@ describe("FormItemTable Component", () => {
         }
       ];
 
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={itemsWithoutQuantityFields}
           rateDates={MOCK_RATE_DATES}
@@ -478,7 +604,7 @@ describe("FormItemTable Component", () => {
         "i-2-c-Form-f-2": 2
       };
 
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -504,7 +630,7 @@ describe("FormItemTable Component", () => {
         "i-2-c-Form-f-2": 2
       };
 
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -521,7 +647,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("shows $0.00 when no quantities are set", () => {
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -532,7 +658,9 @@ describe("FormItemTable Component", () => {
         />
       );
 
-      expect(screen.getByText("edit_form.total_on_caps")).toBeInTheDocument();
+      expect(
+        screen.getByText("edit_sponsor.cart_tab.edit_form.total_on_caps")
+      ).toBeInTheDocument();
     });
   });
 
@@ -542,7 +670,7 @@ describe("FormItemTable Component", () => {
         .spyOn(Date, "now")
         .mockImplementation(() => MOCK_TIME_BEFORE_EARLY_BIRD);
 
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -564,7 +692,7 @@ describe("FormItemTable Component", () => {
             MILLISECONDS_MULTIPLIER
         );
 
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -586,7 +714,7 @@ describe("FormItemTable Component", () => {
             MILLISECONDS_MULTIPLIER
         );
 
-      renderWithProviders(
+      render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -602,7 +730,7 @@ describe("FormItemTable Component", () => {
 
   describe("Notes Functionality", () => {
     it("renders edit/notes button for all items", () => {
-      const { container } = renderWithProviders(
+      const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -619,7 +747,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("calls onNotesClick with correct item when notes button is clicked", () => {
-      const { container } = renderWithProviders(
+      const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -639,7 +767,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("calls onNotesClick for second item independently", () => {
-      const { container } = renderWithProviders(
+      const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
           rateDates={MOCK_RATE_DATES}
@@ -687,7 +815,7 @@ describe("FormItemTable Component", () => {
         type: "CheckBox",
         name: "Test Checkbox"
       };
-      const { container } = renderWithProviders(
+      const { container } = render(
         <RenderInputWrapper field={field} timeZone="UTC" label="Test Label" />
       );
       expect(
@@ -706,7 +834,7 @@ describe("FormItemTable Component", () => {
           { id: 2, value: "Option 2" }
         ]
       };
-      const { container } = renderWithProviders(
+      const { container } = render(
         <RenderInputWrapper field={field} timeZone="UTC" label="Test Label" />
       );
       expect(
@@ -727,7 +855,7 @@ describe("FormItemTable Component", () => {
           { id: 2, value: "Radio 2" }
         ]
       };
-      const { container } = renderWithProviders(
+      const { container } = render(
         <RenderInputWrapper field={field} timeZone="UTC" label="Test Label" />
       );
       expect(
@@ -742,7 +870,7 @@ describe("FormItemTable Component", () => {
         type: "DateTime",
         name: "Test DateTime"
       };
-      const { container } = renderWithProviders(
+      const { container } = render(
         <RenderInputWrapper field={field} timeZone="UTC" label="Test Label" />
       );
       expect(
@@ -757,7 +885,7 @@ describe("FormItemTable Component", () => {
         type: "Time",
         name: "Test Time"
       };
-      const { container } = renderWithProviders(
+      const { container } = render(
         <RenderInputWrapper
           field={field}
           timeZone="America/Chicago"
@@ -782,7 +910,7 @@ describe("FormItemTable Component", () => {
           { id: 2, value: "Combo 2" }
         ]
       };
-      const { container } = renderWithProviders(
+      const { container } = render(
         <RenderInputWrapper field={field} timeZone="UTC" label="Test Label" />
       );
       expect(
@@ -797,7 +925,7 @@ describe("FormItemTable Component", () => {
         type: "Text",
         name: "Test Text"
       };
-      const { container } = renderWithProviders(
+      const { container } = render(
         <RenderInputWrapper field={field} timeZone="UTC" label="Test Label" />
       );
       expect(
@@ -812,7 +940,7 @@ describe("FormItemTable Component", () => {
         type: "TextArea",
         name: "Test TextArea"
       };
-      const { container } = renderWithProviders(
+      const { container } = render(
         <RenderInputWrapper field={field} timeZone="UTC" label="Test Label" />
       );
       expect(
@@ -829,7 +957,7 @@ describe("FormItemTable Component", () => {
         minimum_quantity: 5,
         maximum_quantity: 100
       };
-      const { container } = renderWithProviders(
+      const { container } = render(
         <RenderInputWrapper field={field} timeZone="UTC" label="Test Label" />
       );
       const input = container.querySelector(
