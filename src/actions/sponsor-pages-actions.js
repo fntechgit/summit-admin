@@ -21,12 +21,14 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
+import moment from "moment-timezone";
 import { getAccessTokenSafely } from "../utils/methods";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  PAGES_MODULE_KINDS
 } from "../utils/constants";
 
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
@@ -152,7 +154,7 @@ export const saveSponsorManagedPage =
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeSponsorPage(entity);
+    const normalizedEntity = normalizeSponsorManagedPage(entity);
 
     const params = {
       access_token: accessToken,
@@ -170,7 +172,7 @@ export const saveSponsorManagedPage =
     });
   };
 
-const normalizeSponsorPage = (entity) => {
+const normalizeSponsorManagedPage = (entity) => {
   const normalizedEntity = {
     show_page_ids: entity.pages,
     allowed_add_ons: entity.add_ons.map((a) => a.id),
@@ -216,7 +218,7 @@ export const getSponsorCustomizedPages =
 
     const params = {
       page,
-      fields: "id,code,name,kind,modules_count,allowed_add_ons",
+      fields: "id,code,name,allowed_add_ons,is_archived,modules",
       per_page: perPage,
       access_token: accessToken
     };
@@ -251,11 +253,12 @@ export const saveSponsorCustomizedPage =
     const {
       entity: { id: sponsorId }
     } = currentSponsorState;
+    const summitTZ = currentSummit.time_zone.name;
     const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeSponsorPage(entity);
+    const normalizedEntity = normalizeSponsorCustomPage(entity, summitTZ);
 
     const params = {
       access_token: accessToken,
@@ -272,3 +275,42 @@ export const saveSponsorCustomizedPage =
       dispatch(stopLoading());
     });
   };
+
+const normalizeSponsorCustomPage = (entity, summitTZ) => {
+  const normalizedEntity = {
+    ...entity,
+    apply_to_all_add_ons: false
+  };
+
+  if (entity.allowed_add_ons.includes("all")) {
+    normalizedEntity.apply_to_all_add_ons = true;
+    normalizedEntity.allowed_add_ons = [];
+  } else {
+    normalizedEntity.allowed_add_ons = entity.allowed_add_ons.map((e) => e.id);
+  }
+
+  normalizedEntity.modules = entity.modules.map((module) => {
+    const normalizedModule = { ...module };
+
+    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.upload_deadline) {
+      normalizedModule.upload_deadline = moment
+        .tz(module.upload_deadline, summitTZ)
+        .unix();
+    }
+
+    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.file_type_id) {
+      normalizedModule.file_type_id =
+        module.file_type_id?.value || module.file_type_id;
+    }
+
+    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT && module.file) {
+      normalizedModule.file = module.file[0] || null;
+    }
+
+    delete normalizedModule._tempId;
+
+    return normalizedModule;
+  });
+
+  return normalizedEntity;
+};

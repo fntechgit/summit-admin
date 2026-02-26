@@ -20,6 +20,7 @@ import {
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
+import { PAGES_MODULE_KINDS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   managedPages: {
@@ -137,9 +138,14 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         code: a.code,
         name: a.name,
         allowed_add_ons: a.allowed_add_ons,
-        info_mod: a.modules_count.info_modules_count,
-        upload_mod: a.modules_count.media_request_modules_count,
-        download_mod: a.modules_count.document_download_modules_count
+        is_archived: a.is_archived,
+        info_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.INFO)
+          .length,
+        upload_mod: a.modules.filter((m) => m.kind === PAGES_MODULE_KINDS.MEDIA)
+          .length,
+        download_mod: a.modules.filter(
+          (m) => m.kind === PAGES_MODULE_KINDS.DOCUMENT
+        ).length
       }));
 
       return {

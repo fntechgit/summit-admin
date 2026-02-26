@@ -33,7 +33,7 @@ import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
-import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import AddSponsorPageTemplatePopup from "./components/add-sponsor-page-template-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
 
@@ -45,12 +45,10 @@ const SponsorPagesTab = ({
   managedPages,
   customizedPages,
   summitTZ,
-  sponsorships,
   getSponsorManagedPages,
   saveSponsorManagedPage,
   getSponsorCustomizedPages,
-  saveSponsorCustomizedPage,
-  getSponsorships
+  saveSponsorCustomizedPage
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -159,7 +157,7 @@ const SponsorPagesTab = ({
   };
 
   const handleAddPage = () => {
-    getSponsorships(1, MAX_PER_PAGE).then(() => setOpenPopup("new"));
+    setOpenPopup("new");
   };
 
   const handleArchiveCustomizedPage = (item) =>
@@ -274,6 +272,10 @@ const SponsorPagesTab = ({
       T.translate("edit_sponsor.pages_tab.sponsor_customized_pages")
     )
   ];
+
+  const sponsorshipIds = sponsor.sponsorships_collection.sponsorships.map(
+    (e) => e.id
+  );
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -400,7 +402,9 @@ const SponsorPagesTab = ({
         <PageTemplatePopup
           onSave={handleSaveCustomizedPage}
           onClose={() => setOpenPopup(null)}
-          sponsorships={sponsorships.items}
+          sponsorshipIds={sponsorshipIds}
+          summitId={summitId}
+          sponsorId={sponsor.id}
           summitTZ={summitTZ}
         />
       )}
