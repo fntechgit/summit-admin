@@ -62,7 +62,7 @@ const AddSponsorPageTemplatePopup = ({
         .array()
         .test(
           "add_ons-required",
-          "Select at least one add-on",
+          T.translate("validation.add_on_required"),
           (value) => value?.includes("all") || value?.length > 0
         )
     }),

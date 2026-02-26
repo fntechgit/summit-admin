@@ -193,10 +193,9 @@ const SponsorPagesTab = ({
   };
 
   const handleSaveManagedPageFromTemplate = (entity) => {
-    saveSponsorManagedPage(entity).then(() => {
-      setOpenPopup(null);
-      getSponsorManagedPages();
-    });
+    saveSponsorManagedPage(entity)
+      .then(() => getSponsorManagedPages())
+      .finally(() => setOpenPopup(null));
   };
 
   const baseColumns = (name) => [

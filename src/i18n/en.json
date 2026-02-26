@@ -97,7 +97,8 @@
     "date": "Wrong date format.",
     "after": "'{field1}' must be after '{field2}'.",
     "boolean": "Must be a boolean.",
-    "mib_aligned": "Must be a MiB aligned value"
+    "mib_aligned": "Must be a MiB aligned value",
+    "add_on_required": "Select at least one add-on"
   },
   "landing": {
     "os_summit_admin": "Show Admin",
