@@ -2485,7 +2485,9 @@
       "no_add_ons": "No Add-ons Available",
       "no_pages": "There is no pages that match the criteria",
       "add_page_using_template": "Add Page Template",
-      "add_selected_page_template": "Add Selected Page Template"
+      "add_selected_page_template": "Add Selected Page Template",
+      "custom_page_saved": "Custom Sponsor Page saved",
+      "custom_page_created": "Custom Sponsor Page created"
     },
     "cart_tab": {
       "new_form": "New Form",
