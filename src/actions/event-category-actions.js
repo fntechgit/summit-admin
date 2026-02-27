@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ import {
 import T from "i18n-react/dist/i18n-react";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
-import { HUNDRED_PER_PAGE } from "../utils/constants";
+import { MAX_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_EVENT_CATEGORIES = "REQUEST_EVENT_CATEGORIES";
 export const RECEIVE_EVENT_CATEGORIES = "RECEIVE_EVENT_CATEGORIES";
@@ -390,7 +390,7 @@ export const getEventCategoryGroups = () => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     page: 1,
-    per_page: HUNDRED_PER_PAGE,
+    per_page: MAX_PER_PAGE,
     expand: "tracks",
     fields: "id,name,class_name,color,tracks.name,tracks.id",
     relations: "tracks.none"

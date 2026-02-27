@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ import {
 import AuditLogs from "../../components/audit-logs";
 import Notes from "../../components/notes";
 import { deleteTicket } from "../../actions/attendee-actions";
-import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
+import { MILLISECONDS } from "../../utils/constants";
 
 const EditTicketPage = ({
   entity,
@@ -276,7 +276,7 @@ const EditTicketPage = ({
       value: T.translate("edit_ticket.refund_request_action_date"),
       render: (c) =>
         c.action_date
-          ? moment(c.action_date * MILLISECONDS_IN_SECOND)
+          ? moment(c.action_date * MILLISECONDS)
               .tz(currentSummit.time_zone_id)
               .format("MMMM Do YYYY, h:mm a (z)")
           : "TBD"

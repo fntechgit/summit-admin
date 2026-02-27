@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/edit
 import { GMap } from "openstack-uicore-foundation/lib/components/google-map";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import HourIntervalInput from "../inputs/date-interval-input";
-import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
+import { MILLISECONDS } from "../../utils/constants";
 
 class LocationForm extends React.Component {
   constructor(props) {
@@ -82,7 +82,7 @@ class LocationForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     errors[id] = "";

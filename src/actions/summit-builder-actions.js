@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,12 +24,12 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { SummitEvent } from "openstack-uicore-foundation/lib/models";
 import {
-  FIFTY_NINE,
-  MILLISECONDS_IN_SECOND,
+  TIME_59,
+  MILLISECONDS,
   ONE_MINUTE,
   ScheduleEventsSearchResultMaxPage,
   TWENTY_PER_PAGE,
-  TWENTYTHREE_HOURS
+  TIME_23_HOURS
 } from "../utils/constants";
 import { checkProximityEvents } from "./event-actions";
 import { getAccessTokenSafely } from "../utils/methods";
@@ -226,8 +226,8 @@ export const publishEvent =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/events/${event.id}/publish?access_token=${accessToken}`,
       {
         location_id: currentLocation.id,
-        start_date: eventStarDateTime.valueOf() / MILLISECONDS_IN_SECOND,
-        end_date: eventEndDateTime.valueOf() / MILLISECONDS_IN_SECOND,
+        start_date: eventStarDateTime.valueOf() / MILLISECONDS,
+        end_date: eventEndDateTime.valueOf() / MILLISECONDS,
         duration: eventModel._event.duration
       },
       authErrorHandler
@@ -273,14 +273,14 @@ export const getPublishedEventsBySummitDayLocation =
     currentDay = moment.tz(currentDay, currentSummit.time_zone.name);
     const startDate =
       currentDay.clone().hours(0).minutes(0).seconds(0).valueOf() /
-      MILLISECONDS_IN_SECOND;
+      MILLISECONDS;
     const endDate =
       currentDay
         .clone()
-        .hours(TWENTYTHREE_HOURS)
-        .minutes(FIFTY_NINE)
-        .seconds(FIFTY_NINE)
-        .valueOf() / MILLISECONDS_IN_SECOND;
+        .hours(TIME_23_HOURS)
+        .minutes(TIME_59)
+        .seconds(TIME_59)
+        .valueOf() / MILLISECONDS;
     const filter = [`start_date>=${startDate}`, `end_date<=${endDate}`];
 
     dispatch(startLoading());
@@ -321,14 +321,14 @@ export const getShowAlwaysEvents =
     );
     const startDate =
       proposedSchedDayMoment.clone().hours(0).minutes(0).seconds(0).valueOf() /
-      MILLISECONDS_IN_SECOND;
+      MILLISECONDS;
     const endDate =
       proposedSchedDayMoment
         .clone()
-        .hours(TWENTYTHREE_HOURS)
-        .minutes(FIFTY_NINE)
-        .seconds(FIFTY_NINE)
-        .valueOf() / MILLISECONDS_IN_SECOND;
+        .hours(TIME_23_HOURS)
+        .minutes(TIME_59)
+        .seconds(TIME_59)
+        .valueOf() / MILLISECONDS;
     const params = {
       page: 1,
       per_page: 100,
@@ -370,14 +370,14 @@ export const getProposedEvents =
     );
     const startDate =
       proposedSchedDayMoment.clone().hours(0).minutes(0).seconds(0).valueOf() /
-      MILLISECONDS_IN_SECOND;
+      MILLISECONDS;
     const endDate =
       proposedSchedDayMoment
         .clone()
-        .hours(TWENTYTHREE_HOURS)
-        .minutes(FIFTY_NINE)
-        .seconds(FIFTY_NINE)
-        .valueOf() / MILLISECONDS_IN_SECOND;
+        .hours(TIME_23_HOURS)
+        .minutes(TIME_59)
+        .seconds(TIME_59)
+        .valueOf() / MILLISECONDS;
     const filter = [];
     const params = {
       expand: "summit_event",

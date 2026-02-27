@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ import {
 
 import {
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_EXTRA_QUESTIONS_PER_PAGE,
+  MAX_PER_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE
 } from "../utils/constants";
@@ -173,7 +173,7 @@ export const getMainOrderExtraQuestions = () => async (dispatch, getState) => {
   apiUrl.addQuery("access_token", accessToken);
   apiUrl.addQuery("order", "order");
   apiUrl.addQuery("page", DEFAULT_CURRENT_PAGE);
-  apiUrl.addQuery("per_page", DEFAULT_EXTRA_QUESTIONS_PER_PAGE);
+  apiUrl.addQuery("per_page", MAX_PER_PAGE);
 
   return getRequest(
     null,

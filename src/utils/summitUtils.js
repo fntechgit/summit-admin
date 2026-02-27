@@ -1,5 +1,5 @@
 import moment from "moment-timezone";
-import { MILLISECONDS_IN_SECOND } from "./constants";
+import { MILLISECONDS } from "./constants";
 
 // Default columns to show
 export const defaultColumns = ["id", "event_type", "title", "selection_status"];
@@ -22,7 +22,7 @@ const formatDuration = (duration) => {
 
 export const formatEventData = (e, summit) => {
   const published_date = e.is_published
-    ? moment(e.published_date * MILLISECONDS_IN_SECOND)
+    ? moment(e.published_date * MILLISECONDS)
         .tz(summit.time_zone.name)
         .format("MMMM Do YYYY, h:mm a")
     : "No";
@@ -115,12 +115,12 @@ export const formatEventData = (e, summit) => {
     etherpad_link: e.etherpad_link ? e.etherpad_link : "N/A",
     streaming_type: e.streaming_type ? e.streaming_type : "N/A",
     start_date: e.start_date
-      ? moment(e.start_date * MILLISECONDS_IN_SECOND)
+      ? moment(e.start_date * MILLISECONDS)
           .tz(summit.time_zone.name)
           .format("MMMM Do YYYY, h:mm a")
       : "TBD",
     end_date: e.end_date
-      ? moment(e.end_date * MILLISECONDS_IN_SECOND)
+      ? moment(e.end_date * MILLISECONDS)
           .tz(summit.time_zone.name)
           .format("MMMM Do YYYY, h:mm a")
       : "TBD",
@@ -132,18 +132,18 @@ export const formatEventData = (e, summit) => {
       Array.isArray(e.media_uploads) && e.media_uploads?.length > 0
         ? e?.media_uploads?.map((m) => ({
             ...m,
-            created: moment(m.created * MILLISECONDS_IN_SECOND)
+            created: moment(m.created * MILLISECONDS)
               .tz(summit.time_zone.name)
               .format("MMMM Do YYYY, h:mm a")
           }))
         : "N/A",
     created: e.created
-      ? moment(e.created * MILLISECONDS_IN_SECOND)
+      ? moment(e.created * MILLISECONDS)
           .tz(summit.time_zone_id)
           .format("MMMM Do YYYY, h:mm a")
       : "TBD",
     modified: e.last_edited
-      ? moment(e.last_edited * MILLISECONDS_IN_SECOND)
+      ? moment(e.last_edited * MILLISECONDS)
           .tz(summit.time_zone_id)
           .format("MMMM Do YYYY, h:mm a")
       : "TBD",

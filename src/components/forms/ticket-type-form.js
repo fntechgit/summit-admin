@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@ import {
 } from "openstack-uicore-foundation/lib/components";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import TextAreaInputWithCounter from "../inputs/text-area-input-with-counter";
-import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
+import { MILLISECONDS } from "../../utils/constants";
 
 class TicketTypeForm extends React.Component {
   constructor(props) {
@@ -67,7 +67,7 @@ class TicketTypeForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     errors[id] = "";

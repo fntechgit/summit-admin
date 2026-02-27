@@ -21,7 +21,7 @@ import {
 import "./affiliationstable.css";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { shallowEqual } from "../../../utils/methods";
-import { MILLISECONDS_IN_SECOND, TWO } from "../../../utils/constants";
+import { MILLISECONDS, TWO } from "../../../utils/constants";
 
 const createRow = (row, actions) => {
   let cells = [];
@@ -262,7 +262,7 @@ class AffiliationsTable extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     row[field.id] = value;
@@ -282,7 +282,7 @@ class AffiliationsTable extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     new_row[field.id] = value;

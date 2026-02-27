@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ import {
 import EmailTemplateInput from "../inputs/email-template-input";
 import ImportModal from "../inputs/import-modal";
 import {
-  MILLISECONDS_TO_SECONDS,
+  MILLISECONDS,
   PresentationTypeClassName
 } from "../../utils/constants";
 import Many2ManyDropDown from "../inputs/many-2-many-dropdown";
@@ -165,7 +165,7 @@ class SelectionPlanForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     if (id.startsWith("cfp_")) {

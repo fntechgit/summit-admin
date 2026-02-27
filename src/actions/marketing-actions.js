@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ import { getAccessTokenSafely, isHexColorSetting } from "../utils/methods";
 import {
   DEFAULT_PER_PAGE,
   ERROR_CODE_412,
-  HUNDRED_PER_PAGE,
+  MAX_PER_PAGE,
   MARKETING_SETTING_TYPE_FILE
 } from "../utils/constants";
 
@@ -90,7 +90,7 @@ export const getMarketingSettings =
   };
 
 export const getMarketingSettingsForRegLite =
-  (page = 1, perPage = HUNDRED_PER_PAGE) =>
+  (page = 1, perPage = MAX_PER_PAGE) =>
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;

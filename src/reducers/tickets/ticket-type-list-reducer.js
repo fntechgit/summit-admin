@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ import {
 } from "../../actions/ticket-actions";
 
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
+import { MILLISECONDS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   ticketTypes: [],
@@ -73,12 +73,12 @@ const ticketTypeListReducer = (state = DEFAULT_STATE, action) => {
         cost: t?.cost,
         quantity_2_sell: t?.quantity_2_sell,
         sales_start_date: t.sales_start_date
-          ? moment(t.sales_start_date * MILLISECONDS_TO_SECONDS)
+          ? moment(t.sales_start_date * MILLISECONDS)
               .tz(state.summitTZ)
               .format("MMMM Do YYYY, h:mm a")
           : "TBD",
         sales_end_date: t.sales_end_date
-          ? moment(t.sales_end_date * MILLISECONDS_TO_SECONDS)
+          ? moment(t.sales_end_date * MILLISECONDS)
               .tz(state.summitTZ)
               .format("MMMM Do YYYY, h:mm a")
           : "TBD"

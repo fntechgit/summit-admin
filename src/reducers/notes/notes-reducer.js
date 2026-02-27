@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ import {
   RECEIVE_SUMMIT,
   SET_CURRENT_SUMMIT
 } from "../../actions/summit-actions";
-import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
+import { MILLISECONDS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   summitId: null,
@@ -89,7 +89,7 @@ const formatNote = (note, summitId) => ({
   ...note,
   author_fullname: `${note.author?.first_name} ${note.author?.last_name}`,
   author_email: note.author?.email,
-  created: moment(note.created * MILLISECONDS_IN_SECOND).format(
+  created: moment(note.created * MILLISECONDS).format(
     "MMMM Do YYYY, h:mm a"
   ),
   ticket_link: note.ticket

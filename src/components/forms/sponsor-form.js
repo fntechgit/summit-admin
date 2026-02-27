@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ import {
   denormalizeLeadReportSettings,
   renderOptions
 } from "../../models/lead-report-settings";
-import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
+import { MILLISECONDS } from "../../utils/constants";
 
 class SponsorForm extends React.Component {
   constructor(props) {
@@ -110,7 +110,7 @@ class SponsorForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     errors[id] = "";

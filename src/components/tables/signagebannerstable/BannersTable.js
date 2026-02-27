@@ -14,7 +14,7 @@ import {
   publishDate
 } from "../../../actions/signage-actions";
 import { shallowEqual } from "../../../utils/methods";
-import { MILLISECONDS_IN_SECOND, TWO } from "../../../utils/constants";
+import { MILLISECONDS, TWO } from "../../../utils/constants";
 
 const createRow = (row, actions, summitTz) => {
   let cells = [];
@@ -229,7 +229,7 @@ class BannersTable extends React.Component {
     let {value} = field;
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     row[field.id] = value;
@@ -245,7 +245,7 @@ class BannersTable extends React.Component {
     let {value} = field;
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     new_row[field.id] = value;

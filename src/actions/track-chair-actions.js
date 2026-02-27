@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ import {
   DEBOUNCE_WAIT,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
-  DOUBLE_PER_PAGE
+  TWENTY_PER_PAGE
 } from "../utils/constants";
 
 URI.escapeQuerySpace = false;
@@ -466,7 +466,7 @@ export const getSourceList =
 
     const params = {
       page,
-      per_page: DOUBLE_PER_PAGE,
+      per_page: TWENTY_PER_PAGE,
       access_token: accessToken,
       "filter[]": filter,
       fields:

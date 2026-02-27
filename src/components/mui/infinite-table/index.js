@@ -12,7 +12,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import TableRow from "@mui/material/TableRow";
 import styles from "./styles.module.less";
-import { MILLISECONDS_TO_SECONDS } from "../../../utils/constants";
+import { MILLISECONDS } from "../../../utils/constants";
 
 const MuiInfiniteTable = ({
   boxHeight = "400px",
@@ -38,7 +38,7 @@ const MuiInfiniteTable = ({
 
       setTimeout(() => {
         isLoadingRef.current = false;
-      }, MILLISECONDS_TO_SECONDS);
+      }, MILLISECONDS);
     }
   };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,7 @@ import {
   MAX_PER_PAGE,
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
-  FIVE_PER_PAGE,
-  HUNDRED_PER_PAGE
+  FIVE_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
@@ -2364,7 +2363,7 @@ export const getSponsorPromocodes =
   (
     term = null,
     page = 1,
-    perPage = HUNDRED_PER_PAGE,
+    perPage = MAX_PER_PAGE,
     order = "order",
     orderDir = 1
   ) =>

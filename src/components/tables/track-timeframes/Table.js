@@ -12,7 +12,7 @@ import DayTimeframeTable from "./DayTimeframeTable";
 
 import "./styles.css";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import { MILLISECONDS_IN_SECOND, TWO } from "../../../utils/constants";
+import { MILLISECONDS, TWO } from "../../../utils/constants";
 
 const createRow = (row, actions, summitTZ) => {
   let cells = [];
@@ -141,7 +141,7 @@ class TrackTimeframeTable extends React.Component {
     let {value} = field;
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     new_row[field.id] = value;

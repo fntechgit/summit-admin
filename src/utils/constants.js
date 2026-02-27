@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,85 +70,68 @@ export const NOTIFICATION_TIMEOUT = 2000;
 
 export const DUMMY_ACTION = "DUMMY_ACTION";
 
-export const DEFAULT_CURRENT_PAGE = 1;
-
-export const DEFAULT_PER_PAGE = 10;
-
-export const DOUBLE_PER_PAGE = 20;
-
-export const FIFTEEN_PER_PAGE = 15;
-
-export const MAX_PER_PAGE = 100;
-
-export const TWENTY_PER_PAGE = 20;
-export const FIFTY_PER_PAGE = 50;
-
-export const TWENTYTHREE_HOURS = 23;
-
-export const FIVE_PER_PAGE = 5;
-export const HUNDRED_PER_PAGE = 100;
-export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
-export const DEFAULT_ORDER_DIR = 1;
-
+// BASIC
 export const INT_BASE = 10;
-export const FIFTY_NINE = 59;
-export const ONE_MINUTE = 60;
-export const FIFTEEN_MINUTES = 900;
-export const HOUR_AND_HALF = 5400;
-export const SECONDS_TO_MINUTES = 60;
-export const MILLISECONDS_IN_SECOND = 1000;
-export const TIME_23_HOURS = 23;
-export const TIME_59_MINS = 59;
-export const TIME_59_SECS = 59;
+export const INDEX_NOT_FOUND = -1;
+export const HEX_RADIX = 16;
+export const DEBOUNCE_WAIT = 500;
+export const DEBOUNCE_WAIT_250 = 250;
+export const LETTERS_IN_ALPHABET = 26;
+export const UPPERCASE_A_IN_ASCII = 65;
+export const DECIMAL_DIGITS = 2;
+export const TWO = 2;
+export const TEN = 10;
+export const DEFAULT_Z_INDEX = 1;
+export const HIGH_Z_INDEX = 9999;
+export const DELTA_SECS = 300;
 
-export const SORT_ASCENDING = 1;
-export const SORT_DESCENDING = -1;
+// PAGES
+export const DEFAULT_CURRENT_PAGE = 1;
+export const DEFAULT_PER_PAGE = 10;
+export const FIVE_PER_PAGE = 5;
+export const TWENTY_PER_PAGE = 20;
+export const FIFTEEN_PER_PAGE = 15;
+export const FIFTY_PER_PAGE = 50;
+export const MAX_PER_PAGE = 100;
 export const EXPORT_PAGE_SIZE_100 = 100;
 export const DEFAULT_EXPORT_PAGE_SIZE = 500;
 export const EXPORT_PAGE_SIZE_200 = 200;
 
+// SORT
+export const DEFAULT_ORDER_DIR = 1;
+export const SORT_ASCENDING = 1;
+export const SORT_DESCENDING = -1;
+
+// TIME
+export const ONE_MINUTE = 60;
+export const FIFTEEN_MINUTES = 900;
+export const HOUR_AND_HALF = 5400;
+export const SECONDS_TO_MINUTES = 60;
+export const MILLISECONDS = 1000;
+export const TIME_23_HOURS = 23;
+export const TIME_59 = 59;
+
+// DATE
 export const DATE_FILTER_ARRAY_SIZE = 2;
 
-export const MILLISECONDS_TO_SECONDS = 1000;
-
-export const INDEX_NOT_FOUND = -1;
-
+// RESPONSE CODES
 export const CODE_200 = 200;
-
 export const ERROR_CODE_403 = 403;
-
 export const ERROR_CODE_401 = 401;
-
 export const ERROR_CODE_412 = 412;
-
 export const ERROR_CODE_404 = 404;
-
 export const ERROR_CODE_500 = 500;
 
-export const HEX_RADIX = 16;
+// UPLOAD
+export const KB = 1024;
+export const BYTES_PER_MB = 1_048_576; // 1024 * 1024
+export const MAX_UPLOAD_SIZE = 512000;
+export const MAX_UPLOAD_QTY = 5;
+export const ALLOWED_SLIDES_FORMATS = ["jpg", "jpeg", "ppt", "pptx", "pdf"];
+export const ALLOWED_IMAGE_FORMATS = ["jpg", "jpeg", "png"];
 
-export const DEBOUNCE_WAIT = 500;
 
-export const DEBOUNCE_WAIT_250 = 250;
-
-export const LETTERS_IN_ALPHABET = 26;
-
-export const UPPERCASE_A_IN_ASCII = 65;
-
-export const DECIMAL_DIGITS = 2;
-
-export const TWO = 2;
-
-export const TEN = 10;
-
-export const ONE_HUNDRED = 100;
-
-export const DEFAULT_Z_INDEX = 1;
-
-export const HIGH_Z_INDEX = 9999;
-
-export const DELTA_SECS = 300;
-
+// OTHER
 export const EVENT_TYPE_PRESENTATION = "PresentationType";
 
 export const EVENT_TYPE_FISHBOWL = "Fishbowl";
@@ -162,36 +145,11 @@ export const TRIM_TEXT_LENGTH_40 = 50;
 export const LANGUAGE_CODE_LENGTH = 2;
 
 export const SLICE_TICKET_NUMBER = -15;
-
-export const BYTES_PER_MB = 1_048_576; // 1024 * 1024
-
 export const MARKETING_SETTING_TYPE_TEXT = "TEXT";
 export const MARKETING_SETTING_TYPE_TEXTAREA = "TEXTAREA";
 export const MARKETING_SETTING_TYPE_FILE = "FILE";
 export const MARKETING_SETTING_TYPE_HEX_COLOR = "HEX_COLOR";
-export const KB = 1024;
-// 500 * 1024kb
-export const MAX_MEDIA_UPLOAD_SIZE = 512000;
-// 500 * 1024kb
-export const MAX_SLIDE_UPLOAD_SIZE = 512000;
 
-export const ALLOWED_SLIDES_FORMATS = ["jpg", "jpeg", "ppt", "pptx", "pdf"];
-
-// 500 * 1024kb
-export const MAX_FORM_TEMPLATE_MATERIALS_UPLOAD_SIZE = 512000;
-export const MAX_FORM_TEMPLATE_MATERIALS_UPLOAD_QTY = 5;
-export const ALLOWED_FORM_TEMPLATE_MATERIAL_FORMATS = [
-  "jpg",
-  "jpeg",
-  "ppt",
-  "pptx",
-  "pdf"
-];
-
-// 500 * 1024kb
-export const MAX_INVENTORY_IMAGE_UPLOAD_SIZE = 512000;
-export const MAX_INVENTORY_IMAGES_UPLOAD_QTY = 5;
-export const ALLOWED_INVENTORY_IMAGE_FORMATS = ["jpg", "jpeg", "png"];
 
 export const METAFIELD_TYPES_WITH_OPTIONS = [
   "CheckBoxList",

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ import {
 } from "../../actions/event-material-actions";
 import { EVENT_COMMENT_DELETED } from "../../actions/event-comment-actions";
 import { RECEIVE_QA_USERS_BY_SUMMIT_EVENT } from "../../actions/user-chat-roles-actions";
-import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
+import { MILLISECONDS } from "../../utils/constants";
 
 export const DEFAULT_ENTITY = {
   id: 0,
@@ -264,7 +264,7 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
       const items = payload.response.data.map((e) => ({
         ...e,
         owner_full_name: `${e.owner.first_name} ${e.owner.last_name}`,
-        created: moment(e.created_date * MILLISECONDS_IN_SECOND)
+        created: moment(e.created_date * MILLISECONDS)
           .tz(state.feedbackState.summitTZ)
           .format("MMMM Do YYYY, h:mm a")
       }));
@@ -303,10 +303,10 @@ const summitEventReducer = (state = DEFAULT_STATE, action) => {
       const items = payload.response.data.map((e) => ({
         ...e,
         owner_full_name: `${e.creator.first_name} ${e.creator.last_name}`,
-        created: moment(e.created * MILLISECONDS_IN_SECOND)
+        created: moment(e.created * MILLISECONDS)
           .tz(state.commentState.summitTZ)
           .format("MMMM Do YYYY, h:mm a"),
-        last_edited: moment(e.last_edited * MILLISECONDS_IN_SECOND)
+        last_edited: moment(e.last_edited * MILLISECONDS)
           .tz(state.commentState.summitTZ)
           .format("MMMM Do YYYY, h:mm a"),
         is_activity:

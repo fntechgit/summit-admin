@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import moment from "moment-timezone";
-import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
+import { MILLISECONDS } from "../../utils/constants";
 import {
   RECEIVE_ATTENDEES,
   REQUEST_ATTENDEES,
@@ -120,7 +120,7 @@ const attendeeListReducer = (state = DEFAULT_STATE, action = {}) => {
           tickets_count: a.tickets.length.toString(),
           has_notes: a.notes,
           summit_hall_checked_in_date: a.summit_hall_checked_in_date
-            ? moment(a.summit_hall_checked_in_date * MILLISECONDS_IN_SECOND)
+            ? moment(a.summit_hall_checked_in_date * MILLISECONDS)
                 .tz(state.summitTZ)
                 .format("MMMM Do YYYY, h:mm a")
             : "TBD"
