@@ -22,6 +22,7 @@ import * as Sentry from "@sentry/react";
 import T from "i18n-react/dist/i18n-react";
 import {
   BADGE_QR_MINIMUM_EXPECTED_FIELDS,
+  BYTES_IN_MEGABYTE,
   ERROR_CODE_401,
   ERROR_CODE_403,
   ERROR_CODE_412,
@@ -530,3 +531,6 @@ export const formatBadgeQR = (code, summit) => {
 
   return null;
 };
+
+// eslint-disable-next-line no-magic-numbers
+export const bytesToMb = (bytes) => (bytes / BYTES_IN_MEGABYTE).toFixed(2);
