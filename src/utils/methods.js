@@ -26,12 +26,14 @@ import {
   ERROR_CODE_403,
   ERROR_CODE_412,
   ERROR_CODE_500,
+  FILENAME_TRUNCATE_SIDE_PERCENT,
   HEX_RADIX,
   INT_BASE,
   MARKETING_SETTING_TYPE_HEX_COLOR,
   MILLISECONDS_TO_SECONDS,
   ONE_MINUTE,
-  OR_FILTER
+  OR_FILTER,
+  TRIM_TEXT_LENGTH_20
 } from "./constants";
 
 const DAY_IN_SECONDS = 86400; // 86400 seconds per day
@@ -529,4 +531,42 @@ export const formatBadgeQR = (code, summit) => {
   }
 
   return null;
+};
+
+export const getMediaInputValue = (
+  entity,
+  fieldName = "images",
+  maxLength = TRIM_TEXT_LENGTH_20
+) => {
+  const mediaFiles = entity?.[fieldName];
+
+  if (!mediaFiles?.length) return [];
+
+  return mediaFiles.map((img) => {
+    const fileUrl = img.filename ?? img.file_path ?? img.file_url;
+
+    let filename = fileUrl.includes("/") ? fileUrl.split("/").pop() : fileUrl;
+
+    const parts = filename.split(".");
+    const ext = parts.pop();
+    let nameWithoutExtension = parts.join(".");
+
+    if (nameWithoutExtension.length > maxLength) {
+      const startChars = Math.floor(maxLength * FILENAME_TRUNCATE_SIDE_PERCENT);
+      const endChars = Math.floor(maxLength * FILENAME_TRUNCATE_SIDE_PERCENT);
+      const start = nameWithoutExtension.substring(0, startChars);
+      const end = nameWithoutExtension.substring(
+        nameWithoutExtension.length - endChars
+      );
+      nameWithoutExtension = `${start}...${end}`;
+    }
+
+    filename = `${nameWithoutExtension}.${ext}`;
+
+    return {
+      ...img,
+      public_url: img?.public_url || fileUrl,
+      filename: filename.concat("?t=", Date.now())
+    };
+  });
 };
