@@ -435,5 +435,5 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   getSponsorships,
-  resetSponsorPage  
+  resetSponsorPage
 })(SponsorPagesTab);
