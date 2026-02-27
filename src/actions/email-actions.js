@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ import {
   DEBOUNCE_WAIT,
   DEFAULT_PER_PAGE,
   ERROR_CODE_412,
-  HUNDRED_PER_PAGE
+  MAX_PER_PAGE
 } from "../utils/constants";
 
 URI.escapeQuerySpace = false;
@@ -243,7 +243,7 @@ export const queryTemplates = _.debounce(async (input, callback) => {
   if (input) {
     endpoint.addQuery("identifier__startswith", input);
     endpoint.addQuery("page", 1);
-    endpoint.addQuery("per_page", HUNDRED_PER_PAGE);
+    endpoint.addQuery("per_page", MAX_PER_PAGE);
   }
 
   fetch(endpoint)
@@ -370,7 +370,7 @@ export const getAllClients = () => async (dispatch) => {
 /** ********************************************************************************************************* */
 
 export const getMarketingEmailSettings =
-  (page = 1, perPage = HUNDRED_PER_PAGE) =>
+  (page = 1, perPage = MAX_PER_PAGE) =>
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;

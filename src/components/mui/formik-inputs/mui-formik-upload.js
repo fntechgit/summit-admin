@@ -4,24 +4,24 @@ import { FormHelperText } from "@mui/material";
 import { UploadInputV2 } from "openstack-uicore-foundation/lib/components";
 import { useField } from "formik";
 import {
-  ALLOWED_INVENTORY_IMAGE_FORMATS,
-  MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
-  MAX_INVENTORY_IMAGES_UPLOAD_QTY
+  ALLOWED_IMAGE_FORMATS,
+  MAX_UPLOAD_SIZE,
+  MAX_UPLOAD_QTY
 } from "../../../utils/constants";
 
 const MuiFormikUpload = ({
   id,
   name,
   onImageDeleted,
-  maxFiles = MAX_INVENTORY_IMAGES_UPLOAD_QTY
+  maxFiles = MAX_UPLOAD_QTY
 }) => {
   const [field, meta, helpers] = useField(name);
 
   const mediaType = {
-    max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
+    max_size: MAX_UPLOAD_SIZE,
     max_uploads_qty: maxFiles,
     type: {
-      allowed_extensions: ALLOWED_INVENTORY_IMAGE_FORMATS
+      allowed_extensions: ALLOWED_IMAGE_FORMATS
     }
   };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ import { AffiliationsTable } from "../../tables/affiliationstable";
 import { isEmpty, scrollToError, shallowEqual } from "../../../utils/methods";
 import Notes from "../../notes";
 import CopyClipboard from "../../buttons/copy-clipboard";
-import { MILLISECONDS_IN_SECOND } from "../../../utils/constants";
+import { MILLISECONDS } from "../../../utils/constants";
 
 class AttendeeForm extends React.Component {
   constructor(props) {
@@ -92,7 +92,7 @@ class AttendeeForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_IN_SECOND;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     if (id === "member") {

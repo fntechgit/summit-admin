@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,11 +23,10 @@ import T from "i18n-react/dist/i18n-react";
 import Select from "react-select";
 import { adjustEventDuration } from "../../utils/methods";
 import {
-  MILLISECONDS_IN_SECOND,
+  MILLISECONDS,
   SECONDS_TO_MINUTES,
   TIME_23_HOURS,
-  TIME_59_MINS,
-  TIME_59_SECS
+  TIME_59,
 } from "../../utils/constants";
 
 class SummitEventBulkEditorItem extends React.Component {
@@ -61,7 +60,7 @@ class SummitEventBulkEditorItem extends React.Component {
   getFormattedTime(atime) {
     if (atime == null) return "";
     if (!atime) return atime;
-    atime *= MILLISECONDS_IN_SECOND;
+    atime *= MILLISECONDS;
     return moment(atime).tz(this.props.currentSummit.time_zone.name);
   }
 
@@ -231,7 +230,7 @@ class SummitEventBulkEditorItem extends React.Component {
       .shift()?.value;
     const currentSummitStartDate = moment
       .tz(
-        currentSummit.start_date * MILLISECONDS_IN_SECOND,
+        currentSummit.start_date * MILLISECONDS,
         currentSummit.time_zone.name
       )
       .hour(0)
@@ -239,12 +238,12 @@ class SummitEventBulkEditorItem extends React.Component {
       .second(0);
     const currentSummitEndDate = moment
       .tz(
-        currentSummit.end_date * MILLISECONDS_IN_SECOND,
+        currentSummit.end_date * MILLISECONDS,
         currentSummit.time_zone.name
       )
       .hour(TIME_23_HOURS)
-      .minute(TIME_59_MINS)
-      .second(TIME_59_SECS);
+      .minute(TIME_59)
+      .second(TIME_59);
     const currentSelectionPlan = selectionPlanOptions
       .filter((option) => option.value.id === event.selection_plan_id)
       .shift();
@@ -320,8 +319,8 @@ class SummitEventBulkEditorItem extends React.Component {
               timeConstraints={{ hours: { min: 7, max: 22 } }}
               validation={{
                 after:
-                  currentSummitStartDate.valueOf() / MILLISECONDS_IN_SECOND,
-                before: currentSummitEndDate.valueOf() / MILLISECONDS_IN_SECOND
+                  currentSummitStartDate.valueOf() / MILLISECONDS,
+                before: currentSummitEndDate.valueOf() / MILLISECONDS
               }}
               onChange={this.onTimeLocalChanged}
               value={this.getFormattedTime(event.start_date)}
@@ -344,8 +343,8 @@ class SummitEventBulkEditorItem extends React.Component {
               timezone={currentSummit.time_zone.name}
               validation={{
                 after:
-                  currentSummitStartDate.valueOf() / MILLISECONDS_IN_SECOND,
-                before: currentSummitEndDate.valueOf() / MILLISECONDS_IN_SECOND
+                  currentSummitStartDate.valueOf() / MILLISECONDS,
+                before: currentSummitEndDate.valueOf() / MILLISECONDS
               }}
               onChange={this.onTimeLocalChanged}
               value={this.getFormattedTime(event.end_date)}

@@ -1,7 +1,7 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { Tooltip } from "react-tooltip";
-import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
+import { MILLISECONDS } from "../../utils/constants";
 
 const CopyClipboard = ({ text, tooltipText }) => {
   const tooltipTextToUse =
@@ -13,7 +13,7 @@ const CopyClipboard = ({ text, tooltipText }) => {
     setTooltip(T.translate("general.copied"));
     setTimeout(() => {
       setTooltip(tooltipTextToUse);
-    }, MILLISECONDS_IN_SECOND);
+    }, MILLISECONDS);
   };
 
   return (

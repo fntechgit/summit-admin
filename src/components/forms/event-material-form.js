@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,7 @@ import {
 import {
   ALLOWED_SLIDES_FORMATS,
   KB,
-  MAX_MEDIA_UPLOAD_SIZE,
-  MAX_SLIDE_UPLOAD_SIZE
+  MAX_UPLOAD_SIZE
 } from "../../utils/constants";
 
 const MATERIAL_TYPE = {
@@ -151,7 +150,7 @@ class EventMaterialForm extends React.Component {
     // on admin we upload one per time
     const media_type = {
       ...entity.media_upload_type,
-      max_size: entity.media_upload_type?.max_size || MAX_MEDIA_UPLOAD_SIZE,
+      max_size: entity.media_upload_type?.max_size || MAX_UPLOAD_SIZE,
       max_uploads_qty: 1
     };
     const mediaInputValue = entity.filename ? [entity] : [];
@@ -174,7 +173,7 @@ class EventMaterialForm extends React.Component {
 
     const slideMediaType = {
       id: "slide",
-      max_size: MAX_SLIDE_UPLOAD_SIZE,
+      max_size: MAX_UPLOAD_SIZE,
       type: {
         allowed_extensions: ALLOWED_SLIDES_FORMATS
       }

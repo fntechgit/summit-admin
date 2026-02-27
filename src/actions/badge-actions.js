@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
   DUMMY_ACTION,
-  HUNDRED_PER_PAGE,
+  MAX_PER_PAGE,
   TEN
 } from "../utils/constants";
 
@@ -103,7 +103,7 @@ export const RECEIVE_BADGE_SETTINGS = "RECEIVE_BADGE_SETTINGS";
 /** *********************  MARKETING BADGE SETTINGS  ************************** */
 
 export const getBadgeSettings =
-  (page = DEFAULT_CURRENT_PAGE, perPage = HUNDRED_PER_PAGE) =>
+  (page = DEFAULT_CURRENT_PAGE, perPage = MAX_PER_PAGE) =>
   (dispatch, getState) => {
     const { currentSummitState } = getState();
     const { currentSummit } = currentSummitState;
@@ -613,7 +613,7 @@ export const getBadgeTypes =
 
     const params = {
       page: 1,
-      per_page: HUNDRED_PER_PAGE,
+      per_page: MAX_PER_PAGE,
       access_token: accessToken,
       expand: "access_levels,allowed_view_types",
       fields:
@@ -924,7 +924,7 @@ export const getBadgeFeatures =
     const params = {
       page: 1,
       fields: "name,id,description",
-      per_page: HUNDRED_PER_PAGE,
+      per_page: MAX_PER_PAGE,
       access_token: accessToken
     };
 
@@ -1115,7 +1115,7 @@ export const getAccessLevels =
 
     const params = {
       page: 1,
-      per_page: HUNDRED_PER_PAGE,
+      per_page: MAX_PER_PAGE,
       access_token: accessToken,
       fields: "id,name,description,is_default",
       relations: "none"

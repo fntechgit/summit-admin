@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ import {
   HEX_RADIX,
   INT_BASE,
   MARKETING_SETTING_TYPE_HEX_COLOR,
-  MILLISECONDS_TO_SECONDS,
+  MILLISECONDS,
   ONE_MINUTE,
   OR_FILTER
 } from "./constants";
@@ -178,7 +178,7 @@ export const adjustEventDuration = (evt, entity) => {
   if (type === "datetime") {
     const empty = moment(0);
     if (value.valueOf() === empty.valueOf()) value = null;
-    if (value !== null) value = value.valueOf() / MILLISECONDS_TO_SECONDS;
+    if (value !== null) value = value.valueOf() / MILLISECONDS;
     // if we have both dates, update duration
     if (id === "start_date" && adjustedEntity.end_date) {
       adjustedEntity.duration =
@@ -240,7 +240,7 @@ export const getSummitDays = (summit) => {
 
   do {
     const option = {
-      value: currentAuxDay.valueOf() / MILLISECONDS_TO_SECONDS,
+      value: currentAuxDay.valueOf() / MILLISECONDS,
       label: currentAuxDay.format("MMM Do YYYY")
     };
 

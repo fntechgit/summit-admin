@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ import FragmentParser from "../../../utils/fragmen-parser";
 import TextAreaInputWithCounter from "../../inputs/text-area-input-with-counter";
 import {
   INDEX_NOT_FOUND,
-  MILLISECONDS_TO_SECONDS
+  MILLISECONDS
 } from "../../../utils/constants";
 
 class PromocodeForm extends React.Component {
@@ -104,7 +104,7 @@ class PromocodeForm extends React.Component {
     }
 
     if (ev.target.type === "datetime") {
-      value = value.valueOf() / MILLISECONDS_TO_SECONDS;
+      value = value.valueOf() / MILLISECONDS;
     }
 
     newErrors[id] = "";

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,12 +24,11 @@ import moment from "moment-timezone";
 import Select from "react-select";
 import SummitEventBulkEditorItem from "./summit-event-bulk-editor-item";
 import {
-  MILLISECONDS_IN_SECOND,
+  MILLISECONDS,
   SECONDS_TO_MINUTES,
   TBALocation,
   TIME_23_HOURS,
-  TIME_59_MINS,
-  TIME_59_SECS
+  TIME_59
 } from "../../utils/constants";
 
 import "../../styles/summit-event-bulk-editor.less";
@@ -234,7 +233,7 @@ class SummitEventBulkEditorForm extends React.Component {
 
   handleChangeBulkStartDate(ev) {
     let { value } = ev.target;
-    value = value.valueOf() / MILLISECONDS_IN_SECOND;
+    value = value.valueOf() / MILLISECONDS;
     const { currentBulkEndDate, currentBulkDuration } = this.state;
     this.setState({ ...this.state, currentBulkStartDate: value }, () =>
       this.props.updateEventsStartDateLocal(value)
@@ -256,7 +255,7 @@ class SummitEventBulkEditorForm extends React.Component {
 
   handleChangeBulkEndDate(ev) {
     let { value } = ev.target;
-    value = value.valueOf() / MILLISECONDS_IN_SECOND;
+    value = value.valueOf() / MILLISECONDS;
     const { currentBulkStartDate, currentBulkDuration } = this.state;
     this.setState({ ...this.state, currentBulkEndDate: value }, () =>
       this.props.updateEventsEndDateLocal(value)
@@ -341,7 +340,7 @@ class SummitEventBulkEditorForm extends React.Component {
     const { events, currentSummit } = this.props;
     const currentSummitStartDate = moment
       .tz(
-        currentSummit.start_date * MILLISECONDS_IN_SECOND,
+        currentSummit.start_date * MILLISECONDS,
         currentSummit.time_zone.name
       )
       .hour(0)
@@ -349,12 +348,12 @@ class SummitEventBulkEditorForm extends React.Component {
       .second(0);
     const currentSummitEndDate = moment
       .tz(
-        currentSummit.end_date * MILLISECONDS_IN_SECOND,
+        currentSummit.end_date * MILLISECONDS,
         currentSummit.time_zone.name
       )
       .hour(TIME_23_HOURS)
-      .minute(TIME_59_MINS)
-      .second(TIME_59_SECS);
+      .minute(TIME_59)
+      .second(TIME_59);
 
     if (!currentSummit) return null;
     const venuesOptions = [{ value: TBALocation, label: TBALocation.name }];
@@ -467,9 +466,9 @@ class SummitEventBulkEditorForm extends React.Component {
                 validation={{
                   before:
                     currentBulkEndDate ||
-                    currentSummitEndDate.valueOf() / MILLISECONDS_IN_SECOND,
+                    currentSummitEndDate.valueOf() / MILLISECONDS,
                   after:
-                    currentSummitStartDate.valueOf() / MILLISECONDS_IN_SECOND
+                    currentSummitStartDate.valueOf() / MILLISECONDS
                 }}
                 onChange={this.handleChangeBulkStartDate}
                 className="bulk-edit-date-picker"
@@ -492,10 +491,10 @@ class SummitEventBulkEditorForm extends React.Component {
                 )}
                 validation={{
                   before:
-                    currentSummitEndDate.valueOf() / MILLISECONDS_IN_SECOND,
+                    currentSummitEndDate.valueOf() / MILLISECONDS,
                   after:
                     currentBulkStartDate ||
-                    currentSummitStartDate.valueOf() / MILLISECONDS_IN_SECOND
+                    currentSummitStartDate.valueOf() / MILLISECONDS
                 }}
                 onChange={this.handleChangeBulkEndDate}
                 className="bulk-edit-date-picker"

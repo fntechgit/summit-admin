@@ -24,7 +24,7 @@ import {
 } from "../../actions/event-rsvp-actions";
 import {
   DEFAULT_CURRENT_PAGE,
-  MILLISECONDS_IN_SECOND
+  MILLISECONDS
 } from "../../utils/constants";
 import { queryPaidAttendees } from "../../actions/attendee-actions";
 import EventRSVPReSend from "./event-rsvp-resend";
@@ -122,7 +122,7 @@ const EventRSVPList = ({
       columnKey: "created",
       value: T.translate("event_rsvp_list.created"),
       render: (row) =>
-        moment(row.created * MILLISECONDS_IN_SECOND)
+        moment(row.created * MILLISECONDS)
           .tz(currentSummit.time_zone_id)
           .format("MMMM Do YYYY, h:mm a (z)")
     },
@@ -147,7 +147,7 @@ const EventRSVPList = ({
       columnKey: "action_date",
       value: T.translate("event_rsvp_list.action_date"),
       render: (row) =>
-        moment(row.action_date * MILLISECONDS_IN_SECOND)
+        moment(row.action_date * MILLISECONDS)
           .tz(currentSummit.time_zone_id)
           .format("MMMM Do YYYY, h:mm a (z)")
     }

@@ -20,9 +20,9 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { UploadInputV2 } from "openstack-uicore-foundation/lib/components";
 import {
-  ALLOWED_INVENTORY_IMAGE_FORMATS,
-  MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
-  MAX_INVENTORY_IMAGES_UPLOAD_QTY
+  ALLOWED_IMAGE_FORMATS,
+  MAX_UPLOAD_SIZE,
+  MAX_UPLOAD_QTY
 } from "../../../utils/constants";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield";
@@ -71,10 +71,10 @@ const SponsorItemDialog = ({
   });
 
   const mediaType = {
-    max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
-    max_uploads_qty: MAX_INVENTORY_IMAGES_UPLOAD_QTY,
+    max_size: MAX_UPLOAD_SIZE,
+    max_uploads_qty: MAX_UPLOAD_QTY,
     type: {
-      allowed_extensions: ALLOWED_INVENTORY_IMAGE_FORMATS
+      allowed_extensions: ALLOWED_IMAGE_FORMATS
     }
   };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,9 @@ import FormRepeater from "../form-repeater";
 import InventoryItemMetaFieldForm from "./inventory-item-meta-field-form";
 import { scrollToError, shallowEqual, hasErrors } from "../../utils/methods";
 import {
-  MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
-  MAX_INVENTORY_IMAGES_UPLOAD_QTY,
-  ALLOWED_INVENTORY_IMAGE_FORMATS
+  MAX_UPLOAD_SIZE,
+  MAX_UPLOAD_QTY,
+  ALLOWED_IMAGE_FORMATS
 } from "../../utils/constants";
 
 const InventoryItemForm = ({
@@ -42,10 +42,10 @@ const InventoryItemForm = ({
   const [errors, setErrors] = useState(initialErrors);
 
   const mediaType = {
-    max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
-    max_uploads_qty: MAX_INVENTORY_IMAGES_UPLOAD_QTY,
+    max_size: MAX_UPLOAD_SIZE,
+    max_uploads_qty: MAX_UPLOAD_QTY,
     type: {
-      allowed_extensions: ALLOWED_INVENTORY_IMAGE_FORMATS
+      allowed_extensions: ALLOWED_IMAGE_FORMATS
     }
   };
 
