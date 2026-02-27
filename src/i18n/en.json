@@ -43,6 +43,7 @@
     "delete": "Delete",
     "clone": "Clone",
     "new": "New",
+    "all": "All",
     "new_summit": "New Event",
     "drop_files": "Drop images or click to select files to upload.",
     "search": "Search",
@@ -75,6 +76,7 @@
     "error": "Error!",
     "unarchive": "Unarchive",
     "archive": "Archive",
+    "items": "items",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
@@ -95,7 +97,11 @@
     "date": "Wrong date format.",
     "after": "'{field1}' must be after '{field2}'.",
     "boolean": "Must be a boolean.",
-    "mib_aligned": "Must be a MiB aligned value"
+    "mib_aligned": "Must be a MiB aligned value",
+    "minimum": "Must be at least {minimum}",
+    "maximum": "Must be at most {maximum}",
+    "time": "Wrong time format.",
+    "wrong_format": "Wrong format."
   },
   "landing": {
     "os_summit_admin": "Show Admin",
@@ -2484,13 +2490,33 @@
       "code": "Code",
       "name": "Name",
       "add_ons": "Add-ons",
+      "items": "Items",
       "discount": "Discount",
       "amount": "Amount",
       "manage_items": "Manage Items",
       "add_form": "Add Form",
       "no_cart": "No cart found.",
       "pay_cc": "pay with credit card or ach",
-      "pay_invoice": "pay with invoice"
+      "pay_invoice": "pay with invoice",
+      "add_form_to_cart": "Add Form to Cart",
+      "add_selected_form": "Add selected form",
+      "select_addon": "Select Add-on...",
+      "edit_form": {
+        "code": "Code",
+        "description": "Description",
+        "custom_rate": "Custom Rate",
+        "early_bird_rate": "Early Bird Rate",
+        "standard_rate": "Standard Rate",
+        "onsite_rate": "Onsite Rate",
+        "qty": "Quantity",
+        "total": "Total",
+        "notes": "Notes",
+        "notes_placeholder": "Enter your notes here...",
+        "additional_info": "Additional Info",
+        "discount": "Discount",
+        "total_on_caps": "TOTAL",
+        "no_forms_found": "No forms found."
+      }
     },
     "purchase_tab": {
       "order": "Order",

@@ -264,3 +264,8 @@ export const SPONSOR_USER_ASSIGNMENT_TYPE = {
   EXISTING: "existing",
   NEW: "new"
 };
+
+export const DISCOUNT_TYPES = {
+  AMOUNT: "Amount",
+  RATE: "Rate"
+};
