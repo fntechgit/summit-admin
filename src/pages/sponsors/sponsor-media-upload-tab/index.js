@@ -93,12 +93,12 @@ const SponsorMediaUploadTab = ({
 
   const handleGeneralPageChange = (page) => {
     const { perPage, order, orderDir } = sponsorRequests;
-    getSponsorMURequests(page, perPage, order, orderDir);
+    getGeneralMURequests(page, perPage, order, orderDir);
   };
 
   const handleGeneralSort = (key, dir) => {
     const { currentPage, perPage } = sponsorRequests;
-    getSponsorMURequests(currentPage, perPage, key, dir);
+    getGeneralMURequests(currentPage, perPage, key, dir);
   };
 
   const getTableColumns = (type) => {
@@ -259,6 +259,7 @@ const SponsorMediaUploadTab = ({
         open={!!uploadModule}
         onClose={() => setUploadModule(null)}
         onUpload={handleUploadFile}
+        onRemove={() => handleDelete(uploadModule)}
         value={uploadModule?.media_upload}
         fileMeta={{
           ...(uploadModule?.file_type || {}),

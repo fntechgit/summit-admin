@@ -82,7 +82,9 @@ const UploadDialog = ({
   };
 
   const handleRemove = () => {
-    onRemove();
+    if (onRemove) {
+      onRemove();
+    }
   };
 
   const canAddMore = () => (value?.length || 0) < maxFiles;

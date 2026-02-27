@@ -72,7 +72,7 @@ export const getSponsorMURequests =
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/custom-media-request-modules`,
       snackbarErrorHandler,
       { order, orderDir, currentPage, perPage, summitTZ }
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -113,7 +113,7 @@ export const getGeneralMURequests =
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/managed-media-request-modules`,
       snackbarErrorHandler,
       { order, orderDir, currentPage, perPage, summitTZ }
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -157,6 +157,8 @@ export const removeFileForSponsorMU =
     const { currentSummit } = currentSummitState;
     const { entity: sponsor } = currentSponsorState;
     const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
 
     const params = {
       access_token: accessToken
