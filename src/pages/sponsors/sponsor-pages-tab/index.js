@@ -27,7 +27,9 @@ import {
   getSponsorManagedPages,
   getSponsorCustomizedPages,
   saveSponsorManagedPage,
-  saveSponsorCustomizedPage
+  saveSponsorCustomizedPage,
+  getSponsorCustomizedPage,
+  resetSponsorPage
 } from "../../../actions/sponsor-pages-actions";
 import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
@@ -45,10 +47,13 @@ const SponsorPagesTab = ({
   managedPages,
   customizedPages,
   summitTZ,
+  currentEditPage,
   getSponsorManagedPages,
   saveSponsorManagedPage,
   getSponsorCustomizedPages,
-  saveSponsorCustomizedPage
+  saveSponsorCustomizedPage,
+  getSponsorCustomizedPage,
+  resetSponsorPage
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -153,11 +158,11 @@ const SponsorPagesTab = ({
   };
 
   const handleUsingTemplate = () => {
-    setOpenPopup("template");
+    setOpenPopup("usingTemplate");
   };
 
   const handleAddPage = () => {
-    setOpenPopup("new");
+    setOpenPopup("pagePopup");
   };
 
   const handleArchiveCustomizedPage = (item) =>
@@ -175,7 +180,7 @@ const SponsorPagesTab = ({
   };
 
   const handleCustomizedEdit = (item) => {
-    console.log("EDIT CUSTOMIZED ", item);
+    getSponsorCustomizedPage(item.id).then(() => setOpenPopup("pagePopup"));
   };
 
   const handleCustomizedDelete = (itemId) => {
@@ -227,6 +232,11 @@ const SponsorPagesTab = ({
           orderDir
         );
       }).finally(() => setOpenPopup(null));;
+  };
+
+  const handleClosePagePopup = () => {
+    resetSponsorPage();
+    setOpenPopup(null);
   };
 
   const baseColumns = (name) => [
@@ -389,7 +399,7 @@ const SponsorPagesTab = ({
         />
       </div>
 
-      {openPopup === "template" && (
+      {openPopup === "usingTemplate" && (
         <AddSponsorPageTemplatePopup
           sponsor={sponsor}
           summitId={summitId}
@@ -398,10 +408,11 @@ const SponsorPagesTab = ({
         />
       )}
 
-      {openPopup === "new" && (
+      {openPopup === "pagePopup" && (
         <PageTemplatePopup
           onSave={handleSaveCustomizedPage}
-          onClose={() => setOpenPopup(null)}
+          onClose={handleClosePagePopup}
+          pageTemplate={currentEditPage}
           sponsorshipIds={sponsorshipIds}
           summitId={summitId}
           sponsorId={sponsor.id}
@@ -419,7 +430,9 @@ const mapStateToProps = ({ sponsorPagePagesListState }) => ({
 export default connect(mapStateToProps, {
   getSponsorManagedPages,
   saveSponsorManagedPage,
+  getSponsorCustomizedPage,
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
-  getSponsorships
+  getSponsorships,
+  resetSponsorPage
 })(SponsorPagesTab);

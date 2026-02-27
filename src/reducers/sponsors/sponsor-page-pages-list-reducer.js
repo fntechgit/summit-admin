@@ -16,11 +16,20 @@ import {
   REQUEST_SPONSOR_MANAGED_PAGES,
   RECEIVE_SPONSOR_MANAGED_PAGES,
   RECEIVE_SPONSOR_CUSTOMIZED_PAGES,
-  REQUEST_SPONSOR_CUSTOMIZED_PAGES
+  REQUEST_SPONSOR_CUSTOMIZED_PAGES,
+  RECEIVE_SPONSOR_CUSTOMIZED_PAGE,
+  RESET_EDIT_PAGE
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
 import { PAGES_MODULE_KINDS } from "../../utils/constants";
+
+const DEFAULT_PAGE = {
+  code: "",
+  name: "",
+  allowed_add_ons: [],
+  modules: []
+};
 
 const DEFAULT_STATE = {
   managedPages: {
@@ -41,6 +50,7 @@ const DEFAULT_STATE = {
     perPage: 10,
     totalItems: 0
   },
+  currentEditPage: DEFAULT_PAGE,
   sponsorships: {
     items: [],
     currentPage: 0,
@@ -158,6 +168,13 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
           lastPage
         }
       };
+    }
+    case RECEIVE_SPONSOR_CUSTOMIZED_PAGE: {
+      const customizedPage = payload.response;
+      return { ...state, currentEditPage: customizedPage };
+    }
+    case RESET_EDIT_PAGE: {
+      return { ...state, currentEditPage: DEFAULT_PAGE };
     }
     case RECEIVE_GLOBAL_SPONSORSHIPS: {
       const {
