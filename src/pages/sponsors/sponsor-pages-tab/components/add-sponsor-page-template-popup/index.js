@@ -1,3 +1,16 @@
+/**
+ * Copyright 2026 OpenStack Foundation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * */
+
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
@@ -25,26 +38,29 @@ import { FormikProvider, useFormik } from "formik";
 import MuiTable from "../../../../../components/mui/table/mui-table";
 import MenuButton from "../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../actions/sponsor-actions";
-import { getSponsorForms } from "../../../../../actions/sponsor-forms-actions";
-import { FIVE_PER_PAGE } from "../../../../../utils/constants";
+import { getShowPages } from "../../../../../actions/show-pages-actions";
+import {
+  DEFAULT_CURRENT_PAGE,
+  FIVE_PER_PAGE
+} from "../../../../../utils/constants";
 import MuiFormikSelectGroup from "../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
-const AddSponsorFormTemplatePopup = ({
+const AddSponsorPageTemplatePopup = ({
   onClose,
   onSubmit,
-  sponsorForms,
+  showPages,
   currentPage,
   perPage,
   order,
   orderDir,
   totalCount,
   term = "",
-  getSponsorForms,
+  getShowPages,
   sponsor,
   summitId
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedForms, setSelectedForms] = useState([]);
+  const [selectedPages, setSelectedPages] = useState([]);
 
   const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
 
@@ -59,14 +75,14 @@ const AddSponsorFormTemplatePopup = ({
         .array()
         .test(
           "add_ons-required",
-          "Select at least one add-on",
+          T.translate("validation.add_on_required"),
           (value) => value?.includes("all") || value?.length > 0
         )
     }),
     onSubmit: (values) => {
       const { add_ons } = values;
       const entity = {
-        forms: selectedForms,
+        pages: selectedPages,
         add_ons
       };
       onSubmit(entity);
@@ -75,21 +91,19 @@ const AddSponsorFormTemplatePopup = ({
   });
 
   useEffect(() => {
-    if (open) {
-      getSponsorForms(
-        term,
-        currentPage,
-        FIVE_PER_PAGE,
-        order,
-        orderDir,
-        false,
-        sponsorshipTypeIds
-      );
-    }
-  }, [open]);
+    getShowPages(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      FIVE_PER_PAGE,
+      order,
+      orderDir,
+      false,
+      sponsorshipTypeIds
+    );
+  }, []);
 
   const handlePageChange = (page) => {
-    getSponsorForms(
+    getShowPages(
       term,
       page,
       FIVE_PER_PAGE,
@@ -101,9 +115,9 @@ const AddSponsorFormTemplatePopup = ({
   };
 
   const handleSort = (key, dir) => {
-    getSponsorForms(
+    getShowPages(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       FIVE_PER_PAGE,
       key,
       dir,
@@ -113,25 +127,28 @@ const AddSponsorFormTemplatePopup = ({
   };
 
   const handleOnSearch = (ev) => {
-    if (ev.key === "Enter")
-      getSponsorForms(
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      getShowPages(
         searchTerm,
-        currentPage,
+        DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir,
         false,
         sponsorshipTypeIds
       );
+    }
   };
 
   const handleSelected = (id, isSelected) => {
     if (isSelected) {
-      setSelectedForms([...selectedForms, id]);
+      setSelectedPages([...selectedPages, id]);
       return;
     }
-    const updatedSelected = selectedForms.filter((e) => e !== id);
-    setSelectedForms(updatedSelected);
+    const updatedSelected = selectedPages.filter((e) => e !== id);
+    setSelectedPages(updatedSelected);
   };
 
   const handleClose = () => {
@@ -153,7 +170,7 @@ const AddSponsorFormTemplatePopup = ({
         <FormControlLabel
           control={
             <Checkbox
-              checked={selectedForms.includes(row.id)}
+              checked={selectedPages.includes(row.id)}
               onChange={(ev) => handleSelected(row.id, ev.target.checked)}
             />
           }
@@ -162,19 +179,25 @@ const AddSponsorFormTemplatePopup = ({
     },
     {
       columnKey: "code",
-      header: T.translate("edit_sponsor.forms_tab.code"),
+      header: T.translate("edit_sponsor.pages_tab.code"),
       sortable: false
     },
     {
       columnKey: "name",
-      header: T.translate("edit_sponsor.forms_tab.name"),
+      header: T.translate("edit_sponsor.pages_tab.name"),
       sortable: false
     },
-
     {
-      columnKey: "items_qty",
-      header: T.translate("edit_sponsor.forms_tab.items"),
-      sortable: false
+      columnKey: "info_mod",
+      header: T.translate("edit_sponsor.pages_tab.info_mod")
+    },
+    {
+      columnKey: "upload_mod",
+      header: T.translate("edit_sponsor.pages_tab.upload_mod")
+    },
+    {
+      columnKey: "download_mod",
+      header: T.translate("edit_sponsor.pages_tab.download_mod")
     }
   ];
 
@@ -182,7 +205,7 @@ const AddSponsorFormTemplatePopup = ({
     <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
-          {T.translate("edit_sponsor.forms_tab.add_form_using_template")}
+          {T.translate("edit_sponsor.pages_tab.add_page_using_template")}
         </Typography>
         <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
@@ -207,6 +230,9 @@ const AddSponsorFormTemplatePopup = ({
                 showSelectAll
                 getGroupId={(addon) => addon.sponsorship.type.id}
                 getGroupLabel={(addon) => addon.sponsorship.type.type.name}
+                noOptionsLabel={T.translate(
+                  "edit_sponsor.pages_tab.no_add_ons"
+                )}
                 placeholder={T.translate(
                   "edit_sponsor.placeholders.select_add_ons"
                 )}
@@ -219,7 +245,10 @@ const AddSponsorFormTemplatePopup = ({
                 size={6}
                 sx={{ alignItems: "baseline" }}
               >
-                <Grid2 size={4}>{selectedForms.length} items selected</Grid2>
+                <Grid2 size={4}>
+                  {selectedPages.length}{" "}
+                  {T.translate("edit_sponsor.pages_tab.items_selected")}
+                </Grid2>
               </Grid2>
               <Grid2 container spacing={2} size={6}>
                 <Grid2 size={4}>
@@ -266,11 +295,11 @@ const AddSponsorFormTemplatePopup = ({
               </Grid2>
             </Grid2>
 
-            {sponsorForms.length > 0 && (
+            {showPages.length > 0 && (
               <Box sx={{ p: 2 }}>
                 <MuiTable
                   columns={columns}
-                  data={sponsorForms}
+                  data={showPages}
                   options={tableOptions}
                   currentPage={currentPage}
                   perPage={perPage}
@@ -280,16 +309,21 @@ const AddSponsorFormTemplatePopup = ({
                 />
               </Box>
             )}
+            {showPages.length === 0 && (
+              <Box sx={{ p: 2 }}>
+                {T.translate("edit_sponsor.pages_tab.no_pages")}
+              </Box>
+            )}
           </DialogContent>
           <Divider />
           <DialogActions>
             <Button
               type="submit"
-              disabled={selectedForms.length === 0}
+              disabled={selectedPages.length === 0}
               fullWidth
               variant="contained"
             >
-              {T.translate("edit_sponsor.forms_tab.add_selected_form_template")}
+              {T.translate("edit_sponsor.pages_tab.add_selected_page_template")}
             </Button>
           </DialogActions>
         </Box>
@@ -298,14 +332,14 @@ const AddSponsorFormTemplatePopup = ({
   );
 };
 
-AddSponsorFormTemplatePopup.propTypes = {
+AddSponsorPageTemplatePopup.propTypes = {
   onClose: PropTypes.func.isRequired
 };
 
-const mapStateToProps = ({ sponsorFormsListState }) => ({
-  ...sponsorFormsListState
+const mapStateToProps = ({ showPagesListState }) => ({
+  ...showPagesListState
 });
 
 export default connect(mapStateToProps, {
-  getSponsorForms
-})(AddSponsorFormTemplatePopup);
+  getShowPages
+})(AddSponsorPageTemplatePopup);

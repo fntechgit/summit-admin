@@ -3,7 +3,7 @@
     "user_not_authz": "Hold on. Your user is not authorized!.",
     "user_not_set": "Hold on. Can not get any valid user.",
     "session_expired": "Hold on. Your session expired!.",
-    "empty_list": "there not are any item that match your criteria.",
+    "empty_list": "there not are any {item} that match your criteria.",
     "server_error": "There was a problem with our server, please contact admin.",
     "empty_list_schedule_events": "Please select a Day and a Location ...",
     "not_allowed": "You are not allowed here, please login with another user to access this page.",
@@ -75,6 +75,9 @@
     "error": "Error!",
     "unarchive": "Unarchive",
     "archive": "Archive",
+    "sort_by": "Sort By",
+    "sort_asc_label": "A-Z",
+    "sort_desc_label": "Z-A",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
@@ -95,7 +98,8 @@
     "date": "Wrong date format.",
     "after": "'{field1}' must be after '{field2}'.",
     "boolean": "Must be a boolean.",
-    "mib_aligned": "Must be a MiB aligned value"
+    "mib_aligned": "Must be a MiB aligned value",
+    "add_on_required": "Select at least one add-on"
   },
   "landing": {
     "os_summit_admin": "Show Admin",
@@ -2476,7 +2480,12 @@
       "upload_mod": "Upload Mod",
       "download_mod": "Download Mod",
       "archive": "Archive",
-      "unarchive": "Unarchive"
+      "unarchive": "Unarchive",
+      "items_selected": "items selected",
+      "no_add_ons": "No Add-ons Available",
+      "no_pages": "There is no pages that match the criteria",
+      "add_page_using_template": "Add Page Template",
+      "add_selected_page_template": "Add Selected Page Template"
     },
     "cart_tab": {
       "new_form": "New Form",

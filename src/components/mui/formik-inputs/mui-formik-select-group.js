@@ -44,6 +44,7 @@ const MuiFormikSelectGroup = ({
   selectAllLabel = "Select All",
   getOptionLabel = (item) => item.name,
   getOptionValue = (item) => item.id,
+  noOptionsLabel = "No items",
   getGroupId = null,
   getGroupLabel = null,
   disabled = false
@@ -213,6 +214,79 @@ const MuiFormikSelectGroup = ({
       .flat()
       .filter(Boolean);
 
+  const renderMenuContent = () => {
+    if (loading) {
+      return (
+        <MenuItem disabled>
+          <CircularProgress size={20} />
+        </MenuItem>
+      );
+    }
+
+    if (options.length === 0) {
+      return (
+        <MenuItem disabled>
+          <ListItemText
+            primary={noOptionsLabel}
+            slotProps={{
+              primary: {
+                sx: {
+                  fontSize: "16px",
+                  color: "#00000061"
+                }
+              }
+            }}
+          />
+        </MenuItem>
+      );
+    }
+
+    return (
+      <>
+        {showSelectAll && (
+          <>
+            <MenuItem
+              value="selectAll"
+              sx={{
+                backgroundColor: "#fafafa",
+                "&:hover": {
+                  backgroundColor: "#f0f0f0"
+                }
+              }}
+              onClick={() => {
+                // custom event value to select all
+                handleChange({ target: { value: ["selectAll"] } });
+              }}
+            >
+              <Checkbox
+                checked={isAllSelected}
+                indeterminate={selectedValues.length > 0 && !isAllSelected}
+                sx={{
+                  p: 1,
+                  "& svg": {
+                    fontSize: 24
+                  }
+                }}
+              />
+              <ListItemText
+                primary={selectAllLabel}
+                slotProps={{
+                  primary: {
+                    sx: {
+                      fontSize: "16px"
+                    }
+                  }
+                }}
+              />
+            </MenuItem>
+            <Divider />
+          </>
+        )}
+        {renderGroupedOptions()}
+      </>
+    );
+  };
+
   const IconWithLoading = useMemo(() => getCustomIcon(loading), [loading]);
 
   return (
@@ -243,54 +317,7 @@ const MuiFormikSelectGroup = ({
         error={Boolean(error)}
         IconComponent={IconWithLoading}
       >
-        {loading ? (
-          <MenuItem disabled>
-            <CircularProgress size={20} />
-          </MenuItem>
-        ) : (
-          <>
-            {showSelectAll && options.length > 0 && (
-              <>
-                <MenuItem
-                  value="selectAll"
-                  sx={{
-                    backgroundColor: "#fafafa",
-                    "&:hover": {
-                      backgroundColor: "#f0f0f0"
-                    }
-                  }}
-                  onClick={() => {
-                    // custom event value to select all
-                    handleChange({ target: { value: ["selectAll"] } });
-                  }}
-                >
-                  <Checkbox
-                    checked={isAllSelected}
-                    indeterminate={selectedValues.length > 0 && !isAllSelected}
-                    sx={{
-                      p: 1,
-                      "& svg": {
-                        fontSize: 24
-                      }
-                    }}
-                  />
-                  <ListItemText
-                    primary={selectAllLabel}
-                    slotProps={{
-                      primary: {
-                        sx: {
-                          fontSize: "16px"
-                        }
-                      }
-                    }}
-                  />
-                </MenuItem>
-                <Divider />
-              </>
-            )}
-            {renderGroupedOptions()}
-          </>
-        )}
+        {renderMenuContent()}
       </Select>
       {error && (
         <div
@@ -318,6 +345,7 @@ MuiFormikSelectGroup.propTypes = {
   getOptionValue: PropTypes.func,
   getGroupId: PropTypes.func,
   getGroupLabel: PropTypes.func,
+  noOptionsLabel: PropTypes.string,
   disabled: PropTypes.bool
 };
 
