@@ -1,6 +1,5 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -23,9 +22,14 @@ import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-for
 import PageModules from "./page-template-modules-form";
 import {
   BYTES_PER_MB,
+  COLUMN_4,
+  COLUMN_8,
   PAGES_MODULE_KINDS,
   PAGE_MODULES_MEDIA_TYPES
 } from "../../../../utils/constants";
+import DropdownCheckbox from "../../../../components/mui/dropdown-checkbox";
+import MuiFormikSelectGroup from "../../../../components/mui/formik-inputs/mui-formik-select-group";
+import { querySponsorAddons } from "../../../../actions/sponsor-actions";
 
 const normalizeModules = (modules = [], summitTZ = "UTC") =>
   modules.map((m) => {
@@ -50,11 +54,19 @@ const normalizeModules = (modules = [], summitTZ = "UTC") =>
 
 const PageTemplatePopup = ({
   pageTemplate,
-  open,
   onClose,
   onSave,
-  summitTZ
+  summitTZ,
+  sponsorships,
+  summitId,
+  sponsorId,
+  sponsorshipIds
 }) => {
+  const showSponsorships =
+    Array.isArray(sponsorships) && sponsorships.length > 0;
+
+  const showAllowedAddons = summitId && sponsorId && sponsorshipIds?.length > 0;
+
   const handleClose = () => {
     onClose();
   };
@@ -171,7 +183,7 @@ const PageTemplatePopup = ({
   });
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("page_template_list.page_crud.title")}
@@ -197,13 +209,46 @@ const PageTemplatePopup = ({
                   fullWidth
                 />
               </Grid2>
-              <Grid2 spacing={2} size={8}>
+              <Grid2
+                spacing={2}
+                size={
+                  showSponsorships || showAllowedAddons ? COLUMN_4 : COLUMN_8
+                }
+              >
                 <MuiFormikTextField
                   name="name"
                   label={T.translate("page_template_list.name")}
                   fullWidth
                 />
               </Grid2>
+              {showSponsorships && (
+                <Grid2 spacing={2} size={4}>
+                  <DropdownCheckbox
+                    name="sponsorship_types"
+                    label={T.translate("page_template_list.sponsorship")}
+                    allLabel={T.translate("page_template_list.all_tiers")}
+                    value={formik.values.sponsorship_types}
+                    options={sponsorships}
+                    onChange={formik.handleChange}
+                  />
+                </Grid2>
+              )}
+              {showAllowedAddons && (
+                <Grid2 spacing={2} size={4} sx={{ py: 2 }}>
+                  <MuiFormikSelectGroup
+                    name="allowed_add_ons"
+                    queryFunction={querySponsorAddons}
+                    // params for function, except input
+                    queryParams={[summitId, sponsorId, sponsorshipIds]}
+                    showSelectAll
+                    getGroupId={(addon) => addon.sponsorship.type.id}
+                    getGroupLabel={(addon) => addon.sponsorship.type.type.name}
+                    placeholder={T.translate(
+                      "edit_sponsor.placeholders.select_add_ons"
+                    )}
+                  />
+                </Grid2>
+              )}
             </Grid2>
             <Divider gutterBottom />
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
@@ -256,14 +301,13 @@ const PageTemplatePopup = ({
 };
 
 PageTemplatePopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  summitTZ: PropTypes.string.isRequired
+  summitTZ: PropTypes.string,
+  sponsorships: PropTypes.array,
+  sponsorshipIds: PropTypes.array,
+  summitId: PropTypes.number,
+  sponsorId: PropTypes.number
 };
 
-const mapStateToProps = ({ currentPageTemplateState }) => ({
-  ...currentPageTemplateState
-});
-
-export default connect(mapStateToProps, {})(PageTemplatePopup);
+export default PageTemplatePopup;
