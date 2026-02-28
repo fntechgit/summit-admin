@@ -31,7 +31,7 @@ const DEFAULT_PAGE = {
   modules: []
 };
 
-const DEFAULT_STATE = {
+export const DEFAULT_STATE = {
   managedPages: {
     pages: [],
     order: "name",
