@@ -48,6 +48,7 @@ const MuiTable = ({
   onEdit,
   onArchive,
   onDelete,
+  canDelete = () => true,
   deleteDialogTitle = null,
   deleteDialogBody = null,
   deleteDialogConfirmText = null,
@@ -236,12 +237,14 @@ const MuiTable = ({
                       className={styles.dottedBorderLeft}
                       sx={getCellSx(row, { width: 40 })}
                     >
-                      <IconButton
-                        size="large"
-                        onClick={() => handleDelete(row)}
-                      >
-                        <DeleteIcon fontSize="large" />
-                      </IconButton>
+                      {canDelete(row) && (
+                        <IconButton
+                          size="large"
+                          onClick={() => handleDelete(row)}
+                        >
+                          <DeleteIcon fontSize="large" />
+                        </IconButton>
+                      )}
                     </TableCell>
                   )}
                 </TableRow>
