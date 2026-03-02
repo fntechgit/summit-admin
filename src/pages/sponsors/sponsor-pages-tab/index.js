@@ -25,12 +25,16 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import {
   getSponsorManagedPages,
-  getSponsorCustomizedPages
+  getSponsorCustomizedPages,
+  deleteSponsorManagedPage
 } from "../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
-import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  SPONSOR_MANAGED_PAGE_ASSIGNMENT
+} from "../../../utils/constants";
 
 const SponsorPagesTab = ({
   term,
@@ -38,7 +42,8 @@ const SponsorPagesTab = ({
   managedPages,
   customizedPages,
   getSponsorManagedPages,
-  getSponsorCustomizedPages
+  getSponsorCustomizedPages,
+  deleteSponsorManagedPage
 }) => {
   useEffect(() => {
     getSponsorManagedPages();
@@ -151,6 +156,17 @@ const SponsorPagesTab = ({
   };
 
   const handleManagedDelete = (itemId) => {
+    deleteSponsorManagedPage(itemId).then(() => {
+      const { perPage, order, orderDir } = managedPages;
+      getSponsorManagedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
+    });
     console.log("DELETE MANAGED ", itemId);
   };
 
@@ -333,6 +349,9 @@ const SponsorPagesTab = ({
           onSort={handleManagedSort}
           onEdit={handleManagedEdit}
           onDelete={handleManagedDelete}
+          canDelete={(row) =>
+            row.assigned_type === SPONSOR_MANAGED_PAGE_ASSIGNMENT.EXPLICIT
+          }
           onArchive={handleArchiveManagedPage}
         />
       </div>
@@ -346,5 +365,6 @@ const mapStateToProps = ({ sponsorPagePagesListState }) => ({
 
 export default connect(mapStateToProps, {
   getSponsorManagedPages,
-  getSponsorCustomizedPages
+  getSponsorCustomizedPages,
+  deleteSponsorManagedPage
 })(SponsorPagesTab);

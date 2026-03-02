@@ -15,6 +15,7 @@ import {
   createAction,
   getRequest,
   postRequest,
+  deleteRequest,
   startLoading,
   stopLoading,
   authErrorHandler,
@@ -23,12 +24,17 @@ import {
 import T from "i18n-react/dist/i18n-react";
 import { getAccessTokenSafely } from "../utils/methods";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
-import { DEFAULT_CURRENT_PAGE, DEFAULT_ORDER_DIR, DEFAULT_PER_PAGE } from "../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE
+} from "../utils/constants";
 
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
 
 export const REQUEST_SPONSOR_MANAGED_PAGES = "REQUEST_SPONSOR_MANAGED_PAGES";
 export const RECEIVE_SPONSOR_MANAGED_PAGES = "RECEIVE_SPONSOR_MANAGED_PAGES";
+export const SPONSOR_MANAGED_PAGE_DELETED = "SPONSOR_MANAGED_PAGE_DELETED";
 
 export const REQUEST_SPONSOR_CUSTOMIZED_PAGES =
   "REQUEST_SPONSOR_CUSTOMIZED_PAGES";
@@ -107,7 +113,7 @@ export const getSponsorManagedPages =
 
     const params = {
       page,
-      fields: "id,code,name,kind,modules_count,allowed_add_ons",
+      fields: "id,code,name,kind,modules_count,allowed_add_ons,assigned_type",
       per_page: perPage,
       access_token: accessToken
     };
@@ -133,6 +139,35 @@ export const getSponsorManagedPages =
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
+  };
+
+export const deleteSponsorManagedPage =
+  (pageId) => async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_MANAGED_PAGE_DELETED)({ pageId }),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/managed-pages/${pageId}`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("show_pages.page_delete_success")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 /* ************************************************************************ */
