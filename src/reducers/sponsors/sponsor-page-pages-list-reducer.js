@@ -18,7 +18,9 @@ import {
   RECEIVE_SPONSOR_CUSTOMIZED_PAGES,
   REQUEST_SPONSOR_CUSTOMIZED_PAGES,
   RECEIVE_SPONSOR_CUSTOMIZED_PAGE,
-  RESET_EDIT_PAGE
+  RESET_EDIT_PAGE,
+  SPONSOR_CUSTOMIZED_PAGE_ARCHIVED,
+  SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
@@ -172,6 +174,32 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_SPONSOR_CUSTOMIZED_PAGE: {
       const customizedPage = payload.response;
       return { ...state, currentEditPage: customizedPage };
+    }
+    case SPONSOR_CUSTOMIZED_PAGE_ARCHIVED: {
+      const { pageId } = payload;
+      const pages = state.customizedPages.pages.map((page) =>
+        page.id === pageId ? { ...page, is_archived: true } : page
+      );
+      return {
+        ...state,
+        customizedPages: {
+          ...state.customizedPages,
+          pages: [...pages]
+        }
+      };
+    }
+    case SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED: {
+      const { pageId } = payload;
+      const pages = state.customizedPages.pages.map((page) =>
+        page.id === pageId ? { ...page, is_archived: false } : page
+      );
+      return {
+        ...state,
+        customizedPages: {
+          ...state.customizedPages,
+          pages: [...pages]
+        }
+      };
     }
     case RESET_EDIT_PAGE: {
       return { ...state, currentEditPage: DEFAULT_PAGE };

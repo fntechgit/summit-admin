@@ -2487,7 +2487,9 @@
       "add_page_using_template": "Add Page Template",
       "add_selected_page_template": "Add Selected Page Template",
       "custom_page_saved": "Custom Sponsor Page saved",
-      "custom_page_created": "Custom Sponsor Page created"
+      "custom_page_created": "Custom Sponsor Page created",
+      "customized_page_archived": "Customized Sponsor Page successfully archived.",
+      "customized_page_unarchived": "Customized Sponsor Page successfully unarchived."
     },
     "cart_tab": {
       "new_form": "New Form",

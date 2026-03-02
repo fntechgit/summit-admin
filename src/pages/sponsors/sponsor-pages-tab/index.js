@@ -29,7 +29,9 @@ import {
   saveSponsorManagedPage,
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
-  resetSponsorPage
+  resetSponsorPage,
+  unarchiveCustomizedPage,
+  archiveCustomizedPage
 } from "../../../actions/sponsor-pages-actions";
 import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
@@ -53,6 +55,8 @@ const SponsorPagesTab = ({
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
+  unarchiveCustomizedPage,
+  archiveCustomizedPage,
   resetSponsorPage
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
@@ -166,7 +170,9 @@ const SponsorPagesTab = ({
   };
 
   const handleArchiveCustomizedPage = (item) =>
-    console.log("ARCHIVE CUSTOMIZED ", item);
+    item.is_archived
+      ? unarchiveCustomizedPage(item.id)
+      : archiveCustomizedPage(item.id);
 
   const handleArchiveManagedPage = (item) =>
     console.log("ARCHIVE MANAGED ", item);
@@ -217,7 +223,8 @@ const SponsorPagesTab = ({
           order,
           orderDir
         );
-      }).finally(() => setOpenPopup(null));
+      })
+      .finally(() => setOpenPopup(null));
   };
 
   const handleSaveCustomizedPage = (entity) => {
@@ -231,7 +238,8 @@ const SponsorPagesTab = ({
           order,
           orderDir
         );
-      }).finally(() => setOpenPopup(null));;
+      })
+      .finally(() => setOpenPopup(null));
   };
 
   const handleClosePagePopup = () => {
@@ -433,6 +441,8 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedPage,
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
+  unarchiveCustomizedPage,
+  archiveCustomizedPage,
   getSponsorships,
   resetSponsorPage
 })(SponsorPagesTab);
