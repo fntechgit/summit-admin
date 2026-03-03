@@ -92,12 +92,12 @@ const SponsorMediaUploadTab = ({
   };
 
   const handleGeneralPageChange = (page) => {
-    const { perPage, order, orderDir } = sponsorRequests;
+    const { perPage, order, orderDir } = generalRequests;
     getGeneralMURequests(page, perPage, order, orderDir);
   };
 
   const handleGeneralSort = (key, dir) => {
-    const { currentPage, perPage } = sponsorRequests;
+    const { currentPage, perPage } = generalRequests;
     getGeneralMURequests(currentPage, perPage, key, dir);
   };
 

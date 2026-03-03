@@ -100,16 +100,12 @@ const UploadDialog = ({
     }
   };
 
-  const canAddMore = () => (value?.length || 0) < maxFiles;
+  const handleClose = () => {
+    setUploadedFile(null);
+    onClose();
+  };
 
-  const getInputValue = () =>
-    value?.length > 0
-      ? value.map((file) => ({
-          ...file,
-          filename:
-            file.file_name ?? file.filename ?? file.file_path ?? file.file_url
-        }))
-      : [];
+  const canAddMore = () => (value?.length || 0) < maxFiles;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -118,7 +114,7 @@ const UploadDialog = ({
       </DialogTitle>
       <IconButton
         aria-label="close"
-        onClick={onClose}
+        onClick={handleClose}
         sx={(theme) => ({
           position: "absolute",
           right: 8,
@@ -146,7 +142,7 @@ const UploadDialog = ({
             id={`media_upload_${name}`}
             name={name}
             onUploadComplete={setUploadedFile}
-            value={getInputValue()}
+            value={[]} // we handle with-value view in other way
             mediaType={mediaType}
             onRemove={() => setUploadedFile(null)}
             postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}

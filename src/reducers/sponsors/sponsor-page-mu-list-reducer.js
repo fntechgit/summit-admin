@@ -78,7 +78,7 @@ const mapMediaObject = (mediaObject, summitTZ) => {
 
   return {
     ...mediaObject,
-    add_on: mediaObject.add_ons.map((a) => a.name).join(", "),
+    add_on: mediaObject.add_ons?.map((a) => a.name).join(", ") || "N/A",
     max_size: `${bytesToMb(mediaObject.max_file_size)} MB`,
     format: mediaObject.file_type?.allowed_extensions || "N/A",
     deadline,
@@ -95,7 +95,7 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_MEDIA_UPLOADS: {
-      const { order, orderDir, page, summitTZ } = payload;
+      const { order, orderDir, currentPage, perPage, summitTZ } = payload;
 
       return {
         ...state,
@@ -104,7 +104,8 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
           order,
           orderDir,
           requests: [],
-          currentPage: page
+          currentPage,
+          perPage
         },
         summitTZ
       };
@@ -132,7 +133,7 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case REQUEST_GENERAL_MEDIA_UPLOADS: {
-      const { order, orderDir, page, summitTZ } = payload;
+      const { order, orderDir, currentPage, perPage, summitTZ } = payload;
 
       return {
         ...state,
@@ -141,7 +142,8 @@ const sponsorPageMUListReducer = (state = DEFAULT_STATE, action) => {
           order,
           orderDir,
           requests: [],
-          currentPage: page
+          currentPage,
+          perPage
         },
         summitTZ
       };
