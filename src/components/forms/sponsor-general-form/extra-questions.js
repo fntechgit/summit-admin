@@ -93,11 +93,9 @@ const SponsorExtraQuestions = ({
       saveSponsorExtraQuestionValue(extraQuestionToSave.id, value)
     );
 
-    Promise.all(saveValuePromises).then(() => {
-      saveSponsorExtraQuestion(extraQuestionToSave).then(() =>
-        handleCloseExtraQuestionPopup()
-      );
-    });
+    Promise.all(saveValuePromises)
+      .then(() => saveSponsorExtraQuestion(extraQuestionToSave))
+      .then(() => handleCloseExtraQuestionPopup());
   };
 
   const columns = [
