@@ -569,6 +569,7 @@ describe("FormItemTable Component", () => {
           form_item_id: 10,
           code: "TEST",
           name: "Test Item",
+          quantity: 0,
           rates: {
             early_bird: 10000,
             standard: 12000,
