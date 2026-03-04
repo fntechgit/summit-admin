@@ -254,8 +254,13 @@ export const PAGES_MODULE_KINDS = {
 };
 
 export const PAGE_MODULES_MEDIA_TYPES = {
-  FILE: "file",
-  TEXT: "text"
+  FILE: "File",
+  INPUT: "Input"
+};
+
+export const PAGE_MODULES_DOWNLOAD = {
+  FILE: "File",
+  URL: "Url"
 };
 
 export const PURCHASE_STATUS = {
@@ -268,3 +273,15 @@ export const SPONSOR_USER_ASSIGNMENT_TYPE = {
   EXISTING: "existing",
   NEW: "new"
 };
+
+export const SPONSOR_MEDIA_UPLOAD_STATUS = {
+  PENDING: "PENDING",
+  DEADLINE_ALERT: "DEADLINE ALERT",
+  DEADLINE_MISSED: "DEADLINE MISSED",
+  COMPLETE: "COMPLETE"
+};
+
+// eslint-disable-next-line no-magic-numbers
+export const BYTES_IN_MEGABYTE = 1024 * 1024;
+
+export const DEADLINE_ALERT_DAYS = 3;

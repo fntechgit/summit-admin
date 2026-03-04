@@ -21,10 +21,12 @@ import * as yup from "yup";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import PageModules from "./page-template-modules-form";
+import { resetPageTemplateForm } from "../../../../actions/page-template-actions";
 import {
   BYTES_PER_MB,
   PAGES_MODULE_KINDS,
-  PAGE_MODULES_MEDIA_TYPES
+  PAGE_MODULES_MEDIA_TYPES,
+  PAGE_MODULES_DOWNLOAD
 } from "../../../../utils/constants";
 
 const normalizeModules = (modules = [], summitTZ = "UTC") =>
@@ -53,9 +55,11 @@ const PageTemplatePopup = ({
   open,
   onClose,
   onSave,
-  summitTZ
+  summitTZ,
+  resetPageTemplateForm
 }) => {
   const handleClose = () => {
+    resetPageTemplateForm();
     onClose();
   };
 
@@ -107,8 +111,16 @@ const PageTemplatePopup = ({
     kind: yup.string().equals([PAGES_MODULE_KINDS.DOCUMENT]),
     name: yup.string().required(T.translate("validation.required")),
     description: yup.string().required(T.translate("validation.required")),
-    external_url: yup.string(),
-    file: yup.array().min(1, T.translate("validation.file_required"))
+    external_url: yup.string().when("type", {
+      is: PAGE_MODULES_DOWNLOAD.URL,
+      then: (schema) => schema.required(T.translate("validation.required")),
+      otherwise: (schema) => schema.nullable()
+    }),
+    file: yup.array().when("type", {
+      is: PAGE_MODULES_DOWNLOAD.FILE,
+      then: (schema) => schema.min(1, T.translate("validation.file_required")),
+      otherwise: (schema) => schema.nullable()
+    })
   });
 
   const mediaModuleSchema = yup.object().shape({
@@ -130,7 +142,7 @@ const PageTemplatePopup = ({
           ),
       otherwise: (schema) => schema.nullable()
     }),
-    file_type_id: yup.object().when("type", {
+    file_type_id: yup.number().when("type", {
       is: PAGE_MODULES_MEDIA_TYPES.FILE,
       then: (schema) => schema.required(T.translate("validation.required")),
       otherwise: (schema) => schema.nullable()
@@ -166,6 +178,7 @@ const PageTemplatePopup = ({
         ...m,
         custom_order: idx
       }));
+
       onSave({ ...values, modules: modulesWithOrder });
     }
   });
@@ -190,14 +203,14 @@ const PageTemplatePopup = ({
         >
           <DialogContent sx={{ p: 0 }}>
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2 spacing={2} size={4}>
+              <Grid2 size={4}>
                 <MuiFormikTextField
                   name="code"
                   label={T.translate("page_template_list.code")}
                   fullWidth
                 />
               </Grid2>
-              <Grid2 spacing={2} size={8}>
+              <Grid2 size={8}>
                 <MuiFormikTextField
                   name="name"
                   label={T.translate("page_template_list.name")}
@@ -205,9 +218,9 @@ const PageTemplatePopup = ({
                 />
               </Grid2>
             </Grid2>
-            <Divider gutterBottom />
+            <Divider sx={{ mb: 2 }} />
             <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
-              <Grid2 spacing={2} size={4}>
+              <Grid2 size={4}>
                 <Button
                   variant="contained"
                   fullWidth
@@ -217,7 +230,7 @@ const PageTemplatePopup = ({
                   {T.translate("page_template_list.page_crud.add_info")}
                 </Button>
               </Grid2>
-              <Grid2 spacing={2} size={4}>
+              <Grid2 size={4}>
                 <Button
                   variant="contained"
                   fullWidth
@@ -227,7 +240,7 @@ const PageTemplatePopup = ({
                   {T.translate("page_template_list.page_crud.add_doc")}
                 </Button>
               </Grid2>
-              <Grid2 spacing={2} size={4}>
+              <Grid2 size={4}>
                 <Button
                   variant="contained"
                   fullWidth
@@ -238,7 +251,7 @@ const PageTemplatePopup = ({
                 </Button>
               </Grid2>
             </Grid2>
-            <Divider gutterBottom />
+            <Divider sx={{ mb: 2 }} />
             <Box sx={{ py: 2 }}>
               <PageModules name="modules" />
             </Box>
@@ -262,8 +275,10 @@ PageTemplatePopup.propTypes = {
   summitTZ: PropTypes.string.isRequired
 };
 
-const mapStateToProps = ({ currentPageTemplateState }) => ({
-  ...currentPageTemplateState
+const mapStateToProps = ({ pageTemplateState }) => ({
+  pageTemplate: pageTemplateState.entity
 });
 
-export default connect(mapStateToProps, {})(PageTemplatePopup);
+export default connect(mapStateToProps, {
+  resetPageTemplateForm
+})(PageTemplatePopup);

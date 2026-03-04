@@ -12,7 +12,7 @@ import {
 const MuiFormikUpload = ({
   id,
   name,
-  onImageDeleted,
+  onDelete,
   maxFiles = MAX_INVENTORY_IMAGES_UPLOAD_QTY
 }) => {
   const [field, meta, helpers] = useField(name);
@@ -41,6 +41,7 @@ const MuiFormikUpload = ({
     if (response.md5) file.md5 = response.md5;
     if (response.mime_type) file.mime_type = response.mime_type;
     if (response.source_bucket) file.bucket = response.source_bucket;
+    if (response.size) file.size = response.size;
     if (response.path && response.name)
       file.file_path = `${response.path}${response.name}`;
     return file;
@@ -59,8 +60,8 @@ const MuiFormikUpload = ({
       (i) => i.filename !== imageFile.name
     );
     helpers.setValue(updated);
-    if (onImageDeleted) {
-      onImageDeleted(imageFile.id);
+    if (onDelete) {
+      onDelete(imageFile.id);
     }
   };
 
@@ -91,7 +92,7 @@ const MuiFormikUpload = ({
 MuiFormikUpload.propTypes = {
   id: PropTypes.string,
   name: PropTypes.string.isRequired,
-  onImageDeleted: PropTypes.func,
+  onDelete: PropTypes.func,
   maxFiles: PropTypes.number
 };
 

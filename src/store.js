@@ -159,6 +159,7 @@ import formTemplateListReducer from "./reducers/sponsors_inventory/form-template
 import formTemplateItemReducer from "./reducers/sponsors_inventory/form-template-item-reducer.js";
 import formTemplateItemListReducer from "./reducers/sponsors_inventory/form-template-item-list-reducer.js";
 import pageTemplateListReducer from "./reducers/sponsors_inventory/page-template-list-reducer.js";
+import pageTemplateReducer from "./reducers/sponsors_inventory/page-template-reducer.js";
 import sponsorSettingsReducer from "./reducers/sponsor_settings/sponsor-settings-reducer";
 import eventRSVPListReducer from "./reducers/rsvps/event-rsvp-list-reducer.js";
 import eventRSVPInvitationListReducer from "./reducers/rsvps/event-rsvp-invitation-list-reducer.js";
@@ -170,6 +171,7 @@ import sponsorCustomizedFormItemsListReducer from "./reducers/sponsors/sponsor-c
 import showPagesListReducer from "./reducers/sponsors/show-pages-list-reducer.js";
 import sponsorPagePurchaseListReducer from "./reducers/sponsors/sponsor-page-purchase-list-reducer.js";
 import sponsorPagePagesListReducer from "./reducers/sponsors/sponsor-page-pages-list-reducer.js";
+import sponsorPageMUListReducer from "./reducers/sponsors/sponsor-page-mu-list-reducer.js";
 
 // default: localStorage if web, AsyncStorage if react-native
 
@@ -258,6 +260,7 @@ const reducers = persistCombineReducers(config, {
   sponsorPageFormsListState: sponsorPageFormsListReducer,
   sponsorPageCartListState: sponsorPageCartListReducer,
   sponsorPagePagesListState: sponsorPagePagesListReducer,
+  sponsorPageMUListState: sponsorPageMUListReducer,
   sponsorCustomizedFormState: sponsorCustomizedFormReducer,
   sponsorCustomizedFormItemsListState: sponsorCustomizedFormItemsListReducer,
   sponsorPagePurchaseListState: sponsorPagePurchaseListReducer,
@@ -334,7 +337,8 @@ const reducers = persistCombineReducers(config, {
   currentFormTemplateItemState: formTemplateItemReducer,
   currentFormTemplateItemListState: formTemplateItemListReducer,
   sponsorSettingsState: sponsorSettingsReducer,
-  pageTemplateListState: pageTemplateListReducer
+  pageTemplateListState: pageTemplateListReducer,
+  pageTemplateState: pageTemplateReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
