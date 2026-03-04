@@ -247,18 +247,19 @@ const ShowPagesListPage = ({
           />
         </div>
       )}
-
-      <GlobalPagePopup
-        open={openPopup === "cloneTemplate"}
-        onClose={() => setOpenPopup(null)}
-      />
-      <PageTemplatePopup
-        open={openPopup === "pageTemplate"}
-        pageTemplate={currentShowPage}
-        onClose={handleTemplatePopupClose}
-        onSave={handleSaveShowPage}
-        sponsorships={sponsorships}
-      />
+      {openPopup === "cloneTemplate" &&
+        <GlobalPagePopup
+          onClose={() => setOpenPopup(null)}
+        />
+      }
+      {openPopup === "pageTemplate" &&
+        <PageTemplatePopup
+          pageTemplate={currentShowPage}
+          onClose={handleTemplatePopupClose}
+          onSave={handleSaveShowPage}
+          sponsorships={sponsorships}
+        />
+      }
     </div>
   );
 };

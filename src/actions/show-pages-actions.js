@@ -115,6 +115,7 @@ export const getShowPage = (pageId) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand: "modules"
+    // expand: "modules,modules.file_type,sponsorship_types"
   };
 
   return getRequest(
@@ -132,7 +133,7 @@ const normalizeShowPage = (entity) => {
 
   normalizedEntity.apply_to_all_types = false;
 
-  if (entity.sponsorship_types.includes("all")) {
+  if (entity.sponsorship_types?.includes("all")) {
     normalizedEntity.apply_to_all_types = true;
     delete normalizedEntity.sponsorship_types;
   }
