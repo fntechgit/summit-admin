@@ -44,7 +44,9 @@ const MuiTable = ({
   onArchive,
   onDelete,
   deleteDialogTitle = null,
-  deleteDialogBody = null
+  deleteDialogBody = null,
+  deleteDialogConfirmText = null,
+  confirmButtonColor = null
 }) => {
   const handleChangePage = (_, newPage) => {
     onPageChange(newPage + 1);
@@ -83,8 +85,9 @@ const MuiTable = ({
             `${T.translate("general.row_remove_warning")} ${getName(item)}`,
       type: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
+      confirmButtonColor: confirmButtonColor || "#DD6B55",
+      confirmButtonText:
+        deleteDialogConfirmText || T.translate("general.yes_delete")
     });
 
     if (isConfirmed) {
