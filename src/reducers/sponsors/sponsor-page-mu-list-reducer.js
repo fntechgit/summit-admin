@@ -54,15 +54,17 @@ const DEFAULT_STATE = {
 const getStatus = (mediaObject) => {
   let status = SPONSOR_MEDIA_UPLOAD_STATUS.COMPLETE;
   if (!mediaObject.media_upload) {
-    if (mediaObject.upload_deadline < moment().unix()) {
-      status = SPONSOR_MEDIA_UPLOAD_STATUS.DEADLINE_MISSED;
-    } else if (
-      mediaObject.upload_deadline <
-      moment().add(DEADLINE_ALERT_DAYS, "days").unix()
-    ) {
-      status = SPONSOR_MEDIA_UPLOAD_STATUS.DEADLINE_ALERT;
-    } else {
-      status = SPONSOR_MEDIA_UPLOAD_STATUS.PENDING;
+    status = SPONSOR_MEDIA_UPLOAD_STATUS.PENDING;
+
+    if (mediaObject.upload_deadline) {
+      if (mediaObject.upload_deadline < moment().unix()) {
+        status = SPONSOR_MEDIA_UPLOAD_STATUS.DEADLINE_MISSED;
+      } else if (
+        mediaObject.upload_deadline <
+        moment().add(DEADLINE_ALERT_DAYS, "days").unix()
+      ) {
+        status = SPONSOR_MEDIA_UPLOAD_STATUS.DEADLINE_ALERT;
+      }
     }
   }
 

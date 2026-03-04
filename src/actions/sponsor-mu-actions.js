@@ -54,8 +54,10 @@ export const getSponsorMURequests =
 
     const params = {
       page: currentPage,
-      // fields: "id,name,max_file_size,media_upload,file_type",
-      // relations: "media_upload,file_type",
+      fields:
+        "id,name,max_file_size,deadline,media_upload,file_type.id,file_type.allowed_extensions,add_ons.id,add_ons.name",
+      relations: "media_upload,file_type,add_ons",
+      expand: "media_upload,file_type,add_ons",
       per_page: perPage,
       access_token: accessToken
     };
@@ -95,8 +97,10 @@ export const getGeneralMURequests =
 
     const params = {
       page: currentPage,
-      // fields: "id,name,max_file_size,media_upload,file_type",
-      expand: "media_upload,file_type",
+      fields:
+        "id,name,max_file_size,deadline,media_upload,file_type.id,file_type.allowed_extensions,add_ons.id,add_ons.name",
+      relations: "media_upload,file_type,add_ons",
+      expand: "media_upload,file_type,add_ons",
       per_page: perPage,
       access_token: accessToken
     };

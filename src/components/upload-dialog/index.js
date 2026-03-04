@@ -108,7 +108,7 @@ const UploadDialog = ({
   const canAddMore = () => (value?.length || 0) < maxFiles;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         {T.translate("edit_sponsor.mu_tab.upload_input.upload_file")}
       </DialogTitle>
