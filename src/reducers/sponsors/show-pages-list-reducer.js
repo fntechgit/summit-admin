@@ -12,6 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   RECEIVE_SHOW_PAGE,
   RECEIVE_SHOW_PAGES,
@@ -22,6 +23,8 @@ import {
   RESET_SHOW_PAGE_FORM
 } from "../../actions/show-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+
+
 
 const DEFAULT_SHOW_PAGE = {
   code: "",
@@ -114,9 +117,24 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_SHOW_PAGE: {
-      const showPage = payload.response;
+      const pageData = payload.response;
 
-      return { ...state, currentShowPage: showPage };
+      const currentShowPage = {
+        ...pageData,
+        modules: pageData.modules.map((m) => ({
+          ...m,
+          ...(m.upload_deadline
+            ? {
+                upload_deadline: epochToMomentTimeZone(
+                  m.upload_deadline,
+                  state.summitTZ
+                )
+              }
+            : {})
+        }))
+      };
+
+      return { ...state, currentShowPage };
     }
     case SHOW_PAGE_DELETED: {
       const { pageId } = payload;

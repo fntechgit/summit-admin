@@ -30,7 +30,8 @@ import {
   getPageTemplates,
   getPageTemplate,
   savePageTemplate,
-  unarchivePageTemplate
+  unarchivePageTemplate,
+  resetPageTemplateForm
 } from "../../../actions/page-template-actions";
 import MuiTable from "../../../components/mui/table/mui-table";
 import SearchInput from "../../../components/mui/search-input";
@@ -40,6 +41,7 @@ import PageTemplateClonePopup from "./page-template-clone-popup";
 
 const PageTemplateListPage = ({
   pageTemplates,
+  pageTemplate,
   currentPage,
   perPage,
   term,
@@ -53,9 +55,9 @@ const PageTemplateListPage = ({
   unarchivePageTemplate,
   savePageTemplate,
   deletePageTemplate,
-  summitTZ
+  resetPageTemplateForm
 }) => {
-  const [pageTemplateId, setPageTemplateId] = useState(null);
+  const [openPageDialog, setOpenPageDialog] = useState(false);
   const [openCloneDialog, setOpenCloneDialog] = useState(false);
 
   useEffect(() => {
@@ -104,7 +106,8 @@ const PageTemplateListPage = ({
   };
 
   const handleNewPageTemplate = () => {
-    setPageTemplateId("new");
+    resetPageTemplateForm();
+    setOpenPageDialog(true);
   };
 
   const handleClonePageTemplate = () => {
@@ -112,7 +115,7 @@ const PageTemplateListPage = ({
   };
 
   const handleSavePageTemplate = (entity) => {
-    savePageTemplate(entity).then(() => setPageTemplateId(null));
+    savePageTemplate(entity).then(() => setOpenPageDialog(false));
   };
 
   const handleArchive = (item) =>
@@ -121,7 +124,7 @@ const PageTemplateListPage = ({
       : archivePageTemplate(item.id);
 
   const handleEdit = (row) => {
-    getPageTemplate(row.id).then(() => setPageTemplateId(row.id));
+    getPageTemplate(row.id).then(() => setOpenPageDialog(true));
   };
 
   const handleDelete = (row) => {
@@ -135,6 +138,11 @@ const PageTemplateListPage = ({
         hideArchived
       )
     );
+  };
+
+  const handleClosePageDialog = () => {
+    resetPageTemplateForm();
+    setOpenPageDialog(false);
   };
 
   const columns = [
@@ -268,10 +276,10 @@ const PageTemplateListPage = ({
         )}
       </Box>
       <PageTemplatePopup
-        open={!!pageTemplateId}
-        onClose={() => setPageTemplateId(null)}
+        open={openPageDialog}
+        pageTemplate={pageTemplate}
+        onClose={handleClosePageDialog}
         onSave={handleSavePageTemplate}
-        summitTZ={summitTZ}
       />
       <PageTemplateClonePopup
         open={openCloneDialog}
@@ -281,8 +289,9 @@ const PageTemplateListPage = ({
   );
 };
 
-const mapStateToProps = ({ pageTemplateListState }) => ({
-  ...pageTemplateListState
+const mapStateToProps = ({ pageTemplateListState, pageTemplateState }) => ({
+  ...pageTemplateListState,
+  pageTemplate: pageTemplateState.entity
 });
 
 export default connect(mapStateToProps, {
@@ -291,5 +300,6 @@ export default connect(mapStateToProps, {
   archivePageTemplate,
   unarchivePageTemplate,
   savePageTemplate,
-  deletePageTemplate
+  deletePageTemplate,
+  resetPageTemplateForm
 })(PageTemplateListPage);

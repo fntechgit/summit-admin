@@ -1,22 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
 import { useField } from "formik";
 import MuiFormikTextField from "./mui-formik-textfield";
-import { BYTES_PER_MB } from "../../../utils/constants";
+import { BYTES_PER_MB, DECIMAL_DIGITS } from "../../../utils/constants";
 
 const BLOCKED_KEYS = ["e", "E", "+", "-", ".", ","];
 
 const MuiFormikFilesizeField = ({ name, label, ...props }) => {
   const [field, meta, helpers] = useField(name);
-
-  const displayValue =
-    field.value != null ? Math.floor(field.value / BYTES_PER_MB) : 0;
-
+  const initialValue =
+    field.value != null
+      ? (field.value / BYTES_PER_MB).toFixed(DECIMAL_DIGITS)
+      : 0;
+  const [val, setVal] = useState(initialValue);
   const emptyValue = meta.initialValue === null ? null : 0;
 
-  const handleChange = (e) => {
-    const mbValue = e.target.value;
+  const handleChange = () => {
+    const mbValue = val;
 
     if (mbValue === "") {
       helpers.setValue(emptyValue);
@@ -32,8 +33,9 @@ const MuiFormikFilesizeField = ({ name, label, ...props }) => {
       name={name}
       label={label}
       type="number"
-      value={displayValue}
-      onChange={handleChange}
+      value={val}
+      onChange={(ev) => setVal(ev.target.value)}
+      onBlur={handleChange}
       slotProps={{
         input: {
           endAdornment: <InputAdornment position="end">MB</InputAdornment>

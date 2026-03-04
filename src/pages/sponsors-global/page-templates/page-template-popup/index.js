@@ -1,6 +1,5 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -18,10 +17,8 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import PageModules from "./page-template-modules-form";
-import { resetPageTemplateForm } from "../../../../actions/page-template-actions";
 import {
   BYTES_PER_MB,
   PAGES_MODULE_KINDS,
@@ -29,40 +26,7 @@ import {
   PAGE_MODULES_DOWNLOAD
 } from "../../../../utils/constants";
 
-const normalizeModules = (modules = [], summitTZ = "UTC") =>
-  modules.map((m) => {
-    if (m.kind === PAGES_MODULE_KINDS.MEDIA) {
-      const normalizeModule = { ...m };
-      if (m.upload_deadline) {
-        normalizeModule.upload_deadline = epochToMomentTimeZone(
-          m.upload_deadline,
-          summitTZ
-        );
-      }
-      if (m.file_type) {
-        normalizeModule.file_type_id = {
-          value: m.file_type.id,
-          label: `${m.file_type.name} (${m.file_type.allowed_extensions})`
-        };
-      }
-      return normalizeModule;
-    }
-    return m;
-  });
-
-const PageTemplatePopup = ({
-  pageTemplate,
-  open,
-  onClose,
-  onSave,
-  summitTZ,
-  resetPageTemplateForm
-}) => {
-  const handleClose = () => {
-    resetPageTemplateForm();
-    onClose();
-  };
-
+const PageTemplatePopup = ({ pageTemplate, open, onClose, onSave }) => {
   const addModule = (moduleData) => {
     const modules = formik.values.modules || [];
     const newModule = {
@@ -163,10 +127,7 @@ const PageTemplatePopup = ({
   });
 
   const formik = useFormik({
-    initialValues: {
-      ...pageTemplate,
-      modules: normalizeModules(pageTemplate?.modules, summitTZ) || []
-    },
+    initialValues: pageTemplate,
     validationSchema: yup.object().shape({
       code: yup.string().required(T.translate("validation.required")),
       name: yup.string().required(T.translate("validation.required")),
@@ -184,12 +145,12 @@ const PageTemplatePopup = ({
   });
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("page_template_list.page_crud.title")}
         </Typography>
-        <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
+        <IconButton size="small" onClick={onClose} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -271,14 +232,7 @@ const PageTemplatePopup = ({
 PageTemplatePopup.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired,
-  summitTZ: PropTypes.string.isRequired
+  onSave: PropTypes.func.isRequired
 };
 
-const mapStateToProps = ({ pageTemplateState }) => ({
-  pageTemplate: pageTemplateState.entity
-});
-
-export default connect(mapStateToProps, {
-  resetPageTemplateForm
-})(PageTemplatePopup);
+export default PageTemplatePopup;
