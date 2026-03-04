@@ -42,7 +42,7 @@ import {
 } from "../../../actions/form-template-item-actions";
 import { getFormTemplate } from "../../../actions/form-template-actions";
 import AddFormTemplateItemDialog from "./add-form-template-item-popup";
-import SponsorItemDialog from "./sponsor-inventory-popup";
+import SponsorInventoryDialog from "./sponsor-inventory-popup";
 import { getInventoryItems } from "../../../actions/inventory-item-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
@@ -308,7 +308,7 @@ const FormTemplateItemListPage = ({
         />
       )}
       {showInventoryItemModal && (
-        <SponsorItemDialog
+        <SponsorInventoryDialog
           entity={currentFormTemplateItem}
           errors={currentFormTemplateItemErrors}
           onSave={handleFormTemplateSave}
