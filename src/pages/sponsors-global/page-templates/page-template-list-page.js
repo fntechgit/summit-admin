@@ -26,9 +26,10 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
   archivePageTemplate,
-  getPageTemplates,
-  savePageTemplate,
   deletePageTemplate,
+  getPageTemplates,
+  getPageTemplate,
+  savePageTemplate,
   unarchivePageTemplate
 } from "../../../actions/page-template-actions";
 import MuiTable from "../../../components/mui/table/mui-table";
@@ -47,6 +48,7 @@ const PageTemplateListPage = ({
   hideArchived,
   totalPageTemplates,
   getPageTemplates,
+  getPageTemplate,
   archivePageTemplate,
   unarchivePageTemplate,
   savePageTemplate,
@@ -119,7 +121,7 @@ const PageTemplateListPage = ({
       : archivePageTemplate(item.id);
 
   const handleEdit = (row) => {
-    console.log("EDIT", row);
+    getPageTemplate(row.id).then(() => setPageTemplateId(row.id));
   };
 
   const handleDelete = (row) => {
@@ -285,6 +287,7 @@ const mapStateToProps = ({ pageTemplateListState }) => ({
 
 export default connect(mapStateToProps, {
   getPageTemplates,
+  getPageTemplate,
   archivePageTemplate,
   unarchivePageTemplate,
   savePageTemplate,

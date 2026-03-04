@@ -250,8 +250,13 @@ export const PAGES_MODULE_KINDS = {
 };
 
 export const PAGE_MODULES_MEDIA_TYPES = {
-  FILE: "file",
-  TEXT: "text"
+  FILE: "File",
+  INPUT: "Input"
+};
+
+export const PAGE_MODULES_DOWNLOAD = {
+  FILE: "File",
+  URL: "Url"
 };
 
 export const PURCHASE_STATUS = {

@@ -9,19 +9,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
-
-import {
-  RECEIVE_MEDIA_UPLOAD,
-  RESET_MEDIA_UPLOAD_FORM,
-  UPDATE_MEDIA_UPLOAD,
-  MEDIA_UPLOAD_ADDED
-} from "../../actions/media-upload-actions";
-
-import { RECEIVE_ALL_MEDIA_FILE_TYPES } from "../../actions/media-file-type-actions";
+ * */
 
 import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import {
+  MEDIA_UPLOAD_ADDED,
+  RECEIVE_MEDIA_UPLOAD,
+  RESET_MEDIA_UPLOAD_FORM,
+  UPDATE_MEDIA_UPLOAD
+} from "../../actions/media-upload-actions";
+import { RECEIVE_ALL_MEDIA_FILE_TYPES } from "../../actions/media-file-type-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
 export const DEFAULT_ENTITY = {
@@ -31,7 +29,7 @@ export const DEFAULT_ENTITY = {
   type_id: 0,
   max_size: 0,
   min_uploads_qty: 0,
-  max_uploads_qty: 0, //0: unrestricted
+  max_uploads_qty: 0, // 0: unrestricted
   is_mandatory: false,
   is_editable: true,
   private_storage_type: "None",
@@ -50,63 +48,43 @@ const DEFAULT_STATE = {
 const mediaUploadReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
-    case LOGOUT_USER:
-      {
-        // we need this in case the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
+    case LOGOUT_USER: {
+      // we need this in case the token expired while editing the form
+      if (payload?.persistStore) {
+        return state;
       }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
     case SET_CURRENT_SUMMIT:
-    case RESET_MEDIA_UPLOAD_FORM:
-      {
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      }
-      break;
-    case RECEIVE_ALL_MEDIA_FILE_TYPES:
-      {
-        let { data } = payload.response;
-        let media_file_types = data.map((mft) => {
-          return {
-            value: mft.id,
-            label: mft.name
-          };
-        });
-
-        return { ...state, media_file_types };
-      }
-      break;
-    case UPDATE_MEDIA_UPLOAD:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
+    case RESET_MEDIA_UPLOAD_FORM: {
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
+    }
+    case RECEIVE_ALL_MEDIA_FILE_TYPES: {
+      const { data } = payload.response;
+      return { ...state, media_file_types: data };
+    }
+    case UPDATE_MEDIA_UPLOAD: {
+      return { ...state, entity: { ...payload }, errors: {} };
+    }
     case MEDIA_UPLOAD_ADDED:
-    case RECEIVE_MEDIA_UPLOAD:
-      {
-        let entity = { ...payload.response };
+    case RECEIVE_MEDIA_UPLOAD: {
+      const entity = { ...payload.response };
 
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
         }
+      }
 
-        return {
-          ...state,
-          entity: { ...DEFAULT_ENTITY, ...entity },
-          preview: null
-        };
-      }
-      break;
-    case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+      return {
+        ...state,
+        entity: { ...DEFAULT_ENTITY, ...entity },
+        preview: null
+      };
+    }
+    case VALIDATE: {
+      return { ...state, errors: payload.errors };
+    }
     default:
       return state;
   }
