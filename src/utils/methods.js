@@ -18,6 +18,7 @@ import {
   initLogOut
 } from "openstack-uicore-foundation/lib/security/methods";
 import Swal from "sweetalert2";
+import URI from "urijs";
 import * as Sentry from "@sentry/react";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -532,5 +533,25 @@ export const formatBadgeQR = (code, summit) => {
   return null;
 };
 
+export const getMediaInputValue = (entity, fieldName = "images") => {
+  const mediaFiles = entity?.[fieldName];
+  if (!mediaFiles?.length) return [];
+
+  return mediaFiles.map((img) => {
+    const fileUrl = img.filename ?? img.file_path ?? img.file_url;
+    if (!fileUrl) return { ...img, filename: "" };
+
+    const fileName = new URI(fileUrl).filename();
+    const publicURL = new URI(img?.public_url || fileUrl)
+      .setQuery("t", Date.now())
+      .toString();
+
+    return {
+      ...img,
+      public_url: publicURL,
+      filename: fileName
+    };
+  });
+};
 // eslint-disable-next-line no-magic-numbers
 export const bytesToMb = (bytes) => (bytes / BYTES_IN_MEGABYTE).toFixed(2);

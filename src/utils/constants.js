@@ -155,9 +155,13 @@ export const EVENT_TYPE_FISHBOWL = "Fishbowl";
 
 export const EVENT_TYPE_GROUP_EVENTS = "Groups Events";
 
+export const FILENAME_TRUNCATE_SIDE_PERCENT = 0.4;
+
+export const TRIM_TEXT_LENGTH_20 = 20;
+
 export const TRIM_TEXT_LENGTH_50 = 50;
 
-export const TRIM_TEXT_LENGTH_40 = 50;
+export const TRIM_TEXT_LENGTH_40 = 40;
 
 export const LANGUAGE_CODE_LENGTH = 2;
 
