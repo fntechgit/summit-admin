@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import PropTypes from "prop-types";
 import Button from "@mui/material/Button";
@@ -24,16 +24,21 @@ import { useField } from "formik";
 import { Divider, IconButton, TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-const NotesModal = ({ item, open, onClose, onSave }) => {
+const NotesModal = ({ item, open, onClose }) => {
   const name = `i-${item?.form_item_id}-c-global-f-notes`;
   // eslint-disable-next-line
   const [field, meta, helpers] = useField(name);
-  const [notes, setNotes] = useState(field?.value || "");
+  const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    if (field?.value) {
+      setNotes(field.value);
+    }
+  }, [field?.value]);
 
   const handleSave = () => {
     helpers.setValue(notes);
     onClose();
-    onSave();
   };
 
   return (

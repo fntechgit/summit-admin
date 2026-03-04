@@ -37,6 +37,8 @@ export const SPONSOR_CART_FORM_DELETED = "SPONSOR_CART_FORM_DELETED";
 export const SPONSOR_CART_FORM_LOCKED = "SPONSOR_CART_FORM_LOCKED";
 export const REQUEST_CART_AVAILABLE_FORMS = "REQUEST_CART_AVAILABLE_FORMS";
 export const RECEIVE_CART_AVAILABLE_FORMS = "RECEIVE_CART_AVAILABLE_FORMS";
+export const REQUEST_CART_FORM = "REQUEST_CART_FORM";
+export const RECEIVE_CART_FORM = "RECEIVE_CART_FORM";
 export const REQUEST_CART_SPONSOR_FORM = "REQUEST_CART_SPONSOR_FORM";
 export const RECEIVE_CART_SPONSOR_FORM = "RECEIVE_CART_SPONSOR_FORM";
 export const FORM_CART_SAVED = "FORM_CART_SAVED";
@@ -223,6 +225,30 @@ export const getSponsorFormsForCart =
   };
 
 // get sponsor show form by id USING V2 API
+export const getSponsorCartForm =
+  (cartFormId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return getRequest(
+      createAction(REQUEST_CART_FORM),
+      createAction(RECEIVE_CART_FORM),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms/${cartFormId}`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
+// get sponsor show form by id USING V2 API
 export const getSponsorForm = (formId) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const { currentSummit } = currentSummitState;
@@ -287,6 +313,43 @@ export const addCartForm =
       null,
       createAction(FORM_CART_SAVED),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms`,
+      normalizedEntity,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_list.sponsor_added")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
+  };
+
+export const updateCartForm =
+  (formId, formValues) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    const normalizedEntity = {
+      discount_type: formValues.discount_type,
+      discount_amount: formValues.discount_amount,
+      items: normalizeItems(formValues.items)
+    };
+
+    return putRequest(
+      null,
+      createAction(FORM_CART_SAVED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms/${formId}`,
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)

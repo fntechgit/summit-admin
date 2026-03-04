@@ -19,9 +19,11 @@ import {
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   RECEIVE_CART_AVAILABLE_FORMS,
+  RECEIVE_CART_FORM,
   RECEIVE_CART_SPONSOR_FORM,
   RECEIVE_SPONSOR_CART,
   REQUEST_CART_AVAILABLE_FORMS,
+  REQUEST_CART_FORM,
   REQUEST_CART_SPONSOR_FORM,
   REQUEST_SPONSOR_CART,
   SPONSOR_CART_FORM_DELETED,
@@ -42,7 +44,8 @@ const DEFAULT_STATE = {
     order: "id",
     orderDir: 1
   },
-  sponsorForm: null
+  sponsorForm: null,
+  cartForm: null
 };
 
 const mapForm = (formData) => ({
@@ -163,6 +166,24 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_CART_SPONSOR_FORM: {
       const sponsorForm = payload.response;
       return { ...state, sponsorForm };
+    }
+    case REQUEST_CART_FORM: {
+      return { ...state, cartForm: null };
+    }
+    case RECEIVE_CART_FORM: {
+      const cartForm = payload.response;
+      return {
+        ...state,
+        cartForm: {
+          ...cartForm,
+          items: [
+            ...cartForm.items.map((item) => ({
+              ...item,
+              notes: item.user_notes || ""
+            }))
+          ]
+        }
+      };
     }
     default:
       return state;

@@ -139,7 +139,7 @@ const buildInitialValues = (form, timeZone) => {
       item.quantity || item.default_quantity || 0;
     // custom rate
     acc[`i-${item.form_item_id}-c-global-f-custom_rate`] =
-      item.custom_rate || 0;
+      item.custom_rate || item.rates.custom || 0;
 
     return acc;
   }, {});
@@ -284,6 +284,9 @@ const EditForm = ({
   // wait for formik to re-initialize with form items
   if (!form || Object.keys(formik.values).length === 0) return null;
 
+  console.log("ITEMS: ", form.items);
+  console.log("VALUES: ", formik.values);
+
   return (
     <>
       <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
@@ -332,7 +335,6 @@ const EditForm = ({
           item={notesItem}
           open={!!notesItem}
           onClose={() => setNotesItem(null)}
-          onSave={formik.handleSubmit}
         />
         <ItemSettingsModal
           item={settingsItem}

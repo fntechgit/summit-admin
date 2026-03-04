@@ -16,34 +16,47 @@ import { Box } from "@mui/material";
 import SelectFormDialog from "./components/select-form-dialog";
 import CartView from "./components/cart-view";
 import NewCartForm from "./components/edit-form/new-cart-form";
+import EditCartForm from "./components/edit-form/edit-cart-form";
 
 const SponsorCartTab = ({ sponsor, summitId }) => {
   const [openAddFormDialog, setOpenAddFormDialog] = useState(false);
   const [formEdit, setFormEdit] = useState(null);
+  const [newForm, setNewForm] = useState(null);
 
   const handleFormSelected = (form, addOn) => {
-    setFormEdit({ formId: form.id, addon: addOn });
+    setNewForm({ formId: form.id, addon: addOn });
     setOpenAddFormDialog(false);
   };
 
   const handleOnFormAdded = () => {
+    setNewForm(null);
+  };
+
+  const handleOnFormUpdated = () => {
     setFormEdit(null);
   };
 
   return (
     <Box sx={{ mt: 2 }}>
-      {formEdit && (
+      {newForm && (
         <NewCartForm
-          formId={formEdit.formId}
+          formId={newForm.formId}
           addOn={{
-            addon_name: formEdit.addon?.name,
-            addon_id: formEdit.addon?.id
+            addon_name: newForm.addon?.name,
+            addon_id: newForm.addon?.id
           }}
-          onCancel={() => setFormEdit(null)}
+          onCancel={() => setNewForm(null)}
           onSaveCallback={handleOnFormAdded}
         />
       )}
-      {!formEdit && (
+      {formEdit && (
+        <EditCartForm
+          formId={formEdit.id}
+          onCancel={() => setFormEdit(null)}
+          onSaveCallback={handleOnFormUpdated}
+        />
+      )}
+      {!formEdit && !newForm && (
         <CartView
           onEdit={setFormEdit}
           onAddForm={() => setOpenAddFormDialog(true)}

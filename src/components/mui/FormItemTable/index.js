@@ -85,7 +85,8 @@ const FormItemTable = ({
   const calculateQuantity = useCallback(
     (row) => {
       const qtyEXC = extraColumns.filter((exc) => exc.type === "Quantity");
-      return qtyEXC.reduce((res, exc) => {
+      const globalQty = row.quantity;
+      const itemLevelQty = qtyEXC.reduce((res, exc) => {
         const start = res > 0 ? res : 1;
         return (
           start *
@@ -94,6 +95,8 @@ const FormItemTable = ({
           ] || 0)
         );
       }, 0);
+
+      return qtyEXC.length > 0 ? itemLevelQty : globalQty;
     },
     [valuesStr]
   );
