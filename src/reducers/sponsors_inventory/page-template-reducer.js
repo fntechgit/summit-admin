@@ -44,7 +44,7 @@ const pageTemplateReducer = (state = DEFAULT_STATE, action) => {
   switch (type) {
     case LOGOUT_USER: {
       // we need this in case the token expired while editing the form
-      if (payload.hasOwnProperty("persistStore")) {
+      if (payload?.persistStore) {
         return state;
       }
       return DEFAULT_STATE;

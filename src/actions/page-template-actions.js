@@ -166,7 +166,7 @@ const normalizeEntity = (entity) => {
 
     if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
       if (module.type === PAGE_MODULES_DOWNLOAD.FILE) {
-        normalizedModule.file = module.file[0] || null;
+        normalizedModule.file = module.file?.[0] || null;
         delete normalizedModule.external_url;
       } else {
         delete normalizedModule.file;

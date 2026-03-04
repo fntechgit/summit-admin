@@ -24,7 +24,7 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
       label: T.translate("page_template_list.page_crud.upload_file")
     },
     {
-      value: PAGE_MODULES_MEDIA_TYPES.TEXT,
+      value: PAGE_MODULES_MEDIA_TYPES.INPUT,
       label: T.translate("page_template_list.page_crud.text_input")
     }
   ];
