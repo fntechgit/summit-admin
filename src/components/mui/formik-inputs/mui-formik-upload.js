@@ -41,6 +41,7 @@ const MuiFormikUpload = ({
     if (response.md5) file.md5 = response.md5;
     if (response.mime_type) file.mime_type = response.mime_type;
     if (response.source_bucket) file.bucket = response.source_bucket;
+    if (response.size) file.size = response.size;
     if (response.path && response.name)
       file.file_path = `${response.path}${response.name}`;
     return file;

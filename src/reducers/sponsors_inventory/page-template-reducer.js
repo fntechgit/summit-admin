@@ -71,11 +71,8 @@ const pageTemplateReducer = (state = DEFAULT_STATE, action) => {
           if (module.file) {
             tmpModule.file = [
               {
-                bucket: module.file.bucket,
-                file_name: module.file.file_name,
+                ...module.file,
                 file_path: module.file.storage_key,
-                md5: module.file.md5,
-                mime_type: module.file.mime_type,
                 public_url: module.file.file_url
               }
             ];

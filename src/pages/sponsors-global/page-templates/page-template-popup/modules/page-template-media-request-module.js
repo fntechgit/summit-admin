@@ -87,7 +87,13 @@ const MediaRequestModule = ({ baseName, index, mediaFileTypes }) => {
               name={buildFieldName("file_type_id")}
               renderValue={(selected) => {
                 if (!selected || selected === "") {
-                  return <span style={{ color: "#aaa" }}>{placeholder}</span>;
+                  return (
+                    <span style={{ color: "#aaa" }}>
+                      {T.translate(
+                        "page_template_list.page_crud.allowed_formats"
+                      )}
+                    </span>
+                  );
                 }
                 const selectedOption = fileTypeOptions.find(
                   (t) => t.value === selected
