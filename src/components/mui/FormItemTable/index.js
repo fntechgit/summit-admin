@@ -143,7 +143,7 @@ const FormItemTable = ({
             <TableCell>
               {T.translate("edit_sponsor.cart_tab.edit_form.description")}
             </TableCell>
-            <TableCell sx={{ minWidth: 80 }}>
+            <TableCell sx={{ minWidth: 120 }}>
               {T.translate("edit_sponsor.cart_tab.edit_form.custom_rate")}
             </TableCell>
             <TableCell>
