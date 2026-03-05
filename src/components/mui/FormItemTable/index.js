@@ -250,6 +250,7 @@ const FormItemTable = ({
                 {hasItemFields(row) && (
                   <IconButton
                     size="small"
+                    aria-label="settings"
                     onClick={() => handleEditItemFields(row)}
                   >
                     <SettingsIcon fontSize="large" color="warning" />
@@ -260,7 +261,11 @@ const FormItemTable = ({
                 {currencyAmountFromCents(calculateRowTotal(row))}
               </TableCell>
               <TableCell align="center">
-                <IconButton size="large" onClick={() => handleEdit(row)}>
+                <IconButton
+                  size="large"
+                  aria-label="edit"
+                  onClick={() => handleEdit(row)}
+                >
                   <EditIcon fontSize="large" />
                 </IconButton>
               </TableCell>

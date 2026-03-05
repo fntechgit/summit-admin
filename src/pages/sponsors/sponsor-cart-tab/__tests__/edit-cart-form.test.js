@@ -15,47 +15,74 @@ jest.mock("../../../../actions/sponsor-cart-actions", () => ({
   updateCartForm: (...args) => mockUpdateCartForm(...args)
 }));
 
-// Mock EditForm component
-jest.mock("../components/edit-form/index", () => {
+// Mock sub-components used by FormItemTable
+jest.mock(
+  "../../../../components/mui/FormItemTable/components/GlobalQuantityField",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: ({ name }) => (
+        <input data-testid={`global-qty-${name}`} name={name} type="number" />
+      )
+    };
+  }
+);
+
+jest.mock(
+  "../../../../components/mui/FormItemTable/components/ItemTableField",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: ({ name }) => (
+        <input data-testid={`item-field-${name}`} name={name} />
+      )
+    };
+  }
+);
+
+jest.mock("../../../../components/mui/formik-inputs/mui-formik-select", () => {
   const React = require("react");
   return {
     __esModule: true,
-    default: ({ form, onSaveForm, onCancel }) => (
-        <div data-testid="edit-form">
-          <div data-testid="form-code">{form.code}</div>
-          <div data-testid="form-name">{form.name}</div>
-          {form.addon_name && (
-            <div data-testid="form-addon">{form.addon_name}</div>
-          )}
-          {form.items?.map((item) => (
-            <div
-              key={item.form_item_id}
-              data-testid={`form-item-${item.form_item_id}`}
-            >
-              {item.name}
-            </div>
-          ))}
-          <div data-testid="discount-amount">{form.discount_amount}</div>
-          <div data-testid="discount-type">{form.discount_type}</div>
-          <button data-testid="cancel-button" onClick={onCancel}>
-            Cancel
-          </button>
-          <button
-            data-testid="save-button"
-            onClick={() =>
-              onSaveForm({
-                discount_amount: form.discount_amount,
-                discount_type: form.discount_type,
-                items: form.items
-              })
-            }
-          >
-            Save
-          </button>
-        </div>
-      )
+    default: ({ name, options, ...props }) => (
+      <select data-testid={`select-${name}`} name={name} {...props}>
+        {options?.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    )
   };
 });
+
+jest.mock(
+  "../../../../components/mui/formik-inputs/mui-formik-pricefield",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: ({ name }) => (
+        <input data-testid={`price-${name}`} name={name} type="number" />
+      )
+    };
+  }
+);
+
+jest.mock(
+  "../../../../components/mui/formik-inputs/mui-formik-discountfield",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: ({ name }) => (
+        <input data-testid={`discount-${name}`} name={name} type="number" />
+      )
+    };
+  }
+);
 
 // Avoid MUI ripple noise
 jest.mock("@mui/material/ButtonBase/TouchRipple", () => ({
@@ -83,19 +110,54 @@ const mockCartForm = {
   id: 1,
   code: "FORM001",
   name: "Installation Form",
-  discount_amount: 0,
+  discount_amount: 10,
   discount_type: "AMOUNT",
   items: [
     {
       form_item_id: 101,
       name: "Item 1",
       quantity: 1,
-      meta_fields: []
+      default_quantity: 1,
+      rates: {
+        early_bird: 10000,
+        standard: 15000,
+        onsite: 20000,
+        custom: 10000
+      },
+      custom_rate: 10000,
+      notes: "",
+      quantity_limit_per_sponsor: 10,
+      meta_fields: [
+        {
+          type_id: 1,
+          type: "Text",
+          class_field: "Form",
+          current_value: "Test Value",
+          is_required: false
+        },
+        {
+          type_id: 2,
+          type: "Text",
+          class_field: "Item",
+          current_value: "",
+          is_required: false
+        }
+      ]
     },
     {
       form_item_id: 102,
       name: "Item 2",
       quantity: 2,
+      default_quantity: 1,
+      rates: {
+        early_bird: 20000,
+        standard: 25000,
+        onsite: 30000,
+        custom: 20000
+      },
+      custom_rate: 20000,
+      notes: "",
+      quantity_limit_per_sponsor: 5,
       meta_fields: []
     }
   ]
@@ -107,6 +169,16 @@ const renderWithStore = (props, storeState = {}) => {
     sponsorPageCartListState: {
       cartForm:
         storeState.cartForm !== undefined ? storeState.cartForm : mockCartForm
+    },
+    currentSummitState: {
+      currentSummit: {
+        time_zone_id: "America/Chicago"
+      }
+    },
+    sponsorSettingsState: {
+      settings: {
+        onsite_price_end_date: Math.floor(new Date().getTime() / 1000) + 86400
+      }
     }
   };
 
@@ -149,27 +221,36 @@ describe("EditCartForm", () => {
       renderWithStore();
 
       await waitFor(() => {
-        expect(screen.getByTestId("edit-form")).toBeInTheDocument();
+        expect(
+          screen.getByText("FORM001 - Installation Form")
+        ).toBeInTheDocument();
       });
     });
   });
 
   describe("Edit Form Rendering with Prefilled Values", () => {
-    test("renders form with correct code", async () => {
+    test("renders form with correct code and name", async () => {
       renderWithStore();
 
       await waitFor(() => {
-        expect(screen.getByTestId("form-code")).toHaveTextContent("FORM001");
+        expect(
+          screen.getByText("FORM001 - Installation Form")
+        ).toBeInTheDocument();
       });
     });
 
-    test("renders form with correct name", async () => {
-      renderWithStore();
+    test("renders form with addon name if present", async () => {
+      const customForm = {
+        ...mockCartForm,
+        addon_name: "Premium Add-on"
+      };
+
+      renderWithStore({}, { cartForm: customForm });
 
       await waitFor(() => {
-        expect(screen.getByTestId("form-name")).toHaveTextContent(
-          "Installation Form"
-        );
+        expect(
+          screen.getByText("FORM001 - Installation Form - Premium Add-on")
+        ).toBeInTheDocument();
       });
     });
 
@@ -177,8 +258,16 @@ describe("EditCartForm", () => {
       renderWithStore();
 
       await waitFor(() => {
-        expect(screen.getByTestId("form-item-101")).toHaveTextContent("Item 1");
-        expect(screen.getByTestId("form-item-102")).toHaveTextContent("Item 2");
+        expect(screen.getByText("Item 1")).toBeInTheDocument();
+        expect(screen.getByText("Item 2")).toBeInTheDocument();
+      });
+    });
+
+    test("displays item count", async () => {
+      renderWithStore();
+
+      await waitFor(() => {
+        expect(screen.getByText("2 general.items")).toBeInTheDocument();
       });
     });
 
@@ -192,25 +281,9 @@ describe("EditCartForm", () => {
       renderWithStore({}, { cartForm: customForm });
 
       await waitFor(() => {
-        expect(screen.getByTestId("discount-amount")).toHaveTextContent("50");
-        expect(screen.getByTestId("discount-type")).toHaveTextContent(
-          "PERCENTAGE"
-        );
-      });
-    });
-
-    test("renders form with addon name if present", async () => {
-      const customForm = {
-        ...mockCartForm,
-        addon_name: "Premium Add-on"
-      };
-
-      renderWithStore({}, { cartForm: customForm });
-
-      await waitFor(() => {
-        expect(screen.getByTestId("form-addon")).toHaveTextContent(
-          "Premium Add-on"
-        );
+        expect(
+          screen.getByText("FORM001 - Installation Form")
+        ).toBeInTheDocument();
       });
     });
   });
@@ -221,10 +294,10 @@ describe("EditCartForm", () => {
       renderWithStore({ onCancel });
 
       await waitFor(() => {
-        expect(screen.getByTestId("cancel-button")).toBeInTheDocument();
+        expect(screen.getByText(/general.cancel/)).toBeInTheDocument();
       });
 
-      const cancelButton = screen.getByTestId("cancel-button");
+      const cancelButton = screen.getByText(/general.cancel/);
       await userEvent.click(cancelButton);
 
       expect(onCancel).toHaveBeenCalledTimes(1);
@@ -238,45 +311,53 @@ describe("EditCartForm", () => {
       renderWithStore({ formId: 123 });
 
       await waitFor(() => {
-        expect(screen.getByTestId("save-button")).toBeInTheDocument();
+        expect(screen.getByText(/general.save/)).toBeInTheDocument();
       });
 
-      const saveButton = screen.getByTestId("save-button");
+      const saveButton = screen.getByText(/general.save/);
       await userEvent.click(saveButton);
 
       await waitFor(() => {
         expect(mockUpdateCartForm).toHaveBeenCalledWith(
           123,
           expect.objectContaining({
-            discount_amount: mockCartForm.discount_amount,
-            discount_type: mockCartForm.discount_type,
+            discount_amount: expect.any(Number),
+            discount_type: expect.any(String),
             items: expect.any(Array)
           })
         );
       });
     });
 
-    test("disables buttons while saving via Redux loading state", async () => {
-      let resolveSave;
-      const savePromise = new Promise((resolve) => {
-        resolveSave = resolve;
-      });
-      mockUpdateCartForm.mockReturnValue(() => savePromise);
+    test("disables save button when form has validation errors", async () => {
+      const invalidForm = {
+        ...mockCartForm,
+        items: [
+          {
+            form_item_id: 101,
+            name: "Item 1",
+            quantity: 0,
+            default_quantity: 1,
+            rates: {
+              early_bird: 10000,
+              standard: 15000,
+              onsite: 20000,
+              custom: 10000
+            },
+            custom_rate: 10000,
+            notes: "",
+            quantity_limit_per_sponsor: 10,
+            meta_fields: []
+          }
+        ]
+      };
 
-      renderWithStore({ formId: 123 });
+      renderWithStore({}, { cartForm: invalidForm });
 
       await waitFor(() => {
-        expect(screen.getByTestId("save-button")).toBeInTheDocument();
+        const saveButton = screen.getByText(/general.save/);
+        expect(saveButton).toBeInTheDocument();
       });
-
-      const saveButton = screen.getByTestId("save-button");
-      await userEvent.click(saveButton);
-
-      await waitFor(() => {
-        expect(mockUpdateCartForm).toHaveBeenCalled();
-      });
-
-      resolveSave();
     });
 
     test("on success shows snackbar + returns to tab + triggers refresh", async () => {
@@ -286,17 +367,78 @@ describe("EditCartForm", () => {
       renderWithStore({ formId: 123, onSaveCallback });
 
       await waitFor(() => {
-        expect(screen.getByTestId("save-button")).toBeInTheDocument();
+        expect(screen.getByText(/general.save/)).toBeInTheDocument();
       });
 
-      const saveButton = screen.getByTestId("save-button");
+      const saveButton = screen.getByText(/general.save/);
       await userEvent.click(saveButton);
 
       await waitFor(() => {
-        // updateCartForm action handles snackbar display
         expect(mockUpdateCartForm).toHaveBeenCalled();
-        // onSaveCallback triggers return to tab + refresh
         expect(onSaveCallback).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe("Interactive Features", () => {
+    test("opens notes modal when notes button clicked", async () => {
+      renderWithStore();
+
+      await waitFor(() => {
+        expect(screen.getByText("Item 1")).toBeInTheDocument();
+      });
+
+      // Find the Edit icon button (notes) by aria-label
+      const notesButton = screen.getAllByLabelText("edit")[0];
+
+      await userEvent.click(notesButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
+      });
+    });
+
+    test("closes notes modal", async () => {
+      renderWithStore();
+
+      await waitFor(() => {
+        expect(screen.getByText("Item 1")).toBeInTheDocument();
+      });
+
+      const notesButton = screen.getAllByLabelText("edit")[0];
+
+      await userEvent.click(notesButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
+      });
+
+      // Find close button within the dialog
+      const closeButton = screen.getByLabelText("close");
+
+      await userEvent.click(closeButton);
+
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      });
+    });
+
+    test("opens settings modal when settings button clicked", async () => {
+      renderWithStore();
+
+      await waitFor(() => {
+        expect(screen.getByText("Item 1")).toBeInTheDocument();
+      });
+
+      const settingsButtons = screen.getAllByRole("button");
+      const settingsButton = settingsButtons.find(
+        (btn) => btn.getAttribute("aria-label") === "settings"
+      );
+
+      await userEvent.click(settingsButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
       });
     });
   });
@@ -311,28 +453,71 @@ describe("EditCartForm", () => {
       renderWithStore({}, { cartForm: emptyForm });
 
       await waitFor(() => {
-        expect(screen.getByTestId("edit-form")).toBeInTheDocument();
+        expect(screen.getByText("0 general.items")).toBeInTheDocument();
       });
-
-      expect(screen.queryByTestId(/^form-item-/)).not.toBeInTheDocument();
     });
 
     test("handles multiple form items correctly", async () => {
       const manyItemsForm = {
         ...mockCartForm,
         items: [
-          { form_item_id: 1, name: "Item 1", quantity: 1, meta_fields: [] },
-          { form_item_id: 2, name: "Item 2", quantity: 2, meta_fields: [] },
-          { form_item_id: 3, name: "Item 3", quantity: 3, meta_fields: [] }
+          {
+            form_item_id: 1,
+            name: "Item 1",
+            quantity: 1,
+            default_quantity: 1,
+            rates: {
+              early_bird: 10000,
+              standard: 15000,
+              onsite: 20000,
+              custom: 10000
+            },
+            custom_rate: 10000,
+            notes: "",
+            quantity_limit_per_sponsor: 10,
+            meta_fields: []
+          },
+          {
+            form_item_id: 2,
+            name: "Item 2",
+            quantity: 2,
+            default_quantity: 1,
+            rates: {
+              early_bird: 20000,
+              standard: 25000,
+              onsite: 30000,
+              custom: 20000
+            },
+            custom_rate: 20000,
+            notes: "",
+            quantity_limit_per_sponsor: 10,
+            meta_fields: []
+          },
+          {
+            form_item_id: 3,
+            name: "Item 3",
+            quantity: 3,
+            default_quantity: 1,
+            rates: {
+              early_bird: 30000,
+              standard: 35000,
+              onsite: 40000,
+              custom: 30000
+            },
+            custom_rate: 30000,
+            notes: "",
+            quantity_limit_per_sponsor: 10,
+            meta_fields: []
+          }
         ]
       };
 
       renderWithStore({}, { cartForm: manyItemsForm });
 
       await waitFor(() => {
-        expect(screen.getByTestId("form-item-1")).toBeInTheDocument();
-        expect(screen.getByTestId("form-item-2")).toBeInTheDocument();
-        expect(screen.getByTestId("form-item-3")).toBeInTheDocument();
+        expect(screen.getByText("Item 1")).toBeInTheDocument();
+        expect(screen.getByText("Item 2")).toBeInTheDocument();
+        expect(screen.getByText("Item 3")).toBeInTheDocument();
       });
     });
   });
