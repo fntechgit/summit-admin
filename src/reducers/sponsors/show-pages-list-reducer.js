@@ -24,8 +24,6 @@ import {
 } from "../../actions/show-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 
-
-
 const DEFAULT_SHOW_PAGE = {
   code: "",
   name: "",
@@ -127,7 +125,7 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
             ? {
                 upload_deadline: epochToMomentTimeZone(
                   m.upload_deadline,
-                  state.summitTZ
+                  state.summitTZ || "UTC"
                 )
               }
             : {})
