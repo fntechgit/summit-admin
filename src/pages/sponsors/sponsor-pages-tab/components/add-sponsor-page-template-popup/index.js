@@ -133,7 +133,7 @@ const AddSponsorPageTemplatePopup = ({
       getShowPages(
         searchTerm,
         DEFAULT_CURRENT_PAGE,
-        perPage,
+        FIVE_PER_PAGE,
         order,
         orderDir,
         false,
