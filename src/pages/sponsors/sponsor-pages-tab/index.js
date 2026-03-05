@@ -26,13 +26,18 @@ import AddIcon from "@mui/icons-material/Add";
 import {
   getSponsorManagedPages,
   getSponsorCustomizedPages,
-  saveSponsorManagedPage
+  saveSponsorManagedPage,
+  saveSponsorCustomizedPage,
+  getSponsorCustomizedPage,
+  resetSponsorPage
 } from "../../../actions/sponsor-pages-actions";
+import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import AddSponsorPageTemplatePopup from "./components/add-sponsor-page-template-popup";
+import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
 
 const SponsorPagesTab = ({
   sponsor,
@@ -41,9 +46,14 @@ const SponsorPagesTab = ({
   hideArchived,
   managedPages,
   customizedPages,
+  summitTZ,
+  currentEditPage,
   getSponsorManagedPages,
+  saveSponsorManagedPage,
   getSponsorCustomizedPages,
-  saveSponsorManagedPage
+  saveSponsorCustomizedPage,
+  getSponsorCustomizedPage,
+  resetSponsorPage
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -148,7 +158,11 @@ const SponsorPagesTab = ({
   };
 
   const handleUsingTemplate = () => {
-    setOpenPopup("template");
+    setOpenPopup("usingTemplate");
+  };
+
+  const handleAddPage = () => {
+    setOpenPopup("pagePopup");
   };
 
   const handleArchiveCustomizedPage = (item) =>
@@ -166,7 +180,7 @@ const SponsorPagesTab = ({
   };
 
   const handleCustomizedEdit = (item) => {
-    console.log("EDIT CUSTOMIZED ", item);
+    getSponsorCustomizedPage(item.id).then(() => setOpenPopup("pagePopup"));
   };
 
   const handleCustomizedDelete = (itemId) => {
@@ -194,8 +208,35 @@ const SponsorPagesTab = ({
 
   const handleSaveManagedPageFromTemplate = (entity) => {
     saveSponsorManagedPage(entity)
-      .then(() => getSponsorManagedPages())
-      .finally(() => setOpenPopup(null));
+      .then(() => {
+        const { perPage, order, orderDir } = managedPages;
+        getSponsorManagedPages(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          perPage,
+          order,
+          orderDir
+        );
+      }).finally(() => setOpenPopup(null));
+  };
+
+  const handleSaveCustomizedPage = (entity) => {
+    saveSponsorCustomizedPage(entity)
+      .then(() => {
+        const { perPage, order, orderDir } = customizedPages;
+        getSponsorCustomizedPages(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          perPage,
+          order,
+          orderDir
+        );
+      }).finally(() => setOpenPopup(null));;
+  };
+
+  const handleClosePagePopup = () => {
+    resetSponsorPage();
+    setOpenPopup(null);
   };
 
   const baseColumns = (name) => [
@@ -241,6 +282,10 @@ const SponsorPagesTab = ({
       T.translate("edit_sponsor.pages_tab.sponsor_customized_pages")
     )
   ];
+
+  const sponsorshipIds = sponsor.sponsorships_collection.sponsorships.map(
+    (e) => e.id
+  );
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -305,7 +350,7 @@ const SponsorPagesTab = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => console.log("open popup new")}
+            onClick={handleAddPage}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -354,12 +399,24 @@ const SponsorPagesTab = ({
         />
       </div>
 
-      {openPopup === "template" && (
+      {openPopup === "usingTemplate" && (
         <AddSponsorPageTemplatePopup
           sponsor={sponsor}
           summitId={summitId}
           onSubmit={handleSaveManagedPageFromTemplate}
           onClose={() => setOpenPopup(null)}
+        />
+      )}
+
+      {openPopup === "pagePopup" && (
+        <PageTemplatePopup
+          onSave={handleSaveCustomizedPage}
+          onClose={handleClosePagePopup}
+          pageTemplate={currentEditPage}
+          sponsorshipIds={sponsorshipIds}
+          summitId={summitId}
+          sponsorId={sponsor.id}
+          summitTZ={summitTZ}
         />
       )}
     </Box>
@@ -373,5 +430,9 @@ const mapStateToProps = ({ sponsorPagePagesListState }) => ({
 export default connect(mapStateToProps, {
   getSponsorManagedPages,
   saveSponsorManagedPage,
-  getSponsorCustomizedPages
+  getSponsorCustomizedPage,
+  getSponsorCustomizedPages,
+  saveSponsorCustomizedPage,
+  getSponsorships,
+  resetSponsorPage
 })(SponsorPagesTab);
