@@ -71,7 +71,8 @@ const MOCK_FORM_A = {
           type_id: 4,
           class_field: "Item",
           name: "Special Instructions",
-          type: "Text"
+          type: "Text",
+          is_required: true
         }
       ]
     },

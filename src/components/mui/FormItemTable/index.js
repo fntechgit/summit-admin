@@ -114,6 +114,18 @@ const FormItemTable = ({
   const hasItemFields = (row) =>
     row.meta_fields.filter((mf) => mf.class_field === "Item").length > 0;
 
+  const itemFieldsIncomplete = (row) => {
+    const requiredFields = row.meta_fields.filter(
+      (mf) => mf.class_field === "Item" && mf.is_required
+    );
+    const hasMissingFields = requiredFields.some((mf) => {
+      const value = values[`i-${row.form_item_id}-c-item-f-${mf.type_id}`];
+      return value === undefined || value === null || value === "";
+    });
+
+    return requiredFields.length > 0 && hasMissingFields;
+  };
+
   const totalAmount = useMemo(() => {
     const subtotal = data.reduce((acc, row) => acc + calculateRowTotal(row), 0);
     const discount =
@@ -177,7 +189,7 @@ const FormItemTable = ({
               <TableCell>{row.code}</TableCell>
               <TableCell sx={{ position: "relative" }}>
                 <div>{row.name}</div>
-                {hasItemFields(row) && (
+                {hasItemFields(row) && itemFieldsIncomplete(row) && (
                   <Typography
                     variant="body2"
                     component="p"

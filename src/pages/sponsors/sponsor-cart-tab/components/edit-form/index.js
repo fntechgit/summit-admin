@@ -284,9 +284,6 @@ const EditForm = ({
   // wait for formik to re-initialize with form items
   if (!form || Object.keys(formik.values).length === 0) return null;
 
-  console.log("ITEMS: ", form.items);
-  console.log("VALUES: ", formik.values);
-
   return (
     <>
       <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
