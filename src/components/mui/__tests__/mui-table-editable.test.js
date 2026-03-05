@@ -29,6 +29,23 @@ jest.mock("@mui/material/ButtonBase/TouchRipple", () => ({
   default: () => null
 }));
 
+// TableCell shim to inspect sx prop in tests
+jest.mock("@mui/material/TableCell", () => {
+  const React = require("react");
+  return {
+    __esModule: true,
+    default: ({ children, sx, ...rest }) => (
+      <td
+        data-testid="mui-table-cell"
+        data-sx={sx ? JSON.stringify(sx) : ""}
+        {...rest}
+      >
+        {children}
+      </td>
+    )
+  };
+});
+
 // TablePagination shim
 jest.mock("@mui/material/TablePagination", () => {
   const React = require("react");
@@ -145,7 +162,7 @@ const setup = (overrides = {}) => {
     onPageChange: jest.fn(),
     onPerPageChange: jest.fn(),
     onSort: jest.fn(),
-    options: { sortCol: "name", sortDir: "-1" },
+    options: { sortCol: "name", sortDir: -1 },
     getName: (item) => item.name,
     onEdit: jest.fn(),
     onDelete: jest.fn(),
@@ -154,6 +171,17 @@ const setup = (overrides = {}) => {
   };
   render(<MuiTableEditable {...props} />);
   return props;
+};
+
+const getCellSx = (cell) => {
+  const rawSx = cell.getAttribute("data-sx");
+  if (!rawSx) return {};
+
+  try {
+    return JSON.parse(rawSx);
+  } catch {
+    return {};
+  }
 };
 
 // ---- Tests ----
@@ -270,7 +298,7 @@ describe("MuiTableEditable", () => {
 
   test("sort click triggers onSort with flipped dir", async () => {
     const user = userEvent.setup();
-    const { onSort } = setup({ options: { sortCol: "name", sortDir: "-1" } });
+    const { onSort } = setup({ options: { sortCol: "name", sortDir: -1 } });
 
     // 1) Try our mock's testid first (desc + active when sortDir === "-1")
     let sortBtn = screen.queryByTestId("sort-label-desc-active");
@@ -295,6 +323,45 @@ describe("MuiTableEditable", () => {
     expect(onSort).toHaveBeenCalled();
     const [colKey, newDir] = onSort.mock.calls[0];
     expect(colKey).toBe("name");
-    expect(newDir).toBe(1); // "-1" * -1 => 1
+    expect(newDir).toBe(1);
+  });
+
+  test("applies archived styles to content, edit and delete cells when disableProp matches", () => {
+    setup({
+      options: { sortCol: "name", sortDir: -1, disableProp: "is_archived" },
+      data: [
+        { id: 1, name: "Alice", role: "Dev", age: 35, is_archived: true },
+        { id: 2, name: "Bob", role: "PM", age: 41, is_archived: false }
+      ],
+      onArchive: jest.fn()
+    });
+
+    const aliceRow = screen.getByText("Alice").closest("tr");
+    const cells = within(aliceRow).getAllByTestId("mui-table-cell");
+
+    const archivedCellIndexes = [0, 1, 2, 3, 5];
+    archivedCellIndexes.forEach((index) => {
+      const sx = getCellSx(cells[index]);
+      expect(sx.backgroundColor).toBe("background.light");
+      expect(sx.color).toBe("text.disabled");
+    });
+  });
+
+  test("does not apply archived styles to archive/unarchive action cell", () => {
+    setup({
+      options: { sortCol: "name", sortDir: -1, disableProp: "is_archived" },
+      data: [{ id: 1, name: "Alice", role: "Dev", age: 35, is_archived: true }],
+      onArchive: jest.fn()
+    });
+
+    const unarchiveButton = screen.getByRole("button", {
+      name: "general.unarchive"
+    });
+    const actionCell = unarchiveButton.closest("td");
+    const sx = getCellSx(actionCell);
+
+    expect(sx.width).toBe(80);
+    expect(sx.backgroundColor).toBeUndefined();
+    expect(sx.color).toBeUndefined();
   });
 });
