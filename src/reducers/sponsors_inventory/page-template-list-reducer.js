@@ -30,8 +30,7 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalPageTemplates: 0,
-  hideArchived: false,
-  summitTZ: null
+  hideArchived: false
 };
 
 const pageTemplateListReducer = (state = DEFAULT_STATE, action = {}) => {

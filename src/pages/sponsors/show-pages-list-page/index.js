@@ -47,7 +47,6 @@ const ShowPagesListPage = ({
   orderDir,
   hideArchived,
   totalCount,
-  summitTZ,
   currentShowPage,
   getShowPages,
   archiveShowPage,
@@ -118,6 +117,11 @@ const ShowPagesListPage = ({
   const handleTemplatePopupClose = () => {
     resetShowPageForm();
     setOpenPopup(null);
+  };
+
+  const handleNewShowPage = () => {
+    resetShowPageForm();
+    setOpenPopup("pageTemplate");
   };
 
   const columns = [
@@ -207,7 +211,7 @@ const ShowPagesListPage = ({
             variant="contained"
             size="medium"
             fullWidth
-            onClick={() => setOpenPopup("pageTemplate")}
+            onClick={handleNewShowPage}
             startIcon={<AddIcon />}
             sx={{ height: "36px" }}
           >
@@ -248,7 +252,6 @@ const ShowPagesListPage = ({
         pageTemplate={currentShowPage}
         onClose={handleTemplatePopupClose}
         onSave={handleSaveShowPage}
-        summitTZ={summitTZ}
       />
     </div>
   );

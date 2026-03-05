@@ -30,6 +30,7 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
   PAGE_MODULES_DOWNLOAD,
+  PAGE_MODULES_MEDIA_TYPES,
   PAGES_MODULE_KINDS
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
@@ -56,10 +57,7 @@ export const getPageTemplates =
     orderDir = DEFAULT_ORDER_DIR,
     hideArchived = false
   ) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const { currentSummit } = currentSummitState;
-    const summitTZ = currentSummit.time_zone?.name;
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 
@@ -97,7 +95,7 @@ export const getPageTemplates =
       createAction(RECEIVE_PAGE_TEMPLATES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/page-templates`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
+      { order, orderDir, page, perPage, term, hideArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -153,15 +151,22 @@ const normalizeEntity = (entity) => {
   normalizedEntity.modules = entity.modules.map((module) => {
     const normalizedModule = { ...module };
 
-    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.upload_deadline) {
-      normalizedModule.upload_deadline = moment
-        .utc(module.upload_deadline)
-        .unix();
-    }
+    if (module.kind === PAGES_MODULE_KINDS.MEDIA) {
+      if (module.upload_deadline) {
+        normalizedModule.upload_deadline = moment
+          .utc(module.upload_deadline)
+          .unix();
+      }
 
-    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.file_type_id) {
-      normalizedModule.file_type_id =
-        module.file_type_id?.value || module.file_type_id;
+      if (module.file_type_id) {
+        normalizedModule.file_type_id =
+          module.file_type_id?.value || module.file_type_id;
+      }
+
+      if (module.type === PAGE_MODULES_MEDIA_TYPES.INPUT) {
+        delete normalizedModule.file_type_id;
+        delete normalizedModule.max_file_size;
+      }
     }
 
     if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
