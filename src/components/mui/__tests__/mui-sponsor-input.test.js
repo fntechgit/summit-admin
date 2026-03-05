@@ -1,6 +1,6 @@
 // mui-sponsor-input.test.js
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Formik, Form } from "formik";
 import "@testing-library/jest-dom";
@@ -252,35 +252,34 @@ describe("MuiSponsorInput", () => {
   });
 
   test("debounces API calls", async () => {
+    jest.useFakeTimers();
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime
+    });
     const { querySponsors } = require("../../../actions/sponsor-actions");
     renderWithFormik();
 
-    // Type quickly with some pauses
     const input = screen.getByPlaceholderText("Search sponsors...");
-    await userEvent.click(input);
+    await user.click(input);
 
-    // Type characters with minimal delay
-    await userEvent.type(input, "S");
-    await userEvent.type(input, "p");
-    await userEvent.type(input, "o");
+    // Type characters rapidly
+    await user.type(input, "Spo");
 
-    // Check that the API call hasn't been made immediately
-    // (or has been called fewer times than the number of keystrokes)
+    // Debounce hasn't fired yet — timer is still pending
     expect(querySponsors).toHaveBeenCalledTimes(0);
 
-    // Wait for debounce to complete
-    await waitFor(
-      () => {
-        expect(querySponsors).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 1000 }
-    );
+    // Advance past the 250ms debounce
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
 
-    // Verify it was called with the complete input
+    expect(querySponsors).toHaveBeenCalledTimes(1);
     expect(querySponsors).toHaveBeenCalledWith(
       "Spo",
       123,
       expect.any(Function)
     );
+
+    jest.useRealTimers();
   });
 });
