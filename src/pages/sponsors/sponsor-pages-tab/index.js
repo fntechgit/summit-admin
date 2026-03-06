@@ -23,6 +23,7 @@ import {
   Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
   getSponsorManagedPages,
   getSponsorCustomizedPages,
@@ -218,7 +219,8 @@ const SponsorPagesTab = ({
           order,
           orderDir
         );
-      }).finally(() => setOpenPopup(null));
+      })
+      .finally(() => setOpenPopup(null));
   };
 
   const handleSaveCustomizedPage = (entity) => {
@@ -232,7 +234,8 @@ const SponsorPagesTab = ({
           order,
           orderDir
         );
-      }).finally(() => setOpenPopup(null));;
+      })
+      .finally(() => setOpenPopup(null));
   };
 
   const handleClosePagePopup = () => {
@@ -275,7 +278,25 @@ const SponsorPagesTab = ({
   ];
 
   const managedPagesColumns = [
-    ...baseColumns(T.translate("edit_sponsor.pages_tab.managed_pages"))
+    ...baseColumns(T.translate("edit_sponsor.pages_tab.managed_pages")),
+    {
+      columnKey: "customize",
+      header: "",
+      width: 156,
+      align: "center",
+      render: (row) => (
+        <Button
+          variant="text"
+          color="inherit"
+          size="medium"
+          onClick={() => handleManagedEdit(row)}
+        >
+          {T.translate("edit_sponsor.forms_tab.customize")}
+          <ArrowForwardIcon fontSize="large" sx={{ marginLeft: 1 }} />
+        </Button>
+      ),
+      dottedBorder: true
+    }
   ];
 
   const customizedPagesColumns = [
@@ -394,7 +415,6 @@ const SponsorPagesTab = ({
           onPageChange={handleManagedPageChange}
           onPerPageChange={handleManagedPerPageChange}
           onSort={handleManagedSort}
-          onEdit={handleManagedEdit}
           onDelete={handleManagedDelete}
           onArchive={handleArchiveManagedPage}
         />
