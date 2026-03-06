@@ -32,8 +32,12 @@ import {
   deleteSponsorCartForm,
   getSponsorCart,
   lockSponsorCartForm,
-  unlockSponsorCartForm
+  unlockSponsorCartForm,
+  saveSponsorCartNote,
+  deleteSponsorCartNote
 } from "../../../../actions/sponsor-cart-actions";
+import CartNote from "./cart-note";
+import { SPONSOR_CART_NOTE_TYPES } from "../../../../utils/constants";
 
 const CartView = ({
   cart,
@@ -43,7 +47,9 @@ const CartView = ({
   lockSponsorCartForm,
   unlockSponsorCartForm,
   onEdit,
-  onAddForm
+  onAddForm,
+  saveSponsorCartNote,
+  deleteSponsorCartNote
 }) => {
   useEffect(() => {
     getSponsorCart();
@@ -214,6 +220,19 @@ const CartView = ({
           </Box>
         </Paper>
       )}
+      <CartNote
+        title={T.translate("edit_sponsor.cart_tab.sponsor_note.title")}
+        note={cart?.notes.find(
+          (n) => n.type === SPONSOR_CART_NOTE_TYPES.SPONSOR
+        )}
+        placeholder={T.translate(
+          "edit_sponsor.cart_tab.sponsor_note.placeholder"
+        )}
+        onSave={(note) =>
+          saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.SPONSOR)
+        }
+        onDelete={deleteSponsorCartNote}
+      />
     </>
   );
 };
@@ -226,5 +245,7 @@ export default connect(mapStateToProps, {
   getSponsorCart,
   deleteSponsorCartForm,
   lockSponsorCartForm,
-  unlockSponsorCartForm
+  unlockSponsorCartForm,
+  saveSponsorCartNote,
+  deleteSponsorCartNote
 })(CartView);

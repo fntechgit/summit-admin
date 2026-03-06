@@ -27,7 +27,10 @@ import {
   REQUEST_CART_SPONSOR_FORM,
   REQUEST_SPONSOR_CART,
   SPONSOR_CART_FORM_DELETED,
-  SPONSOR_CART_FORM_LOCKED
+  SPONSOR_CART_FORM_LOCKED,
+  SPONSOR_CART_NOTE_ADDED,
+  SPONSOR_CART_NOTE_DELETED,
+  SPONSOR_CART_NOTE_UPDATED
 } from "../../actions/sponsor-cart-actions";
 import { DISCOUNT_TYPES } from "../../utils/constants";
 
@@ -182,6 +185,31 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
               notes: item.user_notes || ""
             }))
           ]
+        }
+      };
+    }
+    case SPONSOR_CART_NOTE_ADDED:
+    case SPONSOR_CART_NOTE_UPDATED: {
+      const note = payload.response;
+      const newNotes = [
+        ...state.cart.notes.filter((n) => n.id !== note.id),
+        note
+      ];
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          notes: newNotes
+        }
+      };
+    }
+    case SPONSOR_CART_NOTE_DELETED: {
+      const { noteId } = payload;
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          notes: state.cart.notes.filter((n) => n.id !== noteId)
         }
       };
     }

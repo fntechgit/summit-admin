@@ -2516,6 +2516,10 @@
         "discount": "Discount",
         "total_on_caps": "TOTAL",
         "no_forms_found": "No forms found."
+      },
+      "sponsor_note": {
+        "title": "Note to Sponsor",
+        "placeholder": "Enter shared note with sponsor..."
       }
     },
     "purchase_tab": {

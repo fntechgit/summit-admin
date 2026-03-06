@@ -14,10 +14,10 @@
 import {
   authErrorHandler,
   createAction,
-  getRequest,
   deleteRequest,
-  putRequest,
+  getRequest,
   postRequest,
+  putRequest,
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
@@ -42,6 +42,9 @@ export const RECEIVE_CART_FORM = "RECEIVE_CART_FORM";
 export const REQUEST_CART_SPONSOR_FORM = "REQUEST_CART_SPONSOR_FORM";
 export const RECEIVE_CART_SPONSOR_FORM = "RECEIVE_CART_SPONSOR_FORM";
 export const FORM_CART_SAVED = "FORM_CART_SAVED";
+export const SPONSOR_CART_NOTE_ADDED = "SPONSOR_CART_NOTE_ADDED";
+export const SPONSOR_CART_NOTE_UPDATED = "SPONSOR_CART_NOTE_UPDATED";
+export const SPONSOR_CART_NOTE_DELETED = "SPONSOR_CART_NOTE_DELETED";
 
 const customErrorHandler = (err, res) => (dispatch, state) => {
   const code = err.status;
@@ -363,3 +366,80 @@ export const updateCartForm =
       })
       .finally(() => dispatch(stopLoading()));
   };
+
+/* ************************************************************************* */
+/*                              NOTES                                        */
+/* ************************************************************************* */
+
+export const saveSponsorCartNote =
+  (note, type) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    const normalizedEntity = {
+      content: note.content,
+      type
+    };
+
+    if (note.id) {
+      return putRequest(
+        null,
+        createAction(SPONSOR_CART_NOTE_UPDATED),
+        `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/notes/${note.id}`,
+        normalizedEntity,
+        snackbarErrorHandler
+      )(params)(dispatch)
+        .catch(console.log) // need to catch promise reject
+        .finally(() => {
+          dispatch(stopLoading());
+        });
+    }
+
+    return postRequest(
+      null,
+      createAction(SPONSOR_CART_NOTE_ADDED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/notes`,
+      normalizedEntity,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .catch(console.log)
+      .finally(() => dispatch(stopLoading()));
+  };
+
+export const deleteSponsorCartNote = (noteId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_CART_NOTE_DELETED)({ noteId }),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/notes/${noteId}`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      getSponsorCart()(dispatch, getState);
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsor.cart_tab.sponsor_note.deleted")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
