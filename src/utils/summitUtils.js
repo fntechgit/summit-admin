@@ -49,7 +49,7 @@ export const formatEventData = (e, summit) => {
 
   let speakers_count;
 
-  if (e.type.use_speakers) {
+  if (e.type?.use_speakers) {
     if (e.speakers && e.speakers.length > 0) {
       speakers_count = e.speakers.length;
     } else {
