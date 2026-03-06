@@ -1765,6 +1765,7 @@
     "tax_name_rate": "{tax_name} Rate",
     "tax_name_price": "{tax_name} Price",
     "purchase_ticket_price": "Purchase Ticket Price",
+    "no_attendee": "This ticket is not assigned",
     "attendee_incomplete": "Attendee Info Incomplete",
     "attendee_incomplete_msg": "This attendee's ticket has not been issued because their information is incomplete.  Would you like to send a reminder for them to complete their information so the ticket can be issued?",
     "placeholders": {
