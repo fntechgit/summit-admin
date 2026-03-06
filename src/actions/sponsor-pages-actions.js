@@ -39,6 +39,7 @@ export const REQUEST_SPONSOR_MANAGED_PAGES = "REQUEST_SPONSOR_MANAGED_PAGES";
 export const RECEIVE_SPONSOR_MANAGED_PAGES = "RECEIVE_SPONSOR_MANAGED_PAGES";
 export const SPONSOR_MANAGED_PAGE_ADDED = "SPONSOR_MANAGED_PAGE_ADDED";
 export const SPONSOR_MANAGED_PAGE_DELETED = "SPONSOR_MANAGED_PAGE_DELETED";
+export const SPONSOR_MANAGED_PAGE_UPDATED = "SPONSOR_MANAGED_PAGE_UPDATED";
 
 export const REQUEST_SPONSOR_CUSTOMIZED_PAGES =
   "REQUEST_SPONSOR_CUSTOMIZED_PAGES";
@@ -176,6 +177,28 @@ export const saveSponsorManagedPage =
       fields: "id,code,name,kind,modules_count,allowed_add_ons"
     };
 
+    if (entity.id) {
+      return putRequest(
+        null,
+        createAction(SPONSOR_CUSTOMIZED_PAGE_UPDATED),
+        `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages/${entity.id}`,
+        normalizedEntity,
+        snackbarErrorHandler,
+        entity
+      )(params)(dispatch)
+        .then(() => {
+          dispatch(
+            snackbarSuccessHandler({
+              title: T.translate("general.success"),
+              html: T.translate("edit_sponsor.pages_tab.managed_page_saved")
+            })
+          );
+        })
+        .finally(() => {
+          dispatch(stopLoading());
+        });
+    }
+
     return postRequest(
       null,
       createAction(SPONSOR_MANAGED_PAGE_ADDED),
@@ -187,7 +210,7 @@ export const saveSponsorManagedPage =
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("edit_sponsor.pages_tab.managed_page_saved")
+            html: T.translate("edit_sponsor.pages_tab.managed_page_created")
           })
         );
       })

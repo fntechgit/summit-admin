@@ -2500,11 +2500,12 @@
       "no_pages": "There are no pages that match the criteria",
       "add_page_using_template": "Add Page Template",
       "add_selected_page_template": "Add Selected Page Template",
-      "managed_page_saved": "Managed Page updated successfully.",
-      "custom_page_saved": "Custom Sponsor Page saved",
-      "custom_page_created": "Custom Sponsor Page created",
       "customized_page_archived": "Customized Sponsor Page successfully archived.",
-      "customized_page_unarchived": "Customized Sponsor Page successfully unarchived."
+      "customized_page_unarchived": "Customized Sponsor Page successfully unarchived.",
+      "custom_page_saved": "Custom Sponsor Page saved successfully",
+      "custom_page_created": "Custom Sponsor Page created successfully",
+      "managed_page_saved": "Sponsor Managed Page saved successfully",
+      "managed_page_created": "Sponsor Managed Page created successfully"
     },
     "cart_tab": {
       "new_form": "New Form",
