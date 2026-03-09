@@ -165,7 +165,8 @@ const buildValidationSchema = (items) => {
     // validation for the global quantity input
     let globalQtySchema = yup
       .number(T.translate("validation.number"))
-      .min(1, `${T.translate("validation.minimum")} 1`);
+      .min(0, `${T.translate("validation.minimum")} 0`);
+
     if (item.quantity_limit_per_sponsor > 0) {
       globalQtySchema = globalQtySchema.max(
         item.quantity_limit_per_sponsor,
