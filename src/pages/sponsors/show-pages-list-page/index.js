@@ -114,7 +114,7 @@ const ShowPagesListPage = ({
   const handleOpenPageTemplatePopup = async (row) => {
     await Promise.all([
       getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE),
-      row?.id ? getShowPage(row.id) : Promise.resolve()
+      getShowPage(row.id)
     ]);
     setOpenPopup("pageTemplate");
   };
@@ -124,7 +124,8 @@ const ShowPagesListPage = ({
     setOpenPopup(null);
   };
 
-  const handleNewShowPage = () => {
+  const handleNewShowPage = async () => {
+    await getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE);
     resetShowPageForm();
     setOpenPopup("pageTemplate");
   };
@@ -247,19 +248,17 @@ const ShowPagesListPage = ({
           />
         </div>
       )}
-      {openPopup === "cloneTemplate" &&
-        <GlobalPagePopup
-          onClose={() => setOpenPopup(null)}
-        />
-      }
-      {openPopup === "pageTemplate" &&
+      {openPopup === "cloneTemplate" && (
+        <GlobalPagePopup onClose={() => setOpenPopup(null)} />
+      )}
+      {openPopup === "pageTemplate" && (
         <PageTemplatePopup
           pageTemplate={currentShowPage}
           onClose={handleTemplatePopupClose}
           onSave={handleSaveShowPage}
-          sponsorships={sponsorships}
+          sponsorships={sponsorships.items}
         />
-      }
+      )}
     </div>
   );
 };

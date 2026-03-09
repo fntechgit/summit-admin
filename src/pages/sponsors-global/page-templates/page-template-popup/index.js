@@ -29,12 +29,7 @@ import {
 } from "../../../../utils/constants";
 import DropdownCheckbox from "../../../../components/mui/dropdown-checkbox";
 
-const PageTemplatePopup = ({
-  pageTemplate,
-  onClose,
-  onSave,
-  sponsorships
-}) => {
+const PageTemplatePopup = ({ pageTemplate, onClose, onSave, sponsorships }) => {
   const showSponsorships =
     Array.isArray(sponsorships) && sponsorships.length > 0;
 
@@ -156,7 +151,7 @@ const PageTemplatePopup = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("page_template_list.page_crud.title")}

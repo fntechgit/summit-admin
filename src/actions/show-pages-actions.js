@@ -115,7 +115,6 @@ export const getShowPage = (pageId) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand: "modules"
-    // expand: "modules,modules.file_type,sponsorship_types"
   };
 
   return getRequest(
