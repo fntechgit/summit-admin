@@ -38,6 +38,10 @@ jest.mock("../../../../../actions/inventory-item-actions", () => ({
   }))
 }));
 
+jest.mock("openstack-uicore-foundation/lib/utils/money", () => ({
+  currencyAmountFromCents: jest.fn()
+}));
+
 describe("InventoryPopup", () => {
   it("check if title is being rendered", async () => {
     const formId = "AAA";
