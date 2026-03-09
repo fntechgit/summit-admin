@@ -89,6 +89,9 @@ class TicketForm extends React.Component {
     if (id === "ticket_type") {
       shouldShowSave = !(value == null);
     }
+    if (ev.target.type === "ownerinput") {
+      entity.attendee_company = ev.target.value?.company || "";
+    }
 
     entity[id] = value;
     this.setState({
