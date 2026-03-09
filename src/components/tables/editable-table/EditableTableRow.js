@@ -135,7 +135,7 @@ function EditableTableRow(props) {
             return (
               <td key={`row-edit-${col.columnKey}-${row.id}`}>
                 {col.render
-                  ? col.render(row[col.columnKey])
+                  ? col.render(row[col.columnKey], row)
                   : formattedData[col.columnKey]}
               </td>
             );

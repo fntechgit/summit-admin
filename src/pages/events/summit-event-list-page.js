@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,7 +68,6 @@ import {
 } from "../../actions/filter-criteria-actions";
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
-import { saveEventMaterial } from "../../actions/event-material-actions";
 
 const fieldNames = (allSelectionPlans, allTracks, event_types) => [
   {
@@ -253,7 +252,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
     columnKey: "media_uploads",
     value: "media_uploads",
     sortable: false,
-    render: (e) => {
+    render: (e, row) => {
       if (!e?.length) return "N/A";
       return (
         <>
@@ -264,8 +263,9 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
                 className="text-link-button"
                 onClick={(ev) => {
                   ev.preventDefault();
+                  if (!row?.id) return false;
                   window.open(
-                    `/app/summits/${m.summit_id}/events/${m.event_id}/materials/${m.id}`,
+                    `/app/summits/${m.summit_id}/events/${row.id}/materials/${m.id}`,
                     "_blank"
                   );
                   return false;
@@ -295,38 +295,6 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
               <b>{`${m.display_on_site ? "Yes" : "No"}`}</b>
               <br />
             </React.Fragment>
-          ))}
-        </>
-      );
-    },
-    editableField: (extraProps) => {
-      const media_uploads = extraProps.row?.media_uploads || [];
-      if (!media_uploads.length) return false;
-      return (
-        <>
-          {media_uploads.map((m) => (
-            <div key={m.id}>
-              {`"${m.media_upload_type.name}": `}
-              <Dropdown
-                id={`media_uploads___${m.id}___display_on_site`}
-                // eslint-disable-next-line react/jsx-props-no-spreading
-                {...extraProps}
-                value={m.display_on_site}
-                options={[
-                  { label: "Yes", value: true },
-                  { label: "No", value: false }
-                ]}
-                menuPortalTarget={document.body}
-                menuPosition="fixed"
-                styles={{
-                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                  control: (base, state) => ({
-                    ...base,
-                    zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
-                  })
-                }}
-              />
-            </div>
           ))}
         </>
       );
@@ -979,8 +947,7 @@ class SummitEventListPage extends React.Component {
       orderDir,
       totalEvents,
       term,
-      bulkUpdateEvents,
-      saveEventMaterial
+      bulkUpdateEvents
     } = this.props;
     const {
       enabledFilters,
@@ -1991,12 +1958,6 @@ class SummitEventListPage extends React.Component {
                 columns={columns}
                 handleSort={this.handleSort}
                 updateData={bulkUpdateEvents}
-                afterUpdate={[
-                  {
-                    action: (data) => saveEventMaterial(data),
-                    propertyName: "media_uploads"
-                  }
-                ]}
                 handleDeleteRow={this.handleDeleteEvent}
                 formattingFunction={formatEventData}
               />
@@ -2186,6 +2147,5 @@ export default connect(mapStateToProps, {
   changeEventListSearchTerm,
   saveFilterCriteria,
   deleteFilterCriteria,
-  bulkUpdateEvents,
-  saveEventMaterial
+  bulkUpdateEvents
 })(SummitEventListPage);
