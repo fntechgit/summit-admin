@@ -85,7 +85,7 @@ const FormItemTable = ({
   const calculateQuantity = useCallback(
     (row) => {
       const qtyEXC = extraColumns.filter((exc) => exc.type === "Quantity");
-      const globalQty = row.quantity;
+      const globalQty = values[`i-${row.form_item_id}-c-global-f-quantity`];
       const itemLevelQty = qtyEXC.reduce((res, exc) => {
         const start = res > 0 ? res : 1;
         return (
@@ -108,6 +108,7 @@ const FormItemTable = ({
     if (currentApplicableRate === "expired") return 0;
     const customRate = values[`i-${row.form_item_id}-c-global-f-custom_rate`];
     const rate = customRate || row.rates[currentApplicableRate];
+
     return qty * rate;
   };
 

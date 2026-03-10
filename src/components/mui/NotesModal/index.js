@@ -84,7 +84,7 @@ const NotesModal = ({ item, open, onClose }) => {
 };
 
 NotesModal.propTypes = {
-  item: PropTypes.object.isRequired,
+  item: PropTypes.object,
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired
 };

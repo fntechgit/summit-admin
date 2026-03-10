@@ -2519,7 +2519,8 @@
       },
       "sponsor_note": {
         "title": "Note to Sponsor",
-        "placeholder": "Enter shared note with sponsor..."
+        "placeholder": "Enter shared note with sponsor...",
+        "deleted": "Note deleted successfully."
       }
     },
     "purchase_tab": {

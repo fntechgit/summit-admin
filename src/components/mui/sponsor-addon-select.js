@@ -38,7 +38,8 @@ const SponsorAddonSelect = ({
   }, []);
 
   const handleChange = (ev) => {
-    onChange({ id: ev.target.value, name: ev.target.label });
+    const addon = options.find((o) => o.value === ev.target.value);
+    onChange({ id: addon.value, name: addon.label });
   };
 
   return (
@@ -67,7 +68,7 @@ const SponsorAddonSelect = ({
 };
 
 SponsorAddonSelect.propTypes = {
-  value: PropTypes.string,
+  value: PropTypes.number,
   summitId: PropTypes.number.isRequired,
   sponsor: PropTypes.object.isRequired,
   placeholder: PropTypes.string,

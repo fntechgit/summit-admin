@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
 import { useField } from "formik";
@@ -23,6 +23,10 @@ const MuiFormikPriceField = ({
     ? amountFromCents(field.value || 0)
     : field.value;
   const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
 
   const handleChange = () => {
     const val = parseFloat(value) || 0;

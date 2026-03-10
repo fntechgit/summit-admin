@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
 import { useField } from "formik";
@@ -37,6 +37,10 @@ const MuiFormikDiscountField = ({
     ? amountFromCents(field.value || 0)
     : field.value;
   const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
 
   const adornment =
     discountType === DISCOUNT_TYPES.RATE

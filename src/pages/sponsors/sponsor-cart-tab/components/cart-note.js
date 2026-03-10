@@ -150,7 +150,7 @@ CartNote.propTypes = {
   title: PropTypes.string.isRequired,
   note: PropTypes.shape({
     value: PropTypes.string,
-    created: PropTypes.string
+    created: PropTypes.number
   }),
   placeholder: PropTypes.string,
   onSave: PropTypes.func,

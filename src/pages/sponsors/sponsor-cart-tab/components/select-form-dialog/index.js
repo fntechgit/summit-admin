@@ -126,7 +126,7 @@ const SelectFormDialog = ({
       <DialogContent sx={{ p: 0 }}>
         <Grid2 container spacing={2} size={12} sx={{ p: 2 }}>
           <SponsorAddonSelect
-            value={selectedAddon?.id || null}
+            value={selectedAddon?.id || ""}
             summitId={summitId}
             sponsor={sponsor}
             onChange={setSelectedAddon}
