@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,8 +52,7 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
   DEFAULT_Z_INDEX,
-  HIGH_Z_INDEX,
-  INDEX_NOT_FOUND
+  HIGH_Z_INDEX
 } from "../../utils/constants";
 import {
   defaultColumns,
@@ -68,7 +67,7 @@ import {
 } from "../../actions/filter-criteria-actions";
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
-import { saveEventMaterial } from "../../actions/event-material-actions";
+import { buildNameIdDDL } from "../../utils/events/summit-event-list-page.utils";
 
 const fieldNames = (allSelectionPlans, allTracks, event_types) => [
   {
@@ -114,9 +113,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
     value: "track",
     sortable: true,
     editableField: (extraProps) => {
-      const track_ddl = allTracks
-        ?.sort((a, b) => a.order - b.order)
-        .map((t) => ({ label: t.name, value: t.id }));
+      const track_ddl = buildNameIdDDL(allTracks);
 
       return (
         <Dropdown
@@ -153,29 +150,44 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
     value: "selection_plan",
     sortable: true,
     editableField: (extraProps) => {
-      if (!extraProps.row.type?.id) return false;
+      const isValid = (obj, keys) =>
+        keys.every((k) => obj && typeof obj[k] !== "undefined");
+      const isValidSP = (sp) =>
+        sp &&
+        typeof sp.id !== "undefined" &&
+        typeof sp.name === "string" &&
+        sp.name.trim();
 
-      const event_type = event_types.find(
-        (t) => t.id === extraProps.row.type?.id
-      );
+      if (!extraProps.row?.type?.id) return false;
+      const event_type = Array.isArray(event_types)
+        ? event_types.find(
+            (t) => isValid(t, ["id"]) && t.id === extraProps.row.type?.id
+          )
+        : null;
+      if (!event_type) return false;
 
       const allowSelectionPlanEdit =
-        ["PresentationType"].indexOf(event_type.class_name) !==
-          INDEX_NOT_FOUND ||
-        ["PresentationType"].indexOf(event_type.name) !== INDEX_NOT_FOUND;
-
+        ["PresentationType"].includes(event_type.class_name) ||
+        ["PresentationType"].includes(event_type.name);
       if (!allowSelectionPlanEdit) return false;
 
-      const track = allTracks.find((t) => t.id === extraProps.row?.track?.id);
+      const trackId = extraProps.row?.track?.id;
+      const track =
+        trackId !== undefined && trackId !== null
+          ? allTracks.find((t) => isValid(t, ["id"]) && t.id === trackId)
+          : null;
 
-      const selection_plans_per_track = allSelectionPlans
-        .filter(
-          (sp) =>
-            !track ||
-            sp.track_groups.some((gr) => track.track_groups.includes(gr))
-        )
-        ?.sort((a, b) => a.order - b.order)
-        .map((sp) => ({ label: sp.name, value: sp.id }));
+      const selection_plans_per_track = buildNameIdDDL(
+        (Array.isArray(allSelectionPlans) ? allSelectionPlans : [])
+          .filter(isValidSP)
+          .filter(
+            (sp) =>
+              !track ||
+              (Array.isArray(sp.track_groups) &&
+                Array.isArray(track.track_groups) &&
+                sp.track_groups.some((gr) => track.track_groups.includes(gr)))
+          )
+      );
 
       return (
         <Dropdown
@@ -253,7 +265,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
     columnKey: "media_uploads",
     value: "media_uploads",
     sortable: false,
-    render: (e) => {
+    render: (e, row) => {
       if (!e?.length) return "N/A";
       return (
         <>
@@ -264,8 +276,9 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
                 className="text-link-button"
                 onClick={(ev) => {
                   ev.preventDefault();
+                  if (!row?.id) return false;
                   window.open(
-                    `/app/summits/${m.summit_id}/events/${m.event_id}/materials/${m.id}`,
+                    `/app/summits/${m.summit_id}/events/${row.id}/materials/${m.id}`,
                     "_blank"
                   );
                   return false;
@@ -295,38 +308,6 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
               <b>{`${m.display_on_site ? "Yes" : "No"}`}</b>
               <br />
             </React.Fragment>
-          ))}
-        </>
-      );
-    },
-    editableField: (extraProps) => {
-      const media_uploads = extraProps.row?.media_uploads || [];
-      if (!media_uploads.length) return false;
-      return (
-        <>
-          {media_uploads.map((m) => (
-            <div key={m.id}>
-              {`"${m.media_upload_type.name}": `}
-              <Dropdown
-                id={`media_uploads___${m.id}___display_on_site`}
-                // eslint-disable-next-line react/jsx-props-no-spreading
-                {...extraProps}
-                value={m.display_on_site}
-                options={[
-                  { label: "Yes", value: true },
-                  { label: "No", value: false }
-                ]}
-                menuPortalTarget={document.body}
-                menuPosition="fixed"
-                styles={{
-                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                  control: (base, state) => ({
-                    ...base,
-                    zIndex: state.menuIsOpen ? HIGH_Z_INDEX : DEFAULT_Z_INDEX
-                  })
-                }}
-              />
-            </div>
           ))}
         </>
       );
@@ -979,8 +960,7 @@ class SummitEventListPage extends React.Component {
       orderDir,
       totalEvents,
       term,
-      bulkUpdateEvents,
-      saveEventMaterial
+      bulkUpdateEvents
     } = this.props;
     const {
       enabledFilters,
@@ -1046,13 +1026,9 @@ class SummitEventListPage extends React.Component {
       }
     };
 
-    const selection_plans_ddl = currentSummit.selection_plans
-      ?.sort((a, b) => a.order - b.order)
-      .map((sp) => ({ label: sp.name, value: sp.id }));
+    const selection_plans_ddl = buildNameIdDDL(currentSummit.selection_plans);
 
-    const location_ddl = currentSummit.locations
-      ?.sort((a, b) => a.order - b.order)
-      .map((l) => ({ label: l.name, value: l.id }));
+    const location_ddl = buildNameIdDDL(currentSummit.locations);
 
     const selection_status_ddl = [
       { label: "Pending", value: "pending" },
@@ -1061,13 +1037,9 @@ class SummitEventListPage extends React.Component {
       { label: "Alternate", value: "alternate" }
     ];
 
-    const track_ddl = currentSummit.tracks
-      ?.sort((a, b) => a.order - b.order)
-      .map((t) => ({ label: t.name, value: t.id }));
+    const track_ddl = buildNameIdDDL(currentSummit.tracks);
 
-    const event_type_ddl = currentSummit.event_types
-      ?.sort((a, b) => a.order - b.order)
-      .map((t) => ({ label: t.name, value: t.id }));
+    const event_type_ddl = buildNameIdDDL(currentSummit.event_types);
 
     const level_ddl = [
       { label: "Beginner", value: "beginner" },
@@ -1991,12 +1963,6 @@ class SummitEventListPage extends React.Component {
                 columns={columns}
                 handleSort={this.handleSort}
                 updateData={bulkUpdateEvents}
-                afterUpdate={[
-                  {
-                    action: (data) => saveEventMaterial(data),
-                    propertyName: "media_uploads"
-                  }
-                ]}
                 handleDeleteRow={this.handleDeleteEvent}
                 formattingFunction={formatEventData}
               />
@@ -2186,6 +2152,5 @@ export default connect(mapStateToProps, {
   changeEventListSearchTerm,
   saveFilterCriteria,
   deleteFilterCriteria,
-  bulkUpdateEvents,
-  saveEventMaterial
+  bulkUpdateEvents
 })(SummitEventListPage);

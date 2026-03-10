@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ import {
   getBadgeScan,
   saveBadgeScan
 } from "../../../actions/sponsor-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import EditBadgeScanPopup from "./edit-badge-scan-popup";
 
 const SponsorBadgeScans = ({
@@ -54,7 +55,7 @@ const SponsorBadgeScans = ({
       getBadgeScans(
         sponsor.id,
         searchTerm,
-        currentPage,
+        DEFAULT_CURRENT_PAGE,
         perPage,
         order,
         orderDir
@@ -67,7 +68,14 @@ const SponsorBadgeScans = ({
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getBadgeScans(sponsor.id, term, currentPage, newPerPage, order, orderDir);
+    getBadgeScans(
+      sponsor.id,
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir
+    );
   };
 
   const handleSort = (key, dir) => {

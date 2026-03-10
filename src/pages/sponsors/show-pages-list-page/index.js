@@ -32,11 +32,12 @@ import {
   deleteShowPage,
   resetShowPageForm
 } from "../../../actions/show-pages-actions";
+import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
-import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 
 const ShowPagesListPage = ({
   showPages,
@@ -48,13 +49,15 @@ const ShowPagesListPage = ({
   hideArchived,
   totalCount,
   currentShowPage,
+  sponsorships,
   getShowPages,
   archiveShowPage,
   unarchiveShowPage,
   getShowPage,
   saveShowPage,
   deleteShowPage,
-  resetShowPageForm
+  resetShowPageForm,
+  getSponsorships
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -72,12 +75,6 @@ const ShowPagesListPage = ({
 
   const handlePerPageChange = (newPerPage) => {
     getShowPages(term, currentPage, newPerPage, order, orderDir, hideArchived);
-  };
-
-  const handleRowEdit = (row) => {
-    getShowPage(row.id).then(() => {
-      setOpenPopup("pageTemplate");
-    });
   };
 
   const handleRowDelete = (itemId) => {
@@ -114,12 +111,21 @@ const ShowPagesListPage = ({
     });
   };
 
+  const handleOpenPageTemplatePopup = async (row) => {
+    await Promise.all([
+      getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE),
+      getShowPage(row.id)
+    ]);
+    setOpenPopup("pageTemplate");
+  };
+
   const handleTemplatePopupClose = () => {
     resetShowPageForm();
     setOpenPopup(null);
   };
 
-  const handleNewShowPage = () => {
+  const handleNewShowPage = async () => {
+    await getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE);
     resetShowPageForm();
     setOpenPopup("pageTemplate");
   };
@@ -237,22 +243,22 @@ const ShowPagesListPage = ({
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
-            onEdit={handleRowEdit}
+            onEdit={handleOpenPageTemplatePopup}
             onArchive={handleArchiveItem}
           />
         </div>
       )}
-
-      <GlobalPagePopup
-        open={openPopup === "cloneTemplate"}
-        onClose={() => setOpenPopup(null)}
-      />
-      <PageTemplatePopup
-        open={openPopup === "pageTemplate"}
-        pageTemplate={currentShowPage}
-        onClose={handleTemplatePopupClose}
-        onSave={handleSaveShowPage}
-      />
+      {openPopup === "cloneTemplate" && (
+        <GlobalPagePopup onClose={() => setOpenPopup(null)} />
+      )}
+      {openPopup === "pageTemplate" && (
+        <PageTemplatePopup
+          pageTemplate={currentShowPage}
+          onClose={handleTemplatePopupClose}
+          onSave={handleSaveShowPage}
+          sponsorships={sponsorships.items}
+        />
+      )}
     </div>
   );
 };
@@ -268,5 +274,6 @@ export default connect(mapStateToProps, {
   getShowPage,
   saveShowPage,
   deleteShowPage,
-  resetShowPageForm
+  resetShowPageForm,
+  getSponsorships
 })(ShowPagesListPage);

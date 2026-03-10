@@ -275,16 +275,16 @@ const PageTemplateListPage = ({
           </div>
         )}
       </Box>
-      <PageTemplatePopup
-        open={openPageDialog}
-        pageTemplate={pageTemplate}
-        onClose={handleClosePageDialog}
-        onSave={handleSavePageTemplate}
-      />
-      <PageTemplateClonePopup
-        open={openCloneDialog}
-        onClose={() => setOpenCloneDialog(false)}
-      />
+      {openPageDialog && (
+        <PageTemplatePopup
+          pageTemplate={pageTemplate}
+          onClose={handleClosePageDialog}
+          onSave={handleSavePageTemplate}
+        />
+      )}
+      {openCloneDialog && (
+        <PageTemplateClonePopup onClose={() => setOpenCloneDialog(false)} />
+      )}
     </div>
   );
 };
