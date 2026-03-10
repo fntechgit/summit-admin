@@ -371,7 +371,6 @@ const SponsorFormsManageItems = ({
       {openPopup === "add_item" && (
         <SponsorInventoryDialog
           entity={currentInventoryItem}
-          open={openPopup === "add_item"}
           onSave={handleItemSave}
           onClose={handleClose}
         />
