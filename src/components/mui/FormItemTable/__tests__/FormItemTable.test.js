@@ -592,6 +592,7 @@ describe("FormItemTable Component", () => {
           data={itemsWithoutQuantityFields}
           rateDates={MOCK_RATE_DATES}
           timeZone="America/New_York"
+          initialValues={{ "i-10-c-global-f-quantity": 0 }}
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
         />
