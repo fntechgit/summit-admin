@@ -69,6 +69,9 @@ import {
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
 import { saveEventMaterial } from "../../actions/event-material-actions";
+import {
+  buildNameIdDDL
+} from "../../utils/events/summit-event-list-page.utils";
 
 const fieldNames = (allSelectionPlans, allTracks, event_types) => [
   {
@@ -114,9 +117,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
     value: "track",
     sortable: true,
     editableField: (extraProps) => {
-      const track_ddl = allTracks
-        ?.sort((a, b) => a.order - b.order)
-        .map((t) => ({ label: t.name, value: t.id }));
+      const track_ddl = buildNameIdDDL(allTracks);
 
       return (
         <Dropdown
@@ -155,27 +156,27 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
     editableField: (extraProps) => {
       if (!extraProps.row.type?.id) return false;
 
-      const event_type = event_types.find(
-        (t) => t.id === extraProps.row.type?.id
-      );
+      const event_type = Array.isArray(event_types)
+        ? event_types.find((t) => t && t.id === extraProps.row.type?.id)
+        : null;
 
       const allowSelectionPlanEdit =
-        ["PresentationType"].indexOf(event_type.class_name) !==
+        ["PresentationType"].indexOf(event_type?.class_name) !==
           INDEX_NOT_FOUND ||
-        ["PresentationType"].indexOf(event_type.name) !== INDEX_NOT_FOUND;
+        ["PresentationType"].indexOf(event_type?.name) !== INDEX_NOT_FOUND;
 
       if (!allowSelectionPlanEdit) return false;
 
-      const track = allTracks.find((t) => t.id === extraProps.row?.track?.id);
+      const trackId = extraProps.row?.track?.id;
+      const track = trackId ? allTracks.find((t) => t?.id === trackId) : null;
 
-      const selection_plans_per_track = allSelectionPlans
-        .filter(
+      const selection_plans_per_track = buildNameIdDDL(
+        (Array.isArray(allSelectionPlans) ? allSelectionPlans : []).filter(
           (sp) =>
             !track ||
-            sp.track_groups.some((gr) => track.track_groups.includes(gr))
+            sp?.track_groups?.some((gr) => track.track_groups?.includes(gr))
         )
-        ?.sort((a, b) => a.order - b.order)
-        .map((sp) => ({ label: sp.name, value: sp.id }));
+      );
 
       return (
         <Dropdown
@@ -1046,13 +1047,9 @@ class SummitEventListPage extends React.Component {
       }
     };
 
-    const selection_plans_ddl = currentSummit.selection_plans
-      ?.sort((a, b) => a.order - b.order)
-      .map((sp) => ({ label: sp.name, value: sp.id }));
+    const selection_plans_ddl = buildNameIdDDL(currentSummit.selection_plans);
 
-    const location_ddl = currentSummit.locations
-      ?.sort((a, b) => a.order - b.order)
-      .map((l) => ({ label: l.name, value: l.id }));
+    const location_ddl = buildNameIdDDL(currentSummit.locations);
 
     const selection_status_ddl = [
       { label: "Pending", value: "pending" },
@@ -1061,13 +1058,9 @@ class SummitEventListPage extends React.Component {
       { label: "Alternate", value: "alternate" }
     ];
 
-    const track_ddl = currentSummit.tracks
-      ?.sort((a, b) => a.order - b.order)
-      .map((t) => ({ label: t.name, value: t.id }));
+    const track_ddl = buildNameIdDDL(currentSummit.tracks);
 
-    const event_type_ddl = currentSummit.event_types
-      ?.sort((a, b) => a.order - b.order)
-      .map((t) => ({ label: t.name, value: t.id }));
+    const event_type_ddl = buildNameIdDDL(currentSummit.event_types);
 
     const level_ddl = [
       { label: "Beginner", value: "beginner" },
