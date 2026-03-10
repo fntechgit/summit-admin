@@ -167,7 +167,6 @@ const SponsorPagesTab = ({
         hideArchived
       );
     });
-    console.log("DELETE MANAGED ", itemId);
   };
 
   const handleCustomizedEdit = (item) => {
