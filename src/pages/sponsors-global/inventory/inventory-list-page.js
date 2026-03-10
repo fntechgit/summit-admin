@@ -127,6 +127,7 @@ const InventoryListPage = ({
   };
 
   const handleNewInventoryItem = () => {
+    resetInventoryItemForm();
     setOpen(true);
   };
 
@@ -298,7 +299,6 @@ const InventoryListPage = ({
         <SponsorInventoryDialog
           entity={currentInventoryItem}
           errors={currentInventoryItemErrors}
-          open={open}
           onSave={handleInventorySave}
           onClose={handleClose}
           onMetaFieldTypeDeleted={deleteInventoryItemMetaFieldType}
