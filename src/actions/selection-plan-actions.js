@@ -589,8 +589,10 @@ export const deleteSelectionPlanExtraQuestionValue =
 
 /** *********************  EVENT TYPES  ****************************************** */
 
-export const EVENT_TYPE_ADDED = "EVENT_TYPE_ADDED";
-export const EVENT_TYPE_REMOVED = "EVENT_TYPE_REMOVED";
+export const SELECTION_PLAN_EVENT_TYPE_ADDED =
+  "SELECTION_PLAN_EVENT_TYPE_ADDED";
+export const SELECTION_PLAN_EVENT_TYPE_REMOVED =
+  "SELECTION_PLAN_EVENT_TYPE_REMOVED";
 
 export const addEventTypeSelectionPlan =
   (selectionPlanId, eventType) => async (dispatch, getState) => {
@@ -606,7 +608,7 @@ export const addEventTypeSelectionPlan =
 
     return putRequest(
       null,
-      createAction(EVENT_TYPE_ADDED)({ eventType }),
+      createAction(SELECTION_PLAN_EVENT_TYPE_ADDED)({ eventType }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/event-types/${eventType.id}`,
       {},
       authErrorHandler
@@ -628,7 +630,7 @@ export const deleteEventTypeSelectionPlan =
 
     return deleteRequest(
       null,
-      createAction(EVENT_TYPE_REMOVED)({ eventTypeId }),
+      createAction(SELECTION_PLAN_EVENT_TYPE_REMOVED)({ eventTypeId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans/${selectionPlanId}/event-types/${eventTypeId}`,
       null,
       authErrorHandler
