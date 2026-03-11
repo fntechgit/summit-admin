@@ -194,9 +194,12 @@ export const saveSponsorManagedPage =
 
 export const deleteSponsorManagedPage =
   (pageId) => async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
+    const { currentSummitState, currentSponsorState } = getState();
     const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
     const params = { access_token: accessToken };
 
     dispatch(startLoading());
@@ -204,7 +207,7 @@ export const deleteSponsorManagedPage =
     return deleteRequest(
       null,
       createAction(SPONSOR_MANAGED_PAGE_DELETED)({ pageId }),
-      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/managed-pages/${pageId}`,
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages/${pageId}`,
       null,
       snackbarErrorHandler
     )(params)(dispatch)
