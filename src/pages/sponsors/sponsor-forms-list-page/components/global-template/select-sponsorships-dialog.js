@@ -20,6 +20,7 @@ const SelectSponsorshipsDialog = ({
   sponsorships,
   onSave,
   onClose,
+  isSaving = false,
   getSponsorships
 }) => {
   const { items, currentPage, total } = sponsorships;
@@ -36,6 +37,7 @@ const SelectSponsorshipsDialog = ({
   };
 
   const handleClose = () => {
+    if (isSaving) return;
     setSelection({ ids: [], all: false });
     onClose();
   };
@@ -81,7 +83,12 @@ const SelectSponsorshipsDialog = ({
       </DialogContent>
       <Divider />
       <DialogActions>
-        <Button onClick={handleOnSave} fullWidth variant="contained">
+        <Button
+          onClick={handleOnSave}
+          disabled={(selection.ids.length === 0 && !selection.all) || isSaving}
+          fullWidth
+          variant="contained"
+        >
           {T.translate("sponsor_forms.sponsorships_popup.apply")}
         </Button>
       </DialogActions>
@@ -92,7 +99,8 @@ const SelectSponsorshipsDialog = ({
 SelectSponsorshipsDialog.propTypes = {
   sponsorships: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
+  isSaving: PropTypes.bool
 };
 
 const mapStateToProps = ({ sponsorFormsListState }) => ({

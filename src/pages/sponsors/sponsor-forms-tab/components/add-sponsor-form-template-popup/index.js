@@ -45,21 +45,31 @@ const AddSponsorFormTemplatePopup = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedForms, setSelectedForms] = useState([]);
 
-  const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
+  const sponsorshipIds = sponsor?.sponsorships?.map((e) => e.id) || [];
 
-  const sponsorshipTypeIds = sponsor.sponsorships.map((e) => e.type.id);
+  const sponsorshipTypeIds = sponsor?.sponsorships?.map((e) => e.type.id) || [];
 
   const formik = useFormik({
     initialValues: {
       add_ons: []
     },
-    onSubmit: (values) => {
+    validationSchema: yup.object({
+      add_ons: yup
+        .array()
+        .test(
+          "add_ons-required",
+          T.translate("validation.add_on_required"),
+          (value) => value?.includes("all") || value?.length > 0
+        )
+    }),
+    onSubmit: async (values) => {
       const { add_ons } = values;
       const entity = {
         forms: selectedForms,
         add_ons
       };
-      onSubmit(entity);
+
+      await Promise.resolve(onSubmit(entity));
     },
     enableReinitialize: true
   });
@@ -74,6 +84,9 @@ const AddSponsorFormTemplatePopup = ({
       false,
       sponsorshipTypeIds
     );
+    setSelectedForms([]);
+    setSearchTerm("");
+    formik.resetForm();
   }, []);
 
   const handlePageChange = (page) => {
@@ -123,6 +136,8 @@ const AddSponsorFormTemplatePopup = ({
   };
 
   const handleClose = () => {
+    if (formik.isSubmitting) return;
+    formik.resetForm();
     onClose();
   };
 
@@ -167,12 +182,25 @@ const AddSponsorFormTemplatePopup = ({
   ];
 
   return (
-    <Dialog open onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog
+      open
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableEnforceFocus
+      disableAutoFocus
+      disableRestoreFocus
+    >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="1.5rem">
           {T.translate("edit_sponsor.forms_tab.add_form_using_template")}
         </Typography>
-        <IconButton size="small" onClick={() => handleClose()} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={() => handleClose()}
+          disabled={formik.isSubmitting}
+          sx={{ mr: 1 }}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -190,7 +218,6 @@ const AddSponsorFormTemplatePopup = ({
                 name="add_ons"
                 formik={formik}
                 queryFunction={querySponsorAddons}
-                // params for function, except input
                 queryParams={[summitId, sponsor.id, sponsorshipIds]}
                 showSelectAll
                 getGroupId={(addon) => addon.sponsorship.type.id}
@@ -253,8 +280,7 @@ const AddSponsorFormTemplatePopup = ({
                 </Grid2>
               </Grid2>
             </Grid2>
-
-            {sponsorForms.length > 0 && (
+            {Array.isArray(sponsorForms) && sponsorForms.length > 0 && (
               <Box sx={{ p: 2 }}>
                 <MuiTable
                   columns={columns}
@@ -273,7 +299,7 @@ const AddSponsorFormTemplatePopup = ({
           <DialogActions>
             <Button
               type="submit"
-              disabled={selectedForms.length === 0}
+              disabled={selectedForms.length === 0 || formik.isSubmitting}
               fullWidth
               variant="contained"
             >
@@ -287,7 +313,10 @@ const AddSponsorFormTemplatePopup = ({
 };
 
 AddSponsorFormTemplatePopup.propTypes = {
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  sponsor: PropTypes.object.isRequired,
+  summitId: PropTypes.number.isRequired
 };
 
 const mapStateToProps = ({ sponsorFormsListState }) => ({

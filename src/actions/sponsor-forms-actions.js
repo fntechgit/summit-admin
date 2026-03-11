@@ -372,7 +372,9 @@ export const cloneGlobalTemplate =
           })
         );
       })
-      .catch(() => {}); // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 export const saveFormTemplate = (entity) => async (dispatch, getState) => {
@@ -407,7 +409,6 @@ export const saveFormTemplate = (entity) => async (dispatch, getState) => {
         })
       );
     })
-    .catch(() => {}) // need to catch promise reject
     .finally(() => {
       dispatch(stopLoading());
     });
@@ -447,7 +448,6 @@ export const updateFormTemplate = (entity) => async (dispatch, getState) => {
         })
       );
     })
-    .catch(() => {}) // need to catch promise reject
     .finally(() => {
       dispatch(stopLoading());
     });
