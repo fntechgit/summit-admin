@@ -343,13 +343,13 @@ export const cloneGlobalTemplate =
     };
 
     const normalizedEntity = {
-      form_template_ids: templateIds,
-      sponsorship_types: sponsorIds,
-      apply_to_all_types: allSponsors
+      form_template_ids: templateIds
     };
 
-    if (allSponsors) {
-      delete normalizedEntity.sponsorship_types;
+    if (sponsorIds?.length > 0) {
+      normalizedEntity.sponsorship_types = sponsorIds;
+      normalizedEntity.apply_to_all_types = allSponsors;
+      if (allSponsors) delete normalizedEntity.sponsorship_types;
     }
 
     return postRequest(
@@ -562,14 +562,16 @@ export const saveSponsorManagedForm =
 
 const normalizeSponsorManagedForm = (entity) => {
   const normalizedEntity = {
-    show_form_ids: entity.forms,
-    allowed_add_ons: entity.add_ons.map((a) => a.id),
-    apply_to_all_add_ons: false
+    show_form_ids: entity.forms
   };
 
-  if (entity.add_ons.includes("all")) {
-    normalizedEntity.apply_to_all_add_ons = true;
-    normalizedEntity.allowed_add_ons = [];
+  if (entity.add_ons?.length > 0) {
+    normalizedEntity.allowed_add_ons = entity.add_ons.map((a) => a.id);
+    normalizedEntity.apply_to_all_add_ons = false;
+    if (entity.add_ons.includes("all")) {
+      normalizedEntity.apply_to_all_add_ons = true;
+      normalizedEntity.allowed_add_ons = [];
+    }
   }
 
   return normalizedEntity;

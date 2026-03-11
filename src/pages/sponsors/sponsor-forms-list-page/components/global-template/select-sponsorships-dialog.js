@@ -81,12 +81,7 @@ const SelectSponsorshipsDialog = ({
       </DialogContent>
       <Divider />
       <DialogActions>
-        <Button
-          onClick={handleOnSave}
-          disabled={selection.ids.length === 0 && !selection.all}
-          fullWidth
-          variant="contained"
-        >
+        <Button onClick={handleOnSave} fullWidth variant="contained">
           {T.translate("sponsor_forms.sponsorships_popup.apply")}
         </Button>
       </DialogActions>
