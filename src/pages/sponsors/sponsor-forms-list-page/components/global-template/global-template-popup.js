@@ -9,6 +9,7 @@ import { cloneGlobalTemplate } from "../../../../../actions/sponsor-forms-action
 const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
   const [stage, setStage] = useState("templates");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
   const dialogSize = stage === "templates" ? "md" : "sm";
 
   const handleClose = () => {
@@ -23,15 +24,24 @@ const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
   };
 
   const handleOnSave = (selectedTiers, allTiers) => {
-    cloneGlobalTemplate(selectedTemplates, selectedTiers, allTiers).finally(
-      () => {
+    if (isSaving) return;
+
+    setIsSaving(true);
+
+    cloneGlobalTemplate(selectedTemplates, selectedTiers, allTiers)
+      .then(() => {
         handleClose();
-      }
-    );
+      })
+      .catch(() => {
+        // keep dialog open on save error to preserve user progress
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth={dialogSize} fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth={dialogSize} fullWidth>
       {stage === "templates" && (
         <SelectTemplatesDialog
           onSave={handleOnSelectTemplates}
@@ -39,7 +49,11 @@ const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
         />
       )}
       {stage === "sponsorships" && (
-        <SelectSponsorshipsDialog onSave={handleOnSave} onClose={handleClose} />
+        <SelectSponsorshipsDialog
+          onSave={handleOnSave}
+          onClose={handleClose}
+          isSaving={isSaving}
+        />
       )}
     </Dialog>
   );

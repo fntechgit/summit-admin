@@ -172,6 +172,23 @@ const SponsorFormsTab = ({
     });
   };
 
+  const handleCustomizedFormSaved = () => {
+    const {
+      perPage: customizedPerPage,
+      order: customizedOrder,
+      orderDir: customizedOrderDir
+    } = customizedForms;
+
+    getSponsorCustomizedForms(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      customizedPerPage,
+      customizedOrder,
+      customizedOrderDir,
+      hideArchived
+    );
+  };
+
   const baseColumns = (name, manageItemsFn) => [
     {
       columnKey: "name",
@@ -374,6 +391,7 @@ const SponsorFormsTab = ({
 
       {openPopup === "template" && (
         <AddSponsorFormTemplatePopup
+          open={openPopup === "template"}
           onClose={() => setOpenPopup(null)}
           onSubmit={handleSaveFormFromTemplate}
           sponsor={sponsor}
@@ -385,6 +403,7 @@ const SponsorFormsTab = ({
         formId={customFormEdit?.id || null}
         open={!!customFormEdit}
         onClose={() => setCustomFormEdit(null)}
+        onSaved={handleCustomizedFormSaved}
         sponsor={sponsor}
         summitId={summitId}
       />

@@ -46,6 +46,7 @@ const FormTemplateForm = ({
   initialValues,
   sponsorships,
   summitTZ,
+  isSaving = false,
   onSubmit
 }) => {
   const formik = useFormik({
@@ -152,7 +153,12 @@ const FormTemplateForm = ({
         </DialogContent>
         <Divider />
         <DialogActions>
-          <Button type="submit" fullWidth variant="contained">
+          <Button
+            type="submit"
+            disabled={isSaving}
+            fullWidth
+            variant="contained"
+          >
             {T.translate("sponsor_forms.form_template_popup.save")}
           </Button>
         </DialogActions>
