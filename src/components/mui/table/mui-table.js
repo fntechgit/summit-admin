@@ -28,6 +28,11 @@ import {
 import showConfirmDialog from "../showConfirmDialog";
 import styles from "./mui-table.module.less";
 
+const ARCHIVED_CELL_SX = {
+  backgroundColor: "background.light",
+  color: "text.disabled"
+};
+
 const MuiTable = ({
   columns = [],
   data = [],
@@ -74,6 +79,14 @@ const MuiTable = ({
   }
 
   const { sortCol, sortDir } = options;
+
+  const getArchivedCellSx = (row) =>
+    options.disableProp && row[options.disableProp] ? ARCHIVED_CELL_SX : null;
+
+  const getCellSx = (row, baseSx = {}) => ({
+    ...baseSx,
+    ...(getArchivedCellSx(row) || {})
+  });
 
   const handleDelete = async (item) => {
     const isConfirmed = await showConfirmDialog({
@@ -164,9 +177,8 @@ const MuiTable = ({
 
             {/* TABLE BODY */}
             <TableBody>
-              {data.map((row, idx) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <TableRow key={`row-${idx}`}>
+              {data.map((row) => (
+                <TableRow key={row.id}>
                   {/* Main content columns */}
                   {columns.map((col) => (
                     <TableCell
@@ -175,14 +187,7 @@ const MuiTable = ({
                       className={`${
                         col.dottedBorder && styles.dottedBorderLeft
                       } ${col.className}`}
-                      sx={{
-                        ...(options.disableProp && row[options.disableProp]
-                          ? {
-                              backgroundColor: "background.light",
-                              color: "text.disabled"
-                            }
-                          : {})
-                      }}
+                      sx={getCellSx(row)}
                     >
                       {renderCell(row, col)}
                     </TableCell>
@@ -192,15 +197,7 @@ const MuiTable = ({
                     <TableCell
                       align="center"
                       className={styles.dottedBorderLeft}
-                      sx={{
-                        width: 40,
-                        ...(options.disableProp && row[options.disableProp]
-                          ? {
-                              backgroundColor: "background.light",
-                              color: "text.disabled"
-                            }
-                          : {})
-                      }}
+                      sx={getCellSx(row, { width: 40 })}
                     >
                       <IconButton size="large" onClick={() => onEdit(row)}>
                         <EditIcon fontSize="large" />
@@ -237,15 +234,7 @@ const MuiTable = ({
                     <TableCell
                       align="center"
                       className={styles.dottedBorderLeft}
-                      sx={{
-                        width: 40,
-                        ...(options.disableProp && row[options.disableProp]
-                          ? {
-                              backgroundColor: "background.light",
-                              color: "text.disabled"
-                            }
-                          : {})
-                      }}
+                      sx={getCellSx(row, { width: 40 })}
                     >
                       <IconButton
                         size="large"
