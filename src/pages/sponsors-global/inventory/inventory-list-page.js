@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,9 @@ import {
   FormControlLabel,
   FormGroup,
   Grid2,
-  TextField
+  Popover,
+  TextField,
+  Typography
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
@@ -43,6 +45,112 @@ import {
 import MuiTable from "../../../components/mui/table/mui-table";
 import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+
+const PREVIEW_BOX_SIZE = 220;
+const PREVIEW_MARGIN_BOTTOM = 1;
+const PREVIEW_TRANSITION_DURATION = { enter: 120, exit: 90 };
+const PREVIEW_POINTER_EVENTS = "none";
+
+// ...eliminado: declaración duplicada de InventoryImagePreviewCell...
+export const InventoryImagePreviewCell = React.memo(
+  ({ imageUrl, itemName }) => {
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [imageLoadError, setImageLoadError] = useState(false);
+    const previewAlt = itemName
+      ? T.translate("inventory_item_list.image_preview_action_alt", {
+          itemName
+        })
+      : T.translate("inventory_item_list.image_preview_alt");
+
+    if (!imageUrl) return null;
+
+    const isOpen = Boolean(anchorEl);
+
+    const openPreview = (target) => {
+      setAnchorEl(target);
+      setImageLoadError(false);
+    };
+
+    const closePreview = () => setAnchorEl(null);
+
+    return (
+      <>
+        <IconButton
+          size="small"
+          aria-label={previewAlt}
+          onMouseEnter={(event) => openPreview(event.currentTarget)}
+          onMouseLeave={closePreview}
+          onFocus={(event) => openPreview(event.currentTarget)}
+          onBlur={closePreview}
+          onClick={() => window.open(imageUrl, "_blank", "noopener,noreferrer")}
+        >
+          <ImageIcon fontSize="small" />
+        </IconButton>
+
+        <Popover
+          open={isOpen}
+          anchorEl={anchorEl}
+          onClose={closePreview}
+          disableRestoreFocus
+          transitionDuration={PREVIEW_TRANSITION_DURATION}
+          sx={{
+            pointerEvents: PREVIEW_POINTER_EVENTS
+          }}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "center"
+          }}
+          transformOrigin={{
+            vertical: "bottom",
+            horizontal: "center"
+          }}
+          slotProps={{
+            paper: {
+              sx: {
+                p: 1,
+                mb: PREVIEW_MARGIN_BOTTOM,
+                pointerEvents: PREVIEW_POINTER_EVENTS
+              }
+            }
+          }}
+        >
+          <Box
+            sx={{
+              width: PREVIEW_BOX_SIZE,
+              height: PREVIEW_BOX_SIZE,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden"
+            }}
+          >
+            {!imageLoadError ? (
+              <Box
+                component="img"
+                src={imageUrl}
+                alt={previewAlt}
+                loading="lazy"
+                onError={() => setImageLoadError(true)}
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  display: "block",
+                  objectFit: "contain"
+                }}
+              />
+            ) : (
+              <Typography variant="body2" color="text.secondary" align="center">
+                {T.translate("inventory_item_list.image_preview_unavailable")}
+              </Typography>
+            )}
+          </Box>
+        </Popover>
+      </>
+    );
+  }
+);
+
+InventoryImagePreviewCell.displayName = "InventoryImagePreviewCell";
 
 const InventoryListPage = ({
   inventoryItems,
@@ -74,8 +182,15 @@ const InventoryListPage = ({
   };
 
   useEffect(() => {
-    getInventoryItems(term, 1, perPage, order, orderDir, hideArchived);
-  }, []);
+    getInventoryItems(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
+  }, [getInventoryItems]);
 
   const handlePageChange = (page) => {
     getInventoryItems(term, page, perPage, order, orderDir, hideArchived);
@@ -167,21 +282,17 @@ const InventoryListPage = ({
       header: "",
       width: 40,
       align: "center",
-      render: (row) =>
-        row.images.length > 0 ? (
-          <IconButton size="small">
-            <ImageIcon
-              fontSize="small"
-              onClick={() =>
-                window.open(
-                  row.images[0].file_url,
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-            />
-          </IconButton>
-        ) : null
+      render: (row) => {
+        const hasImages = Array.isArray(row.images) && row.images.length > 0;
+        const imageUrl = row.images?.[0]?.file_url;
+        const itemName = row.name;
+
+        if (!hasImages || !imageUrl) return null;
+
+        return (
+          <InventoryImagePreviewCell imageUrl={imageUrl} itemName={itemName} />
+        );
+      }
     }
   ];
 
