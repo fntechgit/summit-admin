@@ -261,7 +261,7 @@ const parseFilters = (filters, term = null) => {
     if (Array.isArray(filters.speakers_count_filter)) {
       // between
       filter.push(
-        `speakers_count[]]${filters.speakers_count_filter[0]}&&${filters.speakers_count_filter[1]}`
+        `speakers_count[]${filters.speakers_count_filter[0]}&&${filters.speakers_count_filter[1]}`
       );
     } else {
       filter.push(`speakers_count${filters.speakers_count_filter}`);
@@ -562,7 +562,7 @@ export const getEvents =
       relations:
         "none,speakers.none,selection_plan.none,track.none,type.none,created_by.none,location.none,media_uploads.media_upload_type.none",
       fields:
-        "id,created,last_edited,title,start_date,end_date,summit_id,duration,class_name,is_published,level,published_date,meeting_url,status,progress,selection_status,streaming_url,streaming_type,etherpad_link,location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,selection_plan.id,media_uploads.id,media_uploads.presentation_id,media_uploads.created,media_uploads.class_name,media_uploads.display_on_site,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id,type.id,type.name,sponsors.id,sponsors.name,allow_feedback,to_record,review_status",
+        "id,created,last_edited,title,start_date,end_date,summit_id,duration,class_name,is_published,level,published_date,meeting_url,status,progress,selection_status,streaming_url,streaming_type,etherpad_link,location.id,location.name,speakers.id,speakers.first_name,speakers.last_name,speakers.company,track.name,track.id,created_by.first_name,created_by.last_name,created_by.email,created_by.company,selection_plan.name,selection_plan.id,media_uploads.id,media_uploads.presentation_id,media_uploads.created,media_uploads.class_name,media_uploads.display_on_site,media_uploads.media_upload_type.name,media_uploads.media_upload_type.id,type.id,type.name,type.use_speakers,sponsors.id,sponsors.name,allow_feedback,to_record,review_status",
       page,
       per_page: perPage,
       access_token: accessToken
