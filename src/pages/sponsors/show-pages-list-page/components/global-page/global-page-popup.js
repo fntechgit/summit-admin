@@ -7,7 +7,7 @@ import SelectSponsorshipsDialog from "../../../sponsor-forms-list-page/component
 import { cloneGlobalPage } from "../../../../../actions/sponsor-pages-actions";
 import { getShowPages } from "../../../../../actions/show-pages-actions";
 
-const GlobalPagePopup = ({ open, onClose, cloneGlobalPage, getShowPages }) => {
+const GlobalPagePopup = ({ onClose, cloneGlobalPage, getShowPages }) => {
   const [stage, setStage] = useState("pages");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
   const dialogSize = stage === "pages" ? "md" : "sm";
@@ -30,7 +30,7 @@ const GlobalPagePopup = ({ open, onClose, cloneGlobalPage, getShowPages }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth={dialogSize} fullWidth>
+    <Dialog open onClose={handleClose} maxWidth={dialogSize} fullWidth>
       {stage === "pages" && (
         <SelectPageTemplateDialog
           onSave={handleOnSelectTemplates}
@@ -46,7 +46,6 @@ const GlobalPagePopup = ({ open, onClose, cloneGlobalPage, getShowPages }) => {
 };
 
 GlobalPagePopup.propTypes = {
-  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired
 };
 

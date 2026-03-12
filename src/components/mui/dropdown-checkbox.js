@@ -38,7 +38,7 @@ const DropdownCheckbox = ({
   };
 
   return (
-    <FormControl fullWidth>
+    <FormControl fullWidth margin="normal">
       <InputLabel id={`${name}_label`}>{label}</InputLabel>
       <Select
         labelId={`${name}_label`}

@@ -98,10 +98,9 @@ const FormTemplateForm = ({
                 fullWidth
               />
             </Grid2>
-            <Grid2 size={4} sx={{ pt: "16px" }}>
+            <Grid2 size={4}>
               <DropdownCheckbox
                 name="sponsorship_types"
-                allName="apply_to_all_types"
                 label={T.translate(
                   "sponsor_forms.form_template_popup.sponsorship"
                 )}
@@ -109,7 +108,6 @@ const FormTemplateForm = ({
                   "sponsor_forms.form_template_popup.all_tiers"
                 )}
                 value={formik.values.sponsorship_types}
-                allValue={formik.values.apply_to_all_types}
                 options={sponsorships.items}
                 onChange={formik.handleChange}
               />
