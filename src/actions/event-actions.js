@@ -430,10 +430,14 @@ export const normalizeEvent = (entity, eventTypeConfig, summit) => {
     });
 
   if (normalizedEntity.hasOwnProperty("sponsors"))
-    normalizedEntity.sponsors = normalizedEntity.sponsors.map((s) => s.id);
+    normalizedEntity.sponsors = normalizedEntity.sponsors
+      .map((s) => (typeof s === "number" ? s : s?.id))
+      .filter((s) => !!s);
 
   if (normalizedEntity.hasOwnProperty("speakers"))
-    normalizedEntity.speakers = normalizedEntity.speakers.map((s) => s.id);
+    normalizedEntity.speakers = normalizedEntity.speakers
+      .map((s) => (typeof s === "number" ? s : s?.id))
+      .filter((s) => !!s);
 
   if (
     normalizedEntity.hasOwnProperty("moderator") &&
@@ -511,7 +515,6 @@ export const normalizeBulkEvents = (entity) => {
       selection_plan_id: getIdValue(e.selection_plan) || e.selection_plan_id,
       location_id: e.location?.id || e.location_id,
       start_date: e.start_date,
-      speakers: e.speakers,
       end_date: e.end_date,
       type_id: getIdValue(e.type) || e.type_id,
       track_id: getIdValue(e.track) || e.track_id,
