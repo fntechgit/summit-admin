@@ -61,7 +61,7 @@ const SpeakersBasePCForm = (props) => {
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         unAssignSpeaker(class_name, id, speakerId);
       }
@@ -86,17 +86,15 @@ const SpeakersBasePCForm = (props) => {
   const handlePageChange = (page) => {
     const { entity } = props;
     const {
-      speakers: { term, order, orderDir, perPage },
-      class_name
+      speakers: { term, order, orderDir, perPage }
     } = entity;
     props.getAssignedSpeakers(entity, term, page, perPage, order, orderDir);
   };
 
-  const handleSort = (index, key, dir, func) => {
+  const handleSort = (index, key, dir) => {
     const { entity } = props;
     const {
-      speakers: { term, currentPage, perPage },
-      class_name
+      speakers: { term, currentPage, perPage }
     } = entity;
     props.getAssignedSpeakers(entity, term, currentPage, perPage, key, dir);
   };
@@ -134,16 +132,18 @@ const SpeakersBasePCForm = (props) => {
       <hr />
       <label> {T.translate("edit_promo_code.speakers")} </label>
       <div className="row">
-        <div className="col-md-6" style={{ zIndex: 0 }}>
-          <FreeTextSearch
-            value={term ?? ""}
-            placeholder={T.translate(
-              "edit_promo_code.placeholders.search_speakers"
-            )}
-            onSearch={handleSearch}
-            preventEvents={true}
-          />
-        </div>
+        {entity.id > 0 && (
+          <div className="col-md-6" style={{ zIndex: 0 }}>
+            <FreeTextSearch
+              value={term ?? ""}
+              placeholder={T.translate(
+                "edit_promo_code.placeholders.search_speakers"
+              )}
+              onSearch={handleSearch}
+              preventEvents
+            />
+          </div>
+        )}
         <div className="col-md-4">
           <SpeakerInput
             id="speaker"
