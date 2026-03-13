@@ -164,21 +164,31 @@ export const saveSponsorManagedPage =
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
       normalizedEntity,
       snackbarErrorHandler
-    )(params)(dispatch).finally(() => {
-      dispatch(stopLoading());
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_sponsor.pages_tab.managed_page_saved")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 const normalizeSponsorManagedPage = (entity) => {
   const normalizedEntity = {
-    show_page_ids: entity.pages,
-    allowed_add_ons: entity.add_ons.map((a) => a.id),
-    apply_to_all_add_ons: false
+    show_page_ids: entity.pages
   };
 
   if (entity.add_ons.includes("all")) {
     normalizedEntity.apply_to_all_add_ons = true;
     normalizedEntity.allowed_add_ons = [];
+  } else {
+    normalizedEntity.allowed_add_ons = entity.add_ons.map((a) => a.id);
+    normalizedEntity.apply_to_all_add_ons = false;
   }
 
   return normalizedEntity;
