@@ -8,15 +8,21 @@ import { useField } from "formik";
 const MuiFormikDatepicker = ({ name, label, required, ...props }) => {
   const [field, meta, helpers] = useField(name);
   const requiredLabel = `${label} *`;
+  const handleBlur = () => {
+    helpers.setTouched(true, true);
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
       <DatePicker
         value={field.value}
         onChange={helpers.setValue}
+        onClose={handleBlur}
         slotProps={{
           textField: {
             name,
             label: required ? requiredLabel : label,
+            onBlur: handleBlur,
             error: meta.touched && Boolean(meta.error),
             helperText: meta.touched && meta.error,
             fullWidth: true

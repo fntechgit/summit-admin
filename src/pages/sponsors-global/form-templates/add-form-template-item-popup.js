@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
+import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import {
@@ -30,7 +31,7 @@ import {
   setSelectedAll,
   unSelectInventoryItem
 } from "../../../actions/inventory-item-actions";
-import { DECIMAL_DIGITS, DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const AddFormTemplateItemDialog = ({
   onClose,
@@ -128,7 +129,7 @@ const AddFormTemplateItemDialog = ({
         "inventory_items_list_modal.early_bid_rate_column_label"
       ),
       sortable: false,
-      render: (row) => `$ ${row.early_bird_rate?.toFixed(DECIMAL_DIGITS)}`
+      render: (row) => currencyAmountFromCents(row.early_bird_rate)
     },
     {
       columnKey: "standard_rate",
@@ -136,7 +137,7 @@ const AddFormTemplateItemDialog = ({
         "inventory_items_list_modal.standard_rate_column_label"
       ),
       sortable: false,
-      render: (row) => `$ ${row.standard_rate?.toFixed(DECIMAL_DIGITS)}`
+      render: (row) => currencyAmountFromCents(row.standard_rate)
     },
     {
       columnKey: "onsite_rate",
@@ -144,7 +145,7 @@ const AddFormTemplateItemDialog = ({
         "inventory_items_list_modal.onsite_rate_column_label"
       ),
       sortable: false,
-      render: (row) => `$ ${row.onsite_rate?.toFixed(DECIMAL_DIGITS)}`
+      render: (row) => currencyAmountFromCents(row.onsite_rate)
     },
     {
       columnKey: "default_quantity",
@@ -206,11 +207,18 @@ const AddFormTemplateItemDialog = ({
                   //   onClick: () => handleSort("date", "+")
                   // },
                   // { label: "Newest", onClick: () => handleSort("date", "+") },
-                  { label: "A-Z", onClick: () => handleSort("name", 1) },
-                  { label: "Z-A", onClick: () => handleSort("name", 0) }
+                  {
+                    label: T.translate("general.sort_asc_label"),
+                    onClick: () => handleSort("name", 1)
+                  },
+                  {
+                    label: T.translate("general.sort_desc_label"),
+                    onClick: () => handleSort("name", 0)
+                  }
                 ]}
               >
-                <SwapVertIcon fontSize="large" sx={{ mr: 1 }} /> sort by
+                <SwapVertIcon fontSize="large" sx={{ mr: 1 }} />{" "}
+                {T.translate("general.sort_by")}
               </MenuButton>
             </Grid2>
             <Grid2 size={8}>

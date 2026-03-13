@@ -23,6 +23,11 @@ import {
 } from "../../../utils/constants";
 import showConfirmDialog from "../showConfirmDialog";
 
+const ARCHIVED_CELL_SX = {
+  backgroundColor: "background.light",
+  color: "text.disabled"
+};
+
 const validateValue = (value, validation) => {
   if (!validation) return { isValid: true };
 
@@ -132,7 +137,7 @@ const MuiTableEditable = ({
   onPageChange,
   onPerPageChange,
   onSort,
-  options = { sortCol: "", sortDir: 1 },
+  options = { sortCol: "", sortDir: 1, disableProp: null },
   getName = (item) => item.name,
   onEdit,
   onArchive,
@@ -162,6 +167,14 @@ const MuiTableEditable = ({
     : [...basePerPageOptions, perPage].sort((a, b) => a - b);
 
   const { sortCol, sortDir } = options;
+
+  const getArchivedCellSx = (row) =>
+    options.disableProp && row[options.disableProp] ? ARCHIVED_CELL_SX : null;
+
+  const getCellSx = (row, baseSx = {}) => ({
+    ...baseSx,
+    ...(getArchivedCellSx(row) || {})
+  });
 
   const handleDelete = async (item) => {
     const isConfirmed = await showConfirmDialog({
@@ -249,17 +262,16 @@ const MuiTableEditable = ({
             </TableHead>
             {/* TABLE BODY */}
             <TableBody>
-              {data.map((row, idx) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <TableRow key={`row-${idx}`} hover>
+              {data.map((row) => (
+                <TableRow key={row.id}>
                   {columns.map((col) => (
                     <TableCell
                       key={`${row.id}-${col.columnKey}`}
                       onClick={() => handleCellClick(row.id, col.columnKey)}
-                      sx={{
+                      sx={getCellSx(row, {
                         cursor: col.editable ? "pointer" : "default",
                         padding: col.editable ? "8px 16px" : undefined // Ensure enough space for the edit icon
-                      }}
+                      })}
                     >
                       {col.editable ? (
                         <EditableCell
@@ -287,7 +299,7 @@ const MuiTableEditable = ({
                     </TableCell>
                   ))}
                   {onEdit && (
-                    <TableCell>
+                    <TableCell sx={getCellSx(row)}>
                       <IconButton
                         onClick={() => onEdit(row)}
                         size="small"
@@ -318,7 +330,7 @@ const MuiTableEditable = ({
                     </TableCell>
                   )}
                   {onDelete && (
-                    <TableCell>
+                    <TableCell sx={getCellSx(row)}>
                       <IconButton
                         onClick={() => handleDelete(row)}
                         size="small"

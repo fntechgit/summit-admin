@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,18 @@ const badgeScansListReducer = (state = DEFAULT_STATE, action = {}) => {
       return DEFAULT_STATE;
     }
     case REQUEST_BADGE_SCANS: {
-      const { term, order, orderDir, sponsorId, summitTZ } = payload;
-      return { ...state, term, order, orderDir, sponsorId, summitTZ };
+      const { term, order, orderDir, sponsorId, summitTZ, page, perPage } =
+        payload;
+      return {
+        ...state,
+        term,
+        order,
+        orderDir,
+        sponsorId,
+        summitTZ,
+        currentPage: page,
+        perPage
+      };
     }
     case RECEIVE_BADGE_SCANS: {
       const {

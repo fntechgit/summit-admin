@@ -95,6 +95,8 @@ const RequestTable = ({ requests, term, getRequests, onRequestDelete }) => {
           deleteDialogBody={T.translate(
             "sponsor_users.process_request.delete_confirmation_body"
           )}
+          deleteDialogConfirmText={T.translate("general.confirm")}
+          confirmButtonColor="primary"
         />
 
         {processRequest && (

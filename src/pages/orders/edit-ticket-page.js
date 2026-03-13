@@ -125,6 +125,14 @@ const EditTicketPage = ({
   const handleResendEmail = (ticket, ev) => {
     ev.preventDefault();
 
+    if (!ticket.owner) {
+      return Swal.fire({
+        title: T.translate("general.error"),
+        text: T.translate("edit_ticket.no_attendee"),
+        type: "warning"
+      });
+    }
+
     if (ticket.owner.status === "Complete") {
       props.reSendTicketEmail(ticket.order_id, ticket.id);
     } else {
