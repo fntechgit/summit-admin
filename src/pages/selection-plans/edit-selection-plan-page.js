@@ -43,6 +43,7 @@ const EditSelectionPlanPage = ({
   allowedMembers,
   errors,
   history,
+  timezones,
   extraQuestionsOrder,
   extraQuestionsOrderDir,
   updateSelectionPlanExtraQuestionOrder,
@@ -194,6 +195,7 @@ const EditSelectionPlanPage = ({
         entity={entity}
         allowedMembers={allowedMembers}
         currentSummit={currentSummit}
+        timezones={timezones}
         errors={errors}
         extraQuestionsOrder={extraQuestionsOrder}
         extraQuestionsOrderDir={extraQuestionsOrderDir}
@@ -228,9 +230,11 @@ const EditSelectionPlanPage = ({
 
 const mapStateToProps = ({
   currentSummitState,
-  currentSelectionPlanState
+  currentSelectionPlanState,
+  baseState
 }) => ({
   currentSummit: currentSummitState.currentSummit,
+  timezones: baseState.timezones,
   ...currentSelectionPlanState
 });
 
