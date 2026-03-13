@@ -43,6 +43,7 @@
     "delete": "Delete",
     "clone": "Clone",
     "new": "New",
+    "all": "All",
     "new_summit": "New Event",
     "drop_files": "Drop images or click to select files to upload.",
     "search": "Search",
@@ -75,6 +76,7 @@
     "error": "Error!",
     "unarchive": "Unarchive",
     "archive": "Archive",
+    "items": "items",
     "sort_by": "Sort By",
     "sort_asc_label": "A-Z",
     "sort_desc_label": "Z-A",
@@ -99,6 +101,10 @@
     "after": "'{field1}' must be after '{field2}'.",
     "boolean": "Must be a boolean.",
     "mib_aligned": "Must be a MiB aligned value",
+    "minimum": "Must be at least {minimum}",
+    "maximum": "Must be at most {maximum}",
+    "time": "Wrong time format.",
+    "wrong_format": "Wrong format.",
     "add_on_required": "Select at least one add-on"
   },
   "landing": {
@@ -2495,13 +2501,43 @@
       "code": "Code",
       "name": "Name",
       "add_ons": "Add-ons",
+      "items": "Items",
       "discount": "Discount",
       "amount": "Amount",
       "manage_items": "Manage Items",
       "add_form": "Add Form",
       "no_cart": "No cart found.",
       "pay_cc": "pay with credit card or ach",
-      "pay_invoice": "pay with invoice"
+      "pay_invoice": "pay with invoice",
+      "add_form_to_cart": "Add Form to Cart",
+      "add_selected_form": "Add selected form",
+      "select_addon": "Select Add-on...",
+      "edit_form": {
+        "code": "Code",
+        "description": "Description",
+        "custom_rate": "Custom Rate",
+        "early_bird_rate": "Early Bird Rate",
+        "standard_rate": "Standard Rate",
+        "onsite_rate": "Onsite Rate",
+        "qty": "Quantity",
+        "total": "Total",
+        "notes": "Notes",
+        "notes_placeholder": "Enter your notes here...",
+        "additional_info": "Additional Info",
+        "discount": "Discount",
+        "total_on_caps": "TOTAL",
+        "no_forms_found": "No forms found."
+      },
+      "sponsor_note": {
+        "title": "Note to Sponsor",
+        "placeholder": "Enter shared note with sponsor...",
+        "deleted": "Note deleted successfully."
+      },
+      "order_note": {
+        "title": "Order Notes",
+        "placeholder": "Enter internal note...",
+        "deleted": "Note deleted successfully."
+      }
     },
     "purchase_tab": {
       "order": "Order",

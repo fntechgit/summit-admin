@@ -30,6 +30,10 @@ const theme = createTheme({
       fontSize: "14px",
       fontWeight: 500
     },
+    caption: {
+      fontSize: "12px",
+      fontWeight: 400
+    },
     h4: {
       fontSize: "34px",
       fontWeight: 500,
@@ -57,7 +61,10 @@ const theme = createTheme({
     MuiFormHelperText: {
       styleOverrides: {
         root: {
-          fontSize: ".8em"
+          fontSize: ".8em",
+          position: "absolute",
+          top: "100%",
+          marginTop: "4px"
         }
       }
     },
