@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
@@ -26,11 +26,14 @@ const CustomizedFormPopup = ({
   summitTZ,
   open,
   onClose,
+  onSaved,
   getSponsorCustomizedForm,
   resetSponsorCustomizedForm,
   saveSponsorCustomizedForm,
   updateSponsorCustomizedForm
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleClose = () => {
     // clear form from reducer
     resetSponsorCustomizedForm();
@@ -38,13 +41,24 @@ const CustomizedFormPopup = ({
   };
 
   const handleOnSave = (values) => {
+    if (isSaving) return;
+
     const save = values.id
       ? updateSponsorCustomizedForm
       : saveSponsorCustomizedForm;
+    setIsSaving(true);
 
-    save(values).finally(() => {
-      handleClose();
-    });
+    save(values)
+      .then(() => {
+        if (onSaved) onSaved();
+        handleClose();
+      })
+      .catch(() => {
+        // keep dialog open on save error to preserve user input
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
   };
 
   useEffect(() => {
@@ -72,6 +86,7 @@ const CustomizedFormPopup = ({
         sponsor={sponsor}
         summitId={summitId}
         summitTZ={summitTZ}
+        isSaving={isSaving}
         onSubmit={handleOnSave}
       />
     </Dialog>
@@ -80,7 +95,8 @@ const CustomizedFormPopup = ({
 
 CustomizedFormPopup.propTypes = {
   open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  onSaved: PropTypes.func
 };
 
 const mapStateToProps = ({

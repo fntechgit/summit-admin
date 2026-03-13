@@ -20,6 +20,7 @@ const SelectSponsorshipsDialog = ({
   sponsorships,
   onSave,
   onClose,
+  isSaving = false,
   getSponsorships
 }) => {
   const { items, currentPage, total } = sponsorships;
@@ -83,7 +84,7 @@ const SelectSponsorshipsDialog = ({
       <DialogActions>
         <Button
           onClick={handleOnSave}
-          disabled={selection.ids.length === 0 && !selection.all}
+          disabled={(selection.ids.length === 0 && !selection.all) || isSaving}
           fullWidth
           variant="contained"
         >
@@ -97,7 +98,8 @@ const SelectSponsorshipsDialog = ({
 SelectSponsorshipsDialog.propTypes = {
   sponsorships: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
+  isSaving: PropTypes.bool
 };
 
 const mapStateToProps = ({ sponsorFormsListState }) => ({

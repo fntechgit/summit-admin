@@ -47,6 +47,7 @@ const CustomizedForm = ({
   sponsor,
   summitId,
   summitTZ,
+  isSaving = false,
   onSubmit
 }) => {
   const sponsorships = sponsor.sponsorships_collection.sponsorships.map(
@@ -167,7 +168,12 @@ const CustomizedForm = ({
         </DialogContent>
         <Divider />
         <DialogActions>
-          <Button type="submit" fullWidth variant="contained">
+          <Button
+            type="submit"
+            disabled={isSaving}
+            fullWidth
+            variant="contained"
+          >
             {T.translate("edit_sponsor.forms_tab.customized_form.save")}
           </Button>
         </DialogActions>
