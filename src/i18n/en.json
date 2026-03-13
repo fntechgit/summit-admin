@@ -2521,6 +2521,11 @@
         "title": "Note to Sponsor",
         "placeholder": "Enter shared note with sponsor...",
         "deleted": "Note deleted successfully."
+      },
+      "order_note": {
+        "title": "Order Notes",
+        "placeholder": "Enter internal note...",
+        "deleted": "Note deleted successfully."
       }
     },
     "purchase_tab": {

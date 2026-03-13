@@ -15,7 +15,7 @@ jest.mock("openstack-uicore-foundation/lib/utils/methods", () => ({
 
 // Mock confirm dialog
 const mockShowConfirmDialog = jest.fn();
-jest.mock("../../../../components/mui/showConfirmDialog", () => ({
+jest.mock("../../../../../../components/mui/showConfirmDialog", () => ({
   __esModule: true,
   default: (...args) => mockShowConfirmDialog(...args)
 }));
@@ -32,7 +32,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import CartNote from "../components/cart-note";
+import CartNote from "../index";
 /* eslint-enable import/first */
 
 // Mock note data
@@ -44,188 +44,35 @@ const mockNote = {
   created_by_fullname: "San Paul"
 };
 
+const mockNoteOlder = {
+  id: 2,
+  content: "Older note",
+  type: "Sponsor",
+  created: 1000000,
+  created_by_fullname: "User A"
+};
+
+const mockNoteNewer = {
+  id: 3,
+  content: "Newer note",
+  type: "Sponsor",
+  created: 2000000,
+  created_by_fullname: "User B"
+};
+
 // ---- Tests ----
 describe("CartNote", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe("State: No Note", () => {
-    test("renders text field when no note exists", () => {
-      render(
-        <CartNote
-          title="Test Note"
-          note={null}
-          placeholder="Enter a note"
-          onSave={jest.fn()}
-        />
-      );
-
-      const textField = screen.getByPlaceholderText("Enter a note");
-      expect(textField).toBeInTheDocument();
-    });
-
-    test("renders save button when no note exists", () => {
-      render(
-        <CartNote
-          title="Test Note"
-          note={null}
-          placeholder="Enter a note"
-          onSave={jest.fn()}
-        />
-      );
-
-      expect(screen.getByText("general.save")).toBeInTheDocument();
-    });
-
-    test("save button is disabled when text field is empty", () => {
-      render(
-        <CartNote
-          title="Test Note"
-          note={null}
-          placeholder="Enter a note"
-          onSave={jest.fn()}
-        />
-      );
-
-      const saveButton = screen.getByText("general.save");
-      expect(saveButton).toBeDisabled();
-    });
-
-    test("save button is enabled when text is entered", async () => {
-      const user = userEvent.setup();
-      render(
-        <CartNote
-          title="Test Note"
-          note={null}
-          placeholder="Enter a note"
-          onSave={jest.fn()}
-        />
-      );
-
-      const textField = screen.getByPlaceholderText("Enter a note");
-      await user.type(textField, "New note content");
-
-      const saveButton = screen.getByText("general.save");
-      expect(saveButton).not.toBeDisabled();
-    });
-
-    test("renders title", () => {
-      render(
-        <CartNote
-          title="Sponsor Notes"
-          note={null}
-          placeholder="Enter a note"
-          onSave={jest.fn()}
-        />
-      );
-
-      expect(screen.getByText("Sponsor Notes")).toBeInTheDocument();
-    });
-  });
-
-  describe("State: Note Present", () => {
-    test("displays note content when note exists", () => {
-      render(
-        <CartNote
-          title="Test Note"
-          note={mockNote}
-          onSave={jest.fn()}
-          onDelete={jest.fn()}
-        />
-      );
-
-      expect(screen.getByText("This is a sponsor note")).toBeInTheDocument();
-    });
-
-    test("displays note metadata (author and date)", () => {
-      render(
-        <CartNote
-          title="Test Note"
-          note={mockNote}
-          onSave={jest.fn()}
-          onDelete={jest.fn()}
-        />
-      );
-
-      expect(
-        screen.getByText(/San Paul - March 6th 2026, 12:00pm/)
-      ).toBeInTheDocument();
-    });
-
-    test("renders edit button when note exists", () => {
-      render(
-        <CartNote
-          title="Test Note"
-          note={mockNote}
-          onSave={jest.fn()}
-          onDelete={jest.fn()}
-        />
-      );
-
-      const buttons = screen.getAllByRole("button");
-      expect(buttons.length).toBeGreaterThan(0);
-    });
-
-    test("renders delete button when note exists", () => {
-      render(
-        <CartNote
-          title="Test Note"
-          note={mockNote}
-          onSave={jest.fn()}
-          onDelete={jest.fn()}
-        />
-      );
-
-      const buttons = screen.getAllByRole("button");
-      expect(buttons.length).toBe(2); // edit and delete buttons
-    });
-
-    test("does not render text field when note exists and not editing", () => {
-      render(
-        <CartNote
-          title="Test Note"
-          note={mockNote}
-          placeholder="Enter a note"
-          onSave={jest.fn()}
-          onDelete={jest.fn()}
-        />
-      );
-
-      expect(
-        screen.queryByPlaceholderText("Enter a note")
-      ).not.toBeInTheDocument();
-    });
-  });
-
   describe("State: Editing Note", () => {
-    test("switches to edit mode when edit button is clicked", async () => {
-      const user = userEvent.setup();
-      render(
-        <CartNote
-          title="Test Note"
-          note={mockNote}
-          placeholder="Edit note"
-          onSave={jest.fn()}
-          onDelete={jest.fn()}
-        />
-      );
-
-      const buttons = screen.getAllByRole("button");
-      const editButton = buttons[0]; // First button is edit
-      await user.click(editButton);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText("Edit note")).toBeInTheDocument();
-      });
-    });
-
     test("pre-fills text field with existing note content when editing", async () => {
       const user = userEvent.setup();
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           placeholder="Edit note"
           onSave={jest.fn()}
           onDelete={jest.fn()}
@@ -242,35 +89,12 @@ describe("CartNote", () => {
       });
     });
 
-    test("hides note display when editing", async () => {
-      const user = userEvent.setup();
-      render(
-        <CartNote
-          title="Test Note"
-          note={mockNote}
-          placeholder="Edit note"
-          onSave={jest.fn()}
-          onDelete={jest.fn()}
-        />
-      );
-
-      const buttons = screen.getAllByRole("button");
-      const editButton = buttons[0];
-      await user.click(editButton);
-
-      await waitFor(() => {
-        expect(
-          screen.queryByText(/San Paul - March 6th 2026/)
-        ).not.toBeInTheDocument();
-      });
-    });
-
     test("allows editing text in edit mode", async () => {
       const user = userEvent.setup();
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           placeholder="Edit note"
           onSave={jest.fn()}
           onDelete={jest.fn()}
@@ -297,7 +121,6 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={null}
           placeholder="Enter a note"
           onSave={mockOnSave}
         />
@@ -321,7 +144,6 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={null}
           placeholder="Enter a note"
           onSave={mockOnSave}
         />
@@ -347,7 +169,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           placeholder="Edit note"
           onSave={mockOnSave}
           onDelete={jest.fn()}
@@ -381,7 +203,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           placeholder="Edit note"
           onSave={mockOnSave}
           onDelete={jest.fn()}
@@ -413,7 +235,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           onDelete={jest.fn()}
         />
@@ -441,7 +263,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           onDelete={mockOnDelete}
         />
@@ -464,7 +286,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           onDelete={mockOnDelete}
         />
@@ -487,7 +309,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           onDelete={jest.fn()}
           canEdit
@@ -503,7 +325,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           onDelete={jest.fn()}
           canEdit={false}
@@ -518,7 +340,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           onDelete={jest.fn()}
         />
@@ -535,7 +357,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           onDelete={jest.fn()}
           canDelete
@@ -551,7 +373,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           onDelete={jest.fn()}
           canDelete={false}
@@ -567,7 +389,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           canDelete
         />
@@ -582,7 +404,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           onSave={jest.fn()}
           onDelete={jest.fn()}
         />
@@ -594,12 +416,278 @@ describe("CartNote", () => {
     });
   });
 
+  describe("multiple=true", () => {
+    describe("Rendering", () => {
+      test("always shows the input form even when notes exist", () => {
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[mockNoteOlder]}
+            placeholder="Add a note"
+            onSave={jest.fn()}
+            onDelete={jest.fn()}
+            multiple
+          />
+        );
+
+        expect(screen.getByPlaceholderText("Add a note")).toBeInTheDocument();
+      });
+
+      test("shows existing notes alongside the input form", () => {
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[mockNoteOlder]}
+            placeholder="Add a note"
+            onSave={jest.fn()}
+            onDelete={jest.fn()}
+            multiple
+          />
+        );
+
+        expect(screen.getByPlaceholderText("Add a note")).toBeInTheDocument();
+        expect(screen.getByText("Older note")).toBeInTheDocument();
+      });
+
+      test("does not render edit buttons for notes", () => {
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[mockNoteOlder, mockNoteNewer]}
+            placeholder="Add a note"
+            onSave={jest.fn()}
+            onDelete={jest.fn()}
+            multiple
+          />
+        );
+
+        expect(screen.queryByLabelText("edit")).not.toBeInTheDocument();
+      });
+
+      test("renders one delete button per note", () => {
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[mockNoteOlder, mockNoteNewer]}
+            placeholder="Add a note"
+            onSave={jest.fn()}
+            onDelete={jest.fn()}
+            multiple
+          />
+        );
+
+        // Only delete buttons (no edit buttons), one per note
+        const buttons = screen.getAllByRole("button");
+        expect(buttons.length).toBe(3); // save + 2 delete
+      });
+    });
+
+    describe("Sort Order", () => {
+      test("renders most recent note first", () => {
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[mockNoteOlder, mockNoteNewer]}
+            placeholder="Add a note"
+            onSave={jest.fn()}
+            onDelete={jest.fn()}
+            multiple
+          />
+        );
+
+        const noteTexts = screen
+          .getAllByText(/note/)
+          .filter((el) => ["Older note", "Newer note"].includes(el.textContent))
+          .map((el) => el.textContent);
+
+        expect(noteTexts[0]).toBe("Newer note");
+        expect(noteTexts[1]).toBe("Older note");
+      });
+    });
+
+    describe("Add Note", () => {
+      test("calls onSave with new note content", async () => {
+        const user = userEvent.setup();
+        const mockOnSave = jest.fn(() => Promise.resolve());
+
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[]}
+            placeholder="Add a note"
+            onSave={mockOnSave}
+            multiple
+          />
+        );
+
+        const textField = screen.getByPlaceholderText("Add a note");
+        await user.type(textField, "New note");
+
+        const saveButton = screen.getByText("general.save");
+        await user.click(saveButton);
+
+        expect(mockOnSave).toHaveBeenCalledWith({ content: "New note" });
+      });
+
+      test("clears input after successful save", async () => {
+        const user = userEvent.setup();
+        const mockOnSave = jest.fn(() => Promise.resolve());
+
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[]}
+            placeholder="Add a note"
+            onSave={mockOnSave}
+            multiple
+          />
+        );
+
+        const textField = screen.getByPlaceholderText("Add a note");
+        await user.type(textField, "New note");
+        await user.click(screen.getByText("general.save"));
+
+        await waitFor(() => {
+          expect(textField).toHaveValue("");
+        });
+      });
+
+      test("save button is disabled when input is empty", () => {
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[]}
+            placeholder="Add a note"
+            onSave={jest.fn()}
+            multiple
+          />
+        );
+
+        expect(screen.getByText("general.save")).toBeDisabled();
+      });
+    });
+
+    describe("Keyboard shortcuts", () => {
+      test("Enter saves when content is present", async () => {
+        const user = userEvent.setup();
+        const mockOnSave = jest.fn(() => Promise.resolve());
+
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[]}
+            placeholder="Add a note"
+            onSave={mockOnSave}
+            multiple
+          />
+        );
+
+        const textField = screen.getByPlaceholderText("Add a note");
+        await user.type(textField, "Quick note{Enter}");
+
+        expect(mockOnSave).toHaveBeenCalledWith({ content: "Quick note" });
+      });
+
+      test("Enter does not save when input is empty", async () => {
+        const user = userEvent.setup();
+        const mockOnSave = jest.fn(() => Promise.resolve());
+
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[]}
+            placeholder="Add a note"
+            onSave={mockOnSave}
+            multiple
+          />
+        );
+
+        const textField = screen.getByPlaceholderText("Add a note");
+        await user.click(textField);
+        await user.keyboard("{Enter}");
+
+        expect(mockOnSave).not.toHaveBeenCalled();
+      });
+
+      test("Escape does not hide the form in multiple mode", async () => {
+        const user = userEvent.setup();
+
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[]}
+            placeholder="Add a note"
+            onSave={jest.fn()}
+            multiple
+          />
+        );
+
+        const textField = screen.getByPlaceholderText("Add a note");
+        await user.type(textField, "Some text");
+        await user.keyboard("{Escape}");
+
+        expect(screen.getByPlaceholderText("Add a note")).toBeInTheDocument();
+      });
+    });
+
+    describe("Delete Functionality", () => {
+      test("calls onDelete with correct note id when confirmed", async () => {
+        const user = userEvent.setup();
+        const mockOnDelete = jest.fn();
+        mockShowConfirmDialog.mockResolvedValue(true);
+
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[mockNoteOlder]}
+            onSave={jest.fn()}
+            onDelete={mockOnDelete}
+            multiple
+          />
+        );
+
+        const buttons = screen.getAllByRole("button");
+        const deleteButton = buttons[1]; // save + delete
+        await user.click(deleteButton);
+
+        await waitFor(() => {
+          expect(mockOnDelete).toHaveBeenCalledWith(mockNoteOlder.id);
+        });
+      });
+
+      test("does not call onDelete when cancelled", async () => {
+        const user = userEvent.setup();
+        const mockOnDelete = jest.fn();
+        mockShowConfirmDialog.mockResolvedValue(false);
+
+        render(
+          <CartNote
+            title="Test Note"
+            notes={[mockNoteOlder]}
+            onSave={jest.fn()}
+            onDelete={mockOnDelete}
+            multiple
+          />
+        );
+
+        const buttons = screen.getAllByRole("button");
+        const deleteButton = buttons[1];
+        await user.click(deleteButton);
+
+        await waitFor(() => {
+          expect(mockShowConfirmDialog).toHaveBeenCalled();
+        });
+
+        expect(mockOnDelete).not.toHaveBeenCalled();
+      });
+    });
+  });
+
   describe("Disabled Save", () => {
     test("save button disabled when text is empty during creation", () => {
       render(
         <CartNote
           title="Test Note"
-          note={null}
           placeholder="Enter a note"
           onSave={jest.fn()}
         />
@@ -614,7 +702,7 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={mockNote}
+          notes={[mockNote]}
           placeholder="Edit note"
           onSave={jest.fn()}
           onDelete={jest.fn()}
@@ -637,7 +725,6 @@ describe("CartNote", () => {
       render(
         <CartNote
           title="Test Note"
-          note={null}
           placeholder="Enter a note"
           onSave={jest.fn()}
         />

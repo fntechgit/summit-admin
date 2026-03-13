@@ -10,14 +10,14 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
 const mockGetSponsorCartForm = jest.fn(() => () => Promise.resolve());
 const mockUpdateCartForm = jest.fn(() => () => Promise.resolve());
 
-jest.mock("../../../../actions/sponsor-cart-actions", () => ({
+jest.mock("../../../../../../actions/sponsor-cart-actions", () => ({
   getSponsorCartForm: (...args) => mockGetSponsorCartForm(...args),
   updateCartForm: (...args) => mockUpdateCartForm(...args)
 }));
 
 // Mock sub-components used by FormItemTable
 jest.mock(
-  "../../../../components/mui/FormItemTable/components/GlobalQuantityField",
+  "../../../../../../components/mui/FormItemTable/components/GlobalQuantityField",
   () => {
     const React = require("react");
     return {
@@ -30,7 +30,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/FormItemTable/components/ItemTableField",
+  "../../../../../../components/mui/FormItemTable/components/ItemTableField",
   () => {
     const React = require("react");
     return {
@@ -42,24 +42,27 @@ jest.mock(
   }
 );
 
-jest.mock("../../../../components/mui/formik-inputs/mui-formik-select", () => {
-  const React = require("react");
-  return {
-    __esModule: true,
-    default: ({ name, options, ...props }) => (
-      <select data-testid={`select-${name}`} name={name} {...props}>
-        {options?.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    )
-  };
-});
+jest.mock(
+  "../../../../../../components/mui/formik-inputs/mui-formik-select",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: ({ name, options, ...props }) => (
+        <select data-testid={`select-${name}`} name={name} {...props}>
+          {options?.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      )
+    };
+  }
+);
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-pricefield",
+  "../../../../../../components/mui/formik-inputs/mui-formik-pricefield",
   () => {
     const React = require("react");
     return {
@@ -72,7 +75,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-discountfield",
+  "../../../../../../components/mui/formik-inputs/mui-formik-discountfield",
   () => {
     const React = require("react");
     return {
@@ -99,7 +102,7 @@ import "@testing-library/jest-dom";
 import { Provider } from "react-redux";
 import configureMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
-import EditCartForm from "../components/edit-form/edit-cart-form";
+import EditCartForm from "../edit-cart-form";
 /* eslint-enable import/first */
 
 const middlewares = [thunk];

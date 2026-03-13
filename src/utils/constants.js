@@ -293,5 +293,5 @@ export const DISCOUNT_TYPES = {
 
 export const SPONSOR_CART_NOTE_TYPES = {
   SPONSOR: "Sponsor",
-  ORDER: "Order"
+  INTERNAL: "Internal"
 };

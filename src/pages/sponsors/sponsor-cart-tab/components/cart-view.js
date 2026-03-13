@@ -222,7 +222,7 @@ const CartView = ({
       )}
       <CartNote
         title={T.translate("edit_sponsor.cart_tab.sponsor_note.title")}
-        note={cart?.notes.find(
+        notes={cart?.notes.filter(
           (n) => n.type === SPONSOR_CART_NOTE_TYPES.SPONSOR
         )}
         placeholder={T.translate(
@@ -232,6 +232,20 @@ const CartView = ({
           saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.SPONSOR)
         }
         onDelete={deleteSponsorCartNote}
+      />
+      <CartNote
+        title={T.translate("edit_sponsor.cart_tab.order_note.title")}
+        notes={cart?.notes.filter(
+          (n) => n.type === SPONSOR_CART_NOTE_TYPES.INTERNAL
+        )}
+        placeholder={T.translate(
+          "edit_sponsor.cart_tab.order_note.placeholder"
+        )}
+        onSave={(note) =>
+          saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.INTERNAL)
+        }
+        onDelete={deleteSponsorCartNote}
+        multiple
       />
     </>
   );
