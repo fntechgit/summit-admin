@@ -2526,7 +2526,9 @@
         "additional_info": "Additional Info",
         "discount": "Discount",
         "total_on_caps": "TOTAL",
-        "no_forms_found": "No forms found."
+        "no_forms_found": "No forms found.",
+        "form_added": "Form added successfully.",
+        "form_updated": "Form updated successfully."
       },
       "sponsor_note": {
         "title": "Note to Sponsor",

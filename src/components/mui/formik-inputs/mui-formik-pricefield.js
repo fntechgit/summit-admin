@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
 import { useField } from "formik";
-import {
-  amountFromCents,
-  amountToCents
-} from "openstack-uicore-foundation/lib/utils/money";
 import MuiFormikTextField from "./mui-formik-textfield";
+import { ONE_HUNDRED } from "../../../utils/constants";
 
 const BLOCKED_KEYS = ["e", "E", "+", "-"];
 
@@ -19,39 +16,57 @@ const MuiFormikPriceField = ({
 }) => {
   // eslint-disable-next-line no-unused-vars
   const [field, meta, helpers] = useField(name);
-  const initialValue = inCents
-    ? amountFromCents(field.value || 0)
-    : field.value;
-  const [value, setValue] = useState(initialValue);
+  const [cleared, setCleared] = useState(false);
 
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
+  const emptyValue = meta.initialValue === null ? null : 0;
 
-  const handleChange = () => {
-    const val = parseFloat(value) || 0;
-    const transformedVal = amountToCents(val);
+  const getDisplayValue = () => {
+    if (cleared) return "";
+    if (field.value == null || field.value === 0) {
+      return field.value === 0 ? 0 : "";
+    }
+    return inCents ? field.value / ONE_HUNDRED : field.value;
+  };
 
-    helpers.setValue(inCents ? transformedVal : val);
+  const handleChange = (e) => {
+    const newVal = e.target.value;
+
+    if (newVal === "") {
+      setCleared(true);
+      helpers.setValue(emptyValue);
+      return;
+    }
+
+    setCleared(false);
+    const newPrice = Number(newVal) * ONE_HUNDRED;
+
+    helpers.setValue(newPrice);
+  };
+
+  const handleKeyDown = (e) => {
+    if (BLOCKED_KEYS.includes(e.key)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    // Block "0" as first character — only 1-9 are valid leading digits.
+    // When value is empty or already "0", prevent any "0" keypress.
+    if (e.key === "0" && (e.target.value === "" || e.target.value === "0")) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
 
   return (
     <MuiFormikTextField
       name={name}
       label={label}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      onBlur={handleChange}
       type="number"
+      value={getDisplayValue()}
+      onChange={handleChange}
       slotProps={{
         input: {
           startAdornment: <InputAdornment position="start">$</InputAdornment>
-        }
-      }}
-      onKeyDown={(e) => {
-        if (BLOCKED_KEYS.includes(e.key)) {
-          e.nativeEvent.preventDefault();
-          e.nativeEvent.stopImmediatePropagation();
         }
       }}
       inputProps={{
@@ -59,6 +74,7 @@ const MuiFormikPriceField = ({
         inputMode: "decimal",
         ...inputProps
       }}
+      onKeyDown={handleKeyDown}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}
     />

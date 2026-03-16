@@ -323,7 +323,7 @@ export const addCartForm =
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("sponsor_list.sponsor_added")
+            html: T.translate("edit_sponsor.cart_tab.edit_form.form_added")
           })
         );
       })
@@ -360,7 +360,7 @@ export const updateCartForm =
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("sponsor_list.sponsor_added")
+            html: T.translate("edit_sponsor.cart_tab.edit_form.form_updated")
           })
         );
       })
@@ -397,7 +397,7 @@ export const saveSponsorCartNote =
         normalizedEntity,
         snackbarErrorHandler
       )(params)(dispatch)
-        .catch(console.log) // need to catch promise reject
+        .catch(() => Promise.reject()) // need to catch promise reject
         .finally(() => {
           dispatch(stopLoading());
         });
