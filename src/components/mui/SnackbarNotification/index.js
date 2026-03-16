@@ -37,14 +37,16 @@ const SnackbarNotification = ({
   };
 
   useEffect(() => {
-    if (msgData.html) {
+    if (msgData.html && msgData.html.trim()) {
       setOpen(true);
+    } else {
+      setOpen(false);
     }
   }, [msgData]);
 
   // when snackbarMessage changes in base-reducer, we trigger the snackbar
   useEffect(() => {
-    if (snackbarMessage?.html) {
+    if (snackbarMessage?.html && snackbarMessage.html.trim()) {
       setMsgData(snackbarMessage);
     }
   }, [snackbarMessage]);
