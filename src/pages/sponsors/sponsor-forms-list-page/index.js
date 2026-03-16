@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +11,8 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -29,14 +30,25 @@ import {
   getSponsorForm,
   getSponsorForms,
   unarchiveSponsorForm,
-  deleteSponsorForm
+  deleteSponsorForm,
+  updateFormTemplate
 } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
 import MuiTable from "../../../components/mui/table/mui-table";
+import DropdownCheckbox from "../../../components/mui/dropdown-checkbox";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+
+const normalizeTiers = (arr) =>
+  Array.isArray(arr)
+    ? arr.length === 0
+      ? ["all"]
+      : typeof arr[0] === "object"
+      ? arr.map((t) => t.id)
+      : arr
+    : [];
 
 const SponsorFormsListPage = ({
   sponsorForms,
@@ -51,7 +63,9 @@ const SponsorFormsListPage = ({
   getSponsorForm,
   archiveSponsorForm,
   unarchiveSponsorForm,
-  deleteSponsorForm
+  deleteSponsorForm,
+  updateFormTemplate,
+  sponsorships
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -124,6 +138,70 @@ const SponsorFormsListPage = ({
     );
   };
 
+  const [editingTiersId, setEditingTiersId] = useState(null);
+  const [tiersValue, setTiersValue] = useState([]);
+  const dropdownRef = useRef();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  useEffect(() => {
+    if (editingTiersId !== null && !dropdownOpen) {
+      const handleClickOutside = (event) => {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(event.target)
+        ) {
+          if (
+            tiersValue.length === 0 ||
+            (
+              sponsorForms.find((f) => f.id === editingTiersId)
+                ?.sponsorship_types || []
+            ).toString() === tiersValue.toString()
+          ) {
+            setEditingTiersId(null);
+          }
+        }
+      };
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [editingTiersId, tiersValue, sponsorForms, dropdownOpen]);
+
+  const handleTiersEdit = (row) => {
+    setEditingTiersId(row.id);
+    setTiersValue(normalizeTiers(row.sponsorship_types));
+  };
+
+  const handleTiersChange = (ev) => {
+    let newValue = ev.target.value;
+    if (!Array.isArray(newValue)) newValue = [newValue];
+    setTiersValue(newValue);
+  };
+
+  const arraysEqual = (a, b) =>
+    a.length === b.length && a.every((v, i) => v === b[i]);
+  const handleTiersSave = async (row) => {
+    const prevAll = row.sponsorship_types?.includes("all");
+    const prevIds = prevAll ? ["all"] : normalizeTiers(row.sponsorship_types);
+    const nextAll = tiersValue.includes("all");
+    const nextIds = nextAll ? ["all"] : normalizeTiers(tiersValue);
+    const changed = prevAll !== nextAll || !arraysEqual(prevIds, nextIds);
+    setEditingTiersId(null);
+    if (!changed) return;
+    const sponsorship_types = nextIds;
+    const apply_to_all_types = nextAll;
+    if (!apply_to_all_types && sponsorship_types.length === 0) return;
+    updateFormTemplate({
+      id: row.id,
+      sponsorship_types,
+      apply_to_all_types
+    })
+      .then(() => {
+        getSponsorForms();
+      })
+      .catch(() => {});
+  };
+
   const columns = [
     {
       columnKey: "code",
@@ -136,14 +214,90 @@ const SponsorFormsListPage = ({
       sortable: true
     },
     {
+      columnKey: "tiers",
+      header: T.translate("sponsor_forms.tiers_column_label"),
+      sortable: false,
+      width: 140,
+      render: (row) => {
+        const cellStyle = {
+          width: 140,
+          maxWidth: 140,
+          minWidth: 140,
+          display: "block"
+        };
+        if (editingTiersId === row.id) {
+          const options =
+            sponsorships && sponsorships.items ? sponsorships.items : [];
+          const value = normalizeTiers(tiersValue);
+          return (
+            <div
+              style={cellStyle}
+              className="tiers-inline-container"
+              ref={dropdownRef}
+            >
+              <DropdownCheckbox
+                name="tiers-inline"
+                label={T.translate(
+                  "sponsor_forms.form_template_popup.sponsorship"
+                )}
+                allLabel={T.translate(
+                  "sponsor_forms.form_template_popup.all_tiers"
+                )}
+                value={value}
+                options={options}
+                onChange={handleTiersChange}
+                onClose={() => handleTiersSave(row)}
+                onOpen={() => setDropdownOpen(true)}
+                onCloseMenu={() => setDropdownOpen(false)}
+              />
+            </div>
+          );
+        }
+        let label = "-";
+        if (row.sponsorship_types && Array.isArray(row.sponsorship_types)) {
+          if (row.sponsorship_types.includes("all")) {
+            label = T.translate("sponsor_forms.form_template_popup.all_tiers");
+          } else if (row.sponsorship_types.length > 0) {
+            const sponsorshipOptions =
+              sponsorships && sponsorships.items ? sponsorships.items : [];
+            label = row.sponsorship_types
+              .map((id) => {
+                const found = sponsorshipOptions.find((s) => s.id === id);
+                return found ? found.name : id;
+              })
+              .join(", ");
+          }
+        }
+        return (
+          <div style={cellStyle}>
+            <span
+              style={{
+                cursor: "pointer",
+                textDecoration: "underline dotted",
+                display: "block",
+                whiteSpace: "normal",
+                wordBreak: "break-word",
+                verticalAlign: "middle"
+              }}
+              title={label}
+              onClick={() => handleTiersEdit(row)}
+            >
+              {label}
+            </span>
+          </div>
+        );
+      }
+    },
+    {
       columnKey: "items_qty",
+      width: 100,
       header: T.translate("sponsor_forms.items_column_label"),
       sortable: false
     },
     {
       columnKey: "manage_items",
       header: "",
-      width: 100,
+      width: 175,
       align: "center",
       render: (row) => (
         <Button
@@ -152,7 +306,7 @@ const SponsorFormsListPage = ({
           size="small"
           onClick={() => handleManageItems(row)}
         >
-          Manage&nbsp;Items
+          {T.translate("sponsor_forms.manage_items_button")}
         </Button>
       ),
       dottedBorder: true
@@ -272,5 +426,6 @@ export default connect(mapStateToProps, {
   getSponsorForm,
   archiveSponsorForm,
   unarchiveSponsorForm,
-  deleteSponsorForm
+  deleteSponsorForm,
+  updateFormTemplate
 })(SponsorFormsListPage);

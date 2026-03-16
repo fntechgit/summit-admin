@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,15 +91,26 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         last_page: lastPage
       } = payload.response;
 
-      const sponsorForms = payload.response.data.map((a) => ({
-        id: a.id,
-        code: a.code,
-        name: a.name,
-        items_qty: `${a.items.length} ${
-          a.items.length === 1 ? "Item" : "Items"
-        }`,
-        is_archived: a.is_archived
-      }));
+      const sponsorForms = payload.response.data.map((a) => {
+        let sponsorship_types = [];
+        if (a.apply_to_all_types) {
+          sponsorship_types = ["all"];
+        } else if (Array.isArray(a.sponsorship_types)) {
+          sponsorship_types = a.sponsorship_types.map((type) =>
+            typeof type === "object" ? type.id : type
+          );
+        }
+        return {
+          id: a.id,
+          code: a.code,
+          name: a.name,
+          items_qty: `${a.items.length} ${
+            a.items.length === 1 ? "Item" : "Items"
+          }`,
+          is_archived: a.is_archived,
+          sponsorship_types
+        };
+      });
 
       return {
         ...state,

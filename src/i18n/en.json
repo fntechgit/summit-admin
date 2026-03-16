@@ -2631,6 +2631,8 @@
     "code_column_label": "Code",
     "name_column_label": "Name",
     "items_column_label": "Items",
+    "tiers_column_label": "Tiers",
+    "manage_items_button": "Manage Items",
     "form_delete_success": "Form successfully deleted.",
     "unarchive_button": "Unarchive",
     "archive_button": "Archive",

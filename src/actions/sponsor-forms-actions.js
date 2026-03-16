@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,8 +131,9 @@ export const getSponsorForms =
 
     const params = {
       page: currentPage,
-      fields: "id,code,name,level,expire_date,is_archived",
-      relations: "items",
+      fields:
+        "id,code,name,level,expire_date,is_archived,sponsorship_types,apply_to_all_types",
+      relations: "items,sponsorship_types",
       per_page: perPage,
       access_token: accessToken
     };
@@ -455,10 +456,28 @@ export const updateFormTemplate = (entity) => async (dispatch, getState) => {
 
 export const normalizeFormTemplate = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
-  const { opens_at, expires_at, sponsorship_types, meta_fields } = entity;
+  if (entity.opens_at !== undefined && entity.opens_at !== null) {
+    normalizedEntity.opens_at =
+      typeof entity.opens_at === "number"
+        ? entity.opens_at
+        : moment.tz(entity.opens_at, summitTZ).unix();
+  } else {
+    delete normalizedEntity.opens_at;
+  }
+  if (entity.expires_at !== undefined && entity.expires_at !== null) {
+    normalizedEntity.expires_at =
+      typeof entity.expires_at === "number"
+        ? entity.expires_at
+        : moment.tz(entity.expires_at, summitTZ).unix();
+  } else {
+    delete normalizedEntity.expires_at;
+  }
 
-  normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
-  normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
+  const sponsorship_types = entity.sponsorship_types || [];
+  const hasMetaFields = Object.prototype.hasOwnProperty.call(
+    entity,
+    "meta_fields"
+  );
 
   Object.assign(
     normalizedEntity,
@@ -469,7 +488,13 @@ export const normalizeFormTemplate = (entity, summitTZ) => {
     )
   );
 
-  normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
+  if (hasMetaFields) {
+    normalizedEntity.meta_fields = Array.isArray(entity.meta_fields)
+      ? entity.meta_fields.filter((mf) => !!mf.name)
+      : undefined;
+  } else {
+    delete normalizedEntity.meta_fields;
+  }
 
   return normalizedEntity;
 };
@@ -1128,7 +1153,6 @@ export const saveSponsorFormItem =
           );
         });
       })
-      .catch(() => {}) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });
