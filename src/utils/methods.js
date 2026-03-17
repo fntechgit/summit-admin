@@ -562,7 +562,11 @@ export const normalizeSelectAllField = (
   listName,
   allSelected
 ) => {
-  if (!items?.length) return {};
+  if (!items?.length)
+    return {
+      [flagName]: false,
+      [listName]: []
+    };
 
   const isAllSelected = allSelected ?? items.includes("all");
   if (isAllSelected) {
