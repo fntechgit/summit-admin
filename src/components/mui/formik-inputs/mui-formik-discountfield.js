@@ -11,16 +11,12 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
 import { useField } from "formik";
-import {
-  amountFromCents,
-  amountToCents
-} from "openstack-uicore-foundation/lib/utils/money";
 import MuiFormikTextField from "./mui-formik-textfield";
-import { DISCOUNT_TYPES } from "../../../utils/constants";
+import { DISCOUNT_TYPES, ONE_HUNDRED } from "../../../utils/constants";
 
 const BLOCKED_KEYS = ["e", "E", "+", "-"];
 
@@ -33,14 +29,16 @@ const MuiFormikDiscountField = ({
 }) => {
   // eslint-disable-next-line no-unused-vars
   const [field, meta, helpers] = useField(name);
-  const initialValue = inCents
-    ? amountFromCents(field.value || 0)
-    : field.value;
-  const [value, setValue] = useState(initialValue);
+  const [cleared, setCleared] = useState(false);
+  const emptyValue = meta.initialValue === null ? null : 0;
 
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
+  const getDisplayValue = () => {
+    if (cleared) return "";
+    if (field.value == null || field.value === 0) {
+      return field.value === 0 ? 0 : "";
+    }
+    return inCents ? field.value / ONE_HUNDRED : field.value;
+  };
 
   const adornment =
     discountType === DISCOUNT_TYPES.RATE
@@ -56,20 +54,35 @@ const MuiFormikDiscountField = ({
       ? { max: 100, inputMode: "numeric", step: 1 }
       : { inputMode: "decimal", step: 1 };
 
-  const handleChange = () => {
-    const val = parseFloat(value) || 0;
-    const transformedVal = amountToCents(val);
+  const handleChange = (e) => {
+    const newVal = e.target.value;
 
-    helpers.setValue(inCents ? transformedVal : val);
+    if (newVal === "") {
+      setCleared(true);
+      helpers.setValue(emptyValue);
+      return;
+    }
+
+    setCleared(false);
+    const numericValue = Number(newVal);
+    const newDiscount = inCents ? numericValue * ONE_HUNDRED : numericValue;
+
+    helpers.setValue(newDiscount);
+  };
+
+  const handleKeyDown = (e) => {
+    if (BLOCKED_KEYS.includes(e.key)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
 
   return (
     <MuiFormikTextField
       name={name}
       label={label}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      onBlur={handleChange}
+      value={getDisplayValue()}
+      onChange={handleChange}
       type="number"
       slotProps={{
         input: {
@@ -78,12 +91,7 @@ const MuiFormikDiscountField = ({
           ...inputProps
         }
       }}
-      onKeyDown={(e) => {
-        if (BLOCKED_KEYS.includes(e.key)) {
-          e.nativeEvent.preventDefault();
-          e.nativeEvent.stopImmediatePropagation();
-        }
-      }}
+      onKeyDown={handleKeyDown}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}
     />

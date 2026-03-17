@@ -38,20 +38,14 @@ const MuiFormikPriceField = ({
     }
 
     setCleared(false);
-    const newPrice = Number(newVal) * ONE_HUNDRED;
+    const numericValue = Number(newVal);
+    const newPrice = inCents ? numericValue * ONE_HUNDRED : numericValue;
 
     helpers.setValue(newPrice);
   };
 
   const handleKeyDown = (e) => {
     if (BLOCKED_KEYS.includes(e.key)) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    // Block "0" as first character — only 1-9 are valid leading digits.
-    // When value is empty or already "0", prevent any "0" keypress.
-    if (e.key === "0" && (e.target.value === "" || e.target.value === "0")) {
       e.preventDefault();
       e.stopPropagation();
     }
