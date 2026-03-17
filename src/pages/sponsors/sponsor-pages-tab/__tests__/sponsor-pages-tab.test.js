@@ -55,6 +55,11 @@ jest.mock("../../../../actions/sponsor-pages-actions", () => ({
   unarchiveCustomizedPage: jest.fn(() => () => Promise.resolve())
 }));
 
+jest.mock("../../../../actions/sponsor-forms-actions", () => ({
+  ...jest.requireActual("../../../../actions/sponsor-forms-actions"),
+  getSponsorships: jest.fn(() => () => Promise.resolve())
+}));
+
 // Helpers
 
 const createSponsor = (overrides = {}) => ({
@@ -92,6 +97,12 @@ const defaultState = {
     },
     hideArchived: false,
     term: ""
+  },
+  currentSummitState: {
+    currentSummit: {
+      id: 1,
+      time_zone: { name: "UTC" }
+    }
   }
 };
 
