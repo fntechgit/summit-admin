@@ -132,7 +132,7 @@ export const getSponsorForms =
     const params = {
       page: currentPage,
       fields:
-        "id,code,name,level,expire_date,is_archived,sponsorship_types,apply_to_all_types",
+        "id,code,name,level,expire_date,is_archived,sponsorship_types,apply_to_all_types,opens_at,expires_at",
       relations: "items,sponsorship_types",
       per_page: perPage,
       access_token: accessToken,
