@@ -187,7 +187,7 @@ const buildValidationSchema = (items) => {
     return acc;
   }, {});
 
-  schema.discount = yup.number(T.translate("validation.number"));
+  schema.discount_amount = yup.number(T.translate("validation.number"));
   schema.discount_type = yup
     .string(T.translate("validation.string"))
     .nullable();
@@ -268,19 +268,16 @@ const EditForm = ({
     onSaveForm({ discount_amount, discount_type, items });
   };
 
-  const formik = useFormik(
-    {
-      initialValues: buildInitialValues(form, showTimeZone),
-      validationSchema: yup.object({
-        ...buildValidationSchema(form?.items || [])
-      }),
-      onSubmit: (values) => {
-        handleSave(values);
-      },
-      enableReinitialize: true
+  const formik = useFormik({
+    initialValues: buildInitialValues(form, showTimeZone),
+    validationSchema: yup.object({
+      ...buildValidationSchema(form?.items || [])
+    }),
+    onSubmit: (values) => {
+      handleSave(values);
     },
-    [form?.items]
-  );
+    enableReinitialize: true
+  });
 
   // wait for formik to re-initialize with form items
   if (!form || Object.keys(formik.values).length === 0) return null;

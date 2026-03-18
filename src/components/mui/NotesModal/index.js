@@ -31,9 +31,7 @@ const NotesModal = ({ item, open, onClose }) => {
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
-    if (field?.value) {
-      setNotes(field.value);
-    }
+    setNotes(field.value || "");
   }, [field?.value]);
 
   const handleSave = () => {

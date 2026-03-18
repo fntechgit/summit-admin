@@ -110,7 +110,7 @@ const SelectFormDialog = ({
   ];
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -118,7 +118,7 @@ const SelectFormDialog = ({
         <Typography variant="h5">
           {T.translate("edit_sponsor.cart_tab.add_form_to_cart")}
         </Typography>
-        <IconButton size="large" sx={{ p: 0 }} onClick={() => handleClose()}>
+        <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>

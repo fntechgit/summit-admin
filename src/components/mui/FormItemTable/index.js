@@ -98,7 +98,7 @@ const FormItemTable = ({
 
       return qtyEXC.length > 0 ? itemLevelQty : globalQty;
     },
-    [valuesStr]
+    [valuesStr, extraColumns]
   );
 
   const calculateRowTotal = (row) => {
