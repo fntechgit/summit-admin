@@ -5,7 +5,7 @@ import { Formik, Form } from "formik";
 import "@testing-library/jest-dom";
 import ItemPriceTiers from "../formik-inputs/item-price-tiers";
 
-jest.mock("i18n-react/dist/i18n-react", () => ({
+jest.mock("i18n-react", () => ({
   __esModule: true,
   default: { translate: (key) => key }
 }));

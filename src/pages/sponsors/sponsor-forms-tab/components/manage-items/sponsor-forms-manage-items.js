@@ -212,7 +212,8 @@ const SponsorFormsManageItems = ({
         "edit_sponsor.forms_tab.form_manage_items.early_bird_rate"
       ),
       sortable: false,
-      editable: (row) => row.early_bird_rate !== "N/A",
+      editable: (row) =>
+        row.early_bird_rate !== T.translate("price_tiers.not_available"),
       validation: {
         schema: rateCellValidation()
       }
@@ -223,7 +224,8 @@ const SponsorFormsManageItems = ({
         "edit_sponsor.forms_tab.form_manage_items.standard_rate"
       ),
       sortable: false,
-      editable: (row) => row.standard_rate !== "N/A",
+      editable: (row) =>
+        row.standard_rate !== T.translate("price_tiers.not_available"),
       validation: {
         schema: rateCellValidation()
       }
@@ -234,7 +236,8 @@ const SponsorFormsManageItems = ({
         "edit_sponsor.forms_tab.form_manage_items.onsite_rate"
       ),
       sortable: false,
-      editable: (row) => row.onsite_rate !== "N/A",
+      editable: (row) =>
+        row.onsite_rate !== T.translate("price_tiers.not_available"),
       validation: {
         schema: rateCellValidation()
       }

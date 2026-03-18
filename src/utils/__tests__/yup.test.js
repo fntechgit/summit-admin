@@ -1,6 +1,6 @@
 import { nullableDecimalValidation } from "../yup";
 
-jest.mock("i18n-react/dist/i18n-react", () => ({
+jest.mock("i18n-react", () => ({
   translate: (key) => key
 }));
 
