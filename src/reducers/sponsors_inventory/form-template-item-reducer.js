@@ -12,7 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
+import { RATE_FIELDS, rateFromCents } from "../../utils/rate-helpers";
 import {
   RECEIVE_FORM_TEMPLATE_ITEM,
   RESET_FORM_TEMPLATE_ITEM_FORM,
@@ -62,16 +62,17 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
     }
     case RECEIVE_FORM_TEMPLATE_ITEM: {
       const entity = { ...payload.response };
+      const rateFieldValues = Object.values(RATE_FIELDS);
 
       for (const key in entity) {
-        if (entity.hasOwnProperty(key)) {
+        if (entity.hasOwnProperty(key) && !rateFieldValues.includes(key)) {
           entity[key] = entity[key] == null ? "" : entity[key];
         }
       }
 
-      entity.early_bird_rate = amountFromCents(entity.early_bird_rate);
-      entity.standard_rate = amountFromCents(entity.standard_rate);
-      entity.onsite_rate = amountFromCents(entity.onsite_rate);
+      entity.early_bird_rate = rateFromCents(entity.early_bird_rate);
+      entity.standard_rate = rateFromCents(entity.standard_rate);
+      entity.onsite_rate = rateFromCents(entity.onsite_rate);
 
       return {
         ...state,
@@ -84,16 +85,17 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
     case FORM_TEMPLATE_ITEM_ADDED:
     case FORM_TEMPLATE_ITEM_UPDATED: {
       const entity = { ...payload.response };
+      const rateFieldValues = Object.values(RATE_FIELDS);
 
       for (const key in entity) {
-        if (entity.hasOwnProperty(key)) {
+        if (entity.hasOwnProperty(key) && !rateFieldValues.includes(key)) {
           entity[key] = entity[key] == null ? "" : entity[key];
         }
       }
 
-      entity.early_bird_rate = amountFromCents(entity.early_bird_rate);
-      entity.standard_rate = amountFromCents(entity.standard_rate);
-      entity.onsite_rate = amountFromCents(entity.onsite_rate);
+      entity.early_bird_rate = rateFromCents(entity.early_bird_rate);
+      entity.standard_rate = rateFromCents(entity.standard_rate);
+      entity.onsite_rate = rateFromCents(entity.onsite_rate);
 
       return {
         ...state,

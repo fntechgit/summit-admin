@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import {
@@ -20,6 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
 import Box from "@mui/material/Box";
+import { formatRateFromCents } from "../../../../utils/rate-helpers";
 import SearchInput from "../../../../components/mui/search-input";
 import MuiTable from "../../../../components/mui/table/mui-table";
 import { addInventoryItems } from "../../../../actions/sponsor-forms-actions";
@@ -123,7 +123,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
         "sponsor_form_item_list.add_from_inventory.early_bird_rate"
       ),
       sortable: false,
-      render: (row) => currencyAmountFromCents(row.early_bird_rate)
+      render: (row) => formatRateFromCents(row.early_bird_rate)
     },
     {
       columnKey: "standard_rate",
@@ -131,7 +131,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
         "sponsor_form_item_list.add_from_inventory.standard_rate"
       ),
       sortable: false,
-      render: (row) => currencyAmountFromCents(row.standard_rate)
+      render: (row) => formatRateFromCents(row.standard_rate)
     },
     {
       columnKey: "onsite_rate",
@@ -139,7 +139,7 @@ const SponsorFormAddItemFromInventoryPopup = ({
         "sponsor_form_item_list.add_from_inventory.onsite_rate"
       ),
       sortable: false,
-      render: (row) => currencyAmountFromCents(row.onsite_rate)
+      render: (row) => formatRateFromCents(row.onsite_rate)
     },
     {
       columnKey: "hasImage",

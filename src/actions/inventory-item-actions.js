@@ -25,7 +25,7 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
-import { amountToCents } from "openstack-uicore-foundation/lib/utils/money";
+import { rateToCents } from "../utils/rate-helpers";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
@@ -200,13 +200,11 @@ const normalizeEntity = (entity) => {
     (img) => img.file_path
   );
 
-  normalizedEntity.early_bird_rate = amountToCents(
+  normalizedEntity.early_bird_rate = rateToCents(
     normalizedEntity.early_bird_rate
   );
-  normalizedEntity.standard_rate = amountToCents(
-    normalizedEntity.standard_rate
-  );
-  normalizedEntity.onsite_rate = amountToCents(normalizedEntity.onsite_rate);
+  normalizedEntity.standard_rate = rateToCents(normalizedEntity.standard_rate);
+  normalizedEntity.onsite_rate = rateToCents(normalizedEntity.onsite_rate);
 
   return normalizedEntity;
 };

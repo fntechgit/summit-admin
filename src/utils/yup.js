@@ -47,7 +47,7 @@ export const decimalValidation = () =>
   yup
     .number()
     .typeError(T.translate("validation.number"))
-    .positive(T.translate("validation.number_positive"))
+    .positive(T.translate("validation.non_negative"))
     .required(T.translate("validation.required"))
     .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
       if (value === undefined || value === null) return true;
@@ -79,7 +79,7 @@ export const rateCellValidation = () =>
         return /^\$?-?\d+(\.\d+)?$/.test(originalValue);
       }
     })
-    .positive(T.translate("validation.number_positive"))
+    .positive(T.translate("validation.non_negative"))
     .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
       if (value === undefined || value === null) return true;
       return /^\d+(\.\d{1,2})?$/.test(value.toString());
@@ -103,7 +103,7 @@ export const requiredHTMLValidation = () =>
 export const positiveNumberValidation = () =>
   numberValidation()
     .integer(T.translate("validation.integer"))
-    .min(0, T.translate("validation.number_positive"));
+    .min(0, T.translate("validation.non_negative"));
 
 export const formMetafieldsValidation = () =>
   yup.array().of(
@@ -159,3 +159,14 @@ export const opensAtValidation = () =>
   yup
     .date(T.translate("validation.date"))
     .required(T.translate("validation.required"));
+
+export const nullableDecimalValidation = () =>
+  yup
+    .number()
+    .nullable()
+    .typeError(T.translate("validation.number"))
+    .min(0, T.translate("validation.non_negative"))
+    .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
+      if (value === undefined || value === null) return true;
+      return /^\d+(\.\d{1,2})?$/.test(value.toString());
+    });

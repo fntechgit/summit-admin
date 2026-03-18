@@ -25,17 +25,17 @@ import {
   MAX_INVENTORY_IMAGES_UPLOAD_QTY
 } from "../../../utils/constants";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
-import MuiFormikPriceField from "../../../components/mui/formik-inputs/mui-formik-pricefield";
 import useScrollToError from "../../../hooks/useScrollToError";
 import FormikTextEditor from "../../../components/inputs/formik-text-editor";
 import {
-  decimalValidation,
+  nullableDecimalValidation,
   requiredStringValidation,
   positiveNumberValidation,
   formMetafieldsValidation,
   requiredHTMLValidation
 } from "../../../utils/yup";
 import AdditionalInputList from "../../../components/mui/formik-inputs/additional-input/additional-input-list";
+import ItemPriceTiers from "../../../components/mui/formik-inputs/item-price-tiers";
 import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
 import { getMediaInputValue } from "../../../utils/methods";
 
@@ -60,9 +60,9 @@ const SponsorItemDialog = ({
       name: requiredStringValidation(),
       description: requiredHTMLValidation(),
       images: yup.array(),
-      early_bird_rate: decimalValidation(),
-      standard_rate: decimalValidation(),
-      onsite_rate: decimalValidation(),
+      early_bird_rate: nullableDecimalValidation(),
+      standard_rate: nullableDecimalValidation(),
+      onsite_rate: nullableDecimalValidation(),
       default_quantity: positiveNumberValidation(),
       quantity_limit_per_sponsor: positiveNumberValidation(),
       quantity_limit_per_show: positiveNumberValidation(),
@@ -174,36 +174,7 @@ const SponsorItemDialog = ({
             <Divider />
 
             <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>
-              <Grid2 size={4}>
-                <InputLabel htmlFor="early_bird_rate">
-                  {T.translate("edit_inventory_item.early_bird_rate")} *
-                </InputLabel>
-                <MuiFormikPriceField
-                  variant="outlined"
-                  name="early_bird_rate"
-                  fullWidth
-                />
-              </Grid2>
-              <Grid2 size={4}>
-                <InputLabel htmlFor="standard_rate">
-                  {T.translate("edit_inventory_item.standard_rate")} *
-                </InputLabel>
-                <MuiFormikPriceField
-                  variant="outlined"
-                  name="standard_rate"
-                  fullWidth
-                />
-              </Grid2>
-              <Grid2 size={4}>
-                <InputLabel htmlFor="onsite_rate">
-                  {T.translate("edit_inventory_item.onsite_rate")} *
-                </InputLabel>
-                <MuiFormikPriceField
-                  variant="outlined"
-                  name="onsite_rate"
-                  fullWidth
-                />
-              </Grid2>
+              <ItemPriceTiers />
             </Grid2>
             <Divider />
             <Grid2 container spacing={2} size={12} sx={{ p: 3 }}>

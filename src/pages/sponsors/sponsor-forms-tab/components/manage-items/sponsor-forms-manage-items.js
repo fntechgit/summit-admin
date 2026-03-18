@@ -212,7 +212,7 @@ const SponsorFormsManageItems = ({
         "edit_sponsor.forms_tab.form_manage_items.early_bird_rate"
       ),
       sortable: false,
-      editable: true,
+      editable: (row) => row.early_bird_rate !== "N/A",
       validation: {
         schema: rateCellValidation()
       }
@@ -223,7 +223,7 @@ const SponsorFormsManageItems = ({
         "edit_sponsor.forms_tab.form_manage_items.standard_rate"
       ),
       sortable: false,
-      editable: true,
+      editable: (row) => row.standard_rate !== "N/A",
       validation: {
         schema: rateCellValidation()
       }
@@ -234,7 +234,7 @@ const SponsorFormsManageItems = ({
         "edit_sponsor.forms_tab.form_manage_items.onsite_rate"
       ),
       sortable: false,
-      editable: true,
+      editable: (row) => row.onsite_rate !== "N/A",
       validation: {
         schema: rateCellValidation()
       }
