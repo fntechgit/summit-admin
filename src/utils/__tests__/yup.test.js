@@ -24,6 +24,10 @@ describe("nullableDecimalValidation", () => {
     await expect(schema.isValid(10.55)).resolves.toBe(true);
   });
 
+  it("should treat empty string as 0 (cleared input field)", async () => {
+    await expect(schema.cast("")).toBe(0);
+  });
+
   it("should fail for a negative value", async () => {
     await expect(schema.isValid(-1)).resolves.toBe(false);
   });

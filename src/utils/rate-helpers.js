@@ -21,6 +21,7 @@ export const rateFromCents = (cents) => {
 
 export const rateToCents = (value) => {
   if (value === null || value === undefined) return null;
+  if (value === "") return 0;
   return amountToCents(value);
 };
 

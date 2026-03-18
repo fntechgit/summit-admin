@@ -42,6 +42,10 @@ describe("rateToCents", () => {
     expect(rateToCents(null)).toBeNull();
   });
 
+  it("should return 0 for empty string (cleared input field)", () => {
+    expect(rateToCents("")).toBe(0);
+  });
+
   it("should converts 0 to 0 cents", () => {
     expect(rateToCents(0)).toBe(0);
   });

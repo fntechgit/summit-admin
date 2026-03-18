@@ -164,6 +164,11 @@ export const nullableDecimalValidation = () =>
   yup
     .number()
     .nullable()
+    .transform((value, originalValue) => {
+      if (typeof originalValue === "string" && originalValue.trim() === "")
+        return 0;
+      return value;
+    })
     .typeError(T.translate("validation.number"))
     .min(0, T.translate("validation.non_negative"))
     .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
