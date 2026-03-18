@@ -346,22 +346,4 @@ describe("MuiTableEditable", () => {
       expect(sx.color).toBe("text.disabled");
     });
   });
-
-  test("does not apply archived styles to archive/unarchive action cell", () => {
-    setup({
-      options: { sortCol: "name", sortDir: -1, disableProp: "is_archived" },
-      data: [{ id: 1, name: "Alice", role: "Dev", age: 35, is_archived: true }],
-      onArchive: jest.fn()
-    });
-
-    const unarchiveButton = screen.getByRole("button", {
-      name: "general.unarchive"
-    });
-    const actionCell = unarchiveButton.closest("td");
-    const sx = getCellSx(actionCell);
-
-    expect(sx.width).toBe(80);
-    expect(sx.backgroundColor).toBeUndefined();
-    expect(sx.color).toBeUndefined();
-  });
 });

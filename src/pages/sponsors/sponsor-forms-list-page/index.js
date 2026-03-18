@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,7 @@
  * */
 
 import React, { useEffect, useState } from "react";
+import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -124,6 +125,11 @@ const SponsorFormsListPage = ({
     );
   };
 
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "";
+    return epochToMoment(Number(timestamp)).format("YYYY/MM/DD");
+  };
+
   const columns = [
     {
       columnKey: "code",
@@ -136,26 +142,46 @@ const SponsorFormsListPage = ({
       sortable: true
     },
     {
+      columnKey: "opens_at",
+      header: T.translate("edit_sponsor.forms_tab.opens_at"),
+      sortable: true,
+      width: 115,
+      render: (row) => formatDate(row.opens_at)
+    },
+    {
+      columnKey: "expires_at",
+      header: T.translate("edit_sponsor.forms_tab.expires_at"),
+      sortable: true,
+      width: 120,
+      render: (row) => formatDate(row.expires_at)
+    },
+    {
       columnKey: "items_qty",
       header: T.translate("sponsor_forms.items_column_label"),
-      sortable: false
+      sortable: false,
+      width: 90
     },
     {
       columnKey: "manage_items",
       header: "",
-      width: 100,
-      align: "center",
+      width: 140,
+      align: "left",
       render: (row) => (
         <Button
           variant="text"
           color="inherit"
           size="small"
+          sx={{
+            padding: 0,
+            color: "rgba(0,0,0,0.56)",
+            fontSize: "13px",
+            fontWeight: "normal"
+          }}
           onClick={() => handleManageItems(row)}
         >
-          Manage&nbsp;Items
+          {T.translate("sponsor_forms.manage_items")}
         </Button>
-      ),
-      dottedBorder: true
+      )
     }
   ];
 
@@ -167,7 +193,7 @@ const SponsorFormsListPage = ({
 
   return (
     <div className="container">
-      <h3>{T.translate("sponsor_forms.forms")}</h3>
+      <h1>{T.translate("sponsor_forms.forms")}</h1>
       <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
       <Grid2
         container

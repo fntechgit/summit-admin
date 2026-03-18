@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,55 +176,69 @@ const SponsorFormsTab = ({
     {
       columnKey: "name",
       header: name,
-      sortable: true
+      sortable: true,
+      width: 235
     },
     {
       columnKey: "code",
       header: T.translate("edit_sponsor.forms_tab.code"),
-      sortable: true
+      sortable: true,
+      width: 90
     },
     {
       columnKey: "allowed_add_ons",
       header: T.translate("edit_sponsor.forms_tab.add_ons"),
       sortable: true,
+      width: 120,
       render: (row) =>
         row.allowed_add_ons?.length > 0
           ? row.allowed_add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
-          : "None"
+          : T.translate("edit_sponsor.forms_tab.none")
     },
     {
       columnKey: "opens_at",
       header: T.translate("edit_sponsor.forms_tab.opens_at"),
-      sortable: true
+      sortable: true,
+      width: 115
     },
     {
       columnKey: "expires_at",
       header: T.translate("edit_sponsor.forms_tab.expires_at"),
-      sortable: true
+      sortable: true,
+      width: 120
     },
     {
       columnKey: "items_qty",
       header: T.translate("edit_sponsor.forms_tab.items"),
       sortable: true,
+      width: 90,
       render: (row) =>
-        `${row.items_count} ${row.items_count === 1 ? "Item" : "Items"}`
+        `${row.items_count} ${
+          row.items_count === 1
+            ? T.translate("edit_sponsor.forms_tab.item")
+            : T.translate("edit_sponsor.forms_tab.items")
+        }`
     },
     {
       columnKey: "manage_items",
       header: "",
-      width: 100,
-      align: "center",
+      align: "left",
+      width: 130,
       render: (row) => (
         <Button
           variant="text"
-          color="inherit"
           size="small"
+          sx={{
+            padding: 0,
+            color: "rgba(0,0,0,0.56)",
+            fontSize: "13px",
+            fontWeight: "normal"
+          }}
           onClick={() => manageItemsFn(row)}
         >
-          Manage&nbsp;Items
+          {T.translate("edit_sponsor.forms_tab.manage_items")}
         </Button>
-      ),
-      dottedBorder: true
+      )
     }
   ];
 
@@ -236,23 +250,24 @@ const SponsorFormsTab = ({
     {
       columnKey: "archive",
       header: "",
-      width: 150,
+      width: 60,
       render: () => null
     },
     {
       columnKey: "customize",
       header: "",
-      width: 156,
+      width: 100,
       align: "center",
       render: (row) => (
         <Button
           variant="text"
           color="inherit"
           size="medium"
+          sx={{ px: 0, color: "rgba(0,0,0,0.56)", fontWeight: "normal" }}
           onClick={() => handleCustomizeForm(row)}
         >
           {T.translate("edit_sponsor.forms_tab.customize")}
-          <ArrowForwardIcon fontSize="large" sx={{ marginLeft: 1 }} />
+          <ArrowForwardIcon fontSize="large" sx={{ marginLeft: 1, px: 0 }} />
         </Button>
       ),
       dottedBorder: true

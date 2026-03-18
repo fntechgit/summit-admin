@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,7 +128,7 @@ export const getSponsorForms =
 
     const params = {
       page: currentPage,
-      fields: "id,code,name,level,expire_date,is_archived",
+      fields: "id,code,name,level,expire_date,is_archived,opens_at,expires_at",
       relations: "items",
       per_page: perPage,
       access_token: accessToken

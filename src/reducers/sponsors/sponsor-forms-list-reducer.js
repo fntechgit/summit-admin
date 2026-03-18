@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,6 +95,8 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
         id: a.id,
         code: a.code,
         name: a.name,
+        opens_at: a.opens_at || "",
+        expires_at: a.expires_at || "",
         items_qty: `${a.items.length} ${
           a.items.length === 1 ? "Item" : "Items"
         }`,
