@@ -25,15 +25,16 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
-  archiveCustomizedPage,
-  deleteSponsorManagedPage,
-  getSponsorCustomizedPage,
-  getSponsorCustomizedPages,
   getSponsorManagedPages,
-  resetSponsorPage,
-  saveSponsorCustomizedPage,
+  getSponsorManagedPage,
+  getSponsorCustomizedPages,
   saveSponsorManagedPage,
-  unarchiveCustomizedPage
+  saveSponsorCustomizedPage,
+  getSponsorCustomizedPage,
+  deleteSponsorManagedPage,
+  unarchiveCustomizedPage,
+  archiveCustomizedPage,
+  resetSponsorPage,
 } from "../../../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import SearchInput from "../../../../../components/mui/search-input";
@@ -55,6 +56,7 @@ const SponsorPagesTab = ({
   summitTZ,
   currentEditPage,
   getSponsorManagedPages,
+  getSponsorManagedPage,
   saveSponsorManagedPage,
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
@@ -194,7 +196,8 @@ const SponsorPagesTab = ({
     console.log("ARCHIVE MANAGED ", item);
 
   const handleManagedEdit = (item) => {
-    console.log("EDIT MANAGED ", item);
+    console.log("CHECK!", item);
+    getSponsorManagedPage(item.id).then(() => setOpenPopup("managedPagePopup"));
   };
 
   const handleManagedDelete = (itemId) => {
@@ -258,6 +261,21 @@ const SponsorPagesTab = ({
       .then(() => {
         const { perPage, order, orderDir } = customizedPages;
         getSponsorCustomizedPages(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          perPage,
+          order,
+          orderDir
+        );
+      })
+      .finally(() => setOpenPopup(null));
+  };
+
+  const handleSaveManagedPage = (entity) => {
+    saveSponsorManagedPage(entity)
+      .then(() => {
+        const { perPage, order, orderDir } = managedPages;
+        getSponsorManagedPages(
           term,
           DEFAULT_CURRENT_PAGE,
           perPage,
@@ -462,9 +480,13 @@ const SponsorPagesTab = ({
         />
       )}
 
-      {openPopup === "pagePopup" && (
+      {(openPopup === "pagePopup" || openPopup === "managedPagePopup") && (
         <PageTemplatePopup
-          onSave={handleSaveCustomizedPage}
+          onSave={
+            openPopup === "pagePopup"
+              ? handleSaveCustomizedPage
+              : handleSaveManagedPage
+          }
           onClose={handleClosePagePopup}
           pageTemplate={currentEditPage}
           sponsorshipIds={sponsorshipIds}
@@ -489,6 +511,7 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getSponsorManagedPages,
+  getSponsorManagedPage,
   saveSponsorManagedPage,
   getSponsorCustomizedPage,
   getSponsorCustomizedPages,

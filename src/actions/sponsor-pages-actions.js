@@ -37,6 +37,7 @@ export const RESET_EDIT_PAGE = "RESET_EDIT_PAGE";
 
 export const REQUEST_SPONSOR_MANAGED_PAGES = "REQUEST_SPONSOR_MANAGED_PAGES";
 export const RECEIVE_SPONSOR_MANAGED_PAGES = "RECEIVE_SPONSOR_MANAGED_PAGES";
+export const RECEIVE_SPONSOR_MANAGED_PAGE = "RECEIVE_SPONSOR_MANAGED_PAGE";
 export const SPONSOR_MANAGED_PAGE_ADDED = "SPONSOR_MANAGED_PAGE_ADDED";
 export const SPONSOR_MANAGED_PAGE_DELETED = "SPONSOR_MANAGED_PAGE_DELETED";
 export const SPONSOR_MANAGED_PAGE_UPDATED = "SPONSOR_MANAGED_PAGE_UPDATED";
@@ -159,6 +160,32 @@ export const getSponsorManagedPages =
     });
   };
 
+export const getSponsorManagedPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: sponsorId }
+  } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    // fields: "id,code,name,kind,modules_count,allowed_add_ons",
+    // expand: "modules",
+    access_token: accessToken
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SPONSOR_MANAGED_PAGE),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages/${pageId}`,
+    snackbarErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
+
 export const saveSponsorManagedPage =
   (entity) => async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -256,7 +283,7 @@ const normalizeSponsorManagedPage = (entity) => {
     show_page_ids: entity.pages
   };
 
-  if (entity.add_ons.includes("all")) {
+  if (normalizedEntity.allowed_add_ons.includes("all")) {
     normalizedEntity.apply_to_all_add_ons = true;
     normalizedEntity.allowed_add_ons = [];
   } else {
