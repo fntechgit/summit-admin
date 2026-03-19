@@ -60,7 +60,7 @@ const ItemTableField = ({ rowId, field, timeZone, label = "" }) => {
           size="small"
           type="number"
           slotProps={{
-            input: {
+            htmlInput: {
               min: field.minimum_quantity,
               ...(field.maximum_quantity > 0
                 ? { max: field.maximum_quantity }

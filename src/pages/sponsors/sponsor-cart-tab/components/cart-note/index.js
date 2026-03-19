@@ -38,9 +38,11 @@ const CartNote = ({
   };
 
   const handleSave = () => {
-    onSave?.(editNote).then(() => {
-      setEditNote(null);
-    });
+    onSave?.(editNote)
+      .then(() => {
+        setEditNote(null);
+      })
+      .catch(console.log); // dummy catch
   };
 
   const handleDelete = async (noteId) => {
@@ -118,6 +120,7 @@ const CartNote = ({
       {showCurrentNotes &&
         sortedNotes.map((note, idx) => (
           <Card
+            key={`notes-${note.id}`}
             variant="contained"
             sx={{
               display: "flex",

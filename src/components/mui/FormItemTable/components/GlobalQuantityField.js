@@ -36,7 +36,7 @@ const GlobalQuantityField = ({ row, extraColumns, value }) => {
       size="small"
       type="number"
       slotProps={{
-        input: {
+        htmlInput: {
           readOnly: isReadOnly,
           min: 0,
           ...(row.quantity_limit_per_sponsor

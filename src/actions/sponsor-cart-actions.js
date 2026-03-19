@@ -246,7 +246,7 @@ export const getSponsorCartForm =
       createAction(RECEIVE_CART_FORM),
       `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/forms/${cartFormId}`,
       authErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -268,7 +268,7 @@ export const getSponsorForm = (formId) => async (dispatch, getState) => {
     createAction(RECEIVE_CART_SPONSOR_FORM),
     `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/show-forms/${formId}`,
     authErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -410,7 +410,7 @@ export const saveSponsorCartNote =
       normalizedEntity,
       snackbarErrorHandler
     )(params)(dispatch)
-      .catch(console.log)
+      .catch(() => Promise.reject())
       .finally(() => dispatch(stopLoading()));
   };
 

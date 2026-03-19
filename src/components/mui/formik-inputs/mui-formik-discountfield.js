@@ -86,7 +86,9 @@ const MuiFormikDiscountField = ({
       type="number"
       slotProps={{
         input: {
-          ...adornment,
+          ...adornment
+        },
+        htmlInput: {
           min: 0,
           ...inputProps
         }
