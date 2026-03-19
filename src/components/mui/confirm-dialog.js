@@ -50,6 +50,7 @@ const ConfirmDialog = ({
         onClick={onCancel}
         color={cancelButtonColor}
         variant="outlined"
+        sx={{ whiteSpace: "nowrap", minWidth: 100 }}
       >
         {cancelButtonText}
       </Button>
@@ -58,6 +59,7 @@ const ConfirmDialog = ({
         onClick={onConfirm}
         color={confirmButtonColor}
         variant="contained"
+        sx={{ whiteSpace: "nowrap", minWidth: 100 }}
       >
         {confirmButtonText}
       </Button>
