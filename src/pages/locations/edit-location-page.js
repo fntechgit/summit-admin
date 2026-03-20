@@ -28,6 +28,7 @@ import {
   deleteLocationImage,
   deleteLocationMap
 } from "../../actions/location-actions";
+import { getSyncConfig, resyncRoom } from "../../actions/dropbox-sync-actions";
 
 import "../../styles/edit-location-page.less";
 import AddNewButton from "../../components/buttons/add-new-button";
@@ -40,6 +41,17 @@ class EditLocationPage extends React.Component {
     this.handleRoomDelete = this.handleRoomDelete.bind(this);
     this.handleImageDelete = this.handleImageDelete.bind(this);
     this.handleMapDelete = this.handleMapDelete.bind(this);
+    this.handleRoomResync = this.handleRoomResync.bind(this);
+  }
+
+  componentDidMount() {
+    const { dropboxSyncState } = this.props;
+    if (
+      window.DROPBOX_MATERIALIZER_API_BASE_URL &&
+      !dropboxSyncState.syncConfig.summit_id
+    ) {
+      this.props.getSyncConfig();
+    }
   }
 
   handleFloorDelete(floorId) {
@@ -118,12 +130,25 @@ class EditLocationPage extends React.Component {
     });
   }
 
+  handleRoomResync(venueName, roomName) {
+    this.props.resyncRoom(venueName, roomName);
+  }
+
   render() {
-    const { currentSummit, allClasses, entity, errors, history, match } =
-      this.props;
+    const {
+      currentSummit,
+      allClasses,
+      entity,
+      errors,
+      history,
+      dropboxSyncState
+    } = this.props;
     const title = entity.id
       ? T.translate("general.edit")
       : T.translate("general.add");
+    const syncEnabled =
+      !!window.DROPBOX_MATERIALIZER_API_BASE_URL &&
+      dropboxSyncState.syncConfig.dropbox_sync_enabled;
 
     return (
       <div className="container">
@@ -146,6 +171,8 @@ class EditLocationPage extends React.Component {
             onRoomDelete={this.handleRoomDelete}
             onImageDelete={this.handleImageDelete}
             onMapDelete={this.handleMapDelete}
+            syncEnabled={syncEnabled}
+            onRoomResync={this.handleRoomResync}
           />
         )}
       </div>
@@ -153,8 +180,13 @@ class EditLocationPage extends React.Component {
   }
 }
 
-const mapStateToProps = ({ currentSummitState, currentLocationState }) => ({
+const mapStateToProps = ({
+  currentSummitState,
+  currentLocationState,
+  dropboxSyncState
+}) => ({
   currentSummit: currentSummitState.currentSummit,
+  dropboxSyncState,
   ...currentLocationState
 });
 
@@ -168,5 +200,7 @@ export default connect(mapStateToProps, {
   deleteFloor,
   deleteRoom,
   deleteLocationImage,
-  deleteLocationMap
+  deleteLocationMap,
+  getSyncConfig,
+  resyncRoom
 })(EditLocationPage);

@@ -52,6 +52,7 @@ class LocationForm extends React.Component {
     this.handleMapUpdate = this.handleMapUpdate.bind(this);
     this.handleMapClick = this.handleMapClick.bind(this);
     this.handleClearHours = this.handleClearHours.bind(this);
+    this.handleRoomResync = this.handleRoomResync.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -212,6 +213,14 @@ class LocationForm extends React.Component {
     this.props.onMarkerDragged(entity);
   }
 
+  handleRoomResync(roomId) {
+    const { entity } = this.state;
+    const room = entity.rooms.find((r) => r.id === roomId);
+    if (room && this.props.onRoomResync) {
+      this.props.onRoomResync(entity.name, room.name);
+    }
+  }
+
   render() {
     const { entity, showSection } = this.state;
     const { currentSummit, allClasses } = this.props;
@@ -264,7 +273,17 @@ class LocationForm extends React.Component {
     const room_options = {
       actions: {
         edit: { onClick: this.handleRoomEdit },
-        delete: { onClick: this.props.onRoomDelete }
+        delete: { onClick: this.props.onRoomDelete },
+        custom: this.props.syncEnabled
+          ? [
+              {
+                name: "resync_dropbox",
+                tooltip: T.translate("dropbox_sync.resync_tooltip"),
+                icon: <i className="fa fa-refresh" />,
+                onClick: this.handleRoomResync
+              }
+            ]
+          : []
       }
     };
 
@@ -637,6 +656,12 @@ class LocationForm extends React.Component {
             title={T.translate("edit_location.rooms")}
             handleClick={this.toggleSection.bind(this, "rooms")}
           >
+            {this.props.syncEnabled && (
+              <div className="alert alert-info">
+                <i className="fa fa-refresh" />{" "}
+                {T.translate("dropbox_sync.resync_helper")}
+              </div>
+            )}
             <button
               className="btn btn-primary pull-right"
               onClick={this.handleNewRoom}

@@ -4026,5 +4026,21 @@
       "module_remove_warning": "Are you sure you want to delete {name}"
     },
     "clone_success": "Page template cloned successfully."
+  },
+  "dropbox_sync": {
+    "panel_title": "Synchronization Settings",
+    "toggle_label": "Enable location based Dropbox file synchronization",
+    "toggle_helper": "It is recommended to not enable this until close to the show, when all locations and rooms are finalized.",
+    "rebuild_title": "Rebuild Synchronization",
+    "rebuild_warning": "This will delete all synced folders for this event and rebuild them from scratch. This action cannot be undone.",
+    "rebuild_button": "Rebuild Synchronization",
+    "rebuild_confirm_title": "Rebuild Synchronization?",
+    "rebuild_confirm_body": "This will delete and rebuild all Dropbox folders for this event. Existing files will be removed.",
+    "rebuild_confirm_yes": "Yes, rebuild all",
+    "rebuild_dispatched": "Rebuild task has been dispatched. This may take several minutes.",
+    "config_saved": "Sync configuration saved successfully.",
+    "resync_helper": "Use the sync icon to re-sync individual room folders to Dropbox.",
+    "resync_tooltip": "Re-sync Dropbox folder",
+    "resync_dispatched": "Room re-sync task has been dispatched."
   }
 }
