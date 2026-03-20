@@ -2279,22 +2279,26 @@ export const querySummitSponsorships = _.debounce(
   DEBOUNCE_WAIT
 );
 
-export const querySummitAddons = _.debounce(
-  async (input, summitId, callback) => {
-    const accessToken = await getAccessTokenSafely();
-    const endpoint = URI(
-      `${window.API_BASE_URL}/api/v1/summits/${summitId}/add-ons/metadata`
-    );
-    endpoint.addQuery("access_token", accessToken);
-    fetch(endpoint)
-      .then(fetchResponseHandler)
-      .then((data) => {
-        callback(data);
-      })
-      .catch(fetchErrorHandler);
-  },
-  DEBOUNCE_WAIT
-);
+export const querySummitAddons = async (
+  summitId,
+  callback
+) => {
+  const accessToken = await getAccessTokenSafely();
+  const endpoint = URI(
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/add-ons/metadata`
+  );
+  endpoint.addQuery("access_token", accessToken);
+  endpoint.addQuery("page", 1);
+  endpoint.addQuery("per_page", MAX_PER_PAGE);
+
+  return fetch(endpoint)
+    .then(fetchResponseHandler)
+    .then((data) => callback(data))
+    .catch((error) => {
+      fetchErrorHandler(error);
+      return [];
+    });
+};
 
 export const querySponsorAddons = async (
   summitId,

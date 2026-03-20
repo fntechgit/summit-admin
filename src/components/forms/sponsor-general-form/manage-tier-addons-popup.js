@@ -24,7 +24,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import useScrollToError from "../../../hooks/useScrollToError";
 import MuiFormikTextField from "../../mui/formik-inputs/mui-formik-textfield";
-import SummitAddonSelect from "../../mui/formik-inputs/summit-addon-select";
+import MuiFormikSummitAddonSelect from "../../mui/formik-inputs/mui-formik-summit-addon-select";
 
 const ManageTierAddonsPopup = ({
   sponsorship,
@@ -223,14 +223,16 @@ const ManageTierAddonsPopup = ({
                   </InputLabel>
                   {editingRow === index ? (
                     <Box width="100%">
-                      <SummitAddonSelect
+                      <MuiFormikSummitAddonSelect
                         name={`addons[${index}].type`}
-                        fullWidth
                         placeholder={T.translate(
                           "edit_sponsor.placeholders.select"
                         )}
                         summitId={summitId}
-                        margin="none"
+                        inputProps={{
+                          fullWidth: true,
+                          margin: "none"
+                        }}
                       />
                     </Box>
                   ) : (
@@ -318,15 +320,16 @@ const ManageTierAddonsPopup = ({
                   {T.translate("edit_sponsor.addon_type")}
                 </InputLabel>
                 <Box width="100%">
-                  <SummitAddonSelect
+                  <MuiFormikSummitAddonSelect
                     name="newAddon.type"
-                    formik={formik}
-                    fullWidth
                     placeholder={T.translate(
                       "edit_sponsor.placeholders.select"
                     )}
                     summitId={summitId}
-                    margin="none"
+                    inputProps={{
+                      fullWidth: true,
+                      margin: "none"
+                    }}
                   />
                 </Box>
               </Grid2>
