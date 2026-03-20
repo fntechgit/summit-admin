@@ -109,6 +109,7 @@ export const REQUEST_BADGE_SCANS = "REQUEST_BADGE_SCANS";
 export const RECEIVE_BADGE_SCANS = "RECEIVE_BADGE_SCANS";
 export const RECEIVE_BADGE_SCAN = "RECEIVE_BADGE_SCAN";
 export const BADGE_SCAN_UPDATED = "BADGE_SCAN_UPDATED";
+export const BADGE_SCAN_ADDED = "BADGE_SCAN_ADDED";
 export const RESET_BADGE_SCAN_FORM = "RESET_BADGE_SCAN_FORM";
 export const RECEIVE_SPONSORS_WITH_SCANS = "RECEIVE_SPONSORS_WITH_SCANS";
 
@@ -1461,6 +1462,34 @@ export const saveBadgeScan = (entity) => async (dispatch, getState) => {
     normalizedEntity,
     snackbarErrorHandler,
     entity
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_badge_scan.badge_scan_saved")
+      })
+    );
+  });
+};
+
+export const addBadgeScan = (entity) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const accessToken = await getAccessTokenSafely();
+  const { currentSummit } = currentSummitState;
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return postRequest(
+    null,
+    createAction(BADGE_SCAN_ADDED),
+    `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/badge-scans`,
+    entity,
+    snackbarErrorHandler
   )(params)(dispatch).then(() => {
     dispatch(stopLoading());
     dispatch(

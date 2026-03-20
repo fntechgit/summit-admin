@@ -2606,6 +2606,12 @@
     "last_name": "Last Name",
     "email": "Email",
     "company": "Company",
+    "scan_popup": {
+      "scan_qr": "Scan QR",
+      "error": "Cannot read QR code, please try again",
+      "badge_scanned": "Badge scanned successfully",
+      "rescan": "Re-scan"
+    },
     "placeholders": {
       "search": "Search..."
     }
