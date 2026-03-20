@@ -14,6 +14,7 @@ const SponsorSection = ({
   summitId,
   userGroups,
   onAdd,
+  isAddDisabled,
   onDelete
 }) => {
   const userGroupOptions = userGroups.map((ug) => ({
@@ -63,6 +64,7 @@ const SponsorSection = ({
           <IconButton
             size="large"
             onClick={() => onAdd()}
+            disabled={isAddDisabled}
             sx={{
               bgcolor: "primary.main",
               color: "white",

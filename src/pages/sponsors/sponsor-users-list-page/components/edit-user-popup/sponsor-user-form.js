@@ -39,12 +39,15 @@ const SponsorUserForm = ({ user, summitId, userGroups, onSubmit }) => {
         yup.object({
           id: yup.number(),
           sponsor: yup
-            .mixed()
-            .test(
-              "sponsor-required",
-              T.translate("sponsor_users.error_missing_sponsor"),
-              (value) => value && value.id && value.name
-            ),
+            .object({
+              id: yup
+                .number()
+                .required(T.translate("sponsor_users.error_missing_sponsor")),
+              name: yup
+                .string()
+                .required(T.translate("sponsor_users.error_missing_sponsor"))
+            })
+            .required(T.translate("sponsor_users.error_missing_sponsor")),
           groups: yup.array().of(yup.number())
         })
       ),
