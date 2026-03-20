@@ -19,7 +19,8 @@ import SummitAddonSelect from "../summit-addon-select";
 const MuiFormikSummitAddonSelect = ({
   name,
   summitId,
-  placeholder = "Select..."
+  placeholder = "Select...",
+  inputProps = {}
 }) => {
   const [field, meta, helpers] = useField(name);
 
@@ -31,7 +32,8 @@ const MuiFormikSummitAddonSelect = ({
       placeholder={placeholder}
       inputProps={{
         error: meta.touched && Boolean(meta.error),
-        helperText: meta.touched && meta.error
+        helperText: meta.touched && meta.error,
+        ...inputProps
       }}
     />
   );
@@ -40,7 +42,8 @@ const MuiFormikSummitAddonSelect = ({
 MuiFormikSummitAddonSelect.propTypes = {
   name: PropTypes.string.isRequired,
   summitId: PropTypes.number.isRequired,
-  placeholder: PropTypes.string
+  placeholder: PropTypes.string,
+  inputProps: PropTypes.object
 };
 
 export default MuiFormikSummitAddonSelect;
