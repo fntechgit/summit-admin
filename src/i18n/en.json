@@ -3782,6 +3782,9 @@
   "inventory_item_list": {
     "inventory_items": "Inventory",
     "alert_info": "You can create or archive items from the list. To edit an item, click pencil icon.",
+    "image_preview_alt": "Inventory item preview",
+    "image_preview_action_alt": "Open image preview for {itemName} in a new tab",
+    "image_preview_unavailable": "Image preview unavailable",
     "code_column_label": "Code",
     "name_column_label": "Name",
     "archive_button": "Archive",
