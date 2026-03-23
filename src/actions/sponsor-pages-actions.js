@@ -147,7 +147,7 @@ export const getSponsorManagedPages =
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
       snackbarErrorHandler,
       { order, orderDir, page, perPage, term, hideArchived, summitTZ }
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -262,7 +262,7 @@ export const getSponsorCustomizedPages =
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages`,
       snackbarErrorHandler,
       { order, orderDir, page, perPage, term, hideArchived, summitTZ }
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -290,7 +290,7 @@ export const getSponsorCustomizedPage =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_PAGE),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages/${pageId}`,
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -342,15 +342,18 @@ export const saveSponsorCustomizedPage =
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages`,
       normalizedEntity,
       snackbarErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      dispatch(
-        snackbarSuccessHandler({
-          title: T.translate("general.success"),
-          html: T.translate("edit_sponsor.pages_tab.custom_page_created")
-        })
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_sponsor.pages_tab.custom_page_created")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
 
 const normalizeSponsorCustomPage = (entity, summitTZ) => {

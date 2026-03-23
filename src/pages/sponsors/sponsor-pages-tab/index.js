@@ -31,7 +31,6 @@ import {
   getSponsorCustomizedPage,
   resetSponsorPage
 } from "../../../actions/sponsor-pages-actions";
-import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
@@ -217,7 +216,8 @@ const SponsorPagesTab = ({
           order,
           orderDir
         );
-      }).finally(() => setOpenPopup(null));
+      })
+      .finally(() => setOpenPopup(null));
   };
 
   const handleSaveCustomizedPage = (entity) => {
@@ -231,7 +231,8 @@ const SponsorPagesTab = ({
           order,
           orderDir
         );
-      }).finally(() => setOpenPopup(null));;
+      })
+      .finally(() => setOpenPopup(null));
   };
 
   const handleClosePagePopup = () => {
@@ -433,6 +434,5 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedPage,
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
-  getSponsorships,
   resetSponsorPage
 })(SponsorPagesTab);
