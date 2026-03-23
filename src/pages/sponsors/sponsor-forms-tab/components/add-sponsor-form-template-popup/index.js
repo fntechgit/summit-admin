@@ -75,18 +75,16 @@ const AddSponsorFormTemplatePopup = ({
   });
 
   useEffect(() => {
-    if (open) {
-      getSponsorForms(
-        term,
-        currentPage,
-        FIVE_PER_PAGE,
-        order,
-        orderDir,
-        false,
-        sponsorshipTypeIds
-      );
-    }
-  }, [open]);
+    getSponsorForms(
+      term,
+      currentPage,
+      FIVE_PER_PAGE,
+      order,
+      orderDir,
+      false,
+      sponsorshipTypeIds
+    );
+  }, []);
 
   const handlePageChange = (page) => {
     getSponsorForms(

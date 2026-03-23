@@ -28,10 +28,14 @@ import {
   PAGE_MODULES_DOWNLOAD
 } from "../../../../utils/constants";
 import DropdownCheckbox from "../../../../components/mui/dropdown-checkbox";
+import MuiFormikSelectGroup from "../../../../components/mui/formik-inputs/mui-formik-select-group";
+import { querySponsorAddons } from "../../../../actions/sponsor-actions";
 
-const PageTemplatePopup = ({ pageTemplate, onClose, onSave, sponsorships }) => {
+const PageTemplatePopup = ({ pageTemplate, onClose, onSave, sponsorships, summitId, sponsorId, sponsorshipIds }) => {
   const showSponsorships =
     Array.isArray(sponsorships) && sponsorships.length > 0;
+
+  const showAllowedAddons = summitId && sponsorId && sponsorshipIds?.length > 0;
 
   const infoModuleSchema = yup.object().shape({
     kind: yup.string().equals([PAGES_MODULE_KINDS.INFO]),
@@ -177,7 +181,12 @@ const PageTemplatePopup = ({ pageTemplate, onClose, onSave, sponsorships }) => {
                   fullWidth
                 />
               </Grid2>
-              <Grid2 spacing={2} size={showSponsorships ? COLUMN_4 : COLUMN_8}>
+              <Grid2
+                spacing={2}
+                size={
+                  showSponsorships || showAllowedAddons ? COLUMN_4 : COLUMN_8
+                }
+              >
                 <MuiFormikTextField
                   name="name"
                   label={T.translate("page_template_list.name")}
@@ -193,6 +202,22 @@ const PageTemplatePopup = ({ pageTemplate, onClose, onSave, sponsorships }) => {
                     value={formik.values.sponsorship_types}
                     options={sponsorships}
                     onChange={formik.handleChange}
+                  />
+                </Grid2>
+              )}
+              {showAllowedAddons && (
+                <Grid2 spacing={2} size={4} sx={{ py: 2 }}>
+                  <MuiFormikSelectGroup
+                    name="allowed_add_ons"
+                    queryFunction={querySponsorAddons}
+                    // params for function, except input
+                    queryParams={[summitId, sponsorId, sponsorshipIds]}
+                    showSelectAll
+                    getGroupId={(addon) => addon.sponsorship.type.id}
+                    getGroupLabel={(addon) => addon.sponsorship.type.type.name}
+                    placeholder={T.translate(
+                      "edit_sponsor.placeholders.select_add_ons"
+                    )}
                   />
                 </Grid2>
               )}
@@ -250,7 +275,10 @@ const PageTemplatePopup = ({ pageTemplate, onClose, onSave, sponsorships }) => {
 PageTemplatePopup.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  sponsorships: PropTypes.array
+  sponsorships: PropTypes.array,
+  sponsorshipIds: PropTypes.array,
+  summitId: PropTypes.number,
+  sponsorId: PropTypes.number
 };
 
 export default PageTemplatePopup;
