@@ -21,29 +21,23 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Typography
+  TableRow
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import SettingsIcon from "@mui/icons-material/Settings";
-import ErrorIcon from "@mui/icons-material/Error";
 import T from "i18n-react/dist/i18n-react";
 import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import {
-  DISCOUNT_TYPES,
-  MILLISECONDS_IN_SECOND,
-  ONE_HUNDRED
-} from "../../../utils/constants";
+import { DISCOUNT_TYPES, ONE_HUNDRED } from "../../../utils/constants";
 import GlobalQuantityField from "./components/GlobalQuantityField";
 import ItemTableField from "./components/ItemTableField";
 import MuiFormikSelect from "../formik-inputs/mui-formik-select";
 import MuiFormikPriceField from "../formik-inputs/mui-formik-pricefield";
 import MuiFormikDiscountField from "../formik-inputs/mui-formik-discountfield";
+import UnderlyingAlertNote from "./components/UnderlyingAlertNote";
 
 const FormItemTable = ({
   data,
-  rateDates,
+  currentApplicableRate,
   timeZone,
   values,
   onNotesClick,
@@ -54,33 +48,6 @@ const FormItemTable = ({
     data[0]?.meta_fields?.filter((mf) => mf.class_field === "Form") || [];
   const fixedColumns = 10;
   const totalColumns = extraColumns.length + fixedColumns;
-
-  const currentApplicableRate = useMemo(() => {
-    const now = epochToMomentTimeZone(
-      Math.floor(new Date() / MILLISECONDS_IN_SECOND),
-      timeZone
-    );
-
-    const earlyBirdEndOfDay = epochToMomentTimeZone(
-      rateDates.early_bird_end_date,
-      timeZone
-    )?.endOf("day");
-    const standardEndOfDay = epochToMomentTimeZone(
-      rateDates.standard_price_end_date,
-      timeZone
-    )?.endOf("day");
-    const onsiteEndOfDay = epochToMomentTimeZone(
-      rateDates.onsite_price_end_date,
-      timeZone
-    )?.endOf("day");
-
-    if (earlyBirdEndOfDay && now.isSameOrBefore(earlyBirdEndOfDay))
-      return "early_bird";
-    if (standardEndOfDay && now.isSameOrBefore(standardEndOfDay))
-      return "standard";
-    if (!onsiteEndOfDay || now.isSameOrBefore(onsiteEndOfDay)) return "onsite";
-    return "expired";
-  }, [rateDates, timeZone]);
 
   const calculateQuantity = useCallback(
     (row) => {
@@ -105,7 +72,9 @@ const FormItemTable = ({
     const qty =
       values[`i-${row.form_item_id}-c-global-f-quantity`] ||
       calculateQuantity(row);
+
     if (currentApplicableRate === "expired") return 0;
+
     const customRate = values[`i-${row.form_item_id}-c-global-f-custom_rate`];
     const rate = customRate || row.rates[currentApplicableRate];
 
@@ -127,6 +96,11 @@ const FormItemTable = ({
     return requiredFields.length > 0 && hasMissingFields;
   };
 
+  const formatRate = (rate) => {
+    if (rate == null) return T.translate("general.n_a");
+    return currencyAmountFromCents(rate);
+  };
+
   const totalAmount = useMemo(() => {
     const subtotal = data.reduce((acc, row) => acc + calculateRowTotal(row), 0);
     const discount =
@@ -135,7 +109,7 @@ const FormItemTable = ({
         : subtotal * (values.discount_amount / ONE_HUNDRED / ONE_HUNDRED); // bps to fraction
 
     return subtotal - Math.round(discount);
-  }, [data, valuesStr]);
+  }, [data, valuesStr, currentApplicableRate]);
 
   const handleEdit = (row) => {
     onNotesClick(row);
@@ -190,29 +164,11 @@ const FormItemTable = ({
               <TableCell>{row.code}</TableCell>
               <TableCell sx={{ position: "relative" }}>
                 <div>{row.name}</div>
-                {hasItemFields(row) && itemFieldsIncomplete(row) && (
-                  <Typography
-                    variant="body2"
-                    component="p"
-                    sx={{
-                      color: "warning.main",
-                      fontSize: "0.6em",
-                      position: "absolute"
-                    }}
-                  >
-                    <ErrorIcon
-                      color="warning"
-                      sx={{
-                        fontSize: "1.4em",
-                        top: "0.2em",
-                        position: "relative"
-                      }}
-                    />{" "}
-                    {T.translate(
-                      "edit_sponsor.cart_tab.edit_form.additional_info"
-                    )}
-                  </Typography>
-                )}
+                <UnderlyingAlertNote
+                  showAdditionalItems={
+                    hasItemFields(row) && itemFieldsIncomplete(row)
+                  }
+                />
               </TableCell>
               <TableCell>
                 <MuiFormikPriceField
@@ -229,19 +185,21 @@ const FormItemTable = ({
                   opacity: currentApplicableRate === "early_bird" ? 1 : "38%"
                 }}
               >
-                {currencyAmountFromCents(row.rates.early_bird)}
+                {formatRate(row.rates.early_bird)}
               </TableCell>
               <TableCell
                 sx={{
                   opacity: currentApplicableRate === "standard" ? 1 : "38%"
                 }}
               >
-                {currencyAmountFromCents(row.rates.standard)}
+                {formatRate(row.rates.standard)}
               </TableCell>
               <TableCell
-                sx={{ opacity: currentApplicableRate === "onsite" ? 1 : "38%" }}
+                sx={{
+                  opacity: currentApplicableRate === "onsite" ? 1 : "38%"
+                }}
               >
-                {currencyAmountFromCents(row.rates.onsite)}
+                {formatRate(row.rates.onsite)}
               </TableCell>
               {extraColumns.map((exc) => (
                 <TableCell key={`datacell-${row.form_item_id}-${exc.type_id}`}>

@@ -21,12 +21,12 @@ import Box from "@mui/material/Box";
 import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import FormItemTable from "../../../../../components/mui/FormItemTable";
-import {
-  DISCOUNT_TYPES,
-  MILLISECONDS_IN_SECOND
-} from "../../../../../utils/constants";
+import { DISCOUNT_TYPES } from "../../../../../utils/constants";
 import NotesModal from "../../../../../components/mui/NotesModal";
 import ItemSettingsModal from "../../../../../components/mui/ItemSettingsModal";
+import {
+  getCurrentApplicableRate
+} from "../../../../../components/mui/FormItemTable/helpers";
 
 const parseValue = (item, timeZone) => {
   switch (item.type) {
@@ -204,18 +204,11 @@ const EditForm = ({
 }) => {
   const [notesItem, setNotesItem] = useState(null);
   const [settingsItem, setSettingsItem] = useState(null);
-  const hasRateExpired = useMemo(() => {
-    const now = epochToMomentTimeZone(
-      Math.floor(new Date() / MILLISECONDS_IN_SECOND),
-      showTimeZone
-    );
-    const onsiteEndOfDay = epochToMomentTimeZone(
-      showMetadata.onsite_price_end_date,
-      showTimeZone
-    )?.endOf("day");
-    if (!onsiteEndOfDay || now.isSameOrBefore(onsiteEndOfDay)) return false;
-    return true;
-  }, [showMetadata, showTimeZone]);
+
+  const currentApplicableRate = useMemo(
+    () => getCurrentApplicableRate(showTimeZone, showMetadata),
+    [showMetadata, showTimeZone]
+  );
 
   const handleCancel = () => {
     onCancel();
@@ -295,7 +288,7 @@ const EditForm = ({
         <Box component="form" onSubmit={formik.handleSubmit} autoComplete="off">
           <FormItemTable
             data={form.items}
-            rateDates={showMetadata}
+            currentApplicableRate={currentApplicableRate}
             values={formik.values}
             timeZone={showTimeZone}
             onNotesClick={setNotesItem}
@@ -318,7 +311,6 @@ const EditForm = ({
               variant="contained"
               color="primary"
               type="submit"
-              disabled={hasRateExpired}
               size="large"
               sx={{ minWidth: 150 }}
             >
