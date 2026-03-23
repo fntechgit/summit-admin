@@ -20,7 +20,7 @@ const UnderlyingAlertNote = ({ showAdditionalItems }) => {
           position: "relative"
         }}
       />{" "}
-      {T.translate("edit_form.additional_info")}
+      {T.translate("edit_sponsor.cart_tab.edit_form.additional_info")}
     </Typography>
   );
 };

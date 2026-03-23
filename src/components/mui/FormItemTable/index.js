@@ -78,6 +78,8 @@ const FormItemTable = ({
     const customRate = values[`i-${row.form_item_id}-c-global-f-custom_rate`];
     const rate = customRate || row.rates[currentApplicableRate];
 
+    if (rate == null || qty == null) return 0;
+
     return qty * rate;
   };
 
