@@ -221,7 +221,7 @@ const FormItemTable = ({
                   label=""
                   size="small"
                   inCents
-                  inputProps={{ step: 1 }}
+                  inputProps={{ step: 0.01 }}
                 />
               </TableCell>
               <TableCell

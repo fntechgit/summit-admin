@@ -89,6 +89,9 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
           addon_name: form.addon_name || "None",
           amount: currencyAmountFromCents(form.net_amount),
           discount,
+          item_count: `${form.items.length} ${
+            form.items.length === 1 ? "item" : "items"
+          }`,
           items: form.items.map((it) => ({
             ...it,
             custom_rate: currencyAmountFromCents(it.custom_rate || 0)
