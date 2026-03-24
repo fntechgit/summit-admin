@@ -38,7 +38,7 @@ import {
   updateExtraQuestionOrder,
   getExtraQuestionMeta
 } from "../../actions/sponsor-actions";
-import {getSponsorPurchasesMeta} from "../../actions/sponsor-settings-actions";
+import { getSponsorPurchasesMeta } from "../../actions/sponsor-settings-actions";
 import SponsorGeneralForm from "../../components/forms/sponsor-general-form/index";
 import SponsorUsersListPerSponsorPage from "./sponsor-users-list-per-sponsor";
 import SponsorFormsTab from "./sponsor-forms-tab";
@@ -49,6 +49,7 @@ import SponsorFormsManageItems from "./sponsor-forms-tab/components/manage-items
 import { SPONSOR_TABS } from "../../utils/constants";
 import SponsorPurchasesTab from "./sponsor-purchases-tab";
 import SponsorMediaUploadTab from "./sponsor-media-upload-tab";
+import Member from "../../models/member";
 
 export const tabsToFragmentMap = [
   "general",
@@ -125,6 +126,7 @@ const EditSponsorPage = (props) => {
 
   const [selectedTab, setSelectedTab] = useState(getTabFromFragment(location));
 
+  const memberObj = new Member(member);
   const isNestedFormItemRoute = !!match.params?.form_id;
 
   const handleTabChange = (event, newValue) => {
@@ -176,25 +178,65 @@ const EditSponsorPage = (props) => {
   const tabs = [
     {
       label: T.translate("edit_sponsor.tab.general"),
-      value: SPONSOR_TABS.GENERAL
+      value: SPONSOR_TABS.GENERAL,
+      accessRoute: "sponsors"
     },
-    { label: T.translate("edit_sponsor.tab.users"), value: SPONSOR_TABS.USERS },
-    { label: T.translate("edit_sponsor.tab.pages"), value: SPONSOR_TABS.PAGES },
+    {
+      label: T.translate("edit_sponsor.tab.users"),
+      value: SPONSOR_TABS.USERS,
+      accessRoute: "admin-sponsors"
+    },
+    {
+      label: T.translate("edit_sponsor.tab.pages"),
+      value: SPONSOR_TABS.PAGES,
+      accessRoute: "admin-sponsors"
+    },
     {
       label: T.translate("edit_sponsor.tab.media_uploads"),
-      value: SPONSOR_TABS.MEDIA_UPLOADS
+      value: SPONSOR_TABS.MEDIA_UPLOADS,
+      accessRoute: "admin-sponsors"
     },
-    { label: T.translate("edit_sponsor.tab.forms"), value: SPONSOR_TABS.FORMS },
-    { label: T.translate("edit_sponsor.tab.cart"), value: SPONSOR_TABS.CART },
+    {
+      label: T.translate("edit_sponsor.tab.forms"),
+      value: SPONSOR_TABS.FORMS,
+      accessRoute: "admin-sponsors"
+    },
+    {
+      label: T.translate("edit_sponsor.tab.cart"),
+      value: SPONSOR_TABS.CART,
+      accessRoute: "admin-sponsors"
+    },
     {
       label: T.translate("edit_sponsor.tab.purchases"),
-      value: SPONSOR_TABS.PURCHASES
+      value: SPONSOR_TABS.PURCHASES,
+      accessRoute: "admin-sponsors"
     },
     {
       label: T.translate("edit_sponsor.tab.badge_scans"),
-      value: SPONSOR_TABS.BADGE_SCANS
+      value: SPONSOR_TABS.BADGE_SCANS,
+      accessRoute: "sponsors"
     }
   ];
+
+  const drawTab = (tab) => {
+    if (!memberObj.hasAccess(tab.accessRoute)) return null;
+    return (
+      <Tab
+        key={tab.value}
+        label={tab.label}
+        value={tab.value}
+        sx={{
+          fontSize: "1.4rem",
+          lineHeight: "1.8rem",
+          height: "36px",
+          minHeight: "36px",
+          px: 2,
+          py: 1
+        }}
+        {...a11yProps(tab.value)}
+      />
+    );
+  };
 
   return (
     <Box>
@@ -210,79 +252,89 @@ const EditSponsorPage = (props) => {
               minHeight: "36px"
             }}
           >
-            {tabs.map((t) => (
-              <Tab
-                key={t.value}
-                label={t.label}
-                value={t.value}
-                sx={{
-                  fontSize: "1.4rem",
-                  lineHeight: "1.8rem",
-                  height: "36px",
-                  minHeight: "36px",
-                  px: 2,
-                  py: 1
-                }}
-                {...a11yProps(t.value)}
-              />
-            ))}
+            {tabs.map(drawTab)}
           </Tabs>
         </Box>
-        <CustomTabPanel value={selectedTab} index={0}>
-          <SponsorGeneralForm
-            sponsor={entity}
-            member={member}
-            summit={currentSummit}
-            onSponsorshipPaginate={handleSponsorshipPaginate}
-            onSponsorshipAdd={addTierToSponsor}
-            onSponsorshipDelete={removeTierFromSponsor}
-            getSponsorshipAddons={getSponsorshipAddons}
-            onSponsorshipSelect={setSelectedSponsorship}
-            onSponsorshipAddonSave={saveAddonsToSponsorship}
-            onSponsorshipAddonRemove={removeAddonToSponsorship}
-            getSponsorLeadReportSettingsMeta={getSponsorLeadReportSettingsMeta}
-            upsertSponsorLeadReportSettings={upsertSponsorLeadReportSettings}
-            getSponsorExtraQuestion={getSponsorExtraQuestion}
-            saveSponsorExtraQuestion={saveSponsorExtraQuestion}
-            saveSponsorExtraQuestionValue={saveSponsorExtraQuestionValue}
-            resetSponsorExtraQuestionForm={resetSponsorExtraQuestionForm}
-            onExtraQuestionDelete={deleteExtraQuestion}
-            onExtraQuestionReOrder={updateExtraQuestionOrder}
-          />
-        </CustomTabPanel>
-        <CustomTabPanel value={selectedTab} index={1}>
-          <SponsorUsersListPerSponsorPage sponsor={entity} />
-        </CustomTabPanel>
-        <CustomTabPanel value={selectedTab} index={2}>
-          <SponsorPagesTab
-            sponsor={entity}
-            summitId={currentSummit.id}
-            history={history}
-          />
-        </CustomTabPanel>
-        <CustomTabPanel value={selectedTab} index={3}>
-          <SponsorMediaUploadTab sponsor={entity} summitId={currentSummit.id} />
-        </CustomTabPanel>
-        <CustomTabPanel value={selectedTab} index={4}>
-          {isNestedFormItemRoute ? (
-            <SponsorFormsManageItems match={match} />
-          ) : (
-            <SponsorFormsTab
+        {memberObj.hasAccess("sponsors") && (
+          <CustomTabPanel value={selectedTab} index={0}>
+            <SponsorGeneralForm
+              sponsor={entity}
+              member={member}
+              summit={currentSummit}
+              onSponsorshipPaginate={handleSponsorshipPaginate}
+              onSponsorshipAdd={addTierToSponsor}
+              onSponsorshipDelete={removeTierFromSponsor}
+              getSponsorshipAddons={getSponsorshipAddons}
+              onSponsorshipSelect={setSelectedSponsorship}
+              onSponsorshipAddonSave={saveAddonsToSponsorship}
+              onSponsorshipAddonRemove={removeAddonToSponsorship}
+              getSponsorLeadReportSettingsMeta={
+                getSponsorLeadReportSettingsMeta
+              }
+              upsertSponsorLeadReportSettings={upsertSponsorLeadReportSettings}
+              getSponsorExtraQuestion={getSponsorExtraQuestion}
+              saveSponsorExtraQuestion={saveSponsorExtraQuestion}
+              saveSponsorExtraQuestionValue={saveSponsorExtraQuestionValue}
+              resetSponsorExtraQuestionForm={resetSponsorExtraQuestionForm}
+              onExtraQuestionDelete={deleteExtraQuestion}
+              onExtraQuestionReOrder={updateExtraQuestionOrder}
+            />
+          </CustomTabPanel>
+        )}
+        {memberObj.hasAccess("admin-sponsors") && (
+          <CustomTabPanel value={selectedTab} index={1}>
+            <SponsorUsersListPerSponsorPage sponsor={entity} />
+          </CustomTabPanel>
+        )}
+        {memberObj.hasAccess("admin-sponsors") && (
+          <CustomTabPanel value={selectedTab} index={2}>
+            <SponsorPagesTab
               sponsor={entity}
               summitId={currentSummit.id}
               history={history}
             />
-          )}
-        </CustomTabPanel>
-        <CustomTabPanel value={selectedTab} index={5}>
-          <SponsorCartTab sponsor={entity} summitId={currentSummit.id} history={history} />
-        </CustomTabPanel>
-        <CustomTabPanel value={selectedTab} index={6}>
-          <SponsorPurchasesTab sponsor={entity} summitId={currentSummit.id} />
-        </CustomTabPanel>
-        <CustomTabPanel value={selectedTab} index={7}>
-          <SponsorBadgeScans sponsor={entity} />
-        </CustomTabPanel>
+          </CustomTabPanel>
+        )}
+        {memberObj.hasAccess("admin-sponsors") && (
+          <CustomTabPanel value={selectedTab} index={3}>
+            <SponsorMediaUploadTab
+              sponsor={entity}
+              summitId={currentSummit.id}
+            />
+          </CustomTabPanel>
+        )}
+        {memberObj.hasAccess("admin-sponsors") && (
+          <CustomTabPanel value={selectedTab} index={4}>
+            {isNestedFormItemRoute ? (
+              <SponsorFormsManageItems match={match} />
+            ) : (
+              <SponsorFormsTab
+                sponsor={entity}
+                summitId={currentSummit.id}
+                history={history}
+              />
+            )}
+          </CustomTabPanel>
+        )}
+        {memberObj.hasAccess("admin-sponsors") && (
+          <CustomTabPanel value={selectedTab} index={5}>
+            <SponsorCartTab
+              sponsor={entity}
+              summitId={currentSummit.id}
+              history={history}
+            />
+          </CustomTabPanel>
+        )}
+        {memberObj.hasAccess("admin-sponsors") && (
+          <CustomTabPanel value={selectedTab} index={6}>
+            <SponsorPurchasesTab sponsor={entity} summitId={currentSummit.id} />
+          </CustomTabPanel>
+        )}
+        {memberObj.hasAccess("sponsors") && (
+          <CustomTabPanel value={selectedTab} index={7}>
+            <SponsorBadgeScans sponsor={entity} />
+          </CustomTabPanel>
+        )}
       </Container>
     </Box>
   );
