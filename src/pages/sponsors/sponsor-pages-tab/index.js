@@ -29,12 +29,16 @@ import {
   saveSponsorManagedPage,
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
+  deleteSponsorManagedPage,
   resetSponsorPage
 } from "../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
-import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  SPONSOR_MANAGED_PAGE_ASSIGNMENT
+} from "../../../utils/constants";
 import AddSponsorPageTemplatePopup from "./components/add-sponsor-page-template-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
 
@@ -52,6 +56,7 @@ const SponsorPagesTab = ({
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
+  deleteSponsorManagedPage,
   resetSponsorPage
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
@@ -175,7 +180,17 @@ const SponsorPagesTab = ({
   };
 
   const handleManagedDelete = (itemId) => {
-    console.log("DELETE MANAGED ", itemId);
+    deleteSponsorManagedPage(itemId).then(() => {
+      const { perPage, order, orderDir } = managedPages;
+      getSponsorManagedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
+    });
   };
 
   const handleCustomizedEdit = (item) => {
@@ -396,6 +411,9 @@ const SponsorPagesTab = ({
           onSort={handleManagedSort}
           onEdit={handleManagedEdit}
           onDelete={handleManagedDelete}
+          canDelete={(row) =>
+            row.assigned_type === SPONSOR_MANAGED_PAGE_ASSIGNMENT.EXPLICIT
+          }
           onArchive={handleArchiveManagedPage}
         />
       </div>
@@ -434,5 +452,6 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedPage,
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
+  deleteSponsorManagedPage,
   resetSponsorPage
 })(SponsorPagesTab);

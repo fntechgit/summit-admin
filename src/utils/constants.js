@@ -299,3 +299,8 @@ export const SPONSOR_CART_NOTE_TYPES = {
   SPONSOR: "Sponsor",
   INTERNAL: "Internal"
 };
+
+export const SPONSOR_MANAGED_PAGE_ASSIGNMENT = {
+  EXPLICIT: "Explicit",
+  IMPLICIT: "Implicit"
+};
