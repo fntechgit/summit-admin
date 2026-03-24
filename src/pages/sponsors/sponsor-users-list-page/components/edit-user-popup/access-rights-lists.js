@@ -47,6 +47,8 @@ const AccessRightsList = ({ name, userGroups, summitId }) => {
     helpers.setValue([...field.value, { sponsor: null, groups: [] }]);
   };
 
+  const hasIncompleteSponsor = field.value.some((item) => !item.sponsor?.id);
+
   return (
     <>
       {field.value.map((item, itemIdx) => (
@@ -59,6 +61,7 @@ const AccessRightsList = ({ name, userGroups, summitId }) => {
           summitId={summitId}
           userGroups={userGroups}
           onAdd={itemIdx === field.value.length - 1 ? handleAdd : null}
+          isAddDisabled={hasIncompleteSponsor}
           onDelete={handleRemove}
           onChange={handleChange}
         />
