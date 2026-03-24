@@ -555,3 +555,28 @@ export const getMediaInputValue = (entity, fieldName = "images") => {
 };
 // eslint-disable-next-line no-magic-numbers
 export const bytesToMb = (bytes) => (bytes / BYTES_IN_MEGABYTE).toFixed(2);
+
+export const normalizeSelectAllField = (
+  items,
+  flagName,
+  listName,
+  allSelected
+) => {
+  if (!items?.length)
+    return {
+      [flagName]: false,
+      [listName]: []
+    };
+
+  const isAllSelected = allSelected ?? items.includes("all");
+  if (isAllSelected) {
+    return {
+      [flagName]: true,
+      [listName]: []
+    };
+  }
+  return {
+    [flagName]: false,
+    [listName]: items.map((a) => a.id ?? a)
+  };
+};

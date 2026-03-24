@@ -1,4 +1,4 @@
-import { getMediaInputValue } from "../methods";
+import { getMediaInputValue, normalizeSelectAllField } from "../methods";
 
 const FIXED_NOW = 1_772_551_911_231;
 beforeAll(() => jest.spyOn(Date, "now").mockReturnValue(FIXED_NOW));
@@ -53,6 +53,53 @@ describe("getMediaInputValue", () => {
         images: [{ filename: "some/path/README" }]
       });
       expect(result.filename).toBe("README");
+    });
+  });
+
+  describe("normalizeSelectAllField", () => {
+    it("should return default object when items is empty array", () => {
+      expect(normalizeSelectAllField([], "apply_to_all", "items")).toEqual({
+        apply_to_all: false,
+        items: []
+      });
+    });
+
+    it("should return all selected when array contains 'all'", () => {
+      expect(
+        normalizeSelectAllField(
+          ["all", { id: 1 }, { id: 2 }],
+          "apply_to_all",
+          "items"
+        )
+      ).toEqual({
+        apply_to_all: true,
+        items: []
+      });
+    });
+
+    it("should return all selected when allSelected flag is true", () => {
+      expect(
+        normalizeSelectAllField([{ id: 1 }], "apply_to_all", "items", true)
+      ).toEqual({
+        apply_to_all: true,
+        items: []
+      });
+    });
+
+    it("should return array of ids when items are objects with id", () => {
+      expect(
+        normalizeSelectAllField([{ id: 1 }, { id: 2 }], "apply_to_all", "items")
+      ).toEqual({
+        apply_to_all: false,
+        items: [1, 2]
+      });
+    });
+
+    it("should return an array of values directly when items are primitives", () => {
+      expect(normalizeSelectAllField([1, 2], "apply_to_all", "items")).toEqual({
+        apply_to_all: false,
+        items: [1, 2]
+      });
     });
   });
 });

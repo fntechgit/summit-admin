@@ -20,7 +20,6 @@ import {
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import MuiTable from "../../../../../components/mui/table/mui-table";
 import MenuButton from "../../../../../components/mui/menu-button";
@@ -54,15 +53,6 @@ const AddSponsorFormTemplatePopup = ({
     initialValues: {
       add_ons: []
     },
-    validationSchema: yup.object({
-      add_ons: yup
-        .array()
-        .test(
-          "add_ons-required",
-          "Select at least one add-on",
-          (value) => value?.includes("all") || value?.length > 0
-        )
-    }),
     onSubmit: (values) => {
       const { add_ons } = values;
       const entity = {

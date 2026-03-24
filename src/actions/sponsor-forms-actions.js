@@ -25,7 +25,11 @@ import {
 import { amountToCents } from "openstack-uicore-foundation/lib/utils/money";
 import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
-import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
+import {
+  escapeFilterValue,
+  getAccessTokenSafely,
+  normalizeSelectAllField
+} from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -344,13 +348,13 @@ export const cloneGlobalTemplate =
 
     const normalizedEntity = {
       form_template_ids: templateIds,
-      sponsorship_types: sponsorIds,
-      apply_to_all_types: allSponsors
+      ...normalizeSelectAllField(
+        sponsorIds,
+        "apply_to_all_types",
+        "sponsorship_types",
+        allSponsors
+      )
     };
-
-    if (allSponsors) {
-      delete normalizedEntity.sponsorship_types;
-    }
 
     return postRequest(
       null,
@@ -563,14 +567,12 @@ export const saveSponsorManagedForm =
 const normalizeSponsorManagedForm = (entity) => {
   const normalizedEntity = {
     show_form_ids: entity.forms,
-    allowed_add_ons: entity.add_ons.map((a) => a.id),
-    apply_to_all_add_ons: false
+    ...normalizeSelectAllField(
+      entity.add_ons,
+      "apply_to_all_add_ons",
+      "allowed_add_ons"
+    )
   };
-
-  if (entity.add_ons.includes("all")) {
-    normalizedEntity.apply_to_all_add_ons = true;
-    normalizedEntity.allowed_add_ons = [];
-  }
 
   return normalizedEntity;
 };
