@@ -32,7 +32,7 @@ import {
   deleteSponsorManagedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
-  resetSponsorPage,
+  resetSponsorPage
 } from "../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
@@ -58,7 +58,7 @@ const SponsorPagesTab = ({
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
-  deleteSponsorManagedPage,  
+  deleteSponsorManagedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
   resetSponsorPage
@@ -174,9 +174,20 @@ const SponsorPagesTab = ({
   };
 
   const handleArchiveCustomizedPage = (item) =>
-    item.is_archived
+    (item.is_archived
       ? unarchiveCustomizedPage(item.id)
-      : archiveCustomizedPage(item.id);
+      : archiveCustomizedPage(item.id)
+    ).then(() => {
+      const { perPage, order, orderDir, currentPage } = customizedPages;
+      return getSponsorCustomizedPages(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
+    });
 
   const handleArchiveManagedPage = (item) =>
     console.log("ARCHIVE MANAGED ", item);
