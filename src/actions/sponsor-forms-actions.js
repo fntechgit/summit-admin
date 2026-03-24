@@ -453,19 +453,21 @@ export const updateFormTemplate = (entity) => async (dispatch, getState) => {
     });
 };
 
-const normalizeFormTemplate = (entity, summitTZ) => {
+export const normalizeFormTemplate = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
   const { opens_at, expires_at, sponsorship_types, meta_fields } = entity;
 
   normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
   normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
-  normalizedEntity.apply_to_all_types = false;
-  normalizedEntity.sponsorship_types = sponsorship_types;
 
-  if (sponsorship_types.includes("all")) {
-    normalizedEntity.apply_to_all_types = true;
-    delete normalizedEntity.sponsorship_types;
-  }
+  Object.assign(
+    normalizedEntity,
+    normalizeSelectAllField(
+      sponsorship_types,
+      "apply_to_all_types",
+      "sponsorship_types"
+    )
+  );
 
   normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
 
@@ -813,7 +815,7 @@ export const resetSponsorCustomizedForm = () => (dispatch) => {
   dispatch(createAction(RESET_SPONSOR_CUSTOMIZED_FORM)({}));
 };
 
-const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
+export const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
   const {
     id,
     opens_at,
@@ -825,13 +827,15 @@ const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
 
   normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
   normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
-  normalizedEntity.apply_to_all_add_ons = false;
-  normalizedEntity.allowed_add_ons = allowed_add_ons.map((ao) => ao.id);
 
-  if (allowed_add_ons.includes("all")) {
-    normalizedEntity.apply_to_all_add_ons = true;
-    delete normalizedEntity.allowed_add_ons;
-  }
+  Object.assign(
+    normalizedEntity,
+    normalizeSelectAllField(
+      allowed_add_ons,
+      "apply_to_all_add_ons",
+      "allowed_add_ons"
+    )
+  );
 
   normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
 

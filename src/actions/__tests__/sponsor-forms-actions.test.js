@@ -6,7 +6,11 @@ import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
 import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
-import { getSponsorForms } from "../sponsor-forms-actions";
+import {
+  getSponsorForms,
+  normalizeFormTemplate,
+  normalizeSponsorCustomizedForm
+} from "../sponsor-forms-actions";
 import * as methods from "../../utils/methods";
 
 jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
@@ -89,6 +93,106 @@ describe("Sponsor Forms Actions", () => {
           }
         );
       });
+    });
+  });
+
+  describe("normalizeFormTemplate", () => {
+    it("should set sponsorship_types to empty array when 'all' is selected", () => {
+      const entity = {
+        opens_at: "2026-01-01 10:00:00",
+        expires_at: "2026-12-31 23:59:59",
+        sponsorship_types: ["all", 1, 2],
+        meta_fields: [{ name: "field1" }, { name: "" }]
+      };
+
+      const result = normalizeFormTemplate(entity, "UTC");
+
+      expect(result.apply_to_all_types).toBe(true);
+      expect(result.sponsorship_types).toEqual([]);
+      expect(typeof result.opens_at).toBe("number");
+      expect(typeof result.expires_at).toBe("number");
+      expect(result.meta_fields).toHaveLength(1);
+    });
+
+    it("should preserve sponsorship_types array when specific types are selected", () => {
+      const entity = {
+        opens_at: "2026-01-01 10:00:00",
+        expires_at: "2026-12-31 23:59:59",
+        sponsorship_types: [1, 2, 3],
+        meta_fields: [{ name: "field1" }]
+      };
+
+      const result = normalizeFormTemplate(entity, "UTC");
+
+      expect(result.apply_to_all_types).toBe(false);
+      expect(result.sponsorship_types).toEqual([1, 2, 3]);
+    });
+
+    it("should handle empty sponsorship_types array", () => {
+      const entity = {
+        opens_at: "2026-01-01 10:00:00",
+        expires_at: "2026-12-31 23:59:59",
+        sponsorship_types: [],
+        meta_fields: []
+      };
+
+      const result = normalizeFormTemplate(entity, "UTC");
+
+      expect(result.apply_to_all_types).toBe(false);
+      expect(result.sponsorship_types).toEqual([]);
+    });
+  });
+
+  describe("normalizeSponsorCustomizedForm", () => {
+    it("should set allowed_add_ons to empty array when 'all' is selected", () => {
+      const entity = {
+        id: 1,
+        code: "TEST",
+        name: "Test Form",
+        opens_at: "2026-01-01 10:00:00",
+        expires_at: "2026-12-31 23:59:59",
+        allowed_add_ons: ["all", { id: 1 }, { id: 2 }],
+        meta_fields: [{ name: "field1" }, { name: "" }]
+      };
+
+      const result = normalizeSponsorCustomizedForm(entity, "UTC");
+
+      expect(result.apply_to_all_add_ons).toBe(true);
+      expect(result.allowed_add_ons).toEqual([]);
+      expect(typeof result.opens_at).toBe("number");
+      expect(typeof result.expires_at).toBe("number");
+      expect(result.meta_fields).toHaveLength(1);
+      expect(result.id).toBeUndefined();
+    });
+
+    it("should map allowed_add_ons to IDs when specific add-ons are selected", () => {
+      const entity = {
+        id: 1,
+        opens_at: "2026-01-01 10:00:00",
+        expires_at: "2026-12-31 23:59:59",
+        allowed_add_ons: [{ id: 1 }, { id: 2 }, { id: 3 }],
+        meta_fields: [{ name: "field1" }]
+      };
+
+      const result = normalizeSponsorCustomizedForm(entity, "UTC");
+
+      expect(result.apply_to_all_add_ons).toBe(false);
+      expect(result.allowed_add_ons).toEqual([1, 2, 3]);
+    });
+
+    it("should handle empty allowed_add_ons array", () => {
+      const entity = {
+        id: 1,
+        opens_at: "2026-01-01 10:00:00",
+        expires_at: "2026-12-31 23:59:59",
+        allowed_add_ons: [],
+        meta_fields: []
+      };
+
+      const result = normalizeSponsorCustomizedForm(entity, "UTC");
+
+      expect(result.apply_to_all_add_ons).toBe(false);
+      expect(result.allowed_add_ons).toEqual([]);
     });
   });
 });
