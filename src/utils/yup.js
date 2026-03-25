@@ -47,7 +47,7 @@ export const decimalValidation = () =>
   yup
     .number()
     .typeError(T.translate("validation.number"))
-    .positive(T.translate("validation.non_negative"))
+    .min(0, T.translate("validation.non_negative"))
     .required(T.translate("validation.required"))
     .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
       if (value === undefined || value === null) return true;
@@ -60,7 +60,7 @@ export const rateCellValidation = () =>
     // allow $ at the start
     .transform((value, originalValue) => {
       if (typeof originalValue === "string") {
-        const cleaned = originalValue.replace(/^\$/, "");
+        const cleaned = originalValue.replace(/^\$/, "").replace(",", ".");
         return cleaned === "" ? undefined : parseFloat(cleaned);
       }
       return value;
@@ -76,10 +76,10 @@ export const rateCellValidation = () =>
           originalValue === ""
         )
           return true;
-        return /^\$?-?\d+(\.\d+)?$/.test(originalValue);
+        return /^\$?-?\d+([.,]\d+)?$/.test(originalValue);
       }
     })
-    .positive(T.translate("validation.non_negative"))
+    .min(0, T.translate("validation.non_negative"))
     .test("max-decimals", T.translate("validation.two_decimals"), (value) => {
       if (value === undefined || value === null) return true;
       return /^\d+(\.\d{1,2})?$/.test(value.toString());

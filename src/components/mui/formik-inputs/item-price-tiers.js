@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import T from "i18n-react";
 import { useFormikContext } from "formik";
 import {
@@ -21,14 +21,13 @@ const TIERS = [
 const ItemPriceTiers = ({ readOnly = false }) => {
   const { values, setFieldValue } = useFormikContext();
 
-  const [enabled, setEnabled] = useState({
+  const enabled = {
     [RATE_FIELDS.EARLY_BIRD]: isRateEnabled(values[RATE_FIELDS.EARLY_BIRD]),
     [RATE_FIELDS.STANDARD]: isRateEnabled(values[RATE_FIELDS.STANDARD]),
     [RATE_FIELDS.ONSITE]: isRateEnabled(values[RATE_FIELDS.ONSITE])
-  });
+  };
 
   const handleToggle = (field, checked) => {
-    setEnabled((prev) => ({ ...prev, [field]: checked }));
     setFieldValue(field, checked ? 0 : null);
   };
 
