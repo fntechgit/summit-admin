@@ -46,7 +46,7 @@ import SponsorBadgeScans from "./sponsor-badge-scans";
 import SponsorCartTab from "./sponsor-cart-tab";
 import SponsorPagesTab from "./sponsor-pages-tab";
 import SponsorFormsManageItems from "./sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items";
-import { SPONSOR_TABS } from "../../utils/constants";
+import { SPONSOR_TABS, ACCESS_ROUTES } from "../../utils/constants";
 import SponsorPurchasesTab from "./sponsor-purchases-tab";
 import SponsorMediaUploadTab from "./sponsor-media-upload-tab";
 import Member from "../../models/member";
@@ -179,42 +179,42 @@ const EditSponsorPage = (props) => {
     {
       label: T.translate("edit_sponsor.tab.general"),
       value: SPONSOR_TABS.GENERAL,
-      accessRoute: "sponsors"
+      accessRoute: ACCESS_ROUTES.SPONSORS
     },
     {
       label: T.translate("edit_sponsor.tab.users"),
       value: SPONSOR_TABS.USERS,
-      accessRoute: "admin-sponsors"
+      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
     },
     {
       label: T.translate("edit_sponsor.tab.pages"),
       value: SPONSOR_TABS.PAGES,
-      accessRoute: "admin-sponsors"
+      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
     },
     {
       label: T.translate("edit_sponsor.tab.media_uploads"),
       value: SPONSOR_TABS.MEDIA_UPLOADS,
-      accessRoute: "admin-sponsors"
+      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
     },
     {
       label: T.translate("edit_sponsor.tab.forms"),
       value: SPONSOR_TABS.FORMS,
-      accessRoute: "admin-sponsors"
+      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
     },
     {
       label: T.translate("edit_sponsor.tab.cart"),
       value: SPONSOR_TABS.CART,
-      accessRoute: "admin-sponsors"
+      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
     },
     {
       label: T.translate("edit_sponsor.tab.purchases"),
       value: SPONSOR_TABS.PURCHASES,
-      accessRoute: "admin-sponsors"
+      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
     },
     {
       label: T.translate("edit_sponsor.tab.badge_scans"),
       value: SPONSOR_TABS.BADGE_SCANS,
-      accessRoute: "sponsors"
+      accessRoute: ACCESS_ROUTES.SPONSORS
     }
   ];
 
@@ -255,7 +255,7 @@ const EditSponsorPage = (props) => {
             {tabs.map(drawTab)}
           </Tabs>
         </Box>
-        {memberObj.hasAccess("sponsors") && (
+        {memberObj.hasAccess(ACCESS_ROUTES.SPONSORS) && (
           <CustomTabPanel value={selectedTab} index={0}>
             <SponsorGeneralForm
               sponsor={entity}
@@ -281,12 +281,12 @@ const EditSponsorPage = (props) => {
             />
           </CustomTabPanel>
         )}
-        {memberObj.hasAccess("admin-sponsors") && (
+        {memberObj.hasAccess(ACCESS_ROUTES.ADMIN_SPONSORS) && (
           <CustomTabPanel value={selectedTab} index={1}>
             <SponsorUsersListPerSponsorPage sponsor={entity} />
           </CustomTabPanel>
         )}
-        {memberObj.hasAccess("admin-sponsors") && (
+        {memberObj.hasAccess(ACCESS_ROUTES.ADMIN_SPONSORS) && (
           <CustomTabPanel value={selectedTab} index={2}>
             <SponsorPagesTab
               sponsor={entity}
@@ -295,7 +295,7 @@ const EditSponsorPage = (props) => {
             />
           </CustomTabPanel>
         )}
-        {memberObj.hasAccess("admin-sponsors") && (
+        {memberObj.hasAccess(ACCESS_ROUTES.ADMIN_SPONSORS) && (
           <CustomTabPanel value={selectedTab} index={3}>
             <SponsorMediaUploadTab
               sponsor={entity}
@@ -303,7 +303,7 @@ const EditSponsorPage = (props) => {
             />
           </CustomTabPanel>
         )}
-        {memberObj.hasAccess("admin-sponsors") && (
+        {memberObj.hasAccess(ACCESS_ROUTES.ADMIN_SPONSORS) && (
           <CustomTabPanel value={selectedTab} index={4}>
             {isNestedFormItemRoute ? (
               <SponsorFormsManageItems match={match} />
@@ -316,7 +316,7 @@ const EditSponsorPage = (props) => {
             )}
           </CustomTabPanel>
         )}
-        {memberObj.hasAccess("admin-sponsors") && (
+        {memberObj.hasAccess(ACCESS_ROUTES.ADMIN_SPONSORS) && (
           <CustomTabPanel value={selectedTab} index={5}>
             <SponsorCartTab
               sponsor={entity}
@@ -325,12 +325,12 @@ const EditSponsorPage = (props) => {
             />
           </CustomTabPanel>
         )}
-        {memberObj.hasAccess("admin-sponsors") && (
+        {memberObj.hasAccess(ACCESS_ROUTES.ADMIN_SPONSORS) && (
           <CustomTabPanel value={selectedTab} index={6}>
             <SponsorPurchasesTab sponsor={entity} summitId={currentSummit.id} />
           </CustomTabPanel>
         )}
-        {memberObj.hasAccess("sponsors") && (
+        {memberObj.hasAccess(ACCESS_ROUTES.SPONSORS) && (
           <CustomTabPanel value={selectedTab} index={7}>
             <SponsorBadgeScans sponsor={entity} />
           </CustomTabPanel>
