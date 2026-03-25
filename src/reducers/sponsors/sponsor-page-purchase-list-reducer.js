@@ -16,7 +16,8 @@ import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   REQUEST_SPONSOR_PURCHASES,
-  RECEIVE_SPONSOR_PURCHASES
+  RECEIVE_SPONSOR_PURCHASES,
+  SPONSOR_PURCHASE_STATUS_UPDATED
 } from "../../actions/sponsor-purchases-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
@@ -61,13 +62,13 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
       } = payload.response;
 
       const purchases = payload.response.data.map((a) => ({
-          ...a,
-          order: a.order_number,
-          amount: `$${amountFromCents(a.raw_amount)}`,
-          purchased: moment(a.created * MILLISECONDS_TO_SECONDS).format(
-            "YYYY/MM/DD HH:mm a"
-          )
-        }));
+        ...a,
+        order: a.order_number,
+        amount: `$${amountFromCents(a.raw_amount)}`,
+        purchased: moment(a.created * MILLISECONDS_TO_SECONDS).format(
+          "YYYY/MM/DD HH:mm a"
+        )
+      }));
 
       return {
         ...state,
@@ -76,6 +77,15 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
         totalCount: total,
         lastPage
       };
+    }
+    case SPONSOR_PURCHASE_STATUS_UPDATED: {
+      const { paymentId, status } = payload;
+      const purchases = state.purchases.map((p) => {
+        if (p.payment_id === paymentId) return { ...p, status };
+        return p;
+      });
+
+      return { ...state, purchases };
     }
     default:
       return state;

@@ -270,7 +270,12 @@ export const PAGE_MODULES_DOWNLOAD = {
 export const PURCHASE_STATUS = {
   PENDING: "Pending",
   PAID: "Paid",
-  CANCELLED: "Cancelled"
+  CANCELLED: "Canceled"
+};
+
+export const PURCHASE_METHODS = {
+  CARD: "card",
+  INVOICE: "Invoice"
 };
 
 export const SPONSOR_USER_ASSIGNMENT_TYPE = {

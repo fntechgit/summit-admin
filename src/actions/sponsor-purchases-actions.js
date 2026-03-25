@@ -15,19 +15,25 @@ import {
   authErrorHandler,
   createAction,
   getRequest,
+  putRequest,
+  deleteRequest,
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
-
+import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  PURCHASE_STATUS
 } from "../utils/constants";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 
 export const REQUEST_SPONSOR_PURCHASES = "REQUEST_SPONSOR_PURCHASES";
 export const RECEIVE_SPONSOR_PURCHASES = "RECEIVE_SPONSOR_PURCHASES";
+export const SPONSOR_PURCHASE_STATUS_UPDATED =
+  "SPONSOR_PURCHASE_STATUS_UPDATED";
 
 export const getSponsorPurchases =
   (
@@ -78,4 +84,78 @@ export const getSponsorPurchases =
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
+  };
+
+export const approveSponsorPurchase =
+  (paymentId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    return putRequest(
+      null,
+      createAction(SPONSOR_PURCHASE_STATUS_UPDATED)({
+        paymentId,
+        status: PURCHASE_STATUS.PAID
+      }),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentId}/approve`,
+      {},
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_sponsor.purchase_tab.status_updated")
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const rejectSponsorPurchase =
+  (paymentId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_PURCHASE_STATUS_UPDATED)({
+        paymentId,
+        status: PURCHASE_STATUS.CANCELLED
+      }),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentId}/cancel`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_sponsor.purchase_tab.status_updated")
+          })
+        );
+      })
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
   };
