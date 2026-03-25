@@ -178,7 +178,8 @@ import dropboxSyncReducer from "./reducers/locations/dropbox-sync-reducer";
 
 const config = {
   key: "root",
-  storage
+  storage,
+  blacklist: ["dropboxSyncState"]
 };
 
 const reducers = persistCombineReducers(config, {

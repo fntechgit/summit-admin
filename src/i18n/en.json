@@ -4029,7 +4029,7 @@
   },
   "dropbox_sync": {
     "panel_title": "Synchronization Settings",
-    "toggle_label": "Enable location based Dropbox file synchronization",
+    "toggle_label": "Enable location-based Dropbox file synchronization",
     "toggle_helper": "It is recommended to not enable this until close to the show, when all locations and rooms are finalized.",
     "rebuild_title": "Rebuild Synchronization",
     "rebuild_warning": "This will delete all synced folders for this event and rebuild them from scratch. This action cannot be undone.",

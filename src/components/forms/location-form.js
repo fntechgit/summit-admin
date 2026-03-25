@@ -215,9 +215,10 @@ class LocationForm extends React.Component {
 
   handleRoomResync(roomId) {
     const { entity } = this.state;
+    const persistedVenueName = this.props.entity.name;
     const room = entity.rooms.find((r) => r.id === roomId);
     if (room && this.props.onRoomResync) {
-      this.props.onRoomResync(entity.name, room.name);
+      this.props.onRoomResync(persistedVenueName, room.name);
     }
   }
 

@@ -34,10 +34,12 @@ const getBaseUrl = () => window.DROPBOX_MATERIALIZER_API_BASE_URL;
 
 export const getSyncConfig = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
+  const baseUrl = getBaseUrl();
+  const summitId = currentSummitState?.currentSummit?.id;
 
-  if (!getBaseUrl()) return;
+  if (!baseUrl || !summitId) return;
+
+  const accessToken = await getAccessTokenSafely();
 
   const params = {
     access_token: accessToken
@@ -46,19 +48,25 @@ export const getSyncConfig = () => async (dispatch, getState) => {
   return getRequest(
     createAction(REQUEST_SYNC_CONFIG),
     createAction(RECEIVE_SYNC_CONFIG),
-    `${getBaseUrl()}/api/sync/config/${currentSummit.id}/`,
+    `${baseUrl}/api/sync/config/${summitId}/`,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-  });
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(stopLoading());
+    })
+    .catch(() => {
+      dispatch(createAction(RECEIVE_SYNC_CONFIG)({}));
+    });
 };
 
 export const updateSyncConfig = (data) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
+  const baseUrl = getBaseUrl();
+  const summitId = currentSummitState?.currentSummit?.id;
 
-  if (!getBaseUrl()) return;
+  if (!baseUrl || !summitId) return;
+
+  const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
 
@@ -69,21 +77,27 @@ export const updateSyncConfig = (data) => async (dispatch, getState) => {
   return putRequest(
     null,
     createAction(SYNC_CONFIG_UPDATED),
-    `${getBaseUrl()}/api/sync/config/${currentSummit.id}/`,
+    `${baseUrl}/api/sync/config/${summitId}/`,
     data,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-    dispatch(showSuccessMessage(T.translate("dropbox_sync.config_saved")));
-  });
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(stopLoading());
+      dispatch(showSuccessMessage(T.translate("dropbox_sync.config_saved")));
+    })
+    .catch(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const rebuildSync = () => async (dispatch, getState) => {
   const { currentSummitState } = getState();
-  const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
+  const baseUrl = getBaseUrl();
+  const summitId = currentSummitState?.currentSummit?.id;
 
-  if (!getBaseUrl()) return;
+  if (!baseUrl || !summitId) return;
+
+  const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
 
@@ -94,24 +108,30 @@ export const rebuildSync = () => async (dispatch, getState) => {
   return postRequest(
     null,
     createAction(REBUILD_SYNC_DISPATCHED),
-    `${getBaseUrl()}/api/sync/rebuild/${currentSummit.id}/`,
+    `${baseUrl}/api/sync/rebuild/${summitId}/`,
     null,
     authErrorHandler
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-    dispatch(
-      showSuccessMessage(T.translate("dropbox_sync.rebuild_dispatched"))
-    );
-  });
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(stopLoading());
+      dispatch(
+        showSuccessMessage(T.translate("dropbox_sync.rebuild_dispatched"))
+      );
+    })
+    .catch(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const resyncRoom =
   (venueName, roomName) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
+    const baseUrl = getBaseUrl();
+    const summitId = currentSummitState?.currentSummit?.id;
 
-    if (!getBaseUrl()) return;
+    if (!baseUrl || !summitId) return;
+
+    const accessToken = await getAccessTokenSafely();
 
     dispatch(startLoading());
 
@@ -122,15 +142,19 @@ export const resyncRoom =
     return postRequest(
       null,
       createAction(RESYNC_ROOM_DISPATCHED),
-      `${getBaseUrl()}/api/sync/materialize/${
-        currentSummit.id
-      }/${encodeURIComponent(venueName)}/${encodeURIComponent(roomName)}/`,
+      `${baseUrl}/api/sync/materialize/${summitId}/${encodeURIComponent(
+        venueName
+      )}/${encodeURIComponent(roomName)}/`,
       null,
       authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-      dispatch(
-        showSuccessMessage(T.translate("dropbox_sync.resync_dispatched"))
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(stopLoading());
+        dispatch(
+          showSuccessMessage(T.translate("dropbox_sync.resync_dispatched"))
+        );
+      })
+      .catch(() => {
+        dispatch(stopLoading());
+      });
   };
