@@ -32,16 +32,20 @@ const parseValue = (item, timeZone) => {
       return item.current_value
         ? parseInt(item.current_value)
         : item.minimum_quantity || 0;
-    case "ComboBox":
+    case "RadioButtonList":
+    case "ComboBox": {
+      const defaultVal = item.values.find((v) => v.is_default)?.id;
+      return item.current_value || defaultVal || "";
+    }
+    case "CheckBoxList": {
+      const defaultVal = item.values.find((v) => v.is_default)?.id;
+      return item.current_value || defaultVal || [];
+    }
     case "Text":
     case "TextArea":
       return item.current_value || "";
     case "CheckBox":
       return item.current_value ? item.current_value === "True" : false;
-    case "CheckBoxList":
-      return item.current_value || [];
-    case "RadioButtonList":
-      return item.current_value || "";
     case "Time":
       return item.current_value
         ? moment.tz(item.current_value, "HH:mm", timeZone)
@@ -150,12 +154,10 @@ const buildInitialValues = (form, timeZone) => {
 
 const buildValidationSchema = (items) => {
   const schema = items.reduce((acc, item) => {
-    item.meta_fields
-      .filter((f) => f.class_field === "Form")
-      .map((f) => {
-        acc[`i-${item.form_item_id}-c-${f.class_field}-f-${f.type_id}`] =
-          getYupValidation(f);
-      });
+    item.meta_fields.map((f) => {
+      acc[`i-${item.form_item_id}-c-${f.class_field}-f-${f.type_id}`] =
+        getYupValidation(f);
+    });
     // notes
     acc[`i-${item.form_item_id}-c-global-f-notes`] = yup.string(
       T.translate("validation.string")

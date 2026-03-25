@@ -12,14 +12,13 @@
  * */
 
 import React from "react";
-import { MenuItem } from "@mui/material";
 import MuiFormikCheckbox from "../../formik-inputs/mui-formik-checkbox";
 import MuiFormikDropdownCheckbox from "../../formik-inputs/mui-formik-dropdown-checkbox";
 import MuiFormikDropdownRadio from "../../formik-inputs/mui-formik-dropdown-radio";
 import MuiFormikDatepicker from "../../formik-inputs/mui-formik-datepicker";
 import MuiFormikTimepicker from "../../formik-inputs/mui-formik-timepicker";
 import MuiFormikTextField from "../../formik-inputs/mui-formik-textfield";
-import MuiFormikSelect from "../../formik-inputs/mui-formik-select";
+import MuiFormikSelectV2 from "../../formik-inputs/mui-formik-select-v2";
 
 const ItemTableField = ({
   rowId,
@@ -33,7 +32,7 @@ const ItemTableField = ({
 
   switch (field.type) {
     case "CheckBox":
-      return <MuiFormikCheckbox {...commonProps} />;
+      return <MuiFormikCheckbox {...commonProps} size="small" />;
     case "CheckBoxList":
       return (
         <MuiFormikDropdownCheckbox
@@ -73,13 +72,11 @@ const ItemTableField = ({
       );
     case "ComboBox":
       return (
-        <MuiFormikSelect {...commonProps} size="small">
-          {field.values.map((v) => (
-            <MenuItem key={`ddopt-${v.id}`} value={v.id}>
-              {v.value}
-            </MenuItem>
-          ))}
-        </MuiFormikSelect>
+        <MuiFormikSelectV2
+          {...commonProps}
+          size="small"
+          options={field.values.map((v) => ({ value: v.id, label: v.value }))}
+        />
       );
     case "Text":
       return <MuiFormikTextField {...commonProps} fullWidth size="small" />;

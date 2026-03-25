@@ -14,6 +14,7 @@
 import React from "react";
 import {
   FormControl,
+  InputLabel,
   ListItemText,
   MenuItem,
   Radio,
@@ -22,7 +23,13 @@ import {
 import { useField } from "formik";
 import T from "i18n-react/dist/i18n-react";
 
-const MuiFormikDropdownRadio = ({ name, options, placeholder, ...rest }) => {
+const MuiFormikDropdownRadio = ({
+  name,
+  label,
+  options,
+  placeholder,
+  ...rest
+}) => {
   const finalPlaceholder =
     placeholder || T.translate("general.select_an_option");
   const [field, meta, helpers] = useField(name);
@@ -33,9 +40,16 @@ const MuiFormikDropdownRadio = ({ name, options, placeholder, ...rest }) => {
 
   return (
     <FormControl fullWidth error={meta.touched && Boolean(meta.error)}>
+      {label && (
+        <InputLabel shrink id={`${name}-label`}>
+          {label}
+        </InputLabel>
+      )}
       <Select
         variant="outlined"
         name={name}
+        label={label}
+        labelId={`${name}-label`}
         value={field.value || ""}
         onChange={handleChange}
         displayEmpty

@@ -14,12 +14,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import { Divider, IconButton, Typography } from "@mui/material";
+import {
+  Button,
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Typography
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ItemTableField from "../FormItemTable/components/ItemTableField";
 
@@ -63,14 +68,14 @@ const ItemSettingsModal = ({ item, timeZone, open, onClose }) => {
           }}
         />
         {itemFields.map((exc) => (
-          <React.Fragment key={`item-field-${exc.type_id}`}>
+          <Box key={`item-field-${exc.type_id}`} sx={{ mb: 2 }}>
             <ItemTableField
               field={exc}
               rowId={item.form_item_id}
               timeZone={timeZone}
               label={exc.name}
             />
-          </React.Fragment>
+          </Box>
         ))}
       </DialogContent>
       <DialogActions>

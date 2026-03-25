@@ -204,7 +204,10 @@ const FormItemTable = ({
                 {formatRate(row.rates.onsite)}
               </TableCell>
               {extraColumns.map((exc) => (
-                <TableCell key={`datacell-${row.form_item_id}-${exc.type_id}`}>
+                <TableCell
+                  key={`datacell-${row.form_item_id}-${exc.type_id}`}
+                  sx={{ minWidth: 200 }}
+                >
                   <ItemTableField
                     field={exc}
                     rowId={row.form_item_id}

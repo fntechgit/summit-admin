@@ -219,6 +219,21 @@ jest.mock("../../formik-inputs/mui-formik-select", () => ({
   )
 }));
 
+jest.mock("../../formik-inputs/mui-formik-select-v2", () => ({
+  __esModule: true,
+  default: ({ name, label, options }) => (
+    <select data-testid={`select-${name}`} name={name}>
+      <option value="">{label}</option>
+      {options &&
+        options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+    </select>
+  )
+}));
+
 jest.mock("../../formik-inputs/mui-formik-checkbox", () => ({
   __esModule: true,
   default: ({ name, label }) => (

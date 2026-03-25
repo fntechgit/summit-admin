@@ -32,7 +32,8 @@ const MuiFormikDatepicker = ({
             error: meta.touched && Boolean(meta.error),
             helperText: meta.touched && meta.error,
             fullWidth: true,
-            disabled
+            disabled,
+            size: "small"
           },
           day: {
             sx: {

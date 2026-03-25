@@ -16,6 +16,7 @@ import {
   Checkbox,
   Divider,
   FormControl,
+  InputLabel,
   ListItemText,
   MenuItem,
   Select
@@ -23,8 +24,16 @@ import {
 import { useField } from "formik";
 import T from "i18n-react/dist/i18n-react";
 
-const MuiFormikDropdownCheckbox = ({ name, options, ...rest }) => {
+const MuiFormikDropdownCheckbox = ({
+  name,
+  label,
+  options,
+  placeholder,
+  ...rest
+}) => {
   const [field, meta, helpers] = useField(name);
+  const finalPlaceholder =
+    placeholder || T.translate("general.select_an_option");
   const allSelected = options.every(({ value }) =>
     field.value?.includes(value)
   );
@@ -46,9 +55,16 @@ const MuiFormikDropdownCheckbox = ({ name, options, ...rest }) => {
 
   return (
     <FormControl fullWidth error={meta.touched && Boolean(meta.error)}>
+      {label && (
+        <InputLabel shrink id={`${name}-label`}>
+          {label}
+        </InputLabel>
+      )}
       <Select
         variant="outlined"
         name={name}
+        label={label}
+        labelId={`${name}-label`}
         multiple
         value={field.value || []}
         onChange={handleChange}
@@ -58,7 +74,7 @@ const MuiFormikDropdownCheckbox = ({ name, options, ...rest }) => {
         {...rest}
         renderValue={(selected) => {
           if (!selected?.length) {
-            return rest.placeholder || "";
+            return <em>{finalPlaceholder}</em>;
           }
           if (allSelected) {
             return T.translate("general.all");
