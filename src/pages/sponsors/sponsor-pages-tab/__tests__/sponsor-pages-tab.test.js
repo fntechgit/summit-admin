@@ -4,7 +4,11 @@ import { act, screen, waitFor } from "@testing-library/react";
 import SponsorPagesTab from "../index";
 import { renderWithRedux } from "../../../../utils/test-utils";
 import { DEFAULT_STATE as sponsorPagesDefaultState } from "../../../../reducers/sponsors/sponsor-page-pages-list-reducer";
-import { getSponsorCustomizedPage } from "../../../../actions/sponsor-pages-actions";
+import {
+  getSponsorCustomizedPage,
+  archiveCustomizedPage,
+  unarchiveCustomizedPage
+} from "../../../../actions/sponsor-pages-actions";
 
 // Mocks
 
@@ -46,7 +50,14 @@ jest.mock("../../../../actions/sponsor-pages-actions", () => ({
   ),
   saveSponsorCustomizedPage: jest.fn(() => () => Promise.resolve()),
   saveSponsorManagedPage: jest.fn(() => () => Promise.resolve()),
-  resetSponsorPage: jest.fn(() => ({ type: "MOCK_ACTION" }))
+  resetSponsorPage: jest.fn(() => ({ type: "MOCK_ACTION" })),
+  archiveCustomizedPage: jest.fn(() => () => Promise.resolve()),
+  unarchiveCustomizedPage: jest.fn(() => () => Promise.resolve())
+}));
+
+jest.mock("../../../../actions/sponsor-forms-actions", () => ({
+  ...jest.requireActual("../../../../actions/sponsor-forms-actions"),
+  getSponsorships: jest.fn(() => () => Promise.resolve())
 }));
 
 // Helpers
@@ -86,6 +97,12 @@ const defaultState = {
     },
     hideArchived: false,
     term: ""
+  },
+  currentSummitState: {
+    currentSummit: {
+      id: 1,
+      time_zone: { name: "UTC" }
+    }
   }
 };
 
@@ -218,5 +235,55 @@ describe("SponsorPagesTab", () => {
         screen.queryByTestId("page-template-popup")
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("should call archiveCustomizedPage for non-archived item", async () => {
+    renderWithRedux(
+      <SponsorPagesTab sponsor={createSponsor()} summitId={1} summitTZ="UTC" />,
+      {
+        initialState: {
+          sponsorPagePagesListState: {
+            ...defaultState.sponsorPagePagesListState,
+            customizedPages: {
+              ...defaultState.sponsorPagePagesListState.customizedPages,
+              pages: [createCustomizedPage(1, { is_archived: false })],
+              totalItems: 1
+            }
+          }
+        }
+      }
+    );
+
+    const archiveButton = screen.getByText("general.archive");
+    await act(async () => {
+      await userEvent.click(archiveButton);
+    });
+
+    expect(archiveCustomizedPage).toHaveBeenCalledWith(1);
+  });
+
+  it("should call unarchiveCustomizedPage for archived item", async () => {
+    renderWithRedux(
+      <SponsorPagesTab sponsor={createSponsor()} summitId={1} summitTZ="UTC" />,
+      {
+        initialState: {
+          sponsorPagePagesListState: {
+            ...defaultState.sponsorPagePagesListState,
+            customizedPages: {
+              ...defaultState.sponsorPagePagesListState.customizedPages,
+              pages: [createCustomizedPage(1, { is_archived: true })],
+              totalItems: 1
+            }
+          }
+        }
+      }
+    );
+
+    const unarchiveButton = screen.getByText("general.unarchive");
+    await act(async () => {
+      await userEvent.click(unarchiveButton);
+    });
+
+    expect(unarchiveCustomizedPage).toHaveBeenCalledWith(1);
   });
 });

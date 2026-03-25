@@ -30,6 +30,8 @@ import {
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  unarchiveCustomizedPage,
+  archiveCustomizedPage,
   resetSponsorPage
 } from "../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
@@ -57,6 +59,8 @@ const SponsorPagesTab = ({
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  unarchiveCustomizedPage,
+  archiveCustomizedPage,
   resetSponsorPage
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
@@ -170,7 +174,20 @@ const SponsorPagesTab = ({
   };
 
   const handleArchiveCustomizedPage = (item) =>
-    console.log("ARCHIVE CUSTOMIZED ", item);
+    (item.is_archived
+      ? unarchiveCustomizedPage(item.id)
+      : archiveCustomizedPage(item.id)
+    ).then(() => {
+      const { perPage, order, orderDir, currentPage } = customizedPages;
+      return getSponsorCustomizedPages(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
+    });
 
   const handleArchiveManagedPage = (item) =>
     console.log("ARCHIVE MANAGED ", item);
@@ -453,5 +470,7 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  unarchiveCustomizedPage,
+  archiveCustomizedPage,
   resetSponsorPage
 })(SponsorPagesTab);
