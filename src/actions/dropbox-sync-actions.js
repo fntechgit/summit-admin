@@ -48,7 +48,7 @@ export const getSyncConfig = () => async (dispatch, getState) => {
   return getRequest(
     createAction(REQUEST_SYNC_CONFIG),
     createAction(RECEIVE_SYNC_CONFIG),
-    `${baseUrl}/api/sync/config/${summitId}/`,
+    `${baseUrl}/api/v1/sync/config/${summitId}/`,
     authErrorHandler
   )(params)(dispatch)
     .then(() => {
@@ -77,7 +77,7 @@ export const updateSyncConfig = (data) => async (dispatch, getState) => {
   return putRequest(
     null,
     createAction(SYNC_CONFIG_UPDATED),
-    `${baseUrl}/api/sync/config/${summitId}/`,
+    `${baseUrl}/api/v1/sync/config/${summitId}/`,
     data,
     authErrorHandler
   )(params)(dispatch)
@@ -108,7 +108,7 @@ export const rebuildSync = () => async (dispatch, getState) => {
   return postRequest(
     null,
     createAction(REBUILD_SYNC_DISPATCHED),
-    `${baseUrl}/api/sync/rebuild/${summitId}/`,
+    `${baseUrl}/api/v1/sync/rebuild/${summitId}/`,
     null,
     authErrorHandler
   )(params)(dispatch)
@@ -142,7 +142,7 @@ export const resyncRoom =
     return postRequest(
       null,
       createAction(RESYNC_ROOM_DISPATCHED),
-      `${baseUrl}/api/sync/materialize/${summitId}/${encodeURIComponent(
+      `${baseUrl}/api/v1/sync/materialize/${summitId}/${encodeURIComponent(
         venueName
       )}/${encodeURIComponent(roomName)}/`,
       null,
