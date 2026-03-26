@@ -28,7 +28,7 @@ const ItemPriceTiers = ({ readOnly = false }) => {
   };
 
   const handleToggle = (field, checked) => {
-    setFieldValue(field, checked ? 0 : null);
+    setFieldValue(field, checked ? null : 0);
   };
 
   return (
@@ -48,17 +48,13 @@ const ItemPriceTiers = ({ readOnly = false }) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={isEnabled}
+                    checked={!isEnabled}
                     onChange={(ev) => handleToggle(field, ev.target.checked)}
                     size="small"
                     disabled={readOnly}
                   />
                 }
-                label={T.translate(
-                  isEnabled
-                    ? "price_tiers.available"
-                    : "price_tiers.not_available"
-                )}
+                label={T.translate("price_tiers.not_available")}
               />
             </Box>
             <Box>
