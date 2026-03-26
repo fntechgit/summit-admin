@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
+import T from "i18n-react/dist/i18n-react";
 import { FormHelperText } from "@mui/material";
-import { UploadInputV2 } from "openstack-uicore-foundation/lib/components";
+import { UploadInputV3 } from "openstack-uicore-foundation/lib/components";
 import { useField } from "formik";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
@@ -72,7 +73,7 @@ const MuiFormikUpload = ({
       {meta.touched && meta.error && (
         <FormHelperText error>{meta.error}</FormHelperText>
       )}
-      <UploadInputV2
+      <UploadInputV3
         id={id}
         name={name}
         onUploadComplete={handleUploadComplete}
@@ -83,6 +84,7 @@ const MuiFormikUpload = ({
         djsConfig={{ withCredentials: true }}
         maxFiles={maxFiles}
         canAdd={canAddMore()}
+        error={!canAddMore() ? T.translate("errors.maximum_files") : undefined}
         parallelChunkUploads
       />
     </>

@@ -8,7 +8,8 @@
     "empty_list_schedule_events": "Please select a Day and a Location ...",
     "not_allowed": "You are not allowed here, please login with another user to access this page.",
     "not_found": "Not Found!",
-    "entity_not_found": "The entity you are looking for was not found."
+    "entity_not_found": "The entity you are looking for was not found.",
+    "maximum_files": "Maximum number of files has been reached"
   },
   "general": {
     "summit": "Event",
