@@ -43,7 +43,7 @@ const buildInitialValues = (extraQuestions) => {
   return values;
 };
 
-const MuiQrBadgePopup = ({ onClose, onScan, extraQuestions = [], isAdmin }) => {
+const MuiQrBadgePopup = ({ onClose, onSave, extraQuestions = [], isAdmin }) => {
   const { errorMessage } = useSnackbarMessage();
   const [scannedCode, setScannedCode] = useState(null);
 
@@ -61,7 +61,7 @@ const MuiQrBadgePopup = ({ onClose, onScan, extraQuestions = [], isAdmin }) => {
         }))
         .filter((q) => q.answer);
 
-      onScan({
+      return onSave({
         qr_code: scannedCode,
         scan_date: moment().unix(),
         notes,
@@ -164,7 +164,7 @@ const MuiQrBadgePopup = ({ onClose, onScan, extraQuestions = [], isAdmin }) => {
               type="submit"
               fullWidth
               variant="contained"
-              disabled={!scannedCode}
+              disabled={!scannedCode || formik.isSubmitting}
             >
               {T.translate("general.save")}
             </Button>

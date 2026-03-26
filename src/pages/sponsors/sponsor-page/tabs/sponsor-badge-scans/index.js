@@ -109,9 +109,17 @@ const SponsorBadgeScans = ({
   };
 
   const handleManualScanSubmit = (entity) => {
-    addBadgeScan(entity)
-      .then(() => getBadgeScans(sponsor.id))
-      .finally(() => setShowManualBadgeScanPopup(false));
+    addBadgeScan(entity).then(() => {
+      setShowManualBadgeScanPopup(false);
+      return getBadgeScans(
+        sponsor.id,
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      );
+    });
   };
 
   const handleExportBadgeScans = () => {
@@ -253,7 +261,7 @@ const SponsorBadgeScans = ({
       )}
       {showManualBadgeScanPopup && (
         <MuiQrBadgePopup
-          onScan={handleManualScanSubmit}
+          onSave={handleManualScanSubmit}
           onClose={() => setShowManualBadgeScanPopup(false)}
           extraQuestions={sponsor.extra_questions}
           isAdmin={isAdmin}
