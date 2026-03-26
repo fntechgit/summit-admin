@@ -12,10 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import {
-  amountFromCents,
-  currencyAmountFromCents
-} from "openstack-uicore-foundation/lib/utils/money";
+import { formatRateFromCents, rateFromCents } from "../../utils/rate-helpers";
 import {
   RECEIVE_SPONSOR_CUSTOMIZED_FORM_ITEMS,
   REQUEST_SPONSOR_CUSTOMIZED_FORM_ITEMS,
@@ -92,9 +89,9 @@ const sponsorCustomizedFormItemsListReducer = (
         id: a.id,
         code: a.code,
         name: a.name,
-        early_bird_rate: currencyAmountFromCents(a.early_bird_rate),
-        standard_rate: currencyAmountFromCents(a.standard_rate),
-        onsite_rate: currencyAmountFromCents(a.onsite_rate),
+        early_bird_rate: formatRateFromCents(a.early_bird_rate),
+        standard_rate: formatRateFromCents(a.standard_rate),
+        onsite_rate: formatRateFromCents(a.onsite_rate),
         default_quantity: a.default_quantity,
         is_archived: a.is_archived,
         images: a.images
@@ -113,9 +110,9 @@ const sponsorCustomizedFormItemsListReducer = (
 
       const currentItem = {
         ...item,
-        early_bird_rate: amountFromCents(item.early_bird_rate),
-        standard_rate: amountFromCents(item.standard_rate),
-        onsite_rate: amountFromCents(item.onsite_rate),
+        early_bird_rate: rateFromCents(item.early_bird_rate),
+        standard_rate: rateFromCents(item.standard_rate),
+        onsite_rate: rateFromCents(item.onsite_rate),
         meta_fields: item.meta_fields.length > 0 ? item.meta_fields : []
       };
       return { ...state, currentItem };
@@ -152,11 +149,9 @@ const sponsorCustomizedFormItemsListReducer = (
               id: updatedItem.id,
               code: updatedItem.code,
               name: updatedItem.name,
-              early_bird_rate: currencyAmountFromCents(
-                updatedItem.early_bird_rate
-              ),
-              standard_rate: currencyAmountFromCents(updatedItem.standard_rate),
-              onsite_rate: currencyAmountFromCents(updatedItem.onsite_rate),
+              early_bird_rate: formatRateFromCents(updatedItem.early_bird_rate),
+              standard_rate: formatRateFromCents(updatedItem.standard_rate),
+              onsite_rate: formatRateFromCents(updatedItem.onsite_rate),
               default_quantity: updatedItem.default_quantity,
               is_archived: updatedItem.is_archived,
               images: updatedItem.images

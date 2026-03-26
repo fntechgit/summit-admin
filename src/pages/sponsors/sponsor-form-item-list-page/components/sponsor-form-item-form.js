@@ -15,7 +15,7 @@ import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import {
   addIssAfterDateFieldValidator,
-  decimalValidation,
+  nullableDecimalValidation,
   formMetafieldsValidation,
   positiveNumberValidation,
   requiredHTMLValidation,
@@ -25,7 +25,7 @@ import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-for
 import AdditionalInputList from "../../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import useScrollToError from "../../../../hooks/useScrollToError";
 import MuiFormikUpload from "../../../../components/mui/formik-inputs/mui-formik-upload";
-import MuiFormikPriceField from "../../../../components/mui/formik-inputs/mui-formik-pricefield";
+import ItemPriceTiers from "../../../../components/mui/formik-inputs/item-price-tiers";
 import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
 import MuiFormikQuantityField from "../../../../components/mui/formik-inputs/mui-formik-quantity-field";
 
@@ -40,9 +40,9 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
       code: requiredStringValidation(),
       name: requiredStringValidation(),
       description: requiredHTMLValidation(),
-      early_bird_rate: decimalValidation(),
-      standard_rate: decimalValidation(),
-      onsite_rate: decimalValidation(),
+      early_bird_rate: nullableDecimalValidation(),
+      standard_rate: nullableDecimalValidation(),
+      onsite_rate: nullableDecimalValidation(),
       default_quantity: positiveNumberValidation().required(
         T.translate("validation.required")
       ),
@@ -92,36 +92,7 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
                 options={{ zIndex: 9999999 }}
               />
             </Grid2>
-            <Grid2 size={4}>
-              <MuiFormikPriceField
-                name="early_bird_rate"
-                label={T.translate(
-                  "sponsor_form_item_list.edit_item.early_bird_rate"
-                )}
-                fullWidth
-                required
-              />
-            </Grid2>
-            <Grid2 size={4}>
-              <MuiFormikPriceField
-                name="standard_rate"
-                label={T.translate(
-                  "sponsor_form_item_list.edit_item.standard_rate"
-                )}
-                fullWidth
-                required
-              />
-            </Grid2>
-            <Grid2 size={4}>
-              <MuiFormikPriceField
-                name="onsite_rate"
-                label={T.translate(
-                  "sponsor_form_item_list.edit_item.onsite_rate"
-                )}
-                fullWidth
-                required
-              />
-            </Grid2>
+            <ItemPriceTiers />
             <Grid2 size={4}>
               <MuiFormikQuantityField
                 name="quantity_limit_per_show"

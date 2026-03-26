@@ -22,7 +22,6 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 
-import { amountToCents } from "openstack-uicore-foundation/lib/utils/money";
 import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
 import {
@@ -30,6 +29,7 @@ import {
   getAccessTokenSafely,
   normalizeSelectAllField
 } from "../utils/methods";
+import { rateToCents, RATE_FIELDS } from "../utils/rate-helpers";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -1369,19 +1369,18 @@ const normalizeManagedItem = (entity) => {
 };
 
 const normalizeRates = (entity, normalizedEntity) => {
-  const { early_bird_rate, standard_rate, onsite_rate } = entity;
-
-  if (early_bird_rate === "" || early_bird_rate === undefined)
-    delete normalizedEntity.early_bird_rate;
-  else normalizedEntity.early_bird_rate = amountToCents(early_bird_rate);
-
-  if (standard_rate === "" || standard_rate === undefined)
-    delete normalizedEntity.standard_rate;
-  else normalizedEntity.standard_rate = amountToCents(standard_rate);
-
-  if (onsite_rate === "" || onsite_rate === undefined)
-    delete normalizedEntity.onsite_rate;
-  else normalizedEntity.onsite_rate = amountToCents(onsite_rate);
+  if (RATE_FIELDS.EARLY_BIRD in entity)
+    normalizedEntity[RATE_FIELDS.EARLY_BIRD] = rateToCents(
+      entity[RATE_FIELDS.EARLY_BIRD]
+    );
+  if (RATE_FIELDS.STANDARD in entity)
+    normalizedEntity[RATE_FIELDS.STANDARD] = rateToCents(
+      entity[RATE_FIELDS.STANDARD]
+    );
+  if (RATE_FIELDS.ONSITE in entity)
+    normalizedEntity[RATE_FIELDS.ONSITE] = rateToCents(
+      entity[RATE_FIELDS.ONSITE]
+    );
 };
 
 export const deleteSponsorFormManagedItem =

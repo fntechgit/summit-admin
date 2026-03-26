@@ -11,8 +11,8 @@
  * limitations under the License.
  * */
 
-import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { formatRateFromCents, rateFromCents } from "../../utils/rate-helpers";
 import {
   RECEIVE_SPONSOR_FORM_ITEM,
   RECEIVE_SPONSOR_FORM_ITEMS,
@@ -37,9 +37,9 @@ const DEFAULT_STATE = {
     code: "",
     name: "",
     description: "",
-    early_bird_rate: "",
-    standard_rate: "",
-    onsite_rate: "",
+    early_bird_rate: 0,
+    standard_rate: 0,
+    onsite_rate: 0,
     quantity_limit_per_show: "",
     quantity_limit_per_sponsor: "",
     default_quantity: "",
@@ -79,9 +79,9 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
         id: a.id,
         code: a.code,
         name: a.name,
-        early_bird_rate: `$${amountFromCents(a.early_bird_rate)}`,
-        standard_rate: `$${amountFromCents(a.standard_rate)}`,
-        onsite_rate: `$${amountFromCents(a.onsite_rate)}`,
+        early_bird_rate: formatRateFromCents(a.early_bird_rate),
+        standard_rate: formatRateFromCents(a.standard_rate),
+        onsite_rate: formatRateFromCents(a.onsite_rate),
         default_quantity: a.default_quantity,
         is_archived: a.is_archived,
         images: a.images
@@ -100,9 +100,9 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
 
       const currentItem = {
         ...item,
-        early_bird_rate: amountFromCents(item.early_bird_rate),
-        standard_rate: amountFromCents(item.standard_rate),
-        onsite_rate: amountFromCents(item.onsite_rate),
+        early_bird_rate: rateFromCents(item.early_bird_rate),
+        standard_rate: rateFromCents(item.standard_rate),
+        onsite_rate: rateFromCents(item.onsite_rate),
         meta_fields: item.meta_fields.length > 0 ? item.meta_fields : []
       };
 

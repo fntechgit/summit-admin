@@ -137,7 +137,8 @@ const SponsorFormItemListPage = ({
       columnKey: "early_bird_rate",
       header: T.translate("sponsor_form_item_list.early_bird_rate"),
       sortable: true,
-      editable: true,
+      editable: (row) =>
+        row.early_bird_rate !== T.translate("price_tiers.not_available"),
       validation: {
         schema: rateCellValidation()
       }
@@ -146,7 +147,8 @@ const SponsorFormItemListPage = ({
       columnKey: "standard_rate",
       header: T.translate("sponsor_form_item_list.standard_rate"),
       sortable: true,
-      editable: true,
+      editable: (row) =>
+        row.standard_rate !== T.translate("price_tiers.not_available"),
       validation: {
         schema: rateCellValidation()
       }
@@ -155,7 +157,8 @@ const SponsorFormItemListPage = ({
       columnKey: "onsite_rate",
       header: T.translate("sponsor_form_item_list.onsite_rate"),
       sortable: true,
-      editable: true,
+      editable: (row) =>
+        row.onsite_rate !== T.translate("price_tiers.not_available"),
       validation: {
         schema: rateCellValidation()
       }

@@ -20,7 +20,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
-import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
+import { formatRateFromCents } from "../../../../../utils/rate-helpers";
 import SearchInput from "../../../../../components/mui/search-input";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -116,7 +116,7 @@ const SponsorFormItemFromInventoryPopup = ({
         "edit_sponsor.forms_tab.form_manage_items.early_bird_rate"
       ),
       sortable: false,
-      render: (row) => currencyAmountFromCents(row.early_bird_rate)
+      render: (row) => formatRateFromCents(row.early_bird_rate)
     },
     {
       columnKey: "standard_rate",
@@ -124,7 +124,7 @@ const SponsorFormItemFromInventoryPopup = ({
         "edit_sponsor.forms_tab.form_manage_items.standard_rate"
       ),
       sortable: false,
-      render: (row) => currencyAmountFromCents(row.standard_rate)
+      render: (row) => formatRateFromCents(row.standard_rate)
     },
     {
       columnKey: "onsite_rate",
@@ -132,7 +132,7 @@ const SponsorFormItemFromInventoryPopup = ({
         "edit_sponsor.forms_tab.form_manage_items.onsite_rate"
       ),
       sortable: false,
-      render: (row) => currencyAmountFromCents(row.onsite_rate)
+      render: (row) => formatRateFromCents(row.onsite_rate)
     },
     {
       columnKey: "default_quantity",

@@ -193,12 +193,15 @@ const MuiTableEditable = ({
     }
   };
 
+  const isEditable = (col, row) =>
+    typeof col.editable === "function" ? col.editable(row) : !!col.editable;
+
   // Handler for starting edit mode on a cell
-  const handleCellClick = (rowId, columnKey) => {
+  const handleCellClick = (row, columnKey) => {
     // Check if the column is editable
     const column = columns.find((col) => col.columnKey === columnKey);
-    if (column && column.editable) {
-      setEditingCell({ rowId, columnKey });
+    if (column && isEditable(column, row)) {
+      setEditingCell({ rowId: row.id, columnKey });
     }
   };
 
@@ -267,13 +270,13 @@ const MuiTableEditable = ({
                   {columns.map((col) => (
                     <TableCell
                       key={`${row.id}-${col.columnKey}`}
-                      onClick={() => handleCellClick(row.id, col.columnKey)}
+                      onClick={() => handleCellClick(row, col.columnKey)}
                       sx={getCellSx(row, {
-                        cursor: col.editable ? "pointer" : "default",
-                        padding: col.editable ? "8px 16px" : undefined // Ensure enough space for the edit icon
+                        cursor: isEditable(col, row) ? "pointer" : "default",
+                        padding: isEditable(col, row) ? "8px 16px" : undefined // Ensure enough space for the edit icon
                       })}
                     >
-                      {col.editable ? (
+                      {isEditable(col, row) ? (
                         <EditableCell
                           value={row[col.columnKey]}
                           isEditing={

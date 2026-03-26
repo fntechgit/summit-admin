@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { currencyAmountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import {
@@ -31,6 +30,7 @@ import {
   setSelectedAll,
   unSelectInventoryItem
 } from "../../../actions/inventory-item-actions";
+import { formatRateFromCents } from "../../../utils/rate-helpers";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
 const AddFormTemplateItemDialog = ({
@@ -129,7 +129,7 @@ const AddFormTemplateItemDialog = ({
         "inventory_items_list_modal.early_bid_rate_column_label"
       ),
       sortable: false,
-      render: (row) => currencyAmountFromCents(row.early_bird_rate)
+      render: (row) => formatRateFromCents(row.early_bird_rate)
     },
     {
       columnKey: "standard_rate",
@@ -137,7 +137,7 @@ const AddFormTemplateItemDialog = ({
         "inventory_items_list_modal.standard_rate_column_label"
       ),
       sortable: false,
-      render: (row) => currencyAmountFromCents(row.standard_rate)
+      render: (row) => formatRateFromCents(row.standard_rate)
     },
     {
       columnKey: "onsite_rate",
@@ -145,7 +145,7 @@ const AddFormTemplateItemDialog = ({
         "inventory_items_list_modal.onsite_rate_column_label"
       ),
       sortable: false,
-      render: (row) => currencyAmountFromCents(row.onsite_rate)
+      render: (row) => formatRateFromCents(row.onsite_rate)
     },
     {
       columnKey: "default_quantity",

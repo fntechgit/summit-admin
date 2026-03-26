@@ -68,7 +68,7 @@ const PageTemplatePopup = ({ pageTemplate, onClose, onSave, sponsorships, summit
       is: PAGE_MODULES_MEDIA_TYPES.FILE,
       then: (schema) =>
         schema
-          .min(BYTES_PER_MB, T.translate("validation.number_positive"))
+          .min(BYTES_PER_MB, T.translate("validation.non_negative"))
           .required(T.translate("validation.required"))
           .test(
             "mib-aligned",

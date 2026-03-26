@@ -91,7 +91,7 @@
     "file_required": "File is required",
     "string": "Must be a string.",
     "number": "Must be a number.",
-    "number_positive": "Must be a positive number.",
+    "non_negative": "Must be a non-negative number.",
     "integer": "Must be a integer",
     "one_option_required": "Must have one option",
     "two_decimals": "Max 2 decimal places",
@@ -106,6 +106,13 @@
     "time": "Wrong time format.",
     "wrong_format": "Wrong format.",
     "add_on_required": "Select at least one add-on"
+  },
+  "price_tiers": {
+    "early_bird_rate": "Early Bird Rate",
+    "standard_rate": "Standard Rate",
+    "onsite_rate": "Onsite Rate",
+    "available": "Available",
+    "not_available": "N/A"
   },
   "landing": {
     "os_summit_admin": "Show Admin",
