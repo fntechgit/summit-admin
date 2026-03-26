@@ -177,7 +177,25 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case RECEIVE_SPONSOR_MANAGED_PAGE:
+    case RECEIVE_SPONSOR_MANAGED_PAGE: {
+      const editPage = payload.response;
+
+      const currentEditPage = {
+        ...editPage,
+        modules: editPage.modules.map((m) => ({
+          ...m,
+          ...(m.upload_deadline
+            ? {
+                upload_deadline: epochToMomentTimeZone(
+                  m.upload_deadline,
+                  state.summitTZ || "UTC"
+                )
+              }
+            : {})
+        }))
+      };
+      return { ...state, currentEditPage };
+    }
     case RECEIVE_SPONSOR_CUSTOMIZED_PAGE: {
       const customizedPage = payload.response;
 

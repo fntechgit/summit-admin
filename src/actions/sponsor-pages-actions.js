@@ -23,7 +23,10 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
-import { getAccessTokenSafely } from "../utils/methods";
+import {
+  getAccessTokenSafely,
+  normalizeSelectAllField
+} from "../utils/methods";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import {
   DEFAULT_CURRENT_PAGE,
@@ -161,27 +164,23 @@ export const getSponsorManagedPages =
   };
 
 export const getSponsorManagedPage = (pageId) => async (dispatch, getState) => {
-  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummitState } = getState();
   const { currentSummit } = currentSummitState;
-  const {
-    entity: { id: sponsorId }
-  } = currentSponsorState;
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
 
   const params = {
-    // fields: "id,code,name,kind,modules_count,allowed_add_ons",
-    // expand: "modules",
-    access_token: accessToken
+    access_token: accessToken,
+    expand: "modules"
   };
 
   return getRequest(
     null,
     createAction(RECEIVE_SPONSOR_MANAGED_PAGE),
-    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages/${pageId}`,
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages/${pageId}`,
     snackbarErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -197,14 +196,14 @@ export const saveSponsorManagedPage =
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeSponsorManagedPage(entity);
-
     const params = {
       access_token: accessToken,
       fields: "id,code,name,kind,modules_count,allowed_add_ons"
     };
 
     if (entity.id) {
+      const normalizedEntity = normalizeSponsorManagedPageToCustomize(entity);
+
       return putRequest(
         null,
         createAction(SPONSOR_CUSTOMIZED_PAGE_UPDATED),
@@ -225,6 +224,8 @@ export const saveSponsorManagedPage =
           dispatch(stopLoading());
         });
     }
+
+    const normalizedEntity = normalizeSponsorManagedPage(entity);
 
     return postRequest(
       null,
@@ -290,6 +291,49 @@ const normalizeSponsorManagedPage = (entity) => {
     normalizedEntity.allowed_add_ons = entity.add_ons.map((a) => a.id);
     normalizedEntity.apply_to_all_add_ons = false;
   }
+
+  return normalizedEntity;
+};
+
+const normalizeSponsorManagedPageToCustomize = (entity) => {
+  const normalizedEntity = {
+    ...entity,
+    ...normalizeSelectAllField(
+      entity.allowed_add_ons,
+      "apply_to_all_types",
+      "allowed_add_ons"
+    )
+  };
+
+  normalizedEntity.modules = entity.modules.map((module) => {
+    const normalizedModule = { ...module };
+
+    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.upload_deadline) {
+      normalizedModule.upload_deadline = moment
+        .utc(module.upload_deadline)
+        .unix();
+    }
+
+    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.file_type_id) {
+      normalizedModule.file_type_id =
+        module.file_type_id?.value || module.file_type_id;
+    }
+
+    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT && module.file) {
+      normalizedModule.file = module.file[0] || null;
+    }
+
+    delete normalizedModule._tempId;
+
+    return normalizedModule;
+  });
+
+  delete normalizedEntity.page_ptr_id;
+  delete normalizedEntity.sponsorship_types;
+  delete normalizedEntity.summit_id;
+  delete normalizedEntity.template_id;
+  delete normalizedEntity.modules_count;
+  delete normalizedEntity.id;
 
   return normalizedEntity;
 };

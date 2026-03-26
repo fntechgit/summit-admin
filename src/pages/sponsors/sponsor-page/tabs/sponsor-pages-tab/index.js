@@ -274,13 +274,19 @@ const SponsorPagesTab = ({
   const handleSaveManagedPage = (entity) => {
     saveSponsorManagedPage(entity)
       .then(() => {
-        const { perPage, order, orderDir } = managedPages;
         getSponsorManagedPages(
           term,
           DEFAULT_CURRENT_PAGE,
-          perPage,
-          order,
-          orderDir
+          managedPages.perPage,
+          managedPages.order,
+          managedPages.orderDir
+        );
+        getSponsorCustomizedPages(
+          term,
+          DEFAULT_CURRENT_PAGE,
+          customizedPages.perPage,
+          customizedPages.order,
+          customizedPages.orderDir
         );
       })
       .finally(() => setOpenPopup(null));
