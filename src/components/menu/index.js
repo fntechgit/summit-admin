@@ -127,7 +127,7 @@ const getSummitItems = (summitId) => [
     name: "selection_plans",
     iconClass: "fa-bars",
     linkUrl: `summits/${summitId}/selection-plans`,
-    accessRoute: "general"
+    accessRoute: "selection_plans"
   },
   {
     name: "events",

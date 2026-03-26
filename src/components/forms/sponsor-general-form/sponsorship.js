@@ -19,10 +19,12 @@ import MuiTable from "../../mui/table/mui-table";
 import AddTierPopup from "./add-tier-popup";
 import ManageTierAddonsPopup from "./manage-tier-addons-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+import Member from "../../../models/member";
 
 const Sponsorship = ({
   sponsor,
   summitId,
+  member,
   onSponsorshipPaginate,
   onSponsorshipAdd,
   onSponsorshipDelete,
@@ -31,6 +33,8 @@ const Sponsorship = ({
   onSponsorshipAddonSave,
   onSponsorshipAddonRemove
 }) => {
+  const memberObj = new Member(member);
+  const canEditSponsors = memberObj.canEditSponsors();
   const [showAddTierPopup, setShowAddTierPopup] = useState(false);
   const [showManageTierAddonsPopup, setShowManageTierAddons] = useState(false);
   const [selectedSponsorshipId, setSelectedSponsorshipId] = useState(null);
@@ -107,8 +111,10 @@ const Sponsorship = ({
         row.add_ons.length > 0
           ? row.add_ons.map((a) => `${a.type} ${a.name}`).join(", ")
           : "None"
-    },
-    {
+    }
+  ];
+  if (canEditSponsors) {
+    columns.push({
       columnKey: "manage_addons",
       header: "",
       width: 170,
@@ -130,8 +136,8 @@ const Sponsorship = ({
         </Button>
       ),
       className: "dottedBorderLeft"
-    }
-  ];
+    });
+  }
 
   return (
     <>
@@ -152,14 +158,16 @@ const Sponsorship = ({
             >
               {T.translate("edit_sponsor.sponsorship")}
             </Typography>
-            <Button
-              variant="contained"
-              onClick={handleOpenAddTierPopup}
-              startIcon={<AddIcon />}
-              sx={{ height: "36px" }}
-            >
-              {T.translate("edit_sponsor.add_tier")}
-            </Button>
+            {canEditSponsors && (
+              <Button
+                variant="contained"
+                onClick={handleOpenAddTierPopup}
+                startIcon={<AddIcon />}
+                sx={{ height: "36px" }}
+              >
+                {T.translate("edit_sponsor.add_tier")}
+              </Button>
+            )}
           </Grid2>
         </Grid2>
       </Box>
@@ -193,6 +201,7 @@ const Sponsorship = ({
           orderField="order"
           perPage={perPage}
           currentPage={currentPage}
+          canDelete={() => canEditSponsors}
           onDelete={handleSponsorshipDelete}
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}

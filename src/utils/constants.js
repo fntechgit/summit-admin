@@ -304,3 +304,8 @@ export const SPONSOR_MANAGED_PAGE_ASSIGNMENT = {
   EXPLICIT: "Explicit",
   IMPLICIT: "Implicit"
 };
+
+export const ACCESS_ROUTES = {
+  ADMIN_SPONSORS: "admin-sponsors",
+  SPONSORS: "sponsors"
+};

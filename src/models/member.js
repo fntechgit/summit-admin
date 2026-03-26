@@ -135,6 +135,14 @@ class Member {
     }
     return false;
   }
+
+  canEditSponsor() {
+    for (const i in this._member.groups) {
+      if (access["sponsor-edit"].includes(this._member.groups[i].code))
+        return true;
+    }
+    return false;
+  }
 }
 
 export default Member;
