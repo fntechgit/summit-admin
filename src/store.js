@@ -172,12 +172,14 @@ import showPagesListReducer from "./reducers/sponsors/show-pages-list-reducer.js
 import sponsorPagePurchaseListReducer from "./reducers/sponsors/sponsor-page-purchase-list-reducer.js";
 import sponsorPagePagesListReducer from "./reducers/sponsors/sponsor-page-pages-list-reducer.js";
 import sponsorPageMUListReducer from "./reducers/sponsors/sponsor-page-mu-list-reducer.js";
+import dropboxSyncReducer from "./reducers/locations/dropbox-sync-reducer";
 
 // default: localStorage if web, AsyncStorage if react-native
 
 const config = {
   key: "root",
-  storage
+  storage,
+  blacklist: ["dropboxSyncState"]
 };
 
 const reducers = persistCombineReducers(config, {
@@ -338,7 +340,8 @@ const reducers = persistCombineReducers(config, {
   currentFormTemplateItemListState: formTemplateItemListReducer,
   sponsorSettingsState: sponsorSettingsReducer,
   pageTemplateListState: pageTemplateListReducer,
-  pageTemplateState: pageTemplateReducer
+  pageTemplateState: pageTemplateReducer,
+  dropboxSyncState: dropboxSyncReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
