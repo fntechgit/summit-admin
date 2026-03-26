@@ -43,6 +43,7 @@ const SponsorGeneralForm = ({
     <Sponsorship
       sponsor={sponsor}
       summitId={summit.id}
+      member={member}
       onSponsorshipPaginate={onSponsorshipPaginate}
       onSponsorshipAdd={onSponsorshipAdd}
       onSponsorshipDelete={onSponsorshipDelete}

@@ -253,3 +253,16 @@ lead-report-settings-edit:
   - super-admins
   - administrators
   - summit-front-end-administrators
+
+inventory:
+  - super-admins
+  - administrators
+
+selection_plans:
+  - super-admins
+  - administrators
+
+sponsor-edit:
+  - super-admins
+  - administrators
+  - summit-front-end-administrators
