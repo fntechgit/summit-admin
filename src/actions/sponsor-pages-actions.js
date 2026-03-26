@@ -300,7 +300,7 @@ const normalizeSponsorManagedPageToCustomize = (entity) => {
     ...entity,
     ...normalizeSelectAllField(
       entity.allowed_add_ons,
-      "apply_to_all_types",
+      "apply_to_all_add_ons",
       "allowed_add_ons"
     )
   };
