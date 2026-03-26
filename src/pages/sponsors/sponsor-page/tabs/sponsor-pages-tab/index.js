@@ -252,7 +252,8 @@ const SponsorPagesTab = ({
           DEFAULT_CURRENT_PAGE,
           perPage,
           order,
-          orderDir
+          orderDir,
+          hideArchived
         );
       })
       .finally(() => setOpenPopup(null));
@@ -267,7 +268,8 @@ const SponsorPagesTab = ({
           DEFAULT_CURRENT_PAGE,
           perPage,
           order,
-          orderDir
+          orderDir,
+          hideArchived
         );
       })
       .finally(() => setOpenPopup(null));
@@ -281,14 +283,16 @@ const SponsorPagesTab = ({
           DEFAULT_CURRENT_PAGE,
           managedPages.perPage,
           managedPages.order,
-          managedPages.orderDir
+          managedPages.orderDir,
+          hideArchived
         );
         getSponsorCustomizedPages(
           term,
           DEFAULT_CURRENT_PAGE,
           customizedPages.perPage,
           customizedPages.order,
-          customizedPages.orderDir
+          customizedPages.orderDir,
+          hideArchived
         );
       })
       .finally(() => setOpenPopup(null));
