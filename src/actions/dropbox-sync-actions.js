@@ -55,7 +55,15 @@ export const getSyncConfig = () => async (dispatch, getState) => {
       dispatch(stopLoading());
     })
     .catch(() => {
-      dispatch(createAction(RECEIVE_SYNC_CONFIG)({}));
+      dispatch(
+        createAction(RECEIVE_SYNC_CONFIG)({
+          response: {
+            summit_id: null,
+            dropbox_sync_enabled: false,
+            preflight_alert_email: null
+          }
+        })
+      );
     });
 };
 
