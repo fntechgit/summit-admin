@@ -173,7 +173,7 @@ const SponsorPagesTab = ({
   };
 
   const handleAddPage = () => {
-    setOpenPopup("pagePopup");
+    setOpenPopup("customizedPagePopup");
   };
 
   const handleArchiveCustomizedPage = (item) =>
@@ -215,7 +215,9 @@ const SponsorPagesTab = ({
   };
 
   const handleCustomizedEdit = (item) => {
-    getSponsorCustomizedPage(item.id).then(() => setOpenPopup("pagePopup"));
+    getSponsorCustomizedPage(item.id).then(() =>
+      setOpenPopup("customizedPagePopup")
+    );
   };
 
   const handleCustomizedDelete = (itemId) => {
@@ -486,10 +488,16 @@ const SponsorPagesTab = ({
         />
       )}
 
-      {(openPopup === "pagePopup" || openPopup === "managedPagePopup") && (
+      {(openPopup === "customizedPagePopup" ||
+        openPopup === "managedPagePopup") && (
         <PageTemplatePopup
+          title={
+            openPopup === "managedPagePopup"
+              ? T.translate("edit_sponsor.pages_tab.title_customize")
+              : undefined
+          }
           onSave={
-            openPopup === "pagePopup"
+            openPopup === "customizedPagePopup"
               ? handleSaveCustomizedPage
               : handleSaveManagedPage
           }
