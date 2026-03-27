@@ -40,35 +40,20 @@ const renderComponent = (initialValues, props = {}, onSubmit = jest.fn()) =>
 
 describe("ItemPriceTiers", () => {
   describe("all enabled", () => {
-    it("should render all 3 checkboxes as checked", () => {
-      renderComponent(ALL_ENABLED);
-      const checkboxes = screen.getAllByRole("checkbox");
-      expect(checkboxes).toHaveLength(3);
-      checkboxes.forEach((cb) => expect(cb).toBeChecked());
-    });
-
-    it("should show no disabled N/A text fields", () => {
-      renderComponent(ALL_ENABLED);
-      const naFields = screen
-        .queryAllByDisplayValue("price_tiers.not_available")
-        .filter((el) => el.disabled);
-      expect(naFields).toHaveLength(0);
-    });
-  });
-
-  describe("all disabled", () => {
     it("should render all 3 checkboxes as unchecked", () => {
-      renderComponent(ALL_DISABLED);
+      renderComponent(ALL_ENABLED);
       const checkboxes = screen.getAllByRole("checkbox");
       expect(checkboxes).toHaveLength(3);
       checkboxes.forEach((cb) => expect(cb).not.toBeChecked());
     });
+  });
 
-    it("should show 3 disabled N/A text fields", () => {
+  describe("all disabled", () => {
+    it("should render all 3 checkboxes as checked", () => {
       renderComponent(ALL_DISABLED);
-      const naFields = screen.getAllByDisplayValue("price_tiers.not_available");
-      expect(naFields).toHaveLength(3);
-      naFields.forEach((el) => expect(el).toBeDisabled());
+      const checkboxes = screen.getAllByRole("checkbox");
+      expect(checkboxes).toHaveLength(3);
+      checkboxes.forEach((cb) => expect(cb).toBeChecked());
     });
   });
 
@@ -78,52 +63,13 @@ describe("ItemPriceTiers", () => {
       const checkboxes = screen.getAllByRole("checkbox");
       const checked = checkboxes.filter((cb) => cb.checked);
       const unchecked = checkboxes.filter((cb) => !cb.checked);
-      expect(checked).toHaveLength(2);
-      expect(unchecked).toHaveLength(1);
-    });
-
-    it("should show 1 disabled N/A text field", () => {
-      renderComponent(MIXED);
-      const naFields = screen.getAllByDisplayValue("price_tiers.not_available");
-      expect(naFields).toHaveLength(1);
+      expect(checked).toHaveLength(1);
+      expect(unchecked).toHaveLength(2);
     });
   });
 
-  describe("toggle on", () => {
-    it("should enable a tier when its checkbox is clicked from unchecked", async () => {
-      renderComponent(ALL_DISABLED);
-      const checkboxes = screen.getAllByRole("checkbox");
-
-      await act(async () => {
-        await userEvent.click(checkboxes[0]);
-      });
-
-      expect(checkboxes[0]).toBeChecked();
-      const naFields = screen.queryAllByDisplayValue(
-        "price_tiers.not_available"
-      );
-      expect(naFields).toHaveLength(2);
-    });
-
-    it("should set the field value to 0 when toggled on", async () => {
-      const onSubmit = jest.fn();
-      renderComponent(ALL_DISABLED, {}, onSubmit);
-      const checkboxes = screen.getAllByRole("checkbox");
-
-      await act(async () => {
-        await userEvent.click(checkboxes[0]);
-        await userEvent.click(screen.getByText("submit"));
-      });
-
-      expect(onSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({ early_bird_rate: 0 }),
-        expect.anything()
-      );
-    });
-  });
-
-  describe("toggle off", () => {
-    it("should disable a tier when its checkbox is clicked from checked", async () => {
+  describe("marking as N/A", () => {
+    it("should check the checkbox when an active tier is clicked", async () => {
       renderComponent(ALL_ENABLED);
       const checkboxes = screen.getAllByRole("checkbox");
 
@@ -131,14 +77,10 @@ describe("ItemPriceTiers", () => {
         await userEvent.click(checkboxes[0]);
       });
 
-      expect(checkboxes[0]).not.toBeChecked();
-      const naFields = screen.queryAllByDisplayValue(
-        "price_tiers.not_available"
-      );
-      expect(naFields).toHaveLength(1);
+      expect(checkboxes[0]).toBeChecked();
     });
 
-    it("should set the field value to null when toggled off", async () => {
+    it("should set the field value to null when marked as N/A", async () => {
       const onSubmit = jest.fn();
       renderComponent(ALL_ENABLED, {}, onSubmit);
       const checkboxes = screen.getAllByRole("checkbox");
@@ -150,6 +92,35 @@ describe("ItemPriceTiers", () => {
 
       expect(onSubmit).toHaveBeenCalledWith(
         expect.objectContaining({ early_bird_rate: null }),
+        expect.anything()
+      );
+    });
+  });
+
+  describe("enabling", () => {
+    it("should uncheck the checkbox when an N/A tier is clicked", async () => {
+      renderComponent(ALL_DISABLED);
+      const checkboxes = screen.getAllByRole("checkbox");
+
+      await act(async () => {
+        await userEvent.click(checkboxes[0]);
+      });
+
+      expect(checkboxes[0]).not.toBeChecked();
+    });
+
+    it("should set the field value to 0 when enabled", async () => {
+      const onSubmit = jest.fn();
+      renderComponent(ALL_DISABLED, {}, onSubmit);
+      const checkboxes = screen.getAllByRole("checkbox");
+
+      await act(async () => {
+        await userEvent.click(checkboxes[0]);
+        await userEvent.click(screen.getByText("submit"));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ early_bird_rate: 0 }),
         expect.anything()
       );
     });
