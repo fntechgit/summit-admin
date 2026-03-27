@@ -11,21 +11,13 @@
  * limitations under the License.
  * */
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Button,
-  Grid2,
-  TextField,
-  Typography,
-  Badge,
-  Tooltip
-} from "@mui/material";
+import { Button, Grid2, Typography, Badge, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
-import _ from "lodash";
+import SearchInput from "../../components/mui/search-input";
 import {
   getLeadReportSettingsMeta,
   getSummitById,
@@ -39,7 +31,7 @@ import {
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
 import MuiTable from "../../components/mui/table/mui-table";
-import { DEBOUNCE_WAIT, DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import AddSponsorDialog from "./popup/add-sponsor-popup";
 
 const SponsorListPage = ({
@@ -57,7 +49,6 @@ const SponsorListPage = ({
   orderDir,
   addSponsorToSummit
 }) => {
-  const [searchTerm, setSearchTerm] = useState(term);
   const [showAddSponsorModal, setShowAddSponsorModal] = useState(false);
 
   useEffect(() => {
@@ -66,14 +57,9 @@ const SponsorListPage = ({
     }
   }, [currentSummit]);
 
-  const handleSearchDebounced = useCallback(
-    _.debounce((term) => {
-      getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
-    }, DEBOUNCE_WAIT),
-    [perPage, order, orderDir]
-  );
-
-  useEffect(() => handleSearchDebounced.cancel(), [handleSearchDebounced]);
+  const handleSearch = (value) => {
+    getSponsors(value, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+  };
 
   const handleEdit = (sponsor) => {
     history.push(`/app/summits/${currentSummit.id}/sponsors/${sponsor.id}`);
@@ -237,28 +223,13 @@ const SponsorListPage = ({
         >
           <Grid2 size={2} />
           <Grid2 size={6}>
-            <TextField
-              variant="outlined"
-              value={searchTerm}
+            <SearchInput
+              term={term}
+              onSearch={handleSearch}
+              debounced
               placeholder={T.translate(
                 "inventory_item_list.placeholders.search_inventory_items"
               )}
-              slotProps={{
-                input: {
-                  startAdornment: <SearchIcon sx={{ mr: 1 }} />
-                }
-              }}
-              onChange={(event) => {
-                const { value } = event.target;
-                setSearchTerm(value);
-                handleSearchDebounced(value);
-              }}
-              fullWidth
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  height: "36px"
-                }
-              }}
             />
           </Grid2>
           <Grid2 size={4}>

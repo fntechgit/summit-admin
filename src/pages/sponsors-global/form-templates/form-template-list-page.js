@@ -18,12 +18,10 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2,
-  TextField
+  Grid2
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -38,6 +36,7 @@ import {
   saveFormTemplate,
   unarchiveFormTemplate
 } from "../../../actions/form-template-actions";
+import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
 import FormTemplateDialog from "./form-template-popup";
 import history from "../../../history";
@@ -71,7 +70,6 @@ const FormTemplateListPage = ({
     formTemplateFromDuplicatePopupOpen,
     setFormTemplateFromDuplicatePopupOpen
   ] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     getFormTemplates(
@@ -104,20 +102,15 @@ const FormTemplateListPage = ({
     getFormTemplates(term, currentPage, perPage, key, dir, hideArchived);
   };
 
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getFormTemplates(
-        searchTerm,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        hideArchived
-      );
-    }
-    // search on duplicate popup
-    if (typeof ev === "string")
-      getFormTemplates(ev, currentPage, perPage, order, orderDir, hideArchived);
+  const handleSearch = (value) => {
+    getFormTemplates(
+      value,
+      currentPage,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
   };
 
   const handleRowEdit = (row) => {
@@ -266,24 +259,12 @@ const FormTemplateListPage = ({
             />
           </FormGroup>
 
-          <TextField
-            variant="outlined"
-            value={searchTerm}
+          <SearchInput
+            term={term}
+            onSearch={handleSearch}
             placeholder={T.translate(
               "inventory_item_list.placeholders.search_inventory_items"
             )}
-            slotProps={{
-              input: {
-                startAdornment: <SearchIcon sx={{ mr: 1 }} />
-              }
-            }}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={handleSearch}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                height: "36px"
-              }
-            }}
           />
           <Button
             variant="contained"

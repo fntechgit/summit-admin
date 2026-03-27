@@ -20,12 +20,10 @@ import {
   FormGroup,
   Grid2,
   Popover,
-  TextField,
   Typography
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import ImageIcon from "@mui/icons-material/Image";
 import { connect } from "react-redux";
@@ -42,6 +40,7 @@ import {
   saveInventoryItem,
   unarchiveInventoryItem
 } from "../../../actions/inventory-item-actions";
+import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
 import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
@@ -178,7 +177,6 @@ const InventoryListPage = ({
   resetInventoryItemForm
 }) => {
   const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const handleClose = () => {
     resetInventoryItemForm();
@@ -215,17 +213,15 @@ const InventoryListPage = ({
     getInventoryItems(term, currentPage, perPage, key, dir, hideArchived);
   };
 
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getInventoryItems(
-        searchTerm,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir,
-        hideArchived
-      );
-    }
+  const handleSearch = (value) => {
+    getInventoryItems(
+      value,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
+    );
   };
 
   const handleHideArchivedForms = (ev) => {
@@ -356,24 +352,12 @@ const InventoryListPage = ({
               label={T.translate("inventory_item_list.hide_archived")}
             />
           </FormGroup>
-          <TextField
-            variant="outlined"
-            value={searchTerm}
+          <SearchInput
+            term={term}
+            onSearch={handleSearch}
             placeholder={T.translate(
               "inventory_item_list.placeholders.search_inventory_items"
             )}
-            slotProps={{
-              input: {
-                startAdornment: <SearchIcon sx={{ mr: 1 }} />
-              }
-            }}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={handleSearch}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                height: "36px"
-              }
-            }}
           />
           <Button
             variant="contained"

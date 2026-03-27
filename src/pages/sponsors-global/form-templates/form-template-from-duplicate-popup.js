@@ -13,12 +13,11 @@ import {
   FormControlLabel,
   Grid2,
   IconButton,
-  TextField,
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
-import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
 import MenuButton from "../../../components/mui/menu-button";
 
@@ -36,7 +35,6 @@ const FormTemplateFromDuplicateDialog = ({
   onPageChange,
   onPerPageChange
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
 
   const handleSort = (key, dir) => {
@@ -55,10 +53,6 @@ const FormTemplateFromDuplicateDialog = ({
 
   const handleOnDuplicate = () => {
     onDuplicate(selectedRow);
-  };
-
-  const handleOnSearch = (ev) => {
-    if (ev.key === "Enter") onSearch(searchTerm);
   };
 
   const columns = [
@@ -134,25 +128,11 @@ const FormTemplateFromDuplicateDialog = ({
               </MenuButton>
             </Grid2>
             <Grid2 size={8}>
-              <TextField
-                variant="outlined"
-                value={searchTerm}
+              <SearchInput
+                onSearch={onSearch}
                 placeholder={T.translate(
                   "inventory_item_list.placeholders.search_inventory_items"
                 )}
-                slotProps={{
-                  input: {
-                    startAdornment: <SearchIcon sx={{ mr: 1 }} />
-                  }
-                }}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                onKeyDown={handleOnSearch}
-                fullWidth
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    height: "36px"
-                  }
-                }}
               />
             </Grid2>
           </Grid2>

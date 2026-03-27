@@ -14,10 +14,10 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, TextField } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
+import SearchInput from "../../../components/mui/search-input";
 import MuiTable from "../../../components/mui/table/mui-table";
 import {
   getBadgeScans,
@@ -47,20 +47,17 @@ const SponsorBadgeScans = ({
     if (sponsor?.id) getBadgeScans(sponsor.id);
   }, [sponsor]);
 
-  const [searchTerm, setSearchTerm] = useState(term);
   const [showEditBadgeScanPopup, setShowEditBadgeScanPopup] = useState(false);
 
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getBadgeScans(
-        sponsor.id,
-        searchTerm,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      );
-    }
+  const handleSearch = (value) => {
+    getBadgeScans(
+      sponsor.id,
+      value,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const handlePageChange = (page) => {
@@ -155,25 +152,12 @@ const SponsorBadgeScans = ({
           </Box>
         </Grid2>
         <Grid2 size={9} justifyContent="flex-end" gap={1} container>
-          <TextField
-            variant="outlined"
-            value={searchTerm}
+          <SearchInput
+            term={term}
+            onSearch={handleSearch}
             placeholder={T.translate(
               "inventory_item_list.placeholders.search_inventory_items"
             )}
-            slotProps={{
-              input: {
-                endAdornment: <SearchIcon sx={{ ml: 1 }} />
-              }
-            }}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={handleSearch}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                height: "36px"
-              },
-              backgroundColor: "white"
-            }}
           />
           <Button
             variant="contained"

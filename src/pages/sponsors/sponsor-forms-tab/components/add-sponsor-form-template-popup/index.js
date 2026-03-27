@@ -14,13 +14,12 @@ import {
   FormControlLabel,
   Grid2,
   IconButton,
-  TextField,
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
-import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
+import SearchInput from "../../../../../components/mui/search-input";
 import MuiTable from "../../../../../components/mui/table/mui-table";
 import MenuButton from "../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../actions/sponsor-actions";
@@ -42,7 +41,6 @@ const AddSponsorFormTemplatePopup = ({
   sponsor,
   summitId
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedForms, setSelectedForms] = useState([]);
 
   const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
@@ -100,17 +98,16 @@ const AddSponsorFormTemplatePopup = ({
     );
   };
 
-  const handleOnSearch = (ev) => {
-    if (ev.key === "Enter")
-      getSponsorForms(
-        searchTerm,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        false,
-        sponsorshipTypeIds
-      );
+  const handleOnSearch = (value) => {
+    getSponsorForms(
+      value,
+      currentPage,
+      perPage,
+      order,
+      orderDir,
+      false,
+      sponsorshipTypeIds
+    );
   };
 
   const handleSelected = (id, isSelected) => {
@@ -230,25 +227,11 @@ const AddSponsorFormTemplatePopup = ({
                   </MenuButton>
                 </Grid2>
                 <Grid2 size={8}>
-                  <TextField
-                    variant="outlined"
-                    value={searchTerm}
+                  <SearchInput
+                    onSearch={handleOnSearch}
                     placeholder={T.translate(
                       "edit_sponsor.placeholders.search"
                     )}
-                    slotProps={{
-                      input: {
-                        startAdornment: <SearchIcon sx={{ mr: 1 }} />
-                      }
-                    }}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                    onKeyDown={handleOnSearch}
-                    fullWidth
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        height: "36px"
-                      }
-                    }}
                   />
                 </Grid2>
               </Grid2>
