@@ -5,7 +5,13 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { useField } from "formik";
 
-const MuiFormikDatepicker = ({ name, label, required, ...props }) => {
+const MuiFormikDatepicker = ({
+  name,
+  label,
+  required,
+  disabled = false,
+  ...props
+}) => {
   const [field, meta, helpers] = useField(name);
   const requiredLabel = `${label} *`;
   const handleBlur = () => {
@@ -25,7 +31,8 @@ const MuiFormikDatepicker = ({ name, label, required, ...props }) => {
             onBlur: handleBlur,
             error: meta.touched && Boolean(meta.error),
             helperText: meta.touched && meta.error,
-            fullWidth: true
+            fullWidth: true,
+            disabled
           },
           day: {
             sx: {
@@ -52,7 +59,8 @@ const MuiFormikDatepicker = ({ name, label, required, ...props }) => {
 MuiFormikDatepicker.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string,
-  required: PropTypes.bool
+  required: PropTypes.bool,
+  disabled: PropTypes.bool
 };
 
 export default MuiFormikDatepicker;

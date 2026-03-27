@@ -19,18 +19,7 @@ import FormItemTable from "../index";
 import ItemTableField from "../components/ItemTableField";
 /* eslint-enable import/first */
 
-const EARLY_BIRD_DATE = 1751035704;
-const STANDARD_DATE = 1851035704;
-const ONSITE_DATE = 1951035704;
-const MOCK_TIME_BEFORE_EARLY_BIRD = 1650000000000;
-const MILLISECONDS_MULTIPLIER = 1000;
-const TIME_OFFSET = 100;
 const TWO_ITEMS = 4;
-const MOCK_RATE_DATES = {
-  early_bird_end_date: EARLY_BIRD_DATE,
-  standard_price_end_date: STANDARD_DATE,
-  onsite_end_date: ONSITE_DATE
-};
 
 // Mock form data
 const MOCK_FORM_A = {
@@ -135,6 +124,34 @@ const MOCK_FORM_A = {
   ]
 };
 
+const MOCK_ITEMS_WITH_NULL_RATES = [
+  {
+    form_item_id: 5,
+    code: "ITEM-NA",
+    name: "Item With N/A Rates",
+    rates: {
+      early_bird: null,
+      standard: null,
+      onsite: null
+    },
+    meta_fields: []
+  }
+];
+
+const MOCK_ITEMS_WITH_MIXED_RATES = [
+  {
+    form_item_id: 6,
+    code: "ITEM-PARTIAL",
+    name: "Item Partial Rates",
+    rates: {
+      early_bird: 10000,
+      standard: null,
+      onsite: null
+    },
+    meta_fields: []
+  }
+];
+
 jest.mock("../../formik-inputs/mui-formik-textfield", () => {
   const { useField } = require("formik");
   return {
@@ -188,7 +205,7 @@ jest.mock("../../formik-inputs/mui-formik-datepicker", () => ({
 
 jest.mock("../../formik-inputs/mui-formik-select", () => ({
   __esModule: true,
-  default: ({ name, label, options }) => (
+  default: ({ name, label, options, children }) => (
     <select data-testid={`select-${name}`} name={name}>
       <option value="">{label}</option>
       {options &&
@@ -197,6 +214,7 @@ jest.mock("../../formik-inputs/mui-formik-select", () => ({
             {opt.label}
           </option>
         ))}
+      {children}
     </select>
   )
 }));
@@ -247,12 +265,56 @@ jest.mock("../../formik-inputs/mui-formik-dropdown-radio", () => ({
   )
 }));
 
+jest.mock("../../formik-inputs/mui-formik-pricefield", () => {
+  const { useField } = require("formik");
+  return {
+    __esModule: true,
+    default: ({ name, label, ...props }) => {
+      const [field] = useField(name);
+      return (
+        <input
+          data-testid={`pricefield-${name}`}
+          name={name}
+          type="number"
+          placeholder={label}
+          value={field.value || ""}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          {...props} // eslint-disable-line react/jsx-props-no-spreading
+        />
+      );
+    }
+  };
+});
+
+jest.mock("../../formik-inputs/mui-formik-discountfield", () => {
+  const { useField } = require("formik");
+  return {
+    __esModule: true,
+    default: ({ name, label, discountType, ...props }) => {
+      const [field] = useField(name);
+      return (
+        <input
+          data-testid={`discountfield-${name}`}
+          name={name}
+          type="number"
+          placeholder={label}
+          value={field.value || ""}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          {...props} // eslint-disable-line react/jsx-props-no-spreading
+        />
+      );
+    }
+  };
+});
+
 // ---- Helpers ----
 
 // Wrapper component with Formik
 const FormItemTableWrapper = ({
   data,
-  rateDates,
+  currentApplicableRate,
   timeZone,
   initialValues,
   onNotesClick,
@@ -273,7 +335,7 @@ const FormItemTableWrapper = ({
     <FormikProvider value={formik}>
       <FormItemTable
         data={data}
-        rateDates={rateDates}
+        currentApplicableRate={currentApplicableRate}
         timeZone={timeZone}
         values={formik.values}
         onNotesClick={onNotesClick}
@@ -285,7 +347,7 @@ const FormItemTableWrapper = ({
 
 FormItemTableWrapper.propTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  rateDates: PropTypes.shape({}).isRequired,
+  currentApplicableRate: PropTypes.string,
   timeZone: PropTypes.string.isRequired,
   initialValues: PropTypes.shape({}),
   onNotesClick: PropTypes.func.isRequired,
@@ -293,6 +355,7 @@ FormItemTableWrapper.propTypes = {
 };
 
 FormItemTableWrapper.defaultProps = {
+  currentApplicableRate: "early_bird",
   initialValues: {}
 };
 
@@ -303,9 +366,6 @@ describe("FormItemTable Component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest
-      .spyOn(Date, "now")
-      .mockImplementation(() => MOCK_TIME_BEFORE_EARLY_BIRD);
   });
 
   afterEach(() => {
@@ -318,7 +378,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -355,7 +415,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -372,7 +432,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -388,7 +448,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -407,7 +467,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -420,12 +480,73 @@ describe("FormItemTable Component", () => {
     });
   });
 
+  describe("N/A Rates", () => {
+    it("displays N/A for items with null rates", () => {
+      render(
+        <FormItemTableWrapper
+          data={MOCK_ITEMS_WITH_NULL_RATES}
+          currentApplicableRate="early_bird"
+          timeZone="America/New_York"
+          onNotesClick={mockOnNotesClick}
+          onSettingsClick={mockOnSettingsClick}
+        />
+      );
+
+      expect(screen.getAllByText("general.n_a").length).toBeGreaterThan(0);
+    });
+
+    it("displays N/A for null rates and dollar amounts for non-null rates on the same item", () => {
+      render(
+        <FormItemTableWrapper
+          data={MOCK_ITEMS_WITH_MIXED_RATES}
+          currentApplicableRate="early_bird"
+          timeZone="America/New_York"
+          onNotesClick={mockOnNotesClick}
+          onSettingsClick={mockOnSettingsClick}
+        />
+      );
+
+      expect(screen.getByText("$100.00")).toBeInTheDocument();
+      expect(screen.getAllByText("general.n_a").length).toBe(2);
+    });
+
+    it("shows $0.00 total for items with null applicable rate", () => {
+      render(
+        <FormItemTableWrapper
+          data={MOCK_ITEMS_WITH_NULL_RATES}
+          currentApplicableRate="early_bird"
+          initialValues={{ "i-5-c-global-f-quantity": 3 }}
+          timeZone="America/New_York"
+          onNotesClick={mockOnNotesClick}
+          onSettingsClick={mockOnSettingsClick}
+        />
+      );
+
+      // Row total and grand total should both be $0.00 when rate is null
+      expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
+    });
+
+    it("renders item with N/A rates without crashing", () => {
+      expect(() => {
+        render(
+          <FormItemTableWrapper
+            data={MOCK_ITEMS_WITH_NULL_RATES}
+            currentApplicableRate="standard"
+            timeZone="America/New_York"
+            onNotesClick={mockOnNotesClick}
+            onSettingsClick={mockOnSettingsClick}
+          />
+        );
+      }).not.toThrow();
+    });
+  });
+
   describe("ITEM Class Fields", () => {
     it("shows warning icon for items with ITEM class fields", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -441,7 +562,7 @@ describe("FormItemTable Component", () => {
       const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -458,7 +579,7 @@ describe("FormItemTable Component", () => {
       const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -480,7 +601,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -497,7 +618,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -513,7 +634,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -551,7 +672,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           initialValues={initialValues}
           onNotesClick={mockOnNotesClick}
@@ -590,7 +711,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={itemsWithoutQuantityFields}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           initialValues={{ "i-10-c-global-f-quantity": 0 }}
           onNotesClick={mockOnNotesClick}
@@ -606,6 +727,8 @@ describe("FormItemTable Component", () => {
 
   describe("Total Calculation", () => {
     it("calculates item total correctly based on quantity and rate", () => {
+      // qty item1 = 2*4 = 8, standard rate = 18800 → 8 * 18800 = 150400 → $1504.00
+      // qty item2 = 1*2 = 2, standard rate = 18800 → 2 * 18800 =  37600 → $376.00
       const initialValues = {
         "i-1-c-Form-f-1": 2,
         "i-1-c-Form-f-2": 4,
@@ -616,7 +739,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="standard"
           timeZone="America/New_York"
           initialValues={initialValues}
           onNotesClick={mockOnNotesClick}
@@ -632,6 +755,7 @@ describe("FormItemTable Component", () => {
     });
 
     it("calculates total amount for all items", () => {
+      // $1504.00 + $376.00 = $1880.00
       const initialValues = {
         "i-1-c-Form-f-1": 2,
         "i-1-c-Form-f-2": 4,
@@ -642,7 +766,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="standard"
           timeZone="America/New_York"
           initialValues={initialValues}
           onNotesClick={mockOnNotesClick}
@@ -659,7 +783,7 @@ describe("FormItemTable Component", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           initialValues={{}}
           onNotesClick={mockOnNotesClick}
@@ -674,15 +798,11 @@ describe("FormItemTable Component", () => {
   });
 
   describe("Rate Highlighting", () => {
-    it("highlights early_bird rate when current time is before early_bird_rate", () => {
-      jest
-        .spyOn(Date, "now")
-        .mockImplementation(() => MOCK_TIME_BEFORE_EARLY_BIRD);
-
+    it("highlights early_bird rate when currentApplicableRate is early_bird", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -692,19 +812,11 @@ describe("FormItemTable Component", () => {
       expect(screen.getAllByText("$150.00").length).toBeGreaterThan(0);
     });
 
-    it("highlights standard rate when current time is between early_bird and standard", () => {
-      jest
-        .spyOn(Date, "now")
-        .mockImplementation(
-          () =>
-            (MOCK_RATE_DATES.early_bird_rate + TIME_OFFSET) *
-            MILLISECONDS_MULTIPLIER
-        );
-
+    it("highlights standard rate when currentApplicableRate is standard", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="standard"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -714,19 +826,11 @@ describe("FormItemTable Component", () => {
       expect(screen.getAllByText("$188.00").length).toBeGreaterThan(0);
     });
 
-    it("highlights onsite rate when current time is after standard_rate", () => {
-      jest
-        .spyOn(Date, "now")
-        .mockImplementation(
-          () =>
-            (MOCK_RATE_DATES.standard_rate + TIME_OFFSET) *
-            MILLISECONDS_MULTIPLIER
-        );
-
+    it("highlights onsite rate when currentApplicableRate is onsite", () => {
       render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="onsite"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -742,7 +846,7 @@ describe("FormItemTable Component", () => {
       const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -759,7 +863,7 @@ describe("FormItemTable Component", () => {
       const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}
@@ -779,7 +883,7 @@ describe("FormItemTable Component", () => {
       const { container } = render(
         <FormItemTableWrapper
           data={MOCK_FORM_A.items}
-          rateDates={MOCK_RATE_DATES}
+          currentApplicableRate="early_bird"
           timeZone="America/New_York"
           onNotesClick={mockOnNotesClick}
           onSettingsClick={mockOnSettingsClick}

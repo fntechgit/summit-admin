@@ -175,6 +175,7 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
     }
     case RECEIVE_CART_FORM: {
       const cartForm = payload.response;
+
       return {
         ...state,
         cartForm: {

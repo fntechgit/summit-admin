@@ -205,6 +205,7 @@ const CartView = ({
               variant="contained"
               color="primary"
               style={{ minWidth: 250 }}
+              disabled={cart?.net_amount === 0}
               onClick={handlePayCreditCard}
             >
               {T.translate("edit_sponsor.cart_tab.pay_cc")}

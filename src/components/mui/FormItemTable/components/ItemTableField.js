@@ -21,17 +21,23 @@ import MuiFormikTimepicker from "../../formik-inputs/mui-formik-timepicker";
 import MuiFormikTextField from "../../formik-inputs/mui-formik-textfield";
 import MuiFormikSelect from "../../formik-inputs/mui-formik-select";
 
-const ItemTableField = ({ rowId, field, timeZone, label = "" }) => {
+const ItemTableField = ({
+  rowId,
+  field,
+  timeZone,
+  label = "",
+  disabled = false
+}) => {
   const name = `i-${rowId}-c-${field.class_field}-f-${field.type_id}`;
+  const commonProps = { name, label, disabled };
 
   switch (field.type) {
     case "CheckBox":
-      return <MuiFormikCheckbox name={name} label={label} />;
+      return <MuiFormikCheckbox {...commonProps} />;
     case "CheckBoxList":
       return (
         <MuiFormikDropdownCheckbox
-          name={name}
-          label={label}
+          {...commonProps}
           size="small"
           options={field.values.map((v) => ({ value: v.id, label: v.value }))}
         />
@@ -39,24 +45,20 @@ const ItemTableField = ({ rowId, field, timeZone, label = "" }) => {
     case "RadioButtonList":
       return (
         <MuiFormikDropdownRadio
-          name={name}
-          label={label}
+          {...commonProps}
           size="small"
           options={field.values.map((v) => ({ value: v.id, label: v.value }))}
         />
       );
     case "DateTime":
-      return <MuiFormikDatepicker name={name} label={label} />;
+      return <MuiFormikDatepicker {...commonProps} />;
     case "Time":
-      return (
-        <MuiFormikTimepicker name={name} timeZone={timeZone} label={label} />
-      );
+      return <MuiFormikTimepicker {...commonProps} timeZone={timeZone} />;
     case "Quantity":
       return (
         <MuiFormikTextField
-          name={name}
+          {...commonProps}
           fullWidth
-          label={label}
           size="small"
           type="number"
           slotProps={{
@@ -71,7 +73,7 @@ const ItemTableField = ({ rowId, field, timeZone, label = "" }) => {
       );
     case "ComboBox":
       return (
-        <MuiFormikSelect name={name} label={label} size="small">
+        <MuiFormikSelect {...commonProps} size="small">
           {field.values.map((v) => (
             <MenuItem key={`ddopt-${v.id}`} value={v.id}>
               {v.value}
@@ -80,14 +82,11 @@ const ItemTableField = ({ rowId, field, timeZone, label = "" }) => {
         </MuiFormikSelect>
       );
     case "Text":
-      return (
-        <MuiFormikTextField name={name} label={label} fullWidth size="small" />
-      );
+      return <MuiFormikTextField {...commonProps} fullWidth size="small" />;
     case "TextArea":
       return (
         <MuiFormikTextField
-          name={name}
-          label={label}
+          {...commonProps}
           fullWidth
           size="small"
           multiline

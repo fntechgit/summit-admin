@@ -15,7 +15,12 @@ import React, { useEffect } from "react";
 import { useField } from "formik";
 import MuiFormikTextField from "../../formik-inputs/mui-formik-textfield";
 
-const GlobalQuantityField = ({ row, extraColumns, value }) => {
+const GlobalQuantityField = ({
+  row,
+  extraColumns,
+  value,
+  disabled = false
+}) => {
   const name = `i-${row.form_item_id}-c-global-f-quantity`;
   // eslint-disable-next-line
   const [field, meta, helpers] = useField(name);
@@ -35,6 +40,7 @@ const GlobalQuantityField = ({ row, extraColumns, value }) => {
       fullWidth
       size="small"
       type="number"
+      disabled={disabled}
       slotProps={{
         htmlInput: {
           readOnly: isReadOnly,

@@ -25,6 +25,7 @@ const MuiFormikDiscountField = ({
   label,
   discountType,
   inCents = false,
+  disabled = false,
   ...props
 }) => {
   // eslint-disable-next-line no-unused-vars
@@ -84,6 +85,7 @@ const MuiFormikDiscountField = ({
       value={getDisplayValue()}
       onChange={handleChange}
       type="number"
+      disabled={disabled}
       slotProps={{
         input: {
           ...adornment
