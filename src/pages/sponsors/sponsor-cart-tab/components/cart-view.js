@@ -83,6 +83,11 @@ const CartView = ({
     console.log("PAY INVOICE");
   };
 
+  const cartData = cart?.forms.map((form) => ({
+    ...form,
+    discount: form.discount === "0%" ? "" : form.discount
+  }));
+
   const tableColumns = [
     {
       columnKey: "code",
@@ -95,6 +100,10 @@ const CartView = ({
     {
       columnKey: "addon_name",
       header: T.translate("edit_sponsor.cart_tab.add_ons")
+    },
+    {
+      columnKey: "item_count",
+      header: T.translate("edit_sponsor.cart_tab.items")
     },
     {
       columnKey: "manage_items",
@@ -180,7 +189,7 @@ const CartView = ({
         <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
           <MuiTable
             columns={tableColumns}
-            data={cart?.forms}
+            data={cartData}
             options={{}}
             onEdit={onEdit}
             onDelete={handleDelete}
