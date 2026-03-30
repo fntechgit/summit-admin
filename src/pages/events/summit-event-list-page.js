@@ -69,7 +69,12 @@ import {
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
 
-const fieldNames = (allSelectionPlans, allTracks, event_types) => [
+const fieldNames = (
+  allSelectionPlans,
+  allTracks,
+  event_types,
+  currentSummitId
+) => [
   {
     columnKey: "speakers",
     value: "speakers",
@@ -263,9 +268,11 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
                 className="text-link-button"
                 onClick={(ev) => {
                   ev.preventDefault();
-                  if (!row?.id) return false;
+                  const summitId =
+                    m?.summit_id || row?.summit_id || currentSummitId;
+                  if (!row?.id || !summitId) return false;
                   window.open(
-                    `/app/summits/${m.summit_id}/events/${row.id}/materials/${m.id}`,
+                    `/app/summits/${summitId}/events/${row.id}/materials/${m.id}`,
                     "_blank"
                   );
                   return false;
@@ -1238,7 +1245,8 @@ class SummitEventListPage extends React.Component {
     const showColumns = fieldNames(
       currentSummit.selection_plans,
       currentSummit.tracks,
-      currentSummit.event_types
+      currentSummit.event_types,
+      currentSummit.id
     )
       .filter(
         (f) =>
