@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
 import { useField } from "formik";
 import MuiFormikTextField from "./mui-formik-textfield";
-import { ONE_HUNDRED } from "../../../utils/constants";
+import { DECIMAL_DIGITS, ONE_HUNDRED } from "../../../utils/constants";
 
 const BLOCKED_KEYS = ["e", "E", "+", "-"];
 
@@ -25,7 +25,11 @@ const MuiFormikPriceField = ({
     if (field.value == null || field.value === 0) {
       return field.value === 0 ? 0 : "";
     }
-    return inCents ? field.value / ONE_HUNDRED : field.value;
+    const raw = inCents ? field.value / ONE_HUNDRED : field.value;
+    const str = String(Number(raw.toFixed(DECIMAL_DIGITS)));
+    const dotIdx = str.indexOf(".");
+    if (dotIdx !== -1 && str.length - dotIdx - 1 === 1) return `${str}0`;
+    return str;
   };
 
   const handleChange = (e) => {
@@ -39,7 +43,9 @@ const MuiFormikPriceField = ({
 
     setCleared(false);
     const numericValue = Number(newVal);
-    const newPrice = inCents ? numericValue * ONE_HUNDRED : numericValue;
+    const newPrice = inCents
+      ? Math.round(numericValue * ONE_HUNDRED)
+      : numericValue;
 
     helpers.setValue(newPrice);
   };
