@@ -19,11 +19,6 @@ const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
     onClose();
   };
 
-  const handleDismiss = () => {
-    if (isSaving) return;
-    onClose();
-  };
-
   const handleOnSelectTemplates = (templates) => {
     setSelectedTemplates(templates);
     setStage("sponsorships");
@@ -51,7 +46,7 @@ const GlobalTemplatePopup = ({ open, onClose, cloneGlobalTemplate }) => {
   return (
     <Dialog
       open={open}
-      onClose={handleDismiss}
+      onClose={handleClose}
       maxWidth={dialogSize}
       fullWidth
       disableEscapeKeyDown={isSaving}

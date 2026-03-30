@@ -53,15 +53,6 @@ const AddSponsorFormTemplatePopup = ({
     initialValues: {
       add_ons: []
     },
-    validationSchema: yup.object({
-      add_ons: yup
-        .array()
-        .test(
-          "add_ons-required",
-          T.translate("validation.add_on_required"),
-          (value) => value?.includes("all") || value?.length > 0
-        )
-    }),
     onSubmit: async (values) => {
       const { add_ons } = values;
       const entity = {

@@ -102,9 +102,10 @@ describe("GlobalTemplatePopup", () => {
     });
 
     expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText("sponsorships-step")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "go-sponsorships" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: "go-sponsorships" })
+    ).toBeInTheDocument();
   });
 
   it("prevents duplicate clone requests while saving", async () => {
