@@ -305,7 +305,6 @@ const EditSponsorPage = (props) => {
         )}
         {memberObj.hasAccess(ACCESS_ROUTES.ADMIN_SPONSORS) && (
           <CustomTabPanel value={selectedTab} index={4}>
-            {console.log("HEREEEEE", isNestedFormItemRoute)}
             {isNestedFormItemRoute ? (
               <SponsorFormsManageItems match={match} />
             ) : (
