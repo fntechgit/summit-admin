@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2018 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import {
   getRequest,
@@ -30,7 +30,7 @@ export const RECEIVE_EXPORT_REPORT = "RECEIVE_EXPORT_REPORT";
 export const RESET_EXPORT_REPORT = "RESET_EXPORT_REPORT";
 export const LOADING_EXPORT_REPORT = "LOADING_EXPORT_REPORT";
 
-const TIMEOUT = 300; //secs
+const TIMEOUT = 300; // secs
 
 export const getReport = (query, reportName, page) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
@@ -39,7 +39,7 @@ export const getReport = (query, reportName, page) => async (dispatch) => {
 
   const params = {
     access_token: accessToken,
-    query: query
+    query
   };
 
   return getRequest(
@@ -73,20 +73,6 @@ export const getMetricRaw = (query) => async (dispatch) => {
     .catch(fetchErrorHandler);
 };
 
-const jsonToCsv = (items) => {
-  const replacer = (key, value) => (value === null ? "" : value);
-  const header = Object.keys(items[0]);
-  let csv = items.map((row) =>
-    header
-      .map((fieldName) => JSON.stringify(row[fieldName], replacer))
-      .join(",")
-  );
-  csv.unshift(header.join(","));
-  csv = csv.join("\r\n");
-
-  return csv;
-};
-
 export const exportReport =
   (buildQuery, reportName, grouped, preProcessData = null) =>
   async (dispatch, getState) => {
@@ -105,61 +91,73 @@ export const exportReport =
       query: null
     };
 
-    for (var i = 1; i <= totalPages; i++) {
-      params.query = buildQuery(i, perPage);
+    try {
+      for (let i = 1; i <= totalPages; i++) {
+        params.query = buildQuery(i, perPage);
 
-      dispatch(
-        createAction(LOADING_EXPORT_REPORT)({ exportProgress: i * perPage })
-      );
+        dispatch(
+          createAction(LOADING_EXPORT_REPORT)({ exportProgress: i * perPage })
+        );
 
-      const result = await getRequest(
-        createAction(REQUEST_EXPORT_REPORT),
-        createAction(DUMMY_ACTION),
-        `${window.REPORT_API_BASE_URL}/reports`,
-        authErrorHandler,
-        {},
-        TIMEOUT,
-        TIMEOUT
-      )(params)(dispatch).then(({ response }) => {
-        const data = response.data?.reportData || [];
-        extraData = response.data?.extraData || null;
-        rawData = [...rawData, ...(data.results || data)];
-      });
-    }
+        await getRequest(
+          createAction(REQUEST_EXPORT_REPORT),
+          createAction(DUMMY_ACTION),
+          `${window.REPORT_API_BASE_URL}/reports`,
+          authErrorHandler,
+          {},
+          TIMEOUT,
+          TIMEOUT
+        )(params)(dispatch)
+          // eslint-disable-next-line no-loop-func
+          .then(({ response }) => {
+            const data = response.data?.reportData || {};
+            extraData = response.data?.extraData || null;
 
-    if (preProcessData) {
-      const procData = preProcessData(rawData, extraData, true);
-      const labels = procData.tableColumns.map((col) => col.value);
-      const keys = procData.tableColumns.map((col) => col.columnKey);
+            if (data.results) {
+              rawData = [...rawData, ...data.results];
+            } else {
+              rawData = data;
+            }
+          });
+      }
 
-      // replace labels
-      if (grouped) {
-        for (var groupName in procData.reportData) {
-          const newSheet = { name: groupName, data: [] };
-          const groupData = procData.reportData[groupName];
-          for (let item in groupData) {
+      if (preProcessData) {
+        const procData = preProcessData(rawData, extraData, true);
+        const labels = procData.tableColumns.map((col) => col.value);
+        const keys = procData.tableColumns.map((col) => col.columnKey);
+
+        // replace labels
+        if (grouped) {
+          for (const groupName in procData.reportData) {
+            const newSheet = { name: groupName, data: [] };
+            const groupData = procData.reportData[groupName];
+            for (const item in groupData) {
+              const newData = {};
+
+              for (const a in labels) {
+                newData[labels[a]] = groupData[item][keys[a]];
+              }
+              newSheet.data.push(newData);
+            }
+            reportData.push(newSheet);
+          }
+        } else {
+          for (const item in procData.reportData) {
             const newData = {};
 
-            for (var a in labels) {
-              newData[labels[a]] = groupData[item][keys[a]];
+            for (const a in labels) {
+              newData[labels[a]] = procData.reportData[item][keys[a]];
             }
-            newSheet.data.push(newData);
+            reportData.push(newData);
           }
-          reportData.push(newSheet);
+          reportData = [{ name: "Data", data: reportData }];
         }
       } else {
-        for (var item in procData.reportData) {
-          var newData = {};
-
-          for (var a in labels) {
-            newData[labels[a]] = procData.reportData[item][keys[a]];
-          }
-          reportData.push(newData);
-        }
-        reportData = [{ name: "Data", data: reportData }];
+        reportData = [{ name: "Data", data: flattenData(rawData) }];
       }
-    } else {
-      reportData = [{ name: "Data", data: flattenData(rawData) }];
+    } catch (error) {
+      console.log("ERROR EXPORTING REPORT: ", error);
+      dispatch(createAction(RESET_EXPORT_REPORT)({}));
     }
 
     // dispatch(stopLoading());
@@ -169,16 +167,11 @@ export const exportReport =
     dispatch(createAction(RESET_EXPORT_REPORT)({}));
   };
 
-const normalizeEntity = (entity) => {
-  const normalizedEntity = { ...entity };
-  return normalizedEntity;
-};
-
 export const flattenData = (data) => {
   const flatData = [];
   const rawData = JSON.parse(JSON.stringify(data));
 
-  for (var idx = 0; idx < rawData.length; idx++) {
+  for (let idx = 0; idx < rawData.length; idx++) {
     const idxRef = { idx };
     const flatItem = {};
     flattenItem(flatItem, rawData[idx], idxRef);
@@ -190,22 +183,22 @@ export const flattenData = (data) => {
 };
 
 export const flattenItem = (flatData, item, idxRef, ctx = "") => {
-  if (typeof item != "object") {
+  if (typeof item !== "object") {
     flatData[ctx] = item;
   } else {
-    for (var property in item) {
-      const flatName = ctx ? ctx + "_" + property : property;
+    for (const property in item) {
+      const flatName = ctx ? `${ctx}_${property}` : property;
 
       if (item[property] == null) {
         flatData[flatName] = "";
       } else if (Array.isArray(item[property]) && item[property].length > 0) {
         flattenItem(flatData, item[property].shift(), idxRef, flatName);
-        if (item[property].length > 0 && typeof item[property] != "string") {
+        if (item[property].length > 0 && typeof item[property] !== "string") {
           idxRef.idx--; // redo this item
         }
       } else if (
-        typeof item[property] == "object" &&
-        typeof item[property] != "string"
+        typeof item[property] === "object" &&
+        typeof item[property] !== "string"
       ) {
         flattenItem(flatData, item[property], idxRef, flatName);
       } else {
