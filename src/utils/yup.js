@@ -112,6 +112,7 @@ export const formMetafieldsValidation = () =>
         .string()
         .when(["type", "values", "minimum_quantity", "maximum_quantity"], {
           is: (type, values, minQty, maxQty) => {
+            if (!type) return false;
             // required only if has values or quantities
             const hasValues = values && values.length > 0;
             const hasQuantities =
