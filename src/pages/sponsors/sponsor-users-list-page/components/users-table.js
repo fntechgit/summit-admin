@@ -93,7 +93,7 @@ const UsersTable = ({
 
   const userData = users.items.map((u) => {
     const sponsorAccessRights = u.access_rights.filter(
-      (ar) => !sponsorId || ar.sponsor_id === sponsorId
+      (ar) => !sponsorId || (ar.sponsor_id ?? ar.sponsor?.id) === sponsorId
     );
 
     const accessRights = sponsorAccessRights.reduce((res, it) => {
