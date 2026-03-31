@@ -67,6 +67,7 @@ const ItemPriceTiers = ({ readOnly = false }) => {
                 <MuiFormikPriceField
                   name={field}
                   fullWidth
+                  inCents
                   disabled={readOnly}
                 />
               ) : (

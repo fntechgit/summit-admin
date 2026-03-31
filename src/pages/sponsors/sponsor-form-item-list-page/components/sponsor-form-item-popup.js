@@ -40,6 +40,8 @@ const SponsorFormItemPopup = ({
     });
   };
 
+  console.log("ITEM: ", item);
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle

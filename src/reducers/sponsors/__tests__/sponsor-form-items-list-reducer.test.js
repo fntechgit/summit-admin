@@ -183,9 +183,6 @@ describe("SponsorFormItemsListReducer", () => {
         ...initialState,
         currentItem: {
           ...item,
-          early_bird_rate: "1.00",
-          standard_rate: "1.00",
-          onsite_rate: "1.00",
           meta_fields: []
         }
       });
