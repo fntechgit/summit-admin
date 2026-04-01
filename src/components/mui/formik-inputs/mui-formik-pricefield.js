@@ -20,7 +20,8 @@ const MuiFormikPriceField = ({
   const [isFocused, setIsFocused] = useState(false);
   const [focusedValue, setFocusedValue] = useState("");
 
-  const emptyValue = meta.initialValue === null ? null : 0;
+  // emptyValue is always 0 when editing this field, null is handled by N/A checkbox
+  const emptyValue = 0;
 
   const getRawString = () => {
     if (cleared || field.value == null) return "";

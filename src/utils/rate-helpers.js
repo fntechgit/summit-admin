@@ -1,7 +1,7 @@
 import T from "i18n-react";
 import {
   amountFromCents,
-  amountToCents,
+  parsePrice,
   currencyAmountFromCents
 } from "openstack-uicore-foundation/lib/utils/money";
 
@@ -22,7 +22,7 @@ export const rateFromCents = (cents) => {
 export const rateToCents = (value) => {
   if (value === null || value === undefined) return null;
   if (value === "") return 0;
-  return amountToCents(value);
+  return parsePrice(value);
 };
 
 export const formatRateFromCents = (cents) => {
