@@ -150,18 +150,10 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
     value: "selection_plan",
     sortable: true,
     editableField: (extraProps) => {
-      const isValid = (obj, keys) =>
-        keys.every((k) => obj && typeof obj[k] !== "undefined");
-      const isValidSP = (sp) =>
-        sp &&
-        typeof sp.id !== "undefined" &&
-        typeof sp.name === "string" &&
-        sp.name.trim();
-
       if (!extraProps.row?.type?.id) return false;
       const event_type = Array.isArray(event_types)
         ? event_types.find(
-            (t) => isValid(t, ["id"]) && t.id === extraProps.row.type?.id
+            (t) => t?.id !== undefined && t.id === extraProps.row.type?.id
           )
         : null;
       if (!event_type) return false;
@@ -174,19 +166,17 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
       const trackId = extraProps.row?.track?.id;
       const track =
         trackId !== undefined && trackId !== null
-          ? allTracks.find((t) => isValid(t, ["id"]) && t.id === trackId)
+          ? allTracks.find((t) => t?.id !== undefined && t.id === trackId)
           : null;
 
       const selection_plans_per_track = buildNameIdDDL(
-        (Array.isArray(allSelectionPlans) ? allSelectionPlans : [])
-          .filter(isValidSP)
-          .filter(
-            (sp) =>
-              !track ||
-              (Array.isArray(sp.track_groups) &&
-                Array.isArray(track.track_groups) &&
-                sp.track_groups.some((gr) => track.track_groups.includes(gr)))
-          )
+        (Array.isArray(allSelectionPlans) ? allSelectionPlans : []).filter(
+          (sp) =>
+            !track ||
+            (Array.isArray(sp.track_groups) &&
+              Array.isArray(track.track_groups) &&
+              sp.track_groups.some((gr) => track.track_groups.includes(gr)))
+        )
       );
 
       return (
