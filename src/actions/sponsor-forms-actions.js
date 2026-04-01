@@ -454,9 +454,60 @@ export const updateFormTemplate = (entity) => async (dispatch, getState) => {
     });
 };
 
+export const updateFormTemplateTiers =
+  ({ id, sponsorship_types = [], apply_to_all_types = false }) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, sponsorFormsListState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const { term, currentPage, perPage, order, orderDir, hideArchived } =
+      sponsorFormsListState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    const normalizedEntity = normalizeSelectAllField(
+      sponsorship_types,
+      "apply_to_all_types",
+      "sponsorship_types",
+      apply_to_all_types
+    );
+
+    return putRequest(
+      null,
+      createAction(TEMPLATE_FORM_CREATED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${id}`,
+      normalizedEntity,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          getSponsorForms(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            hideArchived
+          )
+        );
+      })
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
 export const normalizeFormTemplate = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
-  if (entity.opens_at !== undefined && entity.opens_at !== null) {
+  if (
+    entity.opens_at !== undefined &&
+    entity.opens_at !== null &&
+    entity.opens_at !== ""
+  ) {
     normalizedEntity.opens_at =
       typeof entity.opens_at === "number"
         ? entity.opens_at
@@ -464,7 +515,11 @@ export const normalizeFormTemplate = (entity, summitTZ) => {
   } else {
     delete normalizedEntity.opens_at;
   }
-  if (entity.expires_at !== undefined && entity.expires_at !== null) {
+  if (
+    entity.expires_at !== undefined &&
+    entity.expires_at !== null &&
+    entity.expires_at !== ""
+  ) {
     normalizedEntity.expires_at =
       typeof entity.expires_at === "number"
         ? entity.expires_at

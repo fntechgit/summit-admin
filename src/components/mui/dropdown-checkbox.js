@@ -17,10 +17,7 @@ const DropdownCheckbox = ({
   value = [],
   options,
   onChange,
-  onBlur,
-  onClose,
-  onOpen,
-  onCloseMenu
+  ...rest
 }) => {
   const handleChange = (ev) => {
     const rawValue = ev.target.value;
@@ -57,12 +54,7 @@ const DropdownCheckbox = ({
         multiple
         value={value}
         onChange={handleChange}
-        onBlur={onBlur}
-        onClose={(e) => {
-          if (onClose) onClose(e);
-          if (onCloseMenu) onCloseMenu();
-        }}
-        onOpen={onOpen}
+        {...rest}
         input={<OutlinedInput label={label} />}
         renderValue={(selected) => {
           if (selected.includes("all")) {

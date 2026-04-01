@@ -29,9 +29,10 @@ import {
   archiveSponsorForm,
   getSponsorForm,
   getSponsorForms,
+  getSponsorships,
   unarchiveSponsorForm,
   deleteSponsorForm,
-  updateFormTemplate
+  updateFormTemplateTiers
 } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
@@ -39,16 +40,8 @@ import GlobalTemplatePopup from "./components/global-template/global-template-po
 import FormTemplatePopup from "./components/form-template/form-template-popup";
 import MuiTable from "../../../components/mui/table/mui-table";
 import DropdownCheckbox from "../../../components/mui/dropdown-checkbox";
-import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
-
-const normalizeTiers = (arr) =>
-  Array.isArray(arr)
-    ? arr.length === 0
-      ? ["all"]
-      : typeof arr[0] === "object"
-      ? arr.map((t) => t.id)
-      : arr
-    : [];
+import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
+import { normalizeTiers, sameTierSet } from "./utils";
 
 const SponsorFormsListPage = ({
   sponsorForms,
@@ -61,17 +54,19 @@ const SponsorFormsListPage = ({
   totalCount,
   getSponsorForms,
   getSponsorForm,
+  getSponsorships,
   archiveSponsorForm,
   unarchiveSponsorForm,
   deleteSponsorForm,
-  updateFormTemplate,
+  updateFormTemplateTiers,
   sponsorships
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
   useEffect(() => {
     getSponsorForms();
-  }, []);
+    getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE);
+  }, [getSponsorForms, getSponsorships]);
 
   const handlePageChange = (page) => {
     getSponsorForms(term, page, perPage, order, orderDir, hideArchived);
@@ -151,10 +146,13 @@ const SponsorFormsListPage = ({
         ) {
           if (
             tiersValue.length === 0 ||
-            (
-              sponsorForms.find((f) => f.id === editingTiersId)
-                ?.sponsorship_types || []
-            ).toString() === tiersValue.toString()
+            sameTierSet(
+              normalizeTiers(
+                sponsorForms.find((f) => f.id === editingTiersId)
+                  ?.sponsorship_types || []
+              ),
+              normalizeTiers(tiersValue)
+            )
           ) {
             setEditingTiersId(null);
           }
@@ -178,26 +176,23 @@ const SponsorFormsListPage = ({
     setTiersValue(newValue);
   };
 
-  const arraysEqual = (a, b) =>
-    a.length === b.length && a.every((v, i) => v === b[i]);
   const handleTiersSave = async (row) => {
     const prevAll = row.sponsorship_types?.includes("all");
     const prevIds = prevAll ? ["all"] : normalizeTiers(row.sponsorship_types);
     const nextAll = tiersValue.includes("all");
     const nextIds = nextAll ? ["all"] : normalizeTiers(tiersValue);
-    const changed = prevAll !== nextAll || !arraysEqual(prevIds, nextIds);
-    setEditingTiersId(null);
+    const changed = prevAll !== nextAll || !sameTierSet(prevIds, nextIds);
     if (!changed) return;
     const sponsorship_types = nextIds;
     const apply_to_all_types = nextAll;
     if (!apply_to_all_types && sponsorship_types.length === 0) return;
-    updateFormTemplate({
+    updateFormTemplateTiers({
       id: row.id,
       sponsorship_types,
       apply_to_all_types
     })
       .then(() => {
-        getSponsorForms();
+        setEditingTiersId(null);
       })
       .catch(() => {});
   };
@@ -246,9 +241,11 @@ const SponsorFormsListPage = ({
                 value={value}
                 options={options}
                 onChange={handleTiersChange}
-                onClose={() => handleTiersSave(row)}
+                onClose={() => {
+                  setDropdownOpen(false);
+                  handleTiersSave(row);
+                }}
                 onOpen={() => setDropdownOpen(true)}
-                onCloseMenu={() => setDropdownOpen(false)}
               />
             </div>
           );
@@ -260,12 +257,13 @@ const SponsorFormsListPage = ({
           } else if (row.sponsorship_types.length > 0) {
             const sponsorshipOptions =
               sponsorships && sponsorships.items ? sponsorships.items : [];
-            label = row.sponsorship_types
+            const validNames = row.sponsorship_types
               .map((id) => {
                 const found = sponsorshipOptions.find((s) => s.id === id);
-                return found ? found.name : id;
+                return found ? found.name : null;
               })
-              .join(", ");
+              .filter((name) => name !== null);
+            label = validNames.length > 0 ? validNames.join(", ") : "-";
           }
         }
         return (
@@ -424,8 +422,9 @@ const mapStateToProps = ({ sponsorFormsListState }) => ({
 export default connect(mapStateToProps, {
   getSponsorForms,
   getSponsorForm,
+  getSponsorships,
   archiveSponsorForm,
   unarchiveSponsorForm,
   deleteSponsorForm,
-  updateFormTemplate
+  updateFormTemplateTiers
 })(SponsorFormsListPage);

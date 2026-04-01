@@ -6,6 +6,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import SnackbarNotificationContext from "./Context";
 import { NOTIFICATION_TIMEOUT } from "../../../utils/constants";
+import { empty } from "../../../utils/methods";
 import { clearSnackbarMessage } from "../../../actions/base-actions";
 
 /*
@@ -37,7 +38,7 @@ const SnackbarNotification = ({
   };
 
   useEffect(() => {
-    if (msgData.html && msgData.html.trim()) {
+    if (!empty(msgData.html)) {
       setOpen(true);
     } else {
       setOpen(false);
@@ -46,7 +47,7 @@ const SnackbarNotification = ({
 
   // when snackbarMessage changes in base-reducer, we trigger the snackbar
   useEffect(() => {
-    if (snackbarMessage?.html && snackbarMessage.html.trim()) {
+    if (!empty(snackbarMessage?.html)) {
       setMsgData(snackbarMessage);
     }
   }, [snackbarMessage]);
