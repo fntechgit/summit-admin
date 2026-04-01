@@ -48,6 +48,7 @@ const MuiFormikPriceField = ({
 
   const handleBlur = (e) => {
     setIsFocused(false);
+    field.onBlur(e);
     if (props.onBlur) props.onBlur(e);
   };
 
