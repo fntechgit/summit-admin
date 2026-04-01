@@ -12,7 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { formatRateFromCents, rateFromCents } from "../../utils/rate-helpers";
+import { formatRateFromCents } from "../../utils/rate-helpers";
 import {
   RECEIVE_SPONSOR_FORM_ITEM,
   RECEIVE_SPONSOR_FORM_ITEMS,
@@ -100,9 +100,6 @@ const sponsorFormItemsListReducer = (state = DEFAULT_STATE, action) => {
 
       const currentItem = {
         ...item,
-        early_bird_rate: rateFromCents(item.early_bird_rate),
-        standard_rate: rateFromCents(item.standard_rate),
-        onsite_rate: rateFromCents(item.onsite_rate),
         meta_fields: item.meta_fields.length > 0 ? item.meta_fields : []
       };
 

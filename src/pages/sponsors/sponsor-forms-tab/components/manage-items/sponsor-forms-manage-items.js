@@ -43,6 +43,7 @@ import SponsorInventoryDialog from "../../../../sponsors-global/form-templates/s
 import SponsorFormItemFromInventoryPopup from "./sponsor-form-item-from-inventory";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
 import { rateCellValidation } from "../../../../../utils/yup";
+import { rateToCents } from "../../../../../utils/rate-helpers";
 
 const SponsorFormsManageItems = ({
   term,
@@ -167,11 +168,13 @@ const SponsorFormsManageItems = ({
   };
 
   const handleCellEdit = (rowId, column, value) => {
-    const valueWithNoSign = String(value).replace(/^[^\d.-]+/, "");
+    // since editable cell is TextField and not PriceField, we need to convert to cents
+    const valueInCents = rateToCents(value);
     const tmpEntity = {
       id: rowId,
-      [column]: valueWithNoSign
+      [column]: valueInCents
     };
+
     saveSponsorFormManagedItem(formId, tmpEntity);
   };
 
