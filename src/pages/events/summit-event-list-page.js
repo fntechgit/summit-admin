@@ -268,7 +268,7 @@ const fieldNames = (
                 className="text-link-button"
                 onClick={(ev) => {
                   ev.preventDefault();
-                  if (!row?.id) return false;
+                  if (!row?.id || !currentSummitId) return false;
                   window.open(
                     `/app/summits/${currentSummitId}/events/${row.id}/materials/${m.id}`,
                     "_blank"
