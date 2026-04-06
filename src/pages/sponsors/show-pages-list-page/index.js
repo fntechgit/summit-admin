@@ -37,6 +37,7 @@ import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
+import SearchInput from "../../../components/mui/search-input";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 
 const ShowPagesListPage = ({
@@ -101,6 +102,17 @@ const ShowPagesListPage = ({
       order,
       orderDir,
       ev.target.checked
+    );
+  };
+
+  const handleSearch = (searchTerm) => {
+    getShowPages(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      hideArchived
     );
   };
 
@@ -199,7 +211,13 @@ const ShowPagesListPage = ({
             />
           </FormGroup>
         </Grid2>
-        <Grid2 size={2} />
+        <Grid2 size={2}>
+          <SearchInput
+            term={term}
+            onSearch={handleSearch}
+            placeholder={T.translate("show_pages.placeholders.search")}
+          />
+        </Grid2>
         <Grid2 size={3}>
           <Button
             variant="contained"
