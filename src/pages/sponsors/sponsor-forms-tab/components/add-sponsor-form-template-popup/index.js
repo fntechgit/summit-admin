@@ -60,7 +60,7 @@ const AddSponsorFormTemplatePopup = ({
         add_ons
       };
 
-      await Promise.resolve(onSubmit(entity));
+      await onSubmit(entity);
     },
     enableReinitialize: true
   });

@@ -157,8 +157,7 @@ const SponsorFormsTab = ({
     );
   };
 
-  const handleSaveFormFromTemplate = (entity) => {
-    saveSponsorManagedForm(entity).then(() => {
+  const handleSaveFormFromTemplate = (entity) => saveSponsorManagedForm(entity).then(() => {
       const { perPage, order, orderDir } = managedForms;
       getSponsorManagedForms(
         term,
@@ -170,7 +169,6 @@ const SponsorFormsTab = ({
       );
       setOpenPopup(null);
     });
-  };
 
   const handleCustomizedFormSaved = () => {
     const {
