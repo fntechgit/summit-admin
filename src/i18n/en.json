@@ -51,6 +51,7 @@
     "save": "Save",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    "return": "Return",
     "ingest": "Ingest",
     "save_and_publish": "Save & Publish",
     "save_and_add_next": "Save & Add Next",
@@ -2557,6 +2558,10 @@
         "title": "Order Notes",
         "placeholder": "Enter internal note...",
         "deleted": "Note deleted successfully."
+      },
+      "invoice_view": {
+        "title": "Purchase confirmed",
+        "subtitle": "The administrators will contact you to complete the payment."
       }
     },
     "purchase_tab": {

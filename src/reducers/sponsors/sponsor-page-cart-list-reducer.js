@@ -30,7 +30,9 @@ import {
   SPONSOR_CART_FORM_LOCKED,
   SPONSOR_CART_NOTE_ADDED,
   SPONSOR_CART_NOTE_DELETED,
-  SPONSOR_CART_NOTE_UPDATED
+  SPONSOR_CART_NOTE_UPDATED,
+  OFFLINE_PAYMENT_CREATED,
+  CART_STATUS_UPDATED
 } from "../../actions/sponsor-cart-actions";
 import { DISCOUNT_TYPES } from "../../utils/constants";
 
@@ -48,7 +50,8 @@ const DEFAULT_STATE = {
     orderDir: 1
   },
   sponsorForm: null,
-  cartForm: null
+  cartForm: null,
+  offlinePayment: null
 };
 
 const mapForm = (formData) => ({
@@ -74,6 +77,7 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
         summitTZ
       };
     }
+    case CART_STATUS_UPDATED:
     case RECEIVE_SPONSOR_CART: {
       const cart = payload.response;
       cart.forms = cart.forms.map((form) => {
@@ -216,6 +220,10 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
           notes: state.cart.notes.filter((n) => n.id !== noteId)
         }
       };
+    }
+    case OFFLINE_PAYMENT_CREATED: {
+      const offlinePayment = payload.response;
+      return { ...state, offlinePayment };
     }
     default:
       return state;

@@ -45,6 +45,8 @@ export const FORM_CART_SAVED = "FORM_CART_SAVED";
 export const SPONSOR_CART_NOTE_ADDED = "SPONSOR_CART_NOTE_ADDED";
 export const SPONSOR_CART_NOTE_UPDATED = "SPONSOR_CART_NOTE_UPDATED";
 export const SPONSOR_CART_NOTE_DELETED = "SPONSOR_CART_NOTE_DELETED";
+export const OFFLINE_PAYMENT_CREATED = "OFFLINE_PAYMENT_CREATED";
+export const CART_STATUS_UPDATED = "CART_STATUS_UPDATED";
 
 const customErrorHandler = (err, res) => (dispatch, state) => {
   const code = err.status;
@@ -442,4 +444,63 @@ export const deleteSponsorCartNote = (noteId) => async (dispatch, getState) => {
     .finally(() => {
       dispatch(stopLoading());
     });
+};
+
+/* ************************************************************************* */
+/*                              PAYMENTS                                     */
+/* ************************************************************************* */
+
+export const checkoutCart = () => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return putRequest(
+    null,
+    createAction(CART_STATUS_UPDATED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/checkout`,
+    {},
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
+    dispatch(stopLoading());
+  });
+};
+
+export const payWithInvoice = () => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState, sponsorPageCartListState } =
+    getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+  const { cart } = sponsorPageCartListState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  const payload = {
+    type: "Offline",
+    cart_id: cart.id
+  };
+
+  return postRequest(
+    null,
+    createAction(OFFLINE_PAYMENT_CREATED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments`,
+    payload,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      getSponsorCart()(dispatch, getState);
+    })
+    .catch(console.log);
 };

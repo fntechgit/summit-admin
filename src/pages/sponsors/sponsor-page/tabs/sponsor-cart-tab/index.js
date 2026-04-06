@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,17 +12,26 @@
  * */
 
 import React, { useState } from "react";
-import { Box } from "@mui/material";
 import { connect } from "react-redux";
+import { Box } from "@mui/material";
 import SelectFormDialog from "./components/select-form-dialog";
 import CartView from "./components/cart-view";
 import NewCartForm from "./components/edit-form/new-cart-form";
 import EditCartForm from "./components/edit-form/edit-cart-form";
+import InvoiceView from "./components/invoice-view";
+import {
+  checkoutCart,
+  payWithInvoice
+} from "../../../../../actions/sponsor-cart-actions";
 
-const SponsorCartTab = ({ sponsor, currentSummit }) => {
+const SponsorCartTab = ({ sponsor, currentSummit, checkoutCart, payWithInvoice }) => {
   const [openAddFormDialog, setOpenAddFormDialog] = useState(false);
   const [formEdit, setFormEdit] = useState(null);
   const [newForm, setNewForm] = useState(null);
+  const [invoiceView, setInvoiceView] = useState(null);
+  const [payCCView, setPayCCView] = useState(null);
+
+  const showCartView = !formEdit && !newForm && !invoiceView && !payCCView;
 
   const handleFormSelected = (form, addOn) => {
     setNewForm({ formId: form.id, addon: addOn });
@@ -35,6 +44,14 @@ const SponsorCartTab = ({ sponsor, currentSummit }) => {
 
   const handleOnFormUpdated = () => {
     setFormEdit(null);
+  };
+
+  const handlePayInvoice = () => {
+    checkoutCart().then(() => {
+      payWithInvoice().then(() => {
+        setInvoiceView(true);
+      });
+    });
   };
 
   return (
@@ -57,10 +74,13 @@ const SponsorCartTab = ({ sponsor, currentSummit }) => {
           onSaveCallback={handleOnFormUpdated}
         />
       )}
-      {!formEdit && !newForm && (
+      {invoiceView && <InvoiceView onCancel={() => setInvoiceView(null)} />}
+      {showCartView && (
         <CartView
           onEdit={setFormEdit}
           onAddForm={() => setOpenAddFormDialog(true)}
+          onPayCC={() => setPayCCView(true)}
+          onPayInvoice={handlePayInvoice}
         />
       )}
       <SelectFormDialog
@@ -79,4 +99,7 @@ const mapStateToProps = ({ currentSummitState, currentSponsorState }) => ({
   sponsor: currentSponsorState.entity
 });
 
-export default connect(mapStateToProps, {})(SponsorCartTab);
+export default connect(mapStateToProps, {
+  checkoutCart,
+  payWithInvoice
+})(SponsorCartTab);
