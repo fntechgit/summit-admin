@@ -38,7 +38,8 @@ const MuiFormikPriceField = ({
     }
     const str = getRawString();
     const dotIdx = str.indexOf(".");
-    if (dotIdx !== -1 && str.length - dotIdx - 1 === 1) return `${str}0`;
+    if (dotIdx === -1) return `${str}.00`;
+    if (str.length - dotIdx - 1 === 1) return `${str}0`;
     return str;
   };
 
