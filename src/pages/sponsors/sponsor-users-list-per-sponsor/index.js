@@ -30,6 +30,8 @@ import NewUserPopup from "./components/new-user-popup";
 import ProcessRequestPopup from "./components/process-request-popup";
 import ImportUsersPopup from "./components/import-users-popup";
 import EditUserPopup from "./components/edit-user-popup";
+import { ACCESS_ROUTES } from "../../../utils/constants";
+import Restrict from "../../../routes/restrict";
 
 const SponsorUsersListPerSponsorPage = ({
   sponsor,
@@ -158,12 +160,16 @@ const SponsorUsersListPerSponsorPage = ({
   );
 };
 
-const mapStateToProps = ({ sponsorUsersListState }) => ({
-  ...sponsorUsersListState
+const mapStateToProps = ({ sponsorUsersListState, currentSponsorState }) => ({
+  ...sponsorUsersListState,
+  sponsor: currentSponsorState.entity
 });
 
-export default connect(mapStateToProps, {
-  getSponsorUserRequests,
-  getSponsorUsers,
-  deleteSponsorUser
-})(SponsorUsersListPerSponsorPage);
+export default Restrict(
+  connect(mapStateToProps, {
+    getSponsorUserRequests,
+    getSponsorUsers,
+    deleteSponsorUser
+  })(SponsorUsersListPerSponsorPage),
+  ACCESS_ROUTES.ADMIN_SPONSORS
+);

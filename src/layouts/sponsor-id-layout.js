@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { Switch, Route } from "react-router-dom";
-import EditSponsorPage from "../pages/sponsors/edit-sponsor-page";
+import SponsorPage from "../pages/sponsors/sponsor-page";
 import { getSponsor, resetSponsorForm } from "../actions/sponsor-actions";
 import EditAdSponsorPage from "../pages/sponsors/edit-advertisement-sponsor-page";
 import EditMaterialSponsorPage from "../pages/sponsors/edit-material-sponsor-page";
@@ -141,23 +141,7 @@ class SponsorIdLayout extends React.Component {
               </div>
             )}
           />
-          <Switch>
-            <Route exact path={match.url} component={EditSponsorPage} />
-            <Route
-              path={`${match.url}/sponsor-forms/:form_id/items`}
-              render={(props) => (
-                <div>
-                  <Breadcrumb
-                    data={{
-                      title: "Forms",
-                      pathname: `${match.url}`
-                    }}
-                  />
-                  <EditSponsorPage {...props} />
-                </div>
-              )}
-            />
-          </Switch>
+          <Route path={match.url} component={SponsorPage} />
           <Route component={NoMatchPage} />
         </Switch>
       </div>
