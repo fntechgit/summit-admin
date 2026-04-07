@@ -52,8 +52,7 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE,
   DEFAULT_Z_INDEX,
-  HIGH_Z_INDEX,
-  INDEX_NOT_FOUND
+  HIGH_Z_INDEX
 } from "../../utils/constants";
 import {
   defaultColumns,
@@ -68,6 +67,7 @@ import {
 } from "../../actions/filter-criteria-actions";
 import { CONTEXT_ACTIVITIES } from "../../utils/filter-criteria-constants";
 import EditableTable from "../../components/tables/editable-table/EditableTable";
+import { buildNameIdDDL } from "../../utils/events/summit-event-list-page.utils";
 
 const fieldNames = (allSelectionPlans, allTracks, event_types) => [
   {
@@ -113,9 +113,7 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
     value: "track",
     sortable: true,
     editableField: (extraProps) => {
-      const track_ddl = allTracks
-        ?.sort((a, b) => a.order - b.order)
-        .map((t) => ({ label: t.name, value: t.id }));
+      const track_ddl = buildNameIdDDL(allTracks);
 
       return (
         <Dropdown
@@ -152,29 +150,34 @@ const fieldNames = (allSelectionPlans, allTracks, event_types) => [
     value: "selection_plan",
     sortable: true,
     editableField: (extraProps) => {
-      if (!extraProps.row.type?.id) return false;
-
-      const event_type = event_types.find(
-        (t) => t.id === extraProps.row.type?.id
-      );
+      if (!extraProps.row?.type?.id) return false;
+      const event_type = Array.isArray(event_types)
+        ? event_types.find(
+            (t) => t?.id !== undefined && t.id === extraProps.row.type?.id
+          )
+        : null;
+      if (!event_type) return false;
 
       const allowSelectionPlanEdit =
-        ["PresentationType"].indexOf(event_type.class_name) !==
-          INDEX_NOT_FOUND ||
-        ["PresentationType"].indexOf(event_type.name) !== INDEX_NOT_FOUND;
-
+        ["PresentationType"].includes(event_type.class_name) ||
+        ["PresentationType"].includes(event_type.name);
       if (!allowSelectionPlanEdit) return false;
 
-      const track = allTracks.find((t) => t.id === extraProps.row?.track?.id);
+      const trackId = extraProps.row?.track?.id;
+      const track =
+        trackId !== undefined && trackId !== null
+          ? allTracks.find((t) => t?.id !== undefined && t.id === trackId)
+          : null;
 
-      const selection_plans_per_track = allSelectionPlans
-        .filter(
+      const selection_plans_per_track = buildNameIdDDL(
+        (Array.isArray(allSelectionPlans) ? allSelectionPlans : []).filter(
           (sp) =>
             !track ||
-            sp.track_groups.some((gr) => track.track_groups.includes(gr))
+            (Array.isArray(sp.track_groups) &&
+              Array.isArray(track.track_groups) &&
+              sp.track_groups.some((gr) => track.track_groups.includes(gr)))
         )
-        ?.sort((a, b) => a.order - b.order)
-        .map((sp) => ({ label: sp.name, value: sp.id }));
+      );
 
       return (
         <Dropdown
@@ -1013,13 +1016,9 @@ class SummitEventListPage extends React.Component {
       }
     };
 
-    const selection_plans_ddl = currentSummit.selection_plans
-      ?.sort((a, b) => a.order - b.order)
-      .map((sp) => ({ label: sp.name, value: sp.id }));
+    const selection_plans_ddl = buildNameIdDDL(currentSummit.selection_plans);
 
-    const location_ddl = currentSummit.locations
-      ?.sort((a, b) => a.order - b.order)
-      .map((l) => ({ label: l.name, value: l.id }));
+    const location_ddl = buildNameIdDDL(currentSummit.locations);
 
     const selection_status_ddl = [
       { label: "Pending", value: "pending" },
@@ -1028,13 +1027,9 @@ class SummitEventListPage extends React.Component {
       { label: "Alternate", value: "alternate" }
     ];
 
-    const track_ddl = currentSummit.tracks
-      ?.sort((a, b) => a.order - b.order)
-      .map((t) => ({ label: t.name, value: t.id }));
+    const track_ddl = buildNameIdDDL(currentSummit.tracks);
 
-    const event_type_ddl = currentSummit.event_types
-      ?.sort((a, b) => a.order - b.order)
-      .map((t) => ({ label: t.name, value: t.id }));
+    const event_type_ddl = buildNameIdDDL(currentSummit.event_types);
 
     const level_ddl = [
       { label: "Beginner", value: "beginner" },
