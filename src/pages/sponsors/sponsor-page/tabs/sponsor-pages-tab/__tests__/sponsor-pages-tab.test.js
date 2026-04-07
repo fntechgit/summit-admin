@@ -42,7 +42,7 @@ jest.mock(
 );
 
 jest.mock("../../../../../../actions/sponsor-pages-actions", () => ({
-  ...jest.requireActual("../../../../actions/sponsor-pages-actions"),
+  ...jest.requireActual("../../../../../../actions/sponsor-pages-actions"),
   getSponsorManagedPages: jest.fn(() => ({ type: "MOCK_ACTION" })),
   getSponsorCustomizedPages: jest.fn(() => ({ type: "MOCK_ACTION" })),
   getSponsorCustomizedPage: jest.fn(
@@ -56,7 +56,7 @@ jest.mock("../../../../../../actions/sponsor-pages-actions", () => ({
 }));
 
 jest.mock("../../../../../../actions/sponsor-forms-actions", () => ({
-  ...jest.requireActual("../../../../actions/sponsor-forms-actions"),
+  ...jest.requireActual("../../../../../../actions/sponsor-forms-actions"),
   getSponsorships: jest.fn(() => () => Promise.resolve())
 }));
 
@@ -103,6 +103,10 @@ const defaultState = {
       id: 1,
       time_zone: { name: "UTC" }
     }
+  },
+  currentSponsorState: {
+    entity: { id: 1, sponsorships_collection: { sponsorships: [] } },
+    errors: {}
   }
 };
 
@@ -166,6 +170,7 @@ describe("SponsorPagesTab", () => {
         />,
         {
           initialState: {
+            ...defaultState,
             sponsorPagePagesListState: {
               ...defaultState.sponsorPagePagesListState,
               customizedPages: {
@@ -202,6 +207,7 @@ describe("SponsorPagesTab", () => {
         />,
         {
           initialState: {
+            ...defaultState,
             sponsorPagePagesListState: {
               ...defaultState.sponsorPagePagesListState,
               customizedPages: {
@@ -242,6 +248,7 @@ describe("SponsorPagesTab", () => {
       <SponsorPagesTab sponsor={createSponsor()} summitId={1} summitTZ="UTC" />,
       {
         initialState: {
+          ...defaultState,
           sponsorPagePagesListState: {
             ...defaultState.sponsorPagePagesListState,
             customizedPages: {
@@ -267,6 +274,7 @@ describe("SponsorPagesTab", () => {
       <SponsorPagesTab sponsor={createSponsor()} summitId={1} summitTZ="UTC" />,
       {
         initialState: {
+          ...defaultState,
           sponsorPagePagesListState: {
             ...defaultState.sponsorPagePagesListState,
             customizedPages: {
