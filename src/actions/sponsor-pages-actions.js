@@ -29,6 +29,8 @@ import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
+  PAGE_MODULES_DOWNLOAD,
+  PAGE_MODULES_MEDIA_TYPES,
   PAGES_MODULE_KINDS
 } from "../utils/constants";
 
@@ -111,52 +113,52 @@ export const getSponsorManagedPages =
     orderDir = DEFAULT_ORDER_DIR,
     hideArchived = false
   ) =>
-    async (dispatch, getState) => {
-      const { currentSummitState, currentSponsorState } = getState();
-      const { currentSummit } = currentSummitState;
-      const {
-        entity: { id: sponsorId }
-      } = currentSponsorState;
-      const accessToken = await getAccessTokenSafely();
-      const summitTZ = currentSummit.time_zone.name;
-      const filter = [];
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const summitTZ = currentSummit.time_zone.name;
+    const filter = [];
 
-      dispatch(startLoading());
+    dispatch(startLoading());
 
-      if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
-      }
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
+    }
 
-      const params = {
-        page,
-        fields: "id,code,name,kind,modules_count,allowed_add_ons,assigned_type",
-        per_page: perPage,
-        access_token: accessToken
-      };
-
-      if (hideArchived) filter.push("is_archived==0");
-
-      if (filter.length > 0) {
-        params["filter[]"] = filter;
-      }
-
-      // order
-      if (order != null && orderDir != null) {
-        const orderDirSign = orderDir === 1 ? "" : "-";
-        params.order = `${orderDirSign}${order}`;
-      }
-
-      return getRequest(
-        createAction(REQUEST_SPONSOR_MANAGED_PAGES),
-        createAction(RECEIVE_SPONSOR_MANAGED_PAGES),
-        `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
-        snackbarErrorHandler,
-        { order, orderDir, page, perPage, term, hideArchived, summitTZ }
-      )(params)(dispatch).finally(() => {
-        dispatch(stopLoading());
-      });
+    const params = {
+      page,
+      fields: "id,code,name,kind,modules_count,allowed_add_ons,assigned_type",
+      per_page: perPage,
+      access_token: accessToken
     };
+
+    if (hideArchived) filter.push("is_archived==0");
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_MANAGED_PAGES),
+      createAction(RECEIVE_SPONSOR_MANAGED_PAGES),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
+      snackbarErrorHandler,
+      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
+    )(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 export const saveSponsorManagedPage =
   (entity) => async (dispatch, getState) => {
@@ -256,54 +258,54 @@ export const getSponsorCustomizedPages =
     orderDir = DEFAULT_ORDER_DIR,
     hideArchived = false
   ) =>
-    async (dispatch, getState) => {
-      const { currentSummitState, currentSponsorState } = getState();
-      const { currentSummit } = currentSummitState;
-      const {
-        entity: { id: sponsorId }
-      } = currentSponsorState;
-      const accessToken = await getAccessTokenSafely();
-      const summitTZ = currentSummit.time_zone.name;
-      const filter = [];
+  async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const summitTZ = currentSummit.time_zone.name;
+    const filter = [];
 
-      dispatch(startLoading());
+    dispatch(startLoading());
 
-      if (term) {
-        const escapedTerm = escapeFilterValue(term);
-        filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
-      }
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(`name=@${escapedTerm},code=@${escapedTerm}`);
+    }
 
-      const params = {
-        page,
-        fields:
-          "id,code,name,allowed_add_ons,is_archived,modules,allowed_add_ons.type,allowed_add_ons.name,allowed_add_ons.id",
-        expand: "allowed_add_ons",
-        per_page: perPage,
-        access_token: accessToken
-      };
-
-      if (hideArchived) filter.push("is_archived==0");
-
-      if (filter.length > 0) {
-        params["filter[]"] = filter;
-      }
-
-      // order
-      if (order != null && orderDir != null) {
-        const orderDirSign = orderDir === 1 ? "" : "-";
-        params.order = `${orderDirSign}${order}`;
-      }
-
-      return getRequest(
-        createAction(REQUEST_SPONSOR_CUSTOMIZED_PAGES),
-        createAction(RECEIVE_SPONSOR_CUSTOMIZED_PAGES),
-        `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages`,
-        snackbarErrorHandler,
-        { order, orderDir, page, perPage, term, hideArchived, summitTZ }
-      )(params)(dispatch).finally(() => {
-        dispatch(stopLoading());
-      });
+    const params = {
+      page,
+      fields:
+        "id,code,name,allowed_add_ons,is_archived,modules,allowed_add_ons.type,allowed_add_ons.name,allowed_add_ons.id",
+      expand: "allowed_add_ons",
+      per_page: perPage,
+      access_token: accessToken
     };
+
+    if (hideArchived) filter.push("is_archived==0");
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
+
+    // order
+    if (order != null && orderDir != null) {
+      const orderDirSign = orderDir === 1 ? "" : "-";
+      params.order = `${orderDirSign}${order}`;
+    }
+
+    return getRequest(
+      createAction(REQUEST_SPONSOR_CUSTOMIZED_PAGES),
+      createAction(RECEIVE_SPONSOR_CUSTOMIZED_PAGES),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages`,
+      snackbarErrorHandler,
+      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
+    )(params)(dispatch).finally(() => {
+      dispatch(stopLoading());
+    });
+  };
 
 export const getSponsorCustomizedPage =
   (pageId) => async (dispatch, getState) => {
@@ -475,19 +477,32 @@ const normalizeSponsorCustomPage = (entity, summitTZ) => {
   normalizedEntity.modules = entity.modules.map((module) => {
     const normalizedModule = { ...module };
 
-    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.upload_deadline) {
-      normalizedModule.upload_deadline = moment
-        .tz(module.upload_deadline, summitTZ)
-        .unix();
+    if (module.kind === PAGES_MODULE_KINDS.MEDIA) {
+      if (module.upload_deadline) {
+        normalizedModule.upload_deadline = moment
+          .tz(module.upload_deadline, summitTZ)
+          .unix();
+      }
+
+      if (module.file_type_id) {
+        normalizedModule.file_type_id =
+          module.file_type_id?.value || module.file_type_id;
+      }
+
+      if (module.type === PAGE_MODULES_MEDIA_TYPES.INPUT) {
+        delete normalizedModule.file_type_id;
+        delete normalizedModule.max_file_size;
+      }
     }
 
-    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.file_type_id) {
-      normalizedModule.file_type_id =
-        module.file_type_id?.value || module.file_type_id;
-    }
-
-    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT && module.file) {
-      normalizedModule.file = module.file[0] || null;
+    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
+      if (module.type === PAGE_MODULES_DOWNLOAD.FILE) {
+        normalizedModule.file = module.file?.[0] || null;
+        delete normalizedModule.external_url;
+      } else {
+        delete normalizedModule.file;
+        delete normalizedModule.file_id;
+      }
     }
 
     delete normalizedModule._tempId;
