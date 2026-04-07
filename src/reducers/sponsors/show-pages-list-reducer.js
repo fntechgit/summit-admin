@@ -25,6 +25,10 @@ import {
 } from "../../actions/show-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
+import {
+  PAGE_MODULES_DOWNLOAD,
+  PAGES_MODULE_KINDS
+} from "../../utils/constants";
 
 const DEFAULT_SHOW_PAGE = {
   code: "",
@@ -132,19 +136,39 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
         ? ["all"]
         : pageData.sponsorship_types.map((st) => st.id);
 
-      const currentShowPage = {
-        ...pageData,
-        modules: pageData.modules.map((m) => ({
-          ...m,
-          ...(m.upload_deadline
+      const modules = pageData.modules.map((module) => {
+        const tmpModule = {
+          ...module,
+          ...(module.upload_deadline
             ? {
                 upload_deadline: epochToMomentTimeZone(
-                  m.upload_deadline,
+                  module.upload_deadline,
                   state.summitTZ || "UTC"
                 )
               }
             : {})
-        })),
+        };
+
+        if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
+          if (module.file) {
+            tmpModule.file = [
+              {
+                ...module.file,
+                file_path: module.file.storage_key,
+                public_url: module.file.file_url
+              }
+            ];
+            tmpModule.type = PAGE_MODULES_DOWNLOAD.FILE;
+          } else {
+            tmpModule.type = PAGE_MODULES_DOWNLOAD.URL;
+          }
+        }
+        return tmpModule;
+      });
+
+      const currentShowPage = {
+        ...pageData,
+        modules,
         sponsorship_types: sponsorshipTypeIds
       };
 
