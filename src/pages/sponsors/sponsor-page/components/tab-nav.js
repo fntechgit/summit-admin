@@ -2,60 +2,28 @@ import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Tab, Tabs } from "@mui/material";
-import { ACCESS_ROUTES } from "../../../../utils/constants";
+import { matchPath } from "react-router-dom";
 import Member from "../../../../models/member";
+import { SPONSOR_PAGE_TABS } from "../tabDefs";
 
 const TabNav = ({ currentSummit, sponsor, member, history, location }) => {
   const memberObj = new Member(member);
 
-  const tabs = [
-    {
-      label: T.translate("edit_sponsor.tab.general"),
-      value: "general",
-      accessRoute: ACCESS_ROUTES.SPONSORS
-    },
-    {
-      label: T.translate("edit_sponsor.tab.users"),
-      value: "users",
-      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
-    },
-    {
-      label: T.translate("edit_sponsor.tab.pages"),
-      value: "pages",
-      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
-    },
-    {
-      label: T.translate("edit_sponsor.tab.media_uploads"),
-      value: "media-uploads",
-      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
-    },
-    {
-      label: T.translate("edit_sponsor.tab.forms"),
-      value: "forms",
-      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
-    },
-    {
-      label: T.translate("edit_sponsor.tab.cart"),
-      value: "cart",
-      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
-    },
-    {
-      label: T.translate("edit_sponsor.tab.purchases"),
-      value: "purchases",
-      accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
-    },
-    {
-      label: T.translate("edit_sponsor.tab.badge_scans"),
-      value: "badge-scans",
-      accessRoute: ACCESS_ROUTES.SPONSORS
-    }
-  ];
+  const tabs = SPONSOR_PAGE_TABS.map((t) => ({
+    ...t,
+    label: T.translate(t.labelKey),
+    value: t.path.slice(1) || "general"
+  }));
 
-  const selectedTab = location.pathname.split("/")[6] || tabs[0].value;
+  const routeMatch = matchPath(location.pathname, {
+    path: "/app/summits/:summitId/sponsors/:sponsorId/:tab"
+  });
+  const selectedTab = routeMatch?.params?.tab || tabs[0].value;
 
   const handleTabChange = (value) => {
+    const tab = tabs.find((t) => t.value === value);
     history.push(
-      `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/${value}`
+      `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}${tab.path}`
     );
   };
 

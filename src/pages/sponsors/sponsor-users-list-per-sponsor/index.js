@@ -30,8 +30,6 @@ import NewUserPopup from "./components/new-user-popup";
 import ProcessRequestPopup from "./components/process-request-popup";
 import ImportUsersPopup from "./components/import-users-popup";
 import EditUserPopup from "./components/edit-user-popup";
-import { ACCESS_ROUTES } from "../../../utils/constants";
-import Restrict from "../../../routes/restrict";
 
 const SponsorUsersListPerSponsorPage = ({
   sponsor,
@@ -44,11 +42,13 @@ const SponsorUsersListPerSponsorPage = ({
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const [userEdit, setUserEdit] = useState(null);
+  const sponsorId = sponsor?.id;
+  const companyId = sponsor?.company?.id;
 
   useEffect(() => {
-    getSponsorUserRequests(sponsor.company.id);
-    getSponsorUsers(sponsor.id);
-  }, []);
+    if (companyId) getSponsorUserRequests(companyId);
+    if (sponsorId) getSponsorUsers(sponsorId);
+  }, [sponsorId, companyId]);
 
   const handleSearch = (searchTerm) => {
     getSponsorUsers(sponsor.id, searchTerm);
@@ -165,11 +165,8 @@ const mapStateToProps = ({ sponsorUsersListState, currentSponsorState }) => ({
   sponsor: currentSponsorState.entity
 });
 
-export default Restrict(
-  connect(mapStateToProps, {
-    getSponsorUserRequests,
-    getSponsorUsers,
-    deleteSponsorUser
-  })(SponsorUsersListPerSponsorPage),
-  ACCESS_ROUTES.ADMIN_SPONSORS
-);
+export default connect(mapStateToProps, {
+  getSponsorUserRequests,
+  getSponsorUsers,
+  deleteSponsorUser
+})(SponsorUsersListPerSponsorPage);

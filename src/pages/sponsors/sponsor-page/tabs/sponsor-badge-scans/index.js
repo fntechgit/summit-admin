@@ -25,12 +25,8 @@ import {
   getBadgeScan,
   saveBadgeScan
 } from "../../../../../actions/sponsor-actions";
-import {
-  ACCESS_ROUTES,
-  DEFAULT_CURRENT_PAGE
-} from "../../../../../utils/constants";
+import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
 import EditBadgeScanPopup from "./edit-badge-scan-popup";
-import Restrict from "../../../../../routes/restrict";
 
 const SponsorBadgeScans = ({
   sponsor,
@@ -251,12 +247,9 @@ const mapStateToProps = ({
   sponsor: currentSponsorState.entity
 });
 
-export default Restrict(
-  connect(mapStateToProps, {
-    getBadgeScans,
-    exportBadgeScans,
-    getBadgeScan,
-    saveBadgeScan
-  })(SponsorBadgeScans),
-  ACCESS_ROUTES.SPONSORS
-);
+export default connect(mapStateToProps, {
+  getBadgeScans,
+  exportBadgeScans,
+  getBadgeScan,
+  saveBadgeScan
+})(SponsorBadgeScans);

@@ -15,7 +15,6 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Box, Container, Typography } from "@mui/material";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { Breadcrumb } from "react-breadcrumbs";
 import {
   getExtraQuestionMeta,
   getSponsorAdvertisements,
@@ -26,16 +25,8 @@ import {
   resetSponsorForm
 } from "../../../actions/sponsor-actions";
 import { getSponsorPurchasesMeta } from "../../../actions/sponsor-settings-actions";
-import SponsorGeneralForm from "./tabs/sponsor-general-form/index";
-import SponsorUsersListPerSponsorPage from "../sponsor-users-list-per-sponsor";
-import SponsorFormsTab from "./tabs/sponsor-forms-tab";
-import SponsorBadgeScans from "./tabs/sponsor-badge-scans";
-import SponsorCartTab from "./tabs/sponsor-cart-tab";
-import SponsorPagesTab from "./tabs/sponsor-pages-tab";
-import SponsorFormsManageItems from "./tabs/sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items";
-import SponsorPurchasesTab from "./tabs/sponsor-purchases-tab";
-import SponsorMediaUploadTab from "./tabs/sponsor-media-upload-tab";
 import TabNav from "./components/tab-nav";
+import { SPONSOR_PAGE_TABS } from "./tabDefs";
 
 const SponsorPage = ({
   entity,
@@ -73,67 +64,20 @@ const SponsorPage = ({
           {entity.company?.name}
         </Typography>
         <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 2 }}>
-          <TabNav
-            history={history}
-            location={location}
-            summitId={currentSummit.id}
-            sponsorId={entity.id}
-          />
+          <TabNav history={history} location={location} />
         </Box>
         <Switch>
-          <Route exact strict path={match.url} component={SponsorGeneralForm} />
-          <Route
-            exact
-            path={`${match.url}/users`}
-            component={SponsorUsersListPerSponsorPage}
-          />
-          <Route
-            exact
-            path={`${match.url}/pages`}
-            component={SponsorPagesTab}
-          />
-          <Route
-            exact
-            path={`${match.url}/media-uploads`}
-            component={SponsorMediaUploadTab}
-          />
-          <Route
-            path={`${match.url}/forms`}
-            render={(props) => (
-              <div>
-                <Breadcrumb
-                  data={{
-                    title: "Forms",
-                    pathname: `${match.url}`
-                  }}
-                />
-                <Switch>
-                  <Route
-                    exact
-                    strict
-                    path={props.match.url}
-                    component={SponsorFormsTab}
-                  />
-                  <Route
-                    exact
-                    path={`${props.match.url}/:form_id/items`}
-                    component={SponsorFormsManageItems}
-                  />
-                </Switch>
-              </div>
-            )}
-          />
-          <Route exact path={`${match.url}/cart`} component={SponsorCartTab} />
-          <Route
-            exact
-            path={`${match.url}/purchases`}
-            component={SponsorPurchasesTab}
-          />
-          <Route
-            exact
-            path={`${match.url}/badge-scans`}
-            component={SponsorBadgeScans}
-          />
+          {SPONSOR_PAGE_TABS.map(
+            ({ path, exact, strict, component: Component }) => (
+              <Route
+                key={path}
+                exact={exact}
+                strict={strict}
+                path={`${match.url}${path}`}
+                component={Component}
+              />
+            )
+          )}
           <Redirect
             to={`/app/summits/${currentSummit.id}/sponsors/${entity.id}`}
           />

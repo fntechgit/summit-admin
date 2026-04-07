@@ -27,11 +27,9 @@ import { getSponsorPurchases } from "../../../../../actions/sponsor-purchases-ac
 import SearchInput from "../../../../../components/mui/search-input";
 import MuiTable from "../../../../../components/mui/table/mui-table";
 import {
-  ACCESS_ROUTES,
   DEFAULT_CURRENT_PAGE,
   PURCHASE_STATUS
 } from "../../../../../utils/constants";
-import Restrict from "../../../../../routes/restrict";
 
 const SponsorPurchasesTab = ({
   purchases,
@@ -201,9 +199,6 @@ const mapStateToProps = ({ sponsorPagePurchaseListState }) => ({
   ...sponsorPagePurchaseListState
 });
 
-export default Restrict(
-  connect(mapStateToProps, {
-    getSponsorPurchases
-  })(SponsorPurchasesTab),
-  ACCESS_ROUTES.ADMIN_SPONSORS
-);
+export default connect(mapStateToProps, {
+  getSponsorPurchases
+})(SponsorPurchasesTab);

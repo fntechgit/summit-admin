@@ -27,13 +27,9 @@ import {
 } from "../../../../../actions/sponsor-mu-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import MuiTable from "../../../../../components/mui/table/mui-table";
-import {
-  ACCESS_ROUTES,
-  SPONSOR_MEDIA_UPLOAD_STATUS
-} from "../../../../../utils/constants";
+import { SPONSOR_MEDIA_UPLOAD_STATUS } from "../../../../../utils/constants";
 import UploadDialog from "../../../../../components/upload-dialog";
 import showConfirmDialog from "../../../../../components/mui/showConfirmDialog";
-import Restrict from "../../../../../routes/restrict";
 
 const SponsorMediaUploadTab = ({
   sponsorRequests,
@@ -279,12 +275,9 @@ const mapStateToProps = ({ sponsorPageMUListState }) => ({
   ...sponsorPageMUListState
 });
 
-export default Restrict(
-  connect(mapStateToProps, {
-    getSponsorMURequests,
-    getGeneralMURequests,
-    uploadFileForSponsorMU,
-    removeFileForSponsorMU
-  })(SponsorMediaUploadTab),
-  ACCESS_ROUTES.ADMIN_SPONSORS
-);
+export default connect(mapStateToProps, {
+  getSponsorMURequests,
+  getGeneralMURequests,
+  uploadFileForSponsorMU,
+  removeFileForSponsorMU
+})(SponsorMediaUploadTab);

@@ -14,7 +14,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Box } from "@mui/material";
-import Restrict from "../../../../../routes/restrict";
 import SponsorHeader from "./sponsor-header";
 import Sponsorship from "./sponsorship";
 import BadgeScanSettings from "./badge-scan-settings";
@@ -36,12 +35,12 @@ import {
   updateExtraQuestionOrder,
   upsertSponsorLeadReportSettings
 } from "../../../../../actions/sponsor-actions";
-import { ACCESS_ROUTES } from "../../../../../utils/constants";
 
 const SponsorGeneralForm = ({
   sponsor,
   member,
   currentSummit,
+  getSponsorTiers,
   addTierToSponsor,
   removeTierFromSponsor,
   getSponsorshipAddons,
@@ -107,23 +106,20 @@ const mapStateToProps = ({
   sponsor: currentSponsorState.entity
 });
 
-export default Restrict(
-  connect(mapStateToProps, {
-    getSponsorLeadReportSettingsMeta,
-    getSponsorTiers,
-    addTierToSponsor,
-    removeTierFromSponsor,
-    getSponsorshipAddons,
-    saveAddonsToSponsorship,
-    removeAddonToSponsorship,
-    setSelectedSponsorship,
-    upsertSponsorLeadReportSettings,
-    getSponsorExtraQuestion,
-    saveSponsorExtraQuestion,
-    saveSponsorExtraQuestionValue,
-    resetSponsorExtraQuestionForm,
-    deleteExtraQuestion,
-    updateExtraQuestionOrder
-  })(SponsorGeneralForm),
-  ACCESS_ROUTES.SPONSORS
-);
+export default connect(mapStateToProps, {
+  getSponsorLeadReportSettingsMeta,
+  getSponsorTiers,
+  addTierToSponsor,
+  removeTierFromSponsor,
+  getSponsorshipAddons,
+  saveAddonsToSponsorship,
+  removeAddonToSponsorship,
+  setSelectedSponsorship,
+  upsertSponsorLeadReportSettings,
+  getSponsorExtraQuestion,
+  saveSponsorExtraQuestion,
+  saveSponsorExtraQuestionValue,
+  resetSponsorExtraQuestionForm,
+  deleteExtraQuestion,
+  updateExtraQuestionOrder
+})(SponsorGeneralForm);

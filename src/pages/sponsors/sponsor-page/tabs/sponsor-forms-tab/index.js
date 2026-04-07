@@ -37,11 +37,7 @@ import SearchInput from "../../../../../components/mui/search-input";
 import MuiTable from "../../../../../components/mui/table/mui-table";
 import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
 import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
-import {
-  ACCESS_ROUTES,
-  DEFAULT_CURRENT_PAGE
-} from "../../../../../utils/constants";
-import Restrict from "../../../../../routes/restrict";
+import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
 
 const SponsorFormsTab = ({
   term,
@@ -406,14 +402,11 @@ const mapStateToProps = ({
   sponsor: currentSponsorState.entity
 });
 
-export default Restrict(
-  connect(mapStateToProps, {
-    getSponsorManagedForms,
-    saveSponsorManagedForm,
-    getSponsorCustomizedForms,
-    archiveSponsorCustomizedForm,
-    unarchiveSponsorCustomizedForm,
-    deleteSponsorCustomizedForm
-  })(SponsorFormsTab),
-  ACCESS_ROUTES.ADMIN_SPONSORS
-);
+export default connect(mapStateToProps, {
+  getSponsorManagedForms,
+  saveSponsorManagedForm,
+  getSponsorCustomizedForms,
+  archiveSponsorCustomizedForm,
+  unarchiveSponsorCustomizedForm,
+  deleteSponsorCustomizedForm
+})(SponsorFormsTab);

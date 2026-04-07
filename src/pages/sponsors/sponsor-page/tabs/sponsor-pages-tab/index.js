@@ -24,15 +24,15 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import {
-  getSponsorManagedPages,
-  getSponsorCustomizedPages,
-  saveSponsorManagedPage,
-  saveSponsorCustomizedPage,
-  getSponsorCustomizedPage,
-  deleteSponsorManagedPage,
-  unarchiveCustomizedPage,
   archiveCustomizedPage,
-  resetSponsorPage
+  deleteSponsorManagedPage,
+  getSponsorCustomizedPage,
+  getSponsorCustomizedPages,
+  getSponsorManagedPages,
+  resetSponsorPage,
+  saveSponsorCustomizedPage,
+  saveSponsorManagedPage,
+  unarchiveCustomizedPage
 } from "../../../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import SearchInput from "../../../../../components/mui/search-input";

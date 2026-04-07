@@ -18,8 +18,6 @@ import SelectFormDialog from "./components/select-form-dialog";
 import CartView from "./components/cart-view";
 import NewCartForm from "./components/edit-form/new-cart-form";
 import EditCartForm from "./components/edit-form/edit-cart-form";
-import { ACCESS_ROUTES } from "../../../../../utils/constants";
-import Restrict from "../../../../../routes/restrict";
 
 const SponsorCartTab = ({ sponsor, currentSummit }) => {
   const [openAddFormDialog, setOpenAddFormDialog] = useState(false);
@@ -81,7 +79,4 @@ const mapStateToProps = ({ currentSummitState, currentSponsorState }) => ({
   sponsor: currentSponsorState.entity
 });
 
-export default Restrict(
-  connect(mapStateToProps, {})(SponsorCartTab),
-  ACCESS_ROUTES.ADMIN_SPONSORS
-);
+export default connect(mapStateToProps, {})(SponsorCartTab);

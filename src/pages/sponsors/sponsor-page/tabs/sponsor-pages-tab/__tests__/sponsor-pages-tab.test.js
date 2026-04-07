@@ -77,6 +77,9 @@ const createCustomizedPage = (id, overrides = {}) => ({
 });
 
 const defaultState = {
+  loggedUserState: {
+    member: { groups: {} }
+  },
   sponsorPagePagesListState: {
     ...sponsorPagesDefaultState,
     managedPages: {
