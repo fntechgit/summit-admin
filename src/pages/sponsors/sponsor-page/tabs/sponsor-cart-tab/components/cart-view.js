@@ -26,12 +26,15 @@ import AddIcon from "@mui/icons-material/Add";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockClosedIcon from "@mui/icons-material/Lock";
 import MuiTable, { TotalRow } from "openstack-uicore-foundation/lib/components/mui/table";
+import history from "../../../../../../history";
 import SearchInput from "../../../../../../components/mui/search-input";
 import {
+  checkoutCart,
   deleteSponsorCartForm,
   deleteSponsorCartNote,
   getSponsorCart,
   lockSponsorCartForm,
+  payWithInvoice,
   saveSponsorCartNote,
   unlockSponsorCartForm
 } from "../../../../../../actions/sponsor-cart-actions";
@@ -45,12 +48,12 @@ const CartView = ({
   deleteSponsorCartForm,
   lockSponsorCartForm,
   unlockSponsorCartForm,
-  onEdit,
   onAddForm,
   saveSponsorCartNote,
   deleteSponsorCartNote,
   onPayCC,
-  onPayInvoice
+  checkoutCart,
+  payWithInvoice
 }) => {
   useEffect(() => {
     getSponsorCart();
@@ -68,6 +71,10 @@ const CartView = ({
     console.log("MANAGE ITEMS : ", item);
   };
 
+  const handleEditForm = (form) => {
+    history.push(`cart/forms/${form.id}`);
+  };
+
   const handleLock = (form) => {
     if (form.is_locked) {
       unlockSponsorCartForm(form.id);
@@ -81,7 +88,11 @@ const CartView = ({
   };
 
   const handlePayInvoice = () => {
-    onPayInvoice();
+    checkoutCart().then(() => {
+      payWithInvoice().then(() => {
+        history.push("cart/invoice");
+      });
+    });
   };
 
   const cartData = cart?.forms.map((form) => ({
@@ -193,7 +204,7 @@ const CartView = ({
               columns={tableColumns}
               data={cartData}
               options={{}}
-              onEdit={onEdit}
+              onEdit={handleEditForm}
               onDelete={handleDelete}
               deleteDialogBody={(formName) =>
                 T.translate("edit_sponsor.cart_tab.delete_form_confirm", {
@@ -280,5 +291,7 @@ export default connect(mapStateToProps, {
   lockSponsorCartForm,
   unlockSponsorCartForm,
   saveSponsorCartNote,
-  deleteSponsorCartNote
+  deleteSponsorCartNote,
+  checkoutCart,
+  payWithInvoice
 })(CartView);

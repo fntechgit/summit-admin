@@ -15,31 +15,64 @@ import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
+import history from "../../../../../../history";
 
-const InvoiceView = ({ onCancel }) => (
-  <Card sx={{ borderRadius: "10px", height: "100%" }} variant="outlined">
-    <CardContent>
-      <Box sx={{ pt: 10, pb: 10 }}>
-        <Box sx={{ width: 400, margin: "auto", textAlign: "center" }}>
-          <Typography variant="h4" component="div" sx={{ mb: 2 }}>
-            {T.translate("edit_sponsor.cart_tab.invoice_view.title")}
-          </Typography>
-          <Typography variant="body2" component="div" sx={{ mb: 2 }}>
-            {T.translate("edit_sponsor.cart_tab.invoice_view.subtitle")}
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            style={{ minWidth: 250 }}
-            onClick={onCancel}
-          >
-            {T.translate("general.return")}
-          </Button>
+const InvoiceView = ({ match }) => {
+  const rootUrl = match.url
+    .split("/")
+    .filter((segment) => segment.length > 0)
+    // eslint-disable-next-line no-magic-numbers
+    .slice(0, -2)
+    .join("/");
+
+  const handleCancel = () => {
+    history.push(`/${rootUrl}/cart`);
+  };
+
+  const handleToOrders = () => {
+    history.push(`/${rootUrl}/purchases`);
+  };
+
+  return (
+    <Card sx={{ borderRadius: "10px", height: "100%" }} variant="outlined">
+      <CardContent>
+        <Box sx={{ pt: 10, pb: 10 }}>
+          <Box sx={{ width: 400, margin: "auto", textAlign: "center" }}>
+            <Typography variant="h4" component="div" sx={{ mb: 2 }}>
+              {T.translate("edit_sponsor.cart_tab.invoice_view.title")}
+            </Typography>
+            <Box
+              component="div"
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: 4,
+                gap: 2
+              }}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                style={{ minWidth: 250 }}
+                onClick={handleCancel}
+              >
+                {T.translate("general.return")}
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                style={{ minWidth: 250 }}
+                onClick={handleToOrders}
+              >
+                {T.translate("edit_sponsor.cart_tab.invoice_view.go_to_orders")}
+              </Button>
+            </Box>
+          </Box>
         </Box>
-      </Box>
-    </CardContent>
-  </Card>
-);
+      </CardContent>
+    </Card>
+  );
+};
 
 const mapStateToProps = ({ showAccessState }) => ({
   ...showAccessState

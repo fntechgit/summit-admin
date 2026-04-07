@@ -13,25 +13,19 @@
 
 import React, { useState } from "react";
 import { connect } from "react-redux";
+import { Route, Switch } from "react-router-dom";
 import { Box } from "@mui/material";
+import { Breadcrumb } from "react-breadcrumbs";
 import SelectFormDialog from "./components/select-form-dialog";
 import CartView from "./components/cart-view";
 import NewCartForm from "./components/edit-form/new-cart-form";
 import EditCartForm from "./components/edit-form/edit-cart-form";
 import InvoiceView from "./components/invoice-view";
-import {
-  checkoutCart,
-  payWithInvoice
-} from "../../../../../actions/sponsor-cart-actions";
+import PaymentView from "./components/payment-view";
 
-const SponsorCartTab = ({ sponsor, currentSummit, checkoutCart, payWithInvoice }) => {
+const SponsorCartTab = ({ sponsor, currentSummit, match }) => {
   const [openAddFormDialog, setOpenAddFormDialog] = useState(false);
-  const [formEdit, setFormEdit] = useState(null);
   const [newForm, setNewForm] = useState(null);
-  const [invoiceView, setInvoiceView] = useState(null);
-  const [payCCView, setPayCCView] = useState(null);
-
-  const showCartView = !formEdit && !newForm && !invoiceView && !payCCView;
 
   const handleFormSelected = (form, addOn) => {
     setNewForm({ formId: form.id, addon: addOn });
@@ -42,54 +36,59 @@ const SponsorCartTab = ({ sponsor, currentSummit, checkoutCart, payWithInvoice }
     setNewForm(null);
   };
 
-  const handleOnFormUpdated = () => {
-    setFormEdit(null);
-  };
-
-  const handlePayInvoice = () => {
-    checkoutCart().then(() => {
-      payWithInvoice().then(() => {
-        setInvoiceView(true);
-      });
-    });
+  const handleOnAddForm = () => {
+    setOpenAddFormDialog(true);
   };
 
   return (
     <Box sx={{ mt: 2 }}>
-      {newForm && (
-        <NewCartForm
-          formId={newForm.formId}
-          addOn={{
-            addon_name: newForm.addon?.name,
-            addon_id: newForm.addon?.id
+      <div>
+        <Breadcrumb
+          data={{
+            title: "Cart",
+            pathname: match.url
           }}
-          onCancel={() => setNewForm(null)}
-          onSaveCallback={handleOnFormAdded}
         />
-      )}
-      {formEdit && (
-        <EditCartForm
-          formId={formEdit.id}
-          onCancel={() => setFormEdit(null)}
-          onSaveCallback={handleOnFormUpdated}
-        />
-      )}
-      {invoiceView && <InvoiceView onCancel={() => setInvoiceView(null)} />}
-      {showCartView && (
-        <CartView
-          onEdit={setFormEdit}
-          onAddForm={() => setOpenAddFormDialog(true)}
-          onPayCC={() => setPayCCView(true)}
-          onPayInvoice={handlePayInvoice}
-        />
-      )}
-      <SelectFormDialog
-        open={!!openAddFormDialog}
-        summitId={currentSummit.id}
-        sponsor={sponsor}
-        onSave={handleFormSelected}
-        onClose={() => setOpenAddFormDialog(false)}
-      />
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            render={() => (
+              <>
+                {newForm ? (
+                  <NewCartForm
+                    formId={newForm.formId}
+                    addOn={{
+                      addon_name: newForm.addon?.name,
+                      addon_id: newForm.addon?.id
+                    }}
+                    onCancel={() => setNewForm(null)}
+                    onSaveCallback={handleOnFormAdded}
+                  />
+                ) : (
+                  <CartView onAddForm={handleOnAddForm} />
+                )}
+
+                <SelectFormDialog
+                  open={!!openAddFormDialog}
+                  summitId={currentSummit.id}
+                  sponsor={sponsor}
+                  onSave={handleFormSelected}
+                  onClose={() => setOpenAddFormDialog(false)}
+                />
+              </>
+            )}
+          />
+          <Route exact path={`${match.url}/invoice`} component={InvoiceView} />
+          <Route exact path={`${match.url}/payment`} component={PaymentView} />
+          <Route
+            exact
+            path={`${match.url}/forms/:form_id`}
+            component={EditCartForm}
+          />
+        </Switch>
+      </div>
     </Box>
   );
 };
@@ -99,7 +98,4 @@ const mapStateToProps = ({ currentSummitState, currentSponsorState }) => ({
   sponsor: currentSponsorState.entity
 });
 
-export default connect(mapStateToProps, {
-  checkoutCart,
-  payWithInvoice
-})(SponsorCartTab);
+export default connect(mapStateToProps, {})(SponsorCartTab);

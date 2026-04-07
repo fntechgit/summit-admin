@@ -71,7 +71,6 @@ export const SPONSOR_PAGE_TABS = [
   {
     labelKey: "edit_sponsor.tab.cart",
     path: "/cart",
-    exact: true,
     component: SponsorCartTab,
     accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
   },

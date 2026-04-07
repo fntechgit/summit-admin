@@ -16,6 +16,15 @@ jest.mock("../../../../../../../../actions/sponsor-cart-actions", () => ({
 }));
 
 // Mock foundation components used by EditForm
+
+// Mock history
+const mockHistoryPush = jest.fn();
+jest.mock("../../../../../../../../history", () => ({
+  __esModule: true,
+  default: { push: (...args) => mockHistoryPush(...args) }
+}));
+
+// Mock sub-components used by FormItemTable
 jest.mock(
   "openstack-uicore-foundation/lib/components/mui/form-item-table",
   () => {
@@ -155,8 +164,16 @@ const mockCartForm = {
   ]
 };
 
+const buildMatch = (formId, url) => ({
+  params: { form_id: formId },
+  url: url || `/app/events/1/sponsors/2/cart/forms/${formId}/edit`
+});
+
 // Helper function to render the component with Redux store
-const renderWithStore = (props, storeState = {}) => {
+const renderWithStore = (
+  { formId = 1, ...restProps } = {},
+  storeState = {}
+) => {
   const defaultState = {
     sponsorPageCartListState: {
       cartForm:
@@ -176,16 +193,9 @@ const renderWithStore = (props, storeState = {}) => {
 
   const store = mockStore(defaultState);
 
-  const defaultProps = {
-    formId: 1,
-    onCancel: jest.fn(),
-    onSaveCallback: jest.fn(),
-    ...props
-  };
-
   return render(
     <Provider store={store}>
-      <EditCartForm {...defaultProps} />
+      <EditCartForm match={buildMatch(formId)} {...restProps} />
     </Provider>
   );
 };
@@ -281,9 +291,8 @@ describe("EditCartForm", () => {
   });
 
   describe("Cancel Functionality", () => {
-    test("clicking CANCEL returns to cart tab", async () => {
-      const onCancel = jest.fn();
-      renderWithStore({ onCancel });
+    test("clicking CANCEL navigates back", async () => {
+      renderWithStore();
 
       await waitFor(() => {
         expect(screen.getByText(/general.cancel/)).toBeInTheDocument();
@@ -292,7 +301,7 @@ describe("EditCartForm", () => {
       const cancelButton = screen.getByText(/general.cancel/);
       await userEvent.click(cancelButton);
 
-      expect(onCancel).toHaveBeenCalledTimes(1);
+      expect(mockHistoryPush).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -352,11 +361,10 @@ describe("EditCartForm", () => {
       });
     });
 
-    test("on success shows snackbar + returns to tab + triggers refresh", async () => {
-      const onSaveCallback = jest.fn();
+    test("on success navigates back to cart tab", async () => {
       mockUpdateCartForm.mockReturnValue(() => Promise.resolve());
 
-      renderWithStore({ formId: 123, onSaveCallback });
+      renderWithStore({ formId: 123 });
 
       await waitFor(() => {
         expect(screen.getByText(/general.save/)).toBeInTheDocument();
@@ -367,7 +375,7 @@ describe("EditCartForm", () => {
 
       await waitFor(() => {
         expect(mockUpdateCartForm).toHaveBeenCalled();
-        expect(onSaveCallback).toHaveBeenCalledTimes(1);
+        expect(mockHistoryPush).toHaveBeenCalledTimes(1);
       });
     });
   });

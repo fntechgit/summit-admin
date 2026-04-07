@@ -2561,7 +2561,7 @@
       },
       "invoice_view": {
         "title": "Purchase confirmed",
-        "subtitle": "The administrators will contact you to complete the payment."
+        "go_to_orders": "Go to orders"
       }
     },
     "purchase_tab": {
