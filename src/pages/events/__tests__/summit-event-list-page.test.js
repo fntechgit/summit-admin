@@ -200,6 +200,81 @@ describe("SummitEventListPage", () => {
     );
   });
 
+  test("opens media upload material link using current summit id fallback", async () => {
+    renderWithRedux(<SummitEventListPage />, {
+      initialState: {
+        currentSummitState: {
+          currentSummit: {
+            id: 12,
+            time_zone: { name: "UTC" },
+            time_zone_id: "UTC",
+            selection_plans: [],
+            tracks: [],
+            event_types: [],
+            locations: [],
+            presentation_action_types: []
+          }
+        },
+        currentEventListState: {
+          events: [
+            {
+              id: 101,
+              type: { id: 1, name: "Presentation", use_speakers: true },
+              title: "Sample event",
+              selection_status: "pending",
+              media_uploads: [
+                {
+                  id: 999,
+                  created: "now",
+                  media_upload_type: { name: "Slides" }
+                }
+              ]
+            }
+          ],
+          lastPage: 1,
+          currentPage: 1,
+          order: "id",
+          orderDir: 1,
+          totalEvents: 1,
+          term: "",
+          filters: {},
+          extraColumns: ["media_uploads"],
+          perPage: 10,
+          enabledFilters: []
+        }
+      }
+    });
+
+    const editableTableProps =
+      mockEditableTableSpy.mock.calls[
+        mockEditableTableSpy.mock.calls.length - 1
+      ][0];
+    const mediaUploadsColumn = editableTableProps.columns.find(
+      (col) => col.columnKey === "media_uploads"
+    );
+
+    const mediaUploadItem = {
+      id: 999,
+      created: "now",
+      media_upload_type: { name: "Slides" }
+    };
+
+    const rendered = mediaUploadsColumn.render([mediaUploadItem], { id: 101 });
+    const firstRow = rendered.props.children[0];
+    const firstButton = Array.isArray(firstRow.props.children)
+      ? firstRow.props.children[0]
+      : firstRow.props.children;
+
+    firstButton.props.onClick({
+      preventDefault: jest.fn()
+    });
+
+    expect(windowOpenSpy).toHaveBeenCalledWith(
+      "/app/summits/12/events/101/materials/999",
+      "_blank"
+    );
+  });
+
   test("does not open media upload material link when row event id is missing", async () => {
     renderWithRedux(<SummitEventListPage />, {
       initialState: {
