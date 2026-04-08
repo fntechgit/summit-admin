@@ -10,6 +10,7 @@ import {
   Typography
 } from "@mui/material";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
@@ -23,7 +24,6 @@ import {
 } from "../../../../../utils/yup";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikDatepicker from "../../../../../components/mui/formik-inputs/mui-formik-datepicker";
-import AdditionalInputList from "../../../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import useScrollToError from "../../../../../hooks/useScrollToError";
 import FormikTextEditor from "../../../../../components/inputs/formik-text-editor";
 

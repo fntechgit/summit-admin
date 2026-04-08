@@ -2455,11 +2455,6 @@
         "expires_at": "Expires at",
         "instructions": "Instructions",
         "additional_fields": "Additional Input Fields",
-        "meta_field_title": "Field Title",
-        "meta_field_type": "Field Type",
-        "meta_field_required": "Required",
-        "delete_meta_field_warning": "Are you sure you want to delete meta field ",
-        "delete_value_warning": "Are you sure you want to delete meta field value ",
         "save": "Save Form",
         "created": "Form created successfully.",
         "updated": "Form {formName} updated successfully.",
@@ -2643,16 +2638,25 @@
     }
   },
   "additional_inputs": {
-    "meta_field_title": "Field Title",
-    "meta_field_type": "Field Type",
-    "meta_field_required": "Required",
-    "delete_meta_field_warning": "Are you sure you want to delete meta field ",
+    "title": "Field Title",
+    "type": "Field Type",
+    "required": "Required",
+    "delete_warning": "Are you sure you want to delete meta field ",
     "delete_value_warning": "Are you sure you want to delete meta field value ",
     "placeholders": {
-      "meta_field_title": "Field Title",
-      "meta_field_type": "Select...",
-      "meta_field_maximum_quantity": "Maximum",
-      "meta_field_minimum_quantity": "Minimum"
+      "title": "Field Title",
+      "type": "Select...",
+      "maximum_quantity": "Maximum",
+      "minimum_quantity": "Minimum"
+    }
+  },
+  "meta_fields": {
+    "delete_value_warning": "Please verify you want to delete the added value",
+    "is_default": "Is Default?",
+    "add_value": "Add a value",
+    "placeholders": {
+      "name": "Name",
+      "value": "Value"
     }
   },
   "sponsor_forms": {
@@ -2708,11 +2712,6 @@
       "expires_at": "Expires at",
       "instructions": "Instructions",
       "additional_fields": "Additional Input Fields",
-      "meta_field_title": "Field Title",
-      "meta_field_type": "Field Type",
-      "meta_field_required": "Required",
-      "delete_meta_field_warning": "Are you sure you want to delete meta field ",
-      "delete_value_warning": "Are you sure you want to delete meta field value ",
       "save": "Save Form",
       "created": "Form created successfully.",
       "updated": "Form {formName} updated successfully.",
@@ -3918,22 +3917,10 @@
     "instructions": "Instructions",
     "delete_meta_field_warning": "Are you sure you want to delete meta field ",
     "meta_fields": "Additional Input Fields",
-    "meta_field_values": "Field Values",
     "materials": "Materials",
     "save_changes": "Save Changes",
     "add_form": "Add Form",
-    "required_error": "This field is required.",
-    "meta_field_title": "Field Title",
-    "meta_field_required": "Required Field",
-    "meta_field_type": "Field Type",
-    "placeholders": {
-      "meta_field_title": "Field Title",
-      "meta_field_required": "Required Field",
-      "meta_field_type": "Field Type",
-      "meta_field_values": "Field Values",
-      "meta_field_minimum_quantity": "Minimum Quantity",
-      "meta_field_maximum_quantity": "Maximum Quantity"
-    }
+    "required_error": "This field is required."
   },
   "form_template_from_duplicate_dialog": {
     "duplicate_form": "Duplicate Form",
@@ -3979,22 +3966,8 @@
     }
   },
   "edit_form_template_item": {
-    "form_template_item": "Item",
     "form_template_item_created": "Form Template Item created successfully.",
-    "form_template_item_saved": "Form Template Item saved successfully.",
-    "code": "Code",
-    "name": "Name",
-    "description": "Description",
-    "delete_meta_field_warning": "Are you sure you want to delete meta field ",
-    "meta_fields": "Additional Input Fields",
-    "meta_field_values": "Field Values",
-    "placeholders": {
-      "meta_field_title": "Field Title",
-      "meta_field_required": "Required Field",
-      "meta_field_type": "Field Type",
-      "meta_field_values": "Field Values"
-    },
-    "images": "Images"
+    "form_template_item_saved": "Form Template Item saved successfully."
   },
   "mui_table": {
     "no_items": "No items found.",
