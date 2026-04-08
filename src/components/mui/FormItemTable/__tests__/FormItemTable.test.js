@@ -191,17 +191,20 @@ jest.mock("../../formik-inputs/mui-formik-timepicker", () => ({
   )
 }));
 
-jest.mock("../../formik-inputs/mui-formik-datepicker", () => ({
-  __esModule: true,
-  default: ({ name, label }) => (
-    <input
-      data-testid={`datepicker-${name}`}
-      name={name}
-      type="date"
-      placeholder={label}
-    />
-  )
-}));
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker",
+  () => ({
+    __esModule: true,
+    default: ({ name, label }) => (
+      <input
+        data-testid={`datepicker-${name}`}
+        name={name}
+        type="date"
+        placeholder={label}
+      />
+    )
+  })
+);
 
 jest.mock("../../formik-inputs/mui-formik-select", () => ({
   __esModule: true,

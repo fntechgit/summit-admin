@@ -13,10 +13,10 @@
 
 import React from "react";
 import { MenuItem } from "@mui/material";
+import MuiFormikDatepicker from "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker";
 import MuiFormikCheckbox from "../../formik-inputs/mui-formik-checkbox";
 import MuiFormikDropdownCheckbox from "../../formik-inputs/mui-formik-dropdown-checkbox";
 import MuiFormikDropdownRadio from "../../formik-inputs/mui-formik-dropdown-radio";
-import MuiFormikDatepicker from "../../formik-inputs/mui-formik-datepicker";
 import MuiFormikTimepicker from "../../formik-inputs/mui-formik-timepicker";
 import MuiFormikTextField from "../../formik-inputs/mui-formik-textfield";
 import MuiFormikSelect from "../../formik-inputs/mui-formik-select";
