@@ -65,6 +65,7 @@ export const DEFAULT_ENTITY = {
   name: "",
   submission_period_disclaimer: "",
   is_enabled: false,
+  is_hidden: false,
   max_submission_allowed_per_user: 0,
   selection_begin_date: 0,
   selection_end_date: 0,
