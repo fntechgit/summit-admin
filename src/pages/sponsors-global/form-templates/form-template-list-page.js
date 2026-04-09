@@ -26,6 +26,7 @@ import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   archiveFormTemplate,
   deleteFormTemplate,
@@ -38,7 +39,6 @@ import {
   saveFormTemplate,
   unarchiveFormTemplate
 } from "../../../actions/form-template-actions";
-import MuiTable from "../../../components/mui/table/mui-table";
 import FormTemplateDialog from "./form-template-popup";
 import history from "../../../history";
 import FormTemplateFromDuplicateDialog from "./form-template-from-duplicate-popup";

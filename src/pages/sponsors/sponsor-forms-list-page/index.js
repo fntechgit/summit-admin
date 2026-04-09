@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import history from "../../../history";
 import {
   archiveSponsorForm,
@@ -39,7 +40,6 @@ import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
-import MuiTable from "../../../components/mui/table/mui-table";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 import { normalizeTiers, sameTierSet } from "./utils";
 
@@ -196,10 +196,12 @@ const SponsorFormsListPage = ({
       })
       .catch(() => {});
   };
-  
+
   const formatDate = (timestamp) => {
     if (!timestamp) return "";
-    return epochToMoment(Number(timestamp)).format("MM/DD/YYYY");
+    const num = Number(timestamp);
+    if (Number.isNaN(num)) return "";
+    return epochToMoment(num).format("MM/DD/YYYY");
   };
 
   const columns = [
@@ -307,10 +309,9 @@ const SponsorFormsListPage = ({
     },
     {
       columnKey: "items_qty",
-      width: 100,
+      width: 90,
       header: T.translate("sponsor_forms.items_column_label"),
-      sortable: false,
-      width: 90
+      sortable: false
     },
     {
       columnKey: "manage_items",

@@ -16,6 +16,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Alert, Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import MuiTableSortable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   deleteSummitSponsorship,
@@ -27,7 +28,6 @@ import {
   updateSummitSponsorhipOrder,
   uploadSponsorshipBadgeImage
 } from "../../actions/sponsor-actions";
-import MuiTableSortable from "../../components/mui/sortable-table/mui-table-sortable";
 import EditTierPopup from "./popup/edit-tier-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
