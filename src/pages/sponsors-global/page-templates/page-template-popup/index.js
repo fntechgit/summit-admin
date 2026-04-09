@@ -17,6 +17,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
+import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
 import PageModules from "./page-template-modules-form";
 import {
@@ -27,7 +28,6 @@ import {
   PAGE_MODULES_MEDIA_TYPES,
   PAGE_MODULES_DOWNLOAD
 } from "../../../../utils/constants";
-import DropdownCheckbox from "../../../../components/mui/dropdown-checkbox";
 import MuiFormikSelectGroup from "../../../../components/mui/formik-inputs/mui-formik-select-group";
 import { querySponsorAddons } from "../../../../actions/sponsor-actions";
 
@@ -207,7 +207,7 @@ const PageTemplatePopup = ({
               </Grid2>
               {showSponsorships && (
                 <Grid2 spacing={2} size={4}>
-                  <DropdownCheckbox
+                  <MuiDropdownCheckbox
                     name="sponsorship_types"
                     label={T.translate("page_template_list.sponsorship")}
                     allLabel={T.translate("page_template_list.all_tiers")}

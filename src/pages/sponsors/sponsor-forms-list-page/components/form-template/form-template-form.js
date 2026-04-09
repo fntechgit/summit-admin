@@ -13,6 +13,7 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
+import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
 import {
   addIssAfterDateFieldValidator,
   formMetafieldsValidation,
@@ -20,7 +21,6 @@ import {
   requiredHTMLValidation,
   requiredStringValidation
 } from "../../../../../utils/yup";
-import DropdownCheckbox from "../../../../../components/mui/dropdown-checkbox";
 import MuiFormikTextField from "../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import MuiFormikDatepicker from "../../../../../components/mui/formik-inputs/mui-formik-datepicker";
 import AdditionalInputList from "../../../../../components/mui/formik-inputs/additional-input/additional-input-list";
@@ -100,7 +100,7 @@ const FormTemplateForm = ({
               />
             </Grid2>
             <Grid2 size={4}>
-              <DropdownCheckbox
+              <MuiDropdownCheckbox
                 name="sponsorship_types"
                 label={T.translate(
                   "sponsor_forms.form_template_popup.sponsorship"

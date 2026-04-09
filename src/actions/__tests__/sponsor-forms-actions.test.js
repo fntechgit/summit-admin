@@ -1,7 +1,6 @@
 /**
  * @jest-environment jsdom
  */
-import { expect, jest, describe, it } from "@jest/globals";
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
@@ -33,35 +32,27 @@ describe("Sponsor Forms Actions", () => {
     beforeEach(() => {
       jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
 
-      getRequest.mockImplementation(
-        (
-            requestActionCreator,
-            receiveActionCreator,
-            endpoint, // eslint-disable-line no-unused-vars
-            payload, // eslint-disable-line no-unused-vars
-            errorHandler = null, // eslint-disable-line no-unused-vars
-            requestActionPayload = {}
-          ) =>
-          (
-            params = {} // eslint-disable-line no-unused-vars
-          ) =>
-          (dispatch) => {
-            if (
-              requestActionCreator &&
-              typeof requestActionCreator === "function"
-            )
-              dispatch(requestActionCreator(requestActionPayload));
+      getRequest.mockImplementation((...requestArgs) => {
+        const [requestActionCreator, receiveActionCreator] = requestArgs;
+        const requestActionPayload = requestArgs[5] ?? {};
 
-            return new Promise((resolve) => {
-              if (typeof receiveActionCreator === "function") {
-                dispatch(receiveActionCreator({ response: {} }));
-                resolve({ response: {} });
-              }
-              dispatch(receiveActionCreator);
+        return () => (dispatch) => {
+          if (
+            requestActionCreator &&
+            typeof requestActionCreator === "function"
+          )
+            dispatch(requestActionCreator(requestActionPayload));
+
+          return new Promise((resolve) => {
+            if (typeof receiveActionCreator === "function") {
+              dispatch(receiveActionCreator({ response: {} }));
               resolve({ response: {} });
-            });
-          }
-      );
+            }
+            dispatch(receiveActionCreator);
+            resolve({ response: {} });
+          });
+        };
+      });
     });
 
     afterEach(() => {
@@ -208,51 +199,36 @@ describe("Sponsor Forms Actions", () => {
     beforeEach(() => {
       jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
 
-      putRequest.mockImplementation(
-        (
-            requestActionCreator, // eslint-disable-line no-unused-vars
-            receiveActionCreator,
-            endpoint, // eslint-disable-line no-unused-vars
-            payload // eslint-disable-line no-unused-vars
-          ) =>
-          (
-            params = {} // eslint-disable-line no-unused-vars
-          ) =>
-          (dispatch) => {
-            if (typeof receiveActionCreator === "function") {
-              dispatch(receiveActionCreator({ response: {} }));
-            }
-            return Promise.resolve({ response: {} });
+      putRequest.mockImplementation((...requestArgs) => {
+        const [, receiveActionCreator] = requestArgs;
+
+        return () => (dispatch) => {
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response: {} }));
           }
-      );
+          return Promise.resolve({ response: {} });
+        };
+      });
 
-      getRequest.mockImplementation(
-        (
-            requestActionCreator,
-            receiveActionCreator,
-            endpoint, // eslint-disable-line no-unused-vars
-            payload, // eslint-disable-line no-unused-vars
-            errorHandler = null, // eslint-disable-line no-unused-vars
-            requestActionPayload = {}
-          ) =>
-          (
-            params = {} // eslint-disable-line no-unused-vars
-          ) =>
-          (dispatch) => {
-            if (
-              requestActionCreator &&
-              typeof requestActionCreator === "function"
-            ) {
-              dispatch(requestActionCreator(requestActionPayload));
-            }
+      getRequest.mockImplementation((...requestArgs) => {
+        const [requestActionCreator, receiveActionCreator] = requestArgs;
+        const requestActionPayload = requestArgs[5] ?? {};
 
-            if (typeof receiveActionCreator === "function") {
-              dispatch(receiveActionCreator({ response: {} }));
-            }
-
-            return Promise.resolve({ response: {} });
+        return () => (dispatch) => {
+          if (
+            requestActionCreator &&
+            typeof requestActionCreator === "function"
+          ) {
+            dispatch(requestActionCreator(requestActionPayload));
           }
-      );
+
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response: {} }));
+          }
+
+          return Promise.resolve({ response: {} });
+        };
+      });
     });
 
     afterEach(() => {

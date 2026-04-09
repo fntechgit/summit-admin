@@ -24,6 +24,7 @@ import {
   Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
 import history from "../../../history";
 import {
   archiveSponsorForm,
@@ -39,7 +40,6 @@ import SearchInput from "../../../components/mui/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
 import MuiTable from "../../../components/mui/table/mui-table";
-import DropdownCheckbox from "../../../components/mui/dropdown-checkbox";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 import { normalizeTiers, sameTierSet } from "./utils";
 
@@ -230,7 +230,7 @@ const SponsorFormsListPage = ({
               className="tiers-inline-container"
               ref={dropdownRef}
             >
-              <DropdownCheckbox
+              <MuiDropdownCheckbox
                 name="tiers-inline"
                 label={T.translate(
                   "sponsor_forms.form_template_popup.sponsorship"

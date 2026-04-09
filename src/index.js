@@ -17,6 +17,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/es/integration/react";
 import { GlobalConfirmDialog } from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 
+import MuiSnackbarNotification from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import App from "./app";
 import store, { persistor } from "./store";
 import "font-awesome/css/font-awesome.css";
@@ -24,7 +25,6 @@ import "./styles/landing.css";
 import "./styles/general.less";
 import "openstack-uicore-foundation/lib/css/components/index.css";
 import CustomTheme from "./components/CustomTheme";
-import SnackbarNotification from "./components/mui/SnackbarNotification";
 
 const onBeforeLift = () => {
   console.log("reading state ...");
@@ -34,10 +34,10 @@ ReactDOM.render(
   <Provider store={store}>
     <PersistGate onBeforeLift={onBeforeLift} persistor={persistor}>
       <CustomTheme>
-        <SnackbarNotification>
+        <MuiSnackbarNotification>
           <GlobalConfirmDialog />
           <App />
-        </SnackbarNotification>
+        </MuiSnackbarNotification>
       </CustomTheme>
     </PersistGate>
   </Provider>,
