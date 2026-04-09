@@ -66,7 +66,13 @@ const AddFormTemplateItemDialog = ({
   };
 
   const handleOnSearch = (searchTerm) => {
-    getInventoryItems(searchTerm, currentPage, perPage, order, orderDir);
+    getInventoryItems(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const handleSelected = (id, isSelected) => {

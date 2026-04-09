@@ -24,7 +24,10 @@ import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MenuButton from "../../../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../../../actions/sponsor-actions";
 import { getSponsorForms } from "../../../../../../../actions/sponsor-forms-actions";
-import { FIVE_PER_PAGE } from "../../../../../../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  FIVE_PER_PAGE
+} from "../../../../../../../utils/constants";
 import MuiFormikSelectGroup from "../../../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
 const AddSponsorFormTemplatePopup = ({
@@ -105,7 +108,7 @@ const AddSponsorFormTemplatePopup = ({
   const handleOnSearch = (searchTerm) => {
     getSponsorForms(
       searchTerm,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
