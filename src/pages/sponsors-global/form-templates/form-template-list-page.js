@@ -105,7 +105,7 @@ const FormTemplateListPage = ({
   const handleSearch = (searchTerm) => {
     getFormTemplates(
       searchTerm,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
