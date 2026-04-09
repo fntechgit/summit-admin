@@ -24,7 +24,8 @@ const EditCartForm = ({
   match,
   cartForm,
   getSponsorCartForm,
-  updateCartForm
+  updateCartForm,
+  onCancel
 }) => {
   const formId = match.params.form_id;
 
@@ -45,8 +46,10 @@ const EditCartForm = ({
 
   if (!cartForm) return null;
 
+  const handleCancel = onCancel || backToCart;
+
   return (
-    <EditForm form={cartForm} onSaveForm={saveForm} onCancel={backToCart} />
+    <EditForm form={cartForm} onSaveForm={saveForm} onCancel={handleCancel} />
   );
 };
 

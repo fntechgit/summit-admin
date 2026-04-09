@@ -2548,6 +2548,7 @@
         "discount": "Discount",
         "total_on_caps": "TOTAL",
         "no_forms_found": "No forms found.",
+        "unsaved_changes_warning": "You have unsaved changes. Discard changes?",
         "form_added": "Form added successfully.",
         "form_updated": "Form updated successfully."
       },
