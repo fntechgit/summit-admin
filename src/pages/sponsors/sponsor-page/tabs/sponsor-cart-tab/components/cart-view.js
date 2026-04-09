@@ -39,7 +39,10 @@ import {
   unlockSponsorCartForm
 } from "../../../../../../actions/sponsor-cart-actions";
 import CartNote from "./cart-note";
-import { SPONSOR_CART_NOTE_TYPES } from "../../../../../../utils/constants";
+import {
+  SPONSOR_CART_NOTE_TYPES,
+  SPONSOR_CART_STATUS
+} from "../../../../../../utils/constants";
 
 const CartView = ({
   cart,
@@ -51,10 +54,12 @@ const CartView = ({
   onAddForm,
   saveSponsorCartNote,
   deleteSponsorCartNote,
-  onPayCC,
   checkoutCart,
   payWithInvoice
 }) => {
+  const cartIsPendingPayment =
+    cart?.status === SPONSOR_CART_STATUS.PENDING_PAYMENT;
+
   useEffect(() => {
     getSponsorCart();
   }, []);
@@ -84,11 +89,17 @@ const CartView = ({
   };
 
   const handlePayCreditCard = () => {
-    onPayCC();
+    const promise = cartIsPendingPayment ? Promise.resolve() : checkoutCart();
+
+    promise.then(() => {
+      history.push("cart/payment");
+    });
   };
 
   const handlePayInvoice = () => {
-    checkoutCart().then(() => {
+    const promise = cartIsPendingPayment ? Promise.resolve() : checkoutCart();
+
+    promise.then(() => {
       payWithInvoice().then(() => {
         history.push("cart/invoice");
       });

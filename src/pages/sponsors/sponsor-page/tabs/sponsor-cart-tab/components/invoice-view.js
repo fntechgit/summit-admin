@@ -12,7 +12,6 @@
  * */
 
 import React from "react";
-import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import history from "../../../../../../history";
@@ -74,8 +73,4 @@ const InvoiceView = ({ match }) => {
   );
 };
 
-const mapStateToProps = ({ showAccessState }) => ({
-  ...showAccessState
-});
-
-export default connect(mapStateToProps, {})(InvoiceView);
+export default InvoiceView;

@@ -23,7 +23,11 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
+import {
+  setSnackbarMessage,
+  snackbarErrorHandler,
+  snackbarSuccessHandler
+} from "./base-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -45,19 +49,26 @@ export const FORM_CART_SAVED = "FORM_CART_SAVED";
 export const SPONSOR_CART_NOTE_ADDED = "SPONSOR_CART_NOTE_ADDED";
 export const SPONSOR_CART_NOTE_UPDATED = "SPONSOR_CART_NOTE_UPDATED";
 export const SPONSOR_CART_NOTE_DELETED = "SPONSOR_CART_NOTE_DELETED";
-export const OFFLINE_PAYMENT_CREATED = "OFFLINE_PAYMENT_CREATED";
 export const CART_STATUS_UPDATED = "CART_STATUS_UPDATED";
+export const RECEIVE_PAYMENT_PROFILE = "RECEIVE_PAYMENT_PROFILE";
+export const OFFLINE_PAYMENT_CREATED = "OFFLINE_PAYMENT_CREATED";
+export const PAYMENT_INTENT_CREATED = "PAYMENT_INTENT_CREATED";
+export const PAYMENT_INTENT_UPDATED = "PAYMENT_INTENT_UPDATED";
+export const PAYMENT_CONFIRMED = "PAYMENT_CONFIRMED";
 
-const customErrorHandler = (err, res) => (dispatch, state) => {
-  const code = err.status;
-  dispatch(stopLoading());
-  switch (code) {
-    case ERROR_CODE_404:
-      break;
-    default:
-      authErrorHandler(err, res)(dispatch, state);
-  }
-};
+const customErrorHandler =
+  (err, res, callback = null) =>
+  (dispatch, getState) => {
+    const code = err.status;
+    dispatch(stopLoading());
+    switch (code) {
+      case ERROR_CODE_404:
+        if (callback) callback()(dispatch, getState);
+        break;
+      default:
+        authErrorHandler(err, res)(dispatch, getState);
+    }
+  };
 
 export const getSponsorCart =
   (term = "") =>
@@ -79,7 +90,8 @@ export const getSponsorCart =
     }
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes"
     };
 
     if (filter.length > 0) {
@@ -459,18 +471,24 @@ export const checkoutCart = () => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes"
   };
 
-  return putRequest(
-    null,
-    createAction(CART_STATUS_UPDATED),
-    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/checkout`,
-    {},
-    snackbarErrorHandler
-  )(params)(dispatch).finally(() => {
-    dispatch(stopLoading());
-  });
+  return (
+    putRequest(
+      null,
+      createAction(CART_STATUS_UPDATED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/checkout`,
+      {},
+      snackbarErrorHandler
+    )(params)(dispatch)
+      // this swallows the error neither rejecting or resolving, so we don't need to handle it down the pipe
+      .catch(() => new Promise(() => {}))
+      .finally(() => {
+        dispatch(stopLoading());
+      })
+  );
 };
 
 export const payWithInvoice = () => async (dispatch, getState) => {
@@ -503,4 +521,125 @@ export const payWithInvoice = () => async (dispatch, getState) => {
       getSponsorCart()(dispatch, getState);
     })
     .catch(console.log);
+};
+
+const createPaymentIntent = () => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState, sponsorPageCartListState } =
+    getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+  const { cart } = sponsorPageCartListState;
+  const accessToken = await getAccessTokenSafely();
+
+  const params = {
+    access_token: accessToken
+  };
+
+  const payload = {
+    type: "Online",
+    cart_id: cart.id
+  };
+
+  return postRequest(
+    null,
+    createAction(PAYMENT_INTENT_CREATED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments`,
+    payload,
+    snackbarErrorHandler
+  )(params)(dispatch);
+};
+
+const PaymentProfileNotFound = () => (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const summitName = currentSummit.name;
+
+  setSnackbarMessage({
+    title: T.translate("errors.payment_profile_not_found_title"),
+    html: T.translate("errors.payment_profile_not_found", { summitName }),
+    type: "error"
+  })(dispatch, getState);
+};
+
+export const getPaymentProfile = () => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_PAYMENT_PROFILE),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/payment-profiles/SponsorServices`,
+    (err, res) => (dispatch) =>
+      customErrorHandler(err, res, PaymentProfileNotFound)(dispatch, getState)
+  )(params)(dispatch)
+    .then(() => createPaymentIntent()(dispatch, getState))
+    .catch(console.log)
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const updatePaymentIntent =
+  (paymentMethod) => async (dispatch, getState) => {
+    const {
+      currentSummitState,
+      currentSponsorState,
+      sponsorPageCartListState
+    } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const { cart, paymentIntent } = sponsorPageCartListState;
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    const payload = {
+      payment_method: paymentMethod,
+      cart_id: cart.id
+    };
+
+    return putRequest(
+      null,
+      createAction(PAYMENT_INTENT_UPDATED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentIntent.id}/reprice`,
+      payload,
+      snackbarErrorHandler
+    )(params)(dispatch);
+  };
+
+export const confirmPayment = () => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState, sponsorPageCartListState } =
+    getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+  const { paymentIntent } = sponsorPageCartListState;
+  const accessToken = await getAccessTokenSafely();
+
+  const params = {
+    access_token: accessToken
+  };
+
+  return putRequest(
+    null,
+    createAction(PAYMENT_CONFIRMED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentIntent.id}/confirm`,
+    {},
+    snackbarErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(
+      snackbarSuccessHandler({
+        title: T.translate("general.success"),
+        html: T.translate("edit_sponsor.cart_tab.payment_view.payment_success")
+      })
+    );
+  });
 };

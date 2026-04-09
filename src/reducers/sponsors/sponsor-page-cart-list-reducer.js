@@ -32,7 +32,11 @@ import {
   SPONSOR_CART_NOTE_DELETED,
   SPONSOR_CART_NOTE_UPDATED,
   OFFLINE_PAYMENT_CREATED,
-  CART_STATUS_UPDATED
+  CART_STATUS_UPDATED,
+  RECEIVE_PAYMENT_PROFILE,
+  PAYMENT_INTENT_UPDATED,
+  PAYMENT_INTENT_CREATED,
+  PAYMENT_CONFIRMED
 } from "../../actions/sponsor-cart-actions";
 import { DISCOUNT_TYPES } from "../../utils/constants";
 
@@ -51,6 +55,8 @@ const DEFAULT_STATE = {
   },
   sponsorForm: null,
   cartForm: null,
+  paymentProfile: null,
+  paymentIntent: null,
   offlinePayment: null
 };
 
@@ -219,6 +225,24 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
           ...state.cart,
           notes: state.cart.notes.filter((n) => n.id !== noteId)
         }
+      };
+    }
+    case RECEIVE_PAYMENT_PROFILE: {
+      const paymentProfile = payload.response;
+      return { ...state, paymentProfile };
+    }
+    case PAYMENT_INTENT_UPDATED:
+    case PAYMENT_INTENT_CREATED: {
+      const paymentIntent = payload.response;
+      return { ...state, paymentIntent };
+    }
+    case PAYMENT_CONFIRMED: {
+      return {
+        ...state,
+        cart: null,
+        paymentProfile: null,
+        paymentIntent: null,
+        offlinePayment: null
       };
     }
     case OFFLINE_PAYMENT_CREATED: {

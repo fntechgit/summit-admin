@@ -11,18 +11,154 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { Card, CardContent } from "@mui/material";
+import T from "i18n-react/dist/i18n-react";
+import { Box, Card, CardContent } from "@mui/material";
+import {
+  MuiTable,
+  MuiNotesRow,
+  MuiOrderSummary,
+  MuiStripePayment,
+  MuiTotalRow
+} from "openstack-uicore-foundation/lib/components";
+import history from "../../../../../../history";
+import {
+  confirmPayment,
+  getPaymentProfile,
+  updatePaymentIntent
+} from "../../../../../../actions/sponsor-cart-actions";
+import { mapCartData } from "../helpers";
+import { useSnackbarMessage } from "../../../../../../components/mui/SnackbarNotification/Context";
 
-const PaymentView = () => (
-  <Card sx={{ borderRadius: "10px", height: "100%" }} variant="outlined">
-    <CardContent>PAYMENT VIEW</CardContent>
-  </Card>
-);
+const PaymentView = ({
+  cart,
+  currentSummit,
+  sponsor,
+  paymentIntent,
+  paymentProfile,
+  getPaymentProfile,
+  updatePaymentIntent,
+  confirmPayment
+}) => {
+  const { errorMessage } = useSnackbarMessage();
 
-const mapStateToProps = ({ showAccessState }) => ({
-  ...showAccessState
+  useEffect(() => {
+    if (cart) {
+      getPaymentProfile(cart.id);
+    }
+  }, [cart]);
+
+  const redirectUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/cart`;
+
+  const cartData = mapCartData(cart, true);
+
+  const cartColumns = [
+    {
+      columnKey: "code",
+      header: T.translate("edit_sponsor.cart_tab.payment_view.code")
+    },
+    {
+      columnKey: "name",
+      header: T.translate("edit_sponsor.cart_tab.payment_view.contents")
+    },
+    { columnKey: "item_name", header: "" },
+    {
+      columnKey: "addon_name",
+      header: T.translate("edit_sponsor.cart_tab.payment_view.addon")
+    },
+    {
+      columnKey: "discount",
+      header: T.translate("edit_sponsor.cart_tab.payment_view.discount")
+    },
+    {
+      columnKey: "amount",
+      header: T.translate("edit_sponsor.cart_tab.payment_view.amount")
+    }
+  ];
+
+  const handlePaymentSuccess = (paymentData) =>
+    confirmPayment(paymentData.id).then(() => {
+      history.push(redirectUrl);
+    });
+
+  const handlePaymentError = (error) => {
+    errorMessage(error);
+  };
+
+  return (
+    <>
+      <MuiTable data={cartData} columns={cartColumns}>
+        {cart?.notes.map((note) => (
+          <MuiNotesRow
+            key={`note-${note.id}`}
+            note={note.content}
+            colCount={cartColumns.length}
+          />
+        ))}
+        <MuiTotalRow
+          columns={cartColumns}
+          total={cart?.total}
+          targetCol="amount"
+        />
+      </MuiTable>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          mt: 4,
+          gap: "10px"
+        }}
+      />
+
+      <Box
+        sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 3, pb: 6 }}
+      >
+        <Card
+          sx={{ flex: 1, borderRadius: "10px", height: "100%" }}
+          variant="outlined"
+        >
+          <MuiOrderSummary
+            amount={paymentIntent?.total_amount}
+            // dueDate="2023-05-24"
+            toName={sponsor.company.name}
+            fromName="FNTECH"
+          />
+        </Card>
+        <Card
+          sx={{ flex: 1, borderRadius: "10px", height: "100%" }}
+          variant="outlined"
+        >
+          <CardContent>
+            <MuiStripePayment
+              paymentIntent={paymentIntent}
+              paymentProfile={paymentProfile}
+              client={{}}
+              redirectUrl={redirectUrl}
+              stripeFormTitle={false}
+              updatePaymentIntent={updatePaymentIntent}
+              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentError={handlePaymentError}
+            />
+          </CardContent>
+        </Card>
+      </Box>
+    </>
+  );
+};
+
+const mapStateToProps = ({
+  currentSummitState,
+  currentSponsorState,
+  sponsorPageCartListState
+}) => ({
+  currentSummit: currentSummitState.currentSummit,
+  sponsor: currentSponsorState.entity,
+  ...sponsorPageCartListState
 });
 
-export default connect(mapStateToProps, {})(PaymentView);
+export default connect(mapStateToProps, {
+  getPaymentProfile,
+  updatePaymentIntent,
+  confirmPayment
+})(PaymentView);
