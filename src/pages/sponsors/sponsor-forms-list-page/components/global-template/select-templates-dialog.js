@@ -16,7 +16,7 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import SearchInput from "../../../../../components/mui/search-input";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { getGlobalTemplates } from "../../../../../actions/sponsor-forms-actions";
 import { DEFAULT_PER_PAGE } from "../../../../../utils/constants";
 import MuiInfiniteTable from "../../../../../components/mui/infinite-table";

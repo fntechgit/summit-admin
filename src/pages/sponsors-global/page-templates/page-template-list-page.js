@@ -25,6 +25,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   archivePageTemplate,
   deletePageTemplate,
@@ -34,7 +35,6 @@ import {
   unarchivePageTemplate,
   resetPageTemplateForm
 } from "../../../actions/page-template-actions";
-import SearchInput from "../../../components/mui/search-input";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import PageTemplatePopup from "./page-template-popup";
 import PageTemplateClonePopup from "./page-template-clone-popup";
