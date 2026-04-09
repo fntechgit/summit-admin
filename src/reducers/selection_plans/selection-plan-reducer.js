@@ -9,8 +9,8 @@ import {
   SELECTION_PLAN_ADDED,
   TRACK_GROUP_REMOVED,
   TRACK_GROUP_ADDED,
-  EVENT_TYPE_ADDED,
-  EVENT_TYPE_REMOVED,
+  SELECTION_PLAN_EVENT_TYPE_ADDED,
+  SELECTION_PLAN_EVENT_TYPE_REMOVED,
   SELECTION_PLAN_EXTRA_QUESTION_ADDED,
   SELECTION_PLAN_EXTRA_QUESTION_DELETED,
   SELECTION_PLAN_EXTRA_QUESTION_UPDATED,
@@ -123,9 +123,8 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       // we need this in case the token expired while editing the form
       if (payload.hasOwnProperty("persistStore")) {
         return state;
-      } 
-        return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-      
+      }
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     }
     case SET_CURRENT_SUMMIT:
     case RESET_SELECTION_PLAN_FORM: {
@@ -176,10 +175,10 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
     }
     case RECEIVE_SELECTION_PLAN_PROGRESS_FLAGS: {
       const progressFlags = payload.response.data.map((r) => ({
-          id: r.id,
-          label: r.label,
-          order: parseInt(r.order)
-        }));
+        id: r.id,
+        label: r.label,
+        order: parseInt(r.order)
+      }));
       return {
         ...state,
         entity: {
@@ -203,10 +202,10 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
     }
     case SELECTION_PLAN_PROGRESS_FLAG_ORDER_UPDATED: {
       const progressFlags = payload.map((r) => ({
-          id: r.id,
-          label: r.label,
-          order: parseInt(r.order)
-        }));
+        id: r.id,
+        label: r.label,
+        order: parseInt(r.order)
+      }));
       return {
         ...state,
         entity: {
@@ -249,14 +248,14 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
         }
       };
     }
-    case EVENT_TYPE_REMOVED: {
+    case SELECTION_PLAN_EVENT_TYPE_REMOVED: {
       const { eventTypeId } = payload;
       const eventTypes = state.entity.event_types.filter(
         (t) => t.id !== eventTypeId
       );
       return { ...state, entity: { ...state.entity, event_types: eventTypes } };
     }
-    case EVENT_TYPE_ADDED: {
+    case SELECTION_PLAN_EVENT_TYPE_ADDED: {
       const eventType = { ...payload.eventType };
       return {
         ...state,
@@ -307,12 +306,12 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
 
     case SELECTION_PLAN_EXTRA_QUESTION_ORDER_UPDATED: {
       const extra_questions = payload.map((q, i) => ({
-          id: q.id,
-          name: q.name,
-          label: q.label,
-          type: q.type,
-          order: i + 1
-        }));
+        id: q.id,
+        name: q.name,
+        label: q.label,
+        type: q.type,
+        order: i + 1
+      }));
 
       return {
         ...state,
@@ -357,11 +356,11 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
     }
     case SELECTION_PLAN_RATING_TYPE_ORDER_UPDATED: {
       const track_chair_rating_types = payload.map((r) => ({
-          id: r.id,
-          name: r.name,
-          weight: parseFloat(r.weight),
-          order: parseInt(r.order)
-        }));
+        id: r.id,
+        name: r.name,
+        weight: parseFloat(r.weight),
+        order: parseInt(r.order)
+      }));
       return {
         ...state,
         entity: {
@@ -396,7 +395,7 @@ const selectionPlanReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, errors: payload.errors };
     }
     case RECEIVE_SELECTION_PLAN_SETTINGS: {
-      const {data} = payload.response;
+      const { data } = payload.response;
       // parse data
       const settings = data.map((ms) => ({
         [ms.key.toLowerCase()]: {

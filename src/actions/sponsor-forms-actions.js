@@ -29,7 +29,6 @@ import {
   getAccessTokenSafely,
   normalizeSelectAllField
 } from "../utils/methods";
-import { rateToCents, RATE_FIELDS } from "../utils/rate-helpers";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
@@ -1238,8 +1237,6 @@ const normalizeItem = (entity) => {
     normalizedEntity.images = images?.filter((img) => img.file_path);
   }
 
-  normalizeRates(entity, normalizedEntity);
-
   if (quantity_limit_per_show === "")
     delete normalizedEntity.quantity_limit_per_show;
   if (quantity_limit_per_sponsor === "")
@@ -1363,24 +1360,7 @@ const normalizeManagedItem = (entity) => {
     (img) => img.file_path
   );
 
-  normalizeRates(entity, normalizedEntity);
-
   return normalizedEntity;
-};
-
-const normalizeRates = (entity, normalizedEntity) => {
-  if (RATE_FIELDS.EARLY_BIRD in entity)
-    normalizedEntity[RATE_FIELDS.EARLY_BIRD] = rateToCents(
-      entity[RATE_FIELDS.EARLY_BIRD]
-    );
-  if (RATE_FIELDS.STANDARD in entity)
-    normalizedEntity[RATE_FIELDS.STANDARD] = rateToCents(
-      entity[RATE_FIELDS.STANDARD]
-    );
-  if (RATE_FIELDS.ONSITE in entity)
-    normalizedEntity[RATE_FIELDS.ONSITE] = rateToCents(
-      entity[RATE_FIELDS.ONSITE]
-    );
 };
 
 export const deleteSponsorFormManagedItem =

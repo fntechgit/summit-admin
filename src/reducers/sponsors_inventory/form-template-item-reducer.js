@@ -12,7 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { RATE_FIELDS, rateFromCents } from "../../utils/rate-helpers";
+import { RATE_FIELDS } from "../../utils/rate-helpers";
 import {
   RECEIVE_FORM_TEMPLATE_ITEM,
   RESET_FORM_TEMPLATE_ITEM_FORM,
@@ -70,10 +70,6 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
         }
       }
 
-      entity.early_bird_rate = rateFromCents(entity.early_bird_rate);
-      entity.standard_rate = rateFromCents(entity.standard_rate);
-      entity.onsite_rate = rateFromCents(entity.onsite_rate);
-
       return {
         ...state,
         entity: {
@@ -92,10 +88,6 @@ const formTemplateItemReducer = (state = DEFAULT_STATE, action) => {
           entity[key] = entity[key] == null ? "" : entity[key];
         }
       }
-
-      entity.early_bird_rate = rateFromCents(entity.early_bird_rate);
-      entity.standard_rate = rateFromCents(entity.standard_rate);
-      entity.onsite_rate = rateFromCents(entity.onsite_rate);
 
       return {
         ...state,

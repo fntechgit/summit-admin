@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { InputAdornment } from "@mui/material";
 import { useField } from "formik";
 import MuiFormikTextField from "./mui-formik-textfield";
-import { ONE_HUNDRED } from "../../../utils/constants";
+import { DECIMAL_DIGITS, ONE_HUNDRED } from "../../../utils/constants";
 
 const BLOCKED_KEYS = ["e", "E", "+", "-"];
 
@@ -17,19 +17,46 @@ const MuiFormikPriceField = ({
   // eslint-disable-next-line no-unused-vars
   const [field, meta, helpers] = useField(name);
   const [cleared, setCleared] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [focusedValue, setFocusedValue] = useState("");
 
-  const emptyValue = meta.initialValue === null ? null : 0;
+  // emptyValue is always 0 when editing this field, null is handled by N/A checkbox
+  const emptyValue = 0;
+
+  const getRawString = () => {
+    if (cleared || field.value == null) return "";
+    if (field.value === 0) return "0";
+    const raw = inCents ? field.value / ONE_HUNDRED : field.value;
+    return String(Number(raw.toFixed(DECIMAL_DIGITS)));
+  };
 
   const getDisplayValue = () => {
+    if (isFocused) return focusedValue;
     if (cleared) return "";
     if (field.value == null || field.value === 0) {
       return field.value === 0 ? 0 : "";
     }
-    return inCents ? field.value / ONE_HUNDRED : field.value;
+    const str = getRawString();
+    const dotIdx = str.indexOf(".");
+    if (dotIdx === -1) return `${str}.00`;
+    if (str.length - dotIdx - 1 === 1) return `${str}0`;
+    return str;
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+    setFocusedValue(getRawString());
+  };
+
+  const handleBlur = (e) => {
+    setIsFocused(false);
+    field.onBlur(e);
+    if (props.onBlur) props.onBlur(e);
   };
 
   const handleChange = (e) => {
     const newVal = e.target.value;
+    setFocusedValue(newVal);
 
     if (newVal === "") {
       setCleared(true);
@@ -39,7 +66,9 @@ const MuiFormikPriceField = ({
 
     setCleared(false);
     const numericValue = Number(newVal);
-    const newPrice = inCents ? numericValue * ONE_HUNDRED : numericValue;
+    const newPrice = inCents
+      ? Math.round(numericValue * ONE_HUNDRED)
+      : numericValue;
 
     helpers.setValue(newPrice);
   };
@@ -58,6 +87,8 @@ const MuiFormikPriceField = ({
       type="number"
       value={getDisplayValue()}
       onChange={handleChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       slotProps={{
         input: {
           startAdornment: <InputAdornment position="start">$</InputAdornment>

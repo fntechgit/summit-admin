@@ -41,6 +41,7 @@ import SponsorFormAddItemFromInventoryPopup from "./components/sponsor-form-add-
 import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import { rateCellValidation } from "../../../utils/yup";
+import { rateToCents } from "../../../utils/rate-helpers";
 
 const SponsorFormItemListPage = ({
   match,
@@ -91,8 +92,9 @@ const SponsorFormItemListPage = ({
   };
 
   const handleCellEdit = (rowId, column, value) => {
-    const valueWithNoSign = String(value).replace(/^[^\d.-]+/, "");
-    const tmpEntity = { id: rowId, [column]: valueWithNoSign };
+    // since editable cell is TextField and not PriceField, we need to convert to cents
+    const valueInCents = rateToCents(value);
+    const tmpEntity = { id: rowId, [column]: valueInCents };
     updateSponsorFormItem(formId, tmpEntity);
   };
 

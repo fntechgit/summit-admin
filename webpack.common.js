@@ -63,7 +63,7 @@ module.exports = {
       crypto: require.resolve("crypto-browserify"),
       stream: require.resolve("stream-browserify"),
       buffer: require.resolve("buffer"),
-      fs: require.resolve("fs"),
+      fs: false,
       process: require.resolve("process"),
       vm: false
     }
@@ -82,9 +82,9 @@ module.exports = {
               "@babel/preset-flow"
             ],
             plugins: [
-              "@babel/plugin-proposal-object-rest-spread",
-              "@babel/plugin-proposal-class-properties",
-              "@babel/plugin-proposal-nullish-coalescing-operator"
+              "@babel/plugin-transform-object-rest-spread",
+              "@babel/plugin-transform-class-properties",
+              "@babel/plugin-transform-nullish-coalescing-operator"
             ]
           }
         }
@@ -115,11 +115,6 @@ module.exports = {
             loader: "less-loader"
           }
         ]
-      },
-      {
-        test: /\.scss/,
-        exclude: /\.module\.scss/,
-        use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"]
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,

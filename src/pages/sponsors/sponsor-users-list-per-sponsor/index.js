@@ -42,11 +42,13 @@ const SponsorUsersListPerSponsorPage = ({
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const [userEdit, setUserEdit] = useState(null);
+  const sponsorId = sponsor?.id;
+  const companyId = sponsor?.company?.id;
 
   useEffect(() => {
-    getSponsorUserRequests(sponsor.company.id);
-    getSponsorUsers(sponsor.id);
-  }, []);
+    if (companyId) getSponsorUserRequests(companyId);
+    if (sponsorId) getSponsorUsers(sponsorId);
+  }, [sponsorId, companyId]);
 
   const handleSearch = (searchTerm) => {
     getSponsorUsers(sponsor.id, searchTerm);
@@ -158,8 +160,9 @@ const SponsorUsersListPerSponsorPage = ({
   );
 };
 
-const mapStateToProps = ({ sponsorUsersListState }) => ({
-  ...sponsorUsersListState
+const mapStateToProps = ({ sponsorUsersListState, currentSponsorState }) => ({
+  ...sponsorUsersListState,
+  sponsor: currentSponsorState.entity
 });
 
 export default connect(mapStateToProps, {
