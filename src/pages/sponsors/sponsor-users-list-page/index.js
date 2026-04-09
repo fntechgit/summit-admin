@@ -18,13 +18,13 @@ import { Breadcrumb } from "react-breadcrumbs";
 import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   deleteSponsorUser,
   deleteSponsorUserRequest,
   getSponsorUserRequests,
   getSponsorUsers
 } from "../../../actions/sponsor-users-actions";
-import SearchInput from "../../../components/mui/search-input";
 import RequestTable from "./components/request-table";
 import UsersTable from "./components/users-table";
 import EditUserPopup from "./components/edit-user-popup";

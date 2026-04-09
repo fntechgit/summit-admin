@@ -20,14 +20,13 @@ import {
   FormGroup,
   Grid2,
   Popover,
-  TextField,
   Typography
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import ImageIcon from "@mui/icons-material/Image";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
@@ -178,7 +177,6 @@ const InventoryListPage = ({
   resetInventoryItemForm
 }) => {
   const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const handleClose = () => {
     resetInventoryItemForm();
@@ -215,17 +213,15 @@ const InventoryListPage = ({
     getInventoryItems(term, currentPage, perPage, key, dir, showArchived);
   };
 
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getInventoryItems(
-        searchTerm,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir,
-        showArchived
-      );
-    }
+  const handleSearch = (searchTerm) => {
+    getInventoryItems(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      showArchived
+    );
   };
 
   const handleShowArchivedForms = (ev) => {
@@ -357,24 +353,11 @@ const InventoryListPage = ({
               label={T.translate("inventory_item_list.show_archived")}
             />
           </FormGroup>
-          <TextField
-            variant="outlined"
-            value={searchTerm}
+          <SearchInput
+            onSearch={handleSearch}
             placeholder={T.translate(
               "inventory_item_list.placeholders.search_inventory_items"
             )}
-            slotProps={{
-              input: {
-                startAdornment: <SearchIcon sx={{ mr: 1 }} />
-              }
-            }}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={handleSearch}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                height: "36px"
-              }
-            }}
           />
           <Button
             variant="contained"
