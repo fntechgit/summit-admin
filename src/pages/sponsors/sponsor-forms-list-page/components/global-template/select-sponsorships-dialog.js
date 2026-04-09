@@ -20,6 +20,7 @@ const SelectSponsorshipsDialog = ({
   sponsorships,
   onSave,
   onClose,
+  isSaving = false,
   getSponsorships
 }) => {
   const { items, currentPage, total } = sponsorships;
@@ -36,6 +37,7 @@ const SelectSponsorshipsDialog = ({
   };
 
   const handleClose = () => {
+    if (isSaving) return;
     setSelection({ ids: [], all: false });
     onClose();
   };
@@ -92,7 +94,8 @@ const SelectSponsorshipsDialog = ({
 SelectSponsorshipsDialog.propTypes = {
   sponsorships: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired,
+  isSaving: PropTypes.bool
 };
 
 const mapStateToProps = ({ sponsorFormsListState }) => ({

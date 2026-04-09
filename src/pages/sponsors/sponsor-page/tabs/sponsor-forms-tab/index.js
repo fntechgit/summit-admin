@@ -157,8 +157,7 @@ const SponsorFormsTab = ({
     );
   };
 
-  const handleSaveFormFromTemplate = (entity) => {
-    saveSponsorManagedForm(entity).then(() => {
+  const handleSaveFormFromTemplate = (entity) => saveSponsorManagedForm(entity).then(() => {
       const { perPage, order, orderDir } = managedForms;
       getSponsorManagedForms(
         term,
@@ -170,6 +169,22 @@ const SponsorFormsTab = ({
       );
       setOpenPopup(null);
     });
+
+  const handleCustomizedFormSaved = () => {
+    const {
+      perPage: customizedPerPage,
+      order: customizedOrder,
+      orderDir: customizedOrderDir
+    } = customizedForms;
+
+    getSponsorCustomizedForms(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      customizedPerPage,
+      customizedOrder,
+      customizedOrderDir,
+      hideArchived
+    );
   };
 
   const baseColumns = (name, manageItemsFn) => [
@@ -385,6 +400,7 @@ const SponsorFormsTab = ({
         formId={customFormEdit?.id || null}
         open={!!customFormEdit}
         onClose={() => setCustomFormEdit(null)}
+        onSaved={handleCustomizedFormSaved}
         sponsor={sponsor}
         summitId={currentSummit.id}
       />

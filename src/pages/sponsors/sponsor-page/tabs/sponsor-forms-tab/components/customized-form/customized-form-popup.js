@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
@@ -26,25 +26,43 @@ const CustomizedFormPopup = ({
   summitTZ,
   open,
   onClose,
+  onSaved,
   getSponsorCustomizedForm,
   resetSponsorCustomizedForm,
   saveSponsorCustomizedForm,
   updateSponsorCustomizedForm
 }) => {
-  const handleClose = () => {
-    // clear form from reducer
+  const [isSaving, setIsSaving] = useState(false);
+
+  const closeDialog = () => {
     resetSponsorCustomizedForm();
     onClose();
   };
 
+  const handleClose = () => {
+    if (isSaving) return;
+    closeDialog();
+  };
+
   const handleOnSave = (values) => {
+    if (isSaving) return;
+
     const save = values.id
       ? updateSponsorCustomizedForm
       : saveSponsorCustomizedForm;
+    setIsSaving(true);
 
-    save(values).finally(() => {
-      handleClose();
-    });
+    save(values)
+      .then(() => {
+        if (onSaved) onSaved();
+        closeDialog();
+      })
+      .catch(() => {
+        // keep dialog open on save error to preserve user input
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
   };
 
   useEffect(() => {
@@ -54,7 +72,13 @@ const CustomizedFormPopup = ({
   }, [formId]);
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      disableEscapeKeyDown={isSaving}
+      maxWidth="md"
+      fullWidth
+    >
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
         component="div"
@@ -62,7 +86,12 @@ const CustomizedFormPopup = ({
         <Typography variant="h5">
           {T.translate("edit_sponsor.forms_tab.customized_form.title")}
         </Typography>
-        <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
+        <IconButton
+          size="large"
+          sx={{ p: 0 }}
+          onClick={handleClose}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>
@@ -72,6 +101,7 @@ const CustomizedFormPopup = ({
         sponsor={sponsor}
         summitId={summitId}
         summitTZ={summitTZ}
+        isSaving={isSaving}
         onSubmit={handleOnSave}
       />
     </Dialog>
@@ -80,7 +110,8 @@ const CustomizedFormPopup = ({
 
 CustomizedFormPopup.propTypes = {
   open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  onSaved: PropTypes.func
 };
 
 const mapStateToProps = ({

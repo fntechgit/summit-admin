@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
@@ -31,33 +31,52 @@ const FormTemplatePopup = ({
   updateFormTemplate,
   edit
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     getSponsorships(1, MAX_PER_PAGE);
   }, []);
 
-  const handleClose = () => {
-    // clear form from reducer
+  const closePopup = () => {
     resetFormTemplate();
     onClose();
   };
 
-  const handleOnSave = (values) => {
-    const save = values.id ? updateFormTemplate : saveFormTemplate;
+  const handleClose = () => {
+    if (isSaving) return;
+    closePopup();
+  };
 
-    save(values).finally(() => {
-      handleClose();
-    });
+  const handleOnSave = (values) => {
+    if (isSaving) return;
+
+    const save = values.id ? updateFormTemplate : saveFormTemplate;
+    setIsSaving(true);
+
+    save(values)
+      .then(() => {
+        closePopup();
+      })
+      .catch(() => {
+        // keep dialog open on save error to preserve user input
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
   };
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={() => {
+        handleClose();
+      }}
       maxWidth="md"
       fullWidth
       disableEnforceFocus
       disableAutoFocus
       disableRestoreFocus
+      disableEscapeKeyDown={isSaving}
     >
       <DialogTitle
         sx={{ display: "flex", justifyContent: "space-between" }}
@@ -70,7 +89,12 @@ const FormTemplatePopup = ({
               : "sponsor_forms.form_template_popup.title.new"
           )}
         </Typography>
-        <IconButton size="large" sx={{ p: 0 }} onClick={handleClose}>
+        <IconButton
+          size="large"
+          sx={{ p: 0 }}
+          onClick={handleClose}
+          disabled={isSaving}
+        >
           <CloseIcon fontSize="large" />
         </IconButton>
       </DialogTitle>
@@ -79,6 +103,7 @@ const FormTemplatePopup = ({
         initialValues={formTemplate}
         sponsorships={sponsorships}
         summitTZ={summitTZ}
+        isSaving={isSaving}
         onSubmit={handleOnSave}
       />
     </Dialog>
