@@ -27,6 +27,7 @@ import {
   archiveCustomizedPage,
   deleteSponsorManagedPage,
   getSponsorCustomizedPage,
+  deleteSponsorCustomizedPage,
   getSponsorCustomizedPages,
   getSponsorManagedPages,
   resetSponsorPage,
@@ -59,6 +60,7 @@ const SponsorPagesTab = ({
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  deleteSponsorCustomizedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
   resetSponsorPage
@@ -215,7 +217,17 @@ const SponsorPagesTab = ({
   };
 
   const handleCustomizedDelete = (itemId) => {
-    console.log("DELETE CUSTOMIZED ", itemId);
+    deleteSponsorCustomizedPage(itemId).then(() => {
+      const { perPage, order, orderDir } = customizedPages;
+      getSponsorCustomizedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
+    });
   };
 
   const handleHideArchived = (ev) => {
@@ -476,6 +488,7 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  deleteSponsorCustomizedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
   resetSponsorPage
