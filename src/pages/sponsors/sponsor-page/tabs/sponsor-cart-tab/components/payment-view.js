@@ -49,6 +49,8 @@ const PaymentView = ({
     }
   }, [cart]);
 
+  if (!currentSummit || !sponsor?.company || !cart) return null;
+
   const redirectUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/cart`;
 
   const cartData = mapCartData(cart, true);
@@ -89,7 +91,7 @@ const PaymentView = ({
   return (
     <>
       <MuiTable data={cartData} columns={cartColumns}>
-        {cart?.notes.map((note) => (
+        {cart?.notes?.map((note) => (
           <MuiNotesRow
             key={`note-${note.id}`}
             note={note.content}

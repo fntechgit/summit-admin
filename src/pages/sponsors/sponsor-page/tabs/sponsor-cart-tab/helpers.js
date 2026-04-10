@@ -13,7 +13,7 @@ export const mapCartData = (cart, showItemDescription = false) => {
     }))
     .reduce((res, f) => {
       f.items.forEach((it) => {
-        const formMetaFields = it.meta_fields.filter(
+        const formMetaFields = (it.meta_fields ?? []).filter(
           (mf) => mf.class_field === SPONSOR_FORMS_METAFIELD_CLASS.FORM
         );
 
@@ -23,7 +23,7 @@ export const mapCartData = (cart, showItemDescription = false) => {
           item_name.push(
             ...formMetaFields.map((mf) => {
               const val =
-                mf.values.length > 0
+                mf.values?.length > 0
                   ? mf.values.find((v) => v.id === mf.current_value)?.name
                   : mf.current_value;
               return (

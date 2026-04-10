@@ -2568,7 +2568,7 @@
         "go_to_orders": "Go to orders"
       },
       "payment_view": {
-        "code": "From code",
+        "code": "Form code",
         "contents": "Contents",
         "addon": "Add-on",
         "discount": "Discount",

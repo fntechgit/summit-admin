@@ -33,14 +33,8 @@ const EditCartForm = ({
   }, [formId]);
 
   const backToCart = () => {
-    const backUrl = match.url
-      .split("/")
-      .filter((segment) => segment.length > 0)
-      // eslint-disable-next-line no-magic-numbers
-      .slice(0, -2)
-      .join("/");
-
-    history.push(`/${backUrl}`);
+    const backUrl = match.url.replace(/\/forms\/[^/]+$/, "");
+    history.push(backUrl);
   };
 
   const saveForm = (values) => {

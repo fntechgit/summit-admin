@@ -88,22 +88,23 @@ const CartView = ({
     }
   };
 
-  const handlePayCreditCard = () => {
-    const promise = cartIsPendingPayment ? Promise.resolve() : checkoutCart();
-
-    promise.then(() => {
+  const handlePayCreditCard = async () => {
+    try {
+      if (!cartIsPendingPayment) await checkoutCart();
       history.push("cart/payment");
-    });
+    } catch (err) {
+      console.error("Failed to checkout cart for credit card payment:", err);
+    }
   };
 
-  const handlePayInvoice = () => {
-    const promise = cartIsPendingPayment ? Promise.resolve() : checkoutCart();
-
-    promise.then(() => {
-      payWithInvoice().then(() => {
-        history.push("cart/invoice");
-      });
-    });
+  const handlePayInvoice = async () => {
+    try {
+      if (!cartIsPendingPayment) await checkoutCart();
+      await payWithInvoice();
+      history.push("cart/invoice");
+    } catch (err) {
+      console.error("Failed to process invoice payment:", err);
+    }
   };
 
   const cartData = cart?.forms.map((form) => ({

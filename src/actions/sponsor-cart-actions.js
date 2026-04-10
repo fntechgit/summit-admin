@@ -483,11 +483,11 @@ export const checkoutCart = () => async (dispatch, getState) => {
       {},
       snackbarErrorHandler
     )(params)(dispatch)
-      // this swallows the error neither rejecting or resolving, so we don't need to handle it down the pipe
-      .catch(() => new Promise(() => {}))
       .finally(() => {
         dispatch(stopLoading());
       })
+      // this swallows the error neither rejecting or resolving, so we don't need to handle it down the pipe
+      .catch(() => new Promise(() => {}))
   );
 };
 
@@ -507,7 +507,7 @@ export const payWithInvoice = () => async (dispatch, getState) => {
 
   const payload = {
     type: "Offline",
-    cart_id: cart.id
+    cart_id: cart?.id
   };
 
   return postRequest(
@@ -520,7 +520,9 @@ export const payWithInvoice = () => async (dispatch, getState) => {
     .then(() => {
       getSponsorCart()(dispatch, getState);
     })
-    .catch(console.log);
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 const createPaymentIntent = () => async (dispatch, getState) => {
@@ -537,7 +539,7 @@ const createPaymentIntent = () => async (dispatch, getState) => {
 
   const payload = {
     type: "Online",
-    cart_id: cart.id
+    cart_id: cart?.id
   };
 
   return postRequest(
@@ -604,13 +606,13 @@ export const updatePaymentIntent =
 
     const payload = {
       payment_method: paymentMethod,
-      cart_id: cart.id
+      cart_id: cart?.id
     };
 
     return putRequest(
       null,
       createAction(PAYMENT_INTENT_UPDATED),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentIntent.id}/reprice`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/payments/${paymentIntent?.id}/reprice`,
       payload,
       snackbarErrorHandler
     )(params)(dispatch);
