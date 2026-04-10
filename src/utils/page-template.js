@@ -7,7 +7,7 @@ import {
   PAGES_MODULE_KINDS
 } from "./constants";
 
-export const denormalizePageModules = (modules, timeZone) =>
+export const denormalizePageModules = (modules = [], timeZone = null) =>
   modules.map((module) => {
     const tmpModule = {
       ...module,
@@ -37,7 +37,7 @@ export const denormalizePageModules = (modules, timeZone) =>
     return tmpModule;
   });
 
-export const normalizePageTemplateModules = (modules, timeZone) =>
+export const normalizePageTemplateModules = (modules = [], timeZone = null) =>
   modules.map((module) => {
     const normalizedModule = { ...module };
 
