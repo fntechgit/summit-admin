@@ -71,9 +71,8 @@ export const getShowPages =
       page,
       per_page: perPage,
       access_token: accessToken,
-      fields:
-        "code,name,id,modules_count,sponsorship_types,is_archived,apply_to_all_types",
-      expand: "sponsorship_types"
+      fields: "code,name,id,modules_count,is_archived,apply_to_all_types",
+      expand: "sponsorship_types,modules"
     };
 
     if (hideArchived) filter.push("is_archived==0");
