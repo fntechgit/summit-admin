@@ -11,7 +11,6 @@
  * limitations under the License.
  * */
 
-import moment from "moment-timezone";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
   PAGE_TEMPLATE_ADDED,
@@ -19,11 +18,7 @@ import {
   RECEIVE_PAGE_TEMPLATE,
   RESET_PAGE_TEMPLATE_FORM
 } from "../../actions/page-template-actions";
-import {
-  MILLISECONDS_IN_SECOND,
-  PAGE_MODULES_DOWNLOAD,
-  PAGES_MODULE_KINDS
-} from "../../utils/constants";
+import { denormalizePageModules } from "../../utils/page-template";
 
 export const DEFAULT_ENTITY = {
   id: 0,
@@ -55,34 +50,7 @@ const pageTemplateReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_PAGE_TEMPLATE: {
       const entity = { ...payload.response };
 
-      entity.modules = entity.modules.map((module) => {
-        const tmpModule = {
-          ...module,
-          ...(module.upload_deadline
-            ? {
-                upload_deadline: moment(
-                  module.upload_deadline * MILLISECONDS_IN_SECOND
-                )
-              }
-            : {})
-        };
-
-        if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
-          if (module.file) {
-            tmpModule.file = [
-              {
-                ...module.file,
-                file_path: module.file.storage_key,
-                public_url: module.file.file_url
-              }
-            ];
-            tmpModule.type = PAGE_MODULES_DOWNLOAD.FILE;
-          } else {
-            tmpModule.type = PAGE_MODULES_DOWNLOAD.URL;
-          }
-        }
-        return tmpModule;
-      });
+      entity.modules = denormalizePageModules(entity.modules);
 
       return {
         ...state,

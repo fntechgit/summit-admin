@@ -13,7 +13,6 @@
 import T from "i18n-react/dist/i18n-react";
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   RECEIVE_SHOW_PAGE,
   RECEIVE_SHOW_PAGES,
@@ -25,10 +24,7 @@ import {
 } from "../../actions/show-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
-import {
-  PAGE_MODULES_DOWNLOAD,
-  PAGES_MODULE_KINDS
-} from "../../utils/constants";
+import { denormalizePageModules } from "../../utils/page-template";
 
 const DEFAULT_SHOW_PAGE = {
   code: "",
@@ -136,35 +132,10 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
         ? ["all"]
         : pageData.sponsorship_types.map((st) => st.id);
 
-      const modules = pageData.modules.map((module) => {
-        const tmpModule = {
-          ...module,
-          ...(module.upload_deadline
-            ? {
-                upload_deadline: epochToMomentTimeZone(
-                  module.upload_deadline,
-                  state.summitTZ || "UTC"
-                )
-              }
-            : {})
-        };
-
-        if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
-          if (module.file) {
-            tmpModule.file = [
-              {
-                ...module.file,
-                file_path: module.file.storage_key,
-                public_url: module.file.file_url
-              }
-            ];
-            tmpModule.type = PAGE_MODULES_DOWNLOAD.FILE;
-          } else {
-            tmpModule.type = PAGE_MODULES_DOWNLOAD.URL;
-          }
-        }
-        return tmpModule;
-      });
+      const modules = denormalizePageModules(
+        pageData.modules,
+        state.summitTZ || "UTC"
+      );
 
       const currentShowPage = {
         ...pageData,
