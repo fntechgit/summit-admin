@@ -2484,7 +2484,7 @@
     },
     "pages_tab": {
       "alert_info": "To add a Sponsor Specific Page for this show's sponsor, click Add Page button. Note: this Page will be visible only to this sponsor for this show. The General Pages can only be managed on the Show's Pages section.",
-      "hide_archived": "Hide archived Pages",
+      "show_archived": "Show archived Pages",
       "using_template": "Using Template",
       "new_page": "New Page",
       "pages": "pages",

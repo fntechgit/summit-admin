@@ -111,7 +111,7 @@ const defaultState = {
       order: "id",
       orderDir: 1
     },
-    hideArchived: false,
+    showArchived: false,
     term: ""
   },
   currentSummitState: {

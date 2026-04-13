@@ -42,7 +42,7 @@ export const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  hideArchived: false,
+  showArchived: false,
   currentShowPage: DEFAULT_SHOW_PAGE,
   sponsorships: {
     items: [],
@@ -62,7 +62,7 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SHOW_PAGES: {
-      const { order, orderDir, page, perPage, term, hideArchived, summitTZ } =
+      const { order, orderDir, page, perPage, term, showArchived, summitTZ } =
         payload;
 
       return {
@@ -73,7 +73,7 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
         currentPage: page,
         perPage,
         term,
-        hideArchived,
+        showArchived,
         summitTZ
       };
     }

@@ -93,7 +93,7 @@ const ShowPagesListPage = ({
   const handleArchiveItem = (item) =>
     item.is_archived ? unarchiveShowPage(item.id) : archiveShowPage(item.id);
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getShowPages(
       term,
       currentPage,
@@ -188,14 +188,14 @@ const ShowPagesListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={handleHideArchivedForms}
+                  onChange={handleShowArchivedForms}
                   checked={showArchived}
                   inputProps={{
-                    "aria-label": T.translate("sponsor_pages.show_archived")
+                    "aria-label": T.translate("show_pages.show_archived")
                   }}
                 />
               }
-              label={T.translate("sponsor_pages.show_archived")}
+              label={T.translate("show_pages.show_archived")}
             />
           </FormGroup>
         </Grid2>

@@ -50,7 +50,7 @@ const SponsorPagesTab = ({
   sponsor,
   currentSummit,
   term,
-  hideArchived,
+  showArchived,
   managedPages,
   customizedPages,
   summitTZ,
@@ -75,7 +75,7 @@ const SponsorPagesTab = ({
 
   const handleManagedPageChange = (page) => {
     const { perPage, order, orderDir } = managedPages;
-    getSponsorManagedPages(term, page, perPage, order, orderDir, hideArchived);
+    getSponsorManagedPages(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handleManagedPerPageChange = (newPerPage) => {
@@ -86,7 +86,7 @@ const SponsorPagesTab = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -98,7 +98,7 @@ const SponsorPagesTab = ({
       perPage,
       key,
       dir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -110,7 +110,7 @@ const SponsorPagesTab = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -122,7 +122,7 @@ const SponsorPagesTab = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -135,7 +135,7 @@ const SponsorPagesTab = ({
       perPage,
       key,
       dir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -156,7 +156,7 @@ const SponsorPagesTab = ({
       perPageManaged,
       orderManaged,
       orderDirManaged,
-      hideArchived
+      showArchived
     );
     getSponsorCustomizedPages(
       searchTerm,
@@ -164,7 +164,7 @@ const SponsorPagesTab = ({
       perPageCustomized,
       orderCustomized,
       orderDirCustomized,
-      hideArchived
+      showArchived
     );
   };
 
@@ -188,7 +188,7 @@ const SponsorPagesTab = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
 
@@ -209,7 +209,7 @@ const SponsorPagesTab = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
   };
@@ -224,7 +224,7 @@ const SponsorPagesTab = ({
     console.log("DELETE CUSTOMIZED ", itemId);
   };
 
-  const handleHideArchived = (ev) => {
+  const handleShowArchived = (ev) => {
     getSponsorManagedPages(
       term,
       DEFAULT_CURRENT_PAGE,
@@ -395,16 +395,16 @@ const SponsorPagesTab = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={hideArchived}
-                  onChange={handleHideArchived}
+                  checked={showArchived}
+                  onChange={handleShowArchived}
                   inputProps={{
                     "aria-label": T.translate(
-                      "edit_sponsor.pages_tab.hide_archived"
+                      "edit_sponsor.pages_tab.show_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("edit_sponsor.pages_tab.hide_archived")}
+              label={T.translate("edit_sponsor.pages_tab.show_archived")}
             />
           </FormGroup>
         </Grid2>
