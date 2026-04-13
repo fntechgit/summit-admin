@@ -11,41 +11,47 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Card, CardContent } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import {
-  MuiTable,
   MuiNotesRow,
   MuiOrderSummary,
-  MuiStripePayment,
+  MuiTable,
   MuiTotalRow
 } from "openstack-uicore-foundation/lib/components";
+import StripePayment from "openstack-uicore-foundation/lib/components/mui/stripe-payment";
 import history from "../../../../../../history";
 import {
   confirmPayment,
   getPaymentProfile,
   updatePaymentIntent
 } from "../../../../../../actions/sponsor-cart-actions";
+import { getMemberByExternalId } from "../../../../../../actions/member-actions";
 import { mapCartData } from "../helpers";
 import { useSnackbarMessage } from "../../../../../../components/mui/SnackbarNotification/Context";
+import ClientForm from "./client-form";
 
 const PaymentView = ({
   cart,
+  cartOwner,
   currentSummit,
   sponsor,
   paymentIntent,
   paymentProfile,
   getPaymentProfile,
+  getMemberByExternalId,
   updatePaymentIntent,
   confirmPayment
 }) => {
   const { errorMessage } = useSnackbarMessage();
+  const [client, setClient] = useState({});
 
   useEffect(() => {
     if (cart) {
       getPaymentProfile(cart.id);
+      getMemberByExternalId(cart.owner_id);
     }
   }, [cart]);
 
@@ -104,39 +110,50 @@ const PaymentView = ({
           targetCol="amount"
         />
       </MuiTable>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          mt: 4,
-          gap: "10px"
-        }}
-      />
 
       <Box
         sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 3, pb: 6 }}
       >
-        <Card
-          sx={{ flex: 1, borderRadius: "10px", height: "100%" }}
-          variant="outlined"
-        >
-          <MuiOrderSummary
-            amount={paymentIntent?.total_amount}
-            // dueDate="2023-05-24"
-            toName={sponsor.company.name}
-            fromName="FNTECH"
-          />
-        </Card>
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+          <Card sx={{ borderRadius: "10px" }} variant="outlined">
+            <CardContent>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                {T.translate("edit_sponsor.cart_tab.payment_view.billing_info")}
+              </Typography>
+              <ClientForm initialValues={cartOwner} onChange={setClient} />
+            </CardContent>
+          </Card>
+          <Card sx={{ borderRadius: "10px", flex: 1 }} variant="outlined">
+            <MuiOrderSummary
+              amount={paymentIntent?.total_amount}
+              dueDate={paymentIntent?.due_date}
+              toName={client?.full_name}
+              fromName="FNTECH"
+            />
+          </Card>
+        </Box>
+
         <Card
           sx={{ flex: 1, borderRadius: "10px", height: "100%" }}
           variant="outlined"
         >
           <CardContent>
-            <MuiStripePayment
+            <StripePayment
               paymentIntent={paymentIntent}
               paymentProfile={paymentProfile}
-              client={{}}
+              client={client}
+              showBilling
               redirectUrl={redirectUrl}
+              paymentOptions={{
+                fields: {
+                  billingDetails: {
+                    name: "never",
+                    email: "never",
+                    phone: "never",
+                    address: "never"
+                  }
+                }
+              }}
               stripeFormTitle={false}
               updatePaymentIntent={updatePaymentIntent}
               onPaymentSuccess={handlePaymentSuccess}
@@ -161,6 +178,7 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   getPaymentProfile,
+  getMemberByExternalId,
   updatePaymentIntent,
   confirmPayment
 })(PaymentView);

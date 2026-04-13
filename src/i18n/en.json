@@ -29,6 +29,7 @@
     "file": "File",
     "logo": "Logo",
     "secondary_logo": "Secondary Logo",
+    "full_name": "Full Name",
     "first_name": "First Name",
     "last_name": "Last Name",
     "member": "Member",
@@ -2575,6 +2576,7 @@
         "amount": "Amount",
         "total": "Total",
         "rate": "Rate",
+        "billing_info": "Billing Information",
         "payment_success": "Payment successful"
       }
     },

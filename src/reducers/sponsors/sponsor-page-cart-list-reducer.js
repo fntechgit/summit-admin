@@ -39,6 +39,7 @@ import {
   PAYMENT_CONFIRMED
 } from "../../actions/sponsor-cart-actions";
 import { DISCOUNT_TYPES } from "../../utils/constants";
+import { RECEIVE_MEMBER } from "../../actions/member-actions";
 
 const DEFAULT_STATE = {
   cart: null,
@@ -57,7 +58,8 @@ const DEFAULT_STATE = {
   cartForm: null,
   paymentProfile: null,
   paymentIntent: null,
-  offlinePayment: null
+  offlinePayment: null,
+  cartOwner: null
 };
 
 const mapForm = (formData) => ({
@@ -248,6 +250,16 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
     case OFFLINE_PAYMENT_CREATED: {
       const offlinePayment = payload.response;
       return { ...state, offlinePayment };
+    }
+    case RECEIVE_MEMBER: {
+      const member = payload.response;
+      return {
+        ...state,
+        cartOwner: {
+          ...member,
+          full_name: `${member.first_name} ${member.last_name}`
+        }
+      };
     }
     default:
       return state;
