@@ -15,6 +15,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/es/integration/react";
+import { GlobalConfirmDialog } from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
+
 import App from "./app";
 import store, { persistor } from "./store";
 import "font-awesome/css/font-awesome.css";
@@ -33,6 +35,7 @@ ReactDOM.render(
     <PersistGate onBeforeLift={onBeforeLift} persistor={persistor}>
       <CustomTheme>
         <SnackbarNotification>
+          <GlobalConfirmDialog />
           <App />
         </SnackbarNotification>
       </CustomTheme>
