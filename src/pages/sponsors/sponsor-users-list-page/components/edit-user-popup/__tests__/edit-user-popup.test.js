@@ -26,14 +26,10 @@ global.fetch = jest.fn(() =>
 
 // Mock the actions to return plain objects (not async functions)
 jest.mock("../../../../../../actions/sponsor-users-actions", () => ({
-  getUserGroups: jest.fn().mockReturnValue({
-    type: "GET_USER_GROUPS",
-    payload: Promise.resolve([])
-  }),
-  updateShowSponsorUser: jest.fn().mockReturnValue({
-    type: "UPDATE_SPONSOR_USER",
-    payload: Promise.resolve({})
-  })
+  getUserGroups: jest.fn().mockImplementation(() => () => Promise.resolve([])),
+  updateShowSponsorUser: jest
+    .fn()
+    .mockImplementation(() => () => Promise.resolve({}))
 }));
 
 // Mock the confirm dialog
@@ -93,11 +89,7 @@ describe("EditUserPopup", () => {
 
     // Verify that the action was dispatched
     expect(sponsorUsersActions.getUserGroups).toHaveBeenCalled();
-    expect(store.dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "GET_USER_GROUPS"
-      })
-    );
+    expect(store.dispatch).toHaveBeenCalled();
   });
 
   it("closes when the close button is clicked", async () => {

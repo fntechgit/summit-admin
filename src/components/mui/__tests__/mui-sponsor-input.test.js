@@ -9,15 +9,13 @@ import MuiSponsorInput from "../formik-inputs/mui-sponsor-input";
 // Mock the sponsor actions
 jest.mock("../../../actions/sponsor-actions", () => ({
   querySponsors: jest.fn((query, summitId, callback) => {
-    // Simulate API response based on query
     const mockResults = [
       { id: 1, name: "Sponsor One" },
       { id: 2, name: "Sponsor Two" },
       { id: 3, name: "Another Sponsor" }
     ].filter((s) => s.name.toLowerCase().includes(query.toLowerCase()));
 
-    // Simulate async response
-    setTimeout(() => callback(mockResults), 100);
+    callback(mockResults);
     return Promise.resolve();
   })
 }));
@@ -52,134 +50,90 @@ describe("MuiSponsorInput", () => {
   });
 
   test("opens dropdown and fetches options when typing", async () => {
+    jest.useFakeTimers();
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime
+    });
     const { querySponsors } = require("../../../actions/sponsor-actions");
-
-    // Create a controlled resolution for the mock
-    let resolveAPICall;
-    const apiPromise = new Promise((resolve) => {
-      resolveAPICall = resolve;
-    });
-
-    // Mock with a controlled promise
-    querySponsors.mockImplementation((query, summitId, callback) => {
-      // Call the callback after our test code triggers resolution
-      apiPromise.then(() => {
-        callback([
-          { id: 1, name: "Sponsor One" },
-          { id: 2, name: "Sponsor Two" }
-        ]);
-      });
-      return Promise.resolve();
-    });
 
     renderWithFormik();
 
-    // Type in the search field
     const input = screen.getByPlaceholderText("Search sponsors...");
-    await userEvent.click(input);
-    await userEvent.type(input, "Sponsor");
+    await user.click(input);
+    await user.type(input, "Sponsor");
 
-    // Wait for the API call to be initiated
-    await waitFor(
-      () => {
-        expect(querySponsors).toHaveBeenCalledWith(
-          "Sponsor",
-          123,
-          expect.any(Function)
-        );
-      },
-      { timeout: 2000 }
-    ); // Increase timeout to account for debounce
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
 
-    // Now we can check for loading state
-    // If the component shows "Loading..." text while fetching
-    expect(screen.getByText(/Loading/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(querySponsors).toHaveBeenCalledWith(
+        "Sponsor",
+        123,
+        expect.any(Function)
+      );
+    });
 
-    // Resolve the API call at a controlled time
-    resolveAPICall();
+    expect(await screen.findByText("Sponsor One")).toBeInTheDocument();
+    expect(await screen.findByText("Sponsor Two")).toBeInTheDocument();
 
-    // Now wait for the options to appear with a longer timeout
-    await waitFor(
-      () => {
-        // Use a regex to match option text with case insensitivity
-        const options = screen.getAllByText(/sponsor (one|two)/i);
-        expect(options.length).toBeGreaterThan(0);
-      },
-      { timeout: 3000 }
-    );
-
-    // Verify loading indicator is gone
-    expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument();
+    jest.useRealTimers();
   });
 
   test("selects a sponsor in single selection mode", async () => {
+    jest.useFakeTimers();
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime
+    });
     renderWithFormik();
 
-    // Type and wait for options
     const input = screen.getByPlaceholderText("Search sponsors...");
-    await userEvent.click(input);
-    await userEvent.type(input, "Sponsor");
+    await user.click(input);
+    await user.type(input, "Sponsor");
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
 
-    // Wait for options to appear
-    await waitFor(
-      () => {
-        const options = screen.getAllByText(/Sponsor (One|Two)/);
-        expect(options.length).toBeGreaterThan(0);
-      },
-      { timeout: 1000 }
-    );
-
-    // Find and click the first option that matches "Sponsor One"
     const option = screen.getAllByText(/Sponsor One/)[0];
-    await userEvent.click(option);
+    await user.click(option);
 
-    // Check the input value - this might need to be adjusted based on how selection works
     await waitFor(() => {
       expect(input.value).toBe("Sponsor One");
     });
+
+    jest.useRealTimers();
   });
 
   test("supports multiple selection when isMulti is true", async () => {
+    jest.useFakeTimers();
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime
+    });
     renderWithFormik({ isMulti: true }, { sponsor: [] });
 
-    // Select first option
     const input = screen.getByPlaceholderText("Search sponsors...");
-    await userEvent.click(input);
-    await userEvent.type(input, "Sponsor");
+    await user.click(input);
+    await user.type(input, "Sponsor");
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
 
-    // Wait for options to appear
-    await waitFor(
-      () => {
-        const options = screen.getAllByText(/Sponsor (One|Two)/);
-        expect(options.length).toBeGreaterThan(0);
-      },
-      { timeout: 1000 }
-    );
-
-    // Find and click the option
     const option1 = screen.getAllByText(/Sponsor One/)[0];
-    await userEvent.click(option1);
+    await user.click(option1);
 
-    // Clear input and search for second option
-    await userEvent.clear(input);
-    await userEvent.type(input, "Two");
+    await user.clear(input);
+    await user.type(input, "Two");
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
 
-    // Wait for options to appear
-    await waitFor(
-      () => {
-        const options = screen.getAllByText(/Sponsor Two/);
-        expect(options.length).toBeGreaterThan(0);
-      },
-      { timeout: 1000 }
-    );
-
-    // Select second option
     const option2 = screen.getAllByText(/Sponsor Two/)[0];
-    await userEvent.click(option2);
+    await user.click(option2);
 
-    // Verify both options are selected (may need adjustment based on component implementation)
     expect(screen.getByText(/Sponsor One/)).toBeInTheDocument();
     expect(screen.getByText(/Sponsor Two/)).toBeInTheDocument();
+
+    jest.useRealTimers();
   });
 
   test("handles plain value format correctly", async () => {

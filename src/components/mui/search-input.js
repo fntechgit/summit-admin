@@ -4,7 +4,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 
 const SearchInput = ({ term, onSearch, placeholder = "Search..." }) => {
-  const [searchTerm, setSearchTerm] = useState(term);
+  const [searchTerm, setSearchTerm] = useState(term ?? "");
 
   useEffect(() => {
     setSearchTerm(term || "");
