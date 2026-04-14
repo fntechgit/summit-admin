@@ -277,7 +277,7 @@ export const getSponsorCustomizedPages =
       page,
       fields:
         "id,code,name,allowed_add_ons,is_archived,modules,allowed_add_ons.type,allowed_add_ons.name,allowed_add_ons.id",
-      expand: "allowed_add_ons",
+      expand: "allowed_add_ons,modules",
       per_page: perPage,
       access_token: accessToken
     };
