@@ -2608,9 +2608,11 @@
     "company": "Company",
     "scan_popup": {
       "scan_qr": "Scan QR",
+      "attendee": "Attendee",
       "error": "Cannot read QR code, please try again",
       "badge_scanned": "Badge scanned successfully",
-      "rescan": "Re-scan"
+      "rescan": "Re-scan",
+      "attendee_placeholder": "Enter Attendee..."
     },
     "placeholders": {
       "search": "Search..."

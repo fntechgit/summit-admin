@@ -25,8 +25,11 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControlLabel,
   IconButton,
   InputLabel,
+  Radio,
+  RadioGroup,
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -34,23 +37,35 @@ import { useSnackbarMessage } from "./SnackbarNotification/Context";
 import MuiFormikTextField from "./formik-inputs/mui-formik-textfield";
 import QrReader from "../qr-reader";
 import { getTypeValue, toSlug } from "../../utils/extra-questions";
+import MuiFormikAsyncAutocomplete from "./formik-inputs/mui-formik-async-select";
+import { queryAttendees } from "../../actions/attendee-actions";
 
 const buildInitialValues = (extraQuestions) => {
-  const values = { notes: "" };
+  const values = { notes: "", attendee_email: "" };
   extraQuestions.forEach((q) => {
     values[toSlug(q.name, q.id)] = getTypeValue("", q.type);
   });
   return values;
 };
 
-const MuiQrBadgePopup = ({ onClose, onSave, extraQuestions = [], isAdmin }) => {
+const BADGE_SCAN_MODE_QR = "qr";
+const BADGE_SCAN_MODE_ATTENDEE = "attendee";
+
+const MuiQrBadgePopup = ({
+  onClose,
+  onSave,
+  extraQuestions = [],
+  isAdmin,
+  summitId
+}) => {
   const { errorMessage } = useSnackbarMessage();
   const [scannedCode, setScannedCode] = useState(null);
+  const [scanMode, setScanMode] = useState(null);
 
   const formik = useFormik({
     initialValues: buildInitialValues(extraQuestions),
     onSubmit: (values) => {
-      const { notes, ...extraValues } = values;
+      const { attendee_email, notes, ...extraValues } = values;
 
       const extra_questions = Object.entries(extraValues)
         .map(([slug, value]) => ({
@@ -61,14 +76,23 @@ const MuiQrBadgePopup = ({ onClose, onSave, extraQuestions = [], isAdmin }) => {
         }))
         .filter((q) => q.answer);
 
-      return onSave({
-        qr_code: scannedCode,
+      const entity = {
+        ...(scanMode === BADGE_SCAN_MODE_QR
+          ? { qr_code: scannedCode }
+          : { attendee_email: attendee_email.value }),
         scan_date: moment().unix(),
         notes,
         extra_questions
-      });
+      };
+
+      return onSave(entity);
     }
   });
+
+  const handleScanModeChange = (e) => {
+    setScanMode(e.target.value);
+    setScannedCode(null);
+  };
 
   const handleScan = (data) => {
     if (!data) return;
@@ -82,6 +106,12 @@ const MuiQrBadgePopup = ({ onClose, onSave, extraQuestions = [], isAdmin }) => {
   const handleError = () => {
     errorMessage(T.translate("sponsor_badge_scans.scan_popup.error"));
   };
+
+  const isSubmitDisabled =
+    formik.isSubmitting ||
+    !scanMode ||
+    (scanMode === BADGE_SCAN_MODE_QR && !scannedCode) ||
+    (scanMode === BADGE_SCAN_MODE_ATTENDEE && !formik.values.attendee_email);
 
   return (
     <Dialog open onClose={onClose} maxWidth="md" fullWidth>
@@ -105,26 +135,69 @@ const MuiQrBadgePopup = ({ onClose, onSave, extraQuestions = [], isAdmin }) => {
           autoComplete="off"
         >
           <DialogContent>
-            {scannedCode ? (
-              <Alert
-                severity="success"
-                sx={{ mb: 2, alignItems: "center" }}
-                action={
-                  <Button
-                    variant="outlined"
-                    color="success"
-                    size="small"
-                    onClick={handleRescan}
-                  >
-                    {T.translate("sponsor_badge_scans.scan_popup.rescan")}
-                  </Button>
-                }
-              >
-                {T.translate("sponsor_badge_scans.scan_popup.badge_scanned")}
-              </Alert>
-            ) : (
+            <RadioGroup
+              row
+              value={scanMode}
+              onChange={handleScanModeChange}
+              sx={{ mb: 2 }}
+            >
+              <FormControlLabel
+                value={BADGE_SCAN_MODE_QR}
+                control={<Radio />}
+                label={T.translate("sponsor_badge_scans.scan_popup.scan_qr")}
+              />
+              <FormControlLabel
+                value={BADGE_SCAN_MODE_ATTENDEE}
+                control={<Radio />}
+                label={T.translate("sponsor_badge_scans.scan_popup.attendee")}
+              />
+            </RadioGroup>
+
+            {scanMode === BADGE_SCAN_MODE_QR &&
+              (scannedCode ? (
+                <Alert
+                  severity="success"
+                  sx={{ mb: 2, alignItems: "center" }}
+                  action={
+                    <Button
+                      variant="outlined"
+                      color="success"
+                      size="small"
+                      onClick={handleRescan}
+                    >
+                      {T.translate("sponsor_badge_scans.scan_popup.rescan")}
+                    </Button>
+                  }
+                >
+                  {T.translate("sponsor_badge_scans.scan_popup.badge_scanned")}
+                </Alert>
+              ) : (
+                <Box sx={{ mb: 2 }}>
+                  <QrReader onError={handleError} onScan={handleScan} />
+                </Box>
+              ))}
+
+            {scanMode === BADGE_SCAN_MODE_ATTENDEE && (
               <Box sx={{ mb: 2 }}>
-                <QrReader onError={handleError} onScan={handleScan} />
+                <InputLabel htmlFor="attendee">
+                  {T.translate("sponsor_badge_scans.scan_popup.attendee")}
+                </InputLabel>
+                <MuiFormikAsyncAutocomplete
+                  name="attendee_email"
+                  fullWidth
+                  margin="none"
+                  placeholder={T.translate(
+                    "sponsor_badge_scans.scan_popup.attendee_placeholder"
+                  )}
+                  queryFunction={queryAttendees}
+                  queryParams={[summitId]}
+                  formatOption={(attendee) => ({
+                    value: attendee.email.toString(),
+                    label: `${attendee.first_name || ""} ${
+                      attendee.last_name || ""
+                    } (${attendee.email || attendee.id})`
+                  })}
+                />
               </Box>
             )}
 
@@ -164,7 +237,7 @@ const MuiQrBadgePopup = ({ onClose, onSave, extraQuestions = [], isAdmin }) => {
               type="submit"
               fullWidth
               variant="contained"
-              disabled={!scannedCode || formik.isSubmitting}
+              disabled={isSubmitDisabled}
             >
               {T.translate("general.save")}
             </Button>

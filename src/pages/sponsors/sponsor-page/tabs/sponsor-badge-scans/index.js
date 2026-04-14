@@ -34,6 +34,7 @@ import Member from "../../../models/member";
 const SponsorBadgeScans = ({
   member,
   sponsor,
+  summitId,
   badgeScans,
   totalBadgeScans,
   term,
@@ -265,6 +266,7 @@ const SponsorBadgeScans = ({
           onClose={() => setShowManualBadgeScanPopup(false)}
           extraQuestions={sponsor.extra_questions}
           isAdmin={isAdmin}
+          summitId={summitId}
         />
       )}
     </Box>
@@ -275,12 +277,14 @@ const mapStateToProps = ({
   loggedUserState,
   badgeScansListState,
   currentBadgeScanState,
-  currentSponsorState
+  currentSponsorState,
+  currentSummitState
 }) => ({
   ...badgeScansListState,
   currentBadgeScan: currentBadgeScanState.entity,
   member: loggedUserState.member,
-  sponsor: currentSponsorState.entity
+  sponsor: currentSponsorState.entity,
+  summitId: currentSummitState.currentSummit.id
 });
 
 export default connect(mapStateToProps, {
