@@ -73,15 +73,23 @@ const DEFAULT_PURCHASE_LIST_STATE = {
   term: ""
 };
 
-const createInitialState = (overrides = {}) => ({
-  sponsorPagePurchaseListState: {
+const createInitialState = (overrides = {}) => {
+  const state = {
     ...DEFAULT_PURCHASE_LIST_STATE,
     ...overrides
-  },
-  currentSponsorState: {
-    entity: { id: 123 }
-  }
-});
+  };
+
+  const perPage = state.perPage || 10;
+  const totalCount = state.totalCount || 0;
+  const maxPage = Math.max(1, Math.ceil(totalCount / perPage));
+  if (state.currentPage > maxPage) state.currentPage = maxPage;
+  return {
+    sponsorPagePurchaseListState: state,
+    currentSponsorState: {
+      entity: { id: 123 }
+    }
+  };
+};
 
 const createPurchase = (overrides = {}) => ({
   id: 1,

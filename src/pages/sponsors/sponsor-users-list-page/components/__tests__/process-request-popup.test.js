@@ -31,9 +31,9 @@ jest.mock("../../../../../actions/sponsor-users-actions", () => {
       })
     ),
     getUserGroups: jest.fn(() => ({
-        type: "XXX",
-        payload: {}
-      }))
+      type: "XXX",
+      payload: {}
+    }))
   };
 });
 
@@ -79,7 +79,12 @@ jest.mock("lodash", () => {
   return {
     __esModule: true,
     ...originalModule,
-    debounce: jest.fn()
+    debounce: jest.fn((fn) => {
+      const debounced = (...args) => fn(...args);
+      debounced.cancel = jest.fn();
+      debounced.flush = jest.fn();
+      return debounced;
+    })
   };
 });
 
