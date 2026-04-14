@@ -61,7 +61,15 @@ export const normalizePageTemplateModules = (modules = [], timeZone = null) =>
 
     if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
       if (module.type === PAGE_MODULES_DOWNLOAD.FILE) {
-        normalizedModule.file = module.file?.[0] || null;
+        // Only new files (without id or file_id) are sent in the payload; existing files are omitted to prevent overwriting.
+        const file = Array.isArray(module.file) ? module.file[0] : null;
+        const isNewFile =
+          file && typeof file === "object" && !file.id && !file.file_id;
+        if (isNewFile) {
+          normalizedModule.file = file;
+        } else {
+          delete normalizedModule.file;
+        }
         delete normalizedModule.external_url;
       } else {
         delete normalizedModule.file;
@@ -73,3 +81,4 @@ export const normalizePageTemplateModules = (modules = [], timeZone = null) =>
 
     return normalizedModule;
   });
+  
