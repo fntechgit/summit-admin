@@ -113,7 +113,7 @@ export const getShowPage = (pageId) => async (dispatch, getState) => {
 
   const params = {
     access_token: accessToken,
-    expand: "modules"
+    expand: "modules,sponsorship_types"
   };
 
   return getRequest(
