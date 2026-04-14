@@ -219,6 +219,7 @@ describe("SponsorPagesTab", () => {
         />,
         {
           initialState: {
+            ...defaultState,
             sponsorPagePagesListState: {
               ...defaultState.sponsorPagePagesListState,
               managedPages: {
@@ -246,6 +247,7 @@ describe("SponsorPagesTab", () => {
         />,
         {
           initialState: {
+            ...defaultState,
             sponsorPagePagesListState: {
               ...defaultState.sponsorPagePagesListState,
               managedPages: {
@@ -280,6 +282,7 @@ describe("SponsorPagesTab", () => {
         />,
         {
           initialState: {
+            ...defaultState,
             sponsorPagePagesListState: {
               ...defaultState.sponsorPagePagesListState,
               managedPages: {
