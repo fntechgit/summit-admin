@@ -12,6 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   REQUEST_SPONSOR_MANAGED_PAGES,
   RECEIVE_SPONSOR_MANAGED_PAGES,
@@ -24,7 +25,10 @@ import {
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
-import { PAGES_MODULE_KINDS } from "../../utils/constants";
+import {
+  PAGE_MODULES_DOWNLOAD,
+  PAGES_MODULE_KINDS
+} from "../../utils/constants";
 
 const DEFAULT_PAGE = {
   code: "",
@@ -174,7 +178,38 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
     }
     case RECEIVE_SPONSOR_CUSTOMIZED_PAGE: {
       const customizedPage = payload.response;
-      return { ...state, currentEditPage: customizedPage };
+
+      const modules = customizedPage.modules.map((module) => {
+        const tmpModule = {
+          ...module,
+          ...(module.upload_deadline
+            ? {
+                upload_deadline: epochToMomentTimeZone(
+                  module.upload_deadline,
+                  state.summitTZ || "UTC"
+                )
+              }
+            : {})
+        };
+
+        if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
+          if (module.file) {
+            tmpModule.file = [
+              {
+                ...module.file,
+                file_path: module.file.storage_key,
+                public_url: module.file.file_url
+              }
+            ];
+            tmpModule.type = PAGE_MODULES_DOWNLOAD.FILE;
+          } else {
+            tmpModule.type = PAGE_MODULES_DOWNLOAD.URL;
+          }
+        }
+        return tmpModule;
+      });
+
+      return { ...state, currentEditPage: { ...customizedPage, modules } };
     }
     case SPONSOR_CUSTOMIZED_PAGE_ARCHIVED: {
       const { pageId } = payload;
