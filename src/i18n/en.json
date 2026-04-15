@@ -2514,6 +2514,7 @@
       "add_ons": "Add-ons",
       "items": "Items",
       "discount": "Discount",
+      "delete_form_confirm": "Please verify you want to delete {form}",
       "amount": "Amount",
       "manage_items": "Manage Items",
       "add_form": "Add Form",

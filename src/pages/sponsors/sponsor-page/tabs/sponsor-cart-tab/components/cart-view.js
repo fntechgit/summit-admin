@@ -193,6 +193,12 @@ const CartView = ({
             options={{}}
             onEdit={onEdit}
             onDelete={handleDelete}
+            deleteDialogBody={(formName) =>
+              T.translate("edit_sponsor.cart_tab.delete_form_confirm", {
+                form: formName ?? ""
+              })
+            }
+            confirmButtonColor="error"
           >
             <TotalRow
               columns={tableColumns}
