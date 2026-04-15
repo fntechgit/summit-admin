@@ -174,7 +174,8 @@ export const getSponsorForm = (formId) => async (dispatch, getState) => {
   dispatch(startLoading());
 
   const params = {
-    access_token: accessToken
+    access_token: accessToken,
+    expand: "meta_fields,meta_fields.values,sponsorship_types"
   };
 
   return getRequest(
@@ -507,6 +508,7 @@ export const getSponsorManagedForms =
       page,
       fields:
         "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+      expands: "allowed_add_ons",
       per_page: perPage,
       access_token: accessToken
     };
@@ -612,6 +614,7 @@ export const getSponsorCustomizedForms =
       page,
       fields:
         "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+      expands: "allowed_add_ons",
       per_page: perPage,
       access_token: accessToken
     };
@@ -653,6 +656,7 @@ export const getSponsorCustomizedForm =
     const params = {
       fields:
         "id,code,name,is_archived,opens_at,instructions,expires_at,items_count,allowed_add_ons,meta_fields",
+      expand: "allowed_add_ons,meta_fields,meta_fields.values",
       access_token: accessToken
     };
 
@@ -1007,7 +1011,8 @@ export const getSponsorFormItem =
     dispatch(startLoading());
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      expands: "meta_fields,meta_fields.values,images"
     };
 
     return getRequest(
@@ -1410,7 +1415,8 @@ export const getSponsorFormManagedItem =
     dispatch(startLoading());
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      expands: "meta_fields,meta_fields.values,images"
     };
 
     return getRequest(

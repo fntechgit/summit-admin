@@ -114,7 +114,7 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
 
       const sponsorshipTypeTds = form.apply_to_all_types
         ? ["all"]
-        : [...form.sponsorship_types];
+        : form.sponsorship_types.map((st) => st.id);
 
       const formTemplate = {
         id: form.id,
