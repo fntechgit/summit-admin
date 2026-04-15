@@ -101,6 +101,18 @@ const FormTemplateItemListPage = ({
     );
   };
 
+  const handlePerPageChange = (newPerPage) => {
+    getFormTemplateItems(
+      formTemplateId,
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
+  };
+
   const handleSort = (key, dir) => {
     getFormTemplateItems(
       formTemplateId,
@@ -295,6 +307,7 @@ const FormTemplateItemListPage = ({
             totalRows={totalFormTemplateItems}
             currentPage={currentPage}
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
             onEdit={handleRowEdit}
             onArchive={handleArchiveItem}

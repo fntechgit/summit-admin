@@ -70,6 +70,17 @@ const SponsorFormItemListPage = ({
     getSponsorFormItems(formId, page, perPage, order, orderDir, hideArchived);
   };
 
+  const handlePerPageChange = (newPerPage) => {
+    getSponsorFormItems(
+      formId,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
+  };
+
   const handleSort = (key, dir) => {
     getSponsorFormItems(formId, currentPage, perPage, key, dir, hideArchived);
   };
@@ -283,6 +294,7 @@ const SponsorFormItemListPage = ({
             currentPage={currentPage}
             onDelete={handleRowDelete}
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
             onCellChange={handleCellEdit}
             onEdit={handleRowEdit}
