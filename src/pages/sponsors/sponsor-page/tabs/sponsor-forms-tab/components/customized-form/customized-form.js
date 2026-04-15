@@ -58,6 +58,7 @@ const CustomizedForm = ({
     {
       initialValues: buildInitialValues(initialValues, summitTZ),
       validationSchema: yup.object().shape({
+        name: requiredStringValidation(),
         code: requiredStringValidation(),
         instructions: requiredStringValidation(),
         opens_at: opensAtValidation(),
@@ -113,6 +114,7 @@ const CustomizedForm = ({
                   "edit_sponsor.forms_tab.customized_form.name"
                 )}
                 fullWidth
+                required
               />
             </Grid2>
             <Grid2 size={4} sx={{ pt: "16px" }}>
