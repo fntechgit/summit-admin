@@ -135,7 +135,8 @@ export const getSponsorForms =
         "id,code,name,level,expire_date,is_archived,sponsorship_types,apply_to_all_types",
       relations: "items,sponsorship_types",
       per_page: perPage,
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "sponsorship_types"
     };
 
     if (hideArchived) filter.push("is_archived==0");
@@ -503,36 +504,10 @@ export const updateFormTemplateTiers =
 
 export const normalizeFormTemplate = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
-  if (
-    entity.opens_at !== undefined &&
-    entity.opens_at !== null &&
-    entity.opens_at !== ""
-  ) {
-    normalizedEntity.opens_at =
-      typeof entity.opens_at === "number"
-        ? entity.opens_at
-        : moment.tz(entity.opens_at, summitTZ).unix();
-  } else {
-    delete normalizedEntity.opens_at;
-  }
-  if (
-    entity.expires_at !== undefined &&
-    entity.expires_at !== null &&
-    entity.expires_at !== ""
-  ) {
-    normalizedEntity.expires_at =
-      typeof entity.expires_at === "number"
-        ? entity.expires_at
-        : moment.tz(entity.expires_at, summitTZ).unix();
-  } else {
-    delete normalizedEntity.expires_at;
-  }
+  const { opens_at, expires_at, sponsorship_types, meta_fields } = entity;
 
-  const sponsorship_types = entity.sponsorship_types || [];
-  const hasMetaFields = Object.prototype.hasOwnProperty.call(
-    entity,
-    "meta_fields"
-  );
+  normalizedEntity.opens_at = moment.tz(opens_at, summitTZ).unix();
+  normalizedEntity.expires_at = moment.tz(expires_at, summitTZ).unix();
 
   Object.assign(
     normalizedEntity,
@@ -543,13 +518,7 @@ export const normalizeFormTemplate = (entity, summitTZ) => {
     )
   );
 
-  if (hasMetaFields) {
-    normalizedEntity.meta_fields = Array.isArray(entity.meta_fields)
-      ? entity.meta_fields.filter((mf) => !!mf.name)
-      : undefined;
-  } else {
-    delete normalizedEntity.meta_fields;
-  }
+  normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
 
   return normalizedEntity;
 };
