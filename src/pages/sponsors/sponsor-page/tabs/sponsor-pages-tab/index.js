@@ -68,7 +68,7 @@ const SponsorPagesTab = ({
   useEffect(() => {
     getSponsorManagedPages();
     getSponsorCustomizedPages();
-  }, []);
+  }, [sponsor?.id]);
 
   const handleManagedPageChange = (page) => {
     const { perPage, order, orderDir } = managedPages;

@@ -60,7 +60,7 @@ const SponsorFormsTab = ({
   useEffect(() => {
     getSponsorManagedForms();
     getSponsorCustomizedForms();
-  }, []);
+  }, [sponsor?.id]);
 
   const handleManagedPageChange = (page) => {
     const { perPage, order, orderDir } = managedForms;
@@ -157,7 +157,8 @@ const SponsorFormsTab = ({
     );
   };
 
-  const handleSaveFormFromTemplate = (entity) => saveSponsorManagedForm(entity).then(() => {
+  const handleSaveFormFromTemplate = (entity) =>
+    saveSponsorManagedForm(entity).then(() => {
       const { perPage, order, orderDir } = managedForms;
       getSponsorManagedForms(
         term,
