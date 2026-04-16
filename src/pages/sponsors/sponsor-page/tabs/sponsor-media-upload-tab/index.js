@@ -32,6 +32,7 @@ import UploadDialog from "../../../../../components/upload-dialog";
 import showConfirmDialog from "../../../../../components/mui/showConfirmDialog";
 
 const SponsorMediaUploadTab = ({
+  sponsor,
   sponsorRequests,
   generalRequests,
   getSponsorMURequests,
@@ -44,7 +45,7 @@ const SponsorMediaUploadTab = ({
   useEffect(() => {
     getSponsorMURequests();
     getGeneralMURequests();
-  }, []);
+  }, [sponsor?.id]);
 
   const handleSponsorPageChange = (page) => {
     const { perPage, order, orderDir } = sponsorRequests;
@@ -271,8 +272,9 @@ const SponsorMediaUploadTab = ({
   );
 };
 
-const mapStateToProps = ({ sponsorPageMUListState }) => ({
-  ...sponsorPageMUListState
+const mapStateToProps = ({ sponsorPageMUListState, currentSponsorState }) => ({
+  ...sponsorPageMUListState,
+  sponsor: currentSponsorState.entity
 });
 
 export default connect(mapStateToProps, {
