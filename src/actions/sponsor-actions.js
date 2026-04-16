@@ -985,7 +985,7 @@ export const saveSponsorExtraQuestionValue =
         createAction(SPONSOR_EXTRA_QUESTION_VALUE_UPDATED),
         `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}/values/${entity.id}`,
         entity,
-        authErrorHandler,
+        snackbarErrorHandler,
         entity
       )(params)(dispatch).then(() => {
         dispatch(stopLoading());
@@ -997,7 +997,7 @@ export const saveSponsorExtraQuestionValue =
       createAction(SPONSOR_EXTRA_QUESTION_VALUE_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}/values`,
       entity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -1037,7 +1037,7 @@ export const updateSponsorExtraQuestionValueOrder =
       createAction(""),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}/values/${valueId}`,
       { order: newOrder },
-      authErrorHandler,
+      snackbarErrorHandler,
       { order: newOrder, id: valueId }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
@@ -1062,7 +1062,7 @@ export const deleteSponsorExtraQuestionValue =
       createAction(SPONSOR_EXTRA_QUESTION_VALUE_DELETED)({ valueId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/extra-questions/${questionId}/values/${valueId}`,
       null,
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -2279,10 +2279,7 @@ export const querySummitSponsorships = _.debounce(
   DEBOUNCE_WAIT
 );
 
-export const querySummitAddons = async (
-  summitId,
-  callback
-) => {
+export const querySummitAddons = async (summitId, callback) => {
   const accessToken = await getAccessTokenSafely();
   const endpoint = URI(
     `${window.API_BASE_URL}/api/v1/summits/${summitId}/add-ons/metadata`

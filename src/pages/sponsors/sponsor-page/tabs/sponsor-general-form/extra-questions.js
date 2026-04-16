@@ -73,31 +73,20 @@ const SponsorExtraQuestions = ({
 
     const hasValues = valuesToSave && valuesToSave.length > 0;
 
-    if (!hasValues) {
-      saveSponsorExtraQuestion(extraQuestionToSave).then(() =>
-        handleCloseExtraQuestionPopup()
-      );
-      return;
-    }
+    saveSponsorExtraQuestion(extraQuestionToSave)
+      .then((eq) => {
+        if (!hasValues) {
+          handleCloseExtraQuestionPopup();
+          return;
+        }
 
-    if (!extraQuestionToSave.id) {
-      saveSponsorExtraQuestion(extraQuestionToSave).then((eq) => {
+        const id = extraQuestionToSave.id || eq.id;
         const saveValuePromises = valuesToSave.map((value) =>
-          saveSponsorExtraQuestionValue(eq.id, value)
+          saveSponsorExtraQuestionValue(id, value)
         );
-        Promise.all(saveValuePromises).then(() =>
-          handleCloseExtraQuestionPopup()
-        );
-      });
-      return;
-    }
 
-    const saveValuePromises = valuesToSave.map((value) =>
-      saveSponsorExtraQuestionValue(extraQuestionToSave.id, value)
-    );
-
-    Promise.all(saveValuePromises)
-      .then(() => saveSponsorExtraQuestion(extraQuestionToSave))
+        return Promise.all(saveValuePromises);
+      })
       .then(() => handleCloseExtraQuestionPopup());
   };
 
