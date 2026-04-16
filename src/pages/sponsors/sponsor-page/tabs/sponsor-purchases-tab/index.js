@@ -32,6 +32,7 @@ import {
 } from "../../../../../utils/constants";
 
 const SponsorPurchasesTab = ({
+  sponsor,
   purchases,
   term,
   order,
@@ -43,7 +44,7 @@ const SponsorPurchasesTab = ({
 }) => {
   useEffect(() => {
     getSponsorPurchases();
-  }, []);
+  }, [sponsor?.id]);
 
   const handlePageChange = (page) => {
     getSponsorPurchases(term, page, perPage, order, orderDir);
@@ -195,8 +196,12 @@ const SponsorPurchasesTab = ({
   );
 };
 
-const mapStateToProps = ({ sponsorPagePurchaseListState }) => ({
-  ...sponsorPagePurchaseListState
+const mapStateToProps = ({
+  sponsorPagePurchaseListState,
+  currentSponsorState
+}) => ({
+  ...sponsorPagePurchaseListState,
+  sponsor: currentSponsorState.entity
 });
 
 export default connect(mapStateToProps, {
