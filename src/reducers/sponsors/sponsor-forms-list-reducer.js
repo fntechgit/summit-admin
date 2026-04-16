@@ -13,7 +13,6 @@
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
-  RECEIVE_GLOBAL_SPONSORSHIPS,
   RECEIVE_GLOBAL_TEMPLATES,
   RECEIVE_SPONSOR_FORM,
   RECEIVE_SPONSOR_FORMS,
@@ -24,7 +23,10 @@ import {
   SPONSOR_FORM_DELETED,
   SPONSOR_FORM_UNARCHIVED
 } from "../../actions/sponsor-forms-actions";
-import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import {
+  SET_CURRENT_SUMMIT,
+  RECEIVE_GLOBAL_SPONSORSHIPS
+} from "../../actions/summit-actions";
 
 const DEFAULT_STATE = {
   sponsorForms: [],
