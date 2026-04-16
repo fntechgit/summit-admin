@@ -54,6 +54,7 @@ export const RECEIVE_LEAD_REPORT_SETTINGS_META =
   "RECEIVE_LEAD_REPORT_SETTINGS_META";
 export const LEAD_REPORT_SETTINGS_UPDATED = "LEAD_REPORT_SETTINGS_UPDATED";
 export const RECEIVE_LEAD_REPORT_SETTINGS = "RECEIVE_LEAD_REPORT_SETTINGS";
+export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
 
 export const getSummitById = (summitId) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
@@ -536,3 +537,32 @@ const normalizeEntity = (entity) => {
   }
   return normalizedEntity;
 };
+
+export const getSummitSponsorshipTypes =
+  (page = 1, perPage = DEFAULT_PER_PAGE) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+
+    dispatch(startLoading());
+
+    const params = {
+      page,
+      per_page: perPage,
+      access_token: accessToken,
+      sorting: "order",
+      expand: "type",
+      relations: "type",
+      fields: "id,type.id,type.name"
+    };
+
+    return getRequest(
+      null,
+      createAction(RECEIVE_GLOBAL_SPONSORSHIPS),
+      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
+      authErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
