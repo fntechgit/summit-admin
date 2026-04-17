@@ -25,10 +25,13 @@ import {
   approveSponsorPurchase,
   rejectSponsorPurchase
 } from "../../../../../../actions/sponsor-purchases-actions";
-import { PURCHASE_METHODS, PURCHASE_STATUS } from "../../../../../../utils/constants";
+import {
+  PURCHASE_METHODS,
+  PURCHASE_STATUS
+} from "../../../../../../utils/constants";
 
 jest.mock("../../../../../../actions/sponsor-purchases-actions", () => ({
-  ...jest.requireActual("../../../../actions/sponsor-purchases-actions"),
+  ...jest.requireActual("../../../../../../actions/sponsor-purchases-actions"),
   getSponsorPurchases: jest.fn(() => () => Promise.resolve()),
   approveSponsorPurchase: jest.fn(() => () => Promise.resolve()),
   rejectSponsorPurchase: jest.fn(() => () => Promise.resolve())
