@@ -149,6 +149,7 @@ const SponsorSettingsForm = ({ settings, onSubmit, summitTZ }) => {
                 "sponsor_settings.wire_transfer_notification_email"
               )}
               fullWidth
+              margin="none"
             />
           </Grid2>
           <Grid2 size={12}>
