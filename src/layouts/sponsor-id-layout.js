@@ -1,15 +1,25 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import { Switch, Route } from "react-router-dom";
-import SponsorPage from "../pages/sponsors/sponsor-page";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import { getSponsor, resetSponsorForm } from "../actions/sponsor-actions";
-import EditAdSponsorPage from "../pages/sponsors/edit-advertisement-sponsor-page";
-import EditMaterialSponsorPage from "../pages/sponsors/edit-material-sponsor-page";
-import EditSocialNetworkSponsorPage from "../pages/sponsors/edit-social-network-sponsor-page";
-import EditSponsorExtraQuestion from "../pages/sponsors/edit-sponsor-extra-question-page";
-import NoMatchPage from "../pages/no-match-page";
+
+const SponsorPage = React.lazy(() => import("../pages/sponsors/sponsor-page"));
+const EditAdSponsorPage = React.lazy(() =>
+  import("../pages/sponsors/edit-advertisement-sponsor-page")
+);
+const EditMaterialSponsorPage = React.lazy(() =>
+  import("../pages/sponsors/edit-material-sponsor-page")
+);
+const EditSocialNetworkSponsorPage = React.lazy(() =>
+  import("../pages/sponsors/edit-social-network-sponsor-page")
+);
+const EditSponsorExtraQuestion = React.lazy(() =>
+  import("../pages/sponsors/edit-sponsor-extra-question-page")
+);
+const NoMatchPage = React.lazy(() => import("../pages/no-match-page"));
 
 class SponsorIdLayout extends React.Component {
   constructor(props) {
@@ -48,102 +58,104 @@ class SponsorIdLayout extends React.Component {
     return (
       <div>
         <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-        <Switch>
-          <Route
-            path={`${match.url}/ads`}
-            render={(props) => (
-              <div>
-                <Breadcrumb
-                  data={{ title: "Advertisements", pathname: match.url }}
-                />
-                <Switch>
-                  <Route
-                    exact
-                    strict
-                    path={`${props.match.url}/new`}
-                    component={EditAdSponsorPage}
+        <Suspense fallback={<AjaxLoader show relative size={120} />}>
+          <Switch>
+            <Route
+              path={`${match.url}/ads`}
+              render={(props) => (
+                <div>
+                  <Breadcrumb
+                    data={{ title: "Advertisements", pathname: match.url }}
                   />
-                  <Route
-                    path={`${props.match.url}/:advertisement_id(\\d+)`}
-                    component={EditAdSponsorPage}
+                  <Switch>
+                    <Route
+                      exact
+                      strict
+                      path={`${props.match.url}/new`}
+                      component={EditAdSponsorPage}
+                    />
+                    <Route
+                      path={`${props.match.url}/:advertisement_id(\\d+)`}
+                      component={EditAdSponsorPage}
+                    />
+                    <Route component={NoMatchPage} />
+                  </Switch>
+                </div>
+              )}
+            />
+            <Route
+              path={`${match.url}/materials`}
+              render={(props) => (
+                <div>
+                  <Breadcrumb
+                    data={{ title: "Materials", pathname: match.url }}
                   />
-                  <Route component={NoMatchPage} />
-                </Switch>
-              </div>
-            )}
-          />
-          <Route
-            path={`${match.url}/materials`}
-            render={(props) => (
-              <div>
-                <Breadcrumb
-                  data={{ title: "Materials", pathname: match.url }}
-                />
-                <Switch>
-                  <Route
-                    exact
-                    strict
-                    path={`${props.match.url}/new`}
-                    component={EditMaterialSponsorPage}
+                  <Switch>
+                    <Route
+                      exact
+                      strict
+                      path={`${props.match.url}/new`}
+                      component={EditMaterialSponsorPage}
+                    />
+                    <Route
+                      path={`${props.match.url}/:material_id(\\d+)`}
+                      component={EditMaterialSponsorPage}
+                    />
+                    <Route component={NoMatchPage} />
+                  </Switch>
+                </div>
+              )}
+            />
+            <Route
+              path={`${match.url}/social-networks`}
+              render={(props) => (
+                <div>
+                  <Breadcrumb
+                    data={{ title: "Social Networks", pathname: match.url }}
                   />
-                  <Route
-                    path={`${props.match.url}/:material_id(\\d+)`}
-                    component={EditMaterialSponsorPage}
+                  <Switch>
+                    <Route
+                      exact
+                      strict
+                      path={`${props.match.url}/new`}
+                      component={EditSocialNetworkSponsorPage}
+                    />
+                    <Route
+                      path={`${props.match.url}/:social_network_id(\\d+)`}
+                      component={EditSocialNetworkSponsorPage}
+                    />
+                    <Route component={NoMatchPage} />
+                  </Switch>
+                </div>
+              )}
+            />
+            <Route
+              path={`${match.url}/extra-questions`}
+              render={(props) => (
+                <div>
+                  <Breadcrumb
+                    data={{ title: "Extra Questions", pathname: match.url }}
                   />
-                  <Route component={NoMatchPage} />
-                </Switch>
-              </div>
-            )}
-          />
-          <Route
-            path={`${match.url}/social-networks`}
-            render={(props) => (
-              <div>
-                <Breadcrumb
-                  data={{ title: "Social Networks", pathname: match.url }}
-                />
-                <Switch>
-                  <Route
-                    exact
-                    strict
-                    path={`${props.match.url}/new`}
-                    component={EditSocialNetworkSponsorPage}
-                  />
-                  <Route
-                    path={`${props.match.url}/:social_network_id(\\d+)`}
-                    component={EditSocialNetworkSponsorPage}
-                  />
-                  <Route component={NoMatchPage} />
-                </Switch>
-              </div>
-            )}
-          />
-          <Route
-            path={`${match.url}/extra-questions`}
-            render={(props) => (
-              <div>
-                <Breadcrumb
-                  data={{ title: "Extra Questions", pathname: match.url }}
-                />
-                <Switch>
-                  <Route
-                    exact
-                    strict
-                    path={`${props.match.url}/new`}
-                    component={EditSponsorExtraQuestion}
-                  />
-                  <Route
-                    path={`${props.match.url}/:extra_question_id(\\d+)`}
-                    component={EditSponsorExtraQuestion}
-                  />
-                  <Route component={NoMatchPage} />
-                </Switch>
-              </div>
-            )}
-          />
-          <Route path={match.url} component={SponsorPage} />
-          <Route component={NoMatchPage} />
-        </Switch>
+                  <Switch>
+                    <Route
+                      exact
+                      strict
+                      path={`${props.match.url}/new`}
+                      component={EditSponsorExtraQuestion}
+                    />
+                    <Route
+                      path={`${props.match.url}/:extra_question_id(\\d+)`}
+                      component={EditSponsorExtraQuestion}
+                    />
+                    <Route component={NoMatchPage} />
+                  </Switch>
+                </div>
+              )}
+            />
+            <Route path={match.url} component={SponsorPage} />
+            <Route component={NoMatchPage} />
+          </Switch>
+        </Suspense>
       </div>
     );
   }

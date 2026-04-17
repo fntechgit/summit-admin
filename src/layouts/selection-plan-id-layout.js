@@ -1,17 +1,25 @@
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { connect } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react";
-import EditSelectionPlanPage from "../pages/selection-plans/edit-selection-plan-page";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import {
   getSelectionPlan,
   resetSelectionPlanForm
 } from "../actions/selection-plan-actions";
 import { getMarketingSettingsBySelectionPlan } from "../actions/marketing-actions";
-import SelectionPlanExtraQuestionsLayout from "./selection-plan-extra-questions-layout";
-import SelectionPlanRatingTypesLayout from "./selection-plan-rating-types-layout";
 import { MAX_PER_PAGE } from "../utils/constants";
+
+const EditSelectionPlanPage = React.lazy(() =>
+  import("../pages/selection-plans/edit-selection-plan-page")
+);
+const SelectionPlanExtraQuestionsLayout = React.lazy(() =>
+  import("./selection-plan-extra-questions-layout")
+);
+const SelectionPlanRatingTypesLayout = React.lazy(() =>
+  import("./selection-plan-rating-types-layout")
+);
 
 const SelectionPlanIdLayout = ({
   match,
@@ -44,25 +52,27 @@ const SelectionPlanIdLayout = ({
   return (
     <div>
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-      <Switch>
-        <Route
-          strict
-          exact
-          path={`${match.url}`}
-          component={EditSelectionPlanPage}
-        />
-        <Route
-          path={`${match.url}/extra-questions`}
-          component={SelectionPlanExtraQuestionsLayout}
-        />
-        <Route
-          path={`${match.url}/rating-types`}
-          component={SelectionPlanRatingTypesLayout}
-        />
-        <Redirect
-          to={`/app/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`}
-        />
-      </Switch>
+      <Suspense fallback={<AjaxLoader show relative size={120} />}>
+        <Switch>
+          <Route
+            strict
+            exact
+            path={`${match.url}`}
+            component={EditSelectionPlanPage}
+          />
+          <Route
+            path={`${match.url}/extra-questions`}
+            component={SelectionPlanExtraQuestionsLayout}
+          />
+          <Route
+            path={`${match.url}/rating-types`}
+            component={SelectionPlanRatingTypesLayout}
+          />
+          <Redirect
+            to={`/app/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`}
+          />
+        </Switch>
+      </Suspense>
     </div>
   );
 };
