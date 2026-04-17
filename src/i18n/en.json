@@ -4080,7 +4080,7 @@
       "upload_deadline": "Upload Deadline",
       "max_file_size": "Max File Size (MB)",
       "allowed_formats": "Allowed Formats",
-      "module_remove_warning": "Are you sure you want to delete {name}"
+      "module_remove_warning": "Please verify you want to delete this {name}"
     },
     "clone_success": "Page template cloned successfully."
   },
