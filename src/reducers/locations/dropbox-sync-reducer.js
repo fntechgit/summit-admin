@@ -37,13 +37,13 @@ const dropboxSyncReducer = (state = DEFAULT_STATE, action) => {
     case RECEIVE_SYNC_CONFIG:
       return {
         ...state,
-        syncConfig: payload.response,
+        syncConfig: payload.response ?? DEFAULT_STATE.syncConfig,
         loading: false
       };
     case SYNC_CONFIG_UPDATED:
       return {
         ...state,
-        syncConfig: payload.response,
+        syncConfig: payload.response ?? DEFAULT_STATE.syncConfig,
         loading: false
       };
     case SET_CURRENT_SUMMIT:
