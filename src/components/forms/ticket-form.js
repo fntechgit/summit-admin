@@ -14,10 +14,8 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import {
-  Input,
-  TicketTypesInput
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import OwnerInput from "../inputs/owner-input";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 

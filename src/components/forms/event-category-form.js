@@ -14,14 +14,12 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Input,
-  Panel,
-  TagInput,
-  UploadInput,
-  AccessLevelsInput,
-  SortableTable
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
+import AccessLevelsInput from "openstack-uicore-foundation/lib/components/inputs/access-levels-input"
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import {
   isEmpty,

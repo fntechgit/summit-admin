@@ -1,9 +1,7 @@
 import React from "react";
 import T from "i18n-react";
-import {
-  Input,
-  SponsorInput
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import SponsorInput from "openstack-uicore-foundation/lib/components/inputs/sponsor-input";
 
 const SponsorBasePCForm = (props) => (
   <div className="row form-group">

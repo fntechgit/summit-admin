@@ -12,7 +12,7 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import _ from "lodash";
+import cloneDeep from "lodash/cloneDeep"
 import {
   RECEIVE_TC_SELECTION_PLANS,
   RECEIVE_SOURCE_LIST,
@@ -165,12 +165,12 @@ const teamListsReducer = (state = DEFAULT_STATE, action) => {
     }
     case REORDER_LIST: {
       const { items } = payload;
-      const newState = _.cloneDeep(state);
+      const newState = cloneDeep(state);
       const newItems = items.map((it, i) => ({ ...it, order: i + 1 }));
 
       // only store the original list for rollback
       if (!newState.prevList)
-        newState.prevList = _.cloneDeep(newState.teamList);
+        newState.prevList = cloneDeep(newState.teamList);
 
       newState.teamList.items = newItems;
 

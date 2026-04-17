@@ -12,7 +12,7 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
-import * as _ from "lodash";
+import debounce from "lodash/debounce"
 import {
   getRequest,
   putRequest,
@@ -175,7 +175,7 @@ const normalizeSponsorship = (entity) => {
   return normalizedEntity;
 };
 
-export const querySponsorships = _.debounce(async (input, callback) => {
+export const querySponsorships = debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
   const endpoint = URI(`${window.API_BASE_URL}/api/v1/sponsorship-types`);
   input = escapeFilterValue(input);
@@ -192,7 +192,7 @@ export const querySponsorships = _.debounce(async (input, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
-export const querySponsorshipsBySummit = _.debounce(
+export const querySponsorshipsBySummit = debounce(
   async (input, summitId, callback) => {
     const accessToken = await getAccessTokenSafely();
     const endpoint = URI(

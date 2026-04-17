@@ -12,13 +12,11 @@
  * */
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import {
-  UploadInput,
-  Input,
-  TextArea,
-  Panel,
-  Dropdown
-} from "openstack-uicore-foundation/lib/components";
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input"
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import Switch from "react-switch";
 import Swal from "sweetalert2";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";

@@ -29,7 +29,7 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import _ from "lodash";
+import debounce from "lodash/debounce"
 import history from "../history";
 import { checkOrFilter, getAccessTokenSafely } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
@@ -230,7 +230,7 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const queryTemplates = _.debounce(async (input, callback) => {
+export const queryTemplates = debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
 
   const endpoint = URI(`${window.EMAIL_API_BASE_URL}/api/v1/mail-templates`);

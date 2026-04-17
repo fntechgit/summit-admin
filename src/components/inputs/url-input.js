@@ -13,7 +13,7 @@
 
 import React, { useState, useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Input } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 
 const UrlInput = function ({ onChange, error, id, value: propValue, ...rest }) {
   const [stateValue, setStateValue] = useState(propValue || "");

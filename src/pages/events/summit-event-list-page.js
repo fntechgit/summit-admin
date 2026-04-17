@@ -16,18 +16,16 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";
-import {
-  CompanyInput,
-  DateTimePicker,
-  Dropdown,
-  FreeTextSearch,
-  Input,
-  MemberInput,
-  OperatorInput,
-  SpeakerInput,
-  TagInput,
-  UploadInput
-} from "openstack-uicore-foundation/lib/components";
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import OperatorInput from "openstack-uicore-foundation/lib/components/inputs/operator-input"
+import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 import { SegmentedControl } from "segmented-control";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {

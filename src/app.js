@@ -15,7 +15,7 @@ import React from "react";
 import { Switch, Route, Router } from "react-router-dom";
 import { connect } from "react-redux";
 import { setAppTexts } from "openstack-uicore-foundation/lib/i18n";
-import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import { getBackURL } from "openstack-uicore-foundation/lib/utils/methods";
 import { resetLoading } from "openstack-uicore-foundation/lib/utils/actions";
 import {
@@ -32,8 +32,6 @@ import IdTokenVerifier from "idtoken-verifier";
 import T from "i18n-react";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-// eslint-disable-next-line
-import * as Sentry from "@sentry/react";
 import exclusiveSections from "./exclusive-sections.yml";
 import CustomErrorPage from "./pages/custom-error-page";
 import history from "./history";
@@ -45,7 +43,7 @@ import AuthButton from "./components/auth-button";
 import DefaultRoute from "./routes/default-route";
 import { getTimezones } from "./actions/base-actions";
 import { LANGUAGE_CODE_LENGTH } from "./utils/constants";
-import { SentryFallbackFunction } from "./components/SentryErrorComponent";
+import SentryErrorBoundary from "./components/SentryErrorBoundary";
 
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
@@ -108,31 +106,6 @@ if (exclusiveSections.hasOwnProperty(process.env.APP_CLIENT_NAME)) {
   window.EXCLUSIVE_SECTIONS = exclusiveSections[process.env.APP_CLIENT_NAME];
 }
 
-if (window.SENTRY_DSN && window.SENTRY_DSN !== "") {
-  console.log("app init sentry ...");
-  // Initialize Sentry
-  Sentry.init({
-    dsn: window.SENTRY_DSN,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.browserProfilingIntegration(),
-      Sentry.replayIntegration()
-    ],
-    // Tracing
-    tracesSampleRate: window.SENTRY_TRACE_SAMPLE_RATE, //  Capture 100% of the transactions
-    // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-    tracePropagationTargets: [window.SENTRY_TRACE_PROPAGATION_TARGETS],
-    // Set profilesSampleRate to 1.0 to profile every transaction.
-    // Since profilesSampleRate is relative to tracesSampleRate,
-    // the final profiling rate can be computed as tracesSampleRate * profilesSampleRate
-    // For example, a tracesSampleRate of 0.5 and profilesSampleRate of 0.5 would
-    // results in 25% of transactions being profiled (0.5*0.5=0.25)
-    profilesSampleRate: 1.0,
-    // Session Replay
-    replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-    replaysOnErrorSampleRate: 1.0 // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
-  });
-}
 
 class App extends React.PureComponent {
   constructor(props) {
@@ -173,9 +146,7 @@ class App extends React.PureComponent {
     }
 
     return (
-      <Sentry.ErrorBoundary
-        fallback={SentryFallbackFunction({ componentName: "Summit Admin App" })}
-      >
+      <SentryErrorBoundary componentName="Summit Admin App">
         <LocalizationProvider dateAdapter={AdapterMoment}>
           <Router history={history}>
             <div>
@@ -212,7 +183,7 @@ class App extends React.PureComponent {
             </div>
           </Router>
         </LocalizationProvider>
-      </Sentry.ErrorBoundary>
+      </SentryErrorBoundary>
     );
   }
 }

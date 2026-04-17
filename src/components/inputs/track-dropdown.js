@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown } from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 
 const TrackDropdown = ({ id, value, onChange, tracks, ...rest }) => {
   const options = tracks.map((t) => ({ label: t.name, value: t.id }));

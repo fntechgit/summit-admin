@@ -1,5 +1,5 @@
 import React from "react";
-import _ from "lodash";
+import cloneDeep from "lodash/cloneDeep"
 import { useField } from "formik";
 import T from "i18n-react";
 import showConfirmDialog from "../../../../../components/mui/showConfirmDialog";
@@ -18,7 +18,7 @@ const AccessRightsList = ({ name, userGroups, summitId }) => {
   };
 
   const handleChange = (itemIdx, fieldName, fieldValue) => {
-    const newValues = _.cloneDeep(field.value);
+    const newValues = cloneDeep(field.value);
     newValues[itemIdx][fieldName] = fieldValue;
     helpers.setValue(newValues);
   };

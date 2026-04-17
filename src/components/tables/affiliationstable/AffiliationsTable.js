@@ -1,9 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import {
-  DateTimePicker,
-  OrganizationInput
-} from "openstack-uicore-foundation/lib/components";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import OrganizationInput from "openstack-uicore-foundation/lib/components/inputs/organization-input";
 import {
   epochToMoment,
   formatEpoch

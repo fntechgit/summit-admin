@@ -14,7 +14,8 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import { Input, Dropdown } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class SponsorshipForm extends React.Component {

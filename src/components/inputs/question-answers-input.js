@@ -13,13 +13,11 @@
 
 import React from "react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Input,
-  Dropdown,
-  RadioList,
-  CheckboxList,
-  RawHTML
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import RadioList from "openstack-uicore-foundation/lib/components/inputs/radio-list"
+import CheckboxList from "openstack-uicore-foundation/lib/components/inputs/checkbox-list"
+import RawHTML from "openstack-uicore-foundation/lib/components/raw-html";
 import "../../styles/question-answers-input.less";
 
 export default class QuestionAnswersInput extends React.Component {

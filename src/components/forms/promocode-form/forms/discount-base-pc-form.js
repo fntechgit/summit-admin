@@ -1,7 +1,7 @@
 import React from "react";
 import T from "i18n-react";
 import BasePCForm from "./base-pc-form";
-import { Input } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import { DiscountTicketTable } from "../../../tables/dicount-ticket-table";
 
 const DiscountBasePCForm = (props) => {

@@ -16,12 +16,10 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import {
-  Dropdown,
-  Input,
-  FreeTextSearch,
-  SelectableTable
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable";
 import {
   getSponsorPromocodes,
   selectPromocode,

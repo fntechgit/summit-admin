@@ -12,11 +12,9 @@
  **/
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import {
-  TicketTypesInput,
-  Input,
-  TagInput
-} from "openstack-uicore-foundation/lib/components";
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import {
   hasErrors,
   isEmpty,

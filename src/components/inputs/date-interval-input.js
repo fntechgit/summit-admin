@@ -13,7 +13,7 @@
 
 import React from "react";
 import moment from "moment-timezone";
-import { DateTimePicker } from "openstack-uicore-foundation/lib/components";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 
 const HourIntervalInput = ({
   onChange,

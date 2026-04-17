@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import Select from "react-select";
-import { Input } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import styles from "./index.module.less";
 const Index = ({ onChange, id, operatorInitialValue, filterInitialValue }) => {
   const operatorOptions = [

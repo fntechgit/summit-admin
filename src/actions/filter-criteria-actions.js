@@ -25,7 +25,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import Swal from "sweetalert2";
-import _ from "lodash";
+import debounce from "lodash/debounce"
 
 import { getAccessTokenSafely } from "../utils/methods";
 import {
@@ -112,7 +112,7 @@ export const deleteFilterCriteria = (filterCriteriaId) => async (dispatch) => {
   });
 };
 
-export const queryFilterCriterias = _.debounce(
+export const queryFilterCriterias = debounce(
   async (summitId, context, input, callback) => {
     const accessToken = await getAccessTokenSafely();
 

@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import { Input } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import { isEmpty, shallowEqual } from "../../utils/methods";
 import CreatableSelect from "react-select/lib/Creatable";
 

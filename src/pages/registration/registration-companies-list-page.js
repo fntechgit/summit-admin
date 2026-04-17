@@ -16,12 +16,10 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  Table,
-  CompanyInput,
-  UploadInput
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Table from "openstack-uicore-foundation/lib/components/table"
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getRegistrationCompanies,
