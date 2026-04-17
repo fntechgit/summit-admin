@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown } from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 
 const EventTypeDropdown = ({ id, value, onChange, eventTypes, ...rest }) => {
   const options = eventTypes.map((et) => ({ value: et.id, label: et.name }));

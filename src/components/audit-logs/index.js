@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  FreeTextSearch,
-  Table,
-  Dropdown,
-  MemberInput,
-  DateTimePicker
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Table from "openstack-uicore-foundation/lib/components/table"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import T from "i18n-react";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { Pagination } from "react-bootstrap";

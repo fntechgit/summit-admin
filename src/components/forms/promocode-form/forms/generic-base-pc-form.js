@@ -1,6 +1,6 @@
 import React from "react";
 import T from "i18n-react";
-import { TicketTypesInput } from "openstack-uicore-foundation/lib/components";
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import BasePCForm from "./base-pc-form";
 
 const GenericBasePCForm = (props) => (

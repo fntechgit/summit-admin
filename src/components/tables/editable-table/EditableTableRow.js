@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextArea } from "openstack-uicore-foundation/lib/components";
+import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input";
 import T from "i18n-react/dist/i18n-react";
 import history from "../../../history";
 

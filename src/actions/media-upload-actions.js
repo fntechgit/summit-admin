@@ -27,7 +27,7 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import _ from "lodash";
+import debounce from "lodash/debounce"
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
 import { DEBOUNCE_WAIT, DEFAULT_PER_PAGE } from "../utils/constants";
@@ -117,7 +117,7 @@ export const getMediaUpload = (mediaUploadId) => async (dispatch, getState) => {
   });
 };
 
-export const queryMediaUploads = _.debounce(
+export const queryMediaUploads = debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
     const apiUrl = URI(

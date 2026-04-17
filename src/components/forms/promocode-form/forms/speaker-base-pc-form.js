@@ -1,6 +1,6 @@
 import React from "react";
 import T from "i18n-react";
-import { SpeakerInput } from "openstack-uicore-foundation/lib/components";
+import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input";
 import EmailRedeemForm from "./email-redeem-form";
 
 const SpeakerBasePCForm = (props) => (

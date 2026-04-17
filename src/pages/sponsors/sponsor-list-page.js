@@ -25,7 +25,7 @@ import {
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import _ from "lodash";
+import debounce from "lodash/debounce"
 import {
   getLeadReportSettingsMeta,
   getSummitById,
@@ -67,7 +67,7 @@ const SponsorListPage = ({
   }, [currentSummit]);
 
   const handleSearchDebounced = useCallback(
-    _.debounce((term) => {
+    debounce((term) => {
       getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
     }, DEBOUNCE_WAIT),
     [perPage, order, orderDir]

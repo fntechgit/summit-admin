@@ -1,17 +1,24 @@
-import Ably from "ably";
 import Swal from "sweetalert2";
 
 const AblyApiKey = process.env.SIGNAGE_ABLY_API_KEY;
-const realtimeAbly = AblyApiKey ? new Ably.Realtime(AblyApiKey) : null;
+let realtimeAbly = null;
 
-export const subscribeToAblyChannel = (channel, callback) => {
-  if (!realtimeAbly) {
+const getAblyClient = async () => {
+  if (!AblyApiKey) return null;
+  if (realtimeAbly) return realtimeAbly;
+  const Ably = (await import("ably")).default;
+  realtimeAbly = new Ably.Realtime(AblyApiKey);
+  return realtimeAbly;
+};
+
+export const subscribeToAblyChannel = (channel, callback) => async (dispatch) => {
+  const client = await getAblyClient();
+  if (!client) {
     Swal.fire("Subscribe failed", "No Ably API key found", "warning");
     return false;
   }
 
-  const ablyChannel = realtimeAbly.channels.get(channel);
-
+  const ablyChannel = client.channels.get(channel);
   ablyChannel.subscribe((msg) => {
     callback(msg.data);
   });
@@ -19,13 +26,14 @@ export const subscribeToAblyChannel = (channel, callback) => {
   return true;
 };
 
-export const publishToAblyChannel = (channel, key, message) => {
-  if (!realtimeAbly) {
+export const publishToAblyChannel = (channel, key, message) => async (dispatch) => {
+  const client = await getAblyClient();
+  if (!client) {
     Swal.fire("Publish failed", "No Ably API key found", "warning");
     return false;
   }
 
-  const ablyChannel = realtimeAbly.channels.get(channel);
+  const ablyChannel = client.channels.get(channel);
 
   ablyChannel.subscribe((msg) => {
     console.log(`Received: ${JSON.stringify(msg.data)}`);

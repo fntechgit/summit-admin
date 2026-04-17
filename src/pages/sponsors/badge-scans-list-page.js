@@ -14,10 +14,8 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Table,
-  SponsorInput
-} from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table"
+import SponsorInput from "openstack-uicore-foundation/lib/components/inputs/sponsor-input";
 import { querySponsorsWithBadgeScans } from "openstack-uicore-foundation/lib/utils/query-actions";
 import { Pagination } from "react-bootstrap";
 import { getSummitById } from "../../actions/summit-actions";

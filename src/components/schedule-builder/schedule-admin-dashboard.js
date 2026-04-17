@@ -68,12 +68,10 @@ import * as Scroll from "react-scroll";
 import Swal from "sweetalert2";
 import ScheduleAdminEmptySpotsModal from "./schedule-admin-empty-spots-modal";
 import ScheduleAdminEmptySpotsList from "./schedule-admin-empty-spots-list";
-import {
-  Dropdown,
-  OperatorInput,
-  BulkActionsSelector,
-  ScheduleBuilderView
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import OperatorInput from "openstack-uicore-foundation/lib/components/inputs/operator-input"
+import BulkActionsSelector from "openstack-uicore-foundation/lib/components/bulk-actions-selector"
+import ScheduleBuilderView from "openstack-uicore-foundation/lib/components/schedule-builder-view";
 import { SummitEvent } from "openstack-uicore-foundation/lib/models";
 import UnlockScheduleButton from "../UnlockScheduleButton";
 

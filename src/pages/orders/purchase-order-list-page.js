@@ -14,13 +14,11 @@ import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  Dropdown,
-  DateTimePicker,
-  CompanyInput,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SegmentedControl } from "segmented-control";
 import Swal from "sweetalert2";

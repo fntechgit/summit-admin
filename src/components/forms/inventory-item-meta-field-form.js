@@ -14,11 +14,9 @@
 import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Dropdown,
-  Input,
-  SortableTable
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import Swal from "sweetalert2";
 import { hasErrors, scrollToError, shallowEqual } from "../../utils/methods";
 import { metafieldHasValues } from "../../actions/inventory-shared-actions";

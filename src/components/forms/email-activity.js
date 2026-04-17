@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 import React from "react";
-import { Table } from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import T from "i18n-react/dist/i18n-react";
 
 class EmailActivity extends React.Component {

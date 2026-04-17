@@ -15,10 +15,8 @@ import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Modal } from "react-bootstrap";
-import {
-  MemberInput,
-  TicketTypesInput
-} from "openstack-uicore-foundation/lib/components";
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 
 import history from "../../../history";
 

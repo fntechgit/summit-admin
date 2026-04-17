@@ -16,16 +16,14 @@ import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import {
-  Dropdown,
-  SortableTable,
-  CompanyInput,
-  MemberInput,
-  Panel,
-  Input,
-  UploadInput,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable"
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import EventInput from "../inputs/event-input";

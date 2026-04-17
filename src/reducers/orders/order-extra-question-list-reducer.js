@@ -11,7 +11,7 @@
  * limitations under the License.
  **/
 import React from "react";
-import { RawHTML } from "openstack-uicore-foundation/lib/components";
+import RawHTML from "openstack-uicore-foundation/lib/components/raw-html";
 
 import {
   RECEIVE_ORDER_EXTRA_QUESTIONS,

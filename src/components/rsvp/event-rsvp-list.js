@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {
-  AttendeeInput,
-  FreeTextSearch,
-  SelectableTable
-} from "openstack-uicore-foundation/lib/components";
+import AttendeeInput from "openstack-uicore-foundation/lib/components/inputs/attendee-input"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable";
 import T from "i18n-react";
 import Swal from "sweetalert2";
 import Select from "react-select";

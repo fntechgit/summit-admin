@@ -28,7 +28,7 @@ import {
 import Switch from "react-switch";
 import EditLabelSlider from "../../inputs/edit-label-slider";
 import PreFilterInput from "./pre-filter-input";
-import { SortableTable } from "openstack-uicore-foundation/lib/components";
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 
 class ScheduleSettingsForm extends React.Component {
   constructor(props) {

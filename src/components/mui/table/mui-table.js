@@ -1,6 +1,6 @@
 import * as React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { isBoolean } from "lodash";
+import isBoolean from "lodash/isBoolean"
 import {
   Box,
   Button,

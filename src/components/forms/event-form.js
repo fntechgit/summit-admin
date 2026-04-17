@@ -17,23 +17,21 @@ import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Swal from "sweetalert2";
 import { Tooltip } from "react-tooltip";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import {
-  Dropdown,
-  GroupedDropdown,
-  DateTimePicker,
-  TagInput,
-  SpeakerInput,
-  CompanyInput,
-  GroupInput,
-  UploadInput,
-  Input,
-  Panel,
-  Table,
-  MemberInput,
-  FreeTextSearch,
-  TicketTypesInput,
-  SortableTable
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import GroupedDropdown from "openstack-uicore-foundation/lib/components/inputs/grouped-dropdown"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
+import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input"
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import GroupInput from "openstack-uicore-foundation/lib/components/inputs/group-input"
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
+import Table from "openstack-uicore-foundation/lib/components/table"
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input"
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { Pagination } from "react-bootstrap";
 import ExtraQuestionsForm from "openstack-uicore-foundation/lib/components/extra-questions";

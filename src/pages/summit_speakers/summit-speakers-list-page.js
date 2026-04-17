@@ -16,12 +16,10 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  SelectableTable,
-  Dropdown,
-  Input
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import SpeakerPromoCodeSpecForm from "../../components/forms/speakers-promo-code-spec-form";
 import {
   initSpeakersList,

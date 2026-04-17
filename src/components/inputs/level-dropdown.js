@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown } from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 
 const LevelDropdown = ({ id, value, onChange, ...rest }) => {
   const options = ["N/A", "Beginner", "Intermediate", "Advanced"];

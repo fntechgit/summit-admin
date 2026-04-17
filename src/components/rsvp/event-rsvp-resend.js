@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import Swal from "sweetalert2";
 import T from "i18n-react";
 import { Modal } from "react-bootstrap";

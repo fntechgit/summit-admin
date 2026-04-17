@@ -13,7 +13,7 @@
 
 import React from "react";
 import history from "../../history";
-import { Table } from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import StarRatings from "react-star-ratings";
 import Select from "react-select";
 const Query = require("graphql-query-builder");

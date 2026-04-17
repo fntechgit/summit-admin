@@ -29,7 +29,7 @@ import {
   fetchErrorHandler,
   postFile
 } from "openstack-uicore-foundation/lib/utils/actions";
-import * as _ from "lodash";
+import debounce from "lodash/debounce"
 import URI from "urijs";
 import { getAccessTokenSafely } from "../utils/methods";
 import { normalizeLeadReportSettings } from "../models/lead-report-settings";
@@ -176,7 +176,7 @@ export const SPONSOR_LEAD_REPORT_SETTINGS_UPDATED =
 
 /** ****************  FETCH *************************************** */
 
-export const querySponsors = _.debounce(async (input, summitId, callback) => {
+export const querySponsors = debounce(async (input, summitId, callback) => {
   const accessToken = await getAccessTokenSafely();
   const endpoint = URI(
     `${window.API_BASE_URL}/api/v2/summits/${summitId}/sponsors`
@@ -2256,7 +2256,7 @@ export const deleteSponsorSocialNetwork =
     });
   };
 
-export const querySummitSponsorships = _.debounce(
+export const querySummitSponsorships = debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
     const endpoint = URI(

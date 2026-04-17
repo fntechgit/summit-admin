@@ -12,7 +12,7 @@
  **/
 
 import React from "react";
-import { Table } from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import StarRatings from "react-star-ratings";
 const Query = require("graphql-query-builder");
 import wrapReport from "./report-wrapper";

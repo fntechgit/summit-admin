@@ -14,12 +14,10 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  MemberInput,
-  GroupInput,
-  EventInput,
-  Dropdown
-} from "openstack-uicore-foundation/lib/components";
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import GroupInput from "openstack-uicore-foundation/lib/components/inputs/group-input"
+import EventInput from "openstack-uicore-foundation/lib/components/inputs/event-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class PushNotificationForm extends React.Component {

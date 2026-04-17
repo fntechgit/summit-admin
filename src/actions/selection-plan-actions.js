@@ -12,7 +12,7 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
-import _ from "lodash";
+import debounce from "lodash/debounce"
 import {
   getRequest,
   putRequest,
@@ -698,7 +698,7 @@ export const deleteRatingType =
     });
   };
 
-export const querySelectionPlanExtraQuestions = _.debounce(
+export const querySelectionPlanExtraQuestions = debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
     const endpoint = URI(

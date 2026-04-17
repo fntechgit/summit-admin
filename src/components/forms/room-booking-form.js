@@ -15,11 +15,9 @@ import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import {
-  Dropdown,
-  MemberInput,
-  Input
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import Swal from "sweetalert2";
 import {
   getAvailableBookingDates,
