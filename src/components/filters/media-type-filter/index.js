@@ -41,18 +41,18 @@ const MediaTypeFilter = ({
       ? operatorOptions.find((o) => o.value === operatorInitialValue)
       : null
   );
-  const [filterValue, setFilterValue] = useState(
-    filterInitialValue || null
-  );
+  const [filterValue, setFilterValue] = useState(filterInitialValue || null);
 
   const onChangeOperator = (newOperatorValue) => {
     setOperatorValue(newOperatorValue);
+    if (newOperatorValue?.value == null) return;
+
     const ev = {
       target: {
         id,
         value: filterValue,
         type: "mediatypeinput",
-        operator: newOperatorValue.value
+        operator: newOperatorValue?.value ?? null
       }
     };
     onChange(ev);
@@ -66,7 +66,7 @@ const MediaTypeFilter = ({
         id,
         value,
         type: "mediatypeinput",
-        operator: operatorValue.value
+        operator: operatorValue?.value ?? null
       }
     };
     onChange(ev);
