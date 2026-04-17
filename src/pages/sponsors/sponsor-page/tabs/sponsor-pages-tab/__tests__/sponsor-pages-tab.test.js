@@ -6,6 +6,10 @@ import { renderWithRedux } from "../../../../../../utils/test-utils";
 import { DEFAULT_STATE as sponsorPagesDefaultState } from "../../../../../../reducers/sponsors/sponsor-page-pages-list-reducer";
 import {
   getSponsorCustomizedPage,
+  getSponsorManagedPage,
+  getSponsorManagedPages,
+  getSponsorCustomizedPages,
+  saveSponsorManagedPage,
   archiveCustomizedPage,
   unarchiveCustomizedPage
 } from "../../../../../../actions/sponsor-pages-actions";
@@ -49,6 +53,7 @@ jest.mock("../../../../../../actions/sponsor-pages-actions", () => ({
     () => () => Promise.resolve({ id: 1, name: "Test Page" })
   ),
   saveSponsorCustomizedPage: jest.fn(() => () => Promise.resolve()),
+  getSponsorManagedPage: jest.fn(() => () => Promise.resolve()),
   saveSponsorManagedPage: jest.fn(() => () => Promise.resolve()),
   resetSponsorPage: jest.fn(() => ({ type: "MOCK_ACTION" })),
   archiveCustomizedPage: jest.fn(() => () => Promise.resolve()),
@@ -65,6 +70,14 @@ jest.mock("../../../../../../actions/sponsor-forms-actions", () => ({
 const createSponsor = (overrides = {}) => ({
   id: 1,
   sponsorships_collection: { sponsorships: [] },
+  ...overrides
+});
+
+const createManagedPage = (id, overrides = {}) => ({
+  id,
+  code: `MANAGED-${id}`,
+  name: `Managed Page ${id}`,
+  assigned_type: "EXPLICIT",
   ...overrides
 });
 
@@ -195,6 +208,119 @@ describe("SponsorPagesTab", () => {
       await waitFor(() => {
         expect(screen.getByTestId("page-template-popup")).toBeInTheDocument();
       });
+    });
+
+    it("should render Customize button in managed pages rows", async () => {
+      renderWithRedux(
+        <SponsorPagesTab
+          sponsor={createSponsor()}
+          summitId={1}
+          summitTZ="UTC"
+        />,
+        {
+          initialState: {
+            ...defaultState,
+            sponsorPagePagesListState: {
+              ...defaultState.sponsorPagePagesListState,
+              managedPages: {
+                ...defaultState.sponsorPagePagesListState.managedPages,
+                pages: [createManagedPage(1)],
+                totalItems: 1
+              }
+            }
+          }
+        }
+      );
+
+      expect(
+        screen.getByText("edit_sponsor.forms_tab.customize")
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("ArrowForwardIcon")).toBeInTheDocument();
+    });
+
+    it("should call getSponsorManagedPage and open popup when Customize is clicked", async () => {
+      renderWithRedux(
+        <SponsorPagesTab
+          sponsor={createSponsor()}
+          summitId={1}
+          summitTZ="UTC"
+        />,
+        {
+          initialState: {
+            ...defaultState,
+            sponsorPagePagesListState: {
+              ...defaultState.sponsorPagePagesListState,
+              managedPages: {
+                ...defaultState.sponsorPagePagesListState.managedPages,
+                pages: [createManagedPage(1)],
+                totalItems: 1
+              }
+            }
+          }
+        }
+      );
+
+      const customizeButton = screen.getByText(
+        "edit_sponsor.forms_tab.customize"
+      );
+      await act(async () => {
+        await userEvent.click(customizeButton);
+      });
+
+      expect(getSponsorManagedPage).toHaveBeenCalledWith(1);
+      await waitFor(() => {
+        expect(screen.getByTestId("page-template-popup")).toBeInTheDocument();
+      });
+    });
+
+    it("should call saveSponsorManagedPage, refresh both grids, and close popup after saving a managed page customization", async () => {
+      renderWithRedux(
+        <SponsorPagesTab
+          sponsor={createSponsor()}
+          summitId={1}
+          summitTZ="UTC"
+        />,
+        {
+          initialState: {
+            ...defaultState,
+            sponsorPagePagesListState: {
+              ...defaultState.sponsorPagePagesListState,
+              managedPages: {
+                ...defaultState.sponsorPagePagesListState.managedPages,
+                pages: [createManagedPage(1)],
+                totalItems: 1
+              }
+            }
+          }
+        }
+      );
+
+      const customizeButton = screen.getByText(
+        "edit_sponsor.forms_tab.customize"
+      );
+      await act(async () => {
+        await userEvent.click(customizeButton);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("page-template-popup")).toBeInTheDocument();
+      });
+
+      const saveButton = screen.getByText("Save");
+      await act(async () => {
+        await userEvent.click(saveButton);
+      });
+
+      expect(saveSponsorManagedPage).toHaveBeenCalled();
+
+      await waitFor(() => {
+        expect(getSponsorManagedPages).toHaveBeenCalledTimes(2);
+        expect(getSponsorCustomizedPages).toHaveBeenCalledTimes(2);
+      });
+
+      expect(
+        screen.queryByTestId("page-template-popup")
+      ).not.toBeInTheDocument();
     });
 
     it("should refresh customized pages list after save", async () => {

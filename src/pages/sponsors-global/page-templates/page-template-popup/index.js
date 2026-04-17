@@ -31,7 +31,21 @@ import DropdownCheckbox from "../../../../components/mui/dropdown-checkbox";
 import MuiFormikSelectGroup from "../../../../components/mui/formik-inputs/mui-formik-select-group";
 import { querySponsorAddons } from "../../../../actions/sponsor-actions";
 
-const PageTemplatePopup = ({ pageTemplate, onClose, onSave, sponsorships, summitId, sponsorId, sponsorshipIds }) => {
+const PageTemplatePopup = ({
+  pageTemplate,
+  onClose,
+  onSave,
+  sponsorships,
+  summitId,
+  sponsorId,
+  sponsorshipIds,
+  title
+}) => {
+  const popupTitle =
+    title ??
+    (pageTemplate?.id
+      ? T.translate("page_template_list.page_crud.title_edit")
+      : T.translate("page_template_list.page_crud.title_create"));
   const showSponsorships =
     Array.isArray(sponsorships) && sponsorships.length > 0;
 
@@ -157,9 +171,7 @@ const PageTemplatePopup = ({ pageTemplate, onClose, onSave, sponsorships, summit
   return (
     <Dialog open onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography fontSize="1.5rem">
-          {T.translate("page_template_list.page_crud.title")}
-        </Typography>
+        <Typography fontSize="1.5rem">{popupTitle}</Typography>
         <IconButton size="small" onClick={onClose} sx={{ mr: 1 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -278,7 +290,8 @@ PageTemplatePopup.propTypes = {
   sponsorships: PropTypes.array,
   sponsorshipIds: PropTypes.array,
   summitId: PropTypes.number,
-  sponsorId: PropTypes.number
+  sponsorId: PropTypes.number,
+  title: PropTypes.string
 };
 
 export default PageTemplatePopup;

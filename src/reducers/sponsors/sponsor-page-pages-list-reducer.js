@@ -21,7 +21,8 @@ import {
   RECEIVE_SPONSOR_CUSTOMIZED_PAGE,
   RESET_EDIT_PAGE,
   SPONSOR_CUSTOMIZED_PAGE_ARCHIVED,
-  SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED
+  SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED,
+  RECEIVE_SPONSOR_MANAGED_PAGE
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
@@ -175,6 +176,25 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
           lastPage
         }
       };
+    }
+    case RECEIVE_SPONSOR_MANAGED_PAGE: {
+      const editPage = payload.response;
+
+      const currentEditPage = {
+        ...editPage,
+        modules: editPage.modules.map((m) => ({
+          ...m,
+          ...(m.upload_deadline
+            ? {
+                upload_deadline: epochToMomentTimeZone(
+                  m.upload_deadline,
+                  state.summitTZ || "UTC"
+                )
+              }
+            : {})
+        }))
+      };
+      return { ...state, currentEditPage };
     }
     case RECEIVE_SPONSOR_CUSTOMIZED_PAGE: {
       const customizedPage = payload.response;
