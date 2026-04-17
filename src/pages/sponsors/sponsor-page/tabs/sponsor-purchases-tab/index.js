@@ -23,11 +23,16 @@ import {
   Select
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { getSponsorPurchases } from "../../../../../actions/sponsor-purchases-actions";
 import SearchInput from "../../../../../components/mui/search-input";
 import MuiTable from "../../../../../components/mui/table/mui-table";
 import {
+  approveSponsorPurchase,
+  getSponsorPurchases,
+  rejectSponsorPurchase
+} from "../../../../../actions/sponsor-purchases-actions";
+import {
   DEFAULT_CURRENT_PAGE,
+  PURCHASE_METHODS,
   PURCHASE_STATUS
 } from "../../../../../utils/constants";
 
@@ -39,7 +44,9 @@ const SponsorPurchasesTab = ({
   currentPage,
   perPage,
   totalCount,
-  getSponsorPurchases
+  getSponsorPurchases,
+  approveSponsorPurchase,
+  rejectSponsorPurchase
 }) => {
   useEffect(() => {
     getSponsorPurchases();
@@ -75,8 +82,10 @@ const SponsorPurchasesTab = ({
     console.log("MENU : ", item);
   };
 
-  const handleStatusChange = (stat) => {
-    console.log("STATUS : ", stat);
+  const handleStatusChange = (purchaseId, newStatus) => {
+    if (newStatus === PURCHASE_STATUS.PAID) approveSponsorPurchase(purchaseId);
+    if (newStatus === PURCHASE_STATUS.CANCELLED)
+      rejectSponsorPurchase(purchaseId);
   };
 
   const tableColumns = [
@@ -100,13 +109,18 @@ const SponsorPurchasesTab = ({
       header: T.translate("edit_sponsor.purchase_tab.status"),
       sortable: true,
       render: (row) => {
-        if (row.status === PURCHASE_STATUS.PENDING) {
+        if (
+          row.payment_method === PURCHASE_METHODS.INVOICE &&
+          row.status === PURCHASE_STATUS.PENDING
+        ) {
           return (
             <Select
               fullWidth
               variant="outlined"
               value={row.status}
-              onChange={(ev) => handleStatusChange(ev.target.value)}
+              onChange={(ev) =>
+                handleStatusChange(row.payment_id, ev.target.value)
+              }
             >
               {Object.values(PURCHASE_STATUS).map((s) => (
                 <MenuItem key={`purchase-status-${s}`} value={s}>
@@ -200,5 +214,7 @@ const mapStateToProps = ({ sponsorPagePurchaseListState }) => ({
 });
 
 export default connect(mapStateToProps, {
-  getSponsorPurchases
+  getSponsorPurchases,
+  approveSponsorPurchase,
+  rejectSponsorPurchase
 })(SponsorPurchasesTab);

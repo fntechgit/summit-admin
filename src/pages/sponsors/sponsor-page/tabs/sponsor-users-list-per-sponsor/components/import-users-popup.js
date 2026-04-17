@@ -14,12 +14,12 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import CheckBoxList from "../../../../components/mui/checkbox-list";
-import SummitsDropdown from "../../../../components/mui/summits-dropdown";
+import CheckBoxList from "../../../../../../components/mui/checkbox-list";
+import SummitsDropdown from "../../../../../../components/mui/summits-dropdown";
 import {
   fetchSponsorUsersBySummit,
   importSponsorUsers
-} from "../../../../actions/sponsor-users-actions";
+} from "../../../../../../actions/sponsor-users-actions";
 
 const ImportUsersPopup = ({
   open,

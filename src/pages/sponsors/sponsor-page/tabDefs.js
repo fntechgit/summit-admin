@@ -4,7 +4,7 @@ import { Breadcrumb } from "react-breadcrumbs";
 import { ACCESS_ROUTES } from "../../../utils/constants";
 import Restrict from "../../../routes/restrict";
 import SponsorGeneralForm from "./tabs/sponsor-general-form";
-import SponsorUsersListPerSponsorPage from "../sponsor-users-list-per-sponsor";
+import SponsorUsersListPerSponsorPage from "./tabs/sponsor-users-list-per-sponsor";
 import SponsorPagesTab from "./tabs/sponsor-pages-tab";
 import SponsorMediaUploadTab from "./tabs/sponsor-media-upload-tab";
 import SponsorFormsTab from "./tabs/sponsor-forms-tab";

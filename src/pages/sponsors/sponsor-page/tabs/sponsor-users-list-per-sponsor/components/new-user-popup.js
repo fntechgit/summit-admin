@@ -16,12 +16,12 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
-import CustomAlert from "../../../../components/mui/custom-alert";
-import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
+import CustomAlert from "../../../../../../components/mui/custom-alert";
+import MuiFormikTextField from "../../../../../../components/mui/formik-inputs/mui-formik-textfield";
 import {
   sendSponsorUserInvite,
   getSponsorUsers
-} from "../../../../actions/sponsor-users-actions";
+} from "../../../../../../actions/sponsor-users-actions";
 
 const NewUserPopup = ({
   open,

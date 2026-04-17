@@ -2563,7 +2563,8 @@
       "status": "Status",
       "amount": "Amount",
       "details": "Details",
-      "purchases": "purchases"
+      "purchases": "purchases",
+      "status_updated": "Status updated successfully."
     },
     "mu_tab": {
       "alert_info": "Here you can see the status of this Sponsor's Media Uploads. If an additional file upload is required, it must be requested from the specific page where it is needed.",
