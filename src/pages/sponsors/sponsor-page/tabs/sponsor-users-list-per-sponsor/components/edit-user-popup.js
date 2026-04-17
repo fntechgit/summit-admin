@@ -13,8 +13,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
   getUserGroups,
   updateSponsorUser
-} from "../../../../actions/sponsor-users-actions";
-import { MAX_PER_PAGE } from "../../../../utils/constants";
+} from "../../../../../../actions/sponsor-users-actions";
+import { MAX_PER_PAGE } from "../../../../../../utils/constants";
 import SponsorUserForm from "./sponsor-user-form";
 
 const EditUserPopup = ({

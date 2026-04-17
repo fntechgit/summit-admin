@@ -15,7 +15,7 @@ import {
 jest.mock(
   "../sponsor-page/tabs/sponsor-forms-tab/components/manage-items/sponsor-forms-manage-items.js"
 );
-jest.mock("../sponsor-users-list-per-sponsor/index.js");
+jest.mock("../sponsor-page/tabs/sponsor-users-list-per-sponsor/index.js");
 
 jest.mock("../../../actions/sponsor-actions", () => ({
   ...jest.requireActual("../../../actions/sponsor-actions"),

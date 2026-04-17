@@ -21,11 +21,11 @@ import {
   deleteSponsorUser,
   getSponsorUserRequests,
   getSponsorUsers
-} from "../../../actions/sponsor-users-actions";
-import SearchInput from "../../../components/mui/search-input";
-import UsersTable from "../sponsor-users-list-page/components/users-table";
-import CustomAlert from "../../../components/mui/custom-alert";
-import ChipNotify from "../../../components/mui/chip-notify";
+} from "../../../../../actions/sponsor-users-actions";
+import SearchInput from "../../../../../components/mui/search-input";
+import UsersTable from "../../../sponsor-users-list-page/components/users-table";
+import CustomAlert from "../../../../../components/mui/custom-alert";
+import ChipNotify from "../../../../../components/mui/chip-notify";
 import NewUserPopup from "./components/new-user-popup";
 import ProcessRequestPopup from "./components/process-request-popup";
 import ImportUsersPopup from "./components/import-users-popup";

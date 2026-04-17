@@ -17,9 +17,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
   approveSponsorUserRequest,
   denySponsorUserRequest
-} from "../../../../actions/sponsor-users-actions";
-import CheckBoxList from "../../../../components/mui/checkbox-list";
-import showConfirmDialog from "../../../../components/mui/showConfirmDialog";
+} from "../../../../../../actions/sponsor-users-actions";
+import CheckBoxList from "../../../../../../components/mui/checkbox-list";
+import showConfirmDialog from "../../../../../../components/mui/showConfirmDialog";
 
 const ProcessRequestPopup = ({
   open,
