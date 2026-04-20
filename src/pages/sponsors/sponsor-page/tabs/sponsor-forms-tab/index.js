@@ -56,6 +56,7 @@ const SponsorFormsTab = ({
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const [customFormEdit, setCustomFormEdit] = useState(null);
+  const [upgradeManaged, setUpgradeManaged] = useState(false);
 
   useEffect(() => {
     getSponsorManagedForms();
@@ -102,7 +103,8 @@ const SponsorFormsTab = ({
   };
 
   const handleCustomizeForm = (item) => {
-    console.log("CUSTOMIZE : ", item);
+    setUpgradeManaged(true);
+    setCustomFormEdit(item);
   };
 
   const handleArchiveForm = (item) =>
@@ -157,7 +159,8 @@ const SponsorFormsTab = ({
     );
   };
 
-  const handleSaveFormFromTemplate = (entity) => saveSponsorManagedForm(entity).then(() => {
+  const handleSaveFormFromTemplate = (entity) =>
+    saveSponsorManagedForm(entity).then(() => {
       const { perPage, order, orderDir } = managedForms;
       getSponsorManagedForms(
         term,
@@ -183,6 +186,27 @@ const SponsorFormsTab = ({
       customizedPerPage,
       customizedOrder,
       customizedOrderDir,
+      hideArchived
+    );
+  };
+
+  const handleCloseCustomizedPopup = () => {
+    setCustomFormEdit(null);
+    setUpgradeManaged(false);
+    getSponsorManagedForms(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      managedForms.perPage,
+      managedForms.order,
+      managedForms.orderDir,
+      hideArchived
+    );
+    getSponsorCustomizedForms(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      customizedForms.perPage,
+      customizedForms.order,
+      customizedForms.orderDir,
       hideArchived
     );
   };
@@ -399,7 +423,8 @@ const SponsorFormsTab = ({
       <CustomizedFormPopup
         formId={customFormEdit?.id || null}
         open={!!customFormEdit}
-        onClose={() => setCustomFormEdit(null)}
+        upgradeManaged={upgradeManaged}
+        onClose={handleCloseCustomizedPopup}
         onSaved={handleCustomizedFormSaved}
         sponsor={sponsor}
         summitId={currentSummit.id}

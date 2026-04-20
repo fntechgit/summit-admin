@@ -34,7 +34,7 @@ import {
   deleteSponsorManagedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
-  resetSponsorPage,
+  resetSponsorPage
 } from "../../../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import SearchInput from "../../../../../components/mui/search-input";
@@ -196,7 +196,6 @@ const SponsorPagesTab = ({
     console.log("ARCHIVE MANAGED ", item);
 
   const handleManagedEdit = (item) => {
-    console.log("CHECK!", item);
     getSponsorManagedPage(item.id).then(() => setOpenPopup("managedPagePopup"));
   };
 
