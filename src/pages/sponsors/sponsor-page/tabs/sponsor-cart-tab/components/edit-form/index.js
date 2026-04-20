@@ -25,6 +25,7 @@ import { DISCOUNT_TYPES } from "../../../../../../../utils/constants";
 import NotesModal from "../../../../../../../components/mui/NotesModal";
 import ItemSettingsModal from "../../../../../../../components/mui/ItemSettingsModal";
 import { getCurrentApplicableRate } from "../../../../../../../components/mui/FormItemTable/helpers";
+import showConfirmDialog from "../../../../../../../components/mui/showConfirmDialog";
 
 const parseValue = (item, timeZone) => {
   switch (item.type) {
@@ -208,7 +209,22 @@ const EditForm = ({
     [showMetadata, showTimeZone]
   );
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    if (formik.dirty) {
+      const shouldDiscardChanges = await showConfirmDialog({
+        title: T.translate("general.attention"),
+        text: T.translate(
+          "edit_sponsor.cart_tab.edit_form.unsaved_changes_warning"
+        ),
+        iconType: "warning",
+        confirmButtonColor: "warning",
+        confirmButtonText: T.translate("general.confirm"),
+        cancelButtonText: T.translate("general.cancel")
+      });
+
+      if (!shouldDiscardChanges) return;
+    }
+
     onCancel();
   };
 

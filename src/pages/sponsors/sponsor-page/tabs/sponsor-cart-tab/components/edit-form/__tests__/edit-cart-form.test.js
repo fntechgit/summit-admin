@@ -6,6 +6,19 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   default: { translate: (key) => key }
 }));
 
+jest.mock("../../../../../../../../components/mui/showConfirmDialog", () =>
+  jest.fn()
+);
+
+jest.mock("formik", () => {
+  const actual = jest.requireActual("formik");
+  return {
+    __esModule: true,
+    ...actual,
+    useFormik: jest.fn(actual.useFormik)
+  };
+});
+
 // Mock Redux actions
 const mockGetSponsorCartForm = jest.fn(() => () => Promise.resolve());
 const mockUpdateCartForm = jest.fn(() => () => Promise.resolve());
@@ -87,6 +100,17 @@ jest.mock(
   }
 );
 
+// NotesModal uses useField unconditionally; mock it to keep the Formik context simple
+jest.mock("../../../../../../../../components/mui/NotesModal", () => ({
+  __esModule: true,
+  default: ({ open, onClose }) =>
+    open ? (
+      <div role="dialog">
+        <button aria-label="close" onClick={onClose} />
+      </div>
+    ) : null
+}));
+
 // Avoid MUI ripple noise
 jest.mock("@mui/material/ButtonBase/TouchRipple", () => ({
   __esModule: true,
@@ -100,8 +124,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { Provider } from "react-redux";
+import { useFormik } from "formik";
 import configureMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
+import showConfirmDialog from "../../../../../../../../components/mui/showConfirmDialog";
 import EditCartForm from "../edit-cart-form";
 /* eslint-enable import/first */
 
@@ -205,6 +231,7 @@ const renderWithStore = (props, storeState = {}) => {
 describe("EditCartForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useFormik.mockImplementation(jest.requireActual("formik").useFormik);
   });
 
   describe("Component Initialization", () => {
@@ -304,6 +331,42 @@ describe("EditCartForm", () => {
       await userEvent.click(cancelButton);
 
       expect(onCancel).toHaveBeenCalledTimes(1);
+    });
+
+    describe("with unsaved changes", () => {
+      let onCancel;
+
+      beforeEach(() => {
+        onCancel = jest.fn();
+        useFormik.mockImplementation(() => ({
+          values: { discount_amount: 0, discount_type: "AMOUNT" },
+          dirty: true,
+          handleSubmit: jest.fn()
+        }));
+      });
+
+      test("shows confirm dialog and does NOT cancel when user declines", async () => {
+        showConfirmDialog.mockResolvedValue(false);
+        renderWithStore({ onCancel });
+
+        await userEvent.click(await screen.findByText(/general.cancel/));
+
+        expect(showConfirmDialog).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: "edit_sponsor.cart_tab.edit_form.unsaved_changes_warning"
+          })
+        );
+        expect(onCancel).not.toHaveBeenCalled();
+      });
+
+      test("cancels when user confirms discard", async () => {
+        showConfirmDialog.mockResolvedValue(true);
+        renderWithStore({ onCancel });
+
+        await userEvent.click(await screen.findByText(/general.cancel/));
+
+        await waitFor(() => expect(onCancel).toHaveBeenCalledTimes(1));
+      });
     });
   });
 
