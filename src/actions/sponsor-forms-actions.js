@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,10 +131,12 @@ export const getSponsorForms =
 
     const params = {
       page: currentPage,
-      fields: "id,code,name,level,expire_date,is_archived",
-      relations: "items",
+      fields:
+        "id,code,name,level,expire_date,is_archived,sponsorship_types,apply_to_all_types",
+      relations: "items,sponsorship_types",
       per_page: perPage,
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "sponsorship_types"
     };
 
     if (hideArchived) filter.push("is_archived==0");
@@ -452,6 +454,53 @@ export const updateFormTemplate = (entity) => async (dispatch, getState) => {
       dispatch(stopLoading());
     });
 };
+
+export const updateFormTemplateTiers =
+  ({ id, sponsorship_types = [], apply_to_all_types = false }) =>
+  async (dispatch, getState) => {
+    const { currentSummitState, sponsorFormsListState } = getState();
+    const accessToken = await getAccessTokenSafely();
+    const { currentSummit } = currentSummitState;
+    const { term, currentPage, perPage, order, orderDir, hideArchived } =
+      sponsorFormsListState;
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    const normalizedEntity = normalizeSelectAllField(
+      sponsorship_types,
+      "apply_to_all_types",
+      "sponsorship_types",
+      apply_to_all_types
+    );
+
+    return putRequest(
+      null,
+      createAction(TEMPLATE_FORM_CREATED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${id}`,
+      normalizedEntity,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          getSponsorForms(
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            hideArchived
+          )
+        );
+      })
+      .catch(() => {})
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
 
 export const normalizeFormTemplate = (entity, summitTZ) => {
   const normalizedEntity = { ...entity };
@@ -1128,7 +1177,6 @@ export const saveSponsorFormItem =
           );
         });
       })
-      .catch(() => {}) // need to catch promise reject
       .finally(() => {
         dispatch(stopLoading());
       });

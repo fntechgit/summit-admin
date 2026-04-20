@@ -1,15 +1,18 @@
 /**
  * @jest-environment jsdom
  */
-import { expect, jest, describe, it } from "@jest/globals";
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
-import { getRequest } from "openstack-uicore-foundation/lib/utils/actions";
+import {
+  getRequest,
+  putRequest
+} from "openstack-uicore-foundation/lib/utils/actions";
 import {
   getSponsorForms,
   normalizeFormTemplate,
-  normalizeSponsorCustomizedForm
+  normalizeSponsorCustomizedForm,
+  updateFormTemplateTiers
 } from "../sponsor-forms-actions";
 import * as methods from "../../utils/methods";
 
@@ -17,7 +20,8 @@ jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
   __esModule: true,
   ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
   postRequest: jest.fn(),
-  getRequest: jest.fn()
+  getRequest: jest.fn(),
+  putRequest: jest.fn()
 }));
 
 describe("Sponsor Forms Actions", () => {
@@ -28,35 +32,27 @@ describe("Sponsor Forms Actions", () => {
     beforeEach(() => {
       jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
 
-      getRequest.mockImplementation(
-        (
-            requestActionCreator,
-            receiveActionCreator,
-            endpoint, // eslint-disable-line no-unused-vars
-            payload, // eslint-disable-line no-unused-vars
-            errorHandler = null, // eslint-disable-line no-unused-vars
-            requestActionPayload = {}
-          ) =>
-          (
-            params = {} // eslint-disable-line no-unused-vars
-          ) =>
-          (dispatch) => {
-            if (
-              requestActionCreator &&
-              typeof requestActionCreator === "function"
-            )
-              dispatch(requestActionCreator(requestActionPayload));
+      getRequest.mockImplementation((...requestArgs) => {
+        const [requestActionCreator, receiveActionCreator] = requestArgs;
+        const requestActionPayload = requestArgs[5] ?? {};
 
-            return new Promise((resolve) => {
-              if (typeof receiveActionCreator === "function") {
-                dispatch(receiveActionCreator({ response: {} }));
-                resolve({ response: {} });
-              }
-              dispatch(receiveActionCreator);
+        return () => (dispatch) => {
+          if (
+            requestActionCreator &&
+            typeof requestActionCreator === "function"
+          )
+            dispatch(requestActionCreator(requestActionPayload));
+
+          return new Promise((resolve) => {
+            if (typeof receiveActionCreator === "function") {
+              dispatch(receiveActionCreator({ response: {} }));
               resolve({ response: {} });
-            });
-          }
-      );
+            }
+            dispatch(receiveActionCreator);
+            resolve({ response: {} });
+          });
+        };
+      });
     });
 
     afterEach(() => {
@@ -193,6 +189,102 @@ describe("Sponsor Forms Actions", () => {
 
       expect(result.apply_to_all_add_ons).toBe(false);
       expect(result.allowed_add_ons).toEqual([]);
+    });
+  });
+
+  describe("updateFormTemplateTiers", () => {
+    const middlewares = [thunk];
+    const mockStore = configureStore(middlewares);
+
+    beforeEach(() => {
+      jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
+
+      putRequest.mockImplementation((...requestArgs) => {
+        const [, receiveActionCreator] = requestArgs;
+
+        return () => (dispatch) => {
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response: {} }));
+          }
+          return Promise.resolve({ response: {} });
+        };
+      });
+
+      getRequest.mockImplementation((...requestArgs) => {
+        const [requestActionCreator, receiveActionCreator] = requestArgs;
+        const requestActionPayload = requestArgs[5] ?? {};
+
+        return () => (dispatch) => {
+          if (
+            requestActionCreator &&
+            typeof requestActionCreator === "function"
+          ) {
+            dispatch(requestActionCreator(requestActionPayload));
+          }
+
+          if (typeof receiveActionCreator === "function") {
+            dispatch(receiveActionCreator({ response: {} }));
+          }
+
+          return Promise.resolve({ response: {} });
+        };
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should update tiers and refetch sponsor forms preserving current list params", async () => {
+      const store = mockStore({
+        currentSummitState: {
+          currentSummit: { id: 99 }
+        },
+        sponsorFormsListState: {
+          term: "expo",
+          currentPage: 3,
+          perPage: 25,
+          order: "name",
+          orderDir: -1,
+          hideArchived: true
+        }
+      });
+
+      store.dispatch(
+        updateFormTemplateTiers({
+          id: 77,
+          sponsorship_types: [1, 2],
+          apply_to_all_types: false
+        })
+      );
+
+      await flushPromises();
+
+      expect(putRequest).toHaveBeenCalledWith(
+        null,
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/99/show-forms/77`,
+        {
+          apply_to_all_types: false,
+          sponsorship_types: [1, 2]
+        },
+        expect.any(Function)
+      );
+
+      expect(getRequest).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.any(Function),
+        `${window.PURCHASES_API_URL}/api/v1/summits/99/show-forms`,
+        expect.any(Function),
+        {
+          hideArchived: true,
+          order: "name",
+          orderDir: -1,
+          currentPage: 3,
+          perPage: 25,
+          term: "expo"
+        }
+      );
     });
   });
 });
