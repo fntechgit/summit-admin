@@ -62,9 +62,12 @@ jest.mock(
 );
 
 const mockErrorMessage = jest.fn();
-jest.mock("../SnackbarNotification/Context", () => ({
-  useSnackbarMessage: () => ({ errorMessage: mockErrorMessage })
-}));
+jest.mock(
+  "openstack-uicore-foundation/lib/components/mui/snackbar-notification",
+  () => ({
+    useSnackbarMessage: () => ({ errorMessage: mockErrorMessage })
+  })
+);
 
 jest.mock("../../../actions/attendee-actions", () => ({
   queryAttendees: jest.fn()
