@@ -13,7 +13,7 @@ import {
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
-import { UploadInputV3 } from "openstack-uicore-foundation/lib/components";
+import { MuiFormikUpload } from "openstack-uicore-foundation/lib/components";
 import {
   addIssAfterDateFieldValidator,
   nullableDecimalValidation,
@@ -28,11 +28,7 @@ import useScrollToError from "../../../../hooks/useScrollToError";
 import ItemPriceTiers from "../../../../components/mui/formik-inputs/item-price-tiers";
 import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
 import MuiFormikQuantityField from "../../../../components/mui/formik-inputs/mui-formik-quantity-field";
-import {
-  ALLOWED_INVENTORY_IMAGE_FORMATS,
-  MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
-  MAX_INVENTORY_IMAGES_UPLOAD_QTY
-} from "../../../../utils/constants";
+import { MAX_INVENTORY_IMAGES_UPLOAD_QTY } from "../../../../utils/constants";
 
 const buildInitialValues = (data) => ({ ...data });
 
@@ -148,29 +144,9 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
               <FormLabel>
                 {T.translate("sponsor_form_item_list.edit_item.images")}
               </FormLabel>
-              <UploadInputV3
+              <MuiFormikUpload
                 id="item-image-upload"
-                value={formik.values.images || []}
-                onRemove={(file) => {
-                  const newImages = (formik.values.images || []).filter(
-                    (img) => img.filename !== file.name
-                  );
-                  formik.setFieldValue("images", newImages);
-                }}
-                postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
-                mediaType={{
-                  type: { allowed_extensions: ALLOWED_INVENTORY_IMAGE_FORMATS },
-                  max_size: MAX_INVENTORY_IMAGE_UPLOAD_SIZE
-                }}
-                onUploadComplete={(response) => {
-                  if (response && response.file) {
-                    const newImages = [
-                      ...(formik.values.images || []),
-                      response.file
-                    ];
-                    formik.setFieldValue("images", newImages);
-                  }
-                }}
+                name="images"
                 maxFiles={MAX_INVENTORY_IMAGES_UPLOAD_QTY}
               />
             </Box>
