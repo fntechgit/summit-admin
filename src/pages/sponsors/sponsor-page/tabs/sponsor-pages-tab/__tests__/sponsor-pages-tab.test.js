@@ -61,8 +61,12 @@ jest.mock("../../../../../../actions/sponsor-pages-actions", () => ({
 }));
 
 jest.mock("../../../../../../actions/sponsor-forms-actions", () => ({
-  ...jest.requireActual("../../../../../../actions/sponsor-forms-actions"),
-  getSponsorships: jest.fn(() => () => Promise.resolve())
+  ...jest.requireActual("../../../../../../actions/sponsor-forms-actions")
+}));
+
+jest.mock("../../../../../../actions/summit-actions", () => ({
+  ...jest.requireActual("../../../../../../actions/summit-actions"),
+  getSummitSponsorshipTypes: jest.fn(() => () => Promise.resolve())
 }));
 
 // Helpers

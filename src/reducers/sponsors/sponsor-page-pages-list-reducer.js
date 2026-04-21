@@ -24,8 +24,10 @@ import {
   SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED,
   RECEIVE_SPONSOR_MANAGED_PAGE
 } from "../../actions/sponsor-pages-actions";
-import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
+import {
+  SET_CURRENT_SUMMIT,
+  RECEIVE_GLOBAL_SPONSORSHIPS
+} from "../../actions/summit-actions";
 import {
   PAGE_MODULES_DOWNLOAD,
   PAGES_MODULE_KINDS

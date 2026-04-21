@@ -44,7 +44,6 @@ export const SPONSOR_FORM_UNARCHIVED = "SPONSOR_FORM_UNARCHIVED";
 export const SPONSOR_FORM_DELETED = "SPONSOR_FORM_DELETED";
 export const REQUEST_GLOBAL_TEMPLATES = "REQUEST_GLOBAL_TEMPLATES";
 export const RECEIVE_GLOBAL_TEMPLATES = "RECEIVE_GLOBAL_TEMPLATES";
-export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
 export const GLOBAL_TEMPLATE_CLONED = "GLOBAL_TEMPLATE_CLONED";
 export const TEMPLATE_FORM_CREATED = "TEMPLATE_FORM_CREATED";
 export const RESET_TEMPLATE_FORM = "RESET_TEMPLATE_FORM";
@@ -302,35 +301,6 @@ export const getGlobalTemplates =
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates`,
       authErrorHandler,
       { order, orderDir, page, term }
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
-  };
-
-export const getSponsorships =
-  (page = 1, perPage = DEFAULT_PER_PAGE) =>
-  async (dispatch, getState) => {
-    const { currentSummitState } = getState();
-    const accessToken = await getAccessTokenSafely();
-    const { currentSummit } = currentSummitState;
-
-    dispatch(startLoading());
-
-    const params = {
-      page,
-      per_page: perPage,
-      access_token: accessToken,
-      sorting: "order",
-      expand: "type",
-      relations: "type",
-      fields: "id,type.id,type.name"
-    };
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_GLOBAL_SPONSORSHIPS),
-      `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
-      authErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

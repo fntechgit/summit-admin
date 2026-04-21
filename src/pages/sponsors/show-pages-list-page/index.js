@@ -32,7 +32,7 @@ import {
   deleteShowPage,
   resetShowPageForm
 } from "../../../actions/show-pages-actions";
-import { getSponsorships } from "../../../actions/sponsor-forms-actions";
+import { getSummitSponsorshipTypes } from "../../../actions/summit-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import MuiTable from "../../../components/mui/table/mui-table";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
@@ -57,7 +57,7 @@ const ShowPagesListPage = ({
   saveShowPage,
   deleteShowPage,
   resetShowPageForm,
-  getSponsorships
+  getSummitSponsorshipTypes
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
 
@@ -113,7 +113,7 @@ const ShowPagesListPage = ({
 
   const handleOpenPageTemplatePopup = async (row) => {
     await Promise.all([
-      getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE),
+      getSummitSponsorshipTypes(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE),
       getShowPage(row.id)
     ]);
     setOpenPopup("pageTemplate");
@@ -125,7 +125,7 @@ const ShowPagesListPage = ({
   };
 
   const handleNewShowPage = async () => {
-    await getSponsorships(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE);
+    await getSummitSponsorshipTypes(DEFAULT_CURRENT_PAGE, MAX_PER_PAGE);
     resetShowPageForm();
     setOpenPopup("pageTemplate");
   };
@@ -275,5 +275,5 @@ export default connect(mapStateToProps, {
   saveShowPage,
   deleteShowPage,
   resetShowPageForm,
-  getSponsorships
+  getSummitSponsorshipTypes
 })(ShowPagesListPage);

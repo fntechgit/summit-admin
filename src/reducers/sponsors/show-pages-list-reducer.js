@@ -23,8 +23,10 @@ import {
   SHOW_PAGE_DELETED,
   RESET_SHOW_PAGE_FORM
 } from "../../actions/show-pages-actions";
-import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
-import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
+import {
+  SET_CURRENT_SUMMIT,
+  RECEIVE_GLOBAL_SPONSORSHIPS
+} from "../../actions/summit-actions";
 
 const DEFAULT_SHOW_PAGE = {
   code: "",
