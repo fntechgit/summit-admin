@@ -22,6 +22,7 @@ import {
   MuiTotalRow
 } from "openstack-uicore-foundation/lib/components";
 import StripePayment from "openstack-uicore-foundation/lib/components/mui/stripe-payment";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification-context";
 import history from "../../../../../../history";
 import {
   confirmPayment,
@@ -30,7 +31,6 @@ import {
 } from "../../../../../../actions/sponsor-cart-actions";
 import { getMemberByExternalId } from "../../../../../../actions/member-actions";
 import { mapCartData } from "../helpers";
-import { useSnackbarMessage } from "../../../../../../components/mui/SnackbarNotification/Context";
 import ClientForm from "./client-form";
 
 const PaymentView = ({
