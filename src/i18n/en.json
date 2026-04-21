@@ -2755,6 +2755,7 @@
     "no_sponsors_pages": "No pages found for this search criteria.",
     "page_saved": "Page updated successfully.",
     "page_created": "Page created successfully.",
+    "page_delete_warning": "Please verify you want to delete {page}",
     "page_delete_success": "Page successfully deleted.",
     "placeholders": {
       "search": "Search..."
