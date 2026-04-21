@@ -15,74 +15,63 @@ jest.mock("../../../../../../../../actions/sponsor-cart-actions", () => ({
   updateCartForm: (...args) => mockUpdateCartForm(...args)
 }));
 
-// Mock sub-components used by FormItemTable
+// Mock foundation components used by EditForm
 jest.mock(
-  "../../../../../../../../components/mui/FormItemTable/components/GlobalQuantityField",
+  "openstack-uicore-foundation/lib/components/mui/form-item-table",
   () => {
     const React = require("react");
     return {
       __esModule: true,
-      default: ({ name }) => (
-        <input data-testid={`global-qty-${name}`} name={name} type="number" />
-      )
-    };
-  }
-);
-
-jest.mock(
-  "../../../../../../../../components/mui/FormItemTable/components/ItemTableField",
-  () => {
-    const React = require("react");
-    return {
-      __esModule: true,
-      default: ({ name }) => (
-        <input data-testid={`item-field-${name}`} name={name} />
-      )
-    };
-  }
-);
-
-jest.mock(
-  "../../../../../../../../components/mui/formik-inputs/mui-formik-select",
-  () => {
-    const React = require("react");
-    return {
-      __esModule: true,
-      default: ({ name, options, ...props }) => (
-        <select data-testid={`select-${name}`} name={name} {...props}>
-          {options?.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
+      default: ({ data, onNotesClick, onSettingsClick }) => (
+        <div>
+          {data?.map((item) => (
+            <div key={item.form_item_id}>
+              <span>{item.name}</span>
+              <button
+                aria-label="edit"
+                onClick={() => onNotesClick(item)}
+                type="button"
+              >
+                edit
+              </button>
+              <button
+                aria-label="settings"
+                onClick={() => onSettingsClick(item)}
+                type="button"
+              >
+                settings
+              </button>
+            </div>
           ))}
-        </select>
-      )
+        </div>
+      ),
+      getCurrentApplicableRate: () => "standard"
     };
   }
 );
 
-jest.mock(
-  "../../../../../../../../components/mui/formik-inputs/mui-formik-pricefield",
-  () => {
-    const React = require("react");
-    return {
-      __esModule: true,
-      default: ({ name }) => (
-        <input data-testid={`price-${name}`} name={name} type="number" />
-      )
-    };
-  }
-);
+jest.mock("openstack-uicore-foundation/lib/components/mui/notes-modal", () => {
+  const React = require("react");
+  return {
+    __esModule: true,
+    default: ({ open, onClose }) =>
+      open ? (
+        <div role="dialog">
+          <button aria-label="close" onClick={onClose} type="button">
+            close
+          </button>
+        </div>
+      ) : null
+  };
+});
 
 jest.mock(
-  "../../../../../../../../components/mui/formik-inputs/mui-formik-discountfield",
+  "openstack-uicore-foundation/lib/components/mui/item-settings-modal",
   () => {
     const React = require("react");
     return {
       __esModule: true,
-      default: ({ name }) => (
-        <input data-testid={`discount-${name}`} name={name} type="number" />
-      )
+      default: ({ open }) => (open ? <div role="dialog">Settings</div> : null)
     };
   }
 );

@@ -20,11 +20,12 @@ import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import FormItemTable from "../../../../../../../components/mui/FormItemTable";
+import FormItemTable, {
+  getCurrentApplicableRate
+} from "openstack-uicore-foundation/lib/components/mui/form-item-table";
+import NotesModal from "openstack-uicore-foundation/lib/components/mui/notes-modal";
+import ItemSettingsModal from "openstack-uicore-foundation/lib/components/mui/item-settings-modal";
 import { DISCOUNT_TYPES } from "../../../../../../../utils/constants";
-import NotesModal from "../../../../../../../components/mui/NotesModal";
-import ItemSettingsModal from "../../../../../../../components/mui/ItemSettingsModal";
-import { getCurrentApplicableRate } from "../../../../../../../components/mui/FormItemTable/helpers";
 
 const parseValue = (item, timeZone) => {
   switch (item.type) {
