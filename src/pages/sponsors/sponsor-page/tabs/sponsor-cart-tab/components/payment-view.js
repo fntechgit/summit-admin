@@ -50,7 +50,7 @@ const PaymentView = ({
 
   useEffect(() => {
     if (cart) {
-      getPaymentProfile(cart.id);
+      getPaymentProfile();
       getMemberByExternalId(cart.owner_id);
     }
   }, [cart]);
@@ -85,8 +85,8 @@ const PaymentView = ({
     }
   ];
 
-  const handlePaymentSuccess = (paymentData) =>
-    confirmPayment(paymentData.id).then(() => {
+  const handlePaymentSuccess = () =>
+    confirmPayment().then(() => {
       history.push(redirectUrl);
     });
 

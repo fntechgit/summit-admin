@@ -475,20 +475,15 @@ export const checkoutCart = () => async (dispatch, getState) => {
     expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes"
   };
 
-  return (
-    putRequest(
-      null,
-      createAction(CART_STATUS_UPDATED),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/checkout`,
-      {},
-      snackbarErrorHandler
-    )(params)(dispatch)
-      .finally(() => {
-        dispatch(stopLoading());
-      })
-      // this swallows the error neither rejecting or resolving, so we don't need to handle it down the pipe
-      .catch(() => new Promise(() => {}))
-  );
+  return putRequest(
+    null,
+    createAction(CART_STATUS_UPDATED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/checkout`,
+    {},
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
+    dispatch(stopLoading());
+  });
 };
 
 export const payWithInvoice = () => async (dispatch, getState) => {
