@@ -33,7 +33,7 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useSnackbarMessage } from "./SnackbarNotification/Context";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import MuiFormikTextField from "./formik-inputs/mui-formik-textfield";
 import QrReader from "../qr-reader";
 import { getTypeValue, toSlug } from "../../utils/extra-questions";

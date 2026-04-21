@@ -25,11 +25,11 @@ import {
   getBadgeScan,
   saveBadgeScan,
   addBadgeScan
-} from "../../../actions/sponsor-actions";
-import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
+} from "../../../../../actions/sponsor-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
 import EditBadgeScanPopup from "./edit-badge-scan-popup";
-import MuiQrBadgePopup from "../../../components/mui/mui-qr-badge-popup";
-import Member from "../../../models/member";
+import MuiQrBadgePopup from "../../../../../components/mui/mui-qr-badge-popup";
+import Member from "../../../../../models/member";
 
 const SponsorBadgeScans = ({
   member,
