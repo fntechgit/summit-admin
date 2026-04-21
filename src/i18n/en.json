@@ -82,7 +82,6 @@
     "sort_asc_label": "A-Z",
     "sort_desc_label": "Z-A",
     "n_a": "N/A",
-    "select_an_option": "Select an option",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",

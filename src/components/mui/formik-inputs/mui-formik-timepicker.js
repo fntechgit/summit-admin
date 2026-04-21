@@ -19,7 +19,13 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 
 import { useField } from "formik";
 
-const MuiFormikTimepicker = ({ name, label, minTime, maxTime, timeZone, disabled = false }) => {
+const MuiFormikTimepicker = ({
+  name,
+  minTime,
+  maxTime,
+  timeZone,
+  disabled = false
+}) => {
   const [field, meta, helpers] = useField(name);
 
   return (
@@ -35,7 +41,6 @@ const MuiFormikTimepicker = ({ name, label, minTime, maxTime, timeZone, disabled
         slotProps={{
           textField: {
             name,
-            label,
             error: meta.touched && Boolean(meta.error),
             helperText: meta.touched && meta.error,
             size: "small",
