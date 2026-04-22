@@ -30,15 +30,23 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
   DUMMY_ACTION,
+  IMPORT_SPONSOR_USERS_STATUS,
   SPONSOR_USER_ASSIGNMENT_TYPE
 } from "../utils/constants";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
+import {
+  snackbarErrorHandler,
+  snackbarErrorMsg,
+  snackbarSuccessHandler
+} from "./base-actions";
 
 export const RECEIVE_SPONSOR_USER_GROUPS = "RECEIVE_SPONSOR_USER_GROUPS";
 export const REQUEST_SPONSOR_USER_REQUESTS = "REQUEST_SPONSOR_USER_REQUESTS";
 export const RECEIVE_SPONSOR_USER_REQUESTS = "RECEIVE_SPONSOR_USER_REQUESTS";
 export const REQUEST_SPONSOR_USERS = "REQUEST_SPONSOR_USERS";
 export const RECEIVE_SPONSOR_USERS = "RECEIVE_SPONSOR_USERS";
+export const IMPORT_SPONSOR_USERS_TRIGGERED = "IMPORT_SPONSOR_USERS_TRIGGERED";
+export const RECEIVE_SPONSOR_USERS_IMPORT_STATUS =
+  "RECEIVE_SPONSOR_USERS_IMPORT_STATUS";
 export const SPONSOR_USER_ADDED = "SPONSOR_USER_ADDED";
 export const SPONSOR_USER_REQUEST_ACCEPTED = "SPONSOR_USER_REQUEST_ACCEPTED";
 export const SPONSOR_USER_REQUEST_DELETED = "SPONSOR_USER_REQUEST_DELETED";
@@ -537,15 +545,55 @@ export const sendSponsorUserInvite = (email) => async (dispatch, getState) => {
     });
 };
 
-export const fetchSponsorUsersBySummit = async (summitId, companyId, page) => {
+export const fetchSponsorUsersBySummit = async (
+  currentSummitId,
+  summitId,
+  companyId,
+  page
+) => {
   const accessToken = await getAccessTokenSafely();
 
   return fetch(
-    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users?filter[]=summit_id==${summitId}&filter[]=company_id==${companyId}&access_token=${accessToken}&page=${page}&per_page=10&order=first_name&order_dir=asc`
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users?filter[]=not_summit_id==${currentSummitId}&filter[]=summit_id==${summitId}&filter[]=company_id==${companyId}&access_token=${accessToken}&page=${page}&per_page=10&order=first_name&order_dir=asc`
   )
     .then(fetchResponseHandler)
     .then((json) => json)
     .catch(fetchErrorHandler);
+};
+
+export const trackImportSponsorUsers = () => async (dispatch, getState) => {
+  const { sponsorUserListState } = getState();
+  const { tasks } = sponsorUserListState;
+
+  const accessToken = await getAccessTokenSafely();
+  const params = {
+    access_token: accessToken
+  };
+
+  tasks.forEach((taskId) => {
+    getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_USERS_IMPORT_STATUS),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/tasks/${taskId}`,
+      authErrorHandler
+    )(params)(dispatch).then((res) => {
+      if (res.status === IMPORT_SPONSOR_USERS_STATUS.SUCCESS) {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.import_users.success")
+          })
+        );
+      } else if (res.status === IMPORT_SPONSOR_USERS_STATUS.FAILURE) {
+        dispatch(
+          snackbarErrorMsg({
+            title: T.translate("sponsor_users.import_users.fail"),
+            html: res.error
+          })
+        );
+      }
+    });
+  });
 };
 
 export const importSponsorUsers =
@@ -575,17 +623,16 @@ export const importSponsorUsers =
 
     return postRequest(
       null,
-      createAction(DUMMY_ACTION),
+      createAction(IMPORT_SPONSOR_USERS_TRIGGERED),
       `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users/import`,
       payload,
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        dispatch(stopLoading());
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("sponsor_users.import_users.success")
+            html: T.translate("sponsor_users.import_users.running")
           })
         );
       })

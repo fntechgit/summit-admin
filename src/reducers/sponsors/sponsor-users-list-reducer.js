@@ -14,17 +14,21 @@
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import {
+  IMPORT_SPONSOR_USERS_TRIGGERED,
   RECEIVE_SPONSOR_USER_GROUPS,
   RECEIVE_SPONSOR_USER_REQUESTS,
   RECEIVE_SPONSOR_USERS,
+  RECEIVE_SPONSOR_USERS_IMPORT_STATUS,
   REQUEST_SPONSOR_USER_REQUESTS,
-  REQUEST_SPONSOR_USERS,
+  REQUEST_SPONSOR_USERS
 } from "../../actions/sponsor-users-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
+import { IMPORT_SPONSOR_USERS_STATUS } from "../../utils/constants";
 
 const DEFAULT_STATE = {
   term: "",
   userGroups: [],
+  importTasks: [],
   requests: {
     items: [],
     order: "id",
@@ -142,6 +146,28 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
           lastPage
         }
       };
+    }
+    case IMPORT_SPONSOR_USERS_TRIGGERED: {
+      const { task_id } = payload.response;
+      return {
+        ...state,
+        importTasks: [...state.importTasks, task_id]
+      };
+    }
+    case RECEIVE_SPONSOR_USERS_IMPORT_STATUS: {
+      const { status, task_id } = payload.response;
+      let {importTasks} = state;
+
+      if (
+        [
+          IMPORT_SPONSOR_USERS_STATUS.SUCCESS,
+          IMPORT_SPONSOR_USERS_STATUS.FAILURE
+        ].includes(status)
+      ) {
+        importTasks = state.importTasks.filter((t) => t === task_id);
+      }
+
+      return { ...state, importTasks };
     }
     default:
       return state;
