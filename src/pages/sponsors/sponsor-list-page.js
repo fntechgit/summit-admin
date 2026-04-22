@@ -62,9 +62,9 @@ const SponsorListPage = ({
 
   useEffect(() => {
     if (currentSummit) {
-      getSponsors();
+      getSponsors(term, currentPage, perPage, order, orderDir);
     }
-  }, [currentSummit]);
+  }, [currentSummit, term, perPage, order, orderDir, currentPage]);
 
   const handleSearchDebounced = useCallback(
     _.debounce((term) => {
