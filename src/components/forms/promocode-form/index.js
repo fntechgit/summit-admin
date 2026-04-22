@@ -29,13 +29,16 @@ import {
   SummitPCForm,
   SummitDiscountPCForm,
   SpeakersPCForm,
-  SpeakersDiscountPCForm
+  SpeakersDiscountPCForm,
+  DomainAuthorizedPCForm,
+  DomainAuthorizedDiscountPCForm
 } from "./forms";
 import {
   isEmpty,
   scrollToError,
   shallowEqual,
-  validateEmail
+  validateEmail,
+  validateAllowedEmailDomainEntry
 } from "../../../utils/methods";
 import { DEFAULT_ENTITY } from "../../../reducers/promocodes/promocode-reducer";
 import FragmentParser from "../../../utils/fragmen-parser";
@@ -199,6 +202,22 @@ class PromocodeForm extends React.Component {
       errors.contact_email = "Please enter a valid email.";
       this.setState({ errors });
       return false;
+    }
+
+    const isDomainAuthorized =
+      entity.class_name === "DOMAIN_AUTHORIZED_PROMO_CODE" ||
+      entity.class_name === "DOMAIN_AUTHORIZED_DISCOUNT_CODE";
+    if (isDomainAuthorized && Array.isArray(entity.allowed_email_domains)) {
+      const bad = entity.allowed_email_domains.find(
+        (d) => !validateAllowedEmailDomainEntry(d)
+      );
+      if (bad !== undefined) {
+        errors.allowed_email_domains = T.translate(
+          "edit_promocode.errors.allowed_email_domains_format"
+        );
+        this.setState({ errors });
+        return false;
+      }
     }
 
     return true;
@@ -513,6 +532,28 @@ class PromocodeForm extends React.Component {
             getAssignedSpeakers={getAssignedSpeakers}
             unAssignSpeaker={unAssignSpeaker}
             resetPromocodeForm={resetPromocodeForm}
+          />
+        )}
+
+        {entity.class_name === "DOMAIN_AUTHORIZED_PROMO_CODE" && (
+          <DomainAuthorizedPCForm
+            entity={entity}
+            summit={currentSummit}
+            handleChange={this.handleChange}
+            badgeFeatureColumns={badgeFeatureColumns}
+            badgeFeatureOptions={badgeFeatureOptions}
+            hasErrors={this.hasErrors}
+          />
+        )}
+
+        {entity.class_name === "DOMAIN_AUTHORIZED_DISCOUNT_CODE" && (
+          <DomainAuthorizedDiscountPCForm
+            entity={entity}
+            summit={currentSummit}
+            handleChange={this.handleChange}
+            badgeFeatureColumns={badgeFeatureColumns}
+            badgeFeatureOptions={badgeFeatureOptions}
+            hasErrors={this.hasErrors}
           />
         )}
 
