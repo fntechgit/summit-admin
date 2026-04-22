@@ -29,7 +29,21 @@ describe("validateAllowedEmailDomainEntry", () => {
       ["@@acme.com"], // double @
       ["user @example.com"], // whitespace
       [null],
-      [undefined]
+      [undefined],
+      ["user@abc"], // no TLD dot
+      ["user@example..com"], // consecutive dots
+      ["user@example.com."], // trailing dot
+      ["user@acme"] // no dot, single-segment domain
+    ])("rejects %p", (entry) => {
+      expect(validateAllowedEmailDomainEntry(entry)).toBe(false);
+    });
+  });
+
+  describe("domain-only invalid entries (ALLOWED_DOMAIN_RE)", () => {
+    it.each([
+      ["@example..com"], // consecutive dots
+      ["@example.com."], // trailing dot
+      ["@.com"] // empty first label
     ])("rejects %p", (entry) => {
       expect(validateAllowedEmailDomainEntry(entry)).toBe(false);
     });

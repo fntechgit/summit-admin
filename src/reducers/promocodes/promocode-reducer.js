@@ -141,6 +141,10 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
         }
       }
 
+      if (!Array.isArray(entity.allowed_email_domains)) {
+        entity.allowed_email_domains = [];
+      }
+
       entity.owner = {
         email: entity.email,
         first_name: entity.first_name,
