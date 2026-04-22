@@ -18,7 +18,7 @@ export const getTypeValue = (ans, type) => {
     case QuestionType_Checkbox:
       return ans === "true";
     case QuestionType_CheckBoxList:
-      return ans?.split(",") || [];
+      return ans ? ans.split(",") : [];
     case QuestionType_CountryComboBox:
     case QuestionType_ComboBox:
       return ans || "";
