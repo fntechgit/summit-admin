@@ -257,10 +257,7 @@ describe("showPagesListReducer", () => {
         payload: { response: basePageData }
       });
 
-      expect(result.currentShowPage.sponsorship_types).toStrictEqual([
-        { id: 1 },
-        { id: 2 }
-      ]);
+      expect(result.currentShowPage.sponsorship_types).toStrictEqual([1, 2]);
     });
 
     it("sets sponsorship_types to [\"all\"] when apply_to_all_types is true", () => {

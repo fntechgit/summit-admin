@@ -22,12 +22,16 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
-import { getAccessTokenSafely } from "../utils/methods";
+import {
+  getAccessTokenSafely,
+  normalizeSelectAllField
+} from "../utils/methods";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE
+  DEFAULT_PER_PAGE,
+  PAGES_MODULE_KINDS
 } from "../utils/constants";
 import { normalizePageTemplateModules } from "../utils/page-template";
 
