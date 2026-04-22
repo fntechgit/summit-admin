@@ -630,7 +630,10 @@ export const upgradeSponsorManagedForm =
 
     dispatch(startLoading());
 
-    const normalizedEntity = normalizeSponsorCustomizedForm(entity);
+    const normalizedEntity = normalizeSponsorCustomizedForm(
+      entity,
+      currentSummit.time_zone.id
+    );
 
     const params = {
       access_token: accessToken,
