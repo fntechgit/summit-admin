@@ -112,5 +112,6 @@ describe("DomainAuthorizedBasePCForm", () => {
     const evt = handleChange.mock.calls[0][0];
     expect(evt.target.id).toBe("auto_apply");
     expect(evt.target.type).toBe("checkbox");
+    expect(evt.target.checked).toBe(true);
   });
 });

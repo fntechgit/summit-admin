@@ -29,7 +29,13 @@ const DomainAuthorizedBasePCForm = (props) => {
   };
 
   const handleAutoApplyChange = (ev) => {
-    fireChange("auto_apply", ev.target.checked, "checkbox");
+    handleChange({
+      target: {
+        id: "auto_apply",
+        checked: ev.target.checked,
+        type: "checkbox"
+      }
+    });
   };
 
   const handleDomainsChange = (ev) => {
