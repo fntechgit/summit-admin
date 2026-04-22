@@ -8832,10 +8832,10 @@ open@^10.0.3:
     is-inside-container "^1.0.0"
     wsl-utils "^0.1.0"
 
-openstack-uicore-foundation@5.0.9:
-  version "5.0.9"
-  resolved "https://registry.yarnpkg.com/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.9.tgz#07adad71dae95383e3e707cb63f1b30837f48608"
-  integrity sha512-Gk6QkQaY76a/u5Pzx1cPetX/NJ73AAda5n0YEVRX78sb4y1GknAKZNY8IdlF6QERR6yKAs4GNuuEzAEs/DcZfw==
+openstack-uicore-foundation@5.0.12:
+  version "5.0.12"
+  resolved "https://registry.npmjs.org/openstack-uicore-foundation/-/openstack-uicore-foundation-5.0.12.tgz#a14122cc8aef683bbe4aaf699f38e0c8d9d3aa09"
+  integrity sha512-zPJ0abHHVwT7SVOle3iXoWvn9QvbWe+qWKvppnTrNRivYNbZi1yOBj0oaUALfmgBlG+uD4xu6jSiWWiNdyQQmA==
 
 optionator@^0.9.1:
   version "0.9.4"
