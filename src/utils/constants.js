@@ -314,3 +314,14 @@ export const ACCESS_ROUTES = {
   ADMIN_SPONSORS: "admin-sponsors",
   SPONSORS: "sponsors"
 };
+
+export const SPONSOR_FORMS_METAFIELD_CLASS = {
+  FORM: "Form",
+  ITEM: "Item"
+};
+
+export const SPONSOR_CART_STATUS = {
+  PENDING_PAYMENT: "PendingPayment",
+  OPEN: "Open",
+  CHECKED_OUT: "CheckedOut"
+};

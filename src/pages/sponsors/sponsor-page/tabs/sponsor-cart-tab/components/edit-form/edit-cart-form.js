@@ -17,29 +17,37 @@ import {
   getSponsorCartForm,
   updateCartForm
 } from "../../../../../../../actions/sponsor-cart-actions";
+import history from "../../../../../../../history";
 import EditForm from "./index";
 
 const EditCartForm = ({
-  formId,
+  match,
   cartForm,
-  onCancel,
-  onSaveCallback,
   getSponsorCartForm,
   updateCartForm
 }) => {
+  const formId = match.params.form_id;
+
   useEffect(() => {
-    getSponsorCartForm(formId);
-  }, []);
+    if (formId) getSponsorCartForm(formId);
+  }, [formId]);
+
+  const backToCart = () => {
+    const backUrl = match.url.replace(/\/forms\/[^/]+$/, "");
+    history.push(backUrl);
+  };
 
   const saveForm = (values) => {
     updateCartForm(formId, values).then(() => {
-      onSaveCallback();
+      backToCart();
     });
   };
 
   if (!cartForm) return null;
 
-  return <EditForm form={cartForm} onSaveForm={saveForm} onCancel={onCancel} />;
+  return (
+    <EditForm form={cartForm} onSaveForm={saveForm} onCancel={backToCart} />
+  );
 };
 
 const mapStateToProps = ({ sponsorPageCartListState }) => ({

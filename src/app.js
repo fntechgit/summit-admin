@@ -14,6 +14,7 @@
 import React from "react";
 import { Switch, Route, Router } from "react-router-dom";
 import { connect } from "react-redux";
+import { setAppTexts } from "openstack-uicore-foundation/lib/i18n";
 import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
 import { getBackURL } from "openstack-uicore-foundation/lib/utils/methods";
 import { resetLoading } from "openstack-uicore-foundation/lib/utils/actions";
@@ -67,8 +68,8 @@ if (language.length > LANGUAGE_CODE_LENGTH) {
 }
 
 // DISABLED language - ONLY ENGLISH
-
-T.setTexts(require("./i18n/en.json"));
+// use this method so that uicore translations are not overridden
+setAppTexts(require("./i18n/en.json"));
 
 // move all env var to global scope so ui core has access to this
 

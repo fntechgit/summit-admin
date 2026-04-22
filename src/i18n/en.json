@@ -9,7 +9,9 @@
     "not_allowed": "You are not allowed here, please login with another user to access this page.",
     "not_found": "Not Found!",
     "entity_not_found": "The entity you are looking for was not found.",
-    "maximum_files": "Maximum number of files has been reached"
+    "maximum_files": "Maximum number of files has been reached",
+    "payment_profile_not_found_title": "Payment Profile not found",
+    "payment_profile_not_found": "Missing payment profile for summit {{summitName}}. Please contact support."
   },
   "general": {
     "summit": "Event",
@@ -27,6 +29,7 @@
     "file": "File",
     "logo": "Logo",
     "secondary_logo": "Secondary Logo",
+    "full_name": "Full Name",
     "first_name": "First Name",
     "last_name": "Last Name",
     "member": "Member",
@@ -51,6 +54,7 @@
     "save": "Save",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    "return": "Return",
     "ingest": "Ingest",
     "save_and_publish": "Save & Publish",
     "save_and_add_next": "Save & Add Next",
@@ -82,6 +86,8 @@
     "sort_asc_label": "A-Z",
     "sort_desc_label": "Z-A",
     "n_a": "N/A",
+    "to": "To",
+    "from": "From",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
@@ -2557,6 +2563,21 @@
         "title": "Order Notes",
         "placeholder": "Enter internal note...",
         "deleted": "Note deleted successfully."
+      },
+      "invoice_view": {
+        "title": "Purchase confirmed",
+        "go_to_orders": "Go to orders"
+      },
+      "payment_view": {
+        "code": "Form code",
+        "contents": "Contents",
+        "addon": "Add-on",
+        "discount": "Discount",
+        "amount": "Amount",
+        "total": "Total",
+        "rate": "Rate",
+        "billing_info": "Billing Information",
+        "payment_success": "Payment successful"
       }
     },
     "purchase_tab": {
