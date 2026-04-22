@@ -995,15 +995,25 @@
     "promocode_saved": "Promo Code saved successfully.",
     "promocode_created": "Promo Code created successfully.",
     "apply_to_all_tix_discounts": "Discounts",
+    "allowed_email_domains": "Allowed Email Domains",
+    "quantity_per_account": "Max Per Account",
+    "auto_apply": "Auto-apply for qualifying users",
     "placeholders": {
       "select_badge_features": "Select one or more Badge Features",
       "select_badge_type": "Select a Badge Type",
       "select_ticket_types": "Select Ticket Types",
       "select_class_name": "Select a Class",
-      "select_tags": "Select Tags"
+      "select_tags": "Select Tags",
+      "allowed_email_domains": "Add a domain, TLD, or email and press Enter"
     },
     "info": {
-      "quantity_available": "If zero is set, then Promo Code has no limit to be used"
+      "quantity_available": "If zero is set, then Promo Code has no limit to be used",
+      "allowed_email_domains": "Supported formats: @acme.com (exact domain), .edu (TLD suffix), user@example.com (exact email). Users whose email matches any entry can redeem this code.",
+      "quantity_per_account": "Maximum tickets a single account can purchase with this code. Enter 0 for unlimited.",
+      "auto_apply": "When enabled, the registration widget silently applies this code for qualifying users at checkout, without requiring them to enter it manually."
+    },
+    "errors": {
+      "allowed_email_domains_format": "Each entry must be an exact domain (@acme.com), a TLD suffix (.edu), or a full email address."
     }
   },
   "discount_ticket": {
@@ -1855,6 +1865,8 @@
     "sales_end_date": "Sale End",
     "ticket_type_saved": "Ticket Type saved successfully",
     "ticket_type_created": "Ticket Type created successfully",
+    "audience_with_promo_code": "With Promo Code",
+    "info_audience_with_promo_code": "Hidden from public listings. Only visible when a qualifying promo code includes this ticket type in its Allowed Ticket Types.",
     "placeholders": {
       "select_currency": "Select currency",
       "select_ticket_type": "Select Ticket Type",
