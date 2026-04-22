@@ -72,7 +72,10 @@ export const DEFAULT_ENTITY = {
   description: "",
   tags: [],
   allows_to_delegate: false,
-  allows_to_reassign: true
+  allows_to_reassign: true,
+  allowed_email_domains: [],
+  quantity_per_account: 0,
+  auto_apply: false
 };
 
 const DEFAULT_STATE = {
