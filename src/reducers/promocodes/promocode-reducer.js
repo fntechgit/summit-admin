@@ -152,12 +152,16 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
       };
       entity.speakers = state.entity.speakers;
 
+      // apply_to_all_tix is a UI-only flag; summit-api's discount-code serializer
+      // never returns it, so it must be derived from ticket_types_rules.length
+      // for every class DiscountBasePCForm can render.
       const discount_classes = [
         "SPEAKER_DISCOUNT_CODE",
         "SPONSOR_DISCOUNT_CODE",
         "MEMBER_DISCOUNT_CODE",
         "SUMMIT_DISCOUNT_CODE",
-        "SPEAKERS_DISCOUNT_CODE"
+        "SPEAKERS_DISCOUNT_CODE",
+        "DOMAIN_AUTHORIZED_DISCOUNT_CODE"
       ];
 
       if (discount_classes.includes(entity.class_name)) {

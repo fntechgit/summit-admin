@@ -64,3 +64,50 @@ describe("RECEIVE_PROMOCODE allowed_email_domains coercion", () => {
     expect(state.entity.allowed_email_domains).toEqual([]);
   });
 });
+
+describe("RECEIVE_PROMOCODE apply_to_all_tix derivation", () => {
+  it("derives apply_to_all_tix=false for DOMAIN_AUTHORIZED_DISCOUNT_CODE with populated ticket_types_rules", () => {
+    const state = promocodeReducer(undefined, {
+      type: RECEIVE_PROMOCODE,
+      payload: {
+        response: {
+          id: 1,
+          class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
+          allowed_email_domains: ["@acme.com"],
+          ticket_types_rules: [{ id: 10, ticket_type_id: 5, amount: 10 }]
+        }
+      }
+    });
+    expect(state.entity.apply_to_all_tix).toBe(false);
+  });
+
+  it("derives apply_to_all_tix=true for DOMAIN_AUTHORIZED_DISCOUNT_CODE with empty ticket_types_rules", () => {
+    const state = promocodeReducer(undefined, {
+      type: RECEIVE_PROMOCODE,
+      payload: {
+        response: {
+          id: 2,
+          class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
+          allowed_email_domains: ["@acme.com"],
+          ticket_types_rules: []
+        }
+      }
+    });
+    expect(state.entity.apply_to_all_tix).toBe(true);
+  });
+
+  it("does not derive apply_to_all_tix for DOMAIN_AUTHORIZED_PROMO_CODE (access-only, no discount UI)", () => {
+    const state = promocodeReducer(undefined, {
+      type: RECEIVE_PROMOCODE,
+      payload: {
+        response: {
+          id: 3,
+          class_name: "DOMAIN_AUTHORIZED_PROMO_CODE",
+          allowed_email_domains: ["@acme.com"],
+          ticket_types_rules: [{ id: 10 }]
+        }
+      }
+    });
+    expect(state.entity.apply_to_all_tix).toBe(DEFAULT_ENTITY.apply_to_all_tix);
+  });
+});
