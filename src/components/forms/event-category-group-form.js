@@ -26,6 +26,7 @@ import {
   DateTimePicker
 } from "openstack-uicore-foundation/lib/components";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
+import Swal from "sweetalert2";
 import {
   isEmpty,
   scrollToError,
@@ -94,7 +95,19 @@ class EventCategoryGroupForm extends React.Component {
 
   handleTrackUnLink(valueId) {
     const { entity } = this.state;
-    this.props.onTrackUnLink(entity.id, valueId);
+    const { onTrackUnLink } = this.props;
+
+    Swal.fire({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_event_category_group.unlink_track_warning"),
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonText: T.translate("general.yes")
+    }).then((result) => {
+      if (result.value) {
+        onTrackUnLink(entity.id, valueId);
+      }
+    });
   }
 
   handleAllowedGroupLink(value) {
