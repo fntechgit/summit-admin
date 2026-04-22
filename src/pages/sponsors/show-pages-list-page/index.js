@@ -23,6 +23,7 @@ import {
   Grid2
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   getShowPages,
   archiveShowPage,
@@ -34,7 +35,6 @@ import {
 } from "../../../actions/show-pages-actions";
 import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
-import MuiTable from "../../../components/mui/table/mui-table";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";

@@ -35,7 +35,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
-import MuiTable from "../../../../../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MenuButton from "../../../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../../../actions/sponsor-actions";
 import { getShowPages } from "../../../../../../../actions/show-pages-actions";
