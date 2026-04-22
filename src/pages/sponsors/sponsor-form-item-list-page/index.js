@@ -28,6 +28,7 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
+import MuiTableEditable from "openstack-uicore-foundation/lib/components/mui/editable-table";
 import {
   deleteSponsorFormItem,
   getSponsorFormItem,
@@ -38,7 +39,6 @@ import {
 } from "../../../actions/sponsor-forms-actions";
 import SponsorFormItemPopup from "./components/sponsor-form-item-popup";
 import SponsorFormAddItemFromInventoryPopup from "./components/sponsor-form-add-item-from-inventory-popup";
-import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import { rateCellValidation } from "../../../utils/yup";
 import { rateToCents } from "../../../utils/rate-helpers";

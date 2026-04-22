@@ -27,7 +27,7 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
-import MuiTable from "../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   cloneFromInventoryItem,
   deleteFormTemplateItem,

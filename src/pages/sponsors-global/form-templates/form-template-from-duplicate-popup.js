@@ -19,7 +19,7 @@ import {
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import MuiTable from "../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MenuButton from "../../../components/mui/menu-button";
 
 const FormTemplateFromDuplicateDialog = ({

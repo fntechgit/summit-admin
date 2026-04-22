@@ -30,6 +30,7 @@ import IconButton from "@mui/material/IconButton";
 import ImageIcon from "@mui/icons-material/Image";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   archiveInventoryItem,
   deleteInventoryItem,
@@ -42,7 +43,6 @@ import {
   saveInventoryItem,
   unarchiveInventoryItem
 } from "../../../actions/inventory-item-actions";
-import MuiTable from "../../../components/mui/table/mui-table";
 import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 

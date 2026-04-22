@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ImageIcon from "@mui/icons-material/Image";
+import MuiTableEditable from "openstack-uicore-foundation/lib/components/mui/editable-table";
 import {
   addSponsorManagedFormItems,
   archiveSponsorCustomizedFormItem,
@@ -38,7 +39,6 @@ import {
 } from "../../../../../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../../../../../components/mui/custom-alert";
 import SearchInput from "../../../../../../../components/mui/search-input";
-import MuiTableEditable from "../../../../../../../components/mui/editable-table/mui-table-editable";
 import SponsorInventoryDialog from "../../../../../../sponsors-global/form-templates/sponsor-inventory-popup";
 import SponsorFormItemFromInventoryPopup from "./sponsor-form-item-from-inventory";
 import {

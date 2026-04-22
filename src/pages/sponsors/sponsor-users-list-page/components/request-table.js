@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import T from "i18n-react";
 import { IconButton } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import MuiTable from "../../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import ProcessRequestPopup from "./process-request-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../../utils/constants";
 

@@ -15,7 +15,7 @@ import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Grid2, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import MuiTable from "../../../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import AddTierPopup from "./add-tier-popup";
 import ManageTierAddonsPopup from "./manage-tier-addons-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";

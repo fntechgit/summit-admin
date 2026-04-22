@@ -18,7 +18,7 @@ import { Box, Button, Grid2, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
-import MuiTable from "../../../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   getBadgeScans,
   exportBadgeScans,

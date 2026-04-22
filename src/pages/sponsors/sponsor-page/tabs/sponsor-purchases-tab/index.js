@@ -23,8 +23,8 @@ import {
   Select
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "../../../../../components/mui/search-input";
-import MuiTable from "../../../../../components/mui/table/mui-table";
 import {
   approveSponsorPurchase,
   getSponsorPurchases,

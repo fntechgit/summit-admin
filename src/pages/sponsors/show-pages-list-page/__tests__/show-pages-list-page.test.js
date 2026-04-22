@@ -1,6 +1,7 @@
 import React from "react";
 import userEvent from "@testing-library/user-event";
 import { act, screen, waitFor } from "@testing-library/react";
+import { GlobalConfirmDialog } from "openstack-uicore-foundation/lib/components/mui/show-confirm-dialog";
 import ShowPagesListPage from "../index";
 import { renderWithRedux } from "../../../../utils/test-utils";
 import { DEFAULT_STATE as showPagesListDefaultState } from "../../../../reducers/sponsors/show-pages-list-reducer";
@@ -13,6 +14,7 @@ import {
   unarchiveShowPage
 } from "../../../../actions/show-pages-actions";
 import { getSponsorships } from "../../../../actions/sponsor-forms-actions";
+
 import {
   DEFAULT_CURRENT_PAGE,
   MAX_PER_PAGE
@@ -31,8 +33,6 @@ jest.mock(
       ) : null;
     }
 );
-
-jest.mock("../../../../components/mui/showConfirmDialog", () => jest.fn());
 
 jest.mock(
   "../../../sponsors-global/page-templates/page-template-popup",
@@ -75,6 +75,14 @@ const createShowPage = (id, overrides = {}) => ({
   ...overrides
 });
 
+const renderWithConfirmDialog = (ui, options) => renderWithRedux(
+    <>
+      <GlobalConfirmDialog />
+      {ui}
+    </>,
+    options
+  );
+
 describe("ShowPagesListPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,7 +90,7 @@ describe("ShowPagesListPage", () => {
 
   describe("Component", () => {
     it("should render empty state when no pages exist", () => {
-      renderWithRedux(<ShowPagesListPage />, {
+      renderWithConfirmDialog(<ShowPagesListPage />, {
         initialState: {
           showPagesListState: {
             ...showPagesListDefaultState,
@@ -98,7 +106,7 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should render table when pages exist", () => {
-      renderWithRedux(<ShowPagesListPage />, {
+      renderWithConfirmDialog(<ShowPagesListPage />, {
         initialState: {
           showPagesListState: {
             ...showPagesListDefaultState,
@@ -113,7 +121,7 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should call getShowPage and open popup when edit is clicked", async () => {
-      renderWithRedux(<ShowPagesListPage />, {
+      renderWithConfirmDialog(<ShowPagesListPage />, {
         initialState: {
           showPagesListState: {
             ...showPagesListDefaultState,
@@ -137,7 +145,7 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should refresh list after save", async () => {
-      renderWithRedux(<ShowPagesListPage />, {
+      renderWithConfirmDialog(<ShowPagesListPage />, {
         initialState: {
           showPagesListState: {
             ...showPagesListDefaultState,
@@ -170,9 +178,7 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should call deleteShowPage and refresh list when delete is confirmed", async () => {
-      const showConfirmDialog = require("../../../../components/mui/showConfirmDialog");
-      showConfirmDialog.mockResolvedValue(true);
-      renderWithRedux(<ShowPagesListPage />, {
+      renderWithConfirmDialog(<ShowPagesListPage />, {
         initialState: {
           showPagesListState: {
             ...showPagesListDefaultState,
@@ -190,23 +196,26 @@ describe("ShowPagesListPage", () => {
       await act(async () => {
         await userEvent.click(secondDeleteButton);
       });
-      expect(showConfirmDialog).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "general.are_you_sure",
-          type: "warning",
-          showCancelButton: true
-        })
-      );
-      expect(deleteShowPage).toHaveBeenCalledWith(2); // check id 2
+      expect(
+        await screen.findByText("general.are_you_sure")
+      ).toBeInTheDocument();
+      await act(async () => {
+        await userEvent.click(
+          await screen.findByRole("button", {
+            name: /general\.yes_delete|confirm/i
+          })
+        );
+      });
+      await waitFor(() => {
+        expect(deleteShowPage).toHaveBeenCalledWith(2); // check id 2
+      });
       await waitFor(() => {
         expect(getShowPages).toHaveBeenCalledTimes(2);
       });
     });
 
     it("should not call deleteShowPage when delete is cancelled", async () => {
-      const showConfirmDialog = require("../../../../components/mui/showConfirmDialog");
-      showConfirmDialog.mockResolvedValue(false);
-      renderWithRedux(<ShowPagesListPage />, {
+      renderWithConfirmDialog(<ShowPagesListPage />, {
         initialState: {
           showPagesListState: {
             ...showPagesListDefaultState,
@@ -219,13 +228,22 @@ describe("ShowPagesListPage", () => {
       await act(async () => {
         await userEvent.click(deleteButton);
       });
-      expect(showConfirmDialog).toHaveBeenCalled();
+      expect(
+        await screen.findByText("general.are_you_sure")
+      ).toBeInTheDocument();
+      await act(async () => {
+        await userEvent.click(
+          await screen.findByRole("button", {
+            name: /cancel|general\.cancel/i
+          })
+        );
+      });
       expect(deleteShowPage).not.toHaveBeenCalled();
       expect(getShowPages).toHaveBeenCalledTimes(1);
     });
 
     it("should call archiveShowPage for non-archived item", async () => {
-      renderWithRedux(<ShowPagesListPage />, {
+      renderWithConfirmDialog(<ShowPagesListPage />, {
         initialState: {
           showPagesListState: {
             ...showPagesListDefaultState,
@@ -242,7 +260,7 @@ describe("ShowPagesListPage", () => {
     });
 
     it("should call unarchiveShowPage for archived item", async () => {
-      renderWithRedux(<ShowPagesListPage />, {
+      renderWithConfirmDialog(<ShowPagesListPage />, {
         initialState: {
           showPagesListState: {
             ...showPagesListDefaultState,

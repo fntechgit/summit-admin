@@ -2,7 +2,7 @@ import React from "react";
 import T from "i18n-react";
 import { IconButton } from "@mui/material";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import MuiTable from "../../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import ChipList from "../../../../components/mui/chip-list";
 import { titleCase } from "../../../../utils/methods";
 

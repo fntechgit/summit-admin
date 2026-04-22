@@ -12,7 +12,7 @@
  * */
 
 import React, { useEffect, useState, useRef } from "react";
-
+import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import {
@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiDropdownCheckbox from "openstack-uicore-foundation/lib/components/mui/dropdown-checkbox";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import history from "../../../history";
 import {
   archiveSponsorForm,
@@ -39,7 +40,6 @@ import CustomAlert from "../../../components/mui/custom-alert";
 import SearchInput from "../../../components/mui/search-input";
 import GlobalTemplatePopup from "./components/global-template/global-template-popup";
 import FormTemplatePopup from "./components/form-template/form-template-popup";
-import MuiTable from "../../../components/mui/table/mui-table";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 import { normalizeTiers, sameTierSet } from "./utils";
 
@@ -197,6 +197,13 @@ const SponsorFormsListPage = ({
       .catch(() => {});
   };
 
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "";
+    const num = Number(timestamp);
+    if (Number.isNaN(num)) return "";
+    return epochToMoment(num).format("MM/DD/YYYY");
+  };
+
   const columns = [
     {
       columnKey: "code",
@@ -287,27 +294,46 @@ const SponsorFormsListPage = ({
       }
     },
     {
+      columnKey: "opens_at",
+      header: T.translate("edit_sponsor.forms_tab.opens_at"),
+      sortable: true,
+      width: 115,
+      render: (row) => formatDate(row.opens_at)
+    },
+    {
+      columnKey: "expires_at",
+      header: T.translate("edit_sponsor.forms_tab.expires_at"),
+      sortable: true,
+      width: 120,
+      render: (row) => formatDate(row.expires_at)
+    },
+    {
       columnKey: "items_qty",
-      width: 100,
+      width: 90,
       header: T.translate("sponsor_forms.items_column_label"),
       sortable: false
     },
     {
       columnKey: "manage_items",
       header: "",
-      width: 175,
-      align: "center",
+      width: 140,
+      align: "left",
       render: (row) => (
         <Button
           variant="text"
           color="inherit"
           size="small"
+          sx={{
+            padding: 0,
+            color: "rgba(0,0,0,0.56)",
+            fontSize: "13px",
+            fontWeight: "normal"
+          }}
           onClick={() => handleManageItems(row)}
         >
-          {T.translate("sponsor_forms.manage_items_button")}
+          {T.translate("sponsor_forms.manage_items")}
         </Button>
-      ),
-      dottedBorder: true
+      )
     }
   ];
 
@@ -319,7 +345,7 @@ const SponsorFormsListPage = ({
 
   return (
     <div className="container">
-      <h3>{T.translate("sponsor_forms.forms")}</h3>
+      <h1>{T.translate("sponsor_forms.forms")}</h1>
       <CustomAlert message={T.translate("sponsor_forms.alert_info")} hideIcon />
       <Grid2
         container
