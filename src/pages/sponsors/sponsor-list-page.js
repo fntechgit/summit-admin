@@ -26,6 +26,7 @@ import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import _ from "lodash";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   getLeadReportSettingsMeta,
   getSummitById,
@@ -38,7 +39,6 @@ import {
   updateSponsorOrder
 } from "../../actions/sponsor-actions";
 import Member from "../../models/member";
-import MuiTable from "../../components/mui/table/mui-table";
 import { DEBOUNCE_WAIT, DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 import AddSponsorDialog from "./popup/add-sponsor-popup";
 

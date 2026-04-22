@@ -18,18 +18,23 @@ import { Box, Button, Grid2, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
-import MuiTable from "../../../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   getBadgeScans,
   exportBadgeScans,
   getBadgeScan,
-  saveBadgeScan
+  saveBadgeScan,
+  addBadgeScan
 } from "../../../../../actions/sponsor-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
 import EditBadgeScanPopup from "./edit-badge-scan-popup";
+import MuiQrBadgePopup from "../../../../../components/mui/mui-qr-badge-popup";
+import Member from "../../../../../models/member";
 
 const SponsorBadgeScans = ({
+  member,
   sponsor,
+  summitId,
   badgeScans,
   totalBadgeScans,
   term,
@@ -41,14 +46,20 @@ const SponsorBadgeScans = ({
   exportBadgeScans,
   getBadgeScan,
   saveBadgeScan,
+  addBadgeScan,
   currentBadgeScan
 }) => {
   useEffect(() => {
     if (sponsor?.id) getBadgeScans(sponsor.id);
   }, [sponsor]);
 
+  const memberObj = new Member(member);
+  const isAdmin = memberObj.hasAccess("admin-sponsors");
+
   const [searchTerm, setSearchTerm] = useState(term);
   const [showEditBadgeScanPopup, setShowEditBadgeScanPopup] = useState(false);
+  const [showManualBadgeScanPopup, setShowManualBadgeScanPopup] =
+    useState(false);
 
   const handleSearch = (ev) => {
     if (ev.key === "Enter") {
@@ -94,7 +105,23 @@ const SponsorBadgeScans = ({
     saveBadgeScan(badgeScan).then(() => setShowEditBadgeScanPopup(false));
   };
 
-  const handleNewManualScan = () => {};
+  const handleNewManualScan = () => {
+    setShowManualBadgeScanPopup(true);
+  };
+
+  const handleManualScanSubmit = (entity) => {
+    addBadgeScan(entity).then(() => {
+      setShowManualBadgeScanPopup(false);
+      return getBadgeScans(
+        sponsor.id,
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      );
+    });
+  };
 
   const handleExportBadgeScans = () => {
     exportBadgeScans(sponsor);
@@ -233,23 +260,37 @@ const SponsorBadgeScans = ({
           onSubmit={handleBadgeScanSave}
         />
       )}
+      {showManualBadgeScanPopup && (
+        <MuiQrBadgePopup
+          onSave={handleManualScanSubmit}
+          onClose={() => setShowManualBadgeScanPopup(false)}
+          extraQuestions={sponsor.extra_questions}
+          isAdmin={isAdmin}
+          summitId={summitId}
+        />
+      )}
     </Box>
   );
 };
 
 const mapStateToProps = ({
+  loggedUserState,
   badgeScansListState,
   currentBadgeScanState,
-  currentSponsorState
+  currentSponsorState,
+  currentSummitState
 }) => ({
   ...badgeScansListState,
   currentBadgeScan: currentBadgeScanState.entity,
-  sponsor: currentSponsorState.entity
+  member: loggedUserState.member,
+  sponsor: currentSponsorState.entity,
+  summitId: currentSummitState.currentSummit.id
 });
 
 export default connect(mapStateToProps, {
   getBadgeScans,
   exportBadgeScans,
   getBadgeScan,
-  saveBadgeScan
+  saveBadgeScan,
+  addBadgeScan
 })(SponsorBadgeScans);

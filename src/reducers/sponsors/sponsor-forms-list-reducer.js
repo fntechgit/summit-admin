@@ -105,6 +105,8 @@ const sponsorFormsListReducer = (state = DEFAULT_STATE, action) => {
           id: a.id,
           code: a.code,
           name: a.name,
+          opens_at: a.opens_at || "",
+          expires_at: a.expires_at || "",
           items_qty: `${a.items.length} ${
             a.items.length === 1
               ? T.translate("sponsor_forms.item_label_singular")
