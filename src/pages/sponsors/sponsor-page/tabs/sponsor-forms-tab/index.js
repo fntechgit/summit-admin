@@ -97,8 +97,22 @@ const SponsorFormsTab = ({
   };
 
   const handleSearch = (searchTerm) => {
-    getSponsorManagedForms(searchTerm);
-    getSponsorCustomizedForms(searchTerm);
+    getSponsorManagedForms(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      managedForms.perPage,
+      managedForms.order,
+      managedForms.orderDir,
+      showArchived
+    );
+    getSponsorCustomizedForms(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      customizedForms.perPage,
+      customizedForms.order,
+      customizedForms.orderDir,
+      showArchived
+    );
   };
 
   const handleCustomizeForm = (item) => {

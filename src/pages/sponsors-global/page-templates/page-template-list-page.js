@@ -86,7 +86,7 @@ const PageTemplateListPage = ({
   const handleSearch = (searchTerm) => {
     getPageTemplates(
       searchTerm,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
@@ -97,7 +97,7 @@ const PageTemplateListPage = ({
   const handleShowArchived = (ev) => {
     getPageTemplates(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
