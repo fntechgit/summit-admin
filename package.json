@@ -211,6 +211,7 @@
     "testEnvironment": "jsdom",
     "setupFilesAfterEnv": [
       "<rootDir>/testSetupFile.js"
-    ]
+    ],
+    "maxWorkers": 4
   }
 }
