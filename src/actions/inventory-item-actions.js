@@ -146,35 +146,25 @@ export const getInventoryItems =
     });
   };
 
-export const getInventoryItem =
-  (inventoryItemId, showArchived = false) =>
-  async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
+export const getInventoryItem = (inventoryItemId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const filter = [];
-
-    filter.push(`is_archived==${showArchived ? 1 : 0}`);
-
-    const params = {
-      access_token: accessToken,
-      expand: "images,meta_fields,meta_fields.values"
-    };
-
-    if (filter.length > 0) {
-      params["filter[]"] = filter;
-    }
-
-    return getRequest(
-      null,
-      createAction(RECEIVE_INVENTORY_ITEM),
-      `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}`,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
-      dispatch(stopLoading());
-    });
+  const params = {
+    access_token: accessToken,
+    expand: "images,meta_fields,meta_fields.values"
   };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_INVENTORY_ITEM),
+    `${window.INVENTORY_API_BASE_URL}/api/v1/inventory-items/${inventoryItemId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
 
 export const deleteInventoryItem = (inventoryItemId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
