@@ -114,4 +114,22 @@ describe("DomainAuthorizedBasePCForm", () => {
     expect(evt.target.type).toBe("checkbox");
     expect(evt.target.checked).toBe(true);
   });
+
+  it("propagates auto_apply untoggle through props.handleChange", () => {
+    const handleChange = jest.fn();
+    const { container } = render(
+      <DomainAuthorizedBasePCForm
+        entity={{ ...baseEntity, auto_apply: true }}
+        handleChange={handleChange}
+        hasErrors={() => ""}
+      />
+    );
+    const checkbox = container.querySelector("#auto_apply");
+    fireEvent.click(checkbox);
+    expect(handleChange).toHaveBeenCalled();
+    const evt = handleChange.mock.calls[0][0];
+    expect(evt.target.id).toBe("auto_apply");
+    expect(evt.target.type).toBe("checkbox");
+    expect(evt.target.checked).toBe(false);
+  });
 });

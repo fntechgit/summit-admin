@@ -20,8 +20,10 @@ const DomainAuthorizedBasePCForm = (props) => {
 
   const domainsAsTags = domains.map((d) => ({ value: d, label: d }));
 
-  const fireChange = (id, value, type = "text") => {
-    handleChange({ target: { id, value, type } });
+  // React 16 pools synthetic events; target is nullified after the handler
+  // returns. Synthesize a plain object so tests (and async callers) can read it.
+  const fireChange = (id, value, type = "text", extra = {}) => {
+    handleChange({ target: { id, value, type, ...extra } });
   };
 
   const handleQuantityChange = (ev) => {
@@ -29,12 +31,8 @@ const DomainAuthorizedBasePCForm = (props) => {
   };
 
   const handleAutoApplyChange = (ev) => {
-    handleChange({
-      target: {
-        id: "auto_apply",
-        checked: ev.target.checked,
-        type: "checkbox"
-      }
+    fireChange("auto_apply", ev.target.checked, "checkbox", {
+      checked: ev.target.checked
     });
   };
 
