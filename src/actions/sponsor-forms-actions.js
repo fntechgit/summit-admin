@@ -461,7 +461,7 @@ export const updateFormTemplateTiers =
     const { currentSummitState, sponsorFormsListState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
-    const { term, currentPage, perPage, order, orderDir, hideArchived } =
+    const { term, currentPage, perPage, order, orderDir, showArchived } =
       sponsorFormsListState;
 
     dispatch(startLoading());
@@ -492,7 +492,7 @@ export const updateFormTemplateTiers =
             perPage,
             order,
             orderDir,
-            hideArchived
+            showArchived
           )
         );
       })

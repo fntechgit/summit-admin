@@ -35,7 +35,7 @@ import {
   deleteSponsorManagedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
-  resetSponsorPage,
+  resetSponsorPage
 } from "../../../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import SearchInput from "../../../../../components/mui/search-input";
@@ -253,7 +253,7 @@ const SponsorPagesTab = ({
           perPage,
           order,
           orderDir,
-          hideArchived
+          showArchived
         );
       })
       .finally(() => setOpenPopup(null));
@@ -269,7 +269,7 @@ const SponsorPagesTab = ({
           perPage,
           order,
           orderDir,
-          hideArchived
+          showArchived
         );
       })
       .finally(() => setOpenPopup(null));
@@ -284,7 +284,7 @@ const SponsorPagesTab = ({
           managedPages.perPage,
           managedPages.order,
           managedPages.orderDir,
-          hideArchived
+          showArchived
         );
         getSponsorCustomizedPages(
           term,
@@ -292,7 +292,7 @@ const SponsorPagesTab = ({
           customizedPages.perPage,
           customizedPages.order,
           customizedPages.orderDir,
-          hideArchived
+          showArchived
         );
       })
       .finally(() => setOpenPopup(null));

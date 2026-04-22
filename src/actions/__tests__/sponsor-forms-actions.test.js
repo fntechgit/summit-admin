@@ -246,7 +246,7 @@ describe("Sponsor Forms Actions", () => {
           perPage: 25,
           order: "name",
           orderDir: -1,
-          hideArchived: true
+          showArchived: false
         }
       });
 
@@ -277,7 +277,7 @@ describe("Sponsor Forms Actions", () => {
         `${window.PURCHASES_API_URL}/api/v1/summits/99/show-forms`,
         expect.any(Function),
         {
-          hideArchived: true,
+          showArchived: false,
           order: "name",
           orderDir: -1,
           currentPage: 3,
