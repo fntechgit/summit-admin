@@ -22,7 +22,7 @@ import {
   MuiTotalRow
 } from "openstack-uicore-foundation/lib/components";
 import StripePayment from "openstack-uicore-foundation/lib/components/mui/stripe-payment";
-import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification-context";
+import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
 import history from "../../../../../../history";
 import {
   confirmPayment,
@@ -123,7 +123,10 @@ const PaymentView = ({
               <ClientForm initialValues={cartOwner} onChange={setClient} />
             </CardContent>
           </Card>
-          <Card sx={{ borderRadius: "10px", flex: 1 }} variant="outlined">
+          <Card
+            sx={{ borderRadius: "10px", flex: 1, maxHeight: 170 }}
+            variant="outlined"
+          >
             <MuiOrderSummary
               amount={paymentIntent?.total_amount}
               dueDate={paymentIntent?.due_date}
@@ -144,16 +147,6 @@ const PaymentView = ({
               client={client}
               showBilling
               redirectUrl={redirectUrl}
-              paymentOptions={{
-                fields: {
-                  billingDetails: {
-                    name: "never",
-                    email: "never",
-                    phone: "never",
-                    address: "never"
-                  }
-                }
-              }}
               stripeFormTitle={false}
               updatePaymentIntent={updatePaymentIntent}
               onPaymentSuccess={handlePaymentSuccess}
