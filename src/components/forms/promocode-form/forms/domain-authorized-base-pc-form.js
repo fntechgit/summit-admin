@@ -5,9 +5,13 @@ import { validateAllowedEmailDomainEntry } from "../../../../utils/methods";
 
 const normalizeTagValues = (value) => {
   if (!Array.isArray(value)) return [];
-  return value.map((entry) =>
-    typeof entry === "string" ? entry : entry?.value ?? entry?.label ?? ""
-  );
+  return value
+    .map((entry) => {
+      if (typeof entry === "string") return entry;
+      // TagInput emits {tag, id} for saved chips and {__isNew__, label, value} for new entries mid-flight.
+      return entry?.tag ?? entry?.value ?? entry?.label ?? "";
+    })
+    .filter((s) => typeof s === "string" && s.length > 0);
 };
 
 const DomainAuthorizedBasePCForm = (props) => {
@@ -18,7 +22,7 @@ const DomainAuthorizedBasePCForm = (props) => {
     ? entity.allowed_email_domains
     : [];
 
-  const domainsAsTags = domains.map((d) => ({ value: d, label: d }));
+  const domainsAsTags = domains.map((d) => ({ tag: d }));
 
   // React 16 pools synthetic events; target is nullified after the handler
   // returns. Synthesize a plain object so tests (and async callers) can read it.

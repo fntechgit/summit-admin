@@ -115,6 +115,23 @@ describe("DomainAuthorizedBasePCForm", () => {
     expect(evt.target.checked).toBe(true);
   });
 
+  it("renders without crashing when allowed_email_domains already has entries", () => {
+    const { container } = render(
+      <DomainAuthorizedBasePCForm
+        entity={{
+          allowed_email_domains: ["@acme.com", ".edu"],
+          quantity_per_account: 0,
+          auto_apply: false
+        }}
+        handleChange={noop}
+        hasErrors={() => ""}
+      />
+    );
+    expect(
+      container.querySelector("#allowed_email_domains")
+    ).toBeInTheDocument();
+  });
+
   it("propagates auto_apply untoggle through props.handleChange", () => {
     const handleChange = jest.fn();
     const { container } = render(
