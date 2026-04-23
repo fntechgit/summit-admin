@@ -2886,22 +2886,25 @@
     "sponsorship_types_list": "Tier List",
     "sponsorship_type": "Tier",
     "widget_title": "Widget Title",
-    "no_sponsorships": "No sponsorships found for current search criteria.",
-    "add_sponsorship": "Add Sponsorship",
+    "no_sponsorships": "No tiers found for current search criteria.",
+    "add_sponsorship": "Add Tier",
     "name": "Name",
     "label": "Label",
     "size": "Size",
     "order": "Order",
-    "remove_warning": "Are you sure you want to delete sponsorship "
+    "remove_warning": "Are you sure you want to delete sponsorship ",
+    "placeholders": {
+      "search": "Search tier"
+    }
   },
   "edit_sponsorship": {
-    "sponsorship": "Sponsorship",
+    "sponsorship": "Tier",
     "name": "Name",
     "order": "Order",
     "label": "Label",
     "size": "Size",
-    "sponsorship_saved": "Sponsorship saved successfully",
-    "sponsorship_created": "Sponsorship created successfully",
+    "sponsorship_saved": "Tier saved successfully",
+    "sponsorship_created": "Tier created successfully",
     "placeholders": {
       "select_size": "Select a Size"
     }

@@ -9,168 +9,229 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import { Table } from "openstack-uicore-foundation/lib/components";
+import { Box, Button, Grid2, TextField } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   getSponsorships,
-  deleteSponsorship
+  getSponsorship,
+  saveSponsorship,
+  deleteSponsorship,
+  resetSponsorshipForm
 } from "../../actions/sponsorship-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import SponsorshipDialog from "./components/sponsorship-dialog";
 
-class SponsorshipListPage extends React.Component {
-  constructor(props) {
-    super(props);
+const SponsorshipListPage = ({
+  sponsorships,
+  currentSponsorship,
+  currentPage,
+  perPage,
+  order,
+  orderDir,
+  totalSponsorships,
+  getSponsorships,
+  getSponsorship,
+  saveSponsorship,
+  deleteSponsorship,
+  resetSponsorshipForm
+}) => {
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleNewSponsorship = this.handleNewSponsorship.bind(this);
+  useEffect(() => {
+    getSponsorships();
+  }, [getSponsorships]);
 
-    this.state = {};
-  }
+  const handlePageChange = (page) => {
+    getSponsorships(searchTerm, page, perPage, order, orderDir);
+  };
 
-  componentDidMount() {
-    const { currentPage, perPage, order, orderDir } = this.props;
-    this.props.getSponsorships(currentPage, perPage, order, orderDir);
-  }
-
-  handleEdit(sponsorship_id) {
-    const { history } = this.props;
-    history.push(`/app/sponsorship-types/${sponsorship_id}`);
-  }
-
-  handlePageChange(page) {
-    const { order, orderDir, perPage } = this.props;
-    this.props.getSponsorships(page, perPage, order, orderDir);
-  }
-
-  handleDelete(sponsorshipId) {
-    const { deleteSponsorship, sponsorships } = this.props;
-    let sponsorship = sponsorships.find((t) => t.id === sponsorshipId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("sponsorship_list.remove_warning") + " " + sponsorship.name,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
-      if (result.value) {
-        deleteSponsorship(sponsorshipId);
-      }
-    });
-  }
-
-  handleSort(index, key, dir, func) {
-    const { perPage, page } = this.props;
-    this.props.getSponsorships(page, perPage, key, dir);
-  }
-
-  handleNewSponsorship(ev) {
-    const { history } = this.props;
-    history.push(`/app/sponsorship-types/new`);
-  }
-
-  render() {
-    const {
-      sponsorships,
-      lastPage,
-      currentPage,
+  const handlePerPageChange = (newPerPage) => {
+    getSponsorships(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
       order,
-      orderDir,
-      totalSponsorships
-    } = this.props;
-
-    const columns = [
-      {
-        columnKey: "name",
-        value: T.translate("sponsorship_list.name"),
-        sortable: true
-      },
-      {
-        columnKey: "label",
-        value: T.translate("sponsorship_list.label"),
-        sortable: true
-      },
-      {
-        columnKey: "size",
-        value: T.translate("sponsorship_list.size"),
-        sortable: true
-      }
-    ];
-
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
-
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("sponsorship_list.sponsorship_types_list")} (
-          {totalSponsorships})
-        </h3>
-        <div className={"row"}>
-          <div className="col-md-6 text-right col-md-offset-6">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNewSponsorship}
-            >
-              {T.translate("sponsorship_list.add_sponsorship")}
-            </button>
-          </div>
-        </div>
-
-        {sponsorships.length === 0 && (
-          <div>{T.translate("sponsorship_list.no_sponsorships")}</div>
-        )}
-
-        {sponsorships.length > 0 && (
-          <>
-            <Table
-              options={table_options}
-              data={sponsorships}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </>
-        )}
-      </div>
+      orderDir
     );
-  }
-}
+  };
 
-const mapStateToProps = ({ currentSponsorshipListState }) => ({
-  ...currentSponsorshipListState
+  const handleSort = (key, dir) => {
+    getSponsorships(searchTerm, currentPage, perPage, key, dir);
+  };
+
+  const handleSearch = (ev) => {
+    setSearchTerm(ev.target.value);
+    if (ev.key === "Enter") {
+      getSponsorships(
+        ev.target.value,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      );
+    }
+  };
+
+  const handleRowEdit = (row) => {
+    getSponsorship(row.id).then(() => setOpen(true));
+  };
+
+  const handleNew = () => {
+    resetSponsorshipForm();
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    resetSponsorshipForm();
+    setOpen(false);
+  };
+
+  const handleSave = (entity) => {
+    saveSponsorship(entity)
+      .then(() =>
+        getSponsorships(
+          searchTerm,
+          DEFAULT_CURRENT_PAGE,
+          perPage,
+          order,
+          orderDir
+        )
+      )
+      .finally(() => setOpen(false));
+  };
+
+  const handleDelete = (sponsorshipId) => {
+    deleteSponsorship(sponsorshipId).then(() =>
+      getSponsorships(
+        searchTerm,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      )
+    );
+  };
+
+  const columns = [
+    {
+      columnKey: "name",
+      header: T.translate("sponsorship_list.name"),
+      sortable: true
+    },
+    {
+      columnKey: "label",
+      header: T.translate("sponsorship_list.label"),
+      sortable: true
+    },
+    {
+      columnKey: "size",
+      header: T.translate("sponsorship_list.size"),
+      sortable: true
+    }
+  ];
+
+  const tableOptions = { sortCol: order, sortDir: orderDir };
+
+  return (
+    <div className="container">
+      <h3>{T.translate("sponsorship_list.sponsorship_types_list")}</h3>
+      <Grid2
+        container
+        spacing={1}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={2}>
+          <Box component="span">{totalSponsorships} tiers</Box>
+        </Grid2>
+        <Grid2
+          container
+          size={10}
+          spacing={1}
+          gap={1}
+          sx={{
+            justifyContent: "flex-end",
+            alignItems: "center"
+          }}
+        >
+          <TextField
+            variant="outlined"
+            value={searchTerm}
+            placeholder={T.translate("sponsorship_list.placeholders.search")}
+            slotProps={{
+              input: { startAdornment: <SearchIcon sx={{ mr: 1 }} /> }
+            }}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearch}
+            sx={{ "& .MuiOutlinedInput-root": { height: "36px" } }}
+          />
+          <Button
+            variant="contained"
+            onClick={handleNew}
+            startIcon={<AddIcon />}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
+          >
+            {T.translate("sponsorship_list.add_sponsorship")}
+          </Button>
+        </Grid2>
+      </Grid2>
+
+      {sponsorships.length > 0 && (
+        <MuiTable
+          columns={columns}
+          data={sponsorships}
+          options={tableOptions}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalSponsorships}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onEdit={handleRowEdit}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {open && (
+        <SponsorshipDialog
+          entity={currentSponsorship}
+          onSave={handleSave}
+          onClose={handleClose}
+        />
+      )}
+    </div>
+  );
+};
+
+const mapStateToProps = ({
+  currentSponsorshipListState,
+  currentSponsorshipState
+}) => ({
+  ...currentSponsorshipListState,
+  currentSponsorship: currentSponsorshipState.entity
 });
 
 export default connect(mapStateToProps, {
   getSponsorships,
-  deleteSponsorship
+  getSponsorship,
+  saveSponsorship,
+  deleteSponsorship,
+  resetSponsorshipForm
 })(SponsorshipListPage);

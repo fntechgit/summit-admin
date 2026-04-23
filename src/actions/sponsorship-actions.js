@@ -12,7 +12,7 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
-import * as _ from "lodash";
+import debounce from "lodash/debounce";
 import {
   getRequest,
   putRequest,
@@ -21,15 +21,12 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
-  authErrorHandler,
   escapeFilterValue,
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import history from "../history";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,
@@ -48,12 +45,19 @@ export const SPONSORSHIP_UPDATED = "SPONSORSHIP_UPDATED";
 export const SPONSORSHIP_ADDED = "SPONSORSHIP_ADDED";
 export const SPONSORSHIP_DELETED = "SPONSORSHIP_DELETED";
 
-/** ****************  SPONSORS *************************************** */
+/* *****************  SPONSORS *************************************** */
 
 export const getSponsorships =
-  (page = 1, perPage = DEFAULT_PER_PAGE, order = "name", orderDir = 1) =>
+  (
+    term = "",
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "name",
+    orderDir = 1
+  ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
+    const filter = [];
 
     dispatch(startLoading());
 
@@ -62,6 +66,17 @@ export const getSponsorships =
       per_page: perPage,
       access_token: accessToken
     };
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filter.push(
+        `name=@${escapedTerm},label=@${escapedTerm},size=@${escapedTerm}`
+      );
+    }
+
+    if (filter.length > 0) {
+      params["filter[]"] = filter;
+    }
 
     // order
     if (order != null && orderDir != null) {
@@ -73,9 +88,9 @@ export const getSponsorships =
       createAction(REQUEST_SPONSORSHIPS),
       createAction(RECEIVE_SPONSORSHIPS),
       `${window.API_BASE_URL}/api/v1/sponsorship-types`,
-      authErrorHandler,
-      { order, orderDir, page }
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler,
+      { order, orderDir, page, perPage }
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -93,8 +108,8 @@ export const getSponsorship = (sponsorshipId) => async (dispatch) => {
     null,
     createAction(RECEIVE_SPONSORSHIP),
     `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -115,40 +130,42 @@ export const saveSponsorship = (entity) => async (dispatch) => {
   const normalizedEntity = normalizeSponsorship(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_SPONSORSHIP),
       createAction(SPONSORSHIP_UPDATED),
       `${window.API_BASE_URL}/api/v1/sponsorship-types/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showSuccessMessage(T.translate("edit_sponsorship.sponsorship_saved"))
-      );
-    });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_sponsorship.sponsorship_created"),
-      type: "success"
-    };
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_sponsorship.sponsorship_saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
+  }
 
-    postRequest(
-      createAction(UPDATE_SPONSORSHIP),
-      createAction(SPONSORSHIP_ADDED),
-      `${window.API_BASE_URL}/api/v1/sponsorship-types`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then((payload) => {
+  return postRequest(
+    createAction(UPDATE_SPONSORSHIP),
+    createAction(SPONSORSHIP_ADDED),
+    `${window.API_BASE_URL}/api/v1/sponsorship-types`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then(() => {
       dispatch(
-        showMessage(success_message, () => {
-          history.push(`/app/sponsorship-types/${payload.response.id}`);
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsorship.sponsorship_created")
         })
       );
-    });
-  }
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 export const deleteSponsorship = (sponsorshipId) => async (dispatch) => {
@@ -163,8 +180,8 @@ export const deleteSponsorship = (sponsorshipId) => async (dispatch) => {
     createAction(SPONSORSHIP_DELETED)({ sponsorshipId }),
     `${window.API_BASE_URL}/api/v1/sponsorship-types/${sponsorshipId}`,
     null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -175,7 +192,7 @@ const normalizeSponsorship = (entity) => {
   return normalizedEntity;
 };
 
-export const querySponsorships = _.debounce(async (input, callback) => {
+export const querySponsorships = debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
   const endpoint = URI(`${window.API_BASE_URL}/api/v1/sponsorship-types`);
   input = escapeFilterValue(input);
@@ -192,7 +209,7 @@ export const querySponsorships = _.debounce(async (input, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
-export const querySponsorshipsBySummit = _.debounce(
+export const querySponsorshipsBySummit = debounce(
   async (input, summitId, callback) => {
     const accessToken = await getAccessTokenSafely();
     const endpoint = URI(
