@@ -22,7 +22,6 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
-import moment from "moment-timezone";
 import {
   getAccessTokenSafely,
   normalizeSelectAllField
@@ -34,6 +33,7 @@ import {
   DEFAULT_PER_PAGE,
   PAGES_MODULE_KINDS
 } from "../utils/constants";
+import { normalizePageTemplateModules } from "../utils/page-template";
 
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
 export const RESET_EDIT_PAGE = "RESET_EDIT_PAGE";
@@ -566,28 +566,10 @@ const normalizeSponsorCustomPage = (entity, summitTZ) => {
     normalizedEntity.allowed_add_ons = entity.allowed_add_ons.map((e) => e.id);
   }
 
-  normalizedEntity.modules = entity.modules.map((module) => {
-    const normalizedModule = { ...module };
-
-    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.upload_deadline) {
-      normalizedModule.upload_deadline = moment
-        .tz(module.upload_deadline, summitTZ)
-        .unix();
-    }
-
-    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.file_type_id) {
-      normalizedModule.file_type_id =
-        module.file_type_id?.value || module.file_type_id;
-    }
-
-    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT && module.file) {
-      normalizedModule.file = module.file[0] || null;
-    }
-
-    delete normalizedModule._tempId;
-
-    return normalizedModule;
-  });
+  normalizedEntity.modules = normalizePageTemplateModules(
+    entity.modules,
+    summitTZ
+  );
 
   return normalizedEntity;
 };

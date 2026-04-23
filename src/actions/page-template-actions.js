@@ -12,7 +12,6 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
-import moment from "moment-timezone";
 import {
   getRequest,
   putRequest,
@@ -28,12 +27,10 @@ import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_ORDER_DIR,
-  DEFAULT_PER_PAGE,
-  PAGE_MODULES_DOWNLOAD,
-  PAGE_MODULES_MEDIA_TYPES,
-  PAGES_MODULE_KINDS
+  DEFAULT_PER_PAGE
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
+import { normalizePageTemplateModules } from "../utils/page-template";
 import { GLOBAL_PAGE_CLONED } from "./sponsor-pages-actions";
 
 export const ADD_PAGE_TEMPLATE = "ADD_PAGE_TEMPLATE";
@@ -147,43 +144,7 @@ export const resetPageTemplateForm = () => (dispatch) => {
 
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
-
-  normalizedEntity.modules = entity.modules.map((module) => {
-    const normalizedModule = { ...module };
-
-    if (module.kind === PAGES_MODULE_KINDS.MEDIA) {
-      if (module.upload_deadline) {
-        normalizedModule.upload_deadline = moment
-          .utc(module.upload_deadline)
-          .unix();
-      }
-
-      if (module.file_type_id) {
-        normalizedModule.file_type_id =
-          module.file_type_id?.value || module.file_type_id;
-      }
-
-      if (module.type === PAGE_MODULES_MEDIA_TYPES.INPUT) {
-        delete normalizedModule.file_type_id;
-        delete normalizedModule.max_file_size;
-      }
-    }
-
-    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT) {
-      if (module.type === PAGE_MODULES_DOWNLOAD.FILE) {
-        normalizedModule.file = module.file?.[0] || null;
-        delete normalizedModule.external_url;
-      } else {
-        delete normalizedModule.file;
-        delete normalizedModule.file_id;
-      }
-    }
-
-    delete normalizedModule._tempId;
-
-    return normalizedModule;
-  });
-
+  normalizedEntity.modules = normalizePageTemplateModules(entity.modules);
   return normalizedEntity;
 };
 

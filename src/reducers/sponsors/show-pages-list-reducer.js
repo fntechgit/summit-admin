@@ -13,7 +13,6 @@
 import T from "i18n-react/dist/i18n-react";
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   RECEIVE_SHOW_PAGE,
   RECEIVE_SHOW_PAGES,
@@ -25,6 +24,7 @@ import {
 } from "../../actions/show-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
+import { denormalizePageModules } from "../../utils/page-template";
 
 const DEFAULT_SHOW_PAGE = {
   code: "",
@@ -132,19 +132,14 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
         ? ["all"]
         : pageData.sponsorship_types.map((st) => st.id);
 
+      const modules = denormalizePageModules(
+        pageData.modules,
+        state.summitTZ || "UTC"
+      );
+
       const currentShowPage = {
         ...pageData,
-        modules: pageData.modules.map((m) => ({
-          ...m,
-          ...(m.upload_deadline
-            ? {
-                upload_deadline: epochToMomentTimeZone(
-                  m.upload_deadline,
-                  state.summitTZ || "UTC"
-                )
-              }
-            : {})
-        })),
+        modules,
         sponsorship_types: sponsorshipTypeIds
       };
 
