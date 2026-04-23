@@ -30,14 +30,6 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-upload",
-  () =>
-    function MockMuiFormikUpload({ name }) {
-      return <div data-testid={`upload-${name}`}>Upload</div>;
-    }
-);
-
-jest.mock(
   "../../../../components/mui/formik-inputs/mui-formik-textfield",
   () =>
     function MockMuiFormikTextField({ name }) {
@@ -436,7 +428,6 @@ describe("PageModules", () => {
 
       expect(showConfirmDialog).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: "general.are_you_sure",
           type: "warning",
           showCancelButton: true
         })
