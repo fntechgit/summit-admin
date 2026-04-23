@@ -156,7 +156,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
     }
     case RECEIVE_SPONSOR_USERS_IMPORT_STATUS: {
       const { status, task_id } = payload.response;
-      let {importTasks} = state;
+      let { importTasks } = state;
 
       if (
         [
@@ -164,7 +164,7 @@ const sponsorUsersListReducer = (state = DEFAULT_STATE, action) => {
           IMPORT_SPONSOR_USERS_STATUS.FAILURE
         ].includes(status)
       ) {
-        importTasks = state.importTasks.filter((t) => t === task_id);
+        importTasks = state.importTasks.filter((t) => t !== task_id);
       }
 
       return { ...state, importTasks };

@@ -562,33 +562,42 @@ export const fetchSponsorUsersBySummit = async (
 };
 
 export const trackImportSponsorUsers = () => async (dispatch, getState) => {
-  const { sponsorUserListState } = getState();
-  const { tasks } = sponsorUserListState;
+  const { sponsorUsersListState } = getState();
+  const { importTasks } = sponsorUsersListState;
 
   const accessToken = await getAccessTokenSafely();
   const params = {
     access_token: accessToken
   };
 
-  tasks.forEach((taskId) => {
+  importTasks.forEach((taskId) => {
     getRequest(
       null,
       createAction(RECEIVE_SPONSOR_USERS_IMPORT_STATUS),
       `${window.SPONSOR_USERS_API_URL}/api/v1/tasks/${taskId}`,
       authErrorHandler
-    )(params)(dispatch).then((res) => {
-      if (res.status === IMPORT_SPONSOR_USERS_STATUS.SUCCESS) {
+    )(params)(dispatch).then(({ response }) => {
+      if (response.status === IMPORT_SPONSOR_USERS_STATUS.SUCCESS) {
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
             html: T.translate("sponsor_users.import_users.success")
           })
         );
-      } else if (res.status === IMPORT_SPONSOR_USERS_STATUS.FAILURE) {
+
+        if (response.result.errors.length > 0) {
+          dispatch(
+            snackbarErrorMsg({
+              title: T.translate("sponsor_users.import_users.fail"),
+              html: response.result.errors.map((e) => e.error).join("<br/>")
+            })
+          );
+        }
+      } else if (response.status === IMPORT_SPONSOR_USERS_STATUS.FAILURE) {
         dispatch(
           snackbarErrorMsg({
             title: T.translate("sponsor_users.import_users.fail"),
-            html: res.error
+            html: response.error
           })
         );
       }
@@ -597,7 +606,10 @@ export const trackImportSponsorUsers = () => async (dispatch, getState) => {
 };
 
 export const importSponsorUsers =
-  (sponsorId, companyId, summitId, userIds) => async (dispatch) => {
+  (targetSponsorId, targetCompanyId, sourceSummitId, userIds) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
     const accessToken = await getAccessTokenSafely();
     let payload;
 
@@ -610,13 +622,14 @@ export const importSponsorUsers =
     if (userIds === "all") {
       payload = {
         apply_to_all_users: true,
-        source_company_id: companyId,
-        source_summit_id: summitId
+        source_company_id: targetCompanyId, // target and source companyId is the same
+        source_summit_id: sourceSummitId,
+        target_summit_id: currentSummit.id
       };
     } else {
       payload = {
-        summit_id: summitId,
-        sponsor_id: sponsorId,
+        target_summit_id: currentSummit.id,
+        sponsor_id: targetSponsorId,
         user_ids: userIds
       };
     }
