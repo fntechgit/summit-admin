@@ -153,7 +153,10 @@ const SponsorshipListPage = ({
         }}
       >
         <Grid2 size={2}>
-          <Box component="span">{totalSponsorships} tiers</Box>
+          <Box component="span">
+            {totalSponsorships}{" "}
+            {T.translate("sponsorship_list.sponsorship_types")}
+          </Box>
         </Grid2>
         <Grid2
           container
@@ -206,6 +209,9 @@ const SponsorshipListPage = ({
           onSort={handleSort}
           onEdit={handleRowEdit}
           onDelete={handleDelete}
+          deleteDialogBody={(name) =>
+            T.translate("sponsorship_list.remove_warning", { name })
+          }
         />
       )}
 
