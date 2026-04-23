@@ -835,3 +835,35 @@ export const queryAttendees = _.debounce(async (input, summitId, callback) => {
     })
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
+
+export const queryAttendeesWithTickets = _.debounce(
+  async (input, summitId, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/attendees`
+    );
+
+    input = escapeFilterValue(input);
+    endpoint.addQuery("access_token", accessToken);
+    endpoint.addQuery("order", "first_name,last_name");
+    endpoint.addQuery("page", 1);
+    endpoint.addQuery("per_page", DEFAULT_PER_PAGE);
+
+    if (input) {
+      endpoint.addQuery("filter[]", `full_name=@${input},email=@${input}`);
+    }
+
+    endpoint.addQuery("filter[]", "has_tickets==true");
+    endpoint.addQuery("filter[]", "has_member==true");
+
+    fetch(endpoint)
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);
