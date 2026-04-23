@@ -72,7 +72,7 @@ describe("SponsorshipDialog", () => {
     );
 
     await act(async () => {
-      await user.click(screen.getByRole("button", { name: "" }));
+      await user.click(screen.getByRole("button", { name: "close" }));
     });
 
     expect(onClose).toHaveBeenCalledTimes(1);
