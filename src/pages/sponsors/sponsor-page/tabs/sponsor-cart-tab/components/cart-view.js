@@ -25,7 +25,8 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockClosedIcon from "@mui/icons-material/Lock";
-import MuiTable, { TotalRow } from "openstack-uicore-foundation/lib/components/mui/table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import { TotalRow } from "openstack-uicore-foundation/lib/components/mui/table/extra-rows";
 import history from "../../../../../../history";
 import SearchInput from "../../../../../../components/mui/search-input";
 import {
