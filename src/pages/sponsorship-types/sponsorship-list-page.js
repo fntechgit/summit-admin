@@ -71,7 +71,7 @@ const SponsorshipListPage = ({
     setSearchTerm(ev.target.value);
     if (ev.key === "Enter") {
       getSponsorships(
-        ev.target.value,
+        searchTerm,
         DEFAULT_CURRENT_PAGE,
         perPage,
         order,
@@ -105,7 +105,7 @@ const SponsorshipListPage = ({
           orderDir
         )
       )
-      .finally(() => setOpen(false));
+      .then(() => setOpen(false));
   };
 
   const handleDelete = (sponsorshipId) => {
@@ -207,6 +207,10 @@ const SponsorshipListPage = ({
           onEdit={handleRowEdit}
           onDelete={handleDelete}
         />
+      )}
+
+      {sponsorships.length === 0 && (
+        <div>{T.translate("sponsorship_list.no_sponsorships")}</div>
       )}
 
       {open && (

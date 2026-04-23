@@ -56,18 +56,15 @@ const SponsorshipDialog = ({ entity: initialEntity, onClose, onSave }) => {
       )}`;
 
   return (
-    <Dialog
-      open
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      disableEnforceFocus
-      disableAutoFocus
-      disableRestoreFocus
-    >
+    <Dialog open onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         {title}
-        <IconButton size="small" onClick={handleClose} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          onClick={handleClose}
+          sx={{ mr: 1 }}
+          aria-label="close"
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
