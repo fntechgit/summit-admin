@@ -16,7 +16,7 @@ import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
-import UploadInputV2 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v2";
+import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import {
   isEmpty,
@@ -279,7 +279,7 @@ class EventMaterialForm extends React.Component {
                 {" "}
                 {T.translate("edit_event_material.slide")} (max size 500Mb)
               </label>
-              <UploadInputV2
+              <UploadInputV3
                 id="slide"
                 onUploadComplete={this.onMediaUploadComplete}
                 value={mediaInputValue}
@@ -349,7 +349,7 @@ class EventMaterialForm extends React.Component {
                   {T.translate("edit_event_material.media_upload_file")}{" "}
                   {`(max size: ${entity.media_upload_type.max_size / KB}Mb )`}
                 </label>
-                <UploadInputV2
+                <UploadInputV3
                   id={`media_upload_${media_type.id}`}
                   onUploadComplete={this.onMediaUploadComplete}
                   value={mediaInputValue}

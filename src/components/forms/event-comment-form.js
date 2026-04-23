@@ -9,17 +9,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Dropdown,
-  Input,
-  UploadInputV2,
-  TextEditor
-} from "openstack-uicore-foundation/lib/components";
+import { Input } from "openstack-uicore-foundation/lib/components";
 import {
   isEmpty,
   scrollToError,
@@ -40,7 +35,7 @@ class EventCommentForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     const name = this.props.entity.id
       ? this.props.entity.name
@@ -80,7 +75,7 @@ class EventCommentForm extends React.Component {
 
     errors[id] = "";
     entity[id] = value;
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
@@ -146,7 +141,6 @@ class EventCommentForm extends React.Component {
               value={entity.body}
               onChange={this.handleChange}
               className="form-control"
-              error={hasErrors("body", errors)}
             />
           </div>
         </div>
