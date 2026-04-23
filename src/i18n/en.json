@@ -2892,7 +2892,7 @@
     "label": "Label",
     "size": "Size",
     "order": "Order",
-    "remove_warning": "Are you sure you want to delete sponsorship ",
+    "remove_warning": "Are you sure you want to delete tier {name}",
     "placeholders": {
       "search": "Search tier"
     }
