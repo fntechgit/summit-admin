@@ -4096,7 +4096,7 @@
     },
     "page_crud": {
       "title_create": "Create New Page",
-      "title_edit": "Edit Page",
+      "title_edit": "Edit Page Template",
       "add_info": "Add Info",
       "add_doc": "Add Document Download",
       "add_media": "Add Media Request",
