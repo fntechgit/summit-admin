@@ -122,7 +122,12 @@ const MediaFileTypeDialog = ({ entity: initialEntity, onClose, onSave }) => {
           </DialogContent>
           <Divider />
           <DialogActions>
-            <Button type="submit" fullWidth variant="contained">
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={formik.isSubmitting}
+            >
               {T.translate("general.save")}
             </Button>
           </DialogActions>
