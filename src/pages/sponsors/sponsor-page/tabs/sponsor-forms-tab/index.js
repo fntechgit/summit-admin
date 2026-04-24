@@ -42,7 +42,7 @@ import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
 const SponsorFormsTab = ({
   term,
   history,
-  hideArchived,
+  showArchived,
   managedForms,
   customizedForms,
   sponsor,
@@ -64,12 +64,12 @@ const SponsorFormsTab = ({
 
   const handleManagedPageChange = (page) => {
     const { perPage, order, orderDir } = managedForms;
-    getSponsorManagedForms(term, page, perPage, order, orderDir, hideArchived);
+    getSponsorManagedForms(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handleManagedSort = (key, dir) => {
     const { currentPage, perPage } = managedForms;
-    getSponsorManagedForms(term, currentPage, perPage, key, dir, hideArchived);
+    getSponsorManagedForms(term, currentPage, perPage, key, dir, showArchived);
   };
 
   const handleCustomizedPageChange = (page) => {
@@ -80,7 +80,7 @@ const SponsorFormsTab = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -92,13 +92,27 @@ const SponsorFormsTab = ({
       perPage,
       key,
       dir,
-      hideArchived
+      showArchived
     );
   };
 
   const handleSearch = (searchTerm) => {
-    getSponsorManagedForms(searchTerm);
-    getSponsorCustomizedForms(searchTerm);
+    getSponsorManagedForms(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      managedForms.perPage,
+      managedForms.order,
+      managedForms.orderDir,
+      showArchived
+    );
+    getSponsorCustomizedForms(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      customizedForms.perPage,
+      customizedForms.order,
+      customizedForms.orderDir,
+      showArchived
+    );
   };
 
   const handleCustomizeForm = (item) => {
@@ -133,12 +147,12 @@ const SponsorFormsTab = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
   };
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getSponsorManagedForms(
       term,
       DEFAULT_CURRENT_PAGE,
@@ -157,7 +171,8 @@ const SponsorFormsTab = ({
     );
   };
 
-  const handleSaveFormFromTemplate = (entity) => saveSponsorManagedForm(entity).then(() => {
+  const handleSaveFormFromTemplate = (entity) =>
+    saveSponsorManagedForm(entity).then(() => {
       const { perPage, order, orderDir } = managedForms;
       getSponsorManagedForms(
         term,
@@ -165,7 +180,7 @@ const SponsorFormsTab = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
       setOpenPopup(null);
     });
@@ -183,7 +198,7 @@ const SponsorFormsTab = ({
       customizedPerPage,
       customizedOrder,
       customizedOrderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -321,16 +336,16 @@ const SponsorFormsTab = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  value={hideArchived}
-                  onChange={handleHideArchivedForms}
+                  checked={showArchived}
+                  onChange={handleShowArchivedForms}
                   inputProps={{
                     "aria-label": T.translate(
-                      "edit_sponsor.forms_tab.hide_archived"
+                      "edit_sponsor.forms_tab.show_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("edit_sponsor.forms_tab.hide_archived")}
+              label={T.translate("edit_sponsor.forms_tab.show_archived")}
             />
           </FormGroup>
         </Grid2>

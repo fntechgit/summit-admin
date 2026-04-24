@@ -48,7 +48,7 @@ const SponsorFormItemListPage = ({
   items,
   currentPage,
   perPage,
-  hideArchived,
+  showArchived,
   order,
   orderDir,
   totalCount,
@@ -67,14 +67,14 @@ const SponsorFormItemListPage = ({
   }, []);
 
   const handlePageChange = (page) => {
-    getSponsorFormItems(formId, page, perPage, order, orderDir, hideArchived);
+    getSponsorFormItems(formId, page, perPage, order, orderDir, showArchived);
   };
 
   const handleSort = (key, dir) => {
-    getSponsorFormItems(formId, currentPage, perPage, key, dir, hideArchived);
+    getSponsorFormItems(formId, currentPage, perPage, key, dir, showArchived);
   };
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getSponsorFormItems(
       formId,
       DEFAULT_CURRENT_PAGE,
@@ -111,7 +111,7 @@ const SponsorFormItemListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
   };
@@ -244,15 +244,16 @@ const SponsorFormItemListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={handleHideArchivedForms}
+                  checked={showArchived}
+                  onChange={handleShowArchivedForms}
                   inputProps={{
                     "aria-label": T.translate(
-                      "sponsor_form_item_list.hide_archived"
+                      "sponsor_form_item_list.show_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("sponsor_form_item_list.hide_archived")}
+              label={T.translate("sponsor_form_item_list.show_archived")}
             />
           </FormGroup>
           <Button

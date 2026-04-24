@@ -37,11 +37,11 @@ const SelectPageTemplateDialog = ({
   const [selectedRows, setSelectedRows] = useState([]);
 
   useEffect(() => {
-    getPageTemplates("", 1, DEFAULT_PER_PAGE, "id", 1, true);
+    getPageTemplates("", 1, DEFAULT_PER_PAGE, "id", 1);
   }, []);
 
   const handleSort = (key, dir) => {
-    getPageTemplates(term, 1, DEFAULT_PER_PAGE, key, dir, true);
+    getPageTemplates(term, 1, DEFAULT_PER_PAGE, key, dir);
   };
 
   const handleLoadMore = () => {
@@ -51,8 +51,7 @@ const SelectPageTemplateDialog = ({
         currentPage + 1,
         DEFAULT_PER_PAGE,
         order,
-        orderDir,
-        true
+        orderDir
       );
     }
   };
@@ -76,7 +75,7 @@ const SelectPageTemplateDialog = ({
   };
 
   const handleOnSearch = (searchTerm) => {
-    getPageTemplates(searchTerm, 1, DEFAULT_PER_PAGE, "id", 1, true);
+    getPageTemplates(searchTerm, 1, DEFAULT_PER_PAGE, "id", 1);
   };
 
   const handleOnSave = () => {

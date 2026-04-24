@@ -47,7 +47,7 @@ const ShowPagesListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   totalCount,
   currentShowPage,
   sponsorships,
@@ -67,15 +67,15 @@ const ShowPagesListPage = ({
   }, []);
 
   const handlePageChange = (page) => {
-    getShowPages(term, page, perPage, order, orderDir, hideArchived);
+    getShowPages(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handleSort = (key, dir) => {
-    getShowPages(term, currentPage, perPage, key, dir, hideArchived);
+    getShowPages(term, currentPage, perPage, key, dir, showArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
-    getShowPages(term, currentPage, newPerPage, order, orderDir, hideArchived);
+    getShowPages(term, currentPage, newPerPage, order, orderDir, showArchived);
   };
 
   const handleRowDelete = (itemId) => {
@@ -86,7 +86,7 @@ const ShowPagesListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       )
     );
   };
@@ -94,7 +94,7 @@ const ShowPagesListPage = ({
   const handleArchiveItem = (item) =>
     item.is_archived ? unarchiveShowPage(item.id) : archiveShowPage(item.id);
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getShowPages(
       term,
       currentPage,
@@ -200,14 +200,14 @@ const ShowPagesListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={handleHideArchivedForms}
-                  checked={hideArchived}
+                  onChange={handleShowArchivedForms}
+                  checked={showArchived}
                   inputProps={{
-                    "aria-label": T.translate("show_pages.hide_archived")
+                    "aria-label": T.translate("show_pages.show_archived")
                   }}
                 />
               }
-              label={T.translate("show_pages.hide_archived")}
+              label={T.translate("show_pages.show_archived")}
             />
           </FormGroup>
         </Grid2>

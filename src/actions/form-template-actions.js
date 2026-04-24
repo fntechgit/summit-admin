@@ -76,7 +76,7 @@ export const getFormTemplates =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    showArchived = false
   ) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
@@ -97,7 +97,7 @@ export const getFormTemplates =
       access_token: accessToken
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -114,7 +114,7 @@ export const getFormTemplates =
       createAction(RECEIVE_FORM_TEMPLATES),
       `${window.INVENTORY_API_BASE_URL}/api/v1/form-templates`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term, hideArchived }
+      { order, orderDir, page, perPage, term, showArchived }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

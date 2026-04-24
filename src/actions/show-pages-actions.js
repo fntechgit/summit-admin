@@ -49,7 +49,7 @@ export const getShowPages =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false,
+    showArchived = false,
     sponsorshipTypesId = []
   ) =>
   async (dispatch, getState) => {
@@ -74,7 +74,7 @@ export const getShowPages =
       expand: "sponsorship_types,modules"
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (sponsorshipTypesId?.length > 0) {
       const formattedSponsorships = sponsorshipTypesId.join("&&");
@@ -97,7 +97,7 @@ export const getShowPages =
       createAction(RECEIVE_SHOW_PAGES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/show-pages`,
       authErrorHandler,
-      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
+      { order, orderDir, page, perPage, term, showArchived, summitTZ }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });

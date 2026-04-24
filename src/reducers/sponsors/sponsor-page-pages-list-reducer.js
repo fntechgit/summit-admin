@@ -65,7 +65,7 @@ export const DEFAULT_STATE = {
     total: 0
   },
   term: "",
-  hideArchived: false,
+  showArchived: false,
   summitTZ: ""
 };
 
@@ -78,7 +78,7 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SPONSOR_MANAGED_PAGES: {
-      const { order, orderDir, page, perPage, term, summitTZ, hideArchived } =
+      const { order, orderDir, page, perPage, term, summitTZ, showArchived } =
         payload;
 
       return {
@@ -93,11 +93,11 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         },
         term,
         summitTZ,
-        hideArchived
+        showArchived
       };
     }
     case REQUEST_SPONSOR_CUSTOMIZED_PAGES: {
-      const { order, orderDir, page, perPage, term, summitTZ, hideArchived } =
+      const { order, orderDir, page, perPage, term, summitTZ, showArchived } =
         payload;
 
       return {
@@ -112,7 +112,7 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         },
         term,
         summitTZ,
-        hideArchived
+        showArchived
       };
     }
     case RECEIVE_SPONSOR_MANAGED_PAGES: {

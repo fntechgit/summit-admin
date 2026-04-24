@@ -165,7 +165,7 @@ const InventoryListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   totalInventoryItems,
   saveInventoryItem,
   deleteInventoryItemImage,
@@ -192,12 +192,12 @@ const InventoryListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   }, [getInventoryItems]);
 
   const handlePageChange = (page) => {
-    getInventoryItems(term, page, perPage, order, orderDir, hideArchived);
+    getInventoryItems(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
@@ -207,12 +207,12 @@ const InventoryListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
   const handleSort = (key, dir) => {
-    getInventoryItems(term, currentPage, perPage, key, dir, hideArchived);
+    getInventoryItems(term, currentPage, perPage, key, dir, showArchived);
   };
 
   const handleSearch = (ev) => {
@@ -223,12 +223,12 @@ const InventoryListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     }
   };
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getInventoryItems(
       term,
       DEFAULT_CURRENT_PAGE,
@@ -259,7 +259,7 @@ const InventoryListPage = ({
           perPage,
           order,
           orderDir,
-          hideArchived
+          showArchived
         )
       )
       .finally(() => setOpen(false));
@@ -345,15 +345,16 @@ const InventoryListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={handleHideArchivedForms}
+                  onChange={handleShowArchivedForms}
+                  checked={showArchived}
                   inputProps={{
                     "aria-label": T.translate(
-                      "inventory_item_list.hide_archived"
+                      "inventory_item_list.show_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("inventory_item_list.hide_archived")}
+              label={T.translate("inventory_item_list.show_archived")}
             />
           </FormGroup>
           <TextField
