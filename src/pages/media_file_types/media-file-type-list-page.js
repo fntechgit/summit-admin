@@ -85,13 +85,12 @@ const MediaFileTypeListPage = ({
     setOpen(false);
   };
 
-  const handleSave = (entity) => {
+  const handleSave = (entity) =>
     saveMediaFileType(entity)
       .then(() =>
         getMediaFileTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
       )
       .then(() => setOpen(false));
-  };
 
   const handleDelete = (mediaFileTypeId) => {
     deleteMediaFileType(mediaFileTypeId).then(() =>
@@ -184,7 +183,7 @@ const MediaFileTypeListPage = ({
           onEdit={handleRowEdit}
           onDelete={handleDelete}
           deleteDialogBody={(name) =>
-            T.translate("media_file_type.remove_warning", { name })
+            T.translate("media_file_type.delete_warning", { name })
           }
         />
       )}
