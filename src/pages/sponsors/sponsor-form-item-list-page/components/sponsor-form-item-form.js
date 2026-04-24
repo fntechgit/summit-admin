@@ -14,6 +14,7 @@ import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import { MuiFormikUpload } from "openstack-uicore-foundation/lib/components";
+import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
 import {
   addIssAfterDateFieldValidator,
   nullableDecimalValidation,
@@ -23,7 +24,6 @@ import {
   requiredStringValidation
 } from "../../../../utils/yup";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
-import AdditionalInputList from "../../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import useScrollToError from "../../../../hooks/useScrollToError";
 import ItemPriceTiers from "../../../../components/mui/formik-inputs/item-price-tiers";
 import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
