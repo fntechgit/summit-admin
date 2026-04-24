@@ -562,8 +562,9 @@ export const fetchSponsorUsersBySummit = async (
 };
 
 export const trackImportSponsorUsers = () => async (dispatch, getState) => {
-  const { sponsorUsersListState } = getState();
+  const { sponsorUsersListState, currentSponsorState } = getState();
   const { importTasks } = sponsorUsersListState;
+  const { entity: sponsor } = currentSponsorState;
 
   const accessToken = await getAccessTokenSafely();
   const params = {
@@ -593,6 +594,8 @@ export const trackImportSponsorUsers = () => async (dispatch, getState) => {
             })
           );
         }
+
+        dispatch(getSponsorUsers(sponsor.id));
       } else if (response.status === IMPORT_SPONSOR_USERS_STATUS.FAILURE) {
         dispatch(
           snackbarErrorMsg({
