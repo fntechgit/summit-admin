@@ -9,20 +9,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
+
+import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   REQUEST_TAGS,
   RECEIVE_TAGS,
   TAG_DELETED
 } from "../../actions/tag-actions";
 
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-
-import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
-
 const DEFAULT_STATE = {
-  tags: {},
+  tags: [],
   term: "",
   order: "id",
   orderDir: 1,
@@ -39,12 +38,12 @@ const tagListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_TAGS: {
-      let { order, orderDir, term, page } = payload;
-      return { ...state, order, orderDir, term, currentPage: page };
+      const { order, orderDir, term, page, perPage } = payload;
+      return { ...state, order, orderDir, term, currentPage: page, perPage };
     }
     case RECEIVE_TAGS: {
-      let { current_page, total, last_page } = payload.response;
-      let tags = payload.response.data.map((t) => ({
+      const { current_page, total, last_page } = payload.response;
+      const tags = payload.response.data.map((t) => ({
         ...t,
         created: epochToMoment(t.created).format("MMMM Do YYYY, h:mm:ss a"),
         updated: epochToMoment(t.last_edited).format("MMMM Do YYYY, h:mm:ss a")
@@ -52,14 +51,14 @@ const tagListReducer = (state = DEFAULT_STATE, action) => {
 
       return {
         ...state,
-        tags: tags,
+        tags,
         currentPage: current_page,
         totalTags: total,
         lastPage: last_page
       };
     }
     case TAG_DELETED: {
-      let { tagId } = payload;
+      const { tagId } = payload;
       return { ...state, tags: state.tags.filter((s) => s.id !== tagId) };
     }
     default:
