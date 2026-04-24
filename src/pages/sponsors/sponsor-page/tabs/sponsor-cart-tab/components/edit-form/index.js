@@ -20,9 +20,10 @@ import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import FormItemTable, {
+import {
+  MuiFormItemTable,
   getCurrentApplicableRate
-} from "openstack-uicore-foundation/lib/components/mui/form-item-table";
+} from "openstack-uicore-foundation/lib/components";
 import NotesModal from "openstack-uicore-foundation/lib/components/mui/notes-modal";
 import ItemSettingsModal from "openstack-uicore-foundation/lib/components/mui/item-settings-modal";
 import { DISCOUNT_TYPES } from "../../../../../../../utils/constants";
@@ -287,7 +288,7 @@ const EditForm = ({
       </Box>
       <FormikProvider value={formik}>
         <Box component="form" onSubmit={formik.handleSubmit} autoComplete="off">
-          <FormItemTable
+          <MuiFormItemTable
             data={form.items}
             currentApplicableRate={currentApplicableRate}
             values={formik.values}

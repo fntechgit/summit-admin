@@ -252,7 +252,8 @@ export const getSponsorCartForm =
     dispatch(startLoading());
 
     const params = {
-      access_token: accessToken
+      access_token: accessToken,
+      expand: "items,items.type,items.meta_fields"
     };
 
     return getRequest(
