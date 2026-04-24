@@ -15,50 +15,46 @@ jest.mock("../../../../../../../../actions/sponsor-cart-actions", () => ({
   updateCartForm: (...args) => mockUpdateCartForm(...args)
 }));
 
-// Mock foundation components used by EditForm
-
-// Mock history
-const mockHistoryPush = jest.fn();
-jest.mock("../../../../../../../../history", () => ({
-  __esModule: true,
-  default: { push: (...args) => mockHistoryPush(...args) }
-}));
-
-// Mock sub-components used by FormItemTable
-jest.mock(
-  "openstack-uicore-foundation/lib/components/mui/form-item-table",
-  () => {
-    const React = require("react");
-    return {
-      __esModule: true,
-      default: ({ data, onNotesClick, onSettingsClick }) => (
-        <div>
-          {data?.map((item) => (
-            <div key={item.form_item_id}>
-              <span>{item.name}</span>
-              <button
-                aria-label="edit"
-                onClick={() => onNotesClick(item)}
-                type="button"
-              >
-                edit
-              </button>
-              <button
-                aria-label="settings"
-                onClick={() => onSettingsClick(item)}
-                type="button"
-              >
-                settings
-              </button>
-            </div>
-          ))}
-        </div>
+// Mock the uicore component bundle — prevents setTexts() crash on module init
+jest.mock("openstack-uicore-foundation/lib/components", () => {
+  const React = require("react");
+  return {
+    __esModule: true,
+    MuiFormItemTable: ({ data, onNotesClick, onSettingsClick }) =>
+      React.createElement(
+        "div",
+        null,
+        (data || []).map((item) =>
+          React.createElement(
+            "div",
+            { key: item.form_item_id },
+            React.createElement("span", null, item.name),
+            React.createElement(
+              "button",
+              {
+                "aria-label": "edit",
+                onClick: () => onNotesClick && onNotesClick(item),
+                type: "button"
+              },
+              "edit"
+            ),
+            React.createElement(
+              "button",
+              {
+                "aria-label": "settings",
+                onClick: () => onSettingsClick && onSettingsClick(item),
+                type: "button"
+              },
+              "settings"
+            )
+          )
+        )
       ),
-      getCurrentApplicableRate: () => "standard"
-    };
-  }
-);
+    getCurrentApplicableRate: () => "standard"
+  };
+});
 
+// Mock sub-components used directly by index.js
 jest.mock("openstack-uicore-foundation/lib/components/mui/notes-modal", () => {
   const React = require("react");
   return {
@@ -84,6 +80,13 @@ jest.mock(
     };
   }
 );
+
+// Mock history
+const mockHistoryPush = jest.fn();
+jest.mock("../../../../../../../../history", () => ({
+  __esModule: true,
+  default: { push: (...args) => mockHistoryPush(...args) }
+}));
 
 // Avoid MUI ripple noise
 jest.mock("@mui/material/ButtonBase/TouchRipple", () => ({
