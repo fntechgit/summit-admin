@@ -21,15 +21,12 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
-  authErrorHandler,
   fetchResponseHandler,
   fetchErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import history from "../history";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,
@@ -87,9 +84,9 @@ export const getMediaFileTypes =
       createAction(REQUEST_MEDIA_FILE_TYPES),
       createAction(RECEIVE_MEDIA_FILE_TYPES),
       `${window.API_BASE_URL}/api/v1/summit-media-file-types`,
-      authErrorHandler,
-      { order, orderDir, term }
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler,
+      { order, orderDir, term, perPage }
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -109,9 +106,9 @@ export const getAllMediaFileTypes = () => async (dispatch) => {
     createAction(REQUEST_ALL_MEDIA_FILE_TYPES),
     createAction(RECEIVE_ALL_MEDIA_FILE_TYPES),
     `${window.API_BASE_URL}/api/v1/summit-media-file-types`,
-    authErrorHandler,
+    snackbarErrorHandler,
     {}
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -129,8 +126,8 @@ export const getMediaFileType = (mediaFileTypeId) => async (dispatch) => {
     null,
     createAction(RECEIVE_MEDIA_FILE_TYPE),
     `${window.API_BASE_URL}/api/v1/summit-media-file-types/${mediaFileTypeId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -139,52 +136,52 @@ export const resetMediaFileTypeForm = () => (dispatch) => {
   dispatch(createAction(RESET_MEDIA_FILE_TYPE_FORM)({}));
 };
 
-export const saveMediaFileType =
-  (entity, noAlert = false) =>
-  async (dispatch) => {
-    const accessToken = await getAccessTokenSafely();
+export const saveMediaFileType = (entity) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    dispatch(startLoading());
+  dispatch(startLoading());
 
-    const normalizedEntity = normalizeEntity(entity);
-    const params = { access_token: accessToken };
+  const normalizedEntity = normalizeEntity(entity);
+  const params = { access_token: accessToken };
 
-    if (entity.id) {
-      putRequest(
-        createAction(UPDATE_MEDIA_FILE_TYPE),
-        createAction(MEDIA_FILE_TYPE_UPDATED),
-        `${window.API_BASE_URL}/api/v1/summit-media-file-types/${entity.id}`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then(() => {
-        if (!noAlert)
-          dispatch(showSuccessMessage(T.translate("media_file_type.saved")));
-        else dispatch(stopLoading());
-      });
-    } else {
-      const success_message = {
-        title: T.translate("general.done"),
-        html: T.translate("media_file_type.created"),
-        type: "success"
-      };
-
-      postRequest(
-        createAction(UPDATE_MEDIA_FILE_TYPE),
-        createAction(MEDIA_FILE_TYPE_ADDED),
-        `${window.API_BASE_URL}/api/v1/summit-media-file-types`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
+  if (entity.id) {
+    return putRequest(
+      createAction(UPDATE_MEDIA_FILE_TYPE),
+      createAction(MEDIA_FILE_TYPE_UPDATED),
+      `${window.API_BASE_URL}/api/v1/summit-media-file-types/${entity.id}`,
+      normalizedEntity,
+      snackbarErrorHandler,
+      entity
+    )(params)(dispatch)
+      .then(() => {
         dispatch(
-          showMessage(success_message, () => {
-            history.push(`/app/media-file-types/${payload.response.id}`);
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("media_file_type.saved")
           })
         );
-      });
-    }
-  };
+      })
+      .finally(() => dispatch(stopLoading()));
+  }
+
+  return postRequest(
+    createAction(UPDATE_MEDIA_FILE_TYPE),
+    createAction(MEDIA_FILE_TYPE_ADDED),
+    `${window.API_BASE_URL}/api/v1/summit-media-file-types`,
+    normalizedEntity,
+    snackbarErrorHandler,
+    entity
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("media_file_type.created")
+        })
+      );
+    })
+    .finally(() => dispatch(stopLoading()));
+};
 
 export const deleteMediaFileType = (mediaFileTypeId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
@@ -198,8 +195,8 @@ export const deleteMediaFileType = (mediaFileTypeId) => async (dispatch) => {
     createAction(MEDIA_FILE_TYPE_DELETED)({ mediaFileTypeId }),
     `${window.API_BASE_URL}/api/v1/summit-media-file-types/${mediaFileTypeId}`,
     null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
