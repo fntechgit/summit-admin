@@ -226,7 +226,7 @@ export const getSpeakers =
       createAction(RECEIVE_SPEAKERS),
       `${window.API_BASE_URL}/api/v1/speakers`,
       authErrorHandler,
-      { order, orderDir, page, term }
+      { order, orderDir, page, term, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
