@@ -11,177 +11,208 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
-import { getSummitById } from "../../actions/summit-actions";
+import { Box, Button, Grid2 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getMediaFileTypes,
-  deleteMediaFileType
+  getMediaFileType,
+  saveMediaFileType,
+  deleteMediaFileType,
+  resetMediaFileTypeForm
 } from "../../actions/media-file-type-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import MediaFileTypeDialog from "./components/media-file-type-dialog";
 
-class MediaFileTypeListPage extends React.Component {
-  constructor(props) {
-    super(props);
+const MediaFileTypeListPage = ({
+  media_file_types,
+  currentMediaFileType,
+  term,
+  currentPage,
+  perPage,
+  order,
+  orderDir,
+  totalMediaFileTypes,
+  getMediaFileTypes,
+  getMediaFileType,
+  saveMediaFileType,
+  deleteMediaFileType,
+  resetMediaFileTypeForm
+}) => {
+  const [open, setOpen] = useState(false);
 
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleNewMediaFileType = this.handleNewMediaFileType.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
+  useEffect(() => {
+    getMediaFileTypes();
+  }, []);
 
-    this.state = {};
-  }
+  const handlePageChange = (page) => {
+    getMediaFileTypes(term, page, perPage, order, orderDir);
+  };
 
-  componentDidMount() {
-    this.props.getMediaFileTypes();
-  }
+  const handlePerPageChange = (newPerPage) => {
+    getMediaFileTypes(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+  };
 
-  handleEdit(media_file_type_id) {
-    const { history } = this.props;
-    history.push(`/app/media-file-types/${media_file_type_id}`);
-  }
+  const handleSort = (key, dir) => {
+    getMediaFileTypes(term, currentPage, perPage, key, dir);
+  };
 
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.getMediaFileTypes(term, page, perPage, order, orderDir);
-  }
-
-  handleSort(index, key, dir) {
-    const { term, page, perPage } = this.props;
-    this.props.getMediaFileTypes(term, page, perPage, key, dir);
-  }
-
-  handleSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
-    this.props.getMediaFileTypes(term, page, perPage, order, orderDir);
-  }
-
-  handleNewMediaFileType(ev) {
-    const { history } = this.props;
-    ev.preventDefault();
-
-    history.push("/app/media-file-types/new");
-  }
-
-  handleDelete(typeId) {
-    const { deleteMediaFileType, media_file_types } = this.props;
-    const media_file_type = media_file_types.find((t) => t.id === typeId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("media_file_type.delete_warning")} ${
-        media_file_type.name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteMediaFileType(accessId);
-      }
-    });
-  }
-
-  canEdit = (item) => !item.is_system_defined;
-
-  render() {
-    const { media_file_types, lastPage, currentPage, term, order, orderDir } =
-      this.props;
-
-    const columns = [
-      { columnKey: "id", value: T.translate("general.id"), sortable: true },
-      {
-        columnKey: "name",
-        value: T.translate("media_file_type.name"),
-        sortable: true
-      },
-      {
-        columnKey: "description",
-        value: T.translate("media_file_type.description")
-      },
-      {
-        columnKey: "allowed_extensions",
-        value: T.translate("media_file_type.allowed_extensions")
-      }
-    ];
-
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete, display: this.canEdit }
-      }
-    };
-
-    return (
-      <div className="container">
-        <h3> {T.translate("media_file_type.media_file_type_list")}</h3>
-        <div className="row">
-          <div className="col-md-6">
-            <FreeTextSearch
-              value={term}
-              placeholder={T.translate("media_file_type.placeholders.search")}
-              onSearch={this.handleSearch}
-            />
-          </div>
-          <div className="col-md-6 text-right">
-            <button
-              className="btn btn-primary right-space"
-              onClick={this.handleNewMediaFileType}
-            >
-              {T.translate("media_file_type.add")}
-            </button>
-          </div>
-        </div>
-
-        {media_file_types.length === 0 && (
-          <div>{T.translate("media_file_type.no_results")}</div>
-        )}
-
-        {media_file_types.length > 0 && (
-          <div>
-            <Table
-              options={table_options}
-              data={media_file_types}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </div>
-        )}
-      </div>
+  const handleSearch = (searchTerm) => {
+    getMediaFileTypes(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
     );
-  }
-}
+  };
 
-const mapStateToProps = ({ mediaFileTypeListState }) => ({
-  ...mediaFileTypeListState
+  const handleRowEdit = (row) => {
+    getMediaFileType(row.id).then(() => setOpen(true));
+  };
+
+  const handleNew = () => {
+    resetMediaFileTypeForm();
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    resetMediaFileTypeForm();
+    setOpen(false);
+  };
+
+  const handleSave = (entity) => {
+    saveMediaFileType(entity)
+      .then(() =>
+        getMediaFileTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+      )
+      .then(() => setOpen(false));
+  };
+
+  const handleDelete = (mediaFileTypeId) => {
+    deleteMediaFileType(mediaFileTypeId).then(() =>
+      getMediaFileTypes(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
+  };
+
+  const columns = [
+    {
+      columnKey: "id",
+      header: T.translate("media_file_type.id"),
+      sortable: true
+    },
+    {
+      columnKey: "name",
+      header: T.translate("media_file_type.name"),
+      sortable: true
+    },
+    {
+      columnKey: "description",
+      header: T.translate("media_file_type.description")
+    },
+    {
+      columnKey: "allowed_extensions",
+      header: T.translate("media_file_type.allowed_extensions"),
+      render: (row) => row.allowed_extensions.join(", ")
+    }
+  ];
+
+  const tableOptions = { sortCol: order, sortDir: orderDir };
+
+  return (
+    <div className="container">
+      <h3>{T.translate("media_file_type.media_file_type_list")}</h3>
+      <Grid2
+        container
+        spacing={1}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={2}>
+          <Box component="span">
+            {totalMediaFileTypes}{" "}
+            {T.translate("media_file_type.media_file_types")}
+          </Box>
+        </Grid2>
+        <Grid2
+          container
+          size={10}
+          gap={1}
+          sx={{
+            justifyContent: "flex-end",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={4}>
+            <SearchInput term={term} onSearch={handleSearch} />
+          </Grid2>
+          <Button
+            variant="contained"
+            onClick={handleNew}
+            startIcon={<AddIcon />}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
+          >
+            {T.translate("media_file_type.add")}
+          </Button>
+        </Grid2>
+      </Grid2>
+
+      {media_file_types.length > 0 && (
+        <MuiTable
+          columns={columns}
+          data={media_file_types}
+          options={tableOptions}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalMediaFileTypes}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onEdit={handleRowEdit}
+          onDelete={handleDelete}
+          deleteDialogBody={(name) =>
+            T.translate("media_file_type.remove_warning", { name })
+          }
+        />
+      )}
+
+      {media_file_types.length === 0 && (
+        <div>{T.translate("media_file_type.no_results")}</div>
+      )}
+
+      {open && (
+        <MediaFileTypeDialog
+          entity={currentMediaFileType}
+          onSave={handleSave}
+          onClose={handleClose}
+        />
+      )}
+    </div>
+  );
+};
+
+const mapStateToProps = ({ mediaFileTypeListState, mediaFileTypeState }) => ({
+  ...mediaFileTypeListState,
+  currentMediaFileType: mediaFileTypeState.entity
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getMediaFileTypes,
-  deleteMediaFileType
+  getMediaFileType,
+  saveMediaFileType,
+  deleteMediaFileType,
+  resetMediaFileTypeForm
 })(MediaFileTypeListPage);

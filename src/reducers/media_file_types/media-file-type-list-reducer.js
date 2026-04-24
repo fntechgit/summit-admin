@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_MEDIA_FILE_TYPES,
@@ -17,16 +19,15 @@ import {
   MEDIA_FILE_TYPE_DELETED
 } from "../../actions/media-file-type-actions";
 
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-
 const DEFAULT_STATE = {
   media_file_types: [],
-  term: null,
+  term: "",
   order: "id",
   orderDir: 1,
   currentPage: 1,
   lastPage: 1,
-  perPage: 10
+  perPage: 10,
+  totalMediaFileTypes: 0
 };
 
 const mediaFileTypeListReducer = (state = DEFAULT_STATE, action) => {
@@ -36,30 +37,29 @@ const mediaFileTypeListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_MEDIA_FILE_TYPES: {
-      let { order, orderDir, term } = payload;
+      const { order, orderDir, term, perPage } = payload;
 
-      return { ...state, order, orderDir, term };
+      return { ...state, order, orderDir, term, perPage };
     }
     case RECEIVE_MEDIA_FILE_TYPES: {
-      let { total, last_page, current_page } = payload.response;
-      let media_file_types = payload.response.data.map((mft) => {
-        return {
-          id: mft.id,
-          name: mft.name,
-          description: mft.description,
-          allowed_extensions: mft.allowed_extensions
-        };
-      });
+      const { total, last_page, current_page } = payload.response;
+      const media_file_types = payload.response.data.map((mft) => ({
+        id: mft.id,
+        name: mft.name,
+        description: mft.description,
+        allowed_extensions: mft.allowed_extensions
+      }));
 
       return {
         ...state,
-        media_file_types: media_file_types,
+        media_file_types,
         currentPage: current_page,
-        lastPage: last_page
+        lastPage: last_page,
+        totalMediaFileTypes: total
       };
     }
     case MEDIA_FILE_TYPE_DELETED: {
-      let { mediaFileTypeId } = payload;
+      const { mediaFileTypeId } = payload;
       return {
         ...state,
         media_file_types: state.media_file_types.filter(
