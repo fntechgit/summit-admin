@@ -85,17 +85,8 @@ const SummitSpeakerListPage = ({
 
   const table_options = {
     sortCol: order === "last_name" ? "name" : order,
-    sortDir: orderDir,
-    actions: {}
+    sortDir: orderDir
   };
-
-  if (memberObj.canDeleteSpeakers()) {
-    table_options.actions.delete = { onClick: handleDelete };
-  }
-
-  if (memberObj.canEditSpeakers()) {
-    table_options.actions.edit = { onClick: handleEdit };
-  }
 
   return (
     <div className="container">
@@ -160,8 +151,8 @@ const SummitSpeakerListPage = ({
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}
           onSort={handleSort}
-          onDelete={handleDelete}
-          onEdit={handleEdit}
+          onDelete={memberObj.canDeleteSpeakers() ? handleDelete : null}
+          onEdit={memberObj.canEditSpeakers() ? handleEdit : null}
           deleteDialogBody={(name) =>
             T.translate("speaker_list.delete_speaker_warning", { name })
           }
