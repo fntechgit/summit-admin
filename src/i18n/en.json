@@ -300,7 +300,12 @@
     "summits": "Events",
     "add_summit": "Add Event",
     "remove_warning": "Are you sure you want to delete event",
-    "invitation_only": "Invitation Only"
+    "error_loading": "Error loading directory.",
+    "invitation_only": "Invitation Only",
+    "id": "ID",
+    "summit_name": "Event Name",
+    "start_date": "Start Date",
+    "end_date": "End Date"
   },
   "dashboard": {
     "dashboard": "Dashboard",
