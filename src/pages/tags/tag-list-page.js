@@ -1,157 +1,276 @@
-/**
- * Copyright 2017 OpenStack Foundation
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
-
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
 import {
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
-import { getTags, deleteTag } from "../../actions/tag-actions";
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid2,
+  IconButton,
+  TextField,
+  Typography,
+  Snackbar,
+  Alert
+} from "@mui/material";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  getTags,
+  deleteTag,
+  saveTag,
+  resetTagForm
+} from "../../actions/tag-actions";
+import { DEFAULT_PER_PAGE } from "../../utils/constants";
 
-class TagListPage extends React.Component {
-  constructor(props) {
-    super(props);
+const TagDialog = ({ open, onClose, onSave, initialData }) => {
+  const [tag, setTag] = useState(initialData?.tag || "");
+  const [error, setError] = useState("");
 
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleNewTag = this.handleNewTag.bind(this);
+  useEffect(() => {
+    setTag(initialData?.tag || "");
+    setError("");
+  }, [initialData, open]);
 
-    this.state = {};
-  }
+  const handleSave = () => {
+    if (!tag.trim()) {
+      setError(T.translate("edit_tag.name_required"));
+      return;
+    }
+    onSave({ ...initialData, tag });
+  };
 
-  componentDidMount() {
-    const { term } = this.props;
-    this.props.getTags(term);
-  }
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>
+        {initialData?.id
+          ? T.translate("edit_tag.edit_tag")
+          : T.translate("edit_tag.add_tag")}
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <Divider />
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          label={T.translate("edit_tag.name")}
+          type="text"
+          fullWidth
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+          error={!!error}
+          helperText={error}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{T.translate("general.cancel")}</Button>
+        <Button onClick={handleSave} variant="contained">
+          {T.translate("general.save")}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
-  handleEdit(tag_id) {
-    const { history } = this.props;
-    history.push(`/app/tags/${tag_id}`);
-  }
+const TagListPage = ({
+  tags = [],
+  currentPage = 1,
+  perPage = DEFAULT_PER_PAGE,
+  term = "",
+  order = "id",
+  orderDir = 1,
+  totalTags = 0,
+  getTags,
+  deleteTag,
+  saveTag,
+  resetTagForm
+}) => {
+  const [search, setSearch] = useState(term);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success"
+  });
+  const [deleteId, setDeleteId] = useState(null);
 
-  handleDelete(tagId) {
-    const { deleteTag, tags } = this.props;
-    let tag = tags.find((s) => s.id === tagId);
+  useEffect(() => {
+    getTags(term, currentPage, perPage, order, orderDir);
+    // eslint-disable-next-line
+  }, [currentPage, perPage, order, orderDir]);
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: T.translate("tag_list.delete_tag_warning") + " " + tag.tag,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
-      if (result.value) {
-        deleteTag(tagId);
-      }
-    });
-  }
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      getTags(search, 1, perPage, order, orderDir);
+    }
+  };
 
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.getTags(term, page, perPage, order, orderDir);
-  }
+  const handleOpenDialog = (tag = null) => {
+    setEditData(tag || {});
+    setDialogOpen(true);
+  };
 
-  handleSort(index, key, dir, func) {
-    const { term, page, perPage } = this.props;
-    this.props.getTags(term, page, perPage, key, dir);
-  }
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setEditData(null);
+    resetTagForm();
+  };
 
-  handleSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
-    this.props.getTags(term, page, perPage, order, orderDir);
-  }
+  const handleSaveTag = (entity) => {
+    saveTag(entity)
+      .then(() => {
+        setSnackbar({
+          open: true,
+          message: T.translate("edit_tag.tag_saved"),
+          severity: "success"
+        });
+        handleCloseDialog();
+        getTags(search, currentPage, perPage, order, orderDir);
+      })
+      .catch(() => {
+        setSnackbar({
+          open: true,
+          message: T.translate("edit_tag.save_error"),
+          severity: "error"
+        });
+      });
+  };
 
-  handleNewTag(ev) {
-    const { history } = this.props;
-    history.push(`/app/tags/new`);
-  }
+  const handleDeleteTag = (id) => {
+    deleteTag(id)
+      .then(() => {
+        setSnackbar({
+          open: true,
+          message: T.translate("edit_tag.tag_deleted"),
+          severity: "success"
+        });
+        getTags(search, currentPage, perPage, order, orderDir);
+      })
+      .catch(() => {
+        setSnackbar({
+          open: true,
+          message: T.translate("edit_tag.delete_error"),
+          severity: "error"
+        });
+      });
+    setDeleteId(null);
+  };
 
-  render() {
-    const { tags, lastPage, currentPage, term, order, orderDir, totalTags } =
-      this.props;
+  return (
+    <Box className="container" sx={{ mt: 3 }}>
+      <h3>
+        {T.translate("tag_list.tag_list")} ({totalTags})
+      </h3>
+      <Grid2 container spacing={2} alignItems="center" sx={{ mb: 2 }}>
+        <Grid2 xs={12} sm={6}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder={T.translate("tag_list.placeholders.search_tags")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            size="small"
+          />
+        </Grid2>
+        <Grid2 xs={12} sm={6} sx={{ textAlign: { xs: "left", sm: "right" } }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenDialog()}
+            sx={{ minWidth: 120 }}
+          >
+            {T.translate("tag_list.add_tag")}
+          </Button>
+        </Grid2>
+      </Grid2>
 
-    const columns = [
-      { columnKey: "id", value: "Id", sortable: true },
-      { columnKey: "tag", value: T.translate("general.name"), sortable: true },
-      { columnKey: "created", value: T.translate("tag_list.created") },
-      { columnKey: "updated", value: T.translate("tag_list.updated") }
-    ];
+      <MuiTable
+        columns={[
+          {
+            columnKey: "id",
+            header: "ID",
+            sortable: true,
+            width: 80
+          },
+          {
+            columnKey: "tag",
+            header: T.translate("general.name"),
+            sortable: true
+          },
+          {
+            columnKey: "created",
+            header: T.translate("tag_list.created")
+          },
+          {
+            columnKey: "updated",
+            header: T.translate("tag_list.updated")
+          }
+        ]}
+        data={tags}
+        totalRows={totalTags}
+        perPage={perPage}
+        currentPage={currentPage}
+        onPageChange={(page) => getTags(search, page, perPage, order, orderDir)}
+        onPerPageChange={(newPerPage) =>
+          getTags(search, 1, newPerPage, order, orderDir)
+        }
+        onSort={(col, dir) => getTags(search, 1, perPage, col, dir)}
+        options={{ sortCol: order, sortDir: orderDir }}
+        onEdit={(row) => handleOpenDialog(row)}
+        onDelete={(row) => setDeleteId(row.id)}
+      />
 
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
+      <TagDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        onSave={handleSaveTag}
+        initialData={editData}
+      />
 
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("tag_list.tag_list")} ({totalTags}){" "}
-        </h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
-            <FreeTextSearch
-              value={term}
-              placeholder={T.translate("tag_list.placeholders.search_tags")}
-              onSearch={this.handleSearch}
-            />
-          </div>
-          <div className="col-md-6 text-right">
-            <button className="btn btn-primary" onClick={this.handleNewTag}>
-              {T.translate("tag_list.add_tag")}
-            </button>
-          </div>
-        </div>
+      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
+        <DialogTitle>{T.translate("general.are_you_sure")}</DialogTitle>
+        <DialogContent>
+          <Typography>{T.translate("tag_list.delete_tag_warning")}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteId(null)}>
+            {T.translate("general.cancel")}
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => handleDeleteTag(deleteId)}
+          >
+            {T.translate("general.delete")}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        {tags.length > 0 && (
-          <div>
-            <Table
-              options={table_options}
-              data={tags}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
+  );
+};
 
 const mapStateToProps = ({ currentTagListState }) => ({
   ...currentTagListState
@@ -159,5 +278,7 @@ const mapStateToProps = ({ currentTagListState }) => ({
 
 export default connect(mapStateToProps, {
   getTags,
-  deleteTag
+  deleteTag,
+  saveTag,
+  resetTagForm
 })(TagListPage);
