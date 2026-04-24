@@ -71,7 +71,7 @@ describe("showPagesListReducer", () => {
           orderDir: -1,
           page: 2,
           perPage: 25,
-          hideArchived: true,
+          showArchived: false,
           summitTZ: "America/New_York"
         }
       });
@@ -82,7 +82,7 @@ describe("showPagesListReducer", () => {
       expect(result.orderDir).toBe(-1);
       expect(result.currentPage).toBe(2);
       expect(result.perPage).toBe(25);
-      expect(result.hideArchived).toBe(true);
+      expect(result.showArchived).toBe(false);
       expect(result.summitTZ).toBe("America/New_York");
     });
   });

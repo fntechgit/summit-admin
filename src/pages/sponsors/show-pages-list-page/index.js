@@ -112,7 +112,7 @@ const ShowPagesListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
