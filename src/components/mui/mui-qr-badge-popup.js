@@ -38,7 +38,7 @@ import MuiFormikTextField from "./formik-inputs/mui-formik-textfield";
 import QrReader from "../qr-reader";
 import { getTypeValue, toSlug } from "../../utils/extra-questions";
 import MuiFormikAsyncAutocomplete from "./formik-inputs/mui-formik-async-select";
-import { queryAttendees } from "../../actions/attendee-actions";
+import { queryAttendeesWithTickets } from "../../actions/attendee-actions";
 
 const buildInitialValues = (extraQuestions) => {
   const values = { notes: "", attendee_email: "" };
@@ -189,7 +189,7 @@ const MuiQrBadgePopup = ({
                   placeholder={T.translate(
                     "sponsor_badge_scans.scan_popup.attendee_placeholder"
                   )}
-                  queryFunction={queryAttendees}
+                  queryFunction={queryAttendeesWithTickets}
                   queryParams={[summitId]}
                   formatOption={(attendee) => ({
                     value: attendee.email.toString(),

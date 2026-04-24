@@ -109,7 +109,7 @@ const SponsorBadgeScans = ({
     setShowManualBadgeScanPopup(true);
   };
 
-  const handleManualScanSubmit = (entity) => {
+  const handleManualScanSubmit = (entity) =>
     addBadgeScan(entity).then(() => {
       setShowManualBadgeScanPopup(false);
       return getBadgeScans(
@@ -121,7 +121,6 @@ const SponsorBadgeScans = ({
         orderDir
       );
     });
-  };
 
   const handleExportBadgeScans = () => {
     exportBadgeScans(sponsor);
