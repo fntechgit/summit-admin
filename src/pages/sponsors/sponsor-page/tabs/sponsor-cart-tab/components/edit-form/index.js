@@ -277,6 +277,10 @@ const EditForm = ({
   // wait for formik to re-initialize with form items
   if (!form || Object.keys(formik.values).length === 0) return null;
 
+  const hasItemFieldErrors = Object.keys(formik.errors).some(
+    (key) => key.includes("-c-Item-") && formik.touched[key]
+  );
+
   return (
     <>
       <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
@@ -319,6 +323,18 @@ const EditForm = ({
               {T.translate("general.save")}
             </Button>
           </Box>
+          {hasItemFieldErrors && (
+            <Box component="div" sx={{ mt: 1 }}>
+              <Typography
+                variant="caption"
+                color="error"
+                display="block"
+                sx={{ mt: 0.25, textAlign: "right" }}
+              >
+                {T.translate("validation.additional_items")}
+              </Typography>
+            </Box>
+          )}
         </Box>
         <NotesModal
           item={notesItem}

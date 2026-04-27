@@ -446,6 +446,60 @@ describe("EditCartForm", () => {
     });
   });
 
+  describe("Item Field Error Message", () => {
+    test("shows error message below Save when a required Item field is empty after submit", async () => {
+      const formWithRequiredItemField = {
+        ...mockCartForm,
+        items: [
+          {
+            ...mockCartForm.items[0],
+            meta_fields: [
+              {
+                type_id: 2,
+                type: "Text",
+                class_field: "Item",
+                current_value: "",
+                is_required: true
+              }
+            ]
+          }
+        ]
+      };
+
+      renderWithStore({}, { cartForm: formWithRequiredItemField });
+
+      await waitFor(() => {
+        expect(screen.getByText(/general.save/)).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByText(/general.save/));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("validation.additional_items")
+        ).toBeInTheDocument();
+      });
+    });
+
+    test("does not show error message when no Item fields have validation errors", async () => {
+      renderWithStore();
+
+      await waitFor(() => {
+        expect(screen.getByText(/general.save/)).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByText(/general.save/));
+
+      await waitFor(() => {
+        expect(mockUpdateCartForm).toHaveBeenCalled();
+      });
+
+      expect(
+        screen.queryByText("validation.additional_items")
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe("Edge Cases", () => {
     test("handles empty items array", async () => {
       const emptyForm = {
