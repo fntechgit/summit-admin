@@ -20,6 +20,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
+  getSponsor,
   getBadgeScans,
   exportBadgeScans,
   getBadgeScan,
@@ -42,6 +43,7 @@ const SponsorBadgeScans = ({
   orderDir,
   currentPage,
   perPage,
+  getSponsor,
   getBadgeScans,
   exportBadgeScans,
   getBadgeScan,
@@ -50,8 +52,10 @@ const SponsorBadgeScans = ({
   currentBadgeScan
 }) => {
   useEffect(() => {
-    if (sponsor?.id) getBadgeScans(sponsor.id);
-  }, [sponsor]);
+    if (sponsor?.id) {
+      getSponsor(sponsor.id).then(() => getBadgeScans(sponsor.id));
+    }
+  }, [sponsor.id]);
 
   const memberObj = new Member(member);
   const isAdmin = memberObj.hasAccess("admin-sponsors");
@@ -287,6 +291,7 @@ const mapStateToProps = ({
 });
 
 export default connect(mapStateToProps, {
+  getSponsor,
   getBadgeScans,
   exportBadgeScans,
   getBadgeScan,

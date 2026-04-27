@@ -34,6 +34,7 @@ import {
   deleteSponsorExtraQuestionValue,
   updateSponsorExtraQuestionValueOrder
 } from "../../../../../actions/sponsor-actions";
+import { ExtraQuestionsTypeAllowSubQuestion } from "../../../../../utils/constants";
 
 const AddSponsorExtraQuestionPopup = ({
   entity: extraQuestion,
@@ -67,15 +68,23 @@ const AddSponsorExtraQuestionPopup = ({
       mandatory: yup.boolean(),
       placeholder: yup.string(),
       max_selected_values: yup.number(),
-      values: yup.array().of(
-        yup.object().shape({
-          value: yup.string().required(T.translate("validation.required")),
-          label: yup.string().required(T.translate("validation.required")),
-          is_default: yup.boolean(),
-          order: yup.number(),
-          _shouldSave: yup.boolean()
+      values: yup
+        .array()
+        .when("type", {
+          is: (type) => ExtraQuestionsTypeAllowSubQuestion.includes(type),
+          then: (schema) =>
+            schema.min(1, T.translate("validation.extra_question_value")),
+          otherwise: (schema) => schema
         })
-      )
+        .of(
+          yup.object().shape({
+            value: yup.string().required(T.translate("validation.required")),
+            label: yup.string().required(T.translate("validation.required")),
+            is_default: yup.boolean(),
+            order: yup.number(),
+            _shouldSave: yup.boolean()
+          })
+        )
     }),
     onSubmit: (values) => {
       const valuesToSave = values.values
@@ -183,7 +192,7 @@ const AddSponsorExtraQuestionPopup = ({
   };
 
   const areExtraQuestionsIncomplete = () => {
-    if (formik.errors.values) return true;
+    if (Array.isArray(formik.errors.values)) return true;
     return formik.values.values.some(
       (eq) => eq.name?.trim() === "" || eq.label?.trim() === ""
     );
@@ -484,6 +493,16 @@ const AddSponsorExtraQuestionPopup = ({
                       >
                         {T.translate("edit_sponsor.add_value")}
                       </Button>
+                      {typeof formik.errors.values === "string" &&
+                        formik.submitCount > 0 && (
+                          <Typography
+                            color="error"
+                            fontSize="1.2rem"
+                            sx={{ mt: 0.5, ml: 2 }}
+                          >
+                            {formik.errors.values}
+                          </Typography>
+                        )}
                     </>
                   )}
                 </FieldArray>
