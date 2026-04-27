@@ -2876,7 +2876,9 @@
       "select_users": "Select Users",
       "select_all_users": "Select All Users",
       "import_users": "Import Users",
-      "success": "Users imported successfully."
+      "running": "Users import running on background.",
+      "success": "Users imported successfully.",
+      "fail": "Import failed"
     }
   },
   "sponsorship_list": {

@@ -35,18 +35,22 @@ const ImportUsersPopup = ({
 
   useEffect(() => {
     if (selectedSummit) {
-      fetchSponsorUsersBySummit(selectedSummit, companyId, 1).then(
-        (userData) => {
-          setUserOptions(userData);
-          setSelectedUsers([]);
-        }
-      );
+      fetchSponsorUsersBySummit(
+        currentSummit.id,
+        selectedSummit,
+        companyId,
+        1
+      ).then((userData) => {
+        setUserOptions(userData);
+        setSelectedUsers([]);
+      });
     }
   }, [selectedSummit]);
 
   const handleLoadMoreUsers = () => {
     if (userOptions.current_page < userOptions.last_page) {
       fetchSponsorUsersBySummit(
+        currentSummit.id,
         selectedSummit,
         companyId,
         userOptions.current_page + 1
