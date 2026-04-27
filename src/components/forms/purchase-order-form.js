@@ -38,7 +38,7 @@ import CopyClipboard from "../buttons/copy-clipboard";
 class PurchaseOrderForm extends React.Component {
   constructor(props) {
     super(props);
-    const query = URI.parseQuery(location.search);
+    const query = URI.parseQuery(props.location?.search || "");
 
     this.state = {
       entity: { ...props.entity },
