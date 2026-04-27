@@ -23,6 +23,7 @@ import {
 } from "openstack-uicore-foundation/lib/components";
 import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { Pagination } from "react-bootstrap";
+import URI from "urijs";
 import OwnerInput from "../inputs/owner-input";
 import {
   hasErrors,
@@ -37,11 +38,12 @@ import CopyClipboard from "../buttons/copy-clipboard";
 class PurchaseOrderForm extends React.Component {
   constructor(props) {
     super(props);
+    const query = URI.parseQuery(location.search);
 
     this.state = {
       entity: { ...props.entity },
       errors: props.errors,
-      showSection: "billing",
+      showSection: query?.section === "tickets" ? "tickets" : "billing",
       addTicketTypeId: null,
       addTicketQty: 0,
       addPromoCode: null
