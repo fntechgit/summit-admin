@@ -1,3 +1,16 @@
+/**
+ * Copyright 2017 OpenStack Foundation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * */
+
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
@@ -12,7 +25,6 @@ import {
   Grid2,
   IconButton,
   TextField,
-  Typography,
   Snackbar,
   Alert
 } from "@mui/material";
@@ -48,8 +60,8 @@ const TagDialog = ({ open, onClose, onSave, initialData }) => {
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>
         {initialData?.id
-          ? T.translate("edit_tag.edit_tag")
-          : T.translate("edit_tag.add_tag")}
+          ? `${T.translate("general.edit")  } ${  T.translate("edit_tag.tag")}`
+          : `${T.translate("general.add")  } ${  T.translate("edit_tag.tag")}`}
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -103,7 +115,6 @@ const TagListPage = ({
     message: "",
     severity: "success"
   });
-  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     getTags(term, currentPage, perPage, order, orderDir);
@@ -164,27 +175,36 @@ const TagListPage = ({
           severity: "error"
         });
       });
-    setDeleteId(null);
   };
 
   return (
-    <Box className="container" sx={{ mt: 3 }}>
-      <h3>
-        {T.translate("tag_list.tag_list")} ({totalTags})
-      </h3>
-      <Grid2 container spacing={2} alignItems="center" sx={{ mb: 2 }}>
-        <Grid2 xs={12} sm={6}>
+    <Box className="container">
+      <h3>{T.translate("tag_list.tag_list")}</h3>
+
+      <Grid2
+        container
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: 2, width: "100%" }}
+      >
+        <Grid2 md={2} sx={{ display: "flex", alignItems: "center" }}>
+          <Box component="span">{totalTags} items</Box>
+        </Grid2>
+        <Grid2
+          container
+          md={10}
+          spacing={1}
+          gap={1}
+          sx={{ justifyContent: "flex-end", alignItems: "center" }}
+        >
           <TextField
-            fullWidth
             variant="outlined"
-            placeholder={T.translate("tag_list.placeholders.search_tags")}
             value={search}
+            placeholder={T.translate("tag_list.placeholders.search_tags")}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearchKeyDown}
             size="small"
           />
-        </Grid2>
-        <Grid2 xs={12} sm={6} sx={{ textAlign: { xs: "left", sm: "right" } }}>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -229,7 +249,14 @@ const TagListPage = ({
         onSort={(col, dir) => getTags(search, 1, perPage, col, dir)}
         options={{ sortCol: order, sortDir: orderDir }}
         onEdit={(row) => handleOpenDialog(row)}
-        onDelete={(row) => setDeleteId(row.id)}
+        onDelete={(row) => handleDeleteTag(row.id)}
+        deleteConfirmTitle={T.translate("general.are_you_sure")}
+        deleteDialogBody={(row) =>
+          row?.tag
+            ? `${T.translate("tag_list.delete_tag_warning")} "${row.tag}"?`
+            : T.translate("tag_list.delete_tag_warning")
+        }
+        confirmButtonColor="error"
       />
 
       <TagDialog
@@ -238,25 +265,6 @@ const TagListPage = ({
         onSave={handleSaveTag}
         initialData={editData}
       />
-
-      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
-        <DialogTitle>{T.translate("general.are_you_sure")}</DialogTitle>
-        <DialogContent>
-          <Typography>{T.translate("tag_list.delete_tag_warning")}</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteId(null)}>
-            {T.translate("general.cancel")}
-          </Button>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={() => handleDeleteTag(deleteId)}
-          >
-            {T.translate("general.delete")}
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Snackbar
         open={snackbar.open}
