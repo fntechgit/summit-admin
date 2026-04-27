@@ -164,19 +164,20 @@ const RoomBookingForm = ({
     currentSummit
   ).map((v) => ({ value: v.epoch, label: v.str }));
 
-  const available_slots_ddl = availableSlots?.map((as) => ({
-    value: as.start_date,
-    label: `${epochToMomentTimeZone(
-      as.start_date,
-      currentSummit.time_zone_id
-    ).format("h:mm a")} - 
+  const available_slots_ddl =
+    availableSlots?.map((as) => ({
+      value: as.start_date,
+      label: `${epochToMomentTimeZone(
+        as.start_date,
+        currentSummit.time_zone_id
+      ).format("h:mm a")} - 
                     ${epochToMomentTimeZone(
                       as.end_date,
                       currentSummit.time_zone_id
                     ).format("h:mm a")}
                     ${as.is_free ? "" : " - Booked"}`,
-    isDisabled: !as.is_free
-  }));
+      isDisabled: !as.is_free
+    })) || [];
 
   return (
     <form className="room-booking-form">
