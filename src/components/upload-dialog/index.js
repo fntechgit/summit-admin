@@ -23,7 +23,7 @@ import {
   Typography
 } from "@mui/material";
 import PropTypes from "prop-types";
-import UploadInputV2 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v2";
+import { UploadInputV3 } from "openstack-uicore-foundation/lib/components";
 import T from "i18n-react/dist/i18n-react";
 import CloseIcon from "@mui/icons-material/Close";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
@@ -138,11 +138,11 @@ const UploadDialog = ({
             <CurrentFile file={value} onRemove={handleRemove} />
           </>
         ) : (
-          <UploadInputV2
+          <UploadInputV3
             id={`media_upload_${name}`}
             name={name}
             onUploadComplete={setUploadedFile}
-            value={[]} // we handle with-value view in other way
+            value={[]}
             mediaType={mediaType}
             onRemove={() => setUploadedFile(null)}
             postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}

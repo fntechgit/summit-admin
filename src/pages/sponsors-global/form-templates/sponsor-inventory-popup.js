@@ -18,8 +18,8 @@ import {
   FormHelperText
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { UploadInputV2 } from "openstack-uicore-foundation/lib/components";
 import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
+import { MuiFormikUpload } from "openstack-uicore-foundation/lib/components";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,
@@ -37,12 +37,10 @@ import {
 } from "../../../utils/yup";
 import ItemPriceTiers from "../../../components/mui/formik-inputs/item-price-tiers";
 import MuiFormikQuantityField from "../../../components/mui/formik-inputs/mui-formik-quantity-field";
-import { getMediaInputValue } from "../../../utils/methods";
 
 const SponsorItemDialog = ({
   onClose,
   onSave,
-  onImageDeleted,
   onMetaFieldTypeDeleted,
   onMetaFieldTypeValueDeleted,
   entity: initialEntity
@@ -80,27 +78,6 @@ const SponsorItemDialog = ({
   };
 
   useScrollToError(formik);
-
-  const handleImageUploadComplete = (response) => {
-    if (response) {
-      const image = {
-        file_path: `${response.path}${response.name}`,
-        filename: response.name
-      };
-      formik.setFieldValue("images", [...formik.values.images, image]);
-      formik.setFieldTouched("images", true);
-    }
-  };
-
-  const handleRemoveImage = (imageFile) => {
-    const updated = formik.values.images.filter(
-      (i) => i.filename !== imageFile.name
-    );
-    formik.setFieldValue("images", updated);
-    if (onImageDeleted && initialEntity.id && imageFile.id) {
-      onImageDeleted(initialEntity.id, imageFile.id);
-    }
-  };
 
   const handleClose = () => {
     formik.resetForm();
@@ -240,22 +217,10 @@ const SponsorItemDialog = ({
                 {formik.touched.images && formik.errors.images && (
                   <FormHelperText error>{formik.errors.images}</FormHelperText>
                 )}
-                <UploadInputV2
+                <MuiFormikUpload
                   id="image-upload"
-                  name="image"
-                  onUploadComplete={handleImageUploadComplete}
-                  value={getMediaInputValue(initialEntity)}
-                  mediaType={mediaType}
-                  onRemove={handleRemoveImage}
-                  postUrl={`${window.FILE_UPLOAD_API_BASE_URL}/api/v1/files/upload`}
-                  djsConfig={{ withCredentials: true }}
+                  name="images"
                   maxFiles={mediaType.max_uploads_qty}
-                  canAdd={
-                    mediaType.is_editable ||
-                    (initialEntity.images?.length || 0) <
-                      mediaType.max_uploads_qty
-                  }
-                  parallelChunkUploads
                 />
               </Grid2>
             </Grid2>
@@ -275,6 +240,8 @@ const SponsorItemDialog = ({
 SponsorItemDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  onMetaFieldTypeDeleted: PropTypes.func,
+  onMetaFieldTypeValueDeleted: PropTypes.func,
   entity: PropTypes.object
 };
 
