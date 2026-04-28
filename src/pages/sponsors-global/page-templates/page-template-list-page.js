@@ -226,7 +226,7 @@ const PageTemplateListPage = ({
               label={T.translate("page_template_list.show_archived")}
             />
           </FormGroup>
-          <Grid2 size={4}>
+          <Grid2 size={3}>
             <SearchInput
               onSearch={handleSearch}
               term={term}

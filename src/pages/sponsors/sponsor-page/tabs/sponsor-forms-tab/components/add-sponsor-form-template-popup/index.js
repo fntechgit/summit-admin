@@ -77,7 +77,6 @@ const AddSponsorFormTemplatePopup = ({
       sponsorshipTypeIds
     );
     setSelectedForms([]);
-    setSearchTerm("");
     formik.resetForm();
   }, []);
 

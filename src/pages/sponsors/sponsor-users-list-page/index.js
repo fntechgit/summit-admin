@@ -87,7 +87,7 @@ const SponsorUsersListPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={4}>
+          <Grid2 size={3}>
             <SearchInput term={term} onSearch={handleSearch} />
           </Grid2>
           <Button
