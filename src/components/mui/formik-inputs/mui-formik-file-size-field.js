@@ -77,7 +77,8 @@ const MuiFormikFilesizeField = ({ name, label, ...props }) => {
 
 MuiFormikFilesizeField.propTypes = {
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired
+  // label is optional: callers may supply an external InputLabel instead
+  label: PropTypes.string
 };
 
 export default MuiFormikFilesizeField;

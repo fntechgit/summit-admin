@@ -88,12 +88,6 @@ jest.mock("../../../../../../../../history", () => ({
   default: { push: (...args) => mockHistoryPush(...args) }
 }));
 
-// Avoid MUI ripple noise
-jest.mock("@mui/material/ButtonBase/TouchRipple", () => ({
-  __esModule: true,
-  default: () => null
-}));
-
 // ---- Now imports ----
 /* eslint-disable import/first */
 import React from "react";

@@ -20,23 +20,6 @@ jest.mock("../../../actions/page-template-actions", () => ({
   getPageTemplates: jest.fn(() => () => Promise.resolve())
 }));
 
-// Avoid MUI ripple noise
-jest.mock("@mui/material/IconButton", () => {
-  const React = require("react");
-  return {
-    __esModule: true,
-    default: ({ children, onClick, ...rest }) => (
-      <button type="button" onClick={onClick} {...rest}>
-        {children}
-      </button>
-    )
-  };
-});
-jest.mock("@mui/material/ButtonBase/TouchRipple", () => ({
-  __esModule: true,
-  default: () => null
-}));
-
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
 
