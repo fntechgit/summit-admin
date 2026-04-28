@@ -121,7 +121,7 @@ describe("normalizePageTemplateModules", () => {
   });
 
   describe("DOCUMENT kind — FILE type", () => {
-    it("should extract the first element from the file array and delete external_url", () => {
+    it("should remove file and external_url for existing files", () => {
       const fileObj = {
         id: 10,
         storage_key: "key/file.pdf",
@@ -134,18 +134,18 @@ describe("normalizePageTemplateModules", () => {
         external_url: "https://example.com"
       };
       const [result] = normalizePageTemplateModules([module]);
-      expect(result.file).toStrictEqual(fileObj);
+      expect(result.file).toBeUndefined();
       expect(result.external_url).toBeUndefined();
     });
 
-    it("should set file to null when the file array is empty", () => {
+    it("should remove file when the file array is empty", () => {
       const module = {
         kind: PAGES_MODULE_KINDS.DOCUMENT,
         type: PAGE_MODULES_DOWNLOAD.FILE,
         file: []
       };
       const [result] = normalizePageTemplateModules([module]);
-      expect(result.file).toBeNull();
+      expect(result.file).toBeUndefined();
     });
   });
 
