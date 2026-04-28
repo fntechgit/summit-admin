@@ -77,6 +77,9 @@ const createInitialState = (overrides = {}) => ({
   sponsorPagePurchaseListState: {
     ...DEFAULT_PURCHASE_LIST_STATE,
     ...overrides
+  },
+  currentSponsorState: {
+    entity: { id: 123 }
   }
 });
 
