@@ -67,6 +67,18 @@ const SponsorFormsTab = ({
     getSponsorManagedForms(term, page, perPage, order, orderDir, showArchived);
   };
 
+  const handleManagedPerPageChange = (newPerPage) => {
+    const { order, orderDir } = managedForms;
+    getSponsorManagedForms(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
+    );
+  };
+
   const handleManagedSort = (key, dir) => {
     const { currentPage, perPage } = managedForms;
     getSponsorManagedForms(term, currentPage, perPage, key, dir, showArchived);
@@ -81,6 +93,18 @@ const SponsorFormsTab = ({
       order,
       orderDir,
       showArchived
+    );
+  };
+
+  const handleCustomizedPerPageChange = (newPerPage) => {
+    const { order, orderDir } = customizedForms;
+    getSponsorCustomizedForms(
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      hideArchived
     );
   };
 
@@ -394,6 +418,7 @@ const SponsorFormsTab = ({
           totalRows={customizedForms.totalCount}
           currentPage={customizedForms.currentPage}
           onPageChange={handleCustomizedPageChange}
+          onPerPageChange={handleCustomizedPerPageChange}
           onSort={handleCustomizedSort}
           onEdit={handleCustomizedEdit}
           onDelete={handleCustomizedDelete}
@@ -413,6 +438,7 @@ const SponsorFormsTab = ({
           totalRows={managedForms.totalCount}
           currentPage={managedForms.currentPage}
           onPageChange={handleManagedPageChange}
+          onPerPageChange={handleManagedPerPageChange}
           onSort={handleManagedSort}
         />
       </div>
