@@ -9,10 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import T from "i18n-react/dist/i18n-react";
-import history from "../history";
 import {
   getRequest,
   putRequest,
@@ -26,7 +25,9 @@ import {
   authErrorHandler,
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
+import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_TAGS = "REQUEST_TAGS";
 export const RECEIVE_TAGS = "RECEIVE_TAGS";
@@ -54,8 +55,14 @@ export const TAG_ADDED_TO_GROUP = "TAG_ADDED_TO_GROUP";
 export const TAG_REMOVED_FROM_GROUP = "TAG_REMOVED_FROM_GROUP";
 
 export const getTags =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
-  async (dispatch, getState) => {
+  (
+    term = null,
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
+  async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
     const filter = [];
 
@@ -69,7 +76,7 @@ export const getTags =
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -81,7 +88,7 @@ export const getTags =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -89,13 +96,13 @@ export const getTags =
       createAction(RECEIVE_TAGS),
       `${window.API_BASE_URL}/api/v1/tags`,
       authErrorHandler,
-      { order, orderDir, page, term }
+      { order, orderDir, page, term, perPage }
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
   };
 
-export const getTag = (tagId) => async (dispatch, getState) => {
+export const getTag = (tagId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -114,7 +121,7 @@ export const getTag = (tagId) => async (dispatch, getState) => {
   });
 };
 
-export const deleteTag = (tagId) => async (dispatch, getState) => {
+export const deleteTag = (tagId) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -138,7 +145,7 @@ export const resetTagForm = () => (dispatch) => {
   dispatch(createAction(RESET_TAG_FORM)({}));
 };
 
-export const saveTag = (entity) => async (dispatch, getState) => {
+export const saveTag = (entity) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
   dispatch(startLoading());
 
@@ -149,7 +156,7 @@ export const saveTag = (entity) => async (dispatch, getState) => {
   const normalizedEntity = normalizeTag(entity);
 
   if (entity.id) {
-    putRequest(
+    return putRequest(
       createAction(UPDATE_TAG),
       createAction(TAG_UPDATED),
       `${window.API_BASE_URL}/api/v1/tags/${entity.id}`,
@@ -159,28 +166,27 @@ export const saveTag = (entity) => async (dispatch, getState) => {
     )(params)(dispatch).then(() => {
       dispatch(showSuccessMessage(T.translate("edit_tag.tag_saved")));
     });
-  } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_tag.tag_created"),
-      type: "success"
-    };
-
-    postRequest(
-      createAction(UPDATE_TAG),
-      createAction(TAG_ADDED),
-      `${window.API_BASE_URL}/api/v1/tags`,
-      normalizedEntity,
-      authErrorHandler,
-      entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push(`/app/tags`);
-        })
-      );
-    });
   }
+  const success_message = {
+    title: T.translate("general.done"),
+    html: T.translate("edit_tag.tag_created"),
+    type: "success"
+  };
+
+  return postRequest(
+    createAction(UPDATE_TAG),
+    createAction(TAG_ADDED),
+    `${window.API_BASE_URL}/api/v1/tags`,
+    normalizedEntity,
+    authErrorHandler,
+    entity
+  )(params)(dispatch).then(() => {
+    dispatch(
+      showMessage(success_message, () => {
+        history.push("/app/tags");
+      })
+    );
+  });
 };
 
 export const getTagGroups = () => async (dispatch, getState) => {
@@ -207,7 +213,7 @@ export const getTagGroups = () => async (dispatch, getState) => {
 };
 
 export const updateTagGroupsOrder =
-  (tagGroups, tagGroupId, newOrder) => async (dispatch, getState) => {
+  (tagGroups, tagGroupId) => async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
     const { currentSummit } = currentSummitState;
@@ -219,7 +225,7 @@ export const updateTagGroupsOrder =
     const tagGroup = tagGroups.find((tg) => tg.id === tagGroupId);
     delete tagGroup.allowed_tags;
 
-    putRequest(
+    return putRequest(
       null,
       createAction(TAG_GROUP_ORDER_UPDATED)(tagGroups),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-tag-groups/${tagGroupId}`,
@@ -252,7 +258,7 @@ export const getTagGroup = (tagGroupId) => async (dispatch, getState) => {
   });
 };
 
-export const resetTagGroupForm = () => (dispatch, getState) => {
+export const resetTagGroupForm = () => (dispatch) => {
   dispatch(createAction(RESET_TAG_GROUP_FORM)({}));
 };
 
@@ -274,7 +280,7 @@ export const saveTagGroup = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then(() => {
       dispatch(
         showSuccessMessage(T.translate("edit_tag_group.tag_group_saved"))
       );
@@ -293,11 +299,11 @@ export const saveTagGroup = (entity) => async (dispatch, getState) => {
       normalizedEntity,
       authErrorHandler,
       entity
-    )(params)(dispatch).then((payload) => {
+    )(params)(dispatch).then((response) => {
       dispatch(
         showMessage(success_message, () => {
           history.push(
-            `/app/summits/${currentSummit.id}/tag-groups/${payload.response.id}`
+            `/app/summits/${currentSummit.id}/tag-groups/${response.response.id}`
           );
         })
       );
@@ -388,10 +394,8 @@ export const copyAllTagsToCategory =
     });
   };
 
-export const createTag = (tag, callback) => async (dispatch, getState) => {
-  const { currentSummitState } = getState();
+export const createTag = (tag, callback) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
-  const { currentSummit } = currentSummitState;
 
   const params = {
     access_token: accessToken
@@ -403,7 +407,7 @@ export const createTag = (tag, callback) => async (dispatch, getState) => {
     null,
     createAction(TAG_CREATED),
     `${window.API_BASE_URL}/api/v1/tags`,
-    { tag: tag },
+    { tag },
     authErrorHandler
   )(params)(dispatch).then((payload) => {
     dispatch(stopLoading());
@@ -422,9 +426,9 @@ export const removeTagFromGroup = (tagId) => (dispatch) => {
 const normalizeTag = (entity) => {
   const normalizedEntity = { ...entity };
 
-  delete normalizedEntity["created"];
-  delete normalizedEntity["updated"];
-  delete normalizedEntity["last_edited"];
+  delete normalizedEntity.created;
+  delete normalizedEntity.updated;
+  delete normalizedEntity.last_edited;
 
   return normalizedEntity;
 };

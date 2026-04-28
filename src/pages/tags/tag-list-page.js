@@ -14,23 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid2,
-  IconButton,
-  TextField,
-  Snackbar,
-  Alert
-} from "@mui/material";
+import { Box, Button, Grid2, TextField } from "@mui/material";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
+import TagsDialog from "./tags-popup";
 import {
   getTags,
   deleteTag,
@@ -38,61 +26,6 @@ import {
   resetTagForm
 } from "../../actions/tag-actions";
 import { DEFAULT_PER_PAGE } from "../../utils/constants";
-
-const TagDialog = ({ open, onClose, onSave, initialData }) => {
-  const [tag, setTag] = useState(initialData?.tag || "");
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    setTag(initialData?.tag || "");
-    setError("");
-  }, [initialData, open]);
-
-  const handleSave = () => {
-    if (!tag.trim()) {
-      setError(T.translate("edit_tag.name_required"));
-      return;
-    }
-    onSave({ ...initialData, tag });
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>
-        {initialData?.id
-          ? `${T.translate("general.edit")  } ${  T.translate("edit_tag.tag")}`
-          : `${T.translate("general.add")  } ${  T.translate("edit_tag.tag")}`}
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          label={T.translate("edit_tag.name")}
-          type="text"
-          fullWidth
-          value={tag}
-          onChange={(e) => setTag(e.target.value)}
-          error={!!error}
-          helperText={error}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{T.translate("general.cancel")}</Button>
-        <Button onClick={handleSave} variant="contained">
-          {T.translate("general.save")}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
 
 const TagListPage = ({
   tags = [],
@@ -110,15 +43,9 @@ const TagListPage = ({
   const [search, setSearch] = useState(term);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success"
-  });
 
   useEffect(() => {
     getTags(term, currentPage, perPage, order, orderDir);
-    // eslint-disable-next-line
   }, [currentPage, perPage, order, orderDir]);
 
   const handleSearchKeyDown = (e) => {
@@ -127,8 +54,13 @@ const TagListPage = ({
     }
   };
 
-  const handleOpenDialog = (tag = null) => {
-    setEditData(tag || {});
+  const handleNewTag = () => {
+    setEditData({});
+    setDialogOpen(true);
+  };
+
+  const handleEditTag = (row) => {
+    setEditData(row);
     setDialogOpen(true);
   };
 
@@ -139,43 +71,39 @@ const TagListPage = ({
   };
 
   const handleSaveTag = (entity) => {
-    saveTag(entity)
-      .then(() => {
-        setSnackbar({
-          open: true,
-          message: T.translate("edit_tag.tag_saved"),
-          severity: "success"
-        });
-        handleCloseDialog();
-        getTags(search, currentPage, perPage, order, orderDir);
-      })
-      .catch(() => {
-        setSnackbar({
-          open: true,
-          message: T.translate("edit_tag.save_error"),
-          severity: "error"
-        });
-      });
+    saveTag(entity).then(() => {
+      handleCloseDialog();
+      getTags(search, currentPage, perPage, order, orderDir);
+    });
   };
 
   const handleDeleteTag = (id) => {
-    deleteTag(id)
-      .then(() => {
-        setSnackbar({
-          open: true,
-          message: T.translate("edit_tag.tag_deleted"),
-          severity: "success"
-        });
-        getTags(search, currentPage, perPage, order, orderDir);
-      })
-      .catch(() => {
-        setSnackbar({
-          open: true,
-          message: T.translate("edit_tag.delete_error"),
-          severity: "error"
-        });
-      });
+    deleteTag(id).then(() => {
+      getTags(search, currentPage, perPage, order, orderDir);
+    });
   };
+
+  const columns = [
+    {
+      columnKey: "id",
+      header: "ID",
+      sortable: true,
+      width: 80
+    },
+    {
+      columnKey: "tag",
+      header: T.translate("general.name"),
+      sortable: true
+    },
+    {
+      columnKey: "created",
+      header: T.translate("tag_list.created")
+    },
+    {
+      columnKey: "updated",
+      header: T.translate("tag_list.updated")
+    }
+  ];
 
   return (
     <Box className="container">
@@ -183,12 +111,21 @@ const TagListPage = ({
 
       <Grid2
         container
-        spacing={2}
-        alignItems="center"
-        sx={{ mb: 2, width: "100%" }}
+        sx={{
+          mb: 2,
+          width: "100%",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap"
+        }}
       >
         <Grid2 md={2} sx={{ display: "flex", alignItems: "center" }}>
-          <Box component="span">{totalTags} items</Box>
+          <Box component="span">
+            {totalTags}{" "}
+            {totalTags === 1
+              ? T.translate("tag_list.item")
+              : T.translate("tag_list.items")}
+          </Box>
         </Grid2>
         <Grid2
           container
@@ -204,12 +141,23 @@ const TagListPage = ({
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearchKeyDown}
             size="small"
+            slotProps={{
+              input: {
+                startAdornment: <SearchIcon sx={{ mr: 1 }} />
+              }
+            }}
           />
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-            sx={{ minWidth: 120 }}
+            onClick={() => handleNewTag()}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
           >
             {T.translate("tag_list.add_tag")}
           </Button>
@@ -217,27 +165,7 @@ const TagListPage = ({
       </Grid2>
 
       <MuiTable
-        columns={[
-          {
-            columnKey: "id",
-            header: "ID",
-            sortable: true,
-            width: 80
-          },
-          {
-            columnKey: "tag",
-            header: T.translate("general.name"),
-            sortable: true
-          },
-          {
-            columnKey: "created",
-            header: T.translate("tag_list.created")
-          },
-          {
-            columnKey: "updated",
-            header: T.translate("tag_list.updated")
-          }
-        ]}
+        columns={columns}
         data={tags}
         totalRows={totalTags}
         perPage={perPage}
@@ -248,34 +176,22 @@ const TagListPage = ({
         }
         onSort={(col, dir) => getTags(search, 1, perPage, col, dir)}
         options={{ sortCol: order, sortDir: orderDir }}
-        onEdit={(row) => handleOpenDialog(row)}
-        onDelete={(row) => handleDeleteTag(row.id)}
+        onEdit={(id) => handleEditTag(id)}
+        onDelete={(id) => handleDeleteTag(id)}
+        getName={(row) => row.tag}
         deleteConfirmTitle={T.translate("general.are_you_sure")}
-        deleteDialogBody={(row) =>
-          row?.tag
-            ? `${T.translate("tag_list.delete_tag_warning")} "${row.tag}"?`
-            : T.translate("tag_list.delete_tag_warning")
+        deleteDialogBody={(name) =>
+          `${T.translate("tag_list.delete_tag_warning")} "${name}"?`
         }
         confirmButtonColor="error"
       />
 
-      <TagDialog
+      <TagsDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
         onSave={handleSaveTag}
         initialData={editData}
       />
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };
