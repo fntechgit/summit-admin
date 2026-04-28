@@ -72,7 +72,16 @@ export const getSponsorPurchases =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "" : "-";
-      params.order = `${orderDirSign}${order}`;
+      switch (order) {
+        case "purchased":
+          params.order = `${orderDirSign}created`;
+          break;
+        case "amount":
+          params.order = `${orderDirSign}raw_amount`;
+          break;
+        default:
+          params.order = `${orderDirSign}${order}`;
+      }
     }
 
     return getRequest(
