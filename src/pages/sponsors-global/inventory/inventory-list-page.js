@@ -353,12 +353,14 @@ const InventoryListPage = ({
               label={T.translate("inventory_item_list.show_archived")}
             />
           </FormGroup>
-          <SearchInput
-            onSearch={handleSearch}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-          />
+          <Grid2 size={3}>
+            <SearchInput
+              onSearch={handleSearch}
+              placeholder={T.translate(
+                "inventory_item_list.placeholders.search_inventory_items"
+              )}
+            />
+          </Grid2>
           <Button
             variant="contained"
             onClick={() => handleNewInventoryItem()}
