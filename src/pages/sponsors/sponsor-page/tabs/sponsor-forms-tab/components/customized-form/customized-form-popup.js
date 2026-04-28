@@ -12,6 +12,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import {
   getSponsorCustomizedForm,
+  getSponsorManagedForm,
+  upgradeSponsorManagedForm,
   resetSponsorCustomizedForm,
   saveSponsorCustomizedForm,
   updateSponsorCustomizedForm
@@ -24,11 +26,14 @@ const CustomizedFormPopup = ({
   sponsor,
   summitId,
   summitTZ,
+  upgradeManaged,
   open,
   onClose,
   onSaved,
   getSponsorCustomizedForm,
+  getSponsorManagedForm,
   resetSponsorCustomizedForm,
+  upgradeSponsorManagedForm,
   saveSponsorCustomizedForm,
   updateSponsorCustomizedForm
 }) => {
@@ -47,7 +52,9 @@ const CustomizedFormPopup = ({
   const handleOnSave = (values) => {
     if (isSaving) return;
 
-    const save = values.id
+    const save = upgradeManaged
+      ? upgradeSponsorManagedForm
+      : values.id
       ? updateSponsorCustomizedForm
       : saveSponsorCustomizedForm;
     setIsSaving(true);
@@ -67,7 +74,11 @@ const CustomizedFormPopup = ({
 
   useEffect(() => {
     if (formId) {
-      getSponsorCustomizedForm(formId);
+      if (upgradeManaged) {
+        getSponsorManagedForm(formId);
+      } else {
+        getSponsorCustomizedForm(formId);
+      }
     }
   }, [formId]);
 
@@ -125,6 +136,8 @@ const mapStateToProps = ({
 export default connect(mapStateToProps, {
   resetSponsorCustomizedForm,
   getSponsorCustomizedForm,
+  getSponsorManagedForm,
+  upgradeSponsorManagedForm,
   saveSponsorCustomizedForm,
   updateSponsorCustomizedForm
 })(CustomizedFormPopup);
