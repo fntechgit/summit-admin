@@ -15,12 +15,14 @@ import moment from "moment-timezone";
 import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
-  REQUEST_SPONSOR_PURCHASES,
+  RECEIVE_SPONSOR_ORDER,
   RECEIVE_SPONSOR_PURCHASES,
+  REQUEST_SPONSOR_PURCHASES,
   SPONSOR_PURCHASE_STATUS_UPDATED
 } from "../../actions/sponsor-purchases-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
+import { normalizeOrder } from "../../components/mui/OrderDetailsGrid/helpers";
 
 const DEFAULT_STATE = {
   purchases: [],
@@ -30,7 +32,8 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  term: ""
+  term: "",
+  currentOrder: null
 };
 
 const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
@@ -86,6 +89,12 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
       });
 
       return { ...state, purchases };
+    }
+    case RECEIVE_SPONSOR_ORDER: {
+      const data = payload.response;
+      const currentOrder = normalizeOrder(data);
+
+      return { ...state, currentOrder };
     }
     default:
       return state;
