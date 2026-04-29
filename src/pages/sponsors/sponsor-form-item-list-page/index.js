@@ -77,7 +77,7 @@ const SponsorFormItemListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 

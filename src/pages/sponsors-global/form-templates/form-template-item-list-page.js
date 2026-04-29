@@ -109,7 +109,7 @@ const FormTemplateItemListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -140,20 +140,20 @@ const FormTemplateItemListPage = ({
     const promises = items.map((item) =>
       cloneFromInventoryItem(formTemplateId, item)
     );
-    Promise.all(promises)
-      .then(() => {
-        getFormTemplateItems(
-          formTemplateId,
-          term,
-          currentPage,
-          perPage,
-          order,
-          orderDir,
-          showArchived
-        );
-      })
-      .catch((error) => {
-        console.error(error);
+    Promise.allSettled(promises)
+      .then((results) => {
+        const anySucceeded = results.some((r) => r.status === "fulfilled");
+        if (anySucceeded) {
+          getFormTemplateItems(
+            formTemplateId,
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            showArchived
+          );
+        }
       })
       .finally(() => {
         setShowAddInventoryItemsModal(false);
