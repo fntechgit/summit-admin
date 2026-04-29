@@ -17,7 +17,7 @@ import {
   Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import SearchInput from "../../../../../../../components/mui/search-input";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { getSponsorFormsForCart } from "../../../../../../../actions/sponsor-cart-actions";
 import MuiInfiniteTable from "../../../../../../../components/mui/infinite-table";
 import SponsorAddonSelect from "../../../../../../../components/mui/sponsor-addon-select";

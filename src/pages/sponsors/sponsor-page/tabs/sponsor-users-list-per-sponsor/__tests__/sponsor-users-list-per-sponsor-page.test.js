@@ -27,7 +27,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../../../components/mui/search-input",
+  "openstack-uicore-foundation/lib/components/mui/search-input",
   () =>
     function SearchInputMock({ onSearch }) {
       return (

@@ -12,7 +12,7 @@ jest.mock("../../../../../../../../actions/sponsor-cart-actions", () => ({
 }));
 
 // Mock SearchInput component
-jest.mock("../../../../../../../../components/mui/search-input", () => {
+jest.mock("openstack-uicore-foundation/lib/components/mui/search-input", () => {
   const React = require("react");
   return {
     __esModule: true,

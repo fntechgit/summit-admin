@@ -14,11 +14,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, TextField } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getSponsor,
   getBadgeScans,
@@ -60,22 +60,19 @@ const SponsorBadgeScans = ({
   const memberObj = new Member(member);
   const isAdmin = memberObj.hasAccess("admin-sponsors");
 
-  const [searchTerm, setSearchTerm] = useState(term);
   const [showEditBadgeScanPopup, setShowEditBadgeScanPopup] = useState(false);
   const [showManualBadgeScanPopup, setShowManualBadgeScanPopup] =
     useState(false);
 
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getBadgeScans(
-        sponsor.id,
-        searchTerm,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      );
-    }
+  const handleSearch = (searchTerm) => {
+    getBadgeScans(
+      sponsor.id,
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const handlePageChange = (page) => {
@@ -185,26 +182,14 @@ const SponsorBadgeScans = ({
           </Box>
         </Grid2>
         <Grid2 size={9} justifyContent="flex-end" gap={1} container>
-          <TextField
-            variant="outlined"
-            value={searchTerm}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-            slotProps={{
-              input: {
-                endAdornment: <SearchIcon sx={{ ml: 1 }} />
-              }
-            }}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={handleSearch}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                height: "36px"
-              },
-              backgroundColor: "white"
-            }}
-          />
+          <Grid2 size={4}>
+            <SearchInput
+              onSearch={handleSearch}
+              placeholder={T.translate(
+                "inventory_item_list.placeholders.search_inventory_items"
+              )}
+            />
+          </Grid2>
           <Button
             variant="contained"
             size="medium"

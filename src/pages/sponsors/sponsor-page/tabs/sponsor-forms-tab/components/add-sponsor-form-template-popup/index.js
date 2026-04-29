@@ -14,18 +14,20 @@ import {
   FormControlLabel,
   Grid2,
   IconButton,
-  TextField,
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
-import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { FormikProvider, useFormik } from "formik";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import MenuButton from "../../../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../../../actions/sponsor-actions";
 import { getSponsorForms } from "../../../../../../../actions/sponsor-forms-actions";
-import { FIVE_PER_PAGE } from "../../../../../../../utils/constants";
+import {
+  DEFAULT_CURRENT_PAGE,
+  FIVE_PER_PAGE
+} from "../../../../../../../utils/constants";
 import MuiFormikSelectGroup from "../../../../../../../components/mui/formik-inputs/mui-formik-select-group";
 
 const AddSponsorFormTemplatePopup = ({
@@ -42,7 +44,6 @@ const AddSponsorFormTemplatePopup = ({
   sponsor,
   summitId
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedForms, setSelectedForms] = useState([]);
 
   const sponsorshipIds = sponsor?.sponsorships?.map((e) => e.id) || [];
@@ -76,7 +77,6 @@ const AddSponsorFormTemplatePopup = ({
       sponsorshipTypeIds
     );
     setSelectedForms([]);
-    setSearchTerm("");
     formik.resetForm();
   }, []);
 
@@ -104,17 +104,16 @@ const AddSponsorFormTemplatePopup = ({
     );
   };
 
-  const handleOnSearch = (ev) => {
-    if (ev.key === "Enter")
-      getSponsorForms(
-        searchTerm,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        false,
-        sponsorshipTypeIds
-      );
+  const handleOnSearch = (searchTerm) => {
+    getSponsorForms(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      false,
+      sponsorshipTypeIds
+    );
   };
 
   const handleSelected = (id, isSelected) => {
@@ -248,25 +247,11 @@ const AddSponsorFormTemplatePopup = ({
                   </MenuButton>
                 </Grid2>
                 <Grid2 size={8}>
-                  <TextField
-                    variant="outlined"
-                    value={searchTerm}
+                  <SearchInput
+                    onSearch={handleOnSearch}
                     placeholder={T.translate(
                       "edit_sponsor.placeholders.search"
                     )}
-                    slotProps={{
-                      input: {
-                        startAdornment: <SearchIcon sx={{ mr: 1 }} />
-                      }
-                    }}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                    onKeyDown={handleOnSearch}
-                    fullWidth
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        height: "36px"
-                      }
-                    }}
                   />
                 </Grid2>
               </Grid2>
