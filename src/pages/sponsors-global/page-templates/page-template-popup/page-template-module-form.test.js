@@ -54,7 +54,7 @@ jest.mock(
 );
 
 jest.mock(
-  "../../../../components/mui/formik-inputs/mui-formik-datepicker",
+  "openstack-uicore-foundation/lib/components/mui/formik-inputs/datepicker",
   () =>
     function MockMuiFormikDatepicker({ name }) {
       return <input data-testid={`datepicker-${name}`} type="date" />;
