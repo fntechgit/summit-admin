@@ -20,16 +20,14 @@ import {
   createAction,
   stopLoading,
   startLoading,
-  showMessage,
-  showSuccessMessage,
-  authErrorHandler,
   escapeFilterValue,
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import * as _ from "lodash";
+import debounce from "lodash/debounce";
 import URI from "urijs";
 import history from "../history";
+import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
 import { getAccessTokenSafely } from "../utils/methods";
 import {
   DEBOUNCE_WAIT,
@@ -92,9 +90,9 @@ export const getCompanies =
       createAction(REQUEST_COMPANIES),
       createAction(RECEIVE_COMPANIES),
       `${window.API_BASE_URL}/api/v1/companies`,
-      authErrorHandler,
-      { order, orderDir, page, term }
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler,
+      { order, orderDir, page, perPage, term }
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -114,8 +112,8 @@ export const getCompany = (companyId) => async (dispatch) => {
     null,
     createAction(RECEIVE_COMPANY),
     `${window.API_BASE_URL}/api/v1/companies/${companyId}`,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -134,8 +132,8 @@ export const deleteCompany = (companyId) => async (dispatch) => {
     createAction(COMPANY_DELETED)({ companyId }),
     `${window.API_BASE_URL}/api/v1/companies/${companyId}`,
     null,
-    authErrorHandler
-  )(params)(dispatch).then(() => {
+    snackbarErrorHandler
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
@@ -160,32 +158,36 @@ export const saveCompany = (entity) => async (dispatch) => {
       createAction(COMPANY_UPDATED),
       `${window.API_BASE_URL}/api/v1/companies/${entity.id}`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(showSuccessMessage(T.translate("edit_company.company_saved")));
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_company.company_saved")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   } else {
-    const success_message = {
-      title: T.translate("general.done"),
-      html: T.translate("edit_company.company_created"),
-      type: "success"
-    };
-
     postRequest(
       createAction(UPDATE_COMPANY),
       createAction(COMPANY_ADDED),
       `${window.API_BASE_URL}/api/v1/companies`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
-    )(params)(dispatch).then(() => {
-      dispatch(
-        showMessage(success_message, () => {
-          history.push("/app/companies");
-        })
-      );
-    });
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("edit_company.company_created")
+          })
+        );
+      })
+      .finally(() => dispatch(stopLoading()));
   }
 };
 
@@ -210,7 +212,7 @@ export const attachLogo = (entity, file, picAttr) => async (dispatch) => {
       createAction(COMPANY_ADDED),
       `${window.API_BASE_URL}/api/v1/companies`,
       normalizedEntity,
-      authErrorHandler,
+      snackbarErrorHandler,
       entity
     )(params)(dispatch).then((payload) => {
       dispatch(uploadFile(payload.response, file));
@@ -230,12 +232,13 @@ const uploadLogo = (entity, file) => async (dispatch) => {
     createAction(LOGO_ATTACHED),
     `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo`,
     file,
-    authErrorHandler,
+    snackbarErrorHandler,
     { pic: entity.pic }
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-    history.push(`/app/companies/${entity.id}`);
-  });
+  )(params)(dispatch)
+    .then(() => {
+      history.push(`/app/companies/${entity.id}`);
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 const uploadBigLogo = (entity, file) => async (dispatch) => {
@@ -250,12 +253,13 @@ const uploadBigLogo = (entity, file) => async (dispatch) => {
     createAction(BIG_LOGO_ATTACHED),
     `${window.API_BASE_URL}/api/v1/companies/${entity.id}/logo/big`,
     file,
-    authErrorHandler,
+    snackbarErrorHandler,
     { pic: entity.pic }
-  )(params)(dispatch).then(() => {
-    dispatch(stopLoading());
-    history.push(`/app/companies/${entity.id}`);
-  });
+  )(params)(dispatch)
+    .then(() => {
+      history.push(`/app/companies/${entity.id}`);
+    })
+    .finally(() => dispatch(stopLoading()));
 };
 
 const normalizeEntity = (entity) => {
@@ -270,7 +274,7 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const queryCompanies = _.debounce(async (input, callback) => {
+export const queryCompanies = debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
   const endpoint = URI(`${window.API_BASE_URL}/api/v1/companies`);
   input = escapeFilterValue(input);

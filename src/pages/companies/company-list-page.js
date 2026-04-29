@@ -9,159 +9,156 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import { Box, Button, Grid2 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { getCompanies, deleteCompany } from "../../actions/company-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-class CompanyListPage extends React.Component {
-  constructor(props) {
-    super(props);
+const CompanyListPage = ({
+  history,
+  companies,
+  term,
+  order,
+  orderDir,
+  currentPage,
+  perPage,
+  totalCompanies,
+  getCompanies,
+  deleteCompany
+}) => {
+  const columns = [
+    { columnKey: "id", header: "Id", sortable: true },
+    { columnKey: "name", header: T.translate("general.name"), sortable: true },
+    { columnKey: "contact_email", header: T.translate("general.email") },
+    {
+      columnKey: "member_level",
+      header: T.translate("company_list.member_level")
+    }
+  ];
 
-    props.getCompanies();
+  const table_options = {
+    sortCol: order,
+    sortDir: orderDir
+  };
 
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleNewCompany = this.handleNewCompany.bind(this);
+  useState(() => {
+    getCompanies();
+  }, []);
 
-    this.state = {};
-  }
+  const handleEdit = (company) => {
+    history.push(`/app/companies/${company.id}`);
+  };
 
-  handleEdit(company_id) {
-    const { history } = this.props;
-    history.push(`/app/companies/${company_id}`);
-  }
+  const handleDelete = (companyId) => {
+    deleteCompany(companyId).then(() =>
+      getCompanies(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
+    );
+  };
 
-  handleDelete(companyId) {
-    const { deleteCompany, companies } = this.props;
-    let company = companies.find((s) => s.id === companyId);
+  const handlePageChange = (page) => {
+    getCompanies(term, page, perPage, order, orderDir);
+  };
 
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("company_list.delete_company_warning") + " " + company.name,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
-      if (result.value) {
-        deleteCompany(companyId);
-      }
-    });
-  }
+  const handlePerPageChange = (newPerPage) => {
+    getCompanies(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+  };
 
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.getCompanies(term, page, perPage, order, orderDir);
-  }
+  const handleSort = (key, dir) => {
+    getCompanies(term, currentPage, perPage, key, dir);
+  };
 
-  handleSort(index, key, dir, func) {
-    const { term, page, perPage } = this.props;
-    this.props.getCompanies(term, page, perPage, key, dir);
-  }
+  const handleSearch = (searchTerm) => {
+    getCompanies(searchTerm, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+  };
 
-  handleSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
-    this.props.getCompanies(term, page, perPage, order, orderDir);
-  }
+  const handleNewCompany = () => {
+    history.push("/app/companies/new");
+  };
 
-  handleNewCompany(ev) {
-    const { history } = this.props;
-    history.push(`/app/companies/new`);
-  }
-
-  render() {
-    const {
-      companies,
-      lastPage,
-      currentPage,
-      term,
-      order,
-      orderDir,
-      totalCompanies
-    } = this.props;
-
-    const columns = [
-      { columnKey: "id", value: "Id", sortable: true },
-      { columnKey: "name", value: T.translate("general.name"), sortable: true },
-      { columnKey: "contact_email", value: T.translate("general.email") },
-      {
-        columnKey: "member_level",
-        value: T.translate("company_list.member_level")
-      }
-    ];
-
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
-
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("company_list.company_list")} ({totalCompanies}){" "}
-        </h3>
-        <div className={"row"}>
-          <div className={"col-md-6"}>
-            <FreeTextSearch
-              value={term}
+  return (
+    <div className="container">
+      <h3> {T.translate("company_list.company_list")}</h3>
+      <Grid2
+        container
+        spacing={1}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={2}>
+          <Box component="span">
+            {totalCompanies} {T.translate("company_list.companies")}
+          </Box>
+        </Grid2>
+        <Grid2
+          container
+          size={10}
+          gap={1}
+          sx={{
+            justifyContent: "flex-end",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={4}>
+            <SearchInput
+              term={term}
+              onSearch={handleSearch}
               placeholder={T.translate(
                 "company_list.placeholders.search_companies"
               )}
-              onSearch={this.handleSearch}
             />
-          </div>
-          <div className="col-md-6 text-right">
-            <button className="btn btn-primary" onClick={this.handleNewCompany}>
-              {T.translate("company_list.add_company")}
-            </button>
-          </div>
-        </div>
+          </Grid2>
+          <Button
+            variant="contained"
+            onClick={handleNewCompany}
+            startIcon={<AddIcon />}
+            sx={{
+              height: "36px",
+              padding: "6px 16px",
+              fontSize: "1.4rem",
+              lineHeight: "2.4rem",
+              letterSpacing: "0.4px"
+            }}
+          >
+            {T.translate("company_list.add_company")}
+          </Button>
+        </Grid2>
+      </Grid2>
 
-        {companies.length > 0 && (
-          <div>
-            <Table
-              options={table_options}
-              data={companies}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+      {companies.length > 0 && (
+        <MuiTable
+          columns={columns}
+          data={companies}
+          options={table_options}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalCompanies}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+          deleteDialogBody={(name) =>
+            T.translate("company_list.delete_company_warning", { name })
+          }
+        />
+      )}
+
+      {companies.length === 0 && (
+        <div>{T.translate("company_list.no_results")}</div>
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentCompanyListState }) => ({
   ...currentCompanyListState
