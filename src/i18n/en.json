@@ -54,6 +54,7 @@
     "save": "Save",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    "undo": "Undo",
     "return": "Return",
     "ingest": "Ingest",
     "save_and_publish": "Save & Publish",
@@ -2585,7 +2586,21 @@
       "amount": "Amount",
       "details": "Details",
       "purchases": "purchases",
-      "status_updated": "Status updated successfully."
+      "status_updated": "Status updated successfully.",
+      "order_details": {
+        "order": "Order",
+        "purchase_date": "Purchase Date",
+        "purchased_by": "Purchased by",
+        "show": "Show",
+        "sponsor": "Sponsor",
+        "tier": "Tier",
+        "payment_type": "Payment Type",
+        "payment_status": "Payment Status",
+        "payment_date": "Payment Date",
+        "general_info": "General Info",
+        "payment_info": "Payment Info",
+        "issue_refund": "Issue a Refund"
+      }
     },
     "mu_tab": {
       "alert_info": "Here you can see the status of this Sponsor's Media Uploads. If an additional file upload is required, it must be requested from the specific page where it is needed.",
@@ -4114,5 +4129,41 @@
     "resync_helper": "Use the sync icon to re-sync individual room folders to Dropbox.",
     "resync_tooltip": "Re-sync Dropbox folder",
     "resync_dispatched": "Room re-sync task has been dispatched."
+  },
+  "order_details_grid": {
+    "code": "Code",
+    "content": "Content",
+    "addon": "Add-on",
+    "discount": "Discount",
+    "amount": "Amount",
+    "amount_due": "AMOUNT DUE",
+    "total": "Total",
+    "rate": "Rate",
+    "action": "Action"
+  },
+  "refund_form": {
+    "reason": "Reason for Refund",
+    "amount": "Amount",
+    "queue_refund": "Queue refund",
+    "info": "If the original payment was made via Stripe, the refund will be automatically queued and processed."
+  },
+  "client_card": {
+    "title": "Client & Address Details",
+    "client": "Client",
+    "address": "Address",
+    "edit_client": "Edit Client",
+    "edit_address": "Edit Address",
+    "company_name": "Company Name",
+    "contact_name": "Contact Name",
+    "contact_email": "Contact Email",
+    "contact_phone": "Contact Phone",
+    "line1": "Address Line 1",
+    "line2": "Address Line 2",
+    "postal_code": "Postal Code",
+    "city": "City",
+    "state": "State",
+    "country": "Country",
+    "save": "Save",
+    "cancel": "Cancel"
   }
 }

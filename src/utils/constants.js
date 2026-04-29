@@ -92,6 +92,9 @@ export const HUNDRED_PER_PAGE = 100;
 export const DEFAULT_EXTRA_QUESTIONS_PER_PAGE = 100;
 export const DEFAULT_ORDER_DIR = 1;
 
+export const DATE_FORMAT = "MM/DD/YYYY";
+export const DATETIME_FORMAT = "MM/DD/YYYY hh:mm a";
+
 export const INT_BASE = 10;
 export const FIFTY_NINE = 59;
 export const ONE_MINUTE = 60;
@@ -112,6 +115,8 @@ export const EXPORT_PAGE_SIZE_200 = 200;
 export const DATE_FILTER_ARRAY_SIZE = 2;
 
 export const MILLISECONDS_TO_SECONDS = 1000;
+
+export const BPS = 100;
 
 export const INDEX_NOT_FOUND = -1;
 
