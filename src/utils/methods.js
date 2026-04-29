@@ -24,6 +24,7 @@ import T from "i18n-react/dist/i18n-react";
 import {
   BADGE_QR_MINIMUM_EXPECTED_FIELDS,
   BYTES_IN_MEGABYTE,
+  DATETIME_FORMAT,
   ERROR_CODE_401,
   ERROR_CODE_403,
   ERROR_CODE_412,
@@ -591,4 +592,14 @@ export const normalizeSelectAllField = (
     [flagName]: false,
     [listName]: items.map((a) => a.id ?? a)
   };
+};
+
+export const formatDate = (date, timeZone, format = DATETIME_FORMAT) => {
+  if (timeZone === "LOC") {
+    return moment(date * MILLISECONDS_TO_SECONDS).format(format);
+  }
+
+  return moment(date * MILLISECONDS_TO_SECONDS)
+    .tz(timeZone)
+    .format(format);
 };

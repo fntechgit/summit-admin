@@ -12,6 +12,7 @@ import SponsorFormsManageItems from "./tabs/sponsor-forms-tab/components/manage-
 import SponsorCartTab from "./tabs/sponsor-cart-tab";
 import SponsorPurchasesTab from "./tabs/sponsor-purchases-tab";
 import SponsorBadgeScans from "./tabs/sponsor-badge-scans";
+import SponsorOrderDetails from "./tabs/sponsor-purchases-tab/sponsor-order-details";
 
 const SponsorFormsRoute = ({ match }) => (
   <div>
@@ -27,6 +28,25 @@ const SponsorFormsRoute = ({ match }) => (
         exact
         path={`${match.url}/:form_id/items`}
         component={SponsorFormsManageItems}
+      />
+    </Switch>
+  </div>
+);
+
+const SponsorPurchasesRoute = ({ match }) => (
+  <div>
+    <Breadcrumb
+      data={{
+        title: "Purchases",
+        pathname: match.url
+      }}
+    />
+    <Switch>
+      <Route exact strict path={match.url} component={SponsorPurchasesTab} />
+      <Route
+        exact
+        path={`${match.url}/:order_id`}
+        component={SponsorOrderDetails}
       />
     </Switch>
   </div>
@@ -77,8 +97,7 @@ export const SPONSOR_PAGE_TABS = [
   {
     labelKey: "edit_sponsor.tab.purchases",
     path: "/purchases",
-    exact: true,
-    component: SponsorPurchasesTab,
+    component: SponsorPurchasesRoute,
     accessRoute: ACCESS_ROUTES.ADMIN_SPONSORS
   },
   {

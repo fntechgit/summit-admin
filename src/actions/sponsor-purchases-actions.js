@@ -34,6 +34,7 @@ export const REQUEST_SPONSOR_PURCHASES = "REQUEST_SPONSOR_PURCHASES";
 export const RECEIVE_SPONSOR_PURCHASES = "RECEIVE_SPONSOR_PURCHASES";
 export const SPONSOR_PURCHASE_STATUS_UPDATED =
   "SPONSOR_PURCHASE_STATUS_UPDATED";
+export const RECEIVE_SPONSOR_ORDER = "RECEIVE_SPONSOR_ORDER";
 
 export const getSponsorPurchases =
   (
@@ -168,3 +169,27 @@ export const rejectSponsorPurchase =
         dispatch(stopLoading());
       });
   };
+
+export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken,
+    expand:
+      "forms,forms.items,forms.items.meta_fields,forms.items.type,refunds,payments,notes,fees"
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SPONSOR_ORDER),
+    `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}`,
+    authErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
+};
