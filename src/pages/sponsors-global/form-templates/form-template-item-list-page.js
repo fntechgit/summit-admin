@@ -109,7 +109,7 @@ const FormTemplateItemListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 

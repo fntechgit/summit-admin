@@ -75,7 +75,7 @@ const SponsorFormsTab = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -104,7 +104,7 @@ const SponsorFormsTab = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
