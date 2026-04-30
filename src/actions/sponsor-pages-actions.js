@@ -22,6 +22,7 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
+import moment from "moment-timezone";
 import {
   getAccessTokenSafely,
   normalizeSelectAllField
@@ -281,7 +282,8 @@ export const deleteSponsorManagedPage =
 
 const normalizeSponsorManagedPage = (entity) => {
   const normalizedEntity = {
-    show_page_ids: entity.pages
+    show_page_ids: entity.pages,
+    allowed_add_ons: entity.add_ons
   };
 
   if (normalizedEntity.allowed_add_ons.includes("all")) {
