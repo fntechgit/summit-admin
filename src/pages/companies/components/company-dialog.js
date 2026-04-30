@@ -77,6 +77,7 @@ const CompanyDialog = ({
       url: initialEntity?.url ?? "",
       contact_email: initialEntity?.contact_email ?? "",
       member_level: initialEntity?.member_level ?? "",
+      color: initialEntity?.color ?? "",
       admin_email: initialEntity?.admin_email ?? "",
       city: initialEntity?.city ?? "",
       state: initialEntity?.state ?? "",
@@ -236,12 +237,7 @@ const CompanyDialog = ({
                 <InputLabel htmlFor="color">
                   {T.translate("edit_company.color")}
                 </InputLabel>
-                <MuiFormikColorInput
-                  name="color"
-                  id="color"
-                  margin="none"
-                  fullWidth
-                />
+                <MuiFormikColorInput name="color" margin="none" fullWidth />
               </Grid2>
               <Grid2 size={4}>
                 <InputLabel htmlFor="admin_email">
