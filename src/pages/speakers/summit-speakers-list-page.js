@@ -11,171 +11,160 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import { Box, Button, Grid2 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { getSpeakers, deleteSpeaker } from "../../actions/speaker-actions";
 import Member from "../../models/member";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
-class SummitSpeakerListPage extends React.Component {
-  constructor(props) {
-    super(props);
-    props.getSpeakers();
+const SummitSpeakerListPage = ({
+  member,
+  speakers,
+  term,
+  currentPage,
+  perPage,
+  order,
+  orderDir,
+  totalSpeakers,
+  getSpeakers,
+  deleteSpeaker,
+  history
+}) => {
+  useEffect(() => {
+    getSpeakers();
+  }, []);
 
-    this.state = {};
+  const memberObj = new Member(member);
 
-    this.handleEdit = this.handleEdit.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleSort = this.handleSort.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleNewSpeaker = this.handleNewSpeaker.bind(this);
-  }
+  const handleEdit = (speaker) => {
+    history.push(`/app/speakers/${speaker.id}`);
+  };
 
-  handleEdit(speaker_id) {
-    const { history } = this.props;
-    history.push(`/app/speakers/${speaker_id}`);
-  }
-
-  handleDelete(speakerId) {
-    const { deleteSpeaker, speakers } = this.props;
-    const speaker = speakers.find((s) => s.id === speakerId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("speaker_list.delete_speaker_warning")} ${
-        speaker.name
-      }`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_delete")
-    }).then((result) => {
-      if (result.value) {
-        deleteSpeaker(speakerId);
-      }
-    });
-  }
-
-  handlePageChange(page) {
-    const { term, order, orderDir, perPage } = this.props;
-    this.props.getSpeakers(term, page, perPage, order, orderDir);
-  }
-
-  handleSort(index, key, dir) {
-    const { term, page, perPage } = this.props;
-    key = key === "name" ? "last_name" : key;
-    this.props.getSpeakers(term, page, perPage, key, dir);
-  }
-
-  handleSearch(term) {
-    const { order, orderDir, page, perPage } = this.props;
-    this.props.getSpeakers(term, page, perPage, order, orderDir);
-  }
-
-  handleNewSpeaker() {
-    const { history } = this.props;
-    history.push("/app/speakers/new");
-  }
-
-  render() {
-    const {
-      speakers,
-      lastPage,
-      currentPage,
-      term,
-      order,
-      orderDir,
-      totalSpeakers,
-      member
-    } = this.props;
-
-    const columns = [
-      { columnKey: "id", value: "Id", sortable: true },
-      { columnKey: "name", value: T.translate("general.name"), sortable: true },
-      {
-        columnKey: "email",
-        value: T.translate("general.email"),
-        sortable: true
-      },
-      { columnKey: "member_id", value: T.translate("speaker_list.member_id") }
-    ];
-
-    const table_options = {
-      sortCol: order === "last_name" ? "name" : order,
-      sortDir: orderDir,
-      actions: {}
-    };
-
-    const memberObj = new Member(member);
-
-    if (memberObj.canDeleteSpeakers()) {
-      table_options.actions.delete = { onClick: this.handleDelete };
-    }
-
-    if (memberObj.canEditSpeakers()) {
-      table_options.actions.edit = { onClick: this.handleEdit };
-    }
-
-    return (
-      <div className="container">
-        <h3>
-          {" "}
-          {T.translate("speaker_list.speaker_list")} ({totalSpeakers}){" "}
-        </h3>
-        <div className="row">
-          <div className="col-md-6">
-            <FreeTextSearch
-              value={term ?? ""}
-              placeholder={T.translate("general.placeholders.search_speakers")}
-              onSearch={this.handleSearch}
-            />
-          </div>
-          <div className="col-md-6 text-right">
-            {memberObj.canAddSpeakers() && (
-              <button
-                className="btn btn-primary"
-                onClick={this.handleNewSpeaker}
-              >
-                {T.translate("speaker_list.add_speaker")}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {speakers.length > 0 && (
-          <div>
-            <Table
-              options={table_options}
-              data={speakers}
-              columns={columns}
-              onSort={this.handleSort}
-            />
-            <Pagination
-              bsSize="medium"
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButtons={10}
-              items={lastPage}
-              activePage={currentPage}
-              onSelect={this.handlePageChange}
-            />
-          </div>
-        )}
-      </div>
+  const handleDelete = (speakerId) => {
+    deleteSpeaker(speakerId).then(() =>
+      getSpeakers(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir)
     );
-  }
-}
+  };
+
+  const handlePageChange = (page) => {
+    getSpeakers(term, page, perPage, order, orderDir);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getSpeakers(term, DEFAULT_CURRENT_PAGE, newPerPage, order, orderDir);
+  };
+
+  const handleSort = (key, dir) => {
+    const keySort = key === "name" ? "last_name" : key;
+    getSpeakers(term, currentPage, perPage, keySort, dir);
+  };
+
+  const handleSearch = (searchTerm) => {
+    getSpeakers(searchTerm, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
+  };
+
+  const handleNewSpeaker = () => {
+    history.push("/app/speakers/new");
+  };
+
+  const columns = [
+    { columnKey: "id", header: T.translate("general.id"), sortable: true },
+    { columnKey: "name", header: T.translate("general.name"), sortable: true },
+    {
+      columnKey: "email",
+      header: T.translate("general.email"),
+      sortable: true
+    },
+    { columnKey: "member_id", header: T.translate("speaker_list.member_id") }
+  ];
+
+  const table_options = {
+    sortCol: order === "last_name" ? "name" : order,
+    sortDir: orderDir
+  };
+
+  return (
+    <div className="container">
+      <h3>{T.translate("speaker_list.speaker_list")}</h3>
+      <Grid2
+        container
+        spacing={1}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Grid2 size={2}>
+          <Box component="span">
+            {totalSpeakers} {T.translate("speaker_list.speakers")}
+          </Box>
+        </Grid2>
+        <Grid2
+          container
+          size={10}
+          gap={1}
+          sx={{
+            justifyContent: "flex-end",
+            alignItems: "center"
+          }}
+        >
+          <Grid2 size={4}>
+            <SearchInput
+              term={term}
+              onSearch={handleSearch}
+              placeholder={T.translate("general.placeholders.search_speakers")}
+            />
+          </Grid2>
+          {memberObj.canAddSpeakers() && (
+            <Button
+              variant="contained"
+              onClick={handleNewSpeaker}
+              startIcon={<AddIcon />}
+              sx={{
+                height: "36px",
+                padding: "6px 16px",
+                fontSize: "1.4rem",
+                lineHeight: "2.4rem",
+                letterSpacing: "0.4px"
+              }}
+            >
+              {T.translate("speaker_list.add_speaker")}
+            </Button>
+          )}
+        </Grid2>
+      </Grid2>
+
+      {speakers.length > 0 && (
+        <MuiTable
+          columns={columns}
+          data={speakers}
+          options={table_options}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalSpeakers}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSort={handleSort}
+          onDelete={memberObj.canDeleteSpeakers() ? handleDelete : null}
+          onEdit={memberObj.canEditSpeakers() ? handleEdit : null}
+          deleteDialogBody={(name) =>
+            T.translate("speaker_list.delete_speaker_warning", { name })
+          }
+        />
+      )}
+
+      {speakers.length === 0 && (
+        <div>{T.translate("speaker_list.no_results")}</div>
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSpeakerListState, loggedUserState }) => ({
   ...currentSpeakerListState,
