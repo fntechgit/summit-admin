@@ -18,6 +18,8 @@ import {
   RECEIVE_SPONSOR_ORDER,
   RECEIVE_SPONSOR_PURCHASES,
   REQUEST_SPONSOR_PURCHASES,
+  SPONSOR_CLIENT_ADDRESS_UPDATED,
+  SPONSOR_CLIENT_UPDATED,
   SPONSOR_PURCHASE_STATUS_UPDATED
 } from "../../actions/sponsor-purchases-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
@@ -26,8 +28,8 @@ import { normalizeOrder } from "../../components/mui/OrderDetailsGrid/helpers";
 
 const DEFAULT_STATE = {
   purchases: [],
-  order: "order",
-  orderDir: 1,
+  order: "created",
+  orderDir: -1,
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
@@ -68,7 +70,7 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
         ...a,
         order: a.order_number,
         amount: `$${amountFromCents(a.raw_amount)}`,
-        purchased: moment(a.created * MILLISECONDS_TO_SECONDS).format(
+        purchased: moment(a.purchased_date * MILLISECONDS_TO_SECONDS).format(
           "YYYY/MM/DD HH:mm a"
         )
       }));
@@ -95,6 +97,14 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
       const currentOrder = normalizeOrder(data);
 
       return { ...state, currentOrder };
+    }
+    case SPONSOR_CLIENT_UPDATED: {
+      const client = payload.response;
+      return { ...state, currentOrder: { ...state.currentOrder, client } };
+    }
+    case SPONSOR_CLIENT_ADDRESS_UPDATED: {
+      const address = payload.response;
+      return { ...state, currentOrder: { ...state.currentOrder, address } };
     }
     default:
       return state;

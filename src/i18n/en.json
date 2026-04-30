@@ -2599,7 +2599,9 @@
         "payment_date": "Payment Date",
         "general_info": "General Info",
         "payment_info": "Payment Info",
-        "issue_refund": "Issue a Refund"
+        "issue_refund": "Issue a Refund",
+        "address_updated": "Address updated successfully",
+        "client_updated": "Client info updated successfully"
       }
     },
     "mu_tab": {

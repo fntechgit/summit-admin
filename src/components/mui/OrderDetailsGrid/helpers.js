@@ -12,7 +12,10 @@ const formatDiscount = (amount, type) => {
 export const normalizeOrder = (data) => ({
   ...data,
   total: currencyAmountFromCents(data.net_amount || 0),
-  amount_due: `-${currencyAmountFromCents(-1 * (data.amount_due || 0))}`, // currencyAmountFromCents doesn't allow negatives
+  amount_due:
+    data.amount_due === 0
+      ? "$0.00"
+      : `-${currencyAmountFromCents(-1 * (data.amount_due || 0))}`, // currencyAmountFromCents doesn't allow negatives
   forms: data.forms.map((form) => ({
     ...form,
     add_on_name: form.add_on?.name || "",
@@ -66,7 +69,11 @@ export const mapOrderData = (lines, showItemDescription = false) => {
           );
         }
 
-        res.push({ ...f, item_name });
+        const amount = currencyAmountFromCents(it.amount);
+        const lineId = it.line_id;
+        const cancelled = it.canceled_by_id !== null;
+
+        res.push({ ...f, item_name, amount, id: lineId, cancelled });
       });
       return res;
     }, []);

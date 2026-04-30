@@ -24,8 +24,8 @@ import T from "i18n-react/dist/i18n-react";
 import { escapeFilterValue, getAccessTokenSafely } from "../utils/methods";
 import {
   DEFAULT_CURRENT_PAGE,
-  DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
+  DUMMY_ACTION,
   PURCHASE_STATUS
 } from "../utils/constants";
 import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
@@ -35,14 +35,16 @@ export const RECEIVE_SPONSOR_PURCHASES = "RECEIVE_SPONSOR_PURCHASES";
 export const SPONSOR_PURCHASE_STATUS_UPDATED =
   "SPONSOR_PURCHASE_STATUS_UPDATED";
 export const RECEIVE_SPONSOR_ORDER = "RECEIVE_SPONSOR_ORDER";
+export const SPONSOR_CLIENT_ADDRESS_UPDATED = "SPONSOR_CLIENT_ADDRESS_UPDATED";
+export const SPONSOR_CLIENT_UPDATED = "SPONSOR_CLIENT_UPDATED";
 
 export const getSponsorPurchases =
   (
     term = "",
     page = DEFAULT_CURRENT_PAGE,
     perPage = DEFAULT_PER_PAGE,
-    order = "id",
-    orderDir = DEFAULT_ORDER_DIR
+    order = "created",
+    orderDir = -1
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -184,3 +186,162 @@ export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
     dispatch(stopLoading());
   });
 };
+
+export const updateClientAddress =
+  (orderId, address) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return putRequest(
+      null,
+      createAction(SPONSOR_CLIENT_ADDRESS_UPDATED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}/address`,
+      address,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "edit_sponsor.purchase_tab.order_details.address_updated"
+            )
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const updateClientInfo =
+  (orderId, client) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return putRequest(
+      null,
+      createAction(SPONSOR_CLIENT_UPDATED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}/client`,
+      client,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "edit_sponsor.purchase_tab.order_details.client_updated"
+            )
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const cancelSponsorForm =
+  (orderId, lineId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    const params = {
+      access_token: accessToken
+    };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(DUMMY_ACTION),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}/lines/${lineId}/cancel`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => dispatch(getSponsorOrder(orderId)))
+      .catch(console.log) // need to catch promise reject
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const undoCancelSponsorForm =
+  (orderId, lineId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return putRequest(
+      null,
+      createAction(DUMMY_ACTION),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}/lines/${lineId}/cancel`,
+      {},
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => dispatch(getSponsorOrder(orderId)))
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const refundSponsorOrder =
+  (orderId, amount, reason) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const params = {
+      access_token: accessToken
+    };
+
+    return putRequest(
+      null,
+      createAction(DUMMY_ACTION),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}/refund`,
+      { amount, reason },
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate(
+              "edit_sponsor.purchase_tab.order_details.order_refunded"
+            )
+          })
+        );
+        dispatch(getSponsorOrder(orderId));
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
