@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { TextField } from "@mui/material";
 import { useField } from "formik";
@@ -6,6 +6,10 @@ import { useField } from "formik";
 const MuiFormikColorInput = ({ name, ...rest }) => {
   const [field, meta, helpers] = useField(name);
   const [localValue, setLocalValue] = useState(field.value || "#000000");
+
+  useEffect(() => {
+    setLocalValue(field.value || "#000000");
+  }, [field.value]);
 
   const handleChange = (e) => {
     setLocalValue(e.target.value);
