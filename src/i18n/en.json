@@ -802,7 +802,9 @@
     "placeholders": {
       "select_country": "Select Country",
       "sponsored_project": "Select Sponsored Project",
-      "sponsorship_type": "Select Tier"
+      "sponsorship_type": "Select Tier",
+      "select_project_first": "Select a project first",
+      "no_options": "No options"
     }
   },
   "tag_list": {

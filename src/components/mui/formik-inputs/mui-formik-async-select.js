@@ -18,7 +18,8 @@ const MuiFormikAsyncAutocomplete = ({
   formatOption = (item) => ({ value: item.id.toString(), label: item.name }),
   formatSelectedValue = null,
   queryParams = [],
-  isMulti = false
+  isMulti = false,
+  defaultOptions
 }) => {
   const [field, meta, helpers] = useField(name);
   const [options, setOptions] = useState([]);
@@ -45,7 +46,7 @@ const MuiFormikAsyncAutocomplete = ({
   };
 
   useEffect(() => {
-    if (searchTerm) {
+    if (!defaultOptions && searchTerm) {
       const delayDebounce = setTimeout(() => {
         fetchOptions(searchTerm);
       }, DEBOUNCE_WAIT_250);
@@ -86,7 +87,17 @@ const MuiFormikAsyncAutocomplete = ({
       fullWidth
       getOptionLabel={(option) => option.label || ""}
       isOptionEqualToValue={(option, value) => option.value === value.value}
-      onInputChange={(e, newInput) => setSearchTerm(newInput)}
+      onInputChange={
+        !defaultOptions ? (e, newInput) => setSearchTerm(newInput) : undefined
+      }
+      filterOptions={
+        defaultOptions
+          ? (options, { inputValue }) =>
+              options.filter((opt) =>
+                opt.label.toLowerCase().includes(inputValue.toLowerCase())
+              )
+          : undefined // MUI usa su default que no filtra (deja que la API filtre)
+      }
       renderInput={(params) => (
         <TextField
           {...params}
