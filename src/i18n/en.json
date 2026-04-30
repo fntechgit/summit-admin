@@ -3358,7 +3358,7 @@
     "description": "Description",
     "allowed_extensions_input": "Allowed Extensions (comma separated: PDF,DOC,etc)",
     "allowed_extensions": "Allowed Extensions",
-    "delete_warning": "Are you sure you want to delete media file type ",
+    "delete_warning": "Are you sure you want to delete media file type {name}?",
     "saved": "Media File Type saved successfully.",
     "created": "Media File Type created successfully.",
     "placeholders": {
