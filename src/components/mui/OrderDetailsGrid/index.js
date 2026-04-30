@@ -34,17 +34,11 @@ const OrderDetailsGrid = ({
   fees,
   total,
   amountDue,
-  withDescription = false
+  withDescription = false,
+  onCancelForm,
+  onUndoCancelForm
 }) => {
   const data = mapOrderData(lines, withDescription);
-
-  const handleDelete = (row) => {
-    console.log("delete", row);
-  };
-
-  const handleUndo = (row) => {
-    console.log("undo", row);
-  };
 
   const columns = [
     {
@@ -67,16 +61,17 @@ const OrderDetailsGrid = ({
       header: T.translate("order_details_grid.action"),
       align: "center",
       render: (row) => {
-        if (row.is_deleted) {
+        if (row.cancelled) {
           return (
-            <IconButton size="large" onClick={() => handleUndo(row)}>
-              <ArrowBackIcon fontSize="large" /> {T.translate("general.undo")}
+            <IconButton size="large" onClick={() => onUndoCancelForm(row)}>
+              <ArrowBackIcon fontSize="large" sx={{ mr: 2 }} />{" "}
+              {T.translate("general.undo").toUpperCase()}
             </IconButton>
           );
         }
 
         return (
-          <IconButton size="large" onClick={() => handleDelete(row)}>
+          <IconButton size="large" onClick={() => onCancelForm(row)}>
             <DeleteIcon fontSize="large" />
           </IconButton>
         );
@@ -85,7 +80,11 @@ const OrderDetailsGrid = ({
   ];
 
   return (
-    <MuiTable data={data} columns={columns}>
+    <MuiTable
+      data={data}
+      columns={columns}
+      options={{ disableProp: "cancelled" }}
+    >
       {notes &&
         notes.map((note) => (
           <NotesRow

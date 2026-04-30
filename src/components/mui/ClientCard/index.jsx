@@ -30,8 +30,8 @@ const ClientCard = ({ client, address, onClientSubmit, onAddressSubmit }) => {
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
 
-  const clientDetails = `${client?.company_name}\n${client?.contact_name}`;
-  const addressDetails = `${address?.line1} ${address?.line2},\n${address?.postal_code} ${address?.city}`;
+  const clientDetails = `${client?.company_name}\n${client?.contact_name} - ${client?.contact_email} - ${client?.contact_phone}`;
+  const addressDetails = `${address?.line1} ${address?.line2},\n${address?.postal_code} ${address?.city} ${address?.state} ${address?.country}`;
   const hasAddress = addressDetails.trim().length > 1;
 
   return (

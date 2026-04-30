@@ -15,11 +15,16 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Card, CardContent, Grid2, Typography } from "@mui/material";
-import {
-  ListCard
-} from "openstack-uicore-foundation/lib/components/mui/cards";
+import { ListCard } from "openstack-uicore-foundation/lib/components/mui/cards";
 import OrderDetailsGrid from "../../../../../components/mui/OrderDetailsGrid";
-import { getSponsorOrder } from "../../../../../actions/sponsor-purchases-actions";
+import {
+  getSponsorOrder,
+  undoCancelSponsorForm,
+  updateClientAddress,
+  updateClientInfo,
+  cancelSponsorForm,
+  refundSponsorOrder
+} from "../../../../../actions/sponsor-purchases-actions";
 import { ACCESS_ROUTES, DATE_FORMAT } from "../../../../../utils/constants";
 import Restrict from "../../../../../routes/restrict";
 import { formatDate } from "../../../../../utils/methods";
@@ -31,7 +36,12 @@ const SponsorOrderDetails = ({
   currentOrder,
   currentSummit,
   currentSponsor,
-  getSponsorOrder
+  getSponsorOrder,
+  updateClientInfo,
+  updateClientAddress,
+  cancelSponsorForm,
+  undoCancelSponsorForm,
+  refundSponsorOrder
 }) => {
   const orderId = match.params.order_id;
 
@@ -95,6 +105,26 @@ const SponsorOrderDetails = ({
     }
   ];
 
+  const handleClientSave = (values) => {
+    updateClientInfo(currentOrder.id, values);
+  };
+
+  const handleAddressSave = (values) => {
+    updateClientAddress(currentOrder.id, values);
+  };
+
+  const handleCancelForm = (item) => {
+    cancelSponsorForm(currentOrder.id, item.id);
+  };
+
+  const handleUndoCancelForm = (item) => {
+    undoCancelSponsorForm(currentOrder.id, item.id);
+  };
+
+  const handleOrderRefund = (values) => {
+    refundSponsorOrder(currentOrder.id, values.amount, values.reason);
+  };
+
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="h4" sx={{ mb: 3, mt: 4 }}>
@@ -119,7 +149,12 @@ const SponsorOrderDetails = ({
           />
         </Grid2>
         <Grid2 size={12}>
-          <ClientCard client={client} address={address} />
+          <ClientCard
+            client={client}
+            address={address}
+            onAddressSubmit={handleAddressSave}
+            onClientSubmit={handleClientSave}
+          />
         </Grid2>
         <Grid2 size={12}>
           <Card
@@ -135,6 +170,8 @@ const SponsorOrderDetails = ({
                 fees={currentOrder?.fees || []}
                 amountDue={currentOrder?.amount_due}
                 withDescription
+                onCancelForm={handleCancelForm}
+                onUndoCancelForm={handleUndoCancelForm}
               />
             </CardContent>
           </Card>
@@ -150,7 +187,7 @@ const SponsorOrderDetails = ({
                   "edit_sponsor.purchase_tab.order_details.issue_refund"
                 )}
               </Typography>
-              <RefundForm onSubmit={console.log} />
+              <RefundForm onSubmit={handleOrderRefund} />
             </CardContent>
           </Card>
         </Grid2>
@@ -171,7 +208,12 @@ const mapStateToProps = ({
 
 export default Restrict(
   connect(mapStateToProps, {
-    getSponsorOrder
+    getSponsorOrder,
+    updateClientInfo,
+    updateClientAddress,
+    cancelSponsorForm,
+    undoCancelSponsorForm,
+    refundSponsorOrder
   })(SponsorOrderDetails),
   ACCESS_ROUTES.ADMIN_SPONSORS
 );
