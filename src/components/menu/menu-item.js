@@ -13,7 +13,7 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Exclusive } from "openstack-uicore-foundation/lib/components";
+import Exclusive from "openstack-uicore-foundation/lib/components/exclusive-wrapper";
 import ListItemButton from "@mui/material/ListItemButton";
 import Typography from "@mui/material/Typography";
 
