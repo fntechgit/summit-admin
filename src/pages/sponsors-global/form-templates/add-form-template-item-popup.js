@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
@@ -14,14 +14,13 @@ import {
   FormControlLabel,
   Grid2,
   IconButton,
-  TextField,
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
-import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MenuButton from "../../../components/mui/menu-button";
 import {
   clearAllSelectedInventoryItems,
@@ -50,8 +49,6 @@ const AddFormTemplateItemDialog = ({
   selectedIds,
   term = ""
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-
   useEffect(() => {
     getInventoryItems(term, currentPage, perPage, order, orderDir);
   }, []);
@@ -68,9 +65,14 @@ const AddFormTemplateItemDialog = ({
     getInventoryItems(term, currentPage, perPage, key, dir);
   };
 
-  const handleOnSearch = (ev) => {
-    if (ev.key === "Enter")
-      getInventoryItems(searchTerm, currentPage, perPage, order, orderDir);
+  const handleOnSearch = (searchTerm) => {
+    getInventoryItems(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const handleSelected = (id, isSelected) => {
@@ -222,25 +224,11 @@ const AddFormTemplateItemDialog = ({
               </MenuButton>
             </Grid2>
             <Grid2 size={8}>
-              <TextField
-                variant="outlined"
-                value={searchTerm}
+              <SearchInput
+                onSearch={handleOnSearch}
                 placeholder={T.translate(
                   "inventory_items_list_modal.placeholders.search_inventory_items"
                 )}
-                slotProps={{
-                  input: {
-                    startAdornment: <SearchIcon sx={{ mr: 1 }} />
-                  }
-                }}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                onKeyDown={handleOnSearch}
-                fullWidth
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    height: "36px"
-                  }
-                }}
               />
             </Grid2>
           </Grid2>

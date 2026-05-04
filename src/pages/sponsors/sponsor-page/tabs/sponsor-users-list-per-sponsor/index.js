@@ -17,13 +17,13 @@ import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   deleteSponsorUser,
   getSponsorUserRequests,
   getSponsorUsers,
   trackImportSponsorUsers
 } from "../../../../../actions/sponsor-users-actions";
-import SearchInput from "../../../../../components/mui/search-input";
 import UsersTable from "../../../sponsor-users-list-page/components/users-table";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import ChipNotify from "../../../../../components/mui/chip-notify";
@@ -115,7 +115,7 @@ const SponsorUsersListPerSponsorPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={4}>
+          <Grid2 size={3}>
             <SearchInput term={term} onSearch={handleSearch} />
           </Grid2>
           <Button
