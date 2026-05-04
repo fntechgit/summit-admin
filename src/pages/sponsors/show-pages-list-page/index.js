@@ -258,6 +258,9 @@ const ShowPagesListPage = ({
             totalRows={totalCount}
             currentPage={currentPage}
             onDelete={handleRowDelete}
+            deleteDialogBody={(item) =>
+              T.translate("show_pages.page_delete_warning", { page: item })
+            }
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             onSort={handleSort}
