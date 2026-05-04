@@ -16,7 +16,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import { Table } from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import {
   getSponsorships,
   deleteSponsorship

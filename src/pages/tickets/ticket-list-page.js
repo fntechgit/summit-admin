@@ -14,17 +14,15 @@
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  FreeTextSearch,
-  UploadInput,
-  SelectableTable,
-  Dropdown,
-  PromocodeInput,
-  TagInput,
-  CompanyInput,
-  AccessLevelsInput,
-  TicketTypesInput
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input"
+import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import PromocodeInput from "openstack-uicore-foundation/lib/components/inputs/promocode-input"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import AccessLevelsInput from "openstack-uicore-foundation/lib/components/inputs/access-levels-input"
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import { Modal, Pagination } from "react-bootstrap";
 import { Breadcrumb } from "react-breadcrumbs";
 import { SegmentedControl } from "segmented-control";

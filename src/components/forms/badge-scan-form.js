@@ -14,7 +14,8 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import { Input, TextArea } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input";
 import QuestionsSet from "openstack-uicore-foundation/lib/utils/questions-set";
 import ExtraQuestionsForm from "openstack-uicore-foundation/lib/components/extra-questions";
 

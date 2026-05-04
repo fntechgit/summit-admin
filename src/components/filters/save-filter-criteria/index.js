@@ -14,7 +14,8 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { Input, RadioList } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import RadioList from "openstack-uicore-foundation/lib/components/inputs/radio-list";
 import { hasErrors } from "../../../utils/methods";
 
 import styles from "./index.module.less";

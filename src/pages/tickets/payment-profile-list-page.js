@@ -14,7 +14,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Table } from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import Swal from "sweetalert2";
 import {
   getPaymentProfiles,

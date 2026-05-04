@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown } from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 
 const TrackGroupDropdown = ({ id, value, onChange, trackGroups, ...rest }) => {
   const options = trackGroups.map((t) => ({ label: t.name, value: t.id }));

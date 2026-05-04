@@ -14,12 +14,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import _ from "lodash";
-import {
-  AjaxLoader,
-  Dropdown,
-  Input
-} from "openstack-uicore-foundation/lib/components";
+import debounce from "lodash/debounce"
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import EmailTemplateInput from "../inputs/email-template-input";
 import CodeMirror from "@uiw/react-codemirror";
@@ -135,7 +133,7 @@ const EmailTemplateForm = ({
   }, [singleTab]);
 
   const debouncedRenderTemplate = useRef(
-    _.debounce(async (htmlContent, json_data) => {
+    debounce(async (htmlContent, json_data) => {
       renderEmailTemplate(json_data, htmlContent).then(() => {
         // wait until first API email preview to display template on screen
         if (!previewLoaded) setPreviewLoaded(true);

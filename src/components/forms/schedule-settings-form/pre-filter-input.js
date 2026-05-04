@@ -4,11 +4,9 @@ import LevelDropdown from "../../inputs/level-dropdown";
 import EventTypeDropdown from "../../inputs/event-type-dropdown";
 import TrackDropdown from "../../inputs/track-dropdown";
 import TrackGroupDropdown from "../../inputs/track-group-dropdown";
-import {
-  CompanyInput,
-  SpeakerInput,
-  TagInput
-} from "openstack-uicore-foundation/lib/components";
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import LocationDropdown from "../../inputs/location-dropdown";
 import T from "i18n-react";
 

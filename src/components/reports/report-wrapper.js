@@ -3,11 +3,9 @@ import { connect } from "react-redux";
 import { compose } from "redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import { Pagination } from "react-bootstrap";
-import {
-  AjaxLoader,
-  Dropdown,
-  FreeTextSearch
-} from "openstack-uicore-foundation/lib/components";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import T from "i18n-react/dist/i18n-react";
 import {
   exportReport,

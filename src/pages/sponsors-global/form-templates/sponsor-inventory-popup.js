@@ -18,8 +18,8 @@ import {
   FormHelperText
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { UploadInputV2 } from "openstack-uicore-foundation/lib/components";
 import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
+import UploadInputV2 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v2";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,
   MAX_INVENTORY_IMAGE_UPLOAD_SIZE,

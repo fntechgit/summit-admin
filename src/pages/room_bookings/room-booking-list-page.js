@@ -16,10 +16,8 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";
-import {
-  Table,
-  FreeTextSearch
-} from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { getSummitById } from "../../actions/summit-actions";
 import {

@@ -16,7 +16,7 @@ import T from "i18n-react/dist/i18n-react";
 import moment from "moment-timezone";
 import { Modal } from "react-bootstrap";
 import "./styles.less";
-import { SortableTable } from "openstack-uicore-foundation/lib/components";
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import Swal from "sweetalert2";
 
 const ExtraQuestionsTable = ({

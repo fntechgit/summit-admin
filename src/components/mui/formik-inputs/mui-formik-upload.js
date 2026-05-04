@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
 import { FormHelperText } from "@mui/material";
-import { UploadInputV3 } from "openstack-uicore-foundation/lib/components";
+import UploadInputV3 from "openstack-uicore-foundation/lib/components/inputs/upload-input-v3";
 import { useField } from "formik";
 import {
   ALLOWED_INVENTORY_IMAGE_FORMATS,

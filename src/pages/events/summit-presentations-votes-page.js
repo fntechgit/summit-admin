@@ -14,12 +14,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react";
-import {
-  DateTimePicker,
-  Dropdown,
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import { Pagination } from "react-bootstrap";
 import {
   clearVotesReport,

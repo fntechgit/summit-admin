@@ -30,7 +30,7 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
 import pLimit from "p-limit";
-import _ from "lodash";
+import debounce from "lodash/debounce"
 import history from "../history";
 import { saveMarketingSetting } from "./marketing-actions";
 import { getAccessTokenSafely } from "../utils/methods";
@@ -890,7 +890,7 @@ const normalizeBadgeType = (entity) => {
 
 /** *********************  BADGE FEATURE  *********************************************** */
 
-export const queryBadgeFeatures = _.debounce(
+export const queryBadgeFeatures = debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
     const endpoint = URI(

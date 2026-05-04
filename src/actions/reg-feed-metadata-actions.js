@@ -26,7 +26,6 @@ import {
   authErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
 import { getAccessTokenSafely } from "../utils/methods";
-import _ from "lodash";
 
 export const RESET_REG_FEED_METADATA_FORM = "RESET_REG_FEED_METADATA_FORM";
 export const REQUEST_REG_FEED_METADATA_LIST = "REQUEST_REG_FEED_METADATA_LIST";

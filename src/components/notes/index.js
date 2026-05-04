@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {
-  FreeTextSearch,
-  Table,
-  TextArea
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Table from "openstack-uicore-foundation/lib/components/table"
+import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input";
 import T from "i18n-react";
 import { connect } from "react-redux";
 import {

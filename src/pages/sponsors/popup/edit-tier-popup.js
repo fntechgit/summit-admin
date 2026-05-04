@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
-import { UploadInput } from "openstack-uicore-foundation/lib/components";
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 import SponsorshipTypeInputMUI from "../../../components/mui/formik-inputs/sponsorship-input-mui";
 import MuiFormikTextField from "../../../components/mui/formik-inputs/mui-formik-textfield";
 import useScrollToError from "../../../hooks/useScrollToError";

@@ -15,7 +15,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Breadcrumb } from "react-breadcrumbs";
 import T from "i18n-react/dist/i18n-react";
-import { SimpleForm } from "openstack-uicore-foundation/lib/components";
+import SimpleForm from "openstack-uicore-foundation/lib/components/forms/simple-form";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getAccessLevel,

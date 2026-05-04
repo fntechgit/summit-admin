@@ -14,7 +14,7 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import { Input } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 
 class TagForm extends React.Component {

@@ -12,7 +12,7 @@
  **/
 import React from "react";
 import { Popover, OverlayTrigger } from "react-bootstrap";
-import { RawHTML } from "openstack-uicore-foundation/lib/components";
+import RawHTML from "openstack-uicore-foundation/lib/components/raw-html";
 
 class ScheduleEventResult extends React.Component {
   popoverHoverFocus() {

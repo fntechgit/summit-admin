@@ -25,8 +25,8 @@ import {
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import _ from "lodash";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import debounce from "lodash/debounce"
 import {
   getLeadReportSettingsMeta,
   getSummitById,
@@ -67,7 +67,7 @@ const SponsorListPage = ({
   }, [currentSummit, term, perPage, order, orderDir, currentPage]);
 
   const handleSearchDebounced = useCallback(
-    _.debounce((term) => {
+    debounce((term) => {
       getSponsors(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
     }, DEBOUNCE_WAIT),
     [perPage, order, orderDir]

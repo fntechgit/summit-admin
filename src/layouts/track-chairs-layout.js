@@ -9,30 +9,42 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Switch, Route, withRouter } from "react-router-dom";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import Restrict from "../routes/restrict";
 
-import NoMatchPage from "../pages/no-match-page";
-import TrackChairListPage from "../pages/track_chairs/track-chair-list-page";
-import ProgressFlagsPage from "../pages/track_chairs/progress-flags-page";
-import TrackTimeframeListPage from "../pages/track_chairs/track-timeframe-list-page";
-import TrackTimeframePage from "../pages/track_chairs/track-timeframe-page";
-import TeamListsPage from "../pages/track_chairs/team-lists-page";
+const NoMatchPage = React.lazy(() => import("../pages/no-match-page"));
+const TrackChairListPage = React.lazy(() =>
+  import("../pages/track_chairs/track-chair-list-page")
+);
+const ProgressFlagsPage = React.lazy(() =>
+  import("../pages/track_chairs/progress-flags-page")
+);
+const TrackTimeframeListPage = React.lazy(() =>
+  import("../pages/track_chairs/track-timeframe-list-page")
+);
+const TrackTimeframePage = React.lazy(() =>
+  import("../pages/track_chairs/track-timeframe-page")
+);
+const TeamListsPage = React.lazy(() =>
+  import("../pages/track_chairs/team-lists-page")
+);
 
-const TrackChairsLayout = ({match}) => (
-    <div>
-      <Breadcrumb
-        data={{
-          title: T.translate("track_chairs.track_chairs"),
-          pathname: match.url
-        }}
-      />
+const TrackChairsLayout = ({ match }) => (
+  <div>
+    <Breadcrumb
+      data={{
+        title: T.translate("track_chairs.track_chairs"),
+        pathname: match.url
+      }}
+    />
 
+    <Suspense fallback={<AjaxLoader show relative size={120} />}>
       <Switch>
         <Route strict exact path={match.url} component={TrackChairListPage} />
         <Route
@@ -83,7 +95,8 @@ const TrackChairsLayout = ({match}) => (
         />
         <Route component={NoMatchPage} />
       </Switch>
-    </div>
-  )
+    </Suspense>
+  </div>
+);
 
 export default Restrict(withRouter(TrackChairsLayout), "track-chairs");

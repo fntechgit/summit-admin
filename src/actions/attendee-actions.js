@@ -31,7 +31,7 @@ import {
   downloadFileByContent
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import _ from "lodash";
+import debounce from "lodash/debounce";
 import history from "../history";
 import {
   checkOrFilter,
@@ -778,7 +778,7 @@ export const changeAttendeeListSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_ATTENDEE_SEARCH_TERM)({ term }));
 };
 
-export const queryPaidAttendees = _.debounce(
+export const queryPaidAttendees = debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
 
@@ -810,7 +810,7 @@ export const queryPaidAttendees = _.debounce(
   DEBOUNCE_WAIT
 );
 
-export const queryAttendees = _.debounce(async (input, summitId, callback) => {
+export const queryAttendees = debounce(async (input, summitId, callback) => {
   const accessToken = await getAccessTokenSafely();
 
   const endpoint = URI(
@@ -836,7 +836,7 @@ export const queryAttendees = _.debounce(async (input, summitId, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
-export const queryAttendeesWithTickets = _.debounce(
+export const queryAttendeesWithTickets = debounce(
   async (input, summitId, callback) => {
     const accessToken = await getAccessTokenSafely();
 

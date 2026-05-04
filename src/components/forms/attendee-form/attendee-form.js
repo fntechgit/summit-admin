@@ -14,14 +14,12 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  MemberInput,
-  AttendeeInput,
-  Input,
-  Panel,
-  TagInput,
-  Dropdown
-} from "openstack-uicore-foundation/lib/components";
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import AttendeeInput from "openstack-uicore-foundation/lib/components/inputs/attendee-input"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import ExtraQuestionsForm from "openstack-uicore-foundation/lib/components/extra-questions";
 import QuestionsSet from "openstack-uicore-foundation/lib/utils/questions-set";
 import TicketComponent from "./ticket-component";

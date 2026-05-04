@@ -27,7 +27,7 @@ import {
   fetchResponseHandler,
   fetchErrorHandler
 } from "openstack-uicore-foundation/lib/utils/actions";
-import * as _ from "lodash";
+import debounce from "lodash/debounce"
 import URI from "urijs";
 import history from "../history";
 import { getAccessTokenSafely } from "../utils/methods";
@@ -270,7 +270,7 @@ const normalizeEntity = (entity) => {
   return normalizedEntity;
 };
 
-export const queryCompanies = _.debounce(async (input, callback) => {
+export const queryCompanies = debounce(async (input, callback) => {
   const accessToken = await getAccessTokenSafely();
   const endpoint = URI(`${window.API_BASE_URL}/api/v1/companies`);
   input = escapeFilterValue(input);

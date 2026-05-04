@@ -2,10 +2,8 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Modal, Pagination } from "react-bootstrap";
 import T from "i18n-react";
-import {
-  FreeTextSearch,
-  SelectableTable
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable";
 import {
   clearAllSelectedInventoryItems,
   getInventoryItems,

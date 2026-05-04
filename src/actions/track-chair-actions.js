@@ -23,7 +23,7 @@ import {
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import _ from "lodash";
+import debounce from "lodash/debounce"
 import {
   fetchErrorHandler,
   fetchResponseHandler,
@@ -284,7 +284,7 @@ export const getProgressFlags = () => async (dispatch, getState) => {
   });
 };
 
-export const querySummitProgressFlags = _.debounce(
+export const querySummitProgressFlags = debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
     const endpoint = URI(

@@ -15,7 +15,7 @@ import React from "react";
 import { Switch, Route, Router } from "react-router-dom";
 import { connect } from "react-redux";
 import { setAppTexts } from "openstack-uicore-foundation/lib/i18n";
-import { AjaxLoader } from "openstack-uicore-foundation/lib/components";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import { getBackURL } from "openstack-uicore-foundation/lib/utils/methods";
 import { resetLoading } from "openstack-uicore-foundation/lib/utils/actions";
 import {

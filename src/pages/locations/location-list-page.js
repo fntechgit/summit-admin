@@ -16,7 +16,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import Switch from "react-switch";
-import { SortableTable } from "openstack-uicore-foundation/lib/components";
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable";
 import SummitDropdown from "../../components/summit-dropdown";
 
 import { getSummitById } from "../../actions/summit-actions";

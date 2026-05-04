@@ -16,12 +16,10 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import {
-  Dropdown,
-  FreeTextSearch,
-  MemberInput,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import {
   getTrackChairs,
   deleteTrackChair,

@@ -1,7 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import DiscountTicketActionsTableCell from "./DiscountTicketActionsTableCell";
-import { Dropdown, Input } from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import {
   addDiscountTicket,
   deleteDiscountTicket

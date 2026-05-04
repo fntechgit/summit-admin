@@ -16,7 +16,8 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Swal from "sweetalert2";
-import { Input, Table } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import FragmentParser from "../../utils/fragmen-parser";
 
 import {

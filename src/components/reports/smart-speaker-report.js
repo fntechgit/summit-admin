@@ -13,7 +13,7 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Table } from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import Select from "react-select";
 import wrapReport from "./report-wrapper";
 import { flattenData } from "../../actions/report-actions";

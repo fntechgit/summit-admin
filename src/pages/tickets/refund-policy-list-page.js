@@ -15,7 +15,7 @@ import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
-import { EditableTable } from "openstack-uicore-foundation/lib/components";
+import EditableTable from "openstack-uicore-foundation/lib/components/table-editable";
 import {
   getRefundPolicies,
   saveRefundPolicy,

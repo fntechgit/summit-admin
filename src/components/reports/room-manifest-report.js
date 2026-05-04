@@ -13,7 +13,7 @@
 
 import React from "react";
 import moment from "moment-timezone";
-import { Table } from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import wrapReport from "./report-wrapper";
 import { groupByDate } from "../../utils/methods";
 

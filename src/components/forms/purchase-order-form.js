@@ -14,13 +14,11 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Input,
-  Table,
-  Panel,
-  PromocodeInput,
-  TicketTypesInput
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Table from "openstack-uicore-foundation/lib/components/table"
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
+import PromocodeInput from "openstack-uicore-foundation/lib/components/inputs/promocode-input"
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import { epochToMoment } from "openstack-uicore-foundation/lib/utils/methods";
 import { Pagination } from "react-bootstrap";
 import OwnerInput from "../inputs/owner-input";

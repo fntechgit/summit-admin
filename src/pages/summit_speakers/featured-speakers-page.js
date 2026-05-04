@@ -15,12 +15,10 @@ import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  SpeakerInput,
-  SortableTable,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input"
+import SortableTable from "openstack-uicore-foundation/lib/components/table-sortable"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import {
   getFeaturedSpeakers,
   removeFeaturedSpeaker,

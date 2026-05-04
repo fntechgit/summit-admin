@@ -14,13 +14,11 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { connect } from "react-redux";
-import {
-  Dropdown,
-  Input,
-  PromocodeInput,
-  TagInput,
-  TicketTypesInput
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import PromocodeInput from "openstack-uicore-foundation/lib/components/inputs/promocode-input"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import BadgeFeatureInput from "../inputs/badge-feature-input";
 import {
   resetPromoCodeSpecForm,

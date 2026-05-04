@@ -11,12 +11,13 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Switch, Route } from "react-router-dom";
 import { Breadcrumb } from "react-breadcrumbs";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 
 import {
   getLocation,
@@ -24,12 +25,22 @@ import {
   getLocationMeta
 } from "../actions/location-actions";
 
-import EditLocationPage from "../pages/locations/edit-location-page";
-import EditFloorPage from "../pages/locations/edit-floor-page";
-import EditRoomPage from "../pages/locations/edit-room-page";
-import EditLocationImagePage from "../pages/locations/edit-location-image-page";
-import EditLocationMapPage from "../pages/locations/edit-location-map-page";
-import NoMatchPage from "../pages/no-match-page";
+const EditLocationPage = React.lazy(() =>
+  import("../pages/locations/edit-location-page")
+);
+const EditFloorPage = React.lazy(() =>
+  import("../pages/locations/edit-floor-page")
+);
+const EditRoomPage = React.lazy(() =>
+  import("../pages/locations/edit-room-page")
+);
+const EditLocationImagePage = React.lazy(() =>
+  import("../pages/locations/edit-location-image-page")
+);
+const EditLocationMapPage = React.lazy(() =>
+  import("../pages/locations/edit-location-map-page")
+);
+const NoMatchPage = React.lazy(() => import("../pages/no-match-page"));
 
 const LocationIdLayout = ({ match, entity, allClasses, ...props }) => {
   const locationId = match.params.location_id;
@@ -53,122 +64,124 @@ const LocationIdLayout = ({ match, entity, allClasses, ...props }) => {
   return (
     <div>
       <Breadcrumb data={{ title: breadcrumb, pathname: match.url }} />
-      <Switch>
-        <Route exact strict path={match.url} component={EditLocationPage} />
-        <Route
-          path={`${match.url}/floors`}
-          render={(props) => (
-            <div>
-              <Breadcrumb
-                data={{
-                  title: T.translate("edit_floor.floors"),
-                  pathname: match.url
-                }}
-              />
-              <Switch>
-                <Route
-                  strict
-                  exact
-                  path={`${props.match.url}/new`}
-                  component={EditFloorPage}
+      <Suspense fallback={<AjaxLoader show relative size={120} />}>
+        <Switch>
+          <Route exact strict path={match.url} component={EditLocationPage} />
+          <Route
+            path={`${match.url}/floors`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_floor.floors"),
+                    pathname: match.url
+                  }}
                 />
-                <Route
-                  strict
-                  exact
-                  path={`${props.match.url}/:floor_id(\\d+)`}
-                  component={EditFloorPage}
+                <Switch>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditFloorPage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:floor_id(\\d+)`}
+                    component={EditFloorPage}
+                  />
+                  <Route component={NoMatchPage} />
+                </Switch>
+              </div>
+            )}
+          />
+          <Route
+            path={`${match.url}/rooms`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_room.rooms"),
+                    pathname: match.url
+                  }}
                 />
-                <Route component={NoMatchPage} />
-              </Switch>
-            </div>
-          )}
-        />
-        <Route
-          path={`${match.url}/rooms`}
-          render={(props) => (
-            <div>
-              <Breadcrumb
-                data={{
-                  title: T.translate("edit_room.rooms"),
-                  pathname: match.url
-                }}
-              />
-              <Switch>
-                <Route
-                  strict
-                  exact
-                  path={`${props.match.url}/new`}
-                  component={EditRoomPage}
+                <Switch>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditRoomPage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:room_id`}
+                    component={EditRoomPage}
+                  />
+                  <Route component={NoMatchPage} />
+                </Switch>
+              </div>
+            )}
+          />
+          <Route
+            path={`${match.url}/images`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_location_image.images"),
+                    pathname: match.url
+                  }}
                 />
-                <Route
-                  strict
-                  exact
-                  path={`${props.match.url}/:room_id`}
-                  component={EditRoomPage}
+                <Switch>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditLocationImagePage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:image_id`}
+                    component={EditLocationImagePage}
+                  />
+                  <Route component={NoMatchPage} />
+                </Switch>
+              </div>
+            )}
+          />
+          <Route
+            path={`${match.url}/maps`}
+            render={(props) => (
+              <div>
+                <Breadcrumb
+                  data={{
+                    title: T.translate("edit_location_map.maps"),
+                    pathname: match.url
+                  }}
                 />
-                <Route component={NoMatchPage} />
-              </Switch>
-            </div>
-          )}
-        />
-        <Route
-          path={`${match.url}/images`}
-          render={(props) => (
-            <div>
-              <Breadcrumb
-                data={{
-                  title: T.translate("edit_location_image.images"),
-                  pathname: match.url
-                }}
-              />
-              <Switch>
-                <Route
-                  strict
-                  exact
-                  path={`${props.match.url}/new`}
-                  component={EditLocationImagePage}
-                />
-                <Route
-                  strict
-                  exact
-                  path={`${props.match.url}/:image_id`}
-                  component={EditLocationImagePage}
-                />
-                <Route component={NoMatchPage} />
-              </Switch>
-            </div>
-          )}
-        />
-        <Route
-          path={`${match.url}/maps`}
-          render={(props) => (
-            <div>
-              <Breadcrumb
-                data={{
-                  title: T.translate("edit_location_map.maps"),
-                  pathname: match.url
-                }}
-              />
-              <Switch>
-                <Route
-                  strict
-                  exact
-                  path={`${props.match.url}/new`}
-                  component={EditLocationMapPage}
-                />
-                <Route
-                  strict
-                  exact
-                  path={`${props.match.url}/:map_id`}
-                  component={EditLocationMapPage}
-                />
-                <Route component={NoMatchPage} />
-              </Switch>
-            </div>
-          )}
-        />
-        <Route component={NoMatchPage} />
-      </Switch>
+                <Switch>
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/new`}
+                    component={EditLocationMapPage}
+                  />
+                  <Route
+                    strict
+                    exact
+                    path={`${props.match.url}/:map_id`}
+                    component={EditLocationMapPage}
+                  />
+                  <Route component={NoMatchPage} />
+                </Switch>
+              </div>
+            )}
+          />
+          <Route component={NoMatchPage} />
+        </Switch>
+      </Suspense>
     </div>
   );
 };
