@@ -24,6 +24,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getShowPages,
   archiveShowPage,
@@ -37,7 +38,6 @@ import { getSponsorships } from "../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../components/mui/custom-alert";
 import GlobalPagePopup from "./components/global-page/global-page-popup";
 import PageTemplatePopup from "../../sponsors-global/page-templates/page-template-popup";
-import SearchInput from "../../../components/mui/search-input";
 import { DEFAULT_CURRENT_PAGE, MAX_PER_PAGE } from "../../../utils/constants";
 
 const ShowPagesListPage = ({

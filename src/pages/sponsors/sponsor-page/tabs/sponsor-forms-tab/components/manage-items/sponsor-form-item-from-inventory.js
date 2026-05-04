@@ -21,8 +21,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { formatRateFromCents } from "../../../../../../../utils/rate-helpers";
-import SearchInput from "../../../../../../../components/mui/search-input";
 import {
   DEFAULT_CURRENT_PAGE,
   DEFAULT_PER_PAGE

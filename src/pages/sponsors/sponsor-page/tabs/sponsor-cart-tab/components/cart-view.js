@@ -27,8 +27,8 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockClosedIcon from "@mui/icons-material/Lock";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import { TotalRow } from "openstack-uicore-foundation/lib/components/mui/table/extra-rows";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import history from "../../../../../../history";
-import SearchInput from "../../../../../../components/mui/search-input";
 import {
   checkoutCart,
   deleteSponsorCartForm,

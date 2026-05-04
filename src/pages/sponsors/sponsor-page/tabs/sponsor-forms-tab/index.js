@@ -25,6 +25,7 @@ import {
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   archiveSponsorCustomizedForm,
   deleteSponsorCustomizedForm,
@@ -34,7 +35,6 @@ import {
   unarchiveSponsorCustomizedForm
 } from "../../../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
-import SearchInput from "../../../../../components/mui/search-input";
 import AddSponsorFormTemplatePopup from "./components/add-sponsor-form-template-popup";
 import CustomizedFormPopup from "./components/customized-form/customized-form-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";

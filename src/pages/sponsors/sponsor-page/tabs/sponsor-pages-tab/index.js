@@ -25,6 +25,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getSponsorManagedPages,
   getSponsorManagedPage,
@@ -39,7 +40,6 @@ import {
   resetSponsorPage
 } from "../../../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
-import SearchInput from "../../../../../components/mui/search-input";
 import {
   DEFAULT_CURRENT_PAGE,
   SPONSOR_MANAGED_PAGE_ASSIGNMENT

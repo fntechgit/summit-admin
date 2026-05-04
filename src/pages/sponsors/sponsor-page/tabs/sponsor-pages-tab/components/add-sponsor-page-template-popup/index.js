@@ -27,15 +27,14 @@ import {
   FormControlLabel,
   Grid2,
   IconButton,
-  TextField,
   Typography
 } from "@mui/material";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
-import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import MenuButton from "../../../../../../../components/mui/menu-button";
 import { querySponsorAddons } from "../../../../../../../actions/sponsor-actions";
 import { getShowPages } from "../../../../../../../actions/show-pages-actions";
@@ -59,7 +58,6 @@ const AddSponsorPageTemplatePopup = ({
   sponsor,
   summitId
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedPages, setSelectedPages] = useState([]);
 
   const sponsorshipIds = sponsor.sponsorships.map((e) => e.id);
@@ -126,20 +124,16 @@ const AddSponsorPageTemplatePopup = ({
     );
   };
 
-  const handleOnSearch = (ev) => {
-    if (ev.key === "Enter") {
-      ev.preventDefault();
-      ev.stopPropagation();
-      getShowPages(
-        searchTerm,
-        DEFAULT_CURRENT_PAGE,
-        FIVE_PER_PAGE,
-        order,
-        orderDir,
-        false,
-        sponsorshipTypeIds
-      );
-    }
+  const handleOnSearch = (searchTerm) => {
+    getShowPages(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      FIVE_PER_PAGE,
+      order,
+      orderDir,
+      false,
+      sponsorshipTypeIds
+    );
   };
 
   const handleSelected = (id, isSelected) => {
@@ -271,25 +265,11 @@ const AddSponsorPageTemplatePopup = ({
                   </MenuButton>
                 </Grid2>
                 <Grid2 size={8}>
-                  <TextField
-                    variant="outlined"
-                    value={searchTerm}
+                  <SearchInput
+                    onSearch={handleOnSearch}
                     placeholder={T.translate(
                       "edit_sponsor.placeholders.search"
                     )}
-                    slotProps={{
-                      input: {
-                        startAdornment: <SearchIcon sx={{ mr: 1 }} />
-                      }
-                    }}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                    onKeyDown={handleOnSearch}
-                    fullWidth
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        height: "36px"
-                      }
-                    }}
                   />
                 </Grid2>
               </Grid2>
