@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,42 +14,35 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import MenuItem from "./menu-item";
-import styles from "./menu.module.less";
+import ExpandableItem from "./expandable-item";
 
-function SubMenuItem({
-  name,
-  iconClass,
-  isOpen,
-  onClick,
-  onItemClick,
-  childs,
-  memberObj
-}) {
-  const _childs = childs.filter(
+function SubMenuItem({ name, onItemClick, subItems, memberObj, currentPath }) {
+  const _subItems = subItems.filter(
     (item) =>
       !item.hasOwnProperty("accessRoute") ||
       memberObj.hasAccess(item.accessRoute)
   );
 
+  const isChildActive = _subItems.some(
+    (ch) => currentPath === `/app/${ch.linkUrl}`
+  );
+
   return (
-    <div>
-      <a id={`${name}-menu`} className={styles.menuItem} onClick={onClick}>
-        <i className={`${iconClass} fa`} />
-        <span>{T.translate(`menu.${name}`)}</span>
-      </a>
-      {isOpen && (
-        <div className={styles.submenu}>
-          {_childs.map((ch) => (
-            <MenuItem
-              key={ch.name}
-              {...ch}
-              iconClass="fa-chevron-right"
-              onClick={(e) => onItemClick(e, ch.linkUrl)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <ExpandableItem
+      label={T.translate(`menu.${name}`)}
+      defaultOpen={isChildActive}
+    >
+      {_subItems.map((item) => (
+        <MenuItem
+          key={item.name}
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...item}
+          nested
+          selected={currentPath === `/app/${item.linkUrl}`}
+          onClick={(e) => onItemClick(e, item.linkUrl)}
+        />
+      ))}
+    </ExpandableItem>
   );
 }
 
