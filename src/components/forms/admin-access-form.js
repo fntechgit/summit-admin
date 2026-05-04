@@ -107,9 +107,11 @@ class AdminAccessForm extends React.Component {
             <MemberInput
               id="members"
               value={entity.members}
-              getOptionLabel={(member) => member.hasOwnProperty("email")
-                  ? `${member.first_name} ${member.last_name} (${member.email})`
-                  : `${member.first_name} ${member.last_name} (${member.id})`}
+              getOptionLabel={(member) =>
+                `${member.first_name} ${member.last_name} (${
+                  member.hasOwnProperty("email") ? member.email : member.id
+                })`
+              }
               onChange={this.handleChange}
               multi
             />

@@ -129,7 +129,7 @@ export const resetAdminAccessForm = () => (dispatch) => {
 };
 
 export const saveAdminAccess =
-  (entity, noAlert = false, redirectOnCreate = true) =>
+  (entity, redirectOnCreate = true) =>
   async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
@@ -147,41 +147,34 @@ export const saveAdminAccess =
         authErrorHandler,
         entity
       )(params)(dispatch).then(() => {
-        if (!noAlert)
-          dispatch(showSuccessMessage(T.translate("admin_access.saved")));
-        else dispatch(stopLoading());
+        dispatch(showSuccessMessage(T.translate("admin_access.saved")));
       });
-    } 
-      return postRequest(
-        createAction(UPDATE_ADMIN_ACCESS),
-        createAction(ADMIN_ACCESS_ADDED),
-        `${window.API_BASE_URL}/api/v1/summit-administrator-groups`,
-        normalizedEntity,
-        authErrorHandler,
-        entity
-      )(params)(dispatch).then((payload) => {
-        if (redirectOnCreate) {
-          const successMessage = {
-            title: T.translate("general.done"),
-            html: T.translate("admin_access.created"),
-            type: "success"
-          };
+    }
+    return postRequest(
+      createAction(UPDATE_ADMIN_ACCESS),
+      createAction(ADMIN_ACCESS_ADDED),
+      `${window.API_BASE_URL}/api/v1/summit-administrator-groups`,
+      normalizedEntity,
+      authErrorHandler,
+      entity
+    )(params)(dispatch).then((payload) => {
+      if (redirectOnCreate) {
+        const successMessage = {
+          title: T.translate("general.done"),
+          html: T.translate("admin_access.created"),
+          type: "success"
+        };
 
-          dispatch(
-            showMessage(successMessage, () => {
-              history.push(`/app/admin-access/${payload.response.id}`);
-            })
-          );
-          return;
-        }
+        dispatch(
+          showMessage(successMessage, () => {
+            history.push(`/app/admin-access/${payload.response.id}`);
+          })
+        );
+        return;
+      }
 
-        if (!noAlert) {
-          dispatch(showSuccessMessage(T.translate("admin_access.created")));
-        } else {
-          dispatch(stopLoading());
-        }
-      });
-    
+      dispatch(showSuccessMessage(T.translate("admin_access.created")));
+    });
   };
 
 export const deleteAdminAccess = (adminAccessId) => async (dispatch) => {

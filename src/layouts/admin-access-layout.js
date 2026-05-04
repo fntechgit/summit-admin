@@ -28,9 +28,17 @@ const AdminAccessLayout = ({ match }) => (
     />
 
     <Switch>
+      <Route strict exact path={match.url} component={AdminAccessListPage} />
       <Route
         strict
-        path={`${match.url}/:access_id?`}
+        exact
+        path={`${match.url}/new`}
+        component={AdminAccessListPage}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/:access_id(\\d+)`}
         component={AdminAccessListPage}
       />
       <Redirect to={match.url} />

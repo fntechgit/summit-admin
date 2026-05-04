@@ -23,7 +23,7 @@ import Divider from "@mui/material/Divider";
 import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "../../components/mui/search-input";
+import MuiSearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { getSummitById } from "../../actions/summit-actions";
 import AdminAccessForm from "../../components/forms/admin-access-form";
 import {
@@ -108,7 +108,14 @@ const AdminAccessListPage = ({
 
     if (!accessId) return;
 
-    deleteAdminAccess(accessId);
+    const nextPage =
+      admin_accesses.length === 1 && currentPage > 1
+        ? currentPage - 1
+        : currentPage;
+
+    deleteAdminAccess(accessId).then(() => {
+      getAdminAccesses(term, nextPage, perPage, order, orderDir);
+    });
   };
 
   const closeDialog = () => {
@@ -118,7 +125,7 @@ const AdminAccessListPage = ({
   };
 
   const handleSave = (adminAccessEntity) => {
-    saveAdminAccess(adminAccessEntity, false, false).then(() => {
+    saveAdminAccess(adminAccessEntity, false).then(() => {
       getAdminAccesses(term, currentPage, perPage, order, orderDir);
       closeDialog();
     });
@@ -143,10 +150,7 @@ const AdminAccessListPage = ({
     sortDir: orderDir
   };
 
-  const totalItems =
-    typeof totalAdminAccesses === "number"
-      ? totalAdminAccesses
-      : admin_accesses.length;
+  const totalItems = totalAdminAccesses;
 
   return (
     <Box className="container">
@@ -175,10 +179,11 @@ const AdminAccessListPage = ({
             alignItems: "center"
           }}
         >
-          <SearchInput
+          <MuiSearchInput
             term={searchTerm}
             onSearch={handleSearch}
             placeholder={T.translate("admin_access.placeholders.search")}
+            sx={{ width: 300 }}
           />
           <Button
             variant="contained"
