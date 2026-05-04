@@ -9,7 +9,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   REQUEST_COMPANIES,
@@ -17,11 +19,9 @@ import {
   COMPANY_DELETED
 } from "../../actions/company-actions";
 
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-
 const DEFAULT_STATE = {
-  companies: {},
-  term: null,
+  companies: [],
+  term: "",
   order: "id",
   orderDir: 1,
   currentPage: 1,
@@ -37,25 +37,25 @@ const companyListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_COMPANIES: {
-      let { order, orderDir, term, page } = payload;
-      return { ...state, order, orderDir, term, currentPage: page };
+      const { order, orderDir, term, page, perPage } = payload;
+      return { ...state, order, orderDir, term, currentPage: page, perPage };
     }
     case RECEIVE_COMPANIES: {
-      let { current_page, total, last_page } = payload.response;
-      let companies = payload.response.data.map((c) => ({
+      const { current_page, total, last_page } = payload.response;
+      const companies = payload.response.data.map((c) => ({
         ...c
       }));
 
       return {
         ...state,
-        companies: companies,
+        companies,
         currentPage: current_page,
         totalCompanies: total,
         lastPage: last_page
       };
     }
     case COMPANY_DELETED: {
-      let { companyId } = payload;
+      const { companyId } = payload;
       return {
         ...state,
         companies: state.companies.filter((s) => s.id !== companyId)

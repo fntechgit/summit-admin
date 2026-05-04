@@ -765,7 +765,8 @@
     "companies": "Companies",
     "add_company": "Add Company",
     "member_level": "Member Level",
-    "delete_company_warning": "Are you sure you want to delete company",
+    "delete_company_warning": "Are you sure you want to delete company {name}",
+    "no_results": "No items found for this search criteria.",
     "placeholders": {
       "search_companies": "Search by Company Name"
     }
@@ -801,7 +802,9 @@
     "placeholders": {
       "select_country": "Select Country",
       "sponsored_project": "Select Sponsored Project",
-      "sponsorship_type": "Select Tier"
+      "sponsorship_type": "Select Tier",
+      "select_project_first": "Select a project first",
+      "no_options": "No options"
     }
   },
   "tag_list": {
