@@ -142,7 +142,7 @@ export const resetPageTemplateForm = () => (dispatch) => {
   dispatch(createAction(RESET_PAGE_TEMPLATE_FORM)({}));
 };
 
-const normalizeEntity = (entity) => {
+export const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
   normalizedEntity.modules = normalizePageTemplateModules(entity.modules);
   return normalizedEntity;
