@@ -23,6 +23,8 @@ function SubMenuItem({ name, onItemClick, subItems, memberObj, currentPath }) {
       memberObj.hasAccess(item.accessRoute)
   );
 
+  if (_subItems.length === 0) return null;
+
   const isChildActive = _subItems.some(
     (ch) => currentPath === `/app/${ch.linkUrl}`
   );
