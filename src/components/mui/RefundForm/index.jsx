@@ -61,6 +61,7 @@ const RefundForm = ({ onSubmit }) => {
               name="amount"
               fullWidth
               size="small"
+              inCents
               label={T.translate("refund_form.amount")}
             />
           </Grid2>
