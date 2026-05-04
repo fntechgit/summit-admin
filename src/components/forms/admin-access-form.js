@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
@@ -17,6 +17,10 @@ import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
 import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
 import SummitInput from "openstack-uicore-foundation/lib/components/inputs/summit-input";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Grid2 from "@mui/material/Grid2";
+import Typography from "@mui/material/Typography";
 import {
   scrollToError,
   hasErrors,
@@ -37,7 +41,7 @@ class AdminAccessForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     const state = {};
     scrollToError(this.props.errors);
 
@@ -63,7 +67,7 @@ class AdminAccessForm extends React.Component {
     errors[id] = "";
     entity[id] = value;
 
-    this.setState({ entity: entity, errors: errors });
+    this.setState({ entity, errors });
   }
 
   handleSubmit(ev) {
@@ -77,11 +81,17 @@ class AdminAccessForm extends React.Component {
     const { entity, errors } = this.state;
 
     return (
-      <form className="admin-access-form">
+      <Box
+        component="form"
+        className="admin-access-form"
+        sx={{ width: "100%" }}
+      >
         <input type="hidden" id="id" value={entity.id} />
-        <div className="row form-group">
-          <div className="col-md-4">
-            <label> {T.translate("admin_access.title")} *</label>
+        <Grid2 container spacing={2}>
+          <Grid2 size={12}>
+            <Typography component="label" sx={{ display: "block", mb: 0.5 }}>
+              {T.translate("admin_access.title")} *
+            </Typography>
             <Input
               id="title"
               value={entity.title}
@@ -89,42 +99,46 @@ class AdminAccessForm extends React.Component {
               className="form-control"
               error={hasErrors("title", errors)}
             />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("admin_access.members")} *</label>
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <Typography component="label" sx={{ display: "block", mb: 0.5 }}>
+              {T.translate("admin_access.members")} *
+            </Typography>
             <MemberInput
               id="members"
               value={entity.members}
-              getOptionLabel={(member) => {
-                return member.hasOwnProperty("email")
+              getOptionLabel={(member) => member.hasOwnProperty("email")
                   ? `${member.first_name} ${member.last_name} (${member.email})`
-                  : `${member.first_name} ${member.last_name} (${member.id})`;
-              }}
+                  : `${member.first_name} ${member.last_name} (${member.id})`}
               onChange={this.handleChange}
-              multi={true}
+              multi
             />
-          </div>
-          <div className="col-md-4">
-            <label> {T.translate("admin_access.summits")} *</label>
+          </Grid2>
+          <Grid2 size={{ xs: 12, md: 6 }}>
+            <Typography component="label" sx={{ display: "block", mb: 0.5 }}>
+              {T.translate("admin_access.summits")} *
+            </Typography>
             <SummitInput
               id="summits"
               value={entity.summits}
               onChange={this.handleChange}
-              multi={true}
+              multi
             />
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-12 submit-buttons">
-            <input
+          </Grid2>
+          <Grid2
+            size={12}
+            sx={{ display: "flex", justifyContent: "flex-end", pt: 1 }}
+          >
+            <Button
               type="button"
+              variant="contained"
               onClick={this.handleSubmit}
-              className="btn btn-primary pull-right"
-              value={T.translate("general.save")}
-            />
-          </div>
-        </div>
-      </form>
+            >
+              {T.translate("general.save")}
+            </Button>
+          </Grid2>
+        </Grid2>
+      </Box>
     );
   }
 }
