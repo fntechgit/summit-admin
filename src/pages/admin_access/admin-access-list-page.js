@@ -16,24 +16,18 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Divider from "@mui/material/Divider";
 import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import SearchInput from "../../components/mui/search-input";
-import { getSummitById } from "../../actions/summit-actions";
-import AdminAccessForm from "../../components/forms/admin-access-form";
+import MuiSearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getAdminAccesses,
   deleteAdminAccess,
   getAdminAccess,
-  resetAdminAccessForm,
-  saveAdminAccess
+  resetAdminAccessForm
 } from "../../actions/admin-access-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import AdminAccessFormPopup from "./admin-access-form-popup";
 
 const AdminAccessListPage = ({
   admin_accesses,
@@ -43,15 +37,12 @@ const AdminAccessListPage = ({
   term,
   order,
   orderDir,
-  entity,
-  errors,
   match,
   history,
   getAdminAccesses,
   deleteAdminAccess,
   getAdminAccess,
-  resetAdminAccessForm,
-  saveAdminAccess
+  resetAdminAccessForm
 }) => {
   const [searchTerm, setSearchTerm] = useState(term || "");
   const [open, setOpen] = useState(false);
@@ -71,7 +62,9 @@ const AdminAccessListPage = ({
     }
 
     if (accessId) {
-      getAdminAccess(accessId).then(() => setOpen(true));
+      getAdminAccess(accessId)
+        .then(() => setOpen(true))
+        .catch(() => history.push("/app/admin-access"));
       return;
     }
 
@@ -108,20 +101,21 @@ const AdminAccessListPage = ({
 
     if (!accessId) return;
 
-    deleteAdminAccess(accessId);
+    const nextPage =
+      admin_accesses.length === 1 && currentPage > 1
+        ? currentPage - 1
+        : currentPage;
+
+    deleteAdminAccess(accessId)
+      .finally(() => {
+        getAdminAccesses(term, nextPage, perPage, order, orderDir);
+      })
+      .catch(() => {});
   };
 
   const closeDialog = () => {
-    resetAdminAccessForm();
     setOpen(false);
     history.push("/app/admin-access");
-  };
-
-  const handleSave = (adminAccessEntity) => {
-    saveAdminAccess(adminAccessEntity, false, false).then(() => {
-      getAdminAccesses(term, currentPage, perPage, order, orderDir);
-      closeDialog();
-    });
   };
 
   const columns = useMemo(
@@ -143,10 +137,7 @@ const AdminAccessListPage = ({
     sortDir: orderDir
   };
 
-  const totalItems =
-    typeof totalAdminAccesses === "number"
-      ? totalAdminAccesses
-      : admin_accesses.length;
+  const totalItems = totalAdminAccesses;
 
   return (
     <Box className="container">
@@ -175,10 +166,11 @@ const AdminAccessListPage = ({
             alignItems: "center"
           }}
         >
-          <SearchInput
+          <MuiSearchInput
             term={searchTerm}
             onSearch={handleSearch}
             placeholder={T.translate("admin_access.placeholders.search")}
+            sx={{ width: 300 }}
           />
           <Button
             variant="contained"
@@ -211,7 +203,7 @@ const AdminAccessListPage = ({
           totalRows={totalItems}
           getName={(adminAccess) => adminAccess?.title ?? adminAccess?.id}
           deleteDialogBody={(groupName) =>
-            `${T.translate("admin_access.delete_warning")} "${groupName}" ?`
+            `${T.translate("admin_access.delete_warning")} "${groupName}"`
           }
           confirmButtonColor="error"
           onPageChange={handlePageChange}
@@ -223,38 +215,24 @@ const AdminAccessListPage = ({
       )}
 
       {open && (
-        <Dialog open={open} onClose={closeDialog} maxWidth="md" fullWidth>
-          <DialogTitle>
-            {entity.id
-              ? T.translate("general.edit")
-              : T.translate("general.add")}{" "}
-            {T.translate("admin_access.admin_access")}
-          </DialogTitle>
-          <Divider />
-          <DialogContent sx={{ p: 3 }}>
-            <AdminAccessForm
-              entity={entity}
-              errors={errors}
-              onSubmit={handleSave}
-            />
-          </DialogContent>
-        </Dialog>
+        <AdminAccessFormPopup
+          onClose={closeDialog}
+          onSaved={() =>
+            getAdminAccesses(term, currentPage, perPage, order, orderDir)
+          }
+        />
       )}
     </Box>
   );
 };
 
-const mapStateToProps = ({ adminAccessListState, adminAccessState }) => ({
-  ...adminAccessListState,
-  entity: adminAccessState.entity,
-  errors: adminAccessState.errors
+const mapStateToProps = ({ adminAccessListState }) => ({
+  ...adminAccessListState
 });
 
 export default connect(mapStateToProps, {
-  getSummitById,
   getAdminAccesses,
   deleteAdminAccess,
   getAdminAccess,
-  resetAdminAccessForm,
-  saveAdminAccess
+  resetAdminAccessForm
 })(AdminAccessListPage);

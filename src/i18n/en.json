@@ -3349,7 +3349,7 @@
     "title": "Title",
     "members": "Members",
     "summits": "Events",
-    "delete_warning": "Are you sure you want to delete group ",
+    "delete_warning": "Please verify you want to delete group ",
     "saved": "Admin Access Group saved successfully.",
     "created": "Admin Access Group created successfully.",
     "placeholders": {
