@@ -309,9 +309,9 @@ export const getSponsor = (sponsorId) => async (dispatch, getState) => {
   const params = {
     access_token: accessToken,
     expand:
-      "company,members,sponsorships,sponsorships.type,featured_event,extra_questions,extra_questions.values,lead_report_setting",
+      "company,members,sponsorships,sponsorships.type,sponsorships.type.type,featured_event,extra_questions,extra_questions.values,lead_report_setting",
     fields:
-      "featured_event.id,featured_event.title,sponsorships.id,sponsorships.type.id,sponsorships.type.type_id"
+      "featured_event.id,featured_event.title,sponsorships.id,sponsorships.type.id,sponsorships.type.type.id,sponsorships.type.type.name"
   };
 
   return getRequest(

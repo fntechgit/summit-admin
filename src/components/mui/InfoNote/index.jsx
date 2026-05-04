@@ -8,7 +8,7 @@ const InfoNote = ({ message, sx }) => (
     <InfoOutlinedIcon
       sx={{ fontSize: 16, color: "text.secondary", mt: "2px" }}
     />
-    <Typography variant="body2" color="text.secondary">
+    <Typography variant="body1" color="text.secondary">
       {message}
     </Typography>
   </Box>

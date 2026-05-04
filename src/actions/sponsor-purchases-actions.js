@@ -16,6 +16,7 @@ import {
   createAction,
   getRequest,
   putRequest,
+  postRequest,
   deleteRequest,
   startLoading,
   stopLoading
@@ -323,11 +324,11 @@ export const refundSponsorOrder =
       access_token: accessToken
     };
 
-    return putRequest(
+    return postRequest(
       null,
       createAction(DUMMY_ACTION),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}/refund`,
-      { amount, reason },
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}/refunds`,
+      { amount, notes: reason },
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {

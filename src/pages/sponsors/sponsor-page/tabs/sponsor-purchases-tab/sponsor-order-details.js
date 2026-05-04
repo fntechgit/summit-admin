@@ -30,6 +30,7 @@ import Restrict from "../../../../../routes/restrict";
 import { formatDate } from "../../../../../utils/methods";
 import RefundForm from "../../../../../components/mui/RefundForm";
 import ClientCard from "../../../../../components/mui/ClientCard";
+import InfoNote from "../../../../../components/mui/InfoNote";
 
 const SponsorOrderDetails = ({
   match,
@@ -72,11 +73,11 @@ const SponsorOrderDetails = ({
     },
     {
       label: T.translate("edit_sponsor.purchase_tab.order_details.sponsor"),
-      value: currentSponsor.company_name
+      value: currentSponsor.company?.name || "N/A"
     },
     {
       label: T.translate("edit_sponsor.purchase_tab.order_details.tier"),
-      value: currentSponsor.sponsorships.map((s) => s.type_name).join(", ")
+      value: currentSponsor.sponsorships.map((s) => s.type.type.name).join(", ")
     }
   ];
 
@@ -162,6 +163,12 @@ const SponsorOrderDetails = ({
             variant="outlined"
           >
             <CardContent>
+              <InfoNote
+                message={T.translate(
+                  "edit_sponsor.purchase_tab.order_details.info_note"
+                )}
+                sx={{ mt: 2, mb: 3 }}
+              />
               <OrderDetailsGrid
                 lines={currentOrder?.forms || []}
                 notes={currentOrder?.notes || []}

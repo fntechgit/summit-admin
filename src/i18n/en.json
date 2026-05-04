@@ -2600,8 +2600,10 @@
         "general_info": "General Info",
         "payment_info": "Payment Info",
         "issue_refund": "Issue a Refund",
+        "info_note": "Active order items can be canceled. Canceled items show an undo action to restore them. Refund and payment rows are display-only.",
         "address_updated": "Address updated successfully",
-        "client_updated": "Client info updated successfully"
+        "client_updated": "Client info updated successfully",
+        "order_refunded": "Refund issued successfully."
       }
     },
     "mu_tab": {
