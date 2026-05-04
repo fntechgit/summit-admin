@@ -27,6 +27,7 @@ import {
 import NotesModal from "openstack-uicore-foundation/lib/components/mui/notes-modal";
 import ItemSettingsModal from "openstack-uicore-foundation/lib/components/mui/item-settings-modal";
 import { DISCOUNT_TYPES } from "../../../../../../../utils/constants";
+import showConfirmDialog from "../../../../../../../components/mui/showConfirmDialog";
 
 const parseValue = (item, timeZone) => {
   switch (item.type) {
@@ -212,7 +213,22 @@ const EditForm = ({
     [showMetadata, showTimeZone]
   );
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    if (formik.dirty) {
+      const shouldDiscardChanges = await showConfirmDialog({
+        title: T.translate("general.attention"),
+        text: T.translate(
+          "edit_sponsor.cart_tab.edit_form.unsaved_changes_warning"
+        ),
+        iconType: "warning",
+        confirmButtonColor: "warning",
+        confirmButtonText: T.translate("general.confirm"),
+        cancelButtonText: T.translate("general.cancel")
+      });
+
+      if (!shouldDiscardChanges) return;
+    }
+
     onCancel();
   };
 
