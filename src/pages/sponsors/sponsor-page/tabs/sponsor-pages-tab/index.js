@@ -33,6 +33,7 @@ import {
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  deleteSponsorCustomizedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
   resetSponsorPage
@@ -62,6 +63,7 @@ const SponsorPagesTab = ({
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  deleteSponsorCustomizedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
   resetSponsorPage
@@ -221,7 +223,17 @@ const SponsorPagesTab = ({
   };
 
   const handleCustomizedDelete = (itemId) => {
-    console.log("DELETE CUSTOMIZED ", itemId);
+    deleteSponsorCustomizedPage(itemId).then(() => {
+      const { perPage, order, orderDir } = customizedPages;
+      getSponsorCustomizedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
+    });
   };
 
   const handleShowArchived = (ev) => {
@@ -494,25 +506,25 @@ const SponsorPagesTab = ({
 
       {(openPopup === "customizedPagePopup" ||
         openPopup === "managedPagePopup") && (
-        <PageTemplatePopup
-          title={
-            openPopup === "managedPagePopup"
-              ? T.translate("edit_sponsor.pages_tab.title_customize")
-              : undefined
-          }
-          onSave={
-            openPopup === "customizedPagePopup"
-              ? handleSaveCustomizedPage
-              : handleSaveManagedPage
-          }
-          onClose={handleClosePagePopup}
-          pageTemplate={currentEditPage}
-          sponsorshipIds={sponsorshipIds}
-          summitId={currentSummit.id}
-          sponsorId={sponsor.id}
-          summitTZ={summitTZ}
-        />
-      )}
+          <PageTemplatePopup
+            title={
+              openPopup === "managedPagePopup"
+                ? T.translate("edit_sponsor.pages_tab.title_customize")
+                : undefined
+            }
+            onSave={
+              openPopup === "customizedPagePopup"
+                ? handleSaveCustomizedPage
+                : handleSaveManagedPage
+            }
+            onClose={handleClosePagePopup}
+            pageTemplate={currentEditPage}
+            sponsorshipIds={sponsorshipIds}
+            summitId={currentSummit.id}
+            sponsorId={sponsor.id}
+            summitTZ={summitTZ}
+          />
+        )}
     </Box>
   );
 };
@@ -535,6 +547,7 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  deleteSponsorCustomizedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
   resetSponsorPage

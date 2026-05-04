@@ -54,6 +54,8 @@ export const RECEIVE_SPONSOR_CUSTOMIZED_PAGE =
 export const SPONSOR_CUSTOMIZED_PAGE_ADDED = "SPONSOR_CUSTOMIZED_PAGE_ADDED";
 export const SPONSOR_CUSTOMIZED_PAGE_UPDATED =
   "SPONSOR_CUSTOMIZED_PAGE_UPDATED";
+export const SPONSOR_CUSTOMIZED_PAGE_DELETED =
+  "SPONSOR_CUSTOMIZED_PAGE_DELETED";
 export const SPONSOR_CUSTOMIZED_PAGE_ARCHIVED =
   "SPONSOR_CUSTOMIZED_PAGE_ARCHIVED";
 export const SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED =
@@ -545,6 +547,38 @@ export const unarchiveCustomizedPage =
             html: T.translate(
               "edit_sponsor.pages_tab.customized_page_unarchived"
             )
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
+export const deleteSponsorCustomizedPage =
+  (pageId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_CUSTOMIZED_PAGE_DELETED)({ pageId }),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages/${pageId}`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("show_pages.page_delete_success")
           })
         );
       })
