@@ -806,6 +806,8 @@
   },
   "tag_list": {
     "tag_list": "Tag List",
+    "item": "item",
+    "items": "items",
     "tags": "Tags",
     "add_tag": "Add Tag",
     "delete_tag_warning": "Are you sure you want to delete tag",
@@ -818,6 +820,7 @@
   "edit_tag": {
     "tag": "Tag",
     "name": "Name",
+    "name_required": "Name is required.",
     "tag_saved": "Tag saved successfully.",
     "tag_created": "Tag created successfully."
   },
