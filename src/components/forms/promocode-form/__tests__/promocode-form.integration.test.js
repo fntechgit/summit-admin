@@ -128,7 +128,7 @@ const baseSummit = {
   default_ticket_type_currency_symbol: "$"
 };
 
-const renderForm = (entity) =>
+const renderForm = (entity, extraProps = {}) =>
   render(
     <PromocodeForm
       entity={entity}
@@ -140,6 +140,13 @@ const renderForm = (entity) =>
         { class_name: "SPEAKER_PROMO_CODE", type: [] },
         { class_name: "SPEAKER_DISCOUNT_CODE", type: [] },
         { class_name: "SPONSOR_PROMO_CODE", type: [] },
+        { class_name: "SPONSOR_DISCOUNT_CODE", type: [] },
+        { class_name: "SUMMIT_PROMO_CODE", type: [] },
+        { class_name: "SUMMIT_DISCOUNT_CODE", type: [] },
+        { class_name: "PRE_PAID_PROMO_CODE", type: [] },
+        { class_name: "PRE_PAID_DISCOUNT_CODE", type: [] },
+        { class_name: "SPEAKERS_PROMO_CODE", type: [] },
+        { class_name: "SPEAKERS_DISCOUNT_CODE", type: [] },
         { class_name: "DOMAIN_AUTHORIZED_PROMO_CODE", type: [] },
         { class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE", type: [] }
       ]}
@@ -152,6 +159,7 @@ const renderForm = (entity) =>
       getAssignedSpeakers={() => {}}
       unAssignSpeaker={() => {}}
       resetPromocodeForm={() => {}}
+      {...extraProps}
     />
   );
 
