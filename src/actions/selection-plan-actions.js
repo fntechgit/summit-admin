@@ -12,7 +12,7 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
-import debounce from "lodash/debounce"
+import debounce from "lodash/debounce";
 import {
   getRequest,
   putRequest,
@@ -35,7 +35,12 @@ import {
   fetchErrorHandler
 } from "../utils/methods";
 import { saveMarketingSetting } from "./marketing-actions";
-import { DEBOUNCE_WAIT, DEFAULT_PER_PAGE } from "../utils/constants";
+import {
+  DEBOUNCE_WAIT,
+  DEFAULT_CURRENT_PAGE,
+  DEFAULT_ORDER_DIR,
+  DEFAULT_PER_PAGE
+} from "../utils/constants";
 
 URI.escapeQuerySpace = false;
 
@@ -66,7 +71,13 @@ export const SELECTION_PLAN_PROGRESS_FLAG_ORDER_UPDATED =
   "SELECTION_PLAN_PROGRESS_FLAG_ORDER_UPDATED";
 
 export const getSelectionPlans =
-  (term = "", page = 1, order = "id", orderDir = 1) =>
+  (
+    term = "",
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = DEFAULT_ORDER_DIR
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -84,7 +95,7 @@ export const getSelectionPlans =
       access_token: accessToken,
       relations: "none",
       page,
-      per_page: DEFAULT_PER_PAGE,
+      per_page: perPage,
       order: `${orderDir === 1 ? "" : "-"}${order}`
     };
 
@@ -93,10 +104,11 @@ export const getSelectionPlans =
     }
 
     return getRequest(
-      null,
+      createAction(REQUEST_SELECTION_PLANS),
       createAction(RECEIVE_SELECTION_PLANS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/selection-plans`,
-      authErrorHandler
+      authErrorHandler,
+      { order, orderDir, page, perPage, term }
     )(params)(dispatch).then(async () => {
       dispatch(stopLoading());
     });
