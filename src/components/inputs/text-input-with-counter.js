@@ -13,7 +13,7 @@
 
 import React from "react";
 import PropTypes from "prop-types";
-import { Input } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 
 const TextInputWithCounter = ({
   className,

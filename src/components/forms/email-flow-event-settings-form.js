@@ -14,7 +14,8 @@ import React, { useEffect, useState } from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 import { hasErrors, scrollToError } from "../../utils/methods";
-import { Input, UploadInput } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 import HexColorInput from "../inputs/hex-color-input";
 import Swal from "sweetalert2";
 import { parse } from "address-rfc2822";

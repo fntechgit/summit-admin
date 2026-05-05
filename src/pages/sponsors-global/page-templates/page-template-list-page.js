@@ -24,6 +24,8 @@ import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   archivePageTemplate,
   deletePageTemplate,
@@ -33,8 +35,6 @@ import {
   unarchivePageTemplate,
   resetPageTemplateForm
 } from "../../../actions/page-template-actions";
-import MuiTable from "../../../components/mui/table/mui-table";
-import SearchInput from "../../../components/mui/search-input";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import PageTemplatePopup from "./page-template-popup";
 import PageTemplateClonePopup from "./page-template-clone-popup";
@@ -47,7 +47,7 @@ const PageTemplateListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   totalPageTemplates,
   getPageTemplates,
   getPageTemplate,
@@ -65,7 +65,7 @@ const PageTemplateListPage = ({
   }, []);
 
   const handlePageChange = (page) => {
-    getPageTemplates(term, page, perPage, order, orderDir, hideArchived);
+    getPageTemplates(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
@@ -75,29 +75,29 @@ const PageTemplateListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
   const handleSort = (key, dir) => {
-    getPageTemplates(term, currentPage, perPage, key, dir, hideArchived);
+    getPageTemplates(term, currentPage, perPage, key, dir, showArchived);
   };
 
   const handleSearch = (searchTerm) => {
     getPageTemplates(
       searchTerm,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
-  const handleHideArchived = (ev) => {
+  const handleShowArchived = (ev) => {
     getPageTemplates(
       term,
-      currentPage,
+      DEFAULT_CURRENT_PAGE,
       perPage,
       order,
       orderDir,
@@ -135,7 +135,7 @@ const PageTemplateListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       )
     );
   };
@@ -217,11 +217,16 @@ const PageTemplateListPage = ({
         >
           <FormGroup>
             <FormControlLabel
-              control={<Checkbox onChange={handleHideArchived} />}
-              label={T.translate("page_template_list.hide_archived")}
+              control={
+                <Checkbox
+                  checked={showArchived}
+                  onChange={handleShowArchived}
+                />
+              }
+              label={T.translate("page_template_list.show_archived")}
             />
           </FormGroup>
-          <Grid2 size={4}>
+          <Grid2 size={3}>
             <SearchInput
               onSearch={handleSearch}
               term={term}

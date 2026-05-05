@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown } from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import T from "i18n-react";
 
 const AcceptanceCriteriaDropdown = ({ id, value, onChange, ...rest }) => {

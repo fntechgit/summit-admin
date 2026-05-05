@@ -20,11 +20,14 @@ import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import moment from "moment-timezone";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import FormItemTable from "../../../../../../../components/mui/FormItemTable";
+import {
+  MuiFormItemTable,
+  getCurrentApplicableRate
+} from "openstack-uicore-foundation/lib/components";
+import NotesModal from "openstack-uicore-foundation/lib/components/mui/notes-modal";
+import ItemSettingsModal from "openstack-uicore-foundation/lib/components/mui/item-settings-modal";
 import { DISCOUNT_TYPES } from "../../../../../../../utils/constants";
-import NotesModal from "../../../../../../../components/mui/NotesModal";
-import ItemSettingsModal from "../../../../../../../components/mui/ItemSettingsModal";
-import { getCurrentApplicableRate } from "../../../../../../../components/mui/FormItemTable/helpers";
+import showConfirmDialog from "../../../../../../../components/mui/showConfirmDialog";
 
 const parseValue = (item, timeZone) => {
   switch (item.type) {
@@ -32,16 +35,20 @@ const parseValue = (item, timeZone) => {
       return item.current_value
         ? parseInt(item.current_value)
         : item.minimum_quantity || 0;
-    case "ComboBox":
+    case "RadioButtonList":
+    case "ComboBox": {
+      const defaultVal = item.values.find((v) => v.is_default)?.id;
+      return item.current_value || defaultVal || "";
+    }
+    case "CheckBoxList": {
+      const defaultVal = item.values.find((v) => v.is_default)?.id;
+      return item.current_value || (defaultVal ? [defaultVal] : []);
+    }
     case "Text":
     case "TextArea":
       return item.current_value || "";
     case "CheckBox":
       return item.current_value ? item.current_value === "True" : false;
-    case "CheckBoxList":
-      return item.current_value || [];
-    case "RadioButtonList":
-      return item.current_value || "";
     case "Time":
       return item.current_value
         ? moment.tz(item.current_value, "HH:mm", timeZone)
@@ -150,12 +157,10 @@ const buildInitialValues = (form, timeZone) => {
 
 const buildValidationSchema = (items) => {
   const schema = items.reduce((acc, item) => {
-    item.meta_fields
-      .filter((f) => f.class_field === "Form")
-      .map((f) => {
-        acc[`i-${item.form_item_id}-c-${f.class_field}-f-${f.type_id}`] =
-          getYupValidation(f);
-      });
+    item.meta_fields.map((f) => {
+      acc[`i-${item.form_item_id}-c-${f.class_field}-f-${f.type_id}`] =
+        getYupValidation(f);
+    });
     // notes
     acc[`i-${item.form_item_id}-c-global-f-notes`] = yup.string(
       T.translate("validation.string")
@@ -208,7 +213,22 @@ const EditForm = ({
     [showMetadata, showTimeZone]
   );
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    if (formik.dirty) {
+      const shouldDiscardChanges = await showConfirmDialog({
+        title: T.translate("general.attention"),
+        text: T.translate(
+          "edit_sponsor.cart_tab.edit_form.unsaved_changes_warning"
+        ),
+        iconType: "warning",
+        confirmButtonColor: "warning",
+        confirmButtonText: T.translate("general.confirm"),
+        cancelButtonText: T.translate("general.cancel")
+      });
+
+      if (!shouldDiscardChanges) return;
+    }
+
     onCancel();
   };
 
@@ -273,6 +293,10 @@ const EditForm = ({
   // wait for formik to re-initialize with form items
   if (!form || Object.keys(formik.values).length === 0) return null;
 
+  const hasItemFieldErrors = Object.keys(formik.errors).some(
+    (key) => key.includes("-c-Item-") && formik.touched[key]
+  );
+
   return (
     <>
       <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
@@ -284,7 +308,7 @@ const EditForm = ({
       </Box>
       <FormikProvider value={formik}>
         <Box component="form" onSubmit={formik.handleSubmit} autoComplete="off">
-          <FormItemTable
+          <MuiFormItemTable
             data={form.items}
             currentApplicableRate={currentApplicableRate}
             values={formik.values}
@@ -315,6 +339,18 @@ const EditForm = ({
               {T.translate("general.save")}
             </Button>
           </Box>
+          {hasItemFieldErrors && (
+            <Box component="div" sx={{ mt: 1 }}>
+              <Typography
+                variant="caption"
+                color="error"
+                display="block"
+                sx={{ mt: 0.25, textAlign: "right" }}
+              >
+                {T.translate("validation.additional_items")}
+              </Typography>
+            </Box>
+          )}
         </Box>
         <NotesModal
           item={notesItem}

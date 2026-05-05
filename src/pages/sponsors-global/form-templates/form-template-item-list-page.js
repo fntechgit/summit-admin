@@ -27,7 +27,7 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
-import MuiTable from "../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   cloneFromInventoryItem,
   deleteFormTemplateItem,
@@ -55,7 +55,7 @@ const FormTemplateItemListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   getInventoryItems,
   totalFormTemplateItems,
   cloneFromInventoryItem,
@@ -84,7 +84,7 @@ const FormTemplateItemListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
   }, []);
@@ -97,7 +97,19 @@ const FormTemplateItemListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
+    );
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getFormTemplateItems(
+      formTemplateId,
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      showArchived
     );
   };
 
@@ -109,7 +121,7 @@ const FormTemplateItemListPage = ({
       perPage,
       key,
       dir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -128,20 +140,20 @@ const FormTemplateItemListPage = ({
     const promises = items.map((item) =>
       cloneFromInventoryItem(formTemplateId, item)
     );
-    Promise.all(promises)
-      .then(() => {
-        getFormTemplateItems(
-          formTemplateId,
-          term,
-          currentPage,
-          perPage,
-          order,
-          orderDir,
-          hideArchived
-        );
-      })
-      .catch((error) => {
-        console.error(error);
+    Promise.allSettled(promises)
+      .then((results) => {
+        const anySucceeded = results.some((r) => r.status === "fulfilled");
+        if (anySucceeded) {
+          getFormTemplateItems(
+            formTemplateId,
+            term,
+            currentPage,
+            perPage,
+            order,
+            orderDir,
+            showArchived
+          );
+        }
       })
       .finally(() => {
         setShowAddInventoryItemsModal(false);
@@ -153,7 +165,7 @@ const FormTemplateItemListPage = ({
       ? unarchiveFormTemplateItem(formTemplateId, item)
       : archiveFormTemplateItem(formTemplateId, item);
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getFormTemplateItems(
       formTemplateId,
       term,
@@ -174,7 +186,7 @@ const FormTemplateItemListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       )
     );
     setShowInventoryItemModal(false);
@@ -260,15 +272,16 @@ const FormTemplateItemListPage = ({
               <FormControlLabel
                 control={
                   <Checkbox
-                    onChange={handleHideArchivedForms}
+                    checked={showArchived}
+                    onChange={handleShowArchivedForms}
                     inputProps={{
                       "aria-label": T.translate(
-                        "form_template_item_list.hide_archived"
+                        "form_template_item_list.show_archived"
                       )
                     }}
                   />
                 }
-                label={T.translate("form_template_item_list.hide_archived")}
+                label={T.translate("form_template_item_list.show_archived")}
               />
             </FormGroup>
           </Grid2>
@@ -295,6 +308,7 @@ const FormTemplateItemListPage = ({
             totalRows={totalFormTemplateItems}
             currentPage={currentPage}
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
             onEdit={handleRowEdit}
             onArchive={handleArchiveItem}

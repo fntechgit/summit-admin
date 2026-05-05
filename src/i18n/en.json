@@ -9,7 +9,9 @@
     "not_allowed": "You are not allowed here, please login with another user to access this page.",
     "not_found": "Not Found!",
     "entity_not_found": "The entity you are looking for was not found.",
-    "maximum_files": "Maximum number of files has been reached"
+    "maximum_files": "Maximum number of files has been reached",
+    "payment_profile_not_found_title": "Payment Profile not found",
+    "payment_profile_not_found": "Missing payment profile for summit {{summitName}}. Please contact support."
   },
   "general": {
     "summit": "Event",
@@ -27,6 +29,7 @@
     "file": "File",
     "logo": "Logo",
     "secondary_logo": "Secondary Logo",
+    "full_name": "Full Name",
     "first_name": "First Name",
     "last_name": "Last Name",
     "member": "Member",
@@ -51,6 +54,7 @@
     "save": "Save",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    "return": "Return",
     "ingest": "Ingest",
     "save_and_publish": "Save & Publish",
     "save_and_add_next": "Save & Add Next",
@@ -82,6 +86,8 @@
     "sort_asc_label": "A-Z",
     "sort_desc_label": "Z-A",
     "n_a": "N/A",
+    "to": "To",
+    "from": "From",
     "placeholders": {
       "search_speakers": "Search Speakers by Name, Email, Speaker Id or Member Id",
       "select_acceptance_criteria": "Select acceptance criteria",
@@ -107,7 +113,9 @@
     "maximum": "Must be at most {maximum}",
     "time": "Wrong time format.",
     "wrong_format": "Wrong format.",
-    "add_on_required": "Select at least one add-on"
+    "add_on_required": "Select at least one add-on",
+    "additional_items": "Unable to save due to missing required additional info — click the ⚙ icon to review",
+    "extra_question_value": "This question type requires at least one value."
   },
   "price_tiers": {
     "early_bird_rate": "Early Bird Rate",
@@ -1351,6 +1359,7 @@
     "allowed_groups": "Allowed Groups",
     "group_saved": "Activity Category Group saved successfully.",
     "group_created": "Activity Category Group created successfully.",
+    "unlink_track_warning": "if you remove a category from the category group, any activities linked to that category will automatically be removed from the selection plan. Do you want to continue?",
     "placeholders": {
       "select_class": "Select Class"
     }
@@ -2436,7 +2445,7 @@
     },
     "forms_tab": {
       "alert_info": "To add a Sponsor Specific Form for this show's sponsor, click Add Form Template or Create New Form button. Note: this form will be visible only to this sponsor for this show. The General Forms can only be managed on the Show's Forms page.",
-      "hide_archived": "Hide archived Forms",
+      "show_archived": "Show archived Forms",
       "using_template": "Using Template",
       "new_form": "New Form",
       "forms": "forms",
@@ -2446,9 +2455,11 @@
       "add_ons": "Add-ons",
       "opens_at": "Opens at",
       "expires_at": "Expires at",
+      "item": "Item",
       "items": "Items",
       "managed_forms": "Managed Forms",
       "manage_items": "Manage Items",
+      "none": "None",
       "customize": "Customize",
       "archive": "Archive",
       "unarchive": "Unarchive",
@@ -2463,11 +2474,6 @@
         "expires_at": "Expires at",
         "instructions": "Instructions",
         "additional_fields": "Additional Input Fields",
-        "meta_field_title": "Field Title",
-        "meta_field_type": "Field Type",
-        "meta_field_required": "Required",
-        "delete_meta_field_warning": "Are you sure you want to delete meta field ",
-        "delete_value_warning": "Are you sure you want to delete meta field value ",
         "save": "Save Form",
         "created": "Form created successfully.",
         "updated": "Form {formName} updated successfully.",
@@ -2479,7 +2485,7 @@
         "add_item": "Add Item",
         "add_item_inventory": "Add Item from Inventory",
         "alert_info": "You can add or archive items from the list. To edit an item click on the item's Edit button. You can also change only a rate by clicking on it.",
-        "hide_archived": "Hide archived items",
+        "show_archived": "Show archived items",
         "select_items": "Select items",
         "code": "Code",
         "name": "Name",
@@ -2499,7 +2505,7 @@
     },
     "pages_tab": {
       "alert_info": "To add a Sponsor Specific Page for this show's sponsor, click Add Page button. Note: this Page will be visible only to this sponsor for this show. The General Pages can only be managed on the Show's Pages section.",
-      "hide_archived": "Hide archived Pages",
+      "show_archived": "Show archived Pages",
       "using_template": "Using Template",
       "new_page": "New Page",
       "pages": "pages",
@@ -2559,6 +2565,7 @@
         "discount": "Discount",
         "total_on_caps": "TOTAL",
         "no_forms_found": "No forms found.",
+        "unsaved_changes_warning": "You have unsaved changes. Discard changes?",
         "form_added": "Form added successfully.",
         "form_updated": "Form updated successfully."
       },
@@ -2571,6 +2578,21 @@
         "title": "Order Notes",
         "placeholder": "Enter internal note...",
         "deleted": "Note deleted successfully."
+      },
+      "invoice_view": {
+        "title": "Purchase confirmed",
+        "go_to_orders": "Go to orders"
+      },
+      "payment_view": {
+        "code": "Form code",
+        "contents": "Contents",
+        "addon": "Add-on",
+        "discount": "Discount",
+        "amount": "Amount",
+        "total": "Total",
+        "rate": "Rate",
+        "billing_info": "Billing Information",
+        "payment_success": "Payment successful"
       }
     },
     "purchase_tab": {
@@ -2623,27 +2645,44 @@
     "last_name": "Last Name",
     "email": "Email",
     "company": "Company",
+    "scan_popup": {
+      "scan_qr": "Scan QR",
+      "attendee": "Attendee",
+      "error": "Cannot read QR code, please try again",
+      "badge_scanned": "Badge scanned successfully",
+      "rescan": "Re-scan",
+      "attendee_placeholder": "Enter Attendee..."
+    },
     "placeholders": {
       "search": "Search..."
     }
   },
   "additional_inputs": {
-    "meta_field_title": "Field Title",
-    "meta_field_type": "Field Type",
-    "meta_field_required": "Required",
-    "delete_meta_field_warning": "Are you sure you want to delete meta field ",
+    "title": "Field Title",
+    "type": "Field Type",
+    "required": "Required",
+    "delete_warning": "Are you sure you want to delete meta field ",
     "delete_value_warning": "Are you sure you want to delete meta field value ",
     "placeholders": {
-      "meta_field_title": "Field Title",
-      "meta_field_type": "Select...",
-      "meta_field_maximum_quantity": "Maximum",
-      "meta_field_minimum_quantity": "Minimum"
+      "title": "Field Title",
+      "type": "Select...",
+      "maximum_quantity": "Maximum",
+      "minimum_quantity": "Minimum"
+    }
+  },
+  "meta_fields": {
+    "delete_value_warning": "Please verify you want to delete the added value",
+    "is_default": "Is Default?",
+    "add_value": "Add a value",
+    "placeholders": {
+      "name": "Name",
+      "value": "Value"
     }
   },
   "sponsor_forms": {
     "forms": "Forms",
     "alert_info": "To add an order form, select Add Form to start the process. To edit an existing form, click on the form name. To edit the line items within the form click manage items on the form line you wish to edit.",
-    "hide_archived": "Hide archived Forms",
+    "show_archived": "Show archived Forms",
     "using_global": "Using Global Template",
     "add_form": "New Form Template",
     "code_column_label": "Code",
@@ -2654,6 +2693,7 @@
     "tiers_column_label": "Tiers",
     "manage_items_button": "Manage Items",
     "form_delete_success": "Form successfully deleted.",
+    "manage_items": "Manage Items",
     "unarchive_button": "Unarchive",
     "archive_button": "Archive",
     "remove_form_warning": "Please verify you want to delete {name}",
@@ -2692,11 +2732,6 @@
       "expires_at": "Expires at",
       "instructions": "Instructions",
       "additional_fields": "Additional Input Fields",
-      "meta_field_title": "Field Title",
-      "meta_field_type": "Field Type",
-      "meta_field_required": "Required",
-      "delete_meta_field_warning": "Are you sure you want to delete meta field ",
-      "delete_value_warning": "Are you sure you want to delete meta field value ",
       "save": "Save Form",
       "created": "Form created successfully.",
       "updated": "Form {formName} updated successfully.",
@@ -2712,7 +2747,7 @@
     "standard_rate": "Standard rate",
     "onsite_rate": "On site rate",
     "default_quantity": "Default quantity",
-    "hide_archived": "Hide archived items",
+    "show_archived": "Show archived items",
     "add_item": "Add Item",
     "add_item_from_inventory": "Add Item from Inventory",
     "archive_button": "Archive",
@@ -2738,7 +2773,7 @@
       "quantity_limit_per_sponsor": "Limit total amount per sponsor (empty = disabled)",
       "default_quantity": "Default quantity",
       "additional_fields": "Additional Input Fields",
-      "images": "Images",
+      "images": "Image File",
       "save": "save changes",
       "created": "Item created successfully.",
       "updated": "Item {name} updated successfully."
@@ -2765,13 +2800,14 @@
     "info_mod_column_label": "Info Mod",
     "upload_mod_column_label": "Upload Mod",
     "download_mod_column_label": "Download Mod",
-    "hide_archived": "Hide archived Pages",
+    "show_archived": "Show archived Pages",
     "filter": "Filter",
     "sort_by": "Sort By",
     "all_tiers": "All Tiers",
     "no_sponsors_pages": "No pages found for this search criteria.",
     "page_saved": "Page updated successfully.",
     "page_created": "Page created successfully.",
+    "page_delete_warning": "Please verify you want to delete {page}",
     "page_delete_success": "Page successfully deleted.",
     "placeholders": {
       "search": "Search..."
@@ -2860,7 +2896,9 @@
       "select_users": "Select Users",
       "select_all_users": "Select All Users",
       "import_users": "Import Users",
-      "success": "Users imported successfully."
+      "running": "Users import running on background.",
+      "success": "Users imported successfully.",
+      "fail": "Import failed"
     }
   },
   "sponsorship_list": {
@@ -3828,7 +3866,7 @@
     "unarchive_button": "Unarchive",
     "delete_inventory_item_warning": "Are you sure you want to delete inventory item ",
     "add_inventory_item": "Create new Item",
-    "hide_archived": "Hide archived items",
+    "show_archived": "Show archived items",
     "placeholders": {
       "search_inventory_items": "Search"
     }
@@ -3855,7 +3893,7 @@
     "meta_field_required": "Required Field",
     "meta_field_type": "Field Type",
     "meta_field_add_value": "Add a value",
-    "meta_field_is_default": "Is Default?",
+    "meta_field_is_default": "Default Value",
     "placeholders": {
       "meta_field_name": "Name",
       "meta_field_value": "Value",
@@ -3870,7 +3908,7 @@
     "delete_value_warning": "Please verify you want to delete the added value",
     "name": "Name",
     "value": "Value",
-    "is_default": "Is Default?",
+    "is_default": "Default Value",
     "commit_value": "Set Value",
     "placeholders": {
       "name": "Name",
@@ -3884,7 +3922,7 @@
     "name_column_label": "Name",
     "items_column_label": "Items",
     "manage_items": "Manage Items",
-    "hide_archived": "Hide archived forms",
+    "show_archived": "Show archived forms",
     "delete_form_template_warning": "Are you sure you want to delete form template ",
     "using_duplicate": "Using Duplicate",
     "add_form_template": "New Form",
@@ -3902,22 +3940,10 @@
     "instructions": "Instructions",
     "delete_meta_field_warning": "Are you sure you want to delete meta field ",
     "meta_fields": "Additional Input Fields",
-    "meta_field_values": "Field Values",
     "materials": "Materials",
     "save_changes": "Save Changes",
     "add_form": "Add Form",
-    "required_error": "This field is required.",
-    "meta_field_title": "Field Title",
-    "meta_field_required": "Required Field",
-    "meta_field_type": "Field Type",
-    "placeholders": {
-      "meta_field_title": "Field Title",
-      "meta_field_required": "Required Field",
-      "meta_field_type": "Field Type",
-      "meta_field_values": "Field Values",
-      "meta_field_minimum_quantity": "Minimum Quantity",
-      "meta_field_maximum_quantity": "Maximum Quantity"
-    }
+    "required_error": "This field is required."
   },
   "form_template_from_duplicate_dialog": {
     "duplicate_form": "Duplicate Form",
@@ -3936,7 +3962,7 @@
     "alert_info": "You can clone, create or archive items from the list. To edit an item click on it.",
     "code_column_label": "Code",
     "name_column_label": "Name",
-    "hide_archived": "Hide archived items",
+    "show_archived": "Show archived items",
     "add_item": "Add Item",
     "archive_button": "Archive",
     "unarchive_button": "Unarchive",
@@ -3963,22 +3989,8 @@
     }
   },
   "edit_form_template_item": {
-    "form_template_item": "Item",
     "form_template_item_created": "Form Template Item created successfully.",
-    "form_template_item_saved": "Form Template Item saved successfully.",
-    "code": "Code",
-    "name": "Name",
-    "description": "Description",
-    "delete_meta_field_warning": "Are you sure you want to delete meta field ",
-    "meta_fields": "Additional Input Fields",
-    "meta_field_values": "Field Values",
-    "placeholders": {
-      "meta_field_title": "Field Title",
-      "meta_field_required": "Required Field",
-      "meta_field_type": "Field Type",
-      "meta_field_values": "Field Values"
-    },
-    "images": "Images"
+    "form_template_item_saved": "Form Template Item saved successfully."
   },
   "mui_table": {
     "no_items": "No items found.",
@@ -4066,7 +4078,7 @@
     "info_mod": "Info Mod",
     "upload_mod": "Upload Mod",
     "download_mod": "Download Mod",
-    "hide_archived": "Hide archived pages",
+    "show_archived": "Show archived pages",
     "no_pages": "No pages found.",
     "add_new": "New Page",
     "add_template": "Using Template",
@@ -4080,7 +4092,7 @@
     },
     "page_crud": {
       "title_create": "Create New Page",
-      "title_edit": "Edit Page",
+      "title_edit": "Edit Page Template",
       "add_info": "Add Info",
       "add_doc": "Add Document Download",
       "add_media": "Add Media Request",

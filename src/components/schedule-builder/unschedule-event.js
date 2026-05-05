@@ -14,7 +14,7 @@ import React from "react";
 import { DraggableItemTypes } from "./draggable-items-types";
 import { useDrag } from "react-dnd";
 import { Popover, OverlayTrigger } from "react-bootstrap";
-import { RawHTML } from "openstack-uicore-foundation/lib/components";
+import RawHTML from "openstack-uicore-foundation/lib/components/raw-html";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
 
 const UnScheduleEvent = ({

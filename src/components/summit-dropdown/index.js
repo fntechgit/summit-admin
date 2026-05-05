@@ -14,7 +14,7 @@
 import React from "react";
 
 import T from "i18n-react/dist/i18n-react";
-import { SummitInput } from "openstack-uicore-foundation/lib/components";
+import SummitInput from "openstack-uicore-foundation/lib/components/inputs/summit-input";
 import styles from "./index.module.less";
 
 export default class SummitDropdown extends React.Component {

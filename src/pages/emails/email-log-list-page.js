@@ -15,12 +15,10 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  Table,
-  Dropdown,
-  DateTimePicker
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Table from "openstack-uicore-foundation/lib/components/table"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SegmentedControl } from "segmented-control";
 import { getSentEmails } from "../../actions/email-actions";

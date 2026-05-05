@@ -16,13 +16,11 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import {
-  ActionDropdown,
-  FreeTextSearch,
-  Dropdown,
-  Table,
-  DateTimePicker
-} from "openstack-uicore-foundation/lib/components";
+import ActionDropdown from "openstack-uicore-foundation/lib/components/inputs/action-dropdown"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Table from "openstack-uicore-foundation/lib/components/table"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { getSummitById } from "../../actions/summit-actions";
 import {

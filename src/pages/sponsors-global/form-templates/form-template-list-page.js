@@ -18,14 +18,14 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2,
-  TextField
+  Grid2
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   archiveFormTemplate,
   deleteFormTemplate,
@@ -38,7 +38,6 @@ import {
   saveFormTemplate,
   unarchiveFormTemplate
 } from "../../../actions/form-template-actions";
-import MuiTable from "../../../components/mui/table/mui-table";
 import FormTemplateDialog from "./form-template-popup";
 import history from "../../../history";
 import FormTemplateFromDuplicateDialog from "./form-template-from-duplicate-popup";
@@ -51,7 +50,7 @@ const FormTemplateListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   totalFormTemplates,
   currentFormTemplate,
   currentFormTemplateErrors,
@@ -71,7 +70,6 @@ const FormTemplateListPage = ({
     formTemplateFromDuplicatePopupOpen,
     setFormTemplateFromDuplicatePopupOpen
   ] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     getFormTemplates(
@@ -80,13 +78,13 @@ const FormTemplateListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
     resetFormTemplateForm();
   }, []);
 
   const handlePageChange = (page) => {
-    getFormTemplates(term, page, perPage, order, orderDir, hideArchived);
+    getFormTemplates(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
@@ -96,28 +94,23 @@ const FormTemplateListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
   const handleSort = (key, dir) => {
-    getFormTemplates(term, currentPage, perPage, key, dir, hideArchived);
+    getFormTemplates(term, currentPage, perPage, key, dir, showArchived);
   };
 
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getFormTemplates(
-        searchTerm,
-        currentPage,
-        perPage,
-        order,
-        orderDir,
-        hideArchived
-      );
-    }
-    // search on duplicate popup
-    if (typeof ev === "string")
-      getFormTemplates(ev, currentPage, perPage, order, orderDir, hideArchived);
+  const handleSearch = (searchTerm) => {
+    getFormTemplates(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      showArchived
+    );
   };
 
   const handleRowEdit = (row) => {
@@ -153,7 +146,7 @@ const FormTemplateListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
     setFormTemplateDuplicate(false);
     setFormTemplateFromDuplicatePopupOpen(false);
@@ -162,7 +155,7 @@ const FormTemplateListPage = ({
   const handleArchiveItem = (item) =>
     item.is_archived ? unarchiveFormTemplate(item) : archiveFormTemplate(item);
 
-  const handleHideArchivedForms = (value) => {
+  const handleShowArchivedForms = (value) => {
     getFormTemplates(
       term,
       DEFAULT_CURRENT_PAGE,
@@ -254,37 +247,27 @@ const FormTemplateListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={(ev) => handleHideArchivedForms(ev.target.checked)}
+                  onChange={(ev) => handleShowArchivedForms(ev.target.checked)}
+                  checked={showArchived}
                   inputProps={{
                     "aria-label": T.translate(
-                      "form_template_list.hide_archived"
+                      "form_template_list.show_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("form_template_list.hide_archived")}
+              label={T.translate("form_template_list.show_archived")}
             />
           </FormGroup>
 
-          <TextField
-            variant="outlined"
-            value={searchTerm}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-            slotProps={{
-              input: {
-                startAdornment: <SearchIcon sx={{ mr: 1 }} />
-              }
-            }}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={handleSearch}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                height: "36px"
-              }
-            }}
-          />
+          <Grid2 size={3}>
+            <SearchInput
+              onSearch={handleSearch}
+              placeholder={T.translate(
+                "inventory_item_list.placeholders.search_inventory_items"
+              )}
+            />
+          </Grid2>
           <Button
             variant="contained"
             size="medium"

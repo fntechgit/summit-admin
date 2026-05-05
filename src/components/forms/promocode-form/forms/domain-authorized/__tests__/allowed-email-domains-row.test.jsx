@@ -4,57 +4,58 @@ import AllowedEmailDomainsRow from "../AllowedEmailDomainsRow";
 
 // TagInput mock exposes programmatic onCreate / onChange hooks via data-testid
 // buttons so we can drive both code paths without the real TagInput runtime.
-jest.mock("openstack-uicore-foundation/lib/components", () => {
+// Mocks the direct import path used by AllowedEmailDomainsRow (post-bundle-size
+// rewrite — see master commit cd8b5b98).
+jest.mock("openstack-uicore-foundation/lib/components/inputs/tag-input", () => {
   const React = require("react");
-  return {
-    TagInput: (props) => {
-      const draftRef = React.useRef("");
-      const tags = Array.isArray(props.value) ? props.value : [];
-      return React.createElement(
-        "div",
-        { id: props.id, "data-mocked": "TagInput", "data-field": props.id },
-        ...tags.map((t) => {
-          const label = t.tag ?? t.value ?? t.label ?? "";
-          return React.createElement(
-            "span",
-            {
-              key: `tag-${label}`,
-              "data-testid": `taginput-tag-${label}`
-            },
-            label
-          );
-        }),
-        React.createElement("input", {
-          "data-testid": `taginput-draft-${props.id}`,
-          onChange: (e) => {
-            draftRef.current = e.target.value;
-          }
-        }),
-        React.createElement(
-          "button",
+  const TagInputMock = (props) => {
+    const draftRef = React.useRef("");
+    const tags = Array.isArray(props.value) ? props.value : [];
+    return React.createElement(
+      "div",
+      { id: props.id, "data-mocked": "TagInput", "data-field": props.id },
+      ...tags.map((t) => {
+        const label = t.tag ?? t.value ?? t.label ?? "";
+        return React.createElement(
+          "span",
           {
-            type: "button",
-            "data-testid": `taginput-onCreate-${props.id}`,
-            onClick: () => props.onCreate && props.onCreate(draftRef.current)
+            key: `tag-${label}`,
+            "data-testid": `taginput-tag-${label}`
           },
-          "add"
-        ),
-        React.createElement(
-          "button",
-          {
-            type: "button",
-            "data-testid": `taginput-onChange-${props.id}`,
-            onClick: () =>
-              props.onChange &&
-              props.onChange({
-                target: { value: [{ tag: "@acme.com" }] }
-              })
-          },
-          "change"
-        )
-      );
-    }
+          label
+        );
+      }),
+      React.createElement("input", {
+        "data-testid": `taginput-draft-${props.id}`,
+        onChange: (e) => {
+          draftRef.current = e.target.value;
+        }
+      }),
+      React.createElement(
+        "button",
+        {
+          type: "button",
+          "data-testid": `taginput-onCreate-${props.id}`,
+          onClick: () => props.onCreate && props.onCreate(draftRef.current)
+        },
+        "add"
+      ),
+      React.createElement(
+        "button",
+        {
+          type: "button",
+          "data-testid": `taginput-onChange-${props.id}`,
+          onClick: () =>
+            props.onChange &&
+            props.onChange({
+              target: { value: [{ tag: "@acme.com" }] }
+            })
+        },
+        "change"
+      )
+    );
   };
+  return { __esModule: true, default: TagInputMock };
 });
 
 const baseEntity = (overrides = {}) => ({

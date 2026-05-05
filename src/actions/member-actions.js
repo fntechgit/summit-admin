@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -9,7 +9,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
 import {
   getRequest,
   getCSV,
@@ -23,16 +24,25 @@ import {
 } from "openstack-uicore-foundation/lib/utils/actions";
 import moment from "moment-timezone";
 import { getAccessTokenSafely } from "../utils/methods";
+import { snackbarErrorHandler } from "./base-actions";
+import { DEFAULT_PER_PAGE } from "../utils/constants";
 
 export const REQUEST_MEMBERS = "REQUEST_MEMBERS";
 export const RECEIVE_MEMBERS = "RECEIVE_MEMBERS";
+export const RECEIVE_MEMBER = "RECEIVE_MEMBER";
 export const AFFILIATION_SAVED = "AFFILIATION_SAVED";
 export const AFFILIATION_DELETED = "AFFILIATION_DELETED";
 export const AFFILIATION_ADDED = "AFFILIATION_ADDED";
 export const ORGANIZATION_ADDED = "ORGANIZATION_ADDED";
 
 export const getMembers =
-  (term = null, page = 1, perPage = 10, order = "id", orderDir = 1) =>
+  (
+    term = null,
+    page = 1,
+    perPage = DEFAULT_PER_PAGE,
+    order = "id",
+    orderDir = 1
+  ) =>
   async (dispatch, getState) => {
     const { currentSummitState } = getState();
     const accessToken = await getAccessTokenSafely();
@@ -46,7 +56,7 @@ export const getMembers =
     }
 
     const params = {
-      page: page,
+      page,
       per_page: perPage,
       access_token: accessToken
     };
@@ -58,7 +68,7 @@ export const getMembers =
     // order
     if (order != null && orderDir != null) {
       const orderDirSign = orderDir === 1 ? "+" : "-";
-      params["order"] = `${orderDirSign}${order}`;
+      params.order = `${orderDirSign}${order}`;
     }
 
     return getRequest(
@@ -72,6 +82,29 @@ export const getMembers =
     });
   };
 
+export const getMemberByExternalId = (externalId) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken,
+    relations: "none",
+    fields: "id,first_name,last_name,email"
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_MEMBER),
+    `${window.API_BASE_URL}/api/v1/members/external/${externalId}`,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .catch(console.log)
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
 export const getMembersForEventCSV = (event) => async (dispatch, getState) => {
   const { currentSummitState } = getState();
   const accessToken = await getAccessTokenSafely();
@@ -83,8 +116,9 @@ export const getMembersForEventCSV = (event) => async (dispatch, getState) => {
   const momentEndDate = moment(event.endDate).tz(currentSummit.time_zone_id);
 
   const date = momentStartDate.format("dddd Do");
-  const time =
-    momentStartDate.format("h:mm a") + " - " + momentEndDate.format("h:mm a");
+  const time = `${momentStartDate.format("h:mm a")} - ${momentEndDate.format(
+    "h:mm a"
+  )}`;
   const roomName =
     event.location && event.location.venueroom
       ? event.location.venueroom.name
@@ -111,31 +145,32 @@ export const getMembersForEventCSV = (event) => async (dispatch, getState) => {
   );
 };
 
-/******************************  AFFILIATIONS **************************************************/
+/* ************************************************************************** */
+/*                          AFFILIATIONS                                      */
+/* ************************************************************************** */
 
-export const addOrganization =
-  (organization, callback) => async (dispatch, getState) => {
-    const accessToken = await getAccessTokenSafely();
+export const addOrganization = (organization, callback) => async (dispatch) => {
+  const accessToken = await getAccessTokenSafely();
 
-    const params = {
-      access_token: accessToken
-    };
-
-    dispatch(startLoading());
-
-    postRequest(
-      null,
-      createAction(ORGANIZATION_ADDED),
-      `${window.API_BASE_URL}/api/v1/organizations`,
-      { name: organization },
-      authErrorHandler
-    )(params)(dispatch).then((payload) => {
-      dispatch(stopLoading());
-      callback(payload.response);
-    });
+  const params = {
+    access_token: accessToken
   };
 
-export const addAffiliation = (affiliation) => async (dispatch, getState) => {
+  dispatch(startLoading());
+
+  postRequest(
+    null,
+    createAction(ORGANIZATION_ADDED),
+    `${window.API_BASE_URL}/api/v1/organizations`,
+    { name: organization },
+    authErrorHandler
+  )(params)(dispatch).then((payload) => {
+    dispatch(stopLoading());
+    callback(payload.response);
+  });
+};
+
+export const addAffiliation = (affiliation) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -154,12 +189,12 @@ export const addAffiliation = (affiliation) => async (dispatch, getState) => {
     normalizedEntity,
     authErrorHandler,
     affiliation
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
 };
 
-export const saveAffiliation = (affiliation) => async (dispatch, getState) => {
+export const saveAffiliation = (affiliation) => async (dispatch) => {
   const accessToken = await getAccessTokenSafely();
 
   dispatch(startLoading());
@@ -176,13 +211,13 @@ export const saveAffiliation = (affiliation) => async (dispatch, getState) => {
     `${window.API_BASE_URL}/api/v1/members/${affiliation.owner_id}/affiliations/${affiliation.id}`,
     normalizedEntity,
     authErrorHandler
-  )(params)(dispatch).then((payload) => {
+  )(params)(dispatch).then(() => {
     dispatch(stopLoading());
   });
 };
 
 export const deleteAffiliation =
-  (ownerId, affiliationId) => async (dispatch, getState) => {
+  (ownerId, affiliationId) => async (dispatch) => {
     const accessToken = await getAccessTokenSafely();
 
     const params = {
@@ -203,13 +238,13 @@ export const deleteAffiliation =
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
-  if (!normalizedEntity.end_date) delete normalizedEntity["end_date"];
+  if (!normalizedEntity.end_date) delete normalizedEntity.end_date;
 
   normalizedEntity.organization_id =
     normalizedEntity.organization != null
       ? normalizedEntity.organization.id
       : 0;
-  delete normalizedEntity["organization"];
+  delete normalizedEntity.organization;
 
   return normalizedEntity;
 };

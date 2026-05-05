@@ -23,8 +23,8 @@ import {
   Select
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import SearchInput from "../../../../../components/mui/search-input";
-import MuiTable from "../../../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   approveSponsorPurchase,
   getSponsorPurchases,
@@ -37,6 +37,7 @@ import {
 } from "../../../../../utils/constants";
 
 const SponsorPurchasesTab = ({
+  sponsor,
   purchases,
   term,
   order,
@@ -50,7 +51,7 @@ const SponsorPurchasesTab = ({
 }) => {
   useEffect(() => {
     getSponsorPurchases();
-  }, []);
+  }, [sponsor?.id]);
 
   const handlePageChange = (page) => {
     getSponsorPurchases(term, page, perPage, order, orderDir);
@@ -209,8 +210,12 @@ const SponsorPurchasesTab = ({
   );
 };
 
-const mapStateToProps = ({ sponsorPagePurchaseListState }) => ({
-  ...sponsorPagePurchaseListState
+const mapStateToProps = ({
+  sponsorPagePurchaseListState,
+  currentSponsorState
+}) => ({
+  ...sponsorPagePurchaseListState,
+  sponsor: currentSponsorState.entity
 });
 
 export default connect(mapStateToProps, {

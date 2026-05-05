@@ -13,6 +13,8 @@ import {
 import T from "i18n-react";
 import * as yup from "yup";
 import { FormikProvider, useFormik } from "formik";
+import { MuiFormikUpload } from "openstack-uicore-foundation/lib/components";
+import AdditionalInputList from "openstack-uicore-foundation/lib/components/mui/formik-inputs/additional-input-list";
 import {
   addIssAfterDateFieldValidator,
   nullableDecimalValidation,
@@ -22,12 +24,11 @@ import {
   requiredStringValidation
 } from "../../../../utils/yup";
 import MuiFormikTextField from "../../../../components/mui/formik-inputs/mui-formik-textfield";
-import AdditionalInputList from "../../../../components/mui/formik-inputs/additional-input/additional-input-list";
 import useScrollToError from "../../../../hooks/useScrollToError";
-import MuiFormikUpload from "../../../../components/mui/formik-inputs/mui-formik-upload";
 import ItemPriceTiers from "../../../../components/mui/formik-inputs/item-price-tiers";
 import FormikTextEditor from "../../../../components/inputs/formik-text-editor";
 import MuiFormikQuantityField from "../../../../components/mui/formik-inputs/mui-formik-quantity-field";
+import { MAX_INVENTORY_IMAGES_UPLOAD_QTY } from "../../../../utils/constants";
 
 const buildInitialValues = (data) => ({ ...data });
 
@@ -143,7 +144,11 @@ const SponsorFormItemForm = ({ initialValues, onSubmit }) => {
               <FormLabel>
                 {T.translate("sponsor_form_item_list.edit_item.images")}
               </FormLabel>
-              <MuiFormikUpload id="item-image-upload" name="images" />
+              <MuiFormikUpload
+                id="item-image-upload"
+                name="images"
+                maxFiles={MAX_INVENTORY_IMAGES_UPLOAD_QTY}
+              />
             </Box>
           </Grid2>
         </DialogContent>

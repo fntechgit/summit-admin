@@ -9,20 +9,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
-import { Modal } from "react-bootstrap";
-import { Pagination } from "react-bootstrap";
-import {
-  Table,
-  FreeTextSearch
-} from "openstack-uicore-foundation/lib/components";
-import { getSummitById } from "../../actions/summit-actions";
+import { Modal, Pagination } from "react-bootstrap";
+import Table from "openstack-uicore-foundation/lib/components/table"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { getSummitById } from "../../actions/summit-actions";
 import {
   getRoomBookings,
   exportRoomBookings,
@@ -94,19 +91,18 @@ class RoomBookingListPage extends React.Component {
       perPage,
       filters
     } = this.props;
-    let roomBooking = roomBookings.find((rb) => rb.id === bookingId);
+    const roomBooking = roomBookings.find((rb) => rb.id === bookingId);
 
     Swal.fire({
       title: T.translate("general.are_you_sure"),
-      text:
-        T.translate("room_booking_list.delete_booking_warning") +
-        " " +
-        roomBooking.owner_name,
+      text: `${T.translate("room_booking_list.delete_booking_warning")} ${
+        roomBooking.owner_name
+      }`,
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: T.translate("general.yes_delete")
-    }).then(function (result) {
+    }).then((result) => {
       if (result.value) {
         cancelRoomBooking(roomBooking.room_id, bookingId).then(() =>
           getRoomBookings(term, 1, perPage, order, orderDir, filters)
@@ -120,7 +116,7 @@ class RoomBookingListPage extends React.Component {
     this.props.getRoomBookings(term, page, perPage, order, orderDir, filters);
   }
 
-  handleSort(index, key, dir, func) {
+  handleSort(index, key, dir) {
     const { term, page, perPage, filters } = this.props;
     this.props.getRoomBookings(term, page, perPage, key, dir, filters);
   }
@@ -138,7 +134,7 @@ class RoomBookingListPage extends React.Component {
 
   handleRefundClick(bookingId) {
     const { roomBookings } = this.props;
-    let roomBooking = roomBookings.find((rb) => rb.id === bookingId);
+    const roomBooking = roomBookings.find((rb) => rb.id === bookingId);
 
     this.setState({
       showModal: true,
@@ -148,7 +144,7 @@ class RoomBookingListPage extends React.Component {
 
   hasPaid(bookingId) {
     const { roomBookings } = this.props;
-    let roomBooking = roomBookings.find((rb) => rb.id === bookingId);
+    const roomBooking = roomBookings.find((rb) => rb.id === bookingId);
     return (
       (roomBooking.status === ReservationStatusPaid ||
         roomBooking.status === ReservationStatusRequestedRefund) &&
@@ -158,7 +154,7 @@ class RoomBookingListPage extends React.Component {
 
   isEditable(bookingId) {
     const { roomBookings } = this.props;
-    let roomBooking = roomBookings.find((rb) => rb.id === bookingId);
+    const roomBooking = roomBookings.find((rb) => rb.id === bookingId);
     return roomBooking.status === ReservationStatusPaid;
   }
 
@@ -181,7 +177,7 @@ class RoomBookingListPage extends React.Component {
   }
 
   handleRefundChange(ev) {
-    const { value, id } = ev.target;
+    const { value } = ev.target;
     this.setState({ modalAmount: parseInt(value) });
   }
 
@@ -212,18 +208,18 @@ class RoomBookingListPage extends React.Component {
     const { showModal, modalBooking, modalAmount } = this.state;
 
     const roomBookingsFormatted = roomBookings.map((rb) => {
-      let start_datetime = epochToMomentTimeZone(
+      const start_datetime = epochToMomentTimeZone(
         rb.start_datetime,
         currentSummit.time_zone_id
       ).format("YYYY-MM-DD h:mm a");
-      let end_datetime = epochToMomentTimeZone(
+      const end_datetime = epochToMomentTimeZone(
         rb.end_datetime,
         currentSummit.time_zone_id
       ).format("YYYY-MM-DD h:mm a");
       return {
         ...rb,
-        start_datetime: start_datetime,
-        end_datetime: end_datetime
+        start_datetime,
+        end_datetime
       };
     });
 
@@ -304,8 +300,8 @@ class RoomBookingListPage extends React.Component {
           {totalRoomBookings})
         </h3>
 
-        <div className={"row"}>
-          <div className={"col-md-6"}>
+        <div className="row">
+          <div className="col-md-6">
             <FreeTextSearch
               value={term}
               placeholder={T.translate(
@@ -333,8 +329,8 @@ class RoomBookingListPage extends React.Component {
           <div className="col-md-6">
             <EmailFilter
               id="email_filter"
-              filterInitialValue={filters["email_filter"].value}
-              operatorInitialValue={filters["email_filter"].operator}
+              filterInitialValue={filters.email_filter.value}
+              operatorInitialValue={filters.email_filter.operator}
               onChange={(ev) => {
                 this.setState({
                   ...this.state,
@@ -363,7 +359,7 @@ class RoomBookingListPage extends React.Component {
         )}
 
         {roomBookings.length > 0 && (
-          <div>
+          <div className="table-responsive">
             <Table
               options={table_options}
               data={roomBookingsFormatted}

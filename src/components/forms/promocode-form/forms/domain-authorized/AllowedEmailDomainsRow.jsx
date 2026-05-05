@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import T from "i18n-react";
-import { TagInput } from "openstack-uicore-foundation/lib/components";
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import { validateAllowedEmailDomainEntry } from "../../../../../utils/methods";
 import { fireChange } from "./utils";
 

@@ -12,7 +12,7 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
-import _ from "lodash";
+import debounce from "lodash/debounce"
 import {
   getRequest,
   putRequest,
@@ -1490,7 +1490,7 @@ export const getEventComments =
     });
   };
 
-export const queryEvents = _.debounce(async (summitId, input, callback) => {
+export const queryEvents = debounce(async (summitId, input, callback) => {
   const accessToken = await getAccessTokenSafely();
   const endpoint = URI(
     `${window.API_BASE_URL}/api/v1/summits/${summitId}/events`
@@ -1509,7 +1509,7 @@ export const queryEvents = _.debounce(async (summitId, input, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
-export const queryEventsWithPrivateRSVP = _.debounce(
+export const queryEventsWithPrivateRSVP = debounce(
   async (summitId, input, callback) => {
     const accessToken = await getAccessTokenSafely();
     const endpoint = URI(
@@ -1532,7 +1532,7 @@ export const queryEventsWithPrivateRSVP = _.debounce(
   DEBOUNCE_WAIT
 );
 
-export const querySpeakerCompany = _.debounce(async (input, callback) => {
+export const querySpeakerCompany = debounce(async (input, callback) => {
   const endpoint = URI(
     `${window.API_BASE_URL}/api/public/v1/speakers/all/companies`
   );
@@ -1553,7 +1553,7 @@ export const querySpeakerCompany = _.debounce(async (input, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
-export const querySubmitterCompany = _.debounce(async (input, callback) => {
+export const querySubmitterCompany = debounce(async (input, callback) => {
   const endpoint = URI(
     `${window.API_BASE_URL}/api/public/v1/members/all/companies`
   );
@@ -1574,7 +1574,7 @@ export const querySubmitterCompany = _.debounce(async (input, callback) => {
     .catch(fetchErrorHandler);
 }, DEBOUNCE_WAIT);
 
-export const queryAllCompanies = _.debounce(async (input, callback) => {
+export const queryAllCompanies = debounce(async (input, callback) => {
   input = escapeFilterValue(input);
 
   const accessToken = await getAccessTokenSafely();

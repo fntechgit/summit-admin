@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,16 +12,19 @@
  * */
 
 import React, { useState } from "react";
-import { Box } from "@mui/material";
 import { connect } from "react-redux";
+import { Route, Switch } from "react-router-dom";
+import { Box } from "@mui/material";
+import { Breadcrumb } from "react-breadcrumbs";
 import SelectFormDialog from "./components/select-form-dialog";
 import CartView from "./components/cart-view";
 import NewCartForm from "./components/edit-form/new-cart-form";
 import EditCartForm from "./components/edit-form/edit-cart-form";
+import InvoiceView from "./components/invoice-view";
+import PaymentView from "./components/payment-view";
 
-const SponsorCartTab = ({ sponsor, currentSummit }) => {
+const SponsorCartTab = ({ sponsor, currentSummit, match }) => {
   const [openAddFormDialog, setOpenAddFormDialog] = useState(false);
-  const [formEdit, setFormEdit] = useState(null);
   const [newForm, setNewForm] = useState(null);
 
   const handleFormSelected = (form, addOn) => {
@@ -33,43 +36,59 @@ const SponsorCartTab = ({ sponsor, currentSummit }) => {
     setNewForm(null);
   };
 
-  const handleOnFormUpdated = () => {
-    setFormEdit(null);
+  const handleOnAddForm = () => {
+    setOpenAddFormDialog(true);
   };
 
   return (
     <Box sx={{ mt: 2 }}>
-      {newForm && (
-        <NewCartForm
-          formId={newForm.formId}
-          addOn={{
-            addon_name: newForm.addon?.name,
-            addon_id: newForm.addon?.id
+      <div>
+        <Breadcrumb
+          data={{
+            title: "Cart",
+            pathname: match.url
           }}
-          onCancel={() => setNewForm(null)}
-          onSaveCallback={handleOnFormAdded}
         />
-      )}
-      {formEdit && (
-        <EditCartForm
-          formId={formEdit.id}
-          onCancel={() => setFormEdit(null)}
-          onSaveCallback={handleOnFormUpdated}
-        />
-      )}
-      {!formEdit && !newForm && (
-        <CartView
-          onEdit={setFormEdit}
-          onAddForm={() => setOpenAddFormDialog(true)}
-        />
-      )}
-      <SelectFormDialog
-        open={!!openAddFormDialog}
-        summitId={currentSummit.id}
-        sponsor={sponsor}
-        onSave={handleFormSelected}
-        onClose={() => setOpenAddFormDialog(false)}
-      />
+        <Switch>
+          <Route
+            exact
+            strict
+            path={match.url}
+            render={() => (
+              <>
+                {newForm ? (
+                  <NewCartForm
+                    formId={newForm.formId}
+                    addOn={{
+                      addon_name: newForm.addon?.name,
+                      addon_id: newForm.addon?.id
+                    }}
+                    onCancel={() => setNewForm(null)}
+                    onSaveCallback={handleOnFormAdded}
+                  />
+                ) : (
+                  <CartView onAddForm={handleOnAddForm} />
+                )}
+
+                <SelectFormDialog
+                  open={!!openAddFormDialog}
+                  summitId={currentSummit.id}
+                  sponsor={sponsor}
+                  onSave={handleFormSelected}
+                  onClose={() => setOpenAddFormDialog(false)}
+                />
+              </>
+            )}
+          />
+          <Route exact path={`${match.url}/invoice`} component={InvoiceView} />
+          <Route exact path={`${match.url}/payment`} component={PaymentView} />
+          <Route
+            exact
+            path={`${match.url}/forms/:form_id`}
+            component={EditCartForm}
+          />
+        </Switch>
+      </div>
     </Box>
   );
 };

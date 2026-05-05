@@ -1,11 +1,9 @@
 import React from "react";
 import T from "i18n-react";
-import {
-  DateTimePicker,
-  Dropdown,
-  Input,
-  TextArea
-} from "openstack-uicore-foundation/lib/components";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { isDomainAuthorizedClass } from "./domain-authorized/utils";
 import MaxPerAccountInput from "./domain-authorized/MaxPerAccountInput";

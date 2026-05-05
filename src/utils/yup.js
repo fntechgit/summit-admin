@@ -61,7 +61,8 @@ export const rateCellValidation = () =>
     .transform((value, originalValue) => {
       if (typeof originalValue === "string") {
         const cleaned = originalValue.replace(/^\$/, "").replace(",", ".");
-        return cleaned === "" ? undefined : parseFloat(cleaned);
+        const parsed = parseFloat(cleaned);
+        return cleaned === "" || isNaN(parsed) ? undefined : parsed; // undefined for NaN so Yup shows typeError
       }
       return value;
     })

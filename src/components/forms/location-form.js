@@ -14,13 +14,11 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import {
-  Dropdown,
-  CountryDropdown,
-  Input,
-  Table,
-  Panel
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import CountryDropdown from "openstack-uicore-foundation/lib/components/inputs/country-dropdown"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Table from "openstack-uicore-foundation/lib/components/table"
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import { GMap } from "openstack-uicore-foundation/lib/components/google-map";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";

@@ -6,6 +6,19 @@ jest.mock("i18n-react/dist/i18n-react", () => ({
   default: { translate: (key) => key }
 }));
 
+jest.mock("../../../../../../../../components/mui/showConfirmDialog", () =>
+  jest.fn()
+);
+
+jest.mock("formik", () => {
+  const actual = jest.requireActual("formik");
+  return {
+    __esModule: true,
+    ...actual,
+    useFormik: jest.fn(actual.useFormik)
+  };
+});
+
 // Mock Redux actions
 const mockGetSponsorCartForm = jest.fn(() => () => Promise.resolve());
 const mockUpdateCartForm = jest.fn(() => () => Promise.resolve());
@@ -15,77 +28,78 @@ jest.mock("../../../../../../../../actions/sponsor-cart-actions", () => ({
   updateCartForm: (...args) => mockUpdateCartForm(...args)
 }));
 
-// Mock sub-components used by FormItemTable
+// Mock the uicore component bundle — prevents setTexts() crash on module init
+jest.mock("openstack-uicore-foundation/lib/components", () => {
+  const React = require("react");
+  return {
+    __esModule: true,
+    MuiFormItemTable: ({ data, onNotesClick, onSettingsClick }) =>
+      React.createElement(
+        "div",
+        null,
+        (data || []).map((item) =>
+          React.createElement(
+            "div",
+            { key: item.form_item_id },
+            React.createElement("span", null, item.name),
+            React.createElement(
+              "button",
+              {
+                "aria-label": "edit",
+                onClick: () => onNotesClick && onNotesClick(item),
+                type: "button"
+              },
+              "edit"
+            ),
+            React.createElement(
+              "button",
+              {
+                "aria-label": "settings",
+                onClick: () => onSettingsClick && onSettingsClick(item),
+                type: "button"
+              },
+              "settings"
+            )
+          )
+        )
+      ),
+    getCurrentApplicableRate: () => "standard"
+  };
+});
+
+// Mock sub-components used directly by index.js
+jest.mock("openstack-uicore-foundation/lib/components/mui/notes-modal", () => {
+  const React = require("react");
+  return {
+    __esModule: true,
+    default: ({ open, onClose }) =>
+      open ? (
+        <div role="dialog">
+          <button aria-label="close" onClick={onClose} type="button">
+            close
+          </button>
+        </div>
+      ) : null
+  };
+});
+
 jest.mock(
-  "../../../../../../../../components/mui/FormItemTable/components/GlobalQuantityField",
+  "openstack-uicore-foundation/lib/components/mui/item-settings-modal",
   () => {
     const React = require("react");
     return {
       __esModule: true,
-      default: ({ name }) => (
-        <input data-testid={`global-qty-${name}`} name={name} type="number" />
-      )
+      default: ({ open }) => (open ? <div role="dialog">Settings</div> : null)
     };
   }
 );
 
-jest.mock(
-  "../../../../../../../../components/mui/FormItemTable/components/ItemTableField",
-  () => {
-    const React = require("react");
-    return {
-      __esModule: true,
-      default: ({ name }) => (
-        <input data-testid={`item-field-${name}`} name={name} />
-      )
-    };
-  }
-);
-
-jest.mock(
-  "../../../../../../../../components/mui/formik-inputs/mui-formik-select",
-  () => {
-    const React = require("react");
-    return {
-      __esModule: true,
-      default: ({ name, options, ...props }) => (
-        <select data-testid={`select-${name}`} name={name} {...props}>
-          {options?.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      )
-    };
-  }
-);
-
-jest.mock(
-  "../../../../../../../../components/mui/formik-inputs/mui-formik-pricefield",
-  () => {
-    const React = require("react");
-    return {
-      __esModule: true,
-      default: ({ name }) => (
-        <input data-testid={`price-${name}`} name={name} type="number" />
-      )
-    };
-  }
-);
-
-jest.mock(
-  "../../../../../../../../components/mui/formik-inputs/mui-formik-discountfield",
-  () => {
-    const React = require("react");
-    return {
-      __esModule: true,
-      default: ({ name }) => (
-        <input data-testid={`discount-${name}`} name={name} type="number" />
-      )
-    };
-  }
-);
+// Mock history
+const mockHistoryPush = jest.fn();
+jest.mock("../../../../../../../../history", () => ({
+  __esModule: true,
+  default: { push: (...args) => mockHistoryPush(...args) }
+}));
 
 // Avoid MUI ripple noise
 jest.mock("@mui/material/ButtonBase/TouchRipple", () => ({
@@ -100,8 +114,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { Provider } from "react-redux";
+import { useFormik } from "formik";
 import configureMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
+import showConfirmDialog from "../../../../../../../../components/mui/showConfirmDialog";
 import EditCartForm from "../edit-cart-form";
 /* eslint-enable import/first */
 
@@ -166,8 +182,16 @@ const mockCartForm = {
   ]
 };
 
+const buildMatch = (formId, url) => ({
+  params: { form_id: formId },
+  url: url || `/app/events/1/sponsors/2/cart/forms/${formId}/edit`
+});
+
 // Helper function to render the component with Redux store
-const renderWithStore = (props, storeState = {}) => {
+const renderWithStore = (
+  { formId = 1, ...restProps } = {},
+  storeState = {}
+) => {
   const defaultState = {
     sponsorPageCartListState: {
       cartForm:
@@ -187,16 +211,9 @@ const renderWithStore = (props, storeState = {}) => {
 
   const store = mockStore(defaultState);
 
-  const defaultProps = {
-    formId: 1,
-    onCancel: jest.fn(),
-    onSaveCallback: jest.fn(),
-    ...props
-  };
-
   return render(
     <Provider store={store}>
-      <EditCartForm {...defaultProps} />
+      <EditCartForm match={buildMatch(formId)} {...restProps} />
     </Provider>
   );
 };
@@ -205,6 +222,7 @@ const renderWithStore = (props, storeState = {}) => {
 describe("EditCartForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useFormik.mockImplementation(jest.requireActual("formik").useFormik);
   });
 
   describe("Component Initialization", () => {
@@ -292,9 +310,8 @@ describe("EditCartForm", () => {
   });
 
   describe("Cancel Functionality", () => {
-    test("clicking CANCEL returns to cart tab", async () => {
-      const onCancel = jest.fn();
-      renderWithStore({ onCancel });
+    test("clicking CANCEL navigates back", async () => {
+      renderWithStore();
 
       await waitFor(() => {
         expect(screen.getByText(/general.cancel/)).toBeInTheDocument();
@@ -303,7 +320,45 @@ describe("EditCartForm", () => {
       const cancelButton = screen.getByText(/general.cancel/);
       await userEvent.click(cancelButton);
 
-      expect(onCancel).toHaveBeenCalledTimes(1);
+      expect(mockHistoryPush).toHaveBeenCalledTimes(1);
+    });
+
+    describe("with unsaved changes", () => {
+      let onCancel;
+
+      beforeEach(() => {
+        onCancel = jest.fn();
+        useFormik.mockImplementation(() => ({
+          values: { discount_amount: 0, discount_type: "AMOUNT" },
+          errors: {},
+          touched: {},
+          dirty: true,
+          handleSubmit: jest.fn()
+        }));
+      });
+
+      test("shows confirm dialog and does NOT cancel when user declines", async () => {
+        showConfirmDialog.mockResolvedValue(false);
+        renderWithStore({ onCancel });
+
+        await userEvent.click(await screen.findByText(/general.cancel/));
+
+        expect(showConfirmDialog).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: "edit_sponsor.cart_tab.edit_form.unsaved_changes_warning"
+          })
+        );
+        expect(onCancel).not.toHaveBeenCalled();
+      });
+
+      test("cancels when user confirms discard", async () => {
+        showConfirmDialog.mockResolvedValue(true);
+        renderWithStore({ onCancel });
+
+        await userEvent.click(await screen.findByText(/general.cancel/));
+
+        await waitFor(() => expect(onCancel).toHaveBeenCalledTimes(1));
+      });
     });
   });
 
@@ -363,11 +418,10 @@ describe("EditCartForm", () => {
       });
     });
 
-    test("on success shows snackbar + returns to tab + triggers refresh", async () => {
-      const onSaveCallback = jest.fn();
+    test("on success navigates back to cart tab", async () => {
       mockUpdateCartForm.mockReturnValue(() => Promise.resolve());
 
-      renderWithStore({ formId: 123, onSaveCallback });
+      renderWithStore({ formId: 123 });
 
       await waitFor(() => {
         expect(screen.getByText(/general.save/)).toBeInTheDocument();
@@ -378,7 +432,7 @@ describe("EditCartForm", () => {
 
       await waitFor(() => {
         expect(mockUpdateCartForm).toHaveBeenCalled();
-        expect(onSaveCallback).toHaveBeenCalledTimes(1);
+        expect(mockHistoryPush).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -443,6 +497,60 @@ describe("EditCartForm", () => {
       await waitFor(() => {
         expect(screen.getByRole("dialog")).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("Item Field Error Message", () => {
+    test("shows error message below Save when a required Item field is empty after submit", async () => {
+      const formWithRequiredItemField = {
+        ...mockCartForm,
+        items: [
+          {
+            ...mockCartForm.items[0],
+            meta_fields: [
+              {
+                type_id: 2,
+                type: "Text",
+                class_field: "Item",
+                current_value: "",
+                is_required: true
+              }
+            ]
+          }
+        ]
+      };
+
+      renderWithStore({}, { cartForm: formWithRequiredItemField });
+
+      await waitFor(() => {
+        expect(screen.getByText(/general.save/)).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByText(/general.save/));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("validation.additional_items")
+        ).toBeInTheDocument();
+      });
+    });
+
+    test("does not show error message when no Item fields have validation errors", async () => {
+      renderWithStore();
+
+      await waitFor(() => {
+        expect(screen.getByText(/general.save/)).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByText(/general.save/));
+
+      await waitFor(() => {
+        expect(mockUpdateCartForm).toHaveBeenCalled();
+      });
+
+      expect(
+        screen.queryByText("validation.additional_items")
+      ).not.toBeInTheDocument();
     });
   });
 

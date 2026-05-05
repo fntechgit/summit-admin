@@ -12,7 +12,7 @@
  * */
 
 import T from "i18n-react/dist/i18n-react";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce"
 import {
   getRequest,
   putRequest,

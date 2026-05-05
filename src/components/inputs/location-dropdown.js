@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown } from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 
 const LocationDropdown = ({ id, value, onChange, locations, ...rest }) => {
   const options = locations.map((r) => ({ label: r.name, value: r.id }));

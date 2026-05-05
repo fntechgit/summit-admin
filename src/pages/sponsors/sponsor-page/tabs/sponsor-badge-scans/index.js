@@ -14,22 +14,28 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import { Box, Button, Grid2, TextField } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
-import MuiTable from "../../../../../components/mui/table/mui-table";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
+  getSponsor,
   getBadgeScans,
   exportBadgeScans,
   getBadgeScan,
-  saveBadgeScan
+  saveBadgeScan,
+  addBadgeScan
 } from "../../../../../actions/sponsor-actions";
 import { DEFAULT_CURRENT_PAGE } from "../../../../../utils/constants";
 import EditBadgeScanPopup from "./edit-badge-scan-popup";
+import MuiQrBadgePopup from "../../../../../components/mui/mui-qr-badge-popup";
+import Member from "../../../../../models/member";
 
 const SponsorBadgeScans = ({
+  member,
   sponsor,
+  summitId,
   badgeScans,
   totalBadgeScans,
   term,
@@ -37,30 +43,36 @@ const SponsorBadgeScans = ({
   orderDir,
   currentPage,
   perPage,
+  getSponsor,
   getBadgeScans,
   exportBadgeScans,
   getBadgeScan,
   saveBadgeScan,
+  addBadgeScan,
   currentBadgeScan
 }) => {
   useEffect(() => {
-    if (sponsor?.id) getBadgeScans(sponsor.id);
-  }, [sponsor]);
-
-  const [searchTerm, setSearchTerm] = useState(term);
-  const [showEditBadgeScanPopup, setShowEditBadgeScanPopup] = useState(false);
-
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getBadgeScans(
-        sponsor.id,
-        searchTerm,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir
-      );
+    if (sponsor?.id) {
+      getSponsor(sponsor.id).then(() => getBadgeScans(sponsor.id));
     }
+  }, [sponsor.id]);
+
+  const memberObj = new Member(member);
+  const isAdmin = memberObj.hasAccess("admin-sponsors");
+
+  const [showEditBadgeScanPopup, setShowEditBadgeScanPopup] = useState(false);
+  const [showManualBadgeScanPopup, setShowManualBadgeScanPopup] =
+    useState(false);
+
+  const handleSearch = (searchTerm) => {
+    getBadgeScans(
+      sponsor.id,
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
   };
 
   const handlePageChange = (page) => {
@@ -94,7 +106,22 @@ const SponsorBadgeScans = ({
     saveBadgeScan(badgeScan).then(() => setShowEditBadgeScanPopup(false));
   };
 
-  const handleNewManualScan = () => {};
+  const handleNewManualScan = () => {
+    setShowManualBadgeScanPopup(true);
+  };
+
+  const handleManualScanSubmit = (entity) =>
+    addBadgeScan(sponsor.id, entity).then(() => {
+      setShowManualBadgeScanPopup(false);
+      return getBadgeScans(
+        sponsor.id,
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir
+      );
+    });
 
   const handleExportBadgeScans = () => {
     exportBadgeScans(sponsor);
@@ -155,26 +182,14 @@ const SponsorBadgeScans = ({
           </Box>
         </Grid2>
         <Grid2 size={9} justifyContent="flex-end" gap={1} container>
-          <TextField
-            variant="outlined"
-            value={searchTerm}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-            slotProps={{
-              input: {
-                endAdornment: <SearchIcon sx={{ ml: 1 }} />
-              }
-            }}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={handleSearch}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                height: "36px"
-              },
-              backgroundColor: "white"
-            }}
-          />
+          <Grid2 size={4}>
+            <SearchInput
+              onSearch={handleSearch}
+              placeholder={T.translate(
+                "inventory_item_list.placeholders.search_inventory_items"
+              )}
+            />
+          </Grid2>
           <Button
             variant="contained"
             size="medium"
@@ -233,23 +248,38 @@ const SponsorBadgeScans = ({
           onSubmit={handleBadgeScanSave}
         />
       )}
+      {showManualBadgeScanPopup && (
+        <MuiQrBadgePopup
+          onSave={handleManualScanSubmit}
+          onClose={() => setShowManualBadgeScanPopup(false)}
+          extraQuestions={sponsor.extra_questions}
+          isAdmin={isAdmin}
+          summitId={summitId}
+        />
+      )}
     </Box>
   );
 };
 
 const mapStateToProps = ({
+  loggedUserState,
   badgeScansListState,
   currentBadgeScanState,
-  currentSponsorState
+  currentSponsorState,
+  currentSummitState
 }) => ({
   ...badgeScansListState,
   currentBadgeScan: currentBadgeScanState.entity,
-  sponsor: currentSponsorState.entity
+  member: loggedUserState.member,
+  sponsor: currentSponsorState.entity,
+  summitId: currentSummitState.currentSummit.id
 });
 
 export default connect(mapStateToProps, {
+  getSponsor,
   getBadgeScans,
   exportBadgeScans,
   getBadgeScan,
-  saveBadgeScan
+  saveBadgeScan,
+  addBadgeScan
 })(SponsorBadgeScans);

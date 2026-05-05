@@ -23,10 +23,8 @@ import {
   changeTimeUnit
 } from "../../actions/summit-stats-actions";
 import PieGraph from "../../components/graphs/registration-pie-graph";
-import {
-  AjaxLoader,
-  SteppedSelect
-} from "openstack-uicore-foundation/lib/components";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader"
+import SteppedSelect from "openstack-uicore-foundation/lib/components/inputs/stepped-select";
 import LineGraph from "../../components/graphs/registration-line-graph";
 
 const DATA_POOLING_INTERVAL = 20000;

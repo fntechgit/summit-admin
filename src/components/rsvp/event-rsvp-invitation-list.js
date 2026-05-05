@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  FreeTextSearch,
-  AttendeeInput,
-  SelectableTable,
-  UploadInput
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import AttendeeInput from "openstack-uicore-foundation/lib/components/inputs/attendee-input"
+import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable"
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 import T from "i18n-react";
 import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";

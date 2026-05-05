@@ -16,13 +16,11 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import {
-  FreeTextSearch,
-  Dropdown,
-  MemberInput,
-  Table,
-  TagInput
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
+import Table from "openstack-uicore-foundation/lib/components/table"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import { getSummitById } from "../../actions/summit-actions";
 import {
   getPromocodes,

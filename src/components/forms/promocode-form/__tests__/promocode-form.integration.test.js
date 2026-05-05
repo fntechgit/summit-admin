@@ -8,60 +8,185 @@ import PromocodeForm from "../index";
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 // openstack-uicore-foundation components used across the PromocodeForm tree.
-// Exhaustive list — verified by grep against src/components/forms/promocode-form/**:
-//   Dropdown, Input, TagInput, TextArea, DateTimePicker, TicketTypesInput,
-//   SpeakerInput, SponsorInput, FreeTextSearch, Table.
-// TagInput mock exposes a `data-testid="taginput-onCreate-${id}"` button whose click
-// invokes the component's onCreate with a value read from a sibling draft input.
-jest.mock("openstack-uicore-foundation/lib/components", () => {
+// Master commit cd8b5b98 ("Reduce bundle size") rewrote barrel imports to
+// direct paths to avoid pulling the entire components index. Each component
+// the SUT renders is mocked at its direct path below. Each factory inlines the
+// passthrough body because babel-plugin-jest-hoist hoists `jest.mock` calls
+// above any `const` declarations — references outside the factory ReferenceError.
+/* eslint-disable global-require */
+jest.mock("openstack-uicore-foundation/lib/components/inputs/dropdown", () => {
   const React = require("react");
-  const passThrough = (id) => (props) =>
-    React.createElement("input", {
-      id: props.id ?? id,
-      "data-mocked": id,
-      type: props.type ?? "text",
-      value: props.value ?? "",
-      onChange: props.onChange ?? (() => {})
-    });
-  const TagInput = (props) => {
-    const draftRef = React.useRef("");
-    return React.createElement(
-      "div",
-      {
-        id: props.id,
-        "data-mocked": "TagInput",
-        "data-field": props.id
-      },
-      React.createElement("input", {
-        "data-testid": `taginput-draft-${props.id}`,
-        onChange: (e) => {
-          draftRef.current = e.target.value;
-        }
-      }),
-      React.createElement(
-        "button",
-        {
-          type: "button",
-          "data-testid": `taginput-onCreate-${props.id}`,
-          onClick: () => props.onCreate && props.onCreate(draftRef.current)
-        },
-        "add"
-      )
-    );
-  };
   return {
-    Dropdown: passThrough("Dropdown"),
-    Input: passThrough("Input"),
-    TagInput,
-    TextArea: passThrough("TextArea"),
-    DateTimePicker: passThrough("DateTimePicker"),
-    TicketTypesInput: passThrough("TicketTypesInput"),
-    SpeakerInput: passThrough("SpeakerInput"),
-    SponsorInput: passThrough("SponsorInput"),
-    FreeTextSearch: passThrough("FreeTextSearch"),
-    Table: () => null
+    __esModule: true,
+    default: (props) =>
+      React.createElement("input", {
+        id: props.id ?? "Dropdown",
+        "data-mocked": "Dropdown",
+        type: props.type ?? "text",
+        value: props.value ?? "",
+        onChange: props.onChange ?? (() => {})
+      })
   };
 });
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/text-input",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: (props) =>
+        React.createElement("input", {
+          id: props.id ?? "Input",
+          "data-mocked": "Input",
+          type: props.type ?? "text",
+          value: props.value ?? "",
+          onChange: props.onChange ?? (() => {})
+        })
+    };
+  }
+);
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/textarea-input",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: (props) =>
+        React.createElement("input", {
+          id: props.id ?? "TextArea",
+          "data-mocked": "TextArea",
+          type: props.type ?? "text",
+          value: props.value ?? "",
+          onChange: props.onChange ?? (() => {})
+        })
+    };
+  }
+);
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/datetimepicker",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: (props) =>
+        React.createElement("input", {
+          id: props.id ?? "DateTimePicker",
+          "data-mocked": "DateTimePicker",
+          type: props.type ?? "text",
+          value: props.value ?? "",
+          onChange: props.onChange ?? (() => {})
+        })
+    };
+  }
+);
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/ticket-types-input",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: (props) =>
+        React.createElement("input", {
+          id: props.id ?? "TicketTypesInput",
+          "data-mocked": "TicketTypesInput",
+          type: props.type ?? "text",
+          value: props.value ?? "",
+          onChange: props.onChange ?? (() => {})
+        })
+    };
+  }
+);
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/speaker-input",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: (props) =>
+        React.createElement("input", {
+          id: props.id ?? "SpeakerInput",
+          "data-mocked": "SpeakerInput",
+          type: props.type ?? "text",
+          value: props.value ?? "",
+          onChange: props.onChange ?? (() => {})
+        })
+    };
+  }
+);
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/sponsor-input",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: (props) =>
+        React.createElement("input", {
+          id: props.id ?? "SponsorInput",
+          "data-mocked": "SponsorInput",
+          type: props.type ?? "text",
+          value: props.value ?? "",
+          onChange: props.onChange ?? (() => {})
+        })
+    };
+  }
+);
+jest.mock(
+  "openstack-uicore-foundation/lib/components/free-text-search",
+  () => {
+    const React = require("react");
+    return {
+      __esModule: true,
+      default: (props) =>
+        React.createElement("input", {
+          id: props.id ?? "FreeTextSearch",
+          "data-mocked": "FreeTextSearch",
+          type: props.type ?? "text",
+          value: props.value ?? "",
+          onChange: props.onChange ?? (() => {})
+        })
+    };
+  }
+);
+jest.mock("openstack-uicore-foundation/lib/components/table", () => ({
+  __esModule: true,
+  default: () => null
+}));
+/* eslint-enable global-require */
+
+jest.mock(
+  "openstack-uicore-foundation/lib/components/inputs/tag-input",
+  () => {
+    // eslint-disable-next-line global-require
+    const React = require("react");
+    const TagInputMock = (props) => {
+      const draftRef = React.useRef("");
+      return React.createElement(
+        "div",
+        {
+          id: props.id,
+          "data-mocked": "TagInput",
+          "data-field": props.id
+        },
+        React.createElement("input", {
+          "data-testid": `taginput-draft-${props.id}`,
+          onChange: (e) => {
+            draftRef.current = e.target.value;
+          }
+        }),
+        React.createElement(
+          "button",
+          {
+            type: "button",
+            "data-testid": `taginput-onCreate-${props.id}`,
+            onClick: () => props.onCreate && props.onCreate(draftRef.current)
+          },
+          "add"
+        )
+      );
+    };
+    return { __esModule: true, default: TagInputMock };
+  }
+);
 
 jest.mock("openstack-uicore-foundation/lib/utils/methods", () => ({
   epochToMomentTimeZone: () => null

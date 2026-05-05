@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import UsersTable from "../users-table";
 
 // Capture the data passed to MuiTable so we can assert on processed userData
-jest.mock("../../../../../components/mui/table/mui-table", () => {
+jest.mock("openstack-uicore-foundation/lib/components/mui/table", () => {
   const MockMuiTable = ({ data }) => (
     <div data-testid="mui-table">
       {data.map((row) => (

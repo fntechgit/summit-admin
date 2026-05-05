@@ -15,10 +15,8 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Pagination } from "react-bootstrap";
-import {
-  Dropdown,
-  FreeTextSearch
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
 import {
   deleteOverflowOccupancy,
   getEventsForOccupancy,

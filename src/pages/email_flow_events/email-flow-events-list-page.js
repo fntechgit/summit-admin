@@ -14,10 +14,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  FreeTextSearch,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import { getSummitById } from "../../actions/summit-actions";
 import { getEmailFlowEvents } from "../../actions/email-flows-events-actions";
 import { Pagination } from "react-bootstrap";

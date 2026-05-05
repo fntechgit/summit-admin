@@ -41,7 +41,7 @@ jest.mock("../../../../../../actions/sponsor-purchases-actions", () => ({
  * SearchInput mock: plain <input> that fires onSearch on Enter key,
  * matching the real component behaviour without TextField overhead.
  */
-jest.mock("../../../../../../components/mui/search-input", () => {
+jest.mock("openstack-uicore-foundation/lib/components/mui/search-input", () => {
   const React = require("react");
   return {
     __esModule: true,
@@ -77,6 +77,9 @@ const createInitialState = (overrides = {}) => ({
   sponsorPagePurchaseListState: {
     ...DEFAULT_PURCHASE_LIST_STATE,
     ...overrides
+  },
+  currentSponsorState: {
+    entity: { id: 123 }
   }
 });
 

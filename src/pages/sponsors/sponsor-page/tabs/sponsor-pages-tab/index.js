@@ -24,6 +24,8 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getSponsorManagedPages,
   getSponsorManagedPage,
@@ -32,13 +34,12 @@ import {
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  deleteSponsorCustomizedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
-  resetSponsorPage,
+  resetSponsorPage
 } from "../../../../../actions/sponsor-pages-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
-import SearchInput from "../../../../../components/mui/search-input";
-import MuiTable from "../../../../../components/mui/table/mui-table";
 import {
   DEFAULT_CURRENT_PAGE,
   SPONSOR_MANAGED_PAGE_ASSIGNMENT
@@ -50,7 +51,7 @@ const SponsorPagesTab = ({
   sponsor,
   currentSummit,
   term,
-  hideArchived,
+  showArchived,
   managedPages,
   customizedPages,
   summitTZ,
@@ -62,6 +63,7 @@ const SponsorPagesTab = ({
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  deleteSponsorCustomizedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
   resetSponsorPage
@@ -71,11 +73,11 @@ const SponsorPagesTab = ({
   useEffect(() => {
     getSponsorManagedPages();
     getSponsorCustomizedPages();
-  }, []);
+  }, [sponsor?.id]);
 
   const handleManagedPageChange = (page) => {
     const { perPage, order, orderDir } = managedPages;
-    getSponsorManagedPages(term, page, perPage, order, orderDir, hideArchived);
+    getSponsorManagedPages(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handleManagedPerPageChange = (newPerPage) => {
@@ -86,7 +88,7 @@ const SponsorPagesTab = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -98,7 +100,7 @@ const SponsorPagesTab = ({
       perPage,
       key,
       dir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -110,7 +112,7 @@ const SponsorPagesTab = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -122,7 +124,7 @@ const SponsorPagesTab = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -135,7 +137,7 @@ const SponsorPagesTab = ({
       perPage,
       key,
       dir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -156,7 +158,7 @@ const SponsorPagesTab = ({
       perPageManaged,
       orderManaged,
       orderDirManaged,
-      hideArchived
+      showArchived
     );
     getSponsorCustomizedPages(
       searchTerm,
@@ -164,7 +166,7 @@ const SponsorPagesTab = ({
       perPageCustomized,
       orderCustomized,
       orderDirCustomized,
-      hideArchived
+      showArchived
     );
   };
 
@@ -188,7 +190,7 @@ const SponsorPagesTab = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
 
@@ -209,7 +211,7 @@ const SponsorPagesTab = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
   };
@@ -221,10 +223,20 @@ const SponsorPagesTab = ({
   };
 
   const handleCustomizedDelete = (itemId) => {
-    console.log("DELETE CUSTOMIZED ", itemId);
+    deleteSponsorCustomizedPage(itemId).then(() => {
+      const { perPage, order, orderDir } = customizedPages;
+      getSponsorCustomizedPages(
+        term,
+        DEFAULT_CURRENT_PAGE,
+        perPage,
+        order,
+        orderDir,
+        hideArchived
+      );
+    });
   };
 
-  const handleHideArchived = (ev) => {
+  const handleShowArchived = (ev) => {
     getSponsorManagedPages(
       term,
       DEFAULT_CURRENT_PAGE,
@@ -253,7 +265,7 @@ const SponsorPagesTab = ({
           perPage,
           order,
           orderDir,
-          hideArchived
+          showArchived
         );
       })
       .finally(() => setOpenPopup(null));
@@ -269,7 +281,7 @@ const SponsorPagesTab = ({
           perPage,
           order,
           orderDir,
-          hideArchived
+          showArchived
         );
       })
       .finally(() => setOpenPopup(null));
@@ -284,7 +296,7 @@ const SponsorPagesTab = ({
           managedPages.perPage,
           managedPages.order,
           managedPages.orderDir,
-          hideArchived
+          showArchived
         );
         getSponsorCustomizedPages(
           term,
@@ -292,7 +304,7 @@ const SponsorPagesTab = ({
           customizedPages.perPage,
           customizedPages.order,
           customizedPages.orderDir,
-          hideArchived
+          showArchived
         );
       })
       .finally(() => setOpenPopup(null));
@@ -395,16 +407,16 @@ const SponsorPagesTab = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={hideArchived}
-                  onChange={handleHideArchived}
+                  checked={showArchived}
+                  onChange={handleShowArchived}
                   inputProps={{
                     "aria-label": T.translate(
-                      "edit_sponsor.pages_tab.hide_archived"
+                      "edit_sponsor.pages_tab.show_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("edit_sponsor.pages_tab.hide_archived")}
+              label={T.translate("edit_sponsor.pages_tab.show_archived")}
             />
           </FormGroup>
         </Grid2>
@@ -494,25 +506,25 @@ const SponsorPagesTab = ({
 
       {(openPopup === "customizedPagePopup" ||
         openPopup === "managedPagePopup") && (
-        <PageTemplatePopup
-          title={
-            openPopup === "managedPagePopup"
-              ? T.translate("edit_sponsor.pages_tab.title_customize")
-              : undefined
-          }
-          onSave={
-            openPopup === "customizedPagePopup"
-              ? handleSaveCustomizedPage
-              : handleSaveManagedPage
-          }
-          onClose={handleClosePagePopup}
-          pageTemplate={currentEditPage}
-          sponsorshipIds={sponsorshipIds}
-          summitId={currentSummit.id}
-          sponsorId={sponsor.id}
-          summitTZ={summitTZ}
-        />
-      )}
+          <PageTemplatePopup
+            title={
+              openPopup === "managedPagePopup"
+                ? T.translate("edit_sponsor.pages_tab.title_customize")
+                : undefined
+            }
+            onSave={
+              openPopup === "customizedPagePopup"
+                ? handleSaveCustomizedPage
+                : handleSaveManagedPage
+            }
+            onClose={handleClosePagePopup}
+            pageTemplate={currentEditPage}
+            sponsorshipIds={sponsorshipIds}
+            summitId={currentSummit.id}
+            sponsorId={sponsor.id}
+            summitTZ={summitTZ}
+          />
+        )}
     </Box>
   );
 };
@@ -535,6 +547,7 @@ export default connect(mapStateToProps, {
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   deleteSponsorManagedPage,
+  deleteSponsorCustomizedPage,
   unarchiveCustomizedPage,
   archiveCustomizedPage,
   resetSponsorPage

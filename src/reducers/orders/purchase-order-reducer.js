@@ -14,7 +14,7 @@ import React from "react";
 import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
-import _ from "lodash";
+import cloneDeep from "lodash/cloneDeep"
 
 import history from "../../history";
 import {
@@ -263,7 +263,7 @@ const purchaseOrderReducer = (state = DEFAULT_STATE, action) => {
         purchaseOrder.raw_amount - purchaseOrder.discount_amount;
       let adjusted_total_order_purchase_price = 0;
       // use deep copy to avoid mutations on elements of the array
-      const adjusted_applied_taxes = _.cloneDeep(purchaseOrder.applied_taxes);
+      const adjusted_applied_taxes = cloneDeep(purchaseOrder.applied_taxes);
       approved_refunds.forEach((refund) => {
         refund.ticket_id = refund.ticket.id;
         refund.refunded_amount_formatted = `${currencySymbol}${refund.refunded_amount.toFixed(

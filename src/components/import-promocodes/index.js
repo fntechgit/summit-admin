@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import T from "i18n-react";
 import { Modal } from "react-bootstrap";
-import { UploadInput } from "openstack-uicore-foundation/lib/components";
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 
 const ImportPromocodesBtn = ({
   onImport,

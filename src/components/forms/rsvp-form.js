@@ -13,7 +13,7 @@
 
 import React from "react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import { RawHTML } from "openstack-uicore-foundation/lib/components";
+import RawHTML from "openstack-uicore-foundation/lib/components/raw-html";
 import Select from "react-select";
 
 class RsvpForm extends React.Component {

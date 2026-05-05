@@ -64,7 +64,7 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
       const purchases = payload.response.data.map((a) => ({
         ...a,
         order: a.order_number,
-        amount: `$${amountFromCents(a.raw_amount)}`,
+        amount: `$${amountFromCents(a.raw_amount - a.discount_amount)}`,
         purchased: moment(a.created * MILLISECONDS_TO_SECONDS).format(
           "YYYY/MM/DD HH:mm a"
         )

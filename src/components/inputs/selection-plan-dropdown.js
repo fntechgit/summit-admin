@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown } from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 
 const SelectionPlanDropdown = ({ id, value, onChange, selectionPlans, ...rest }) => {
   const options = selectionPlans.map(sp => ({ label: sp.name, value: sp.id }));

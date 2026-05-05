@@ -13,14 +13,12 @@
 
 import React from "react";
 import moment from "moment-timezone";
-import {
-  CompanyInput,
-  DateTimePicker,
-  Dropdown,
-  EventInput,
-  Panel,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import EventInput from "openstack-uicore-foundation/lib/components/inputs/event-input"
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel"
+import Table from "openstack-uicore-foundation/lib/components/table";
 const Query = require("graphql-query-builder");
 import wrapReport from "./report-wrapper";
 import { groupByDate } from "../../utils/methods";

@@ -31,7 +31,7 @@ import {
   downloadFileByContent
 } from "openstack-uicore-foundation/lib/utils/actions";
 import URI from "urijs";
-import _ from "lodash";
+import debounce from "lodash/debounce";
 import history from "../history";
 import {
   checkOrFilter,
@@ -778,8 +778,66 @@ export const changeAttendeeListSearchTerm = (term) => (dispatch) => {
   dispatch(createAction(CHANGE_ATTENDEE_SEARCH_TERM)({ term }));
 };
 
-export const queryPaidAttendees = _.debounce(
+export const queryPaidAttendees = debounce(
   async (summitId, input, callback) => {
+    const accessToken = await getAccessTokenSafely();
+
+    const endpoint = URI(
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/attendees`
+    );
+
+    input = escapeFilterValue(input);
+    endpoint.addQuery("access_token", accessToken);
+    endpoint.addQuery("order", "first_name,last_name");
+    endpoint.addQuery("page", 1);
+    endpoint.addQuery("per_page", DEFAULT_PER_PAGE);
+
+    if (input) {
+      endpoint.addQuery("filter[]", `full_name=@${input},email=@${input}`);
+    }
+
+    endpoint.addQuery("filter[]", "has_tickets==true");
+    endpoint.addQuery("filter[]", "has_member==true");
+
+    fetch(endpoint)
+      .then(fetchResponseHandler)
+      .then((json) => {
+        const options = [...json.data];
+        callback(options);
+      })
+      .catch(fetchErrorHandler);
+  },
+  DEBOUNCE_WAIT
+);
+
+export const queryAttendees = debounce(async (input, summitId, callback) => {
+  const accessToken = await getAccessTokenSafely();
+
+  const endpoint = URI(
+    `${window.API_BASE_URL}/api/v1/summits/${summitId}/attendees`
+  );
+
+  input = escapeFilterValue(input);
+  endpoint.addQuery("access_token", accessToken);
+  endpoint.addQuery("order", "first_name,last_name");
+  endpoint.addQuery("page", 1);
+  endpoint.addQuery("per_page", DEFAULT_PER_PAGE);
+
+  if (input) {
+    endpoint.addQuery("filter[]", `full_name=@${input},email=@${input}`);
+  }
+
+  fetch(endpoint)
+    .then(fetchResponseHandler)
+    .then((json) => {
+      const options = [...json.data];
+      callback(options);
+    })
+    .catch(fetchErrorHandler);
+}, DEBOUNCE_WAIT);
+
+export const queryAttendeesWithTickets = debounce(
+  async (input, summitId, callback) => {
     const accessToken = await getAccessTokenSafely();
 
     const endpoint = URI(

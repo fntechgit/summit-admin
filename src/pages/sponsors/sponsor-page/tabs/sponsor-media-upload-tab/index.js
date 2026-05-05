@@ -19,6 +19,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import DownloadIcon from "@mui/icons-material/Download";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   getGeneralMURequests,
   getSponsorMURequests,
@@ -26,12 +27,12 @@ import {
   uploadFileForSponsorMU
 } from "../../../../../actions/sponsor-mu-actions";
 import CustomAlert from "../../../../../components/mui/custom-alert";
-import MuiTable from "../../../../../components/mui/table/mui-table";
 import { SPONSOR_MEDIA_UPLOAD_STATUS } from "../../../../../utils/constants";
 import UploadDialog from "../../../../../components/upload-dialog";
 import showConfirmDialog from "../../../../../components/mui/showConfirmDialog";
 
 const SponsorMediaUploadTab = ({
+  sponsor,
   sponsorRequests,
   generalRequests,
   getSponsorMURequests,
@@ -44,7 +45,7 @@ const SponsorMediaUploadTab = ({
   useEffect(() => {
     getSponsorMURequests();
     getGeneralMURequests();
-  }, []);
+  }, [sponsor?.id]);
 
   const handleSponsorPageChange = (page) => {
     const { perPage, order, orderDir } = sponsorRequests;
@@ -271,8 +272,9 @@ const SponsorMediaUploadTab = ({
   );
 };
 
-const mapStateToProps = ({ sponsorPageMUListState }) => ({
-  ...sponsorPageMUListState
+const mapStateToProps = ({ sponsorPageMUListState, currentSponsorState }) => ({
+  ...sponsorPageMUListState,
+  sponsor: currentSponsorState.entity
 });
 
 export default connect(mapStateToProps, {

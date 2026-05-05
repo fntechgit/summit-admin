@@ -13,7 +13,8 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Input, Dropdown } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import { MILLISECONDS_IN_SECOND } from "../../utils/constants";
 

@@ -25,19 +25,25 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockClosedIcon from "@mui/icons-material/Lock";
-import MuiTable from "../../../../../../components/mui/table/mui-table";
-import { TotalRow } from "../../../../../../components/mui/table/extra-rows";
-import SearchInput from "../../../../../../components/mui/search-input";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import { TotalRow } from "openstack-uicore-foundation/lib/components/mui/table/extra-rows";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import history from "../../../../../../history";
 import {
+  checkoutCart,
   deleteSponsorCartForm,
+  deleteSponsorCartNote,
   getSponsorCart,
   lockSponsorCartForm,
-  unlockSponsorCartForm,
+  payWithInvoice,
   saveSponsorCartNote,
-  deleteSponsorCartNote
+  unlockSponsorCartForm
 } from "../../../../../../actions/sponsor-cart-actions";
 import CartNote from "./cart-note";
-import { SPONSOR_CART_NOTE_TYPES } from "../../../../../../utils/constants";
+import {
+  SPONSOR_CART_NOTE_TYPES,
+  SPONSOR_CART_STATUS
+} from "../../../../../../utils/constants";
 
 const CartView = ({
   cart,
@@ -46,11 +52,15 @@ const CartView = ({
   deleteSponsorCartForm,
   lockSponsorCartForm,
   unlockSponsorCartForm,
-  onEdit,
   onAddForm,
   saveSponsorCartNote,
-  deleteSponsorCartNote
+  deleteSponsorCartNote,
+  checkoutCart,
+  payWithInvoice
 }) => {
+  const cartIsPendingPayment =
+    cart?.status === SPONSOR_CART_STATUS.PENDING_PAYMENT;
+
   useEffect(() => {
     getSponsorCart();
   }, []);
@@ -67,6 +77,10 @@ const CartView = ({
     console.log("MANAGE ITEMS : ", item);
   };
 
+  const handleEditForm = (form) => {
+    history.push(`cart/forms/${form.id}`);
+  };
+
   const handleLock = (form) => {
     if (form.is_locked) {
       unlockSponsorCartForm(form.id);
@@ -75,12 +89,23 @@ const CartView = ({
     }
   };
 
-  const handlePayCreditCard = () => {
-    console.log("PAY CREDIT CARD");
+  const handlePayCreditCard = async () => {
+    try {
+      if (!cartIsPendingPayment) await checkoutCart();
+      history.push("cart/payment");
+    } catch (err) {
+      console.error("Failed to checkout cart for credit card payment:", err);
+    }
   };
 
-  const handlePayInvoice = () => {
-    console.log("PAY INVOICE");
+  const handlePayInvoice = async () => {
+    try {
+      if (!cartIsPendingPayment) await checkoutCart();
+      await payWithInvoice();
+      history.push("cart/invoice");
+    } catch (err) {
+      console.error("Failed to process invoice payment:", err);
+    }
   };
 
   const cartData = cart?.forms.map((form) => ({
@@ -181,88 +206,90 @@ const CartView = ({
         </Grid2>
       </Grid2>
       {!cart && (
-        <Typography variant="h6" textAlign="center">
+        <Typography variant="h6" textAlign="center" sx={{ mb: 2, mt: 4 }}>
           {T.translate("edit_sponsor.cart_tab.no_cart")}
         </Typography>
       )}
       {!!cart && (
-        <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
-          <MuiTable
-            columns={tableColumns}
-            data={cartData}
-            options={{}}
-            onEdit={onEdit}
-            onDelete={handleDelete}
-            deleteDialogBody={(formName) =>
-              T.translate("edit_sponsor.cart_tab.delete_form_confirm", {
-                form: formName ?? ""
-              })
-            }
-            confirmButtonColor="error"
-          >
-            <TotalRow
+        <>
+          <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
+            <MuiTable
               columns={tableColumns}
-              total={cart?.total}
-              targetCol="amount"
-              trailing={2}
-            />
-          </MuiTable>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              mt: 4,
-              pb: 4,
-              gap: "10px"
-            }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ minWidth: 250 }}
-              disabled={cart?.net_amount === 0}
-              onClick={handlePayCreditCard}
+              data={cartData}
+              options={{}}
+              onEdit={handleEditForm}
+              onDelete={handleDelete}
+              deleteDialogBody={(formName) =>
+                T.translate("edit_sponsor.cart_tab.delete_form_confirm", {
+                  form: formName ?? ""
+                })
+              }
+              confirmButtonColor="error"
             >
-              {T.translate("edit_sponsor.cart_tab.pay_cc")}
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ minWidth: 250 }}
-              onClick={handlePayInvoice}
+              <TotalRow
+                columns={tableColumns}
+                total={cart?.total}
+                targetCol="amount"
+                trailing={2}
+              />
+            </MuiTable>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                mt: 4,
+                pb: 4,
+                gap: "10px"
+              }}
             >
-              {T.translate("edit_sponsor.cart_tab.pay_invoice")}
-            </Button>
-          </Box>
-        </Paper>
+              <Button
+                variant="contained"
+                color="primary"
+                style={{ minWidth: 250 }}
+                disabled={cart?.net_amount === 0}
+                onClick={handlePayCreditCard}
+              >
+                {T.translate("edit_sponsor.cart_tab.pay_cc")}
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                style={{ minWidth: 250 }}
+                onClick={handlePayInvoice}
+              >
+                {T.translate("edit_sponsor.cart_tab.pay_invoice")}
+              </Button>
+            </Box>
+          </Paper>
+          <CartNote
+            title={T.translate("edit_sponsor.cart_tab.sponsor_note.title")}
+            notes={cart?.notes.filter(
+              (n) => n.type === SPONSOR_CART_NOTE_TYPES.SPONSOR
+            )}
+            placeholder={T.translate(
+              "edit_sponsor.cart_tab.sponsor_note.placeholder"
+            )}
+            onSave={(note) =>
+              saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.SPONSOR)
+            }
+            onDelete={deleteSponsorCartNote}
+          />
+          <CartNote
+            title={T.translate("edit_sponsor.cart_tab.order_note.title")}
+            notes={cart?.notes.filter(
+              (n) => n.type === SPONSOR_CART_NOTE_TYPES.INTERNAL
+            )}
+            placeholder={T.translate(
+              "edit_sponsor.cart_tab.order_note.placeholder"
+            )}
+            onSave={(note) =>
+              saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.INTERNAL)
+            }
+            onDelete={deleteSponsorCartNote}
+            multiple
+          />
+        </>
       )}
-      <CartNote
-        title={T.translate("edit_sponsor.cart_tab.sponsor_note.title")}
-        notes={cart?.notes.filter(
-          (n) => n.type === SPONSOR_CART_NOTE_TYPES.SPONSOR
-        )}
-        placeholder={T.translate(
-          "edit_sponsor.cart_tab.sponsor_note.placeholder"
-        )}
-        onSave={(note) =>
-          saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.SPONSOR)
-        }
-        onDelete={deleteSponsorCartNote}
-      />
-      <CartNote
-        title={T.translate("edit_sponsor.cart_tab.order_note.title")}
-        notes={cart?.notes.filter(
-          (n) => n.type === SPONSOR_CART_NOTE_TYPES.INTERNAL
-        )}
-        placeholder={T.translate(
-          "edit_sponsor.cart_tab.order_note.placeholder"
-        )}
-        onSave={(note) =>
-          saveSponsorCartNote(note, SPONSOR_CART_NOTE_TYPES.INTERNAL)
-        }
-        onDelete={deleteSponsorCartNote}
-        multiple
-      />
     </>
   );
 };
@@ -277,5 +304,7 @@ export default connect(mapStateToProps, {
   lockSponsorCartForm,
   unlockSponsorCartForm,
   saveSponsorCartNote,
-  deleteSponsorCartNote
+  deleteSponsorCartNote,
+  checkoutCart,
+  payWithInvoice
 })(CartView);

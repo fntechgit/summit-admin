@@ -12,11 +12,9 @@
  * */
 import React from "react";
 import { FormGroup, FormControl } from "react-bootstrap";
-import {
-  DateTimePicker,
-  SummitVenuesSelect,
-  Dropdown
-} from "openstack-uicore-foundation/lib/components";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import SummitVenuesSelect from "openstack-uicore-foundation/lib/components/inputs/summit-venues-select"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import { SummitEvent } from "openstack-uicore-foundation/lib/models";
 import moment from "moment-timezone";
 import T from "i18n-react/dist/i18n-react";

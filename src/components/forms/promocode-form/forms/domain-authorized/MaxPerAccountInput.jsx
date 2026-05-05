@@ -1,6 +1,6 @@
 import React from "react";
 import T from "i18n-react";
-import { Input } from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import { fireChange } from "./utils";
 
 // Returns the col-md-4 directly. Host (BasePCForm's Quantity row) provides

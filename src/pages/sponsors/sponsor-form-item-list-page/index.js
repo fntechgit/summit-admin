@@ -28,6 +28,7 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ImageIcon from "@mui/icons-material/Image";
+import MuiTableEditable from "openstack-uicore-foundation/lib/components/mui/editable-table";
 import {
   deleteSponsorFormItem,
   getSponsorFormItem,
@@ -38,7 +39,6 @@ import {
 } from "../../../actions/sponsor-forms-actions";
 import SponsorFormItemPopup from "./components/sponsor-form-item-popup";
 import SponsorFormAddItemFromInventoryPopup from "./components/sponsor-form-add-item-from-inventory-popup";
-import MuiTableEditable from "../../../components/mui/editable-table/mui-table-editable";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 import { rateCellValidation } from "../../../utils/yup";
 import { rateToCents } from "../../../utils/rate-helpers";
@@ -48,7 +48,7 @@ const SponsorFormItemListPage = ({
   items,
   currentPage,
   perPage,
-  hideArchived,
+  showArchived,
   order,
   orderDir,
   totalCount,
@@ -67,14 +67,25 @@ const SponsorFormItemListPage = ({
   }, []);
 
   const handlePageChange = (page) => {
-    getSponsorFormItems(formId, page, perPage, order, orderDir, hideArchived);
+    getSponsorFormItems(formId, page, perPage, order, orderDir, showArchived);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getSponsorFormItems(
+      formId,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir,
+      showArchived
+    );
   };
 
   const handleSort = (key, dir) => {
-    getSponsorFormItems(formId, currentPage, perPage, key, dir, hideArchived);
+    getSponsorFormItems(formId, currentPage, perPage, key, dir, showArchived);
   };
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getSponsorFormItems(
       formId,
       DEFAULT_CURRENT_PAGE,
@@ -111,7 +122,7 @@ const SponsorFormItemListPage = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
     });
   };
@@ -244,15 +255,16 @@ const SponsorFormItemListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={handleHideArchivedForms}
+                  checked={showArchived}
+                  onChange={handleShowArchivedForms}
                   inputProps={{
                     "aria-label": T.translate(
-                      "sponsor_form_item_list.hide_archived"
+                      "sponsor_form_item_list.show_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("sponsor_form_item_list.hide_archived")}
+              label={T.translate("sponsor_form_item_list.show_archived")}
             />
           </FormGroup>
           <Button
@@ -283,6 +295,7 @@ const SponsorFormItemListPage = ({
             currentPage={currentPage}
             onDelete={handleRowDelete}
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             onSort={handleSort}
             onCellChange={handleCellEdit}
             onEdit={handleRowEdit}

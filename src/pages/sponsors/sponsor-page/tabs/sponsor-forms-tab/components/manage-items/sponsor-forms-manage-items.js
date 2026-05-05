@@ -26,6 +26,8 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ImageIcon from "@mui/icons-material/Image";
+import MuiTableEditable from "openstack-uicore-foundation/lib/components/mui/editable-table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   addSponsorManagedFormItems,
   archiveSponsorCustomizedFormItem,
@@ -37,8 +39,6 @@ import {
   getSponsorFormManagedItem
 } from "../../../../../../../actions/sponsor-forms-actions";
 import CustomAlert from "../../../../../../../components/mui/custom-alert";
-import SearchInput from "../../../../../../../components/mui/search-input";
-import MuiTableEditable from "../../../../../../../components/mui/editable-table/mui-table-editable";
 import SponsorInventoryDialog from "../../../../../../sponsors-global/form-templates/sponsor-inventory-popup";
 import SponsorFormItemFromInventoryPopup from "./sponsor-form-item-from-inventory";
 import {
@@ -52,7 +52,7 @@ import Restrict from "../../../../../../../routes/restrict";
 const SponsorFormsManageItems = ({
   term,
   match,
-  hideArchived,
+  showArchived,
   items,
   order,
   orderDir,
@@ -89,7 +89,7 @@ const SponsorFormsManageItems = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -101,7 +101,7 @@ const SponsorFormsManageItems = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -113,7 +113,7 @@ const SponsorFormsManageItems = ({
       perPage,
       key,
       dir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -125,7 +125,7 @@ const SponsorFormsManageItems = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
@@ -138,7 +138,7 @@ const SponsorFormsManageItems = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       );
       resetSponsorFormManagedItem();
       setOpenPopup(null);
@@ -155,7 +155,7 @@ const SponsorFormsManageItems = ({
       ? unarchiveSponsorCustomizedFormItem(formId, item.id)
       : archiveSponsorCustomizedFormItem(formId, item.id);
 
-  const handleHideArchivedItems = (ev) => {
+  const handleShowArchivedItems = (ev) => {
     getSponsorCustomizedFormItems(
       formId,
       term,
@@ -197,7 +197,7 @@ const SponsorFormsManageItems = ({
         perPage,
         order,
         orderDir,
-        hideArchived
+        showArchived
       )
     );
   };
@@ -306,17 +306,17 @@ const SponsorFormsManageItems = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={hideArchived}
-                  onChange={handleHideArchivedItems}
+                  checked={showArchived}
+                  onChange={handleShowArchivedItems}
                   inputProps={{
                     "aria-label": T.translate(
-                      "edit_sponsor.forms_tab.form_manage_items.hide_archived"
+                      "edit_sponsor.forms_tab.form_manage_items.show_archived"
                     )
                   }}
                 />
               }
               label={T.translate(
-                "edit_sponsor.forms_tab.form_manage_items.hide_archived"
+                "edit_sponsor.forms_tab.form_manage_items.show_archived"
               )}
             />
           </FormGroup>

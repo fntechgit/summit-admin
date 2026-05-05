@@ -30,15 +30,23 @@ import {
   DEFAULT_ORDER_DIR,
   DEFAULT_PER_PAGE,
   DUMMY_ACTION,
+  IMPORT_SPONSOR_USERS_STATUS,
   SPONSOR_USER_ASSIGNMENT_TYPE
 } from "../utils/constants";
-import { snackbarErrorHandler, snackbarSuccessHandler } from "./base-actions";
+import {
+  snackbarErrorHandler,
+  snackbarErrorMsg,
+  snackbarSuccessHandler
+} from "./base-actions";
 
 export const RECEIVE_SPONSOR_USER_GROUPS = "RECEIVE_SPONSOR_USER_GROUPS";
 export const REQUEST_SPONSOR_USER_REQUESTS = "REQUEST_SPONSOR_USER_REQUESTS";
 export const RECEIVE_SPONSOR_USER_REQUESTS = "RECEIVE_SPONSOR_USER_REQUESTS";
 export const REQUEST_SPONSOR_USERS = "REQUEST_SPONSOR_USERS";
 export const RECEIVE_SPONSOR_USERS = "RECEIVE_SPONSOR_USERS";
+export const IMPORT_SPONSOR_USERS_TRIGGERED = "IMPORT_SPONSOR_USERS_TRIGGERED";
+export const RECEIVE_SPONSOR_USERS_IMPORT_STATUS =
+  "RECEIVE_SPONSOR_USERS_IMPORT_STATUS";
 export const SPONSOR_USER_ADDED = "SPONSOR_USER_ADDED";
 export const SPONSOR_USER_REQUEST_ACCEPTED = "SPONSOR_USER_REQUEST_ACCEPTED";
 export const SPONSOR_USER_REQUEST_DELETED = "SPONSOR_USER_REQUEST_DELETED";
@@ -537,19 +545,74 @@ export const sendSponsorUserInvite = (email) => async (dispatch, getState) => {
     });
 };
 
-export const fetchSponsorUsersBySummit = async (summitId, companyId, page) => {
+export const fetchSponsorUsersBySummit = async (
+  currentSummitId,
+  summitId,
+  companyId,
+  page
+) => {
   const accessToken = await getAccessTokenSafely();
 
   return fetch(
-    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users?filter[]=summit_id==${summitId}&filter[]=company_id==${companyId}&access_token=${accessToken}&page=${page}&per_page=10&order=first_name&order_dir=asc`
+    `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users?filter[]=not_summit_id==${currentSummitId}&filter[]=summit_id==${summitId}&filter[]=company_id==${companyId}&access_token=${accessToken}&page=${page}&per_page=10&order=first_name&order_dir=asc`
   )
     .then(fetchResponseHandler)
     .then((json) => json)
     .catch(fetchErrorHandler);
 };
 
+export const trackImportSponsorUsers = () => async (dispatch, getState) => {
+  const { sponsorUsersListState, currentSponsorState } = getState();
+  const { importTasks } = sponsorUsersListState;
+  const { entity: sponsor } = currentSponsorState;
+
+  const accessToken = await getAccessTokenSafely();
+  const params = {
+    access_token: accessToken
+  };
+
+  importTasks.forEach((taskId) => {
+    getRequest(
+      null,
+      createAction(RECEIVE_SPONSOR_USERS_IMPORT_STATUS),
+      `${window.SPONSOR_USERS_API_URL}/api/v1/tasks/${taskId}`,
+      authErrorHandler
+    )(params)(dispatch).then(({ response }) => {
+      if (response.status === IMPORT_SPONSOR_USERS_STATUS.SUCCESS) {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("sponsor_users.import_users.success")
+          })
+        );
+
+        if (response.result.errors.length > 0) {
+          dispatch(
+            snackbarErrorMsg({
+              title: T.translate("sponsor_users.import_users.fail"),
+              html: response.result.errors.map((e) => e.error).join("<br/>")
+            })
+          );
+        }
+
+        dispatch(getSponsorUsers(sponsor.id));
+      } else if (response.status === IMPORT_SPONSOR_USERS_STATUS.FAILURE) {
+        dispatch(
+          snackbarErrorMsg({
+            title: T.translate("sponsor_users.import_users.fail"),
+            html: response.error
+          })
+        );
+      }
+    });
+  });
+};
+
 export const importSponsorUsers =
-  (sponsorId, companyId, summitId, userIds) => async (dispatch) => {
+  (targetSponsorId, targetCompanyId, sourceSummitId, userIds) =>
+  async (dispatch, getState) => {
+    const { currentSummitState } = getState();
+    const { currentSummit } = currentSummitState;
     const accessToken = await getAccessTokenSafely();
     let payload;
 
@@ -562,30 +625,30 @@ export const importSponsorUsers =
     if (userIds === "all") {
       payload = {
         apply_to_all_users: true,
-        source_company_id: companyId,
-        source_summit_id: summitId
+        source_company_id: targetCompanyId, // target and source companyId is the same
+        source_summit_id: sourceSummitId,
+        target_summit_id: currentSummit.id
       };
     } else {
       payload = {
-        summit_id: summitId,
-        sponsor_id: sponsorId,
+        target_summit_id: currentSummit.id,
+        sponsor_id: targetSponsorId,
         user_ids: userIds
       };
     }
 
     return postRequest(
       null,
-      createAction(DUMMY_ACTION),
+      createAction(IMPORT_SPONSOR_USERS_TRIGGERED),
       `${window.SPONSOR_USERS_API_URL}/api/v1/sponsor-users/import`,
       payload,
       snackbarErrorHandler
     )(params)(dispatch)
       .then(() => {
-        dispatch(stopLoading());
         dispatch(
           snackbarSuccessHandler({
             title: T.translate("general.success"),
-            html: T.translate("sponsor_users.import_users.success")
+            html: T.translate("sponsor_users.import_users.running")
           })
         );
       })

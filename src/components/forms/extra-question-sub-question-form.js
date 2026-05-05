@@ -13,10 +13,8 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Dropdown,
-  RadioList
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import RadioList from "openstack-uicore-foundation/lib/components/inputs/radio-list";
 import {
   ExtraQuestionsTypeAllowSubQuestion,
   SubQuestionAnswerValuesOperators,

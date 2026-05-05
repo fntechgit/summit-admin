@@ -30,9 +30,16 @@ import {
   SPONSOR_CART_FORM_LOCKED,
   SPONSOR_CART_NOTE_ADDED,
   SPONSOR_CART_NOTE_DELETED,
-  SPONSOR_CART_NOTE_UPDATED
+  SPONSOR_CART_NOTE_UPDATED,
+  OFFLINE_PAYMENT_CREATED,
+  CART_STATUS_UPDATED,
+  RECEIVE_PAYMENT_PROFILE,
+  PAYMENT_INTENT_UPDATED,
+  PAYMENT_INTENT_CREATED,
+  PAYMENT_CONFIRMED
 } from "../../actions/sponsor-cart-actions";
 import { DISCOUNT_TYPES } from "../../utils/constants";
+import { RECEIVE_MEMBER } from "../../actions/member-actions";
 
 const DEFAULT_STATE = {
   cart: null,
@@ -48,7 +55,11 @@ const DEFAULT_STATE = {
     orderDir: 1
   },
   sponsorForm: null,
-  cartForm: null
+  cartForm: null,
+  paymentProfile: null,
+  paymentIntent: null,
+  offlinePayment: null,
+  cartOwner: null
 };
 
 const mapForm = (formData) => ({
@@ -74,6 +85,7 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
         summitTZ
       };
     }
+    case CART_STATUS_UPDATED:
     case RECEIVE_SPONSOR_CART: {
       const cart = payload.response;
       cart.forms = cart.forms.map((form) => {
@@ -214,6 +226,38 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
         cart: {
           ...state.cart,
           notes: state.cart.notes.filter((n) => n.id !== noteId)
+        }
+      };
+    }
+    case RECEIVE_PAYMENT_PROFILE: {
+      const paymentProfile = payload.response;
+      return { ...state, paymentProfile };
+    }
+    case PAYMENT_INTENT_UPDATED:
+    case PAYMENT_INTENT_CREATED: {
+      const paymentIntent = payload.response;
+      return { ...state, paymentIntent };
+    }
+    case PAYMENT_CONFIRMED: {
+      return {
+        ...state,
+        cart: null,
+        paymentProfile: null,
+        paymentIntent: null,
+        offlinePayment: null
+      };
+    }
+    case OFFLINE_PAYMENT_CREATED: {
+      const offlinePayment = payload.response;
+      return { ...state, offlinePayment };
+    }
+    case RECEIVE_MEMBER: {
+      const member = payload.response;
+      return {
+        ...state,
+        cartOwner: {
+          ...member,
+          full_name: `${member.first_name} ${member.last_name}`
         }
       };
     }

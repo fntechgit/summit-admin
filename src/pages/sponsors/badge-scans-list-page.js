@@ -11,13 +11,11 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import {
-  Table,
-  SponsorInput
-} from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table"
+import SponsorInput from "openstack-uicore-foundation/lib/components/inputs/sponsor-input";
 import { querySponsorsWithBadgeScans } from "openstack-uicore-foundation/lib/utils/query-actions";
 import { Pagination } from "react-bootstrap";
 import { getSummitById } from "../../actions/summit-actions";
@@ -45,23 +43,25 @@ const BadgeScansListPage = ({
     }
   }, []);
 
+  const [currentSponsor, setCurrentSponsor] = useState(false);
+
   const handlePageChange = (page) => {
-    props.getBadgeScans(sponsorId, _, page, perPage, order, orderDir);
+    props.getBadgeScans(sponsorId, "", page, perPage, order, orderDir);
   };
 
   const handleSort = (index, key, dir) => {
-    props.getBadgeScans(sponsorId, _, currentPage, perPage, key, dir);
+    props.getBadgeScans(sponsorId, "", currentPage, perPage, key, dir);
   };
 
   const handleSponsorChange = (ev) => {
     const { value } = ev.target;
-    props.getBadgeScans(value.id, _, currentPage, perPage, order, orderDir);
+    setCurrentSponsor(value);
+    props.getBadgeScans(value.id, "", currentPage, perPage, order, orderDir);
   };
 
   const handleExport = (ev) => {
     ev.preventDefault();
-    const sponsor = allSponsors.find((s) => s.id === sponsorId);
-    props.exportBadgeScans(sponsor, order, orderDir);
+    props.exportBadgeScans(currentSponsor, order, orderDir);
   };
 
   const handleEditBadgeScan = (id) => {
@@ -122,8 +122,6 @@ const BadgeScansListPage = ({
 
   if (!currentSummit.id) return <div />;
 
-  // console.log(badgeScans, table_options, columns)
-
   return (
     <div className="container">
       <h3>
@@ -142,7 +140,7 @@ const BadgeScansListPage = ({
           <div className="col-md-6 pull-right">
             <SponsorInput
               id="sponsor"
-              value={sponsorId}
+              value={currentSponsor}
               onChange={handleSponsorChange}
               summitId={currentSummit?.id}
               placeholder={T.translate(

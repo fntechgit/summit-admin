@@ -22,7 +22,6 @@ import {
   escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import T from "i18n-react/dist/i18n-react";
-import moment from "moment-timezone";
 import {
   getAccessTokenSafely,
   normalizeSelectAllField
@@ -34,6 +33,7 @@ import {
   DEFAULT_PER_PAGE,
   PAGES_MODULE_KINDS
 } from "../utils/constants";
+import { normalizePageTemplateModules } from "../utils/page-template";
 
 export const GLOBAL_PAGE_CLONED = "GLOBAL_PAGE_CLONED";
 export const RESET_EDIT_PAGE = "RESET_EDIT_PAGE";
@@ -54,6 +54,8 @@ export const RECEIVE_SPONSOR_CUSTOMIZED_PAGE =
 export const SPONSOR_CUSTOMIZED_PAGE_ADDED = "SPONSOR_CUSTOMIZED_PAGE_ADDED";
 export const SPONSOR_CUSTOMIZED_PAGE_UPDATED =
   "SPONSOR_CUSTOMIZED_PAGE_UPDATED";
+export const SPONSOR_CUSTOMIZED_PAGE_DELETED =
+  "SPONSOR_CUSTOMIZED_PAGE_DELETED";
 export const SPONSOR_CUSTOMIZED_PAGE_ARCHIVED =
   "SPONSOR_CUSTOMIZED_PAGE_ARCHIVED";
 export const SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED =
@@ -114,7 +116,7 @@ export const getSponsorManagedPages =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    showArchived = false
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -140,7 +142,7 @@ export const getSponsorManagedPages =
       access_token: accessToken
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -157,7 +159,7 @@ export const getSponsorManagedPages =
       createAction(RECEIVE_SPONSOR_MANAGED_PAGES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages`,
       snackbarErrorHandler,
-      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
+      { order, orderDir, page, perPage, term, showArchived, summitTZ }
     )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
@@ -348,7 +350,7 @@ export const getSponsorCustomizedPages =
     perPage = DEFAULT_PER_PAGE,
     order = "id",
     orderDir = DEFAULT_ORDER_DIR,
-    hideArchived = false
+    showArchived = false
   ) =>
   async (dispatch, getState) => {
     const { currentSummitState, currentSponsorState } = getState();
@@ -376,7 +378,7 @@ export const getSponsorCustomizedPages =
       access_token: accessToken
     };
 
-    if (hideArchived) filter.push("is_archived==0");
+    filter.push(`is_archived==${showArchived ? 1 : 0}`);
 
     if (filter.length > 0) {
       params["filter[]"] = filter;
@@ -393,7 +395,7 @@ export const getSponsorCustomizedPages =
       createAction(RECEIVE_SPONSOR_CUSTOMIZED_PAGES),
       `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages`,
       snackbarErrorHandler,
-      { order, orderDir, page, perPage, term, hideArchived, summitTZ }
+      { order, orderDir, page, perPage, term, showArchived, summitTZ }
     )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
@@ -553,6 +555,38 @@ export const unarchiveCustomizedPage =
       });
   };
 
+export const deleteSponsorCustomizedPage =
+  (pageId) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+    const params = { access_token: accessToken };
+
+    dispatch(startLoading());
+
+    return deleteRequest(
+      null,
+      createAction(SPONSOR_CUSTOMIZED_PAGE_DELETED)({ pageId }),
+      `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/sponsor-pages/${pageId}`,
+      null,
+      snackbarErrorHandler
+    )(params)(dispatch)
+      .then(() => {
+        dispatch(
+          snackbarSuccessHandler({
+            title: T.translate("general.success"),
+            html: T.translate("show_pages.page_delete_success")
+          })
+        );
+      })
+      .finally(() => {
+        dispatch(stopLoading());
+      });
+  };
+
 const normalizeSponsorCustomPage = (entity, summitTZ) => {
   const normalizedEntity = {
     ...entity,
@@ -566,28 +600,10 @@ const normalizeSponsorCustomPage = (entity, summitTZ) => {
     normalizedEntity.allowed_add_ons = entity.allowed_add_ons.map((e) => e.id);
   }
 
-  normalizedEntity.modules = entity.modules.map((module) => {
-    const normalizedModule = { ...module };
-
-    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.upload_deadline) {
-      normalizedModule.upload_deadline = moment
-        .tz(module.upload_deadline, summitTZ)
-        .unix();
-    }
-
-    if (module.kind === PAGES_MODULE_KINDS.MEDIA && module.file_type_id) {
-      normalizedModule.file_type_id =
-        module.file_type_id?.value || module.file_type_id;
-    }
-
-    if (module.kind === PAGES_MODULE_KINDS.DOCUMENT && module.file) {
-      normalizedModule.file = module.file[0] || null;
-    }
-
-    delete normalizedModule._tempId;
-
-    return normalizedModule;
-  });
+  normalizedEntity.modules = normalizePageTemplateModules(
+    entity.modules,
+    summitTZ
+  );
 
   return normalizedEntity;
 };

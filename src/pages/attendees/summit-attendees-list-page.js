@@ -16,16 +16,14 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import {
-  Dropdown,
-  Input,
-  FreeTextSearch,
-  SelectableTable,
-  DateTimePicker,
-  TagInput,
-  CompanyInput,
-  TicketTypesInput
-} from "openstack-uicore-foundation/lib/components";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input"
+import CompanyInput from "openstack-uicore-foundation/lib/components/inputs/company-input"
+import TicketTypesInput from "openstack-uicore-foundation/lib/components/inputs/ticket-types-input";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import { SegmentedControl } from "segmented-control";
 import ScheduleModal from "../../components/schedule-modal";

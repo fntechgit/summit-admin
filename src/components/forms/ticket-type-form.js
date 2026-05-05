@@ -14,11 +14,9 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
-import {
-  Input,
-  DateTimePicker,
-  Dropdown
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import { isEmpty, scrollToError, shallowEqual } from "../../utils/methods";
 import TextAreaInputWithCounter from "../inputs/text-area-input-with-counter";
 import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";

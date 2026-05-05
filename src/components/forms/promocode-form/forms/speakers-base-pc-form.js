@@ -1,11 +1,9 @@
 import React, { useEffect } from "react";
 import Swal from "sweetalert2";
 import T from "i18n-react";
-import {
-  FreeTextSearch,
-  SpeakerInput,
-  Table
-} from "openstack-uicore-foundation/lib/components";
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
+import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input"
+import Table from "openstack-uicore-foundation/lib/components/table";
 import { Pagination } from "react-bootstrap";
 
 const SpeakersBasePCForm = (props) => {

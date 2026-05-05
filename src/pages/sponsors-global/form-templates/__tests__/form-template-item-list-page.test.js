@@ -22,7 +22,7 @@ describe("FormTemplateItemListPage", () => {
   const perPage = 10;
   const order = "name";
   const orderDir = 1;
-  const hideArchived = false;
+  const showArchived = false;
   const buildInitialState = () => ({
     currentFormTemplateItemListState: {
       formTemplateItems: [],
@@ -33,7 +33,7 @@ describe("FormTemplateItemListPage", () => {
       lastPage: 1,
       perPage,
       totalFormTemplateItems: 5,
-      hideArchived
+      showArchived
     },
     currentFormTemplateState: {
       entity: { id: formTemplateId, code: "FT", name: "Form Template" },
@@ -69,7 +69,7 @@ describe("FormTemplateItemListPage", () => {
           perPage,
           order,
           orderDir,
-          hideArchived
+          showArchived
         );
       });
     });

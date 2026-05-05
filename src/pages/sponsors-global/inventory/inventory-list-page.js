@@ -20,16 +20,16 @@ import {
   FormGroup,
   Grid2,
   Popover,
-  TextField,
   Typography
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import ImageIcon from "@mui/icons-material/Image";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
   archiveInventoryItem,
   deleteInventoryItem,
@@ -42,7 +42,6 @@ import {
   saveInventoryItem,
   unarchiveInventoryItem
 } from "../../../actions/inventory-item-actions";
-import MuiTable from "../../../components/mui/table/mui-table";
 import SponsorInventoryDialog from "../form-templates/sponsor-inventory-popup";
 import { DEFAULT_CURRENT_PAGE } from "../../../utils/constants";
 
@@ -165,7 +164,7 @@ const InventoryListPage = ({
   term,
   order,
   orderDir,
-  hideArchived,
+  showArchived,
   totalInventoryItems,
   saveInventoryItem,
   deleteInventoryItemImage,
@@ -178,7 +177,6 @@ const InventoryListPage = ({
   resetInventoryItemForm
 }) => {
   const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const handleClose = () => {
     resetInventoryItemForm();
@@ -192,12 +190,12 @@ const InventoryListPage = ({
       perPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   }, [getInventoryItems]);
 
   const handlePageChange = (page) => {
-    getInventoryItems(term, page, perPage, order, orderDir, hideArchived);
+    getInventoryItems(term, page, perPage, order, orderDir, showArchived);
   };
 
   const handlePerPageChange = (newPerPage) => {
@@ -207,28 +205,26 @@ const InventoryListPage = ({
       newPerPage,
       order,
       orderDir,
-      hideArchived
+      showArchived
     );
   };
 
   const handleSort = (key, dir) => {
-    getInventoryItems(term, currentPage, perPage, key, dir, hideArchived);
+    getInventoryItems(term, currentPage, perPage, key, dir, showArchived);
   };
 
-  const handleSearch = (ev) => {
-    if (ev.key === "Enter") {
-      getInventoryItems(
-        searchTerm,
-        DEFAULT_CURRENT_PAGE,
-        perPage,
-        order,
-        orderDir,
-        hideArchived
-      );
-    }
+  const handleSearch = (searchTerm) => {
+    getInventoryItems(
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir,
+      showArchived
+    );
   };
 
-  const handleHideArchivedForms = (ev) => {
+  const handleShowArchivedForms = (ev) => {
     getInventoryItems(
       term,
       DEFAULT_CURRENT_PAGE,
@@ -259,7 +255,7 @@ const InventoryListPage = ({
           perPage,
           order,
           orderDir,
-          hideArchived
+          showArchived
         )
       )
       .finally(() => setOpen(false));
@@ -345,36 +341,26 @@ const InventoryListPage = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  onChange={handleHideArchivedForms}
+                  onChange={handleShowArchivedForms}
+                  checked={showArchived}
                   inputProps={{
                     "aria-label": T.translate(
-                      "inventory_item_list.hide_archived"
+                      "inventory_item_list.show_archived"
                     )
                   }}
                 />
               }
-              label={T.translate("inventory_item_list.hide_archived")}
+              label={T.translate("inventory_item_list.show_archived")}
             />
           </FormGroup>
-          <TextField
-            variant="outlined"
-            value={searchTerm}
-            placeholder={T.translate(
-              "inventory_item_list.placeholders.search_inventory_items"
-            )}
-            slotProps={{
-              input: {
-                startAdornment: <SearchIcon sx={{ mr: 1 }} />
-              }
-            }}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={handleSearch}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                height: "36px"
-              }
-            }}
-          />
+          <Grid2 size={3}>
+            <SearchInput
+              onSearch={handleSearch}
+              placeholder={T.translate(
+                "inventory_item_list.placeholders.search_inventory_items"
+              )}
+            />
+          </Grid2>
           <Button
             variant="contained"
             onClick={() => handleNewInventoryItem()}

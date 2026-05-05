@@ -11,25 +11,33 @@
  * limitations under the License.
  * */
 
-import React from "react";
+import React, { Suspense } from "react";
 import { connect } from "react-redux";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { Breadcrumbs, Breadcrumb } from "react-breadcrumbs";
+import AjaxLoader from "openstack-uicore-foundation/lib/components/ajaxloader";
 import Restrict from "../routes/restrict";
 import Menu from "../components/menu";
-import SummitLayout from "./summit-layout";
-import SummitDirectoryPage from "../pages/summits/summit-directory-page";
-import SpeakerLayout from "./speaker-layout";
-import CompanyLayout from "./company-layout";
-import InventoryItemLayout from "./inventory-item-layout";
-import FormTemplateLayout from "./form-template-layout";
-import EmailLayout from "./email-layout";
-import AdminAccessLayout from "./admin-access-layout";
-import MediaFileTypeLayout from "./media-file-type-layout";
-import SponsoredProjectLayout from "./sponsored-project-layout";
-import TagLayout from "./tag-layout";
-import SponsorshipLayout from "./sponsorship-layout";
-import PageTemplateLayout from "./page-template-layout";
+
+const SummitLayout = React.lazy(() => import("./summit-layout"));
+const SummitDirectoryPage = React.lazy(() =>
+  import("../pages/summits/summit-directory-page")
+);
+const SpeakerLayout = React.lazy(() => import("./speaker-layout"));
+const CompanyLayout = React.lazy(() => import("./company-layout"));
+const InventoryItemLayout = React.lazy(() => import("./inventory-item-layout"));
+const FormTemplateLayout = React.lazy(() => import("./form-template-layout"));
+const EmailLayout = React.lazy(() => import("./email-layout"));
+const AdminAccessLayout = React.lazy(() => import("./admin-access-layout"));
+const MediaFileTypeLayout = React.lazy(() =>
+  import("./media-file-type-layout")
+);
+const SponsoredProjectLayout = React.lazy(() =>
+  import("./sponsored-project-layout")
+);
+const TagLayout = React.lazy(() => import("./tag-layout"));
+const SponsorshipLayout = React.lazy(() => import("./sponsorship-layout"));
+const PageTemplateLayout = React.lazy(() => import("./page-template-layout"));
 
 const PrimaryLayout = ({ match, currentSummit, location, member }) => {
   let extraClass = "container";
@@ -55,30 +63,38 @@ const PrimaryLayout = ({ match, currentSummit, location, member }) => {
           data={{ title: <i className="fa fa-home" />, pathname: match.url }}
         />
 
-        <Switch>
-          <Route
-            strict
-            exact
-            path="/app/directory"
-            component={SummitDirectoryPage}
-          />
-          <Route path="/app/speakers" component={SpeakerLayout} />
-          <Route path="/app/companies" component={CompanyLayout} />
-          <Route path="/app/inventory" component={InventoryItemLayout} />
-          <Route path="/app/form-templates" component={FormTemplateLayout} />
-          <Route path="/app/page-templates" component={PageTemplateLayout} />
-          <Route path="/app/sponsorship-types" component={SponsorshipLayout} />
-          <Route path="/app/tags" component={TagLayout} />
-          <Route
-            path="/app/sponsored-projects"
-            component={SponsoredProjectLayout}
-          />
-          <Route path="/app/emails" component={EmailLayout} />
-          <Route path="/app/admin-access" component={AdminAccessLayout} />
-          <Route path="/app/media-file-types" component={MediaFileTypeLayout} />
-          <Route path="/app/summits" component={SummitLayout} />
-          <Route render={() => <Redirect to="/app/directory" />} />
-        </Switch>
+        <Suspense fallback={<AjaxLoader show relative size={120} />}>
+          <Switch>
+            <Route
+              strict
+              exact
+              path="/app/directory"
+              component={SummitDirectoryPage}
+            />
+            <Route path="/app/speakers" component={SpeakerLayout} />
+            <Route path="/app/companies" component={CompanyLayout} />
+            <Route path="/app/inventory" component={InventoryItemLayout} />
+            <Route path="/app/form-templates" component={FormTemplateLayout} />
+            <Route path="/app/page-templates" component={PageTemplateLayout} />
+            <Route
+              path="/app/sponsorship-types"
+              component={SponsorshipLayout}
+            />
+            <Route path="/app/tags" component={TagLayout} />
+            <Route
+              path="/app/sponsored-projects"
+              component={SponsoredProjectLayout}
+            />
+            <Route path="/app/emails" component={EmailLayout} />
+            <Route path="/app/admin-access" component={AdminAccessLayout} />
+            <Route
+              path="/app/media-file-types"
+              component={MediaFileTypeLayout}
+            />
+            <Route path="/app/summits" component={SummitLayout} />
+            <Route render={() => <Redirect to="/app/directory" />} />
+          </Switch>
+        </Suspense>
       </main>
     </div>
   );

@@ -2,19 +2,20 @@ import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
 import MaxPerAccountInput from "../MaxPerAccountInput";
 
-jest.mock("openstack-uicore-foundation/lib/components", () => {
+// Mocks the direct import path used by MaxPerAccountInput (post-bundle-size
+// rewrite — see master commit cd8b5b98).
+jest.mock("openstack-uicore-foundation/lib/components/inputs/text-input", () => {
   const React = require("react");
-  return {
-    Input: (props) =>
-      React.createElement("input", {
-        id: props.id,
-        type: props.type ?? "text",
-        min: props.min,
-        value: props.value ?? "",
-        onChange: props.onChange,
-        className: props.className
-      })
-  };
+  const InputMock = (props) =>
+    React.createElement("input", {
+      id: props.id,
+      type: props.type ?? "text",
+      min: props.min,
+      value: props.value ?? "",
+      onChange: props.onChange,
+      className: props.className
+    });
+  return { __esModule: true, default: InputMock };
 });
 
 const baseEntity = (overrides = {}) => ({

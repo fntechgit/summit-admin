@@ -14,7 +14,7 @@
 import React from "react";
 const Query = require("graphql-query-builder");
 import wrapReport from "./report-wrapper";
-import { Table } from "openstack-uicore-foundation/lib/components";
+import Table from "openstack-uicore-foundation/lib/components/table";
 import Select from "react-select";
 import T from "i18n-react";
 import TicketTypeFilter from "../filters/ticket-type-filter";

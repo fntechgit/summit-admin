@@ -11,18 +11,19 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Button, Grid2 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   deleteSponsorUser,
   getSponsorUserRequests,
-  getSponsorUsers
+  getSponsorUsers,
+  trackImportSponsorUsers
 } from "../../../../../actions/sponsor-users-actions";
-import SearchInput from "../../../../../components/mui/search-input";
 import UsersTable from "../../../sponsor-users-list-page/components/users-table";
 import CustomAlert from "../../../../../components/mui/custom-alert";
 import ChipNotify from "../../../../../components/mui/chip-notify";
@@ -30,18 +31,23 @@ import NewUserPopup from "./components/new-user-popup";
 import ProcessRequestPopup from "./components/process-request-popup";
 import ImportUsersPopup from "./components/import-users-popup";
 import EditUserPopup from "./components/edit-user-popup";
+import { TEN_SECONDS_IN_MILLISECONDS } from "../../../../../utils/constants";
 
 const SponsorUsersListPerSponsorPage = ({
   sponsor,
   requests,
   users,
   term,
+  importTasks,
   getSponsorUserRequests,
   getSponsorUsers,
-  deleteSponsorUser
+  deleteSponsorUser,
+  trackImportSponsorUsers
 }) => {
   const [openPopup, setOpenPopup] = useState(null);
   const [userEdit, setUserEdit] = useState(null);
+  const importIntervalRef = useRef(null);
+  const hasImportTasks = !!importTasks?.length;
   const sponsorId = sponsor?.id;
   const companyId = sponsor?.company?.id;
 
@@ -49,6 +55,22 @@ const SponsorUsersListPerSponsorPage = ({
     if (companyId) getSponsorUserRequests(companyId);
     if (sponsorId) getSponsorUsers(sponsorId);
   }, [sponsorId, companyId]);
+
+  useEffect(() => {
+    if (hasImportTasks && !importIntervalRef.current) {
+      importIntervalRef.current = setInterval(
+        () => trackImportSponsorUsers(),
+        TEN_SECONDS_IN_MILLISECONDS
+      );
+    } else if (!hasImportTasks && importIntervalRef.current) {
+      clearInterval(importIntervalRef.current);
+      importIntervalRef.current = null;
+    }
+    return () => {
+      clearInterval(importIntervalRef.current);
+      importIntervalRef.current = null;
+    };
+  }, [hasImportTasks]);
 
   const handleSearch = (searchTerm) => {
     getSponsorUsers(sponsor.id, searchTerm);
@@ -93,7 +115,7 @@ const SponsorUsersListPerSponsorPage = ({
             alignItems: "center"
           }}
         >
-          <Grid2 size={4}>
+          <Grid2 size={3}>
             <SearchInput term={term} onSearch={handleSearch} />
           </Grid2>
           <Button
@@ -168,5 +190,6 @@ const mapStateToProps = ({ sponsorUsersListState, currentSponsorState }) => ({
 export default connect(mapStateToProps, {
   getSponsorUserRequests,
   getSponsorUsers,
-  deleteSponsorUser
+  deleteSponsorUser,
+  trackImportSponsorUsers
 })(SponsorUsersListPerSponsorPage);

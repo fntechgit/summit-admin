@@ -13,7 +13,6 @@
 import T from "i18n-react/dist/i18n-react";
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
 import {
   RECEIVE_SHOW_PAGE,
   RECEIVE_SHOW_PAGES,
@@ -25,6 +24,7 @@ import {
 } from "../../actions/show-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
+import { denormalizePageModules } from "../../utils/page-template";
 
 const DEFAULT_SHOW_PAGE = {
   code: "",
@@ -42,7 +42,7 @@ export const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  hideArchived: false,
+  showArchived: false,
   currentShowPage: DEFAULT_SHOW_PAGE,
   sponsorships: {
     items: [],
@@ -62,7 +62,7 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
       return DEFAULT_STATE;
     }
     case REQUEST_SHOW_PAGES: {
-      const { order, orderDir, page, perPage, term, hideArchived, summitTZ } =
+      const { order, orderDir, page, perPage, term, showArchived, summitTZ } =
         payload;
 
       return {
@@ -73,7 +73,7 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
         currentPage: page,
         perPage,
         term,
-        hideArchived,
+        showArchived,
         summitTZ
       };
     }
@@ -132,19 +132,14 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
         ? ["all"]
         : pageData.sponsorship_types.map((st) => st.id);
 
+      const modules = denormalizePageModules(
+        pageData.modules,
+        state.summitTZ || "UTC"
+      );
+
       const currentShowPage = {
         ...pageData,
-        modules: pageData.modules.map((m) => ({
-          ...m,
-          ...(m.upload_deadline
-            ? {
-                upload_deadline: epochToMomentTimeZone(
-                  m.upload_deadline,
-                  state.summitTZ || "UTC"
-                )
-              }
-            : {})
-        })),
+        modules,
         sponsorship_types: sponsorshipTypeIds
       };
 
