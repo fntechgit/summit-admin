@@ -1,7 +1,11 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent, screen } from "@testing-library/react";
 
 import PromocodeForm from "../index";
+
+// jsdom does not implement scrollIntoView; polyfill so componentDidUpdate
+// (which calls scrollToError → firstNode.scrollIntoView) does not throw.
+window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 // openstack-uicore-foundation components used across the PromocodeForm tree.
 // Exhaustive list — verified by grep against src/components/forms/promocode-form/**:
@@ -305,5 +309,50 @@ describe("DOMAIN_AUTHORIZED layout positions", () => {
       emailDomainsRow.compareDocumentPosition(descriptionRow) & 4;
     /* eslint-enable no-bitwise */
     expect(followsBit).toBeTruthy();
+  });
+});
+
+describe("validate() — domain-authorized email-domain enforcement", () => {
+  it("blocks save on malformed allowed_email_domains for DOMAIN_AUTHORIZED_DISCOUNT_CODE", () => {
+    const onSubmit = jest.fn();
+    renderForm(
+      baseEntity({
+        class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
+        allowed_email_domains: ["malformed-no-at-sign"]
+      }),
+      { onSubmit }
+    );
+    // T.translate("general.save") renders the raw key "general.save" in the
+    // jest env (no locale loaded; same behavior the existing file documents
+    // starting at :227). The regex /save/i matches the substring within the
+    // raw key, so the button is found.
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("allows save on valid allowed_email_domains for DOMAIN_AUTHORIZED_DISCOUNT_CODE", () => {
+    const onSubmit = jest.fn();
+    renderForm(
+      baseEntity({
+        class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
+        allowed_email_domains: ["@valid.com", ".edu"]
+      }),
+      { onSubmit }
+    );
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it("does NOT validate allowed_email_domains for non-DomainAuthorized classes (MEMBER_PROMO_CODE)", () => {
+    const onSubmit = jest.fn();
+    renderForm(
+      baseEntity({
+        class_name: "MEMBER_PROMO_CODE",
+        allowed_email_domains: ["malformed"] // present but should be ignored
+      }),
+      { onSubmit }
+    );
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 });
