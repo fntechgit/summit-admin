@@ -6,7 +6,6 @@ import MemberBasePCForm from "./member-base-pc-form";
 import SponsorBasePCForm from "./sponsor-base-pc-form";
 import DiscountBasePCForm from "./discount-base-pc-form";
 import SpeakersBasePCForm from "./speakers-base-pc-form";
-import DomainAuthorizedBasePCForm from "./domain-authorized-base-pc-form";
 
 export const MemberPCForm = (props) => (
   <>
@@ -50,9 +49,7 @@ export const SponsorDiscountPCForm = (props) => (
   </>
 );
 
-export const SummitPCForm = (props) => (
-  <GenericBasePCForm {...props} />
-);
+export const SummitPCForm = (props) => <GenericBasePCForm {...props} />;
 
 export const SummitDiscountPCForm = (props) => (
   <DiscountBasePCForm {...props} />
@@ -73,15 +70,9 @@ export const SpeakersDiscountPCForm = (props) => (
 );
 
 export const DomainAuthorizedPCForm = (props) => (
-  <>
-    <DomainAuthorizedBasePCForm {...props} />
-    <GenericBasePCForm {...props} />
-  </>
+  <GenericBasePCForm {...props} />
 );
 
 export const DomainAuthorizedDiscountPCForm = (props) => (
-  <>
-    <DomainAuthorizedBasePCForm {...props} />
-    <DiscountBasePCForm {...props} />
-  </>
+  <DiscountBasePCForm {...props} />
 );

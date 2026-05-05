@@ -40,6 +40,9 @@ import {
   validateEmail,
   validateAllowedEmailDomainEntry
 } from "../../../utils/methods";
+import { isDomainAuthorizedClass } from "./forms/domain-authorized/utils";
+import AllowedEmailDomainsRow from "./forms/domain-authorized/AllowedEmailDomainsRow";
+import AutoApplyCheckbox from "./forms/domain-authorized/AutoApplyCheckbox";
 import { DEFAULT_ENTITY } from "../../../reducers/promocodes/promocode-reducer";
 import FragmentParser from "../../../utils/fragmen-parser";
 import TextAreaInputWithCounter from "../../inputs/text-area-input-with-counter";
@@ -204,9 +207,7 @@ class PromocodeForm extends React.Component {
       return false;
     }
 
-    const isDomainAuthorized =
-      entity.class_name === "DOMAIN_AUTHORIZED_PROMO_CODE" ||
-      entity.class_name === "DOMAIN_AUTHORIZED_DISCOUNT_CODE";
+    const isDomainAuthorized = isDomainAuthorizedClass(entity.class_name);
     if (isDomainAuthorized && Array.isArray(entity.allowed_email_domains)) {
       const bad = entity.allowed_email_domains.find(
         (d) => !validateAllowedEmailDomainEntry(d)
@@ -234,6 +235,7 @@ class PromocodeForm extends React.Component {
       unAssignSpeaker,
       resetPromocodeForm
     } = this.props;
+    const isDomainAuthorized = isDomainAuthorizedClass(entity.class_name);
     const typeScope = this.fragmentParser.getParam("type");
 
     let promocode_class_ddl = allClasses.map((c) => ({
@@ -346,6 +348,12 @@ class PromocodeForm extends React.Component {
             />
           </div>
         </div>
+        {isDomainAuthorized && (
+          <AllowedEmailDomainsRow
+            entity={entity}
+            handleChange={this.handleChange}
+          />
+        )}
         <div className="row form-group">
           <div className="col-md-8">
             <label htmlFor="description">
@@ -400,6 +408,12 @@ class PromocodeForm extends React.Component {
                 />
               </label>
             </div>
+            {isDomainAuthorized && (
+              <AutoApplyCheckbox
+                entity={entity}
+                handleChange={this.handleChange}
+              />
+            )}
           </div>
         </div>
 
