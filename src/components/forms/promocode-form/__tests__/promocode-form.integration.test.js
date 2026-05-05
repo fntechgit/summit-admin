@@ -401,7 +401,7 @@ describe("regression — non-DomainAuthorized classes are unaffected by the layo
   // Block 2: classes that should have NO #auto_apply anywhere.
   // SUMMIT_*, PRE_PAID_*, SPEAKERS_*, SPONSOR_* — none of their fragments
   // render auto_apply. PRE_PAID_* routes through SummitPCForm /
-  // SummitDiscountPCForm per index.js:480-504.
+  // SummitDiscountPCForm per index.js:494-518.
   it.each([
     ["SPONSOR_PROMO_CODE"],
     ["SPONSOR_DISCOUNT_CODE"],
