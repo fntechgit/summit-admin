@@ -13,17 +13,25 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import {
-  PaymentRow,
-  RefundRow,
   FeeRow,
   NotesRow,
+  PaymentRow,
+  RefundRow,
+  DiscountRow,
   TotalRow
 } from "openstack-uicore-foundation/lib/components/mui/table/extra-rows";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import TableContainer from "@mui/material/TableContainer";
+import TableRow from "@mui/material/TableRow";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
 import { mapOrderData } from "./helpers";
 
 const OrderDetailsGrid = ({
@@ -39,88 +47,173 @@ const OrderDetailsGrid = ({
   onUndoCancelForm
 }) => {
   const data = mapOrderData(lines, withDescription);
+  const showActionCol = onCancelForm && onUndoCancelForm;
+  const trailingCols = showActionCol ? 1 : 0;
 
   const columns = [
     {
       columnKey: "code",
       header: T.translate("order_details_grid.code")
     },
-    { columnKey: "name", header: T.translate("order_details_grid.content") },
-    { columnKey: "item_name", header: "" },
+    {
+      columnKey: "name",
+      header: T.translate("order_details_grid.contents")
+    },
     {
       columnKey: "addon_name",
       header: T.translate("order_details_grid.addon")
     },
     {
-      columnKey: "discount",
-      header: T.translate("order_details_grid.discount")
+      columnKey: "item_name",
+      header: T.translate("order_details_grid.details")
     },
-    { columnKey: "amount", header: T.translate("order_details_grid.amount") },
     {
-      columnKey: "actions",
-      header: T.translate("order_details_grid.action"),
-      align: "center",
-      render: (row) => {
-        if (row.cancelled) {
-          return (
-            <IconButton size="large" onClick={() => onUndoCancelForm(row)}>
-              <ArrowBackIcon fontSize="large" sx={{ mr: 2 }} />{" "}
-              {T.translate("general.undo").toUpperCase()}
-            </IconButton>
-          );
-        }
-
-        return (
-          <IconButton size="large" onClick={() => onCancelForm(row)}>
-            <DeleteIcon fontSize="large" />
-          </IconButton>
-        );
-      }
+      columnKey: "rate",
+      header: T.translate("order_details_grid.rate")
+    },
+    {
+      columnKey: "amount",
+      header: T.translate("order_details_grid.amount")
     }
   ];
 
+  if (showActionCol) {
+    columns.push(
+      {
+        columnKey: "actions",
+        header: T.translate("order_details_grid.action"),
+        align: "center",
+        render: (row) => {
+          if (row.cancelled) {
+            return (
+              <IconButton size="large" onClick={() => onUndoCancelForm(row)}>
+                <ArrowBackIcon fontSize="large" sx={{ mr: 2 }} />{" "}
+                {T.translate("general.undo").toUpperCase()}
+              </IconButton>
+            );
+          }
+
+          return (
+            <IconButton size="large" onClick={() => onCancelForm(row)}>
+              <DeleteIcon fontSize="large" />
+            </IconButton>
+          );
+        }
+      }
+    )
+  }
+
   return (
-    <MuiTable
-      data={data}
-      columns={columns}
-      options={{ disableProp: "cancelled" }}
-    >
-      {notes &&
-        notes.map((note) => (
-          <NotesRow
-            note={note.content}
-            colCount={7}
-            key={`note-row-${note.id}`}
-          />
-        ))}
-      {payments &&
-        payments.map((payment) => (
-          <PaymentRow
-            payment={payment}
-            key={`payment-row-${payment.id}`}
-            trailing={1}
-          />
-        ))}
-      {refunds &&
-        refunds.map((refund) => (
-          <RefundRow
-            refund={refund}
-            key={`refund-row-${refund.id}`}
-            trailing={1}
-          />
-        ))}
-      {fees &&
-        fees.map((fee) => (
-          <FeeRow fee={fee} key={`fee-row-${fee.id}`} trailing={1} />
-        ))}
-      <TotalRow
-        columns={columns}
-        total={total || amountDue}
-        label={amountDue ? T.translate("order_details_grid.amount_due") : null}
-        targetCol="amount"
-        rowSx={{ backgroundColor: "#F1F3F5" }}
-      />
-    </MuiTable>
+    <Box sx={{ width: "100%" }}>
+      <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 0, boxShadow: "none" }}
+        >
+          <Table>
+            {/* TABLE HEADER */}
+            <TableHead sx={{ backgroundColor: "#EAEAEA" }}>
+              <TableRow>
+                {columns.map((col) => (
+                  <TableCell key={col.columnKey} align={col.align ?? "left"}>
+                    {col.header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((form) => {
+                const rows = form.items.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    sx={{
+                      ...(row.cancelled && {
+                        color: "text.secondary",
+                        textDecoration: "line-through"
+                      })
+                    }}
+                  >
+                    {columns.map((col) => (
+                      <TableCell
+                        key={col.columnKey}
+                        align={col.align ?? "left"}
+                        sx={{ fontWeight: "normal" }}
+                      >
+                        {col.render ? (
+                          col.render(row)
+                        ) : (
+                          <span style={{ fontWeight: "normal" }}>
+                            {row[col.columnKey]}
+                          </span>
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ));
+
+                rows.push(
+                  <DiscountRow
+                    discount={form.discount}
+                    discountTotal={form.discount_total}
+                    trailing={trailingCols}
+                  />
+                );
+
+                return rows;
+              })}
+              {fees &&
+                fees.map((fee) => (
+                  <FeeRow fee={fee} key={`fee-row-${fee.id}`} trailing={1} />
+                ))}
+              {refunds &&
+                refunds.map((refund) => (
+                  <RefundRow
+                    refund={refund}
+                    key={`refund-row-${refund.id}`}
+                    trailing={trailingCols}
+                  />
+                ))}
+              {payments &&
+                payments.map((payment) => (
+                  <PaymentRow
+                    payment={payment}
+                    key={`payment-row-${payment.id}`}
+                    trailing={trailingCols}
+                  />
+                ))}
+              {notes &&
+                notes.map((note) => (
+                  <NotesRow
+                    note={note.content}
+                    colCount={columns.length}
+                    key={`note-row-${note.id}`}
+                    showCode
+                  />
+                ))}
+              <TotalRow
+                columns={columns}
+                total={total || amountDue}
+                label={
+                  amountDue
+                    ? T.translate("order_details_grid.amount_due")
+                    : null
+                }
+                targetCol="amount"
+                rowSx={{ backgroundColor: "#F1F3F5" }}
+              />
+
+              {data.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={columns.length} align="center">
+                    {T.translate("mui_table.no_items")}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </Box>
   );
 };
 
