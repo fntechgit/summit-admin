@@ -14,6 +14,7 @@ describe("domain-authorized/utils", () => {
     it("forwards `extra` props onto the synthesized target (checkbox case)", () => {
       const handleChange = jest.fn();
       fireChange(handleChange, "box", true, "checkbox", { checked: true });
+      expect(handleChange).toHaveBeenCalledTimes(1);
       expect(handleChange).toHaveBeenCalledWith({
         target: { id: "box", value: true, type: "checkbox", checked: true }
       });
