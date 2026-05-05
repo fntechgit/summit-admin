@@ -36,10 +36,12 @@ import {
   RECEIVE_PAYMENT_PROFILE,
   PAYMENT_INTENT_UPDATED,
   PAYMENT_INTENT_CREATED,
-  PAYMENT_CONFIRMED
+  PAYMENT_CONFIRMED,
+  SPONSOR_CART_REOPENED
 } from "../../actions/sponsor-cart-actions";
-import { DISCOUNT_TYPES } from "../../utils/constants";
+import { SPONSOR_CART_STATUS } from "../../utils/constants";
 import { RECEIVE_MEMBER } from "../../actions/member-actions";
+import { normalizeOrder } from "../../components/mui/OrderDetailsGrid/helpers";
 
 const DEFAULT_STATE = {
   cart: null,
@@ -87,35 +89,21 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
     }
     case CART_STATUS_UPDATED:
     case RECEIVE_SPONSOR_CART: {
-      const cart = payload.response;
-      cart.forms = cart.forms.map((form) => {
-        const discountAmount = amountFromCents(form.discount_amount); // this works also for rate from bps
-        const discountStr =
-          form.discount_type === DISCOUNT_TYPES.RATE
-            ? `${discountAmount} %`
-            : `$${discountAmount}`;
-        const discount = form.discount_amount ? discountStr : "";
-
-        return {
-          ...form,
-          addon_name: form.addon_name || "None",
-          amount: currencyAmountFromCents(form.net_amount),
-          discount,
-          item_count: `${form.items.length} ${
-            form.items.length === 1 ? "item" : "items"
-          }`,
-          items: form.items.map((it) => ({
-            ...it,
-            custom_rate: currencyAmountFromCents(it.custom_rate || 0)
-          }))
-        };
-      });
-      cart.total = currencyAmountFromCents(cart.net_amount);
+      const cart = normalizeOrder(payload.response);
 
       return {
         ...state,
         cart
       };
+    }
+    case SPONSOR_CART_REOPENED: {
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          status: SPONSOR_CART_STATUS.OPEN,
+        }
+      }
     }
     case SPONSOR_CART_FORM_DELETED: {
       const { formId } = payload;

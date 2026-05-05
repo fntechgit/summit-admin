@@ -4136,8 +4136,9 @@
   },
   "order_details_grid": {
     "code": "Code",
-    "content": "Content",
+    "contents": "Contents",
     "addon": "Add-on",
+    "details": "Details",
     "discount": "Discount",
     "amount": "Amount",
     "amount_due": "AMOUNT DUE",

@@ -50,6 +50,7 @@ export const SPONSOR_CART_NOTE_ADDED = "SPONSOR_CART_NOTE_ADDED";
 export const SPONSOR_CART_NOTE_UPDATED = "SPONSOR_CART_NOTE_UPDATED";
 export const SPONSOR_CART_NOTE_DELETED = "SPONSOR_CART_NOTE_DELETED";
 export const CART_STATUS_UPDATED = "CART_STATUS_UPDATED";
+export const SPONSOR_CART_REOPENED = "SPONSOR_CART_REOPENED";
 export const RECEIVE_PAYMENT_PROFILE = "RECEIVE_PAYMENT_PROFILE";
 export const OFFLINE_PAYMENT_CREATED = "OFFLINE_PAYMENT_CREATED";
 export const PAYMENT_INTENT_CREATED = "PAYMENT_INTENT_CREATED";
@@ -91,7 +92,7 @@ export const getSponsorCart =
 
     const params = {
       access_token: accessToken,
-      expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes"
+      expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes,fees"
     };
 
     if (filter.length > 0) {
@@ -473,7 +474,7 @@ export const checkoutCart = () => async (dispatch, getState) => {
 
   const params = {
     access_token: accessToken,
-    expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes"
+    expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes,fees"
   };
 
   return putRequest(
@@ -485,6 +486,31 @@ export const checkoutCart = () => async (dispatch, getState) => {
   )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
+};
+
+export const reopenCart = () => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const { entity: sponsor } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    access_token: accessToken,
+    expand: "forms,forms.items,forms.items.type,forms.items.meta_fields,notes,fees"
+  };
+
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_CART_REOPENED),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/carts/current/checkout`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .finally(() => {
+      dispatch(stopLoading());
+    });
 };
 
 export const payWithInvoice = () => async (dispatch, getState) => {
