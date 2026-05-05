@@ -111,7 +111,7 @@ const SponsorBadgeScans = ({
   };
 
   const handleManualScanSubmit = (entity) =>
-    addBadgeScan(entity).then(() => {
+    addBadgeScan(sponsor.id, entity).then(() => {
       setShowManualBadgeScanPopup(false);
       return getBadgeScans(
         sponsor.id,
