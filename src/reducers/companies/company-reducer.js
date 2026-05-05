@@ -9,7 +9,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
+
+import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
+import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 import {
   RECEIVE_COMPANY,
@@ -24,9 +27,6 @@ import {
   SPONSORED_PROJECT_SPONSORSHIP_TYPE_SUPPORTING_COMPANY_DELETED,
   SPONSORED_PROJECT_SPONSORSHIP_TYPE_SUPPORTING_COMPANY_ADDED
 } from "../../actions/sponsored-project-actions";
-
-import { VALIDATE } from "openstack-uicore-foundation/lib/utils/actions";
-import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 
 export const DEFAULT_ENTITY = {
   id: 0,
@@ -49,7 +49,7 @@ export const DEFAULT_ENTITY = {
   commitment_author: "",
   logo: "",
   big_logo: "",
-  color: "#DADADA",
+  color: "",
   project_sponsorships: []
 };
 
@@ -63,65 +63,46 @@ const companyReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
   switch (type) {
     case LOGOUT_USER:
-      {
-        // we need this in ce the token expired while editing the form
-        if (payload.hasOwnProperty("persistStore")) {
-          return state;
-        } else {
-          return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
-        }
+      // we need this in ce the token expired while editing the form
+      if (payload.hasOwnProperty("persistStore")) {
+        return state;
       }
-      break;
+      return { ...state, entity: { ...DEFAULT_ENTITY }, errors: {} };
     case RESET_COMPANY_FORM:
-      {
-        return DEFAULT_STATE;
-      }
-      break;
+      return DEFAULT_STATE;
     case UPDATE_COMPANY:
-      {
-        return { ...state, entity: { ...payload }, errors: {} };
-      }
-      break;
+      return { ...state, entity: { ...payload }, errors: {} };
     case COMPANY_ADDED:
-    case RECEIVE_COMPANY:
-      {
-        let entity = { ...payload.response };
-
-        for (var key in entity) {
-          if (entity.hasOwnProperty(key)) {
-            entity[key] = entity[key] == null ? "" : entity[key];
-          }
+    case RECEIVE_COMPANY: {
+      const entity = { ...payload.response };
+      for (const key in entity) {
+        if (entity.hasOwnProperty(key)) {
+          entity[key] = entity[key] == null ? "" : entity[key];
         }
-
-        return {
-          ...state,
-          entity: { ...DEFAULT_ENTITY, ...entity },
-          errors: {}
-        };
       }
-      break;
+
+      return {
+        ...state,
+        entity: { ...DEFAULT_ENTITY, ...entity },
+        errors: {}
+      };
+    }
     case LOGO_ATTACHED: {
-      let logo = state.entity.logo + "?" + new Date().getTime();
-      return { ...state, entity: { ...state.entity, logo: logo } };
+      const logo = `${state.entity.logo}?${new Date().getTime()}`;
+      return { ...state, entity: { ...state.entity, logo } };
     }
     case BIG_LOGO_ATTACHED: {
-      let logo = state.entity.big_logo + "?" + new Date().getTime();
+      const logo = `${state.entity.big_logo}?${new Date().getTime()}`;
       return { ...state, entity: { ...state.entity, big_logo: logo } };
     }
     case COMPANY_UPDATED:
-      {
-        return state;
-      }
-      break;
+      return state;
     case VALIDATE:
-      {
-        return { ...state, errors: payload.errors };
-      }
-      break;
+      return { ...state, errors: payload.errors };
     case SPONSORED_PROJECT_SPONSORSHIP_TYPE_SUPPORTING_COMPANY_DELETED: {
       let { project_sponsorships } = state.entity;
-      let f = project_sponsorships.find((ps) => {
-        let e = ps.supporting_companies.find(
+      const f = project_sponsorships.find((ps) => {
+        const e = ps.supporting_companies.find(
           (sp) => sp.id == payload.supportingCompanyId
         );
         return e;
@@ -129,15 +110,15 @@ const companyReducer = (state = DEFAULT_STATE, action) => {
       project_sponsorships = project_sponsorships.filter((e) => e.id != f.id);
       return {
         ...state,
-        entity: { ...state.entity, project_sponsorships: project_sponsorships }
+        entity: { ...state.entity, project_sponsorships }
       };
     }
     case SPONSORED_PROJECT_SPONSORSHIP_TYPE_SUPPORTING_COMPANY_ADDED: {
-      let entity = { ...payload.response };
-      let { project_sponsorships } = entity.company;
+      const entity = { ...payload.response };
+      const { project_sponsorships } = entity.company;
       return {
         ...state,
-        entity: { ...state.entity, project_sponsorships: project_sponsorships }
+        entity: { ...state.entity, project_sponsorships }
       };
     }
     default:
