@@ -20,15 +20,13 @@ import {
   queryEventTypes,
   queryMembers
 } from "openstack-uicore-foundation/lib/utils/query-actions";
-import {
-  Input,
-  DateTimePicker,
-  SimpleLinkList,
-  SortableTable,
-  Panel,
-  Table,
-  Dropdown
-} from "openstack-uicore-foundation/lib/components";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
+import DateTimePicker from "openstack-uicore-foundation/lib/components/inputs/datetimepicker";
+import SimpleLinkList from "openstack-uicore-foundation/lib/components/simple-link-list";
+import SortableTable from "openstack-uicore-foundation/lib/components/mui/sortable-table";
+import Panel from "openstack-uicore-foundation/lib/components/sections/panel";
+import Table from "openstack-uicore-foundation/lib/components/mui/table";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import TextEditorV3 from "openstack-uicore-foundation/lib/components/inputs/editor-input-v3";
 import Switch from "react-switch";
 import { Pagination } from "react-bootstrap";
@@ -52,7 +50,6 @@ import {
   DEFAULT_ALLOWED_QUESTIONS,
   DEFAULT_CFP_PRESENTATION_EDITION_TABS
 } from "../../reducers/selection_plans/selection-plan-reducer";
-import history from "../../history";
 
 class SelectionPlanForm extends React.Component {
   constructor(props) {
@@ -194,17 +191,15 @@ class SelectionPlanForm extends React.Component {
   handleSubmit(ev) {
     ev.preventDefault();
 
-    const entity = { ...this.state.entity };
-    const { currentSummit } = this.props;
+    const { onSaved } = this.props;
 
     this.props.onSubmit(this.state.entity).then((e) => {
       this.props
-        .saveSelectionPlanSettings(entity.marketing_settings, e.id)
+        .saveSelectionPlanSettings(this.state.entity.marketing_settings, e.id)
         .then(() => {
-          if (!entity.id)
-            history.push(
-              `/app/summits/${currentSummit.id}/selection-plans/${e.id}`
-            );
+          if (onSaved) {
+            onSaved(e);
+          }
         });
     });
   }
@@ -370,15 +365,15 @@ class SelectionPlanForm extends React.Component {
     const extraQuestionColumns = [
       {
         columnKey: "type",
-        value: T.translate("order_extra_question_list.question_type")
+        header: T.translate("order_extra_question_list.question_type")
       },
       {
         columnKey: "label",
-        value: T.translate("order_extra_question_list.visible_question")
+        header: T.translate("order_extra_question_list.visible_question")
       },
       {
         columnKey: "name",
-        value: T.translate("order_extra_question_list.question_id")
+        header: T.translate("order_extra_question_list.question_id")
       }
     ];
 
@@ -392,8 +387,8 @@ class SelectionPlanForm extends React.Component {
     };
 
     const ratingTypesColumns = [
-      { columnKey: "name", value: T.translate("rating_type_list.name") },
-      { columnKey: "weight", value: T.translate("rating_type_list.weight") }
+      { columnKey: "name", header: T.translate("rating_type_list.name") },
+      { columnKey: "weight", header: T.translate("rating_type_list.weight") }
     ];
 
     const ratingTypesOptions = {
@@ -404,7 +399,7 @@ class SelectionPlanForm extends React.Component {
     };
 
     const actionTypesColumns = [
-      { columnKey: "label", value: T.translate("progress_flags.label") }
+      { columnKey: "label", header: T.translate("progress_flags.label") }
     ];
 
     const actionTypesOptions = {
@@ -416,8 +411,8 @@ class SelectionPlanForm extends React.Component {
     };
 
     const allowedMembersColumns = [
-      { columnKey: "id", value: T.translate("edit_selection_plan.id") },
-      { columnKey: "email", value: T.translate("edit_selection_plan.email") }
+      { columnKey: "id", header: T.translate("edit_selection_plan.id") },
+      { columnKey: "email", header: T.translate("edit_selection_plan.email") }
     ];
 
     const allowedMembersOptions = {
@@ -427,8 +422,6 @@ class SelectionPlanForm extends React.Component {
         delete: { onClick: this.handleDeleteAllowedMember }
       }
     };
-
-    console.log("CHECK...", entity, currentSummit);
 
     return (
       <form className="selection-plan-form">
@@ -738,8 +731,8 @@ class SelectionPlanForm extends React.Component {
                     label: stripTags(q.label)
                   }))}
                   columns={extraQuestionColumns}
-                  dropCallback={this.props.updateExtraQuestionOrder}
-                  orderField="order"
+                  onReorder={this.props.updateExtraQuestionOrder}
+                  updateOrderKey="order"
                 />
               )}
             </Panel>
@@ -858,8 +851,8 @@ class SelectionPlanForm extends React.Component {
                 options={ratingTypesOptions}
                 data={entity.track_chair_rating_types}
                 columns={ratingTypesColumns}
-                dropCallback={this.props.onUpdateRatingTypeOrder}
-                orderField="order"
+                onReorder={this.props.onUpdateRatingTypeOrder}
+                updateOrderKey="order"
               />
             </Panel>
             <Panel
@@ -895,8 +888,8 @@ class SelectionPlanForm extends React.Component {
                   options={actionTypesOptions}
                   data={entity.allowed_presentation_action_types}
                   columns={actionTypesColumns}
-                  dropCallback={this.props.onUpdateProgressFlagOrder}
-                  orderField="order"
+                  onReorder={this.props.onUpdateProgressFlagOrder}
+                  updateOrderKey="order"
                 />
               )}
             </Panel>

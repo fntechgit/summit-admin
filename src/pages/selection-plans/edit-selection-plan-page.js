@@ -35,13 +35,14 @@ import {
   updateRatingTypeOrder,
   updateSelectionPlanExtraQuestionOrder
 } from "../../actions/selection-plan-actions";
-import AddNewButton from "../../components/buttons/add-new-button";
 
 const EditSelectionPlanPage = ({
   currentSummit,
   entity,
   allowedMembers,
   errors,
+  hideHeader = false,
+  onSaved,
   history,
   extraQuestionsOrder,
   extraQuestionsOrderDir,
@@ -185,16 +186,20 @@ const EditSelectionPlanPage = ({
 
   return (
     <div className="container">
-      <h3>
-        {title} {T.translate("edit_selection_plan.selection_plan")}
-        <AddNewButton entity={entity} />
-      </h3>
-      <hr />
+      {!hideHeader && (
+        <>
+          <h3>
+            {title} {T.translate("edit_selection_plan.selection_plan")}
+          </h3>
+          <hr />
+        </>
+      )}
       <SelectionPlanForm
         entity={entity}
         allowedMembers={allowedMembers}
         currentSummit={currentSummit}
         errors={errors}
+        onSaved={onSaved}
         extraQuestionsOrder={extraQuestionsOrder}
         extraQuestionsOrderDir={extraQuestionsOrderDir}
         onTrackGroupLink={addTrackGroupToSelectionPlan}
