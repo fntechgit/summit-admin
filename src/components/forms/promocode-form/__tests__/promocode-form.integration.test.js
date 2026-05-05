@@ -259,3 +259,51 @@ describe("PromocodeForm class switching", () => {
     });
   });
 });
+
+describe("DOMAIN_AUTHORIZED layout positions", () => {
+  it("renders auto_apply as the third checkbox in the description-row column", () => {
+    const { container } = renderForm(
+      baseEntity({ class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE" })
+    );
+    const checkboxesDiv = container.querySelector(".checkboxes-div");
+    const checkboxes = checkboxesDiv.querySelectorAll("input[type=\"checkbox\"]");
+    expect(checkboxes).toHaveLength(3);
+    expect(checkboxes[0].id).toBe("allows_to_delegate");
+    expect(checkboxes[1].id).toBe("allows_to_reassign");
+    expect(checkboxes[2].id).toBe("auto_apply");
+  });
+
+  it("renders quantity_per_account as the third col-md-4 in the quantity row", () => {
+    const { container } = renderForm(
+      baseEntity({ class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE" })
+    );
+    const quantityRow = container
+      .querySelector("#quantity_available")
+      .closest(".row.form-group");
+    const cols = quantityRow.querySelectorAll(".col-md-4");
+    expect(cols).toHaveLength(3);
+    expect(cols[0].querySelector("#quantity_available")).toBeTruthy();
+    expect(cols[1].querySelector("#quantity_used")).toBeTruthy();
+    expect(cols[2].querySelector("#quantity_per_account")).toBeTruthy();
+  });
+
+  it("renders allowed-email-domains-row before the description row", () => {
+    const { container } = renderForm(
+      baseEntity({ class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE" })
+    );
+    const emailDomainsRow = container.querySelector(
+      "[data-testid=\"allowed-email-domains-row\"]"
+    );
+    const descriptionRow = container
+      .querySelector("#description")
+      .closest(".row.form-group");
+    expect(emailDomainsRow).toBeTruthy();
+    expect(descriptionRow).toBeTruthy();
+    /* eslint-disable no-bitwise */
+    // bitmask 4 = DOCUMENT_POSITION_FOLLOWING
+    const followsBit =
+      emailDomainsRow.compareDocumentPosition(descriptionRow) & 4;
+    /* eslint-enable no-bitwise */
+    expect(followsBit).toBeTruthy();
+  });
+});
