@@ -9,9 +9,21 @@ jest.mock("openstack-uicore-foundation/lib/components", () => {
   return {
     TagInput: (props) => {
       const draftRef = React.useRef("");
+      const tags = Array.isArray(props.value) ? props.value : [];
       return React.createElement(
         "div",
         { id: props.id, "data-mocked": "TagInput", "data-field": props.id },
+        ...tags.map((t) => {
+          const label = t.tag ?? t.value ?? t.label ?? "";
+          return React.createElement(
+            "span",
+            {
+              key: `tag-${label}`,
+              "data-testid": `taginput-tag-${label}`
+            },
+            label
+          );
+        }),
         React.createElement("input", {
           "data-testid": `taginput-draft-${props.id}`,
           onChange: (e) => {
@@ -134,5 +146,23 @@ describe("AllowedEmailDomainsRow", () => {
       id: "allowed_email_domains",
       value: ["@acme.com"]
     });
+  });
+
+  it("renders chips for each saved entry in entity.allowed_email_domains", () => {
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity({ allowed_email_domains: ["@acme.com", ".edu"] })}
+        handleChange={() => {}}
+      />
+    );
+    // The component derives `domainsAsTags = domains.map((d) => ({ tag: d }))`
+    // and passes it as TagInput's `value` prop. The mock renders each tag as
+    // a span with a tag-keyed testid, so we can assert both chips appear.
+    expect(
+      container.querySelector("[data-testid=\"taginput-tag-@acme.com\"]")
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector("[data-testid=\"taginput-tag-.edu\"]")
+    ).toBeInTheDocument();
   });
 });
