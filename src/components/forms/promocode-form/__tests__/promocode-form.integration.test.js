@@ -121,6 +121,17 @@ const baseEntity = (overrides = {}) => ({
   owner: null,
   speaker: null,
   sponsor: null,
+  // speakers fragment (speakers-base-pc-form.js) destructures entity.speakers;
+  // provide an empty structure so SPEAKERS_* class renders without crashing.
+  speakers: {
+    filtered_speakers_list: [],
+    speakers_list: [],
+    term: "",
+    order: "id",
+    orderDir: 1,
+    currentPage: 1,
+    lastPage: 1
+  },
   ...overrides
 });
 
@@ -355,4 +366,67 @@ describe("validate() — domain-authorized email-domain enforcement", () => {
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
+});
+
+describe("regression — non-DomainAuthorized classes are unaffected by the layout reflow", () => {
+  // Block 1: classes whose own fragments render #auto_apply
+  // (MEMBER, SPEAKER variants). See member-base-pc-form.js:27 and
+  // speaker-base-pc-form.js:25 — both render <input id="auto_apply">
+  // unconditionally.
+  it.each([
+    ["MEMBER_PROMO_CODE"],
+    ["MEMBER_DISCOUNT_CODE"],
+    ["SPEAKER_PROMO_CODE"],
+    ["SPEAKER_DISCOUNT_CODE"]
+  ])(
+    "for %s: does NOT render the new DomainAuthorized layout but DOES render fragment-owned #auto_apply",
+    (class_name) => {
+      const { container } = renderForm(baseEntity({ class_name }));
+      const quantityRow = container
+        .querySelector("#quantity_available")
+        .closest(".row.form-group");
+      const cols = quantityRow.querySelectorAll(".col-md-4");
+      expect(cols).toHaveLength(2);
+      expect(
+        container.querySelector("#quantity_per_account")
+      ).not.toBeInTheDocument();
+      expect(
+        container.querySelector("[data-testid=\"allowed-email-domains-row\"]")
+      ).not.toBeInTheDocument();
+      // member/speaker fragments still render auto_apply (unchanged)
+      expect(container.querySelector("#auto_apply")).toBeInTheDocument();
+    }
+  );
+
+  // Block 2: classes that should have NO #auto_apply anywhere.
+  // SUMMIT_*, PRE_PAID_*, SPEAKERS_*, SPONSOR_* — none of their fragments
+  // render auto_apply. PRE_PAID_* routes through SummitPCForm /
+  // SummitDiscountPCForm per index.js:480-504.
+  it.each([
+    ["SPONSOR_PROMO_CODE"],
+    ["SPONSOR_DISCOUNT_CODE"],
+    ["SUMMIT_PROMO_CODE"],
+    ["SUMMIT_DISCOUNT_CODE"],
+    ["PRE_PAID_PROMO_CODE"],
+    ["PRE_PAID_DISCOUNT_CODE"],
+    ["SPEAKERS_PROMO_CODE"],
+    ["SPEAKERS_DISCOUNT_CODE"]
+  ])(
+    "for %s: does NOT render the new DomainAuthorized layout and does NOT render #auto_apply",
+    (class_name) => {
+      const { container } = renderForm(baseEntity({ class_name }));
+      const quantityRow = container
+        .querySelector("#quantity_available")
+        .closest(".row.form-group");
+      const cols = quantityRow.querySelectorAll(".col-md-4");
+      expect(cols).toHaveLength(2);
+      expect(
+        container.querySelector("#quantity_per_account")
+      ).not.toBeInTheDocument();
+      expect(container.querySelector("#auto_apply")).not.toBeInTheDocument();
+      expect(
+        container.querySelector("[data-testid=\"allowed-email-domains-row\"]")
+      ).not.toBeInTheDocument();
+    }
+  );
 });
