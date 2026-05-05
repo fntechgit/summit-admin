@@ -38,7 +38,13 @@ const SelectionPlanLayout = ({ match, currentSummit }) => (
         strict
         exact
         path={`${match.url}/new`}
-        component={SelectionPlanIdLayout}
+        render={() => <Redirect to={`${match.url}`} />}
+      />
+      <Route
+        strict
+        exact
+        path={`${match.url}/:selection_plan_id(\\d+)`}
+        component={SelectionPlanListPage}
       />
       <Route
         path={`${match.url}/:selection_plan_id(\\d+)`}
