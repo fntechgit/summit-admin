@@ -57,8 +57,8 @@ const TrackChairListPage = ({
   const [dialogEntity, setDialogEntity] = useState(null);
 
   useEffect(() => {
-    if (currentSummit) getTrackChairs();
-  }, []);
+    if (currentSummit?.id) getTrackChairs();
+  }, [currentSummit?.id]);
 
   const chairTracks = currentSummit.tracks.filter((t) => t.chair_visible);
 
