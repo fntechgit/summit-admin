@@ -21,7 +21,8 @@ import {
   stopLoading,
   startLoading,
   showSuccessMessage,
-  authErrorHandler
+  authErrorHandler,
+  escapeFilterValue
 } from "openstack-uicore-foundation/lib/utils/actions";
 import moment from "moment-timezone";
 import {
@@ -130,7 +131,12 @@ export const clearCurrentSummit = () => (dispatch) => {
 };
 
 export const loadSummits =
-  (page = DEFAULT_CURRENT_PAGE, perPage = DEFAULT_PER_PAGE) =>
+  (
+    page = DEFAULT_CURRENT_PAGE,
+    perPage = DEFAULT_PER_PAGE,
+    term = "",
+    hidePastEvents = false
+  ) =>
   async (dispatch, getState) => {
     const accessToken = await getAccessTokenSafely();
 
@@ -145,6 +151,22 @@ export const loadSummits =
       per_page: perPage,
       order: "-start_date"
     };
+
+    const filters = [];
+
+    if (term) {
+      const escapedTerm = escapeFilterValue(term);
+      filters.push(`name=@${escapedTerm}`);
+    }
+
+    if (hidePastEvents) {
+      const now = moment().tz("UTC").unix();
+      filters.push(`end_date>=${now}`);
+    }
+
+    if (filters.length > 0) {
+      params["filter[]"] = filters;
+    }
 
     getRequest(
       createAction(REQUEST_SUMMITS),

@@ -297,10 +297,23 @@
   },
   "directory": {
     "select": "Select",
-    "summits": "Events",
+    "summits": "Shows",
+    "shows": "shows",
     "add_summit": "Add Event",
     "remove_warning": "Are you sure you want to delete event",
-    "invitation_only": "Invitation Only"
+    "error_loading": "Error loading directory.",
+    "invitation_only": "Invitation Only",
+    "id": "ID",
+    "summit_name": "Event Name",
+    "sponsors": "Sponsors",
+    "forms": "Forms",
+    "attachments": "Attachments",
+    "hide_past_events": "Hide past events",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "placeholders": {
+      "search": "Search..."
+    }
   },
   "dashboard": {
     "dashboard": "Dashboard",
