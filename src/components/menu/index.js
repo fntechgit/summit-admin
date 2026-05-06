@@ -107,7 +107,7 @@ const Menu = ({ currentSummit, member, history }) => {
               {globalItems.map(drawMenuItem)}
             </ExpandableItem>
 
-            {currentSummit?.id && (
+            {!!currentSummit?.id && (
               <>
                 <Divider sx={{ my: 2 }} />
                 <ExpandableItem label={currentSummit.name} isHeader>
