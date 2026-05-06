@@ -2449,7 +2449,8 @@
       "add_form_using_template": "Add Form Using Template",
       "add_selected_form_template": "Add Selected Form Template",
       "customized_form": {
-        "title": "Create New Form",
+        "new_form_title": "Create New Form",
+        "edit_form_title": "Edit Form",
         "code": "Code",
         "name": "Name",
         "addons": "Add-ons",

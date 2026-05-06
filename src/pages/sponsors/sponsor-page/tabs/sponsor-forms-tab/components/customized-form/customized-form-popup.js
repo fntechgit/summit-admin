@@ -95,7 +95,11 @@ const CustomizedFormPopup = ({
         component="div"
       >
         <Typography variant="h5">
-          {T.translate("edit_sponsor.forms_tab.customized_form.title")}
+          {T.translate(
+            `edit_sponsor.forms_tab.customized_form.${
+              formId ? "edit_form_title" : "new_form_title"
+            }`
+          )}
         </Typography>
         <IconButton
           size="large"
