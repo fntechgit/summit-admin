@@ -8,8 +8,13 @@ import FormTemplatePopup from "../form-template-popup";
 jest.mock("actions/sponsor-forms-actions", () => ({
   saveFormTemplate: jest.fn(),
   updateFormTemplate: jest.fn(),
-  getSponsorships: jest.fn(() => ({ type: "GET_SPONSORSHIPS" })),
   resetFormTemplate: jest.fn(() => ({ type: "RESET_TEMPLATE_FORM" }))
+}));
+
+jest.mock("actions/summit-actions", () => ({
+  getSummitSponsorshipTypes: jest.fn(() => ({
+    type: "GET_SUMMIT_SPONSORSHIP_TYPES"
+  }))
 }));
 
 jest.mock("../form-template-form", () => ({
