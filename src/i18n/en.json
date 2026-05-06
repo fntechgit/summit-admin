@@ -3459,7 +3459,7 @@
     "no_items": "No items found for this search criteria.",
     "name": "Name",
     "track": "Track",
-    "delete_warning": "Are you sure you want to remove track chair ",
+    "delete_warning": "Are you sure you want to remove track chair for",
     "saved": "Track chair assigned successfully.",
     "placeholders": {
       "search": "Search track chairs by name",
