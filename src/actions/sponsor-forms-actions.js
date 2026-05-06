@@ -51,7 +51,10 @@ export const RESET_TEMPLATE_FORM = "RESET_TEMPLATE_FORM";
 
 export const REQUEST_SPONSOR_MANAGED_FORMS = "REQUEST_SPONSOR_MANAGED_FORMS";
 export const RECEIVE_SPONSOR_MANAGED_FORMS = "RECEIVE_SPONSOR_MANAGED_FORMS";
+export const REQUEST_SPONSOR_MANAGED_FORM = "REQUEST_SPONSOR_MANAGED_FORM";
+export const RECEIVE_SPONSOR_MANAGED_FORM = "RECEIVE_SPONSOR_MANAGED_FORM";
 export const SPONSOR_MANAGED_FORMS_ADDED = "SPONSOR_MANAGED_FORMS_ADDED";
+export const SPONSOR_MANAGED_FORMS_UPGRADED = "SPONSOR_MANAGED_FORMS_UPGRADED";
 
 export const REQUEST_SPONSOR_CUSTOMIZED_FORMS =
   "REQUEST_SPONSOR_CUSTOMIZED_FORMS";
@@ -616,6 +619,40 @@ export const saveSponsorManagedForm =
     });
   };
 
+export const upgradeSponsorManagedForm =
+  (entity) => async (dispatch, getState) => {
+    const { currentSummitState, currentSponsorState } = getState();
+    const { currentSummit } = currentSummitState;
+    const {
+      entity: { id: sponsorId }
+    } = currentSponsorState;
+    const accessToken = await getAccessTokenSafely();
+
+    dispatch(startLoading());
+
+    const normalizedEntity = normalizeSponsorCustomizedForm(
+      entity,
+      currentSummit.time_zone.id
+    );
+
+    const params = {
+      access_token: accessToken,
+      fields:
+        "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+      relations: "allowed_add_ons"
+    };
+
+    return putRequest(
+      null,
+      createAction(SPONSOR_MANAGED_FORMS_UPGRADED),
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-forms/${entity.id}`,
+      normalizedEntity,
+      snackbarErrorHandler
+    )(params)(dispatch).then(() => {
+      dispatch(stopLoading());
+    });
+  };
+
 const normalizeSponsorManagedForm = (entity) => {
   const normalizedEntity = {
     show_form_ids: entity.forms,
@@ -627,6 +664,31 @@ const normalizeSponsorManagedForm = (entity) => {
   };
 
   return normalizedEntity;
+};
+
+export const getSponsorManagedForm = (formId) => async (dispatch, getState) => {
+  const { currentSummitState } = getState();
+  const { currentSummit } = currentSummitState;
+  const accessToken = await getAccessTokenSafely();
+
+  dispatch(startLoading());
+
+  const params = {
+    fields:
+      "id,code,name,is_archived,opens_at,expires_at,items_count,allowed_add_ons",
+    expand:
+      "allowed_add_ons,meta_fields,meta_fields.values,items,items.meta_fields,items.meta_fields.values,items.images",
+    access_token: accessToken
+  };
+
+  return getRequest(
+    null,
+    createAction(RECEIVE_SPONSOR_CUSTOMIZED_FORM),
+    `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms/${formId}`,
+    snackbarErrorHandler
+  )(params)(dispatch).then(() => {
+    dispatch(stopLoading());
+  });
 };
 
 /* ************************************************************************ */
@@ -890,6 +952,8 @@ export const normalizeSponsorCustomizedForm = (entity, summitTZ) => {
   );
 
   normalizedEntity.meta_fields = meta_fields.filter((mf) => !!mf.name);
+
+  delete normalizedEntity.sponsorship_types;
 
   return normalizedEntity;
 };

@@ -198,7 +198,6 @@ const SponsorPagesTab = ({
     console.log("ARCHIVE MANAGED ", item);
 
   const handleManagedEdit = (item) => {
-    console.log("CHECK!", item);
     getSponsorManagedPage(item.id).then(() => setOpenPopup("managedPagePopup"));
   };
 
