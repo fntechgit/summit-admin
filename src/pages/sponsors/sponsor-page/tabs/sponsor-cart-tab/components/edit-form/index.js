@@ -157,10 +157,8 @@ const buildInitialValues = (form, timeZone) => {
 
 const buildValidationSchema = (items) => {
   const schema = items.reduce((acc, item) => {
-    item.meta_fields.map((f) => {
-      acc[`i-${item.form_item_id}-c-${f.class_field}-f-${f.type_id}`] =
-        getYupValidation(f);
-    });
+    const quantityKey = `i-${item.form_item_id}-c-global-f-quantity`;
+
     // notes
     acc[`i-${item.form_item_id}-c-global-f-notes`] = yup.string(
       T.translate("validation.string")
@@ -181,11 +179,21 @@ const buildValidationSchema = (items) => {
     globalQtySchema = globalQtySchema.required(
       T.translate("validation.required")
     );
-    acc[`i-${item.form_item_id}-c-global-f-quantity`] = globalQtySchema;
+    acc[quantityKey] = globalQtySchema;
     // custom rate
     acc[`i-${item.form_item_id}-c-global-f-custom_rate`] = yup.number(
       T.translate("validation.number")
     );
+
+    item.meta_fields.map((f) => {
+      acc[`i-${item.form_item_id}-c-${f.class_field}-f-${f.type_id}`] = yup
+        .mixed()
+        .when(quantityKey, {
+          is: (val) => val > 0,
+          then: () => getYupValidation(f),
+          otherwise: () => yup.mixed().notRequired()
+        });
+    });
 
     return acc;
   }, {});
