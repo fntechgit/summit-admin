@@ -22,7 +22,7 @@ export const normalizeOrder = (data) => {
       ...form,
       add_on_name: form.add_on?.name || "",
       discount: formatDiscount(form.discount_amount, form.discount_type),
-      discount_total: form.discount_in_cents || 100,
+      discount_total: form.discount_in_cents || 0,
       amount: currencyAmountFromCents(form.net_amount || 0)
     }))
   };
