@@ -468,6 +468,11 @@ const SponsorPagesTab = ({
           onSort={handleCustomizedSort}
           onEdit={handleCustomizedEdit}
           onDelete={handleCustomizedDelete}
+          deleteDialogBody={(item) =>
+            T.translate("edit_sponsor.pages_tab.page_delete_warning", {
+              page: item
+            })
+          }
           onArchive={handleArchiveCustomizedPage}
         />
       </div>
@@ -487,6 +492,11 @@ const SponsorPagesTab = ({
           onPerPageChange={handleManagedPerPageChange}
           onSort={handleManagedSort}
           onDelete={handleManagedDelete}
+          deleteDialogBody={(item) =>
+            T.translate("edit_sponsor.pages_tab.page_delete_warning", {
+              page: item
+            })
+          }
           canDelete={(row) =>
             row.assigned_type === SPONSOR_MANAGED_PAGE_ASSIGNMENT.EXPLICIT
           }
@@ -505,25 +515,25 @@ const SponsorPagesTab = ({
 
       {(openPopup === "customizedPagePopup" ||
         openPopup === "managedPagePopup") && (
-          <PageTemplatePopup
-            title={
-              openPopup === "managedPagePopup"
-                ? T.translate("edit_sponsor.pages_tab.title_customize")
-                : undefined
-            }
-            onSave={
-              openPopup === "customizedPagePopup"
-                ? handleSaveCustomizedPage
-                : handleSaveManagedPage
-            }
-            onClose={handleClosePagePopup}
-            pageTemplate={currentEditPage}
-            sponsorshipIds={sponsorshipIds}
-            summitId={currentSummit.id}
-            sponsorId={sponsor.id}
-            summitTZ={summitTZ}
-          />
-        )}
+        <PageTemplatePopup
+          title={
+            openPopup === "managedPagePopup"
+              ? T.translate("edit_sponsor.pages_tab.title_customize")
+              : undefined
+          }
+          onSave={
+            openPopup === "customizedPagePopup"
+              ? handleSaveCustomizedPage
+              : handleSaveManagedPage
+          }
+          onClose={handleClosePagePopup}
+          pageTemplate={currentEditPage}
+          sponsorshipIds={sponsorshipIds}
+          summitId={currentSummit.id}
+          sponsorId={sponsor.id}
+          summitTZ={summitTZ}
+        />
+      )}
     </Box>
   );
 };

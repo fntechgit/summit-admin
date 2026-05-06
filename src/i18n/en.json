@@ -2513,7 +2513,8 @@
       "custom_page_saved": "Custom Sponsor Page saved successfully",
       "custom_page_created": "Custom Sponsor Page created successfully",
       "managed_page_saved": "Sponsor Managed Page saved successfully",
-      "managed_page_created": "Sponsor Managed Page created successfully"
+      "managed_page_created": "Sponsor Managed Page created successfully",
+      "page_delete_warning": "Please verify you want to delete {page}"
     },
     "cart_tab": {
       "new_form": "New Form",
