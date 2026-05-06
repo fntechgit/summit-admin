@@ -145,6 +145,17 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
         entity.allowed_email_domains = [];
       }
 
+      // Restore boolean/numeric typing after the null→"" coercion above so
+      // legacy promocodes (where these fields were null in the DB) don't
+      // round-trip mixed-typed payloads to summit-api.
+      entity.auto_apply = entity.auto_apply === true;
+      if (
+        entity.quantity_per_account === "" ||
+        entity.quantity_per_account == null
+      ) {
+        entity.quantity_per_account = 0;
+      }
+
       entity.owner = {
         email: entity.email,
         first_name: entity.first_name,

@@ -130,63 +130,57 @@ jest.mock(
     };
   }
 );
-jest.mock(
-  "openstack-uicore-foundation/lib/components/free-text-search",
-  () => {
-    const React = require("react");
-    return {
-      __esModule: true,
-      default: (props) =>
-        React.createElement("input", {
-          id: props.id ?? "FreeTextSearch",
-          "data-mocked": "FreeTextSearch",
-          type: props.type ?? "text",
-          value: props.value ?? "",
-          onChange: props.onChange ?? (() => {})
-        })
-    };
-  }
-);
+jest.mock("openstack-uicore-foundation/lib/components/free-text-search", () => {
+  const React = require("react");
+  return {
+    __esModule: true,
+    default: (props) =>
+      React.createElement("input", {
+        id: props.id ?? "FreeTextSearch",
+        "data-mocked": "FreeTextSearch",
+        type: props.type ?? "text",
+        value: props.value ?? "",
+        onChange: props.onChange ?? (() => {})
+      })
+  };
+});
 jest.mock("openstack-uicore-foundation/lib/components/table", () => ({
   __esModule: true,
   default: () => null
 }));
 /* eslint-enable global-require */
 
-jest.mock(
-  "openstack-uicore-foundation/lib/components/inputs/tag-input",
-  () => {
-    // eslint-disable-next-line global-require
-    const React = require("react");
-    const TagInputMock = (props) => {
-      const draftRef = React.useRef("");
-      return React.createElement(
-        "div",
+jest.mock("openstack-uicore-foundation/lib/components/inputs/tag-input", () => {
+  // eslint-disable-next-line global-require
+  const React = require("react");
+  const TagInputMock = (props) => {
+    const draftRef = React.useRef("");
+    return React.createElement(
+      "div",
+      {
+        id: props.id,
+        "data-mocked": "TagInput",
+        "data-field": props.id
+      },
+      React.createElement("input", {
+        "data-testid": `taginput-draft-${props.id}`,
+        onChange: (e) => {
+          draftRef.current = e.target.value;
+        }
+      }),
+      React.createElement(
+        "button",
         {
-          id: props.id,
-          "data-mocked": "TagInput",
-          "data-field": props.id
+          type: "button",
+          "data-testid": `taginput-onCreate-${props.id}`,
+          onClick: () => props.onCreate && props.onCreate(draftRef.current)
         },
-        React.createElement("input", {
-          "data-testid": `taginput-draft-${props.id}`,
-          onChange: (e) => {
-            draftRef.current = e.target.value;
-          }
-        }),
-        React.createElement(
-          "button",
-          {
-            type: "button",
-            "data-testid": `taginput-onCreate-${props.id}`,
-            onClick: () => props.onCreate && props.onCreate(draftRef.current)
-          },
-          "add"
-        )
-      );
-    };
-    return { __esModule: true, default: TagInputMock };
-  }
-);
+        "add"
+      )
+    );
+  };
+  return { __esModule: true, default: TagInputMock };
+});
 
 jest.mock("openstack-uicore-foundation/lib/utils/methods", () => ({
   epochToMomentTimeZone: () => null
@@ -451,7 +445,7 @@ describe("DOMAIN_AUTHORIZED layout positions", () => {
 describe("validate() — domain-authorized email-domain enforcement", () => {
   it("blocks save on malformed allowed_email_domains for DOMAIN_AUTHORIZED_DISCOUNT_CODE", () => {
     const onSubmit = jest.fn();
-    renderForm(
+    const { container } = renderForm(
       baseEntity({
         class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
         allowed_email_domains: ["malformed-no-at-sign"]
@@ -464,6 +458,36 @@ describe("validate() — domain-authorized email-domain enforcement", () => {
     // raw key, so the button is found.
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     expect(onSubmit).not.toHaveBeenCalled();
+    // Validate-path error must reach the DOM via the hasErrors prop wired
+    // through to AllowedEmailDomainsRow — otherwise Save silently no-ops
+    // (the bug smarcet flagged on PR #915).
+    expect(container.querySelector(".text-danger")?.textContent ?? "").toMatch(
+      /allowed_email_domains_format/i
+    );
+  });
+
+  it("scrolls to the offending field even when other fields were edited first", () => {
+    // Regression for a bug introduced when scrollToError(state.errors) was
+    // first added to validate(): handleChange (index.js:114) writes
+    // newErrors[id] = "" on every edit, so state.errors accumulates
+    // empty-string keys. scrollToError uses Object.keys()[0] without
+    // filtering empties, so it would scroll to the first-edited field
+    // rather than the one with the actual error. Pass a single-key object.
+    const getByIdSpy = jest.spyOn(document, "getElementById");
+    const { container } = renderForm(
+      baseEntity({
+        class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
+        allowed_email_domains: ["malformed"]
+      })
+    );
+    // Edit the `code` field first — this seeds state.errors.code = "".
+    const codeInput = container.querySelector("#code");
+    fireEvent.change(codeInput, { target: { value: "EARLY-BIRD" } });
+    getByIdSpy.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    expect(getByIdSpy).toHaveBeenCalledWith("allowed_email_domains");
+    expect(getByIdSpy).not.toHaveBeenCalledWith("code");
+    getByIdSpy.mockRestore();
   });
 
   it("allows save on valid allowed_email_domains for DOMAIN_AUTHORIZED_DISCOUNT_CODE", () => {

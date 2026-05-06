@@ -14,8 +14,8 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import {
   SpeakerPCForm,
@@ -202,6 +202,12 @@ class PromocodeForm extends React.Component {
     if (entity.contact_email && !validEmail) {
       errors.contact_email = "Please enter a valid email.";
       this.setState({ errors });
+      // componentDidUpdate's scrollToError reads props.errors (server-side),
+      // so local validate() errors never trigger it. Scroll directly here.
+      // Pass a single-key object so scrollToError targets THIS field — state
+      // .errors accumulates empty-string keys for every edited field via
+      // handleChange (line 114), and scrollToError uses Object.keys()[0].
+      scrollToError({ contact_email: errors.contact_email });
       return false;
     }
 
@@ -215,6 +221,9 @@ class PromocodeForm extends React.Component {
           "edit_promocode.errors.allowed_email_domains_format"
         );
         this.setState({ errors });
+        scrollToError({
+          allowed_email_domains: errors.allowed_email_domains
+        });
         return false;
       }
     }
@@ -350,6 +359,7 @@ class PromocodeForm extends React.Component {
           <AllowedEmailDomainsRow
             entity={entity}
             handleChange={this.handleChange}
+            hasErrors={this.hasErrors}
           />
         )}
         <div className="row form-group">

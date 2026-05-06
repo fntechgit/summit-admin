@@ -16,13 +16,22 @@ const normalizeTagValues = (value) => {
     .filter((s) => typeof s === "string" && s.length > 0);
 };
 
-const AllowedEmailDomainsRow = ({ entity, handleChange }) => {
+const AllowedEmailDomainsRow = ({
+  entity,
+  handleChange,
+  hasErrors = () => ""
+}) => {
   const [domainsError, setDomainsError] = useState("");
 
   const domains = Array.isArray(entity.allowed_email_domains)
     ? entity.allowed_email_domains
     : [];
   const domainsAsTags = domains.map((d) => ({ tag: d }));
+  // validate-path error (parent state) takes precedence over the local
+  // onCreate-path error so a failed Save with a malformed pre-existing chip
+  // surfaces in the DOM. handleChange clears parent state.errors[id] on the
+  // next user edit, so this naturally clears too.
+  const renderedError = hasErrors("allowed_email_domains") || domainsError;
 
   const handleDomainsChange = (ev) => {
     const next = normalizeTagValues(ev?.target?.value ?? []);
@@ -72,9 +81,9 @@ const AllowedEmailDomainsRow = ({ entity, handleChange }) => {
         <small className="form-text text-muted">
           {T.translate("edit_promocode.captions.allowed_email_domains")}
         </small>
-        {domainsError && (
+        {renderedError && (
           <div className="text-danger" style={{ marginTop: 4 }}>
-            {domainsError}
+            {renderedError}
           </div>
         )}
       </div>

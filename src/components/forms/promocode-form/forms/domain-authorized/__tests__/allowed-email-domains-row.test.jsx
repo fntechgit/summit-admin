@@ -166,4 +166,43 @@ describe("AllowedEmailDomainsRow", () => {
       container.querySelector("[data-testid=\"taginput-tag-.edu\"]")
     ).toBeInTheDocument();
   });
+
+  it("renders parent-supplied error from hasErrors prop (validate-path)", () => {
+    const hasErrors = (field) =>
+      field === "allowed_email_domains" ? "boom" : "";
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity()}
+        handleChange={() => {}}
+        hasErrors={hasErrors}
+      />
+    );
+    expect(container.querySelector(".text-danger")?.textContent).toBe("boom");
+  });
+
+  it("prefers parent-supplied error over local onCreate error when both are set", () => {
+    const hasErrors = (field) =>
+      field === "allowed_email_domains" ? "parent-wins" : "";
+    const { container } = render(
+      <AllowedEmailDomainsRow
+        entity={baseEntity()}
+        handleChange={() => {}}
+        hasErrors={hasErrors}
+      />
+    );
+    typeAndAdd(container, "invalid"); // sets local domainsError
+    expect(container.querySelector(".text-danger")?.textContent).toBe(
+      "parent-wins"
+    );
+  });
+
+  it("falls back to local onCreate error when no hasErrors prop is provided (regression)", () => {
+    const { container } = render(
+      <AllowedEmailDomainsRow entity={baseEntity()} handleChange={jest.fn()} />
+    );
+    typeAndAdd(container, "invalid");
+    expect(container.querySelector(".text-danger")?.textContent ?? "").toMatch(
+      /allowed_email_domains_format/i
+    );
+  });
 });
