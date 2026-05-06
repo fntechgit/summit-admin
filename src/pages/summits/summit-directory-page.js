@@ -11,12 +11,19 @@
  * limitations under the License.
  * */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { formatEpoch } from "openstack-uicore-foundation/lib/utils/methods";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
-import { Button, Box, Grid2 } from "@mui/material";
+import MuiSearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import Chip from "@mui/material/Chip";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
+import Grid2 from "@mui/material/Grid2";
 import AddIcon from "@mui/icons-material/Add";
 import {
   loadSummits,
@@ -24,6 +31,7 @@ import {
   deleteSummit
 } from "../../actions/summit-actions";
 import Member from "../../models/member";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
 
 const SummitDirectoryPage = ({
   summits,
@@ -36,6 +44,8 @@ const SummitDirectoryPage = ({
   deleteSummit,
   history
 }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [hidePastEvents, setHidePastEvents] = useState(false);
   const safeSummits = Array.isArray(summits) ? summits : [];
   const safeMember =
     member && typeof member === "object"
@@ -43,7 +53,7 @@ const SummitDirectoryPage = ({
       : { groups: [] };
   useEffect(() => {
     clearCurrentSummit();
-    loadSummits();
+    loadSummits(DEFAULT_CURRENT_PAGE, perPage, searchTerm, hidePastEvents);
   }, []);
 
   let memberObj;
@@ -71,7 +81,18 @@ const SummitDirectoryPage = ({
 
   try {
     const handlePageChange = (page) => {
-      loadSummits(page, perPage);
+      loadSummits(page, perPage, searchTerm, hidePastEvents);
+    };
+
+    const handleSearch = (value) => {
+      setSearchTerm(value);
+      loadSummits(DEFAULT_CURRENT_PAGE, perPage, value, hidePastEvents);
+    };
+
+    const handleHidePastEventsChange = (ev) => {
+      const { checked } = ev.target;
+      setHidePastEvents(checked);
+      loadSummits(DEFAULT_CURRENT_PAGE, perPage, searchTerm, checked);
     };
 
     const handleNewSummit = () => {
@@ -97,6 +118,21 @@ const SummitDirectoryPage = ({
         header: T.translate("directory.summit_name")
       },
       {
+        columnKey: "sponsor_qty",
+        header: T.translate("directory.sponsors"),
+        render: (row) => row.sponsor_qty ?? 0
+      },
+      {
+        columnKey: "sponsor_forms_qty",
+        header: T.translate("directory.forms"),
+        render: (row) => row.sponsor_forms_qty ?? 0
+      },
+      {
+        columnKey: "sponsor_attachments_qty",
+        header: T.translate("directory.attachments"),
+        render: (row) => row.sponsor_attachments_qty ?? 0
+      },
+      {
         columnKey: "start_date",
         header: T.translate("directory.start_date"),
         render: (row) => formatEpoch(row.start_date, "MMMM Do YYYY")
@@ -108,13 +144,11 @@ const SummitDirectoryPage = ({
       },
       {
         columnKey: "invite_only_registration",
-        header: T.translate("directory.invitation_only"),
+        header: "",
         width: 120,
         render: (row) =>
           row.invite_only_registration ? (
-            <span style={{ color: "#b26a00", fontWeight: 500 }}>
-              {T.translate("directory.invitation_only")}
-            </span>
+            <Chip label={T.translate("directory.invitation_only")} />
           ) : null
       }
     ];
@@ -133,9 +167,30 @@ const SummitDirectoryPage = ({
           }}
         >
           <Box component="span" sx={{ minWidth: 120 }}>
-            {totalSummits} {T.translate("general.items")}
+            {totalSummits} {T.translate("directory.shows")}
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    onChange={handleHidePastEventsChange}
+                    checked={hidePastEvents}
+                    inputProps={{
+                      "aria-label": T.translate("directory.hide_past_events")
+                    }}
+                  />
+                }
+                label={T.translate("directory.hide_past_events")}
+              />
+            </FormGroup>
+            <Box sx={{ width: 300, maxWidth: "100%" }}>
+              <MuiSearchInput
+                term={searchTerm}
+                onSearch={handleSearch}
+                placeholder={T.translate("directory.placeholders.search")}
+              />
+            </Box>
             {canAddSummits && (
               <Button
                 variant="contained"
