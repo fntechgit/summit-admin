@@ -37,6 +37,10 @@ const buildInitialValues = (data, summitTZ) => {
     ? epochToMomentTimeZone(expires_at, summitTZ)
     : null;
 
+  normalized.allowed_add_ons = data.apply_to_all_add_ons
+    ? ["all"]
+    : data.allowed_add_ons;
+
   return normalized;
 };
 

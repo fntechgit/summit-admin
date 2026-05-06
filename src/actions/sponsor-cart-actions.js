@@ -201,10 +201,11 @@ export const getSponsorFormsForCart =
     orderDir = DEFAULT_ORDER_DIR
   ) =>
   async (dispatch, getState) => {
-    const { currentSummitState } = getState();
+    const { currentSummitState, currentSponsorState } = getState();
     const { currentSummit } = currentSummitState;
+    const { entity: sponsor } = currentSponsorState;
     const accessToken = await getAccessTokenSafely();
-    const filter = ["has_items==1"];
+    const filter = [];
 
     dispatch(startLoading());
 
@@ -215,7 +216,7 @@ export const getSponsorFormsForCart =
 
     const params = {
       page: currentPage,
-      fields: "id,code,name,items",
+      fields: "id,code,name,items_count",
       per_page: DEFAULT_PER_PAGE,
       access_token: accessToken
     };
@@ -233,7 +234,7 @@ export const getSponsorFormsForCart =
     return getRequest(
       createAction(REQUEST_CART_AVAILABLE_FORMS),
       createAction(RECEIVE_CART_AVAILABLE_FORMS),
-      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/show-forms`,
+      `${window.PURCHASES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsor.id}/available-forms`,
       authErrorHandler,
       { term, order, orderDir, currentPage }
     )(params)(dispatch).then(() => {
