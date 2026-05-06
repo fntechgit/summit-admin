@@ -51,8 +51,7 @@ const selectionPlanListReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_SELECTION_PLANS: {
-      const { current_page, total, last_page, per_page, data } =
-        payload.response;
+      const { total, last_page, data } = payload.response;
 
       const selectionPlans = data.map((sp) => ({
         ...sp,
@@ -64,9 +63,7 @@ const selectionPlanListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         selectionPlans,
         totalSelectionPlans: total,
-        currentPage: current_page,
-        lastPage: last_page,
-        perPage: per_page || state.perPage
+        lastPage: last_page
       };
     }
     case SELECTION_PLAN_ADDED: {
