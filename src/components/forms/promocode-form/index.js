@@ -14,8 +14,8 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import "awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
+import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import TagInput from "openstack-uicore-foundation/lib/components/inputs/tag-input";
 import {
   SpeakerPCForm,
@@ -27,14 +27,20 @@ import {
   SummitPCForm,
   SummitDiscountPCForm,
   SpeakersPCForm,
-  SpeakersDiscountPCForm
+  SpeakersDiscountPCForm,
+  DomainAuthorizedPCForm,
+  DomainAuthorizedDiscountPCForm
 } from "./forms";
 import {
   isEmpty,
   scrollToError,
   shallowEqual,
-  validateEmail
+  validateEmail,
+  validateAllowedEmailDomainEntry
 } from "../../../utils/methods";
+import { isDomainAuthorizedClass } from "./forms/domain-authorized/utils";
+import AllowedEmailDomainsRow from "./forms/domain-authorized/AllowedEmailDomainsRow";
+import AutoApplyCheckbox from "./forms/domain-authorized/AutoApplyCheckbox";
 import { DEFAULT_ENTITY } from "../../../reducers/promocodes/promocode-reducer";
 import FragmentParser from "../../../utils/fragmen-parser";
 import TextAreaInputWithCounter from "../../inputs/text-area-input-with-counter";
@@ -196,7 +202,30 @@ class PromocodeForm extends React.Component {
     if (entity.contact_email && !validEmail) {
       errors.contact_email = "Please enter a valid email.";
       this.setState({ errors });
+      // componentDidUpdate's scrollToError reads props.errors (server-side),
+      // so local validate() errors never trigger it. Scroll directly here.
+      // Pass a single-key object so scrollToError targets THIS field — state
+      // .errors accumulates empty-string keys for every edited field via
+      // handleChange (line 114), and scrollToError uses Object.keys()[0].
+      scrollToError({ contact_email: errors.contact_email });
       return false;
+    }
+
+    const isDomainAuthorized = isDomainAuthorizedClass(entity.class_name);
+    if (isDomainAuthorized && Array.isArray(entity.allowed_email_domains)) {
+      const bad = entity.allowed_email_domains.find(
+        (d) => !validateAllowedEmailDomainEntry(d)
+      );
+      if (bad !== undefined) {
+        errors.allowed_email_domains = T.translate(
+          "edit_promocode.errors.allowed_email_domains_format"
+        );
+        this.setState({ errors });
+        scrollToError({
+          allowed_email_domains: errors.allowed_email_domains
+        });
+        return false;
+      }
     }
 
     return true;
@@ -213,6 +242,7 @@ class PromocodeForm extends React.Component {
       unAssignSpeaker,
       resetPromocodeForm
     } = this.props;
+    const isDomainAuthorized = isDomainAuthorizedClass(entity.class_name);
     const typeScope = this.fragmentParser.getParam("type");
 
     let promocode_class_ddl = allClasses.map((c) => ({
@@ -325,6 +355,13 @@ class PromocodeForm extends React.Component {
             />
           </div>
         </div>
+        {isDomainAuthorized && (
+          <AllowedEmailDomainsRow
+            entity={entity}
+            handleChange={this.handleChange}
+            hasErrors={this.hasErrors}
+          />
+        )}
         <div className="row form-group">
           <div className="col-md-8">
             <label htmlFor="description">
@@ -379,6 +416,12 @@ class PromocodeForm extends React.Component {
                 />
               </label>
             </div>
+            {isDomainAuthorized && (
+              <AutoApplyCheckbox
+                entity={entity}
+                handleChange={this.handleChange}
+              />
+            )}
           </div>
         </div>
 
@@ -511,6 +554,28 @@ class PromocodeForm extends React.Component {
             getAssignedSpeakers={getAssignedSpeakers}
             unAssignSpeaker={unAssignSpeaker}
             resetPromocodeForm={resetPromocodeForm}
+          />
+        )}
+
+        {entity.class_name === "DOMAIN_AUTHORIZED_PROMO_CODE" && (
+          <DomainAuthorizedPCForm
+            entity={entity}
+            summit={currentSummit}
+            handleChange={this.handleChange}
+            badgeFeatureColumns={badgeFeatureColumns}
+            badgeFeatureOptions={badgeFeatureOptions}
+            hasErrors={this.hasErrors}
+          />
+        )}
+
+        {entity.class_name === "DOMAIN_AUTHORIZED_DISCOUNT_CODE" && (
+          <DomainAuthorizedDiscountPCForm
+            entity={entity}
+            summit={currentSummit}
+            handleChange={this.handleChange}
+            badgeFeatureColumns={badgeFeatureColumns}
+            badgeFeatureOptions={badgeFeatureOptions}
+            hasErrors={this.hasErrors}
           />
         )}
 

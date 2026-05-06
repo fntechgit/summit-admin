@@ -72,7 +72,10 @@ export const DEFAULT_ENTITY = {
   description: "",
   tags: [],
   allows_to_delegate: false,
-  allows_to_reassign: true
+  allows_to_reassign: true,
+  allowed_email_domains: [],
+  quantity_per_account: 0,
+  auto_apply: false
 };
 
 const DEFAULT_STATE = {
@@ -138,6 +141,21 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
         }
       }
 
+      if (!Array.isArray(entity.allowed_email_domains)) {
+        entity.allowed_email_domains = [];
+      }
+
+      // Restore boolean/numeric typing after the null→"" coercion above so
+      // legacy promocodes (where these fields were null in the DB) don't
+      // round-trip mixed-typed payloads to summit-api.
+      entity.auto_apply = entity.auto_apply === true;
+      if (
+        entity.quantity_per_account === "" ||
+        entity.quantity_per_account == null
+      ) {
+        entity.quantity_per_account = 0;
+      }
+
       entity.owner = {
         email: entity.email,
         first_name: entity.first_name,
@@ -145,12 +163,16 @@ const promocodeReducer = (state = DEFAULT_STATE, action) => {
       };
       entity.speakers = state.entity.speakers;
 
+      // apply_to_all_tix is a UI-only flag; summit-api's discount-code serializer
+      // never returns it, so it must be derived from ticket_types_rules.length
+      // for every class DiscountBasePCForm can render.
       const discount_classes = [
         "SPEAKER_DISCOUNT_CODE",
         "SPONSOR_DISCOUNT_CODE",
         "MEMBER_DISCOUNT_CODE",
         "SUMMIT_DISCOUNT_CODE",
-        "SPEAKERS_DISCOUNT_CODE"
+        "SPEAKERS_DISCOUNT_CODE",
+        "DOMAIN_AUTHORIZED_DISCOUNT_CODE"
       ];
 
       if (discount_classes.includes(entity.class_name)) {

@@ -285,6 +285,26 @@ export const validateEmail = (email) =>
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     );
 
+// Client-side form-validation for the allowed_email_domains field.
+// Stricter than summit-api's app/Rules/AllowedEmailDomainsArray.php (see SDS line 59):
+// we require at least one dot-separated label (rejects "@acme", "user@abc") so the UI
+// surfaces obvious mistakes at entry time. The server remains the authority.
+// Update in lockstep if the server regex changes.
+const ALLOWED_DOMAIN_RE = /^@[\w][\w-]*(?:\.[\w][\w-]*)+$/;
+const ALLOWED_TLD_RE = /^\.[a-z0-9]+(?:\.[a-z0-9]+)*$/i;
+const ALLOWED_EMAIL_RE = /^[^@\s]+@[\w][\w-]*(?:\.[\w][\w-]*)+$/;
+
+export const validateAllowedEmailDomainEntry = (entry) => {
+  if (typeof entry !== "string") return false;
+  const trimmed = entry.trim();
+  if (trimmed.length === 0) return false;
+  return (
+    ALLOWED_DOMAIN_RE.test(trimmed) ||
+    ALLOWED_TLD_RE.test(trimmed) ||
+    ALLOWED_EMAIL_RE.test(trimmed)
+  );
+};
+
 export const parseSpeakerAuditLog = (logString) => {
   const logEntries = logString.split("|");
   const userChanges = {};

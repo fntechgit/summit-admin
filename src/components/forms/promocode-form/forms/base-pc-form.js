@@ -5,6 +5,8 @@ import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input"
 import TextArea from "openstack-uicore-foundation/lib/components/inputs/textarea-input";
 import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/methods";
+import { isDomainAuthorizedClass } from "./domain-authorized/utils";
+import MaxPerAccountInput from "./domain-authorized/MaxPerAccountInput";
 
 const BasePCForm = (props) => {
   const badge_features_ddl = props.summit.badge_features.map((f) => ({
@@ -17,6 +19,7 @@ const BasePCForm = (props) => {
     "PRE_PAID_PROMO_CODE",
     "PRE_PAID_DISCOUNT_CODE"
   ].includes(props.entity.class_name);
+  const isDomainAuthorized = isDomainAuthorizedClass(props.entity.class_name);
 
   return (
     <>
@@ -51,6 +54,12 @@ const BasePCForm = (props) => {
             disabled
           />
         </div>
+        {isDomainAuthorized && (
+          <MaxPerAccountInput
+            entity={props.entity}
+            handleChange={props.handleChange}
+          />
+        )}
       </div>
       <div className="row form-group">
         <div className="col-md-4">
