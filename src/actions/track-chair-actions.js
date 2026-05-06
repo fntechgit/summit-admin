@@ -35,6 +35,7 @@ import {
   DEFAULT_PER_PAGE,
   DOUBLE_PER_PAGE
 } from "../utils/constants";
+import { snackbarErrorHandler } from "./base-actions";
 
 URI.escapeQuerySpace = false;
 
@@ -95,7 +96,7 @@ export const getTrackChairs =
       expand: "member,categories",
       relations: "member.none,categories.none",
       fields:
-        "id,categories.id,categories.name,member.first_name,member.last_name,member.email"
+        "id,categories.id,categories.name,member.first_name,member.last_name,member.email,member.id"
     };
 
     if (filter.length > 0) {
@@ -125,9 +126,9 @@ export const getTrackChairs =
       createAction(REQUEST_TRACK_CHAIRS),
       createAction(RECEIVE_TRACK_CHAIRS),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-chairs`,
-      authErrorHandler,
-      { trackId, term, order, orderDir }
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler,
+      { trackId, term, order, orderDir, perPage }
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -150,7 +151,7 @@ export const addTrackChair =
       createAction(TRACK_CHAIR_ADDED),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-chairs`,
       { member_id: member.id, categories: trackIds },
-      authErrorHandler
+      snackbarErrorHandler
     )(params)(dispatch).then(() => {
       dispatch(stopLoading());
     });
@@ -175,7 +176,7 @@ export const saveTrackChair =
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-chairs/${trackChairId}`,
       { categories: trackIds },
       authErrorHandler
-    )(params)(dispatch).then(() => {
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };
@@ -195,8 +196,8 @@ export const deleteTrackChair =
       createAction(TRACK_CHAIR_DELETED)({ trackChairId }),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/track-chairs/${trackChairId}`,
       null,
-      authErrorHandler
-    )(params)(dispatch).then(() => {
+      snackbarErrorHandler
+    )(params)(dispatch).finally(() => {
       dispatch(stopLoading());
     });
   };

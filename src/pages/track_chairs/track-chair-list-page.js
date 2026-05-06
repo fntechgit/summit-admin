@@ -9,17 +9,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ * */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
-import Swal from "sweetalert2";
-import { Pagination } from "react-bootstrap";
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import MemberInput from "openstack-uicore-foundation/lib/components/inputs/member-input"
-import Table from "openstack-uicore-foundation/lib/components/table";
+import {
+  Box,
+  Button,
+  FormControl,
+  Grid2,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Select
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import ClearIcon from "@mui/icons-material/Clear";
+import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
+import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
 import {
   getTrackChairs,
   deleteTrackChair,
@@ -27,272 +35,262 @@ import {
   addTrackChair,
   exportTrackChairs
 } from "../../actions/track-chair-actions";
+import { DEFAULT_CURRENT_PAGE } from "../../utils/constants";
+import TrackChairDialog from "./components/track-chair-dialog";
 
-import "../../styles/track-chair-list-page.less";
+const TrackChairListPage = ({
+  currentSummit,
+  trackChairs,
+  currentPage,
+  perPage,
+  term,
+  order,
+  orderDir,
+  totalTrackChairs,
+  trackId,
+  getTrackChairs,
+  deleteTrackChair,
+  saveTrackChair,
+  addTrackChair,
+  exportTrackChairs
+}) => {
+  const [dialogEntity, setDialogEntity] = useState(null);
 
-class TrackChairListPage extends React.Component {
-  constructor(props) {
-    super(props);
+  useEffect(() => {
+    if (currentSummit?.id) getTrackChairs();
+  }, [currentSummit?.id]);
 
-    this.state = {
-      showForm: false,
-      member: null,
-      trackIds: [],
-      trackId: null
-    };
-  }
+  const chairTracks = currentSummit.tracks.filter((t) => t.chair_visible);
 
-  componentDidMount() {
-    const { currentSummit } = this.props;
-    if (currentSummit) {
-      this.props.getTrackChairs();
-    }
-  }
-
-  toggleForm = (open) => {
-    this.setState((state) => ({ showForm: open, member: null, trackIds: [] }));
-  };
-
-  handleChange = (ev) => {
-    const { value, id } = ev.target;
-    const isNew = id === "member";
-
-    this.setState((state) => ({
-      [id]: value,
-      trackId: isNew ? 0 : state.trackId
-    }));
-  };
-
-  handleEdit = (trackChairId) => {
-    const { trackChairs } = this.props;
-    const trackChair = trackChairs.find((s) => s.id === trackChairId);
-
-    this.setState({
-      member: trackChair.member,
-      trackIds: trackChair.categories.map((c) => c.id),
-      showForm: true,
-      trackId: trackChairId
-    });
-  };
-
-  handleSave = () => {
-    const { member, trackIds, trackId } = this.state;
-
-    if (trackId) {
-      this.props.saveTrackChair(trackId, trackIds).then(() => {
-        this.setState({ member: null, trackIds: [], showForm: false });
-      });
-    } else {
-      this.props.addTrackChair(member, trackIds).then(() => {
-        this.setState({ member: null, trackIds: [], showForm: false });
-      });
-    }
-  };
-
-  handleFilterByTrack = (ev) => {
-    const { value } = ev.target;
-    const { term, page, order, orderDir, perPage } = this.props;
-    this.props.getTrackChairs(value, term, page, perPage, order, orderDir);
-  };
-
-  handlePageChange = (page) => {
-    const { trackId, term, order, orderDir, perPage } = this.props;
-    this.props.getTrackChairs(trackId, term, page, perPage, order, orderDir);
-  };
-
-  handleSort = (index, key, dir, func) => {
-    const { trackId, term, page, perPage } = this.props;
-
-    this.props.getTrackChairs(trackId, term, page, perPage, key, dir);
-  };
-
-  handleSearch = (term) => {
-    const { trackId, order, orderDir, page, perPage } = this.props;
-    this.props.getTrackChairs(trackId, term, page, perPage, order, orderDir);
-  };
-
-  handleDelete = (trackChairId) => {
-    const { deleteTrackChair, trackChairs } = this.props;
-    const trackChair = trackChairs.find((s) => s.id === trackChairId);
-
-    Swal.fire({
-      title: T.translate("general.are_you_sure"),
-      text: `${T.translate("track_chairs.delete_warning")} ${trackChair.name}`,
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#DD6B55",
-      confirmButtonText: T.translate("general.yes_remove")
-    }).then(function (result) {
-      if (result.value) {
-        deleteTrackChair(trackChairId);
-      }
-    });
-  };
-
-  handleExport = () => {
-    const { trackChairs } = this.props;
-    this.props.exportTrackChairs(trackChairs);
-  };
-
-  render() {
-    const {
-      currentSummit,
-      trackChairs,
-      lastPage,
-      currentPage,
-      term,
+  const handleSearch = (searchTerm) => {
+    getTrackChairs(
+      trackId,
+      searchTerm,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
       order,
-      orderDir,
-      totalTrackChairs
-    } = this.props;
-    const { showForm, member, trackIds } = this.state;
-    const disabledSave = trackIds.length === 0 || !member;
-
-    const columns = [
-      {
-        columnKey: "name",
-        value: T.translate("track_chairs.name"),
-        sortable: true
-      },
-      { columnKey: "trackNames", value: T.translate("track_chairs.track") }
-    ];
-
-    const table_options = {
-      sortCol: order,
-      sortDir: orderDir,
-      actions: {
-        edit: { onClick: this.handleEdit },
-        delete: { onClick: this.handleDelete }
-      }
-    };
-
-    const tracks_ddl = currentSummit.tracks
-      .filter((t) => t.chair_visible)
-      .map((t) => ({ label: t.name, value: t.id }));
-
-    if (!currentSummit.id) return <div />;
-
-    return (
-      <>
-        <div className="container">
-          <h3>
-            {" "}
-            {T.translate("track_chairs.list")} ({totalTrackChairs})
-          </h3>
-          <div className={"row"}>
-            <div className={"col-md-4"}>
-              <FreeTextSearch
-                value={term}
-                placeholder={T.translate("track_chairs.placeholders.search")}
-                onSearch={this.handleSearch}
-              />
-            </div>
-            <div className={"col-md-3"}>
-              <Dropdown
-                id="trackFilter"
-                onChange={this.handleFilterByTrack}
-                placeholder={T.translate(
-                  "track_chairs.placeholders.select_track"
-                )}
-                options={tracks_ddl}
-                clearable
-              />
-            </div>
-            <div className="col-md-5 text-right">
-              <button
-                className="btn btn-default right-space"
-                onClick={this.handleExport}
-              >
-                {T.translate("general.export")}
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => this.toggleForm(true)}
-              >
-                {T.translate("track_chairs.add")}
-              </button>
-            </div>
-          </div>
-
-          {showForm && (
-            <div className="add-new-wrapper row">
-              <div className="col-md-5">
-                <MemberInput
-                  id="member"
-                  value={member}
-                  onChange={this.handleChange}
-                  getOptionLabel={(member) => {
-                    return member.hasOwnProperty("email")
-                      ? `${member.first_name} ${member.last_name} (${member.email})`
-                      : `${member.first_name} ${member.last_name} (${member.id})`;
-                  }}
-                  placeholder={T.translate(
-                    "track_chairs.placeholders.select_track_chair"
-                  )}
-                />
-              </div>
-              <div className="col-md-5">
-                <Dropdown
-                  id="trackIds"
-                  value={trackIds}
-                  onChange={this.handleChange}
-                  placeholder={T.translate(
-                    "track_chairs.placeholders.select_track"
-                  )}
-                  options={tracks_ddl}
-                  isMulti
-                />
-              </div>
-              <div className="col-md-2">
-                <button
-                  className="btn btn-primary right-space"
-                  onClick={this.handleSave}
-                  disabled={disabledSave}
-                >
-                  {T.translate("general.save")}
-                </button>
-                <button
-                  className="btn btn-default"
-                  onClick={() => this.toggleForm(false)}
-                >
-                  {T.translate("general.cancel")}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {trackChairs.length === 0 ? (
-            <div className="no-items">
-              {T.translate("track_chairs.no_items")}
-            </div>
-          ) : (
-            <div>
-              <Table
-                options={table_options}
-                data={trackChairs}
-                columns={columns}
-                onSort={this.handleSort}
-              />
-              <Pagination
-                bsSize="medium"
-                prev
-                next
-                first
-                last
-                ellipsis
-                boundaryLinks
-                maxButtons={10}
-                items={lastPage}
-                activePage={currentPage}
-                onSelect={this.handlePageChange}
-              />
-            </div>
-          )}
-        </div>
-      </>
+      orderDir
     );
-  }
-}
+  };
+
+  const handleFilterByTrack = (ev) => {
+    getTrackChairs(
+      ev.target.value,
+      term,
+      DEFAULT_CURRENT_PAGE,
+      perPage,
+      order,
+      orderDir
+    );
+  };
+
+  const handleSort = (key, dir) => {
+    getTrackChairs(trackId, term, currentPage, perPage, key, dir);
+  };
+
+  const handlePageChange = (page) => {
+    getTrackChairs(trackId, term, page, perPage, order, orderDir);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    getTrackChairs(
+      trackId,
+      term,
+      DEFAULT_CURRENT_PAGE,
+      newPerPage,
+      order,
+      orderDir
+    );
+  };
+
+  const handleNewTrackChair = () => {
+    setDialogEntity({});
+  };
+
+  const handleEdit = (trackChair) => {
+    setDialogEntity({
+      id: trackChair.id,
+      member: trackChair.member,
+      originalMemberId: trackChair.member.id,
+      trackIds: trackChair.categories.map((c) => c.id)
+    });
+  };
+
+  const handleDelete = (trackChairId) => {
+    deleteTrackChair(trackChairId);
+  };
+
+  const handleSave = ({ id, member, trackIds }) => {
+    const newMember = dialogEntity?.originalMemberId !== member?.value;
+    const action =
+      !id || newMember
+        ? addTrackChair({ id: member.value }, trackIds)
+        : saveTrackChair(id, trackIds);
+    action.then(() => setDialogEntity(null));
+  };
+
+  const handleClose = () => {
+    setDialogEntity(null);
+  };
+
+  const columns = [
+    {
+      columnKey: "name",
+      header: T.translate("track_chairs.name"),
+      sortable: true
+    },
+    { columnKey: "trackNames", header: T.translate("track_chairs.track") }
+  ];
+
+  const table_options = { sortCol: order, sortDir: orderDir };
+
+  const tracks_ddl = chairTracks.map((t) => ({ label: t.name, value: t.id }));
+
+  const buttonSx = {
+    height: "36px",
+    padding: "6px 16px",
+    fontSize: "1.4rem",
+    lineHeight: "2.4rem",
+    letterSpacing: "0.4px"
+  };
+
+  if (!currentSummit?.id) return <div />;
+
+  return (
+    <div className="container">
+      <h3>{T.translate("track_chairs.list")}</h3>
+      <Grid2
+        container
+        spacing={1}
+        sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
+      >
+        <Grid2 size={2}>
+          <Box component="span">
+            {totalTrackChairs} {T.translate("track_chairs.track_chairs")}
+          </Box>
+        </Grid2>
+        <Grid2
+          container
+          size={10}
+          gap={1}
+          sx={{ justifyContent: "flex-end", alignItems: "center" }}
+        >
+          <Grid2 size={3}>
+            <SearchInput
+              term={term}
+              placeholder={T.translate("track_chairs.placeholders.search")}
+              onSearch={handleSearch}
+            />
+          </Grid2>
+          <Grid2 size={3}>
+            <FormControl
+              fullWidth
+              sx={{ "& .MuiOutlinedInput-root": { height: "36px" } }}
+            >
+              <Select
+                size="small"
+                value={trackId ?? ""}
+                onChange={handleFilterByTrack}
+                displayEmpty
+                renderValue={(selected) =>
+                  selected ? (
+                    tracks_ddl.find((t) => t.value === selected)?.label
+                  ) : (
+                    <span style={{ color: "#aaa" }}>
+                      {T.translate("track_chairs.placeholders.select_track")}
+                    </span>
+                  )
+                }
+                endAdornment={
+                  trackId ? (
+                    <InputAdornment position="end" sx={{ mr: 2 }}>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          getTrackChairs(
+                            null,
+                            term,
+                            DEFAULT_CURRENT_PAGE,
+                            perPage,
+                            order,
+                            orderDir
+                          )
+                        }
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null
+                }
+              >
+                {tracks_ddl.map((t) => (
+                  <MenuItem key={t.value} value={t.value}>
+                    {t.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid2>
+          <Grid2
+            size="auto"
+            gap={1}
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center"
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={() => exportTrackChairs(trackChairs)}
+              sx={buttonSx}
+            >
+              {T.translate("general.export")}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleNewTrackChair}
+              startIcon={<AddIcon />}
+              sx={buttonSx}
+            >
+              {T.translate("track_chairs.add")}
+            </Button>
+          </Grid2>
+        </Grid2>
+      </Grid2>
+
+      {trackChairs.length === 0 ? (
+        <div>{T.translate("track_chairs.no_items")}</div>
+      ) : (
+        <MuiTable
+          columns={columns}
+          data={trackChairs}
+          options={table_options}
+          perPage={perPage}
+          currentPage={currentPage}
+          totalRows={totalTrackChairs}
+          onSort={handleSort}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          deleteDialogBody={(name) =>
+            `${T.translate("track_chairs.delete_warning")} ${name}`
+          }
+        />
+      )}
+
+      {dialogEntity !== null && (
+        <TrackChairDialog
+          entity={dialogEntity}
+          tracks={chairTracks}
+          onSave={handleSave}
+          onClose={handleClose}
+        />
+      )}
+    </div>
+  );
+};
 
 const mapStateToProps = ({ currentSummitState, trackChairListState }) => ({
   currentSummit: currentSummitState.currentSummit,
