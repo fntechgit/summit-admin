@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal } from "react-bootstrap";
 import T from "i18n-react";
-import { UploadInput } from "openstack-uicore-foundation/lib/components";
+import UploadInput from "openstack-uicore-foundation/lib/components/inputs/upload-input";
 
 export default ({ title, children, show, wrapperClass, onHide, onIngest }) => {
   const [importFile, setImportFile] = useState(null);
