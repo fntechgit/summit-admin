@@ -14,10 +14,10 @@
 import {
   authErrorHandler,
   createAction,
-  getRequest,
-  putRequest,
-  postRequest,
   deleteRequest,
+  getRequest,
+  postRequest,
+  putRequest,
   startLoading,
   stopLoading
 } from "openstack-uicore-foundation/lib/utils/actions";
@@ -183,7 +183,7 @@ export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
     createAction(RECEIVE_SPONSOR_ORDER),
     `${window.PURCHASES_API_URL}/api/v2/summits/${currentSummit.id}/sponsors/${sponsor.id}/purchases/${orderId}`,
     authErrorHandler
-  )(params)(dispatch).then(() => {
+  )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
 };
