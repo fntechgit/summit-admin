@@ -5,17 +5,15 @@
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import flushPromises from "flush-promises";
-import * as SummitActions from "../../actions/summit-actions";
-import * as methods from "../../utils/methods";
 import { postRequest } from "openstack-uicore-foundation/lib/utils/actions";
+import * as SummitActions from "../summit-actions";
+import * as methods from "../../utils/methods";
 
-jest.mock("openstack-uicore-foundation/lib/utils/actions", () => {
-  return {
-    __esModule: true,
-    ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
-    postRequest: jest.fn()
-  };
-});
+jest.mock("openstack-uicore-foundation/lib/utils/actions", () => ({
+  __esModule: true,
+  ...jest.requireActual("openstack-uicore-foundation/lib/utils/actions"),
+  postRequest: jest.fn()
+}));
 
 describe("summit actions", () => {
   const middlewares = [thunk];
@@ -27,15 +25,8 @@ describe("summit actions", () => {
     store.clearActions();
     jest.spyOn(methods, "getAccessTokenSafely").mockReturnValue("TOKEN");
     postRequest.mockImplementation(
-      (
-          requestActionCreator,
-          receiveActionCreator,
-          endpoint,
-          payload,
-          errorHandler = null,
-          requestActionPayload = {}
-        ) =>
-        (params = {}) =>
+      (requestActionCreator, receiveActionCreator, requestActionPayload = {}) =>
+        () =>
         (dispatch) => {
           if (
             requestActionCreator &&
@@ -46,10 +37,11 @@ describe("summit actions", () => {
           return new Promise((resolve) => {
             if (typeof receiveActionCreator === "function") {
               dispatch(receiveActionCreator({ response: {} }));
-              return resolve({ response: {} });
+              resolve({ response: {} });
+            } else {
+              dispatch(receiveActionCreator);
+              resolve({ response: {} });
             }
-            dispatch(receiveActionCreator);
-            return resolve({ response: {} });
           });
         }
     );
@@ -73,7 +65,7 @@ describe("summit actions", () => {
     await flushPromises();
 
     expect(store.getActions()).toEqual(expectedActions);
-    expect(postRequest).toBeCalledTimes(1);
-    expect(methods.getAccessTokenSafely).toBeCalledTimes(2);
+    expect(postRequest).toHaveBeenCalledTimes(1);
+    expect(methods.getAccessTokenSafely).toHaveBeenCalledTimes(2);
   });
 });

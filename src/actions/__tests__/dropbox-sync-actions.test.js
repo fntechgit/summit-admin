@@ -79,7 +79,7 @@ describe("dropbox sync actions", () => {
       { payload: { response: {} }, type: "RECEIVE_SYNC_CONFIG" },
       { payload: undefined, type: "STOP_LOADING" }
     ]);
-    expect(getRequest).toBeCalledTimes(1);
+    expect(getRequest).toHaveBeenCalledTimes(1);
   });
 
   test("getSyncConfig early returns when getBaseUrl() is falsy", async () => {
@@ -89,8 +89,8 @@ describe("dropbox sync actions", () => {
     await flushPromises();
 
     expect(store.getActions()).toEqual([]);
-    expect(getRequest).not.toBeCalled();
-    expect(methods.getAccessTokenSafely).not.toBeCalled();
+    expect(getRequest).not.toHaveBeenCalled();
+    expect(methods.getAccessTokenSafely).not.toHaveBeenCalled();
   });
 
   test("getSyncConfig early returns when summitId is missing", async () => {
@@ -102,8 +102,8 @@ describe("dropbox sync actions", () => {
     await flushPromises();
 
     expect(store.getActions()).toEqual([]);
-    expect(getRequest).not.toBeCalled();
-    expect(methods.getAccessTokenSafely).not.toBeCalled();
+    expect(getRequest).not.toHaveBeenCalled();
+    expect(methods.getAccessTokenSafely).not.toHaveBeenCalled();
   });
 
   test("updateSyncConfig dispatches START_LOADING, SYNC_CONFIG_UPDATED, STOP_LOADING", async () => {
@@ -119,7 +119,7 @@ describe("dropbox sync actions", () => {
       type: "SYNC_CONFIG_UPDATED"
     });
     expect(actions[2]).toEqual({ payload: undefined, type: "STOP_LOADING" });
-    expect(putRequest).toBeCalledTimes(1);
+    expect(putRequest).toHaveBeenCalledTimes(1);
   });
 
   test("rebuildSync dispatches START_LOADING, REBUILD_SYNC_DISPATCHED, STOP_LOADING", async () => {
@@ -133,7 +133,7 @@ describe("dropbox sync actions", () => {
       type: "REBUILD_SYNC_DISPATCHED"
     });
     expect(actions[2]).toEqual({ payload: undefined, type: "STOP_LOADING" });
-    expect(postRequest).toBeCalledTimes(1);
+    expect(postRequest).toHaveBeenCalledTimes(1);
   });
 
   test("resyncRoom dispatches START_LOADING, RESYNC_ROOM_DISPATCHED, STOP_LOADING", async () => {
@@ -147,7 +147,7 @@ describe("dropbox sync actions", () => {
       type: "RESYNC_ROOM_DISPATCHED"
     });
     expect(actions[2]).toEqual({ payload: undefined, type: "STOP_LOADING" });
-    expect(postRequest).toBeCalled();
+    expect(postRequest).toHaveBeenCalled();
   });
 
   test("getSyncConfig dispatches RECEIVE_SYNC_CONFIG with empty payload on failure", async () => {

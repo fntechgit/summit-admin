@@ -9,7 +9,7 @@ const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
 
 jest.mock("openstack-uicore-foundation/lib/components", () => ({
-  Table: ({ children, ...props }) => (
+  Table: ({ children, onSort, ...props }) => (
     <table data-testid="table" {...props}>
       {children}
     </table>
