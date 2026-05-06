@@ -56,8 +56,6 @@ const TrackChairListPage = ({
 }) => {
   const [dialogEntity, setDialogEntity] = useState(null);
 
-  if (!currentSummit.id) return <div />;
-
   useEffect(() => {
     if (currentSummit) getTrackChairs();
   }, []);
@@ -155,6 +153,8 @@ const TrackChairListPage = ({
     lineHeight: "2.4rem",
     letterSpacing: "0.4px"
   };
+
+  if (!currentSummit?.id) return <div />;
 
   return (
     <div className="container">
