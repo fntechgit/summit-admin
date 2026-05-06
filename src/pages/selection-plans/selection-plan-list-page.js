@@ -11,7 +11,7 @@
  * limitations under the License.
  * */
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Dialog from "@mui/material/Dialog";
@@ -57,48 +57,46 @@ const SelectionPlanListPage = ({
   const [openSelectionPlanPopup, setOpenSelectionPlanPopup] = useState(false);
   const routeSelectionPlanId = match?.params?.selection_plan_id;
 
-  const openEditModal = (selectionPlanId) => {
-    if (!selectionPlanId) return;
+  const openEditModal = useCallback(
+    (selectionPlanId) => {
+      if (!selectionPlanId) return;
 
-    getSelectionPlan(selectionPlanId)
-      .then(() =>
-        getMarketingSettingsBySelectionPlan(
-          selectionPlanId,
-          null,
-          DEFAULT_CURRENT_PAGE,
-          MAX_PER_PAGE
+      getSelectionPlan(selectionPlanId)
+        .then(() =>
+          getMarketingSettingsBySelectionPlan(
+            selectionPlanId,
+            null,
+            DEFAULT_CURRENT_PAGE,
+            MAX_PER_PAGE
+          )
         )
-      )
-      .then(() => setOpenSelectionPlanPopup(true));
-  };
+        .then(() => setOpenSelectionPlanPopup(true));
+    },
+    [getMarketingSettingsBySelectionPlan, getSelectionPlan]
+  );
 
   useEffect(() => {
     getSelectionPlans(term, DEFAULT_CURRENT_PAGE, perPage, order, orderDir);
-  }, [getSelectionPlans]);
+  }, []);
 
   useEffect(() => {
     if (routeSelectionPlanId) {
       openEditModal(routeSelectionPlanId);
     }
-  }, [routeSelectionPlanId]);
+  }, [openEditModal, routeSelectionPlanId]);
 
   const refreshSelectionPlans = () =>
     getSelectionPlans(term, currentPage, perPage, order, orderDir);
 
   const handleEdit = (selectionPlan) => {
-    const selectionPlanId = selectionPlan?.id || selectionPlan;
-    if (!selectionPlanId) return;
-
-    history.push(
-      `/app/summits/${currentSummit.id}/selection-plans/${selectionPlanId}`
-    );
+    if (!selectionPlan?.id) return;
+    openEditModal(selectionPlan.id);
   };
 
-  const handleDelete = (row) => {
-    const selectionPlanId = row?.id || row;
-    if (!selectionPlanId) return;
+  const handleDelete = (selectionPlan) => {
+    if (!selectionPlan?.id) return;
 
-    deleteSelectionPlan(selectionPlanId).then(() => refreshSelectionPlans());
+    deleteSelectionPlan(selectionPlan.id).then(() => refreshSelectionPlans());
   };
 
   const handleNew = () => {
@@ -173,10 +171,7 @@ const SelectionPlanListPage = ({
 
   const tableOptions = {
     sortCol: order,
-    sortDir: orderDir,
-    actions: {
-      edit: { onClick: handleEdit }
-    }
+    sortDir: orderDir
   };
 
   if (!currentSummit.id) return <div />;
@@ -264,7 +259,6 @@ const SelectionPlanListPage = ({
         <Divider />
         <DialogContent>
           <EditSelectionPlanPage
-            hideHeader
             onSaved={handleSelectionPlanSaved}
             history={history}
             currentSummit={currentSummit}
