@@ -90,6 +90,10 @@ export const UNSELECT_ALL_SUMMIT_SPEAKERS = "UNSELECT_ALL_SUMMIT_SPEAKERS";
 export const SEND_SPEAKERS_EMAILS = "SEND_SPEAKERS_EMAILS";
 export const SET_SPEAKERS_CURRENT_FLOW_EVENT =
   "SET_SPEAKERS_CURRENT_FLOW_EVENT";
+export const REQUEST_SPEAKERS_ACTIVITIES_COUNT =
+  "REQUEST_SPEAKERS_ACTIVITIES_COUNT";
+export const RECEIVE_SPEAKERS_ACTIVITIES_COUNT =
+  "RECEIVE_SPEAKERS_ACTIVITIES_COUNT";
 
 export const REQUEST_SPEAKERS_ACTIVITIES_COUNT =
   "REQUEST_SPEAKERS_ACTIVITIES_COUNT";
@@ -886,6 +890,7 @@ const parseFilters = (filters) => {
   // return checkOrFilter(filters, filter);
   return filter;
 };
+
 
 const getSpeakersActivitiesCount =
   (summitId, filter, accessToken) => (dispatch) => {
