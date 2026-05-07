@@ -20,7 +20,8 @@ import {
   SELECT_ALL_SUMMIT_SUBMITTERS,
   UNSELECT_ALL_SUMMIT_SUBMITTERS,
   SEND_SUBMITTERS_EMAILS,
-  SET_SUBMITTERS_CURRENT_FLOW_EVENT
+  SET_SUBMITTERS_CURRENT_FLOW_EVENT,
+  RECEIVE_SUBMITTERS_ACTIVITIES_COUNT
 } from "../../actions/submitter-actions";
 
 import {
@@ -38,6 +39,7 @@ const DEFAULT_STATE = {
   lastPage: 1,
   perPage: 10,
   totalItems: 0,
+  totalActivities: 0,
   selectedCount: 0,
   selectedItems: [],
   excludedItems: [],
@@ -186,6 +188,9 @@ const summitSubmittersListReducer = (state = DEFAULT_STATE, action) => {
     }
     case SET_SUBMITTERS_CURRENT_FLOW_EVENT: {
       return { ...state, currentFlowEvent: payload };
+    }
+    case RECEIVE_SUBMITTERS_ACTIVITIES_COUNT: {
+      return { ...state, totalActivities: payload.response.count };
     }
     default:
       return state;

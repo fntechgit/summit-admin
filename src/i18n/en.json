@@ -35,6 +35,7 @@
     "member": "Member",
     "members": "Members",
     "event": "Activity",
+    "activities": "Activities",
     "group": "Group",
     "yes": "Yes",
     "no": "No",
@@ -1093,7 +1094,7 @@
     "send_emails_title": "You are about to send an EMAIL BLAST to selected speakers !",
     "should_send_copy_2_submitter": "Also send to submitter?",
     "allows_to_reassign": "Allow to reassign?",
-    "items_qty": "Selected {qty} Speakers",
+    "items_qty": "Selected {qty} Speakers | {activitiesQty} Activities",
     "placeholders": {
       "search_speakers": "Search by Full Name, Email, Speaker Id, Member Id, Title Or Abstract",
       "test_recipient": "Optional Test Recipient"
@@ -1107,7 +1108,8 @@
     "send_emails_title": "You are about to send an EMAIL BLAST to selected submitters !",
     "resend_done": "Emails sent successfully.",
     "submitters": "Submitters",
-    "submitters_no_speakers": "Submitters (no speakers)"
+    "submitters_no_speakers": "Submitters (no speakers)",
+    "items_qty": "Selected {qty} Submitters | {activitiesQty} Activities"
   },
   "speaker_attendance_list": {
     "speaker_attendance_list": "Speaker Attendance List",
