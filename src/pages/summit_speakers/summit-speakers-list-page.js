@@ -16,9 +16,9 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import Swal from "sweetalert2";
 import { Modal, Pagination } from "react-bootstrap";
-import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search"
-import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable"
-import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown"
+import FreeTextSearch from "openstack-uicore-foundation/lib/components/free-text-search";
+import SelectableTable from "openstack-uicore-foundation/lib/components/table-selectable";
+import Dropdown from "openstack-uicore-foundation/lib/components/inputs/dropdown";
 import Input from "openstack-uicore-foundation/lib/components/inputs/text-input";
 import SpeakerPromoCodeSpecForm from "../../components/forms/speakers-promo-code-spec-form";
 import {
@@ -702,8 +702,11 @@ class SummitSpeakersListPage extends React.Component {
       order,
       orderDir,
       totalItems,
+      totalActivities,
       selectedCount,
       selectedAll,
+      selectedItems,
+      excludedItems,
       selectionPlanFilter,
       trackFilter,
       trackGroupFilter,
@@ -712,6 +715,20 @@ class SummitSpeakersListPage extends React.Component {
       mediaUploadTypeFilter,
       currentFlowEvent
     } = this.getSubjectProps();
+
+    const selectedActivities = (() => {
+      if (selectedAll && excludedItems.length === 0) return totalActivities;
+      const relevant = selectedAll
+        ? items.filter((item) => !excludedItems.includes(item.id))
+        : items.filter((item) => selectedItems.includes(item.id));
+      const ids = new Set();
+      relevant.forEach((item) => {
+        (item.accepted_presentations || []).forEach((p) => ids.add(p.id));
+        (item.alternate_presentations || []).forEach((p) => ids.add(p.id));
+        (item.rejected_presentations || []).forEach((p) => ids.add(p.id));
+      });
+      return ids.size;
+    })();
 
     const columns = [
       {
@@ -901,7 +918,11 @@ class SummitSpeakersListPage extends React.Component {
           {this.state.source === sources.speakers
             ? T.translate("summit_speakers_list.summit_speakers_list")
             : T.translate("summit_submitters_list.summit_submitters_list")}{" "}
-          ({totalItems})
+          ({totalItems}{" "}
+          {this.state.source === sources.speakers
+            ? T.translate("summit_speakers_list.speakers")
+            : T.translate("summit_submitters_list.submitters")}{" "}
+          | {totalActivities} {T.translate("general.activities")})
         </h3>
         <div className="row">
           <div className="col-md-6">
@@ -1044,9 +1065,12 @@ class SummitSpeakersListPage extends React.Component {
           <div>
             <span>
               <b>
-                {T.translate("summit_speakers_list.items_qty", {
-                  qty: selectedCount
-                })}
+                {T.translate(
+                  this.state.source === sources.speakers
+                    ? "summit_speakers_list.items_qty"
+                    : "summit_submitters_list.items_qty",
+                  { qty: selectedCount, activitiesQty: selectedActivities }
+                )}
               </b>
             </span>
             <SelectableTable

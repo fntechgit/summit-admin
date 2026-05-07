@@ -673,6 +673,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       };
     }
     case RECEIVE_REG_LITE_SETTINGS: {
+      if (!payload.response) return state;
       const { data } = payload.response;
       const reg_lite_marketing_settings = {};
 
@@ -695,6 +696,7 @@ const currentSummitReducer = (state = DEFAULT_STATE, action) => {
       return { ...state, reg_lite_marketing_settings: newMarketingSettings };
     }
     case RECEIVE_PRINT_APP_SETTINGS: {
+      if (!payload.response) return state;
       const { data } = payload.response;
       const print_app_marketing_settings = {};
 
