@@ -287,12 +287,18 @@ export const validateEmail = (email) =>
 
 // Client-side form-validation for the allowed_email_domains field.
 // Stricter than summit-api's app/Rules/AllowedEmailDomainsArray.php (see SDS line 59):
-// we require at least one dot-separated label (rejects "@acme", "user@abc") so the UI
-// surfaces obvious mistakes at entry time. The server remains the authority.
-// Update in lockstep if the server regex changes.
-const ALLOWED_DOMAIN_RE = /^@[\w][\w-]*(?:\.[\w][\w-]*)+$/;
+//   1. Requires at least one dot-separated label (rejects "@acme", "user@abc"),
+//      where the server's `[\w.-]+` accepts dotless suffixes.
+//   2. RFC-1035-style labels: each label must start and end with [a-z0-9] and
+//      may contain internal hyphens. Rejects underscores and labels with
+//      leading/trailing hyphens (e.g. "@acme_corp.com", "@acme-.com",
+//      "@-acme.com") that the server's `\w` / `[\w.-]` patterns admit.
+// The server remains the authority on save; the UI just blocks obvious noise.
+const ALLOWED_DOMAIN_RE =
+  /^@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/i;
 const ALLOWED_TLD_RE = /^\.[a-z0-9]+(?:\.[a-z0-9]+)*$/i;
-const ALLOWED_EMAIL_RE = /^[^@\s]+@[\w][\w-]*(?:\.[\w][\w-]*)+$/;
+const ALLOWED_EMAIL_RE =
+  /^[^@\s]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/i;
 
 export const validateAllowedEmailDomainEntry = (entry) => {
   if (typeof entry !== "string") return false;

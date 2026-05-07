@@ -40,7 +40,7 @@ import {
 } from "../../../utils/methods";
 import { isDomainAuthorizedClass } from "./forms/domain-authorized/utils";
 import AllowedEmailDomainsRow from "./forms/domain-authorized/AllowedEmailDomainsRow";
-import AutoApplyCheckbox from "./forms/domain-authorized/AutoApplyCheckbox";
+import AutoApplyCheckbox from "./forms/auto-apply-checkbox";
 import { DEFAULT_ENTITY } from "../../../reducers/promocodes/promocode-reducer";
 import FragmentParser from "../../../utils/fragmen-parser";
 import TextAreaInputWithCounter from "../../inputs/text-area-input-with-counter";
@@ -420,6 +420,8 @@ class PromocodeForm extends React.Component {
               <AutoApplyCheckbox
                 entity={entity}
                 handleChange={this.handleChange}
+                withCaption
+                marginTop
               />
             )}
           </div>

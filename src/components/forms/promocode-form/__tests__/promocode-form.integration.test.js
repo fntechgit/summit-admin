@@ -349,16 +349,15 @@ describe("PromocodeForm class switching", () => {
     expect(container.querySelector("#auto_apply")).not.toBeInTheDocument();
   });
 
-  describe("allowed_email_domains onCreate path", () => {
+  describe("allowed_email_domains commit path", () => {
     const addDomain = (container, value) => {
-      const draft = container.querySelector(
-        "[data-testid=\"taginput-draft-allowed_email_domains\"]"
+      // Post-PR-#915-review: AllowedEmailDomainsRow uses a bare freeform
+      // input (no TagInput / react-select) — see santipalenque's review.
+      const input = container.querySelector(
+        "[data-testid=\"allowed_email_domains_input\"]"
       );
-      const addBtn = container.querySelector(
-        "[data-testid=\"taginput-onCreate-allowed_email_domains\"]"
-      );
-      fireEvent.change(draft, { target: { value } });
-      fireEvent.click(addBtn);
+      fireEvent.change(input, { target: { value } });
+      fireEvent.keyDown(input, { key: "Enter" });
     };
 
     it("rejects malformed entries inline and leaves handleChange (for domains) uncalled", () => {
@@ -488,6 +487,28 @@ describe("validate() — domain-authorized email-domain enforcement", () => {
     expect(getByIdSpy).toHaveBeenCalledWith("allowed_email_domains");
     expect(getByIdSpy).not.toHaveBeenCalledWith("code");
     getByIdSpy.mockRestore();
+  });
+
+  it("clears the .text-danger banner on plain typing after a failed save (regression — Codex review)", () => {
+    const { container } = renderForm(
+      baseEntity({
+        class_name: "DOMAIN_AUTHORIZED_DISCOUNT_CODE",
+        allowed_email_domains: ["malformed"]
+      })
+    );
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    expect(container.querySelector(".text-danger")?.textContent ?? "").toMatch(
+      /allowed_email_domains_format/i
+    );
+    // Typing into the input alone (no commit, no chip-remove) should clear
+    // the parent error banner — the chip input must mirror handleChange:114
+    // semantics that every other field on the form gets via direct
+    // onChange wiring.
+    const input = container.querySelector(
+      "[data-testid='allowed_email_domains_input']"
+    );
+    fireEvent.change(input, { target: { value: "@" } });
+    expect(container.querySelector(".text-danger")).toBeNull();
   });
 
   it("allows save on valid allowed_email_domains for DOMAIN_AUTHORIZED_DISCOUNT_CODE", () => {

@@ -2,6 +2,7 @@ import React from "react";
 import T from "i18n-react";
 import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input";
 import EmailRedeemForm from "./email-redeem-form";
+import AutoApplyCheckbox from "./auto-apply-checkbox";
 
 const SpeakerBasePCForm = (props) => (
   <>
@@ -19,23 +20,10 @@ const SpeakerBasePCForm = (props) => (
     </div>
     <div className="row form-group">
       <div className="col-md-12">
-        <div className="form-check abc-checkbox">
-          <input
-            type="checkbox"
-            id="auto_apply"
-            checked={!!props.entity.auto_apply}
-            onChange={props.handleChange}
-            className="form-check-input"
-          />
-          <label className="form-check-label" htmlFor="auto_apply">
-            {T.translate("edit_promocode.auto_apply")}&nbsp;
-            <i
-              className="fa fa-info-circle"
-              aria-hidden="true"
-              title={T.translate("edit_promocode.info.auto_apply")}
-            />
-          </label>
-        </div>
+        <AutoApplyCheckbox
+          entity={props.entity}
+          handleChange={props.handleChange}
+        />
       </div>
     </div>
 

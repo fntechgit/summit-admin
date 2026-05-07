@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import AutoApplyCheckbox from "../AutoApplyCheckbox";
+import AutoApplyCheckbox from "../auto-apply-checkbox";
 
 const baseEntity = (overrides = {}) => ({
   auto_apply: false,
@@ -44,10 +44,34 @@ describe("AutoApplyCheckbox", () => {
     });
   });
 
-  it("renders the visible caption from edit_promocode.captions.auto_apply", () => {
+  it("does not render the caption by default (member/speaker fragment shape)", () => {
     render(<AutoApplyCheckbox entity={baseEntity()} handleChange={() => {}} />);
+    expect(
+      screen.queryByText("edit_promocode.captions.auto_apply")
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the caption when withCaption is set (DomainAuthorized leaf shape)", () => {
+    render(
+      <AutoApplyCheckbox
+        entity={baseEntity()}
+        handleChange={() => {}}
+        withCaption
+      />
+    );
     expect(
       screen.getByText("edit_promocode.captions.auto_apply")
     ).toBeInTheDocument();
+  });
+
+  it("applies marginTop:10px when marginTop is set", () => {
+    const { container } = render(
+      <AutoApplyCheckbox
+        entity={baseEntity()}
+        handleChange={() => {}}
+        marginTop
+      />
+    );
+    expect(container.firstChild).toHaveStyle({ marginTop: "10px" });
   });
 });
