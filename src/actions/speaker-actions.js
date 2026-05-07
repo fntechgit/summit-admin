@@ -91,6 +91,11 @@ export const SEND_SPEAKERS_EMAILS = "SEND_SPEAKERS_EMAILS";
 export const SET_SPEAKERS_CURRENT_FLOW_EVENT =
   "SET_SPEAKERS_CURRENT_FLOW_EVENT";
 
+export const REQUEST_SPEAKERS_ACTIVITIES_COUNT =
+  "REQUEST_SPEAKERS_ACTIVITIES_COUNT";
+export const RECEIVE_SPEAKERS_ACTIVITIES_COUNT =
+  "RECEIVE_SPEAKERS_ACTIVITIES_COUNT";
+
 const normalizeEntity = (entity) => {
   const normalizedEntity = { ...entity };
 
@@ -1167,3 +1172,15 @@ export const unselectAllSummitSpeakers = () => (dispatch) => {
 export const setCurrentFlowEvent = (value) => (dispatch) => {
   dispatch(createAction(SET_SPEAKERS_CURRENT_FLOW_EVENT)(value));
 };
+
+const getSpeakersActivitiesCount =
+  (summitId, filter, accessToken) => (dispatch) => {
+    const params = { access_token: accessToken };
+    if (filter.length > 0) params["filter[]"] = filter;
+    return getRequest(
+      createAction(REQUEST_SPEAKERS_ACTIVITIES_COUNT),
+      createAction(RECEIVE_SPEAKERS_ACTIVITIES_COUNT),
+      `${window.API_BASE_URL}/api/v1/summits/${summitId}/speakers/all/events/count`,
+      authErrorHandler
+    )(params)(dispatch);
+  };
