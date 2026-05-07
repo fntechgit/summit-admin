@@ -54,7 +54,8 @@ export const RECEIVE_LEAD_REPORT_SETTINGS_META =
   "RECEIVE_LEAD_REPORT_SETTINGS_META";
 export const LEAD_REPORT_SETTINGS_UPDATED = "LEAD_REPORT_SETTINGS_UPDATED";
 export const RECEIVE_LEAD_REPORT_SETTINGS = "RECEIVE_LEAD_REPORT_SETTINGS";
-export const RECEIVE_GLOBAL_SPONSORSHIPS = "RECEIVE_GLOBAL_SPONSORSHIPS";
+export const RECEIVE_SUMMIT_SPONSORSHIP_TYPES =
+  "RECEIVE_SUMMIT_SPONSORSHIP_TYPES";
 
 export const getSummitById = (summitId) => async (dispatch, getState) => {
   const accessToken = await getAccessTokenSafely();
@@ -559,7 +560,7 @@ export const getSummitSponsorshipTypes =
 
     return getRequest(
       null,
-      createAction(RECEIVE_GLOBAL_SPONSORSHIPS),
+      createAction(RECEIVE_SUMMIT_SPONSORSHIP_TYPES),
       `${window.API_BASE_URL}/api/v1/summits/${currentSummit.id}/sponsorships-types`,
       authErrorHandler
     )(params)(dispatch).then(() => {

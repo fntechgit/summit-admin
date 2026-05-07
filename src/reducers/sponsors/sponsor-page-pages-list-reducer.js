@@ -26,7 +26,7 @@ import {
 } from "../../actions/sponsor-pages-actions";
 import {
   SET_CURRENT_SUMMIT,
-  RECEIVE_GLOBAL_SPONSORSHIPS
+  RECEIVE_SUMMIT_SPONSORSHIP_TYPES
 } from "../../actions/summit-actions";
 import {
   PAGE_MODULES_DOWNLOAD,
@@ -262,7 +262,7 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
     case RESET_EDIT_PAGE: {
       return { ...state, currentEditPage: DEFAULT_PAGE };
     }
-    case RECEIVE_GLOBAL_SPONSORSHIPS: {
+    case RECEIVE_SUMMIT_SPONSORSHIP_TYPES: {
       const {
         current_page: currentPage,
         last_page: lastPage,

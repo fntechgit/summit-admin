@@ -4,7 +4,7 @@ import showPagesListReducer, {
 } from "../show-pages-list-reducer";
 import {
   SET_CURRENT_SUMMIT,
-  RECEIVE_GLOBAL_SPONSORSHIPS
+  RECEIVE_SUMMIT_SPONSORSHIP_TYPES
 } from "../../../actions/summit-actions";
 import {
   REQUEST_SHOW_PAGES,
@@ -411,7 +411,7 @@ describe("showPagesListReducer", () => {
     });
   });
 
-  describe("RECEIVE_GLOBAL_SPONSORSHIPS", () => {
+  describe("RECEIVE_SUMMIT_SPONSORSHIP_TYPES", () => {
     const makePayload = (currentPage, data) => ({
       response: {
         current_page: currentPage,
@@ -432,7 +432,7 @@ describe("showPagesListReducer", () => {
       });
 
       const result = showPagesListReducer(state, {
-        type: RECEIVE_GLOBAL_SPONSORSHIPS,
+        type: RECEIVE_SUMMIT_SPONSORSHIP_TYPES,
         payload: makePayload(1, [{ id: 2, type: { name: "Gold" } }])
       });
 
@@ -455,7 +455,7 @@ describe("showPagesListReducer", () => {
       });
 
       const result = showPagesListReducer(state, {
-        type: RECEIVE_GLOBAL_SPONSORSHIPS,
+        type: RECEIVE_SUMMIT_SPONSORSHIP_TYPES,
         payload: makePayload(2, [{ id: 2, type: { name: "Silver" } }])
       });
 

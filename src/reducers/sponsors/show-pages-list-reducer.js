@@ -24,7 +24,7 @@ import {
 } from "../../actions/show-pages-actions";
 import {
   SET_CURRENT_SUMMIT,
-  RECEIVE_GLOBAL_SPONSORSHIPS
+  RECEIVE_SUMMIT_SPONSORSHIP_TYPES
 } from "../../actions/summit-actions";
 import { denormalizePageModules } from "../../utils/page-template";
 
@@ -156,7 +156,7 @@ const showPagesListReducer = (state = DEFAULT_STATE, action) => {
     case RESET_SHOW_PAGE_FORM: {
       return { ...state, currentShowPage: DEFAULT_SHOW_PAGE };
     }
-    case RECEIVE_GLOBAL_SPONSORSHIPS: {
+    case RECEIVE_SUMMIT_SPONSORSHIP_TYPES: {
       const {
         current_page: currentPage,
         last_page: lastPage,
