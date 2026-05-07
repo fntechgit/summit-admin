@@ -62,7 +62,8 @@ const PurchaseOrderIdLayout = ({ currentPurchaseOrder, match, ...props }) => {
               <Breadcrumb
                 data={{
                   title: T.translate("purchase_order_list.tickets"),
-                  pathname: match.url
+                  pathname: match.url,
+                  search: "?section=tickets"
                 }}
               />
               <EditTicketPage {...props} />

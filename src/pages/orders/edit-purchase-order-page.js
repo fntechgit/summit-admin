@@ -32,6 +32,7 @@ const EditPurchaseOrderPage = ({
   errors,
   currentSummit,
   history,
+  location,
   ticketsCurrentPage,
   ticketsTotal,
   ticketsLastPage,
@@ -93,6 +94,7 @@ const EditPurchaseOrderPage = ({
 
       <PurchaseOrderForm
         history={history}
+        location={location}
         currentSummit={currentSummit}
         entity={entity}
         errors={errors}
