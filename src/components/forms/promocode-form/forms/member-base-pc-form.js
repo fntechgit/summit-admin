@@ -1,6 +1,7 @@
 import React from "react";
 import OwnerInput from "../../../inputs/owner-input";
 import EmailRedeemForm from "./email-redeem-form";
+import AutoApplyCheckbox from "./auto-apply-checkbox";
 
 const MemberBasePCForm = (props) => (
   <>
@@ -15,6 +16,14 @@ const MemberBasePCForm = (props) => (
             first_name: props.hasErrors("first_name"),
             last_name: props.hasErrors("last_name")
           }}
+        />
+      </div>
+    </div>
+    <div className="row form-group">
+      <div className="col-md-12">
+        <AutoApplyCheckbox
+          entity={props.entity}
+          handleChange={props.handleChange}
         />
       </div>
     </div>

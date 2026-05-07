@@ -285,6 +285,32 @@ export const validateEmail = (email) =>
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     );
 
+// Client-side form-validation for the allowed_email_domains field.
+// Stricter than summit-api's app/Rules/AllowedEmailDomainsArray.php (see SDS line 59):
+//   1. Requires at least one dot-separated label (rejects "@acme", "user@abc"),
+//      where the server's `[\w.-]+` accepts dotless suffixes.
+//   2. RFC-1035-style labels: each label must start and end with [a-z0-9] and
+//      may contain internal hyphens. Rejects underscores and labels with
+//      leading/trailing hyphens (e.g. "@acme_corp.com", "@acme-.com",
+//      "@-acme.com") that the server's `\w` / `[\w.-]` patterns admit.
+// The server remains the authority on save; the UI just blocks obvious noise.
+const ALLOWED_DOMAIN_RE =
+  /^@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/i;
+const ALLOWED_TLD_RE = /^\.[a-z0-9]+(?:\.[a-z0-9]+)*$/i;
+const ALLOWED_EMAIL_RE =
+  /^[^@\s]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/i;
+
+export const validateAllowedEmailDomainEntry = (entry) => {
+  if (typeof entry !== "string") return false;
+  const trimmed = entry.trim();
+  if (trimmed.length === 0) return false;
+  return (
+    ALLOWED_DOMAIN_RE.test(trimmed) ||
+    ALLOWED_TLD_RE.test(trimmed) ||
+    ALLOWED_EMAIL_RE.test(trimmed)
+  );
+};
+
 export const parseSpeakerAuditLog = (logString) => {
   const logEntries = logString.split("|");
   const userChanges = {};

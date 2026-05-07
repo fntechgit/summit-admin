@@ -318,7 +318,13 @@ const TicketTypeListPage = function ({
   const audienceDDL = [
     { label: "All", value: "All" },
     { label: "With Invitation", value: "WithInvitation" },
-    { label: "Without Invitation", value: "WithoutInvitation" }
+    { label: "Without Invitation", value: "WithoutInvitation" },
+    // Additive audience added with the domain-authorized promo code feature.
+    // See sds/promo-codes-for-early-registration-access-summit-admin.md.
+    {
+      label: T.translate("edit_ticket_type.audience_with_promo_code"),
+      value: "WithPromoCode"
+    }
   ];
 
   const badge_types_ddl = currentSummit.badge_types?.map((bt) => ({

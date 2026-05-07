@@ -107,7 +107,13 @@ class TicketTypeForm extends React.Component {
     const audience_ddl = [
       { label: "With Invitation", value: "WithInvitation" },
       { label: "Without Invitation", value: "WithoutInvitation" },
-      { label: "All", value: "All" }
+      { label: "All", value: "All" },
+      // Additive audience added with the domain-authorized promo code feature.
+      // See sds/promo-codes-for-early-registration-access-summit-admin.md.
+      {
+        label: T.translate("edit_ticket_type.audience_with_promo_code"),
+        value: "WithPromoCode"
+      }
     ];
 
     return (
@@ -172,6 +178,18 @@ class TicketTypeForm extends React.Component {
             <label htmlFor="audience">
               {" "}
               {T.translate("edit_ticket_type.audience")}
+              {entity.audience === "WithPromoCode" && (
+                <>
+                  &nbsp;
+                  <i
+                    className="fa fa-info-circle"
+                    aria-hidden="true"
+                    title={T.translate(
+                      "edit_ticket_type.info_audience_with_promo_code"
+                    )}
+                  />
+                </>
+              )}
             </label>
             <Dropdown
               id="audience"

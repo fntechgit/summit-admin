@@ -2,6 +2,7 @@ import React from "react";
 import T from "i18n-react";
 import SpeakerInput from "openstack-uicore-foundation/lib/components/inputs/speaker-input";
 import EmailRedeemForm from "./email-redeem-form";
+import AutoApplyCheckbox from "./auto-apply-checkbox";
 
 const SpeakerBasePCForm = (props) => (
   <>
@@ -14,6 +15,14 @@ const SpeakerBasePCForm = (props) => (
           onChange={props.handleChange}
           summitId={props.summit.id}
           error={props.hasErrors("speaker_id")}
+        />
+      </div>
+    </div>
+    <div className="row form-group">
+      <div className="col-md-12">
+        <AutoApplyCheckbox
+          entity={props.entity}
+          handleChange={props.handleChange}
         />
       </div>
     </div>
