@@ -23,17 +23,19 @@ describe("RefundForm", () => {
     render(<RefundForm onSubmit={onSubmit} />);
 
     const reasonField = screen.getByLabelText(/refund_form\.reason/i);
+    const amountField = screen.getByLabelText(/refund_form\.amount/i);
     const submitButton = screen.getByRole("button", {
       name: /refund_form\.queue_refund/i
     });
 
     await act(async () => {
       await userEvent.type(reasonField, "Duplicate charge");
+      await userEvent.type(amountField, "10");
       await userEvent.click(submitButton);
     });
 
     expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ reason: "Duplicate charge" }),
+      expect.objectContaining({ reason: "Duplicate charge", amount: 1000 }),
       expect.anything()
     );
   });
