@@ -22,9 +22,7 @@ import {
   RESET_EDIT_PAGE,
   SPONSOR_CUSTOMIZED_PAGE_ARCHIVED,
   SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED,
-  RECEIVE_SPONSOR_MANAGED_PAGE,
-  SPONSOR_MANAGED_PAGE_ARCHIVED,
-  SPONSOR_MANAGED_PAGE_UNARCHIVED
+  RECEIVE_SPONSOR_MANAGED_PAGE
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
@@ -129,7 +127,6 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         code: a.code,
         name: a.name,
         allowed_add_ons: a.allowed_add_ons,
-        is_archived: a.is_archived,
         info_mod: a.modules_count.info_modules_count,
         upload_mod: a.modules_count.media_request_modules_count,
         download_mod: a.modules_count.document_download_modules_count,
@@ -233,32 +230,6 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
       });
 
       return { ...state, currentEditPage: { ...customizedPage, modules } };
-    }
-    case SPONSOR_MANAGED_PAGE_ARCHIVED: {
-      const { pageId } = payload;
-      const pages = state.managedPages.pages.map((page) =>
-        page.id === pageId ? { ...page, is_archived: true } : page
-      );
-      return {
-        ...state,
-        managedPages: {
-          ...state.managedPages,
-          pages: [...pages]
-        }
-      };
-    }
-    case SPONSOR_MANAGED_PAGE_UNARCHIVED: {
-      const { pageId } = payload;
-      const pages = state.managedPages.pages.map((page) =>
-        page.id === pageId ? { ...page, is_archived: false } : page
-      );
-      return {
-        ...state,
-        managedPages: {
-          ...state.managedPages,
-          pages: [...pages]
-        }
-      };
     }
     case SPONSOR_CUSTOMIZED_PAGE_ARCHIVED: {
       const { pageId } = payload;
