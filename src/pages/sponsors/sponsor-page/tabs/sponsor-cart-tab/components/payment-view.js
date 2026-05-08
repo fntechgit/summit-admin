@@ -15,14 +15,10 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Card, CardContent, Typography } from "@mui/material";
-import {
-  MuiNotesRow,
-  MuiOrderSummary,
-  MuiTable,
-  MuiTotalRow
-} from "openstack-uicore-foundation/lib/components";
+import OrderSummary from "openstack-uicore-foundation/lib/components/mui/order-summary";
 import StripePayment from "openstack-uicore-foundation/lib/components/mui/stripe-payment";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
+import SponsorOrderGrid from "openstack-uicore-foundation/lib/components/mui/sponsor-order-grid";
 import history from "../../../../../../history";
 import {
   confirmPayment,
@@ -30,7 +26,6 @@ import {
   updatePaymentIntent
 } from "../../../../../../actions/sponsor-cart-actions";
 import { getMemberByExternalId } from "../../../../../../actions/member-actions";
-import { mapCartData } from "../helpers";
 import ClientForm from "./client-form";
 
 const PaymentView = ({
@@ -55,35 +50,16 @@ const PaymentView = ({
     }
   }, [cart]);
 
-  if (!currentSummit || !sponsor?.company || !cart) return null;
+  if (
+    !currentSummit ||
+    !sponsor?.company ||
+    !paymentProfile ||
+    !paymentIntent ||
+    !cart
+  )
+    return null;
 
   const redirectUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/cart`;
-
-  const cartData = mapCartData(cart, true);
-
-  const cartColumns = [
-    {
-      columnKey: "code",
-      header: T.translate("edit_sponsor.cart_tab.payment_view.code")
-    },
-    {
-      columnKey: "name",
-      header: T.translate("edit_sponsor.cart_tab.payment_view.contents")
-    },
-    { columnKey: "item_name", header: "" },
-    {
-      columnKey: "addon_name",
-      header: T.translate("edit_sponsor.cart_tab.payment_view.addon")
-    },
-    {
-      columnKey: "discount",
-      header: T.translate("edit_sponsor.cart_tab.payment_view.discount")
-    },
-    {
-      columnKey: "amount",
-      header: T.translate("edit_sponsor.cart_tab.payment_view.amount")
-    }
-  ];
 
   const handlePaymentSuccess = () =>
     confirmPayment().then(() => {
@@ -96,20 +72,19 @@ const PaymentView = ({
 
   return (
     <>
-      <MuiTable data={cartData} columns={cartColumns}>
-        {cart?.notes?.map((note) => (
-          <MuiNotesRow
-            key={`note-${note.id}`}
-            note={note.content}
-            colCount={cartColumns.length}
-          />
-        ))}
-        <MuiTotalRow
-          columns={cartColumns}
-          total={cart?.total}
-          targetCol="amount"
-        />
-      </MuiTable>
+      <Box sx={{ width: "100%" }}>
+        <Card sx={{ borderRadius: "10px", height: "100%" }} variant="outlined">
+          <CardContent>
+            <SponsorOrderGrid
+              lines={cart.forms || []}
+              notes={cart?.notes || []}
+              fees={cart?.fees || []}
+              total={cart?.total}
+              withDescription
+            />
+          </CardContent>
+        </Card>
+      </Box>
 
       <Box
         sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 3, pb: 6 }}
@@ -127,7 +102,7 @@ const PaymentView = ({
             sx={{ borderRadius: "10px", flex: 1, maxHeight: 170 }}
             variant="outlined"
           >
-            <MuiOrderSummary
+            <OrderSummary
               amount={paymentIntent?.total_amount}
               dueDate={paymentIntent?.due_date}
               toName={client?.full_name}

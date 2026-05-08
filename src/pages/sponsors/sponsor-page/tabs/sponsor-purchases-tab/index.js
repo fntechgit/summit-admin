@@ -25,6 +25,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import MuiTable from "openstack-uicore-foundation/lib/components/mui/table";
 import SearchInput from "openstack-uicore-foundation/lib/components/mui/search-input";
+import history from "../../../../../history";
 import {
   approveSponsorPurchase,
   getSponsorPurchases,
@@ -76,7 +77,7 @@ const SponsorPurchasesTab = ({
   };
 
   const handleDetails = (item) => {
-    console.log("DETAILS : ", item);
+    history.push(`purchases/${item.id}`);
   };
 
   const handleMenu = (item) => {

@@ -34,6 +34,11 @@ const theme = createTheme({
       fontSize: "12px",
       fontWeight: 400
     },
+    subtitle2: ({ theme }) => ({
+      fontSize: "14px",
+      fontWeight: 500,
+      color: theme.palette.text.primary
+    }),
     h4: {
       fontSize: "34px",
       fontWeight: 500,
@@ -70,12 +75,24 @@ const theme = createTheme({
     },
     MuiButton: {
       styleOverrides: {
-        root: {
-          fontSize: "14px",
+        root: ({ ownerState }) => ({
           fontWeight: 500,
-          lineHeight: "20px",
-          padding: "10px 20px"
-        }
+          ...(ownerState.size === "small" && {
+            fontSize: "13px",
+            lineHeight: "18px",
+            padding: "9px 16px"
+          }),
+          ...(ownerState.size === "medium" && {
+            fontSize: "14px",
+            lineHeight: "20px",
+            padding: "10px 20px"
+          }),
+          ...(ownerState.size === "large" && {
+            fontSize: "16px",
+            lineHeight: "22px",
+            padding: "12px 24px"
+          })
+        })
       }
     },
     MuiTab: {

@@ -36,6 +36,7 @@ import {
   getSponsorCart,
   lockSponsorCartForm,
   payWithInvoice,
+  reopenCart,
   saveSponsorCartNote,
   unlockSponsorCartForm
 } from "../../../../../../actions/sponsor-cart-actions";
@@ -44,6 +45,7 @@ import {
   SPONSOR_CART_NOTE_TYPES,
   SPONSOR_CART_STATUS
 } from "../../../../../../utils/constants";
+import showConfirmDialog from "../../../../../../components/mui/showConfirmDialog";
 
 const CartView = ({
   cart,
@@ -56,10 +58,12 @@ const CartView = ({
   saveSponsorCartNote,
   deleteSponsorCartNote,
   checkoutCart,
+  reopenCart,
   payWithInvoice
 }) => {
   const cartIsPendingPayment =
     cart?.status === SPONSOR_CART_STATUS.PENDING_PAYMENT;
+  const cartIsCheckedOut = cart?.status === SPONSOR_CART_STATUS.CHECKED_OUT;
 
   useEffect(() => {
     getSponsorCart();
@@ -67,6 +71,20 @@ const CartView = ({
 
   const handleSearch = (searchTerm) => {
     getSponsorCart(searchTerm);
+  };
+
+  const handleReopenCart = async () => {
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_sponsor.cart_tab.reopen_warning"),
+      type: "warning",
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("edit_sponsor.cart_tab.reopen")
+    });
+
+    if (isConfirmed) {
+      reopenCart();
+    }
   };
 
   const handleDelete = (itemId) => {
@@ -180,12 +198,12 @@ const CartView = ({
           mb: 2
         }}
       >
-        <Grid2 size={2}>
+        <Grid2 size={4}>
           {cart && (
             <Box component="span">{cart?.forms.length} forms in Cart</Box>
           )}
         </Grid2>
-        <Grid2 size={2} offset={6}>
+        <Grid2 size={2} offset={4}>
           <SearchInput
             term={term}
             onSearch={handleSearch}
@@ -242,6 +260,16 @@ const CartView = ({
                 gap: "10px"
               }}
             >
+              {(cartIsPendingPayment || cartIsCheckedOut) && (
+                <Button
+                  onClick={handleReopenCart}
+                  variant="outlined"
+                  color="primary"
+                  style={{ minWidth: 250 }}
+                >
+                  {T.translate("general.cancel")}
+                </Button>
+              )}
               <Button
                 variant="contained"
                 color="primary"
@@ -306,5 +334,6 @@ export default connect(mapStateToProps, {
   saveSponsorCartNote,
   deleteSponsorCartNote,
   checkoutCart,
+  reopenCart,
   payWithInvoice
 })(CartView);

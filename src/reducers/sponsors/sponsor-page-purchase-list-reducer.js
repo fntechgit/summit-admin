@@ -15,22 +15,28 @@ import moment from "moment-timezone";
 import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
-  REQUEST_SPONSOR_PURCHASES,
+  CLEAR_SPONSOR_ORDER,
+  RECEIVE_SPONSOR_ORDER,
   RECEIVE_SPONSOR_PURCHASES,
+  REQUEST_SPONSOR_PURCHASES,
+  SPONSOR_CLIENT_ADDRESS_UPDATED,
+  SPONSOR_CLIENT_UPDATED,
   SPONSOR_PURCHASE_STATUS_UPDATED
 } from "../../actions/sponsor-purchases-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
+import { normalizeOrder } from "../../pages/sponsors/sponsor-page/utils";
 
 const DEFAULT_STATE = {
   purchases: [],
-  order: "order",
-  orderDir: 1,
+  order: "created",
+  orderDir: -1,
   currentPage: 1,
   lastPage: 1,
   perPage: 10,
   totalCount: 0,
-  term: ""
+  term: "",
+  currentOrder: null
 };
 
 const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
@@ -64,8 +70,8 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
       const purchases = payload.response.data.map((a) => ({
         ...a,
         order: a.order_number,
-        amount: `$${amountFromCents(a.raw_amount - a.discount_amount)}`,
-        purchased: moment(a.created * MILLISECONDS_TO_SECONDS).format(
+        amount: `$${amountFromCents(a.net_amount)}`,
+        purchased: moment(a.purchased_date * MILLISECONDS_TO_SECONDS).format(
           "YYYY/MM/DD HH:mm a"
         )
       }));
@@ -86,6 +92,23 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
       });
 
       return { ...state, purchases };
+    }
+    case RECEIVE_SPONSOR_ORDER: {
+      const data = payload.response;
+      const currentOrder = normalizeOrder(data);
+
+      return { ...state, currentOrder };
+    }
+    case CLEAR_SPONSOR_ORDER: {
+      return { ...state, currentOrder: null };
+    }
+    case SPONSOR_CLIENT_UPDATED: {
+      const client = payload.response;
+      return { ...state, currentOrder: { ...state.currentOrder, client } };
+    }
+    case SPONSOR_CLIENT_ADDRESS_UPDATED: {
+      const address = payload.response;
+      return { ...state, currentOrder: { ...state.currentOrder, address } };
     }
     default:
       return state;

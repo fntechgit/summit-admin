@@ -54,6 +54,7 @@
     "save": "Save",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    "undo": "Undo",
     "return": "Return",
     "ingest": "Ingest",
     "save_and_publish": "Save & Publish",
@@ -101,6 +102,7 @@
     "number": "Must be a number.",
     "non_negative": "Must be a non-negative number.",
     "integer": "Must be a integer",
+    "positive": "Must be a positive number.",
     "one_option_required": "Must have one option",
     "two_decimals": "Max 2 decimal places",
     "email": "Wrong email format.",
@@ -2551,6 +2553,8 @@
       "add_form_to_cart": "Add Form to Cart",
       "add_selected_form": "Add selected form",
       "select_addon": "Select Add-on...",
+      "reopen_warning": "Are you sure you want to reopen the cart?",
+      "reopen": "Reopen Cart",
       "edit_form": {
         "code": "Code",
         "description": "Description",
@@ -2604,7 +2608,25 @@
       "amount": "Amount",
       "details": "Details",
       "purchases": "purchases",
-      "status_updated": "Status updated successfully."
+      "status_updated": "Status updated successfully.",
+      "order_details": {
+        "order": "Order",
+        "purchase_date": "Purchase Date",
+        "purchased_by": "Purchased by",
+        "show": "Show",
+        "sponsor": "Sponsor",
+        "tier": "Tier",
+        "payment_type": "Payment Type",
+        "payment_status": "Payment Status",
+        "payment_date": "Payment Date",
+        "general_info": "General Info",
+        "payment_info": "Payment Info",
+        "issue_refund": "Issue a Refund",
+        "info_note": "Active order items can be canceled. Canceled items show an undo action to restore them. Refund and payment rows are display-only.",
+        "address_updated": "Address updated successfully",
+        "client_updated": "Client info updated successfully",
+        "order_refunded": "Refund issued successfully."
+      }
     },
     "mu_tab": {
       "alert_info": "Here you can see the status of this Sponsor's Media Uploads. If an additional file upload is required, it must be requested from the specific page where it is needed.",
@@ -4134,5 +4156,30 @@
     "resync_helper": "Use the sync icon to re-sync individual room folders to Dropbox.",
     "resync_tooltip": "Re-sync Dropbox folder",
     "resync_dispatched": "Room re-sync task has been dispatched."
+  },
+  "refund_form": {
+    "reason": "Reason for Refund",
+    "amount": "Amount",
+    "queue_refund": "Queue refund",
+    "info": "If the original payment was made via Stripe, the refund will be automatically queued and processed."
+  },
+  "client_card": {
+    "title": "Client & Address Details",
+    "client": "Client",
+    "address": "Address",
+    "edit_client": "Edit Client",
+    "edit_address": "Edit Address",
+    "company_name": "Company Name",
+    "contact_name": "Contact Name",
+    "contact_email": "Contact Email",
+    "contact_phone": "Contact Phone",
+    "line1": "Address Line 1",
+    "line2": "Address Line 2",
+    "postal_code": "Postal Code",
+    "city": "City",
+    "state": "State",
+    "country": "Country",
+    "save": "Save",
+    "cancel": "Cancel"
   }
 }
