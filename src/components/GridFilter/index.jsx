@@ -13,51 +13,96 @@
 
 import React, { useState } from "react";
 import T from "i18n-react/dist/i18n-react";
-import { Button, Dialog, DialogActions, DialogContent, Divider, IconButton, Typography } from "@mui/material";
+import { Button, Box, Dialog, DialogActions, DialogContent, Divider, IconButton, Typography } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ToggleButtons from "./components/ToggleButtons";
-import Box from "@mui/material/Box";
 import Filter from "./components/Filter";
 
-// sample settings
+
+// sample props
 /*
-settings = {
-  criteria: {
-    options: [
-      { value: "name", label: "Name" },
-      { value: "email", label: "Email" },
-    ],
-    placeholder: "Select a criteria",
-  },
-  operator: {
-    options: [
-      { value: "eq", label: "Equals" },
-      { value: "ne", label: "Not Equals" },
-      { value: "gt", label: "Greater Than" },
-      { value: "lt", label: "Less Than" },
-    ],
-    placeholder: "Select an operator",
-  },
-  value: {
-    type: "ValueInput", // class name of the component to render the value
-    props: {
-      type: "text", // props to pass to the component
+criterias =  [
+    {
+      key: "tracks",
+      label: "Tracks",
+      operators: [
+        {value: "==", label: "is"},
+        {value: "=@", label: "like"},
+      ],
+      values: {
+        type: "select",
+        props: {
+          options: [
+            {value: 1, label: "OpenStack"},
+            {value: 2, label: "FnTech"}
+          ],
+          multi: true,
+          placeholder: "Select Tracks"
+        },
+      },
     },
+    {
+      key: "sponsor",
+      label: "Sponsor",
+      operators: [
+        {value: "==", label: "is"},
+        {value: "=@", label: "like"},
+      ],
+      values: {
+        type: "text",
+        props: {
+          placeholder: "Type Sponsor Name"
+        },
+      },
+    }
+  ]
+
+
+value = [
+  {
+    criteria: "tracks",
+    operator: "==",
+    value: [1, 2]
+  },
+  {
+    criteria: "sponsor",
+    operator: "=@",
+    value: "openstack"
   }
-}
+]
 
 
  */
 
-const GridFilter = ({values, settings}) => {
+const GridFilter = ({values, criterias}) => {
   const [openModal, setOpenModal] = useState(false);
+  const [filters, setFilters] = useState(values);
+  const criteriaOptions = criterias.map(c => ({label: c.label, value: c.key}))
 
 
-  const handleChange = (val) => {}
+  const handleChange = (filter) => {
+    setFilters(prevFilters => ({...prevFilters, filter}))
+    console.log("change filter", filter);
+  }
 
-  const handleClear = () => {}
+  const handleAdd = () => {
+    const emptyFilter = {};
+    setFilters(prevFilters => ({...prevFilters, emptyFilter}))
+    console.log("add filter");
+  }
 
-  const handleSubmit = () => {}
+  const handleRemove = (filter) => {
+    setFilters(prevFilters => prevFilters.filter(f => f !== filter.criteria))
+    console.log("remove filter", filter);
+  }
+
+  const handleClear = () => {
+    console.log("clear filters");
+  }
+
+  const handleSubmit = () => {
+    console.log("save filters", filters);
+  }
 
   return (
     <>
@@ -80,18 +125,20 @@ const GridFilter = ({values, settings}) => {
           <Typography variant="body2">{T.translate("grid_filter.following")}</Typography>
           <Divider />
           <Box>
-            {values.map(({criteria, value}, index) => (
+            {values.map((value, index) => {
+              const criteria = criterias.find(c => c.key === value.criteria);
+
+              return (
               <Filter
                 id={`grid-filter-${index}`}
+                criteria={criteria}
+                criteriaOptions={criteriaOptions}
                 value={value}
-                criteriaSettings={settings.criteria}
-                operatorSettings={settings[criteria].operator}
-                valueSettings={settings[criteria].value}
-                onChange={() => {}}
-                onAdd={() => {}}
-                onDelete={() => {}}
+                onChange={handleChange}
+                onAdd={handleAdd}
+                onDelete={handleRemove}
               />
-            ))}
+            )})}
           </Box>
         </DialogContent>
         <Divider />
