@@ -84,6 +84,10 @@ const SummitDirectoryPage = ({
       loadSummits(page, perPage, searchTerm, hidePastEvents);
     };
 
+    const handlePerPageChange = (newPerPage) => {
+      loadSummits(DEFAULT_CURRENT_PAGE, newPerPage, searchTerm, hidePastEvents);
+    };
+
     const handleSearch = (value) => {
       setSearchTerm(value);
       loadSummits(DEFAULT_CURRENT_PAGE, perPage, value, hidePastEvents);
@@ -217,6 +221,7 @@ const SummitDirectoryPage = ({
           perPage={perPage}
           currentPage={currentPage}
           onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
           onEdit={canEditSummit ? handleEditSummit : undefined}
           onDelete={canDeleteSummits ? (id) => deleteSummit(id) : undefined}
           onSelect={handleSelectSummit}
