@@ -105,6 +105,23 @@ const getYupValidation = (field) => {
       }
       break;
     }
+    case "RadioButtonList":
+    case "ComboBox": {
+      schema = yup.string(T.translate("validation.string"));
+
+      if (field.is_required) {
+        schema = schema.required(T.translate("validation.required"));
+      }
+      break;
+    }
+    case "CheckBox": {
+      schema = yup.boolean();
+
+      if (field.is_required) {
+        schema = schema.oneOf([true], T.translate("validation.required"));
+      }
+      break;
+    }
     case "CheckBoxList": {
       schema = yup
         .array()
@@ -112,7 +129,7 @@ const getYupValidation = (field) => {
         .typeError(T.translate("validation.wrong_format"));
 
       if (field.is_required) {
-        schema = schema.required(T.translate("validation.required"));
+        schema = schema.min(1, T.translate("validation.required"));
       }
       break;
     }
