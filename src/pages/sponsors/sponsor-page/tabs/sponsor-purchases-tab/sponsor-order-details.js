@@ -17,6 +17,7 @@ import T from "i18n-react/dist/i18n-react";
 import { Box, Card, CardContent, Grid2, Typography } from "@mui/material";
 import { ListCard } from "openstack-uicore-foundation/lib/components/mui/cards";
 import SponsorOrderGrid from "openstack-uicore-foundation/lib/components/mui/sponsor-order-grid";
+import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";
 import {
   cancelSponsorForm,
   getSponsorOrder,
@@ -31,7 +32,6 @@ import Restrict from "../../../../../routes/restrict";
 import { formatDate } from "../../../../../utils/methods";
 import RefundForm from "../../../../../components/mui/RefundForm";
 import ClientCard from "../../../../../components/mui/ClientCard";
-import InfoNote from "../../../../../components/mui/InfoNote";
 
 const SponsorOrderDetails = ({
   match,

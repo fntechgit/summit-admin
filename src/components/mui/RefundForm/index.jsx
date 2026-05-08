@@ -18,7 +18,7 @@ import * as yup from "yup";
 import { Box, Button, Grid2 } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
 import MuiFormikPriceField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/price-field";
-import InfoNote from "../InfoNote";
+import InfoNote from "openstack-uicore-foundation/lib/components/mui/info-note";
 
 const RefundForm = ({ onSubmit }) => {
   const formik = useFormik({
