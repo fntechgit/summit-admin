@@ -16,7 +16,7 @@ import { connect } from "react-redux";
 import T from "i18n-react/dist/i18n-react";
 import { Box, Card, CardContent, Grid2, Typography } from "@mui/material";
 import { ListCard } from "openstack-uicore-foundation/lib/components/mui/cards";
-import OrderDetailsGrid from "../../../../../components/mui/OrderDetailsGrid";
+import SponsorOrderGrid from "openstack-uicore-foundation/lib/components/mui/sponsor-order-grid";
 import {
   cancelSponsorForm,
   getSponsorOrder,
@@ -172,7 +172,7 @@ const SponsorOrderDetails = ({
                 )}
                 sx={{ mt: 2, mb: 3 }}
               />
-              <OrderDetailsGrid
+              <SponsorOrderGrid
                 lines={currentOrder?.forms || []}
                 notes={currentOrder?.notes || []}
                 payments={currentOrder?.payments || []}

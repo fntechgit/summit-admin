@@ -18,6 +18,7 @@ import { Box, Card, CardContent, Typography } from "@mui/material";
 import OrderSummary from "openstack-uicore-foundation/lib/components/mui/order-summary";
 import StripePayment from "openstack-uicore-foundation/lib/components/mui/stripe-payment";
 import { useSnackbarMessage } from "openstack-uicore-foundation/lib/components/mui/snackbar-notification";
+import SponsorOrderGrid from "openstack-uicore-foundation/lib/components/mui/sponsor-order-grid";
 import history from "../../../../../../history";
 import {
   confirmPayment,
@@ -26,7 +27,6 @@ import {
 } from "../../../../../../actions/sponsor-cart-actions";
 import { getMemberByExternalId } from "../../../../../../actions/member-actions";
 import ClientForm from "./client-form";
-import OrderDetailsGrid from "../../../../../../components/mui/OrderDetailsGrid";
 
 const PaymentView = ({
   cart,
@@ -50,7 +50,14 @@ const PaymentView = ({
     }
   }, [cart]);
 
-  if (!currentSummit || !sponsor?.company || !paymentProfile || !paymentIntent || !cart) return null;
+  if (
+    !currentSummit ||
+    !sponsor?.company ||
+    !paymentProfile ||
+    !paymentIntent ||
+    !cart
+  )
+    return null;
 
   const redirectUrl = `/app/summits/${currentSummit.id}/sponsors/${sponsor.id}/cart`;
 
@@ -66,12 +73,9 @@ const PaymentView = ({
   return (
     <>
       <Box sx={{ width: "100%" }}>
-        <Card
-          sx={{ borderRadius: "10px", height: "100%" }}
-          variant="outlined"
-        >
+        <Card sx={{ borderRadius: "10px", height: "100%" }} variant="outlined">
           <CardContent>
-            <OrderDetailsGrid
+            <SponsorOrderGrid
               lines={cart.forms || []}
               notes={cart?.notes || []}
               fees={cart?.fees || []}

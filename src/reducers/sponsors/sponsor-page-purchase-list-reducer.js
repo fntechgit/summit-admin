@@ -25,7 +25,7 @@ import {
 } from "../../actions/sponsor-purchases-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { MILLISECONDS_TO_SECONDS } from "../../utils/constants";
-import { normalizeOrder } from "../../components/mui/OrderDetailsGrid/helpers";
+import { normalizeOrder } from "../../pages/sponsors/sponsor-page/utils";
 
 const DEFAULT_STATE = {
   purchases: [],

@@ -12,10 +12,6 @@
  * */
 
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
-import {
-  amountFromCents,
-  currencyAmountFromCents
-} from "openstack-uicore-foundation/lib/utils/money";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import {
   RECEIVE_CART_AVAILABLE_FORMS,
@@ -41,7 +37,7 @@ import {
 } from "../../actions/sponsor-cart-actions";
 import { SPONSOR_CART_STATUS } from "../../utils/constants";
 import { RECEIVE_MEMBER } from "../../actions/member-actions";
-import { normalizeOrder } from "../../components/mui/OrderDetailsGrid/helpers";
+import { normalizeOrder } from "../../pages/sponsors/sponsor-page/utils";
 
 const DEFAULT_STATE = {
   cart: null,
@@ -101,9 +97,9 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
         ...state,
         cart: {
           ...state.cart,
-          status: SPONSOR_CART_STATUS.OPEN,
+          status: SPONSOR_CART_STATUS.OPEN
         }
-      }
+      };
     }
     case SPONSOR_CART_FORM_DELETED: {
       const { formId } = payload;
