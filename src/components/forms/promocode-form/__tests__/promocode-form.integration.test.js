@@ -600,3 +600,37 @@ describe("regression — non-DomainAuthorized classes are unaffected by the layo
     }
   );
 });
+
+describe("regression — handleSubmit must not dehydrate allowed_ticket_types", () => {
+  // Reproduces the "Ticket Types reverts to undefined" bug (Jam
+  // b1566c62-c802-4f43-b093-9c5c2f5a5fde, ClickUp 86b9v01bt). Pre-fix,
+  // handleSubmit mutated state.entity.allowed_ticket_types from [{id, name}]
+  // to [id]; on a 412, the form re-rendered with raw IDs, and the
+  // openstack-uicore TicketTypesInput's getOptionLabel = `${e.name}` produced
+  // the literal string "undefined" for each chip. The action layer
+  // (normalizeEntity in promocode-actions.js) is responsible for the
+  // hydrated → API-shape conversion; the form must hand off untouched
+  // option objects.
+  it("passes onSubmit an entity whose allowed_ticket_types retain {id,name} objects", () => {
+    const onSubmit = jest.fn();
+    const ticketType = { id: 197, name: "Early Access Members" };
+    renderForm(
+      baseEntity({
+        class_name: "DOMAIN_AUTHORIZED_PROMO_CODE",
+        allowed_email_domains: ["@valid.com"],
+        allowed_ticket_types: [ticketType]
+      }),
+      { onSubmit }
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    const submittedEntity = onSubmit.mock.calls[0][0];
+    expect(submittedEntity.allowed_ticket_types).toEqual([ticketType]);
+    expect(submittedEntity.allowed_ticket_types[0]).toMatchObject({
+      id: 197,
+      name: "Early Access Members"
+    });
+  });
+});

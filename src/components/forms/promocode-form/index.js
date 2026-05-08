@@ -141,12 +141,6 @@ class PromocodeForm extends React.Component {
     const { entity } = this.state;
     const typeScope = this.fragmentParser.getParam("type");
 
-    if (entity.allowed_ticket_types.length > 0) {
-      entity.allowed_ticket_types = entity.allowed_ticket_types.map(
-        (tt) => tt.id
-      );
-    }
-
     if (this.validate()) {
       onSubmit(entity, typeScope === "sponsor");
     }

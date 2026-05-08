@@ -147,6 +147,12 @@ const normalizeEntity = (entity) => {
     normalizedEntity.tags = entity.tags.map((e) => e.tag);
   }
 
+  if (Array.isArray(entity.allowed_ticket_types)) {
+    normalizedEntity.allowed_ticket_types = entity.allowed_ticket_types.map(
+      (tt) => (typeof tt === "object" && tt !== null ? tt.id : tt)
+    );
+  }
+
   delete normalizedEntity.owner;
   delete normalizedEntity.owner_id;
   delete normalizedEntity.speaker;
