@@ -14,7 +14,7 @@ export const normalizeOrder = (data) => {
     amount_due: data.amount_due === 0 ? "$0.00" : amountDue,
     forms: data.forms.map((form) => ({
       ...form,
-      add_on_name: form.add_on?.name || "",
+      addon_name: form.add_on?.name || "",
       discount: formatDiscount(form.discount_amount, form.discount_type),
       discount_total: form.discount_in_cents || 0,
       amount: currencyAmountFromCents(form.net_amount || 0)

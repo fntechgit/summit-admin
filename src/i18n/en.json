@@ -4157,18 +4157,6 @@
     "resync_tooltip": "Re-sync Dropbox folder",
     "resync_dispatched": "Room re-sync task has been dispatched."
   },
-  "order_details_grid": {
-    "code": "Code",
-    "contents": "Contents",
-    "addon": "Add-on",
-    "details": "Details",
-    "discount": "Discount",
-    "amount": "Amount",
-    "amount_due": "AMOUNT DUE",
-    "total": "Total",
-    "rate": "Rate",
-    "action": "Action"
-  },
   "refund_form": {
     "reason": "Reason for Refund",
     "amount": "Amount",
