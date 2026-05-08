@@ -18,12 +18,13 @@ import { Box, Card, CardContent, Grid2, Typography } from "@mui/material";
 import { ListCard } from "openstack-uicore-foundation/lib/components/mui/cards";
 import OrderDetailsGrid from "../../../../../components/mui/OrderDetailsGrid";
 import {
+  cancelSponsorForm,
   getSponsorOrder,
+  clearSponsorOrder,
+  refundSponsorOrder,
   undoCancelSponsorForm,
   updateClientAddress,
-  updateClientInfo,
-  cancelSponsorForm,
-  refundSponsorOrder
+  updateClientInfo
 } from "../../../../../actions/sponsor-purchases-actions";
 import { ACCESS_ROUTES, DATE_FORMAT } from "../../../../../utils/constants";
 import Restrict from "../../../../../routes/restrict";
@@ -38,6 +39,7 @@ const SponsorOrderDetails = ({
   currentSummit,
   currentSponsor,
   getSponsorOrder,
+  clearSponsorOrder,
   updateClientInfo,
   updateClientAddress,
   cancelSponsorForm,
@@ -48,7 +50,8 @@ const SponsorOrderDetails = ({
 
   useEffect(() => {
     getSponsorOrder(orderId);
-  }, []);
+    return () => clearSponsorOrder();
+  }, [orderId]);
 
   if (!currentOrder) return null;
 
@@ -216,6 +219,7 @@ const mapStateToProps = ({
 export default Restrict(
   connect(mapStateToProps, {
     getSponsorOrder,
+    clearSponsorOrder,
     updateClientInfo,
     updateClientAddress,
     cancelSponsorForm,

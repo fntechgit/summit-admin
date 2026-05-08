@@ -15,6 +15,7 @@ import moment from "moment-timezone";
 import { amountFromCents } from "openstack-uicore-foundation/lib/utils/money";
 import { LOGOUT_USER } from "openstack-uicore-foundation/lib/security/actions";
 import {
+  CLEAR_SPONSOR_ORDER,
   RECEIVE_SPONSOR_ORDER,
   RECEIVE_SPONSOR_PURCHASES,
   REQUEST_SPONSOR_PURCHASES,
@@ -97,6 +98,9 @@ const sponsorPagePurchaseListReducer = (state = DEFAULT_STATE, action) => {
       const currentOrder = normalizeOrder(data);
 
       return { ...state, currentOrder };
+    }
+    case CLEAR_SPONSOR_ORDER: {
+      return { ...state, currentOrder: null };
     }
     case SPONSOR_CLIENT_UPDATED: {
       const client = payload.response;

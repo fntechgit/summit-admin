@@ -36,6 +36,7 @@ export const RECEIVE_SPONSOR_PURCHASES = "RECEIVE_SPONSOR_PURCHASES";
 export const SPONSOR_PURCHASE_STATUS_UPDATED =
   "SPONSOR_PURCHASE_STATUS_UPDATED";
 export const RECEIVE_SPONSOR_ORDER = "RECEIVE_SPONSOR_ORDER";
+export const CLEAR_SPONSOR_ORDER = "CLEAR_SPONSOR_ORDER";
 export const SPONSOR_CLIENT_ADDRESS_UPDATED = "SPONSOR_CLIENT_ADDRESS_UPDATED";
 export const SPONSOR_CLIENT_UPDATED = "SPONSOR_CLIENT_UPDATED";
 
@@ -195,6 +196,10 @@ export const getSponsorOrder = (orderId) => async (dispatch, getState) => {
   )(params)(dispatch).finally(() => {
     dispatch(stopLoading());
   });
+};
+
+export const clearSponsorOrder = () => async (dispatch) => {
+  dispatch(createAction(CLEAR_SPONSOR_ORDER)({}));
 };
 
 export const updateClientAddress =

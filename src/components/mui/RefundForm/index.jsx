@@ -13,7 +13,7 @@
 
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
-import { useFormik, FormikProvider } from "formik";
+import { FormikProvider, useFormik } from "formik";
 import * as yup from "yup";
 import { Box, Button, Grid2 } from "@mui/material";
 import MuiFormikTextField from "openstack-uicore-foundation/lib/components/mui/formik-inputs/textfield";
@@ -31,7 +31,9 @@ const RefundForm = ({ onSubmit }) => {
         .string(T.translate("validation.string"))
         .required(T.translate("validation.required")),
       amount: yup
-        .number(T.translate("validation.number"))
+        .number()
+        .typeError(T.translate("validation.number"))
+        .positive(T.translate("validation.positive"))
         .required(T.translate("validation.required"))
     }),
     onSubmit,

@@ -45,6 +45,7 @@ import {
   SPONSOR_CART_NOTE_TYPES,
   SPONSOR_CART_STATUS
 } from "../../../../../../utils/constants";
+import showConfirmDialog from "../../../../../../components/mui/showConfirmDialog";
 
 const CartView = ({
   cart,
@@ -72,8 +73,18 @@ const CartView = ({
     getSponsorCart(searchTerm);
   };
 
-  const handleReopenCart = () => {
-    reopenCart();
+  const handleReopenCart = async () => {
+    const isConfirmed = await showConfirmDialog({
+      title: T.translate("general.are_you_sure"),
+      text: T.translate("edit_sponsor.cart_tab.reopen_warning"),
+      type: "warning",
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: T.translate("edit_sponsor.cart_tab.reopen")
+    });
+
+    if (isConfirmed) {
+      reopenCart();
+    }
   };
 
   const handleDelete = (itemId) => {

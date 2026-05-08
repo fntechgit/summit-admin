@@ -102,6 +102,7 @@
     "number": "Must be a number.",
     "non_negative": "Must be a non-negative number.",
     "integer": "Must be a integer",
+    "positive": "Must be a positive number.",
     "one_option_required": "Must have one option",
     "two_decimals": "Max 2 decimal places",
     "email": "Wrong email format.",
@@ -2552,6 +2553,8 @@
       "add_form_to_cart": "Add Form to Cart",
       "add_selected_form": "Add selected form",
       "select_addon": "Select Add-on...",
+      "reopen_warning": "Are you sure you want to reopen the cart?",
+      "reopen": "Reopen Cart",
       "edit_form": {
         "code": "Code",
         "description": "Description",

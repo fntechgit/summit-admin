@@ -78,29 +78,27 @@ const OrderDetailsGrid = ({
   ];
 
   if (showActionCol) {
-    columns.push(
-      {
-        columnKey: "actions",
-        header: T.translate("order_details_grid.action"),
-        align: "center",
-        render: (row) => {
-          if (row.cancelled) {
-            return (
-              <IconButton size="large" onClick={() => onUndoCancelForm(row)}>
-                <ArrowBackIcon fontSize="large" sx={{ mr: 2 }} />{" "}
-                {T.translate("general.undo").toUpperCase()}
-              </IconButton>
-            );
-          }
-
+    columns.push({
+      columnKey: "actions",
+      header: T.translate("order_details_grid.action"),
+      align: "center",
+      render: (row) => {
+        if (row.cancelled) {
           return (
-            <IconButton size="large" onClick={() => onCancelForm(row)}>
-              <DeleteIcon fontSize="large" />
+            <IconButton size="large" onClick={() => onUndoCancelForm(row)}>
+              <ArrowBackIcon fontSize="large" sx={{ mr: 2 }} />{" "}
+              {T.translate("general.undo").toUpperCase()}
             </IconButton>
           );
         }
+
+        return (
+          <IconButton size="large" onClick={() => onCancelForm(row)}>
+            <DeleteIcon fontSize="large" />
+          </IconButton>
+        );
       }
-    )
+    });
   }
 
   return (
@@ -153,6 +151,7 @@ const OrderDetailsGrid = ({
 
                 rows.push(
                   <DiscountRow
+                    key={`discount-row-${form.id}`}
                     discount={form.discount}
                     discountTotal={form.discount_total}
                     trailing={trailingCols}
