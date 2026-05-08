@@ -31,6 +31,8 @@ import {
   getSponsorManagedPage,
   getSponsorCustomizedPages,
   saveSponsorManagedPage,
+  archiveManagedPage,
+  unarchiveManagedPage,
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
   deleteSponsorManagedPage,
@@ -59,6 +61,8 @@ const SponsorPagesTab = ({
   getSponsorManagedPages,
   getSponsorManagedPage,
   saveSponsorManagedPage,
+  archiveManagedPage,
+  unarchiveManagedPage,
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,
   getSponsorCustomizedPage,
@@ -195,7 +199,20 @@ const SponsorPagesTab = ({
     });
 
   const handleArchiveManagedPage = (item) =>
-    console.log("ARCHIVE MANAGED ", item);
+    (item.is_archived
+      ? unarchiveManagedPage(item.id)
+      : archiveManagedPage(item.id)
+    ).then(() => {
+      const { perPage, order, orderDir, currentPage } = managedPages;
+      return getSponsorManagedPages(
+        term,
+        currentPage,
+        perPage,
+        order,
+        orderDir,
+        showArchived
+      );
+    });
 
   const handleManagedEdit = (item) => {
     getSponsorManagedPage(item.id).then(() => setOpenPopup("managedPagePopup"));
@@ -552,6 +569,8 @@ export default connect(mapStateToProps, {
   getSponsorManagedPages,
   getSponsorManagedPage,
   saveSponsorManagedPage,
+  archiveManagedPage,
+  unarchiveManagedPage,
   getSponsorCustomizedPage,
   getSponsorCustomizedPages,
   saveSponsorCustomizedPage,

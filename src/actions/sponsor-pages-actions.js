@@ -44,6 +44,9 @@ export const RECEIVE_SPONSOR_MANAGED_PAGE = "RECEIVE_SPONSOR_MANAGED_PAGE";
 export const SPONSOR_MANAGED_PAGE_ADDED = "SPONSOR_MANAGED_PAGE_ADDED";
 export const SPONSOR_MANAGED_PAGE_DELETED = "SPONSOR_MANAGED_PAGE_DELETED";
 export const SPONSOR_MANAGED_PAGE_UPDATED = "SPONSOR_MANAGED_PAGE_UPDATED";
+export const SPONSOR_MANAGED_PAGE_ARCHIVED = "SPONSOR_MANAGED_PAGE_ARCHIVED";
+export const SPONSOR_MANAGED_PAGE_UNARCHIVED =
+  "SPONSOR_MANAGED_PAGE_UNARCHIVED";
 
 export const REQUEST_SPONSOR_CUSTOMIZED_PAGES =
   "REQUEST_SPONSOR_CUSTOMIZED_PAGES";
@@ -248,6 +251,68 @@ export const saveSponsorManagedPage =
         dispatch(stopLoading());
       });
   };
+
+export const archiveManagedPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: sponsorId }
+  } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return putRequest(
+    null,
+    createAction(SPONSOR_MANAGED_PAGE_ARCHIVED)({ pageId }),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages/${pageId}/archive`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsor.pages_tab.managed_page_archived")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
+
+export const unarchiveManagedPage = (pageId) => async (dispatch, getState) => {
+  const { currentSummitState, currentSponsorState } = getState();
+  const { currentSummit } = currentSummitState;
+  const {
+    entity: { id: sponsorId }
+  } = currentSponsorState;
+  const accessToken = await getAccessTokenSafely();
+  const params = { access_token: accessToken };
+
+  dispatch(startLoading());
+
+  return deleteRequest(
+    null,
+    createAction(SPONSOR_MANAGED_PAGE_UNARCHIVED)({ pageId }),
+    `${window.SPONSOR_PAGES_API_URL}/api/v1/summits/${currentSummit.id}/sponsors/${sponsorId}/managed-pages/${pageId}/archive`,
+    null,
+    snackbarErrorHandler
+  )(params)(dispatch)
+    .then(() => {
+      dispatch(
+        snackbarSuccessHandler({
+          title: T.translate("general.success"),
+          html: T.translate("edit_sponsor.pages_tab.managed_page_unarchived")
+        })
+      );
+    })
+    .finally(() => {
+      dispatch(stopLoading());
+    });
+};
 
 export const deleteSponsorManagedPage =
   (pageId) => async (dispatch, getState) => {

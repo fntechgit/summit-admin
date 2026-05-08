@@ -22,7 +22,9 @@ import {
   RESET_EDIT_PAGE,
   SPONSOR_CUSTOMIZED_PAGE_ARCHIVED,
   SPONSOR_CUSTOMIZED_PAGE_UNARCHIVED,
-  RECEIVE_SPONSOR_MANAGED_PAGE
+  RECEIVE_SPONSOR_MANAGED_PAGE,
+  SPONSOR_MANAGED_PAGE_ARCHIVED,
+  SPONSOR_MANAGED_PAGE_UNARCHIVED
 } from "../../actions/sponsor-pages-actions";
 import { SET_CURRENT_SUMMIT } from "../../actions/summit-actions";
 import { RECEIVE_GLOBAL_SPONSORSHIPS } from "../../actions/sponsor-forms-actions";
@@ -230,6 +232,32 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
       });
 
       return { ...state, currentEditPage: { ...customizedPage, modules } };
+    }
+    case SPONSOR_MANAGED_PAGE_ARCHIVED: {
+      const { pageId } = payload;
+      const pages = state.managedPages.pages.map((page) =>
+        page.id === pageId ? { ...page, is_archived: true } : page
+      );
+      return {
+        ...state,
+        managedPages: {
+          ...state.managedPages,
+          pages: [...pages]
+        }
+      };
+    }
+    case SPONSOR_MANAGED_PAGE_UNARCHIVED: {
+      const { pageId } = payload;
+      const pages = state.managedPages.pages.map((page) =>
+        page.id === pageId ? { ...page, is_archived: false } : page
+      );
+      return {
+        ...state,
+        managedPages: {
+          ...state.managedPages,
+          pages: [...pages]
+        }
+      };
     }
     case SPONSOR_CUSTOMIZED_PAGE_ARCHIVED: {
       const { pageId } = payload;
