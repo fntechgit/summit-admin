@@ -122,19 +122,19 @@ const mockForms = [
     id: 1,
     code: "FORM001",
     name: "Installation Form",
-    item_count: 5
+    items_count: 5
   },
   {
     id: 2,
     code: "FORM002",
     name: "Dismantle Form",
-    item_count: 3
+    items_count: 3
   },
   {
     id: 3,
     code: "FORM003",
     name: "Setup Form",
-    item_count: 8
+    items_count: 8
   }
 ];
 

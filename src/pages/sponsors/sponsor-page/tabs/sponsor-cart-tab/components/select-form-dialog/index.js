@@ -103,7 +103,7 @@ const SelectFormDialog = ({
       sortable: true
     },
     {
-      columnKey: "item_count",
+      columnKey: "items_count",
       header: T.translate("general.items"),
       sortable: false
     }

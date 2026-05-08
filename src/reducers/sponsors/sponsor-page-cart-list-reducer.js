@@ -60,11 +60,6 @@ const DEFAULT_STATE = {
   cartOwner: null
 };
 
-const mapForm = (formData) => ({
-  ...formData,
-  item_count: `${formData.items.length} items`
-});
-
 const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
   const { type, payload } = action;
 
@@ -148,9 +143,7 @@ const sponsorPageCartListReducer = (state = DEFAULT_STATE, action) => {
       } = payload.response;
 
       const forms =
-        currentPage === 1
-          ? data.map(mapForm)
-          : [...state.availableForms.forms, ...data.map(mapForm)];
+        currentPage === 1 ? data : [...state.availableForms.forms, ...data];
 
       const availableForms = {
         ...state.availableForms,
