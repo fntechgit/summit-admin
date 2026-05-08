@@ -140,7 +140,8 @@ export const getSponsorManagedPages =
 
     const params = {
       page,
-      fields: "id,code,name,kind,modules_count,allowed_add_ons,assigned_type",
+      fields:
+        "id,code,name,kind,modules_count,allowed_add_ons,assigned_type,is_archived",
       per_page: perPage,
       access_token: accessToken
     };

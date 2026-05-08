@@ -129,6 +129,7 @@ const sponsorPagePagesListReducer = (state = DEFAULT_STATE, action) => {
         code: a.code,
         name: a.name,
         allowed_add_ons: a.allowed_add_ons,
+        is_archived: a.is_archived,
         info_mod: a.modules_count.info_modules_count,
         upload_mod: a.modules_count.media_request_modules_count,
         download_mod: a.modules_count.document_download_modules_count,
