@@ -17,10 +17,8 @@ import T from "i18n-react/dist/i18n-react";
 import { Breadcrumb } from "react-breadcrumbs";
 import Restrict from "../routes/restrict";
 
-import PaymentProfileListPage from "../pages/tickets/payment-profile-list-page";
-import EditPaymentProfilePage from "../pages/tickets/edit-payment-profile-page";
+import PaymentProfileListPage from "../pages/tickets/payment-profile/payment-profile-list-page";
 import NoMatchPage from "../pages/no-match-page";
-import EditPaymentFeeTypePage from "../pages/tickets/edit-payment-fee-type-page";
 
 const PaymentProfileLayout = ({ match }) => (
   <div>
@@ -32,31 +30,6 @@ const PaymentProfileLayout = ({ match }) => (
     />
     <Switch>
       <Route strict exact path={match.url} component={PaymentProfileListPage} />
-      <Route
-        strict
-        exact
-        path={`${match.url}/new`}
-        component={EditPaymentProfilePage}
-      />
-      <Route
-        strict
-        exact
-        path={`${match.url}/:payment_profile_id(\\d+)`}
-        component={EditPaymentProfilePage}
-      />
-      <Route
-        strict
-        exact
-        path={`${match.url}/:payment_profile_id(\\d+)/payment-fee-type/new`}
-        component={EditPaymentFeeTypePage}
-      />
-      <Route
-        strict
-        exact
-        path={`${match.url}/:payment_profile_id(\\d+)/payment-fee-type/:payment_fee_type_id(\\d+)`}
-        component={EditPaymentFeeTypePage}
-      />
-
       <Route component={NoMatchPage} />
     </Switch>
   </div>
