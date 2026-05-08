@@ -20,7 +20,19 @@ import Box from "@mui/material/Box";
 import Dropdown from "./Dropdown";
 import ValueInput from "./ValueInput";
 
-const Filter = ({ id, value, criteriaSettings, operatorSettings, valueSettings, onChange, onAdd, onDelete }) => {
+const Filter = ({
+  id,
+  value,
+  criteria,
+  criteriaOptions,
+  onChange,
+  onAdd,
+  onDelete
+}) => {
+  const criteriaSettings = { options: criteriaOptions };
+  const operatorSettings = criteria.operators;
+  const valueSettings = criteria.values;
+
   const handleChange = (prop, val) => {
     onChange({ ...value, [prop]: val });
   };
@@ -32,6 +44,7 @@ const Filter = ({ id, value, criteriaSettings, operatorSettings, valueSettings, 
           <Dropdown
             id={`${id}-column`}
             value={value.criteria}
+            placeholder={T.translate("grid_filter.select_criteria")}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...criteriaSettings}
             onChange={(val) => handleChange("criteria", val)}
@@ -39,6 +52,7 @@ const Filter = ({ id, value, criteriaSettings, operatorSettings, valueSettings, 
           <Dropdown
             id={`${id}-operator`}
             value={value.operator}
+            placeholder={T.translate("grid_filter.select_operator")}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...operatorSettings}
             onChange={(val) => handleChange("operator", val)}
@@ -47,6 +61,7 @@ const Filter = ({ id, value, criteriaSettings, operatorSettings, valueSettings, 
             id={`${id}-value`}
             value={value.value}
             type={valueSettings.type}
+            placeholder={T.translate("grid_filter.select_values")}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...valueSettings.props}
             onChange={(val) => handleChange("value", val)}
@@ -74,25 +89,34 @@ Filter.propTypes = {
   value: PropTypes.shape({
     criteria: PropTypes.string,
     operator: PropTypes.string,
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool, PropTypes.array])
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+      PropTypes.bool,
+      PropTypes.array
+    ])
   }),
   criteriaSettings: PropTypes.shape({
-    options: PropTypes.arrayOf(PropTypes.shape({
-      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      label: PropTypes.string
-    })).isRequired,
+    options: PropTypes.arrayOf(
+      PropTypes.shape({
+        value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        label: PropTypes.string
+      })
+    ).isRequired,
     placeholder: PropTypes.string
   }).isRequired,
   operatorSettings: PropTypes.shape({
-    options: PropTypes.arrayOf(PropTypes.shape({
-      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      label: PropTypes.string
-    })).isRequired,
+    options: PropTypes.arrayOf(
+      PropTypes.shape({
+        value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        label: PropTypes.string
+      })
+    ).isRequired,
     placeholder: PropTypes.string
   }).isRequired,
   valueSettings: PropTypes.shape({
     type: PropTypes.string, // class name of the component to render the value
-    props: PropTypes.object, // props to pass to the component
+    props: PropTypes.object // props to pass to the component
   }).isRequired,
   onChange: PropTypes.func.isRequired,
   onAdd: PropTypes.func.isRequired,
