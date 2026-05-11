@@ -23,6 +23,7 @@ API counterpart SDS: `summit-api/doc/promo-code-apply-to-all-audience-restrictio
 
 - `src/i18n/en.json` — update `edit_promocode.apply_to_all_tix` copy; add `edit_promocode.apply_to_all_tix_helper` for the inline explainer.
 - `src/components/forms/promocode-form/forms/discount-base-pc-form.js` — render the helper text below the checkbox.
+- `src/components/forms/speakers-promo-code-spec-form.js` — same checkbox label is reused here under the `AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE` branch; render the same helper text so admins on the bulk-speaker-discount path get the same clarity.
 - Extend `src/components/forms/promocode-form/__tests__/promocode-form.integration.test.js` (existing — extended for this change) with assertions for the new label and helper text.
 
 ### Out of Scope
@@ -56,7 +57,7 @@ API counterpart SDS: `summit-api/doc/promo-code-apply-to-all-audience-restrictio
 ## Context for Implementer
 
 - **Entry point:** `src/components/forms/promocode-form/forms/discount-base-pc-form.js` is the only JSX file that changes. The checkbox sits at lines 19-30; the helper row goes immediately after the closing `</div>` of the `form-check` block (line 30) but still inside the `col-md-4` (line 15).
-- **i18n keys:** existing `edit_promocode.apply_to_all_tix` (line 1001) gets a copy update. New key `edit_promocode.apply_to_all_tix_helper` is added beside it.
+- **i18n keys:** existing `edit_promocode.apply_to_all_tix` (line 1003 in `en.json`) gets a copy update. New key `edit_promocode.apply_to_all_tix_helper` is added beside it. The same key is also rendered by `src/components/forms/speakers-promo-code-spec-form.js:227` under the `AUTO_GENERATED_SPEAKERS_DISCOUNT_CODE` branch — that form gets a matching helper-text row.
 - **Existing tests touched:** `src/components/forms/promocode-form/__tests__/promocode-form.integration.test.js` already asserts label rendering for the discount-code form; extend rather than duplicate.
 - **Style:** keep the helper-text styling consistent with surrounding form rows (bootstrap legacy classes — `form-text`, `text-muted`, or equivalent — no MUI). The skill file `skills/react-frontend.md` in the fn-skills vault calls out the legacy-Bootstrap convention for this area.
 
@@ -68,7 +69,7 @@ API counterpart SDS: `summit-api/doc/promo-code-apply-to-all-audience-restrictio
 
 **Changes:**
 
-- Update `edit_promocode.apply_to_all_tix` (line 1001) from `"Apply to all Ticket Types"` to `"Apply to all ticket types (Audience: All)"`.
+- Update `edit_promocode.apply_to_all_tix` (around line 1003 in `en.json`) from `"Apply to all Ticket Types"` to `"Apply to all ticket types (Audience: All)"`.
 - Add new key beneath it: `edit_promocode.apply_to_all_tix_helper` with value:
   `"Only ticket types with Audience = All are covered. WithInvitation, WithoutInvitation, and WithPromoCode ticket types must be added explicitly via the ticket-type picker after saving."`
 
