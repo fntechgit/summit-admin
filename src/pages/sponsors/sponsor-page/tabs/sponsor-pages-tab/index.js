@@ -194,9 +194,6 @@ const SponsorPagesTab = ({
       );
     });
 
-  const handleArchiveManagedPage = (item) =>
-    console.log("ARCHIVE MANAGED ", item);
-
   const handleManagedEdit = (item) => {
     getSponsorManagedPage(item.id).then(() => setOpenPopup("managedPagePopup"));
   };
@@ -500,7 +497,6 @@ const SponsorPagesTab = ({
           canDelete={(row) =>
             row.assigned_type === SPONSOR_MANAGED_PAGE_ASSIGNMENT.EXPLICIT
           }
-          onArchive={handleArchiveManagedPage}
         />
       </div>
 
