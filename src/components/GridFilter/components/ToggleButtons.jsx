@@ -15,9 +15,9 @@ import React from "react";
 import { ToggleButtonGroup, ToggleButton } from "react-bootstrap";
 import PropTypes from "prop-types";
 
-const ToggleButtons = ({ options, value, onChange }) => {
-  return (
+const ToggleButtons = ({ name, options, value, onChange }) => (
     <ToggleButtonGroup
+      name={name}
       color="primary"
       value={value}
       exclusive
@@ -31,9 +31,9 @@ const ToggleButtons = ({ options, value, onChange }) => {
       ))}
     </ToggleButtonGroup>
   );
-};
 
 ToggleButtons.propTypes = {
+  name: PropTypes.string.isRequired,
   options: PropTypes.arrayOf(PropTypes.string).isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func.isRequired,

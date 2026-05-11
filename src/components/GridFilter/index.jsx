@@ -12,12 +12,36 @@
  * */
 
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react/dist/i18n-react";
-import { Button, Box, Dialog, DialogActions, DialogContent, Divider, IconButton, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  Divider,
+  IconButton,
+  Typography
+} from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ToggleButtons from "./components/ToggleButtons";
 import Filter from "./components/Filter";
 
+const OPERATORS = [
+  { value: "==", label: "is" },
+  { value: "=@", label: "like" },
+  { value: "@@", label: "like start" },
+  { value: "<>", label: "is not" },
+  { value: ">>", label: "has" },
+  { value: "!>>", label: "has not" },
+  { value: "<", label: "less than" },
+  { value: "<=", label: "less than or equal to" },
+  { value: ">", label: "greater than" },
+  { value: ">=", label: "greater than or equal to" },
+  { value: "[]", label: "between" },
+  { value: "()", label: "between strict" }
+];
 
 // sample props
 /*
@@ -74,44 +98,47 @@ value = [
 
  */
 
-const GridFilter = ({values, criterias}) => {
+const GridFilter = ({ values, criterias, onApply }) => {
   const [openModal, setOpenModal] = useState(false);
   const [filters, setFilters] = useState(values);
-  const criteriaOptions = criterias.map(c => ({label: c.label, value: c.key}))
-
+  const criteriaOptions = criterias.map((c) => ({
+    label: c.label,
+    value: c.key
+  }));
 
   const handleChange = (filter) => {
-    setFilters(prevFilters => ({...prevFilters, filter}))
+    setFilters((prevFilters) => ({ ...prevFilters, filter }));
     console.log("change filter", filter);
-  }
+  };
 
   const handleAdd = () => {
-    const emptyFilter = {};
-    setFilters(prevFilters => ({...prevFilters, emptyFilter}))
     console.log("add filter");
-  }
+  };
 
   const handleRemove = (filter) => {
-    setFilters(prevFilters => prevFilters.filter(f => f !== filter.criteria))
+    setFilters((prevFilters) =>
+      prevFilters.filter((f) => f !== filter.criteria)
+    );
     console.log("remove filter", filter);
-  }
+  };
 
   const handleClear = () => {
     console.log("clear filters");
-  }
+  };
 
   const handleSubmit = () => {
     console.log("save filters", filters);
-  }
+    onApply(filters);
+  };
 
   return (
     <>
       <IconButton
-        size="small"
+        size="large"
         onClick={() => setOpenModal(true)}
-        sx={{ mr: 1 }}
+        sx={{ mr: 1, top: "-6px", position: "relative" }}
       >
-        <FilterListIcon fontSize="small" />
+        <FilterListIcon fontSize="large" />
       </IconButton>
       <Dialog
         open={openModal}
@@ -120,25 +147,43 @@ const GridFilter = ({values, criterias}) => {
         fullWidth
       >
         <DialogContent sx={{ p: 0 }}>
-          <Typography variant="body2">{T.translate("grid_filter.filter_by")}</Typography>
-          <ToggleButtons options={["All", "Any"]} onChange={(val) => handleChange(val)} />
-          <Typography variant="body2">{T.translate("grid_filter.following")}</Typography>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Typography variant="body2">
+              {T.translate("grid_filter.filter_by")}
+            </Typography>
+            <ToggleButtons
+              options={["All", "Any"]}
+              onChange={(val) => handleChange(val)}
+              name="and-or-any"
+            />
+            <Typography variant="body2">
+              {T.translate("grid_filter.following")}
+            </Typography>
+          </Box>
           <Divider />
           <Box>
             {values.map((value, index) => {
-              const criteria = criterias.find(c => c.key === value.criteria);
+              const criteria = criterias.find((c) => c.key === value.criteria);
 
               return (
-              <Filter
-                id={`grid-filter-${index}`}
-                criteria={criteria}
-                criteriaOptions={criteriaOptions}
-                value={value}
-                onChange={handleChange}
-                onAdd={handleAdd}
-                onDelete={handleRemove}
-              />
-            )})}
+                <Filter
+                  id={`grid-filter-${index}`}
+                  key={`grid-filter-${index}`}
+                  criterias={criterias}
+                  value={value}
+                  onChange={handleChange}
+                  onAdd={handleAdd}
+                  onDelete={handleRemove}
+                />
+              );
+            })}
+            <Filter
+              id="grid-filter-new"
+              criterias={criterias}
+              onChange={handleChange}
+              onAdd={handleAdd}
+              onDelete={handleRemove}
+            />
           </Box>
         </DialogContent>
         <Divider />
@@ -157,3 +202,41 @@ const GridFilter = ({values, criterias}) => {
     </>
   );
 };
+
+GridFilter.propTypes = {
+  values: PropTypes.arrayOf(
+    PropTypes.shape({
+      criteria: PropTypes.string.isRequired,
+      operator: PropTypes.string.isRequired,
+      value: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+        PropTypes.arrayOf(
+          PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+        )
+      ]).isRequired
+    })
+  ),
+  criterias: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      operators: PropTypes.arrayOf(
+        PropTypes.shape({
+          value: PropTypes.string.isRequired,
+          label: PropTypes.string.isRequired
+        })
+      ),
+      values: PropTypes.shape({
+        type: PropTypes.string.isRequired,
+        props: PropTypes.object.isRequired
+      })
+    })
+  ).isRequired
+};
+
+GridFilter.defaultProps = {
+  values: []
+};
+
+export default GridFilter;

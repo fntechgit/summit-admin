@@ -20,6 +20,7 @@ const INPUT_TYPE_MAP = { text: TextField, select: Dropdown };
 
 const ValueInput = ({type, ...rest}) => {
   const Component = INPUT_TYPE_MAP[type];
+  console.log(type, typeof Component);
   // eslint-disable-next-line react/jsx-props-no-spreading
   return Component ? <Component {...rest} /> : null;
 }
