@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 OpenStack Foundation
+ * Copyright 2026 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,26 @@
 import React from "react";
 import T from "i18n-react/dist/i18n-react";
 import Exclusive from "openstack-uicore-foundation/lib/components/exclusive-wrapper";
-import styles from "./menu.module.less";
+import ListItemButton from "@mui/material/ListItemButton";
+import Typography from "@mui/material/Typography";
 
-const MenuItem = ({ name, iconClass, onClick, exclusive }) => {
-  const itemHtml = [
-    <a
+const MenuItem = ({ name, onClick, exclusive, nested, selected }) => {
+  const itemHtml = (
+    <ListItemButton
       id={`${name}-menu`}
-      key={`${name}-menu`}
-      className={styles.menuItem}
       onClick={onClick}
+      selected={selected}
+      // eslint-disable-next-line no-magic-numbers
+      sx={{ pl: nested ? 4 : 2, py: 1 }}
     >
-      <i className={`${iconClass} fa`} />
-      <span>{T.translate(`menu.${name}`)}</span>
-    </a>
-  ];
+      <Typography
+        variant="body1"
+        sx={{ ...(selected && { color: "primary.main", fontWeight: 700 }) }}
+      >
+        {T.translate(`menu.${name}`)}
+      </Typography>
+    </ListItemButton>
+  );
 
   if (exclusive) {
     return <Exclusive name={exclusive}>{itemHtml}</Exclusive>;
