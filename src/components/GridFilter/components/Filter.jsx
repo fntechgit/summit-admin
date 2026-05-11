@@ -11,31 +11,63 @@
  * limitations under the License.
  * */
 
-import React from "react";
-import { Button, Grid2 } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import T from "i18n-react/dist/i18n-react";
+import { Grid2, Button, Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
 import Dropdown from "./Dropdown";
 import ValueInput from "./ValueInput";
 
 const Filter = ({
   id,
   value,
-  criteria,
-  criteriaOptions,
+  criterias,
   onChange,
   onAdd,
   onDelete
 }) => {
-  const criteriaSettings = { options: criteriaOptions };
-  const operatorSettings = criteria.operators;
-  const valueSettings = criteria.values;
+  const [selectedCriteria, setSelectedCriteria] = useState(null);
+  const [selectedOperator, setSelectedOperator] = useState(null);
+  const [selectedValue, setSelectedValue] = useState(null);
+  const criteriaOptions = criterias.map(({ key, label }) => ({ value: key, label }));
+  const criteriaObj = criterias.find(({ key }) => key === selectedCriteria);
+  const operatorOptions = criteriaObj?.operators || [];
+  const valueSettings = criteriaObj?.values || {};
+
+  useEffect(() => {
+    if(value){
+      setSelectedCriteria(value.criteria);
+      setSelectedOperator(value.operator);
+      setSelectedValue(value.value);
+    }
+  }, [value])
 
   const handleChange = (prop, val) => {
     onChange({ ...value, [prop]: val });
   };
+
+
+  // TODO: no es mejor hacer el change en el state del padre ??? pq guardo el state aca ???
+
+  const handleChangeCriteria = (ev) => {
+    const val = ev.target.value;
+    setSelectedCriteria(val);
+    handleChange("criteria", val);
+  }
+
+  const handleChangeOperator = (ev) => {
+    const val = ev.target.value;
+    setSelectedOperator(val);
+    handleChange("operator", val);
+  }
+
+  const handleChangeValue = (ev) => {
+    const val = ev.target.value;
+    setSelectedValue(val);
+    handleChange("value", val);
+  }
 
   return (
     <Grid2 container spacing={2} sx={{ alignItems: "center" }}>
@@ -43,49 +75,50 @@ const Filter = ({
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Dropdown
             id={`${id}-column`}
-            value={value.criteria}
+            value={selectedCriteria}
             placeholder={T.translate("grid_filter.select_criteria")}
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            {...criteriaSettings}
-            onChange={(val) => handleChange("criteria", val)}
+            options={criteriaOptions}
+            onChange={handleChangeCriteria}
           />
           <Dropdown
             id={`${id}-operator`}
-            value={value.operator}
+            value={selectedOperator}
             placeholder={T.translate("grid_filter.select_operator")}
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            {...operatorSettings}
-            onChange={(val) => handleChange("operator", val)}
+            options={operatorOptions}
+            onChange={handleChangeOperator}
           />
           <ValueInput
             id={`${id}-value`}
-            value={value.value}
+            value={selectedValue}
             type={valueSettings.type}
             placeholder={T.translate("grid_filter.select_values")}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...valueSettings.props}
-            onChange={(val) => handleChange("value", val)}
+            onChange={handleChangeValue}
           />
         </Box>
       </Grid2>
       <Grid2 size={1}>
-        <Button
-          variant="outlined"
-          aria-label="delete"
-          onClick={() => onDelete(id)}
-        >
-          <DeleteIcon />
-        </Button>
-        <Button variant="contained" aria-label="add" onClick={onAdd}>
-          <AddIcon />
-        </Button>
+        {value ? (
+          <Button
+            variant="outlined"
+            aria-label="delete"
+            onClick={() => onDelete(id)}
+          >
+            <DeleteIcon />
+          </Button>
+        ) : (
+          <Button variant="contained" aria-label="add" onClick={onAdd}>
+            <AddIcon />
+          </Button>
+        )}
       </Grid2>
     </Grid2>
   );
 };
 
 Filter.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string.isRequired,
   value: PropTypes.shape({
     criteria: PropTypes.string,
     operator: PropTypes.string,
@@ -96,28 +129,22 @@ Filter.propTypes = {
       PropTypes.array
     ])
   }),
-  criteriaSettings: PropTypes.shape({
-    options: PropTypes.arrayOf(
-      PropTypes.shape({
-        value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        label: PropTypes.string
+  criterias: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      operators: PropTypes.arrayOf(
+        PropTypes.shape({
+          value: PropTypes.string.isRequired,
+          label: PropTypes.string.isRequired
+        })
+      ),
+      values: PropTypes.shape({
+        type: PropTypes.string.isRequired,
+        props: PropTypes.object.isRequired
       })
-    ).isRequired,
-    placeholder: PropTypes.string
-  }).isRequired,
-  operatorSettings: PropTypes.shape({
-    options: PropTypes.arrayOf(
-      PropTypes.shape({
-        value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        label: PropTypes.string
-      })
-    ).isRequired,
-    placeholder: PropTypes.string
-  }).isRequired,
-  valueSettings: PropTypes.shape({
-    type: PropTypes.string, // class name of the component to render the value
-    props: PropTypes.object // props to pass to the component
-  }).isRequired,
+    })
+  ).isRequired,
   onChange: PropTypes.func.isRequired,
   onAdd: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired
