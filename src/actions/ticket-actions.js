@@ -14,6 +14,7 @@
 import T from "i18n-react/dist/i18n-react";
 import pLimit from "p-limit";
 import {
+  VALIDATE,
   authErrorHandler,
   createAction,
   deleteRequest,
@@ -113,11 +114,24 @@ export const customErrorHandler = (ticketId, err, res) => (dispatch) => {
 
   switch (code) {
     case ERROR_CODE_412:
-      Swal.fire(
-        "Validation error",
-        `Ticket number ${ticketId} not found.`,
-        "warning"
-      );
+      if (Array.isArray(err.response.body)) {
+        err.response.body.forEach((er) => {
+          msg += `${er}<br>`;
+        });
+      } else {
+        Object.keys(err.response.body).forEach((key) => {
+          msg += `${err.response.body[key]}<br>`;
+        });
+      }
+
+      Swal.fire("Validation error", msg, "warning");
+
+      if (err.response.body.errors) {
+        dispatch({
+          type: VALIDATE,
+          payload: { errors: err.response.body }
+        });
+      }
       break;
     default:
       dispatch(authErrorHandler(err, res));
