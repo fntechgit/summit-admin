@@ -634,3 +634,66 @@ describe("regression — handleSubmit must not dehydrate allowed_ticket_types", 
     });
   });
 });
+
+describe("DiscountBasePCForm — Apply to all Ticket Types audience restriction copy", () => {
+  // i18n-react renders raw keys in the jest env (no translator configured),
+  // so we match against the key strings, not the translated copy. See the
+  // existing comment around line 368 for the same convention.
+  const APPLY_ALL_KEY = "edit_promocode.apply_to_all_tix";
+  const HELPER_KEY = "edit_promocode.apply_to_all_tix_helper";
+
+  // Classes that route through DiscountBasePCForm and therefore should
+  // render both the (Audience: All) label and the helper-text row.
+  // The helper text belongs to the same col-md-4 column that hosts the
+  // apply_to_all_tix checkbox. Scope the selector to that column to avoid
+  // colliding with other `small.form-text.text-muted` rows (e.g. the
+  // allowed_email_domains caption on the DOMAIN_AUTHORIZED form).
+  const getApplyToAllHelper = (container) =>
+    container
+      .querySelector("#apply_to_all_tix")
+      .closest(".col-md-4")
+      .querySelector("small.form-text.text-muted");
+
+  it.each([
+    ["SUMMIT_DISCOUNT_CODE"],
+    ["MEMBER_DISCOUNT_CODE"],
+    ["SPEAKER_DISCOUNT_CODE"],
+    ["SPONSOR_DISCOUNT_CODE"],
+    ["SPEAKERS_DISCOUNT_CODE"],
+    ["DOMAIN_AUTHORIZED_DISCOUNT_CODE"]
+  ])(
+    "for %s: renders the Audience=All label and helper-text below the checkbox",
+    (class_name) => {
+      const { container } = renderForm(baseEntity({ class_name }));
+
+      const checkboxLabel = container.querySelector(
+        "label[for=\"apply_to_all_tix\"]"
+      );
+      expect(checkboxLabel).toBeInTheDocument();
+      expect(checkboxLabel.textContent).toBe(APPLY_ALL_KEY);
+
+      const helper = getApplyToAllHelper(container);
+      expect(helper).toBeInTheDocument();
+      expect(helper.textContent).toBe(HELPER_KEY);
+    }
+  );
+
+  it("renders the helper text even when apply_to_all_tix is unchecked", () => {
+    const { container } = renderForm(
+      baseEntity({
+        class_name: "SUMMIT_DISCOUNT_CODE",
+        apply_to_all_tix: false
+      })
+    );
+
+    // Checkbox state reflects the override.
+    const checkbox = container.querySelector("#apply_to_all_tix");
+    expect(checkbox).toBeInTheDocument();
+    expect(checkbox.checked).toBe(false);
+
+    // Helper text is always rendered — it's reference copy, not state-gated.
+    const helper = getApplyToAllHelper(container);
+    expect(helper).toBeInTheDocument();
+    expect(helper.textContent).toBe(HELPER_KEY);
+  });
+});
