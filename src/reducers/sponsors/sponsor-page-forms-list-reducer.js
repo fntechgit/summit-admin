@@ -16,7 +16,6 @@ import { epochToMomentTimeZone } from "openstack-uicore-foundation/lib/utils/met
 import {
   REQUEST_SPONSOR_MANAGED_FORMS,
   RECEIVE_SPONSOR_MANAGED_FORMS,
-  SPONSOR_MANAGED_FORMS_ADDED,
   RECEIVE_SPONSOR_CUSTOMIZED_FORMS,
   REQUEST_SPONSOR_CUSTOMIZED_FORMS,
   SPONSOR_CUSTOMIZED_FORM_ADDED,
@@ -173,31 +172,6 @@ const sponsorPageFormsListReducer = (state = DEFAULT_STATE, action) => {
           currentPage,
           totalCount: total,
           lastPage
-        }
-      };
-    }
-    case SPONSOR_MANAGED_FORMS_ADDED: {
-      const newForm = payload.response;
-
-      newForm.opens_at = payload.response.opens_at
-        ? epochToMomentTimeZone(
-            payload.response.opens_at,
-            state.summitTZ
-          )?.format("YYYY/MM/DD")
-        : "N/A";
-      newForm.expires_at = payload.response.expires_at
-        ? epochToMomentTimeZone(
-            payload.response.expires_at,
-            state.summitTZ
-          )?.format("YYYY/MM/DD")
-        : "N/A";
-
-      return {
-        ...state,
-        managedForms: {
-          ...state.managedForms,
-          forms: [...state.managedForms.forms, newForm],
-          totalCount: state.managedForms.totalCount + 1
         }
       };
     }
